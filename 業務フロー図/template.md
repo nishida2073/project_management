@@ -26,17 +26,17 @@ XXX
 flowchart LR
     subgraph L0a["アクター名"]
         direction TB
-        X["作業名<br/>利用ツール"]:::アクター名
+        X["1. 作業名<br/>利用ツール"]:::アクター名
         subgraph L0a_g1[" "]
             direction LR
-            Y["作業名2<br/>利用ツール2"]:::アクター名
+            Y["1. 作業名2<br/>利用ツール2"]:::アクター名
             Y -.- N1["メモの内容"]:::note
         end
         X --> L0a_g1
     end
 
     classDef note fill:#fff6cc,stroke:#c9a227,stroke-dasharray:4 3,color:#1c232c;
-    classDef lane fill:#f2f2f2,stroke:#b0b0b0;
+    classDef lane fill:#f2f2f2,stroke:#b0b0b0,color:#000;
     classDef invisible fill:none,stroke:none;
 
     class L0a lane;

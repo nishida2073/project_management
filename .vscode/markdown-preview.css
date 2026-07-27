@@ -1,0 +1,10 @@
+body {
+    background-color: #ffffff !important;
+    color: #1c232c !important;
+}
+
+.vscode-dark body,
+.vscode-high-contrast body {
+    background-color: #ffffff !important;
+    color: #1c232c !important;
+}
