@@ -126,13 +126,18 @@ Copy `業務フロー図/template.md` for new docs and keep this structure:
     - 構築担当者 → `build`: `fill:#4c8a8a` (teal)
     - 運営（SD） → `sd`: `fill:#8a4c6b` (wine)
     - システムフロンティア → `sf`: `fill:#5b6b4c` (olive)
+    - 設営担当者 → `setup`: `fill:#8a5c4c` (rust/terracotta)
+  - All actor `classDef`s (the four core colors and any additional muted colors above) also set
+    `color:#000` — the node text must render in black rather than inheriting a light/white default,
+    which is unreadable against these mid-tone fills.
   - Supplementary note callouts (dashed, linked with `-.-`) use a `note` class:
     `fill:#fff6cc,stroke:#c9a227,stroke-dasharray:4 3,color:#1c232c`. The explicit `color` is required —
     without it the note text inherits the page's default node text color, which reads as white on the
     pale yellow fill and is unreadable.
-  - Actor subgraph (lane) boxes get an explicit `lane` class — `fill:#f2f2f2,stroke:#b0b0b0` — applied
-    via `class <subgraph ids> lane;` for every subgraph in the diagram. Mermaid's default cluster
+  - Actor subgraph (lane) boxes get an explicit `lane` class — `fill:#f2f2f2,stroke:#b0b0b0,color:#000` —
+    applied via `class <subgraph ids> lane;` for every subgraph in the diagram. Mermaid's default cluster
     background is a pale yellow that's easy to confuse with the `note` callout color, so every diagram
-    must override it explicitly rather than relying on the default.
+    must override it explicitly rather than relying on the default; the explicit `color:#000` keeps the
+    lane title text black regardless of the surrounding theme.
 - Mermaid syntax rules: never use the bidirectional arrow (`<-->`), always use `-->`; represent
   cautionary/supplementary content as a dashed `note`-class box linked with `-.-`, not inline text.
