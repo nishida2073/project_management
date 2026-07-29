@@ -12,21 +12,28 @@ with mermaid flowchart diagrams and PDF bookmarks. There is no git repository in
 ## Directory layout
 
 - `業務フロー図の元データ/*-base.md` — raw source notes for a business process, written as plain
-  nested lists (no mermaid). Structure: `# アクター` (actor list) → `# <業務名>` → `## N. <サブタスク>`
-  → `### <担当者>` → numbered steps, each with nested `- 概要` / `- 利用ツール` sub-bullets (the actual
-  description/tool text is one level deeper still, under those two labels). Omit `利用ツール` entirely
-  when the step uses no tool. A step may also carry an optional `- メモ` sub-bullet (same nesting) for
-  a supplementary note — carry it into the diagram as a note-class callout (see "Flowchart conventions").
+  nested lists (no mermaid). Structure: `# アクター` (actor list) → `## 実施タイミング` (a short bullet
+  list stating when the overall flow is triggered, e.g. 事前/研修前/研修当日/研修後 — copy this bullet
+  list verbatim into the diagram doc's `### 実施タイミング`, never paraphrase or invent wording for it)
+  → `# <業務名>` → `## N. <サブタスク>` → `### <担当者>` → numbered steps, each with nested `- 概要` /
+  `- 利用ツール` sub-bullets (the actual description/tool text is one level deeper still, under those
+  two labels). Omit `利用ツール` entirely when the step uses no tool. A step may also carry an optional
+  `- メモ` sub-bullet (same nesting) for a supplementary note — carry it into the diagram as a note-class
+  callout verbatim, same rule: no paraphrasing, no invented category labels (see "Flowchart conventions").
 - `業務フロー図/*.md` — working deliverables: the same processes redrawn as mermaid swimlane
   flowcharts (see "Flowchart conventions" below). Start a new one by copying `業務フロー図/template.md`
-  and following its structure exactly.
+  and following its structure exactly. Naming: `業務フロー（<業務名>）-base.md` maps to
+  `業務フロー図（<実施タイミングの値>：<業務名>）.md` — the 実施タイミング value is the doc's own
+  `### 実施タイミング` bullet (copied verbatim from the source `-base.md`, see above), not a fixed label;
+  e.g. `業務フロー（勤怠）-base.md` (実施タイミング: 研修当日) → `業務フロー図（研修当日：勤怠）.md`.
 - `業務フロー図/template.md` — the scaffold for new diagram docs; it is the source of truth for the
   current structure (headings, mermaid skeleton, 作業 list format) — check it before relying on the
   conventions summarized below, since it is the file most likely to have been edited since.
-- `PDF/` — final rendered PDFs collected for distribution, one per business process (e.g.
-  `PDF/業務フロー（勤怠）.pdf`), rendered from the corresponding file in `業務フロー図/`. `md2pdf.bat`
-  and `render-pdf.js` write next to the input `.md` by default, so the output still needs to be
-  placed/renamed into `PDF/` to match this convention.
+- `PDF/` — final rendered PDFs collected for distribution, one per business process, same
+  `業務フロー図（<実施タイミング>：<業務名>）.pdf` naming as the source `.md` (e.g.
+  `PDF/業務フロー図（研修当日：勤怠）.pdf`), rendered from the corresponding file in `業務フロー図/`.
+  `md2pdf.bat` and `render-pdf.js` write next to the input `.md` by default, so the output still needs
+  to be placed/renamed into `PDF/` to match this convention.
 - `tools/md2png/` — the Node.js/Puppeteer conversion tool (see below). Its `node_modules` is already
   present/committed; only run `npm install` here if dependencies are missing.
 - `md2pdf.bat` — Windows entry point: drag a `.md` file onto it (or run
@@ -78,9 +85,13 @@ There is no lint/test suite (`package.json`'s `test` script is an unused placeho
 Copy `業務フロー図/template.md` for new docs and keep this structure:
 
 - Top of file: `# <フロー名>`, then `## 概要` with a one-line summary, a bullet list of the sub-flows
-  covered, a sentence noting that diagrams are split by lane/condition, and a `**凡例**` legend (lane
-  colors, a note that the paragraph under each `##` heading states that diagram's triggering condition,
-  and the yellow-dashed-note-box legend line — include it even in docs that end up with no notes).
+  covered, a sentence noting that diagrams are split by lane/condition, a `### 実施タイミング` bullet
+  list copied verbatim from the source `-base.md`'s own `## 実施タイミング` section (distinct from each
+  `## N.` section's own one-line condition paragraph, which states that specific diagram's narrower
+  condition — that paragraph is still your own summary wording, only `### 実施タイミング` must be
+  copied as-is), and a `**凡例**` legend (lane colors, a note that the paragraph under each `##` heading
+  states that diagram's triggering condition, and the yellow-dashed-note-box legend line — include it
+  even in docs that end up with no notes).
 - Each sub-flow/condition is one `## N. <name>` section, containing in order:
   1. A one-line paragraph stating when this diagram applies (the condition, e.g. 事前連絡あり/なし,
      到着後, 未実施者向け).
