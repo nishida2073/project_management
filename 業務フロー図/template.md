@@ -40,6 +40,7 @@ flowchart LR
         X --> L0a_g1
     end
 
+    classDef アクター名 fill:#XXXXXX,color:#000;
     classDef note fill:#fff6cc,stroke:#c9a227,stroke-dasharray:4 3,color:#1c232c;
     classDef lane fill:#f2f2f2,stroke:#b0b0b0,color:#000;
     classDef invisible fill:none,stroke:none;
@@ -60,7 +61,7 @@ flowchart LR
 2. 作業名2
    - アクター
      - 作業名2のアクター
-　 - 概要
+   - 概要
      - 作業名2の概要
    - 利用ツール
      - 作業名2の利用ツール
