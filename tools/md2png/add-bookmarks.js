@@ -51,12 +51,15 @@ function countAll(nodes) {
   return c;
 }
 
-async function addBookmarks(inPath, headings, outPath) {
+async function addBookmarks(inPath, headings, outPath, title) {
   const pdfBytes = fs.readFileSync(inPath);
   const headingsWithPages = await findHeadingPages(pdfBytes, headings);
   const tree = buildTree(headingsWithPages);
 
   const pdfDoc = await PDFDocument.load(pdfBytes);
+  if (title) {
+    pdfDoc.setTitle(title, { showInWindowTitleBar: true });
+  }
   const context = pdfDoc.context;
   const pages = pdfDoc.getPages();
 

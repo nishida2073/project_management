@@ -8,7 +8,7 @@ const { addBookmarks } = require('./add-bookmarks');
 const mdPath = process.argv[2];
 const outPath = process.argv[3];
 
-const { page, headings } = buildHtml(mdPath);
+const { page, headings, title } = buildHtml(mdPath);
 
 (async () => {
   const browser = await puppeteer.launch();
@@ -27,7 +27,7 @@ const { page, headings } = buildHtml(mdPath);
   });
   await browser.close();
 
-  await addBookmarks(tmpPath, headings, outPath);
+  await addBookmarks(tmpPath, headings, outPath, title);
   fs.unlinkSync(tmpPath);
 
   console.log('done');

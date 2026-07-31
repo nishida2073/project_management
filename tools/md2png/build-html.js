@@ -1,7 +1,9 @@
 const fs = require('fs');
+const path = require('path');
 const { marked } = require('marked');
 
 function buildHtml(mdPath) {
+  const title = path.basename(mdPath, path.extname(mdPath));
   let md = fs.readFileSync(mdPath, 'utf8');
 
   const mermaidBlocks = [];
@@ -37,6 +39,7 @@ function buildHtml(mdPath) {
 <html>
 <head>
 <meta charset="utf-8">
+<title>${title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
 <style>
   body {
     font-family: "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
@@ -69,7 +72,7 @@ ${html}
 </body>
 </html>`;
 
-  return { page, headings };
+  return { page, headings, title };
 }
 
 module.exports = { buildHtml };
