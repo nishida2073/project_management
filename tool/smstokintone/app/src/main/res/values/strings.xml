@@ -1,0 +1,75 @@
+<resources>
+    <string name="app_name">SMS　→　kintone</string>
+
+    <!-- トップ画面 -->
+    <string name="top_status_running">起動中</string>
+    <string name="btn_open_log">ログを見る</string>
+    <string name="btn_open_sms_search">SMSを検索して送信</string>
+    <string name="btn_open_kintone_settings">kintoneの設定</string>
+    <string name="btn_open_app_settings">アプリの設定</string>
+
+    <!-- kintone設定画面 -->
+    <string name="kintone_settings_title">kintone設定</string>
+    <string name="hint_subdomain">サブドメイン（例: your-company）</string>
+    <string name="hint_app_id">アプリID</string>
+    <string name="label_auth_method">認証方式</string>
+    <string name="rb_auth_api_token">APIトークン</string>
+    <string name="rb_auth_password">ID・パスワード</string>
+    <string name="hint_api_token">APIトークン</string>
+    <string name="hint_login_name">ログイン名</string>
+    <string name="hint_login_password">パスワード</string>
+    <string name="section_field_mapping">保存先フィールド設定</string>
+    <string name="hint_field_phone">送信元電話番号を保存するフィールドコード（任意）</string>
+    <string name="hint_field_body">SMS本文を保存するフィールドコード（必須）</string>
+    <string name="hint_field_datetime">受信日時を保存するフィールドコード（任意）</string>
+    <string name="validation_error">サブドメイン・アプリID・認証情報・本文フィールドコードは必須です</string>
+    <string name="btn_save">設定を保存</string>
+
+    <!-- アプリ設定画面 -->
+    <string name="app_settings_title">アプリ設定</string>
+    <string name="switch_forwarding_enabled">転送を有効にする</string>
+    <string name="switch_log_enabled">ログを保存する</string>
+    <string name="switch_auto_refresh_enabled">ログ画面を自動更新する</string>
+    <string name="hint_auto_refresh_interval">自動更新の間隔（秒）</string>
+    <string name="auto_refresh_interval_error">自動更新の間隔は1以上の数値で入力してください</string>
+    <string name="label_theme_mode">表示テーマ</string>
+    <string name="rb_theme_system">システム設定</string>
+    <string name="rb_theme_light">ライト</string>
+    <string name="rb_theme_dark">ダーク</string>
+    <string name="section_permission">端末の許可</string>
+    <string name="permission_status_granted">SMS受信の許可: 許可済み</string>
+    <string name="permission_status_denied">SMS受信の許可: 未許可</string>
+    <string name="btn_request_permission">SMS受信を許可する</string>
+
+    <!-- ログ画面 -->
+    <string name="log_title">ログ</string>
+    <string name="log_empty">ログはまだありません</string>
+    <string name="log_result_success">成功</string>
+    <string name="log_result_failure">失敗</string>
+    <string name="log_type_receive">受信完了</string>
+    <string name="log_type_send_start">送信開始</string>
+    <string name="log_type_send_complete">送信完了</string>
+    <string name="btn_clear_log">クリア</string>
+    <string name="btn_refresh_log">更新</string>
+    <string name="confirm_clear_log_title">ログをクリアしますか？</string>
+    <string name="confirm_clear_log_message">この操作は取り消せません。</string>
+    <string name="btn_cancel">キャンセル</string>
+    <string name="btn_clear">クリア</string>
+
+    <!-- 受信済みSMS送信画面 -->
+    <string name="sms_search_title">受信済みSMS送信</string>
+    <string name="hint_date_from">開始日</string>
+    <string name="hint_date_to">終了日</string>
+    <string name="hint_sender_filter">送信元（任意）</string>
+    <string name="hint_body_filter">本文に含む文字列（任意）</string>
+    <string name="filter_unsent_only">未送信のみ表示</string>
+    <string name="btn_search_sms">検索</string>
+    <string name="btn_select_all">全選択</string>
+    <string name="btn_deselect_all">選択解除</string>
+    <string name="btn_send_selected">選択したSMSを送信</string>
+    <string name="sms_search_empty">該当するSMSがありません</string>
+    <string name="sms_search_permission_required">受信済みのSMSを読み取るには許可が必要です</string>
+    <string name="btn_request_read_sms_permission">SMSの読み取りを許可する</string>
+    <string name="toast_no_selection">送信するSMSを選択してください</string>
+    <string name="toast_queued">%1$d件をkintoneへ送信キューに追加しました</string>
+</resources>

@@ -1,0 +1,9 @@
+<resources>
+    <color name="status_running">#81C784</color>
+    <color name="log_success">#81C784</color>
+    <color name="log_failure">#EF9A9A</color>
+    <color name="log_receive">#90CAF9</color>
+    <color name="log_send_start">#FFB74D</color>
+    <color name="log_divider">#616161</color>
+    <color name="sms_sent_background">#424242</color>
+</resources>
