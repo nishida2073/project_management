@@ -35,41 +35,37 @@ foreach ($sheet in $excel.Name) {
 
     foreach ($row in $rows) {
 
-        if ($row.利用 -eq "×") {
-            continue
-        }
-
-        $source = $row.取得元フルパス
+        $source = $row.'取得元（フルパス）'
 
         if (!(Test-Path $source)) {
             Write-Host "存在しません：$source"
             continue
         }
 
-        # ZIP配置先
-        $zipTarget = $companyWork
-        if ($row.ZIP配置先) {
-            $zipTarget = Join-Path $companyWork $row.ZIP配置先
+        # 格納先
+        $storeRoot = $companyWork
+        if ($row.格納先) {
+            $storeRoot = Join-Path $companyWork $row.格納先
         }
-        New-Item $zipTarget -ItemType Directory -Force | Out-Null
+        New-Item $storeRoot -ItemType Directory -Force | Out-Null
 
-        # Folder処理
-        if ($row.種別 -eq "Folder") {
+        if (Test-Path -LiteralPath $source -PathType Container) {
 
+            # フォルダ処理
             $sourceTrimmed = $source.TrimEnd('\')
 
             Get-ChildItem $source -Recurse | ForEach-Object {
 
                 $relative = $_.FullName.Substring($sourceTrimmed.Length).TrimStart('\')
 
-                # Include判定
-                if ($row.Include -and !($relative -like $row.Include)) {
+                # 含める形式
+                if ($row.含める形式 -and !($relative -like $row.含める形式)) {
                     return
                 }
 
-                # Exclude判定
-                if ($row.Exclude) {
-                    foreach ($exclude in $row.Exclude.Split(",")) {
+                # 除外する形式
+                if ($row.除外する形式) {
+                    foreach ($exclude in $row.除外する形式.Split(",")) {
                         if ($relative -like "*$($exclude.Trim())*") {
                             return
                         }
@@ -77,22 +73,17 @@ foreach ($sheet in $excel.Name) {
                 }
 
                 if (!$_.PSIsContainer) {
-                    $destination = Join-Path $zipTarget $relative
+                    $destination = Join-Path $storeRoot $relative
                     New-Item (Split-Path $destination -Parent) -ItemType Directory -Force | Out-Null
                     Copy-Item $_.FullName $destination -Force
                 }
             }
 
-        }
-        # File処理
-        elseif ($row.種別 -eq "File") {
+        } else {
 
+            # ファイル処理
             $fileName = Split-Path $source -Leaf
-            if ($row.ZIP名) {
-                $fileName = $row.ZIP名
-            }
-
-            Copy-Item $source (Join-Path $zipTarget $fileName) -Force
+            Copy-Item $source (Join-Path $storeRoot $fileName) -Force
         }
     }
 
