@@ -10,6 +10,17 @@
 
     <!-- kintone設定画面 -->
     <string name="kintone_settings_title">kintone設定</string>
+    <string name="kintone_settings_description">SMS本文に含まれる言葉によって、送信先のkintone設定を切り替えられます。「本文に含まれる言葉」が空欄の設定は、どの言葉にも一致しなかった場合のデフォルトとして使われます。</string>
+    <string name="hint_profile_name">設定名（任意）</string>
+    <string name="hint_keywords">本文に含まれる言葉</string>
+    <string name="helper_keywords">カンマ区切りで複数指定可。空欄の場合はデフォルト設定として扱われます</string>
+    <string name="btn_add_profile">設定を追加</string>
+    <string name="btn_copy_profile">コピー</string>
+    <string name="btn_delete_profile">削除</string>
+    <string name="profile_copy_suffix">のコピー</string>
+    <string name="label_profile_none">未設定</string>
+    <string name="profile_index_format">設定 %1$d</string>
+    <string name="toast_no_profiles">設定を1つ以上追加してください</string>
     <string name="hint_subdomain">サブドメイン（例: your-company）</string>
     <string name="hint_app_id">アプリID</string>
     <string name="label_auth_method">認証方式</string>
@@ -22,12 +33,12 @@
     <string name="hint_field_phone">送信元電話番号を保存するフィールドコード（任意）</string>
     <string name="hint_field_body">SMS本文を保存するフィールドコード（必須）</string>
     <string name="hint_field_datetime">受信日時を保存するフィールドコード（任意）</string>
-    <string name="validation_error">サブドメイン・アプリID・認証情報・本文フィールドコードは必須です</string>
+    <string name="validation_error">%1$s: サブドメイン・アプリID・認証情報・本文フィールドコードは必須です</string>
     <string name="btn_save">設定を保存</string>
 
     <!-- アプリ設定画面 -->
     <string name="app_settings_title">アプリ設定</string>
-    <string name="switch_forwarding_enabled">転送を有効にする</string>
+    <string name="switch_forwarding_enabled">自動転送を有効にする</string>
     <string name="switch_log_enabled">ログを保存する</string>
     <string name="switch_auto_refresh_enabled">ログ画面を自動更新する</string>
     <string name="hint_auto_refresh_interval">自動更新の間隔（秒）</string>
@@ -60,8 +71,9 @@
     <string name="sms_search_title">受信済みSMS送信</string>
     <string name="hint_date_from">開始日</string>
     <string name="hint_date_to">終了日</string>
-    <string name="hint_sender_filter">送信元（任意）</string>
     <string name="hint_body_filter">本文に含む文字列（任意）</string>
+    <string name="label_profile_filter">設定で絞り込む（任意）</string>
+    <string name="filter_profile_all">すべて</string>
     <string name="filter_unsent_only">未送信のみ表示</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>
@@ -72,4 +84,6 @@
     <string name="btn_request_read_sms_permission">SMSの読み取りを許可する</string>
     <string name="toast_no_selection">送信するSMSを選択してください</string>
     <string name="toast_queued">%1$d件をkintoneへ送信キューに追加しました</string>
+    <string name="toast_send_finished">送信処理が完了しました（成功%1$d件 / 失敗%2$d件）</string>
+    <string name="toast_send_finished_no_log">送信処理が完了しました</string>
 </resources>

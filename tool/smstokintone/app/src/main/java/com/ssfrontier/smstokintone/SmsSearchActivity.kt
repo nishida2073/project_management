@@ -6,13 +6,20 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Telephony
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
+import androidx.lifecycle.Observer
 import androidx.work.BackoffPolicy
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkContinuation
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.workDataOf
@@ -30,6 +37,9 @@ class SmsSearchActivity : AppCompatActivity() {
     private var fromMillis: Long? = null
     private var toMillis: Long? = null
     private val records = mutableListOf<SmsRecord>()
+
+    private var profileOptions: List<Prefs.KintoneProfile?> = emptyList()
+    private var selectedProfileId: String? = null
 
     private val requestReadSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -57,6 +67,13 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.btnRequestReadSmsPermission.setOnClickListener {
             requestReadSmsPermissionLauncher.launch(Manifest.permission.READ_SMS)
         }
+        binding.spProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedProfileId = profileOptions.getOrNull(position)?.id
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
 
         val today = Calendar.getInstance()
         val weekAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -7) }
@@ -67,6 +84,20 @@ class SmsSearchActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updatePermissionUi()
+        refreshProfileFilterOptions()
+    }
+
+    private fun refreshProfileFilterOptions() {
+        val profiles = Prefs.loadProfiles(this)
+        profileOptions = listOf(null) + profiles
+        val labels = listOf(getString(R.string.filter_profile_all)) + profiles.map { it.displayName }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spProfileFilter.adapter = adapter
+
+        val restoreIndex = profileOptions.indexOfFirst { it?.id == selectedProfileId }
+        binding.spProfileFilter.setSelection(if (restoreIndex >= 0) restoreIndex else 0)
     }
 
     private fun hasReadSmsPermission(): Boolean =
@@ -119,10 +150,9 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun searchSms() {
+    private fun searchSms(showFoundToast: Boolean = true) {
         if (!hasReadSmsPermission()) return
 
-        val senderFilter = binding.etSenderFilter.text.toString().trim()
         val bodyFilter = binding.etBodyFilter.text.toString().trim()
         val selectionParts = mutableListOf("${Telephony.Sms.TYPE} = ?")
         val selectionArgs = mutableListOf(Telephony.Sms.MESSAGE_TYPE_INBOX.toString())
@@ -134,10 +164,6 @@ class SmsSearchActivity : AppCompatActivity() {
         toMillis?.let {
             selectionParts.add("${Telephony.Sms.DATE} <= ?")
             selectionArgs.add(it.toString())
-        }
-        if (senderFilter.isNotBlank()) {
-            selectionParts.add("${Telephony.Sms.ADDRESS} LIKE ?")
-            selectionArgs.add("%$senderFilter%")
         }
         if (bodyFilter.isNotBlank()) {
             selectionParts.add("${Telephony.Sms.BODY} LIKE ?")
@@ -184,13 +210,19 @@ class SmsSearchActivity : AppCompatActivity() {
             records.removeAll { it.id in sentSmsIds }
         }
 
-        Toast.makeText(this, "${records.size}件見つかりました", Toast.LENGTH_SHORT).show()
+        selectedProfileId?.let { profileId ->
+            records.removeAll { Prefs.findProfileForBody(this, it.body)?.id != profileId }
+        }
+
+        if (showFoundToast) {
+            Toast.makeText(this, "${records.size}件見つかりました", Toast.LENGTH_SHORT).show()
+        }
         renderSmsList()
     }
 
     private fun loadSentSmsIds(): Set<Long> =
         UploadLogStore.getAll(this)
-            .filter { it.type == UploadLogStore.EntryType.SEND_START }
+            .filter { it.type == UploadLogStore.EntryType.SEND_COMPLETE && it.success }
             .mapNotNull { it.smsId }
             .toSet()
 
@@ -203,7 +235,14 @@ class SmsSearchActivity : AppCompatActivity() {
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
                 tag = record.id
-                text = "${dateFormat.format(Date(record.dateMillis))}　${record.address}\n${record.body.take(80)}"
+                val profileName = Prefs.findProfileForBody(this@SmsSearchActivity, record.body)?.displayName
+                    ?: getString(R.string.label_profile_none)
+                val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
+                text = buildSpannedString {
+                    color(profileColor) { bold { append(profileName) } }
+                    append("\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
+                    append(record.body.take(80))
+                }
                 layoutParams = android.widget.LinearLayout.LayoutParams(
                     android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
@@ -213,7 +252,17 @@ class SmsSearchActivity : AppCompatActivity() {
                     setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, R.color.sms_sent_background))
                 }
             }
+
+            val divider = View(this).apply {
+                setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, R.color.log_divider))
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                    2
+                )
+            }
+
             binding.llSmsListContainer.addView(checkBox)
+            binding.llSmsListContainer.addView(divider)
         }
     }
 
@@ -237,6 +286,8 @@ class SmsSearchActivity : AppCompatActivity() {
         }
 
         val workManager = WorkManager.getInstance(this)
+        var continuation: WorkContinuation? = null
+        var lastRequest: androidx.work.OneTimeWorkRequest? = null
         selectedRecords.forEach { record ->
             val data = workDataOf(
                 KintoneUploadWorker.KEY_SENDER to record.address,
@@ -253,14 +304,51 @@ class SmsSearchActivity : AppCompatActivity() {
                     TimeUnit.MILLISECONDS
                 )
                 .build()
-            workManager.enqueue(request)
+            // 1件ずつ順番に処理させ、ログの送信開始/送信完了が入り乱れないようにする
+            continuation = continuation?.then(request) ?: workManager.beginWith(request)
+            lastRequest = request
         }
+        continuation?.enqueue()
+
+        val selectedIds = selectedRecords.map { it.id }.toSet()
+        lastRequest?.let { request ->
+            workManager.getWorkInfoByIdLiveData(request.id).observe(this, Observer { workInfo ->
+                if (workInfo != null && workInfo.state.isFinished) {
+                    onSendBatchFinished(selectedIds)
+                }
+            })
+        }
+
+        // キュー投入直後にチェックを解除して一覧を更新し、投入されたことを見た目でも分かるようにする
+        setAllChecked(false)
+        searchSms(showFoundToast = false)
 
         Toast.makeText(
             this,
             getString(R.string.toast_queued, selectedRecords.size),
             Toast.LENGTH_LONG
         ).show()
+    }
+
+    private fun onSendBatchFinished(selectedIds: Set<Long>) {
+        val latestCompleteEntryPerSms = UploadLogStore.getAll(this)
+            .filter { it.type == UploadLogStore.EntryType.SEND_COMPLETE && it.smsId in selectedIds }
+            .groupBy { it.smsId }
+            .mapValues { it.value.first() }
+
+        if (latestCompleteEntryPerSms.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_send_finished_no_log), Toast.LENGTH_LONG).show()
+        } else {
+            val successCount = latestCompleteEntryPerSms.values.count { it.success }
+            val failureCount = latestCompleteEntryPerSms.size - successCount
+            Toast.makeText(
+                this,
+                getString(R.string.toast_send_finished, successCount, failureCount),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
+        searchSms(showFoundToast = false)
     }
 
     private data class SmsRecord(

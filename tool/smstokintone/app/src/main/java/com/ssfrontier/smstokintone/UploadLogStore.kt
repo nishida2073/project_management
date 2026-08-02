@@ -30,7 +30,8 @@ object UploadLogStore {
         val bodyPreview: String,
         val success: Boolean,
         val message: String,
-        val smsId: Long?
+        val smsId: Long?,
+        val profileName: String?
     )
 
     private fun prefs(context: Context) =
@@ -44,7 +45,8 @@ object UploadLogStore {
         body: String,
         success: Boolean,
         message: String,
-        smsId: Long? = null
+        smsId: Long? = null,
+        profileName: String? = null
     ) {
         val entries = getAll(context).toMutableList()
         entries.add(
@@ -57,23 +59,24 @@ object UploadLogStore {
                 bodyPreview = body.take(BODY_PREVIEW_LIMIT),
                 success = success,
                 message = message,
-                smsId = smsId
+                smsId = smsId,
+                profileName = profileName
             )
         )
 
         val array = JSONArray()
         entries.forEach { entry ->
-            array.put(
-                JSONObject()
-                    .put("type", entry.type.name)
-                    .put("loggedAt", entry.loggedAtMillis)
-                    .put("ts", entry.timestampMillis)
-                    .put("sender", entry.sender)
-                    .put("body", entry.bodyPreview)
-                    .put("success", entry.success)
-                    .put("message", entry.message)
-                    .put("smsId", entry.smsId ?: NO_SMS_ID)
-            )
+            val obj = JSONObject()
+                .put("type", entry.type.name)
+                .put("loggedAt", entry.loggedAtMillis)
+                .put("ts", entry.timestampMillis)
+                .put("sender", entry.sender)
+                .put("body", entry.bodyPreview)
+                .put("success", entry.success)
+                .put("message", entry.message)
+                .put("smsId", entry.smsId ?: NO_SMS_ID)
+            entry.profileName?.let { obj.put("profileName", it) }
+            array.put(obj)
         }
 
         prefs(context).edit().putString(KEY_ENTRIES, array.toString()).apply()
@@ -93,7 +96,8 @@ object UploadLogStore {
                 bodyPreview = obj.optString("body", ""),
                 success = obj.optBoolean("success", false),
                 message = obj.optString("message", ""),
-                smsId = if (smsId == NO_SMS_ID) null else smsId
+                smsId = if (smsId == NO_SMS_ID) null else smsId,
+                profileName = obj.optString("profileName", "").ifBlank { null }
             )
         }
     }

@@ -42,7 +42,8 @@ class SmsReceiver : BroadcastReceiver() {
                 body = body,
                 success = true,
                 message = "SMSを受信しました",
-                smsId = smsId
+                smsId = smsId,
+                profileName = Prefs.findProfileForBody(context, body)?.displayName
             )
         }
 

@@ -30,47 +30,51 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
         if (!manual && !config.forwardingEnabled) {
-            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "kintoneへの転送が無効になっています")
+            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "kintoneへの転送が無効になっています", profileName = null)
             return@withContext Result.success()
         }
-        if (!config.isValid) {
-            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "kintoneの接続設定が未完了です")
-            return@withContext Result.failure()
-        }
 
-        logStart(config, sender, body, timestampMillis, smsId)
+        val profile = Prefs.findProfileForBody(applicationContext, body)
+        logStart(config, sender, body, timestampMillis, smsId, profileName = profile?.displayName)
+
+        if (profile == null || !profile.isValid) {
+            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "本文に一致するkintoneの接続設定が見つからないか未完了です", profileName = profile?.displayName)
+            // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
+            // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
+            return@withContext Result.success()
+        }
 
         val record = JSONObject()
-        if (config.fieldPhone.isNotBlank()) {
-            record.put(config.fieldPhone, JSONObject().put("value", sender))
+        if (profile.fieldPhone.isNotBlank()) {
+            record.put(profile.fieldPhone, JSONObject().put("value", sender))
         }
-        record.put(config.fieldBody, JSONObject().put("value", body))
-        if (config.fieldDatetime.isNotBlank()) {
+        record.put(profile.fieldBody, JSONObject().put("value", body))
+        if (profile.fieldDatetime.isNotBlank()) {
             val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }
             record.put(
-                config.fieldDatetime,
+                profile.fieldDatetime,
                 JSONObject().put("value", isoFormat.format(Date(timestampMillis)))
             )
         }
 
         val payload = JSONObject()
-            .put("app", config.appId)
+            .put("app", profile.appId)
             .put("record", record)
 
         val requestBody = payload.toString()
             .toRequestBody("application/json; charset=utf-8".toMediaType())
 
         val requestBuilder = Request.Builder()
-            .url("https://${config.subdomain}.cybozu.com/k/v1/record.json")
+            .url("https://${profile.subdomain}.cybozu.com/k/v1/record.json")
             .post(requestBody)
 
-        when (config.authMethod) {
+        when (profile.authMethod) {
             Prefs.AuthMethod.API_TOKEN ->
-                requestBuilder.addHeader("X-Cybozu-API-Token", config.apiToken)
+                requestBuilder.addHeader("X-Cybozu-API-Token", profile.apiToken)
             Prefs.AuthMethod.PASSWORD -> {
-                val credentials = "${config.loginName}:${config.loginPassword}"
+                val credentials = "${profile.loginName}:${profile.loginPassword}"
                 val encoded = Base64.encodeToString(
                     credentials.toByteArray(Charsets.UTF_8),
                     Base64.NO_WRAP
@@ -84,18 +88,18 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         try {
             OkHttpClient().newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    logComplete(config, sender, body, timestampMillis, smsId, success = true, message = "登録成功")
+                    logComplete(config, sender, body, timestampMillis, smsId, success = true, message = "登録成功", profileName = profile.displayName)
                     Result.success()
                 } else {
                     val detail = "${response.code} ${response.body?.string()}"
                     Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                    logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail")
-                    if (response.code in 500..599) Result.retry() else Result.failure()
+                    logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName)
+                    if (response.code in 500..599) Result.retry() else Result.success()
                 }
             }
         } catch (e: IOException) {
             Log.e(TAG, "kintoneへの通信でエラーが発生しました", e)
-            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${e.message}")
+            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${e.message}", profileName = profile.displayName)
             Result.retry()
         }
     }
@@ -105,7 +109,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         sender: String,
         body: String,
         timestampMillis: Long,
-        smsId: Long?
+        smsId: Long?,
+        profileName: String?
     ) {
         if (!config.logEnabled) return
         UploadLogStore.add(
@@ -116,7 +121,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             body = body,
             success = true,
             message = "kintoneへの送信を開始しました",
-            smsId = smsId
+            smsId = smsId,
+            profileName = profileName
         )
     }
 
@@ -127,7 +133,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         timestampMillis: Long,
         smsId: Long?,
         success: Boolean,
-        message: String
+        message: String,
+        profileName: String?
     ) {
         if (!config.logEnabled) return
         UploadLogStore.add(
@@ -138,7 +145,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             body = body,
             success = success,
             message = message,
-            smsId = smsId
+            smsId = smsId,
+            profileName = profileName
         )
     }
 
