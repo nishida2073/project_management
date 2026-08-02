@@ -37,6 +37,10 @@ foreach ($sheet in $excel.Name) {
 
         $source = $row.'取得元（フルパス）'
 
+        if (!$source) {
+            continue
+        }
+
         if (!(Test-Path $source)) {
             Write-Host "存在しません：$source"
             continue
