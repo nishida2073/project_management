@@ -13,7 +13,6 @@ object Prefs {
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     private const val KEY_THEME_MODE = "theme_mode"
-    private const val DEFAULT_AUTO_REFRESH_INTERVAL_SECONDS = 30
 
     private const val KEY_KINTONE_PROFILES = "kintone_profiles"
 
@@ -94,7 +93,7 @@ object Prefs {
 
         val isValid: Boolean
             get() {
-                if (subdomain.isBlank() || appId.isBlank() || fieldBody.isBlank()) return false
+                if (name.isBlank() || subdomain.isBlank() || appId.isBlank() || fieldBody.isBlank()) return false
                 return when (authMethod) {
                     AuthMethod.API_TOKEN -> apiToken.isNotBlank()
                     AuthMethod.PASSWORD -> loginName.isNotBlank() && loginPassword.isNotBlank()
@@ -108,15 +107,15 @@ object Prefs {
                 id = UUID.randomUUID().toString(),
                 name = "",
                 keywords = "",
-                subdomain = "",
+                subdomain = Defaults.NEW_PROFILE_SUBDOMAIN,
                 appId = "",
                 authMethod = AuthMethod.PASSWORD,
                 apiToken = "",
                 loginName = "",
                 loginPassword = "",
-                fieldPhone = "",
-                fieldBody = "",
-                fieldDatetime = ""
+                fieldPhone = Defaults.NEW_PROFILE_FIELD_PHONE,
+                fieldBody = Defaults.NEW_PROFILE_FIELD_BODY,
+                fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME
             )
         }
     }
@@ -140,7 +139,7 @@ object Prefs {
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
             autoRefreshIntervalSeconds = p.getInt(
                 KEY_AUTO_REFRESH_INTERVAL_SECONDS,
-                DEFAULT_AUTO_REFRESH_INTERVAL_SECONDS
+                Defaults.AUTO_REFRESH_INTERVAL_SECONDS
             ),
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null))
         )

@@ -3,9 +3,18 @@ package com.ssfrontier.smstokintone
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.ssfrontier.smstokintone.databinding.ActivitySettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemKintoneProfileBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -70,6 +79,8 @@ class SettingsActivity : AppCompatActivity() {
             renumberCards()
         }
 
+        itemBinding.btnTestSend.setOnClickListener { onTestSendClicked(itemBinding, card) }
+
         if (insertAt < 0 || insertAt >= profileCards.size) {
             binding.llProfilesContainer.addView(itemBinding.root)
             profileCards.add(card)
@@ -101,6 +112,52 @@ class SettingsActivity : AppCompatActivity() {
             fieldBody = itemBinding.etFieldBody.text.toString().trim(),
             fieldDatetime = itemBinding.etFieldDatetime.text.toString().trim()
         )
+    }
+
+    private fun onTestSendClicked(itemBinding: ItemKintoneProfileBinding, card: ProfileCard) {
+        val profile = readProfileFromBinding(itemBinding, id = card.id)
+        if (!profile.isValid) {
+            val index = profileCards.indexOf(card)
+            val label = profile.name.ifBlank { getString(R.string.profile_index_format, index + 1) }
+            AlertDialog.Builder(this)
+                .setTitle(R.string.test_send_result_title)
+                .setMessage(getString(R.string.validation_error, label))
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
+
+        val datetimeIso = if (profile.fieldDatetime.isNotBlank()) {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }.format(Date())
+        } else {
+            null
+        }
+
+        itemBinding.btnTestSend.isEnabled = false
+        CoroutineScope(Dispatchers.Main).launch {
+            val result = withContext(Dispatchers.IO) {
+                KintoneApi.postRecord(
+                    profile,
+                    phoneValue = Defaults.TEST_SEND_PHONE,
+                    bodyValue = getString(R.string.test_send_body),
+                    datetimeIsoValue = datetimeIso
+                )
+            }
+            itemBinding.btnTestSend.isEnabled = true
+
+            val message = when (result) {
+                is KintoneApi.PostResult.Success -> result.message
+                is KintoneApi.PostResult.HttpFailure -> "送信失敗: ${result.code} ${result.detail}"
+                is KintoneApi.PostResult.NetworkError -> "通信エラー: ${result.message}"
+            }
+            AlertDialog.Builder(this@SettingsActivity)
+                .setTitle(R.string.test_send_result_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
     }
 
     private fun renumberCards() {
@@ -139,5 +196,6 @@ class SettingsActivity : AppCompatActivity() {
 
         Prefs.saveProfiles(this, newProfiles)
         Toast.makeText(this, "設定を保存しました", Toast.LENGTH_SHORT).show()
+        finish()
     }
 }

@@ -1,18 +1,11 @@
 package com.ssfrontier.smstokintone
 
 import android.content.Context
-import android.util.Base64
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -47,63 +40,31 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             return@withContext Result.success()
         }
 
-        val record = JSONObject()
-        if (profile.fieldPhone.isNotBlank()) {
-            record.put(profile.fieldPhone, JSONObject().put("value", sender))
-        }
-        record.put(profile.fieldBody, JSONObject().put("value", body))
-        if (profile.fieldDatetime.isNotBlank()) {
+        val datetimeIso = if (profile.fieldDatetime.isNotBlank()) {
             val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }
-            record.put(
-                profile.fieldDatetime,
-                JSONObject().put("value", isoFormat.format(Date(timestampMillis)))
-            )
+            isoFormat.format(Date(timestampMillis))
+        } else {
+            null
         }
 
-        val payload = JSONObject()
-            .put("app", profile.appId)
-            .put("record", record)
-
-        val requestBody = payload.toString()
-            .toRequestBody("application/json; charset=utf-8".toMediaType())
-
-        val requestBuilder = Request.Builder()
-            .url("https://${profile.subdomain}.cybozu.com/k/v1/record.json")
-            .post(requestBody)
-
-        when (profile.authMethod) {
-            Prefs.AuthMethod.API_TOKEN ->
-                requestBuilder.addHeader("X-Cybozu-API-Token", profile.apiToken)
-            Prefs.AuthMethod.PASSWORD -> {
-                val credentials = "${profile.loginName}:${profile.loginPassword}"
-                val encoded = Base64.encodeToString(
-                    credentials.toByteArray(Charsets.UTF_8),
-                    Base64.NO_WRAP
-                )
-                requestBuilder.addHeader("X-Cybozu-Authorization", encoded)
+        when (val result = KintoneApi.postRecord(profile, phoneValue = sender, bodyValue = body, datetimeIsoValue = datetimeIso)) {
+            is KintoneApi.PostResult.Success -> {
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)
+                Result.success()
             }
-        }
-
-        val request = requestBuilder.build()
-
-        try {
-            OkHttpClient().newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    logComplete(sender, body, timestampMillis, smsId, success = true, message = "登録成功", profileName = profile.displayName, manual = manual)
-                    Result.success()
-                } else {
-                    val detail = "${response.code} ${response.body?.string()}"
-                    Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                    logComplete(sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName, manual = manual)
-                    if (response.code in 500..599) Result.retry() else Result.success()
-                }
+            is KintoneApi.PostResult.HttpFailure -> {
+                val detail = "${result.code} ${result.detail}"
+                Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName, manual = manual)
+                if (result.code in 500..599) Result.retry() else Result.success()
             }
-        } catch (e: IOException) {
-            Log.e(TAG, "kintoneへの通信でエラーが発生しました", e)
-            logComplete(sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${e.message}", profileName = profile.displayName, manual = manual)
-            Result.retry()
+            is KintoneApi.PostResult.NetworkError -> {
+                Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${result.message}", profileName = profile.displayName, manual = manual)
+                Result.retry()
+            }
         }
     }
 

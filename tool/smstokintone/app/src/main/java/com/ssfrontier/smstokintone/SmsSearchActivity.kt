@@ -239,6 +239,7 @@ class SmsSearchActivity : AppCompatActivity() {
 
     private fun renderSmsList() {
         binding.llSmsListContainer.removeAllViews()
+        binding.svSmsList.scrollTo(0, 0)
         binding.tvSmsListEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
 
         val completedEntries = loadCompletedEntries()
