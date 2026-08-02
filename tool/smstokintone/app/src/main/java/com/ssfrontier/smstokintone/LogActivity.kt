@@ -74,8 +74,10 @@ class LogActivity : AppCompatActivity() {
         entries.forEach { entry ->
             val typeLabel = when (entry.type) {
                 UploadLogStore.EntryType.RECEIVE -> getString(R.string.log_type_receive)
-                UploadLogStore.EntryType.SEND_START -> getString(R.string.log_type_send_start)
-                UploadLogStore.EntryType.SEND_COMPLETE -> getString(R.string.log_type_send_complete)
+                UploadLogStore.EntryType.SEND_START ->
+                    getString(R.string.log_type_send_start) + (if (entry.manual) "・手動" else "・自動")
+                UploadLogStore.EntryType.SEND_COMPLETE ->
+                    getString(R.string.log_type_send_complete) + (if (entry.manual) "・手動" else "・自動")
             }
 
             val resultColor = ContextCompat.getColor(

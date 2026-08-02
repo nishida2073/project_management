@@ -27,18 +27,21 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val body = inputData.getString(KEY_BODY) ?: ""
         val timestampMillis = inputData.getLong(KEY_TIMESTAMP, System.currentTimeMillis())
         val manual = inputData.getBoolean(KEY_MANUAL, false)
+        // 手動送信時のみ、検索画面で特定済みの確実なSMSプロバイダ上のIDが渡ってくる。
+        // 自動受信時はここでは解決せず、「受信済みSMS送信」画面側で送信元・タイムスタンプの
+        // 近さによって突き合わせる（SmsMatching参照）。
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
         if (!manual && !config.forwardingEnabled) {
-            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "kintoneへの転送が無効になっています", profileName = null)
+            logComplete(sender, body, timestampMillis, smsId, success = false, message = "kintoneへの転送が無効になっています", profileName = null, manual = manual)
             return@withContext Result.success()
         }
 
         val profile = Prefs.findProfileForBody(applicationContext, body)
-        logStart(config, sender, body, timestampMillis, smsId, profileName = profile?.displayName)
+        logStart(sender, body, timestampMillis, smsId, profileName = profile?.displayName, manual = manual)
 
         if (profile == null || !profile.isValid) {
-            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "本文に一致するkintoneの接続設定が見つからないか未完了です", profileName = profile?.displayName)
+            logComplete(sender, body, timestampMillis, smsId, success = false, message = "本文に一致するkintoneの接続設定が見つからないか未完了です", profileName = profile?.displayName, manual = manual)
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
             // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
             return@withContext Result.success()
@@ -88,31 +91,30 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         try {
             OkHttpClient().newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    logComplete(config, sender, body, timestampMillis, smsId, success = true, message = "登録成功", profileName = profile.displayName)
+                    logComplete(sender, body, timestampMillis, smsId, success = true, message = "登録成功", profileName = profile.displayName, manual = manual)
                     Result.success()
                 } else {
                     val detail = "${response.code} ${response.body?.string()}"
                     Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                    logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName)
+                    logComplete(sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName, manual = manual)
                     if (response.code in 500..599) Result.retry() else Result.success()
                 }
             }
         } catch (e: IOException) {
             Log.e(TAG, "kintoneへの通信でエラーが発生しました", e)
-            logComplete(config, sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${e.message}", profileName = profile.displayName)
+            logComplete(sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${e.message}", profileName = profile.displayName, manual = manual)
             Result.retry()
         }
     }
 
     private fun logStart(
-        config: Prefs.Config,
         sender: String,
         body: String,
         timestampMillis: Long,
         smsId: Long?,
-        profileName: String?
+        profileName: String?,
+        manual: Boolean
     ) {
-        if (!config.logEnabled) return
         UploadLogStore.add(
             applicationContext,
             type = UploadLogStore.EntryType.SEND_START,
@@ -122,21 +124,21 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             success = true,
             message = "kintoneへの送信を開始しました",
             smsId = smsId,
-            profileName = profileName
+            profileName = profileName,
+            manual = manual
         )
     }
 
     private fun logComplete(
-        config: Prefs.Config,
         sender: String,
         body: String,
         timestampMillis: Long,
         smsId: Long?,
         success: Boolean,
         message: String,
-        profileName: String?
+        profileName: String?,
+        manual: Boolean
     ) {
-        if (!config.logEnabled) return
         UploadLogStore.add(
             applicationContext,
             type = UploadLogStore.EntryType.SEND_COMPLETE,
@@ -146,7 +148,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             success = success,
             message = message,
             smsId = smsId,
-            profileName = profileName
+            profileName = profileName,
+            manual = manual
         )
     }
 

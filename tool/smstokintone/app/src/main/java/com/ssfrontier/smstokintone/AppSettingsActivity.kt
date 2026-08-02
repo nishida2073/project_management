@@ -3,11 +3,13 @@ package com.ssfrontier.smstokintone
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import com.ssfrontier.smstokintone.databinding.ActivityAppSettingsBinding
 
 class AppSettingsActivity : AppCompatActivity() {
@@ -36,30 +38,42 @@ class AppSettingsActivity : AppCompatActivity() {
             Prefs.save(this, Prefs.load(this).copy(forwardingEnabled = isChecked))
         }
 
-        binding.swLogEnabled.isChecked = Prefs.load(this).logEnabled
-        binding.swLogEnabled.setOnCheckedChangeListener { _, isChecked ->
-            Prefs.save(this, Prefs.load(this).copy(logEnabled = isChecked))
-        }
-
         val config = Prefs.load(this)
         binding.swAutoRefreshEnabled.isChecked = config.autoRefreshEnabled
         binding.etAutoRefreshInterval.setText(config.autoRefreshIntervalSeconds.toString())
+        binding.tilAutoRefreshInterval.isEnabled = config.autoRefreshEnabled
 
         binding.swAutoRefreshEnabled.setOnCheckedChangeListener { _, isChecked ->
             Prefs.save(this, Prefs.load(this).copy(autoRefreshEnabled = isChecked))
+            binding.tilAutoRefreshInterval.isEnabled = isChecked
         }
-        binding.btnSaveAutoRefreshInterval.setOnClickListener { onSaveAutoRefreshIntervalClicked() }
+        binding.etAutoRefreshInterval.addTextChangedListener { text ->
+            val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
+            if (seconds < 1) return@addTextChangedListener
+            Prefs.save(this, Prefs.load(this).copy(autoRefreshIntervalSeconds = seconds))
+        }
 
-        when (config.themeMode) {
-            Prefs.ThemeMode.SYSTEM -> binding.rbThemeSystem.isChecked = true
-            Prefs.ThemeMode.LIGHT -> binding.rbThemeLight.isChecked = true
-            Prefs.ThemeMode.DARK -> binding.rbThemeDark.isChecked = true
+        applyThemeSelection(config.themeMode)
+
+        binding.swThemeFollowSystem.setOnCheckedChangeListener { _, isChecked ->
+            binding.rbThemeLight.isEnabled = !isChecked
+            binding.rbThemeDark.isEnabled = !isChecked
+            val themeMode = if (isChecked) {
+                Prefs.ThemeMode.SYSTEM
+            } else if (binding.rbThemeDark.isChecked) {
+                Prefs.ThemeMode.DARK
+            } else {
+                Prefs.ThemeMode.LIGHT
+            }
+            Prefs.save(this, Prefs.load(this).copy(themeMode = themeMode))
+            AppCompatDelegate.setDefaultNightMode(themeMode.toNightMode())
         }
-        binding.rgThemeMode.setOnCheckedChangeListener { _, checkedId ->
-            val themeMode = when (checkedId) {
-                binding.rbThemeLight.id -> Prefs.ThemeMode.LIGHT
-                binding.rbThemeDark.id -> Prefs.ThemeMode.DARK
-                else -> Prefs.ThemeMode.SYSTEM
+        binding.rgThemeLightDark.setOnCheckedChangeListener { _, checkedId ->
+            if (binding.swThemeFollowSystem.isChecked) return@setOnCheckedChangeListener
+            val themeMode = if (checkedId == binding.rbThemeDark.id) {
+                Prefs.ThemeMode.DARK
+            } else {
+                Prefs.ThemeMode.LIGHT
             }
             Prefs.save(this, Prefs.load(this).copy(themeMode = themeMode))
             AppCompatDelegate.setDefaultNightMode(themeMode.toNightMode())
@@ -70,15 +84,13 @@ class AppSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun onSaveAutoRefreshIntervalClicked() {
-        val seconds = binding.etAutoRefreshInterval.text.toString().toIntOrNull()
-        if (seconds == null || seconds < 1) {
-            Toast.makeText(this, getString(R.string.auto_refresh_interval_error), Toast.LENGTH_LONG).show()
-            return
-        }
-
-        Prefs.save(this, Prefs.load(this).copy(autoRefreshIntervalSeconds = seconds))
-        Toast.makeText(this, "設定を保存しました", Toast.LENGTH_SHORT).show()
+    private fun applyThemeSelection(themeMode: Prefs.ThemeMode) {
+        val followSystem = themeMode == Prefs.ThemeMode.SYSTEM
+        binding.swThemeFollowSystem.isChecked = followSystem
+        binding.rbThemeDark.isChecked = themeMode == Prefs.ThemeMode.DARK
+        binding.rbThemeLight.isChecked = themeMode != Prefs.ThemeMode.DARK
+        binding.rbThemeLight.isEnabled = !followSystem
+        binding.rbThemeDark.isEnabled = !followSystem
     }
 
     override fun onResume() {
@@ -97,5 +109,6 @@ class AppSettingsActivity : AppCompatActivity() {
         } else {
             getString(R.string.permission_status_denied)
         }
+        binding.btnRequestPermission.visibility = if (granted) View.GONE else View.VISIBLE
     }
 }

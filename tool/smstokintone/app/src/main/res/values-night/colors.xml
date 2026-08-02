@@ -5,6 +5,7 @@
     <color name="log_receive">#90CAF9</color>
     <color name="log_send_start">#FFB74D</color>
     <color name="log_divider">#616161</color>
-    <color name="sms_sent_background">#424242</color>
+    <color name="sms_sent_auto_background">#424242</color>
+    <color name="sms_sent_manual_background">#33475C</color>
     <color name="profile_name">#03DAC5</color>
 </resources>

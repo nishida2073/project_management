@@ -31,7 +31,8 @@ object UploadLogStore {
         val success: Boolean,
         val message: String,
         val smsId: Long?,
-        val profileName: String?
+        val profileName: String?,
+        val manual: Boolean
     )
 
     private fun prefs(context: Context) =
@@ -46,7 +47,8 @@ object UploadLogStore {
         success: Boolean,
         message: String,
         smsId: Long? = null,
-        profileName: String? = null
+        profileName: String? = null,
+        manual: Boolean = false
     ) {
         val entries = getAll(context).toMutableList()
         entries.add(
@@ -60,7 +62,8 @@ object UploadLogStore {
                 success = success,
                 message = message,
                 smsId = smsId,
-                profileName = profileName
+                profileName = profileName,
+                manual = manual
             )
         )
 
@@ -75,6 +78,7 @@ object UploadLogStore {
                 .put("success", entry.success)
                 .put("message", entry.message)
                 .put("smsId", entry.smsId ?: NO_SMS_ID)
+                .put("manual", entry.manual)
             entry.profileName?.let { obj.put("profileName", it) }
             array.put(obj)
         }
@@ -97,7 +101,8 @@ object UploadLogStore {
                 success = obj.optBoolean("success", false),
                 message = obj.optString("message", ""),
                 smsId = if (smsId == NO_SMS_ID) null else smsId,
-                profileName = obj.optString("profileName", "").ifBlank { null }
+                profileName = obj.optString("profileName", "").ifBlank { null },
+                manual = obj.optBoolean("manual", false)
             )
         }
     }

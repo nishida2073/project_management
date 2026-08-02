@@ -38,13 +38,13 @@
 
     <!-- アプリ設定画面 -->
     <string name="app_settings_title">アプリ設定</string>
+    <string name="section_forwarding">自動転送</string>
     <string name="switch_forwarding_enabled">自動転送を有効にする</string>
-    <string name="switch_log_enabled">ログを保存する</string>
-    <string name="switch_auto_refresh_enabled">ログ画面を自動更新する</string>
-    <string name="hint_auto_refresh_interval">自動更新の間隔（秒）</string>
-    <string name="auto_refresh_interval_error">自動更新の間隔は1以上の数値で入力してください</string>
+    <string name="section_log">ログ</string>
+    <string name="switch_auto_refresh_enabled">自動更新を有効にする</string>
+    <string name="hint_auto_refresh_interval">更新間隔（秒）</string>
     <string name="label_theme_mode">表示テーマ</string>
-    <string name="rb_theme_system">システム設定</string>
+    <string name="switch_theme_follow_system">システム設定を有効にする</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>
     <string name="section_permission">端末の許可</string>

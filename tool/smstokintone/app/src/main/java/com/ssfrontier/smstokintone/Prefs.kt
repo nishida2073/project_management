@@ -9,7 +9,6 @@ import java.util.UUID
 object Prefs {
 
     private const val PREFS_NAME = "smstokintone_prefs"
-    private const val KEY_LOG_ENABLED = "log_enabled"
     private const val KEY_FORWARDING_ENABLED = "forwarding_enabled"
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
@@ -58,7 +57,6 @@ object Prefs {
 
     /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[KintoneProfile]を参照） */
     data class Config(
-        val logEnabled: Boolean,
         val forwardingEnabled: Boolean,
         val autoRefreshEnabled: Boolean,
         val autoRefreshIntervalSeconds: Int,
@@ -128,7 +126,6 @@ object Prefs {
 
     fun save(context: Context, config: Config) {
         prefs(context).edit()
-            .putBoolean(KEY_LOG_ENABLED, config.logEnabled)
             .putBoolean(KEY_FORWARDING_ENABLED, config.forwardingEnabled)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
@@ -139,7 +136,6 @@ object Prefs {
     fun load(context: Context): Config {
         val p = prefs(context)
         return Config(
-            logEnabled = p.getBoolean(KEY_LOG_ENABLED, true),
             forwardingEnabled = p.getBoolean(KEY_FORWARDING_ENABLED, true),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
             autoRefreshIntervalSeconds = p.getInt(

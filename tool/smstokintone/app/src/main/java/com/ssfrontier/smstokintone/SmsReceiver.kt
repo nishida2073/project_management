@@ -26,32 +26,27 @@ class SmsReceiver : BroadcastReceiver() {
         val body = messages.joinToString(separator = "") { it.messageBody ?: "" }
         val timestampMillis = messages[0].timestampMillis
 
-        // 既定のSMSアプリはSMS_DELIVERを先に受け取ってcontent://smsへ書き込んでから
-        // SMS_RECEIVEDが他のアプリへブロードキャストされるため、この時点でSMSプロバイダの
-        // 実IDを引けることが多い。これを送信済み判定の照合キーとして使う。
-        val smsId = findSmsId(context, sender, body)
-
         // kintoneへの送信結果を待たず、受信した時点で即座にログへ記録する。
         // これにより送信ログ画面を見れば、そもそもSMSを受信できているかを確認できる。
-        if (Prefs.load(context).logEnabled) {
-            UploadLogStore.add(
-                context,
-                type = UploadLogStore.EntryType.RECEIVE,
-                timestampMillis = timestampMillis,
-                sender = sender,
-                body = body,
-                success = true,
-                message = "SMSを受信しました",
-                smsId = smsId,
-                profileName = Prefs.findProfileForBody(context, body)?.displayName
-            )
-        }
+        // SMSプロバイダ上の実IDはこの時点で確実には特定できない（電話番号の表記ゆれや、既定の
+        // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
+        // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
+        // （SmsMatching参照）。
+        UploadLogStore.add(
+            context,
+            type = UploadLogStore.EntryType.RECEIVE,
+            timestampMillis = timestampMillis,
+            sender = sender,
+            body = body,
+            success = true,
+            message = "SMSを受信しました",
+            profileName = Prefs.findProfileForBody(context, body)?.displayName
+        )
 
         val data = workDataOf(
             KintoneUploadWorker.KEY_SENDER to sender,
             KintoneUploadWorker.KEY_BODY to body,
-            KintoneUploadWorker.KEY_TIMESTAMP to timestampMillis,
-            KintoneUploadWorker.KEY_SMS_ID to (smsId ?: -1L)
+            KintoneUploadWorker.KEY_TIMESTAMP to timestampMillis
         )
 
         val request = OneTimeWorkRequestBuilder<KintoneUploadWorker>()
@@ -64,25 +59,5 @@ class SmsReceiver : BroadcastReceiver() {
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
-    }
-
-    private fun findSmsId(context: Context, sender: String, body: String): Long? {
-        return try {
-            context.contentResolver.query(
-                Telephony.Sms.CONTENT_URI,
-                arrayOf(Telephony.Sms._ID),
-                "${Telephony.Sms.ADDRESS} = ? AND ${Telephony.Sms.BODY} = ?",
-                arrayOf(sender, body),
-                "${Telephony.Sms.DATE} DESC"
-            )?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    cursor.getLong(cursor.getColumnIndexOrThrow(Telephony.Sms._ID))
-                } else {
-                    null
-                }
-            }
-        } catch (e: SecurityException) {
-            null
-        }
     }
 }

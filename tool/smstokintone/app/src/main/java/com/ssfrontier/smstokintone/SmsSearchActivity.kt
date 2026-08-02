@@ -206,8 +206,8 @@ class SmsSearchActivity : AppCompatActivity() {
         }
 
         if (binding.cbUnsentOnly.isChecked) {
-            val sentSmsIds = loadSentSmsIds()
-            records.removeAll { it.id in sentSmsIds }
+            val completedEntries = loadCompletedEntries()
+            records.removeAll { findSentEntry(it, completedEntries) != null }
         }
 
         selectedProfileId?.let { profileId ->
@@ -220,17 +220,28 @@ class SmsSearchActivity : AppCompatActivity() {
         renderSmsList()
     }
 
-    private fun loadSentSmsIds(): Set<Long> =
+    private fun loadCompletedEntries(): List<UploadLogStore.Entry> =
         UploadLogStore.getAll(this)
             .filter { it.type == UploadLogStore.EntryType.SEND_COMPLETE && it.success }
-            .mapNotNull { it.smsId }
-            .toSet()
+
+    /**
+     * 手動送信のログはSMS検索画面で特定済みの確実なIDを持つため、そのID一致で判定する。
+     * 自動転送のログはIDを持たないため、送信元とタイムスタンプの近さで判定する（SmsMatching参照）。
+     */
+    private fun findSentEntry(record: SmsRecord, completedEntries: List<UploadLogStore.Entry>): UploadLogStore.Entry? =
+        completedEntries.firstOrNull { entry ->
+            if (entry.smsId != null) {
+                entry.smsId == record.id
+            } else {
+                SmsMatching.isLikelySameSms(entry.sender, entry.timestampMillis, record.address, record.dateMillis)
+            }
+        }
 
     private fun renderSmsList() {
         binding.llSmsListContainer.removeAllViews()
         binding.tvSmsListEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
 
-        val sentSmsIds = loadSentSmsIds()
+        val completedEntries = loadCompletedEntries()
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
@@ -248,8 +259,14 @@ class SmsSearchActivity : AppCompatActivity() {
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 setPadding(0, 16, 0, 16)
-                if (record.id in sentSmsIds) {
-                    setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, R.color.sms_sent_background))
+                val sentEntry = findSentEntry(record, completedEntries)
+                if (sentEntry != null) {
+                    val backgroundColor = if (sentEntry.manual) {
+                        R.color.sms_sent_manual_background
+                    } else {
+                        R.color.sms_sent_auto_background
+                    }
+                    setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, backgroundColor))
                 }
             }
 
