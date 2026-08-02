@@ -49,7 +49,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             null
         }
 
-        when (val result = KintoneApi.postRecord(profile, phoneValue = sender, bodyValue = body, datetimeIsoValue = datetimeIso)) {
+        when (val result = KintoneApi.postRecord(profile, senderValue = sender, bodyValue = body, datetimeIsoValue = datetimeIso)) {
             is KintoneApi.PostResult.Success -> {
                 logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)
                 Result.success()

@@ -206,10 +206,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="@string/hint_field_phone">
+            android:hint="@string/hint_field_sender">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFieldPhone"
+                android:id="@+id/etFieldSender"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />

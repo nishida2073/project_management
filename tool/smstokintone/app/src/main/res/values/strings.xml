@@ -34,7 +34,7 @@
     <string name="hint_login_name">ログイン名</string>
     <string name="hint_login_password">パスワード</string>
     <string name="section_field_mapping">フィールドコード</string>
-    <string name="hint_field_phone">送信元</string>
+    <string name="hint_field_sender">送信元</string>
     <string name="hint_field_body">本文</string>
     <string name="hint_field_datetime">受信日時</string>
     <string name="validation_error">%1$s: 設定名・サブドメイン・認証方式・アプリID・フィールドコードは必須です</string>

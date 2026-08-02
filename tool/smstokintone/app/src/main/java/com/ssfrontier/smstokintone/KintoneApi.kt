@@ -16,20 +16,20 @@ object KintoneApi {
     private const val TAG = "KintoneApi"
 
     sealed class PostResult {
-        data class Success(val message: String = "登録成功") : PostResult()
+        data class Success(val message: String) : PostResult()
         data class HttpFailure(val code: Int, val detail: String) : PostResult()
         data class NetworkError(val message: String) : PostResult()
     }
 
     /**
-     * レコードを登録する。ただし送信元（[profile].fieldPhone）と受信日時（[profile].fieldDatetime）
+     * レコードを登録する。ただし送信元（[profile].fieldSender）と受信日時（[profile].fieldDatetime）
      * が一致する既存レコードが見つかった場合は、新規登録ではなくそのレコードを更新する。
      */
-    fun postRecord(profile: Prefs.KintoneProfile, phoneValue: String, bodyValue: String, datetimeIsoValue: String?): PostResult {
-        val record = buildRecord(profile, phoneValue, bodyValue, datetimeIsoValue)
+    fun postRecord(profile: Prefs.KintoneProfile, senderValue: String, bodyValue: String, datetimeIsoValue: String?): PostResult {
+        val record = buildRecord(profile, senderValue, bodyValue, datetimeIsoValue)
 
-        val existingId = if (profile.fieldPhone.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
-            findExistingRecordId(profile, phoneValue, datetimeIsoValue)
+        val existingId = if (profile.fieldSender.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
+            findExistingRecordId(profile, senderValue, datetimeIsoValue)
         } else {
             null
         }
@@ -41,10 +41,10 @@ object KintoneApi {
         }
     }
 
-    private fun buildRecord(profile: Prefs.KintoneProfile, phoneValue: String, bodyValue: String, datetimeIsoValue: String?): JSONObject {
+    private fun buildRecord(profile: Prefs.KintoneProfile, senderValue: String, bodyValue: String, datetimeIsoValue: String?): JSONObject {
         val record = JSONObject()
-        if (profile.fieldPhone.isNotBlank()) {
-            record.put(profile.fieldPhone, JSONObject().put("value", phoneValue))
+        if (profile.fieldSender.isNotBlank()) {
+            record.put(profile.fieldSender, JSONObject().put("value", senderValue))
         }
         record.put(profile.fieldBody, JSONObject().put("value", bodyValue))
         if (profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
@@ -54,8 +54,8 @@ object KintoneApi {
     }
 
     /** 送信元と受信日時が一致する既存レコードのIDを探す。見つからない・検索に失敗した場合はnull */
-    private fun findExistingRecordId(profile: Prefs.KintoneProfile, phoneValue: String, datetimeIsoValue: String): String? {
-        val query = "${profile.fieldPhone} = \"${escapeForQuery(phoneValue)}\" and " +
+    private fun findExistingRecordId(profile: Prefs.KintoneProfile, senderValue: String, datetimeIsoValue: String): String? {
+        val query = "${profile.fieldSender} = \"${escapeForQuery(senderValue)}\" and " +
             "${profile.fieldDatetime} = \"${escapeForQuery(datetimeIsoValue)}\""
 
         val url = HttpUrl.Builder()
@@ -99,7 +99,7 @@ object KintoneApi {
             .post(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
         addAuthHeader(requestBuilder, profile)
 
-        return execute(requestBuilder, successMessage = "登録成功")
+        return execute(requestBuilder, successMessage = "登録に成功しました")
     }
 
     private fun updateRecord(profile: Prefs.KintoneProfile, recordId: String, record: JSONObject): PostResult {
@@ -113,7 +113,7 @@ object KintoneApi {
             .put(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
         addAuthHeader(requestBuilder, profile)
 
-        return execute(requestBuilder, successMessage = "更新成功")
+        return execute(requestBuilder, successMessage = "更新に成功しました")
     }
 
     private fun addAuthHeader(requestBuilder: Request.Builder, profile: Prefs.KintoneProfile) {

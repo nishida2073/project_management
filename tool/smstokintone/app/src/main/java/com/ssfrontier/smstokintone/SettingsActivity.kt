@@ -48,7 +48,7 @@ class SettingsActivity : AppCompatActivity() {
         itemBinding.etApiToken.setText(profile.apiToken)
         itemBinding.etLoginName.setText(profile.loginName)
         itemBinding.etLoginPassword.setText(profile.loginPassword)
-        itemBinding.etFieldPhone.setText(profile.fieldPhone)
+        itemBinding.etFieldSender.setText(profile.fieldSender)
         itemBinding.etFieldBody.setText(profile.fieldBody)
         itemBinding.etFieldDatetime.setText(profile.fieldDatetime)
 
@@ -108,7 +108,7 @@ class SettingsActivity : AppCompatActivity() {
             apiToken = itemBinding.etApiToken.text.toString().trim(),
             loginName = itemBinding.etLoginName.text.toString().trim(),
             loginPassword = itemBinding.etLoginPassword.text.toString(),
-            fieldPhone = itemBinding.etFieldPhone.text.toString().trim(),
+            fieldSender = itemBinding.etFieldSender.text.toString().trim(),
             fieldBody = itemBinding.etFieldBody.text.toString().trim(),
             fieldDatetime = itemBinding.etFieldDatetime.text.toString().trim()
         )
@@ -140,7 +140,7 @@ class SettingsActivity : AppCompatActivity() {
             val result = withContext(Dispatchers.IO) {
                 KintoneApi.postRecord(
                     profile,
-                    phoneValue = Defaults.TEST_SEND_PHONE,
+                    senderValue = Defaults.TEST_SEND_SENDER,
                     bodyValue = getString(R.string.test_send_body),
                     datetimeIsoValue = datetimeIso
                 )

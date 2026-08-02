@@ -23,19 +23,19 @@
             android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenLog"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_open_log" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenSmsSearch"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:text="@string/btn_open_sms_search" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenLog"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/btn_open_log" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenKintoneSettings"

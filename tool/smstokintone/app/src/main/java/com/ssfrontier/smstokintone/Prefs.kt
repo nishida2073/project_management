@@ -16,17 +16,6 @@ object Prefs {
 
     private const val KEY_KINTONE_PROFILES = "kintone_profiles"
 
-    // 旧バージョン（単一設定のみ）で使われていたキー。移行専用。
-    private const val LEGACY_KEY_SUBDOMAIN = "subdomain"
-    private const val LEGACY_KEY_APP_ID = "app_id"
-    private const val LEGACY_KEY_AUTH_METHOD = "auth_method"
-    private const val LEGACY_KEY_API_TOKEN = "api_token"
-    private const val LEGACY_KEY_LOGIN_NAME = "login_name"
-    private const val LEGACY_KEY_LOGIN_PASSWORD = "login_password"
-    private const val LEGACY_KEY_FIELD_PHONE = "field_phone"
-    private const val LEGACY_KEY_FIELD_BODY = "field_body"
-    private const val LEGACY_KEY_FIELD_DATETIME = "field_datetime"
-
     enum class AuthMethod {
         API_TOKEN,
         PASSWORD;
@@ -77,7 +66,7 @@ object Prefs {
         val apiToken: String,
         val loginName: String,
         val loginPassword: String,
-        val fieldPhone: String,
+        val fieldSender: String,
         val fieldBody: String,
         val fieldDatetime: String
     ) {
@@ -113,7 +102,7 @@ object Prefs {
                 apiToken = "",
                 loginName = "",
                 loginPassword = "",
-                fieldPhone = Defaults.NEW_PROFILE_FIELD_PHONE,
+                fieldSender = Defaults.NEW_PROFILE_FIELD_SENDER,
                 fieldBody = Defaults.NEW_PROFILE_FIELD_BODY,
                 fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME
             )
@@ -159,7 +148,7 @@ object Prefs {
                     .put("apiToken", profile.apiToken)
                     .put("loginName", profile.loginName)
                     .put("loginPassword", profile.loginPassword)
-                    .put("fieldPhone", profile.fieldPhone)
+                    .put("fieldSender", profile.fieldSender)
                     .put("fieldBody", profile.fieldBody)
                     .put("fieldDatetime", profile.fieldDatetime)
             )
@@ -169,7 +158,7 @@ object Prefs {
 
     fun loadProfiles(context: Context): List<KintoneProfile> {
         val json = prefs(context).getString(KEY_KINTONE_PROFILES, null)
-            ?: return migrateLegacyProfile(context)
+            ?: return createDefaultProfile(context)
 
         val array = JSONArray(json)
         return (0 until array.length()).map { i ->
@@ -184,31 +173,16 @@ object Prefs {
                 apiToken = obj.optString("apiToken", ""),
                 loginName = obj.optString("loginName", ""),
                 loginPassword = obj.optString("loginPassword", ""),
-                fieldPhone = obj.optString("fieldPhone", ""),
+                fieldSender = obj.optString("fieldSender", ""),
                 fieldBody = obj.optString("fieldBody", ""),
                 fieldDatetime = obj.optString("fieldDatetime", "")
             )
         }
     }
 
-    /** 旧バージョンの単一kintone設定を、キーワード未設定（デフォルト）の1プロファイルとして移行する */
-    private fun migrateLegacyProfile(context: Context): List<KintoneProfile> {
-        val p = prefs(context)
-        val legacyProfile = KintoneProfile(
-            id = UUID.randomUUID().toString(),
-            name = "",
-            keywords = "",
-            subdomain = p.getString(LEGACY_KEY_SUBDOMAIN, "") ?: "",
-            appId = p.getString(LEGACY_KEY_APP_ID, "") ?: "",
-            authMethod = AuthMethod.fromName(p.getString(LEGACY_KEY_AUTH_METHOD, null)),
-            apiToken = p.getString(LEGACY_KEY_API_TOKEN, "") ?: "",
-            loginName = p.getString(LEGACY_KEY_LOGIN_NAME, "") ?: "",
-            loginPassword = p.getString(LEGACY_KEY_LOGIN_PASSWORD, "") ?: "",
-            fieldPhone = p.getString(LEGACY_KEY_FIELD_PHONE, "") ?: "",
-            fieldBody = p.getString(LEGACY_KEY_FIELD_BODY, "") ?: "",
-            fieldDatetime = p.getString(LEGACY_KEY_FIELD_DATETIME, "") ?: ""
-        )
-        val profiles = listOf(legacyProfile)
+    /** 保存済みのプロファイルが1件もない場合に、初期値のみの空プロファイルを1件作成する */
+    private fun createDefaultProfile(context: Context): List<KintoneProfile> {
+        val profiles = listOf(KintoneProfile.newEmpty())
         saveProfiles(context, profiles)
         return profiles
     }

@@ -6,9 +6,9 @@ object Defaults {
     const val AUTO_REFRESH_INTERVAL_SECONDS = 30
 
     const val NEW_PROFILE_SUBDOMAIN = "univ-kyousai-{X}"
-    const val NEW_PROFILE_FIELD_PHONE = "sender"
+    const val NEW_PROFILE_FIELD_SENDER = "sender"
     const val NEW_PROFILE_FIELD_BODY = "content"
     const val NEW_PROFILE_FIELD_DATETIME = "receive_datetime"
 
-    const val TEST_SEND_PHONE = "09000000000"
+    const val TEST_SEND_SENDER = "09000000000"
 }

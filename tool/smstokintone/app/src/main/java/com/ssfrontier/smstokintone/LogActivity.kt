@@ -97,14 +97,14 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 24, 0, 4)
             }
 
-            // グループ2: 設定名／電話番号／SMS自体のタイムスタンプ／メッセージ（SMS本文）
+            // グループ2: 設定名／送信元／SMS自体のタイムスタンプ／メッセージ（SMS本文）
             val profileView = TextView(this).apply {
                 text = entry.profileName ?: getString(R.string.label_profile_none)
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
                 setTextColor(ContextCompat.getColor(this@LogActivity, R.color.profile_name))
                 setPadding(0, 16, 0, 4)
             }
-            val phoneView = TextView(this).apply {
+            val senderView = TextView(this).apply {
                 text = entry.sender
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
                 setPadding(0, 0, 0, 4)
@@ -143,7 +143,7 @@ class LogActivity : AppCompatActivity() {
 
             binding.llLogContainer.addView(typeAndTimestampView)
             binding.llLogContainer.addView(profileView)
-            binding.llLogContainer.addView(phoneView)
+            binding.llLogContainer.addView(senderView)
             binding.llLogContainer.addView(smsTimestampView)
             binding.llLogContainer.addView(bodyView)
             binding.llLogContainer.addView(resultView)
