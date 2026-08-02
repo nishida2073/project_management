@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SMS　→　kintone</string>
+    <string name="app_name">S2k</string>
 
     <!-- トップ画面 -->
     <string name="top_status_running">起動中</string>
@@ -21,7 +21,7 @@
     <string name="label_profile_none">未設定</string>
     <string name="profile_index_format">設定 %1$d</string>
     <string name="toast_no_profiles">設定を1つ以上追加してください</string>
-    <string name="hint_subdomain">サブドメイン（例: your-company）</string>
+    <string name="hint_subdomain">サブドメイン</string>
     <string name="hint_app_id">アプリID</string>
     <string name="label_auth_method">認証方式</string>
     <string name="rb_auth_api_token">APIトークン</string>
