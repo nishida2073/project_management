@@ -11,8 +11,8 @@
     <!-- kintone設定画面 -->
     <string name="kintone_settings_title">kintone設定</string>
     <string name="kintone_settings_description">SMS本文に含まれる言葉によって、送信先のkintone設定を切り替えられます。「本文に含まれる言葉」が空欄の設定は、どの言葉にも一致しなかった場合のデフォルトとして使われます。</string>
-    <string name="hint_profile_name">設定名</string>
-    <string name="hint_keywords">本文に含まれる言葉</string>
+    <string name="hint_profile_name">送信先名</string>
+    <string name="hint_keywords">本文に含まれる言葉（任意）</string>
     <string name="helper_keywords">カンマ区切りで複数の指定が可能です。空欄の場合はデフォルト設定として扱われます</string>
     <string name="btn_add_profile">設定を追加</string>
     <string name="btn_copy_profile">コピー</string>
@@ -21,10 +21,9 @@
     <string name="label_profile_none">未設定</string>
     <string name="profile_index_format">設定 %1$d</string>
     <string name="toast_no_profiles">設定を1つ以上追加してください</string>
-    <string name="section_profile_info">設定</string>
     <string name="section_connection">接続</string>
     <string name="section_app">アプリ</string>
-    <string name="section_sms_target">SMSの絞り込み</string>
+    <string name="section_sms_target">対象のSMS</string>
     <string name="hint_subdomain">サブドメイン</string>
     <string name="hint_app_id">アプリID</string>
     <string name="label_auth_method">認証方式</string>
@@ -37,16 +36,19 @@
     <string name="hint_field_sender">送信元</string>
     <string name="hint_field_body">本文</string>
     <string name="hint_field_datetime">受信日時</string>
-    <string name="validation_error">%1$s: 設定名・サブドメイン・認証方式・アプリID・フィールドコードは必須です</string>
+    <string name="section_update_condition">更新条件</string>
+    <string name="hint_update_window_hours">受信日時の範囲</string>
+    <string name="helper_update_window_hours">送信元が一致し、受信日時の差がこの時間の範囲であれば、新規登録ではなく更新にします</string>
+    <string name="validation_error">%1$s: 送信先名・サブドメイン・認証方式・アプリID・フィールドコードは必須です</string>
     <string name="btn_save">設定を保存</string>
     <string name="btn_test_send">テスト送信</string>
-    <string name="test_send_result_title">テスト送信結果</string>
+    <string name="test_send_result_title">テスト結果</string>
     <string name="test_send_body">これはsmstokintoneアプリからのテスト送信です</string>
 
     <!-- アプリ設定画面 -->
     <string name="app_settings_title">アプリ設定</string>
-    <string name="section_forwarding">自動転送</string>
-    <string name="switch_forwarding_enabled">自動転送を有効にする</string>
+    <string name="section_forwarding">自動送信</string>
+    <string name="switch_forwarding_enabled">自動送信を有効にする</string>
     <string name="section_log">ログ</string>
     <string name="switch_auto_refresh_enabled">自動更新を有効にする</string>
     <string name="hint_auto_refresh_interval">更新間隔（秒）</string>
@@ -79,7 +81,7 @@
     <string name="hint_date_from">開始日</string>
     <string name="hint_date_to">終了日</string>
     <string name="hint_body_filter">本文に含む文字列（任意）</string>
-    <string name="label_profile_filter">設定で絞り込む（任意）</string>
+    <string name="label_profile_filter">送信先で絞り込む（任意）</string>
     <string name="filter_profile_all">すべて</string>
     <string name="filter_unsent_only">未送信のみ表示</string>
     <string name="btn_search_sms">検索</string>

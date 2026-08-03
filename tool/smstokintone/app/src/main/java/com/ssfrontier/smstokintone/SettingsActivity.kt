@@ -51,6 +51,7 @@ class SettingsActivity : AppCompatActivity() {
         itemBinding.etFieldSender.setText(profile.fieldSender)
         itemBinding.etFieldBody.setText(profile.fieldBody)
         itemBinding.etFieldDatetime.setText(profile.fieldDatetime)
+        itemBinding.etUpdateWindowHours.setText(profile.updateWindowHours.toString())
 
         when (profile.authMethod) {
             Prefs.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
@@ -110,7 +111,9 @@ class SettingsActivity : AppCompatActivity() {
             loginPassword = itemBinding.etLoginPassword.text.toString(),
             fieldSender = itemBinding.etFieldSender.text.toString().trim(),
             fieldBody = itemBinding.etFieldBody.text.toString().trim(),
-            fieldDatetime = itemBinding.etFieldDatetime.text.toString().trim()
+            fieldDatetime = itemBinding.etFieldDatetime.text.toString().trim(),
+            updateWindowHours = itemBinding.etUpdateWindowHours.text.toString().trim().toIntOrNull()
+                ?: Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
         )
     }
 

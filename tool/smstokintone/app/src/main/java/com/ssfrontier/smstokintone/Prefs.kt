@@ -68,7 +68,8 @@ object Prefs {
         val loginPassword: String,
         val fieldSender: String,
         val fieldBody: String,
-        val fieldDatetime: String
+        val fieldDatetime: String,
+        val updateWindowHours: Int
     ) {
         val keywordList: List<String>
             get() = keywords.split(",").map { it.trim() }.filter { it.isNotEmpty() }
@@ -104,7 +105,8 @@ object Prefs {
                 loginPassword = "",
                 fieldSender = Defaults.NEW_PROFILE_FIELD_SENDER,
                 fieldBody = Defaults.NEW_PROFILE_FIELD_BODY,
-                fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME
+                fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME,
+                updateWindowHours = Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
             )
         }
     }
@@ -151,6 +153,7 @@ object Prefs {
                     .put("fieldSender", profile.fieldSender)
                     .put("fieldBody", profile.fieldBody)
                     .put("fieldDatetime", profile.fieldDatetime)
+                    .put("updateWindowHours", profile.updateWindowHours)
             )
         }
         prefs(context).edit().putString(KEY_KINTONE_PROFILES, array.toString()).apply()
@@ -175,7 +178,8 @@ object Prefs {
                 loginPassword = obj.optString("loginPassword", ""),
                 fieldSender = obj.optString("fieldSender", ""),
                 fieldBody = obj.optString("fieldBody", ""),
-                fieldDatetime = obj.optString("fieldDatetime", "")
+                fieldDatetime = obj.optString("fieldDatetime", ""),
+                updateWindowHours = obj.optInt("updateWindowHours", Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS)
             )
         }
     }

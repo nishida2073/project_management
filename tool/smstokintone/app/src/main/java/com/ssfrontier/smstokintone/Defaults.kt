@@ -9,6 +9,7 @@ object Defaults {
     const val NEW_PROFILE_FIELD_SENDER = "sender"
     const val NEW_PROFILE_FIELD_BODY = "content"
     const val NEW_PROFILE_FIELD_DATETIME = "receive_datetime"
+    const val NEW_PROFILE_UPDATE_WINDOW_HOURS = 5
 
     const val TEST_SEND_SENDER = "09000000000"
 }

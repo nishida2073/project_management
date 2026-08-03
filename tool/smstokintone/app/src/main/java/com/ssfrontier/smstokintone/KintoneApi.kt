@@ -9,6 +9,11 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 /** kintoneへのレコード登録・更新リクエストを組み立てて送信する共通処理 */
 object KintoneApi {
@@ -22,8 +27,9 @@ object KintoneApi {
     }
 
     /**
-     * レコードを登録する。ただし送信元（[profile].fieldSender）と受信日時（[profile].fieldDatetime）
-     * が一致する既存レコードが見つかった場合は、新規登録ではなくそのレコードを更新する。
+     * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、受信日時（[profile].fieldDatetime）
+     * の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、
+     * 新規登録ではなくそのレコードを更新する。
      */
     fun postRecord(profile: Prefs.KintoneProfile, senderValue: String, bodyValue: String, datetimeIsoValue: String?): PostResult {
         val record = buildRecord(profile, senderValue, bodyValue, datetimeIsoValue)
@@ -53,10 +59,29 @@ object KintoneApi {
         return record
     }
 
-    /** 送信元と受信日時が一致する既存レコードのIDを探す。見つからない・検索に失敗した場合はnull */
+    /**
+     * 送信元が一致し、受信日時の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードの
+     * IDを探す。複数件ヒットした場合は受信日時が最も新しいものを返す。見つからない・検索に失敗した
+     * 場合はnull
+     */
     private fun findExistingRecordId(profile: Prefs.KintoneProfile, senderValue: String, datetimeIsoValue: String): String? {
+        val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val baseMillis = try {
+            isoFormat.parse(datetimeIsoValue)?.time
+        } catch (e: ParseException) {
+            null
+        } ?: return null
+
+        val windowMillis = profile.updateWindowHours.coerceAtLeast(0) * 3_600_000L
+        val rangeStart = isoFormat.format(Date(baseMillis - windowMillis))
+        val rangeEnd = isoFormat.format(Date(baseMillis + windowMillis))
+
         val query = "${profile.fieldSender} = \"${escapeForQuery(senderValue)}\" and " +
-            "${profile.fieldDatetime} = \"${escapeForQuery(datetimeIsoValue)}\""
+            "${profile.fieldDatetime} >= \"$rangeStart\" and " +
+            "${profile.fieldDatetime} <= \"$rangeEnd\" " +
+            "order by ${profile.fieldDatetime} desc limit 1"
 
         val url = HttpUrl.Builder()
             .scheme("https")

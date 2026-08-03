@@ -16,7 +16,7 @@ class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
-        // 転送の有効/無効・kintone設定の完否はKintoneUploadWorker側で判定しログに残す。
+        // 自動送信の有効/無効・kintone設定の完否はKintoneUploadWorker側で判定しログに残す。
         // ここで早期returnすると、その判定結果が送信ログ画面に一切表示されなくなるため行わない。
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         if (messages.isNullOrEmpty()) return

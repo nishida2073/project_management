@@ -26,7 +26,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
         if (!manual && !config.forwardingEnabled) {
-            logComplete(sender, body, timestampMillis, smsId, success = false, message = "kintoneへの転送が無効になっています", profileName = null, manual = manual)
+            logComplete(sender, body, timestampMillis, smsId, success = false, message = "kintoneへの自動送信が無効になっています", profileName = null, manual = manual)
             return@withContext Result.success()
         }
 

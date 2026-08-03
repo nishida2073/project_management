@@ -38,7 +38,7 @@ class SmsSearchActivity : AppCompatActivity() {
     private var toMillis: Long? = null
     private val records = mutableListOf<SmsRecord>()
 
-    private var profileOptions: List<Prefs.KintoneProfile?> = emptyList()
+    private var profileFilterKeys: List<String?> = emptyList()
     private var selectedProfileId: String? = null
 
     private val requestReadSmsPermissionLauncher =
@@ -69,7 +69,7 @@ class SmsSearchActivity : AppCompatActivity() {
         }
         binding.spProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedProfileId = profileOptions.getOrNull(position)?.id
+                selectedProfileId = profileFilterKeys.getOrNull(position)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -89,14 +89,16 @@ class SmsSearchActivity : AppCompatActivity() {
 
     private fun refreshProfileFilterOptions() {
         val profiles = Prefs.loadProfiles(this)
-        profileOptions = listOf(null) + profiles
-        val labels = listOf(getString(R.string.filter_profile_all)) + profiles.map { it.displayName }
+        profileFilterKeys = listOf(null) + profiles.map { it.id } + FILTER_KEY_UNSET
+        val labels = listOf(getString(R.string.filter_profile_all)) +
+            profiles.map { it.displayName } +
+            getString(R.string.label_profile_none)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spProfileFilter.adapter = adapter
 
-        val restoreIndex = profileOptions.indexOfFirst { it?.id == selectedProfileId }
+        val restoreIndex = profileFilterKeys.indexOf(selectedProfileId)
         binding.spProfileFilter.setSelection(if (restoreIndex >= 0) restoreIndex else 0)
     }
 
@@ -210,8 +212,10 @@ class SmsSearchActivity : AppCompatActivity() {
             records.removeAll { findSentEntry(it, completedEntries) != null }
         }
 
-        selectedProfileId?.let { profileId ->
-            records.removeAll { Prefs.findProfileForBody(this, it.body)?.id != profileId }
+        when (val profileId = selectedProfileId) {
+            null -> Unit
+            FILTER_KEY_UNSET -> records.removeAll { Prefs.findProfileForBody(this, it.body) != null }
+            else -> records.removeAll { Prefs.findProfileForBody(this, it.body)?.id != profileId }
         }
 
         if (showFoundToast) {
@@ -226,7 +230,7 @@ class SmsSearchActivity : AppCompatActivity() {
 
     /**
      * 手動送信のログはSMS検索画面で特定済みの確実なIDを持つため、そのID一致で判定する。
-     * 自動転送のログはIDを持たないため、送信元とタイムスタンプの近さで判定する（SmsMatching参照）。
+     * 自動送信のログはIDを持たないため、送信元とタイムスタンプの近さで判定する（SmsMatching参照）。
      */
     private fun findSentEntry(record: SmsRecord, completedEntries: List<UploadLogStore.Entry>): UploadLogStore.Entry? =
         completedEntries.firstOrNull { entry ->
@@ -375,4 +379,8 @@ class SmsSearchActivity : AppCompatActivity() {
         val body: String,
         val dateMillis: Long
     )
+
+    companion object {
+        private const val FILTER_KEY_UNSET = "__filter_key_unset__"
+    }
 }
