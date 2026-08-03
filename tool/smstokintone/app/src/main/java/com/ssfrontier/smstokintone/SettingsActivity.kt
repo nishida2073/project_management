@@ -152,6 +152,7 @@ class SettingsActivity : AppCompatActivity() {
 
             val message = when (result) {
                 is KintoneApi.PostResult.Success -> result.message
+                is KintoneApi.PostResult.Skipped -> result.message
                 is KintoneApi.PostResult.HttpFailure -> "送信失敗: ${result.code} ${result.detail}"
                 is KintoneApi.PostResult.NetworkError -> "通信エラー: ${result.message}"
             }

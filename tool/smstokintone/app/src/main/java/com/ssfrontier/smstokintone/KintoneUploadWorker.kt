@@ -54,6 +54,10 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)
                 Result.success()
             }
+            is KintoneApi.PostResult.Skipped -> {
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)
+                Result.success()
+            }
             is KintoneApi.PostResult.HttpFailure -> {
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")

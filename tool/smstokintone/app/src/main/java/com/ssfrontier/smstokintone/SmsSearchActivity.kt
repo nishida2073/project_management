@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.DatePickerDialog
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Telephony
 import android.view.View
 import android.widget.AdapterView
@@ -341,15 +343,18 @@ class SmsSearchActivity : AppCompatActivity() {
             })
         }
 
-        // キュー投入直後にチェックを解除して一覧を更新し、投入されたことを見た目でも分かるようにする
-        setAllChecked(false)
-        searchSms(showFoundToast = false)
-
         Toast.makeText(
             this,
             getString(R.string.toast_queued, selectedRecords.size),
             Toast.LENGTH_LONG
         ).show()
+
+        // メッセージの表示が終わってからチェックを解除して一覧を更新する。すぐ更新すると
+        // チェックが消えるところがメッセージの表示と重なって見えてしまうため
+        Handler(Looper.getMainLooper()).postDelayed({
+            setAllChecked(false)
+            searchSms(showFoundToast = false)
+        }, TOAST_LONG_DURATION_MILLIS)
     }
 
     private fun onSendBatchFinished(selectedIds: Set<Long>) {
@@ -370,7 +375,9 @@ class SmsSearchActivity : AppCompatActivity() {
             ).show()
         }
 
-        searchSms(showFoundToast = false)
+        // Toast.LENGTH_LONGの表示が終わってから一覧を更新する。すぐ更新するとチェック状態が
+        // 消えるところがメッセージの表示と重なって見えてしまうため
+        Handler(Looper.getMainLooper()).postDelayed({ searchSms(showFoundToast = false) }, TOAST_LONG_DURATION_MILLIS)
     }
 
     private data class SmsRecord(
@@ -382,5 +389,6 @@ class SmsSearchActivity : AppCompatActivity() {
 
     companion object {
         private const val FILTER_KEY_UNSET = "__filter_key_unset__"
+        private const val TOAST_LONG_DURATION_MILLIS = 3_500L
     }
 }

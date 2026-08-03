@@ -19,32 +19,110 @@ import java.util.TimeZone
 object KintoneApi {
 
     private const val TAG = "KintoneApi"
+    private const val ENTRY_SEPARATOR = "ーーーー"
 
     sealed class PostResult {
         data class Success(val message: String) : PostResult()
+        data class Skipped(val message: String) : PostResult()
         data class HttpFailure(val code: Int, val detail: String) : PostResult()
         data class NetworkError(val message: String) : PostResult()
     }
 
+    private data class ExistingRecord(val id: String, val bodyValue: String, val datetimeValue: String)
+
     /**
-     * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、受信日時（[profile].fieldDatetime）
-     * の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、
-     * 新規登録ではなくそのレコードを更新する。
+     * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、最終受信日時（[profile].fieldDatetime）
+     * の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、新規登録
+     * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
+     * 既存レコードの最終受信日時と完全に一致する場合（同一SMSの重複配信など）は何も送信せずスキップする。
      */
     fun postRecord(profile: Prefs.KintoneProfile, senderValue: String, bodyValue: String, datetimeIsoValue: String?): PostResult {
-        val record = buildRecord(profile, senderValue, bodyValue, datetimeIsoValue)
+        val entryText = buildEntryText(datetimeIsoValue, bodyValue)
 
-        val existingId = if (profile.fieldSender.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
-            findExistingRecordId(profile, senderValue, datetimeIsoValue)
+        val existing = if (profile.fieldSender.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
+            findExistingRecord(profile, senderValue, datetimeIsoValue)
         } else {
             null
         }
 
-        return if (existingId != null) {
-            updateRecord(profile, existingId, record)
+        val isSameMinute = existing != null && datetimeIsoValue != null &&
+            isSameMinute(existing.datetimeValue, datetimeIsoValue)
+
+        return if (isSameMinute) {
+            PostResult.Skipped("最終受信日時と一致するため、スキップしました")
+        } else if (existing != null) {
+            val newEntryMillis = datetimeIsoValue?.let { parseIsoDateTime(it) }
+            val mergedBody = mergeBody(existing.bodyValue, entryText, newEntryMillis)
+            val existingMillis = parseIsoDateTime(existing.datetimeValue)
+            val recordDatetimeIsoValue = if (existingMillis != null && newEntryMillis != null && existingMillis > newEntryMillis) {
+                existing.datetimeValue
+            } else {
+                datetimeIsoValue
+            }
+            val record = buildRecord(profile, senderValue, mergedBody, recordDatetimeIsoValue)
+            updateRecord(profile, existing.id, record)
         } else {
+            val record = buildRecord(profile, senderValue, entryText, datetimeIsoValue)
             insertRecord(profile, record)
         }
+    }
+
+    /**
+     * 既存の本文を[ENTRY_SEPARATOR]区切りのエントリに分解し、新しいエントリを受信日時順（古い順）の
+     * 正しい位置に挿入する。新しいエントリの日時が不明、または既存エントリの日時が読み取れない場合は
+     * 末尾に追加する
+     */
+    private fun mergeBody(existingBody: String, newEntryText: String, newEntryMillis: Long?): String {
+        if (existingBody.isBlank()) return newEntryText
+
+        val separator = "\n\n$ENTRY_SEPARATOR\n\n"
+        if (newEntryMillis == null) return "$existingBody$separator$newEntryText"
+
+        val displayFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
+        val entries = existingBody.split(separator).toMutableList()
+        val insertIndex = entries.indexOfFirst { entry ->
+            val entryMillis = try {
+                displayFormat.parse(entry.substringBefore("\n\n"))?.time
+            } catch (e: ParseException) {
+                null
+            }
+            entryMillis != null && entryMillis > newEntryMillis
+        }
+
+        if (insertIndex < 0) entries.add(newEntryText) else entries.add(insertIndex, newEntryText)
+        return entries.joinToString(separator)
+    }
+
+    /** 受信日時（人が読める形式）と本文を、間に空行を挟んで組み立てる */
+    private fun buildEntryText(datetimeIsoValue: String?, bodyValue: String): String {
+        val displayDatetime = datetimeIsoValue?.let { formatDisplayDateTime(it) }
+        return if (displayDatetime != null) "$displayDatetime\n\n$bodyValue" else bodyValue
+    }
+
+    private fun formatDisplayDateTime(datetimeIsoValue: String): String? {
+        val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return null
+        return SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN).format(Date(baseMillis))
+    }
+
+    private fun parseIsoDateTime(datetimeIsoValue: String): Long? {
+        val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        return try {
+            isoFormat.parse(datetimeIsoValue)?.time
+        } catch (e: ParseException) {
+            null
+        }
+    }
+
+    /**
+     * kintoneの日時フィールドは秒を保持せず分単位に切り捨てられるため、秒を無視して分単位が
+     * 一致するかどうかで比較する
+     */
+    private fun isSameMinute(a: String, b: String): Boolean {
+        val aMillis = parseIsoDateTime(a) ?: return false
+        val bMillis = parseIsoDateTime(b) ?: return false
+        return aMillis / 60_000L == bMillis / 60_000L
     }
 
     private fun buildRecord(profile: Prefs.KintoneProfile, senderValue: String, bodyValue: String, datetimeIsoValue: String?): JSONObject {
@@ -60,19 +138,15 @@ object KintoneApi {
     }
 
     /**
-     * 送信元が一致し、受信日時の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードの
-     * IDを探す。複数件ヒットした場合は受信日時が最も新しいものを返す。見つからない・検索に失敗した
-     * 場合はnull
+     * 送信元が一致し、最終受信日時の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードを
+     * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。見つからない・検索に失敗した場合は
+     * null
      */
-    private fun findExistingRecordId(profile: Prefs.KintoneProfile, senderValue: String, datetimeIsoValue: String): String? {
+    private fun findExistingRecord(profile: Prefs.KintoneProfile, senderValue: String, datetimeIsoValue: String): ExistingRecord? {
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
-        val baseMillis = try {
-            isoFormat.parse(datetimeIsoValue)?.time
-        } catch (e: ParseException) {
-            null
-        } ?: return null
+        val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return null
 
         val windowMillis = profile.updateWindowHours.coerceAtLeast(0) * 3_600_000L
         val rangeStart = isoFormat.format(Date(baseMillis - windowMillis))
@@ -90,6 +164,8 @@ object KintoneApi {
             .addQueryParameter("app", profile.appId)
             .addQueryParameter("query", query)
             .addQueryParameter("fields[0]", "\$id")
+            .addQueryParameter("fields[1]", profile.fieldBody)
+            .addQueryParameter("fields[2]", profile.fieldDatetime)
             .build()
 
         val requestBuilder = Request.Builder().url(url).get()
@@ -103,7 +179,10 @@ object KintoneApi {
                 }
                 val records = JSONObject(response.body?.string() ?: "{}").optJSONArray("records")
                 val first = records?.optJSONObject(0) ?: return null
-                first.getJSONObject("\$id").getString("value")
+                val id = first.getJSONObject("\$id").getString("value")
+                val bodyValue = first.optJSONObject(profile.fieldBody)?.optString("value", "") ?: ""
+                val datetimeValue = first.optJSONObject(profile.fieldDatetime)?.optString("value", "") ?: ""
+                ExistingRecord(id, bodyValue, datetimeValue)
             }
         } catch (e: IOException) {
             Log.w(TAG, "既存レコードの検索で通信エラーが発生しました: ${e.message}")
