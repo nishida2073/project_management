@@ -6,13 +6,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="status_running">#2E7D32</color>
+    <color name="status_running">#1565C0</color>
+    <color name="status_manual">#F9A825</color>
     <color name="log_success">#2E7D32</color>
     <color name="log_failure">#C62828</color>
-    <color name="log_receive">#1565C0</color>
-    <color name="log_send_start">#EF6C00</color>
     <color name="log_divider">#BDBDBD</color>
-    <color name="sms_sent_auto_background">#E0E0E0</color>
-    <color name="sms_sent_manual_background">#D8E8F5</color>
-    <color name="profile_name">@color/teal_700</color>
+    <color name="sms_sent_auto_background">#DCE8F6</color>
+    <color name="sms_sent_manual_background">#FEF2DE</color>
+    <color name="profile_name">#424242</color>
 </resources>

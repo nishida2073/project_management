@@ -3,6 +3,7 @@ package com.ssfrontier.smstokintone
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.ssfrontier.smstokintone.databinding.ActivityTopBinding
 
 class TopActivity : AppCompatActivity() {
@@ -26,5 +27,23 @@ class TopActivity : AppCompatActivity() {
         binding.btnOpenSmsSearch.setOnClickListener {
             startActivity(Intent(this, SmsSearchActivity::class.java))
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateModeStatus()
+    }
+
+    private fun updateModeStatus() {
+        val forwardingEnabled = Prefs.load(this).forwardingEnabled
+        binding.tvTopStatus.text = getString(
+            if (forwardingEnabled) R.string.top_status_mode_auto else R.string.top_status_mode_manual
+        )
+        binding.tvTopStatus.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (forwardingEnabled) R.color.status_running else R.color.status_manual
+            )
+        )
     }
 }

@@ -8,6 +8,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.text.buildSpannedString
+import androidx.core.text.color
 import com.ssfrontier.smstokintone.databinding.ActivityLogBinding
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -74,26 +76,24 @@ class LogActivity : AppCompatActivity() {
         entries.forEach { entry ->
             val typeLabel = when (entry.type) {
                 UploadLogStore.EntryType.RECEIVE -> getString(R.string.log_type_receive)
-                UploadLogStore.EntryType.SEND_START ->
-                    getString(R.string.log_type_send_start) + (if (entry.manual) "・手動" else "・自動")
-                UploadLogStore.EntryType.SEND_COMPLETE ->
-                    getString(R.string.log_type_send_complete) + (if (entry.manual) "・手動" else "・自動")
+                UploadLogStore.EntryType.SEND_START -> getString(R.string.log_type_send_start)
+                UploadLogStore.EntryType.SEND_COMPLETE -> getString(R.string.log_type_send_complete)
             }
 
-            val resultColor = ContextCompat.getColor(
+            val modeColor = ContextCompat.getColor(
                 this@LogActivity,
-                when {
-                    entry.type == UploadLogStore.EntryType.RECEIVE -> R.color.log_receive
-                    entry.type == UploadLogStore.EntryType.SEND_START -> R.color.log_send_start
-                    entry.success -> R.color.log_success
-                    else -> R.color.log_failure
-                }
+                if (entry.manual) R.color.status_manual else R.color.status_running
             )
 
-            // グループ1: ログ種別＋実行時のタイムスタンプ
+            // グループ1: ログ種別＋実行時のタイムスタンプ（種別は無彩色、送信系は自動＝青・手動＝アンバーで末尾に区別を付ける）
             val typeAndTimestampView = TextView(this).apply {
-                text = "[$typeLabel] ${dateFormat.format(Date(entry.loggedAtMillis))}"
-                setTextColor(resultColor)
+                text = buildSpannedString {
+                    append("[$typeLabel")
+                    if (entry.type != UploadLogStore.EntryType.RECEIVE) {
+                        color(modeColor) { append(if (entry.manual) "・手動" else "・自動") }
+                    }
+                    append("] ${dateFormat.format(Date(entry.loggedAtMillis))}")
+                }
                 setPadding(0, 24, 0, 4)
             }
 
@@ -118,7 +118,7 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 0, 0, 4)
             }
 
-            // グループ3: 結果
+            // グループ3: 結果（送信完了のみ成功＝緑・失敗＝赤で色付け）
             val resultView = TextView(this).apply {
                 text = if (entry.type == UploadLogStore.EntryType.SEND_COMPLETE) {
                     val resultLabel = if (entry.success) {
@@ -131,6 +131,14 @@ class LogActivity : AppCompatActivity() {
                     entry.message
                 }
                 setPadding(0, 16, 0, 4)
+                if (entry.type == UploadLogStore.EntryType.SEND_COMPLETE) {
+                    setTextColor(
+                        ContextCompat.getColor(
+                            this@LogActivity,
+                            if (entry.success) R.color.log_success else R.color.log_failure
+                        )
+                    )
+                }
             }
 
             val divider = View(this).apply {

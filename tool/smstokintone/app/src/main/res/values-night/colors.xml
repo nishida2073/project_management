@@ -1,11 +1,10 @@
 <resources>
-    <color name="status_running">#81C784</color>
+    <color name="status_running">#90CAF9</color>
+    <color name="status_manual">#FFD54F</color>
     <color name="log_success">#81C784</color>
     <color name="log_failure">#EF9A9A</color>
-    <color name="log_receive">#90CAF9</color>
-    <color name="log_send_start">#FFB74D</color>
     <color name="log_divider">#616161</color>
-    <color name="sms_sent_auto_background">#424242</color>
-    <color name="sms_sent_manual_background">#33475C</color>
-    <color name="profile_name">#03DAC5</color>
+    <color name="sms_sent_auto_background">#3D4B57</color>
+    <color name="sms_sent_manual_background">#594E2D</color>
+    <color name="profile_name">#E0E0E0</color>
 </resources>
