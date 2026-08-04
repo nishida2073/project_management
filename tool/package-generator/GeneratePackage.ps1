@@ -3,10 +3,10 @@
 # =========================================
 
 $basePath = Split-Path $MyInvocation.MyCommand.Path
-$configPath = if ($env:PKG_CONFIG_PATH) { $env:PKG_CONFIG_PATH } else { Join-Path $basePath "config\package_definition.xlsx" }
-$workPath = if ($env:PKG_WORK_PATH) { $env:PKG_WORK_PATH } else { Join-Path $basePath "work" }
-$outputPath = if ($env:PKG_OUTPUT_PATH) { $env:PKG_OUTPUT_PATH } else { Join-Path $basePath "output" }
-$logBasePath = if ($env:PKG_LOG_PATH) { $env:PKG_LOG_PATH } else { Join-Path $basePath "log" }
+$configPath = if ($env:GENERATE_CONFIG_PATH) { $env:GENERATE_CONFIG_PATH } else { Join-Path $basePath "config\package_definition.xlsx" }
+$workPath = if ($env:COMMON_WORK_PATH) { $env:COMMON_WORK_PATH } else { Join-Path $basePath "work" }
+$outputPath = if ($env:COMMON_OUTPUT_PATH) { $env:COMMON_OUTPUT_PATH } else { Join-Path $basePath "output" }
+$logBasePath = if ($env:COMMON_LOG_PATH) { $env:COMMON_LOG_PATH } else { Join-Path $basePath "log" }
 
 # 初期化
 Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
@@ -46,13 +46,13 @@ function Get-TreeLines {
 
 $sheetNames = $excel.Name
 
-if ($env:PKG_SHEETS_INCLUDE) {
-    $includeList = $env:PKG_SHEETS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+if ($env:GENERATE_SHEETS_INCLUDE) {
+    $includeList = $env:GENERATE_SHEETS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
     $sheetNames = $sheetNames | Where-Object { $includeList -contains $_ }
 }
 
-if ($env:PKG_SHEETS_EXCLUDE) {
-    $excludeList = $env:PKG_SHEETS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+if ($env:GENERATE_SHEETS_EXCLUDE) {
+    $excludeList = $env:GENERATE_SHEETS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
     $sheetNames = $sheetNames | Where-Object { $excludeList -notcontains $_ }
 }
 
@@ -78,8 +78,8 @@ foreach ($sheet in $sheetNames) {
             continue
         }
 
-        if ($env:PKG_SOURCE_BASE -and !([System.IO.Path]::IsPathRooted($source))) {
-            $source = Join-Path $env:PKG_SOURCE_BASE $source
+        if ($env:GENERATE_SOURCE_BASE -and !([System.IO.Path]::IsPathRooted($source))) {
+            $source = Join-Path $env:GENERATE_SOURCE_BASE $source
         }
 
         if (!(Test-Path $source)) {
@@ -145,7 +145,7 @@ foreach ($sheet in $sheetNames) {
         Write-Host "$zip 作成完了"
 
         # ログ出力（ZIP単位）
-        $logPath = Join-Path $logBasePath "$sheet.log"
+        $logPath = Join-Path $logBasePath "$($env:GENERATE_LOG_PREFIX)$sheet.log"
         $logLines = @()
         $logLines += "# コピー結果"
         $logLines += $copyLog

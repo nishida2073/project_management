@@ -11,8 +11,8 @@ rem   CreatePackage.bat "include=対象シート1" "exclude=除外シート1"
 :parse_args
 if "%~1"=="" goto args_done
 set "arg=%~1"
-if /i "%arg:~0,8%"=="include=" set "PKG_SHEETS_INCLUDE=%arg:~8%"
-if /i "%arg:~0,8%"=="exclude=" set "PKG_SHEETS_EXCLUDE=%arg:~8%"
+if /i "%arg:~0,8%"=="include=" set "GENERATE_SHEETS_INCLUDE=%arg:~8%"
+if /i "%arg:~0,8%"=="exclude=" set "GENERATE_SHEETS_EXCLUDE=%arg:~8%"
 shift
 goto parse_args
 :args_done
