@@ -3,14 +3,16 @@
 # =========================================
 
 $basePath = Split-Path $MyInvocation.MyCommand.Path
-$configPath = Join-Path $basePath "config\package_definition.xlsx"
-$workPath = Join-Path $basePath "work"
-$outputPath = Join-Path $basePath "output"
+$configPath = if ($env:PKG_CONFIG_PATH) { $env:PKG_CONFIG_PATH } else { Join-Path $basePath "config\package_definition.xlsx" }
+$workPath = if ($env:PKG_WORK_PATH) { $env:PKG_WORK_PATH } else { Join-Path $basePath "work" }
+$outputPath = if ($env:PKG_OUTPUT_PATH) { $env:PKG_OUTPUT_PATH } else { Join-Path $basePath "output" }
+$logBasePath = if ($env:PKG_LOG_PATH) { $env:PKG_LOG_PATH } else { Join-Path $basePath "log" }
 
 # 初期化
 Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
 New-Item $workPath -ItemType Directory | Out-Null
 New-Item $outputPath -ItemType Directory -Force | Out-Null
+New-Item $logBasePath -ItemType Directory -Force | Out-Null
 
 # Excelモジュール確認
 if (!(Get-Module -ListAvailable ImportExcel)) {
@@ -21,7 +23,40 @@ if (!(Get-Module -ListAvailable ImportExcel)) {
 # Excelシート取得
 $excel = Get-ExcelSheetInfo $configPath
 
-foreach ($sheet in $excel.Name) {
+function Get-TreeLines {
+    param(
+        [string]$Path,
+        [string]$Prefix = ""
+    )
+
+    $items = Get-ChildItem -LiteralPath $Path | Sort-Object { !$_.PSIsContainer }, Name
+
+    for ($i = 0; $i -lt $items.Count; $i++) {
+        $item = $items[$i]
+        $isLast = ($i -eq $items.Count - 1)
+        $connector = if ($isLast) { "└─ " } else { "├─ " }
+        Write-Output "$Prefix$connector$($item.Name)"
+
+        if ($item.PSIsContainer) {
+            $childPrefix = if ($isLast) { "$Prefix    " } else { "$Prefix│   " }
+            Get-TreeLines -Path $item.FullName -Prefix $childPrefix
+        }
+    }
+}
+
+$sheetNames = $excel.Name
+
+if ($env:PKG_SHEETS_INCLUDE) {
+    $includeList = $env:PKG_SHEETS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+    $sheetNames = $sheetNames | Where-Object { $includeList -contains $_ }
+}
+
+if ($env:PKG_SHEETS_EXCLUDE) {
+    $excludeList = $env:PKG_SHEETS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+    $sheetNames = $sheetNames | Where-Object { $excludeList -notcontains $_ }
+}
+
+foreach ($sheet in $sheetNames) {
 
     Write-Host ""
     Write-Host "===================="
@@ -31,6 +66,8 @@ foreach ($sheet in $excel.Name) {
     $companyWork = Join-Path $workPath $sheet
     New-Item $companyWork -ItemType Directory -Force | Out-Null
 
+    $copyLog = @()
+
     $rows = Import-Excel -Path $configPath -WorksheetName $sheet
 
     foreach ($row in $rows) {
@@ -39,6 +76,10 @@ foreach ($sheet in $excel.Name) {
 
         if (!$source) {
             continue
+        }
+
+        if ($env:PKG_SOURCE_BASE -and !([System.IO.Path]::IsPathRooted($source))) {
+            $source = Join-Path $env:PKG_SOURCE_BASE $source
         }
 
         if (!(Test-Path $source)) {
@@ -80,6 +121,7 @@ foreach ($sheet in $excel.Name) {
                     $destination = Join-Path $storeRoot $relative
                     New-Item (Split-Path $destination -Parent) -ItemType Directory -Force | Out-Null
                     Copy-Item $_.FullName $destination -Force
+                    $copyLog += "$($_.FullName) -> $destination"
                 }
             }
 
@@ -87,7 +129,9 @@ foreach ($sheet in $excel.Name) {
 
             # ファイル処理
             $fileName = Split-Path $source -Leaf
-            Copy-Item $source (Join-Path $storeRoot $fileName) -Force
+            $destination = Join-Path $storeRoot $fileName
+            Copy-Item $source $destination -Force
+            $copyLog += "$source -> $destination"
         }
     }
 
@@ -99,6 +143,18 @@ foreach ($sheet in $excel.Name) {
     if ($zipItems) {
         Compress-Archive -LiteralPath $zipItems.FullName -DestinationPath $zip
         Write-Host "$zip 作成完了"
+
+        # ログ出力（ZIP単位）
+        $logPath = Join-Path $logBasePath "$sheet.log"
+        $logLines = @()
+        $logLines += "# コピー結果"
+        $logLines += $copyLog
+        $logLines += ""
+        $logLines += "# 最終結果"
+        $logLines += $sheet
+        $logLines += (Get-TreeLines -Path $companyWork)
+        $logLines | Out-File -FilePath $logPath -Encoding Default
+        Write-Host "$logPath 作成完了"
     } else {
         Write-Host "$sheet ：対象ファイルが無いためZIPを作成しませんでした"
     }
