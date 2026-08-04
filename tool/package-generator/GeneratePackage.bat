@@ -5,9 +5,9 @@ cd /d %~dp0
 call SetEnv.bat
 
 rem 引数で対象/除外シートを指定する場合（順不同、片方だけの指定も可）:
-rem   CreatePackage.bat "include=対象シート1,対象シート2"
-rem   CreatePackage.bat "exclude=除外シート1,除外シート2"
-rem   CreatePackage.bat "include=対象シート1" "exclude=除外シート1"
+rem   GeneratePackage.bat "include=対象シート1,対象シート2"
+rem   GeneratePackage.bat "exclude=除外シート1,除外シート2"
+rem   GeneratePackage.bat "include=対象シート1" "exclude=除外シート1"
 :parse_args
 if "%~1"=="" goto args_done
 set "arg=%~1"

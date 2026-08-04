@@ -36,7 +36,7 @@ SyncFolder.bat
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
 | `SYNC_SITE_URL` | 取得元のSharePointサイトURL（例：`https://xxx.sharepoint.com/sites/チーム名`） | 空（必須設定） |
-| `SYNC_FOLDER` | サイト内の取得元フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/ClientA`） | 空（必須設定） |
+| `SYNC_FOLDER` | サイト内の取得元フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | 空（必須設定） |
 | `SYNC_TENANT_ID` | 対象のAzure ADテナントID | 空（必須設定） |
 | `SYNC_LOCAL_DEST` | ダウンロード先のローカルフォルダ（フルパス、または`GENERATE_SOURCE_BASE`からの相対パス） | 空の場合、`GENERATE_SOURCE_BASE`配下に`SYNC_FOLDER`の末尾フォルダ名で作成 |
 | `SYNC_LOG_PREFIX` | ログファイル名（`<ダウンロード先フォルダ名>.log`）の先頭に付けるプレフィックス | 空（なし） |
