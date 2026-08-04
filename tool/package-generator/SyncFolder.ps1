@@ -132,7 +132,7 @@ $logLines = @()
 $logLines += "# 取得結果"
 $logLines += $downloadLog
 $logLines += ""
-$logLines += "# 最終結果"
+$logLines += "# フォルダ構成"
 $logLines += (Split-Path $localDest -Leaf)
 $logLines += (Get-TreeLines -Path $localDest)
 $logLines | Out-File -FilePath $logPath -Encoding Default

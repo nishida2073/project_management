@@ -82,6 +82,8 @@ foreach ($sheet in $sheetNames) {
             $source = Join-Path $env:GENERATE_SOURCE_BASE $source
         }
 
+        $source = [System.IO.Path]::GetFullPath($source)
+
         if (!(Test-Path $source)) {
             Write-Host "存在しません：$source"
             continue
@@ -150,7 +152,7 @@ foreach ($sheet in $sheetNames) {
         $logLines += "# コピー結果"
         $logLines += $copyLog
         $logLines += ""
-        $logLines += "# 最終結果"
+        $logLines += "# フォルダ構成"
         $logLines += $sheet
         $logLines += (Get-TreeLines -Path $companyWork)
         $logLines | Out-File -FilePath $logPath -Encoding Default
