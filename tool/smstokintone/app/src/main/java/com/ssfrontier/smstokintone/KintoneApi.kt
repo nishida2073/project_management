@@ -134,6 +134,9 @@ object KintoneApi {
         if (profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
             record.put(profile.fieldDatetime, JSONObject().put("value", datetimeIsoValue))
         }
+        if (profile.fieldType.isNotBlank()) {
+            record.put(profile.fieldType, JSONObject().put("value", Defaults.REGISTRATION_TYPE_VALUE))
+        }
         return record
     }
 
@@ -152,7 +155,13 @@ object KintoneApi {
         val rangeStart = isoFormat.format(Date(baseMillis - windowMillis))
         val rangeEnd = isoFormat.format(Date(baseMillis + windowMillis))
 
-        val query = "${profile.fieldSender} = \"${escapeForQuery(senderValue)}\" and " +
+        val typeCondition = if (profile.fieldType.isNotBlank()) {
+            "${profile.fieldType} in (\"${escapeForQuery(Defaults.REGISTRATION_TYPE_VALUE)}\") and "
+        } else {
+            ""
+        }
+        val query = typeCondition +
+            "${profile.fieldSender} = \"${escapeForQuery(senderValue)}\" and " +
             "${profile.fieldDatetime} >= \"$rangeStart\" and " +
             "${profile.fieldDatetime} <= \"$rangeEnd\" " +
             "order by ${profile.fieldDatetime} desc limit 1"

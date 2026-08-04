@@ -69,6 +69,7 @@ object Prefs {
         val fieldSender: String,
         val fieldBody: String,
         val fieldDatetime: String,
+        val fieldType: String,
         val updateWindowHours: Int
     ) {
         val keywordList: List<String>
@@ -83,7 +84,8 @@ object Prefs {
 
         val isValid: Boolean
             get() {
-                if (name.isBlank() || subdomain.isBlank() || appId.isBlank() || fieldBody.isBlank()) return false
+                if (name.isBlank() || subdomain.isBlank() || appId.isBlank()) return false
+                if (fieldSender.isBlank() || fieldBody.isBlank() || fieldDatetime.isBlank() || fieldType.isBlank()) return false
                 return when (authMethod) {
                     AuthMethod.API_TOKEN -> apiToken.isNotBlank()
                     AuthMethod.PASSWORD -> loginName.isNotBlank() && loginPassword.isNotBlank()
@@ -106,6 +108,7 @@ object Prefs {
                 fieldSender = Defaults.NEW_PROFILE_FIELD_SENDER,
                 fieldBody = Defaults.NEW_PROFILE_FIELD_BODY,
                 fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME,
+                fieldType = Defaults.NEW_PROFILE_FIELD_TYPE,
                 updateWindowHours = Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
             )
         }
@@ -153,6 +156,7 @@ object Prefs {
                     .put("fieldSender", profile.fieldSender)
                     .put("fieldBody", profile.fieldBody)
                     .put("fieldDatetime", profile.fieldDatetime)
+                    .put("fieldType", profile.fieldType)
                     .put("updateWindowHours", profile.updateWindowHours)
             )
         }
@@ -179,6 +183,7 @@ object Prefs {
                 fieldSender = obj.optString("fieldSender", ""),
                 fieldBody = obj.optString("fieldBody", ""),
                 fieldDatetime = obj.optString("fieldDatetime", ""),
+                fieldType = obj.optString("fieldType", ""),
                 updateWindowHours = obj.optInt("updateWindowHours", Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS)
             )
         }

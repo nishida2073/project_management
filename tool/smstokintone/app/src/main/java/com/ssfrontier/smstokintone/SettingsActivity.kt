@@ -51,6 +51,7 @@ class SettingsActivity : AppCompatActivity() {
         itemBinding.etFieldSender.setText(profile.fieldSender)
         itemBinding.etFieldBody.setText(profile.fieldBody)
         itemBinding.etFieldDatetime.setText(profile.fieldDatetime)
+        itemBinding.etFieldType.setText(profile.fieldType)
         itemBinding.etUpdateWindowHours.setText(profile.updateWindowHours.toString())
 
         when (profile.authMethod) {
@@ -112,6 +113,7 @@ class SettingsActivity : AppCompatActivity() {
             fieldSender = itemBinding.etFieldSender.text.toString().trim(),
             fieldBody = itemBinding.etFieldBody.text.toString().trim(),
             fieldDatetime = itemBinding.etFieldDatetime.text.toString().trim(),
+            fieldType = itemBinding.etFieldType.text.toString().trim(),
             updateWindowHours = itemBinding.etUpdateWindowHours.text.toString().trim().toIntOrNull()
                 ?: Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
         )
@@ -123,7 +125,7 @@ class SettingsActivity : AppCompatActivity() {
             val index = profileCards.indexOf(card)
             val label = profile.name.ifBlank { getString(R.string.profile_index_format, index + 1) }
             AlertDialog.Builder(this)
-                .setTitle(R.string.test_send_result_title)
+                .setTitle(R.string.validation_error_title)
                 .setMessage(getString(R.string.validation_error, label))
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
@@ -191,7 +193,11 @@ class SettingsActivity : AppCompatActivity() {
 
             if (!profile.isValid) {
                 val label = profile.name.ifBlank { getString(R.string.profile_index_format, index + 1) }
-                Toast.makeText(this, getString(R.string.validation_error, label), Toast.LENGTH_LONG).show()
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.validation_error_title)
+                    .setMessage(getString(R.string.validation_error, label))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
                 return
             }
 
