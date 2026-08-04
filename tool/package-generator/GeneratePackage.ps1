@@ -3,9 +3,10 @@
 # =========================================
 
 $basePath = Split-Path $MyInvocation.MyCommand.Path
+. (Join-Path $basePath "Common.ps1")
 $configPath = if ($env:GENERATE_CONFIG_PATH) { $env:GENERATE_CONFIG_PATH } else { Join-Path $basePath "config\package_definition.xlsx" }
-$workPath = if ($env:COMMON_WORK_PATH) { $env:COMMON_WORK_PATH } else { Join-Path $basePath "work" }
-$outputPath = if ($env:COMMON_OUTPUT_PATH) { $env:COMMON_OUTPUT_PATH } else { Join-Path $basePath "output" }
+$workPath = if ($env:GENERATE_WORK_PATH) { $env:GENERATE_WORK_PATH } else { Join-Path $basePath "work" }
+$outputPath = if ($env:GENERATE_OUTPUT_PATH) { $env:GENERATE_OUTPUT_PATH } else { Join-Path $basePath "output" }
 $logBasePath = if ($env:COMMON_LOG_PATH) { $env:COMMON_LOG_PATH } else { Join-Path $basePath "log" }
 
 # èâä˙âª
@@ -23,26 +24,6 @@ if (!(Get-Module -ListAvailable ImportExcel)) {
 # ExcelÉVÅ[ÉgéÊìæ
 $excel = Get-ExcelSheetInfo $configPath
 
-function Get-TreeLines {
-    param(
-        [string]$Path,
-        [string]$Prefix = ""
-    )
-
-    $items = Get-ChildItem -LiteralPath $Path | Sort-Object { !$_.PSIsContainer }, Name
-
-    for ($i = 0; $i -lt $items.Count; $i++) {
-        $item = $items[$i]
-        $isLast = ($i -eq $items.Count - 1)
-        $connector = if ($isLast) { "Ñ§Ñü " } else { "Ñ•Ñü " }
-        Write-Output "$Prefix$connector$($item.Name)"
-
-        if ($item.PSIsContainer) {
-            $childPrefix = if ($isLast) { "$Prefix    " } else { "$PrefixÑ†   " }
-            Get-TreeLines -Path $item.FullName -Prefix $childPrefix
-        }
-    }
-}
 
 $sheetNames = $excel.Name
 
