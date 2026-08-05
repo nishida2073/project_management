@@ -6,14 +6,14 @@
 # Microsoft Graph APIで直接ファイルを取得する。
 
 $basePath = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $basePath "Common.ps1")
+. (Join-Path $basePath "common.ps1")
 
 $siteUrl = $env:DOWNLOAD_SITE_URL
 $folder = $env:DOWNLOAD_FOLDER
 $tenantId = $env:DOWNLOAD_TENANT_ID
 
 if (!$siteUrl -or !$folder -or !$tenantId) {
-    Write-Host "DOWNLOAD_SITE_URL と DOWNLOAD_FOLDER と DOWNLOAD_TENANT_ID を SetEnv.bat で設定してください"
+    Write-Host "DOWNLOAD_SITE_URL と DOWNLOAD_FOLDER と DOWNLOAD_TENANT_ID を set-env.bat で設定してください"
     exit 1
 }
 

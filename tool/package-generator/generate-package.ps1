@@ -3,7 +3,7 @@
 # =========================================
 
 $basePath = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $basePath "Common.ps1")
+. (Join-Path $basePath "common.ps1")
 $configPath = if ($env:GENERATE_CONFIG_PATH) { $env:GENERATE_CONFIG_PATH } else { Join-Path $basePath "config\package_definition.xlsx" }
 $workPath = if ($env:GENERATE_WORK_PATH) { $env:GENERATE_WORK_PATH } else { Join-Path $basePath "work" }
 $outputPath = if ($env:GENERATE_OUTPUT_PATH) { $env:GENERATE_OUTPUT_PATH } else { Join-Path $basePath "output" }

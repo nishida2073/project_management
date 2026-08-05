@@ -1,10 +1,10 @@
 # =========================================
 # ローカルフォルダ→SharePointアップロードツール（Azure CLI + Microsoft Graph版）
 # =========================================
-# DownloadFolder.ps1と同じ仕組み（Azure CLIで取得したトークンでMicrosoft Graph APIを直接呼ぶ）の逆方向版。
+# download-folder.ps1と同じ仕組み（Azure CLIで取得したトークンでMicrosoft Graph APIを直接呼ぶ）の逆方向版。
 
 $basePath = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $basePath "Common.ps1")
+. (Join-Path $basePath "common.ps1")
 
 $siteUrl = $env:UPLOAD_SITE_URL
 $folder = $env:UPLOAD_FOLDER
@@ -12,7 +12,7 @@ $tenantId = $env:UPLOAD_TENANT_ID
 $localSource = $env:UPLOAD_LOCAL_SOURCE
 
 if (!$siteUrl -or !$folder -or !$tenantId -or !$localSource) {
-    Write-Host "UPLOAD_SITE_URL と UPLOAD_FOLDER と UPLOAD_TENANT_ID と UPLOAD_LOCAL_SOURCE を SetEnv.bat で設定してください"
+    Write-Host "UPLOAD_SITE_URL と UPLOAD_FOLDER と UPLOAD_TENANT_ID と UPLOAD_LOCAL_SOURCE を set-env.bat で設定してください"
     exit 1
 }
 

@@ -2,20 +2,20 @@
 
 cd /d %~dp0
 
-call SetEnv.bat
+call set-env.bat
 
 if "%DOWNLOAD_ENABLED%"=="1" (
-    call DownloadFolder.bat
+    call download-folder.bat
     if errorlevel 1 goto :error
 )
 
 if "%GENERATE_ENABLED%"=="1" (
-    call GeneratePackage.bat
+    call generate-package.bat
     if errorlevel 1 goto :error
 )
 
 if "%UPLOAD_ENABLED%"=="1" (
-    call UploadFolder.bat
+    call upload-folder.bat
     if errorlevel 1 goto :error
 )
 

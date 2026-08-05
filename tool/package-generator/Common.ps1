@@ -1,8 +1,8 @@
 # =========================================
 # 共通処理（Azure CLI / Microsoft Graph 関連）
 # =========================================
-# GeneratePackage.ps1 / DownloadFolder.ps1 / UploadFolder.ps1 で共通して使う関数をまとめたもの。
-# 各スクリプトの先頭でドットソース（. "パス\Common.ps1"）して読み込む。
+# generate-package.ps1 / download-folder.ps1 / upload-folder.ps1 で共通して使う関数をまとめたもの。
+# 各スクリプトの先頭でドットソース（. "パス\common.ps1"）して読み込む。
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 

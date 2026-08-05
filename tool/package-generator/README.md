@@ -8,11 +8,11 @@
 2. ダウンロードした素材からExcelの設定に従って個別パッケージ（ZIP）を作成（[2. 個別パッケージの作成について](#2-個別パッケージの作成について)）
 3. 作成したパッケージをTeams/SharePointにアップロード（[3. ファイルアップロードについて](#3-ファイルアップロードについて)）
 
-`all.bat`を実行すると、上記3段階を`SetEnv.bat`を呼び出した上でこの順に続けて実行する。いずれかの段階が失敗した場合はそこで中断し、後続の段階は実行しない。各段階は`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED`で有効/無効を切り替えられる（`UPLOAD_ENABLED`は既定で`0`＝無効、他は既定で`1`＝有効。[環境変数（全体）](#環境変数全体)を参照）。
+`all.bat`を実行すると、上記3段階を`set-env.bat`を呼び出した上でこの順に続けて実行する。いずれかの段階が失敗した場合はそこで中断し、後続の段階は実行しない。各段階は`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED`で有効/無効を切り替えられる（`UPLOAD_ENABLED`は既定で`0`＝無効、他は既定で`1`＝有効。[環境変数（全体）](#環境変数全体)を参照）。
 
-パス関連の設定は `SetEnv.bat` にまとめてある。PowerShellスクリプト（`GeneratePackage.ps1` / `DownloadFolder.ps1` / `UploadFolder.ps1`）を直接編集せずに、`SetEnv.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`SetEnv.bat` の値は上書きしない（`if not defined` 方式）。
+パス関連の設定は `set-env.bat` にまとめてある。PowerShellスクリプト（`generate-package.ps1` / `download-folder.ps1` / `upload-folder.ps1`）を直接編集せずに、`set-env.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`set-env.bat` の値は上書きしない（`if not defined` 方式）。
 
-`Common.ps1`は上記3つのスクリプトが共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）をまとめたファイルで、各スクリプトの先頭でドットソースして読み込まれる。直接実行するものではない。
+`common.ps1`は上記3つのスクリプトが共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）をまとめたファイルで、各スクリプトの先頭でドットソースして読み込まれる。直接実行するものではない。
 
 ## 環境変数（全体）
 
@@ -27,14 +27,14 @@
 
 ## 1. ファイルダウンロードについて
 
-取得元（`GENERATE_SOURCE_BASE`配下）にコピーしたいファイルがTeams/SharePoint上にある場合、`DownloadFolder.bat`で事前にローカルへダウンロードできる。OneDriveの同期クライアントは使わず、Azure CLIで取得したトークンでMicrosoft Graph APIから直接取得する。
+取得元（`GENERATE_SOURCE_BASE`配下）にコピーしたいファイルがTeams/SharePoint上にある場合、`download-folder.bat`で事前にローカルへダウンロードできる。OneDriveの同期クライアントは使わず、Azure CLIで取得したトークンでMicrosoft Graph APIから直接取得する。
 
 処理の流れ：
 
 ```
-DownloadFolder.bat
-  → SetEnv.bat を呼び出し、環境変数の初期値をセット
-  → DownloadFolder.ps1 を実行
+download-folder.bat
+  → set-env.bat を呼び出し、環境変数の初期値をセット
+  → download-folder.ps1 を実行
       - Azure CLIでサインイン（未サインイン・期限切れ時はデバイスコードでログイン）
       - Microsoft Graph APIでサイトを解決し、指定フォルダ配下を再帰的にローカルへダウンロード
 ```
@@ -67,7 +67,7 @@ DownloadFolder.bat
 
 ### 必要なもの・注意点
 
-- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`DownloadFolder.ps1`がエラーで案内を表示して終了する。
+- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`download-folder.ps1`がエラーで案内を表示して終了する。
 - 初回、またはサインインが切れている場合はデバイスコードでのログインが必要（URLとコードがコンソールに表示されるので、ブラウザで開いて入力する）。テナントの条件付きアクセス設定によってはMFAが必要になる場合がある。
   - サブスクリプションを持っていないアカウントでも、`--allow-no-subscriptions`でサインインするため問題ない。
 - 大量のファイル・深いフォルダ構成があると取得に時間がかかる。
@@ -78,14 +78,14 @@ DownloadFolder.bat
 `config\package_definition.xlsx` の内容に従って、シートごとにファイルを集めてZIP化する。
 Excelの書き方は[config\README.md](config/README.md)を参照。
 
-`GeneratePackage.bat` をダブルクリックして実行する。
+`generate-package.bat` をダブルクリックして実行する。
 
 処理の流れ：
 
 ```
-GeneratePackage.bat
-  → SetEnv.bat を呼び出し、環境変数の初期値をセット
-  → GeneratePackage.ps1 を実行
+generate-package.bat
+  → set-env.bat を呼び出し、環境変数の初期値をセット
+  → generate-package.ps1 を実行
       - config\package_definition.xlsx を読み込み
       - シートごとにファイルをコピー・ZIP化
       - output フォルダに zip、log フォルダに log を出力
@@ -103,12 +103,12 @@ GeneratePackage.bat
 | `GENERATE_SHEETS_EXCLUDE` | 処理対象から除外するシート名（カンマ区切り、複数指定可） | 空（除外なし） |
 | `GENERATE_LOG_PREFIX` | ログファイル名（`<シート名>.log`）の先頭に付けるプレフィックス | `パッケージング_` |
 
-`GENERATE_SHEETS_INCLUDE` / `GENERATE_SHEETS_EXCLUDE` は `GeneratePackage.bat` の引数でも指定できる（環境変数より優先される）。
+`GENERATE_SHEETS_INCLUDE` / `GENERATE_SHEETS_EXCLUDE` は `generate-package.bat` の引数でも指定できる（環境変数より優先される）。
 
 ```
-GeneratePackage.bat "include=対象シート1,対象シート2"
-GeneratePackage.bat "exclude=除外シート1,除外シート2"
-GeneratePackage.bat "include=対象シート1" "exclude=除外シート1"
+generate-package.bat "include=対象シート1,対象シート2"
+generate-package.bat "exclude=除外シート1,除外シート2"
+generate-package.bat "include=対象シート1" "exclude=除外シート1"
 ```
 
 `include=` / `exclude=` は順不同で、どちらか片方だけの指定もできる。両方指定した場合は、対象シートに絞り込んだ後にさらに除外シートを取り除く。
@@ -140,14 +140,14 @@ PowerShellモジュール「ImportExcel」が必要。未インストールの�
 
 ## 3. ファイルアップロードについて
 
-ローカルフォルダの中身をTeams/SharePointにアップロードしたい場合、`UploadFolder.bat`で送信できる。`DownloadFolder.bat`の逆方向で、同じくAzure CLIで取得したトークンでMicrosoft Graph APIから直接アップロードする（ファイルサイズの上限を避けるため、常にアップロードセッション＝チャンク方式で送信する）。
+ローカルフォルダの中身をTeams/SharePointにアップロードしたい場合、`upload-folder.bat`で送信できる。`download-folder.bat`の逆方向で、同じくAzure CLIで取得したトークンでMicrosoft Graph APIから直接アップロードする（ファイルサイズの上限を避けるため、常にアップロードセッション＝チャンク方式で送信する）。
 
 処理の流れ：
 
 ```
-UploadFolder.bat
-  → SetEnv.bat を呼び出し、環境変数の初期値をセット
-  → UploadFolder.ps1 を実行
+upload-folder.bat
+  → set-env.bat を呼び出し、環境変数の初期値をセット
+  → upload-folder.ps1 を実行
       - Azure CLIでサインイン（未サインイン・期限切れ時はデバイスコードでログイン）
       - Microsoft Graph APIでサイトを解決し、ローカルフォルダ配下を再帰的にアップロード
 ```
@@ -178,7 +178,7 @@ UploadFolder.bat
 
 ### 必要なもの・注意点
 
-- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`UploadFolder.ps1`がエラーで案内を表示して終了する。
-- 初回、またはサインインが切れている場合はデバイスコードでのログインが必要（`DownloadFolder.bat`と同様）。
+- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`upload-folder.ps1`がエラーで案内を表示して終了する。
+- 初回、またはサインインが切れている場合はデバイスコードでのログインが必要（`download-folder.bat`と同様）。
 - SharePoint側のアップロード用エンドポイントとの通信が不安定な場合があり、1チャンクにつき最大8回リトライする。
 - 大量のファイル・深いフォルダ構成があると時間がかかる。

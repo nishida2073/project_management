@@ -2,11 +2,11 @@
 
 cd /d %~dp0
 
-call SetEnv.bat
+call set-env.bat
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File .\UploadFolder.ps1
+ -File .\download-folder.ps1
 set "EXITCODE=%ERRORLEVEL%"
 
 echo 5•bŒã‚ÉŽ©“®“I‚É•Â‚¶‚Ü‚·...
