@@ -4,7 +4,6 @@
 # download-folder.ps1と同じ仕組み（Azure CLIで取得したトークンでMicrosoft Graph APIを直接呼ぶ）の逆方向版。
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-$basePath = Split-Path $scriptDir -Parent
 . (Join-Path $scriptDir "common.ps1")
 
 $siteUrl = $env:UPLOAD_SITE_URL
@@ -22,7 +21,7 @@ if (!(Test-Path -LiteralPath $localSource)) {
     exit 1
 }
 
-$logBasePath = if ($env:COMMON_LOG_PATH) { $env:COMMON_LOG_PATH } else { Join-Path $basePath "log" }
+$logBasePath = $env:COMMON_LOG_PATH
 New-Item -ItemType Directory -Path $logBasePath -Force | Out-Null
 
 $uploadLog = @()

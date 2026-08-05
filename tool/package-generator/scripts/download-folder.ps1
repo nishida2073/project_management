@@ -6,7 +6,6 @@
 # Microsoft Graph APIで直接ファイルを取得する。
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-$basePath = Split-Path $scriptDir -Parent
 . (Join-Path $scriptDir "common.ps1")
 
 $siteUrl = $env:DOWNLOAD_SITE_URL
@@ -18,9 +17,9 @@ if (!$siteUrl -or !$folder -or !$tenantId) {
     exit 1
 }
 
-$sourceBase = if ($env:GENERATE_SOURCE_BASE) { $env:GENERATE_SOURCE_BASE } else { $basePath }
-$localDest = if ($env:DOWNLOAD_LOCAL_DEST) { if ([System.IO.Path]::IsPathRooted($env:DOWNLOAD_LOCAL_DEST)) { $env:DOWNLOAD_LOCAL_DEST } else { Join-Path $sourceBase $env:DOWNLOAD_LOCAL_DEST } } else { Join-Path $sourceBase (Split-Path $folder -Leaf) }
-$logBasePath = if ($env:COMMON_LOG_PATH) { $env:COMMON_LOG_PATH } else { Join-Path $basePath "log" }
+$sourceBase = $env:GENERATE_SOURCE_BASE
+$localDest = if ([System.IO.Path]::IsPathRooted($env:DOWNLOAD_LOCAL_DEST)) { $env:DOWNLOAD_LOCAL_DEST } else { Join-Path $sourceBase $env:DOWNLOAD_LOCAL_DEST }
+$logBasePath = $env:COMMON_LOG_PATH
 New-Item -ItemType Directory -Path $logBasePath -Force | Out-Null
 
 $downloadLog = @()

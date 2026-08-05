@@ -3,12 +3,16 @@
 # =========================================
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-$basePath = Split-Path $scriptDir -Parent
 . (Join-Path $scriptDir "common.ps1")
-$configPath = if ($env:GENERATE_CONFIG_PATH) { $env:GENERATE_CONFIG_PATH } else { Join-Path $basePath "config\package_definition.xlsx" }
-$workPath = if ($env:GENERATE_WORK_PATH) { $env:GENERATE_WORK_PATH } else { Join-Path $basePath "work" }
-$outputPath = if ($env:GENERATE_OUTPUT_PATH) { $env:GENERATE_OUTPUT_PATH } else { Join-Path $basePath "output" }
-$logBasePath = if ($env:COMMON_LOG_PATH) { $env:COMMON_LOG_PATH } else { Join-Path $basePath "log" }
+$configPath = $env:GENERATE_CONFIG_PATH
+$workPath = $env:GENERATE_WORK_PATH
+$outputPath = $env:GENERATE_OUTPUT_PATH
+$logBasePath = $env:COMMON_LOG_PATH
+
+if (!$configPath -or !$workPath -or !$outputPath -or !$logBasePath) {
+    Write-Host "GENERATE_CONFIG_PATH と GENERATE_WORK_PATH と GENERATE_OUTPUT_PATH と COMMON_LOG_PATH を set-env.bat で設定してください"
+    exit 1
+}
 
 # 初期化
 Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
@@ -88,14 +92,24 @@ foreach ($sheet in $sheetNames) {
                 $relative = $_.FullName.Substring($sourceTrimmed.Length).TrimStart('\')
 
                 # 含める形式
-                if ($row.含める形式 -and !($relative -like $row.含める形式)) {
-                    return
+                if ($row.含める形式) {
+                    $includePatterns = $row.含める形式.Split(",") | ForEach-Object { $_.Trim() }
+                    $included = $false
+                    foreach ($pattern in $includePatterns) {
+                        if ($relative -like $pattern) {
+                            $included = $true
+                            break
+                        }
+                    }
+                    if (!$included) {
+                        return
+                    }
                 }
 
                 # 除外する形式
                 if ($row.除外する形式) {
                     foreach ($exclude in $row.除外する形式.Split(",")) {
-                        if ($relative -like "*$($exclude.Trim())*") {
+                        if ($relative -like $exclude.Trim()) {
                             return
                         }
                     }
