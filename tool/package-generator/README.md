@@ -33,7 +33,7 @@
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
-| `COMMON_LOG_PATH` | log の出力先フォルダ | `log` フォルダ |
+| `COMMON_LOG_PATH` | ログの出力先フォルダ | `log` フォルダ |
 | `DOWNLOAD_ENABLED` | `all.bat`実行時に「1. ファイルダウンロード」を実行するかどうか（`0`にすると無効化） | `1`（有効） |
 | `GENERATE_ENABLED` | `all.bat`実行時に「2. 個別パッケージの作成」を実行するかどうか（`0`にすると無効化） | `1`（有効） |
 | `UPLOAD_ENABLED` | `all.bat`実行時に「3. ファイルアップロード」を実行するかどうか（`1`にすると有効化） | `0`（無効） |
@@ -112,7 +112,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 | `GENERATE_SOURCE_BASE` | Excelの「取得元（フルパス）」列を相対パスで書いたときの共通の親フォルダ（※ドライブ文字や`\\`から始まるフルパスの行には影響しない） | `DOWNLOAD_LOCAL_DEST`と同じ（ダウンロードしたフォルダ） |
 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `config\package_definition.xlsx` |
 | `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ（実行時に毎回削除→再作成される） | `work` フォルダ |
-| `GENERATE_OUTPUT_PATH` | 成果物の出力先フォルダ | `output` フォルダ |
+| `GENERATE_OUTPUT_PATH` | 成果物の出力先フォルダ | `generated` フォルダ |
 | `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名（カンマ区切り、複数指定可）。設定時はここに書いたシートのみ処理する | 空（絞り込みなし＝全シート対象） |
 | `GENERATE_SHEETS_EXCLUDE` | 処理対象から除外するシート名（カンマ区切り、複数指定可） | 空（除外なし） |
 | `GENERATE_LOG_PREFIX` | ログファイル名（`<シート名>.log`）の先頭に付けるプレフィックス | `パッケージング_` |
@@ -151,7 +151,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 ### 必要なもの・注意点
 
 - PowerShellモジュール「ImportExcel」が必要。未インストールの場合、実行時に自動でインストールされる（初回はインターネット接続とインストール確認が必要）。
-- `output`フォルダ自体は自動でクリーンされない（各シートのZIPはそのシート処理時に個別に削除→再作成されるが、Excelから削除・リネームしたシートの古いZIPは残り続ける）。不要になった古いZIPを残したくない場合は、実行前に`GENERATE_OUTPUT_PATH`の中身を自分で削除しておくこと。
+- 成果物フォルダ（`GENERATE_OUTPUT_PATH`）自体は自動でクリーンされない（各シートのZIPはそのシート処理時に個別に削除→再作成されるが、Excelから削除・リネームしたシートの古いZIPは残り続ける）。不要になった古いZIPを残したくない場合は、実行前に`GENERATE_OUTPUT_PATH`の中身を自分で削除しておくこと。
 
 ## 3. ファイルアップロードについて
 
@@ -174,7 +174,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | `UPLOAD_SITE_URL` | アップロード先のSharePointサイトURL（例：`https://xxx.sharepoint.com/sites/チーム名`） | `DOWNLOAD_SITE_URL`と同じ |
 | `UPLOAD_SITE_FOLDER` | サイト内のアップロード先フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/納品`）が設定済み |
 | `UPLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | `DOWNLOAD_SITE_TENANT_ID`と同じ |
-| `UPLOAD_LOCAL_SOURCE` | アップロード元のローカルフォルダ（フルパス） | `GENERATE_OUTPUT_PATH`と同じ（zip作成の出力先） |
+| `UPLOAD_LOCAL_SOURCE` | アップロード元のローカルフォルダ（フルパス） | `GENERATE_OUTPUT_PATH`と同じ（ZIP作成の出力先） |
 | `UPLOAD_LOG_PREFIX` | ログファイル名（`<アップロード元フォルダ名>.log`）の先頭に付けるプレフィックス | `アップロード_` |
 
 同名ファイルが既にサイト側にある場合は上書きされる。

@@ -34,7 +34,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
   Not meant to be run directly by the user.
 - `config/package_definition.xlsx` + `config/README.md` — the manifest driving
   stage 2, and the guide for how to fill it in.
-- `download/`, `work/`, `output/`, `log/`, `test/` — runtime-generated folders
+- `download/`, `work/`, `generated/`, `log/`, `test/` — runtime-generated folders
   (all gitignored). Safe to delete; scripts recreate what they need.
 
 ## Critical constraint: Shift-JIS (CP932) encoding
