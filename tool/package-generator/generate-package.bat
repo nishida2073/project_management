@@ -19,7 +19,7 @@ goto parse_args
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File .\generate-package.ps1
+ -File .\scripts\generate-package.ps1
 set "EXITCODE=%ERRORLEVEL%"
 
 echo 5•bŒã‚ÉŽ©“®“I‚É•Â‚¶‚Ü‚·...

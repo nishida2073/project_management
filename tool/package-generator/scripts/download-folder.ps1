@@ -5,15 +5,16 @@
 # 既にテナントで許可されているAzure CLIでトークンを取得し、
 # Microsoft Graph APIで直接ファイルを取得する。
 
-$basePath = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $basePath "common.ps1")
+$scriptDir = Split-Path $MyInvocation.MyCommand.Path
+$basePath = Split-Path $scriptDir -Parent
+. (Join-Path $scriptDir "common.ps1")
 
 $siteUrl = $env:DOWNLOAD_SITE_URL
-$folder = $env:DOWNLOAD_FOLDER
-$tenantId = $env:DOWNLOAD_TENANT_ID
+$folder = $env:DOWNLOAD_SITE_FOLDER
+$tenantId = $env:DOWNLOAD_SITE_TENANT_ID
 
 if (!$siteUrl -or !$folder -or !$tenantId) {
-    Write-Host "DOWNLOAD_SITE_URL と DOWNLOAD_FOLDER と DOWNLOAD_TENANT_ID を set-env.bat で設定してください"
+    Write-Host "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_FOLDER と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください"
     exit 1
 }
 

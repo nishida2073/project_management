@@ -2,8 +2,9 @@
 # å¬é–ï ZIPê∂ê¨ÉcÅ[Éã
 # =========================================
 
-$basePath = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $basePath "common.ps1")
+$scriptDir = Split-Path $MyInvocation.MyCommand.Path
+$basePath = Split-Path $scriptDir -Parent
+. (Join-Path $scriptDir "common.ps1")
 $configPath = if ($env:GENERATE_CONFIG_PATH) { $env:GENERATE_CONFIG_PATH } else { Join-Path $basePath "config\package_definition.xlsx" }
 $workPath = if ($env:GENERATE_WORK_PATH) { $env:GENERATE_WORK_PATH } else { Join-Path $basePath "work" }
 $outputPath = if ($env:GENERATE_OUTPUT_PATH) { $env:GENERATE_OUTPUT_PATH } else { Join-Path $basePath "output" }

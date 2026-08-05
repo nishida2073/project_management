@@ -6,7 +6,7 @@ call set-env.bat
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File .\upload-folder.ps1
+ -File .\scripts\upload-folder.ps1
 set "EXITCODE=%ERRORLEVEL%"
 
 echo 5•bŒã‚ÉŽ©“®“I‚É•Â‚¶‚Ü‚·...

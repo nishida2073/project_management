@@ -10,13 +10,24 @@
 
 `all.bat`を実行すると、上記3段階を`set-env.bat`を呼び出した上でこの順に続けて実行する。いずれかの段階が失敗した場合はそこで中断し、後続の段階は実行しない。各段階は`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED`で有効/無効を切り替えられる（`UPLOAD_ENABLED`は既定で`0`＝無効、他は既定で`1`＝有効。[環境変数（全体）](#環境変数全体)を参照）。
 
+## ツールの構成
+
+| ファイル/フォルダ | 役割 |
+|---|---|
+| `all.bat` | 3段階（ダウンロード→パッケージ作成→アップロード）を続けて実行するエントリーポイント |
+| `set-env.bat` | 環境変数の初期値をまとめて設定する（他の`.bat`から`call`される） |
+| `download-folder.bat` | 「1. ファイルダウンロード」のエントリーポイント |
+| `generate-package.bat` | 「2. 個別パッケージの作成」のエントリーポイント |
+| `upload-folder.bat` | 「3. ファイルアップロード」のエントリーポイント |
+| `scripts\common.ps1` | 3つの`.ps1`が共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
+| `scripts\download-folder.ps1` / `generate-package.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
+| `config\package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
+
+`download-folder.ps1`と`upload-folder.ps1`は共通してAzure CLIでサインインし、そのトークンでMicrosoft Graph APIを直接呼び出す（`common.ps1`に集約）。初回、またはサインインが切れている場合はデバイスコードでのログインが必要（URLとコードがコンソールに表示されるので、ブラウザで開いて入力する）。テナントの条件付きアクセス設定によってはMFAが必要になる場合がある。サブスクリプションを持っていないアカウントでも`--allow-no-subscriptions`でサインインするため問題ない。
+
 パス関連の設定は `set-env.bat` にまとめてある。PowerShellスクリプト（`generate-package.ps1` / `download-folder.ps1` / `upload-folder.ps1`）を直接編集せずに、`set-env.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`set-env.bat` の値は上書きしない（`if not defined` 方式）。
 
-`common.ps1`は上記3つのスクリプトが共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）をまとめたファイルで、各スクリプトの先頭でドットソースして読み込まれる。直接実行するものではない。
-
 ## 環境変数（全体）
-
-全体に関わる変数。
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
@@ -31,21 +42,21 @@
 
 処理の流れ：
 
-```
-download-folder.bat
-  → set-env.bat を呼び出し、環境変数の初期値をセット
-  → download-folder.ps1 を実行
-      - Azure CLIでサインイン（未サインイン・期限切れ時はデバイスコードでログイン）
-      - Microsoft Graph APIでサイトを解決し、指定フォルダ配下を再帰的にローカルへダウンロード
-```
+1. `download-folder.bat` を実行する
+2. `set-env.bat` が呼び出され、環境変数の初期値がセットされる
+3. `download-folder.ps1` が実行される
+   1. Azure CLIでサインインする（未サインイン・期限切れ時はデバイスコードでのログインが必要）
+   2. Microsoft Graph APIでサイト（`DOWNLOAD_SITE_URL`）を解決する
+   3. 指定フォルダ（`DOWNLOAD_SITE_FOLDER`）配下を再帰的にローカル（`DOWNLOAD_LOCAL_DEST`）へダウンロードする
+   4. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
 ### 環境変数（ダウンロード）
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
 | `DOWNLOAD_SITE_URL` | 取得元のSharePointサイトURL（例：`https://xxx.sharepoint.com/sites/チーム名`） | テスト用サイトのURLが設定済み |
-| `DOWNLOAD_FOLDER` | サイト内の取得元フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/原本`）が設定済み |
-| `DOWNLOAD_TENANT_ID` | 対象のAzure ADテナントID | テスト用テナントIDが設定済み |
+| `DOWNLOAD_SITE_FOLDER` | サイト内の取得元フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/原本`）が設定済み |
+| `DOWNLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | テスト用テナントIDが設定済み |
 | `DOWNLOAD_LOCAL_DEST` | ダウンロード先のローカルフォルダ（フルパス、または`GENERATE_SOURCE_BASE`からの相対パス） | `download` フォルダ |
 | `DOWNLOAD_LOG_PREFIX` | ログファイル名（`<ダウンロード先フォルダ名>.log`）の先頭に付けるプレフィックス | `ダウンロード_` |
 
@@ -53,9 +64,14 @@ download-folder.bat
 
 同名のローカルファイルが既にある場合は上書きされる。
 
-### 出力ファイル
+### 出力結果
 
-ダウンロード先フォルダ名と同じ名前で、`log`フォルダ（`COMMON_LOG_PATH`）に処理ログを出力する。
+| ファイル | 出力先 | 内容 |
+|---|---|---|
+| ダウンロードしたファイル一式 | ダウンロード先（`DOWNLOAD_LOCAL_DEST`） | SharePointからダウンロードしたファイル・フォルダ |
+| `<ダウンロード先フォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（下記） |
+
+#### ログの形式
 
 ```
 # 取得結果
@@ -67,36 +83,32 @@ download-folder.bat
 
 ### 必要なもの・注意点
 
-- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`download-folder.ps1`がエラーで案内を表示して終了する。
-- 初回、またはサインインが切れている場合はデバイスコードでのログインが必要（URLとコードがコンソールに表示されるので、ブラウザで開いて入力する）。テナントの条件付きアクセス設定によってはMFAが必要になる場合がある。
-  - サブスクリプションを持っていないアカウントでも、`--allow-no-subscriptions`でサインインするため問題ない。
+- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`download-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[ツールの構成](#ツールの構成)を参照。
 - 大量のファイル・深いフォルダ構成があると取得に時間がかかる。
 - ダウンロード先フォルダは自動でクリーンされない（SharePoint側で削除されたファイルもローカルには残り続ける）。SharePoint側と完全に一致させたい場合は、実行前に`DOWNLOAD_LOCAL_DEST`の中身を自分で削除しておくこと。
 
 ## 2. 個別パッケージの作成について
 
-`config\package_definition.xlsx` の内容に従って、シートごとにファイルを集めてZIP化する。
+パッケージ定義ファイル（`GENERATE_CONFIG_PATH`）の内容に従って、シートごとにファイルを集めてZIP化する。
 Excelの書き方は[config\README.md](config/README.md)を参照。
 
 `generate-package.bat` をダブルクリックして実行する。
 
 処理の流れ：
 
-```
-generate-package.bat
-  → set-env.bat を呼び出し、環境変数の初期値をセット
-  → generate-package.ps1 を実行
-      - config\package_definition.xlsx を読み込み
-      - シートごとにファイルをコピー・ZIP化
-      - output フォルダに zip、log フォルダに log を出力
-```
+1. `generate-package.bat` を実行する
+2. `set-env.bat` が呼び出され、環境変数の初期値がセットされる
+3. `generate-package.ps1` が実行される
+   1. パッケージ定義ファイル（`GENERATE_CONFIG_PATH`、既定は`config\package_definition.xlsx`）を読み込む
+   2. シートごとにファイルをコピーしてZIP化する
+   3. ZIPの出力先（`GENERATE_OUTPUT_PATH`）にZIP、ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
 ### 環境変数（個別パッケージの作成）
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
 | `GENERATE_SOURCE_BASE` | Excelの「取得元（フルパス）」列を相対パスで書いたときの共通の親フォルダ（※ドライブ文字や`\\`から始まるフルパスの行には影響しない） | `DOWNLOAD_LOCAL_DEST`と同じ（ダウンロードしたフォルダ） |
-| `GENERATE_CONFIG_PATH` | `package_definition.xlsx` のパス | `config\package_definition.xlsx` |
+| `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `config\package_definition.xlsx` |
 | `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ（実行時に毎回削除→再作成される） | `work` フォルダ |
 | `GENERATE_OUTPUT_PATH` | 成果物の出力先フォルダ | `output` フォルダ |
 | `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名（カンマ区切り、複数指定可）。設定時はここに書いたシートのみ処理する | 空（絞り込みなし＝全シート対象） |
@@ -113,14 +125,16 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 
 `include=` / `exclude=` は順不同で、どちらか片方だけの指定もできる。両方指定した場合は、対象シートに絞り込んだ後にさらに除外シートを取り除く。
 
-### 出力ファイル
+### 出力結果
 
 シートごとに、ZIPと処理ログを別フォルダに出力する。
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `<シート名>.zip` | `output` フォルダ | コピーしたファイル一式をまとめたZIP |
-| `<シート名>.log` | `log` フォルダ | 処理内容のログ（下記） |
+| `<シート名>.zip` | ZIPの出力先（`GENERATE_OUTPUT_PATH`） | コピーしたファイル一式をまとめたZIP |
+| `<シート名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（下記） |
+
+#### ログの形式
 
 ```
 # コピー結果
@@ -132,41 +146,45 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 
 対象ファイルが1件も無かったシートは、ZIP/ログとも出力されない。
 
-`output`フォルダ自体は自動でクリーンされない（各シートのZIPはそのシート処理時に個別に削除→再作成されるが、Excelから削除・リネームしたシートの古いZIPは残り続ける）。不要になった古いZIPを残したくない場合は、実行前に`GENERATE_OUTPUT_PATH`の中身を自分で削除しておくこと。
+### 必要なもの・注意点
 
-### 必要なもの
-
-PowerShellモジュール「ImportExcel」が必要。未インストールの場合、実行時に自動でインストールされる（初回はインターネット接続とインストール確認が必要）。
+- PowerShellモジュール「ImportExcel」が必要。未インストールの場合、実行時に自動でインストールされる（初回はインターネット接続とインストール確認が必要）。
+- `output`フォルダ自体は自動でクリーンされない（各シートのZIPはそのシート処理時に個別に削除→再作成されるが、Excelから削除・リネームしたシートの古いZIPは残り続ける）。不要になった古いZIPを残したくない場合は、実行前に`GENERATE_OUTPUT_PATH`の中身を自分で削除しておくこと。
 
 ## 3. ファイルアップロードについて
 
-ローカルフォルダの中身をTeams/SharePointにアップロードしたい場合、`upload-folder.bat`で送信できる。`download-folder.bat`の逆方向で、同じくAzure CLIで取得したトークンでMicrosoft Graph APIから直接アップロードする（ファイルサイズの上限を避けるため、常にアップロードセッション＝チャンク方式で送信する）。
+ローカルフォルダの中身をTeams/SharePointにアップロードしたい場合、`upload-folder.bat`で送信できる。`download-folder.bat`の逆方向で、同じくAzure CLIで取得したトークンでMicrosoft Graph APIから直接アップロードする（ファイルサイズの上限を避けるため、基本はアップロードセッション＝チャンク方式で送信する。ただし0バイトファイルはチャンク方式では送信できないため、直接PUTする）。
 
 処理の流れ：
 
-```
-upload-folder.bat
-  → set-env.bat を呼び出し、環境変数の初期値をセット
-  → upload-folder.ps1 を実行
-      - Azure CLIでサインイン（未サインイン・期限切れ時はデバイスコードでログイン）
-      - Microsoft Graph APIでサイトを解決し、ローカルフォルダ配下を再帰的にアップロード
-```
+1. `upload-folder.bat` を実行する
+2. `set-env.bat` が呼び出され、環境変数の初期値がセットされる
+3. `upload-folder.ps1` が実行される
+   1. Azure CLIでサインインする（未サインイン・期限切れ時はデバイスコードでのログインが必要）
+   2. Microsoft Graph APIでサイト（`UPLOAD_SITE_URL`）を解決する
+   3. ローカルフォルダ（`UPLOAD_LOCAL_SOURCE`）配下を再帰的にアップロードする
+   4. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
 ### 環境変数（アップロード）
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
 | `UPLOAD_SITE_URL` | アップロード先のSharePointサイトURL（例：`https://xxx.sharepoint.com/sites/チーム名`） | `DOWNLOAD_SITE_URL`と同じ |
-| `UPLOAD_FOLDER` | サイト内のアップロード先フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/納品`）が設定済み |
-| `UPLOAD_TENANT_ID` | 対象のAzure ADテナントID | `DOWNLOAD_TENANT_ID`と同じ |
+| `UPLOAD_SITE_FOLDER` | サイト内のアップロード先フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/納品`）が設定済み |
+| `UPLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | `DOWNLOAD_SITE_TENANT_ID`と同じ |
 | `UPLOAD_LOCAL_SOURCE` | アップロード元のローカルフォルダ（フルパス） | `GENERATE_OUTPUT_PATH`と同じ（zip作成の出力先） |
 | `UPLOAD_LOG_PREFIX` | ログファイル名（`<アップロード元フォルダ名>.log`）の先頭に付けるプレフィックス | `アップロード_` |
 
 同名ファイルが既にサイト側にある場合は上書きされる。
 
-### 出力ファイル
+### 出力結果
 
-アップロード元フォルダ名と同じ名前で、`log`フォルダ（`COMMON_LOG_PATH`）に処理ログを出力する。
+| ファイル | 出力先 | 内容 |
+|---|---|---|
+| アップロードしたファイル一式 | アップロード先（`UPLOAD_SITE_FOLDER`、SharePoint側） | ローカルからアップロードしたファイル・フォルダ |
+| `<アップロード元フォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（下記） |
+
+#### ログの形式
 
 ```
 # アップロード結果
@@ -178,7 +196,6 @@ upload-folder.bat
 
 ### 必要なもの・注意点
 
-- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`upload-folder.ps1`がエラーで案内を表示して終了する。
-- 初回、またはサインインが切れている場合はデバイスコードでのログインが必要（`download-folder.bat`と同様）。
+- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`upload-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[ツールの構成](#ツールの構成)を参照。
 - SharePoint側のアップロード用エンドポイントとの通信が不安定な場合があり、1チャンクにつき最大8回リトライする。
 - 大量のファイル・深いフォルダ構成があると時間がかかる。
