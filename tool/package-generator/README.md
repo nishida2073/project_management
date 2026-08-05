@@ -21,7 +21,7 @@
 | `upload-folder.bat` | 「3. ファイルアップロード」のエントリーポイント |
 | `scripts\common.ps1` | 3つの`.ps1`が共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
 | `scripts\download-folder.ps1` / `generate-package.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
-| `config\package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
+| `package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
 
 パス関連の設定は `set-env.bat` にまとめてある。PowerShellスクリプト（`generate-package.ps1` / `download-folder.ps1` / `upload-folder.ps1`）を直接編集せずに、`set-env.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`set-env.bat` の値は上書きしない（`if not defined` 方式）。
 
@@ -101,7 +101,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 1. `generate-package.bat` を実行する
 2. `set-env.bat` が呼び出され、環境変数の初期値がセットされる
 3. `generate-package.ps1` が実行される
-   1. パッケージ定義ファイル（`GENERATE_CONFIG_PATH`、既定は`config\package_definition.xlsx`）を読み込む
+   1. パッケージ定義ファイル（`GENERATE_CONFIG_PATH`、既定は`download\package_definition.xlsx`）を読み込む
    2. シートごとにファイルをコピーしてZIP化する
    3. ZIPの出力先（`GENERATE_OUTPUT_PATH`）にZIP、ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
@@ -110,7 +110,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
 | `GENERATE_SOURCE_BASE` | Excelの「取得元（フルパス）」列を相対パスで書いたときの共通の親フォルダ（※ドライブ文字や`\\`から始まるフルパスの行には影響しない） | `DOWNLOAD_LOCAL_DEST`と同じ（ダウンロードしたフォルダ） |
-| `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `config\package_definition.xlsx` |
+| `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `download\package_definition.xlsx`（`DOWNLOAD_LOCAL_DEST`配下） |
 | `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ（実行時に毎回削除→再作成される） | `work` フォルダ |
 | `GENERATE_OUTPUT_PATH` | 成果物の出力先フォルダ | `generated` フォルダ |
 | `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名（カンマ区切り、複数指定可）。設定時はここに書いたシートのみ処理する | 空（絞り込みなし＝全シート対象） |
