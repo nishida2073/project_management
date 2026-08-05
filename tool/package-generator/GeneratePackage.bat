@@ -20,6 +20,9 @@ goto parse_args
 powershell.exe ^
  -ExecutionPolicy Bypass ^
  -File .\GeneratePackage.ps1
+set "EXITCODE=%ERRORLEVEL%"
 
 echo 5•bŒã‚ÉŽ©“®“I‚É•Â‚¶‚Ü‚·...
 timeout /t 5 >nul
+
+exit /b %EXITCODE%
