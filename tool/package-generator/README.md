@@ -23,9 +23,11 @@
 | `scripts\download-folder.ps1` / `generate-package.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `config\package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
 
-`download-folder.ps1`と`upload-folder.ps1`は共通してAzure CLIでサインインし、そのトークンでMicrosoft Graph APIを直接呼び出す（`common.ps1`に集約）。初回、またはサインインが切れている場合はデバイスコードでのログインが必要（URLとコードがコンソールに表示されるので、ブラウザで開いて入力する）。テナントの条件付きアクセス設定によってはMFAが必要になる場合がある。サブスクリプションを持っていないアカウントでも`--allow-no-subscriptions`でサインインするため問題ない。
-
 パス関連の設定は `set-env.bat` にまとめてある。PowerShellスクリプト（`generate-package.ps1` / `download-folder.ps1` / `upload-folder.ps1`）を直接編集せずに、`set-env.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`set-env.bat` の値は上書きしない（`if not defined` 方式）。
+
+## Azure CLIでのサインイン
+
+`download-folder.ps1`と`upload-folder.ps1`は共通してAzure CLIでサインインし、そのトークンでMicrosoft Graph APIを直接呼び出す（`common.ps1`に集約）。初回、またはサインインが切れている場合はデバイスコードでのログインが必要（URLとコードがコンソールに表示されるので、ブラウザで開いて入力する）。テナントの条件付きアクセス設定によってはMFAが必要になる場合がある。サブスクリプションを持っていないアカウントでも`--allow-no-subscriptions`でサインインするため問題ない。
 
 ## 環境変数（全体）
 
@@ -83,7 +85,7 @@
 
 ### 必要なもの・注意点
 
-- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`download-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[ツールの構成](#ツールの構成)を参照。
+- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`download-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[Azure CLIでのサインイン](#azure-cliでのサインイン)を参照。
 - 大量のファイル・深いフォルダ構成があると取得に時間がかかる。
 - ダウンロード先フォルダは自動でクリーンされない（SharePoint側で削除されたファイルもローカルには残り続ける）。SharePoint側と完全に一致させたい場合は、実行前に`DOWNLOAD_LOCAL_DEST`の中身を自分で削除しておくこと。
 
@@ -196,6 +198,6 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 
 ### 必要なもの・注意点
 
-- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`upload-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[ツールの構成](#ツールの構成)を参照。
+- **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`upload-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[Azure CLIでのサインイン](#azure-cliでのサインイン)を参照。
 - SharePoint側のアップロード用エンドポイントとの通信が不安定な場合があり、1チャンクにつき最大8回リトライする。
 - 大量のファイル・深いフォルダ構成があると時間がかかる。
