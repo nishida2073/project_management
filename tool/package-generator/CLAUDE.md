@@ -61,6 +61,15 @@ tool ever produces LF-only output, normalize with
 `README.md` and `config/README.md` are plain UTF-8 Markdown — normal Edit/Write
 is fine for those.
 
+Always spell the filename `README.md` (all caps) in every tool call — never
+`Readme.md`. Windows' filesystem is case-insensitive but case-*preserving*, so
+reading/writing the file via the wrong case actually renames it on disk to that
+case, silently, even though the path still resolves. This has happened
+repeatedly to both `README.md` and `config/README.md` in this project. If it
+happens again, fix it with `Rename-Item` (a plain `mv`/rename to the same name
+with different case is a no-op on some tools — use PowerShell's `Rename-Item`,
+which handles the case-only rename correctly).
+
 ## Conventions
 
 - File naming: kebab-case for `.bat`/`.ps1` (`download-folder.bat`, not
