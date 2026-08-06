@@ -3,3 +3,4 @@ log
 generated
 work
 test
+*.exe

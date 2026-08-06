@@ -36,11 +36,130 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
   stage 2, and the guide for how to fill it in.
 - `download/`, `work/`, `generated/`, `log/`, `test/` — runtime-generated folders
   (all gitignored). Safe to delete; scripts recreate what they need.
+- `scripts/gui.ps1` — a WinForms front-end, three tabs (`実行`/`ログ`/`設定`),
+  added via a single `$tabControl.Controls.AddRange(@($tabRun, $tabLogs,
+  $tabSettings))` at creation time — see the ps2exe `Insert()` quirk below for
+  why this must NOT be done by adding two tabs and inserting the third later.
+  `$tabControl.SelectedTab = $tabRun` is set explicitly right before
+  `Application::Run` — without it, WinForms silently defaulted to showing
+  `設定` on startup instead of `実行` (root cause not fully understood; fixing
+  the symptom directly was more productive than chasing it further). Don't
+  remove that explicit assignment.
+  - **実行 (Run)**: checkboxes for the 3 stages + a Run button + a log
+    textbox. `Sync-RunCheckboxes` sets each checkbox from `Get-ResolvedVar`
+    (i.e. from the *current* `set-env.bat`/env state, not a hardcoded
+    default) — called once at startup and again whenever this tab is
+    selected (`$tabControl.Add_SelectedIndexChanged`), so edits made on the
+    設定 tab are reflected without restarting the app. Don't go back to
+    hardcoding `.Checked = $true/$false` on the checkbox objects. Clicking
+    実行 sets `$env:DOWNLOAD_ENABLED` / `GENERATE_ENABLED` /
+    `UPLOAD_ENABLED` from the checkboxes, then launches `all.bat` as a
+    redirected child process and streams its stdout/stderr into the textbox
+    (`Write-Host` output from the underlying `.ps1`s is captured fine this
+    way — confirmed empirically). The log is *appended to*, not cleared,
+    across runs (a `====================` divider is inserted between runs)
+    — don't reintroduce a `$txtLog.Clear()` here, that was an explicit user
+    request to preserve run history.
+  - **ログ (Log)**: radio buttons for the 3 stages + a single read-only
+    viewer (no file picker — deliberately simplified per explicit user
+    request; don't reintroduce a `ListBox` here). `Get-ResolvedVar` resolves
+    a `set-env.bat` variable the same way `set-env.bat` itself would at
+    runtime — env var override first
+    (`[Environment]::GetEnvironmentVariable`), else the file's own
+    `if not defined` default (via `Get-SetEnvDefaults`, reusing the 設定
+    tab's `$lineRegex`/`Read-SetEnvLines`) — then expands `%BASE_DIR%`
+    (hardcoded to `$basePath`) and recursively expands any other `%VAR%`
+    token found in the value (e.g. `UPLOAD_SITE_URL=%DOWNLOAD_SITE_URL%`).
+    Selecting a stage's radio button finds the newest file in
+    `Get-ResolvedVar COMMON_LOG_PATH` matching `"$(Get-ResolvedVar
+    "<STAGE>_LOG_PREFIX")*.log"` and loads it — stage 2 (individual package
+    creation) writes one log per Excel sheet, so only the most recently
+    modified sheet's log is shown, not all of them. Re-scans whenever that
+    radio changes or the ログ tab is selected, so it reflects the latest run
+    without needing an explicit refresh button.
+  - **設定 (Settings)**: a generic editor for `set-env.bat`. It parses every
+    `if not defined VAR set "VAR=value"` line via the regex
+    `^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$` (backreference
+    ensures the two occurrences of the var name match) and renders one
+    label per variable, grouped by the prefix before the first `_`
+    (`COMMON`/`DOWNLOAD`/`GENERATE`/`UPLOAD`). The value-side control depends
+    on the variable name, checked against three explicit lists
+    (`$enabledVars`/`$folderBrowseVars`/`$fileBrowseVars` — extend these
+    lists, don't infer field type from the name pattern, per explicit user
+    preference over an earlier `.EndsWith("_ENABLED")` version):
+    - `$enabledVars` (`DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`):
+      a 有効/無効 `RadioButton` pair instead of a `TextBox`. **Each pair must
+      live in its own child `Panel`** — WinForms `RadioButton`s are mutually
+      exclusive against every *sibling* under the same parent, so without
+      separate panels, checking one field's 有効 silently unchecks another
+      field's (confirmed by reproducing it: setting all three to `Checked =
+      $true` in sequence left only the last one actually checked). Recorded
+      per-field in `$script:fieldRadios[$varName]` (the 有効 radio); Save
+      reads `.Checked` from there instead of `.Text` from
+      `$script:fieldTextBoxes`.
+    - `$folderBrowseVars` (`DOWNLOAD_LOCAL_DEST`/`GENERATE_OUTPUT_PATH`/
+      `UPLOAD_LOCAL_SOURCE`) and `$fileBrowseVars` (`GENERATE_CONFIG_PATH`):
+      a `TextBox` plus a "参照..." button opening a `FolderBrowserDialog` /
+      `OpenFileDialog`. The button's `.Tag` is set to its own `TextBox`
+      object and the click handler reads `$this.Tag` — do this, don't
+      capture `$txt` directly in the `Add_Click` scriptblock, since `$txt`
+      is a loop variable reassigned every iteration of the field loop and a
+      closure over it would see only the *last* field's textbox by the time
+      any button is actually clicked. `Resolve-BrowseStart` expands
+      `%BASE_DIR%`/`%VAR%` tokens in the field's current text (reusing
+      `Get-ResolvedVar`) so the dialog opens at the real resolved location.
+    - Everything else: a plain `TextBox`, as before.
+
+    On Save, matched lines' values are rewritten back into `set-env.bat`
+    byte-for-byte (verified via `Compare-Object` that untouched lines
+    round-trip identically — including ones containing `%OTHER_VAR%`
+    references, empty values, and backslashes). Adding a new variable to
+    `set-env.bat` makes it show up here automatically as a plain `TextBox`
+    field — no `gui.ps1` change needed unless it should be one of the
+    special field types above.
+
+  `build-gui.bat` / `scripts/build-gui.ps1` compile `gui.ps1` into
+  `個社別ZIP生成ツール.exe` at the project root via the `ps2exe` PowerShell
+  module (auto-installed on first run, same pattern as `ImportExcel`). The
+  `.exe` itself is gitignored (`*.exe`) — it's a build artifact, rebuild it
+  with `build-gui.bat` whenever `gui.ps1` changes.
+
+  **Another confirmed ps2exe-only quirk**: `$tabControl.Controls.Insert(int,
+  TabPage)` threw `"指定されたメソッドはサポートされていません"`
+  (`NotSupportedException`) in the compiled `.exe`, but ran fine when the
+  same script was launched directly via `powershell.exe -File` — i.e. it
+  reproduced only in the packaged build, same as the `$MyInvocation` issue
+  below. Root cause not fully understood (unlike the encoding issue, which
+  was cleanly isolated to input-file reading); the fix was simply to avoid
+  `TabPageCollection.Insert` altogether and add all tabs in final order via
+  a single `.AddRange()` at creation time instead of building them in one
+  order and reordering later. If a future change needs to reorder or
+  dynamically insert tabs, budget time to test the actual compiled `.exe`,
+  not just the `.ps1` — this class of bug is invisible in the latter.
+
+  **Verification gotcha**: `SendMessage(hwnd, BM_GETCHECK, ...)` against a
+  running WinForms `CheckBox`/`RadioButton`'s native handle is **not**
+  reliable for verifying checked state from outside the process (it read `0`
+  in every test here even when the `.Checked` .NET property — confirmed via
+  an in-process trace written to a file from a `Form.Add_Shown` handler —
+  was correctly `True`). When testing this GUI from outside (no access to
+  the running PowerShell session's variables), prefer writing an in-process
+  debug trace (e.g. from `Add_Click`/`Add_Shown`) to a temp file over
+  `user32.dll` `SendMessage`/`GetWindowText`-based black-box probing for
+  anything beyond visibility and text content. Also: `EnumChildWindows`
+  finds controls belonging to *every* tab regardless of which is currently
+  selected (not just the visible one) — filter by `IsWindowVisible` and be
+  aware that controls on different tabs can have identical `Text` (e.g. the
+  実行 tab's checkboxes and the ログ tab's radio buttons are both labelled
+  "1. ファイルダウンロード" etc.), so a text-only match can silently grab the
+  wrong tab's control.
 
 ## Critical constraint: Shift-JIS (CP932) encoding
 
 All `.bat` and `.ps1` files contain Japanese text and are saved as **Shift-JIS
-(CP932)**, not UTF-8. **Never edit them with the Edit/Write tools directly** —
+(CP932)**, not UTF-8, **except `scripts/gui.ps1`, which must be UTF-8 with a
+BOM** (see below) because it is compiled by `ps2exe`. **Never edit any of
+these files with the Edit/Write tools directly** —
 those assume UTF-8 and will silently corrupt every multi-byte character on save
 (this has happened before and is not easily noticed until the file is reopened).
 
@@ -57,6 +176,28 @@ Also preserve CRLF line endings — LF-only line endings combined with `^`
 line-continuation in `.bat` files cause `cmd.exe` to misparse the file. If a
 tool ever produces LF-only output, normalize with
 `.Replace("\r\n","\n").Replace("\n","\r\n")` before writing.
+
+**`scripts/gui.ps1` is the one exception** — it must be saved as UTF-8 with a
+BOM, not CP932. Confirmed empirically: `ps2exe`'s `-inputFile` reader does not
+respect the system ANSI codepage, so a CP932-encoded source compiles into an
+exe with mangled/garbled Japanese text in every string literal (window title,
+labels, log messages) — the string *lengths* even change (e.g. an 11-character
+title became 17 characters), which is the tell that this is happening versus a
+display-only rendering issue. UTF-8-with-BOM reads correctly both ways: via
+`powershell.exe -File` (BOM is honored regardless of system codepage) and via
+`ps2exe` compilation. Edit it like this instead of the CP932 snippet above:
+
+```powershell
+$utf8bom = [System.Text.UTF8Encoding]::new($true)
+$content = [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8)
+$content = $content.Replace($old, $new)
+[System.IO.File]::WriteAllText($path, $content, $utf8bom)
+```
+
+After editing `gui.ps1`, rebuild with `build-gui.bat` and actually launch the
+resulting `.exe` to confirm the title/labels render correctly before
+considering the change done — this class of bug is invisible in the source
+file itself (which decodes fine) and only shows up in the compiled output.
 
 `README.md` and `config/README.md` are plain UTF-8 Markdown — normal Edit/Write
 is fine for those.

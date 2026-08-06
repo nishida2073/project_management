@@ -2,7 +2,7 @@
 
 ## 概要
 
-大まかな流れは以下の3段階。
+### 実施手順
 
 1. Teams/SharePoint上の素材をローカルにダウンロード（[1. ファイルダウンロードについて](#1-ファイルダウンロードについて)）
 2. ダウンロードした素材からExcelの設定に従って個別パッケージ（ZIP）を作成（[2. 個別パッケージの作成について](#2-個別パッケージの作成について)）
@@ -22,6 +22,8 @@
 | `scripts\common.ps1` | 3つの`.ps1`が共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
 | `scripts\download-folder.ps1` / `generate-package.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
+| `build-gui.bat` | GUI版（`個社別ZIP生成ツール.exe`）をビルドするエントリーポイント。[GUI版](#gui版)を参照 |
+| `scripts\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
 
 パス関連の設定は `set-env.bat` にまとめてある。PowerShellスクリプト（`generate-package.ps1` / `download-folder.ps1` / `upload-folder.ps1`）を直接編集せずに、`set-env.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`set-env.bat` の値は上書きしない（`if not defined` 方式）。
 
@@ -87,7 +89,7 @@
 
 #### 必要なもの
 
-**Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`download-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[Azure CLIでのサインイン](#azure-cliでのサインイン)を参照。
+> **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`download-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[Azure CLIでのサインイン](#azure-cliでのサインイン)を参照。
 
 #### 注意点
 
@@ -158,7 +160,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 
 #### 必要なもの
 
-PowerShellモジュール「ImportExcel」が必要。未インストールの場合、実行時に自動でインストールされる（初回はインターネット接続とインストール確認が必要）。
+> PowerShellモジュール「ImportExcel」が必要。未インストールの場合、実行時に自動でインストールされる（初回はインターネット接続とインストール確認が必要）。
 
 #### 注意点
 
@@ -209,10 +211,41 @@ PowerShellモジュール「ImportExcel」が必要。未インストールの�
 
 #### 必要なもの
 
-**Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`upload-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[Azure CLIでのサインイン](#azure-cliでのサインイン)を参照。
+> **Azure CLI**が必要（`winget install --id Microsoft.AzureCLI`）。未インストールの場合、`upload-folder.ps1`がエラーで案内を表示して終了する。サインイン方法は[Azure CLIでのサインイン](#azure-cliでのサインイン)を参照。
 
 #### 注意点
 
 > SharePoint側のアップロード用エンドポイントとの通信が不安定な場合があり、1チャンクにつき最大8回リトライする。
 
 > 大量のファイル・深いフォルダ構成があると時間がかかる。
+
+## GUI版
+
+`.bat`をコマンドプロンプトから実行する代わりに、画面から操作したい場合は`build-gui.bat`でGUI版（`個社別ZIP生成ツール.exe`）を作成できる。
+
+### 実施手順
+
+1. `build-gui.bat` を実行する（`ps2exe`モジュールが未インストールの場合、初回に自動でインストールされる）
+2. プロジェクトのルートに`個社別ZIP生成ツール.exe`が作成される
+3. `個社別ZIP生成ツール.exe`を実行する。画面は「実行」「ログ」「設定」の3タブ
+
+### 注意点
+
+> Azure CLIのデバイスコードサインインが必要な場合、URLとコードもログ欄に表示される。
+
+### 実行タブ
+
+- 「1. ファイルダウンロード」「2. 個別パッケージの作成」「3. ファイルアップロード」のチェックボックス（現在の`DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`の値を反映。「設定」タブで値を変更した場合も、この画面に戻ってくると最新の値に更新される）で、実行する段階を選ぶ
+- 「実行」ボタンを押すと、選んだ内容で`all.bat`が呼び出され、その出力が画面のログ欄に追記表示される（実行するたびに区切り線を挟んで積み重なる。過去の実行結果も遡って確認できる）
+
+### ログタブ
+
+- 「1. ファイルダウンロード」「2. 個別パッケージの作成」「3. ファイルアップロード」のラジオボタンで、確認したい段階のログを切り替える
+- 選んだ段階の`COMMON_LOG_PATH`配下のログファイル（`DOWNLOAD_LOG_PREFIX`/`GENERATE_LOG_PREFIX`/`UPLOAD_LOG_PREFIX`で始まるファイルのうち最新の`.log`ファイル）の内容が表示される。「2. 個別パッケージの作成」はシートごとに複数出力されるため、最後に更新されたシートのログが表示される
+
+### 設定タブ
+
+- `set-env.bat`の中身（`if not defined VAR set "VAR=値"`の各行）を一覧表示し、値を書き換えて「保存」で`set-env.bat`に書き込める。テキストエディタで`set-env.bat`を直接編集する代わりに使える
+- `DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`は「有効」「無効」のラジオボタンで切り替える
+- `DOWNLOAD_LOCAL_DEST`/`GENERATE_CONFIG_PATH`/`GENERATE_OUTPUT_PATH`/`UPLOAD_LOCAL_SOURCE`は「参照...」ボタンからフォルダ（`GENERATE_CONFIG_PATH`はファイル）を選んで入力できる
+- 「再読込」で`set-env.bat`の現在の内容を読み直す（保存前の変更を取り消したい場合など）
