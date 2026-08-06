@@ -50,27 +50,27 @@ $runTopPanel.Height = 150
 $chkDownload = New-Object System.Windows.Forms.CheckBox
 $chkDownload.Text = "1. ファイルダウンロード"
 $chkDownload.AutoSize = $true
-$chkDownload.Location = New-Object System.Drawing.Point(20, 20)
+$chkDownload.Location = New-Object System.Drawing.Point(20, 14)
 
 $chkGenerate = New-Object System.Windows.Forms.CheckBox
 $chkGenerate.Text = "2. 個別パッケージの作成"
 $chkGenerate.AutoSize = $true
-$chkGenerate.Location = New-Object System.Drawing.Point(20, 46)
+$chkGenerate.Location = New-Object System.Drawing.Point(20, 40)
 
 $chkUpload = New-Object System.Windows.Forms.CheckBox
 $chkUpload.Text = "3. ファイルアップロード"
 $chkUpload.AutoSize = $true
-$chkUpload.Location = New-Object System.Drawing.Point(20, 72)
+$chkUpload.Location = New-Object System.Drawing.Point(20, 66)
 
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "実行"
-$btnRun.Location = New-Object System.Drawing.Point(20, 106)
+$btnRun.Location = New-Object System.Drawing.Point(20, 100)
 $btnRun.Size = New-Object System.Drawing.Size(100, 32)
 
 $lblStatus = New-Object System.Windows.Forms.Label
 $lblStatus.Text = ""
 $lblStatus.AutoSize = $true
-$lblStatus.Location = New-Object System.Drawing.Point(134, 116)
+$lblStatus.Location = New-Object System.Drawing.Point(134, 110)
 $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $btnRun, $lblStatus))
@@ -91,6 +91,7 @@ function Append-Log {
 }
 
 $btnRun.Add_Click({
+    $tabControl.Enabled = $false
     $chkDownload.Enabled = $false
     $chkGenerate.Enabled = $false
     $chkUpload.Enabled = $false
@@ -143,6 +144,7 @@ $btnRun.Add_Click({
     $chkGenerate.Enabled = $true
     $chkUpload.Enabled = $true
     $btnRun.Enabled = $true
+    $tabControl.Enabled = $true
 })
 
 # ----- 設定タブ（set-env.batの編集） -----
@@ -160,18 +162,18 @@ $topPanel.Height = 40
 
 $btnSave = New-Object System.Windows.Forms.Button
 $btnSave.Text = "保存"
-$btnSave.Location = New-Object System.Drawing.Point(20, 6)
+$btnSave.Location = New-Object System.Drawing.Point(20, 14)
 $btnSave.Size = New-Object System.Drawing.Size(100, 28)
 
 $btnReload = New-Object System.Windows.Forms.Button
 $btnReload.Text = "再読込"
-$btnReload.Location = New-Object System.Drawing.Point(130, 6)
+$btnReload.Location = New-Object System.Drawing.Point(130, 14)
 $btnReload.Size = New-Object System.Drawing.Size(100, 28)
 
 $lblSaveStatus = New-Object System.Windows.Forms.Label
 $lblSaveStatus.Text = ""
 $lblSaveStatus.AutoSize = $true
-$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 12)
+$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 20)
 $lblSaveStatus.Font = New-Object System.Drawing.Font($lblSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $topPanel.Controls.AddRange(@($btnSave, $btnReload, $lblSaveStatus))
@@ -182,6 +184,39 @@ $fieldPanel.AutoScroll = $true
 
 $tabSettings.Controls.Add($fieldPanel)
 $tabSettings.Controls.Add($topPanel)
+
+$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+
+$groupLabels = @{
+    "COMMON" = "共通"
+    "DOWNLOAD" = "ダウンロード"
+    "GENERATE" = "パッケージ作成"
+    "UPLOAD" = "アップロード"
+}
+
+$varLabels = @{
+    "COMMON_LOG_PATH" = "ログの出力先"
+    "DOWNLOAD_ENABLED" = "機能の有効化"
+    "DOWNLOAD_SITE_URL" = "取得元サイトURL"
+    "DOWNLOAD_SITE_FOLDER" = "取得元フォルダ"
+    "DOWNLOAD_SITE_TENANT_ID" = "テナントID"
+    "DOWNLOAD_LOCAL_DEST" = "ダウンロード先フォルダ"
+    "DOWNLOAD_LOG_PREFIX" = "ログファイル名の接頭辞"
+    "GENERATE_ENABLED" = "機能の有効化"
+    "GENERATE_SOURCE_BASE" = "取得元の基準フォルダ"
+    "GENERATE_CONFIG_PATH" = "パッケージ定義ファイル"
+    "GENERATE_WORK_PATH" = "作業用フォルダ"
+    "GENERATE_OUTPUT_PATH" = "成果物の出力先"
+    "GENERATE_SHEETS_INCLUDE" = "対象シート名"
+    "GENERATE_SHEETS_EXCLUDE" = "除外シート名"
+    "GENERATE_LOG_PREFIX" = "ログファイル名の接頭辞"
+    "UPLOAD_ENABLED" = "機能の有効化"
+    "UPLOAD_SITE_URL" = "アップロード先サイトURL"
+    "UPLOAD_SITE_FOLDER" = "アップロード先フォルダ"
+    "UPLOAD_SITE_TENANT_ID" = "テナントID"
+    "UPLOAD_LOCAL_SOURCE" = "アップロード元フォルダ"
+    "UPLOAD_LOG_PREFIX" = "ログファイル名の接頭辞"
+}
 
 $script:fieldTextBoxes = @{}
 $script:fieldRadios = @{}
@@ -224,21 +259,32 @@ function Load-SettingsFields {
 
         $group = $varName.Split("_")[0]
         if ($group -ne $lastGroup) {
+            if ($lastGroup -ne "") {
+                $y += 10
+                $separator = New-Object System.Windows.Forms.Panel
+                $separator.BackColor = [System.Drawing.Color]::LightGray
+                $separator.Location = New-Object System.Drawing.Point(10, $y)
+                $separator.Size = New-Object System.Drawing.Size(630, 2)
+                $fieldPanel.Controls.Add($separator)
+                $y += 14
+            }
+
             $lblGroup = New-Object System.Windows.Forms.Label
-            $lblGroup.Text = $group
+            $lblGroup.Text = if ($groupLabels.ContainsKey($group)) { $groupLabels[$group] } else { $group }
             $lblGroup.AutoSize = $true
             $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
-            $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font, [System.Drawing.FontStyle]::Bold)
+            $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
             $fieldPanel.Controls.Add($lblGroup)
-            $y += 26
+            $y += 28
             $lastGroup = $group
         }
 
         $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = $varName
+        $lbl.Text = if ($varLabels.ContainsKey($varName)) { $varLabels[$varName] } else { $varName }
         $lbl.AutoSize = $false
         $lbl.Size = New-Object System.Drawing.Size(220, 20)
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
+        $settingsToolTip.SetToolTip($lbl, $varName)
         $fieldPanel.Controls.Add($lbl)
 
         if ($enabledVars -contains $varName) {
@@ -311,8 +357,8 @@ function Load-SettingsFields {
             $txt = New-Object System.Windows.Forms.TextBox
             $txt.Text = $varValue
             $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            $txt.Size = New-Object System.Drawing.Size(400, 22)
-            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+            $txt.Size = New-Object System.Drawing.Size(380, 22)
+            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
 
             $fieldPanel.Controls.Add($txt)
             $script:fieldTextBoxes[$varName] = $txt
@@ -399,17 +445,17 @@ $radioDownloadLog = New-Object System.Windows.Forms.RadioButton
 $radioDownloadLog.Text = "1. ファイルダウンロード"
 $radioDownloadLog.AutoSize = $true
 $radioDownloadLog.Checked = $true
-$radioDownloadLog.Location = New-Object System.Drawing.Point(20, 10)
+$radioDownloadLog.Location = New-Object System.Drawing.Point(20, 14)
 
 $radioGenerateLog = New-Object System.Windows.Forms.RadioButton
 $radioGenerateLog.Text = "2. 個別パッケージの作成"
 $radioGenerateLog.AutoSize = $true
-$radioGenerateLog.Location = New-Object System.Drawing.Point(220, 10)
+$radioGenerateLog.Location = New-Object System.Drawing.Point(220, 14)
 
 $radioUploadLog = New-Object System.Windows.Forms.RadioButton
 $radioUploadLog.Text = "3. ファイルアップロード"
 $radioUploadLog.AutoSize = $true
-$radioUploadLog.Location = New-Object System.Drawing.Point(440, 10)
+$radioUploadLog.Location = New-Object System.Drawing.Point(440, 14)
 
 $logStagePanel.Controls.AddRange(@($radioDownloadLog, $radioGenerateLog, $radioUploadLog))
 

@@ -237,6 +237,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 
 - 「1. ファイルダウンロード」「2. 個別パッケージの作成」「3. ファイルアップロード」のチェックボックス（現在の`DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`の値を反映。「設定」タブで値を変更した場合も、この画面に戻ってくると最新の値に更新される）で、実行する段階を選ぶ
 - 「実行」ボタンを押すと、選んだ内容で`all.bat`が呼び出され、その出力が画面のログ欄に追記表示される（実行するたびに区切り線を挟んで積み重なる。過去の実行結果も遡って確認できる）
+- 実行中は「ログ」「設定」タブへの切り替えを含め、画面の操作ができなくなる（完了するまで待つ必要がある）
 
 ### ログタブ
 
@@ -246,6 +247,29 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 ### 設定タブ
 
 - `set-env.bat`の中身（`if not defined VAR set "VAR=値"`の各行）を一覧表示し、値を書き換えて「保存」で`set-env.bat`に書き込める。テキストエディタで`set-env.bat`を直接編集する代わりに使える
-- `DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`は「有効」「無効」のラジオボタンで切り替える
-- `DOWNLOAD_LOCAL_DEST`/`GENERATE_CONFIG_PATH`/`GENERATE_OUTPUT_PATH`/`UPLOAD_LOCAL_SOURCE`は「参照...」ボタンからフォルダ（`GENERATE_CONFIG_PATH`はファイル）を選んで入力できる
+- 各項目のラベルは環境変数名ではなく日本語の表示名を表示する（元の環境変数名はラベルにマウスを乗せるとツールチップで確認できる）
 - 「再読込」で`set-env.bat`の現在の内容を読み直す（保存前の変更を取り消したい場合など）
+
+| グループ | 環境変数名 | 表示名 |
+|---|---|---|
+| 共通 | `COMMON_LOG_PATH` | ログの出力先 |
+| ダウンロード | `DOWNLOAD_ENABLED` | 機能の有効化 |
+| ダウンロード | `DOWNLOAD_SITE_URL` | 取得元サイトURL |
+| ダウンロード | `DOWNLOAD_SITE_FOLDER` | 取得元フォルダ |
+| ダウンロード | `DOWNLOAD_SITE_TENANT_ID` | テナントID |
+| ダウンロード | `DOWNLOAD_LOCAL_DEST` | ダウンロード先フォルダ |
+| ダウンロード | `DOWNLOAD_LOG_PREFIX` | ログファイル名の接頭辞 |
+| パッケージ作成 | `GENERATE_ENABLED` | 機能の有効化 |
+| パッケージ作成 | `GENERATE_SOURCE_BASE` | 取得元の基準フォルダ |
+| パッケージ作成 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル |
+| パッケージ作成 | `GENERATE_WORK_PATH` | 作業用フォルダ |
+| パッケージ作成 | `GENERATE_OUTPUT_PATH` | 成果物の出力先 |
+| パッケージ作成 | `GENERATE_SHEETS_INCLUDE` | 対象シート |
+| パッケージ作成 | `GENERATE_SHEETS_EXCLUDE` | 除外シート |
+| パッケージ作成 | `GENERATE_LOG_PREFIX` | ログファイル名の接頭辞 |
+| アップロード | `UPLOAD_ENABLED` | 機能の有効化 |
+| アップロード | `UPLOAD_SITE_URL` | アップロード先サイトURL |
+| アップロード | `UPLOAD_SITE_FOLDER` | アップロード先フォルダ |
+| アップロード | `UPLOAD_SITE_TENANT_ID` | テナントID |
+| アップロード | `UPLOAD_LOCAL_SOURCE` | アップロード元フォルダ |
+| アップロード | `UPLOAD_LOG_PREFIX` | ログファイル名の接頭辞 |

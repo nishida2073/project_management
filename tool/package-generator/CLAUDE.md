@@ -52,7 +52,12 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     selected (`$tabControl.Add_SelectedIndexChanged`), so edits made on the
     設定 tab are reflected without restarting the app. Don't go back to
     hardcoding `.Checked = $true/$false` on the checkbox objects. Clicking
-    実行 sets `$env:DOWNLOAD_ENABLED` / `GENERATE_ENABLED` /
+    実行 disables `$tabControl` itself (not just the checkboxes/button) for
+    the duration of the run — this blocks tab-switching too, since a
+    disabled `TabControl` also refuses header clicks, not just its child
+    controls (explicit user request: no navigating away mid-run). Re-enable
+    it in the same place the checkboxes/button get re-enabled after
+    `$proc.WaitForExit()`. Sets `$env:DOWNLOAD_ENABLED` / `GENERATE_ENABLED` /
     `UPLOAD_ENABLED` from the checkboxes, then launches `all.bat` as a
     redirected child process and streams its stdout/stderr into the textbox
     (`Write-Host` output from the underlying `.ps1`s is captured fine this
@@ -82,8 +87,19 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     `^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$` (backreference
     ensures the two occurrences of the var name match) and renders one
     label per variable, grouped by the prefix before the first `_`
-    (`COMMON`/`DOWNLOAD`/`GENERATE`/`UPLOAD`). The value-side control depends
-    on the variable name, checked against three explicit lists
+    (`COMMON`/`DOWNLOAD`/`GENERATE`/`UPLOAD`). Both the group label and the
+    field label display a Japanese description (`$groupLabels`/`$varLabels`
+    lookup tables) rather than the raw env var name — falls back to the raw
+    name for anything not in the table, so a newly added `set-env.bat`
+    variable still shows up (untranslated) instead of silently disappearing.
+    The raw variable name is preserved as a `ToolTip` on the label
+    (`$settingsToolTip.SetToolTip($lbl, $varName)`) so it's still
+    discoverable for cross-referencing with this file/README.md. When adding
+    a new variable to `set-env.bat`, also add an entry to `$varLabels` (and
+    `$groupLabels` if it introduces a new prefix) — don't leave it to fall
+    back silently if a proper Japanese label is easy to write. The
+    value-side control depends on the variable name, checked against three
+    explicit lists
     (`$enabledVars`/`$folderBrowseVars`/`$fileBrowseVars` — extend these
     lists, don't infer field type from the name pattern, per explicit user
     preference over an earlier `.EndsWith("_ENABLED")` version):
@@ -109,6 +125,23 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
       `%BASE_DIR%`/`%VAR%` tokens in the field's current text (reusing
       `Get-ResolvedVar`) so the dialog opens at the real resolved location.
     - Everything else: a plain `TextBox`, as before.
+
+    **Every field control in `$fieldPanel` must use `Anchor = Top|Left`
+    only — never add `Right`.** `$fieldPanel` is measured at a tiny
+    placeholder size (~200x60) at control-creation time and only reaches its
+    real size (~660x456) once the tab is actually shown; a `Right`-anchored
+    control's width/position is recalculated against whichever size was
+    current when the anchor was established, which silently produces a
+    control 20-30px wider/further right than the fixed `Size`/`Location` you
+    gave it — confirmed twice: once with the "参照..." buttons appearing to
+    not render at all (they were pushed outside the visible/scrollable area)
+    and once with a plain `TextBox` (`DOWNLOAD_SITE_URL`) whose right edge
+    ended up past `fieldPanel`'s actual client width, clipped off entirely.
+    Both were fixed the same way: drop `Right` from `Anchor`, keep a fixed
+    `Size` comfortably inside the ~660px usable width instead of relying on
+    stretch-to-fit. If a control here ever looks missing or clipped, this is
+    the first thing to check — verify with an in-process trace (see the
+    verification gotcha below), not by eyeballing the compiled `.exe`.
 
     On Save, matched lines' values are rewritten back into `set-env.bat`
     byte-for-byte (verified via `Compare-Object` that untouched lines
