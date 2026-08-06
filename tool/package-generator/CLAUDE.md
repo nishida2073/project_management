@@ -72,7 +72,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     runtime — env var override first
     (`[Environment]::GetEnvironmentVariable`), else the file's own
     `if not defined` default (via `Get-SetEnvDefaults`, reusing the 設定
-    tab's `$lineRegex`/`Read-SetEnvLines`) — then expands `%BASE_DIR%`
+    tab's `$lineRegex`/`Read-SetEnvLines`) — then expands `%BASE_PATH%`
     (hardcoded to `$basePath`) and recursively expands any other `%VAR%`
     token found in the value (e.g. `UPLOAD_SITE_URL=%DOWNLOAD_SITE_URL%`).
     Selecting a stage's radio button finds the newest file in
@@ -113,8 +113,8 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
       per-field in `$script:fieldRadios[$varName]` (the 有効 radio); Save
       reads `.Checked` from there instead of `.Text` from
       `$script:fieldTextBoxes`.
-    - `$folderBrowseVars` (`DOWNLOAD_LOCAL_DEST`/`GENERATE_OUTPUT_PATH`/
-      `UPLOAD_LOCAL_SOURCE`) and `$fileBrowseVars` (`GENERATE_CONFIG_PATH`):
+    - `$folderBrowseVars` (`DOWNLOAD_LOCAL_PATH`/`GENERATE_OUTPUT_PATH`/
+      `UPLOAD_LOCAL_PATH`) and `$fileBrowseVars` (`GENERATE_CONFIG_PATH`):
       a `TextBox` plus a "参照..." button opening a `FolderBrowserDialog` /
       `OpenFileDialog`. The button's `.Tag` is set to its own `TextBox`
       object and the click handler reads `$this.Tag` — do this, don't
@@ -122,7 +122,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
       is a loop variable reassigned every iteration of the field loop and a
       closure over it would see only the *last* field's textbox by the time
       any button is actually clicked. `Resolve-BrowseStart` expands
-      `%BASE_DIR%`/`%VAR%` tokens in the field's current text (reusing
+      `%BASE_PATH%`/`%VAR%` tokens in the field's current text (reusing
       `Get-ResolvedVar`) so the dialog opens at the real resolved location.
     - Everything else: a plain `TextBox`, as before.
 
@@ -251,7 +251,7 @@ which handles the case-only rename correctly).
 - Env vars: `set-env.bat` defines all defaults via `if not defined VAR set "VAR=..."`,
   so external env vars (or values set earlier in the same file) always win.
   `%VAR%` expansion is per-line and order-sensitive — a variable referencing
-  another (e.g. `GENERATE_SOURCE_BASE=%DOWNLOAD_LOCAL_DEST%`) must be defined
+  another (e.g. `GENERATE_SOURCE_PATH=%DOWNLOAD_LOCAL_PATH%`) must be defined
   after what it references.
 - Each `.ps1` splits `$scriptDir` (for dot-sourcing `common.ps1`, since the
   scripts live in `scripts/`) from `$basePath` (the project root, for

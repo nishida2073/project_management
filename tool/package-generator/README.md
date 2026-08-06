@@ -44,7 +44,7 @@
 
 ### 1. ファイルダウンロードについて
 
-取得元（`GENERATE_SOURCE_BASE`配下）にコピーしたいファイルがTeams/SharePoint上にある場合、`download-folder.bat`で事前にローカルへダウンロードできる。OneDriveの同期クライアントは使わず、Azure CLIで取得したトークンでMicrosoft Graph APIから直接取得する。
+取得元（`GENERATE_SOURCE_PATH`配下）にコピーしたいファイルがTeams/SharePoint上にある場合、`download-folder.bat`で事前にローカルへダウンロードできる。OneDriveの同期クライアントは使わず、Azure CLIで取得したトークンでMicrosoft Graph APIから直接取得する。
 
 #### 処理の流れ
 
@@ -53,7 +53,7 @@
 3. `download-folder.ps1` が実行される
    1. Azure CLIでサインインする（未サインイン・期限切れ時はデバイスコードでのログインが必要）
    2. Microsoft Graph APIでサイト（`DOWNLOAD_SITE_URL`）を解決する
-   3. 指定フォルダ（`DOWNLOAD_SITE_FOLDER`）配下を再帰的にローカル（`DOWNLOAD_LOCAL_DEST`）へダウンロードする
+   3. 指定フォルダ（`DOWNLOAD_SITE_PATH`）配下を再帰的にローカル（`DOWNLOAD_LOCAL_PATH`）へダウンロードする
    4. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
 #### 環境変数
@@ -61,12 +61,12 @@
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
 | `DOWNLOAD_SITE_URL` | 取得元のSharePointサイトURL（例：`https://xxx.sharepoint.com/sites/チーム名`） | テスト用サイトのURLが設定済み |
-| `DOWNLOAD_SITE_FOLDER` | サイト内の取得元フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/原本`）が設定済み |
+| `DOWNLOAD_SITE_PATH` | サイト内の取得元フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/原本`）が設定済み |
 | `DOWNLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | テスト用テナントIDが設定済み |
-| `DOWNLOAD_LOCAL_DEST` | ダウンロード先のローカルフォルダ（フルパス、または`GENERATE_SOURCE_BASE`からの相対パス） | `download` フォルダ |
+| `DOWNLOAD_LOCAL_PATH` | ダウンロード先のローカルフォルダ（フルパス、または`GENERATE_SOURCE_PATH`からの相対パス） | `download` フォルダ |
 | `DOWNLOAD_LOG_PREFIX` | ログファイル名（`<ダウンロード先フォルダ名>.log`）の先頭に付けるプレフィックス | `ダウンロード_` |
 
-`DOWNLOAD_LOCAL_DEST`を省略するか、相対パス（例：`download`）で指定すると、`GENERATE_SOURCE_BASE`配下に置かれるので、そのままExcelの「取得元（フルパス）」列から相対パスで参照できる。ドライブ文字や`\\`から始まるフルパスを指定した場合はそのまま使われる。
+`DOWNLOAD_LOCAL_PATH`を省略するか、相対パス（例：`download`）で指定すると、`GENERATE_SOURCE_PATH`配下に置かれるので、そのままExcelの「取得元（フルパス）」列から相対パスで参照できる。ドライブ文字や`\\`から始まるフルパスを指定した場合はそのまま使われる。
 
 同名のローカルファイルが既にある場合は上書きされる。
 
@@ -74,7 +74,7 @@
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| ダウンロードしたファイル一式 | ダウンロード先（`DOWNLOAD_LOCAL_DEST`） | SharePointからダウンロードしたファイル・フォルダ |
+| ダウンロードしたファイル一式 | ダウンロード先（`DOWNLOAD_LOCAL_PATH`） | SharePointからダウンロードしたファイル・フォルダ |
 | `<ダウンロード先フォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（下記） |
 
 ##### ログの形式
@@ -95,7 +95,7 @@
 
 > 大量のファイル・深いフォルダ構成があると取得に時間がかかる。
 
-> ダウンロード先フォルダは自動でクリーンされない（SharePoint側で削除されたファイルもローカルには残り続ける）。SharePoint側と完全に一致させたい場合は、実行前に`DOWNLOAD_LOCAL_DEST`の中身を自分で削除しておくこと。
+> ダウンロード先フォルダは自動でクリーンされない（SharePoint側で削除されたファイルもローカルには残り続ける）。SharePoint側と完全に一致させたい場合は、実行前に`DOWNLOAD_LOCAL_PATH`の中身を自分で削除しておくこと。
 
 ### 2. 個別パッケージの作成について
 
@@ -118,8 +118,8 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
-| `GENERATE_SOURCE_BASE` | Excelの「取得元（フルパス）」列を相対パスで書いたときの共通の親フォルダ（※ドライブ文字や`\\`から始まるフルパスの行には影響しない） | `DOWNLOAD_LOCAL_DEST`と同じ（ダウンロードしたフォルダ） |
-| `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `download\package_definition.xlsx`（`DOWNLOAD_LOCAL_DEST`配下） |
+| `GENERATE_SOURCE_PATH` | Excelの「取得元（フルパス）」列を相対パスで書いたときの共通の親フォルダ（※ドライブ文字や`\\`から始まるフルパスの行には影響しない） | `DOWNLOAD_LOCAL_PATH`と同じ（ダウンロードしたフォルダ） |
+| `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `download\package_definition.xlsx`（`DOWNLOAD_LOCAL_PATH`配下） |
 | `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ（実行時に毎回削除→再作成される） | `work` フォルダ |
 | `GENERATE_OUTPUT_PATH` | 成果物の出力先フォルダ | `generated` フォルダ |
 | `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名（カンマ区切り、複数指定可）。設定時はここに書いたシートのみ処理する | 空（絞り込みなし＝全シート対象） |
@@ -177,7 +177,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 3. `upload-folder.ps1` が実行される
    1. Azure CLIでサインインする（未サインイン・期限切れ時はデバイスコードでのログインが必要）
    2. Microsoft Graph APIでサイト（`UPLOAD_SITE_URL`）を解決する
-   3. ローカルフォルダ（`UPLOAD_LOCAL_SOURCE`）配下を再帰的にアップロードする
+   3. ローカルフォルダ（`UPLOAD_LOCAL_PATH`）配下を再帰的にアップロードする
    4. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
 #### 環境変数
@@ -185,9 +185,9 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
 | `UPLOAD_SITE_URL` | アップロード先のSharePointサイトURL（例：`https://xxx.sharepoint.com/sites/チーム名`） | `DOWNLOAD_SITE_URL`と同じ |
-| `UPLOAD_SITE_FOLDER` | サイト内のアップロード先フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/納品`）が設定済み |
+| `UPLOAD_SITE_PATH` | サイト内のアップロード先フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/納品`）が設定済み |
 | `UPLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | `DOWNLOAD_SITE_TENANT_ID`と同じ |
-| `UPLOAD_LOCAL_SOURCE` | アップロード元のローカルフォルダ（フルパス） | `GENERATE_OUTPUT_PATH`と同じ（ZIP作成の出力先） |
+| `UPLOAD_LOCAL_PATH` | アップロード元のローカルフォルダ（フルパス） | `GENERATE_OUTPUT_PATH`と同じ（ZIP作成の出力先） |
 | `UPLOAD_LOG_PREFIX` | ログファイル名（`<アップロード元フォルダ名>.log`）の先頭に付けるプレフィックス | `アップロード_` |
 
 同名ファイルが既にサイト側にある場合は上書きされる。
@@ -196,7 +196,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| アップロードしたファイル一式 | アップロード先（`UPLOAD_SITE_FOLDER`、SharePoint側） | ローカルからアップロードしたファイル・フォルダ |
+| アップロードしたファイル一式 | アップロード先（`UPLOAD_SITE_PATH`、SharePoint側） | ローカルからアップロードしたファイル・フォルダ |
 | `<アップロード元フォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（下記） |
 
 ##### ログの形式
@@ -255,12 +255,12 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | 共通 | `COMMON_LOG_PATH` | ログの出力先 |
 | ダウンロード | `DOWNLOAD_ENABLED` | 機能の有効化 |
 | ダウンロード | `DOWNLOAD_SITE_URL` | 取得元サイトURL |
-| ダウンロード | `DOWNLOAD_SITE_FOLDER` | 取得元フォルダ |
+| ダウンロード | `DOWNLOAD_SITE_PATH` | 取得元フォルダ |
 | ダウンロード | `DOWNLOAD_SITE_TENANT_ID` | テナントID |
-| ダウンロード | `DOWNLOAD_LOCAL_DEST` | ダウンロード先フォルダ |
+| ダウンロード | `DOWNLOAD_LOCAL_PATH` | ダウンロード先フォルダ |
 | ダウンロード | `DOWNLOAD_LOG_PREFIX` | ログファイル名の接頭辞 |
 | パッケージ作成 | `GENERATE_ENABLED` | 機能の有効化 |
-| パッケージ作成 | `GENERATE_SOURCE_BASE` | 取得元の基準フォルダ |
+| パッケージ作成 | `GENERATE_SOURCE_PATH` | 取得元の基準フォルダ |
 | パッケージ作成 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル |
 | パッケージ作成 | `GENERATE_WORK_PATH` | 作業用フォルダ |
 | パッケージ作成 | `GENERATE_OUTPUT_PATH` | 成果物の出力先 |
@@ -269,7 +269,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | パッケージ作成 | `GENERATE_LOG_PREFIX` | ログファイル名の接頭辞 |
 | アップロード | `UPLOAD_ENABLED` | 機能の有効化 |
 | アップロード | `UPLOAD_SITE_URL` | アップロード先サイトURL |
-| アップロード | `UPLOAD_SITE_FOLDER` | アップロード先フォルダ |
+| アップロード | `UPLOAD_SITE_PATH` | アップロード先フォルダ |
 | アップロード | `UPLOAD_SITE_TENANT_ID` | テナントID |
-| アップロード | `UPLOAD_LOCAL_SOURCE` | アップロード元フォルダ |
+| アップロード | `UPLOAD_LOCAL_PATH` | アップロード元フォルダ |
 | アップロード | `UPLOAD_LOG_PREFIX` | ログファイル名の接頭辞 |

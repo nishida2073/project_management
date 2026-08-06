@@ -201,12 +201,12 @@ $varLabels = @{
     "COMMON_LOG_PATH" = "ログの出力先"
     "DOWNLOAD_ENABLED" = "機能の有効化"
     "DOWNLOAD_SITE_URL" = "取得元サイトURL"
-    "DOWNLOAD_SITE_FOLDER" = "取得元フォルダ"
+    "DOWNLOAD_SITE_PATH" = "取得元フォルダ"
     "DOWNLOAD_SITE_TENANT_ID" = "テナントID"
-    "DOWNLOAD_LOCAL_DEST" = "ダウンロード先フォルダ"
+    "DOWNLOAD_LOCAL_PATH" = "ダウンロード先フォルダ"
     "DOWNLOAD_LOG_PREFIX" = "ログファイル名の接頭辞"
     "GENERATE_ENABLED" = "機能の有効化"
-    "GENERATE_SOURCE_BASE" = "取得元の基準フォルダ"
+    "GENERATE_SOURCE_PATH" = "取得元の基準フォルダ"
     "GENERATE_CONFIG_PATH" = "パッケージ定義ファイル"
     "GENERATE_WORK_PATH" = "作業用フォルダ"
     "GENERATE_OUTPUT_PATH" = "成果物の出力先"
@@ -215,9 +215,9 @@ $varLabels = @{
     "GENERATE_LOG_PREFIX" = "ログファイル名の接頭辞"
     "UPLOAD_ENABLED" = "機能の有効化"
     "UPLOAD_SITE_URL" = "アップロード先サイトURL"
-    "UPLOAD_SITE_FOLDER" = "アップロード先フォルダ"
+    "UPLOAD_SITE_PATH" = "アップロード先フォルダ"
     "UPLOAD_SITE_TENANT_ID" = "テナントID"
-    "UPLOAD_LOCAL_SOURCE" = "アップロード元フォルダ"
+    "UPLOAD_LOCAL_PATH" = "アップロード元フォルダ"
     "UPLOAD_LOG_PREFIX" = "ログファイル名の接頭辞"
 }
 
@@ -225,7 +225,7 @@ $script:fieldTextBoxes = @{}
 $script:fieldRadios = @{}
 
 $enabledVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
-$folderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_DEST", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_SOURCE")
+$folderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_PATH", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_PATH")
 $fileBrowseVars = @("GENERATE_CONFIG_PATH")
 
 function Resolve-BrowseStart {
@@ -233,7 +233,7 @@ function Resolve-BrowseStart {
     if (!$RawValue) {
         return $basePath
     }
-    $expanded = $RawValue.Replace("%BASE_DIR%", "$basePath\")
+    $expanded = $RawValue.Replace("%BASE_PATH%", "$basePath\")
     $expanded = [regex]::Replace($expanded, '%(\w+)%', {
         param($match)
         $refVal = Get-ResolvedVar $match.Groups[1].Value
@@ -431,7 +431,7 @@ function Get-ResolvedVar {
         return $val
     }
 
-    $val = $val.Replace("%BASE_DIR%", "$basePath\")
+    $val = $val.Replace("%BASE_PATH%", "$basePath\")
     $val = [regex]::Replace($val, '%(\w+)%', {
         param($match)
         $refVal = Get-ResolvedVar $match.Groups[1].Value
@@ -483,13 +483,13 @@ function Get-LogPrefixForStage {
 
 function Update-LogView {
     $stage = if ($radioDownloadLog.Checked) { "download" } elseif ($radioGenerateLog.Checked) { "generate" } else { "upload" }
-    $logFolder = Get-ResolvedVar "COMMON_LOG_PATH"
+    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
     $prefix = Get-LogPrefixForStage $stage
 
     $logContentBox.Text = ""
 
-    if ($logFolder -and $prefix -and (Test-Path -LiteralPath $logFolder)) {
-        $file = Get-ChildItem -LiteralPath $logFolder -Filter "$prefix*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($logPath -and $prefix -and (Test-Path -LiteralPath $logPath)) {
+        $file = Get-ChildItem -LiteralPath $logPath -Filter "$prefix*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if ($file) {
             $logContentBox.Text = [System.IO.File]::ReadAllText($file.FullName, $cp932)
         }

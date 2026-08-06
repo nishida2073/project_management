@@ -9,18 +9,18 @@ $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
 
 $siteUrl = $env:DOWNLOAD_SITE_URL
-$folder = $env:DOWNLOAD_SITE_FOLDER
+$sitePath = $env:DOWNLOAD_SITE_PATH
 $tenantId = $env:DOWNLOAD_SITE_TENANT_ID
 
-if (!$siteUrl -or !$folder -or !$tenantId) {
-    Write-Host "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_FOLDER と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください"
+if (!$siteUrl -or !$sitePath -or !$tenantId) {
+    Write-Host "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_PATH と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください"
     exit 1
 }
 
-$sourceBase = $env:GENERATE_SOURCE_BASE
-$localDest = if ([System.IO.Path]::IsPathRooted($env:DOWNLOAD_LOCAL_DEST)) { $env:DOWNLOAD_LOCAL_DEST } else { Join-Path $sourceBase $env:DOWNLOAD_LOCAL_DEST }
-$logBasePath = $env:COMMON_LOG_PATH
-New-Item -ItemType Directory -Path $logBasePath -Force | Out-Null
+$sourcePath = $env:GENERATE_SOURCE_PATH
+$localPath = if ([System.IO.Path]::IsPathRooted($env:DOWNLOAD_LOCAL_PATH)) { $env:DOWNLOAD_LOCAL_PATH } else { Join-Path $sourcePath $env:DOWNLOAD_LOCAL_PATH }
+$logPath = $env:COMMON_LOG_PATH
+New-Item -ItemType Directory -Path $logPath -Force | Out-Null
 
 $downloadLog = @()
 
@@ -32,7 +32,7 @@ $headers = @{ Authorization = "Bearer $token" }
 $siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $siteUrl
 
 # --- フォルダパスの解決（先頭のドキュメントライブラリ名を除いた残りが既定のdriveのroot以下のパスになる） ---
-$folderParts = $folder -split '/'
+$folderParts = $sitePath -split '/'
 $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
 $encodedRelativeFolder = Get-EncodedSitePath $relativeFolder
 
@@ -71,19 +71,19 @@ function Get-GraphChildrenRecursive {
 }
 
 Write-Host ""
-Write-Host "取得開始：$folder -> $localDest"
-Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localDest -RelativePath $folder
+Write-Host "取得開始：$sitePath -> $localPath"
+Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localPath -RelativePath $sitePath
 
-$logPath = Join-Path $logBasePath "$($env:DOWNLOAD_LOG_PREFIX)$(Split-Path $localDest -Leaf).log"
+$logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Split-Path $localPath -Leaf).log"
 $logLines = @()
 $logLines += "# 取得結果"
 $logLines += $downloadLog
 $logLines += ""
 $logLines += "# フォルダ構成"
-$logLines += (Split-Path $localDest -Leaf)
-$logLines += (Get-TreeLines -Path $localDest)
-$logLines | Out-File -FilePath $logPath -Encoding Default
+$logLines += (Split-Path $localPath -Leaf)
+$logLines += (Get-TreeLines -Path $localPath)
+$logLines | Out-File -FilePath $logFilePath -Encoding Default
 
 Write-Host ""
-Write-Host "取得完了：$localDest"
-Write-Host "$logPath 作成完了"
+Write-Host "取得完了：$localPath"
+Write-Host "$logFilePath 作成完了"

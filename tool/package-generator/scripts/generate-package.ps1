@@ -7,9 +7,9 @@ $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $configPath = $env:GENERATE_CONFIG_PATH
 $workPath = $env:GENERATE_WORK_PATH
 $outputPath = $env:GENERATE_OUTPUT_PATH
-$logBasePath = $env:COMMON_LOG_PATH
+$logPath = $env:COMMON_LOG_PATH
 
-if (!$configPath -or !$workPath -or !$outputPath -or !$logBasePath) {
+if (!$configPath -or !$workPath -or !$outputPath -or !$logPath) {
     Write-Host "GENERATE_CONFIG_PATH と GENERATE_WORK_PATH と GENERATE_OUTPUT_PATH と COMMON_LOG_PATH を set-env.bat で設定してください"
     exit 1
 }
@@ -18,7 +18,7 @@ if (!$configPath -or !$workPath -or !$outputPath -or !$logBasePath) {
 Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
 New-Item $workPath -ItemType Directory | Out-Null
 New-Item $outputPath -ItemType Directory -Force | Out-Null
-New-Item $logBasePath -ItemType Directory -Force | Out-Null
+New-Item $logPath -ItemType Directory -Force | Out-Null
 
 # Excelモジュール確認
 if (!(Get-Module -ListAvailable ImportExcel)) {
@@ -64,8 +64,8 @@ foreach ($sheet in $sheetNames) {
             continue
         }
 
-        if ($env:GENERATE_SOURCE_BASE -and !([System.IO.Path]::IsPathRooted($source))) {
-            $source = Join-Path $env:GENERATE_SOURCE_BASE $source
+        if ($env:GENERATE_SOURCE_PATH -and !([System.IO.Path]::IsPathRooted($source))) {
+            $source = Join-Path $env:GENERATE_SOURCE_PATH $source
         }
 
         $source = [System.IO.Path]::GetFullPath($source)
@@ -143,7 +143,7 @@ foreach ($sheet in $sheetNames) {
         Write-Host "$zip 作成完了"
 
         # ログ出力（ZIP単位）
-        $logPath = Join-Path $logBasePath "$($env:GENERATE_LOG_PREFIX)$sheet.log"
+        $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$sheet.log"
         $logLines = @()
         $logLines += "# コピー結果"
         $logLines += $copyLog
@@ -151,8 +151,8 @@ foreach ($sheet in $sheetNames) {
         $logLines += "# フォルダ構成"
         $logLines += $sheet
         $logLines += (Get-TreeLines -Path $companyWork)
-        $logLines | Out-File -FilePath $logPath -Encoding Default
-        Write-Host "$logPath 作成完了"
+        $logLines | Out-File -FilePath $logFilePath -Encoding Default
+        Write-Host "$logFilePath 作成完了"
     } else {
         Write-Host "$sheet ：対象ファイルが無いためZIPを作成しませんでした"
     }

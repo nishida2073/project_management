@@ -7,22 +7,22 @@ $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
 
 $siteUrl = $env:UPLOAD_SITE_URL
-$folder = $env:UPLOAD_SITE_FOLDER
+$sitePath = $env:UPLOAD_SITE_PATH
 $tenantId = $env:UPLOAD_SITE_TENANT_ID
-$localSource = $env:UPLOAD_LOCAL_SOURCE
+$localPath = $env:UPLOAD_LOCAL_PATH
 
-if (!$siteUrl -or !$folder -or !$tenantId -or !$localSource) {
-    Write-Host "UPLOAD_SITE_URL と UPLOAD_SITE_FOLDER と UPLOAD_SITE_TENANT_ID と UPLOAD_LOCAL_SOURCE を set-env.bat で設定してください"
+if (!$siteUrl -or !$sitePath -or !$tenantId -or !$localPath) {
+    Write-Host "UPLOAD_SITE_URL と UPLOAD_SITE_PATH と UPLOAD_SITE_TENANT_ID と UPLOAD_LOCAL_PATH を set-env.bat で設定してください"
     exit 1
 }
 
-if (!(Test-Path -LiteralPath $localSource)) {
-    Write-Host "アップロード元が存在しません：$localSource"
+if (!(Test-Path -LiteralPath $localPath)) {
+    Write-Host "アップロード元が存在しません：$localPath"
     exit 1
 }
 
-$logBasePath = $env:COMMON_LOG_PATH
-New-Item -ItemType Directory -Path $logBasePath -Force | Out-Null
+$logPath = $env:COMMON_LOG_PATH
+New-Item -ItemType Directory -Path $logPath -Force | Out-Null
 
 $uploadLog = @()
 
@@ -34,7 +34,7 @@ $headers = @{ Authorization = "Bearer $token" }
 $siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $siteUrl
 
 # --- アップロード先パスの解決（先頭のドキュメントライブラリ名を除いた残りが既定のdriveのroot以下のパスになる） ---
-$folderParts = $folder -split '/'
+$folderParts = $sitePath -split '/'
 $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
 
 # --- 空ファイル（0バイト）は範囲指定が不正になるため、アップロードセッションを使わず直接PUTする ---
@@ -140,28 +140,28 @@ function Send-FolderRecursive {
         if ($_.PSIsContainer) {
             Send-FolderRecursive -LocalFolder $_.FullName -SubPath $childSubPath
         } else {
-            $sitePath = if ($relativeFolder) { "$relativeFolder/$childSubPath" } else { $childSubPath }
-            Send-FileToSharePoint -LocalFile $_.FullName -SiteRelativePath $sitePath
+            $fileSitePath = if ($relativeFolder) { "$relativeFolder/$childSubPath" } else { $childSubPath }
+            Send-FileToSharePoint -LocalFile $_.FullName -SiteRelativePath $fileSitePath
             Write-Host "アップロード：$($_.Name)"
-            $script:uploadLog += "$($_.FullName) -> $folder/$childSubPath"
+            $script:uploadLog += "$($_.FullName) -> $sitePath/$childSubPath"
         }
     }
 }
 
 Write-Host ""
-Write-Host "アップロード開始：$localSource -> $folder"
-Send-FolderRecursive -LocalFolder $localSource -SubPath ""
+Write-Host "アップロード開始：$localPath -> $sitePath"
+Send-FolderRecursive -LocalFolder $localPath -SubPath ""
 
-$logPath = Join-Path $logBasePath "$($env:UPLOAD_LOG_PREFIX)$(Split-Path $localSource -Leaf).log"
+$logFilePath = Join-Path $logPath "$($env:UPLOAD_LOG_PREFIX)$(Split-Path $localPath -Leaf).log"
 $logLines = @()
 $logLines += "# アップロード結果"
 $logLines += $uploadLog
 $logLines += ""
 $logLines += "# フォルダ構成"
-$logLines += (Split-Path $localSource -Leaf)
-$logLines += (Get-TreeLines -Path $localSource)
-$logLines | Out-File -FilePath $logPath -Encoding Default
+$logLines += (Split-Path $localPath -Leaf)
+$logLines += (Get-TreeLines -Path $localPath)
+$logLines | Out-File -FilePath $logFilePath -Encoding Default
 
 Write-Host ""
-Write-Host "アップロード完了：$folder"
-Write-Host "$logPath 作成完了"
+Write-Host "アップロード完了：$sitePath"
+Write-Host "$logFilePath 作成完了"
