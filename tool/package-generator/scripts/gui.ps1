@@ -7,6 +7,9 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+[System.Windows.Forms.Application]::EnableVisualStyles()
+[System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
+
 if ($MyInvocation.MyCommand.Path) {
     # .ps1として実行された場合（scripts配下）
     $scriptDir = Split-Path $MyInvocation.MyCommand.Path
@@ -65,7 +68,7 @@ $chkUpload.Location = New-Object System.Drawing.Point(20, 66)
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "実行"
 $btnRun.Location = New-Object System.Drawing.Point(20, 100)
-$btnRun.Size = New-Object System.Drawing.Size(100, 32)
+$btnRun.Size = New-Object System.Drawing.Size(100, 24)
 
 $lblStatus = New-Object System.Windows.Forms.Label
 $lblStatus.Text = ""
@@ -163,12 +166,12 @@ $topPanel.Height = 40
 $btnSave = New-Object System.Windows.Forms.Button
 $btnSave.Text = "保存"
 $btnSave.Location = New-Object System.Drawing.Point(20, 14)
-$btnSave.Size = New-Object System.Drawing.Size(100, 28)
+$btnSave.Size = New-Object System.Drawing.Size(100, 24)
 
 $btnReload = New-Object System.Windows.Forms.Button
 $btnReload.Text = "再読込"
 $btnReload.Location = New-Object System.Drawing.Point(130, 14)
-$btnReload.Size = New-Object System.Drawing.Size(100, 28)
+$btnReload.Size = New-Object System.Drawing.Size(100, 24)
 
 $lblSaveStatus = New-Object System.Windows.Forms.Label
 $lblSaveStatus.Text = ""
