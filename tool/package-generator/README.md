@@ -110,6 +110,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
    1. パッケージ定義ファイル（`GENERATE_CONFIG_PATH`、既定は`download\package_definition.xlsx`）を読み込む
    2. シートごとにファイルをコピーしてZIP化する
    3. ZIPの出力先（`GENERATE_OUTPUT_PATH`）にZIP、ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
+   4. パッケージ定義ファイル自体もZIPの出力先（`GENERATE_OUTPUT_PATH`）にコピーする
 
 #### 環境変数
 
@@ -141,6 +142,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 |---|---|---|
 | `<シート名>.zip` | ZIPの出力先（`GENERATE_OUTPUT_PATH`） | コピーしたファイル一式をまとめたZIP |
 | `<シート名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（下記） |
+| パッケージ定義ファイルのコピー | ZIPの出力先（`GENERATE_OUTPUT_PATH`） | 実行時に使われた`GENERATE_CONFIG_PATH`のファイルそのもの |
 
 ##### ログの形式
 

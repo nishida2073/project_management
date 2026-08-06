@@ -158,5 +158,7 @@ foreach ($sheet in $sheetNames) {
     }
 }
 
+Copy-Item $configPath (Join-Path $outputPath (Split-Path $configPath -Leaf)) -Force
+
 Write-Host ""
 Write-Host "‘Sˆ—Š®—¹"
