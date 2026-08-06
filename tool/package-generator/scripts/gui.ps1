@@ -88,7 +88,7 @@ $txtLog.Dock = [System.Windows.Forms.DockStyle]::Fill
 $tabRun.Controls.Add($txtLog)
 $tabRun.Controls.Add($runTopPanel)
 
-function Append-Log {
+function Write-Log {
     param([string]$Text)
     $txtLog.AppendText("$Text`r`n")
 }
@@ -102,8 +102,8 @@ $btnRun.Add_Click({
     $lblStatus.ForeColor = [System.Drawing.Color]::Black
     $lblStatus.Text = "実行中..."
     if ($txtLog.Text.Length -gt 0) {
-        Append-Log ""
-        Append-Log "------------------------------------------------"
+        Write-Log ""
+        Write-Log "------------------------------------------------"
     }
 
     $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
@@ -125,11 +125,11 @@ $btnRun.Add_Click({
     $proc.Start() | Out-Null
 
     while (!$proc.StandardOutput.EndOfStream) {
-        Append-Log $proc.StandardOutput.ReadLine()
+        Write-Log $proc.StandardOutput.ReadLine()
         [System.Windows.Forms.Application]::DoEvents()
     }
     while (!$proc.StandardError.EndOfStream) {
-        Append-Log $proc.StandardError.ReadLine()
+        Write-Log $proc.StandardError.ReadLine()
         [System.Windows.Forms.Application]::DoEvents()
     }
 
@@ -242,7 +242,7 @@ function Resolve-BrowseStart {
     return $expanded
 }
 
-function Load-SettingsFields {
+function Update-SettingsFields {
     $fieldPanel.Controls.Clear()
     $script:fieldTextBoxes = @{}
     $script:fieldRadios = @{}
@@ -371,10 +371,10 @@ function Load-SettingsFields {
     }
 }
 
-Load-SettingsFields
+Update-SettingsFields
 
 $btnReload.Add_Click({
-    Load-SettingsFields
+    Update-SettingsFields
     $lblSaveStatus.ForeColor = [System.Drawing.Color]::Black
     $lblSaveStatus.Text = "再読込しました"
 })
@@ -481,7 +481,7 @@ function Get-LogPrefixForStage {
     }
 }
 
-function Refresh-LogView {
+function Update-LogView {
     $stage = if ($radioDownloadLog.Checked) { "download" } elseif ($radioGenerateLog.Checked) { "generate" } else { "upload" }
     $logFolder = Get-ResolvedVar "COMMON_LOG_PATH"
     $prefix = Get-LogPrefixForStage $stage
@@ -496,9 +496,9 @@ function Refresh-LogView {
     }
 }
 
-$radioDownloadLog.Add_CheckedChanged({ if ($radioDownloadLog.Checked) { Refresh-LogView } })
-$radioGenerateLog.Add_CheckedChanged({ if ($radioGenerateLog.Checked) { Refresh-LogView } })
-$radioUploadLog.Add_CheckedChanged({ if ($radioUploadLog.Checked) { Refresh-LogView } })
+$radioDownloadLog.Add_CheckedChanged({ if ($radioDownloadLog.Checked) { Update-LogView } })
+$radioGenerateLog.Add_CheckedChanged({ if ($radioGenerateLog.Checked) { Update-LogView } })
+$radioUploadLog.Add_CheckedChanged({ if ($radioUploadLog.Checked) { Update-LogView } })
 
 function Sync-RunCheckboxes {
     $chkDownload.Checked = (Get-ResolvedVar "DOWNLOAD_ENABLED") -eq "1"
@@ -510,12 +510,12 @@ $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
         Sync-RunCheckboxes
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Refresh-LogView
+        Update-LogView
     }
 })
 
 Sync-RunCheckboxes
-Refresh-LogView
+Update-LogView
 $tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)
