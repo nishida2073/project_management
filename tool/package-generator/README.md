@@ -64,7 +64,7 @@
 | `DOWNLOAD_SITE_PATH` | サイト内のダウンロード元フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/原本`）が設定済み |
 | `DOWNLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | テスト用テナントIDが設定済み |
 | `DOWNLOAD_LOCAL_PATH` | ダウンロード先のローカルフォルダ（フルパス、または`GENERATE_SOURCE_PATH`からの相対パス） | `download` フォルダ |
-| `DOWNLOAD_LOG_PREFIX` | ログファイル名（`<ダウンロード元のフォルダ>.log`）の先頭に付けるプレフィックス | `ダウンロード_` |
+| `DOWNLOAD_LOG_PREFIX` | ログファイル名（`<ダウンロード元のフォルダ名>.log`）の先頭に付けるプレフィックス | `ダウンロード_` |
 
 `DOWNLOAD_LOCAL_PATH`を省略するか、相対パス（例：`download`）で指定すると、`GENERATE_SOURCE_PATH`配下に置かれるので、そのままExcelの「取得元（フルパス）」列から相対パスで参照できる。ドライブ文字や`\`から始まるフルパス（`\\`から始まるUNCパスも含む）を指定した場合はそのまま使われる。
 
@@ -75,7 +75,7 @@
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | ダウンロードしたファイル一式 | ダウンロード先（`DOWNLOAD_LOCAL_PATH`） | SharePointからダウンロードしたファイル・フォルダ |
-| `<ダウンロード先フォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `<ダウンロード元のフォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
 
 #### 必要なもの
 
@@ -166,7 +166,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | `UPLOAD_SITE_PATH` | サイト内のアップロード先フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/納品`）が設定済み |
 | `UPLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | `DOWNLOAD_SITE_TENANT_ID`と同じ |
 | `UPLOAD_LOCAL_PATH` | アップロード元のローカルフォルダ（フルパス） | `GENERATE_OUTPUT_PATH`と同じ（パッケージ作成の出力先） |
-| `UPLOAD_LOG_PREFIX` | ログファイル名（`<アップロード先のフォルダ>.log`）の先頭に付けるプレフィックス | `アップロード_` |
+| `UPLOAD_LOG_PREFIX` | ログファイル名（`<アップロード先のフォルダ名>.log`）の先頭に付けるプレフィックス | `アップロード_` |
 
 同名ファイルが既にサイト側にある場合は上書きされる。
 
@@ -175,7 +175,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | アップロードしたファイル一式 | アップロード先（`UPLOAD_SITE_PATH`、SharePoint側） | ローカルからアップロードしたファイル・フォルダ |
-| `<アップロード元フォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `<アップロード先のフォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
 
 #### 必要なもの
 
