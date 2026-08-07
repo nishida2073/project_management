@@ -44,6 +44,17 @@ $tabSettings.Text = "設定"
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
+$script:isRunning = $false
+# $tabControl.Enabled = $falseで丸ごと無効化すると、子コントロールである$txtLog
+# （ログ欄）も操作不能になり、サインインURL/コードの選択・コピーができなくなる
+# （WinFormsは親が無効だと子も無効になる）。タブの切り替えだけをSelectingで
+# キャンセルすることで、ログ欄の選択・コピーは実行中も可能なままにする。
+$tabControl.Add_Selecting({
+    if ($script:isRunning -and $_.TabPage -ne $tabRun) {
+        $_.Cancel = $true
+    }
+})
+
 # ----- 実行タブ -----
 
 $runTopPanel = New-Object System.Windows.Forms.Panel
@@ -78,12 +89,14 @@ $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawin
 
 $runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $btnRun, $lblStatus))
 
-$txtLog = New-Object System.Windows.Forms.TextBox
+$txtLog = New-Object System.Windows.Forms.RichTextBox
 $txtLog.Multiline = $true
-$txtLog.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
+$txtLog.ScrollBars = [System.Windows.Forms.RichTextBoxScrollBars]::Vertical
 $txtLog.ReadOnly = $true
 $txtLog.Font = New-Object System.Drawing.Font("Consolas", 9)
 $txtLog.Dock = [System.Windows.Forms.DockStyle]::Fill
+$txtLog.DetectUrls = $true
+$txtLog.Add_LinkClicked({ [System.Diagnostics.Process]::Start($_.LinkText) })
 
 $tabRun.Controls.Add($txtLog)
 $tabRun.Controls.Add($runTopPanel)
@@ -94,7 +107,7 @@ function Write-Log {
 }
 
 $btnRun.Add_Click({
-    $tabControl.Enabled = $false
+    $script:isRunning = $true
     $chkDownload.Enabled = $false
     $chkGenerate.Enabled = $false
     $chkUpload.Enabled = $false
@@ -112,29 +125,56 @@ $btnRun.Add_Click({
     $env:UPLOAD_ENABLED = if ($chkUpload.Checked) { "1" } else { "0" }
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = $allBat
+    $psi.FileName = "cmd.exe"
+    # all.batの標準エラー出力（az loginのサインインコードなど）を標準出力に合流させてから読む。
+    # 標準出力と標準エラー出力を別々に（順番に）読むと、片方が完了を待って止まっている間は
+    # もう片方の内容が画面に表示されず、フリーズしたように見えるため。
+    $psi.Arguments = "/c ""`"$allBat`" 2>&1"""
     $psi.WorkingDirectory = $basePath
     $psi.UseShellExecute = $false
     $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
     $psi.CreateNoWindow = $true
     $psi.StandardOutputEncoding = $cp932
-    $psi.StandardErrorEncoding = $cp932
 
     $proc = New-Object System.Diagnostics.Process
     $proc.StartInfo = $psi
+
+    # ReadLine()で直接読むと「次の1行が来るまでブロック」してしまい、az loginの
+    # サインイン待ちのように次の行がしばらく来ない場合にDoEvents()が呼ばれず、
+    # 画面が固まって選択・コピーもできなくなる。OutputDataReceivedで非同期に受け取り、
+    # ここではキューから取り出すだけにしてブロッキング呼び出しを避ける。
+    $outputQueue = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
+    $outputAction = {
+        if ($null -ne $EventArgs.Data) {
+            $Event.MessageData.Enqueue($EventArgs.Data)
+        }
+    }
+    $outputEvent = Register-ObjectEvent -InputObject $proc -EventName OutputDataReceived -Action $outputAction -MessageData $outputQueue
+
     $proc.Start() | Out-Null
+    $proc.BeginOutputReadLine()
 
-    while (!$proc.StandardOutput.EndOfStream) {
-        Write-Log $proc.StandardOutput.ReadLine()
+    while (!$proc.HasExited) {
+        $line = $null
+        while ($outputQueue.TryDequeue([ref]$line)) {
+            Write-Log $line
+        }
         [System.Windows.Forms.Application]::DoEvents()
-    }
-    while (!$proc.StandardError.EndOfStream) {
-        Write-Log $proc.StandardError.ReadLine()
-        [System.Windows.Forms.Application]::DoEvents()
+        Start-Sleep -Milliseconds 50
     }
 
+    # プロセス終了直後は、OutputDataReceivedの最後のイベントがまだキューに
+    # 届いていないことがある（HasExitedが先にtrueになる競合状態）ため、
+    # WaitForExit()で完全な終了と非同期イベントの完了を待ってからもう一度drainする。
     $proc.WaitForExit()
+    Start-Sleep -Milliseconds 200
+    $line = $null
+    while ($outputQueue.TryDequeue([ref]$line)) {
+        Write-Log $line
+    }
+
+    Unregister-Event -SourceIdentifier $outputEvent.Name
+    Remove-Job -Name $outputEvent.Name -Force
 
     if ($proc.ExitCode -eq 0) {
         $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
@@ -148,7 +188,7 @@ $btnRun.Add_Click({
     $chkGenerate.Enabled = $true
     $chkUpload.Enabled = $true
     $btnRun.Enabled = $true
-    $tabControl.Enabled = $true
+    $script:isRunning = $false
 })
 
 # ----- 設定タブ（set-env.batの編集） -----

@@ -52,12 +52,22 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     selected (`$tabControl.Add_SelectedIndexChanged`), so edits made on the
     設定 tab are reflected without restarting the app. Don't go back to
     hardcoding `.Checked = $true/$false` on the checkbox objects. Clicking
-    実行 disables `$tabControl` itself (not just the checkboxes/button) for
-    the duration of the run — this blocks tab-switching too, since a
-    disabled `TabControl` also refuses header clicks, not just its child
-    controls (explicit user request: no navigating away mid-run). Re-enable
-    it in the same place the checkboxes/button get re-enabled after
-    `$proc.WaitForExit()`. Sets `$env:DOWNLOAD_ENABLED` / `GENERATE_ENABLED` /
+    実行 blocks tab-switching for the duration of the run (explicit user
+    request: no navigating away mid-run), but **not** via
+    `$tabControl.Enabled = $false` — that was the original approach and it
+    broke device-code sign-in: WinForms cascades a disabled parent down to
+    all descendants regardless of their own `.Enabled` value, so disabling
+    `$tabControl` also disabled `$txtLog` (the log textbox, a descendant of
+    the 実行 tab), making the just-printed sign-in URL/code unselectable and
+    uncopyable right when the user needed to copy it into a browser. Fixed
+    by leaving `$tabControl` itself always enabled and instead cancelling
+    navigation via its `Selecting` event: a script-scoped `$script:isRunning`
+    flag is set `$true` at the top of `Add_Click` / `$false` at the end, and
+    `$tabControl.Add_Selecting({ if ($script:isRunning -and $_.TabPage -ne $tabRun) { $_.Cancel = $true } })`
+    (registered once, right after the tab pages are added) blocks switching
+    to ログ/設定 while running without touching any control's `Enabled`
+    state — `$txtLog` stays selectable/copyable throughout. Sets
+    `$env:DOWNLOAD_ENABLED` / `GENERATE_ENABLED` /
     `UPLOAD_ENABLED` from the checkboxes, then launches `all.bat` as a
     redirected child process and streams its stdout/stderr into the textbox
     (`Write-Host` output from the underlying `.ps1`s is captured fine this
@@ -297,6 +307,61 @@ with `Content-Range`); genuinely 0-byte files must instead `PUT` directly to
 go through `[System.Net.HttpWebRequest]` with `KeepAlive=$false` and a retry
 loop, not `Invoke-WebRequest` — the latter intermittently drops the connection
 on this endpoint.
+
+**Device-code sign-in and the GUI can deadlock/hang if you read child-process
+stdout and stderr sequentially.** `az login --use-device-code`'s own "open the
+page ... and enter the code ..." prompt goes to *stderr*, not stdout. Two
+places in this codebase read a child process's output and both must merge
+stderr into stdout (via a `cmd.exe /c "... 2>&1"` wrapper) rather than reading
+the two streams with separate loops — reading stdout to completion before
+ever touching stderr means a message on stderr (like the sign-in prompt)
+never surfaces while the child is still blocked waiting on it, which reads as
+a frozen GUI showing only "サインインが必要です..." with no code:
+- `scripts/gui.ps1`'s `$btnRun.Add_Click` (launches `all.bat`) — `$psi.FileName`
+  is `cmd.exe` with `Arguments = "/c ""` + a quoted path + `" 2>&1"""` (the
+  doubled outer quotes are required cmd.exe syntax when the command being
+  redirected is itself a quoted, space-containing path), and only
+  `StandardOutput` is read/redirected — no separate `StandardError` loop.
+- `Get-GraphToken` in `scripts/common.ps1` — rather than piping `az login`'s
+  output to `Out-Null` and hoping the device-code prompt appears somewhere on
+  its own, it launches `az login` the same `cmd.exe /c "... 2>&1"` way,
+  reads the merged stream line-by-line, and regex-matches
+  `open the page (?<url>\S+)\s+and enter the code (?<code>[A-Z0-9\-]+)`
+  (the stable MSAL/Azure CLI device-flow message wording) to print a
+  clean `URL: ...` / `コード：...` pair instead of relying on whatever raw
+  text Azure CLI happens to emit. Verified the regex against the real MSAL
+  message text and the cmd.exe merge mechanics against a synthetic
+  space-containing-path batch file; could not verify the live network round
+  trip in this sandbox (its `az login` processes hung indefinitely with no
+  response, apparently no route to Azure AD's device-code endpoint here) —
+  confirmed working against a real signed-out Azure CLI on the user's actual
+  machine instead.
+
+**Merging stderr into stdout fixes the missing-message problem but not by
+itself a frozen/uncopyable GUI.** Once the sign-in URL/code actually appeared
+in `gui.ps1`'s log textbox, the user could still not select or copy it — the
+window looked frozen. Root cause: `$btnRun.Add_Click` read output via
+`while (!$proc.StandardOutput.EndOfStream) { Write-Log $proc.StandardOutput.ReadLine(); ... DoEvents() }`
+— `ReadLine()` blocks until the *next* line arrives, and while the user is
+off in a browser completing device-code sign-in, no next line arrives for a
+long time, so `DoEvents()` simply never gets called and the WinForms message
+pump stalls (already-rendered text becomes unselectable, the whole window
+stops responding) even though the text was written before the block. Fixed
+by switching to `Process.OutputDataReceived` (`$proc.BeginOutputReadLine()`)
+feeding a `[System.Collections.Concurrent.ConcurrentQueue[string]]` via
+`Register-ObjectEvent -Action {...} -MessageData $outputQueue` (the `-Action`
+scriptblock runs off-thread when the event fires; the queue is the safe way
+to hand data back without needing `Invoke()`), with the main loop merely
+polling `TryDequeue` + `DoEvents()` + a short `Start-Sleep` — never calling a
+blocking read itself. Verified via a synthetic batch file that pauses for
+several seconds mid-run: the polling loop kept iterating (~50ms cadence)
+throughout the pause instead of stalling. One more gotcha found through that
+same test: `$proc.HasExited` can flip `true` slightly before the *last*
+`OutputDataReceived` event for a just-exited process has been delivered, so
+exiting the loop on `HasExited` alone drops the final line — fixed by calling
+`$proc.WaitForExit()` (which per its documented contract also waits out any
+in-flight redirected-stream events) followed by one more queue drain before
+unregistering the event.
 
 ## No test/lint suite
 

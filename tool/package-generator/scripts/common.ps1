@@ -62,7 +62,33 @@ function Get-GraphToken {
     $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     if ($LASTEXITCODE -ne 0 -or !$out) {
         Write-Host "サインインが必要です。表示されるURLとコードでログインしてください。"
-        & $Az login --tenant $TenantId --scope "https://graph.microsoft.com/.default" --use-device-code --allow-no-subscriptions | Out-Null
+        Write-Host ""
+
+        # az loginの標準エラー出力に出るデバイスコードの案内文からURLとコードだけを
+        # 抜き出して整形表示する（標準出力・標準エラー出力をcmd側で合流させてから読む）
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "cmd.exe"
+        $psi.Arguments = "/c ""`"$Az`" login --tenant $TenantId --scope https://graph.microsoft.com/.default --use-device-code --allow-no-subscriptions 2>&1"""
+        $psi.UseShellExecute = $false
+        $psi.RedirectStandardOutput = $true
+        $psi.CreateNoWindow = $true
+
+        $loginProc = New-Object System.Diagnostics.Process
+        $loginProc.StartInfo = $psi
+        $loginProc.Start() | Out-Null
+
+        $shown = $false
+        while (!$loginProc.StandardOutput.EndOfStream) {
+            $line = $loginProc.StandardOutput.ReadLine()
+            if (!$shown -and $line -match "open the page (?<url>\S+)\s+and enter the code (?<code>[A-Z0-9\-]+)") {
+                Write-Host "URL: $($Matches.url)"
+                Write-Host "コード：$($Matches.code)"
+                Write-Host ""
+                $shown = $true
+            }
+        }
+        $loginProc.WaitForExit()
+
         $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     }
     if (!$out) {
