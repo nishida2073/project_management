@@ -280,18 +280,23 @@ $enabledVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
 $folderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_PATH", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_PATH")
 $fileBrowseVars = @("GENERATE_CONFIG_PATH")
 
-function Resolve-BrowseStart {
-    param([string]$RawValue)
-    if (!$RawValue) {
-        return $basePath
-    }
-    $expanded = $RawValue.Replace("%BASE_PATH%", "$basePath\")
+function Expand-VarTokens {
+    param([string]$Value)
+    $expanded = $Value.Replace("%BASE_PATH%", "$basePath\")
     $expanded = [regex]::Replace($expanded, '%(\w+)%', {
         param($match)
         $refVal = Get-ResolvedVar $match.Groups[1].Value
         if ($refVal) { $refVal } else { $match.Value }
     })
     return $expanded
+}
+
+function Resolve-BrowseStart {
+    param([string]$RawValue)
+    if (!$RawValue) {
+        return $basePath
+    }
+    return Expand-VarTokens $RawValue
 }
 
 function Update-SettingsFields {
@@ -483,13 +488,7 @@ function Get-ResolvedVar {
         return $val
     }
 
-    $val = $val.Replace("%BASE_PATH%", "$basePath\")
-    $val = [regex]::Replace($val, '%(\w+)%', {
-        param($match)
-        $refVal = Get-ResolvedVar $match.Groups[1].Value
-        if ($refVal) { $refVal } else { $match.Value }
-    })
-    return $val
+    return Expand-VarTokens $val
 }
 
 $logStagePanel = New-Object System.Windows.Forms.Panel
