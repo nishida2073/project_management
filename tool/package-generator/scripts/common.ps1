@@ -6,6 +6,18 @@
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
+$cp932 = [System.Text.Encoding]::GetEncoding(932)
+
+# コンソールのアクティブコードページがShift-JISと異なる環境でも、日本語を含む
+# 新規パスへの書き込みが失敗しないよう、Out-Fileではなく直接ファイルに書き込む
+function Write-LogFile {
+    param(
+        [string]$Path,
+        [string[]]$Lines
+    )
+    [System.IO.File]::WriteAllLines($Path, $Lines, $cp932)
+}
+
 function Get-TreeLines {
     param(
         [string]$Path,

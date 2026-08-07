@@ -2,6 +2,11 @@
 
 cd /d %~dp0
 
+set "BATCH_NAME=%~nx0"
+echo ========================================
+echo %BATCH_NAME% äJénÅF%date% %time%
+echo ========================================
+
 call set-env.bat
 
 powershell.exe ^

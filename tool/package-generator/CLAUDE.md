@@ -75,12 +75,22 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     tab's `$lineRegex`/`Read-SetEnvLines`) — then expands `%BASE_PATH%`
     (hardcoded to `$basePath`) and recursively expands any other `%VAR%`
     token found in the value (e.g. `UPLOAD_SITE_URL=%DOWNLOAD_SITE_URL%`).
-    Selecting a stage's radio button finds the newest file in
+    Selecting a stage's radio button finds every file in
     `Get-ResolvedVar COMMON_LOG_PATH` matching `"$(Get-ResolvedVar
-    "<STAGE>_LOG_PREFIX")*.log"` and loads it — stage 2 (individual package
-    creation) writes one log per Excel sheet, so only the most recently
-    modified sheet's log is shown, not all of them. Re-scans whenever that
-    radio changes or the ログ tab is selected, so it reflects the latest run
+    "<STAGE>_LOG_PREFIX")*.log"` and concatenates their raw contents
+    (newest-first, no added header — each `generate-package.ps1` log
+    already embeds its own sheet name via its own `# フォルダ構成` section,
+    so a synthetic per-file header in the viewer would be redundant, and
+    for download/upload it'd just show the meaningless local-folder-name
+    part of the filename) — no stage-specific branch; download/upload just
+    happen to normally have only one matching file per run, so this looks
+    like "show the one log" for them, while stage 2 (individual package
+    creation, one log per Excel sheet) shows every sheet's log at once
+    without needing a separate file picker. Per-sheet separation *during a
+    run* instead comes from `generate-package.ps1`'s own
+    `Write-Host "作成開始　$sheet"` / `"作成完了　$zip"` lines, which
+    surface as-is in the 実行 tab's live-streamed log. Re-scans whenever that radio
+    changes or the ログ tab is selected, so it reflects the latest run
     without needing an explicit refresh button.
   - **設定 (Settings)**: a generic editor for `set-env.bat`. It parses every
     `if not defined VAR set "VAR=value"` line via the regex

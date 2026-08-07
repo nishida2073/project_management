@@ -42,12 +42,12 @@ if ($env:GENERATE_SHEETS_EXCLUDE) {
     $sheetNames = $sheetNames | Where-Object { $excludeList -notcontains $_ }
 }
 
+Write-Host "作成開始"
 foreach ($sheet in $sheetNames) {
 
     Write-Host ""
-    Write-Host "===================="
-    Write-Host "$sheet 作成開始"
-    Write-Host "===================="
+    $sheetStartTime = Get-Date
+    Write-Host "$sheet"
 
     $companyWork = Join-Path $workPath $sheet
     New-Item $companyWork -ItemType Directory -Force | Out-Null
@@ -140,25 +140,30 @@ foreach ($sheet in $sheetNames) {
     $zipItems = Get-ChildItem -LiteralPath $companyWork
     if ($zipItems) {
         Compress-Archive -LiteralPath $zipItems.FullName -DestinationPath $zip
-        Write-Host "$zip 作成完了"
-
+        Write-Host "$zip"
         # ログ出力（ZIP単位）
+        $sheetEndTime = Get-Date
         $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$sheet.log"
         $logLines = @()
+        $logLines += "# 実行情報"
+        $logLines += "バッチ名: $($env:BATCH_NAME)"
+        $logLines += "シート名: $($sheet)"
+        $logLines += "開始時刻: $($sheetStartTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+        $logLines += "終了時刻: $($sheetEndTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+        $logLines += ""
         $logLines += "# コピー結果"
         $logLines += $copyLog
         $logLines += ""
         $logLines += "# フォルダ構成"
         $logLines += $sheet
         $logLines += (Get-TreeLines -Path $companyWork)
-        $logLines | Out-File -FilePath $logFilePath -Encoding Default
-        Write-Host "$logFilePath 作成完了"
+        Write-LogFile -Path $logFilePath -Lines $logLines
     } else {
-        Write-Host "$sheet ：対象ファイルが無いためZIPを作成しませんでした"
+        Write-Host "$sheet：対象ファイルが無いためZIPを作成しませんでした"
     }
 }
 
 Copy-Item $configPath (Join-Path $outputPath (Split-Path $configPath -Leaf)) -Force
 
 Write-Host ""
-Write-Host "全処理完了"
+Write-Host "作成完了"

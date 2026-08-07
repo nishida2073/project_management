@@ -5,6 +5,7 @@
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
+$startTime = Get-Date
 
 $siteUrl = $env:UPLOAD_SITE_URL
 $sitePath = $env:UPLOAD_SITE_PATH
@@ -142,26 +143,32 @@ function Send-FolderRecursive {
         } else {
             $fileSitePath = if ($relativeFolder) { "$relativeFolder/$childSubPath" } else { $childSubPath }
             Send-FileToSharePoint -LocalFile $_.FullName -SiteRelativePath $fileSitePath
-            Write-Host "アップロード：$($_.Name)"
+            Write-Host "$($_.Name)"
             $script:uploadLog += "$($_.FullName) -> $sitePath/$childSubPath"
         }
     }
 }
 
 Write-Host ""
-Write-Host "アップロード開始：$localPath -> $sitePath"
+Write-Host "アップロード開始"
+Write-Host "$localPath -> $sitePath"
 Send-FolderRecursive -LocalFolder $localPath -SubPath ""
 
+$endTime = Get-Date
 $logFilePath = Join-Path $logPath "$($env:UPLOAD_LOG_PREFIX)$(Split-Path $localPath -Leaf).log"
 $logLines = @()
+$logLines += "# 実行情報"
+$logLines += "バッチ名: $($env:BATCH_NAME)"
+$logLines += "開始時刻: $($startTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+$logLines += "終了時刻: $($endTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+$logLines += ""
 $logLines += "# アップロード結果"
 $logLines += $uploadLog
 $logLines += ""
 $logLines += "# フォルダ構成"
 $logLines += (Split-Path $localPath -Leaf)
 $logLines += (Get-TreeLines -Path $localPath)
-$logLines | Out-File -FilePath $logFilePath -Encoding Default
+Write-LogFile -Path $logFilePath -Lines $logLines
 
 Write-Host ""
-Write-Host "アップロード完了：$sitePath"
-Write-Host "$logFilePath 作成完了"
+Write-Host "アップロード完了"

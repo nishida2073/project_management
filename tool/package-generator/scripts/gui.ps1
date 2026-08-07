@@ -104,6 +104,7 @@ $btnRun.Add_Click({
     if ($txtLog.Text.Length -gt 0) {
         Write-Log ""
         Write-Log "------------------------------------------------"
+        Write-Log ""
     }
 
     $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
@@ -488,12 +489,14 @@ function Update-LogView {
 
     $logContentBox.Text = ""
 
-    if ($logPath -and $prefix -and (Test-Path -LiteralPath $logPath)) {
-        $file = Get-ChildItem -LiteralPath $logPath -Filter "$prefix*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-        if ($file) {
-            $logContentBox.Text = [System.IO.File]::ReadAllText($file.FullName, $cp932)
-        }
+    if (!($logPath -and $prefix -and (Test-Path -LiteralPath $logPath))) {
+        return
     }
+
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+
+    $sections = foreach ($file in $files) { [System.IO.File]::ReadAllText($file.FullName, $cp932) }
+    $logContentBox.Text = $sections -join "`r`n`r`n"
 }
 
 $radioDownloadLog.Add_CheckedChanged({ if ($radioDownloadLog.Checked) { Update-LogView } })

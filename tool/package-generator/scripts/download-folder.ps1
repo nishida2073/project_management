@@ -7,6 +7,7 @@
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
+$startTime = Get-Date
 
 $siteUrl = $env:DOWNLOAD_SITE_URL
 $sitePath = $env:DOWNLOAD_SITE_PATH
@@ -60,7 +61,7 @@ function Get-GraphChildrenRecursive {
             if ($item.file) {
                 $dest = Join-Path $LocalFolder $item.Name
                 Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
-                Write-Host "取得：$($item.Name)"
+                Write-Host "$($item.Name)"
                 $script:downloadLog += "$RelativePath/$($item.Name) -> $dest"
             } elseif ($item.folder) {
                 Get-GraphChildrenRecursive -ItemId $item.id -LocalFolder (Join-Path $LocalFolder $item.Name) -RelativePath "$RelativePath/$($item.Name)"
@@ -71,19 +72,25 @@ function Get-GraphChildrenRecursive {
 }
 
 Write-Host ""
-Write-Host "取得開始：$sitePath -> $localPath"
+Write-Host "ダウンロード開始"
+Write-Host "$sitePath -> $localPath"
 Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localPath -RelativePath $sitePath
 
+$endTime = Get-Date
 $logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Split-Path $localPath -Leaf).log"
 $logLines = @()
-$logLines += "# 取得結果"
+$logLines += "# 実行情報"
+$logLines += "バッチ名: $($env:BATCH_NAME)"
+$logLines += "開始時刻: $($startTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+$logLines += "終了時刻: $($endTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+$logLines += ""
+$logLines += "# ダウンロード結果"
 $logLines += $downloadLog
 $logLines += ""
 $logLines += "# フォルダ構成"
 $logLines += (Split-Path $localPath -Leaf)
 $logLines += (Get-TreeLines -Path $localPath)
-$logLines | Out-File -FilePath $logFilePath -Encoding Default
+Write-LogFile -Path $logFilePath -Lines $logLines
 
 Write-Host ""
-Write-Host "取得完了：$localPath"
-Write-Host "$logFilePath 作成完了"
+Write-Host "ダウンロード完了"
