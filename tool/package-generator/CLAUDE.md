@@ -166,7 +166,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     special field types above.
 
   `build-gui.bat` / `scripts/build-gui.ps1` compile `gui.ps1` into
-  `個社別ZIP生成ツール.exe` at the project root via the `ps2exe` PowerShell
+  `コース別パッケージ生成ツール.exe` at the project root via the `ps2exe` PowerShell
   module (auto-installed on first run, same pattern as `ImportExcel`). The
   `.exe` itself is gitignored (`*.exe`) — it's a build artifact, rebuild it
   with `build-gui.bat` whenever `gui.ps1` changes.

@@ -1,5 +1,5 @@
 ﻿# =========================================
-# GUI（個社別ZIP生成ツール）
+# GUI（コース別パッケージ生成ツール）
 # =========================================
 # all.batを画面から実行するためのGUI。「実行」タブでダウンロード/パッケージ作成/
 # アップロードの有効・無効を切り替えて実行し、「設定」タブでset-env.batの値を編集する。
@@ -24,7 +24,7 @@ $setEnvBat = Join-Path $basePath "set-env.bat"
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "個社別ZIP生成ツール"
+$form.Text = "コース別パッケージ生成ツール"
 $form.Size = New-Object System.Drawing.Size(700, 560)
 $form.StartPosition = "CenterScreen"
 $form.MinimumSize = New-Object System.Drawing.Size(520, 360)
@@ -210,7 +210,7 @@ $varLabels = @{
     "GENERATE_SOURCE_PATH" = "圧縮元のフォルダ"
     "GENERATE_CONFIG_PATH" = "パッケージ定義ファイル"
     "GENERATE_WORK_PATH" = "作業用のフォルダ"
-    "GENERATE_OUTPUT_PATH" = "成果物の出力先"
+    "GENERATE_OUTPUT_PATH" = "パッケージの出力先"
     "GENERATE_SHEETS_INCLUDE" = "対象のシート名"
     "GENERATE_SHEETS_EXCLUDE" = "除外のシート名"
     "GENERATE_LOG_PREFIX" = "ログファイル名の接頭辞"
