@@ -75,7 +75,7 @@ Write-Host "$sitePath -> $localPath"
 Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localPath -RelativePath $sitePath
 
 $endTime = Get-Date
-$logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Split-Path $localPath -Leaf).log"
+$logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Split-Path $sitePath -Leaf).log"
 $logLines = @()
 $logLines += "# 実行情報"
 $logLines += "バッチ名: $($env:BATCH_NAME)"

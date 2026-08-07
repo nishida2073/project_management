@@ -154,7 +154,7 @@ Write-Host "$localPath -> $sitePath"
 Send-FolderRecursive -LocalFolder $localPath -SubPath ""
 
 $endTime = Get-Date
-$logFilePath = Join-Path $logPath "$($env:UPLOAD_LOG_PREFIX)$(Split-Path $localPath -Leaf).log"
+$logFilePath = Join-Path $logPath "$($env:UPLOAD_LOG_PREFIX)$(Split-Path $relativeFolder -Leaf).log"
 $logLines = @()
 $logLines += "# 実行情報"
 $logLines += "バッチ名: $($env:BATCH_NAME)"
