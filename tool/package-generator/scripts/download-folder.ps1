@@ -18,8 +18,7 @@ if (!$siteUrl -or !$sitePath -or !$tenantId) {
     exit 1
 }
 
-$sourcePath = $env:GENERATE_SOURCE_PATH
-$localPath = if ([System.IO.Path]::IsPathRooted($env:DOWNLOAD_LOCAL_PATH)) { $env:DOWNLOAD_LOCAL_PATH } else { Join-Path $sourcePath $env:DOWNLOAD_LOCAL_PATH }
+$localPath = $env:DOWNLOAD_LOCAL_PATH
 $logPath = $env:COMMON_LOG_PATH
 New-Item -ItemType Directory -Path $logPath -Force | Out-Null
 

@@ -108,7 +108,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
-| `GENERATE_SOURCE_PATH` | 生成元の基準フォルダ | `DOWNLOAD_LOCAL_PATH`と同じ（ダウンロードしたフォルダ） |
+| `GENERATE_SOURCE_PATH` | 圧縮元のフォルダ | `DOWNLOAD_LOCAL_PATH`と同じ（ダウンロードしたフォルダ） |
 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `download\package_definition.xlsx`（`DOWNLOAD_LOCAL_PATH`配下） |
 | `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ（実行時に毎回削除→再作成される） | `work` フォルダ |
 | `GENERATE_OUTPUT_PATH` | 成果物の出力先フォルダ | `generated` フォルダ |
@@ -224,22 +224,22 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 |---|---|---|
 | 共通 | `COMMON_LOG_PATH` | ログの出力先 |
 | ダウンロード | `DOWNLOAD_ENABLED` | 機能の有効化 |
-| ダウンロード | `DOWNLOAD_SITE_URL` | ダウンロード元サイトURL |
-| ダウンロード | `DOWNLOAD_SITE_PATH` | ダウンロード元フォルダ |
+| ダウンロード | `DOWNLOAD_SITE_URL` | ダウンロード元のサイトURL |
+| ダウンロード | `DOWNLOAD_SITE_PATH` | ダウンロード元のフォルダ |
 | ダウンロード | `DOWNLOAD_SITE_TENANT_ID` | テナントID |
-| ダウンロード | `DOWNLOAD_LOCAL_PATH` | ダウンロード先フォルダ |
+| ダウンロード | `DOWNLOAD_LOCAL_PATH` | ダウンロード先のフォルダ |
 | ダウンロード | `DOWNLOAD_LOG_PREFIX` | ログファイル名の接頭辞 |
 | パッケージ作成 | `GENERATE_ENABLED` | 機能の有効化 |
-| パッケージ作成 | `GENERATE_SOURCE_PATH` | 生成元の基準フォルダ |
+| パッケージ作成 | `GENERATE_SOURCE_PATH` | 圧縮元のフォルダ |
 | パッケージ作成 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル |
-| パッケージ作成 | `GENERATE_WORK_PATH` | 作業用フォルダ |
+| パッケージ作成 | `GENERATE_SHEETS_INCLUDE` | 対象のシート名 |
+| パッケージ作成 | `GENERATE_SHEETS_EXCLUDE` | 除外のシート名 |
+| パッケージ作成 | `GENERATE_WORK_PATH` | 作業用のフォルダ |
 | パッケージ作成 | `GENERATE_OUTPUT_PATH` | 成果物の出力先 |
-| パッケージ作成 | `GENERATE_SHEETS_INCLUDE` | 対象シート名 |
-| パッケージ作成 | `GENERATE_SHEETS_EXCLUDE` | 除外シート名 |
 | パッケージ作成 | `GENERATE_LOG_PREFIX` | ログファイル名の接頭辞 |
 | アップロード | `UPLOAD_ENABLED` | 機能の有効化 |
-| アップロード | `UPLOAD_SITE_URL` | アップロード先サイトURL |
-| アップロード | `UPLOAD_SITE_PATH` | アップロード先フォルダ |
+| アップロード | `UPLOAD_SITE_URL` | アップロード先のサイトURL |
+| アップロード | `UPLOAD_SITE_PATH` | アップロード先のフォルダ |
 | アップロード | `UPLOAD_SITE_TENANT_ID` | テナントID |
-| アップロード | `UPLOAD_LOCAL_PATH` | アップロード元フォルダ |
+| アップロード | `UPLOAD_LOCAL_PATH` | アップロード元のフォルダ |
 | アップロード | `UPLOAD_LOG_PREFIX` | ログファイル名の接頭辞 |
