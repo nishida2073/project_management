@@ -42,7 +42,7 @@ if ($env:GENERATE_SHEETS_EXCLUDE) {
     $sheetNames = $sheetNames | Where-Object { $excludeList -notcontains $_ }
 }
 
-Write-Host "作成開始"
+Write-Host "# ZIP作成開始"
 foreach ($sheet in $sheetNames) {
 
     Write-Host ""
@@ -166,4 +166,4 @@ foreach ($sheet in $sheetNames) {
 Copy-Item $configPath (Join-Path $outputPath (Split-Path $configPath -Leaf)) -Force
 
 Write-Host ""
-Write-Host "作成完了"
+Write-Host "# ZIP作成完了"

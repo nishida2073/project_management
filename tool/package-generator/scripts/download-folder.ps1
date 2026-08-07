@@ -71,8 +71,7 @@ function Get-GraphChildrenRecursive {
     }
 }
 
-Write-Host ""
-Write-Host "ダウンロード開始"
+Write-Host "# ダウンロード開始"
 Write-Host "$sitePath -> $localPath"
 Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localPath -RelativePath $sitePath
 
@@ -93,4 +92,4 @@ $logLines += (Get-TreeLines -Path $localPath)
 Write-LogFile -Path $logFilePath -Lines $logLines
 
 Write-Host ""
-Write-Host "ダウンロード完了"
+Write-Host "# ダウンロード完了"

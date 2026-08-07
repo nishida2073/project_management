@@ -149,8 +149,7 @@ function Send-FolderRecursive {
     }
 }
 
-Write-Host ""
-Write-Host "アップロード開始"
+Write-Host "# アップロード開始"
 Write-Host "$localPath -> $sitePath"
 Send-FolderRecursive -LocalFolder $localPath -SubPath ""
 
@@ -171,4 +170,4 @@ $logLines += (Get-TreeLines -Path $localPath)
 Write-LogFile -Path $logFilePath -Lines $logLines
 
 Write-Host ""
-Write-Host "アップロード完了"
+Write-Host "# アップロード完了"

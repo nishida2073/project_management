@@ -103,7 +103,7 @@ $btnRun.Add_Click({
     $lblStatus.Text = "実行中..."
     if ($txtLog.Text.Length -gt 0) {
         Write-Log ""
-        Write-Log "------------------------------------------------"
+        Write-Log "-------------------- 新しい実行 --------------------"
         Write-Log ""
     }
 

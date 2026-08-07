@@ -62,8 +62,12 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     redirected child process and streams its stdout/stderr into the textbox
     (`Write-Host` output from the underlying `.ps1`s is captured fine this
     way — confirmed empirically). The log is *appended to*, not cleared,
-    across runs (a `====================` divider is inserted between runs)
-    — don't reintroduce a `$txtLog.Clear()` here, that was an explicit user
+    across runs (a `---------------- 新しい実行 ----------------` divider is
+    inserted between runs — a plain dashed rule read as ambiguous once the
+    per-batch `==================================================` headers
+    were added below it, so it carries a label; the `-` vs `=` distinguishes
+    "new GUI-triggered run" from "a batch within that run" at a glance) —
+    don't reintroduce a `$txtLog.Clear()` here, that was an explicit user
     request to preserve run history.
   - **ログ (Log)**: radio buttons for the 3 stages + a single read-only
     viewer (no file picker — deliberately simplified per explicit user
