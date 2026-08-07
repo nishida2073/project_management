@@ -29,6 +29,15 @@ $form.Size = New-Object System.Drawing.Size(700, 560)
 $form.StartPosition = "CenterScreen"
 $form.MinimumSize = New-Object System.Drawing.Size(520, 360)
 
+# 画面を閉じたときにall.bat以下（az loginなど）の子プロセスが残らないよう、
+# ツリーごと終了させる。taskkill /Tで子プロセスの子プロセスまで再帰的に終了できる。
+$script:currentProc = $null
+$form.Add_FormClosing({
+    if ($script:currentProc -and !$script:currentProc.HasExited) {
+        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
+    }
+})
+
 $tabControl = New-Object System.Windows.Forms.TabControl
 $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 
@@ -152,6 +161,7 @@ $btnRun.Add_Click({
     $outputEvent = Register-ObjectEvent -InputObject $proc -EventName OutputDataReceived -Action $outputAction -MessageData $outputQueue
 
     $proc.Start() | Out-Null
+    $script:currentProc = $proc
     $proc.BeginOutputReadLine()
 
     while (!$proc.HasExited) {
@@ -189,6 +199,7 @@ $btnRun.Add_Click({
     $chkUpload.Enabled = $true
     $btnRun.Enabled = $true
     $script:isRunning = $false
+    $script:currentProc = $null
 })
 
 # ----- 設定タブ（set-env.batの編集） -----
