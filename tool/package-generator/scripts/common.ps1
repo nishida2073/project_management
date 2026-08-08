@@ -7,6 +7,7 @@
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
+$defaultClientLabel = "デフォルト"
 
 function Write-LogFile {
     param(
@@ -20,14 +21,14 @@ function Get-ClientLogSegment {
     if ($env:CLIENT_NAME) {
         return "$($env:CLIENT_NAME)_"
     }
-    return "デフォルト_"
+    return "${defaultClientLabel}_"
 }
 
 function Get-ClientLogHeaderLines {
     if ($env:CLIENT_NAME) {
         return @("クライアント: $($env:CLIENT_NAME)")
     }
-    return @("クライアント: デフォルト")
+    return @("クライアント: $defaultClientLabel")
 }
 
 function Get-TreeLines {

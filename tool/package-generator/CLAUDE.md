@@ -393,10 +393,47 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     redundant-with-default lines. "新規作成..." (`$btnNewClient`) prompts for
     a name via `[Microsoft.VisualBasic.Interaction]::InputBox` (needs
     `Add-Type -AssemblyName Microsoft.VisualBasic`; loaded lazily in the
-    click handler, not at script startup, since nothing else needs it),
-    refuses to overwrite an existing client file (`MessageBox` warning), and
-    creates an *empty* file — `Get-SettingsFieldSource` then naturally shows
-    every field as inherited-from-default until the user edits and saves.
+    click handler, not at script startup, since nothing else needs it) and
+    refuses to overwrite an existing client file (`MessageBox` warning). It
+    deliberately does **not** touch disk at all — no client `.bat` is
+    created until the user actually clicks 保存. An earlier version wrote an
+    empty file (later, briefly, a file pre-populated with the three initial
+    values below) immediately on click; both were rejected because a file
+    already existed on disk before any explicit save, which reads as
+    "新規作成だけでファイルが作成されてしまう" (confirmed by user report) and, for the
+    pre-populated version, left a window where the on-disk content (just
+    three vars) didn't match what 保存 would eventually write (every
+    `$clientOverridableVars` entry) — a "中途半端" intermediate state.
+    Instead, the handler adds the new name directly to
+    `$cmbSettingsClient.Items` (bypassing `Update-ClientComboItems`'s
+    filesystem scan entirely) and selects it, which fires the existing
+    `SelectedIndexChanged` handler and renders fields the normal way —
+    `Get-SettingsFieldSource` → `Get-ClientProfileRawValues` finds no file on
+    disk and returns an empty map, so every field falls back to
+    `Get-SetEnvDefaults`, exactly as if an empty client file existed. Three
+    fields then get a friendlier starting value than the bare default,
+    written directly into `$script:fieldTextBoxes[...].Text` (UI only,
+    nothing round-tripped through a file) — each derived from
+    `Get-SetEnvDefaults`'s *raw* value for that var plus the new client name,
+    matching the "クライアント名以外は set-env.bat の値から取得" requirement:
+    - `GENERATE_CONFIG_PATH`: default's trailing `.xlsx` becomes
+      `_<name>.xlsx` (e.g. `...\package_definition.xlsx` →
+      `...\package_definition_<name>.xlsx`)
+    - `GENERATE_OUTPUT_PATH`: default with `/<name>` appended
+      (`%BASE_PATH%generated` → `%BASE_PATH%generated/<name>`)
+    - `UPLOAD_SITE_PATH`: default with `/<name>` appended — confirmed with
+      the user that this means appending to the literal current default
+      (`.../納品2`) rather than a hand-typed `.../納品` some other tool or doc
+      might use, i.e. whatever set-env.bat's `UPLOAD_SITE_PATH` default
+      says today is always the base, "2" included or not
+    A file only comes into existence when `$btnSave.Add_Click` calls
+    `Save-ClientProfile`, which was already unconditional-`WriteAllText` and
+    needed no change — it works identically whether or not the target file
+    previously existed. The trade-off: if the user leaves the 設定 tab (or
+    otherwise triggers `Update-SettingsClientList`'s filesystem rescan)
+    before saving, the pending name — never having been on disk — silently
+    drops out of `$cmbSettingsClient`'s item list on the next rebuild. This
+    is intentional under "unsaved = doesn't exist," not a bug to fix.
   - **ログ (Log) — client filter**: a `$cmbLogClient` dropdown (label
     `$lblLogClient`, text "クライアント:", positioned above the stage radio
     buttons, same layout convention as the 実行 tab's `$lblClient`/`$cmbClient`
@@ -420,13 +457,28 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     case in the shared `$tabControl` handler calls both `Update-LogClientList`
     and `Update-LogView`). A sibling helper, `Get-ClientLogHeaderLines` (also
     `scripts\common.ps1`), returns `@("クライアント: <名前>")` when
-    `$env:CLIENT_NAME` is set, or `@("クライアント: デフォルト")` otherwise —
-    mirroring `Get-ClientLogSegment`'s own `$env:CLIENT_NAME` check
-    (`"$($env:CLIENT_NAME)_"` or `"デフォルト_"`) so the log *content* and the
-    log *filename* always agree on which client (or デフォルト) actually ran,
-    even though the two live in separate functions (one returns a display
-    line, the other a filename fragment) rather than sharing a single
-    implementation.
+    `$env:CLIENT_NAME` is set, or `@("クライアント: $defaultClientLabel")`
+    otherwise — mirroring `Get-ClientLogSegment`'s own `$env:CLIENT_NAME`
+    check (`"$($env:CLIENT_NAME)_"` or `"${defaultClientLabel}_"`) so the log
+    *content* and the log *filename* always agree on which client (or
+    デフォルト) actually ran, even though the two live in separate functions
+    (one returns a display line, the other a filename fragment). Both read
+    a `$defaultClientLabel = "デフォルト"` defined once near the top of
+    `scripts\common.ps1` (right after `$cp932`) — added after "デフォルト" was
+    found hardcoded independently in both functions (confirmed by user
+    report: the literal was scattered across the codebase with no single
+    source of truth). Note this is a **separate** constant from `gui.ps1`'s
+    own `$defaultClientLabel` (see above) — the two can't share one
+    PowerShell variable since `common.ps1` is dot-sourced into the
+    `download-folder.ps1`/`generate-package.ps1`/`upload-folder.ps1` child
+    processes `all.bat` launches, an entirely different PowerShell session
+    from the GUI's, and those scripts must also work when run standalone
+    without the GUI at all. Consolidation only happens *within* each file;
+    keep both literals in sync by hand if "デフォルト" ever needs to change.
+    Watch for `"$defaultClientLabel_"` here — PowerShell parses a trailing
+    underscore as part of the variable name, silently interpolating an
+    unset `$defaultClientLabel_` (empty string) instead of the intended
+    variable followed by a literal `_`; use `"${defaultClientLabel}_"`.
     Each of the three stage `.ps1` scripts splices its result into
     `$logLines` right after `"# 実行情報"` and before `バッチ名:`, without
     duplicating the `if ($env:CLIENT_NAME) {...}` check a third time.

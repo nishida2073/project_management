@@ -22,7 +22,7 @@ if not defined GENERATE_LOG_PREFIX set "GENERATE_LOG_PREFIX=パッケージ作成_"
 
 if not defined UPLOAD_ENABLED set "UPLOAD_ENABLED=0"
 if not defined UPLOAD_SITE_URL set "UPLOAD_SITE_URL=%DOWNLOAD_SITE_URL%"
-if not defined UPLOAD_SITE_PATH set "UPLOAD_SITE_PATH=Shared Documents/Fy27標準化Pj/テスト用/ツール/納品"
+if not defined UPLOAD_SITE_PATH set "UPLOAD_SITE_PATH=Shared Documents/Fy27標準化Pj/テスト用/ツール/納品2"
 if not defined UPLOAD_SITE_TENANT_ID set "UPLOAD_SITE_TENANT_ID=%DOWNLOAD_SITE_TENANT_ID%"
 if not defined UPLOAD_LOCAL_PATH set "UPLOAD_LOCAL_PATH=%GENERATE_OUTPUT_PATH%"
 if not defined UPLOAD_LOG_PREFIX set "UPLOAD_LOG_PREFIX=アップロード_"

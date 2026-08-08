@@ -33,7 +33,7 @@ function Get-ClientBatPath {
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "コース別パッケージ生成ツール"
-$form.Size = New-Object System.Drawing.Size(700, 560)
+$form.Size = New-Object System.Drawing.Size(760, 560)
 $form.StartPosition = "CenterScreen"
 $form.MinimumSize = New-Object System.Drawing.Size(520, 360)
 
@@ -189,11 +189,11 @@ $btnRun.Add_Click({
     $cmbClient.Enabled = $false
     $lblStatus.ForeColor = [System.Drawing.Color]::Black
     $lblStatus.Text = "実行中..."
-    if ($txtLog.Text.Length -gt 0) {
-        Write-Log ""
-        Write-Log "-------------------- 新しい実行 --------------------"
-        Write-Log ""
-    }
+    $selectedClient = $cmbClient.SelectedItem
+    $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
+    Write-Log ""
+    Write-Log "-------------------- $clientDisplayName --------------------"
+    Write-Log ""
 
     $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
     $env:GENERATE_ENABLED = if ($chkGenerate.Checked) { "1" } else { "0" }
@@ -204,11 +204,7 @@ $btnRun.Add_Click({
     }
     $script:lastClientVars = @()
 
-    $selectedClient = $cmbClient.SelectedItem
     if ($selectedClient -and $selectedClient -ne $defaultClientLabel) {
-        Write-Log "# クライアント"
-        Write-Log "$selectedClient"
-        Write-Log ""
         $clientValues = Get-ClientProfileValues $selectedClient
         $appliedVars = @()
         foreach ($varName in $clientValues.Keys) {
@@ -400,13 +396,24 @@ function Resolve-BrowseStart {
     return Expand-VarTokens $RawValue
 }
 
+function Get-NewClientInitialValues {
+    param([string]$ClientName, [hashtable]$Defaults)
+    return @{
+        "GENERATE_CONFIG_PATH" = $Defaults["GENERATE_CONFIG_PATH"] -replace '\.xlsx$', "_$ClientName.xlsx"
+        "GENERATE_OUTPUT_PATH" = "$($Defaults["GENERATE_OUTPUT_PATH"])/$ClientName"
+        "UPLOAD_SITE_PATH" = "$($Defaults["UPLOAD_SITE_PATH"])/$ClientName"
+    }
+}
+
 function Get-SettingsFieldSource {
     $client = $cmbSettingsClient.SelectedItem
     if ($client -and $client -ne $defaultClientLabel) {
         $clientRaw = Get-ClientProfileRawValues $client
         $defaults = Get-SetEnvDefaults
+        $isPendingNewClient = !(Test-Path -LiteralPath (Get-ClientBatPath $client))
+        $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $client $defaults } else { @{} }
         foreach ($varName in $clientOverridableVars) {
-            $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } else { $defaults[$varName] }
+            $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { $defaults[$varName] }
             [PSCustomObject]@{ VarName = $varName; VarValue = $varValue }
         }
     } else {
@@ -438,7 +445,7 @@ function Update-SettingsFields {
                 $separator = New-Object System.Windows.Forms.Panel
                 $separator.BackColor = [System.Drawing.Color]::LightGray
                 $separator.Location = New-Object System.Drawing.Point(10, $y)
-                $separator.Size = New-Object System.Drawing.Size(630, 2)
+                $separator.Size = New-Object System.Drawing.Size(690, 2)
                 $fieldPanel.Controls.Add($separator)
                 $y += 14
             }
@@ -482,6 +489,8 @@ function Update-SettingsFields {
             $fieldPanel.Controls.Add($radioGroupPanel)
             $script:fieldRadios[$varName] = $radioEnabled
         } elseif ($folderBrowseVars -contains $varName -or $fileBrowseVars -contains $varName) {
+            $isFileBrowse = $fileBrowseVars -contains $varName
+
             $txt = New-Object System.Windows.Forms.TextBox
             $txt.Text = $varValue
             $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
@@ -523,13 +532,32 @@ function Update-SettingsFields {
                 })
             }
 
-            $fieldPanel.Controls.AddRange(@($txt, $btnBrowse))
+            if ($isFileBrowse) {
+                $btnOpen = New-Object System.Windows.Forms.Button
+                $btnOpen.Text = "開く"
+                $btnOpen.Location = New-Object System.Drawing.Point(640, ($y - 3))
+                $btnOpen.Size = New-Object System.Drawing.Size(70, 24)
+                $btnOpen.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+                $btnOpen.Tag = $txt
+                $btnOpen.Add_Click({
+                    $targetTxt = $this.Tag
+                    $openPath = Resolve-BrowseStart $targetTxt.Text
+                    if (Test-Path -LiteralPath $openPath) {
+                        Start-Process -FilePath $openPath
+                    } else {
+                        [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません: $openPath", "エラー") | Out-Null
+                    }
+                })
+                $fieldPanel.Controls.AddRange(@($txt, $btnBrowse, $btnOpen))
+            } else {
+                $fieldPanel.Controls.AddRange(@($txt, $btnBrowse))
+            }
             $script:fieldTextBoxes[$varName] = $txt
         } else {
             $txt = New-Object System.Windows.Forms.TextBox
             $txt.Text = $varValue
             $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            $txt.Size = New-Object System.Drawing.Size(380, 22)
+            $txt.Size = New-Object System.Drawing.Size(440, 22)
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
 
             $fieldPanel.Controls.Add($txt)
@@ -615,13 +643,12 @@ $btnNewClient.Add_Click({
     }
 
     $newClientBat = Get-ClientBatPath $newName
-    if (Test-Path -LiteralPath $newClientBat) {
+    if ((Test-Path -LiteralPath $newClientBat) -or $cmbSettingsClient.Items.Contains($newName)) {
         [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "クライアントの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
 
-    [System.IO.File]::WriteAllText($newClientBat, "", $cp932)
-    Update-SettingsClientList
+    $cmbSettingsClient.Items.Add($newName) | Out-Null
     $cmbSettingsClient.SelectedItem = $newName
 })
 
