@@ -109,7 +109,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 |---|---|---|
 | `GENERATE_SOURCE_PATH` | 圧縮元のフォルダ | `DOWNLOAD_LOCAL_PATH`と同じ（ダウンロードしたフォルダ） |
 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `download\package_definition.xlsx`（`DOWNLOAD_LOCAL_PATH`配下） |
-| `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ（実行時に毎回削除→再作成される） | `work` フォルダ |
+| `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ | `work` フォルダ |
 | `GENERATE_OUTPUT_PATH` | パッケージの出力先フォルダ | `generated` フォルダ |
 | `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名（カンマ区切り、複数指定可）。設定時はここに書いたシートのみ処理する | 空（絞り込みなし＝全シート対象） |
 | `GENERATE_SHEETS_EXCLUDE` | 処理対象から除外するシート名（カンマ区切り、複数指定可） | 空（除外なし） |

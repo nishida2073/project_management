@@ -154,6 +154,8 @@ foreach ($sheet in $sheetNames) {
     }
 }
 
+Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
+
 Copy-Item $configPath (Join-Path $outputPath (Split-Path $configPath -Leaf)) -Force
 
 Write-Host ""
