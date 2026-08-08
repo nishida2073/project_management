@@ -8,14 +8,19 @@
 
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 
-# コンソールのアクティブコードページがShift-JISと異なる環境でも、日本語を含む
-# 新規パスへの書き込みが失敗しないよう、Out-Fileではなく直接ファイルに書き込む
 function Write-LogFile {
     param(
         [string]$Path,
         [string[]]$Lines
     )
     [System.IO.File]::WriteAllLines($Path, $Lines, $cp932)
+}
+
+function Get-ClientLogSegment {
+    if ($env:CLIENT_NAME) {
+        return "$($env:CLIENT_NAME)_"
+    }
+    return ""
 }
 
 function Get-TreeLines {
@@ -52,7 +57,6 @@ function Get-AzureCliPath {
     return $az
 }
 
-# --- Graph用トークン取得（未ログイン・期限切れなら device code でログイン） ---
 function Get-GraphToken {
     param(
         [string]$Az,
@@ -64,8 +68,6 @@ function Get-GraphToken {
         Write-Host "サインインが必要です。表示されるURLとコードでログインしてください。"
         Write-Host ""
 
-        # az loginの標準エラー出力に出るデバイスコードの案内文からURLとコードだけを
-        # 抜き出して整形表示する（標準出力・標準エラー出力をcmd側で合流させてから読む）
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "cmd.exe"
         $psi.Arguments = "/c ""`"$Az`" login --tenant $TenantId --scope https://graph.microsoft.com/.default --use-device-code --allow-no-subscriptions 2>&1"""

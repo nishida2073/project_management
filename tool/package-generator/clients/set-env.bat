@@ -1,6 +1,6 @@
 @echo off
 
-set "BASE_PATH=%~dp0"
+for %%I in ("%~dp0..") do set "BASE_PATH=%%~fI\"
 
 if not defined COMMON_LOG_PATH set "COMMON_LOG_PATH=%BASE_PATH%log"
 

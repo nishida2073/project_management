@@ -28,10 +28,8 @@ $az = Get-AzureCliPath
 $token = Get-GraphToken -Az $az -TenantId $tenantId
 $headers = @{ Authorization = "Bearer $token" }
 
-# --- サイトIDの解決 ---
 $siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $siteUrl
 
-# --- フォルダパスの解決（先頭のドキュメントライブラリ名を除いた残りが既定のdriveのroot以下のパスになる） ---
 $folderParts = $sitePath -split '/'
 $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
 $encodedRelativeFolder = Get-EncodedSitePath $relativeFolder
@@ -43,7 +41,6 @@ $startUri = if ($relativeFolder) {
 }
 $startItem = Invoke-GraphGet -Headers $headers -Uri $startUri
 
-# --- 再帰ダウンロード ---
 function Get-GraphChildrenRecursive {
     param(
         [string]$ItemId,
@@ -75,7 +72,7 @@ Write-Host "$sitePath -> $localPath"
 Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localPath -RelativePath $sitePath
 
 $endTime = Get-Date
-$logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Split-Path $sitePath -Leaf).log"
+$logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $sitePath -Leaf).log"
 $logLines = @()
 $logLines += "# 実行情報"
 $logLines += "バッチ名: $($env:BATCH_NAME)"

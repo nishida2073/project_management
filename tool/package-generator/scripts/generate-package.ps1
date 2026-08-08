@@ -14,19 +14,16 @@ if (!$configPath -or !$workPath -or !$outputPath -or !$logPath) {
     exit 1
 }
 
-# 初期化
 Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
 New-Item $workPath -ItemType Directory | Out-Null
 New-Item $outputPath -ItemType Directory -Force | Out-Null
 New-Item $logPath -ItemType Directory -Force | Out-Null
 
-# Excelモジュール確認
 if (!(Get-Module -ListAvailable ImportExcel)) {
     Write-Host "ImportExcelをインストールします"
     Install-Module ImportExcel -Scope CurrentUser -Force
 }
 
-# Excelシート取得
 $excel = Get-ExcelSheetInfo $configPath
 
 
@@ -75,7 +72,6 @@ foreach ($sheet in $sheetNames) {
             continue
         }
 
-        # 格納先
         $storeRoot = $companyWork
         if ($row.格納先) {
             $storeRoot = Join-Path $companyWork $row.格納先
@@ -84,14 +80,12 @@ foreach ($sheet in $sheetNames) {
 
         if (Test-Path -LiteralPath $source -PathType Container) {
 
-            # フォルダ処理
             $sourceTrimmed = $source.TrimEnd('\')
 
             Get-ChildItem $source -Recurse | ForEach-Object {
 
                 $relative = $_.FullName.Substring($sourceTrimmed.Length).TrimStart('\')
 
-                # 含める形式
                 if ($row.含める形式) {
                     $includePatterns = $row.含める形式.Split(",") | ForEach-Object { $_.Trim() }
                     $included = $false
@@ -106,7 +100,6 @@ foreach ($sheet in $sheetNames) {
                     }
                 }
 
-                # 除外する形式
                 if ($row.除外する形式) {
                     foreach ($exclude in $row.除外する形式.Split(",")) {
                         if ($relative -like $exclude.Trim()) {
@@ -125,7 +118,6 @@ foreach ($sheet in $sheetNames) {
 
         } else {
 
-            # ファイル処理
             $fileName = Split-Path $source -Leaf
             $destination = Join-Path $storeRoot $fileName
             Copy-Item $source $destination -Force
@@ -133,7 +125,6 @@ foreach ($sheet in $sheetNames) {
         }
     }
 
-    # ZIP作成
     $zip = Join-Path $outputPath "$sheet.zip"
     Remove-Item $zip -Force -ErrorAction SilentlyContinue
 
@@ -141,9 +132,8 @@ foreach ($sheet in $sheetNames) {
     if ($zipItems) {
         Compress-Archive -LiteralPath $zipItems.FullName -DestinationPath $zip
         Write-Host "$zip"
-        # ログ出力（ZIP単位）
         $sheetEndTime = Get-Date
-        $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$sheet.log"
+        $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheet.log"
         $logLines = @()
         $logLines += "# 実行情報"
         $logLines += "バッチ名: $($env:BATCH_NAME)"

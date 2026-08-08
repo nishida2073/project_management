@@ -15,7 +15,7 @@ per-client delivery ZIPs from files stored on Teams/SharePoint:
 3. **Upload** — push the generated ZIPs back to a (different) SharePoint folder.
 
 `all.bat` runs all three in order; each stage can be individually skipped via
-`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED` in `set-env.bat`.
+`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED` in `clients\set-env.bat`.
 
 **`README.md` (this folder) and `config/README.md` are the source of truth** for
 current behavior, env var names/defaults, and the Excel column format — this file
@@ -27,11 +27,22 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
 ## Directory layout
 
 - `*.bat` (root) — user-facing entry points: `all.bat`, `download-folder.bat`,
-  `generate-package.bat`, `upload-folder.bat`, `set-env.bat`. Kept flat in the
-  root by explicit user preference (not moved into a `bats/` subfolder).
+  `generate-package.bat`, `upload-folder.bat`. Kept flat in the
+  root by explicit user preference (not moved into a `bats/` subfolder). Each
+  does `cd /d %~dp0` then `call clients\set-env.bat` — note the `clients\`
+  prefix; `set-env.bat` itself lives one level down (see next bullet), unlike
+  these four which stay in the root.
 - `scripts/*.ps1` — the actual implementation, one per stage, plus `common.ps1`
   (dot-sourced shared helpers: Azure CLI/Graph auth, tree-view log formatting).
   Not meant to be run directly by the user.
+- `clients/` — `set-env.bat` (the real defaults file, moved here from the
+  project root — see `clients/README.md` for why and the resulting
+  `BASE_PATH` computation gotcha) plus one `set-env-<client name>.bat` per
+  client, each overriding a subset of the same variables. See the GUI's
+  設定/実行 tab notes below for how these are read/written/applied — this
+  mechanism is entirely GUI-side; the `.bat`/`.ps1` entry points have no
+  concept of "clients", they only ever see whatever's already in the
+  environment plus whatever `clients\set-env.bat` fills in.
 - `config/package_definition.xlsx` + `config/README.md` — the manifest driving
   stage 2, and the guide for how to fill it in.
 - `download/`, `work/`, `generated/`, `log/`, `test/` — runtime-generated folders
@@ -46,12 +57,47 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
   the symptom directly was more productive than chasing it further). Don't
   remove that explicit assignment.
   - **実行 (Run)**: checkboxes for the 3 stages + a Run button + a log
-    textbox. `Sync-RunCheckboxes` sets each checkbox from `Get-ResolvedVar`
-    (i.e. from the *current* `set-env.bat`/env state, not a hardcoded
-    default) — called once at startup and again whenever this tab is
-    selected (`$tabControl.Add_SelectedIndexChanged`), so edits made on the
-    設定 tab are reflected without restarting the app. Don't go back to
-    hardcoding `.Checked = $true/$false` on the checkbox objects. Clicking
+    textbox. `Update-RunCheckboxesFromClient` (via `Get-ClientAwareEnabledValue`,
+    which reads the selected client's `*_ENABLED` value or falls back to
+    `Get-ResolvedVar`, i.e. the *current* `set-env.bat`/env state, not a
+    hardcoded default) sets the checkboxes — called once at true startup and
+    again whenever the client dropdown's selection actually changes
+    (`$cmbClient.Add_SelectedIndexChanged`). **It is deliberately NOT called
+    just from revisiting this tab.** `Sync-RunCheckboxes` (called once at
+    startup and again whenever the 実行 tab is (re-)selected) only calls
+    `Update-ClientList` — it used to also call the checkbox-sync function on
+    every tab visit, but that silently discarded any manual checkbox edit the
+    moment the user switched to 設定/ログ and back, which reads as "the GUI
+    checkbox isn't being respected" (confirmed by user report). The set-env.bat/
+    client value is only ever a *starting point*; once the checkboxes are on
+    screen, only an explicit client-dropdown switch (or restarting the app)
+    reloads them from that starting point again — a manual checkbox edit
+    persists across tab switches, and whatever the checkboxes show at the
+    moment 実行 is clicked is what runs (matches the pre-existing
+    `$clientRuntimeExcludeVars` design principle: checkboxes are the runtime
+    authority — see the ログ/設定 note on `Get-ClientAwareEnabledValue` below
+    for the loading side of this). Don't go back to calling the checkbox-sync
+    function from `Sync-RunCheckboxes` or from the tab-selection handler.
+
+    A related trap: `Update-ClientComboItems` (shared by all three client
+    dropdowns) does `$ComboBox.Items.Clear()` then re-adds items and
+    re-applies `.SelectedIndex` — `Clear()` resets `SelectedIndex` to `-1`
+    first, so the subsequent re-assignment fires `SelectedIndexChanged` even
+    when the resolved selection is the *same* client as before. Left
+    unguarded, this means merely refreshing the client list (e.g. from
+    `Sync-RunCheckboxes` on every 実行-tab visit, or `Update-SettingsClientList`
+    on every 設定-tab visit) would spuriously re-trigger whatever's wired to
+    that dropdown's `SelectedIndexChanged` — silently resetting the run
+    checkboxes (this exact bug), and would similarly wipe out any *unsaved*
+    edits in the 設定 tab's field panel via a spurious `Update-SettingsFields`
+    re-render. Fixed with a script-scoped `$script:suppressComboSync` flag,
+    set `$true` for the duration of `Update-ClientComboItems`'s
+    Clear/re-add/re-select and checked (skip if `$true`) at the top of all
+    three dropdowns' `SelectedIndexChanged` handlers
+    (`$cmbClient`/`$cmbSettingsClient`/`$cmbLogClient`). A genuine user click
+    on a dropdown item never goes through `Update-ClientComboItems`, so the
+    flag is always `$false` when a real selection change happens — only the
+    programmatic refresh's spurious re-fire gets suppressed. Clicking
     実行 blocks tab-switching for the duration of the run (explicit user
     request: no navigating away mid-run), but **not** via
     `$tabControl.Enabled = $false` — that was the original approach and it
@@ -79,10 +125,118 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     "new GUI-triggered run" from "a batch within that run" at a glance) —
     don't reintroduce a `$txtLog.Clear()` here, that was an explicit user
     request to preserve run history.
+
+    **Client profile switching**: a `$cmbClient` dropdown (populated by
+    `Update-ClientList`, called from `Sync-RunCheckboxes` so the *list of
+    clients* refreshes whenever the 実行 tab is selected — not the checkboxes,
+    see above) lists every
+    `clients\set-env-*.bat` file with the `set-env-` prefix and `.bat`
+    extension stripped, plus a leading `$defaultClientLabel` ("デフォルト" —
+    shared across all three client dropdowns, see below). `Update-ClientList`
+    and the 設定 tab's `Update-SettingsClientList` are both thin wrappers around the
+    shared `Update-ClientComboItems -ComboBox ... -FirstItem ...` — don't
+    reintroduce a second copy of the scan/populate logic if a third dropdown
+    like this ever gets added. The `set-env-` prefix itself is never
+    hardcoded: `$clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)`
+    derives it from `$setEnvBat` (`clients\set-env.bat`), so renaming that
+    file would (mostly) carry through automatically — see `Get-ClientBatPath`,
+    the single place that builds a `clients\<prefix>-<name>.bat` path.
+
+    This is a deliberately lightweight, session-only override mechanism —
+    it does **not** touch `clients\set-env.bat`. Each
+    `clients\set-env-<name>.bat` holds plain unconditional `set "VAR=value"`
+    lines (see `clients/README.md` for the format), parsed by
+    `Get-ClientProfileValues` with its own regex
+    (`^set "(?<var>\S+?)=(?<val>.*)"$` — no `if not defined`/no backreference,
+    unlike `$lineRegex`, since these lines are meant to unconditionally win)
+    and each value run through the existing `Expand-VarTokens` (so
+    `%BASE_PATH%` etc. still work inside a client file). `$clientOverridableVars`
+    lists every variable a client file is allowed to override — everything
+    in `clients\set-env.bat` *except* the four log-related ones
+    (`COMMON_LOG_PATH`/`DOWNLOAD_LOG_PREFIX`/`GENERATE_LOG_PREFIX`/
+    `UPLOAD_LOG_PREFIX`) — kept as an explicit list, not a
+    name-pattern exclusion, per the same "extend the list, don't infer from
+    the name" preference as `$enabledVars`/`$folderBrowseVars`/`$fileBrowseVars`
+    above. That list includes the three `*_ENABLED` vars (so a client file
+    *can* record its own preferred enabled/disabled state and the 設定 tab
+    can edit it). `Get-ClientAwareEnabledValue`/`Update-RunCheckboxesFromClient`
+    (wired to `$cmbClient.Add_SelectedIndexChanged`, and also called once at
+    startup — see the 実行-tab note above for why it's *not* called from
+    `Sync-RunCheckboxes`) read the selected client's `*_ENABLED` value (via
+    `Get-ClientProfileValues`, falling back to `Get-ResolvedVar` when the
+    client doesn't override that var or `$defaultClientLabel` is selected)
+    and set the checkboxes to match *at the moment the dropdown selection
+    changes* — this is what actually makes a client's saved `*_ENABLED`
+    preference visible/useful, since previously it was write-only (editable
+    in 設定, never read anywhere). Despite that, `$clientRuntimeExcludeVars`
+    (just those three) is still consulted when *applying* a client on
+    `Add_Click` — the checkboxes are the actual authority over what runs for
+    *this* click, so a client's own `*_ENABLED` value is skipped there to
+    avoid silently overriding whatever the user just checked/unchecked by
+    hand *after* switching clients. In other words: switching clients loads
+    that client's `*_ENABLED` values into the checkboxes as a starting point,
+    but whatever the checkboxes actually show at the moment 実行 is clicked
+    is what wins — switching clients doesn't bypass manual checkbox edits.
+
+    **This exclusion on the GUI side is not sufficient by itself — the
+    `.bat` layer needs the equivalent protection too, and originally didn't
+    have it.** `$env:DOWNLOAD_ENABLED`/etc. set from the checkboxes are only
+    the *starting* environment for the child `all.bat` process; `all.bat`
+    (and, redundantly but harmlessly for everything except this, each of
+    `download-folder.bat`/`generate-package.bat`/`upload-folder.bat`) still
+    calls `clients\set-env.bat` (`if not defined`, harmless — checkbox values
+    survive) *and then* `clients\set-env-%CLIENT_NAME%.bat`, whose lines are
+    unconditional `set "VAR=value"` (that's the documented, intentional
+    format for client files — see `clients\README.md`). `Save-ClientProfile`
+    writes *every* `$clientOverridableVars` entry unconditionally, which
+    includes the three `*_ENABLED` vars (needed so `Get-ClientProfileValues`
+    can read them back for the checkbox-loading feature above) — so a
+    selected client's file, once `call`ed, unconditionally overwrote
+    `DOWNLOAD_ENABLED`/etc. right back to that client's own saved value,
+    clobbering whatever the checkboxes had just set. Symptom (confirmed by
+    user report): checkboxes were respected with デフォルト selected (no
+    client file gets `call`ed) but silently ignored with any other client
+    selected. Since `call` shares one environment block across the whole
+    chain, this wasn't a one-time clobber either — `all.bat`'s `call
+    download-folder.bat` re-triggers `download-folder.bat`'s own identical
+    `call clients\set-env-%CLIENT_NAME%.bat` line (CLIENT_NAME is inherited),
+    re-clobbering `GENERATE_ENABLED`/`UPLOAD_ENABLED` again before `all.bat`
+    even reaches its own `if "%GENERATE_ENABLED%"=="1"` check. Fixed
+    identically in all four entry points (`all.bat`, `download-folder.bat`,
+    `generate-package.bat`, `upload-folder.bat`): snapshot the three vars
+    into `SAVED_*` right after `call clients\set-env.bat` (this captures
+    whatever was already inherited — the GUI's checkbox value, or
+    `set-env.bat`'s own default for a bare command-line run with no GUI
+    involved) and restore them from `SAVED_*` immediately after the
+    `clients\set-env-%CLIENT_NAME%.bat` call — so the client file is still
+    free to unconditionally set those three vars (needed for the GUI's
+    checkbox-loading feature to keep working), but that write is always
+    overwritten back to whatever was already resolved before the client file
+    ran, at every one of the four entry points, not just `all.bat`. If a
+    future change moves where `CLIENT_NAME` becomes known relative to `call
+    clients\set-env.bat` in any of these files (`generate-package.bat`
+    resolves it later, inside its merged `:parse_args` loop, so its snapshot
+    point is right after `call clients\set-env.bat` at the top rather than
+    immediately before the client-file `call`), keep the snapshot anchored to
+    right after `call clients\set-env.bat` and the restore anchored to right
+    after the client-file `call`, not the other way around.
+    On `Add_Click`, before applying the
+    selected client's (non-excluded) values, every var name from
+    `$script:lastClientVars` (whatever the *previous* run's client actually
+    applied) is cleared via `[Environment]::SetEnvironmentVariable($varName, $null)`
+    — skipping this step means switching from one client to `$defaultClientLabel`
+    (or to a client that doesn't override the same vars) would silently leave the
+    previous client's values in the process environment, since
+    `[Environment]::SetEnvironmentVariable` at process scope persists for
+    the GUI's lifetime, not just one run. `$cmbClient` is disabled for the
+    duration of a run alongside the stage checkboxes (not via the
+    `$tabControl.Enabled` mistake above — same reasoning, but this control
+    lives in the always-enabled 実行 tab so it was never actually at risk;
+    disabled purely to prevent switching clients mid-run).
   - **ログ (Log)**: radio buttons for the 3 stages + a single read-only
     viewer (no file picker — deliberately simplified per explicit user
     request; don't reintroduce a `ListBox` here). `Get-ResolvedVar` resolves
-    a `set-env.bat` variable the same way `set-env.bat` itself would at
+    a `clients\set-env.bat` variable the same way that file itself would at
     runtime — env var override first
     (`[Environment]::GetEnvironmentVariable`), else the file's own
     `if not defined` default (via `Get-SetEnvDefaults`, reusing the 設定
@@ -106,7 +260,9 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     surface as-is in the 実行 tab's live-streamed log. Re-scans whenever that radio
     changes or the ログ tab is selected, so it reflects the latest run
     without needing an explicit refresh button.
-  - **設定 (Settings)**: a generic editor for `set-env.bat`. It parses every
+  - **設定 (Settings)**: a generic editor for `clients\set-env.bat` (and, via
+    the target dropdown described further down, for `clients\set-env-<name>.bat`
+    client files too). It parses every
     `if not defined VAR set "VAR=value"` line via the regex
     `^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$` (backreference
     ensures the two occurrences of the var name match) and renders one
@@ -119,7 +275,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     The raw variable name is preserved as a `ToolTip` on the label
     (`$settingsToolTip.SetToolTip($lbl, $varName)`) so it's still
     discoverable for cross-referencing with this file/README.md. When adding
-    a new variable to `set-env.bat`, also add an entry to `$varLabels` (and
+    a new variable to `clients\set-env.bat`, also add an entry to `$varLabels` (and
     `$groupLabels` if it introduces a new prefix) — don't leave it to fall
     back silently if a proper Japanese label is easy to write. The
     value-side control depends on the variable name, checked against three
@@ -167,13 +323,86 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     the first thing to check — verify with an in-process trace (see the
     verification gotcha below), not by eyeballing the compiled `.exe`.
 
-    On Save, matched lines' values are rewritten back into `set-env.bat`
-    byte-for-byte (verified via `Compare-Object` that untouched lines
-    round-trip identically — including ones containing `%OTHER_VAR%`
-    references, empty values, and backslashes). Adding a new variable to
-    `set-env.bat` makes it show up here automatically as a plain `TextBox`
-    field — no `gui.ps1` change needed unless it should be one of the
-    special field types above.
+    On Save, matched lines' values are rewritten back into
+    `clients\set-env.bat` byte-for-byte (verified via `Compare-Object` that
+    untouched lines round-trip identically — including ones containing
+    `%OTHER_VAR%` references, empty values, and backslashes). Adding a new
+    variable to `clients\set-env.bat` makes it show up here automatically as
+    a plain `TextBox` field — no `gui.ps1` change needed unless it should be
+    one of the special field types above (though see the next paragraph —
+    also add it to `$clientOverridableVars` unless it's log-related, or a
+    client target's field list will silently be missing it).
+
+    **Client profile editing** (added alongside the 実行 tab's `$cmbClient`
+    dropdown — see there for the runtime-override mechanism and for
+    `$clientFilePrefix`/`Get-ClientBatPath`, both defined once near the top
+    of the script and reused by everything below): a `$cmbSettingsClient`
+    dropdown at the top (label `$lblSettingsClient`, text "クライアント:" —
+    originally "対象:"/`$lblTarget`/`$cmbSettingsTarget`, renamed so the label
+    and variable names read the same across all three tabs' client dropdowns,
+    see `$defaultClientLabel` below), populated by `Update-SettingsClientList`
+    with `$defaultClientLabel` ("デフォルト" — a single shared constant defined
+    once near the top of the script and reused by the 実行/ログ/設定 tabs'
+    dropdowns, so the "no client selected" wording can't drift out of sync
+    between them again) plus every `clients\set-env-*.bat` filename
+    (prefix/extension stripped), sharing its scan/populate logic with the
+    実行 tab's dropdown via `Update-ClientComboItems -ComboBox ... -FirstItem
+    ...` (only the first item and target `ComboBox` differ — don't duplicate
+    the `Get-ChildItem`/`Sort-Object`/preserve-selection logic a third time
+    if another dropdown like this gets added later). Switching
+    `$cmbSettingsClient` (`Add_SelectedIndexChanged`) re-renders
+    `$fieldPanel` via the same `Update-SettingsFields`, which now delegates
+    the *which fields, in what order, with what starting value* decision to
+    `Get-SettingsFieldSource`: `$defaultClientLabel` selected → same as
+    before (every `clients\set-env.bat` line); a client selected → only
+    `$clientOverridableVars` — every variable *except* the four log-related
+    ones (see the 実行-tab note above for why that list is explicit, and why
+    it still includes the three `*_ENABLED` vars even though applying a
+    client at runtime skips them) — each value coming from that client's own
+    `set "VAR=value"` line (`Get-ClientProfileRawValues` — deliberately the
+    *raw*, un-`Expand-VarTokens`'d value, e.g. still `%DOWNLOAD_SITE_URL%`
+    rather than its resolved URL, so the editor shows/round-trips literal
+    template text the same way the default editor already does) if
+    present, else `Get-SetEnvDefaults`'s raw value for that var. The rest of
+    the per-field rendering body (group headers, `$varLabels`, the
+    `$enabledVars`/`$folderBrowseVars`/`$fileBrowseVars` dispatch) is
+    unchanged and shared regardless of which is selected — e.g. the three
+    `*_ENABLED` vars still render as the same 有効/無効 `RadioButton` pair, and
+    `GENERATE_CONFIG_PATH` still gets the file-browse button, when editing a
+    client. Save (`$btnSave.Add_Click`) branches the same way, into
+    `Save-DefaultSettings` (the original `clients\set-env.bat` rewrite,
+    unchanged) or `Save-ClientProfile` — the latter always writes *every*
+    `$clientOverridableVars` entry as an unconditional `set "VAR=value"`
+    line (even ones left equal to the inherited default), rather than only
+    the ones the user actually edited — simpler than tracking which fields
+    were touched, at the cost of the saved file containing some
+    redundant-with-default lines. "新規作成..." (`$btnNewClient`) prompts for
+    a name via `[Microsoft.VisualBasic.Interaction]::InputBox` (needs
+    `Add-Type -AssemblyName Microsoft.VisualBasic`; loaded lazily in the
+    click handler, not at script startup, since nothing else needs it),
+    refuses to overwrite an existing client file (`MessageBox` warning), and
+    creates an *empty* file — `Get-SettingsFieldSource` then naturally shows
+    every field as inherited-from-default until the user edits and saves.
+  - **ログ (Log) — client filter**: a `$cmbLogClient` dropdown (label
+    `$lblLogClient`, text "クライアント:", positioned above the stage radio
+    buttons, same layout convention as the 実行 tab's `$lblClient`/`$cmbClient`
+    row) populated by `Update-LogClientList` — another thin wrapper around
+    `Update-ClientComboItems`, but with `-FirstItem "すべて"` rather than
+    `$defaultClientLabel`. This is deliberately a different word/concept, not
+    an oversight: "デフォルト" would mean "only logs from runs where no client
+    was selected", whereas "すべて" means "logs from every run regardless of
+    client" (the pre-existing, no-filter behavior) — the two are not the same
+    filter, so don't "fix" this to `$defaultClientLabel` for consistency with
+    the other two tabs. `Update-LogView` reads `$cmbLogClient.SelectedItem`
+    and, unless it's "すべて", appends `"$logClient" + "_"` to the
+    `Get-ChildItem -Filter` pattern — matching the `<クライアント名>_` segment
+    `Get-ClientLogSegment` (`scripts\common.ps1`) inserts into log filenames
+    whenever a run was started with a client selected (`$env:CLIENT_NAME`
+    set, either via this GUI's client dropdown or the `.bat` entry points'
+    own `client=<name>` argument). Re-scans/re-renders on the same triggers
+    as the stage radios (`Add_SelectedIndexChanged`, and the ログ tab's
+    `SelectedIndexChanged` case in the shared `$tabControl` handler calls both
+    `Update-LogClientList` and `Update-LogView`).
 
   `build-gui.bat` / `scripts/build-gui.ps1` compile `gui.ps1` into
   `コース別パッケージ生成ツール.exe` at the project root via the `ps2exe` PowerShell
@@ -272,7 +501,7 @@ which handles the case-only rename correctly).
 
 - File naming: kebab-case for `.bat`/`.ps1` (`download-folder.bat`, not
   `DownloadFolder.bat` or `download_folder.bat`).
-- Env vars: `set-env.bat` defines all defaults via `if not defined VAR set "VAR=..."`,
+- Env vars: `clients\set-env.bat` defines all defaults via `if not defined VAR set "VAR=..."`,
   so external env vars (or values set earlier in the same file) always win.
   `%VAR%` expansion is per-line and order-sensitive — a variable referencing
   another (e.g. `GENERATE_SOURCE_PATH=%DOWNLOAD_LOCAL_PATH%`) must be defined
@@ -288,6 +517,21 @@ which handles the case-only rename correctly).
   the `powershell.exe` call (before any trailing `echo`/`timeout`, which would
   otherwise overwrite `%ERRORLEVEL%`) and `exit /b %EXITCODE%` at the end, so
   `all.bat`'s `if errorlevel 1 goto :error` chaining works correctly.
+- **`clients\set-env.bat`'s `BASE_PATH` line is not a plain `%~dp0`.**
+  `%~dp0` always means "the directory of the currently-executing batch
+  file", so after `set-env.bat` moved from the project root into `clients\`,
+  a bare `set "BASE_PATH=%~dp0"` there would silently point every default
+  (`COMMON_LOG_PATH`, `DOWNLOAD_LOCAL_PATH`, `GENERATE_WORK_PATH`,
+  `GENERATE_OUTPUT_PATH`, ...) one level too deep, into
+  `clients\log`/`clients\download`/etc. instead of the real project root.
+  Fixed with the standard batch idiom for resolving a relative `..` to a
+  clean absolute path: `for %%I in ("%~dp0..") do set "BASE_PATH=%%~fI\"`
+  (`%%~fI` fully-qualifies/normalizes whatever token `for` hands it — this
+  works even though `%~dp0..` isn't a file, `for %%I in (...)` treats its
+  argument as a literal string to transform, not a file-existence check).
+  Verified empirically (see `clients/README.md` for the user-facing
+  version of this warning) — don't simplify this back to `%~dp0` if
+  `set-env.bat` ever moves again without re-deriving this.
 
 ## Auth: Azure CLI + Microsoft Graph, not PnP.PowerShell
 

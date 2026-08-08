@@ -8,14 +8,13 @@
 2. ダウンロードした素材からExcelの設定に従って個別パッケージを作成（[2. 個別パッケージの作成について](#2-個別パッケージの作成について)）
 3. 作成したパッケージをTeams/SharePointにアップロード（[3. ファイルアップロードについて](#3-ファイルアップロードについて)）
 
-`all.bat`を実行すると、上記3段階を`set-env.bat`を呼び出した上でこの順に続けて実行する。いずれかの段階が失敗した場合はそこで中断し、後続の段階は実行しない。各段階は`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED`で有効/無効を切り替えられる（`UPLOAD_ENABLED`は既定で`0`＝無効、他は既定で`1`＝有効。[環境変数](#環境変数)を参照）。
+`all.bat`を実行すると、上記3段階を`clients\set-env.bat`を呼び出した上でこの順に続けて実行する。いずれかの段階が失敗した場合はそこで中断し、後続の段階は実行しない。各段階は`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED`で有効/無効を切り替えられる（`UPLOAD_ENABLED`は既定で`0`＝無効、他は既定で`1`＝有効。[環境変数](#環境変数)を参照）。
 
 ## ツールの構成
 
 | ファイル/フォルダ | 役割 |
 |---|---|
 | `all.bat` | 3段階（ダウンロード→パッケージ作成→アップロード）を続けて実行するエントリーポイント |
-| `set-env.bat` | 環境変数の初期値をまとめて設定する（他の`.bat`から`call`される） |
 | `download-folder.bat` | 「1. ファイルダウンロード」のエントリーポイント |
 | `generate-package.bat` | 「2. 個別パッケージの作成」のエントリーポイント |
 | `upload-folder.bat` | 「3. ファイルアップロード」のエントリーポイント |
@@ -24,8 +23,10 @@
 | `package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
 | `build-gui.bat` | GUI版（`コース別パッケージ生成ツール.exe`）をビルドするエントリーポイント。[GUI版](#gui版)を参照 |
 | `scripts\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
+| `clients\set-env.bat` | 環境変数の初期値をまとめて設定する（他の`.bat`から`call clients\set-env.bat`される） |
+| `clients\set-env-<クライアント名>.bat` | クライアントごとの上書き設定ファイル（GUI版の「実行」「ログ」「設定」タブの「クライアント」ドロップダウンから選ぶ）。書き方は[clients\README.md](clients/README.md)を参照 |
 
-パス関連の設定は `set-env.bat` にまとめてある。PowerShellスクリプト（`generate-package.ps1` / `download-folder.ps1` / `upload-folder.ps1`）を直接編集せずに、`set-env.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`set-env.bat` の値は上書きしない（`if not defined` 方式）。
+パス関連の設定は `clients\set-env.bat` にまとめてある。PowerShellスクリプト（`generate-package.ps1` / `download-folder.ps1` / `upload-folder.ps1`）を直接編集せずに、`clients\set-env.bat` の内容を書き換えるか、実行前に環境変数を設定することで変更できる。すでに環境変数が設定されている場合はそれが優先され、`clients\set-env.bat` の値は上書きしない（`if not defined` 方式）。
 
 ## Azure CLIでのサインイン
 
@@ -49,7 +50,7 @@
 #### 処理の流れ
 
 1. `download-folder.bat` を実行する
-2. `set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
 3. `download-folder.ps1` が実行される
    1. Azure CLIでサインインする（未サインイン・期限切れ時はデバイスコードでのログインが必要）
    2. Microsoft Graph APIでサイト（`DOWNLOAD_SITE_URL`）を解決する
@@ -95,7 +96,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 #### 処理の流れ
 
 1. `generate-package.bat` を実行する
-2. `set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
 3. `generate-package.ps1` が実行される
    1. パッケージ定義ファイル（`GENERATE_CONFIG_PATH`、既定は`download\package_definition.xlsx`）を読み込む
    2. シートごとにファイルをコピーしてパッケージ化する
@@ -151,7 +152,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 #### 処理の流れ
 
 1. `upload-folder.bat` を実行する
-2. `set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
 3. `upload-folder.ps1` が実行される
    1. Azure CLIでサインインする（未サインイン・期限切れ時はデバイスコードでのログインが必要）
    2. Microsoft Graph APIでサイト（`UPLOAD_SITE_URL`）を解決する
@@ -202,20 +203,25 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 
 ### 実行タブ
 
-- 「1. ファイルダウンロード」「2. 個別パッケージの作成」「3. ファイルアップロード」のチェックボックス（現在の`DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`の値を反映。「設定」タブで値を変更した場合も、この画面に戻ってくると最新の値に更新される）で、実行する段階を選ぶ
+- 「クライアント」ドロップダウンで、`clients`フォルダに置いたクライアントごとの設定ファイルを選べる。「デフォルト」を選べば`clients\set-env.bat`の値のまま
+- 「1. ファイルダウンロード」「2. 個別パッケージの作成」「3. ファイルアップロード」のチェックボックス（現在の`DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`の値を反映。「設定」タブで値を変更した場合や、上の「クライアント」ドロップダウンを切り替えた場合も、その時点の最新の値に更新される）で、実行する段階を選ぶ。切り替え後に手動でチェックを変更すれば、その状態が「実行」時に優先される
 - 「実行」ボタンを押すと、選んだ内容で`all.bat`が呼び出され、その出力が画面のログ欄に追記表示される（実行するたびに区切り線を挟んで積み重なる。過去の実行結果も遡って確認できる）
 - 実行中は「ログ」「設定」タブへの切り替えを含め、画面の操作ができなくなる（完了するまで待つ必要がある）
 
 ### ログタブ
 
+- 「クライアント」ドロップダウンで、表示するログをクライアント別に絞り込める。「すべて」を選べば絞り込みなし（クライアント指定の有無を問わず全ログを表示）
 - 「1. ファイルダウンロード」「2. 個別パッケージの作成」「3. ファイルアップロード」のラジオボタンで、確認したい段階のログを切り替える
 - 選んだ段階の`COMMON_LOG_PATH`配下のログファイル（`DOWNLOAD_LOG_PREFIX`/`GENERATE_LOG_PREFIX`/`UPLOAD_LOG_PREFIX`で始まる`.log`ファイル）を、該当するものすべて連結して（新しい順に）表示する。「1. ファイルダウンロード」「3. ファイルアップロード」は実行ごとに1件しか出力されないため実質1件のみ表示されるが、「2. 個別パッケージの作成」はシートごとに複数出力されるため、それらすべてがまとめて表示される
 
 ### 設定タブ
 
-- `set-env.bat`の中身（`if not defined VAR set "VAR=値"`の各行）を一覧表示し、値を書き換えて「保存」で`set-env.bat`に書き込める。テキストエディタで`set-env.bat`を直接編集する代わりに使える
+- 「クライアント」ドロップダウンで「デフォルト」または既存のクライアント（`clients`フォルダの`set-env-*.bat`）を選ぶ
+  - 「デフォルト」を選んだ場合: `clients\set-env.bat`の中身（`if not defined VAR set "VAR=値"`の各行）を一覧表示し、値を書き換えて「保存」で`clients\set-env.bat`に書き込める。テキストエディタで直接編集する代わりに使える
+  - クライアントを選んだ場合: そのクライアントが上書きできる項目（ログ関連以外の全項目。書き方は[clients\README.md](clients/README.md)を参照）だけを表示する。クライアント側に値が無い項目は`clients\set-env.bat`の既定値を表示する。「保存」すると、表示されている値がそのまま`clients\set-env-<クライアント名>.bat`に書き込まれる（`clients\set-env.bat`自体は変更しない）
+- 「新規作成...」でクライアント名を入力すると、`clients`フォルダに新しい空のクライアントファイル（`set-env-<クライアント名>.bat`）を作成し、クライアントに切り替える（フィールドは`clients\set-env.bat`の既定値で表示されるので、必要な項目だけ書き換えて保存する）
 - 各項目のラベルは環境変数名ではなく日本語の表示名を表示する（元の環境変数名はラベルにマウスを乗せるとツールチップで確認できる）
-- 「再読込」で`set-env.bat`の現在の内容を読み直す（保存前の変更を取り消したい場合など）
+- 「再読込」で選択中のデフォルト/クライアントの現在の内容を読み直す（保存前の変更を取り消したい場合など）
 
 | グループ | 環境変数名 | 表示名 |
 |---|---|---|

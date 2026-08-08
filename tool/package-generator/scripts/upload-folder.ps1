@@ -31,14 +31,11 @@ $az = Get-AzureCliPath
 $token = Get-GraphToken -Az $az -TenantId $tenantId
 $headers = @{ Authorization = "Bearer $token" }
 
-# --- サイトIDの解決 ---
 $siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $siteUrl
 
-# --- アップロード先パスの解決（先頭のドキュメントライブラリ名を除いた残りが既定のdriveのroot以下のパスになる） ---
 $folderParts = $sitePath -split '/'
 $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
 
-# --- 空ファイル（0バイト）は範囲指定が不正になるため、アップロードセッションを使わず直接PUTする ---
 function Send-EmptyFileToSharePoint {
     param(
         [string]$SiteRelativePath
@@ -65,7 +62,6 @@ function Send-EmptyFileToSharePoint {
     }
 }
 
-# --- チャンクアップロード（サイズ上限を避けるため常にアップロードセッション経由） ---
 function Send-FileToSharePoint {
     param(
         [string]$LocalFile,
@@ -128,7 +124,6 @@ function Send-FileToSharePoint {
     }
 }
 
-# --- 再帰アップロード ---
 function Send-FolderRecursive {
     param(
         [string]$LocalFolder,
@@ -154,7 +149,7 @@ Write-Host "$localPath -> $sitePath"
 Send-FolderRecursive -LocalFolder $localPath -SubPath ""
 
 $endTime = Get-Date
-$logFilePath = Join-Path $logPath "$($env:UPLOAD_LOG_PREFIX)$(Split-Path $relativeFolder -Leaf).log"
+$logFilePath = Join-Path $logPath "$($env:UPLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $relativeFolder -Leaf).log"
 $logLines = @()
 $logLines += "# 実行情報"
 $logLines += "バッチ名: $($env:BATCH_NAME)"

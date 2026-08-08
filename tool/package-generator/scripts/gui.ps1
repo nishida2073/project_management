@@ -11,17 +11,24 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
 
 if ($MyInvocation.MyCommand.Path) {
-    # .ps1として実行された場合（scripts配下）
     $scriptDir = Split-Path $MyInvocation.MyCommand.Path
     $basePath = Split-Path $scriptDir -Parent
 } else {
-    # build-gui.batでexe化された場合、$MyInvocation.MyCommand.Pathは空になるため
-    # 実行中のexe自身のパスから取得する（exeはプロジェクトルートに置かれる）
     $basePath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
 $allBat = Join-Path $basePath "all.bat"
-$setEnvBat = Join-Path $basePath "set-env.bat"
+$clientsDir = Join-Path $basePath "clients"
+$setEnvBat = Join-Path $clientsDir "set-env.bat"
+$clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
+$clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
+$defaultClientLabel = "デフォルト"
+$script:suppressComboSync = $false
+
+function Get-ClientBatPath {
+    param([string]$ClientName)
+    return Join-Path $clientsDir "$clientFilePrefix-$ClientName.bat"
+}
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "コース別パッケージ生成ツール"
@@ -29,8 +36,6 @@ $form.Size = New-Object System.Drawing.Size(700, 560)
 $form.StartPosition = "CenterScreen"
 $form.MinimumSize = New-Object System.Drawing.Size(520, 360)
 
-# 画面を閉じたときにall.bat以下（az loginなど）の子プロセスが残らないよう、
-# ツリーごと終了させる。taskkill /Tで子プロセスの子プロセスまで再帰的に終了できる。
 $script:currentProc = $null
 $form.Add_FormClosing({
     if ($script:currentProc -and !$script:currentProc.HasExited) {
@@ -54,49 +59,102 @@ $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
 $script:isRunning = $false
-# $tabControl.Enabled = $falseで丸ごと無効化すると、子コントロールである$txtLog
-# （ログ欄）も操作不能になり、サインインURL/コードの選択・コピーができなくなる
-# （WinFormsは親が無効だと子も無効になる）。タブの切り替えだけをSelectingで
-# キャンセルすることで、ログ欄の選択・コピーは実行中も可能なままにする。
+$script:lastClientVars = @()
 $tabControl.Add_Selecting({
     if ($script:isRunning -and $_.TabPage -ne $tabRun) {
         $_.Cancel = $true
     }
 })
 
-# ----- 実行タブ -----
-
 $runTopPanel = New-Object System.Windows.Forms.Panel
 $runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$runTopPanel.Height = 150
+$runTopPanel.Height = 176
+
+$lblClient = New-Object System.Windows.Forms.Label
+$lblClient.Text = "クライアント"
+$lblClient.AutoSize = $true
+$lblClient.Location = New-Object System.Drawing.Point(20, 17)
+
+$cmbClient = New-Object System.Windows.Forms.ComboBox
+$cmbClient.Location = New-Object System.Drawing.Point(100, 14)
+$cmbClient.Size = New-Object System.Drawing.Size(260, 24)
+$cmbClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $chkDownload = New-Object System.Windows.Forms.CheckBox
 $chkDownload.Text = "1. ファイルダウンロード"
 $chkDownload.AutoSize = $true
-$chkDownload.Location = New-Object System.Drawing.Point(20, 14)
+$chkDownload.Location = New-Object System.Drawing.Point(20, 40)
 
 $chkGenerate = New-Object System.Windows.Forms.CheckBox
 $chkGenerate.Text = "2. 個別パッケージの作成"
 $chkGenerate.AutoSize = $true
-$chkGenerate.Location = New-Object System.Drawing.Point(20, 40)
+$chkGenerate.Location = New-Object System.Drawing.Point(20, 66)
 
 $chkUpload = New-Object System.Windows.Forms.CheckBox
 $chkUpload.Text = "3. ファイルアップロード"
 $chkUpload.AutoSize = $true
-$chkUpload.Location = New-Object System.Drawing.Point(20, 66)
+$chkUpload.Location = New-Object System.Drawing.Point(20, 92)
 
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "実行"
-$btnRun.Location = New-Object System.Drawing.Point(20, 100)
+$btnRun.Location = New-Object System.Drawing.Point(20, 126)
 $btnRun.Size = New-Object System.Drawing.Size(100, 24)
 
 $lblStatus = New-Object System.Windows.Forms.Label
 $lblStatus.Text = ""
 $lblStatus.AutoSize = $true
-$lblStatus.Location = New-Object System.Drawing.Point(134, 110)
+$lblStatus.Location = New-Object System.Drawing.Point(134, 136)
 $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $btnRun, $lblStatus))
+function Update-ClientComboItems {
+    param(
+        [System.Windows.Forms.ComboBox]$ComboBox,
+        [string]$FirstItem
+    )
+    $selected = $ComboBox.SelectedItem
+    $script:suppressComboSync = $true
+    $ComboBox.Items.Clear()
+    $ComboBox.Items.Add($FirstItem) | Out-Null
+    Get-ChildItem -LiteralPath $clientsDir -Filter "$clientFilePrefix-*.bat" -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
+        $clientName = [System.IO.Path]::GetFileNameWithoutExtension($_.Name).Substring($clientFilePrefix.Length + 1)
+        $ComboBox.Items.Add($clientName) | Out-Null
+    }
+    $ComboBox.SelectedIndex = if ($selected -and $ComboBox.Items.Contains($selected)) { $ComboBox.Items.IndexOf($selected) } else { 0 }
+    $script:suppressComboSync = $false
+}
+
+function Update-ClientList {
+    Update-ClientComboItems -ComboBox $cmbClient -FirstItem $defaultClientLabel
+}
+Update-ClientList
+
+function Get-ClientProfileRawValues {
+    param([string]$ClientName)
+    $result = @{}
+    $clientBat = Get-ClientBatPath $ClientName
+    if (!(Test-Path -LiteralPath $clientBat)) {
+        return $result
+    }
+    foreach ($line in [System.IO.File]::ReadAllLines($clientBat, $cp932)) {
+        $m = $clientLineRegex.Match($line.Trim())
+        if ($m.Success) {
+            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
+        }
+    }
+    return $result
+}
+
+function Get-ClientProfileValues {
+    param([string]$ClientName)
+    $raw = Get-ClientProfileRawValues $ClientName
+    $result = @{}
+    foreach ($varName in $raw.Keys) {
+        $result[$varName] = Expand-VarTokens $raw[$varName]
+    }
+    return $result
+}
+
+$runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $btnRun, $lblStatus, $lblClient, $cmbClient))
 
 $txtLog = New-Object System.Windows.Forms.RichTextBox
 $txtLog.Multiline = $true
@@ -121,6 +179,7 @@ $btnRun.Add_Click({
     $chkGenerate.Enabled = $false
     $chkUpload.Enabled = $false
     $btnRun.Enabled = $false
+    $cmbClient.Enabled = $false
     $lblStatus.ForeColor = [System.Drawing.Color]::Black
     $lblStatus.Text = "実行中..."
     if ($txtLog.Text.Length -gt 0) {
@@ -133,11 +192,33 @@ $btnRun.Add_Click({
     $env:GENERATE_ENABLED = if ($chkGenerate.Checked) { "1" } else { "0" }
     $env:UPLOAD_ENABLED = if ($chkUpload.Checked) { "1" } else { "0" }
 
+    foreach ($varName in $script:lastClientVars) {
+        [Environment]::SetEnvironmentVariable($varName, $null)
+    }
+    $script:lastClientVars = @()
+
+    $selectedClient = $cmbClient.SelectedItem
+    if ($selectedClient -and $selectedClient -ne $defaultClientLabel) {
+        Write-Log "# クライアント"
+        Write-Log "$selectedClient"
+        Write-Log ""
+        $clientValues = Get-ClientProfileValues $selectedClient
+        $appliedVars = @()
+        foreach ($varName in $clientValues.Keys) {
+            if ($clientRuntimeExcludeVars -contains $varName) {
+                continue
+            }
+            [Environment]::SetEnvironmentVariable($varName, $clientValues[$varName])
+            $appliedVars += $varName
+        }
+        $script:lastClientVars = $appliedVars
+        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $selectedClient)
+    } else {
+        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $null)
+    }
+
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "cmd.exe"
-    # all.batの標準エラー出力（az loginのサインインコードなど）を標準出力に合流させてから読む。
-    # 標準出力と標準エラー出力を別々に（順番に）読むと、片方が完了を待って止まっている間は
-    # もう片方の内容が画面に表示されず、フリーズしたように見えるため。
     $psi.Arguments = "/c ""`"$allBat`" 2>&1"""
     $psi.WorkingDirectory = $basePath
     $psi.UseShellExecute = $false
@@ -148,10 +229,6 @@ $btnRun.Add_Click({
     $proc = New-Object System.Diagnostics.Process
     $proc.StartInfo = $psi
 
-    # ReadLine()で直接読むと「次の1行が来るまでブロック」してしまい、az loginの
-    # サインイン待ちのように次の行がしばらく来ない場合にDoEvents()が呼ばれず、
-    # 画面が固まって選択・コピーもできなくなる。OutputDataReceivedで非同期に受け取り、
-    # ここではキューから取り出すだけにしてブロッキング呼び出しを避ける。
     $outputQueue = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
     $outputAction = {
         if ($null -ne $EventArgs.Data) {
@@ -173,9 +250,6 @@ $btnRun.Add_Click({
         Start-Sleep -Milliseconds 50
     }
 
-    # プロセス終了直後は、OutputDataReceivedの最後のイベントがまだキューに
-    # 届いていないことがある（HasExitedが先にtrueになる競合状態）ため、
-    # WaitForExit()で完全な終了と非同期イベントの完了を待ってからもう一度drainする。
     $proc.WaitForExit()
     Start-Sleep -Milliseconds 200
     $line = $null
@@ -198,11 +272,10 @@ $btnRun.Add_Click({
     $chkGenerate.Enabled = $true
     $chkUpload.Enabled = $true
     $btnRun.Enabled = $true
+    $cmbClient.Enabled = $true
     $script:isRunning = $false
     $script:currentProc = $null
 })
-
-# ----- 設定タブ（set-env.batの編集） -----
 
 $lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 
@@ -213,25 +286,40 @@ function Read-SetEnvLines {
 
 $topPanel = New-Object System.Windows.Forms.Panel
 $topPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$topPanel.Height = 40
+$topPanel.Height = 70
+
+$lblSettingsClient = New-Object System.Windows.Forms.Label
+$lblSettingsClient.Text = "クライアント"
+$lblSettingsClient.AutoSize = $true
+$lblSettingsClient.Location = New-Object System.Drawing.Point(20, 17)
+
+$cmbSettingsClient = New-Object System.Windows.Forms.ComboBox
+$cmbSettingsClient.Location = New-Object System.Drawing.Point(100, 14)
+$cmbSettingsClient.Size = New-Object System.Drawing.Size(260, 24)
+$cmbSettingsClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+$btnNewClient = New-Object System.Windows.Forms.Button
+$btnNewClient.Text = "新規作成..."
+$btnNewClient.Location = New-Object System.Drawing.Point(370, 14)
+$btnNewClient.Size = New-Object System.Drawing.Size(100, 24)
 
 $btnSave = New-Object System.Windows.Forms.Button
 $btnSave.Text = "保存"
-$btnSave.Location = New-Object System.Drawing.Point(20, 14)
+$btnSave.Location = New-Object System.Drawing.Point(20, 44)
 $btnSave.Size = New-Object System.Drawing.Size(100, 24)
 
 $btnReload = New-Object System.Windows.Forms.Button
 $btnReload.Text = "再読込"
-$btnReload.Location = New-Object System.Drawing.Point(130, 14)
+$btnReload.Location = New-Object System.Drawing.Point(130, 44)
 $btnReload.Size = New-Object System.Drawing.Size(100, 24)
 
 $lblSaveStatus = New-Object System.Windows.Forms.Label
 $lblSaveStatus.Text = ""
 $lblSaveStatus.AutoSize = $true
-$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 20)
+$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
 $lblSaveStatus.Font = New-Object System.Drawing.Font($lblSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$topPanel.Controls.AddRange(@($btnSave, $btnReload, $lblSaveStatus))
+$topPanel.Controls.AddRange(@($lblSettingsClient, $cmbSettingsClient, $btnNewClient, $btnSave, $btnReload, $lblSaveStatus))
 
 $fieldPanel = New-Object System.Windows.Forms.Panel
 $fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -280,6 +368,14 @@ $enabledVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
 $folderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_PATH", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_PATH")
 $fileBrowseVars = @("GENERATE_CONFIG_PATH")
 
+$clientOverridableVars = @(
+    "DOWNLOAD_ENABLED", "DOWNLOAD_SITE_URL", "DOWNLOAD_SITE_PATH", "DOWNLOAD_SITE_TENANT_ID", "DOWNLOAD_LOCAL_PATH",
+    "GENERATE_ENABLED", "GENERATE_SOURCE_PATH", "GENERATE_CONFIG_PATH", "GENERATE_WORK_PATH", "GENERATE_OUTPUT_PATH",
+    "GENERATE_SHEETS_INCLUDE", "GENERATE_SHEETS_EXCLUDE",
+    "UPLOAD_ENABLED", "UPLOAD_SITE_URL", "UPLOAD_SITE_PATH", "UPLOAD_SITE_TENANT_ID", "UPLOAD_LOCAL_PATH"
+)
+$clientRuntimeExcludeVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
+
 function Expand-VarTokens {
     param([string]$Value)
     $expanded = $Value.Replace("%BASE_PATH%", "$basePath\")
@@ -299,23 +395,36 @@ function Resolve-BrowseStart {
     return Expand-VarTokens $RawValue
 }
 
+function Get-SettingsFieldSource {
+    $client = $cmbSettingsClient.SelectedItem
+    if ($client -and $client -ne $defaultClientLabel) {
+        $clientRaw = Get-ClientProfileRawValues $client
+        $defaults = Get-SetEnvDefaults
+        foreach ($varName in $clientOverridableVars) {
+            $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } else { $defaults[$varName] }
+            [PSCustomObject]@{ VarName = $varName; VarValue = $varValue }
+        }
+    } else {
+        foreach ($line in (Read-SetEnvLines)) {
+            $m = $lineRegex.Match($line.Trim())
+            if ($m.Success) {
+                [PSCustomObject]@{ VarName = $m.Groups["var"].Value; VarValue = $m.Groups["val"].Value }
+            }
+        }
+    }
+}
+
 function Update-SettingsFields {
     $fieldPanel.Controls.Clear()
     $script:fieldTextBoxes = @{}
     $script:fieldRadios = @{}
 
-    $lines = Read-SetEnvLines
     $y = 10
     $lastGroup = ""
 
-    foreach ($line in $lines) {
-        $m = $lineRegex.Match($line.Trim())
-        if (!$m.Success) {
-            continue
-        }
-
-        $varName = $m.Groups["var"].Value
-        $varValue = $m.Groups["val"].Value
+    foreach ($field in (Get-SettingsFieldSource)) {
+        $varName = $field.VarName
+        $varValue = $field.VarValue
 
         $group = $varName.Split("_")[0]
         if ($group -ne $lastGroup) {
@@ -348,8 +457,6 @@ function Update-SettingsFields {
         $fieldPanel.Controls.Add($lbl)
 
         if ($enabledVars -contains $varName) {
-            # 同じ親を共有するラジオボタンは自動的に排他制御されるため、フィールドごとに
-            # 専用のパネルへ入れて「有効・無効」のペアをそれぞれ独立させる
             $radioGroupPanel = New-Object System.Windows.Forms.Panel
             $radioGroupPanel.Location = New-Object System.Drawing.Point(250, ($y - 2))
             $radioGroupPanel.Size = New-Object System.Drawing.Size(200, 22)
@@ -428,15 +535,28 @@ function Update-SettingsFields {
     }
 }
 
-Update-SettingsFields
-
 $btnReload.Add_Click({
     Update-SettingsFields
     $lblSaveStatus.ForeColor = [System.Drawing.Color]::Black
     $lblSaveStatus.Text = "再読込しました"
 })
 
-$btnSave.Add_Click({
+function Save-ClientProfile {
+    param([string]$ClientName)
+    $clientBat = Get-ClientBatPath $ClientName
+    $newLines = foreach ($varName in $clientOverridableVars) {
+        $newVal = if ($script:fieldRadios.ContainsKey($varName)) {
+            if ($script:fieldRadios[$varName].Checked) { "1" } else { "0" }
+        } else {
+            $script:fieldTextBoxes[$varName].Text
+        }
+        "set `"$varName=$newVal`""
+    }
+    $content = ($newLines -join "`r`n") + "`r`n"
+    [System.IO.File]::WriteAllText($clientBat, $content, $cp932)
+}
+
+function Save-DefaultSettings {
     $lines = Read-SetEnvLines
     $newLines = for ($i = 0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
@@ -456,12 +576,46 @@ $btnSave.Add_Click({
 
     $content = ($newLines -join "`r`n") + "`r`n"
     [System.IO.File]::WriteAllText($setEnvBat, $content, $cp932)
+}
+
+$btnSave.Add_Click({
+    $client = $cmbSettingsClient.SelectedItem
+    if ($client -and $client -ne $defaultClientLabel) {
+        Save-ClientProfile $client
+    } else {
+        Save-DefaultSettings
+    }
 
     $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
     $lblSaveStatus.Text = "保存しました"
 })
 
-# ----- ログタブ（各段階のログファイルを確認） -----
+function Update-SettingsClientList {
+    Update-ClientComboItems -ComboBox $cmbSettingsClient -FirstItem $defaultClientLabel
+}
+Update-SettingsClientList
+Update-SettingsFields
+
+$cmbSettingsClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-SettingsFields } })
+
+$btnNewClient.Add_Click({
+    Add-Type -AssemblyName Microsoft.VisualBasic
+    $newName = [Microsoft.VisualBasic.Interaction]::InputBox("クライアント名を入力してください", "クライアントの新規作成", "")
+    $newName = $newName.Trim()
+    if (!$newName) {
+        return
+    }
+
+    $newClientBat = Get-ClientBatPath $newName
+    if (Test-Path -LiteralPath $newClientBat) {
+        [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "クライアントの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    [System.IO.File]::WriteAllText($newClientBat, "", $cp932)
+    Update-SettingsClientList
+    $cmbSettingsClient.SelectedItem = $newName
+})
 
 function Get-SetEnvDefaults {
     $result = @{}
@@ -493,25 +647,39 @@ function Get-ResolvedVar {
 
 $logStagePanel = New-Object System.Windows.Forms.Panel
 $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$logStagePanel.Height = 40
+$logStagePanel.Height = 66
+
+$lblLogClient = New-Object System.Windows.Forms.Label
+$lblLogClient.Text = "クライアント"
+$lblLogClient.AutoSize = $true
+$lblLogClient.Location = New-Object System.Drawing.Point(20, 17)
+
+$cmbLogClient = New-Object System.Windows.Forms.ComboBox
+$cmbLogClient.Location = New-Object System.Drawing.Point(100, 14)
+$cmbLogClient.Size = New-Object System.Drawing.Size(260, 24)
+$cmbLogClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+function Update-LogClientList {
+    Update-ClientComboItems -ComboBox $cmbLogClient -FirstItem "すべて"
+}
 
 $radioDownloadLog = New-Object System.Windows.Forms.RadioButton
 $radioDownloadLog.Text = "1. ファイルダウンロード"
 $radioDownloadLog.AutoSize = $true
 $radioDownloadLog.Checked = $true
-$radioDownloadLog.Location = New-Object System.Drawing.Point(20, 14)
+$radioDownloadLog.Location = New-Object System.Drawing.Point(20, 40)
 
 $radioGenerateLog = New-Object System.Windows.Forms.RadioButton
 $radioGenerateLog.Text = "2. 個別パッケージの作成"
 $radioGenerateLog.AutoSize = $true
-$radioGenerateLog.Location = New-Object System.Drawing.Point(220, 14)
+$radioGenerateLog.Location = New-Object System.Drawing.Point(220, 40)
 
 $radioUploadLog = New-Object System.Windows.Forms.RadioButton
 $radioUploadLog.Text = "3. ファイルアップロード"
 $radioUploadLog.AutoSize = $true
-$radioUploadLog.Location = New-Object System.Drawing.Point(440, 14)
+$radioUploadLog.Location = New-Object System.Drawing.Point(440, 40)
 
-$logStagePanel.Controls.AddRange(@($radioDownloadLog, $radioGenerateLog, $radioUploadLog))
+$logStagePanel.Controls.AddRange(@($lblLogClient, $cmbLogClient, $radioDownloadLog, $radioGenerateLog, $radioUploadLog))
 
 $logContentBox = New-Object System.Windows.Forms.TextBox
 $logContentBox.Multiline = $true
@@ -543,7 +711,9 @@ function Update-LogView {
         return
     }
 
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    $logClient = $cmbLogClient.SelectedItem
+    $clientFilter = if ($logClient -and $logClient -ne "すべて") { "$logClient" + "_" } else { "" }
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix$clientFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
 
     $sections = foreach ($file in $files) { [System.IO.File]::ReadAllText($file.FullName, $cp932) }
     $logContentBox.Text = $sections -join "`r`n`r`n"
@@ -552,22 +722,46 @@ function Update-LogView {
 $radioDownloadLog.Add_CheckedChanged({ if ($radioDownloadLog.Checked) { Update-LogView } })
 $radioGenerateLog.Add_CheckedChanged({ if ($radioGenerateLog.Checked) { Update-LogView } })
 $radioUploadLog.Add_CheckedChanged({ if ($radioUploadLog.Checked) { Update-LogView } })
+$cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
+
+function Get-ClientAwareEnabledValue {
+    param([string]$VarName)
+    $client = $cmbClient.SelectedItem
+    if ($client -and $client -ne $defaultClientLabel) {
+        $clientValues = Get-ClientProfileValues $client
+        if ($clientValues.ContainsKey($VarName)) {
+            return $clientValues[$VarName]
+        }
+    }
+    return Get-ResolvedVar $VarName
+}
+
+function Update-RunCheckboxesFromClient {
+    $chkDownload.Checked = (Get-ClientAwareEnabledValue "DOWNLOAD_ENABLED") -eq "1"
+    $chkGenerate.Checked = (Get-ClientAwareEnabledValue "GENERATE_ENABLED") -eq "1"
+    $chkUpload.Checked = (Get-ClientAwareEnabledValue "UPLOAD_ENABLED") -eq "1"
+}
 
 function Sync-RunCheckboxes {
-    $chkDownload.Checked = (Get-ResolvedVar "DOWNLOAD_ENABLED") -eq "1"
-    $chkGenerate.Checked = (Get-ResolvedVar "GENERATE_ENABLED") -eq "1"
-    $chkUpload.Checked = (Get-ResolvedVar "UPLOAD_ENABLED") -eq "1"
+    Update-ClientList
 }
+
+$cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-RunCheckboxesFromClient } })
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
         Sync-RunCheckboxes
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
+        Update-LogClientList
         Update-LogView
+    } elseif ($tabControl.SelectedTab -eq $tabSettings) {
+        Update-SettingsClientList
     }
 })
 
 Sync-RunCheckboxes
+Update-RunCheckboxesFromClient
+Update-LogClientList
 Update-LogView
 $tabControl.SelectedTab = $tabRun
 
