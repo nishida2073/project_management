@@ -40,57 +40,57 @@ if ($env:GENERATE_SHEETS_EXCLUDE) {
 }
 
 Write-Host "# パッケージ作成開始"
-foreach ($sheet in $sheetNames) {
+foreach ($sheetName in $sheetNames) {
 
     Write-Host ""
     $sheetStartTime = Get-Date
-    Write-Host "$sheet"
+    Write-Host "$sheetName"
 
-    $packageWork = Join-Path $workPath $sheet
-    New-Item $packageWork -ItemType Directory -Force | Out-Null
+    $packageWorkPath = Join-Path $workPath $sheetName
+    New-Item $packageWorkPath -ItemType Directory -Force | Out-Null
 
     $copyLog = @()
 
-    $rows = Import-Excel -Path $configPath -WorksheetName $sheet
+    $rows = Import-Excel -Path $configPath -WorksheetName $sheetName
 
     foreach ($row in $rows) {
 
-        $source = $row.'取得元（フルパス）'
+        $sourcePath = $row.'取得元（フルパス）'
 
-        if (!$source) {
+        if (!$sourcePath) {
             continue
         }
 
-        if ($env:GENERATE_SOURCE_PATH -and !([System.IO.Path]::IsPathRooted($source))) {
-            $source = Join-Path $env:GENERATE_SOURCE_PATH $source
+        if ($env:GENERATE_SOURCE_PATH -and !([System.IO.Path]::IsPathRooted($sourcePath))) {
+            $sourcePath = Join-Path $env:GENERATE_SOURCE_PATH $sourcePath
         }
 
-        $source = [System.IO.Path]::GetFullPath($source)
+        $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
 
-        if (!(Test-Path $source)) {
-            Write-Host "存在しません：$source"
+        if (!(Test-Path $sourcePath)) {
+            Write-Host "存在しません：$sourcePath"
             continue
         }
 
-        $storeRoot = $packageWork
+        $storeRootPath = $packageWorkPath
         if ($row.格納先) {
-            $storeRoot = Join-Path $packageWork $row.格納先
+            $storeRootPath = Join-Path $packageWorkPath $row.格納先
         }
-        New-Item $storeRoot -ItemType Directory -Force | Out-Null
+        New-Item $storeRootPath -ItemType Directory -Force | Out-Null
 
-        if (Test-Path -LiteralPath $source -PathType Container) {
+        if (Test-Path -LiteralPath $sourcePath -PathType Container) {
 
-            $sourceTrimmed = $source.TrimEnd('\')
+            $sourcePathTrimmed = $sourcePath.TrimEnd('\')
 
-            Get-ChildItem $source -Recurse | ForEach-Object {
+            Get-ChildItem $sourcePath -Recurse | ForEach-Object {
 
-                $relative = $_.FullName.Substring($sourceTrimmed.Length).TrimStart('\')
+                $relativePath = $_.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
 
                 if ($row.含める形式) {
                     $includePatterns = $row.含める形式.Split(",") | ForEach-Object { $_.Trim() }
                     $included = $false
                     foreach ($pattern in $includePatterns) {
-                        if ($relative -like $pattern) {
+                        if ($relativePath -like $pattern) {
                             $included = $true
                             break
                         }
@@ -102,43 +102,43 @@ foreach ($sheet in $sheetNames) {
 
                 if ($row.除外する形式) {
                     foreach ($exclude in $row.除外する形式.Split(",")) {
-                        if ($relative -like $exclude.Trim()) {
+                        if ($relativePath -like $exclude.Trim()) {
                             return
                         }
                     }
                 }
 
                 if (!$_.PSIsContainer) {
-                    $destination = Join-Path $storeRoot $relative
-                    New-Item (Split-Path $destination -Parent) -ItemType Directory -Force | Out-Null
-                    Copy-Item $_.FullName $destination -Force
-                    $copyLog += "$($_.FullName) -> $destination"
+                    $destinationPath = Join-Path $storeRootPath $relativePath
+                    New-Item (Split-Path $destinationPath -Parent) -ItemType Directory -Force | Out-Null
+                    Copy-Item $_.FullName $destinationPath -Force
+                    $copyLog += "$($_.FullName) -> $destinationPath"
                 }
             }
 
         } else {
 
-            $fileName = Split-Path $source -Leaf
-            $destination = Join-Path $storeRoot $fileName
-            Copy-Item $source $destination -Force
-            $copyLog += "$source -> $destination"
+            $fileName = Split-Path $sourcePath -Leaf
+            $destinationPath = Join-Path $storeRootPath $fileName
+            Copy-Item $sourcePath $destinationPath -Force
+            $copyLog += "$sourcePath -> $destinationPath"
         }
     }
 
-    $zip = Join-Path $outputPath "$sheet.zip"
-    Remove-Item $zip -Force -ErrorAction SilentlyContinue
+    $packagePath = Join-Path $outputPath "$sheetName.zip"
+    Remove-Item $packagePath -Force -ErrorAction SilentlyContinue
 
-    $zipItems = Get-ChildItem -LiteralPath $packageWork
-    if ($zipItems) {
-        Compress-Archive -LiteralPath $zipItems.FullName -DestinationPath $zip
-        Write-Host "$zip"
+    $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
+    if ($packageItems) {
+        Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
+        Write-Host "$packagePath"
         $sheetEndTime = Get-Date
-        $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheet.log"
+        $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log"
         $logLines = @()
         $logLines += "# 実行情報"
         $logLines += (Get-ClientLogHeaderLines)
         $logLines += "バッチ名: $($env:BATCH_NAME)"
-        $logLines += "シート名: $($sheet)"
+        $logLines += "シート名: $($sheetName)"
         $logLines += "開始時刻: $($sheetStartTime.ToString('yyyy/MM/dd HH:mm:ss'))"
         $logLines += "終了時刻: $($sheetEndTime.ToString('yyyy/MM/dd HH:mm:ss'))"
         $logLines += ""
@@ -146,11 +146,11 @@ foreach ($sheet in $sheetNames) {
         $logLines += $copyLog
         $logLines += ""
         $logLines += "# フォルダ構成"
-        $logLines += $sheet
-        $logLines += (Get-TreeLines -Path $packageWork)
+        $logLines += $sheetName
+        $logLines += (Get-TreeLines -Path $packageWorkPath)
         Write-LogFile -Path $logFilePath -Lines $logLines
     } else {
-        Write-Host "$sheet：対象ファイルが無いためパッケージを作成しませんでした"
+        Write-Host "$sheetName：対象ファイルが無いためパッケージを作成しませんでした"
     }
 }
 
