@@ -22,7 +22,7 @@ $setEnvBat = Join-Path $clientsDir "set-env.bat"
 $clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
-$clientEnabledLineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
+$lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 $defaultClientLabel = "デフォルト"
 $script:suppressComboSync = $false
 
@@ -110,12 +110,14 @@ $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawin
 function Update-ClientComboItems {
     param(
         [System.Windows.Forms.ComboBox]$ComboBox,
-        [string]$FirstItem
+        [string[]]$FixedItems
     )
     $selected = $ComboBox.SelectedItem
     $script:suppressComboSync = $true
     $ComboBox.Items.Clear()
-    $ComboBox.Items.Add($FirstItem) | Out-Null
+    foreach ($item in $FixedItems) {
+        $ComboBox.Items.Add($item) | Out-Null
+    }
     Get-ChildItem -LiteralPath $clientsDir -Filter "$clientFilePrefix-*.bat" -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
         $clientName = [System.IO.Path]::GetFileNameWithoutExtension($_.Name).Substring($clientFilePrefix.Length + 1)
         $ComboBox.Items.Add($clientName) | Out-Null
@@ -125,7 +127,7 @@ function Update-ClientComboItems {
 }
 
 function Update-ClientList {
-    Update-ClientComboItems -ComboBox $cmbClient -FirstItem $defaultClientLabel
+    Update-ClientComboItems -ComboBox $cmbClient -FixedItems @($defaultClientLabel)
 }
 Update-ClientList
 
@@ -140,7 +142,7 @@ function Get-ClientProfileRawValues {
         $trimmed = $line.Trim()
         $m = $clientLineRegex.Match($trimmed)
         if (!$m.Success) {
-            $m = $clientEnabledLineRegex.Match($trimmed)
+            $m = $lineRegex.Match($trimmed)
         }
         if ($m.Success) {
             $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
@@ -281,8 +283,6 @@ $btnRun.Add_Click({
     $script:isRunning = $false
     $script:currentProc = $null
 })
-
-$lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 
 function Read-SetEnvLines {
     $rawLines = [System.IO.File]::ReadAllLines($setEnvBat, $cp932)
@@ -546,15 +546,23 @@ $btnReload.Add_Click({
     $lblSaveStatus.Text = "再読込しました"
 })
 
+function Get-FieldValue {
+    param([string]$VarName)
+    if ($script:fieldRadios.ContainsKey($VarName)) {
+        if ($script:fieldRadios[$VarName].Checked) { return "1" }
+        return "0"
+    }
+    return $script:fieldTextBoxes[$VarName].Text
+}
+
 function Save-ClientProfile {
     param([string]$ClientName)
     $clientBat = Get-ClientBatPath $ClientName
     $newLines = foreach ($varName in $clientOverridableVars) {
+        $newVal = Get-FieldValue $varName
         if ($script:fieldRadios.ContainsKey($varName)) {
-            $newVal = if ($script:fieldRadios[$varName].Checked) { "1" } else { "0" }
             "if not defined $varName set `"$varName=$newVal`""
         } else {
-            $newVal = $script:fieldTextBoxes[$varName].Text
             "set `"$varName=$newVal`""
         }
     }
@@ -563,17 +571,11 @@ function Save-ClientProfile {
 }
 
 function Save-DefaultSettings {
-    $lines = Read-SetEnvLines
-    $newLines = for ($i = 0; $i -lt $lines.Count; $i++) {
-        $line = $lines[$i]
+    $newLines = foreach ($line in (Read-SetEnvLines)) {
         $m = $lineRegex.Match($line.Trim())
-        if ($m.Success -and $script:fieldRadios.ContainsKey($m.Groups["var"].Value)) {
-            $varName = $m.Groups["var"].Value
-            $newVal = if ($script:fieldRadios[$varName].Checked) { "1" } else { "0" }
-            "if not defined $varName set `"$varName=$newVal`""
-        } elseif ($m.Success -and $script:fieldTextBoxes.ContainsKey($m.Groups["var"].Value)) {
-            $varName = $m.Groups["var"].Value
-            $newVal = $script:fieldTextBoxes[$varName].Text
+        $varName = if ($m.Success) { $m.Groups["var"].Value } else { $null }
+        if ($varName -and ($script:fieldRadios.ContainsKey($varName) -or $script:fieldTextBoxes.ContainsKey($varName))) {
+            $newVal = Get-FieldValue $varName
             "if not defined $varName set `"$varName=$newVal`""
         } else {
             $line
@@ -597,7 +599,7 @@ $btnSave.Add_Click({
 })
 
 function Update-SettingsClientList {
-    Update-ClientComboItems -ComboBox $cmbSettingsClient -FirstItem $defaultClientLabel
+    Update-ClientComboItems -ComboBox $cmbSettingsClient -FixedItems @($defaultClientLabel)
 }
 Update-SettingsClientList
 Update-SettingsFields
@@ -666,7 +668,7 @@ $cmbLogClient.Size = New-Object System.Drawing.Size(260, 24)
 $cmbLogClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 function Update-LogClientList {
-    Update-ClientComboItems -ComboBox $cmbLogClient -FirstItem "すべて"
+    Update-ClientComboItems -ComboBox $cmbLogClient -FixedItems @("すべて", $defaultClientLabel)
 }
 
 $radioDownloadLog = New-Object System.Windows.Forms.RadioButton
@@ -748,15 +750,11 @@ function Update-RunCheckboxesFromClient {
     $chkUpload.Checked = (Get-ClientAwareEnabledValue "UPLOAD_ENABLED") -eq "1"
 }
 
-function Sync-RunCheckboxes {
-    Update-ClientList
-}
-
 $cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-RunCheckboxesFromClient } })
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
-        Sync-RunCheckboxes
+        Update-ClientList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-LogClientList
         Update-LogView
@@ -765,7 +763,7 @@ $tabControl.Add_SelectedIndexChanged({
     }
 })
 
-Sync-RunCheckboxes
+Update-ClientList
 Update-RunCheckboxesFromClient
 Update-LogClientList
 Update-LogView

@@ -136,6 +136,7 @@ foreach ($sheet in $sheetNames) {
         $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheet.log"
         $logLines = @()
         $logLines += "# 実行情報"
+        $logLines += (Get-ClientLogHeaderLines)
         $logLines += "バッチ名: $($env:BATCH_NAME)"
         $logLines += "シート名: $($sheet)"
         $logLines += "開始時刻: $($sheetStartTime.ToString('yyyy/MM/dd HH:mm:ss'))"

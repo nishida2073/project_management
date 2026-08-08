@@ -63,10 +63,12 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     hardcoded default) sets the checkboxes — called once at true startup and
     again whenever the client dropdown's selection actually changes
     (`$cmbClient.Add_SelectedIndexChanged`). **It is deliberately NOT called
-    just from revisiting this tab.** `Sync-RunCheckboxes` (called once at
-    startup and again whenever the 実行 tab is (re-)selected) only calls
-    `Update-ClientList` — it used to also call the checkbox-sync function on
-    every tab visit, but that silently discarded any manual checkbox edit the
+    just from revisiting this tab.** The `$tabControl.Add_SelectedIndexChanged`
+    handler's 実行-tab branch calls only `Update-ClientList` (refreshes the
+    client dropdown's *items*) — it used to also call the checkbox-sync
+    function on every tab visit (via a `Sync-RunCheckboxes` wrapper, since
+    removed as a no-op-adding indirection once it was trimmed down to just
+    that one call), but that silently discarded any manual checkbox edit the
     moment the user switched to 設定/ログ and back, which reads as "the GUI
     checkbox isn't being respected" (confirmed by user report). The set-env.bat/
     client value is only ever a *starting point*; once the checkboxes are on
@@ -77,7 +79,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     `$clientRuntimeExcludeVars` design principle: checkboxes are the runtime
     authority — see the ログ/設定 note on `Get-ClientAwareEnabledValue` below
     for the loading side of this). Don't go back to calling the checkbox-sync
-    function from `Sync-RunCheckboxes` or from the tab-selection handler.
+    function from the 実行-tab branch of the tab-selection handler.
 
     A related trap: `Update-ClientComboItems` (shared by all three client
     dropdowns) does `$ComboBox.Items.Clear()` then re-adds items and
@@ -85,7 +87,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     first, so the subsequent re-assignment fires `SelectedIndexChanged` even
     when the resolved selection is the *same* client as before. Left
     unguarded, this means merely refreshing the client list (e.g. from
-    `Sync-RunCheckboxes` on every 実行-tab visit, or `Update-SettingsClientList`
+    `Update-ClientList` on every 実行-tab visit, or `Update-SettingsClientList`
     on every 設定-tab visit) would spuriously re-trigger whatever's wired to
     that dropdown's `SelectedIndexChanged` — silently resetting the run
     checkboxes (this exact bug), and would similarly wipe out any *unsaved*
@@ -127,16 +129,19 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     request to preserve run history.
 
     **Client profile switching**: a `$cmbClient` dropdown (populated by
-    `Update-ClientList`, called from `Sync-RunCheckboxes` so the *list of
-    clients* refreshes whenever the 実行 tab is selected — not the checkboxes,
-    see above) lists every
+    `Update-ClientList`, called directly from the 実行-tab branch of the
+    `$tabControl.Add_SelectedIndexChanged` handler so the *list of clients*
+    refreshes whenever the 実行 tab is selected — not the checkboxes, see
+    above) lists every
     `clients\set-env-*.bat` file with the `set-env-` prefix and `.bat`
     extension stripped, plus a leading `$defaultClientLabel` ("デフォルト" —
     shared across all three client dropdowns, see below). `Update-ClientList`
     and the 設定 tab's `Update-SettingsClientList` are both thin wrappers around the
-    shared `Update-ClientComboItems -ComboBox ... -FirstItem ...` — don't
-    reintroduce a second copy of the scan/populate logic if a third dropdown
-    like this ever gets added. The `set-env-` prefix itself is never
+    shared `Update-ClientComboItems -ComboBox ... -FixedItems @(...)` (the
+    `-FixedItems` array lets a dropdown prepend more than one non-client
+    entry — the ログ tab's dropdown needs both "すべて" and `$defaultClientLabel`,
+    see below) — don't reintroduce a second copy of the scan/populate logic
+    if a third dropdown like this ever gets added. The `set-env-` prefix itself is never
     hardcoded: `$clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)`
     derives it from `$setEnvBat` (`clients\set-env.bat`), so renaming that
     file would (mostly) carry through automatically — see `Get-ClientBatPath`,
@@ -161,8 +166,8 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     *can* record its own preferred enabled/disabled state and the 設定 tab
     can edit it). `Get-ClientAwareEnabledValue`/`Update-RunCheckboxesFromClient`
     (wired to `$cmbClient.Add_SelectedIndexChanged`, and also called once at
-    startup — see the 実行-tab note above for why it's *not* called from
-    `Sync-RunCheckboxes`) read the selected client's `*_ENABLED` value (via
+    startup — see the 実行-tab note above for why it's *not* called from the
+    tab-selection handler's 実行-tab branch) read the selected client's `*_ENABLED` value (via
     `Get-ClientProfileValues`, falling back to `Get-ResolvedVar` when the
     client doesn't override that var or `$defaultClientLabel` is selected)
     and set the checkboxes to match *at the moment the dropdown selection
@@ -208,11 +213,13 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     `*_ENABLED` preference (read back for the checkbox-loading feature), it
     just never actually *takes effect* when the batch chain runs — consistent
     for both the GUI path and a bare `client=<name>` command-line run with no
-    GUI involved. `Get-ClientProfileRawValues` gained a second regex,
-    `$clientEnabledLineRegex` (identical pattern to the top-level `$lineRegex`
-    used for `set-env.bat` itself, just scoped to client files), tried after
-    `$clientLineRegex` fails to match a line, so it can still parse this
-    `if not defined` form back out for the checkbox-loading feature — a
+    GUI involved. `Get-ClientProfileRawValues` falls back to matching a
+    client-file line against `$lineRegex` (the same `if not defined VAR set
+    "VAR=value"` pattern used to parse `set-env.bat` itself, now shared
+    rather than duplicated — see `$clientLineRegex` for the plain-`set`
+    pattern tried first) when `$clientLineRegex` fails to match, so it can
+    still parse this `if not defined` form back out for the
+    checkbox-loading feature — a
     client file is now expected to mix both line styles, which is why
     `clients\README.md` carves out this exception to its otherwise-blanket
     "use unconditional `set`" rule. Trade-off worth knowing: this only
@@ -352,9 +359,10 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     dropdowns, so the "no client selected" wording can't drift out of sync
     between them again) plus every `clients\set-env-*.bat` filename
     (prefix/extension stripped), sharing its scan/populate logic with the
-    実行 tab's dropdown via `Update-ClientComboItems -ComboBox ... -FirstItem
-    ...` (only the first item and target `ComboBox` differ — don't duplicate
-    the `Get-ChildItem`/`Sort-Object`/preserve-selection logic a third time
+    実行 tab's dropdown via `Update-ClientComboItems -ComboBox ... -FixedItems
+    @($defaultClientLabel)` (only the fixed items and target `ComboBox`
+    differ — don't duplicate the `Get-ChildItem`/`Sort-Object`/
+    preserve-selection logic a third time
     if another dropdown like this gets added later). Switching
     `$cmbSettingsClient` (`Add_SelectedIndexChanged`) re-renders
     `$fieldPanel` via the same `Update-SettingsFields`, which now delegates
@@ -393,22 +401,35 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     `$lblLogClient`, text "クライアント:", positioned above the stage radio
     buttons, same layout convention as the 実行 tab's `$lblClient`/`$cmbClient`
     row) populated by `Update-LogClientList` — another thin wrapper around
-    `Update-ClientComboItems`, but with `-FirstItem "すべて"` rather than
-    `$defaultClientLabel`. This is deliberately a different word/concept, not
-    an oversight: "デフォルト" would mean "only logs from runs where no client
-    was selected", whereas "すべて" means "logs from every run regardless of
-    client" (the pre-existing, no-filter behavior) — the two are not the same
-    filter, so don't "fix" this to `$defaultClientLabel` for consistency with
-    the other two tabs. `Update-LogView` reads `$cmbLogClient.SelectedItem`
+    `Update-ClientComboItems`, but with `-FixedItems @("すべて",
+    $defaultClientLabel)` instead of just `@($defaultClientLabel)`: "すべて"
+    (no filtering — every log regardless of which client, if any, produced
+    it) and "デフォルト" (only logs from runs where no client was selected)
+    are genuinely different filters, so both are offered rather than
+    collapsing to one. `Update-LogView` reads `$cmbLogClient.SelectedItem`
     and, unless it's "すべて", appends `"$logClient" + "_"` to the
-    `Get-ChildItem -Filter` pattern — matching the `<クライアント名>_` segment
+    `Get-ChildItem -Filter` pattern — when `$logClient` is `$defaultClientLabel`
+    ("デフォルト") this becomes the same `"デフォルト_"` segment
     `Get-ClientLogSegment` (`scripts\common.ps1`) inserts into log filenames
-    whenever a run was started with a client selected (`$env:CLIENT_NAME`
-    set, either via this GUI's client dropdown or the `.bat` entry points'
-    own `client=<name>` argument). Re-scans/re-renders on the same triggers
-    as the stage radios (`Add_SelectedIndexChanged`, and the ログ tab's
-    `SelectedIndexChanged` case in the shared `$tabControl` handler calls both
-    `Update-LogClientList` and `Update-LogView`).
+    for a no-client run, and when it's an actual client name it becomes that
+    client's `<name>_` segment — either way `Update-LogView`'s filter and
+    `Get-ClientLogSegment`'s filename segment are built from the same
+    `$defaultClientLabel` string, so they can't drift out of sync. Re-scans/
+    re-renders on the same triggers as the stage radios
+    (`Add_SelectedIndexChanged`, and the ログ tab's `SelectedIndexChanged`
+    case in the shared `$tabControl` handler calls both `Update-LogClientList`
+    and `Update-LogView`). A sibling helper, `Get-ClientLogHeaderLines` (also
+    `scripts\common.ps1`), returns `@("クライアント: <名前>")` when
+    `$env:CLIENT_NAME` is set, or `@("クライアント: デフォルト")` otherwise —
+    mirroring `Get-ClientLogSegment`'s own `$env:CLIENT_NAME` check
+    (`"$($env:CLIENT_NAME)_"` or `"デフォルト_"`) so the log *content* and the
+    log *filename* always agree on which client (or デフォルト) actually ran,
+    even though the two live in separate functions (one returns a display
+    line, the other a filename fragment) rather than sharing a single
+    implementation.
+    Each of the three stage `.ps1` scripts splices its result into
+    `$logLines` right after `"# 実行情報"` and before `バッチ名:`, without
+    duplicating the `if ($env:CLIENT_NAME) {...}` check a third time.
 
   `build-gui.bat` / `scripts/build-gui.ps1` compile `gui.ps1` into
   `コース別パッケージ生成ツール.exe` at the project root via the `ps2exe` PowerShell

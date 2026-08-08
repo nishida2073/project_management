@@ -75,6 +75,7 @@ $endTime = Get-Date
 $logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $sitePath -Leaf).log"
 $logLines = @()
 $logLines += "# 実行情報"
+$logLines += (Get-ClientLogHeaderLines)
 $logLines += "バッチ名: $($env:BATCH_NAME)"
 $logLines += "開始時刻: $($startTime.ToString('yyyy/MM/dd HH:mm:ss'))"
 $logLines += "終了時刻: $($endTime.ToString('yyyy/MM/dd HH:mm:ss'))"
