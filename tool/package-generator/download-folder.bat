@@ -15,13 +15,7 @@ shift
 goto parse_args
 :args_done
 call clients\set-env.bat
-set "SAVED_DOWNLOAD_ENABLED=%DOWNLOAD_ENABLED%"
-set "SAVED_GENERATE_ENABLED=%GENERATE_ENABLED%"
-set "SAVED_UPLOAD_ENABLED=%UPLOAD_ENABLED%"
 if defined CLIENT_NAME if exist "clients\set-env-%CLIENT_NAME%.bat" call clients\set-env-%CLIENT_NAME%.bat
-set "DOWNLOAD_ENABLED=%SAVED_DOWNLOAD_ENABLED%"
-set "GENERATE_ENABLED=%SAVED_GENERATE_ENABLED%"
-set "UPLOAD_ENABLED=%SAVED_UPLOAD_ENABLED%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^

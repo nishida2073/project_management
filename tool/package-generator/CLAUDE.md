@@ -178,48 +178,54 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     but whatever the checkboxes actually show at the moment 実行 is clicked
     is what wins — switching clients doesn't bypass manual checkbox edits.
 
-    **This exclusion on the GUI side is not sufficient by itself — the
-    `.bat` layer needs the equivalent protection too, and originally didn't
-    have it.** `$env:DOWNLOAD_ENABLED`/etc. set from the checkboxes are only
-    the *starting* environment for the child `all.bat` process; `all.bat`
-    (and, redundantly but harmlessly for everything except this, each of
-    `download-folder.bat`/`generate-package.bat`/`upload-folder.bat`) still
+    **This exclusion on the GUI side is not sufficient by itself.**
+    `$env:DOWNLOAD_ENABLED`/etc. set from the checkboxes are only the
+    *starting* environment for the child `all.bat` process; `all.bat` still
     calls `clients\set-env.bat` (`if not defined`, harmless — checkbox values
-    survive) *and then* `clients\set-env-%CLIENT_NAME%.bat`, whose lines are
-    unconditional `set "VAR=value"` (that's the documented, intentional
-    format for client files — see `clients\README.md`). `Save-ClientProfile`
-    writes *every* `$clientOverridableVars` entry unconditionally, which
-    includes the three `*_ENABLED` vars (needed so `Get-ClientProfileValues`
-    can read them back for the checkbox-loading feature above) — so a
-    selected client's file, once `call`ed, unconditionally overwrote
+    survive) *and then* `clients\set-env-%CLIENT_NAME%.bat`. Client files use
+    unconditional `set "VAR=value"` by design (see `clients\README.md`) so
+    that a client's override always wins for every other variable — but
+    `Save-ClientProfile` originally wrote the three `*_ENABLED` vars the same
+    unconditional way too (needed so `Get-ClientProfileValues` could read
+    them back for the checkbox-loading feature above), so a selected
+    client's file, once `call`ed by `all.bat`, unconditionally overwrote
     `DOWNLOAD_ENABLED`/etc. right back to that client's own saved value,
     clobbering whatever the checkboxes had just set. Symptom (confirmed by
     user report): checkboxes were respected with デフォルト selected (no
     client file gets `call`ed) but silently ignored with any other client
-    selected. Since `call` shares one environment block across the whole
-    chain, this wasn't a one-time clobber either — `all.bat`'s `call
-    download-folder.bat` re-triggers `download-folder.bat`'s own identical
-    `call clients\set-env-%CLIENT_NAME%.bat` line (CLIENT_NAME is inherited),
-    re-clobbering `GENERATE_ENABLED`/`UPLOAD_ENABLED` again before `all.bat`
-    even reaches its own `if "%GENERATE_ENABLED%"=="1"` check. Fixed
-    identically in all four entry points (`all.bat`, `download-folder.bat`,
-    `generate-package.bat`, `upload-folder.bat`): snapshot the three vars
-    into `SAVED_*` right after `call clients\set-env.bat` (this captures
-    whatever was already inherited — the GUI's checkbox value, or
-    `set-env.bat`'s own default for a bare command-line run with no GUI
-    involved) and restore them from `SAVED_*` immediately after the
-    `clients\set-env-%CLIENT_NAME%.bat` call — so the client file is still
-    free to unconditionally set those three vars (needed for the GUI's
-    checkbox-loading feature to keep working), but that write is always
-    overwritten back to whatever was already resolved before the client file
-    ran, at every one of the four entry points, not just `all.bat`. If a
-    future change moves where `CLIENT_NAME` becomes known relative to `call
-    clients\set-env.bat` in any of these files (`generate-package.bat`
-    resolves it later, inside its merged `:parse_args` loop, so its snapshot
-    point is right after `call clients\set-env.bat` at the top rather than
-    immediately before the client-file `call`), keep the snapshot anchored to
-    right after `call clients\set-env.bat` and the restore anchored to right
-    after the client-file `call`, not the other way around.
+    selected.
+
+    Fixed entirely on the `gui.ps1` side, with **zero changes to any `.bat`
+    file** — `Save-ClientProfile` now writes the three `*_ENABLED` lines as
+    `if not defined VAR set "VAR=value"` (the same idiom `set-env.bat` itself
+    uses) instead of a plain unconditional `set`, while every other
+    `$clientOverridableVars` entry stays unconditional. Since `all.bat`
+    always calls `clients\set-env.bat` first — which sets `DOWNLOAD_ENABLED`
+    etc. from the GUI's checkbox-derived env var if already defined, or its
+    own default otherwise — by the time the client file's `if not defined`
+    line runs, the var is already defined either way, so that line is always
+    a no-op at execution time. The client file can still carry its own saved
+    `*_ENABLED` preference (read back for the checkbox-loading feature), it
+    just never actually *takes effect* when the batch chain runs — consistent
+    for both the GUI path and a bare `client=<name>` command-line run with no
+    GUI involved. `Get-ClientProfileRawValues` gained a second regex,
+    `$clientEnabledLineRegex` (identical pattern to the top-level `$lineRegex`
+    used for `set-env.bat` itself, just scoped to client files), tried after
+    `$clientLineRegex` fails to match a line, so it can still parse this
+    `if not defined` form back out for the checkbox-loading feature — a
+    client file is now expected to mix both line styles, which is why
+    `clients\README.md` carves out this exception to its otherwise-blanket
+    "use unconditional `set`" rule. Trade-off worth knowing: this only
+    protects files the GUI itself writes — `clients\README.md` also
+    documents hand-editing a client file with plain `set` lines, and a
+    manually-added unconditional `set "DOWNLOAD_ENABLED=..."` would
+    reintroduce the exact same clobbering bug for that one file. A
+    `.bat`-side fix (save the three vars to `SAVED_*` right after `call
+    clients\set-env.bat`, restore them right after the client-file `call`,
+    in all four entry points) would have protected against that too, at the
+    cost of touching every entry point instead of just `gui.ps1` — deliberately
+    not chosen here; revisit if a hand-edited client file's `*_ENABLED` line
+    turns out to matter in practice.
     On `Add_Click`, before applying the
     selected client's (non-excluded) values, every var name from
     `$script:lastClientVars` (whatever the *previous* run's client actually

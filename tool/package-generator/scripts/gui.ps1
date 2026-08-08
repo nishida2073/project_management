@@ -22,6 +22,7 @@ $setEnvBat = Join-Path $clientsDir "set-env.bat"
 $clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
+$clientEnabledLineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 $defaultClientLabel = "デフォルト"
 $script:suppressComboSync = $false
 
@@ -136,7 +137,11 @@ function Get-ClientProfileRawValues {
         return $result
     }
     foreach ($line in [System.IO.File]::ReadAllLines($clientBat, $cp932)) {
-        $m = $clientLineRegex.Match($line.Trim())
+        $trimmed = $line.Trim()
+        $m = $clientLineRegex.Match($trimmed)
+        if (!$m.Success) {
+            $m = $clientEnabledLineRegex.Match($trimmed)
+        }
         if ($m.Success) {
             $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
         }
@@ -545,12 +550,13 @@ function Save-ClientProfile {
     param([string]$ClientName)
     $clientBat = Get-ClientBatPath $ClientName
     $newLines = foreach ($varName in $clientOverridableVars) {
-        $newVal = if ($script:fieldRadios.ContainsKey($varName)) {
-            if ($script:fieldRadios[$varName].Checked) { "1" } else { "0" }
+        if ($script:fieldRadios.ContainsKey($varName)) {
+            $newVal = if ($script:fieldRadios[$varName].Checked) { "1" } else { "0" }
+            "if not defined $varName set `"$varName=$newVal`""
         } else {
-            $script:fieldTextBoxes[$varName].Text
+            $newVal = $script:fieldTextBoxes[$varName].Text
+            "set `"$varName=$newVal`""
         }
-        "set `"$varName=$newVal`""
     }
     $content = ($newLines -join "`r`n") + "`r`n"
     [System.IO.File]::WriteAllText($clientBat, $content, $cp932)

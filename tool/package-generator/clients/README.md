@@ -13,6 +13,7 @@ GUI版の「設定」タブから作成・編集できる（「クライアン�
 - 書かなかった変数は`set-env.bat`の値がそのまま使われる。
 - ファイル名の`set-env-`より後ろの部分（拡張子`.bat`を除く）がGUIのドロップダウンに表示される。
 - `if not defined`ではなく`set`（無条件の上書き）を使うこと。GUI側はこのファイルの値を必ず優先させる。
+  - 例外：`DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`の3項目だけは`if not defined VAR set "VAR=値"`（`set-env.bat`と同じ書き方）で書く。実行タブのチェックボックス（または`set-env.bat`の既定値）が先に定義済みのため、この3行は実質無視され、実行時にはチェックボックス側が優先される。GUIの「設定」タブから保存すると自動でこの形式になる。
 - ここに書いたファイルは`set-env.bat`自体を書き換えない。GUIを実行するたびに一時的に反映されるだけなので、クライアントを切り替えても`set-env.bat`の内容は元のまま。
 
 ## `.bat`から直接使う場合
@@ -40,6 +41,6 @@ GUIの「実行」タブでクライアントを選ぶか、`.bat`に`client=`�
 
 ## 注意点
 
-> `if not defined VAR set "VAR=値"`（`set-env.bat`と同じ書き方）ではなく、`set "VAR=値"`（無条件）で書くこと。GUIはこのファイルの`set`行だけを読み取るため、`if not defined`形式で書いても無視される。
+> `DOWNLOAD_ENABLED`/`GENERATE_ENABLED`/`UPLOAD_ENABLED`の3項目以外は、`if not defined VAR set "VAR=値"`（`set-env.bat`と同じ書き方）ではなく、`set "VAR=値"`（無条件）で書くこと。この3項目だけは逆に`if not defined`で書く（上のファイルの作り方を参照）。
 
 > `set-env.bat`自身が`%~dp0`（自分の場所）から`BASE_PATH`を計算しているため、`set-env.bat`を別の場所に移動する場合は`clients`フォルダの1つ上がツールのルートになるように置くこと。
