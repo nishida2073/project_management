@@ -22,7 +22,11 @@ powershell.exe ^
  -File .\scripts\download-folder.ps1
 set "EXITCODE=%ERRORLEVEL%"
 
-echo 5•bŒã‚ÉŽ©“®“I‚É•Â‚¶‚Ü‚·...
+echo ==================================================
+echo %BATCH_NAME% I—¹F%date% %time%
+echo ==================================================
+
 timeout /t 5 >nul
+
 
 exit /b %EXITCODE%
