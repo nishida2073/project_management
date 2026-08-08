@@ -39,15 +39,15 @@ if ($env:GENERATE_SHEETS_EXCLUDE) {
     $sheetNames = $sheetNames | Where-Object { $excludeList -notcontains $_ }
 }
 
-Write-Host "# ZIP作成開始"
+Write-Host "# パッケージ作成開始"
 foreach ($sheet in $sheetNames) {
 
     Write-Host ""
     $sheetStartTime = Get-Date
     Write-Host "$sheet"
 
-    $companyWork = Join-Path $workPath $sheet
-    New-Item $companyWork -ItemType Directory -Force | Out-Null
+    $packageWork = Join-Path $workPath $sheet
+    New-Item $packageWork -ItemType Directory -Force | Out-Null
 
     $copyLog = @()
 
@@ -72,9 +72,9 @@ foreach ($sheet in $sheetNames) {
             continue
         }
 
-        $storeRoot = $companyWork
+        $storeRoot = $packageWork
         if ($row.格納先) {
-            $storeRoot = Join-Path $companyWork $row.格納先
+            $storeRoot = Join-Path $packageWork $row.格納先
         }
         New-Item $storeRoot -ItemType Directory -Force | Out-Null
 
@@ -128,7 +128,7 @@ foreach ($sheet in $sheetNames) {
     $zip = Join-Path $outputPath "$sheet.zip"
     Remove-Item $zip -Force -ErrorAction SilentlyContinue
 
-    $zipItems = Get-ChildItem -LiteralPath $companyWork
+    $zipItems = Get-ChildItem -LiteralPath $packageWork
     if ($zipItems) {
         Compress-Archive -LiteralPath $zipItems.FullName -DestinationPath $zip
         Write-Host "$zip"
@@ -147,10 +147,10 @@ foreach ($sheet in $sheetNames) {
         $logLines += ""
         $logLines += "# フォルダ構成"
         $logLines += $sheet
-        $logLines += (Get-TreeLines -Path $companyWork)
+        $logLines += (Get-TreeLines -Path $packageWork)
         Write-LogFile -Path $logFilePath -Lines $logLines
     } else {
-        Write-Host "$sheet：対象ファイルが無いためZIPを作成しませんでした"
+        Write-Host "$sheet：対象ファイルが無いためパッケージを作成しませんでした"
     }
 }
 
@@ -159,4 +159,4 @@ Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
 Copy-Item $configPath (Join-Path $outputPath (Split-Path $configPath -Leaf)) -Force
 
 Write-Host ""
-Write-Host "# ZIP作成完了"
+Write-Host "# パッケージ作成完了"
