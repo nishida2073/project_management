@@ -1,13 +1,13 @@
+ï»¿# =========================================
+# å…±é€šå‡¦ç†ï¼ˆAzure CLI / Microsoft Graph é–¢é€£ï¼‰
 # =========================================
-# ‹¤’Êˆ—iAzure CLI / Microsoft Graph ŠÖ˜Aj
-# =========================================
-# generate-package.ps1 / download-folder.ps1 / upload-folder.ps1 ‚Å‹¤’Ê‚µ‚Äg‚¤ŠÖ”‚ğ‚Ü‚Æ‚ß‚½‚à‚ÌB
-# ŠeƒXƒNƒŠƒvƒg‚Ìæ“ª‚Åƒhƒbƒgƒ\[ƒXi. "ƒpƒX\common.ps1"j‚µ‚Ä“Ç‚İ‚ŞB
+# generate-package.ps1 / download-folder.ps1 / upload-folder.ps1 ã§å…±é€šã—ã¦ä½¿ã†é–¢æ•°ã‚’ã¾ã¨ã‚ãŸã‚‚ã®ã€‚
+# å„ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®å…ˆé ­ã§ãƒ‰ãƒƒãƒˆã‚½ãƒ¼ã‚¹ï¼ˆ. "ãƒ‘ã‚¹\common.ps1"ï¼‰ã—ã¦èª­ã¿è¾¼ã‚€ã€‚
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
-$defaultClientLabel = "ƒfƒtƒHƒ‹ƒg"
+$defaultClientLabel = "ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ"
 
 function Write-LogFile {
     param(
@@ -26,9 +26,9 @@ function Get-ClientLogSegment {
 
 function Get-ClientLogHeaderLines {
     if ($env:CLIENT_NAME) {
-        return @("ƒNƒ‰ƒCƒAƒ“ƒg: $($env:CLIENT_NAME)")
+        return @("ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆ: $($env:CLIENT_NAME)")
     }
-    return @("ƒNƒ‰ƒCƒAƒ“ƒg: $defaultClientLabel")
+    return @("ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆ: $defaultClientLabel")
 }
 
 function Get-TreeLines {
@@ -42,14 +42,56 @@ function Get-TreeLines {
     for ($i = 0; $i -lt $items.Count; $i++) {
         $item = $items[$i]
         $isLast = ($i -eq $items.Count - 1)
-        $connector = if ($isLast) { "„¤„Ÿ " } else { "„¥„Ÿ " }
+        $connector = if ($isLast) { "â””â”€ " } else { "â”œâ”€ " }
         Write-Output "$Prefix$connector$($item.Name)"
 
         if ($item.PSIsContainer) {
-            $childPrefix = if ($isLast) { "$Prefix    " } else { "$Prefix„    " }
+            $childPrefix = if ($isLast) { "$Prefix    " } else { "$Prefixâ”‚   " }
             Get-TreeLines -Path $item.FullName -Prefix $childPrefix
         }
     }
+}
+
+function Write-RunLogFile {
+    param(
+        [string]$LogPath,
+        [string]$LogFileName,
+        [string[]]$ExtraHeaderLines = @(),
+        [datetime]$StartTime,
+        [datetime]$EndTime,
+        [string]$ResultSectionTitle,
+        [string[]]$ResultLines,
+        [string]$FolderPath
+    )
+
+    $logFilePath = Join-Path $LogPath $LogFileName
+    $logLines = @()
+    $logLines += "# å®Ÿè¡Œæƒ…å ±"
+    $logLines += (Get-ClientLogHeaderLines)
+    $logLines += "ãƒãƒƒãƒå: $($env:BATCH_NAME)"
+    $logLines += $ExtraHeaderLines
+    $logLines += "é–‹å§‹æ™‚åˆ»: $($StartTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+    $logLines += "çµ‚äº†æ™‚åˆ»: $($EndTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+    $logLines += ""
+    $logLines += "# $ResultSectionTitle"
+    $logLines += $ResultLines
+    $logLines += ""
+    $logLines += "# ãƒ•ã‚©ãƒ«ãƒ€æ§‹æˆ"
+    $logLines += (Split-Path $FolderPath -Leaf)
+    $logLines += (Get-TreeLines -Path $FolderPath)
+    Write-LogFile -Path $logFilePath -Lines $logLines
+
+    return $logFilePath
+}
+
+function Show-LogFileContent {
+    param([string]$Path)
+
+    Write-Host ""
+    foreach ($line in [System.IO.File]::ReadAllLines($Path, $cp932)) {
+        Write-Host $line
+    }
+    Write-Host ""
 }
 
 function Get-AzureCliPath {
@@ -58,7 +100,7 @@ function Get-AzureCliPath {
         $az = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
     }
     if (!(Test-Path $az)) {
-        Write-Host "Azure CLI‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñBˆÈ‰º‚ÅƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚­‚¾‚³‚¢F"
+        Write-Host "Azure CLIãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚ä»¥ä¸‹ã§ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¦ãã ã•ã„ï¼š"
         Write-Host "  winget install --id Microsoft.AzureCLI"
         exit 1
     }
@@ -73,7 +115,7 @@ function Get-GraphToken {
 
     $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     if ($LASTEXITCODE -ne 0 -or !$out) {
-        Write-Host "ƒTƒCƒ“ƒCƒ“‚ª•K—v‚Å‚·B•\¦‚³‚ê‚éURL‚ÆƒR[ƒh‚ÅƒƒOƒCƒ“‚µ‚Ä‚­‚¾‚³‚¢B"
+        Write-Host "ã‚µã‚¤ãƒ³ã‚¤ãƒ³ãŒå¿…è¦ã§ã™ã€‚è¡¨ç¤ºã•ã‚Œã‚‹URLã¨ã‚³ãƒ¼ãƒ‰ã§ãƒ­ã‚°ã‚¤ãƒ³ã—ã¦ãã ã•ã„ã€‚"
         Write-Host ""
 
         $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -92,7 +134,7 @@ function Get-GraphToken {
             $line = $loginProc.StandardOutput.ReadLine()
             if (!$shown -and $line -match "open the page (?<url>\S+)\s+and enter the code (?<code>[A-Z0-9\-]+)") {
                 Write-Host "URL: $($Matches.url)"
-                Write-Host "ƒR[ƒhF$($Matches.code)"
+                Write-Host "ã‚³ãƒ¼ãƒ‰ï¼š$($Matches.code)"
                 Write-Host ""
                 $shown = $true
             }
@@ -102,7 +144,7 @@ function Get-GraphToken {
         $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     }
     if (!$out) {
-        Write-Host "ƒg[ƒNƒ“‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½"
+        Write-Host "ãƒˆãƒ¼ã‚¯ãƒ³ã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸ"
         exit 1
     }
     return ($out | Out-String | ConvertFrom-Json).accessToken

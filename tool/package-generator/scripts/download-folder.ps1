@@ -1,9 +1,9 @@
+ï»¿# =========================================
+# Teams/SharePointãƒ•ã‚¡ã‚¤ãƒ«å–å¾—ãƒ„ãƒ¼ãƒ«ï¼ˆAzure CLI + Microsoft Graphç‰ˆï¼‰
 # =========================================
-# Teams/SharePointƒtƒ@ƒCƒ‹æ“¾ƒc[ƒ‹iAzure CLI + Microsoft Graph”Åj
-# =========================================
-# PnP.PowerShell‚ÌŠù’èƒAƒvƒŠ‚ªƒeƒiƒ“ƒg‚Å‹–‰Â‚³‚ê‚Ä‚¢‚È‚¢ŠÂ‹«Œü‚¯‚ÉA
-# Šù‚Éƒeƒiƒ“ƒg‚Å‹–‰Â‚³‚ê‚Ä‚¢‚éAzure CLI‚Åƒg[ƒNƒ“‚ğæ“¾‚µA
-# Microsoft Graph API‚Å’¼Úƒtƒ@ƒCƒ‹‚ğæ“¾‚·‚éB
+# PnP.PowerShellã®æ—¢å®šã‚¢ãƒ—ãƒªãŒãƒ†ãƒŠãƒ³ãƒˆã§è¨±å¯ã•ã‚Œã¦ã„ãªã„ç’°å¢ƒå‘ã‘ã«ã€
+# æ—¢ã«ãƒ†ãƒŠãƒ³ãƒˆã§è¨±å¯ã•ã‚Œã¦ã„ã‚‹Azure CLIã§ãƒˆãƒ¼ã‚¯ãƒ³ã‚’å–å¾—ã—ã€
+# Microsoft Graph APIã§ç›´æ¥ãƒ•ã‚¡ã‚¤ãƒ«ã‚’å–å¾—ã™ã‚‹ã€‚
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
@@ -14,7 +14,7 @@ $sitePath = $env:DOWNLOAD_SITE_PATH
 $tenantId = $env:DOWNLOAD_SITE_TENANT_ID
 
 if (!$siteUrl -or !$sitePath -or !$tenantId) {
-    Write-Host "DOWNLOAD_SITE_URL ‚Æ DOWNLOAD_SITE_PATH ‚Æ DOWNLOAD_SITE_TENANT_ID ‚ğ set-env.bat ‚Åİ’è‚µ‚Ä‚­‚¾‚³‚¢"
+    Write-Host "DOWNLOAD_SITE_URL ã¨ DOWNLOAD_SITE_PATH ã¨ DOWNLOAD_SITE_TENANT_ID ã‚’ set-env.bat ã§è¨­å®šã—ã¦ãã ã•ã„"
     exit 1
 }
 
@@ -56,8 +56,8 @@ function Get-GraphChildrenRecursive {
         foreach ($item in $page.value) {
             if ($item.file) {
                 $dest = Join-Path $LocalFolder $item.Name
+                Write-Host "æ“ä½œä¸­ï¼š$($item.Name)"
                 Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
-                Write-Host "$($item.Name)"
                 $script:downloadLog += "$RelativePath/$($item.Name) -> $dest"
             } elseif ($item.folder) {
                 Get-GraphChildrenRecursive -ItemId $item.id -LocalFolder (Join-Path $LocalFolder $item.Name) -RelativePath "$RelativePath/$($item.Name)"
@@ -67,26 +67,11 @@ function Get-GraphChildrenRecursive {
     }
 }
 
-Write-Host "# ƒ_ƒEƒ“ƒ[ƒhŠJn"
-Write-Host "$sitePath -> $localPath"
 Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localPath -RelativePath $sitePath
 
 $endTime = Get-Date
-$logFilePath = Join-Path $logPath "$($env:DOWNLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $sitePath -Leaf).log"
-$logLines = @()
-$logLines += "# Àsî•ñ"
-$logLines += (Get-ClientLogHeaderLines)
-$logLines += "ƒoƒbƒ`–¼: $($env:BATCH_NAME)"
-$logLines += "ŠJn: $($startTime.ToString('yyyy/MM/dd HH:mm:ss'))"
-$logLines += "I—¹: $($endTime.ToString('yyyy/MM/dd HH:mm:ss'))"
-$logLines += ""
-$logLines += "# ƒ_ƒEƒ“ƒ[ƒhŒ‹‰Ê"
-$logLines += $downloadLog
-$logLines += ""
-$logLines += "# ƒtƒHƒ‹ƒ_\¬"
-$logLines += (Split-Path $localPath -Leaf)
-$logLines += (Get-TreeLines -Path $localPath)
-Write-LogFile -Path $logFilePath -Lines $logLines
-
-Write-Host ""
-Write-Host "# ƒ_ƒEƒ“ƒ[ƒhŠ®—¹"
+$logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:DOWNLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $sitePath -Leaf).log" `
+    -StartTime $startTime -EndTime $endTime `
+    -ResultSectionTitle "ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰çµæœ" -ResultLines $downloadLog `
+    -FolderPath $localPath
+Show-LogFileContent -Path $logFilePath

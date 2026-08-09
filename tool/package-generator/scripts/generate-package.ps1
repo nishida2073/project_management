@@ -1,5 +1,5 @@
-# =========================================
-# ƒR[ƒX•ÊƒpƒbƒP[ƒW¶¬ƒc[ƒ‹
+ï»¿# =========================================
+# ã‚³ãƒ¼ã‚¹åˆ¥ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ç”Ÿæˆãƒ„ãƒ¼ãƒ«
 # =========================================
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
@@ -10,7 +10,7 @@ $outputPath = $env:GENERATE_OUTPUT_PATH
 $logPath = $env:COMMON_LOG_PATH
 
 if (!$configPath -or !$workPath -or !$outputPath -or !$logPath) {
-    Write-Host "GENERATE_CONFIG_PATH ‚Æ GENERATE_WORK_PATH ‚Æ GENERATE_OUTPUT_PATH ‚Æ COMMON_LOG_PATH ‚ğ set-env.bat ‚Åİ’è‚µ‚Ä‚­‚¾‚³‚¢"
+    Write-Host "GENERATE_CONFIG_PATH ã¨ GENERATE_WORK_PATH ã¨ GENERATE_OUTPUT_PATH ã¨ COMMON_LOG_PATH ã‚’ set-env.bat ã§è¨­å®šã—ã¦ãã ã•ã„"
     exit 1
 }
 
@@ -20,7 +20,7 @@ New-Item $outputPath -ItemType Directory -Force | Out-Null
 New-Item $logPath -ItemType Directory -Force | Out-Null
 
 if (!(Get-Module -ListAvailable ImportExcel)) {
-    Write-Host "ImportExcel‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ü‚·"
+    Write-Host "ImportExcelã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¾ã™"
     Install-Module ImportExcel -Scope CurrentUser -Force
 }
 
@@ -39,13 +39,8 @@ if ($env:GENERATE_SHEETS_EXCLUDE) {
     $sheetNames = $sheetNames | Where-Object { $excludeList -notcontains $_ }
 }
 
-Write-Host "# ƒpƒbƒP[ƒWì¬ŠJn"
 foreach ($sheetName in $sheetNames) {
-
-    Write-Host ""
     $sheetStartTime = Get-Date
-    Write-Host "$sheetName"
-
     $packageWorkPath = Join-Path $workPath $sheetName
     New-Item $packageWorkPath -ItemType Directory -Force | Out-Null
 
@@ -55,7 +50,7 @@ foreach ($sheetName in $sheetNames) {
 
     foreach ($row in $rows) {
 
-        $sourcePath = $row.'æ“¾Œ³iƒtƒ‹ƒpƒXj'
+        $sourcePath = $row.'å–å¾—å…ƒï¼ˆãƒ•ãƒ«ãƒ‘ã‚¹ï¼‰'
 
         if (!$sourcePath) {
             continue
@@ -68,13 +63,13 @@ foreach ($sheetName in $sheetNames) {
         $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
 
         if (!(Test-Path $sourcePath)) {
-            Write-Host "‘¶İ‚µ‚Ü‚¹‚ñF$sourcePath"
+            Write-Host "å­˜åœ¨ã—ã¾ã›ã‚“ï¼š$sourcePath"
             continue
         }
 
         $storeRootPath = $packageWorkPath
-        if ($row.Ši”[æ) {
-            $storeRootPath = Join-Path $packageWorkPath $row.Ši”[æ
+        if ($row.æ ¼ç´å…ˆ) {
+            $storeRootPath = Join-Path $packageWorkPath $row.æ ¼ç´å…ˆ
         }
         New-Item $storeRootPath -ItemType Directory -Force | Out-Null
 
@@ -86,8 +81,8 @@ foreach ($sheetName in $sheetNames) {
 
                 $relativePath = $_.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
 
-                if ($row.ŠÜ‚ß‚éŒ`®) {
-                    $includePatterns = $row.ŠÜ‚ß‚éŒ`®.Split(",") | ForEach-Object { $_.Trim() }
+                if ($row.å«ã‚ã‚‹å½¢å¼) {
+                    $includePatterns = $row.å«ã‚ã‚‹å½¢å¼.Split(",") | ForEach-Object { $_.Trim() }
                     $included = $false
                     foreach ($pattern in $includePatterns) {
                         if ($relativePath -like $pattern) {
@@ -100,8 +95,8 @@ foreach ($sheetName in $sheetNames) {
                     }
                 }
 
-                if ($row.œŠO‚·‚éŒ`®) {
-                    foreach ($exclude in $row.œŠO‚·‚éŒ`®.Split(",")) {
+                if ($row.é™¤å¤–ã™ã‚‹å½¢å¼) {
+                    foreach ($exclude in $row.é™¤å¤–ã™ã‚‹å½¢å¼.Split(",")) {
                         if ($relativePath -like $exclude.Trim()) {
                             return
                         }
@@ -131,26 +126,15 @@ foreach ($sheetName in $sheetNames) {
     $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
     if ($packageItems) {
         Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
-        Write-Host "$packagePath"
         $sheetEndTime = Get-Date
-        $logFilePath = Join-Path $logPath "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log"
-        $logLines = @()
-        $logLines += "# Àsî•ñ"
-        $logLines += (Get-ClientLogHeaderLines)
-        $logLines += "ƒoƒbƒ`–¼: $($env:BATCH_NAME)"
-        $logLines += "ƒV[ƒg–¼: $($sheetName)"
-        $logLines += "ŠJn: $($sheetStartTime.ToString('yyyy/MM/dd HH:mm:ss'))"
-        $logLines += "I—¹: $($sheetEndTime.ToString('yyyy/MM/dd HH:mm:ss'))"
-        $logLines += ""
-        $logLines += "# ƒRƒs[Œ‹‰Ê"
-        $logLines += $copyLog
-        $logLines += ""
-        $logLines += "# ƒtƒHƒ‹ƒ_\¬"
-        $logLines += $sheetName
-        $logLines += (Get-TreeLines -Path $packageWorkPath)
-        Write-LogFile -Path $logFilePath -Lines $logLines
+        $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log" `
+            -ExtraHeaderLines @("ã‚·ãƒ¼ãƒˆå: $sheetName") `
+            -StartTime $sheetStartTime -EndTime $sheetEndTime `
+            -ResultSectionTitle "ã‚³ãƒ”ãƒ¼çµæœ" -ResultLines $copyLog `
+            -FolderPath $packageWorkPath
+        Show-LogFileContent -Path $logFilePath
     } else {
-        Write-Host "$sheetNameF‘ÎÛƒtƒ@ƒCƒ‹‚ª–³‚¢‚½‚ßƒpƒbƒP[ƒW‚ğì¬‚µ‚Ü‚¹‚ñ‚Å‚µ‚½"
+        Write-Host "$sheetNameï¼šå¯¾è±¡ãƒ•ã‚¡ã‚¤ãƒ«ãŒç„¡ã„ãŸã‚ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã‚’ä½œæˆã—ã¾ã›ã‚“ã§ã—ãŸ"
     }
 }
 
@@ -158,5 +142,3 @@ Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
 
 Copy-Item $configPath (Join-Path $outputPath (Split-Path $configPath -Leaf)) -Force
 
-Write-Host ""
-Write-Host "# ƒpƒbƒP[ƒWì¬Š®—¹"

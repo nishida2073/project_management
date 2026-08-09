@@ -519,16 +519,16 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
   "1. ファイルダウンロード" etc.), so a text-only match can silently grab the
   wrong tab's control.
 
-## Critical constraint: Shift-JIS (CP932) encoding
+## Critical constraint: file encoding
 
-All `.bat` and `.ps1` files contain Japanese text and are saved as **Shift-JIS
-(CP932)**, not UTF-8, **except `scripts/gui.ps1`, which must be UTF-8 with a
-BOM** (see below) because it is compiled by `ps2exe`. **Never edit any of
-these files with the Edit/Write tools directly** —
-those assume UTF-8 and will silently corrupt every multi-byte character on save
-(this has happened before and is not easily noticed until the file is reopened).
-
-Use a byte-safe read/modify/write instead:
+**`.bat` files** contain Japanese text and are saved as **Shift-JIS (CP932)**,
+not UTF-8 — cmd.exe's native handling of Japanese text is far more reliable
+than UTF-8, which needs `chcp 65001` and still has rough edges (BOM
+misinterpreted as garbage on the first line, some built-in commands mangling
+non-ASCII). **Never edit `.bat` files with the Edit/Write tools directly** —
+those assume UTF-8 and will silently corrupt every multi-byte character on
+save (this has happened before and is not easily noticed until the file is
+reopened). Use a byte-safe read/modify/write instead:
 
 ```powershell
 $enc = [System.Text.Encoding]::GetEncoding(932)
@@ -542,27 +542,38 @@ line-continuation in `.bat` files cause `cmd.exe` to misparse the file. If a
 tool ever produces LF-only output, normalize with
 `.Replace("\r\n","\n").Replace("\n","\r\n")` before writing.
 
-**`scripts/gui.ps1` is the one exception** — it must be saved as UTF-8 with a
-BOM, not CP932. Confirmed empirically: `ps2exe`'s `-inputFile` reader does not
-respect the system ANSI codepage, so a CP932-encoded source compiles into an
-exe with mangled/garbled Japanese text in every string literal (window title,
-labels, log messages) — the string *lengths* even change (e.g. an 11-character
-title became 17 characters), which is the tell that this is happening versus a
-display-only rendering issue. UTF-8-with-BOM reads correctly both ways: via
-`powershell.exe -File` (BOM is honored regardless of system codepage) and via
-`ps2exe` compilation. Edit it like this instead of the CP932 snippet above:
+**All `.ps1` files** (`common.ps1`, `download-folder.ps1`,
+`generate-package.ps1`, `upload-folder.ps1`, `build-gui.ps1`, `gui.ps1`) are
+saved as **UTF-8 with a BOM** — not CP932. `gui.ps1` had to be UTF-8-with-BOM
+from the start: it's compiled by `ps2exe`, whose `-inputFile` reader doesn't
+respect the system ANSI codepage, so a CP932 source there used to compile into
+an exe with mangled Japanese string literals (confirmed empirically — string
+*lengths* even changed, e.g. an 11-character title became 17 characters). The
+other four `.ps1` files were migrated from CP932 to UTF-8-with-BOM afterward,
+purely to remove the CP932 editing tax (byte-safe read/modify/write, no plain
+Edit/Write, an actual bug introduced mid-migration from a `"$var_"` PowerShell
+interpolation gotcha) that `.bat` files are stuck with for the cmd.exe reasons
+above — `.ps1` has no such constraint, since Windows PowerShell 5.1 honors a
+UTF-8 BOM regardless of the system codepage (`chcp`/locale don't matter),
+confirmed both via `powershell.exe -File` and `ps2exe` compilation.
+
+Because of this, **`.ps1` files can be edited with the normal Edit/Write
+tools** — verified empirically that Edit preserves the BOM. After any edit,
+still verify both, since a lost BOM or line-ending drift is easy to miss
+silently:
 
 ```powershell
-$utf8bom = [System.Text.UTF8Encoding]::new($true)
+$bytes = [System.IO.File]::ReadAllBytes($path)
+$hasBom = ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)
 $content = [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8)
-$content = $content.Replace($old, $new)
-[System.IO.File]::WriteAllText($path, $content, $utf8bom)
+$null = [System.Management.Automation.PSParser]::Tokenize($content, [ref]$null)  # throws on syntax error
 ```
 
-After editing `gui.ps1`, rebuild with `build-gui.bat` and actually launch the
-resulting `.exe` to confirm the title/labels render correctly before
-considering the change done — this class of bug is invisible in the source
-file itself (which decodes fine) and only shows up in the compiled output.
+After editing `gui.ps1` specifically, also rebuild with `build-gui.bat` and
+actually launch the resulting `.exe` to confirm the title/labels render
+correctly before considering the change done — a lost BOM is invisible in the
+source file itself (which still decodes fine) and only shows up in the
+compiled output.
 
 `README.md` and `config/README.md` are plain UTF-8 Markdown — normal Edit/Write
 is fine for those.

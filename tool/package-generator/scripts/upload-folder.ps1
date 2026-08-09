@@ -1,7 +1,7 @@
+ï»¿# =========================================
+# ãƒ­ãƒ¼ã‚«ãƒ«ãƒ•ã‚©ãƒ«ãƒ€â†’SharePointã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰ãƒ„ãƒ¼ãƒ«ï¼ˆAzure CLI + Microsoft Graphç‰ˆï¼‰
 # =========================================
-# ƒ[ƒJƒ‹ƒtƒHƒ‹ƒ_¨SharePointƒAƒbƒvƒ[ƒhƒc[ƒ‹iAzure CLI + Microsoft Graph”Åj
-# =========================================
-# download-folder.ps1‚Æ“¯‚¶d‘g‚İiAzure CLI‚Åæ“¾‚µ‚½ƒg[ƒNƒ“‚ÅMicrosoft Graph API‚ğ’¼ÚŒÄ‚Ôj‚Ì‹t•ûŒü”ÅB
+# download-folder.ps1ã¨åŒã˜ä»•çµ„ã¿ï¼ˆAzure CLIã§å–å¾—ã—ãŸãƒˆãƒ¼ã‚¯ãƒ³ã§Microsoft Graph APIã‚’ç›´æ¥å‘¼ã¶ï¼‰ã®é€†æ–¹å‘ç‰ˆã€‚
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
@@ -13,12 +13,12 @@ $tenantId = $env:UPLOAD_SITE_TENANT_ID
 $localPath = $env:UPLOAD_LOCAL_PATH
 
 if (!$siteUrl -or !$sitePath -or !$tenantId -or !$localPath) {
-    Write-Host "UPLOAD_SITE_URL ‚Æ UPLOAD_SITE_PATH ‚Æ UPLOAD_SITE_TENANT_ID ‚Æ UPLOAD_LOCAL_PATH ‚ğ set-env.bat ‚Åİ’è‚µ‚Ä‚­‚¾‚³‚¢"
+    Write-Host "UPLOAD_SITE_URL ã¨ UPLOAD_SITE_PATH ã¨ UPLOAD_SITE_TENANT_ID ã¨ UPLOAD_LOCAL_PATH ã‚’ set-env.bat ã§è¨­å®šã—ã¦ãã ã•ã„"
     exit 1
 }
 
 if (!(Test-Path -LiteralPath $localPath)) {
-    Write-Host "ƒAƒbƒvƒ[ƒhŒ³‚ª‘¶İ‚µ‚Ü‚¹‚ñF$localPath"
+    Write-Host "ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰å…ƒãŒå­˜åœ¨ã—ã¾ã›ã‚“ï¼š$localPath"
     exit 1
 }
 
@@ -137,33 +137,18 @@ function Send-FolderRecursive {
             Send-FolderRecursive -LocalFolder $_.FullName -SubPath $childSubPath
         } else {
             $fileSitePath = if ($relativeFolder) { "$relativeFolder/$childSubPath" } else { $childSubPath }
+            Write-Host "æ“ä½œä¸­ï¼š$($_.Name)"
             Send-FileToSharePoint -LocalFile $_.FullName -SiteRelativePath $fileSitePath
-            Write-Host "$($_.Name)"
             $script:uploadLog += "$($_.FullName) -> $sitePath/$childSubPath"
         }
     }
 }
 
-Write-Host "# ƒAƒbƒvƒ[ƒhŠJn"
-Write-Host "$localPath -> $sitePath"
 Send-FolderRecursive -LocalFolder $localPath -SubPath ""
 
 $endTime = Get-Date
-$logFilePath = Join-Path $logPath "$($env:UPLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $relativeFolder -Leaf).log"
-$logLines = @()
-$logLines += "# Àsî•ñ"
-$logLines += (Get-ClientLogHeaderLines)
-$logLines += "ƒoƒbƒ`–¼: $($env:BATCH_NAME)"
-$logLines += "ŠJn: $($startTime.ToString('yyyy/MM/dd HH:mm:ss'))"
-$logLines += "I—¹: $($endTime.ToString('yyyy/MM/dd HH:mm:ss'))"
-$logLines += ""
-$logLines += "# ƒAƒbƒvƒ[ƒhŒ‹‰Ê"
-$logLines += $uploadLog
-$logLines += ""
-$logLines += "# ƒtƒHƒ‹ƒ_\¬"
-$logLines += (Split-Path $localPath -Leaf)
-$logLines += (Get-TreeLines -Path $localPath)
-Write-LogFile -Path $logFilePath -Lines $logLines
-
-Write-Host ""
-Write-Host "# ƒAƒbƒvƒ[ƒhŠ®—¹"
+$logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:UPLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $relativeFolder -Leaf).log" `
+    -StartTime $startTime -EndTime $endTime `
+    -ResultSectionTitle "ã‚¢ãƒƒãƒ—ãƒ­ãƒ¼ãƒ‰çµæœ" -ResultLines $uploadLog `
+    -FolderPath $localPath
+Show-LogFileContent -Path $logFilePath

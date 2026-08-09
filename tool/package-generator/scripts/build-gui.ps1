@@ -1,20 +1,20 @@
-$scriptDir = Split-Path $MyInvocation.MyCommand.Path
+ï»¿$scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $basePath = Split-Path $scriptDir -Parent
 
 if (!(Get-Module -ListAvailable ps2exe)) {
-    Write-Host "ps2exe‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ü‚·"
+    Write-Host "ps2exeã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã—ã¾ã™"
     Install-Module ps2exe -Scope CurrentUser -Force -AllowClobber
 }
 
 $inputFile = Join-Path $scriptDir "gui.ps1"
-$outputFile = Join-Path $basePath "ƒR[ƒX•ÊƒpƒbƒP[ƒW¶¬ƒc[ƒ‹.exe"
+$outputFile = Join-Path $basePath "ã‚³ãƒ¼ã‚¹åˆ¥ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ç”Ÿæˆãƒ„ãƒ¼ãƒ«.exe"
 
-Invoke-PS2EXE -inputFile $inputFile -outputFile $outputFile -STA -noConsole -title "ƒR[ƒX•ÊƒpƒbƒP[ƒW¶¬ƒc[ƒ‹" -product "ƒR[ƒX•ÊƒpƒbƒP[ƒW¶¬ƒc[ƒ‹" -version "1.0.0.0"
+Invoke-PS2EXE -inputFile $inputFile -outputFile $outputFile -STA -noConsole -title "ã‚³ãƒ¼ã‚¹åˆ¥ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ç”Ÿæˆãƒ„ãƒ¼ãƒ«" -product "ã‚³ãƒ¼ã‚¹åˆ¥ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ç”Ÿæˆãƒ„ãƒ¼ãƒ«" -version "1.0.0.0"
 
 if (Test-Path $outputFile) {
     Write-Host ""
-    Write-Host "$outputFile ‚ğì¬‚µ‚Ü‚µ‚½"
+    Write-Host "$outputFile ã‚’ä½œæˆã—ã¾ã—ãŸ"
 } else {
-    Write-Host "ƒrƒ‹ƒh‚É¸”s‚µ‚Ü‚µ‚½"
+    Write-Host "ãƒ“ãƒ«ãƒ‰ã«å¤±æ•—ã—ã¾ã—ãŸ"
     exit 1
 }
