@@ -136,10 +136,16 @@ function Send-FolderRecursive {
         if ($_.PSIsContainer) {
             Send-FolderRecursive -LocalFolder $_.FullName -SubPath $childSubPath
         } else {
+            $currentFile = $_.FullName
+            $currentName = $_.Name
             $fileSitePath = if ($relativeFolder) { "$relativeFolder/$childSubPath" } else { $childSubPath }
-            Write-Host "操作中：$($_.Name)"
-            Send-FileToSharePoint -LocalFile $_.FullName -SiteRelativePath $fileSitePath
-            $script:uploadLog += "$($_.FullName) -> $sitePath/$childSubPath"
+            Write-Host "操作中：$currentName"
+            try {
+                Send-FileToSharePoint -LocalFile $currentFile -SiteRelativePath $fileSitePath
+                $script:uploadLog += "$currentFile -> $sitePath/$childSubPath"
+            } catch {
+                $script:uploadLog += "$currentFile -> エラー: $($_.Exception.Message)"
+            }
         }
     }
 }

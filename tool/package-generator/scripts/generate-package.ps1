@@ -44,7 +44,7 @@ foreach ($sheetName in $sheetNames) {
     $packageWorkPath = Join-Path $workPath $sheetName
     New-Item $packageWorkPath -ItemType Directory -Force | Out-Null
 
-    $copyLog = @()
+    $packageLog = @()
 
     $rows = Import-Excel -Path $configPath -WorksheetName $sheetName
 
@@ -64,6 +64,7 @@ foreach ($sheetName in $sheetNames) {
 
         if (!(Test-Path $sourcePath)) {
             Write-Host "存在しません：$sourcePath"
+            $packageLog += "$sourcePath -> 存在しません"
             continue
         }
 
@@ -104,10 +105,15 @@ foreach ($sheetName in $sheetNames) {
                 }
 
                 if (!$_.PSIsContainer) {
+                    $currentFile = $_.FullName
                     $destinationPath = Join-Path $storeRootPath $relativePath
                     New-Item (Split-Path $destinationPath -Parent) -ItemType Directory -Force | Out-Null
-                    Copy-Item $_.FullName $destinationPath -Force
-                    $copyLog += "$($_.FullName) -> $destinationPath"
+                    try {
+                        Copy-Item $currentFile $destinationPath -Force
+                        $packageLog += "$currentFile -> $destinationPath"
+                    } catch {
+                        $packageLog += "$currentFile -> エラー: $($_.Exception.Message)"
+                    }
                 }
             }
 
@@ -115,8 +121,12 @@ foreach ($sheetName in $sheetNames) {
 
             $fileName = Split-Path $sourcePath -Leaf
             $destinationPath = Join-Path $storeRootPath $fileName
-            Copy-Item $sourcePath $destinationPath -Force
-            $copyLog += "$sourcePath -> $destinationPath"
+            try {
+                Copy-Item $sourcePath $destinationPath -Force
+                $packageLog += "$sourcePath -> $destinationPath"
+            } catch {
+                $packageLog += "$sourcePath -> エラー: $($_.Exception.Message)"
+            }
         }
     }
 
@@ -126,17 +136,23 @@ foreach ($sheetName in $sheetNames) {
     $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
     if ($packageItems) {
         Write-Host "操作中：$sheetName.zip"
-        Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
-        $sheetEndTime = Get-Date
-        $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log" `
-            -ExtraHeaderLines @("シート名: $sheetName") `
-            -StartTime $sheetStartTime -EndTime $sheetEndTime `
-            -ResultSectionTitle "コピー結果" -ResultLines $copyLog `
-            -FolderPath $packageWorkPath
-        Show-LogFileContent -Path $logFilePath
+        try {
+            Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
+        } catch {
+            $packageLog += "パッケージ作成エラー: $($_.Exception.Message)"
+        }
     } else {
         Write-Host "$sheetName：対象ファイルが無いためパッケージを作成しませんでした"
+        $packageLog += "対象ファイルが無いためパッケージを作成しませんでした"
     }
+
+    $sheetEndTime = Get-Date
+    $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log" `
+        -ExtraHeaderLines @("シート名: $sheetName") `
+        -StartTime $sheetStartTime -EndTime $sheetEndTime `
+        -ResultSectionTitle "パッケージ結果" -ResultLines $packageLog `
+        -FolderPath $packageWorkPath
+    Show-LogFileContent -Path $logFilePath
 }
 
 Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue

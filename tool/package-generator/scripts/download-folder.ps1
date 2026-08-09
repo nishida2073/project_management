@@ -57,8 +57,12 @@ function Get-GraphChildrenRecursive {
             if ($item.file) {
                 $dest = Join-Path $LocalFolder $item.Name
                 Write-Host "操作中：$($item.Name)"
-                Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
-                $script:downloadLog += "$RelativePath/$($item.Name) -> $dest"
+                try {
+                    Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
+                    $script:downloadLog += "$RelativePath/$($item.Name) -> $dest"
+                } catch {
+                    $script:downloadLog += "$RelativePath/$($item.Name) -> エラー: $($_.Exception.Message)"
+                }
             } elseif ($item.folder) {
                 Get-GraphChildrenRecursive -ItemId $item.id -LocalFolder (Join-Path $LocalFolder $item.Name) -RelativePath "$RelativePath/$($item.Name)"
             }
