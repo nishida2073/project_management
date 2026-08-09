@@ -77,7 +77,7 @@ function Write-RunLogFile {
     $logLines += $ResultLines
     $logLines += ""
     $logLines += "# フォルダ構成"
-    $logLines += (Split-Path $FolderPath -Leaf)
+    $logLines += $FolderPath
     $logLines += (Get-TreeLines -Path $FolderPath)
     Write-LogFile -Path $logFilePath -Lines $logLines
 

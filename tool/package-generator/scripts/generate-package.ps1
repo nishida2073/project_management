@@ -4,6 +4,7 @@
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
+$scriptStartTime = Get-Date
 $configPath = $env:GENERATE_CONFIG_PATH
 $workPath = $env:GENERATE_WORK_PATH
 $outputPath = $env:GENERATE_OUTPUT_PATH
@@ -24,7 +25,20 @@ if (!(Get-Module -ListAvailable ImportExcel)) {
     Install-Module ImportExcel -Scope CurrentUser -Force
 }
 
-$excel = Get-ExcelSheetInfo $configPath
+$prevEap = $ErrorActionPreference
+try {
+    $ErrorActionPreference = "Stop"
+    $excel = Get-ExcelSheetInfo $configPath
+} catch {
+    $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $configPath -Leaf).log" `
+        -StartTime $scriptStartTime -EndTime (Get-Date) `
+        -ResultSectionTitle "エラー" -ResultLines @("パッケージ定義ファイルの読み込みに失敗しました：$configPath", "$($_.Exception.Message)") `
+        -FolderPath $workPath
+    Show-LogFileContent -Path $logFilePath
+    exit 1
+} finally {
+    $ErrorActionPreference = $prevEap
+}
 
 
 $sheetNames = $excel.Name
@@ -151,7 +165,7 @@ foreach ($sheetName in $sheetNames) {
         -ExtraHeaderLines @("シート名: $sheetName") `
         -StartTime $sheetStartTime -EndTime $sheetEndTime `
         -ResultSectionTitle "パッケージ結果" -ResultLines $packageLog `
-        -FolderPath $packageWorkPath
+        -FolderPath $outputPath
     Show-LogFileContent -Path $logFilePath
 }
 
