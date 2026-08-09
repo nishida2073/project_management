@@ -77,5 +77,5 @@ $endTime = Get-Date
 $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:DOWNLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $sitePath -Leaf).log" `
     -StartTime $startTime -EndTime $endTime `
     -ResultSectionTitle "ダウンロード結果" -ResultLines $downloadLog `
-    -FolderPath $localPath
+    -TreePath $localPath
 Show-LogFileContent -Path $logFilePath

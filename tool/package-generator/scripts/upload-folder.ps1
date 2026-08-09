@@ -156,5 +156,5 @@ $endTime = Get-Date
 $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:UPLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $relativeFolder -Leaf).log" `
     -StartTime $startTime -EndTime $endTime `
     -ResultSectionTitle "アップロード結果" -ResultLines $uploadLog `
-    -FolderPath $localPath
+    -TreePath $localPath
 Show-LogFileContent -Path $logFilePath

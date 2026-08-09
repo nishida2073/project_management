@@ -5,6 +5,7 @@
 # 各スクリプトの先頭でドットソース（. "パス\common.ps1"）して読み込む。
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $defaultClientLabel = "デフォルト"
@@ -31,25 +32,79 @@ function Get-ClientLogHeaderLines {
     return @("クライアント: $defaultClientLabel")
 }
 
+function Write-TreeNode {
+    param(
+        [System.Collections.Specialized.OrderedDictionary]$Node,
+        [string]$Prefix = ""
+    )
+
+    $keys = @($Node.Keys | Sort-Object { $null -eq $Node[$_] }, { $_ })
+    for ($i = 0; $i -lt $keys.Count; $i++) {
+        $key = $keys[$i]
+        $isLast = ($i -eq $keys.Count - 1)
+        $connector = if ($isLast) { "└─ " } else { "├─ " }
+        Write-Output "$Prefix$connector$key"
+
+        if ($null -ne $Node[$key]) {
+            $childPrefix = if ($isLast) { "$Prefix    " } else { "$Prefix│   " }
+            Write-TreeNode -Node $Node[$key] -Prefix $childPrefix
+        }
+    }
+}
+
+function Get-FolderTree {
+    param([string]$Path)
+
+    $tree = [ordered]@{}
+    foreach ($item in (Get-ChildItem -LiteralPath $Path)) {
+        if ($item.PSIsContainer) {
+            $tree[$item.Name] = Get-FolderTree -Path $item.FullName
+        } else {
+            $tree[$item.Name] = $null
+        }
+    }
+    return $tree
+}
+
+function Get-ZipTree {
+    param([string]$Path)
+
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
+    try {
+        $tree = [ordered]@{}
+        foreach ($entry in $zip.Entries) {
+            $segments = @($entry.FullName -split '[\\/]' | Where-Object { $_ })
+            $node = $tree
+            for ($i = 0; $i -lt $segments.Count; $i++) {
+                $segment = $segments[$i]
+                if ($i -eq $segments.Count - 1) {
+                    $node[$segment] = $null
+                } else {
+                    if (!$node.Contains($segment) -or $null -eq $node[$segment]) {
+                        $node[$segment] = [ordered]@{}
+                    }
+                    $node = $node[$segment]
+                }
+            }
+        }
+        return $tree
+    } finally {
+        $zip.Dispose()
+    }
+}
+
 function Get-TreeLines {
     param(
         [string]$Path,
         [string]$Prefix = ""
     )
 
-    $items = Get-ChildItem -LiteralPath $Path | Sort-Object { !$_.PSIsContainer }, Name
-
-    for ($i = 0; $i -lt $items.Count; $i++) {
-        $item = $items[$i]
-        $isLast = ($i -eq $items.Count - 1)
-        $connector = if ($isLast) { "└─ " } else { "├─ " }
-        Write-Output "$Prefix$connector$($item.Name)"
-
-        if ($item.PSIsContainer) {
-            $childPrefix = if ($isLast) { "$Prefix    " } else { "$Prefix│   " }
-            Get-TreeLines -Path $item.FullName -Prefix $childPrefix
-        }
+    $tree = if ((Test-Path -LiteralPath $Path -PathType Leaf) -and $Path.ToLower().EndsWith(".zip")) {
+        Get-ZipTree -Path $Path
+    } else {
+        Get-FolderTree -Path $Path
     }
+    Write-TreeNode -Node $tree -Prefix $Prefix
 }
 
 function Write-RunLogFile {
@@ -61,7 +116,7 @@ function Write-RunLogFile {
         [datetime]$EndTime,
         [string]$ResultSectionTitle,
         [string[]]$ResultLines,
-        [string]$FolderPath
+        [string]$TreePath
     )
 
     $logFilePath = Join-Path $LogPath $LogFileName
@@ -76,9 +131,9 @@ function Write-RunLogFile {
     $logLines += "# $ResultSectionTitle"
     $logLines += $ResultLines
     $logLines += ""
-    $logLines += "# フォルダ構成"
-    $logLines += $FolderPath
-    $logLines += (Get-TreeLines -Path $FolderPath)
+    $logLines += "# 構成"
+    $logLines += $TreePath
+    $logLines += (Get-TreeLines -Path $TreePath)
     Write-LogFile -Path $logFilePath -Lines $logLines
 
     return $logFilePath

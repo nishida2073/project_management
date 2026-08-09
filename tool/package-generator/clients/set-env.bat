@@ -13,7 +13,7 @@ if not defined DOWNLOAD_LOG_PREFIX set "DOWNLOAD_LOG_PREFIX=ダウンロード_"
 
 if not defined GENERATE_ENABLED set "GENERATE_ENABLED=1"
 if not defined GENERATE_SOURCE_PATH set "GENERATE_SOURCE_PATH=%DOWNLOAD_LOCAL_PATH%"
-if not defined GENERATE_CONFIG_PATH set "GENERATE_CONFIG_PATH=%DOWNLOAD_LOCAL_PATH%\package_definition.xlsx"
+if not defined GENERATE_CONFIG_PATH set "GENERATE_CONFIG_PATH=C:\Users\ishid\Desktop\project_management\tool\package-generator\config\package_definition.xlsx"
 if not defined GENERATE_SHEETS_INCLUDE set "GENERATE_SHEETS_INCLUDE="
 if not defined GENERATE_SHEETS_EXCLUDE set "GENERATE_SHEETS_EXCLUDE="
 if not defined GENERATE_WORK_PATH set "GENERATE_WORK_PATH=%BASE_PATH%work"
