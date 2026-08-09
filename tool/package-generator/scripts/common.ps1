@@ -116,7 +116,7 @@ function Write-RunLogFile {
         [datetime]$EndTime,
         [string]$ResultSectionTitle,
         [string[]]$ResultLines,
-        [string]$TreePath
+        [string]$TreePath = ""
     )
 
     $logFilePath = Join-Path $LogPath $LogFileName
@@ -130,10 +130,12 @@ function Write-RunLogFile {
     $logLines += ""
     $logLines += "# $ResultSectionTitle"
     $logLines += $ResultLines
-    $logLines += ""
-    $logLines += "# 構成"
-    $logLines += $TreePath
-    $logLines += (Get-TreeLines -Path $TreePath)
+    if ($TreePath) {
+        $logLines += ""
+        $logLines += "# 構成"
+        $logLines += $TreePath
+        $logLines += (Get-TreeLines -Path $TreePath)
+    }
     Write-LogFile -Path $logFilePath -Lines $logLines
 
     return $logFilePath
