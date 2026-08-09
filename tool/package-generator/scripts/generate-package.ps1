@@ -125,6 +125,7 @@ foreach ($sheetName in $sheetNames) {
 
     $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
     if ($packageItems) {
+        Write-Host "操作中：$sheetName.zip"
         Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
         $sheetEndTime = Get-Date
         $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log" `
