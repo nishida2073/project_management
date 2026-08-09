@@ -586,6 +586,8 @@ function Get-FieldValue {
 function Save-ClientProfile {
     param([string]$ClientName)
     $clientBat = Get-ClientBatPath $ClientName
+    $isNewClient = !(Test-Path -LiteralPath $clientBat)
+
     $newLines = foreach ($varName in $clientOverridableVars) {
         $newVal = Get-FieldValue $varName
         if ($script:fieldRadios.ContainsKey($varName)) {
@@ -596,6 +598,16 @@ function Save-ClientProfile {
     }
     $content = ($newLines -join "`r`n") + "`r`n"
     [System.IO.File]::WriteAllText($clientBat, $content, $cp932)
+
+    if ($isNewClient) {
+        $defaults = Get-SetEnvDefaults
+        $defaultConfigPath = Expand-VarTokens $defaults["GENERATE_CONFIG_PATH"]
+        $newConfigPath = Expand-VarTokens (Get-FieldValue "GENERATE_CONFIG_PATH")
+        if ($newConfigPath -ne $defaultConfigPath -and (Test-Path -LiteralPath $defaultConfigPath) -and !(Test-Path -LiteralPath $newConfigPath)) {
+            New-Item (Split-Path $newConfigPath -Parent) -ItemType Directory -Force | Out-Null
+            Copy-Item -LiteralPath $defaultConfigPath -Destination $newConfigPath
+        }
+    }
 }
 
 function Save-DefaultSettings {
