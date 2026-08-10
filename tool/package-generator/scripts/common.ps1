@@ -237,6 +237,16 @@ function Resolve-GraphSiteId {
     return $site.id
 }
 
+function Test-NameMatchesPatterns {
+    param([string]$Name, [string[]]$Patterns)
+    foreach ($pattern in $Patterns) {
+        if ($Name -like $pattern) {
+            return $true
+        }
+    }
+    return $false
+}
+
 function Get-EncodedSitePath {
     param([string]$Path)
     return ($Path -split '/' | ForEach-Object { [System.Uri]::EscapeDataString($_) }) -join '/'

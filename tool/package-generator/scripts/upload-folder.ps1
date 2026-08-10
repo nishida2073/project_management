@@ -124,6 +124,28 @@ function Send-FileToSharePoint {
     }
 }
 
+function Send-Item {
+    param(
+        [System.IO.FileSystemInfo]$Item,
+        [string]$SubPath
+    )
+
+    if ($Item.PSIsContainer) {
+        Send-FolderRecursive -LocalFolder $Item.FullName -SubPath $SubPath
+    } else {
+        $currentFile = $Item.FullName
+        $currentName = $Item.Name
+        $fileSitePath = if ($relativeFolder) { "$relativeFolder/$SubPath" } else { $SubPath }
+        Write-Host "操作中：$currentName"
+        try {
+            Send-FileToSharePoint -LocalFile $currentFile -SiteRelativePath $fileSitePath
+            $script:uploadLog += "$currentFile -> $sitePath/$SubPath"
+        } catch {
+            $script:uploadLog += "$currentFile -> エラー: $($_.Exception.Message)"
+        }
+    }
+}
+
 function Send-FolderRecursive {
     param(
         [string]$LocalFolder,
@@ -132,25 +154,25 @@ function Send-FolderRecursive {
 
     Get-ChildItem -LiteralPath $LocalFolder | ForEach-Object {
         $childSubPath = if ($SubPath) { "$SubPath/$($_.Name)" } else { $_.Name }
-
-        if ($_.PSIsContainer) {
-            Send-FolderRecursive -LocalFolder $_.FullName -SubPath $childSubPath
-        } else {
-            $currentFile = $_.FullName
-            $currentName = $_.Name
-            $fileSitePath = if ($relativeFolder) { "$relativeFolder/$childSubPath" } else { $childSubPath }
-            Write-Host "操作中：$currentName"
-            try {
-                Send-FileToSharePoint -LocalFile $currentFile -SiteRelativePath $fileSitePath
-                $script:uploadLog += "$currentFile -> $sitePath/$childSubPath"
-            } catch {
-                $script:uploadLog += "$currentFile -> エラー: $($_.Exception.Message)"
-            }
-        }
+        Send-Item -Item $_ -SubPath $childSubPath
     }
 }
 
-Send-FolderRecursive -LocalFolder $localPath -SubPath ""
+$topLevelItems = Get-ChildItem -LiteralPath $localPath
+
+if ($env:UPLOAD_ITEMS_INCLUDE) {
+    $includePatterns = $env:UPLOAD_ITEMS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+    $topLevelItems = $topLevelItems | Where-Object { Test-NameMatchesPatterns -Name $_.Name -Patterns $includePatterns }
+}
+
+if ($env:UPLOAD_ITEMS_EXCLUDE) {
+    $excludePatterns = $env:UPLOAD_ITEMS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+    $topLevelItems = $topLevelItems | Where-Object { !(Test-NameMatchesPatterns -Name $_.Name -Patterns $excludePatterns) }
+}
+
+$topLevelItems | ForEach-Object {
+    Send-Item -Item $_ -SubPath $_.Name
+}
 
 $endTime = Get-Date
 $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:UPLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $relativeFolder -Leaf).log" `

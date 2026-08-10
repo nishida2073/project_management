@@ -44,13 +44,13 @@ try {
 $sheetNames = $excel.Name
 
 if ($env:GENERATE_SHEETS_INCLUDE) {
-    $includeList = $env:GENERATE_SHEETS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
-    $sheetNames = $sheetNames | Where-Object { $includeList -contains $_ }
+    $includePatterns = $env:GENERATE_SHEETS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+    $sheetNames = $sheetNames | Where-Object { Test-NameMatchesPatterns -Name $_ -Patterns $includePatterns }
 }
 
 if ($env:GENERATE_SHEETS_EXCLUDE) {
-    $excludeList = $env:GENERATE_SHEETS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
-    $sheetNames = $sheetNames | Where-Object { $excludeList -notcontains $_ }
+    $excludePatterns = $env:GENERATE_SHEETS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+    $sheetNames = $sheetNames | Where-Object { !(Test-NameMatchesPatterns -Name $_ -Patterns $excludePatterns) }
 }
 
 foreach ($sheetName in $sheetNames) {

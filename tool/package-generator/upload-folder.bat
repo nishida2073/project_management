@@ -11,6 +11,8 @@ echo ==================================================
 if "%~1"=="" goto args_done
 set "arg=%~1"
 if /i "%arg:~0,7%"=="client=" set "CLIENT_NAME=%arg:~7%"
+if /i "%arg:~0,8%"=="include=" set "UPLOAD_ITEMS_INCLUDE=%arg:~8%"
+if /i "%arg:~0,8%"=="exclude=" set "UPLOAD_ITEMS_EXCLUDE=%arg:~8%"
 shift
 goto parse_args
 :args_done

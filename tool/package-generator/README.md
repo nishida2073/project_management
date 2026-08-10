@@ -113,14 +113,15 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル（`package_definition.xlsx`）のパス | `download\package_definition.xlsx`（`DOWNLOAD_LOCAL_PATH`配下） |
 | `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ | `work` フォルダ |
 | `GENERATE_OUTPUT_PATH` | パッケージの出力先フォルダ | `generated` フォルダ |
-| `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名（カンマ区切り、複数指定可）。設定時はここに書いたシートのみ処理する | 空（絞り込みなし＝全シート対象） |
-| `GENERATE_SHEETS_EXCLUDE` | 処理対象から除外するシート名（カンマ区切り、複数指定可） | 空（除外なし） |
+| `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名パターン（カンマ区切り、複数指定可、ワイルドカード`*`/`?`が使える）。設定時はいずれかのパターンに一致するシートのみ処理する | 空（絞り込みなし＝全シート対象） |
+| `GENERATE_SHEETS_EXCLUDE` | 処理対象から除外するシート名パターン（カンマ区切り、複数指定可、ワイルドカード`*`/`?`が使える） | 空（除外なし） |
 | `GENERATE_LOG_PREFIX` | ログファイル名（`<シート名>.log`）の先頭に付けるプレフィックス | `パッケージ作成_` |
 
-`GENERATE_SHEETS_INCLUDE` / `GENERATE_SHEETS_EXCLUDE` は `generate-package.bat` の引数でも指定できる（環境変数より優先される）。
+`GENERATE_SHEETS_INCLUDE` / `GENERATE_SHEETS_EXCLUDE` は `generate-package.bat` の引数でも指定できる（環境変数より優先される）。パターンはシート名に対するワイルドカード一致（`-like`演算子と同じ、大文字小文字は区別しない）で、シート名をそのまま指定するほか、`対象*`のような形式指定でも絞り込める。
 
 ```
 generate-package.bat "include=対象シート1,対象シート2"
+generate-package.bat "include=対象*"
 generate-package.bat "exclude=除外シート1,除外シート2"
 generate-package.bat "include=対象シート1" "exclude=除外シート1"
 ```
@@ -158,7 +159,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 3. `upload-folder.ps1` が実行される
    1. Azure CLIでサインインする（未サインイン・期限切れ時はデバイスコードでのログインが必要）
    2. Microsoft Graph APIでサイト（`UPLOAD_SITE_URL`）を解決する
-   3. ローカルフォルダ（`UPLOAD_LOCAL_PATH`）配下を再帰的にアップロードする
+   3. ローカルフォルダ（`UPLOAD_LOCAL_PATH`）直下の項目（ファイル・フォルダ）を絞り込んだ上で、それぞれ配下を再帰的にアップロードする
    4. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
 #### 環境変数
@@ -169,7 +170,20 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | `UPLOAD_SITE_PATH` | サイト内のアップロード先フォルダ（先頭はドキュメントライブラリ名、例：`Shared Documents/フォルダA`） | テスト用フォルダ（`.../ツール/納品`）が設定済み |
 | `UPLOAD_SITE_TENANT_ID` | 対象のAzure ADテナントID | `DOWNLOAD_SITE_TENANT_ID`と同じ |
 | `UPLOAD_LOCAL_PATH` | アップロード元のローカルフォルダ（フルパス） | `GENERATE_OUTPUT_PATH`と同じ（パッケージ作成の出力先） |
+| `UPLOAD_ITEMS_INCLUDE` | 処理対象にする`UPLOAD_LOCAL_PATH`直下の項目名パターン（カンマ区切り、複数指定可、ワイルドカード`*`/`?`が使える）。設定時はいずれかのパターンに一致する項目のみ処理する | `*.zip`（パッケージのZIPのみが対象。） |
+| `UPLOAD_ITEMS_EXCLUDE` | 処理対象から除外する`UPLOAD_LOCAL_PATH`直下の項目名パターン（カンマ区切り、複数指定可、ワイルドカード`*`/`?`が使える） | 空（除外なし） |
 | `UPLOAD_LOG_PREFIX` | ログファイル名（`<アップロード先のフォルダ名>.log`）の先頭に付けるプレフィックス | `アップロード_` |
+
+`UPLOAD_ITEMS_INCLUDE` / `UPLOAD_ITEMS_EXCLUDE` は `upload-folder.bat` の引数でも指定できる（環境変数より優先される）。パターンは`UPLOAD_LOCAL_PATH`直下のファイル・フォルダ名に対するワイルドカード一致（`-like`演算子と同じ、大文字小文字は区別しない）で、シート名を直接指定する（例：`<シート名>.zip`）ほか、シート名がわからない場合でも`*.zip`のような形式指定で絞り込める。絞り込みは直下の項目のみが対象で、その配下（フォルダの中身）はすべて再帰的にアップロードされる。
+
+```
+upload-folder.bat "include=対象シート1.zip,対象シート2.zip"
+upload-folder.bat "include=*.zip"
+upload-folder.bat "exclude=除外シート1.zip"
+upload-folder.bat "include=対象シート1.zip" "exclude=除外シート1.zip"
+```
+
+`include=` / `exclude=` は順不同で、どちらか片方だけの指定もできる。両方指定した場合は、対象項目に絞り込んだ後にさらに除外項目を取り除く。
 
 同名ファイルが既にサイト側にある場合は上書きされる。
 
@@ -239,8 +253,8 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | パッケージ作成 | `GENERATE_ENABLED` | 機能の有効化 |
 | パッケージ作成 | `GENERATE_SOURCE_PATH` | 圧縮元のフォルダ |
 | パッケージ作成 | `GENERATE_CONFIG_PATH` | パッケージ定義ファイル |
-| パッケージ作成 | `GENERATE_SHEETS_INCLUDE` | 対象のシート名 |
-| パッケージ作成 | `GENERATE_SHEETS_EXCLUDE` | 除外のシート名 |
+| パッケージ作成 | `GENERATE_SHEETS_INCLUDE` | 対象のシート形式 |
+| パッケージ作成 | `GENERATE_SHEETS_EXCLUDE` | 除外のシート形式 |
 | パッケージ作成 | `GENERATE_WORK_PATH` | 作業用のフォルダ |
 | パッケージ作成 | `GENERATE_OUTPUT_PATH` | パッケージの出力先 |
 | パッケージ作成 | `GENERATE_LOG_PREFIX` | ログファイル名の接頭辞 |
@@ -249,4 +263,6 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | アップロード | `UPLOAD_SITE_PATH` | アップロード先のフォルダ |
 | アップロード | `UPLOAD_SITE_TENANT_ID` | テナントID |
 | アップロード | `UPLOAD_LOCAL_PATH` | アップロード元のフォルダ |
+| アップロード | `UPLOAD_ITEMS_INCLUDE` | 対象の項目形式 |
+| アップロード | `UPLOAD_ITEMS_EXCLUDE` | 除外の項目形式 |
 | アップロード | `UPLOAD_LOG_PREFIX` | ログファイル名の接頭辞 |
