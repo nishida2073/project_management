@@ -165,7 +165,7 @@ foreach ($sheetName in $sheetNames) {
         -ExtraHeaderLines @("シート名: $sheetName") `
         -StartTime $sheetStartTime -EndTime $sheetEndTime `
         -ResultSectionTitle "パッケージ結果" -ResultLines $packageLog `
-        -TreePath $packagePath
+        -TreeRootPath $packagePath
     Show-LogFileContent -Path $logFilePath
 }
 

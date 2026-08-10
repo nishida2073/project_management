@@ -93,16 +93,38 @@ function Get-ZipTree {
     }
 }
 
+function Get-TreeNodeForPath {
+    param([string]$Path)
+
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+        if ($Path.ToLower().EndsWith(".zip")) {
+            return Get-ZipTree -Path $Path
+        }
+        return $null
+    }
+    return Get-FolderTree -Path $Path
+}
+
 function Get-TreeLines {
     param(
         [string]$Path,
         [string]$Prefix = ""
     )
 
-    $tree = if ((Test-Path -LiteralPath $Path -PathType Leaf) -and $Path.ToLower().EndsWith(".zip")) {
-        Get-ZipTree -Path $Path
-    } else {
-        Get-FolderTree -Path $Path
+    $tree = Get-TreeNodeForPath -Path $Path
+    if ($null -eq $tree) { $tree = [ordered]@{} }
+    Write-TreeNode -Node $tree -Prefix $Prefix
+}
+
+function Get-ItemListLines {
+    param(
+        [string[]]$Paths,
+        [string]$Prefix = ""
+    )
+
+    $tree = [ordered]@{}
+    foreach ($itemPath in $Paths) {
+        $tree[(Split-Path $itemPath -Leaf)] = $null
     }
     Write-TreeNode -Node $tree -Prefix $Prefix
 }
@@ -116,8 +138,14 @@ function Write-RunLogFile {
         [datetime]$EndTime,
         [string]$ResultSectionTitle,
         [string[]]$ResultLines,
-        [string]$TreePath = ""
+        [string]$TreeRootPath = "",
+        [string]$ItemListRootPath = "",
+        [string[]]$ItemListPaths = @()
     )
+
+    if ($TreeRootPath -and $ItemListPaths.Count -gt 0) {
+        throw "TreeRootPath と ItemListPaths は同時に指定できません"
+    }
 
     $logFilePath = Join-Path $LogPath $LogFileName
     $logLines = @()
@@ -130,11 +158,18 @@ function Write-RunLogFile {
     $logLines += ""
     $logLines += "# $ResultSectionTitle"
     $logLines += $ResultLines
-    if ($TreePath) {
+    if ($TreeRootPath) {
         $logLines += ""
         $logLines += "# 構成"
-        $logLines += $TreePath
-        $logLines += (Get-TreeLines -Path $TreePath)
+        $logLines += $TreeRootPath
+        $logLines += (Get-TreeLines -Path $TreeRootPath)
+    } elseif ($ItemListPaths.Count -gt 0) {
+        $logLines += ""
+        $logLines += "# 構成"
+        if ($ItemListRootPath) {
+            $logLines += $ItemListRootPath
+        }
+        $logLines += (Get-ItemListLines -Paths $ItemListPaths)
     }
     Write-LogFile -Path $logFilePath -Lines $logLines
 
