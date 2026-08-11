@@ -97,8 +97,6 @@ $script:exitCode = 0
     # =========================================
     # アプリ単位の処理（スペースとは無関係にアプリIDだけで処理する）
     # =========================================
-    $touchedAppIds = New-Object System.Collections.Generic.List[string]
-
     $applyAppList = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-list"
     $applyAppAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-acl"
     $applyAppRecordAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-record-acl"
@@ -122,6 +120,9 @@ $script:exitCode = 0
             Write-Host ""
             Write-Host "=== アプリID: $appId ($label) ===" -ForegroundColor Cyan
 
+            $appHasError = $false
+            $appChanged = $false
+
             # --- 3. アプリ名 ---
             if ($applyAppList -and $appNameRow) {
                 $finalName = $appNameRow.'アプリ名'
@@ -131,11 +132,12 @@ $script:exitCode = 0
                     } else {
                         Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
                         Write-Host "アプリID[$appId] の名前を[$finalName]に設定しました"
-                        $touchedAppIds.Add([string]$appId)
+                        $appChanged = $true
                     }
                 } catch {
                     Write-Host "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                     $hasError = $true
+                    $appHasError = $true
                 }
             }
 
@@ -149,11 +151,12 @@ $script:exitCode = 0
                     } else {
                         Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights
                         Write-Host "アプリ[$label](appId=$appId)のACLを設定しました ($($rights.Count)件)"
-                        $touchedAppIds.Add([string]$appId)
+                        $appChanged = $true
                     }
                 } catch {
                     Write-Host "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                     $hasError = $true
+                    $appHasError = $true
                 }
             }
 
@@ -167,11 +170,28 @@ $script:exitCode = 0
                     } else {
                         Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
                         Write-Host "アプリ[$label](appId=$appId)のレコードACLを設定しました (条件$($recordRights.Count)件)"
-                        $touchedAppIds.Add([string]$appId)
+                        $appChanged = $true
                     }
                 } catch {
                     Write-Host "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                     $hasError = $true
+                    $appHasError = $true
+                }
+            }
+
+            # --- 6. アプリの更新（1つでも設定に失敗した場合はデプロイしない） ---
+            # 成功した項目だけが中途半端に反映されるのを避けるため、そのアプリの設定が
+            # 1つでも失敗していればデプロイをスキップし、修正して再実行してもらう。
+            if ($appChanged) {
+                if ($appHasError) {
+                    Write-Host "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow
+                } elseif (-not $WhatIf) {
+                    try {
+                        Update-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds @($appId)
+                    } catch {
+                        Write-Host "アプリ[$label](appId=$appId)の更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                        $hasError = $true
+                    }
                 }
             }
         }
@@ -183,20 +203,9 @@ $script:exitCode = 0
         }
     }
 
-    # --- 6. アプリの更新 ---
-    if (-not $WhatIf -and $touchedAppIds.Count -gt 0) {
-        Write-Host ""
-        try {
-            Update-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds $touchedAppIds
-        } catch {
-            Write-Host "アプリの更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
-            $hasError = $true
-        }
-    }
-
     Write-Host ""
     if ($hasError) {
-        Write-Host "一部の処理でエラーが発生しました。上のログを確認してください。" -ForegroundColor Red
+        Write-Host "一部の処理でエラーが発生しました。" -ForegroundColor Red
         $script:exitCode = 1
     } else {
         Write-Host "すべての反映が完了しました。" -ForegroundColor Green
