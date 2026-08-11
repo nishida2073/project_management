@@ -182,6 +182,8 @@ $script:exitCode = 0
 
     Set-KintoneHeaderRowColor -Path $outputPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
 
+    $applyDiffColoring = $false # 赤字処理を一旦無効化
+
     # スペース名・アプリ名は{PH}置き換え部分だけを赤字にする。設定値は変更のあるセルのみ赤字にする。
     # space-app-acl/space-app-record-aclはテンプレートから丸ごと生成した行なので行全体を赤字にし、
     # space-member-listはテンプレート由来の行だけ赤字にする（引き継いだ既存メンバーの行は色を付けない）
@@ -195,36 +197,38 @@ $script:exitCode = 0
         $Cell.Style.Font.Bold = $true
     }
 
-    $wsSettings = $pkg.Workbook.Worksheets["space-settings"]
-    Set-KintonePlaceholderRichText -Cell $wsSettings.Cells[2, 2] -OriginalValue $downloadSpaceRow.'スペース名' -ConfigName $DownloadConfigName -Color $diffColor
-    Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 3] -DownloadValue "$($downloadSpaceRow.'参加メンバーだけにこのスペースを公開する')" -FinalValue "$($templateSpaceRow.'参加メンバーだけにこのスペースを公開する')"
-    Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 4] -DownloadValue "$($downloadSpaceRow.'スペースのポータルと複数のスレッドを使用する')" -FinalValue "$($templateSpaceRow.'スペースのポータルと複数のスレッドを使用する')"
-    Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 5] -DownloadValue "$($downloadSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')" -FinalValue "$($templateSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')"
-    Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 6] -DownloadValue "$($downloadSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')" -FinalValue "$($templateSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
+    if ($applyDiffColoring) {
+        $wsSettings = $pkg.Workbook.Worksheets["space-settings"]
+        Set-KintonePlaceholderRichText -Cell $wsSettings.Cells[2, 2] -OriginalValue $downloadSpaceRow.'スペース名' -ConfigName $DownloadConfigName -Color $diffColor
+        Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 3] -DownloadValue "$($downloadSpaceRow.'参加メンバーだけにこのスペースを公開する')" -FinalValue "$($templateSpaceRow.'参加メンバーだけにこのスペースを公開する')"
+        Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 4] -DownloadValue "$($downloadSpaceRow.'スペースのポータルと複数のスレッドを使用する')" -FinalValue "$($templateSpaceRow.'スペースのポータルと複数のスレッドを使用する')"
+        Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 5] -DownloadValue "$($downloadSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')" -FinalValue "$($templateSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')"
+        Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 6] -DownloadValue "$($downloadSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')" -FinalValue "$($templateSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
 
-    $wsAppList = $pkg.Workbook.Worksheets["space-app-list"]
-    for ($i = 0; $i -lt $matchedApps.Count; $i++) {
-        Set-KintonePlaceholderRichText -Cell $wsAppList.Cells[($i + 2), 2] -OriginalValue $matchedApps[$i].DownloadAppName -ConfigName $DownloadConfigName -Color $diffColor
-    }
+        $wsAppList = $pkg.Workbook.Worksheets["space-app-list"]
+        for ($i = 0; $i -lt $matchedApps.Count; $i++) {
+            Set-KintonePlaceholderRichText -Cell $wsAppList.Cells[($i + 2), 2] -OriginalValue $matchedApps[$i].DownloadAppName -ConfigName $DownloadConfigName -Color $diffColor
+        }
 
-    $wsMember = $pkg.Workbook.Worksheets["space-member-list"]
-    if ($wsMember -and $wsMember.Dimension) {
-        $templateRowEnd = [Math]::Min(1 + $templateMemberRows.Count, $wsMember.Dimension.End.Row)
-        for ($row = 2; $row -le $templateRowEnd; $row++) {
-            for ($col = 1; $col -le $wsMember.Dimension.End.Column; $col++) {
-                $wsMember.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
-                $wsMember.Cells[$row, $col].Style.Font.Bold = $true
+        $wsMember = $pkg.Workbook.Worksheets["space-member-list"]
+        if ($wsMember -and $wsMember.Dimension) {
+            $templateRowEnd = [Math]::Min(1 + $templateMemberRows.Count, $wsMember.Dimension.End.Row)
+            for ($row = 2; $row -le $templateRowEnd; $row++) {
+                for ($col = 1; $col -le $wsMember.Dimension.End.Column; $col++) {
+                    $wsMember.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
+                    $wsMember.Cells[$row, $col].Style.Font.Bold = $true
+                }
             }
         }
-    }
 
-    foreach ($sheetName in @("space-app-acl", "space-app-record-acl")) {
-        $ws = $pkg.Workbook.Worksheets[$sheetName]
-        if (-not $ws -or -not $ws.Dimension) { continue }
-        for ($row = 2; $row -le $ws.Dimension.End.Row; $row++) {
-            for ($col = 1; $col -le $ws.Dimension.End.Column; $col++) {
-                $ws.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
-                $ws.Cells[$row, $col].Style.Font.Bold = $true
+        foreach ($sheetName in @("space-app-acl", "space-app-record-acl")) {
+            $ws = $pkg.Workbook.Worksheets[$sheetName]
+            if (-not $ws -or -not $ws.Dimension) { continue }
+            for ($row = 2; $row -le $ws.Dimension.End.Row; $row++) {
+                for ($col = 1; $col -le $ws.Dimension.End.Column; $col++) {
+                    $ws.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
+                    $ws.Cells[$row, $col].Style.Font.Bold = $true
+                }
             }
         }
     }
