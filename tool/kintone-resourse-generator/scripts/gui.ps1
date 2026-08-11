@@ -3,7 +3,7 @@
 # =========================================
 # download-kintone-resources.bat → generate-config-from-template.bat →
 # apply-kintone-resources.bat → check-kintone-resources.bat を画面から順番に実行するGUI。
-# 「実行」タブでconfig名等を入力し実行する処理にチェックを入れて実行する。
+# 「実行」タブで設定ファイル名等を入力し実行する処理にチェックを入れて実行する。
 # 「設定」タブでset-env.batの値（KINTONE_*の各パス・URL）を編集する。
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -70,82 +70,69 @@ $runTopPanel = New-Object System.Windows.Forms.Panel
 $runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $runTopPanel.Height = 196
 
-$lblConfigName = New-Object System.Windows.Forms.Label
-$lblConfigName.Text = "config名"
-$lblConfigName.AutoSize = $true
-$lblConfigName.Location = New-Object System.Drawing.Point(20, 17)
-
-$txtConfigName = New-Object System.Windows.Forms.TextBox
-$txtConfigName.Location = New-Object System.Drawing.Point(110, 14)
-$txtConfigName.Size = New-Object System.Drawing.Size(180, 22)
-
 $lblSpaceId = New-Object System.Windows.Forms.Label
-$lblSpaceId.Text = "スペースID（①のみ）"
+$lblSpaceId.Text = "スペースID"
 $lblSpaceId.AutoSize = $true
-$lblSpaceId.Location = New-Object System.Drawing.Point(320, 17)
+$lblSpaceId.Location = New-Object System.Drawing.Point(20, 17)
 
 $txtSpaceId = New-Object System.Windows.Forms.TextBox
-$txtSpaceId.Location = New-Object System.Drawing.Point(460, 14)
-$txtSpaceId.Size = New-Object System.Drawing.Size(180, 22)
+$txtSpaceId.Location = New-Object System.Drawing.Point(160, 14)
+$txtSpaceId.Size = New-Object System.Drawing.Size(200, 22)
 
-$lblTemplateConfigName = New-Object System.Windows.Forms.Label
-$lblTemplateConfigName.Text = "テンプレートconfig名（②のみ）"
-$lblTemplateConfigName.AutoSize = $true
-$lblTemplateConfigName.Location = New-Object System.Drawing.Point(20, 47)
+$lblConfigName = New-Object System.Windows.Forms.Label
+$lblConfigName.Text = "設定ファイル名"
+$lblConfigName.AutoSize = $true
+$lblConfigName.Location = New-Object System.Drawing.Point(20, 51)
 
-$txtTemplateConfigName = New-Object System.Windows.Forms.TextBox
-$txtTemplateConfigName.Location = New-Object System.Drawing.Point(190, 44)
-$txtTemplateConfigName.Size = New-Object System.Drawing.Size(180, 22)
+$txtConfigName = New-Object System.Windows.Forms.TextBox
+$txtConfigName.Location = New-Object System.Drawing.Point(160, 48)
+$txtConfigName.Size = New-Object System.Drawing.Size(200, 22)
 
-$lblSheets = New-Object System.Windows.Forms.Label
-$lblSheets.Text = "対象シート（③④省略可、カンマ区切り）"
-$lblSheets.AutoSize = $true
-$lblSheets.Location = New-Object System.Drawing.Point(390, 47)
+$lblTemplateName = New-Object System.Windows.Forms.Label
+$lblTemplateName.Text = "テンプレート名"
+$lblTemplateName.AutoSize = $true
+$lblTemplateName.Location = New-Object System.Drawing.Point(20, 85)
 
-$txtSheets = New-Object System.Windows.Forms.TextBox
-$txtSheets.Location = New-Object System.Drawing.Point(390, 66)
-$txtSheets.Size = New-Object System.Drawing.Size(280, 22)
-
-$chkWhatIf = New-Object System.Windows.Forms.CheckBox
-$chkWhatIf.Text = "③を試行のみ実施する（-WhatIf、kintoneへの反映は行わない）"
-$chkWhatIf.AutoSize = $true
-$chkWhatIf.Location = New-Object System.Drawing.Point(20, 76)
+$cmbTemplateName = New-Object System.Windows.Forms.ComboBox
+$cmbTemplateName.Location = New-Object System.Drawing.Point(160, 82)
+$cmbTemplateName.Size = New-Object System.Drawing.Size(220, 22)
+$cmbTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $chkDownload = New-Object System.Windows.Forms.CheckBox
 $chkDownload.Text = "1. ダウンロード"
 $chkDownload.AutoSize = $true
-$chkDownload.Location = New-Object System.Drawing.Point(20, 108)
+$chkDownload.Location = New-Object System.Drawing.Point(20, 122)
 
 $chkGenerate = New-Object System.Windows.Forms.CheckBox
-$chkGenerate.Text = "2. config生成"
+$chkGenerate.Text = "2. 設定ファイルの生成"
 $chkGenerate.AutoSize = $true
-$chkGenerate.Location = New-Object System.Drawing.Point(160, 108)
+$chkGenerate.Location = New-Object System.Drawing.Point(160, 122)
 
 $chkApply = New-Object System.Windows.Forms.CheckBox
 $chkApply.Text = "3. kintoneへ反映"
 $chkApply.AutoSize = $true
-$chkApply.Location = New-Object System.Drawing.Point(300, 108)
+$chkApply.Location = New-Object System.Drawing.Point(300, 122)
 
 $chkCheck = New-Object System.Windows.Forms.CheckBox
-$chkCheck.Text = "4. 差分チェック"
+$chkCheck.Text = "4. データチェック"
 $chkCheck.AutoSize = $true
-$chkCheck.Location = New-Object System.Drawing.Point(440, 108)
+$chkCheck.Location = New-Object System.Drawing.Point(440, 122)
 
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "実行"
-$btnRun.Location = New-Object System.Drawing.Point(20, 140)
+$btnRun.Location = New-Object System.Drawing.Point(20, 154)
 $btnRun.Size = New-Object System.Drawing.Size(100, 24)
 
 $lblStatus = New-Object System.Windows.Forms.Label
 $lblStatus.Text = ""
 $lblStatus.AutoSize = $true
-$lblStatus.Location = New-Object System.Drawing.Point(134, 150)
+$lblStatus.Location = New-Object System.Drawing.Point(134, 164)
 $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $runTopPanel.Controls.AddRange(@(
-    $lblConfigName, $txtConfigName, $lblSpaceId, $txtSpaceId,
-    $lblTemplateConfigName, $txtTemplateConfigName, $lblSheets, $txtSheets,
-    $chkWhatIf, $chkDownload, $chkGenerate, $chkApply, $chkCheck,
+    $lblSpaceId, $txtSpaceId, $lblConfigName, $txtConfigName,
+    $lblTemplateName, $cmbTemplateName,
+    $chkDownload, $chkGenerate, $chkApply, $chkCheck,
     $btnRun, $lblStatus
 ))
 
@@ -224,7 +211,7 @@ function Invoke-BatStep {
 $btnRun.Add_Click({
     $configName = $txtConfigName.Text.Trim()
     if (!$configName) {
-        [System.Windows.Forms.MessageBox]::Show("config名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("設定ファイル名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
 
@@ -241,33 +228,28 @@ $btnRun.Add_Click({
         }
     }
     if ($chkGenerate.Checked) {
-        if (!$txtTemplateConfigName.Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("②config生成にはテンプレートconfig名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        if (!$cmbTemplateName.Text.Trim()) {
+            [System.Windows.Forms.MessageBox]::Show("②設定ファイルの生成にはテンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
             return
         }
         $steps += [PSCustomObject]@{
-            Name = "2. config生成"
+            Name = "2. 設定ファイルの生成"
             Bat  = $generateBat
-            Args = @("-TemplateConfigName", $txtTemplateConfigName.Text.Trim(), "-DownloadConfigName", $configName)
+            Args = @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $configName)
         }
     }
     if ($chkApply.Checked) {
-        $applyArgs = @("-ConfigName", $configName)
-        if ($txtSheets.Text.Trim()) { $applyArgs += @("-Sheets", $txtSheets.Text.Trim()) }
-        if ($chkWhatIf.Checked) { $applyArgs += "-WhatIf" }
         $steps += [PSCustomObject]@{
             Name = "3. kintoneへ反映"
             Bat  = $applyBat
-            Args = $applyArgs
+            Args = @("-ConfigName", $configName)
         }
     }
     if ($chkCheck.Checked) {
-        $checkArgs = @("-ConfigName", $configName)
-        if ($txtSheets.Text.Trim()) { $checkArgs += @("-Sheets", $txtSheets.Text.Trim()) }
         $steps += [PSCustomObject]@{
-            Name = "4. 差分チェック"
+            Name = "4. データチェック"
             Bat  = $checkBat
-            Args = $checkArgs
+            Args = @("-ConfigName", $configName)
         }
     }
 
@@ -279,9 +261,7 @@ $btnRun.Add_Click({
     $script:isRunning = $true
     $txtConfigName.Enabled = $false
     $txtSpaceId.Enabled = $false
-    $txtTemplateConfigName.Enabled = $false
-    $txtSheets.Enabled = $false
-    $chkWhatIf.Enabled = $false
+    $cmbTemplateName.Enabled = $false
     $chkDownload.Enabled = $false
     $chkGenerate.Enabled = $false
     $chkApply.Enabled = $false
@@ -315,9 +295,7 @@ $btnRun.Add_Click({
 
     $txtConfigName.Enabled = $true
     $txtSpaceId.Enabled = $true
-    $txtTemplateConfigName.Enabled = $true
-    $txtSheets.Enabled = $true
-    $chkWhatIf.Enabled = $true
+    $cmbTemplateName.Enabled = $true
     $chkDownload.Enabled = $true
     $chkGenerate.Enabled = $true
     $chkApply.Enabled = $true
@@ -376,6 +354,25 @@ function Resolve-BrowseStart {
     return Expand-VarTokens $RawValue
 }
 
+function Update-TemplateNameList {
+    $selected = $cmbTemplateName.SelectedItem
+    $cmbTemplateName.Items.Clear()
+
+    $templatePath = Get-ResolvedVar "KINTONE_TEMPLATE_PATH"
+    if ($templatePath -and (Test-Path -LiteralPath $templatePath)) {
+        $names = Get-ChildItem -LiteralPath $templatePath -Filter "*.xlsx" -ErrorAction SilentlyContinue |
+            ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) } |
+            Sort-Object
+        foreach ($name in $names) {
+            $cmbTemplateName.Items.Add($name) | Out-Null
+        }
+    }
+
+    if ($selected -and $cmbTemplateName.Items.Contains($selected)) {
+        $cmbTemplateName.SelectedItem = $selected
+    }
+}
+
 # =========================================
 # 設定タブ
 # =========================================
@@ -411,10 +408,10 @@ $tabSettings.Controls.Add($topPanel)
 
 $varLabels = [ordered]@{
     "KINTONE_BASE_URL"         = "kintoneのサイトURL"
-    "KINTONE_DOWNLOAD_PATH"    = "ダウンロード先のフォルダ（①の出力先）"
-    "KINTONE_TEMPLATE_PATH"    = "テンプレートのフォルダ（②の入力元）"
-    "KINTONE_CONFIG_PATH"      = "configのフォルダ（②の出力先、③④の入力元）"
-    "KINTONE_CHECK_OUTPUT_PATH" = "差分チェック結果の出力先フォルダ（④の出力先）"
+    "KINTONE_DOWNLOAD_PATH"    = "ダウンロード先のフォルダ"
+    "KINTONE_TEMPLATE_PATH"    = "テンプレートファイルのフォルダ"
+    "KINTONE_CONFIG_PATH"      = "設定ファイルのフォルダ"
+    "KINTONE_CHECK_OUTPUT_PATH" = "チェック結果の出力先フォルダ"
     "KINTONE_LOG_PATH"         = "ログの出力先フォルダ"
 }
 
@@ -518,7 +515,7 @@ $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $logStagePanel.Height = 66
 
 $lblLogConfigName = New-Object System.Windows.Forms.Label
-$lblLogConfigName.Text = "config名"
+$lblLogConfigName.Text = "設定ファイル名"
 $lblLogConfigName.AutoSize = $true
 $lblLogConfigName.Location = New-Object System.Drawing.Point(20, 17)
 
@@ -529,9 +526,9 @@ $cmbLogConfigName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDown
 
 $logStagePrefixes = [ordered]@{
     "download" = "1. ダウンロード"
-    "generate" = "2. config生成"
+    "generate" = "2. 設定ファイルの生成"
     "apply"    = "3. kintoneへ反映"
-    "check"    = "4. 差分チェック"
+    "check"    = "4. データチェック"
 }
 
 $radioDownloadLog = New-Object System.Windows.Forms.RadioButton
@@ -541,7 +538,7 @@ $radioDownloadLog.Checked = $true
 $radioDownloadLog.Location = New-Object System.Drawing.Point(20, 40)
 
 $radioGenerateLog = New-Object System.Windows.Forms.RadioButton
-$radioGenerateLog.Text = "2. config生成"
+$radioGenerateLog.Text = "2. 設定ファイルの生成"
 $radioGenerateLog.AutoSize = $true
 $radioGenerateLog.Location = New-Object System.Drawing.Point(160, 40)
 
@@ -551,7 +548,7 @@ $radioApplyLog.AutoSize = $true
 $radioApplyLog.Location = New-Object System.Drawing.Point(300, 40)
 
 $radioCheckLog = New-Object System.Windows.Forms.RadioButton
-$radioCheckLog.Text = "4. 差分チェック"
+$radioCheckLog.Text = "4. データチェック"
 $radioCheckLog.AutoSize = $true
 $radioCheckLog.Location = New-Object System.Drawing.Point(440, 40)
 
@@ -613,7 +610,9 @@ $radioCheckLog.Add_CheckedChanged({ if ($radioCheckLog.Checked) { Update-LogView
 $cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
 
 $tabControl.Add_SelectedIndexChanged({
-    if ($tabControl.SelectedTab -eq $tabLogs) {
+    if ($tabControl.SelectedTab -eq $tabRun) {
+        Update-TemplateNameList
+    } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-LogConfigNameList
         Update-LogView
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
@@ -621,6 +620,7 @@ $tabControl.Add_SelectedIndexChanged({
     }
 })
 
+Update-TemplateNameList
 Update-LogConfigNameList
 Update-LogView
 $tabControl.SelectedTab = $tabRun

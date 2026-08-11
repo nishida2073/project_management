@@ -1,20 +1,11 @@
 ﻿# =========================================
 # テンプレートと新スペースのダウンロード結果からconfigを自動生成する
 # =========================================
-# template\<TEMPLATE_CONFIG_NAME>.xlsx（共通のACL・メンバー設定などを持つテンプレート）と
-# download\<DOWNLOAD_CONFIG_NAME>.xlsx（新しく作成したスペースを一度ダウンロードした結果、
-# IDは正しいがACLなどはまだ反映されていない状態）を組み合わせて、
-# 正しいIDを持つ完成済みconfig（config\<DOWNLOAD_CONFIG_NAME>.xlsx、ダウンロード結果と同じ名前）を生成する。
-# テンプレート側は実際のスペースに紐づかないため、スペースID・アプリIDを持たない
-# （space-app-list/space-app-acl/space-app-record-aclはアプリ名だけでテンプレート内の
-# 行同士を結び付ける）。
-# アプリの対応付けはアプリ名の一致（どちらかがどちらかを含むか）で自動判定するため、
-# 対応できなかったアプリはコンソールに一覧で表示する。「対応なし」のアプリはACL等が
-# 生成されないため、必要なら手動でconfigに追記する。
-# ダウンロード結果のスペース名・アプリ名に"{PH}"が含まれる場合、生成先のconfig名に置き換える
-# （kintone側でスペース・アプリを作成する時点では最終的な名前が決まらないため、
-# 仮の名前として"{PH}"を埋め込んでおく運用を想定）。
-# kintoneへの書き込みは行わない（apply-kintone-resources.bat で別途反映する）。
+# テンプレート（スペースID・アプリIDを持たず、アプリ名だけで紐づく共通ACL・メンバー設定）と
+# ダウンロード結果（新スペースの実ID入り）をアプリ名の一致で対応付けてconfigを生成する。
+# 対応付けられなかったアプリはコンソールに一覧表示するので、必要なら手動でconfigに追記する。
+# スペース名・アプリ名の"{PH}"は、kintone側で最終名が決まる前の仮名という運用を想定し、
+# 設定ファイル名に置き換える。kintoneへの書き込みは行わない。
 
 param(
     [string]$TemplateConfigName,
@@ -34,10 +25,10 @@ if (-not $templateRoot -or -not $configRoot -or -not $downloadRoot -or -not $log
     exit 1
 }
 if (-not $TemplateConfigName) {
-    $TemplateConfigName = Read-Host "テンプレートのconfig"
+    $TemplateConfigName = Read-Host "テンプレート名"
 }
 if (-not $DownloadConfigName) {
-    $DownloadConfigName = Read-Host "ダウンロードしたconfig"
+    $DownloadConfigName = Read-Host "設定ファイル名"
 }
 
 $templatePath = Join-Path $templateRoot "$TemplateConfigName.xlsx"
@@ -65,11 +56,9 @@ $script:exitCode = 0
     $newSpaceId = $downloadSpaceRow.'スペースID'
     $finalSpaceName = Expand-KintonePlaceholder -Value $downloadSpaceRow.'スペース名' -ConfigName $DownloadConfigName
 
-    # --- アプリ名の一致でテンプレート側アプリと新スペース側アプリを対応付ける ---
     $mapping = Get-AppNameMapping -TemplateApps $templateAppRows -DownloadApps $downloadAppRows
 
-    # ダウンロード結果のアプリ名に含まれる"{PH}"をconfig名に置き換えた最終的な名前を作る
-    # （DownloadAppNameは対応付けに使った元の名前として残すため、別プロパティとして持たせる）。
+    # DownloadAppNameは対応付けに使った元の名前として残すため、{PH}置き換え後の名前は別プロパティに持たせる
     foreach ($m in $mapping) {
         $m | Add-Member -NotePropertyName "FinalAppName" -NotePropertyValue (Expand-KintonePlaceholder -Value $m.DownloadAppName -ConfigName $DownloadConfigName)
     }
@@ -87,7 +76,7 @@ $script:exitCode = 0
         }
     }
 
-    # --- space-settings（スペース名は新スペース側、それ以外はテンプレート側の値を使う） ---
+    # space-settings: スペース名は新スペース側、それ以外はテンプレート側の値を使う
     $outSpaceRow = [PSCustomObject]@{
         "スペースID"                                                     = $newSpaceId
         "スペース名"                                                     = $finalSpaceName
@@ -102,10 +91,9 @@ $script:exitCode = 0
     Write-Host "  スペースID[$newSpaceId] のスペース名を[$finalSpaceName]に設定"
     Write-Host "  参加メンバーだけにこのスペースを公開する=$($outSpaceRow.'参加メンバーだけにこのスペースを公開する') スペースのポータルと複数のスレッドを使用する=$($outSpaceRow.'スペースのポータルと複数のスレッドを使用する') スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する=$($outSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') アプリ作成できるユーザーをスペースの管理者に限定する=$($outSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
 
-    # --- space-member-list（テンプレートのメンバー構成を新スペースIDに適用。
-    #     テンプレートに無い既存メンバー（スペース作成時にkintoneが自動追加する個人ユーザーなど）は
-    #     ダウンロード結果から引き継ぐ。apply側のSet-SpaceMembersはシートに無いコードのメンバーを
-    #     消さずに残す設計のため、ここで引き継いでおかないとcheckで「想定外」と誤検知される） ---
+    # テンプレートに無い既存メンバー（スペース作成時にkintoneが自動追加する個人ユーザーなど）は
+    # ダウンロード結果から引き継ぐ。apply側のSet-SpaceMembersはシートに無いコードのメンバーを
+    # 消さずに残す設計のため、ここで引き継いでおかないとcheckで「想定外」と誤検知される
     $downloadMemberRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-member-list")
     $templateMemberCodes = @($templateMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' })
     $keptMemberRows = @($downloadMemberRows | Where-Object { $templateMemberCodes -notcontains $_.'ユーザー/組織/グループ' })
@@ -135,7 +123,6 @@ $script:exitCode = 0
         Write-Host "  テンプレートに無い既存メンバーを引き継ぎ ($($keptMemberRows.Count)件): $(($keptMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' }) -join ', ')" -ForegroundColor Yellow
     }
 
-    # --- space-app-list（新スペース側の実際のID・アプリ名（{PH}置き換え済み）を使う） ---
     $matchedApps = @($mapping | Where-Object { $_.TemplateAppName -and $_.DownloadAppId })
     $outAppRows = @($matchedApps | ForEach-Object {
         [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
@@ -147,7 +134,6 @@ $script:exitCode = 0
         Write-Host "  アプリID[$($m.DownloadAppId)] の名前を[$($m.FinalAppName)]に設定"
     }
 
-    # --- space-app-acl（テンプレートの権限内容を、対応付けた新スペース側のID・アプリ名に付け替える） ---
     $outAclRows = New-Object System.Collections.Generic.List[psobject]
     Write-Host ""
     Write-Host "=== space-app-acl ===" -ForegroundColor Cyan
@@ -172,7 +158,6 @@ $script:exitCode = 0
     }
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-acl" -Rows $outAclRows.ToArray() -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
 
-    # --- space-app-record-acl（同様に付け替える） ---
     $outRecordAclRows = New-Object System.Collections.Generic.List[psobject]
     Write-Host ""
     Write-Host "=== space-app-record-acl ===" -ForegroundColor Cyan
@@ -197,15 +182,9 @@ $script:exitCode = 0
 
     Set-KintoneHeaderRowColor -Path $outputPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
 
-    # --- 差分を赤字にする ---
-    # スペース名・アプリ名はダウンロード結果の値に対して{PH}を置き換えただけなので、
-    # 置き換わった部分（config名）だけをリッチテキストで赤字にする（"クラススペース"のような
-    # 共通部分は、ダウンロードとテンプレートのどちらから見ても変わっていないため色を付けない）。
-    # 非公開などの設定値はダウンロード結果の実際の値とテンプレートの値を比較し、異なるセルだけ
-    # 赤字にする。space-app-acl/space-app-record-aclはダウンロード側に対応データが無い
-    # （テンプレートから丸ごと生成した）行なので、行全体を赤字にする。space-member-listは
-    # テンプレート由来の行だけを赤字にし、ダウンロード結果から引き継いだ既存メンバーの行
-    # （現状のまま変更が無い）は色を付けない。
+    # スペース名・アプリ名は{PH}置き換え部分だけを赤字にする。設定値は変更のあるセルのみ赤字にする。
+    # space-app-acl/space-app-record-aclはテンプレートから丸ごと生成した行なので行全体を赤字にし、
+    # space-member-listはテンプレート由来の行だけ赤字にする（引き継いだ既存メンバーの行は色を付けない）
     $diffColor = [System.Drawing.Color]::FromArgb(255, 0, 0)
     $pkg = Open-ExcelPackage -Path $outputPath
 

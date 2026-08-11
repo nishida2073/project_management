@@ -25,7 +25,7 @@ if (-not $SpaceId) {
     $SpaceId = Read-Host "ダウンロード対象のスペースID"
 }
 if (-not $ConfigName) {
-    $ConfigName = Read-Host "config名（download\<CONFIG_NAME>.xlsx の<CONFIG_NAME>）"
+    $ConfigName = Read-Host "設定ファイル名（download\<CONFIG_NAME>.xlsx の<CONFIG_NAME>）"
 }
 
 $downloadPath = Join-Path $downloadRoot "$ConfigName.xlsx"
@@ -47,7 +47,6 @@ $script:exitCode = 0
 
     Write-Host "スペース名: $($space.spaceName)　アプリ数: $($space.apps.Count)　メンバー数: $($space.members.Count)"
 
-    # --- space-settings ---
     $spaceListRows = @([PSCustomObject]@{
         "スペースID"                                                     = $space.spaceId
         "スペース名"                                                     = $space.spaceName
@@ -58,7 +57,6 @@ $script:exitCode = 0
     })
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-settings" -Rows $spaceListRows -Headers @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する")
 
-    # --- space-member-list ---
     $memberRows = @($space.members | ForEach-Object {
         [PSCustomObject]@{
             "スペースID"             = $space.spaceId
@@ -70,7 +68,6 @@ $script:exitCode = 0
     })
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-member-list" -Rows $memberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
 
-    # --- space-app-list ---
     $appListRows = @($space.apps | ForEach-Object {
         [PSCustomObject]@{
             "アプリID" = $_.appId
@@ -79,7 +76,6 @@ $script:exitCode = 0
     })
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-list" -Rows $appListRows -Headers @("アプリID", "アプリ名")
 
-    # --- space-app-acl ---
     $appAclRows = @()
     foreach ($app in $space.apps) {
         foreach ($right in $app.rights) {
@@ -101,7 +97,6 @@ $script:exitCode = 0
     }
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-acl" -Rows $appAclRows -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
 
-    # --- space-app-record-acl ---
     $recordAclRows = @()
     foreach ($app in $space.apps) {
         foreach ($right in $app.recordRights) {
@@ -125,7 +120,6 @@ $script:exitCode = 0
     }
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl" -Rows $recordAclRows -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除", "アクセス権の継承")
 
-    # ヘッダー行を灰色で塗る
     Set-KintoneHeaderRowColor -Path $downloadPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
 
     Write-Host ""

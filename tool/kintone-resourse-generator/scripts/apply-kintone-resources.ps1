@@ -24,7 +24,7 @@ if (-not $baseUrl -or -not $configRoot -or -not $logRoot) {
     exit 1
 }
 if (-not $ConfigName) {
-    $ConfigName = Read-Host "config名（config\<CONFIG_NAME>.xlsx の<CONFIG_NAME>）"
+    $ConfigName = Read-Host "設定ファイル名（config\<CONFIG_NAME>.xlsx の<CONFIG_NAME>）"
 }
 
 $configPath = Join-Path $configRoot "$ConfigName.xlsx"
@@ -48,9 +48,6 @@ $script:exitCode = 0
 
     $hasError = $false
 
-    # =========================================
-    # スペース単位の処理
-    # =========================================
     foreach ($spaceGroup in (Group-RowsBySpaceId -Rows $spaceRows)) {
         $spaceId = $spaceGroup.Name
         $spaceRow = $spaceGroup.Group | Select-Object -First 1
@@ -58,7 +55,6 @@ $script:exitCode = 0
         Write-Host ""
         Write-Host "=== スペースID: $spaceId ($($spaceRow.'スペース名')) ===" -ForegroundColor Cyan
 
-        # --- 1. スペース設定 ---
         if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-settings") {
             try {
                 if ($WhatIf) {
@@ -77,7 +73,6 @@ $script:exitCode = 0
             }
         }
 
-        # --- 2. スペースメンバー ---
         if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-member-list") {
             try {
                 $targetMemberRows = @($memberRows | Where-Object { $_.'スペースID' -eq $spaceId })
@@ -94,9 +89,7 @@ $script:exitCode = 0
         }
     }
 
-    # =========================================
     # アプリ単位の処理（スペースとは無関係にアプリIDだけで処理する）
-    # =========================================
     $applyAppList = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-list"
     $applyAppAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-acl"
     $applyAppRecordAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-record-acl"
@@ -123,7 +116,6 @@ $script:exitCode = 0
             $appHasError = $false
             $appChanged = $false
 
-            # --- 3. アプリ名 ---
             if ($applyAppList -and $appNameRow) {
                 $finalName = $appNameRow.'アプリ名'
                 try {
@@ -141,7 +133,6 @@ $script:exitCode = 0
                 }
             }
 
-            # --- 4. アプリのACL ---
             if ($applyAppAcl -and $aclRowsForApp.Count -gt 0) {
                 try {
                     $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $baseUrl -Authorization $authorization -Row $_ })
@@ -160,7 +151,6 @@ $script:exitCode = 0
                 }
             }
 
-            # --- 5. アプリのレコードACL ---
             if ($applyAppRecordAcl -and $recordAclRowsForApp.Count -gt 0) {
                 try {
                     $recordRights = New-RecordAclRightsFromRows -BaseUrl $baseUrl -Authorization $authorization -Rows $recordAclRowsForApp
@@ -179,9 +169,7 @@ $script:exitCode = 0
                 }
             }
 
-            # --- 6. アプリの更新（1つでも設定に失敗した場合はデプロイしない） ---
-            # 成功した項目だけが中途半端に反映されるのを避けるため、そのアプリの設定が
-            # 1つでも失敗していればデプロイをスキップし、修正して再実行してもらう。
+            # 成功した項目だけが中途半端に反映されるのを避けるため、1つでも設定に失敗していればデプロイをスキップする
             if ($appChanged) {
                 if ($appHasError) {
                     Write-Host "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow

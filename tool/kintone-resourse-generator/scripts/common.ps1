@@ -39,10 +39,6 @@ function ToBool($value) {
     return $false
 }
 
-# =========================================
-# 認証・API呼び出し
-# =========================================
-
 function Get-KintoneAuthorizationHeader {
     param([string]$BaseUrl)
 
@@ -119,10 +115,6 @@ function ConvertTo-SheetNameArray {
     if (-not $Sheets) { return @() }
     return @($Sheets.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 }
-
-# =========================================
-# スペース
-# =========================================
 
 function Get-CurrentSpace {
     param(
@@ -341,10 +333,6 @@ function Set-SpaceMembers {
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space/members.json" -Body $body | Out-Null
 }
 
-# =========================================
-# アプリ
-# =========================================
-
 function Set-AppName {
     param(
         [Parameter(Mandatory)][string]$BaseUrl,
@@ -510,10 +498,6 @@ function Update-KintoneApps {
         }
     }
 }
-
-# =========================================
-# Excel入出力
-# =========================================
 
 function Read-KintoneExcelRows {
     param(
