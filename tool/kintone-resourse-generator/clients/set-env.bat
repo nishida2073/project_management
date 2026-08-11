@@ -9,6 +9,4 @@ if not defined KINTONE_TEMPLATE_PATH set "KINTONE_TEMPLATE_PATH=%BASE_PATH%templ
 if not defined KINTONE_CHECK_OUTPUT_PATH set "KINTONE_CHECK_OUTPUT_PATH=%BASE_PATH%checked"
 if not defined KINTONE_LOG_PATH set "KINTONE_LOG_PATH=%BASE_PATH%log"
 
-rem KINTONE_LOGIN・KINTONE_PASSWORDはset-credentials.bat（.gitignore対象、リポジトリには含まない）に書く。
-rem 無ければ実行時にその場でログインID・パスワードの入力を求められる。
 if exist "%~dp0set-credentials.bat" call "%~dp0set-credentials.bat"

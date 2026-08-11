@@ -9,7 +9,7 @@ if (!(Get-Module -ListAvailable ps2exe)) {
 $inputFile = Join-Path $scriptDir "gui.ps1"
 $outputFile = Join-Path $basePath "kintoneリソース生成ツール.exe"
 
-Invoke-PS2EXE -inputFile $inputFile -outputFile $outputFile -STA -noConsole -title "コース別パッケージ生成ツール" -product "コース別パッケージ生成ツール" -version "1.0.0.0"
+Invoke-PS2EXE -inputFile $inputFile -outputFile $outputFile -STA -noConsole -title "kintoneリソース生成ツール" -product "kintoneリソース生成ツール" -version "1.0.0.0"
 
 if (Test-Path $outputFile) {
     Write-Host ""

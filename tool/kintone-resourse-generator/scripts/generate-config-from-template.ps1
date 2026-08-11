@@ -102,8 +102,23 @@ $script:exitCode = 0
     Write-Host "  スペースID[$newSpaceId] のスペース名を[$finalSpaceName]に設定"
     Write-Host "  参加メンバーだけにこのスペースを公開する=$($outSpaceRow.'参加メンバーだけにこのスペースを公開する') スペースのポータルと複数のスレッドを使用する=$($outSpaceRow.'スペースのポータルと複数のスレッドを使用する') スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する=$($outSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') アプリ作成できるユーザーをスペースの管理者に限定する=$($outSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
 
-    # --- space-member-list（テンプレートのメンバー構成をそのまま新スペースIDに適用） ---
+    # --- space-member-list（テンプレートのメンバー構成を新スペースIDに適用。
+    #     テンプレートに無い既存メンバー（スペース作成時にkintoneが自動追加する個人ユーザーなど）は
+    #     ダウンロード結果から引き継ぐ。apply側のSet-SpaceMembersはシートに無いコードのメンバーを
+    #     消さずに残す設計のため、ここで引き継いでおかないとcheckで「想定外」と誤検知される） ---
+    $downloadMemberRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-member-list")
+    $templateMemberCodes = @($templateMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' })
+    $keptMemberRows = @($downloadMemberRows | Where-Object { $templateMemberCodes -notcontains $_.'ユーザー/組織/グループ' })
+
     $outMemberRows = @($templateMemberRows | ForEach-Object {
+        [PSCustomObject]@{
+            "スペースID"             = $newSpaceId
+            "種別"                   = $_.'種別'
+            "ユーザー/組織/グループ" = $_.'ユーザー/組織/グループ'
+            "管理者"                 = $_.'管理者'
+            "下位組織も含める"       = $_.'下位組織も含める'
+        }
+    }) + @($keptMemberRows | ForEach-Object {
         [PSCustomObject]@{
             "スペースID"             = $newSpaceId
             "種別"                   = $_.'種別'
@@ -115,7 +130,10 @@ $script:exitCode = 0
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-member-list" -Rows $outMemberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
     Write-Host ""
     Write-Host "=== space-member-list ===" -ForegroundColor Cyan
-    Write-Host "  スペースID[$newSpaceId] にメンバーを設定 ($($outMemberRows.Count)件)"
+    Write-Host "  スペースID[$newSpaceId] にテンプレートのメンバーを設定 ($($templateMemberRows.Count)件)"
+    if ($keptMemberRows.Count -gt 0) {
+        Write-Host "  テンプレートに無い既存メンバーを引き継ぎ ($($keptMemberRows.Count)件): $(($keptMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' }) -join ', ')" -ForegroundColor Yellow
+    }
 
     # --- space-app-list（新スペース側の実際のID・アプリ名（{PH}置き換え済み）を使う） ---
     $matchedApps = @($mapping | Where-Object { $_.TemplateAppName -and $_.DownloadAppId })
@@ -184,8 +202,10 @@ $script:exitCode = 0
     # 置き換わった部分（config名）だけをリッチテキストで赤字にする（"クラススペース"のような
     # 共通部分は、ダウンロードとテンプレートのどちらから見ても変わっていないため色を付けない）。
     # 非公開などの設定値はダウンロード結果の実際の値とテンプレートの値を比較し、異なるセルだけ
-    # 赤字にする。space-member-list/space-app-acl/space-app-record-aclはダウンロード側に対応
-    # データが無い（テンプレートから丸ごと生成した）行なので、行全体を赤字にする。
+    # 赤字にする。space-app-acl/space-app-record-aclはダウンロード側に対応データが無い
+    # （テンプレートから丸ごと生成した）行なので、行全体を赤字にする。space-member-listは
+    # テンプレート由来の行だけを赤字にし、ダウンロード結果から引き継いだ既存メンバーの行
+    # （現状のまま変更が無い）は色を付けない。
     $diffColor = [System.Drawing.Color]::FromArgb(255, 0, 0)
     $pkg = Open-ExcelPackage -Path $outputPath
 
@@ -208,7 +228,18 @@ $script:exitCode = 0
         Set-KintonePlaceholderRichText -Cell $wsAppList.Cells[($i + 2), 2] -OriginalValue $matchedApps[$i].DownloadAppName -ConfigName $DownloadConfigName -Color $diffColor
     }
 
-    foreach ($sheetName in @("space-member-list", "space-app-acl", "space-app-record-acl")) {
+    $wsMember = $pkg.Workbook.Worksheets["space-member-list"]
+    if ($wsMember -and $wsMember.Dimension) {
+        $templateRowEnd = [Math]::Min(1 + $templateMemberRows.Count, $wsMember.Dimension.End.Row)
+        for ($row = 2; $row -le $templateRowEnd; $row++) {
+            for ($col = 1; $col -le $wsMember.Dimension.End.Column; $col++) {
+                $wsMember.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
+                $wsMember.Cells[$row, $col].Style.Font.Bold = $true
+            }
+        }
+    }
+
+    foreach ($sheetName in @("space-app-acl", "space-app-record-acl")) {
         $ws = $pkg.Workbook.Worksheets[$sheetName]
         if (-not $ws -or -not $ws.Dimension) { continue }
         for ($row = 2; $row -le $ws.Dimension.End.Row; $row++) {
