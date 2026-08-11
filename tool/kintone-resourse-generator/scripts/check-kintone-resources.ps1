@@ -287,6 +287,9 @@ $script:exitCode = 0
                         try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $baseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
                     }
                     $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "レコードの条件" = $cond; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName }
+                    # アクセス権の継承は組織種別にしか意味を持たず、apply側も組織以外は常にfalseで送るため、
+                    # 組織以外の期待値はシートの値に関わらずfalseとして扱う（誤検知の「異なる」を防ぐ）。
+                    $expectedIncludeSubs = if ($typeLabel -eq "組織") { ToBool $exp.'アクセス権の継承' } else { $false }
                     if ($cur -and -not $exp) {
                         $row["閲覧_現状"] = $cur.Entity.viewable; $row["閲覧_期待値"] = $null
                         $row["編集_現状"] = $cur.Entity.editable; $row["編集_期待値"] = $null
@@ -297,14 +300,14 @@ $script:exitCode = 0
                         $row["閲覧_現状"] = $null; $row["閲覧_期待値"] = (ToBool $exp.'閲覧')
                         $row["編集_現状"] = $null; $row["編集_期待値"] = (ToBool $exp.'編集')
                         $row["削除_現状"] = $null; $row["削除_期待値"] = (ToBool $exp.'削除')
-                        $row["アクセス権の継承_現状"] = $null; $row["アクセス権の継承_期待値"] = (ToBool $exp.'アクセス権の継承')
+                        $row["アクセス権の継承_現状"] = $null; $row["アクセス権の継承_期待値"] = $expectedIncludeSubs
                         $row["結果"] = "存在しない"
                     } else {
                         $allMatch = Add-FieldColumns -Row $row -Pairs @(
                             @{ Label = "閲覧";             Current = $cur.Entity.viewable;    Expected = (ToBool $exp.'閲覧') },
                             @{ Label = "編集";             Current = $cur.Entity.editable;    Expected = (ToBool $exp.'編集') },
                             @{ Label = "削除";             Current = $cur.Entity.deletable;   Expected = (ToBool $exp.'削除') },
-                            @{ Label = "アクセス権の継承"; Current = $cur.Entity.includeSubs; Expected = (ToBool $exp.'アクセス権の継承') }
+                            @{ Label = "アクセス権の継承"; Current = $cur.Entity.includeSubs; Expected = $expectedIncludeSubs }
                         )
                         $row["結果"] = if ($allMatch) { "同じ" } else { "異なる" }
                     }

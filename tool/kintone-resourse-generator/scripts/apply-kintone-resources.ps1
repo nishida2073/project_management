@@ -62,17 +62,17 @@ $script:exitCode = 0
         if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-settings") {
             try {
                 if ($WhatIf) {
-                    Write-Host "[WhatIf] スペース設定を更新: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
+                    Write-Host "[WhatIf] スペース設定を設定: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
                 } else {
                     Set-Space -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId `
                         -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
                         -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
                         -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
                         -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')
-                    Write-Host "スペース設定を更新しました: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
+                    Write-Host "スペース設定を設定しました: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
                 }
             } catch {
-                Write-Host "スペースID $spaceId のスペース設定更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "スペースID $spaceId のスペース設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                 $hasError = $true
             }
         }
@@ -82,13 +82,13 @@ $script:exitCode = 0
             try {
                 $targetMemberRows = @($memberRows | Where-Object { $_.'スペースID' -eq $spaceId })
                 if ($WhatIf) {
-                    Write-Host "[WhatIf] スペースメンバーを更新: $($targetMemberRows.Count)件"
+                    Write-Host "[WhatIf] スペースメンバーを設定: $($targetMemberRows.Count)件"
                 } else {
                     Set-SpaceMembers -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
-                    Write-Host "スペースメンバーを更新しました ($($targetMemberRows.Count)件)"
+                    Write-Host "スペースメンバーを設定しました ($($targetMemberRows.Count)件)"
                 }
             } catch {
-                Write-Host "スペースID $spaceId のメンバー更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "スペースID $spaceId のメンバー設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                 $hasError = $true
             }
         }
@@ -97,86 +97,99 @@ $script:exitCode = 0
     # =========================================
     # アプリ単位の処理（スペースとは無関係にアプリIDだけで処理する）
     # =========================================
-    Write-Host ""
-    Write-Host "=== アプリの設定 ===" -ForegroundColor Cyan
-
     $touchedAppIds = New-Object System.Collections.Generic.List[string]
 
-    # --- 3. アプリ名 ---
-    if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-list") {
-        foreach ($row in @($appRows | Where-Object { $_.'アプリID' })) {
-            $appId = $row.'アプリID'
-            $finalName = $row.'アプリ名'
+    $applyAppList = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-list"
+    $applyAppAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-acl"
+    $applyAppRecordAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-record-acl"
 
-            try {
-                if ($WhatIf) {
-                    Write-Host "[WhatIf] アプリID[$appId]の名前を[$finalName]に設定"
-                } else {
-                    Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
-                    Write-Host "  アプリID[$appId] の名前を[$finalName]に設定しました"
-                    $touchedAppIds.Add([string]$appId)
+    if ($applyAppList -or $applyAppAcl -or $applyAppRecordAcl) {
+        $allAppIds = @(
+            @($(if ($applyAppList) { $appRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } })) +
+            @($(if ($applyAppAcl) { $appAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } })) +
+            @($(if ($applyAppRecordAcl) { $recordAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } }))
+        ) | Select-Object -Unique
+
+        foreach ($appId in $allAppIds) {
+            $appNameRow = $appRows | Where-Object { "$($_.'アプリID')" -eq $appId } | Select-Object -First 1
+            $aclRowsForApp = @($appAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
+            $recordAclRowsForApp = @($recordAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
+
+            $label = $appNameRow.'アプリ名'
+            if (-not $label -and $aclRowsForApp.Count -gt 0) { $label = $aclRowsForApp[0].'アプリ名' }
+            if (-not $label -and $recordAclRowsForApp.Count -gt 0) { $label = $recordAclRowsForApp[0].'アプリ名' }
+
+            Write-Host ""
+            Write-Host "=== アプリID: $appId ($label) ===" -ForegroundColor Cyan
+
+            # --- 3. アプリ名 ---
+            if ($applyAppList -and $appNameRow) {
+                $finalName = $appNameRow.'アプリ名'
+                try {
+                    if ($WhatIf) {
+                        Write-Host "[WhatIf] アプリID[$appId]の名前を[$finalName]に設定"
+                    } else {
+                        Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
+                        Write-Host "アプリID[$appId] の名前を[$finalName]に設定しました"
+                        $touchedAppIds.Add([string]$appId)
+                    }
+                } catch {
+                    Write-Host "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                    $hasError = $true
                 }
-            } catch {
-                Write-Host "  アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
-                $hasError = $true
+            }
+
+            # --- 4. アプリのACL ---
+            if ($applyAppAcl -and $aclRowsForApp.Count -gt 0) {
+                try {
+                    $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $baseUrl -Authorization $authorization -Row $_ })
+
+                    if ($WhatIf) {
+                        Write-Host "[WhatIf] アプリ[$label](appId=$appId)のACLを設定: $($rights.Count)件"
+                    } else {
+                        Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights
+                        Write-Host "アプリ[$label](appId=$appId)のACLを設定しました ($($rights.Count)件)"
+                        $touchedAppIds.Add([string]$appId)
+                    }
+                } catch {
+                    Write-Host "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                    $hasError = $true
+                }
+            }
+
+            # --- 5. アプリのレコードACL ---
+            if ($applyAppRecordAcl -and $recordAclRowsForApp.Count -gt 0) {
+                try {
+                    $recordRights = New-RecordAclRightsFromRows -BaseUrl $baseUrl -Authorization $authorization -Rows $recordAclRowsForApp
+
+                    if ($WhatIf) {
+                        Write-Host "[WhatIf] アプリ[$label](appId=$appId)のレコードACLを設定: 条件$($recordRights.Count)件"
+                    } else {
+                        Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
+                        Write-Host "アプリ[$label](appId=$appId)のレコードACLを設定しました (条件$($recordRights.Count)件)"
+                        $touchedAppIds.Add([string]$appId)
+                    }
+                } catch {
+                    Write-Host "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                    $hasError = $true
+                }
             }
         }
+
         $skippedAppRows = @($appRows | Where-Object { -not $_.'アプリID' })
-        if ($skippedAppRows.Count -gt 0) {
-            Write-Host "  (アプリIDが空の行($($skippedAppRows.Count)件)はスキップしました。このツールはアプリの新規作成は行いません)" -ForegroundColor Yellow
+        if ($applyAppList -and $skippedAppRows.Count -gt 0) {
+            Write-Host ""
+            Write-Host "(アプリIDが空の行($($skippedAppRows.Count)件)はスキップしました。このツールはアプリの新規作成は行いません)" -ForegroundColor Yellow
         }
     }
 
-    # --- 4. アプリのACL ---
-    if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-acl") {
-        foreach ($aclGroup in (@($appAclRows | Where-Object { $_.'アプリID' }) | Group-Object -Property 'アプリID')) {
-            $appId = $aclGroup.Name
-            $label = $aclGroup.Group[0].'アプリ名'
-            try {
-                $rights = @($aclGroup.Group | ForEach-Object { New-AppAclRightFromRow -BaseUrl $baseUrl -Authorization $authorization -Row $_ })
-
-                if ($WhatIf) {
-                    Write-Host "[WhatIf] アプリ[$label](appId=$appId)のACLを更新: $($rights.Count)件"
-                } else {
-                    Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights
-                    Write-Host "  アプリ[$label](appId=$appId)のACLを更新しました ($($rights.Count)件)"
-                    $touchedAppIds.Add([string]$appId)
-                }
-            } catch {
-                Write-Host "  アプリ[$label](appId=$appId)のACL更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
-                $hasError = $true
-            }
-        }
-    }
-
-    # --- 5. アプリのレコードACL ---
-    if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-record-acl") {
-        foreach ($recordAclGroup in (@($recordAclRows | Where-Object { $_.'アプリID' }) | Group-Object -Property 'アプリID')) {
-            $appId = $recordAclGroup.Name
-            $label = $recordAclGroup.Group[0].'アプリ名'
-            try {
-                $recordRights = New-RecordAclRightsFromRows -BaseUrl $baseUrl -Authorization $authorization -Rows $recordAclGroup.Group
-
-                if ($WhatIf) {
-                    Write-Host "[WhatIf] アプリ[$label](appId=$appId)のレコードACLを更新: 条件$($recordRights.Count)件"
-                } else {
-                    Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
-                    Write-Host "  アプリ[$label](appId=$appId)のレコードACLを更新しました (条件$($recordRights.Count)件)"
-                    $touchedAppIds.Add([string]$appId)
-                }
-            } catch {
-                Write-Host "  アプリ[$label](appId=$appId)のレコードACL更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
-                $hasError = $true
-            }
-        }
-    }
-
-    # --- 6. デプロイ ---
+    # --- 6. アプリの更新 ---
     if (-not $WhatIf -and $touchedAppIds.Count -gt 0) {
+        Write-Host ""
         try {
-            Deploy-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds $touchedAppIds
+            Update-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds $touchedAppIds
         } catch {
-            Write-Host "デプロイでエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "アプリの更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
             $hasError = $true
         }
     }

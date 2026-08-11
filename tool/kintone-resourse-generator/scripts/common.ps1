@@ -442,12 +442,15 @@ function New-RecordAclRightsFromRows {
         $entities = @($condGroup.Group | ForEach-Object {
             $orgName = $_.'ユーザー／組織／グループ'
             $entityType = Resolve-KintoneEntityType -BaseUrl $BaseUrl -Authorization $Authorization -TypeLabel $_.'種別' -Code $orgName -AllowCreator
+            # アクセス権の継承（下位組織も含める）は組織種別にしか意味を持たないため、
+            # 組織以外（グループ・ユーザー・作成者）は常にfalseで送る。
+            $includeSubs = if ($entityType -eq "ORGANIZATION") { [bool](ToBool $_.'アクセス権の継承') } else { $false }
             @{
                 entity      = @{ type = $entityType; code = $(if ($entityType -eq "CREATOR") { $null } else { $orgName }) }
                 viewable    = [bool](ToBool $_.'閲覧')
                 editable    = [bool](ToBool $_.'編集')
                 deletable   = [bool](ToBool $_.'削除')
-                includeSubs = [bool](ToBool $_.'アクセス権の継承')
+                includeSubs = $includeSubs
             }
         })
         $rights += @{
@@ -471,7 +474,7 @@ function Set-AppRecordAcl {
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/preview/record/acl.json" -Body $body | Out-Null
 }
 
-function Deploy-KintoneApps {
+function Update-KintoneApps {
     param(
         [Parameter(Mandatory)][string]$BaseUrl,
         [Parameter(Mandatory)][string]$Authorization,
@@ -482,7 +485,7 @@ function Deploy-KintoneApps {
     $uniqueIds = @($AppIds | Select-Object -Unique)
     if ($uniqueIds.Count -eq 0) { return }
 
-    Write-Host "デプロイ開始: $($uniqueIds -join ', ')"
+    Write-Host "アプリの更新開始: $($uniqueIds -join ', ')"
 
     $body = @{ apps = @($uniqueIds | ForEach-Object { @{ app = $_ } }) }
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method POST -Path "/k/v1/preview/app/deploy.json" -Body $body | Out-Null
@@ -497,13 +500,13 @@ function Deploy-KintoneApps {
         if ($pending.Count -eq 0) {
             $failed = @($resp.apps | Where-Object { $_.status -ne "SUCCESS" })
             if ($failed.Count -gt 0) {
-                throw "デプロイに失敗したアプリがあります: $($failed | ConvertTo-Json -Compress)"
+                throw "更新に失敗したアプリがあります: $($failed | ConvertTo-Json -Compress)"
             }
-            Write-Host "デプロイ完了: $($uniqueIds -join ', ')"
+            Write-Host "アプリの更新完了: $($uniqueIds -join ', ')"
             return
         }
         if ((Get-Date) -gt $deadline) {
-            throw "デプロイがタイムアウトしました(${TimeoutSeconds}秒): $($resp.apps | ConvertTo-Json -Compress)"
+            throw "更新がタイムアウトしました(${TimeoutSeconds}秒): $($resp.apps | ConvertTo-Json -Compress)"
         }
     }
 }
