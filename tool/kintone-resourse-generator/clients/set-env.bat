@@ -9,13 +9,6 @@ if not defined KINTONE_TEMPLATE_PATH set "KINTONE_TEMPLATE_PATH=%BASE_PATH%templ
 if not defined KINTONE_CHECK_OUTPUT_PATH set "KINTONE_CHECK_OUTPUT_PATH=%BASE_PATH%checked"
 if not defined KINTONE_LOG_PATH set "KINTONE_LOG_PATH=%BASE_PATH%log"
 
-rem KINTONE_LOGIN / KINTONE_PASSWORD を指定すると、実行時のログインID/パスワードの
-rem プロンプト入力をスキップする。空のままなら実行時にその場で入力を求められる。
-rem 平文でパスワードを保存することになるため、このファイルの共有・コミットには注意すること。
-if not defined KINTONE_LOGIN set "KINTONE_LOGIN="
-if not defined KINTONE_PASSWORD set "KINTONE_PASSWORD="
-
-rem SpaceId・ConfigNameは各.batの引数で毎回明示的に渡す（環境変数の既定値は持たせていない）。
-rem 例: download-kintone-resources.bat 2 NJK-クラス-テクニカル
-rem     apply-kintone-resources.bat NJK-クラス-テクニカル
-rem     check-kintone-resources.bat NJK-クラス-テクニカル
+rem KINTONE_LOGIN・KINTONE_PASSWORDはset-credentials.bat（.gitignore対象、リポジトリには含まない）に書く。
+rem 無ければ実行時にその場でログインID・パスワードの入力を求められる。
+if exist "%~dp0set-credentials.bat" call "%~dp0set-credentials.bat"
