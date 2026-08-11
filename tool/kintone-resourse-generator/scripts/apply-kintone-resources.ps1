@@ -62,14 +62,14 @@ $script:exitCode = 0
         if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-settings") {
             try {
                 if ($WhatIf) {
-                    Write-Host "[WhatIf] スペース設定を更新: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'非公開') useMultiThread=$($spaceRow.'複数スレッドを使用する') fixedMember=$($spaceRow.'参加退会・フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成を管理者に限定する')"
+                    Write-Host "[WhatIf] スペース設定を更新: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
                 } else {
                     Set-Space -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId `
-                        -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'非公開') `
-                        -UseMultiThread (ToBool $spaceRow.'複数スレッドを使用する') `
-                        -FixedMember (ToBool $spaceRow.'参加退会・フォロー解除を禁止する') `
-                        -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成を管理者に限定する')
-                    Write-Host "スペース設定を更新しました: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'非公開') useMultiThread=$($spaceRow.'複数スレッドを使用する') fixedMember=$($spaceRow.'参加退会・フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成を管理者に限定する')"
+                        -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
+                        -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
+                        -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
+                        -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')
+                    Write-Host "スペース設定を更新しました: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
                 }
             } catch {
                 Write-Host "スペースID $spaceId のスペース設定更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
@@ -133,7 +133,7 @@ $script:exitCode = 0
             $appId = $aclGroup.Name
             $label = $aclGroup.Group[0].'アプリ名'
             try {
-                $rights = @($aclGroup.Group | ForEach-Object { New-AppAclRightFromRow -Row $_ })
+                $rights = @($aclGroup.Group | ForEach-Object { New-AppAclRightFromRow -BaseUrl $baseUrl -Authorization $authorization -Row $_ })
 
                 if ($WhatIf) {
                     Write-Host "[WhatIf] アプリ[$label](appId=$appId)のACLを更新: $($rights.Count)件"
@@ -155,7 +155,7 @@ $script:exitCode = 0
             $appId = $recordAclGroup.Name
             $label = $recordAclGroup.Group[0].'アプリ名'
             try {
-                $recordRights = New-RecordAclRightsFromRows -Rows $recordAclGroup.Group
+                $recordRights = New-RecordAclRightsFromRows -BaseUrl $baseUrl -Authorization $authorization -Rows $recordAclGroup.Group
 
                 if ($WhatIf) {
                     Write-Host "[WhatIf] アプリ[$label](appId=$appId)のレコードACLを更新: 条件$($recordRights.Count)件"

@@ -1,8 +1,8 @@
 ﻿# =========================================
 # kintoneリソース生成ツール 共通処理
 # =========================================
-# download-kintone-resources.ps1 / check-kintone-resources.ps1 / apply-kintone-resources.ps1
-# で共通して使う関数をまとめたもの。
+# download-kintone-resources.ps1 / check-kintone-resources.ps1 / apply-kintone-resources.ps1 /
+# generate-config-from-template.ps1 で共通して使う関数をまとめたもの。
 # 各スクリプトの先頭でドットソース（. "パス\common.ps1"）して読み込む。
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
@@ -249,11 +249,62 @@ function Set-Space {
         $body["permissions"] = @{ createApp = $(if ($CreateAppAdminOnly) { "ADMIN" } else { "EVERYONE" }) }
     }
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space.json" -Body $body | Out-Null
+
+    # スペース名を変更した場合、デフォルトスレッドの名前もスペース名と同じにする。
+    if ($Name) {
+        $space = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/space.json?id=$SpaceId"
+        if ($space.defaultThread) {
+            Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space/thread.json" -Body @{ id = $space.defaultThread; name = $Name } | Out-Null
+        }
+    }
+}
+
+# space-member-listシートの「種別」列（組織/グループ/ユーザー）とkintoneのentity.typeを相互変換する。
+# ラベルが空・未知の場合はGet-KintoneMemberTypeが$nullを返す（呼び出し側で自動判定にフォールバックする）。
+function Get-KintoneMemberTypeLabel {
+    param([string]$Type)
+    switch ($Type) {
+        "ORGANIZATION" { return "組織" }
+        "GROUP"        { return "グループ" }
+        "USER"         { return "ユーザー" }
+        default        { return $Type }
+    }
+}
+
+function Get-KintoneMemberType {
+    param([string]$Label)
+    switch ($Label) {
+        "組織"     { return "ORGANIZATION" }
+        "グループ" { return "GROUP" }
+        "ユーザー" { return "USER" }
+        default    { return $null }
+    }
+}
+
+# 組織・グループ・ユーザーのコードは重複しない前提のため、コードだけから種別を自動判定する
+# （kintoneのユーザーAPIで組織→グループ→ユーザーの順に検索し、最初に見つかった種別を返す）。
+function Get-KintoneMemberEntityType {
+    param(
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$Authorization,
+        [Parameter(Mandatory)][string]$Code
+    )
+
+    $org = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/v1/organizations.json?codes[0]=$Code"
+    if ($org.organizations.Count -gt 0) { return "ORGANIZATION" }
+
+    $group = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/v1/groups.json?codes[0]=$Code"
+    if ($group.groups.Count -gt 0) { return "GROUP" }
+
+    $user = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/v1/users.json?codes[0]=$Code"
+    if ($user.users.Count -gt 0) { return "USER" }
+
+    throw "組織・グループ・ユーザーのいずれにも一致しないコードです: $Code"
 }
 
 # PUT /k/v1/space/members.jsonは送ったmembers配列で完全に置き換わる（実機で確認済み）。
-# space-member-listシートはORGANIZATION種別しか持たないため、そのままPUTするとUSER/GROUPメンバーが
-# 消える。現在のメンバーを取得し、ORGANIZATION以外を残した上でORGANIZATION分だけ置き換える。
+# space-member-listシートに無いコードのメンバー（個人ユーザーなど、テンプレートで管理しないもの）を
+# 消さないよう、現在のメンバーのうちシートに無いコードだけを残し、シートの内容を追加する。
 function Set-SpaceMembers {
     param(
         [Parameter(Mandatory)][string]$BaseUrl,
@@ -262,8 +313,10 @@ function Set-SpaceMembers {
         [Parameter(Mandatory)][AllowEmptyCollection()][array]$MemberRows
     )
 
+    $sheetCodes = @($MemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' })
+
     $current = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/space/members.json?id=$SpaceId"
-    $keptMembers = @($current.members | Where-Object { $_.entity.type -ne "ORGANIZATION" } | ForEach-Object {
+    $keptMembers = @($current.members | Where-Object { $sheetCodes -notcontains $_.entity.code } | ForEach-Object {
         @{
             entity      = @{ type = $_.entity.type; code = $_.entity.code }
             isAdmin     = [bool]$_.isAdmin
@@ -271,15 +324,20 @@ function Set-SpaceMembers {
         }
     })
 
-    $newOrgMembers = @($MemberRows | ForEach-Object {
+    $newMembers = @($MemberRows | ForEach-Object {
+        $code = $_.'ユーザー/組織/グループ'
+        $type = Get-KintoneMemberType $_.'種別'
+        if (-not $type) {
+            $type = Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $Authorization -Code $code
+        }
         @{
-            entity      = @{ type = "ORGANIZATION"; code = $_.'組織名' }
+            entity      = @{ type = $type; code = $code }
             isAdmin     = [bool](ToBool $_.'管理者')
             includeSubs = [bool](ToBool $_.'下位組織も含める')
         }
     })
 
-    $body = @{ id = $SpaceId; members = @($keptMembers + $newOrgMembers) }
+    $body = @{ id = $SpaceId; members = @($keptMembers + $newMembers) }
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space/members.json" -Body $body | Out-Null
 }
 
@@ -299,23 +357,36 @@ function Set-AppName {
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/preview/app/settings.json" -Body $body | Out-Null
 }
 
-function Get-KintoneEntityType {
-    param([string]$Name)
-    switch ($Name) {
-        "everyone" { return "GROUP" }
-        "作成者"   { return "CREATOR" }
-        default    { return "ORGANIZATION" }
-    }
+# 「種別」列（組織/グループ/ユーザー/作成者）が指定されていればそれを使い、無ければコードから
+# 自動判定する（Get-KintoneMemberEntityType）。-AllowCreatorを指定した場合のみ、コードが
+# "作成者"であればCREATOR（レコード作成者、codeはnull）として扱う。
+function Resolve-KintoneEntityType {
+    param(
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$Authorization,
+        [string]$TypeLabel,
+        [Parameter(Mandatory)][string]$Code,
+        [switch]$AllowCreator
+    )
+    if ($AllowCreator -and $Code -eq "作成者") { return "CREATOR" }
+
+    $type = Get-KintoneMemberType $TypeLabel
+    if ($type) { return $type }
+    return Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $Authorization -Code $Code
 }
 
 function New-AppAclRightFromRow {
-    param($Row)
+    param(
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$Authorization,
+        $Row
+    )
 
-    $orgName = $Row.'組織名'
-    $entityType = Get-KintoneEntityType -Name $orgName
+    $orgName = $Row.'ユーザー／組織／グループ'
+    $entityType = Resolve-KintoneEntityType -BaseUrl $BaseUrl -Authorization $Authorization -TypeLabel $Row.'種別' -Code $orgName
 
     return @{
-        entity            = @{ type = $entityType; code = $(if ($entityType -eq "CREATOR") { $null } else { $orgName }) }
+        entity            = @{ type = $entityType; code = $orgName }
         includeSubs       = $false
         appEditable       = [bool](ToBool $Row.'アプリ管理')
         recordViewable    = [bool](ToBool $Row.'レコード閲覧')
@@ -323,7 +394,7 @@ function New-AppAclRightFromRow {
         recordEditable    = [bool](ToBool $Row.'レコード編集')
         recordDeletable   = [bool](ToBool $Row.'レコード削除')
         recordImportable  = [bool](ToBool $Row.'ファイル読み込み')
-        recordExportable  = $false
+        recordExportable  = [bool](ToBool $Row.'ファイル書き出し')
     }
 }
 
@@ -360,14 +431,19 @@ function Set-AppAcl {
 
 # レコードの条件列はkintoneのクエリ記法そのままの値として無変換で渡す。
 function New-RecordAclRightsFromRows {
-    param([Parameter(Mandatory)][array]$Rows)
+    param(
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$Authorization,
+        [Parameter(Mandatory)][array]$Rows
+    )
 
     $rights = @()
     foreach ($condGroup in ($Rows | Group-Object -Property 'レコードの条件')) {
         $entities = @($condGroup.Group | ForEach-Object {
-            $orgName = $_.'組織名'
+            $orgName = $_.'ユーザー／組織／グループ'
+            $entityType = Resolve-KintoneEntityType -BaseUrl $BaseUrl -Authorization $Authorization -TypeLabel $_.'種別' -Code $orgName -AllowCreator
             @{
-                entity      = @{ type = (Get-KintoneEntityType -Name $orgName); code = $(if ($orgName -eq "作成者") { $null } else { $orgName }) }
+                entity      = @{ type = $entityType; code = $(if ($entityType -eq "CREATOR") { $null } else { $orgName }) }
                 viewable    = [bool](ToBool $_.'閲覧')
                 editable    = [bool](ToBool $_.'編集')
                 deletable   = [bool](ToBool $_.'削除')
@@ -477,6 +553,105 @@ function Group-RowsBySpaceId {
     return $Rows | Group-Object -Property 'スペースID'
 }
 
+# ダウンロード結果のスペース名・アプリ名に含まれる "{PH}" を、そのconfig名に置き換える。
+# kintone側でスペース・アプリを作成する時点では最終的な名前が決まらないため、
+# 仮の名前として"{PH}"を埋め込んでおき、generate-config-from-template実行時に確定させる用途。
+function Expand-KintonePlaceholder {
+    param([string]$Value, [Parameter(Mandatory)][string]$ConfigName)
+    if (-not $Value) { return $Value }
+    return $Value.Replace('{PH}', $ConfigName)
+}
+
+# "{PH}"を含む元の値を基準に、{PH}だった部分だけ色を変えたリッチテキストをセルに設定する
+# （置き換わった文字だけ見分けられるように）。{PH}を含まない場合は何もしない。
+function Set-KintonePlaceholderRichText {
+    param(
+        [Parameter(Mandatory)]$Cell,
+        [string]$OriginalValue,
+        [Parameter(Mandatory)][string]$ConfigName,
+        [Parameter(Mandatory)][System.Drawing.Color]$Color
+    )
+    if (-not $OriginalValue -or -not $OriginalValue.Contains('{PH}')) { return }
+
+    $segments = $OriginalValue.Split([string[]]@('{PH}'), [System.StringSplitOptions]::None)
+    $Cell.Value = $null
+    for ($i = 0; $i -lt $segments.Length; $i++) {
+        if ($segments[$i]) { $Cell.RichText.Add($segments[$i]) | Out-Null }
+        if ($i -lt $segments.Length - 1) {
+            $run = $Cell.RichText.Add($ConfigName)
+            $run.Color = $Color
+            $run.Bold = $true
+        }
+    }
+}
+
+# アプリ名は毎回、共通の一部に対して前後（プレフィックス/サフィックス）が付き足される形でしか
+# 変化しない前提のため、「どちらかがどちらかを含むか」の2択で一致判定する（1=一致/0=不一致）。
+function Get-AppNameSimilarity {
+    param([string]$A, [string]$B)
+    if (-not $A -or -not $B) { return 0.0 }
+    if ($A.Contains($B) -or $B.Contains($A)) { return 1.0 }
+    return 0.0
+}
+
+# テンプレート側アプリ（アプリ名のみ、IDは持たない）と新スペース側アプリを、
+# アプリ名の一致（どちらかがどちらかを含む）で1対1に対応付ける。
+# 一致するペアが複数のアプリにまたがって重複した場合は、先に確定したペアを優先する。
+# 対応関係は配列のインデックスで管理する（アプリ名をキーにすると、同名のアプリが
+# 複数あった場合に片方の対応付けでもう片方まで「対応済み」扱いになり、
+# 結果から消えてしまうため）。
+function Get-AppNameMapping {
+    param(
+        [Parameter(Mandatory)][array]$TemplateApps,
+        [Parameter(Mandatory)][array]$DownloadApps
+    )
+
+    $candidates = New-Object System.Collections.Generic.List[psobject]
+    for ($ti = 0; $ti -lt $TemplateApps.Count; $ti++) {
+        for ($di = 0; $di -lt $DownloadApps.Count; $di++) {
+            $similarity = Get-AppNameSimilarity -A "$($TemplateApps[$ti].'アプリ名')" -B "$($DownloadApps[$di].'アプリ名')"
+            $candidates.Add([PSCustomObject]@{ TemplateIndex = $ti; DownloadIndex = $di; Similarity = $similarity })
+        }
+    }
+
+    $usedTemplateIndexes = @{}
+    $usedDownloadIndexes = @{}
+    $result = New-Object System.Collections.Generic.List[psobject]
+
+    foreach ($c in ($candidates | Sort-Object -Property Similarity -Descending)) {
+        if ($usedTemplateIndexes.ContainsKey($c.TemplateIndex) -or $usedDownloadIndexes.ContainsKey($c.DownloadIndex)) { continue }
+        if ($c.Similarity -eq 0) { continue }
+        $usedTemplateIndexes[$c.TemplateIndex] = $true
+        $usedDownloadIndexes[$c.DownloadIndex] = $true
+        $result.Add([PSCustomObject]@{
+            TemplateAppName = $TemplateApps[$c.TemplateIndex].'アプリ名'
+            DownloadAppId   = $DownloadApps[$c.DownloadIndex].'アプリID'
+            DownloadAppName = $DownloadApps[$c.DownloadIndex].'アプリ名'
+            Status          = "対応"
+        })
+    }
+
+    for ($ti = 0; $ti -lt $TemplateApps.Count; $ti++) {
+        if ($usedTemplateIndexes.ContainsKey($ti)) { continue }
+        $result.Add([PSCustomObject]@{
+            TemplateAppName = $TemplateApps[$ti].'アプリ名'
+            DownloadAppId   = $null
+            DownloadAppName = $null
+            Status          = "対応なし（新スペース側に見つかりません）"
+        })
+    }
+    for ($di = 0; $di -lt $DownloadApps.Count; $di++) {
+        if ($usedDownloadIndexes.ContainsKey($di)) { continue }
+        $result.Add([PSCustomObject]@{
+            TemplateAppName = $null
+            DownloadAppId   = $DownloadApps[$di].'アプリID'
+            DownloadAppName = $DownloadApps[$di].'アプリ名'
+            Status          = "対応なし（テンプレート側に見つかりません）"
+        })
+    }
+    return $result
+}
+
 function Set-KintoneHeaderRowColor {
     param(
         [Parameter(Mandatory)][string]$Path,
@@ -494,6 +669,18 @@ function Set-KintoneHeaderRowColor {
             $cell.Style.Fill.PatternType = [OfficeOpenXml.Style.ExcelFillStyle]::Solid
             $cell.Style.Fill.BackgroundColor.SetColor($Color)
         }
+        Set-KintoneColumnWidth -Worksheet $ws
     }
     Close-ExcelPackage $pkg
+}
+
+# 列の幅を内容に合わせて自動調整する。EPPlusのAutoFitColumnsは日本語（全角）文字の幅を
+# 少し狭く見積もる傾向があるため、自動調整後に余白を追加して見切れを防ぐ。
+function Set-KintoneColumnWidth {
+    param([Parameter(Mandatory)]$Worksheet)
+    if (-not $Worksheet.Dimension) { return }
+    $Worksheet.Cells.AutoFitColumns()
+    for ($c = 1; $c -le $Worksheet.Dimension.End.Column; $c++) {
+        $Worksheet.Column($c).Width += 4
+    }
 }

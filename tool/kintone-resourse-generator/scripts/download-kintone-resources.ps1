@@ -49,28 +49,26 @@ $script:exitCode = 0
 
     # --- space-settings ---
     $spaceListRows = @([PSCustomObject]@{
-        "スペースID"                       = $space.spaceId
-        "スペース名"                       = $space.spaceName
-        "非公開"                           = $space.isPrivate
-        "複数スレッドを使用する"           = $space.useMultiThread
-        "参加退会・フォロー解除を禁止する" = $space.fixedMember
-        "アプリ作成を管理者に限定する"     = ($space.createApp -eq "ADMIN")
+        "スペースID"                                                     = $space.spaceId
+        "スペース名"                                                     = $space.spaceName
+        "参加メンバーだけにこのスペースを公開する"                       = $space.isPrivate
+        "スペースのポータルと複数のスレッドを使用する"                   = $space.useMultiThread
+        "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する" = $space.fixedMember
+        "アプリ作成できるユーザーをスペースの管理者に限定する"           = ($space.createApp -eq "ADMIN")
     })
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-settings" -Rows $spaceListRows -Headers @("スペースID", "スペース名", "非公開", "複数スレッドを使用する", "参加退会・フォロー解除を禁止する", "アプリ作成を管理者に限定する")
+    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-settings" -Rows $spaceListRows -Headers @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する")
 
     # --- space-member-list ---
-    $memberRows = @($space.members | Where-Object { $_.entity.type -eq "ORGANIZATION" } | ForEach-Object {
+    $memberRows = @($space.members | ForEach-Object {
         [PSCustomObject]@{
-            "スペースID"       = $space.spaceId
-            "組織名"           = $_.entity.code
-            "管理者"           = $_.isAdmin
-            "下位組織も含める" = $_.includeSubs
+            "スペースID"             = $space.spaceId
+            "種別"                   = Get-KintoneMemberTypeLabel $_.entity.type
+            "ユーザー/組織/グループ" = $_.entity.code
+            "管理者"                 = $_.isAdmin
+            "下位組織も含める"       = $_.includeSubs
         }
     })
-    if ($memberRows.Count -lt $space.members.Count) {
-        Write-Host "  (ORGANIZATION以外のメンバー($($space.members.Count - $memberRows.Count)件)はspace-member-listシートの対象外のため書き出していません)" -ForegroundColor Yellow
-    }
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-member-list" -Rows $memberRows -Headers @("スペースID", "組織名", "管理者", "下位組織も含める")
+    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-member-list" -Rows $memberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
 
     # --- space-app-list ---
     $appListRows = @($space.apps | ForEach-Object {
@@ -89,46 +87,49 @@ $script:exitCode = 0
             $appAclRows += [PSCustomObject]@{
                 "アプリID"         = $app.appId
                 "アプリ名"         = $app.name
-                "組織名"           = $right.entity.code
+                "種別"             = Get-KintoneMemberTypeLabel $right.entity.type
+                "ユーザー／組織／グループ" = $right.entity.code
                 "レコード閲覧"     = $right.recordViewable
                 "レコード追加"     = $right.recordAddable
                 "レコード編集"     = $right.recordEditable
                 "レコード削除"     = $right.recordDeletable
                 "アプリ管理"       = $right.appEditable
                 "ファイル読み込み" = $right.recordImportable
+                "ファイル書き出し" = $right.recordExportable
             }
         }
     }
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-acl" -Rows $appAclRows -Headers @("アプリID", "アプリ名", "組織名", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み")
+    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-acl" -Rows $appAclRows -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
 
     # --- space-app-record-acl ---
     $recordAclRows = @()
     foreach ($app in $space.apps) {
         foreach ($right in $app.recordRights) {
             foreach ($entity in $right.entities) {
-                $orgName = if ($entity.entity.type -eq "CREATOR") { "作成者" } else { $entity.entity.code }
+                $isCreator = $entity.entity.type -eq "CREATOR"
+                $orgName = if ($isCreator) { "作成者" } else { $entity.entity.code }
+                $typeLabel = if ($isCreator) { "作成者" } else { Get-KintoneMemberTypeLabel $entity.entity.type }
                 $recordAclRows += [PSCustomObject]@{
-                    "アプリID"         = $app.appId
-                    "アプリ名"         = $app.name
-                    "レコードの条件"   = $right.filterCond
-                    "組織名"           = $orgName
-                    "閲覧"             = $entity.viewable
-                    "編集"             = $entity.editable
-                    "削除"             = $entity.deletable
-                    "アクセス権の継承" = $entity.includeSubs
+                    "アプリID"               = $app.appId
+                    "アプリ名"               = $app.name
+                    "レコードの条件"         = $right.filterCond
+                    "種別"                   = $typeLabel
+                    "ユーザー／組織／グループ" = $orgName
+                    "閲覧"                   = $entity.viewable
+                    "編集"                   = $entity.editable
+                    "削除"                   = $entity.deletable
+                    "アクセス権の継承"       = $entity.includeSubs
                 }
             }
         }
     }
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl" -Rows $recordAclRows -Headers @("アプリID", "アプリ名", "レコードの条件", "組織名", "閲覧", "編集", "削除", "アクセス権の継承")
+    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl" -Rows $recordAclRows -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除", "アクセス権の継承")
 
     # ヘッダー行を灰色で塗る
     Set-KintoneHeaderRowColor -Path $downloadPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
 
     Write-Host ""
-    Write-Host "書き出し完了: $downloadPath" -ForegroundColor Green
-    Write-Host "  シート: space-settings / space-member-list / space-app-list / space-app-acl / space-app-record-acl"
-    Write-Host "アプリ名やACLを編集した後、apply-kintone-resources.bat で反映してください。"
+    Write-Host "現在の状態を出力しました: $downloadPath" -ForegroundColor Green
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
