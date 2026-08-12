@@ -8,8 +8,8 @@ set "OutputRootDir=%~dp0..\output"
 set "TemplateRootDir=%~dp0..\template"
 
 
-set "OutputReportDir=%OutputRootDir%\01_ï¿½ï¿½oï¿½ï¿½"
-set "OutputCollectDataRootDir=%OutputRootDir%\02_ï¿½Aï¿½vï¿½ï¿½ï¿½fï¿½[ï¿½^ï¿½Wï¿½v"
-set "OutputAlertRootDir=%OutputRootDir%\03_ï¿½Aï¿½ï¿½ï¿½[ï¿½gï¿½ï¿½ï¿½mï¿½ï¿½ï¿½ï¿½"
+set "OutputReportDir=%OutputRootDir%\01_’ñoó‹µ"
+set "OutputCollectDataRootDir=%OutputRootDir%\02_ƒAƒvƒŠƒf[ƒ^WŒv"
+set "OutputAlertRootDir=%OutputRootDir%\03_ƒAƒ‰[ƒgŒŸ’mŒ‹‰Ê"
 
 
