@@ -163,16 +163,34 @@ function Open-KintoneOutputFile {
     Start-Process -FilePath $Path
 }
 
-# 各工程を1行の「カード」として表示する（名前 → 実行ボタン → 状態 → 開くボタン）。
-# 「0. スペース作成」と「3. kintoneへ反映」は出力ファイルが無いため開くボタンを持たない。
 # 「0. スペース作成」も「まとめて実行」の対象。成功すると①で使うスペースIDが自動入力されるため、
 # 各工程の必須項目チェックは開始前ではなく工程の直前に行う。
 $stepMeta = @(
-    [PSCustomObject]@{ Id = 0; Label = "0. スペース作成" }
-    [PSCustomObject]@{ Id = 1; Label = "1. ダウンロード" }
-    [PSCustomObject]@{ Id = 2; Label = "2. 設定ファイルの生成" }
-    [PSCustomObject]@{ Id = 3; Label = "3. kintoneへ反映" }
-    [PSCustomObject]@{ Id = 4; Label = "4. データチェック" }
+    [PSCustomObject]@{
+        Id = 0; Label = "0. スペース作成"; StageKey = "createspace"; Bat = $createSpaceBat
+        ArgsFn = { param($ConfigName) @("-TemplateId", $txtSpaceTemplateId.Text.Trim(), "-SpaceName", $ConfigName) }
+        OutputPathFn = $null
+    }
+    [PSCustomObject]@{
+        Id = 1; Label = "1. ダウンロード"; StageKey = "download"; Bat = $downloadBat
+        ArgsFn = { param($ConfigName) @("-SpaceId", $txtSpaceId.Text.Trim(), "-ConfigName", $ConfigName) }
+        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "KINTONE_DOWNLOAD_PATH") "${ConfigName}_download.xlsx" }
+    }
+    [PSCustomObject]@{
+        Id = 2; Label = "2. 設定ファイルの生成"; StageKey = "generate"; Bat = $generateBat
+        ArgsFn = { param($ConfigName) @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $ConfigName) }
+        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "KINTONE_CONFIG_PATH") "${ConfigName}_config.xlsx" }
+    }
+    [PSCustomObject]@{
+        Id = 3; Label = "3. kintoneへ反映"; StageKey = "apply"; Bat = $applyBat
+        ArgsFn = { param($ConfigName) @("-ConfigName", $ConfigName) }
+        OutputPathFn = $null
+    }
+    [PSCustomObject]@{
+        Id = 4; Label = "4. データチェック"; StageKey = "check"; Bat = $checkBat
+        ArgsFn = { param($ConfigName) @("-ConfigName", $ConfigName) }
+        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "KINTONE_CHECK_OUTPUT_PATH") "${ConfigName}_check.xlsx" }
+    }
 )
 
 $script:stepRunButtons = @{}
@@ -212,7 +230,7 @@ foreach ($sm in $stepMeta) {
     $stepCardsPanel.Controls.Add($lblStepStatus)
     $script:stepStatusLabels[$sm.Id] = $lblStepStatus
 
-    if ($sm.Id -ne 0 -and $sm.Id -ne 3) {
+    if ($sm.OutputPathFn) {
         $btnStepOpen = New-Object System.Windows.Forms.Button
         $btnStepOpen.Text = "開く"
         $btnStepOpen.Size = New-Object System.Drawing.Size(70, 24)
@@ -228,7 +246,6 @@ foreach ($sm in $stepMeta) {
 }
 $runTopPanel.Controls.Add($stepCardsPanel)
 
-# 単体実行タブの工程カード（まとめて実行より下）を折りたたみ、ログ表示を広く使えるようにする。
 $script:singleRunExpandedHeight = $runTopPanel.Height
 $script:singleRunCollapsedHeight = 190
 
@@ -386,38 +403,22 @@ function Invoke-BatStep {
 
 function Get-StepBat {
     param([int]$Id)
-    switch ($Id) {
-        0 { return $createSpaceBat }
-        1 { return $downloadBat }
-        2 { return $generateBat }
-        3 { return $applyBat }
-        4 { return $checkBat }
-    }
+    return ($stepMeta | Where-Object { $_.Id -eq $Id }).Bat
 }
 
 function Get-StepArgs {
     param([int]$Id, [string]$ConfigName)
-    switch ($Id) {
-        0 { return @("-TemplateId", $txtSpaceTemplateId.Text.Trim(), "-SpaceName", $ConfigName) }
-        1 { return @("-SpaceId", $txtSpaceId.Text.Trim(), "-ConfigName", $ConfigName) }
-        2 { return @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $ConfigName) }
-        3 { return @("-ConfigName", $ConfigName) }
-        4 { return @("-ConfigName", $ConfigName) }
-    }
+    $sm = $stepMeta | Where-Object { $_.Id -eq $Id }
+    return & $sm.ArgsFn $ConfigName
 }
 
 function Get-StepOutputPath {
     param([int]$Id, [string]$ConfigName)
-    switch ($Id) {
-        1 { return Join-Path (Get-ResolvedVar "KINTONE_DOWNLOAD_PATH") "${ConfigName}_download.xlsx" }
-        2 { return Join-Path (Get-ResolvedVar "KINTONE_CONFIG_PATH") "${ConfigName}_config.xlsx" }
-        4 { return Join-Path (Get-ResolvedVar "KINTONE_CHECK_OUTPUT_PATH") "${ConfigName}_check.xlsx" }
-        default { return $null }
-    }
+    $sm = $stepMeta | Where-Object { $_.Id -eq $Id }
+    if (!$sm.OutputPathFn) { return $null }
+    return & $sm.OutputPathFn $ConfigName
 }
 
-# UI上の入力欄の並び（スペース識別名 → スペーステンプレートID → スペースID → 設定テンプレート名）
-# と同じ順番でチェックする。
 function Test-StepPrereq {
     param([int]$Id, [string]$ConfigName)
     if (!$ConfigName) {
@@ -463,7 +464,6 @@ function Set-RunControlsEnabled {
     foreach ($btn in $script:stepRunButtons.Values) { $btn.Enabled = $Enabled }
 }
 
-# 1工程分を実行し、成功したら状態表示と開くボタンを更新する。成功/失敗をboolで返す。
 function Invoke-Step {
     param([int]$Id, [string]$ConfigName)
 
@@ -514,9 +514,7 @@ function Invoke-SingleStep {
     $script:isRunning = $false
 }
 
-# 0.スペース作成はスペースIDが無い状態から始まるため、各工程の直前にその工程の
-# 必須項目をチェックする（0が成功すると①で使うスペースIDが自動入力されるため）。
-# 現在の入力欄の値のまま0→4を順に実行し、失敗した工程のLabelを返す（全部成功なら$null）。
+# 失敗した工程のLabelを返す（全部成功なら$null）。
 function Invoke-AllStepsForCurrentInputs {
     foreach ($sm in $stepMeta) {
         $configName = $txtConfigName.Text.Trim()
@@ -854,41 +852,21 @@ $cmbLogConfigName.Location = New-Object System.Drawing.Point(160, 14)
 $cmbLogConfigName.Size = New-Object System.Drawing.Size(220, 24)
 $cmbLogConfigName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$logStagePrefixes = [ordered]@{
-    "createspace" = "0. スペース作成"
-    "download"    = "1. ダウンロード"
-    "generate"    = "2. 設定ファイルの生成"
-    "apply"       = "3. kintoneへ反映"
-    "check"       = "4. データチェック"
+$script:logStageRadios = @{}
+for ($i = 0; $i -lt $stepMeta.Count; $i++) {
+    $sm = $stepMeta[$i]
+    $radio = New-Object System.Windows.Forms.RadioButton
+    $radio.Text = $sm.Label
+    $radio.AutoSize = $true
+    $radio.Tag = $sm.StageKey
+    $radio.Checked = ($sm.Id -eq 0)
+    $radio.Location = New-Object System.Drawing.Point((20 + 140 * ($i % 3)), (40 + 24 * [Math]::Floor($i / 3)))
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+    $logStagePanel.Controls.Add($radio)
+    $script:logStageRadios[$sm.StageKey] = $radio
 }
 
-$radioCreateSpaceLog = New-Object System.Windows.Forms.RadioButton
-$radioCreateSpaceLog.Text = "0. スペース作成"
-$radioCreateSpaceLog.AutoSize = $true
-$radioCreateSpaceLog.Checked = $true
-$radioCreateSpaceLog.Location = New-Object System.Drawing.Point(20, 40)
-
-$radioDownloadLog = New-Object System.Windows.Forms.RadioButton
-$radioDownloadLog.Text = "1. ダウンロード"
-$radioDownloadLog.AutoSize = $true
-$radioDownloadLog.Location = New-Object System.Drawing.Point(160, 40)
-
-$radioGenerateLog = New-Object System.Windows.Forms.RadioButton
-$radioGenerateLog.Text = "2. 設定ファイルの生成"
-$radioGenerateLog.AutoSize = $true
-$radioGenerateLog.Location = New-Object System.Drawing.Point(300, 40)
-
-$radioApplyLog = New-Object System.Windows.Forms.RadioButton
-$radioApplyLog.Text = "3. kintoneへ反映"
-$radioApplyLog.AutoSize = $true
-$radioApplyLog.Location = New-Object System.Drawing.Point(20, 64)
-
-$radioCheckLog = New-Object System.Windows.Forms.RadioButton
-$radioCheckLog.Text = "4. データチェック"
-$radioCheckLog.AutoSize = $true
-$radioCheckLog.Location = New-Object System.Drawing.Point(160, 64)
-
-$logStagePanel.Controls.AddRange(@($lblLogConfigName, $cmbLogConfigName, $radioCreateSpaceLog, $radioDownloadLog, $radioGenerateLog, $radioApplyLog, $radioCheckLog))
+$logStagePanel.Controls.AddRange(@($lblLogConfigName, $cmbLogConfigName))
 
 $logContentBox = New-Object System.Windows.Forms.TextBox
 $logContentBox.Multiline = $true
@@ -907,7 +885,8 @@ function Update-LogConfigNameList {
 
     $logPath = Get-ResolvedVar "KINTONE_LOG_PATH"
     if ($logPath -and (Test-Path -LiteralPath $logPath)) {
-        $stagePrefixPattern = '^(createspace|download|generate|apply|check)_(?<config>.+)_\d{8}_\d{6}$'
+        $stageKeyPattern = ($stepMeta.StageKey -join '|')
+        $stagePrefixPattern = "^(?:$stageKeyPattern)_(?<config>.+)_\d{8}_\d{6}$"
         $configNames = Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue |
             ForEach-Object {
                 $m = [regex]::Match([System.IO.Path]::GetFileNameWithoutExtension($_.Name), $stagePrefixPattern)
@@ -922,7 +901,7 @@ function Update-LogConfigNameList {
 }
 
 function Update-LogView {
-    $stage = if ($radioCreateSpaceLog.Checked) { "createspace" } elseif ($radioDownloadLog.Checked) { "download" } elseif ($radioGenerateLog.Checked) { "generate" } elseif ($radioApplyLog.Checked) { "apply" } else { "check" }
+    $stage = ($script:logStageRadios.GetEnumerator() | Where-Object { $_.Value.Checked }).Key
     $logPath = Get-ResolvedVar "KINTONE_LOG_PATH"
 
     $logContentBox.Text = ""
@@ -939,11 +918,6 @@ function Update-LogView {
     $logContentBox.Text = $sections -join "`r`n`r`n"
 }
 
-$radioCreateSpaceLog.Add_CheckedChanged({ if ($radioCreateSpaceLog.Checked) { Update-LogView } })
-$radioDownloadLog.Add_CheckedChanged({ if ($radioDownloadLog.Checked) { Update-LogView } })
-$radioGenerateLog.Add_CheckedChanged({ if ($radioGenerateLog.Checked) { Update-LogView } })
-$radioApplyLog.Add_CheckedChanged({ if ($radioApplyLog.Checked) { Update-LogView } })
-$radioCheckLog.Add_CheckedChanged({ if ($radioCheckLog.Checked) { Update-LogView } })
 $cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
 
 $tabControl.Add_SelectedIndexChanged({
