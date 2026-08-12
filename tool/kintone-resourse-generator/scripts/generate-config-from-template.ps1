@@ -32,21 +32,23 @@ if (-not $DownloadConfigName) {
 }
 
 $templatePath = Join-Path $templateRoot "$TemplateConfigName.xlsx"
-$downloadPath = Join-Path $downloadRoot "$DownloadConfigName.xlsx"
-$outputPath = Join-Path $configRoot "$DownloadConfigName.xlsx"
+$downloadPath = Join-Path $downloadRoot "${DownloadConfigName}_download.xlsx"
+$outputPath = Join-Path $configRoot "${DownloadConfigName}_config.xlsx"
 $logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "generate_$DownloadConfigName"
 
 $script:exitCode = 0
 
 & {
     $templateSpaceRow = Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-settings" | Select-Object -First 1
-    $templateMemberRows = Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-member-list"
+    $templateMemberRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-member-list")
     $templateAppRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-list" | Where-Object { $_.'アプリ名' })
-    $templateAclRows = Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-acl"
-    $templateRecordAclRows = Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-record-acl"
+    $templateAclRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-acl")
+    $templateRecordAclRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-record-acl")
 
     $downloadSpaceRow = Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-settings" | Select-Object -First 1
     $downloadAppRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-list" | Where-Object { $_.'アプリID' })
+    $downloadAclRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-acl")
+    $downloadRecordAclRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl")
 
     if (-not $templateSpaceRow -or -not $downloadSpaceRow) {
         Write-Host "テンプレートまたはダウンロード結果のspace-settingsが空です" -ForegroundColor Red
@@ -135,6 +137,7 @@ $script:exitCode = 0
     }
 
     $outAclRows = New-Object System.Collections.Generic.List[psobject]
+    $aclRowSources = New-Object System.Collections.Generic.List[psobject]
     Write-Host ""
     Write-Host "=== space-app-acl ===" -ForegroundColor Cyan
     foreach ($m in $matchedApps) {
@@ -153,12 +156,14 @@ $script:exitCode = 0
                 "ファイル読み込み" = $r.'ファイル読み込み'
                 "ファイル書き出し" = $r.'ファイル書き出し'
             })
+            $aclRowSources.Add([PSCustomObject]@{ DownloadAppName = $m.DownloadAppName; TemplateRow = $r })
         }
         Write-Host "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のACLを設定 ($($rows.Count)件)"
     }
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-acl" -Rows $outAclRows.ToArray() -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
 
     $outRecordAclRows = New-Object System.Collections.Generic.List[psobject]
+    $recordAclRowSources = New-Object System.Collections.Generic.List[psobject]
     Write-Host ""
     Write-Host "=== space-app-record-acl ===" -ForegroundColor Cyan
     foreach ($m in $matchedApps) {
@@ -173,20 +178,25 @@ $script:exitCode = 0
                 "閲覧"                     = $r.'閲覧'
                 "編集"                     = $r.'編集'
                 "削除"                     = $r.'削除'
-                "アクセス権の継承"         = $r.'アクセス権の継承'
             })
+            $recordAclRowSources.Add([PSCustomObject]@{ DownloadAppName = $m.DownloadAppName; TemplateRow = $r })
         }
         Write-Host "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のレコードACLを設定 (条件$($rows.Count)件)"
     }
-    Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-record-acl" -Rows $outRecordAclRows.ToArray() -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除", "アクセス権の継承")
+    Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-record-acl" -Rows $outRecordAclRows.ToArray() -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除")
 
     Set-KintoneHeaderRowColor -Path $outputPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
 
-    $applyDiffColoring = $false # 赤字処理を一旦無効化
+    $applyDiffColoring = $true # 赤字処理を一旦無効化
 
-    # スペース名・アプリ名は{PH}置き換え部分だけを赤字にする。設定値は変更のあるセルのみ赤字にする。
-    # space-app-acl/space-app-record-aclはテンプレートから丸ごと生成した行なので行全体を赤字にし、
-    # space-member-listはテンプレート由来の行だけ赤字にする（引き継いだ既存メンバーの行は色を付けない）
+    # スペース名・アプリ名は{PH}置き換え部分だけを赤字にする。
+    # それ以外は、ユニークキーでダウンロード結果に対応する行がある場合は値が異なるセルだけを赤字にし、
+    # 対応する行が無い（新規追加）場合は行全体を赤字にする。ユニークキーは以下:
+    #   space-settings: なし（1行のみ）
+    #   space-member-list: 種別, ユーザー/組織/グループ
+    #   space-app-list: アプリ名（マッチング済みのアプリのみ出力するため常に対応行あり）
+    #   space-app-acl: アプリ名, 種別, ユーザー／組織／グループ
+    #   space-app-record-acl: アプリ名, レコードの条件, 種別, ユーザー／組織／グループ
     $diffColor = [System.Drawing.Color]::FromArgb(255, 0, 0)
     $pkg = Open-ExcelPackage -Path $outputPath
 
@@ -214,21 +224,78 @@ $script:exitCode = 0
         if ($wsMember -and $wsMember.Dimension) {
             $templateRowEnd = [Math]::Min(1 + $templateMemberRows.Count, $wsMember.Dimension.End.Row)
             for ($row = 2; $row -le $templateRowEnd; $row++) {
-                for ($col = 1; $col -le $wsMember.Dimension.End.Column; $col++) {
-                    $wsMember.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
-                    $wsMember.Cells[$row, $col].Style.Font.Bold = $true
+                $tmplRow = $templateMemberRows[$row - 2]
+                # ユニークキー: 種別 + ユーザー/組織/グループ
+                $dlRow = $downloadMemberRows | Where-Object {
+                    "$($_.'種別')" -eq "$($tmplRow.'種別')" -and
+                    "$($_.'ユーザー/組織/グループ')" -eq "$($tmplRow.'ユーザー/組織/グループ')"
+                } | Select-Object -First 1
+                if (-not $dlRow) {
+                    for ($col = 1; $col -le $wsMember.Dimension.End.Column; $col++) {
+                        $wsMember.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
+                        $wsMember.Cells[$row, $col].Style.Font.Bold = $true
+                    }
+                    continue
                 }
+                Set-KintoneCellDiffColor -Cell $wsMember.Cells[$row, 4] -DownloadValue "$($dlRow.'管理者')" -FinalValue "$($tmplRow.'管理者')"
+                Set-KintoneCellDiffColor -Cell $wsMember.Cells[$row, 5] -DownloadValue "$($dlRow.'下位組織も含める')" -FinalValue "$($tmplRow.'下位組織も含める')"
             }
         }
 
-        foreach ($sheetName in @("space-app-acl", "space-app-record-acl")) {
-            $ws = $pkg.Workbook.Worksheets[$sheetName]
-            if (-not $ws -or -not $ws.Dimension) { continue }
-            for ($row = 2; $row -le $ws.Dimension.End.Row; $row++) {
-                for ($col = 1; $col -le $ws.Dimension.End.Column; $col++) {
-                    $ws.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
-                    $ws.Cells[$row, $col].Style.Font.Bold = $true
+        $wsAcl = $pkg.Workbook.Worksheets["space-app-acl"]
+        if ($wsAcl -and $wsAcl.Dimension) {
+            for ($i = 0; $i -lt $aclRowSources.Count; $i++) {
+                $row = $i + 2
+                if ($row -gt $wsAcl.Dimension.End.Row) { break }
+                $src = $aclRowSources[$i]
+                $tmplRow = $src.TemplateRow
+                # ユニークキー: アプリ名 + 種別 + ユーザー／組織／グループ
+                $dlRow = $downloadAclRows | Where-Object {
+                    "$($_.'アプリ名')" -eq "$($src.DownloadAppName)" -and
+                    "$($_.'種別')" -eq "$($tmplRow.'種別')" -and
+                    "$($_.'ユーザー／組織／グループ')" -eq "$($tmplRow.'ユーザー／組織／グループ')"
+                } | Select-Object -First 1
+                if (-not $dlRow) {
+                    for ($col = 1; $col -le $wsAcl.Dimension.End.Column; $col++) {
+                        $wsAcl.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
+                        $wsAcl.Cells[$row, $col].Style.Font.Bold = $true
+                    }
+                    continue
                 }
+                Set-KintoneCellDiffColor -Cell $wsAcl.Cells[$row, 5] -DownloadValue "$($dlRow.'レコード閲覧')" -FinalValue "$($tmplRow.'レコード閲覧')"
+                Set-KintoneCellDiffColor -Cell $wsAcl.Cells[$row, 6] -DownloadValue "$($dlRow.'レコード追加')" -FinalValue "$($tmplRow.'レコード追加')"
+                Set-KintoneCellDiffColor -Cell $wsAcl.Cells[$row, 7] -DownloadValue "$($dlRow.'レコード編集')" -FinalValue "$($tmplRow.'レコード編集')"
+                Set-KintoneCellDiffColor -Cell $wsAcl.Cells[$row, 8] -DownloadValue "$($dlRow.'レコード削除')" -FinalValue "$($tmplRow.'レコード削除')"
+                Set-KintoneCellDiffColor -Cell $wsAcl.Cells[$row, 9] -DownloadValue "$($dlRow.'アプリ管理')" -FinalValue "$($tmplRow.'アプリ管理')"
+                Set-KintoneCellDiffColor -Cell $wsAcl.Cells[$row, 10] -DownloadValue "$($dlRow.'ファイル読み込み')" -FinalValue "$($tmplRow.'ファイル読み込み')"
+                Set-KintoneCellDiffColor -Cell $wsAcl.Cells[$row, 11] -DownloadValue "$($dlRow.'ファイル書き出し')" -FinalValue "$($tmplRow.'ファイル書き出し')"
+            }
+        }
+
+        $wsRecordAcl = $pkg.Workbook.Worksheets["space-app-record-acl"]
+        if ($wsRecordAcl -and $wsRecordAcl.Dimension) {
+            for ($i = 0; $i -lt $recordAclRowSources.Count; $i++) {
+                $row = $i + 2
+                if ($row -gt $wsRecordAcl.Dimension.End.Row) { break }
+                $src = $recordAclRowSources[$i]
+                $tmplRow = $src.TemplateRow
+                # ユニークキー: アプリ名 + レコードの条件 + 種別 + ユーザー／組織／グループ
+                $dlRow = $downloadRecordAclRows | Where-Object {
+                    "$($_.'アプリ名')" -eq "$($src.DownloadAppName)" -and
+                    "$($_.'レコードの条件')" -eq "$($tmplRow.'レコードの条件')" -and
+                    "$($_.'種別')" -eq "$($tmplRow.'種別')" -and
+                    "$($_.'ユーザー／組織／グループ')" -eq "$($tmplRow.'ユーザー／組織／グループ')"
+                } | Select-Object -First 1
+                if (-not $dlRow) {
+                    for ($col = 1; $col -le $wsRecordAcl.Dimension.End.Column; $col++) {
+                        $wsRecordAcl.Cells[$row, $col].Style.Font.Color.SetColor($diffColor)
+                        $wsRecordAcl.Cells[$row, $col].Style.Font.Bold = $true
+                    }
+                    continue
+                }
+                Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells[$row, 6] -DownloadValue "$($dlRow.'閲覧')" -FinalValue "$($tmplRow.'閲覧')"
+                Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells[$row, 7] -DownloadValue "$($dlRow.'編集')" -FinalValue "$($tmplRow.'編集')"
+                Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells[$row, 8] -DownloadValue "$($dlRow.'削除')" -FinalValue "$($tmplRow.'削除')"
             }
         }
     }

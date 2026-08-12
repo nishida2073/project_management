@@ -24,10 +24,10 @@ if (-not $baseUrl -or -not $configRoot -or -not $logRoot) {
     exit 1
 }
 if (-not $ConfigName) {
-    $ConfigName = Read-Host "設定ファイル名（config\<CONFIG_NAME>.xlsx の<CONFIG_NAME>）"
+    $ConfigName = Read-Host "設定ファイル名（config\<CONFIG_NAME>_config.xlsx の<CONFIG_NAME>）"
 }
 
-$configPath = Join-Path $configRoot "$ConfigName.xlsx"
+$configPath = Join-Path $configRoot "${ConfigName}_config.xlsx"
 $logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "apply_$ConfigName"
 
 $script:exitCode = 0

@@ -25,10 +25,10 @@ if (-not $SpaceId) {
     $SpaceId = Read-Host "ダウンロード対象のスペースID"
 }
 if (-not $ConfigName) {
-    $ConfigName = Read-Host "設定ファイル名（download\<CONFIG_NAME>.xlsx の<CONFIG_NAME>）"
+    $ConfigName = Read-Host "設定ファイル名（download\<CONFIG_NAME>_download.xlsx の<CONFIG_NAME>）"
 }
 
-$downloadPath = Join-Path $downloadRoot "$ConfigName.xlsx"
+$downloadPath = Join-Path $downloadRoot "${ConfigName}_download.xlsx"
 $logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "download_$ConfigName"
 
 $script:exitCode = 0
@@ -113,12 +113,11 @@ $script:exitCode = 0
                     "閲覧"                   = $entity.viewable
                     "編集"                   = $entity.editable
                     "削除"                   = $entity.deletable
-                    "アクセス権の継承"       = $entity.includeSubs
                 }
             }
         }
     }
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl" -Rows $recordAclRows -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除", "アクセス権の継承")
+    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl" -Rows $recordAclRows -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除")
 
     Set-KintoneHeaderRowColor -Path $downloadPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
 

@@ -3,7 +3,7 @@
 # =========================================
 # download-kintone-resources.bat → generate-config-from-template.bat →
 # apply-kintone-resources.bat → check-kintone-resources.bat を画面から順番に実行するGUI。
-# 「実行」タブで設定ファイル名等を入力し実行する処理にチェックを入れて実行する。
+# 「実行」タブで設定ファイル名等を入力し、工程ごとの実行ボタン（個別実行）か「まとめて実行」（全工程を順番に実行）で実行する。
 # 「設定」タブでset-env.batの値（KINTONE_*の各パス・URL）を編集する。
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -34,6 +34,7 @@ $form.StartPosition = "CenterScreen"
 $form.MinimumSize = New-Object System.Drawing.Size(600, 400)
 
 $script:currentProc = $null
+$script:stepOutputPaths = @{}
 $form.Add_FormClosing({
     if ($script:currentProc -and !$script:currentProc.HasExited) {
         & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
@@ -68,7 +69,7 @@ $tabControl.Add_Selecting({
 
 $runTopPanel = New-Object System.Windows.Forms.Panel
 $runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$runTopPanel.Height = 196
+$runTopPanel.Height = 300
 
 $lblSpaceId = New-Object System.Windows.Forms.Label
 $lblSpaceId.Text = "スペースID"
@@ -98,43 +99,86 @@ $cmbTemplateName.Location = New-Object System.Drawing.Point(160, 82)
 $cmbTemplateName.Size = New-Object System.Drawing.Size(220, 22)
 $cmbTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$chkDownload = New-Object System.Windows.Forms.CheckBox
-$chkDownload.Text = "1. ダウンロード"
-$chkDownload.AutoSize = $true
-$chkDownload.Location = New-Object System.Drawing.Point(20, 122)
+$btnRunAll = New-Object System.Windows.Forms.Button
+$btnRunAll.Text = "まとめて実行"
+$btnRunAll.Location = New-Object System.Drawing.Point(20, 118)
+$btnRunAll.Size = New-Object System.Drawing.Size(120, 26)
 
-$chkGenerate = New-Object System.Windows.Forms.CheckBox
-$chkGenerate.Text = "2. 設定ファイルの生成"
-$chkGenerate.AutoSize = $true
-$chkGenerate.Location = New-Object System.Drawing.Point(160, 122)
-
-$chkApply = New-Object System.Windows.Forms.CheckBox
-$chkApply.Text = "3. kintoneへ反映"
-$chkApply.AutoSize = $true
-$chkApply.Location = New-Object System.Drawing.Point(300, 122)
-
-$chkCheck = New-Object System.Windows.Forms.CheckBox
-$chkCheck.Text = "4. データチェック"
-$chkCheck.AutoSize = $true
-$chkCheck.Location = New-Object System.Drawing.Point(440, 122)
-
-$btnRun = New-Object System.Windows.Forms.Button
-$btnRun.Text = "実行"
-$btnRun.Location = New-Object System.Drawing.Point(20, 154)
-$btnRun.Size = New-Object System.Drawing.Size(100, 24)
-
-$lblStatus = New-Object System.Windows.Forms.Label
-$lblStatus.Text = ""
-$lblStatus.AutoSize = $true
-$lblStatus.Location = New-Object System.Drawing.Point(134, 164)
-$lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
+$lblOverallStatus = New-Object System.Windows.Forms.Label
+$lblOverallStatus.Text = ""
+$lblOverallStatus.AutoSize = $true
+$lblOverallStatus.Location = New-Object System.Drawing.Point(150, 124)
+$lblOverallStatus.Font = New-Object System.Drawing.Font($lblOverallStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $runTopPanel.Controls.AddRange(@(
     $lblSpaceId, $txtSpaceId, $lblConfigName, $txtConfigName,
     $lblTemplateName, $cmbTemplateName,
-    $chkDownload, $chkGenerate, $chkApply, $chkCheck,
-    $btnRun, $lblStatus
+    $btnRunAll, $lblOverallStatus
 ))
+
+function Open-KintoneOutputFile {
+    param([string]$Path)
+    if (!$Path -or !(Test-Path -LiteralPath $Path)) {
+        [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    Start-Process -FilePath $Path
+}
+
+# 各工程を1行の「カード」として表示する（名前 → 実行ボタン → 状態 → 開くボタン）。
+# 「3. kintoneへ反映」だけは出力ファイルが無いため開くボタンを持たない。
+$stepMeta = @(
+    [PSCustomObject]@{ Id = 1; Label = "1. ダウンロード" }
+    [PSCustomObject]@{ Id = 2; Label = "2. 設定ファイルの生成" }
+    [PSCustomObject]@{ Id = 3; Label = "3. kintoneへ反映" }
+    [PSCustomObject]@{ Id = 4; Label = "4. データチェック" }
+)
+
+$script:stepRunButtons = @{}
+$script:stepStatusLabels = @{}
+$script:stepOpenButtons = @{}
+
+$stepRowY = 154
+foreach ($sm in $stepMeta) {
+    $lblStepName = New-Object System.Windows.Forms.Label
+    $lblStepName.Text = $sm.Label
+    $lblStepName.AutoSize = $false
+    $lblStepName.Size = New-Object System.Drawing.Size(180, 22)
+    $lblStepName.Location = New-Object System.Drawing.Point(20, $stepRowY)
+    $runTopPanel.Controls.Add($lblStepName)
+
+    $btnStepRun = New-Object System.Windows.Forms.Button
+    $btnStepRun.Text = "実行"
+    $btnStepRun.Size = New-Object System.Drawing.Size(70, 24)
+    $btnStepRun.Location = New-Object System.Drawing.Point(210, ($stepRowY - 2))
+    $btnStepRun.Tag = $sm.Id
+    $btnStepRun.Add_Click({ Invoke-SingleStep -Id $this.Tag })
+    $runTopPanel.Controls.Add($btnStepRun)
+    $script:stepRunButtons[$sm.Id] = $btnStepRun
+
+    $lblStepStatus = New-Object System.Windows.Forms.Label
+    $lblStepStatus.Text = "未実行"
+    $lblStepStatus.AutoSize = $false
+    $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
+    $lblStepStatus.Location = New-Object System.Drawing.Point(300, $stepRowY)
+    $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
+    $runTopPanel.Controls.Add($lblStepStatus)
+    $script:stepStatusLabels[$sm.Id] = $lblStepStatus
+
+    if ($sm.Id -ne 3) {
+        $btnStepOpen = New-Object System.Windows.Forms.Button
+        $btnStepOpen.Text = "開く"
+        $btnStepOpen.Size = New-Object System.Drawing.Size(70, 24)
+        $btnStepOpen.Location = New-Object System.Drawing.Point(460, ($stepRowY - 2))
+        $btnStepOpen.Enabled = $false
+        $btnStepOpen.Tag = $sm.Id
+        $btnStepOpen.Add_Click({ Open-KintoneOutputFile $script:stepOutputPaths[$this.Tag] })
+        $runTopPanel.Controls.Add($btnStepOpen)
+        $script:stepOpenButtons[$sm.Id] = $btnStepOpen
+    }
+
+    $stepRowY += 34
+}
 
 $txtLog = New-Object System.Windows.Forms.RichTextBox
 $txtLog.Multiline = $true
@@ -208,99 +252,152 @@ function Invoke-BatStep {
     return $proc.ExitCode
 }
 
-$btnRun.Add_Click({
+function Get-StepBat {
+    param([int]$Id)
+    switch ($Id) {
+        1 { return $downloadBat }
+        2 { return $generateBat }
+        3 { return $applyBat }
+        4 { return $checkBat }
+    }
+}
+
+function Get-StepArgs {
+    param([int]$Id, [string]$ConfigName)
+    switch ($Id) {
+        1 { return @("-SpaceId", $txtSpaceId.Text.Trim(), "-ConfigName", $ConfigName) }
+        2 { return @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $ConfigName) }
+        3 { return @("-ConfigName", $ConfigName) }
+        4 { return @("-ConfigName", $ConfigName) }
+    }
+}
+
+function Get-StepOutputPath {
+    param([int]$Id, [string]$ConfigName)
+    switch ($Id) {
+        1 { return Join-Path (Get-ResolvedVar "KINTONE_DOWNLOAD_PATH") "${ConfigName}_download.xlsx" }
+        2 { return Join-Path (Get-ResolvedVar "KINTONE_CONFIG_PATH") "${ConfigName}_config.xlsx" }
+        4 { return Join-Path (Get-ResolvedVar "KINTONE_CHECK_OUTPUT_PATH") "${ConfigName}_check.xlsx" }
+        default { return $null }
+    }
+}
+
+function Test-StepPrereq {
+    param([int]$Id)
+    if ($Id -eq 1 -and !$txtSpaceId.Text.Trim()) {
+        [System.Windows.Forms.MessageBox]::Show("①ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return $false
+    }
+    if ($Id -eq 2 -and !$cmbTemplateName.Text.Trim()) {
+        [System.Windows.Forms.MessageBox]::Show("②設定ファイルの生成にはテンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return $false
+    }
+    return $true
+}
+
+function Set-StepStatus {
+    param([int]$Id, [string]$Text)
+    $lbl = $script:stepStatusLabels[$Id]
+    $lbl.Text = $Text
+    $lbl.ForeColor = switch ($Text) {
+        "実行中..." { [System.Drawing.Color]::Black }
+        "成功"      { [System.Drawing.Color]::DarkGreen }
+        "失敗"      { [System.Drawing.Color]::DarkRed }
+        default     { [System.Drawing.Color]::Gray }
+    }
+}
+
+function Set-RunControlsEnabled {
+    param([bool]$Enabled)
+    $txtConfigName.Enabled = $Enabled
+    $txtSpaceId.Enabled = $Enabled
+    $cmbTemplateName.Enabled = $Enabled
+    $btnRunAll.Enabled = $Enabled
+    foreach ($btn in $script:stepRunButtons.Values) { $btn.Enabled = $Enabled }
+}
+
+# 1工程分を実行し、成功したら状態表示と開くボタンを更新する。成功/失敗をboolで返す。
+function Invoke-Step {
+    param([int]$Id, [string]$ConfigName)
+
+    Set-StepStatus -Id $Id -Text "実行中..."
+    $label = ($stepMeta | Where-Object { $_.Id -eq $Id }).Label
+    Write-Log ""
+    Write-Log "===== $label ====="
+
+    $exitCode = Invoke-BatStep -BatPath (Get-StepBat -Id $Id) -ArgList (Get-StepArgs -Id $Id -ConfigName $ConfigName)
+
+    if ($exitCode -ne 0) {
+        Set-StepStatus -Id $Id -Text "失敗"
+        return $false
+    }
+
+    Set-StepStatus -Id $Id -Text "成功"
+    if ($script:stepOpenButtons.ContainsKey($Id)) {
+        $outputPath = Get-StepOutputPath -Id $Id -ConfigName $ConfigName
+        if ($outputPath -and (Test-Path -LiteralPath $outputPath)) {
+            $script:stepOutputPaths[$Id] = $outputPath
+            $script:stepOpenButtons[$Id].Enabled = $true
+        }
+    }
+    return $true
+}
+
+function Invoke-SingleStep {
+    param([int]$Id)
+
     $configName = $txtConfigName.Text.Trim()
     if (!$configName) {
         [System.Windows.Forms.MessageBox]::Show("設定ファイル名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
-
-    $steps = @()
-    if ($chkDownload.Checked) {
-        if (!$txtSpaceId.Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("①ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        $steps += [PSCustomObject]@{
-            Name = "1. ダウンロード"
-            Bat  = $downloadBat
-            Args = @("-SpaceId", $txtSpaceId.Text.Trim(), "-ConfigName", $configName)
-        }
-    }
-    if ($chkGenerate.Checked) {
-        if (!$cmbTemplateName.Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("②設定ファイルの生成にはテンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        $steps += [PSCustomObject]@{
-            Name = "2. 設定ファイルの生成"
-            Bat  = $generateBat
-            Args = @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $configName)
-        }
-    }
-    if ($chkApply.Checked) {
-        $steps += [PSCustomObject]@{
-            Name = "3. kintoneへ反映"
-            Bat  = $applyBat
-            Args = @("-ConfigName", $configName)
-        }
-    }
-    if ($chkCheck.Checked) {
-        $steps += [PSCustomObject]@{
-            Name = "4. データチェック"
-            Bat  = $checkBat
-            Args = @("-ConfigName", $configName)
-        }
-    }
-
-    if ($steps.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("実行する処理を選択してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
+    if (!(Test-StepPrereq -Id $Id)) { return }
 
     $script:isRunning = $true
-    $txtConfigName.Enabled = $false
-    $txtSpaceId.Enabled = $false
-    $cmbTemplateName.Enabled = $false
-    $chkDownload.Enabled = $false
-    $chkGenerate.Enabled = $false
-    $chkApply.Enabled = $false
-    $chkCheck.Enabled = $false
-    $btnRun.Enabled = $false
-    $lblStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblStatus.Text = "実行中..."
+    Set-RunControlsEnabled $false
+    $lblOverallStatus.Text = ""
+
+    Write-Log ""
+    Write-Log "-------------------- $configName --------------------"
+    Invoke-Step -Id $Id -ConfigName $configName | Out-Null
+
+    Set-RunControlsEnabled $true
+    $script:isRunning = $false
+}
+
+$btnRunAll.Add_Click({
+    $configName = $txtConfigName.Text.Trim()
+    if (!$configName) {
+        [System.Windows.Forms.MessageBox]::Show("設定ファイル名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    if (!(Test-StepPrereq -Id 1) -or !(Test-StepPrereq -Id 2)) { return }
+
+    $script:isRunning = $true
+    Set-RunControlsEnabled $false
+    $lblOverallStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblOverallStatus.Text = "実行中..."
 
     Write-Log ""
     Write-Log "-------------------- $configName --------------------"
 
-    $failedStep = $null
-    $exitCode = 0
-    foreach ($step in $steps) {
-        Write-Log ""
-        Write-Log "===== $($step.Name) ====="
-        $exitCode = Invoke-BatStep -BatPath $step.Bat -ArgList $step.Args
-        if ($exitCode -ne 0) {
-            $failedStep = $step.Name
+    $failedLabel = $null
+    foreach ($sm in $stepMeta) {
+        if (!(Invoke-Step -Id $sm.Id -ConfigName $configName)) {
+            $failedLabel = $sm.Label
             break
         }
     }
 
-    if ($failedStep) {
-        $lblStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblStatus.Text = "エラーが発生しました（$failedStep、終了コード: $exitCode）"
+    if ($failedLabel) {
+        $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkRed
+        $lblOverallStatus.Text = "エラーが発生しました（$failedLabel）"
     } else {
-        $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-        $lblStatus.Text = "完了しました"
+        $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+        $lblOverallStatus.Text = "完了しました"
     }
 
-    $txtConfigName.Enabled = $true
-    $txtSpaceId.Enabled = $true
-    $cmbTemplateName.Enabled = $true
-    $chkDownload.Enabled = $true
-    $chkGenerate.Enabled = $true
-    $chkApply.Enabled = $true
-    $chkCheck.Enabled = $true
-    $btnRun.Enabled = $true
+    Set-RunControlsEnabled $true
     $script:isRunning = $false
 })
 
