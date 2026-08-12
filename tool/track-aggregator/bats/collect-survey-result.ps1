@@ -1,0 +1,643 @@
+﻿param(
+    [string]$BaseUrl,
+    [string]$MasterDataFilePath,
+    [string]$AutoHotkeyExePath,
+    [string]$AutoHotkeyScriptPath,
+    [string]$TargetGroupName,
+    [string]$OutputRootDir,
+    [string]$TemplateFilePath,
+    [string]$SurveyResultRootDir,
+    [string]$TestResultRootDir
+)
+
+$libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$libraryDir = Join-Path $libraryDir "library"
+Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
+    Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
+}
+
+$primeSurveyItems = @("S27","S1","S2","S7","S10","S13","S16","S19","S22","S25")
+
+function Create-SurveyDatas {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$DataFilePath
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    $dataLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex 3
+    
+    $bodies = @()
+    $headerMap = @{
+        '通番'   = 'surveyNo'
+        'アンケート名'     = 'surveyName'
+    }
+    $headers = $dataLines[0] -split ',' | ForEach-Object { $_.Trim() }
+    $bodyLines = $dataLines | Select-Object -Skip 1
+    foreach ($line in $bodyLines) {
+        $parts = $line -split ',' | ForEach-Object { $_.Trim() }
+        $body = [PSCustomObject]@{}
+        for ($i = 0; $i -lt $headers.Count; $i++) {
+            $header = $headers[$i]
+            $value  = $parts[$i]
+            $body | Add-Member -NotePropertyName $header -NotePropertyValue $value
+            if ($headerMap.ContainsKey($header)) {
+                $internalName = $headerMap[$header]
+                $body | Add-Member -NotePropertyName $internalName -NotePropertyValue $value -Force
+            }
+        }
+        $bodies += $body
+    }
+    return $bodies
+}
+
+
+function Create-ResultDatas {
+    param(
+        [string]$SurveyResultRootDir,
+        [string]$TargetGroupName,
+        [array]$SurveyDatas
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    $allResultDatas = @()
+    foreach($surveyData in $SurveyDatas){
+        $surveyName = $surveyData.surveyName
+        $surveyGroupDir = Join-Path $SurveyResultRootDir $TargetGroupName
+        $surveyResultDir = Join-Path $surveyGroupDir $surveyName
+        $resultFiles = @(Get-ChildItem $surveyResultDir -Filter *.csv)
+        foreach($resultFile in $resultFiles){
+            $csv = Import-Csv $resultFile.FullName
+            foreach ($row in $csv) {
+                $obj = $row | Select-Object *
+                $obj | Add-Member -NotePropertyName surveyName -NotePropertyValue $surveyName
+                $obj | Add-Member -NotePropertyName userCode -NotePropertyValue $row.account
+                $obj | Add-Member -NotePropertyName isExecute -NotePropertyValue ($row.status -ne "NotStarted")
+                $surveyCount = ($obj.PSObject.Properties.Name -like 'surveyAnswerValue*').Count
+                $obj | Add-Member -NotePropertyName surveyCount -NotePropertyValue $surveyCount
+                for ($i = 1; $i -le $obj.surveyCount; $i++) {
+                    $propName = "surveyAnswerValue/$i"
+                    $propValue = if ($obj.PSObject.Properties.Name -contains $propName){
+                        $obj.$propName
+                    }else {
+                        ""
+                    }
+                    $obj | Add-Member -NotePropertyName "S$i" -NotePropertyValue $propValue
+                }
+                $allResultDatas += $obj
+            }
+        }
+    }
+    # Write-Message $allResultDatas -VarName "allResultDatas" -Type "Info"
+    return $allResultDatas
+}
+
+    
+function Create-CollectResultsDatas {
+    param(
+        $UserDatas,
+        $SurveyDatas,
+        $SurveyResultDatas,
+        $UserTestResultsDatas,
+        $TotalTestResultsDatas
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    $userCodes = $UserDatas.userCode
+    $validSurveyResultDatas = $SurveyResultDatas |
+        Where-Object {
+            $_.isExecute -and $_.userCode -in $userCodes
+        } |
+        Group-Object userCode, surveyName | ForEach-Object { $_.Group[0] }
+    
+    $plainSurveyResults = foreach ($userData in $UserDatas) {
+        $userResults = @($validSurveyResultDatas | Where-Object { $_.userCode -eq $userData.userCode })
+        foreach ($surveyData in $SurveyDatas) {
+            $filtered = $userResults | Where-Object { $_.surveyName -eq $surveyData.surveyName }| Select-Object -First 1
+            [pscustomobject]@{
+                userCode    = $userData.userCode
+                userData    = $userData
+                surveyName  = $surveyData.surveyName
+                surveyResult = $filtered
+                isExecute   = $filtered -and $filtered.isExecute
+            }
+        }
+    }
+    
+    $ClassNames = $UserDatas.className | Sort-Object -Unique
+    $CompanyNames = $UserDatas.companyName | Select-Object -Unique
+    $rankOrder = @("S","A","B","C","D","E")
+    $RankNames = $UserDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) }
+    
+    # totalSummary
+    $totalSummarySurveyResults = Create-SummaryDataByGroup `
+        -UserDatas $UserDatas `
+        -SurveyDatas $SurveyDatas `
+        -ValidResultDatas $validSurveyResultDatas
+    
+    # companySummary
+    $companySummarySurveyResults = Create-SummaryDataByGroup `
+        -GroupValues $CompanyNames `
+        -GroupKey "companyName" `
+        -UserDatas $UserDatas `
+        -SurveyDatas $SurveyDatas `
+        -ValidResultDatas $validSurveyResultDatas
+    
+    # classSummary
+    $classSummaryResults = Create-SummaryDataByGroup `
+        -GroupValues $ClassNames `
+        -GroupKey "className" `
+        -UserDatas $UserDatas `
+        -SurveyDatas $SurveyDatas `
+        -ValidResultDatas $validSurveyResultDatas
+    
+    # rankSummary
+    $rankSummaryResults = Create-SummaryDataByGroup `
+        -GroupValues $RankNames `
+        -GroupKey "rankName" `
+        -UserDatas $UserDatas `
+        -SurveyDatas $SurveyDatas `
+        -ValidResultDatas $validSurveyResultDatas
+    
+    # combine
+    $combineSummaryResults = [ordered]@{}
+    foreach ($t in $TotalTestResultsDatas) {
+        $key = $t.テスト名
+        if (-not $combineSummaryResults.Contains($key)) {
+            $combineSummaryResults[$key] = [ordered]@{}
+        }
+        $combineSummaryResults[$key].Test = $t
+    }
+    foreach ($s in $totalSummarySurveyResults) {
+        $key = $s.surveyName
+        if (-not $combineSummaryResults.Contains($key)) {
+            $combineSummaryResults[$key] = [ordered]@{}
+        }
+        $combineSummaryResults[$key].Survey = $s
+    }
+    
+    # ユーザのテスト結果
+    $userTestResults = $UserTestResultsDatas
+    
+    # 全体
+    $results = [PSCustomObject]@{
+        userTestResults = $userTestResults
+        combineSummaryResults  = $combineSummaryResults
+        
+        plainSurveyResults = $plainSurveyResults
+        
+        totalSummarySurveyResults = $totalSummarySurveyResults
+        companySummarySurveyResults = $companySummarySurveyResults
+        classSummarySurveyResults = $classSummaryResults
+        rankSummarySurveyResults = $rankSummaryResults
+    }
+    
+    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
+    return $results
+}
+
+
+function Create-SummaryDataByGroup {
+    param(
+        [array]$ValidResultDatas,
+        [array]$UserDatas,
+        [array]$SurveyDatas,
+        [array]$GroupValues,
+        [string]$GroupKey
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    if (-not $GroupValues) {
+        $GroupValues = @($null)
+    }
+    $results = foreach ($groupValue in $GroupValues) {
+        if ($GroupKey) {
+            $groupUsers = @(
+                $UserDatas |
+                Where-Object { $_.$GroupKey -eq $groupValue }
+            )
+        } else {
+            $groupUsers = $UserDatas
+        }
+        $groupResults = @(
+            $ValidResultDatas |
+            Where-Object userCode -in $groupUsers.userCode
+        )
+        foreach ($surveyData in $SurveyDatas) {
+            $filtered = @(
+                $groupResults |
+                Where-Object { $_.surveyName -eq $surveyData.surveyName }
+            )
+            $planCount   = $groupUsers.Count
+            $actualCount = $filtered.Count
+            $isExecute = ($filtered.Count -ne 0)
+            $obj = [ordered]@{}
+            # total 以外のみグループキー追加
+            if ($GroupKey) {
+                $obj[$GroupKey] = $groupValue
+            }
+            $obj += @{
+                surveyName  = $surveyData.surveyName
+                isExecute = $isExecute
+                planCount    = $planCount
+                actualCount  = $actualCount
+            }
+            
+            # 平均
+            if ($isExecute) {
+                $surveyCount = $filtered[0].surveyCount
+                foreach ($primeSurveyItem in $primeSurveyItems) {
+                    $propValues = $filtered | Where-Object { $_.isExecute -and $_.PSObject.Properties.Name -contains $primeSurveyItem } | ForEach-Object { $_.$primeSurveyItem }
+                    $avgValue = ($propValues | Measure-Object -Average).Average
+                    if ($null -eq $avgValue) {
+                        $avgValue = ""
+                    } else {
+                        $avgValue = $avgValue
+                    }
+                    $obj[$primeSurveyItem] = if ($avgValue -eq "") { "" } else { $avgValue }
+                }
+            }
+            [pscustomobject]$obj
+        }
+    }
+    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
+    return $results
+}
+
+function Export-UserTestData {
+    param(
+        $Workbook,
+        $UserTestResultsDatas,
+        $TemplateSheetName
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
+    
+    $rowDatas = @()
+    if($UserTestResultsDatas.Count -eq 0){
+        $rowDatas += ,@("")
+    } else {
+        $rowData = @($UserTestResultsDatas[0].PSObject.Properties.Name)
+        $rowDatas += ,$rowData
+        foreach ($userTestResultsData in $UserTestResultsDatas) {
+            $rowData = @()
+            foreach ($prop in $userTestResultsData.PSObject.Properties) {
+                $rowData +=  $prop.Value
+            }
+            $rowDatas += ,$rowData
+        }
+    }
+    
+    # データの書き込み
+    $dataStartCell = Get-CellByKey $sheet "{結果データ}" -ErrorOnMissing
+    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
+    
+    # 初期セル設定
+    Set-SheetFirstCell -Sheet $sheet
+    
+}
+
+
+function Export-UserPlainData {
+    param(
+        $Workbook,
+        $SurveyDatas,
+        $TotalSummarySurveyResultDatas,
+        $PlainSurveyResultDatas,
+        $TemplateSheetName
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    $newSheetNameParts = $TemplateSheetName -split "-", 2
+    $newSheetNameFormat = "$($newSheetNameParts[0])-{0}-$($newSheetNameParts[1])"
+    
+    $pickedSurveyItems = $primeSurveyItems
+    
+    foreach ($surveyData in $SurveyDatas) {
+        $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
+        $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
+        $newSheet = $Workbook.ActiveSheet
+        $newSheet.Name = $newSheetNameFormat -f $surveyData.surveyName
+        
+        $rowDatas = @()
+        
+        $targetPlainSurveyResultDatas = @($PlainSurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
+        $surveyCount = if ($targetPlainSurveyResultDatas) { [int]$targetPlainSurveyResultDatas[0].surveyResult.surveyCount } else { 0 }
+        
+        # 全体
+        $targetTotalSummarySurveyResultData = @($TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
+        
+        $rowData = @()
+        $rowData += "全体-平均"
+        $rowData += ""
+        $rowData += ""
+        $rowData += ""
+        $rowData += ""
+        $rowData += ""
+        foreach ($pickedSurveyItem in $pickedSurveyItems) {
+            $exists = $targetTotalSummarySurveyResultData | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
+            if ($exists) {
+                $rowData += $targetTotalSummarySurveyResultData.$pickedSurveyItem
+            }else{
+                $rowData +=""
+            }
+        }
+        for ($i = 0; $i -le $surveyCount; $i++) {
+            $rowData += ""
+        }
+        $rowDatas += ,$rowData
+        
+        # ユーザ別
+        foreach ($targetPlainSurveyResultData in $targetPlainSurveyResultDatas) {
+            $targetUserData = $targetPlainSurveyResultData.userData
+            $rowData = @()
+            $rowData += $targetUserData.userCode
+            $rowData += $targetUserData.userName
+            $rowData += $targetUserData.companyName
+            $rowData += $targetUserData.className
+            $rowData += $targetUserData.rankName
+            if ($targetPlainSurveyResultData.isExecute){
+                $rowData += ""
+            } else {
+                $userUrl = "$BaseUrl/k/#/people/user/$($targetUserData.userCode)"
+                $rowData += '=HYPERLINK("' + $userUrl + '","督促")'
+            }
+            $targetSurveyResult = $targetPlainSurveyResultData.surveyResult
+            foreach ($pickedSurveyItem in $pickedSurveyItems) {
+                $exists = $targetSurveyResult.PSObject.Properties[$pickedSurveyItem]
+                if ($exists) {
+                    $rowData += $targetSurveyResult.$pickedSurveyItem
+                }else{
+                    $rowData +=""
+                }
+            }
+            for ($i = 0; $i -le $surveyCount; $i++) {
+                $propName = "S$i"
+                $rowData += $targetSurveyResult.$propName
+            }
+            $rowDatas += ,$rowData
+        }
+        
+        if($rowDatas.Count -eq 0){
+            $rowDatas += ,@("")
+        }
+        $dataStartCell = Get-CellByKey $newSheet "{ユーザーデータ}" -ErrorOnMissing
+        $rowStartIndex = $dataStartCell.Row
+        $columsStartIndex = $dataStartCell.Column
+        
+        # 行のコピー
+        Expand-RowsFromTemplate -Sheet $newSheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
+        
+        # データの書き込み
+        Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
+        
+        # 初期セル設定
+        Set-SheetFirstCell -Sheet $newSheet
+        
+        # オートフィルター
+        $headerRange = $newSheet.Range(
+            $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
+            $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count)
+        )
+        Set-AutoFilter $headerRange
+        
+        # オートフィット
+        Set-AutoFit $newSheet
+    }
+    Remove-Sheet $Workbook $TemplateSheetName
+}
+
+
+
+function Export-GroupSummaryData {
+    param(
+        $Workbook,
+        $SurveyDatas,
+        $TotalSummarySurveyResultDatas,
+        $UseSummaryResults,
+        $TemplateSheetName,
+        $TargetUniquePropName
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    $pickedSurveyItems = @("planCount","actualCount") + $primeSurveyItems
+    
+    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
+    
+    $dataStartCell = Get-CellByKey $sheet "{アンケートデータ}" -ErrorOnMissing
+    $rowStartIndex = $dataStartCell.Row
+    $columsStartIndex = $dataStartCell.Column
+    Expand-ColumnsFromTemplate -Sheet $sheet -TemplateStartColumn $columsStartIndex -TotalSets $SurveyDatas.Count -ColumnsPerSet $pickedSurveyItems.Count
+    
+    $headData = @()
+    foreach ($surveyData in $SurveyDatas) {
+        $headData += $surveyData.surveyName
+        $headData += [string[]]::new($pickedSurveyItems.Count-1)
+    }
+    $headDatas = ,$headData
+    Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
+    
+    $rowDatas = @()
+    # 全体
+    $rowData = @()
+    $rowData += "全体"
+    foreach ($surveyData in $SurveyDatas) {
+        $totalResult = $TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName } |
+                      Select-Object -First 1
+        foreach ($pickedSurveyItem in $pickedSurveyItems) {
+            $exists = $totalResult | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
+            if ($exists) {
+                $rowData += $totalResult.$pickedSurveyItem
+            }else{
+                $rowData +=""
+            }
+        }
+    }
+    $rowDatas += ,$rowData
+    
+    
+    # X別
+    $uniqueUseSummaryResults = $UseSummaryResults | Select-Object -Property $TargetUniquePropName -Unique
+    foreach ($uniqueUseSummaryResult in $uniqueUseSummaryResults) {
+        $rowData = @()
+        $rowData += "$($uniqueUseSummaryResult.$TargetUniquePropName)"
+        $surveyResults = $UseSummaryResults | Where-Object { $_.$TargetUniquePropName -eq $uniqueUseSummaryResult.$TargetUniquePropName }
+        foreach ($surveyData in $SurveyDatas) {
+            $surveyResult = $surveyResults | Where-Object { $_.surveyName -eq $surveyData.surveyName } |
+                          Select-Object -First 1
+            foreach ($pickedSurveyItem in $pickedSurveyItems) {
+                $exists = $surveyResult | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
+                if ($exists) {
+                    $rowData += $surveyResult.$pickedSurveyItem
+                }else{
+                    $rowData +=""
+                }
+            }
+        }
+        $rowDatas += ,$rowData
+    }
+    
+    $dataStartCell = Get-CellByKey $sheet "{結果データ}" -ErrorOnMissing
+    $rowStartIndex = $dataStartCell.Row
+    $columsStartIndex = $dataStartCell.Column
+    
+    # 行のコピー
+    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
+    
+    # データの書き込み
+    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
+    
+    # 初期セル設定
+    Set-SheetFirstCell -Sheet $sheet
+    
+    # オートフィット
+    Set-AutoFit $sheet
+}
+
+
+function Export-CombineSummaryData {
+    param(
+        $Workbook,
+        $CombineSummaryResults,
+        $TemplateSheetName
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    $pickedSurveyItems = $primeSurveyItems
+    
+    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
+    
+    $rowDatas = @()
+    foreach ($key in $CombineSummaryResults.Keys) {
+        $testResults   = $CombineSummaryResults[$key].Test
+        $surveyResults = $CombineSummaryResults[$key].Survey
+        $rowData = @()
+        $rowData +=  $key
+        if( $testResults ){
+            $rowData +=  if($testResults.平均点 -ne "") { [double] $testResults.平均点 }
+            $rowData +=  if($testResults.中央値 -ne "") { [double] $testResults.中央値 }
+            $rowData +=  if($testResults.修了率 -ne "") { [double] $testResults.修了率/100 }
+        } else {
+            $rowData += @("") * 3
+        }
+        if( $surveyResults ){
+            foreach ($pickedSurveyItem in $pickedSurveyItems) {
+                $exists = $surveyResults | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
+                if ($exists) {
+                    $rowData += $surveyResults.$pickedSurveyItem
+                }else{
+                    $rowData +=""
+                }
+            }
+        } else {
+            $rowData += @("") * $pickedSurveyItems.Count
+        }
+        $rowDatas += ,$rowData
+    }
+    
+    $dataStartCell = Get-CellByKey $sheet "{結果データ}" -ErrorOnMissing
+    $rowStartIndex = $dataStartCell.Row
+    # 行のコピー
+    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
+    # データの書き込み
+    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
+    
+    # 初期セル設定
+    Set-SheetFirstCell -Sheet $sheet
+    
+}
+
+function Export-Excel {
+    param(
+        [array]$SurveyDatas,
+        [string]$TemplateFilePath,
+        [object]$CollectResultDatas,
+        [string]$OutputFilePath
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+    
+    $excel = $null
+    $workbook = $null
+    try {
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+        $excel.ScreenUpdating = $false
+        $excel.EnableEvents = $false
+        
+        $workbook = $excel.Workbooks.Open($OutputFilePath)
+        # データ作成
+        # Export-UserTestData -Workbook $workbook -UserTestResultsDatas $CollectResultDatas.userTestResults -TemplateSheetName "テスト結果"
+        
+        Export-UserPlainData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -PlainSurveyResultDatas $CollectResultDatas.plainSurveyResults -TemplateSheetName "詳細-ユーザ別"
+        
+        Export-CombineSummaryData -Workbook $workbook -CombineSummaryResults $CollectResultDatas.combineSummaryResults -TemplateSheetName "サマリ"
+        
+        Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.companySummarySurveyResults -TemplateSheetName "サマリ-会社別" -TargetUniquePropName "companyName"
+        
+        Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.classSummarySurveyResults -TemplateSheetName "サマリ-クラス別" -TargetUniquePropName "className"
+        
+        Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.rankSummarySurveyResults -TemplateSheetName "サマリ-ランク別" -TargetUniquePropName "rankName"
+        
+        # 最初のシートをアクティブに
+        Set-FirstVisibleSheet -Workbook $workbook
+        
+        # 保存
+        $workbook.SaveAs($OutputFilePath, 51)
+    }
+    finally {
+        if ($workbook) { $workbook.Close($true) }
+        if ($excel) { $excel.Quit() }
+        if ($workbook) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+        if ($excel) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+    }
+}
+
+
+$userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+# Write-Message $userDatas -VarName "userDatas" -Type "Info"
+
+$userTestResultsFilePath = Join-Path $TestResultRootDir "$TargetGroupName-ユーザ別.txt"
+$userTestResultsDatas = if ( Test-Path $userTestResultsFilePath ) {
+    Convert-TsvPsObject $userTestResultsFilePath
+}else{
+    @()
+}
+# Write-Message $userTestResultsDatas -VarName "userTestResultsDatas" -Type "Info" 
+
+$totalTestResultsFilePath = Join-Path $TestResultRootDir "$TargetGroupName-全体.txt"
+$totalTestResultsDatas = if ( Test-Path $totalTestResultsFilePath ) {
+    Convert-TsvPsObject $totalTestResultsFilePath
+} else {
+    @()
+}
+# Write-Message $totalTestResultsDatas -VarName "totalTestResultsDatas" -Type "Info" 
+
+New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+
+$surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
+$surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+
+# Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
+
+Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas  -NameProperty "surveyName"
+
+$surveyResultDatas = Create-ResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+# Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info" 
+
+$collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas -UserTestResultsDatas $userTestResultsDatas -TotalTestResultsDatas $totalTestResultsDatas
+# Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info" 
+
+$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+
+Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
