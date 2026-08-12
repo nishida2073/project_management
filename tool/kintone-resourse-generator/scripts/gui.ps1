@@ -930,7 +930,7 @@ function Update-LogView {
 
     $logConfigName = $cmbLogConfigName.SelectedItem
     $configFilter = if ($logConfigName -and $logConfigName -ne "すべて") { "$logConfigName" + "_" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}_$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}_$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
 
     $sections = foreach ($file in $files) { [System.IO.File]::ReadAllText($file.FullName, $cp932) }
     $logContentBox.Text = $sections -join "`r`n`r`n"
