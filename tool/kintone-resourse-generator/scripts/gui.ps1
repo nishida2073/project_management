@@ -726,49 +726,50 @@ $btnReload.Text = "再読込"
 $btnReload.Location = New-Object System.Drawing.Point(130, 11)
 $btnReload.Size = New-Object System.Drawing.Size(100, 24)
 
-$btnTestConnection = New-Object System.Windows.Forms.Button
-$btnTestConnection.Text = "接続テスト"
-$btnTestConnection.Location = New-Object System.Drawing.Point(240, 11)
-$btnTestConnection.Size = New-Object System.Drawing.Size(100, 24)
-
 $lblSaveStatus = New-Object System.Windows.Forms.Label
 $lblSaveStatus.Text = ""
 $lblSaveStatus.AutoSize = $true
-$lblSaveStatus.Location = New-Object System.Drawing.Point(354, 17)
+$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 17)
 $lblSaveStatus.Font = New-Object System.Drawing.Font($lblSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$topPanel.Controls.AddRange(@($btnSave, $btnReload, $btnTestConnection, $lblSaveStatus))
+$topPanel.Controls.AddRange(@($btnSave, $btnReload, $lblSaveStatus))
 
 # 「設定」タブの入力欄（保存前の値）を使ってkintoneに接続できるか確認する。set-kintone.batへの保存は行わない。
-$btnTestConnection.Add_Click({
+# 結果はボタンの下の専用ラベル（StatusLabel、ボタン再生成のたびにTagで渡す）に表示する。
+function Test-KintoneConnectionFromFields {
+    param(
+        [System.Windows.Forms.Button]$Button,
+        [System.Windows.Forms.Label]$StatusLabel
+    )
+
     $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
     $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
     $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
 
     if (!$baseUrlVal -or !$loginVal -or !$passwordVal) {
-        $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblSaveStatus.Text = "接続テスト: kintoneのサイトURL・ログイン名・パスワードをすべて入力してください"
+        $StatusLabel.ForeColor = [System.Drawing.Color]::DarkRed
+        $StatusLabel.Text = "kintoneのサイトURL・ログイン名・パスワードをすべて入力してください"
         return
     }
 
-    $btnTestConnection.Enabled = $false
-    $lblSaveStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblSaveStatus.Text = "接続テスト中..."
+    $Button.Enabled = $false
+    $StatusLabel.ForeColor = [System.Drawing.Color]::Black
+    $StatusLabel.Text = "接続テスト中..."
     [System.Windows.Forms.Application]::DoEvents()
 
     try {
         $pair = "${loginVal}:${passwordVal}"
         $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
         Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
-        $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-        $lblSaveStatus.Text = "接続テスト: 成功しました"
+        $StatusLabel.ForeColor = [System.Drawing.Color]::DarkGreen
+        $StatusLabel.Text = "成功しました"
     } catch {
-        $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblSaveStatus.Text = "接続テスト: 失敗しました（$($_.Exception.Message)）"
+        $StatusLabel.ForeColor = [System.Drawing.Color]::DarkRed
+        $StatusLabel.Text = "失敗しました（$($_.Exception.Message)）"
     }
 
-    $btnTestConnection.Enabled = $true
-})
+    $Button.Enabled = $true
+}
 
 $fieldPanel = New-Object System.Windows.Forms.Panel
 $fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -874,6 +875,27 @@ function Update-SettingsFields {
 
         $y += 32
     }
+
+    $y += 4
+    $btnTestConnection = New-Object System.Windows.Forms.Button
+    $btnTestConnection.Text = "接続テスト"
+    $btnTestConnection.Location = New-Object System.Drawing.Point(310, $y)
+    $btnTestConnection.Size = New-Object System.Drawing.Size(100, 26)
+    $fieldPanel.Controls.Add($btnTestConnection)
+    $y += 32
+
+    $lblTestStatus = New-Object System.Windows.Forms.Label
+    $lblTestStatus.Text = ""
+    $lblTestStatus.AutoSize = $true
+    # 幅を制限して、長いエラーメッセージでも横スクロールにならず折り返して表示させる
+    $lblTestStatus.MaximumSize = New-Object System.Drawing.Size(420, 0)
+    $lblTestStatus.Location = New-Object System.Drawing.Point(310, $y)
+    $lblTestStatus.Font = New-Object System.Drawing.Font($lblTestStatus.Font, [System.Drawing.FontStyle]::Bold)
+    $fieldPanel.Controls.Add($lblTestStatus)
+
+    # ボタンは「設定」タブを開くたびに再生成されるため、対応する結果ラベルをTagで持たせてクリック時に参照する
+    $btnTestConnection.Tag = $lblTestStatus
+    $btnTestConnection.Add_Click({ Test-KintoneConnectionFromFields -Button $this -StatusLabel $this.Tag })
 }
 
 $btnReload.Add_Click({
