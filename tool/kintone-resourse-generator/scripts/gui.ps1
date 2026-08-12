@@ -234,7 +234,7 @@ $script:singleRunCollapsedHeight = 190
 
 function Update-InnerRunTabHeight {
     if ($innerRunTabControl.SelectedTab -eq $tabBatchRun) {
-        $innerRunTabControl.Height = 70
+        $innerRunTabControl.Height = $batchPanel.Height + 30
     } else {
         $stepCardsPanel.Visible = !$script:stepsCollapsed
         if ($script:stepsCollapsed) {
@@ -262,7 +262,7 @@ $lnkToggleSteps.Add_LinkClicked({
 
 $batchPanel = New-Object System.Windows.Forms.Panel
 $batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$batchPanel.Height = 40
+$batchPanel.Height = 64
 
 $lblBatchExcelPath = New-Object System.Windows.Forms.Label
 $lblBatchExcelPath.Text = "実行一覧ファイル"
@@ -287,7 +287,7 @@ $btnBatchRunAll.Size = New-Object System.Drawing.Size(100, 26)
 $lblBatchStatus = New-Object System.Windows.Forms.Label
 $lblBatchStatus.Text = ""
 $lblBatchStatus.AutoSize = $true
-$lblBatchStatus.Location = New-Object System.Drawing.Point(600, 18)
+$lblBatchStatus.Location = New-Object System.Drawing.Point(20, 42)
 $lblBatchStatus.Font = New-Object System.Drawing.Font($lblBatchStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $batchPanel.Controls.AddRange(@(
