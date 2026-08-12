@@ -3,7 +3,7 @@
 # =========================================
 # download-kintone-resources.bat → generate-config-from-template.bat →
 # apply-kintone-resources.bat → check-kintone-resources.bat を画面から順番に実行するGUI。
-# 「実行」タブで設定ファイル名等を入力し、工程ごとの実行ボタン（個別実行）か「まとめて実行」（全工程を順番に実行）で実行する。
+# 「実行」タブでスペース識別名等を入力し、工程ごとの実行ボタン（個別実行）か「まとめて実行」（全工程を順番に実行）で実行する。
 # 「設定」タブでset-env.batの値（KINTONE_*の各パス・URL）を編集する。
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -48,6 +48,25 @@ $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 $tabRun = New-Object System.Windows.Forms.TabPage
 $tabRun.Text = "実行"
 
+$innerRunTabControl = New-Object System.Windows.Forms.TabControl
+$innerRunTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
+$innerRunTabControl.Height = 404
+
+$tabSingleRun = New-Object System.Windows.Forms.TabPage
+$tabSingleRun.Text = "単体実行"
+
+$tabBatchRun = New-Object System.Windows.Forms.TabPage
+$tabBatchRun.Text = "一括実行"
+
+$innerRunTabControl.Controls.AddRange(@($tabSingleRun, $tabBatchRun))
+$innerRunTabControl.Add_Selecting({
+    if ($script:isRunning) { $_.Cancel = $true }
+})
+# 一括実行タブ・工程カードを隠した単体実行タブは内容が少ないため、状況に応じて
+# innerRunTabControlの高さを変え、ログ表示（下のtxtLog）がより上に来るようにする。
+# （Update-InnerRunTabHeight関数はrunTopPanel構築後に定義）
+$innerRunTabControl.Add_SelectedIndexChanged({ Update-InnerRunTabHeight })
+
 $tabLogs = New-Object System.Windows.Forms.TabPage
 $tabLogs.Text = "ログ"
 
@@ -58,6 +77,7 @@ $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
 $script:isRunning = $false
+$script:stepsCollapsed = $true
 $tabControl.Add_Selecting({
     if ($script:isRunning -and $_.TabPage -ne $tabRun) {
         $_.Cancel = $true
@@ -72,23 +92,23 @@ $runTopPanel = New-Object System.Windows.Forms.Panel
 $runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $runTopPanel.Height = 374
 
+$lblConfigName = New-Object System.Windows.Forms.Label
+$lblConfigName.Text = "スペース識別名"
+$lblConfigName.AutoSize = $true
+$lblConfigName.Location = New-Object System.Drawing.Point(20, 17)
+
+$txtConfigName = New-Object System.Windows.Forms.TextBox
+$txtConfigName.Location = New-Object System.Drawing.Point(160, 14)
+$txtConfigName.Size = New-Object System.Drawing.Size(200, 22)
+
 $lblSpaceTemplateId = New-Object System.Windows.Forms.Label
 $lblSpaceTemplateId.Text = "スペーステンプレートID"
 $lblSpaceTemplateId.AutoSize = $true
-$lblSpaceTemplateId.Location = New-Object System.Drawing.Point(20, 17)
+$lblSpaceTemplateId.Location = New-Object System.Drawing.Point(20, 51)
 
 $txtSpaceTemplateId = New-Object System.Windows.Forms.TextBox
-$txtSpaceTemplateId.Location = New-Object System.Drawing.Point(160, 14)
+$txtSpaceTemplateId.Location = New-Object System.Drawing.Point(160, 48)
 $txtSpaceTemplateId.Size = New-Object System.Drawing.Size(200, 22)
-
-$lblConfigName = New-Object System.Windows.Forms.Label
-$lblConfigName.Text = "設定ファイル名"
-$lblConfigName.AutoSize = $true
-$lblConfigName.Location = New-Object System.Drawing.Point(20, 51)
-
-$txtConfigName = New-Object System.Windows.Forms.TextBox
-$txtConfigName.Location = New-Object System.Drawing.Point(160, 48)
-$txtConfigName.Size = New-Object System.Drawing.Size(200, 22)
 
 $lblSpaceId = New-Object System.Windows.Forms.Label
 $lblSpaceId.Text = "スペースID"
@@ -120,11 +140,17 @@ $lblOverallStatus.AutoSize = $true
 $lblOverallStatus.Location = New-Object System.Drawing.Point(150, 158)
 $lblOverallStatus.Font = New-Object System.Drawing.Font($lblOverallStatus.Font, [System.Drawing.FontStyle]::Bold)
 
+$lnkToggleSteps = New-Object System.Windows.Forms.LinkLabel
+$lnkToggleSteps.Text = "▼ 詳細を表示"
+$lnkToggleSteps.AutoSize = $true
+$lnkToggleSteps.Location = New-Object System.Drawing.Point(640, 158)
+
 $runTopPanel.Controls.AddRange(@(
-    $lblSpaceTemplateId, $txtSpaceTemplateId,
     $lblConfigName, $txtConfigName,
+    $lblSpaceTemplateId, $txtSpaceTemplateId,
     $lblSpaceId, $txtSpaceId,
     $lblTemplateName, $cmbTemplateName,
+    $lnkToggleSteps,
     $btnRunAll, $lblOverallStatus
 ))
 
@@ -139,7 +165,8 @@ function Open-KintoneOutputFile {
 
 # 各工程を1行の「カード」として表示する（名前 → 実行ボタン → 状態 → 開くボタン）。
 # 「0. スペース作成」と「3. kintoneへ反映」は出力ファイルが無いため開くボタンを持たない。
-# 「0. スペース作成」はスペースIDが無い状態から始めるため「まとめて実行」の対象には含めない（個別実行のみ）。
+# 「0. スペース作成」も「まとめて実行」の対象。成功すると①で使うスペースIDが自動入力されるため、
+# 各工程の必須項目チェックは開始前ではなく工程の直前に行う。
 $stepMeta = @(
     [PSCustomObject]@{ Id = 0; Label = "0. スペース作成" }
     [PSCustomObject]@{ Id = 1; Label = "1. ダウンロード" }
@@ -152,14 +179,20 @@ $script:stepRunButtons = @{}
 $script:stepStatusLabels = @{}
 $script:stepOpenButtons = @{}
 
-$stepRowY = 188
+# 工程カードを専用のパネルにまとめておき、折りたたみ時はこのパネルごとVisible=$falseにする
+# （runTopPanelの高さだけで隠すと、はみ出た分がわずかに見えてしまうため）。
+$stepCardsPanel = New-Object System.Windows.Forms.Panel
+$stepCardsPanel.Location = New-Object System.Drawing.Point(0, 188)
+$stepCardsPanel.Size = New-Object System.Drawing.Size(760, ($stepMeta.Count * 34))
+
+$stepRowY = 0
 foreach ($sm in $stepMeta) {
     $lblStepName = New-Object System.Windows.Forms.Label
     $lblStepName.Text = $sm.Label
     $lblStepName.AutoSize = $false
     $lblStepName.Size = New-Object System.Drawing.Size(180, 22)
     $lblStepName.Location = New-Object System.Drawing.Point(20, $stepRowY)
-    $runTopPanel.Controls.Add($lblStepName)
+    $stepCardsPanel.Controls.Add($lblStepName)
 
     $btnStepRun = New-Object System.Windows.Forms.Button
     $btnStepRun.Text = "実行"
@@ -167,7 +200,7 @@ foreach ($sm in $stepMeta) {
     $btnStepRun.Location = New-Object System.Drawing.Point(210, ($stepRowY - 2))
     $btnStepRun.Tag = $sm.Id
     $btnStepRun.Add_Click({ Invoke-SingleStep -Id $this.Tag })
-    $runTopPanel.Controls.Add($btnStepRun)
+    $stepCardsPanel.Controls.Add($btnStepRun)
     $script:stepRunButtons[$sm.Id] = $btnStepRun
 
     $lblStepStatus = New-Object System.Windows.Forms.Label
@@ -176,7 +209,7 @@ foreach ($sm in $stepMeta) {
     $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
     $lblStepStatus.Location = New-Object System.Drawing.Point(300, $stepRowY)
     $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
-    $runTopPanel.Controls.Add($lblStepStatus)
+    $stepCardsPanel.Controls.Add($lblStepStatus)
     $script:stepStatusLabels[$sm.Id] = $lblStepStatus
 
     if ($sm.Id -ne 0 -and $sm.Id -ne 3) {
@@ -187,12 +220,85 @@ foreach ($sm in $stepMeta) {
         $btnStepOpen.Enabled = $false
         $btnStepOpen.Tag = $sm.Id
         $btnStepOpen.Add_Click({ Open-KintoneOutputFile $script:stepOutputPaths[$this.Tag] })
-        $runTopPanel.Controls.Add($btnStepOpen)
+        $stepCardsPanel.Controls.Add($btnStepOpen)
         $script:stepOpenButtons[$sm.Id] = $btnStepOpen
     }
 
     $stepRowY += 34
 }
+$runTopPanel.Controls.Add($stepCardsPanel)
+
+# 単体実行タブの工程カード（まとめて実行より下）を折りたたみ、ログ表示を広く使えるようにする。
+$script:singleRunExpandedHeight = $runTopPanel.Height
+$script:singleRunCollapsedHeight = 190
+
+function Update-InnerRunTabHeight {
+    if ($innerRunTabControl.SelectedTab -eq $tabBatchRun) {
+        $innerRunTabControl.Height = 70
+        return
+    }
+    $stepCardsPanel.Visible = !$script:stepsCollapsed
+    if ($script:stepsCollapsed) {
+        $runTopPanel.Height = $script:singleRunCollapsedHeight
+        $innerRunTabControl.Height = $script:singleRunCollapsedHeight + 30
+    } else {
+        $runTopPanel.Height = $script:singleRunExpandedHeight
+        $innerRunTabControl.Height = $script:singleRunExpandedHeight + 30
+    }
+}
+
+$lnkToggleSteps.Add_LinkClicked({
+    $script:stepsCollapsed = !$script:stepsCollapsed
+    $lnkToggleSteps.Text = if ($script:stepsCollapsed) { "▼ 詳細を表示" } else { "▲ 詳細を隠す" }
+    Update-InnerRunTabHeight
+})
+
+# =========================================
+# 一括実行（Excelの複数行を順に0→4まで自動実行）
+# =========================================
+
+$batchPanel = New-Object System.Windows.Forms.Panel
+$batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$batchPanel.Height = 40
+
+$lblBatchExcelPath = New-Object System.Windows.Forms.Label
+$lblBatchExcelPath.Text = "実行一覧ファイル"
+$lblBatchExcelPath.AutoSize = $true
+$lblBatchExcelPath.Location = New-Object System.Drawing.Point(20, 10)
+
+$txtBatchExcelPath = New-Object System.Windows.Forms.TextBox
+$txtBatchExcelPath.Location = New-Object System.Drawing.Point(140, 7)
+$txtBatchExcelPath.Size = New-Object System.Drawing.Size(250, 22)
+$txtBatchExcelPath.ReadOnly = $true
+
+$btnBatchBrowse = New-Object System.Windows.Forms.Button
+$btnBatchBrowse.Text = "参照..."
+$btnBatchBrowse.Location = New-Object System.Drawing.Point(400, 6)
+$btnBatchBrowse.Size = New-Object System.Drawing.Size(70, 24)
+
+$btnBatchRunAll = New-Object System.Windows.Forms.Button
+$btnBatchRunAll.Text = "実行"
+$btnBatchRunAll.Location = New-Object System.Drawing.Point(480, 5)
+$btnBatchRunAll.Size = New-Object System.Drawing.Size(100, 26)
+
+$lblBatchStatus = New-Object System.Windows.Forms.Label
+$lblBatchStatus.Text = ""
+$lblBatchStatus.AutoSize = $true
+$lblBatchStatus.Location = New-Object System.Drawing.Point(600, 11)
+$lblBatchStatus.Font = New-Object System.Drawing.Font($lblBatchStatus.Font, [System.Drawing.FontStyle]::Bold)
+
+$batchPanel.Controls.AddRange(@(
+    $lblBatchExcelPath, $txtBatchExcelPath, $btnBatchBrowse, $btnBatchRunAll, $lblBatchStatus
+))
+
+$dlgBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
+$dlgBatchExcel.Filter = "Excelファイル (*.xlsx)|*.xlsx"
+
+$btnBatchBrowse.Add_Click({
+    if ($dlgBatchExcel.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+        $txtBatchExcelPath.Text = $dlgBatchExcel.FileName
+    }
+})
 
 $txtLog = New-Object System.Windows.Forms.RichTextBox
 $txtLog.Multiline = $true
@@ -203,12 +309,17 @@ $txtLog.Dock = [System.Windows.Forms.DockStyle]::Fill
 $txtLog.DetectUrls = $true
 $txtLog.Add_LinkClicked({ [System.Diagnostics.Process]::Start($_.LinkText) })
 
+$tabSingleRun.Controls.Add($runTopPanel)
+$tabBatchRun.Controls.Add($batchPanel)
+
 $tabRun.Controls.Add($txtLog)
-$tabRun.Controls.Add($runTopPanel)
+$tabRun.Controls.Add($innerRunTabControl)
 
 function Write-Log {
     param([string]$Text)
     $txtLog.AppendText("$Text`r`n")
+    $txtLog.SelectionStart = $txtLog.TextLength
+    $txtLog.ScrollToCaret()
 }
 
 function Invoke-BatStep {
@@ -302,18 +413,24 @@ function Get-StepOutputPath {
     }
 }
 
+# UI上の入力欄の並び（スペース識別名 → スペーステンプレートID → スペースID → 設定テンプレート名）
+# と同じ順番でチェックする。
 function Test-StepPrereq {
-    param([int]$Id)
+    param([int]$Id, [string]$ConfigName)
+    if (!$ConfigName) {
+        [System.Windows.Forms.MessageBox]::Show("スペース識別名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return $false
+    }
     if ($Id -eq 0 -and !$txtSpaceTemplateId.Text.Trim()) {
-        [System.Windows.Forms.MessageBox]::Show("⓪スペース作成にはスペーステンプレートIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("スペース作成にはスペーステンプレートIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     if ($Id -eq 1 -and !$txtSpaceId.Text.Trim()) {
-        [System.Windows.Forms.MessageBox]::Show("①ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     if ($Id -eq 2 -and !$cmbTemplateName.Text.Trim()) {
-        [System.Windows.Forms.MessageBox]::Show("②設定ファイルの生成には設定テンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("設定ファイルの生成には設定テンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     return $true
@@ -338,6 +455,8 @@ function Set-RunControlsEnabled {
     $cmbTemplateName.Enabled = $Enabled
     $txtSpaceTemplateId.Enabled = $Enabled
     $btnRunAll.Enabled = $Enabled
+    $btnBatchBrowse.Enabled = $Enabled
+    $btnBatchRunAll.Enabled = $Enabled
     foreach ($btn in $script:stepRunButtons.Values) { $btn.Enabled = $Enabled }
 }
 
@@ -378,11 +497,7 @@ function Invoke-SingleStep {
     param([int]$Id)
 
     $configName = $txtConfigName.Text.Trim()
-    if (!$configName) {
-        [System.Windows.Forms.MessageBox]::Show("設定ファイル名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-    if (!(Test-StepPrereq -Id $Id)) { return }
+    if (!(Test-StepPrereq -Id $Id -ConfigName $configName)) { return }
 
     $script:isRunning = $true
     Set-RunControlsEnabled $false
@@ -396,13 +511,25 @@ function Invoke-SingleStep {
     $script:isRunning = $false
 }
 
+# 0.スペース作成はスペースIDが無い状態から始まるため、各工程の直前にその工程の
+# 必須項目をチェックする（0が成功すると①で使うスペースIDが自動入力されるため）。
+# 現在の入力欄の値のまま0→4を順に実行し、失敗した工程のLabelを返す（全部成功なら$null）。
+function Invoke-AllStepsForCurrentInputs {
+    foreach ($sm in $stepMeta) {
+        $configName = $txtConfigName.Text.Trim()
+        if (!(Test-StepPrereq -Id $sm.Id -ConfigName $configName)) {
+            return $sm.Label
+        }
+        if (!(Invoke-Step -Id $sm.Id -ConfigName $configName)) {
+            return $sm.Label
+        }
+    }
+    return $null
+}
+
 $btnRunAll.Add_Click({
     $configName = $txtConfigName.Text.Trim()
-    if (!$configName) {
-        [System.Windows.Forms.MessageBox]::Show("設定ファイル名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-    if (!(Test-StepPrereq -Id 1) -or !(Test-StepPrereq -Id 2)) { return }
+    if (!(Test-StepPrereq -Id 0 -ConfigName $configName)) { return }
 
     $script:isRunning = $true
     Set-RunControlsEnabled $false
@@ -412,13 +539,7 @@ $btnRunAll.Add_Click({
     Write-Log ""
     Write-Log "-------------------- $configName --------------------"
 
-    $failedLabel = $null
-    foreach ($sm in ($stepMeta | Where-Object { $_.Id -ne 0 })) {
-        if (!(Invoke-Step -Id $sm.Id -ConfigName $configName)) {
-            $failedLabel = $sm.Label
-            break
-        }
-    }
+    $failedLabel = Invoke-AllStepsForCurrentInputs
 
     if ($failedLabel) {
         $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkRed
@@ -426,6 +547,84 @@ $btnRunAll.Add_Click({
     } else {
         $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkGreen
         $lblOverallStatus.Text = "完了しました"
+    }
+
+    Set-RunControlsEnabled $true
+    $script:isRunning = $false
+})
+
+# Excelの列: スペース識別名 / スペーステンプレートID / 設定テンプレート名。
+# 1行につき現在の入力欄へ値をセットしてから0→4を順に実行する。
+$btnBatchRunAll.Add_Click({
+    $excelPath = $txtBatchExcelPath.Text.Trim()
+    if (!$excelPath -or !(Test-Path -LiteralPath $excelPath)) {
+        [System.Windows.Forms.MessageBox]::Show("実行一覧ファイルを選択してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    $rows = $null
+    try {
+        $rows = @(Import-Excel -Path $excelPath)
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("Excelの読み込みに失敗しました: $($_.Exception.Message)", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        return
+    }
+    if ($rows.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("Excelに行がありません。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    $script:isRunning = $true
+    Set-RunControlsEnabled $false
+
+    $resultLines = New-Object System.Collections.Generic.List[string]
+    for ($i = 0; $i -lt $rows.Count; $i++) {
+        $row = $rows[$i]
+        $rowConfigName = "$($row.'スペース識別名')".Trim()
+        $rowTemplateId = "$($row.'スペーステンプレートID')".Trim()
+        $rowResourceTemplate = "$($row.'設定テンプレート名')".Trim()
+
+        $lblBatchStatus.ForeColor = [System.Drawing.Color]::Black
+        $lblBatchStatus.Text = "実行中... ($($i + 1)/$($rows.Count): $rowConfigName)"
+        [System.Windows.Forms.Application]::DoEvents()
+
+        Write-Log ""
+        Write-Log "==================== 一括実行 $($i + 1)/$($rows.Count): $rowConfigName ===================="
+
+        if (!$rowConfigName -or !$rowTemplateId -or !$rowResourceTemplate) {
+            Write-Log "スペース識別名・スペーステンプレートID・設定テンプレート名のいずれかが空のためスキップします。"
+            $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（必須項目が空）")
+            continue
+        }
+
+        $txtConfigName.Text = $rowConfigName
+        $txtSpaceTemplateId.Text = $rowTemplateId
+        $txtSpaceId.Text = ""
+        if ($cmbTemplateName.Items.Contains($rowResourceTemplate)) {
+            $cmbTemplateName.SelectedItem = $rowResourceTemplate
+        } else {
+            $cmbTemplateName.Text = $rowResourceTemplate
+        }
+
+        $failedLabel = Invoke-AllStepsForCurrentInputs
+        if ($failedLabel) {
+            $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗（$failedLabel）")
+        } else {
+            $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")
+        }
+    }
+
+    Write-Log ""
+    Write-Log "==================== 一括実行 結果 ===================="
+    foreach ($line in $resultLines) { Write-Log $line }
+
+    $failedCount = @($resultLines | Where-Object { $_ -notmatch ": 成功$" }).Count
+    if ($failedCount -gt 0) {
+        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkRed
+        $lblBatchStatus.Text = "完了（$($rows.Count)件中$failedCount件が失敗/スキップ）"
+    } else {
+        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+        $lblBatchStatus.Text = "完了しました（全$($rows.Count)件成功）"
     }
 
     Set-RunControlsEnabled $true
@@ -640,47 +839,53 @@ Update-SettingsFields
 
 $logStagePanel = New-Object System.Windows.Forms.Panel
 $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$logStagePanel.Height = 66
+$logStagePanel.Height = 90
 
 $lblLogConfigName = New-Object System.Windows.Forms.Label
-$lblLogConfigName.Text = "設定ファイル名"
+$lblLogConfigName.Text = "スペース識別名"
 $lblLogConfigName.AutoSize = $true
 $lblLogConfigName.Location = New-Object System.Drawing.Point(20, 17)
 
 $cmbLogConfigName = New-Object System.Windows.Forms.ComboBox
-$cmbLogConfigName.Location = New-Object System.Drawing.Point(90, 14)
+$cmbLogConfigName.Location = New-Object System.Drawing.Point(160, 14)
 $cmbLogConfigName.Size = New-Object System.Drawing.Size(220, 24)
 $cmbLogConfigName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $logStagePrefixes = [ordered]@{
-    "download" = "1. ダウンロード"
-    "generate" = "2. 設定ファイルの生成"
-    "apply"    = "3. kintoneへ反映"
-    "check"    = "4. データチェック"
+    "createspace" = "0. スペース作成"
+    "download"    = "1. ダウンロード"
+    "generate"    = "2. 設定ファイルの生成"
+    "apply"       = "3. kintoneへ反映"
+    "check"       = "4. データチェック"
 }
+
+$radioCreateSpaceLog = New-Object System.Windows.Forms.RadioButton
+$radioCreateSpaceLog.Text = "0. スペース作成"
+$radioCreateSpaceLog.AutoSize = $true
+$radioCreateSpaceLog.Checked = $true
+$radioCreateSpaceLog.Location = New-Object System.Drawing.Point(20, 40)
 
 $radioDownloadLog = New-Object System.Windows.Forms.RadioButton
 $radioDownloadLog.Text = "1. ダウンロード"
 $radioDownloadLog.AutoSize = $true
-$radioDownloadLog.Checked = $true
-$radioDownloadLog.Location = New-Object System.Drawing.Point(20, 40)
+$radioDownloadLog.Location = New-Object System.Drawing.Point(160, 40)
 
 $radioGenerateLog = New-Object System.Windows.Forms.RadioButton
 $radioGenerateLog.Text = "2. 設定ファイルの生成"
 $radioGenerateLog.AutoSize = $true
-$radioGenerateLog.Location = New-Object System.Drawing.Point(160, 40)
+$radioGenerateLog.Location = New-Object System.Drawing.Point(300, 40)
 
 $radioApplyLog = New-Object System.Windows.Forms.RadioButton
 $radioApplyLog.Text = "3. kintoneへ反映"
 $radioApplyLog.AutoSize = $true
-$radioApplyLog.Location = New-Object System.Drawing.Point(300, 40)
+$radioApplyLog.Location = New-Object System.Drawing.Point(20, 64)
 
 $radioCheckLog = New-Object System.Windows.Forms.RadioButton
 $radioCheckLog.Text = "4. データチェック"
 $radioCheckLog.AutoSize = $true
-$radioCheckLog.Location = New-Object System.Drawing.Point(440, 40)
+$radioCheckLog.Location = New-Object System.Drawing.Point(160, 64)
 
-$logStagePanel.Controls.AddRange(@($lblLogConfigName, $cmbLogConfigName, $radioDownloadLog, $radioGenerateLog, $radioApplyLog, $radioCheckLog))
+$logStagePanel.Controls.AddRange(@($lblLogConfigName, $cmbLogConfigName, $radioCreateSpaceLog, $radioDownloadLog, $radioGenerateLog, $radioApplyLog, $radioCheckLog))
 
 $logContentBox = New-Object System.Windows.Forms.TextBox
 $logContentBox.Multiline = $true
@@ -699,7 +904,7 @@ function Update-LogConfigNameList {
 
     $logPath = Get-ResolvedVar "KINTONE_LOG_PATH"
     if ($logPath -and (Test-Path -LiteralPath $logPath)) {
-        $stagePrefixPattern = '^(download|generate|apply|check)_(?<config>.+)_\d{8}_\d{6}$'
+        $stagePrefixPattern = '^(createspace|download|generate|apply|check)_(?<config>.+)_\d{8}_\d{6}$'
         $configNames = Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue |
             ForEach-Object {
                 $m = [regex]::Match([System.IO.Path]::GetFileNameWithoutExtension($_.Name), $stagePrefixPattern)
@@ -714,7 +919,7 @@ function Update-LogConfigNameList {
 }
 
 function Update-LogView {
-    $stage = if ($radioDownloadLog.Checked) { "download" } elseif ($radioGenerateLog.Checked) { "generate" } elseif ($radioApplyLog.Checked) { "apply" } else { "check" }
+    $stage = if ($radioCreateSpaceLog.Checked) { "createspace" } elseif ($radioDownloadLog.Checked) { "download" } elseif ($radioGenerateLog.Checked) { "generate" } elseif ($radioApplyLog.Checked) { "apply" } else { "check" }
     $logPath = Get-ResolvedVar "KINTONE_LOG_PATH"
 
     $logContentBox.Text = ""
@@ -731,6 +936,7 @@ function Update-LogView {
     $logContentBox.Text = $sections -join "`r`n`r`n"
 }
 
+$radioCreateSpaceLog.Add_CheckedChanged({ if ($radioCreateSpaceLog.Checked) { Update-LogView } })
 $radioDownloadLog.Add_CheckedChanged({ if ($radioDownloadLog.Checked) { Update-LogView } })
 $radioGenerateLog.Add_CheckedChanged({ if ($radioGenerateLog.Checked) { Update-LogView } })
 $radioApplyLog.Add_CheckedChanged({ if ($radioApplyLog.Checked) { Update-LogView } })
@@ -751,6 +957,7 @@ $tabControl.Add_SelectedIndexChanged({
 Update-TemplateNameList
 Update-LogConfigNameList
 Update-LogView
+Update-InnerRunTabHeight
 $tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)
