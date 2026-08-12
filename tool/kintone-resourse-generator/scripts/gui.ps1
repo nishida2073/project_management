@@ -128,6 +128,8 @@ $lblTemplateName.Text = "設定テンプレート名"
 $lblTemplateName.AutoSize = $true
 $lblTemplateName.Location = New-Object System.Drawing.Point(20, 119)
 
+$script:templateNamePlaceholder = "未選択"
+
 $cmbTemplateName = New-Object System.Windows.Forms.ComboBox
 $cmbTemplateName.Location = New-Object System.Drawing.Point(160, 116)
 $cmbTemplateName.Size = New-Object System.Drawing.Size(220, 22)
@@ -437,7 +439,7 @@ function Test-StepPrereq {
         [System.Windows.Forms.MessageBox]::Show("ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
-    if ($Id -eq 2 -and !$cmbTemplateName.Text.Trim()) {
+    if ($Id -eq 2 -and (!$cmbTemplateName.Text.Trim() -or $cmbTemplateName.Text.Trim() -eq $script:templateNamePlaceholder)) {
         [System.Windows.Forms.MessageBox]::Show("設定ファイルの生成には設定テンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
@@ -582,6 +584,13 @@ $btnBatchRunAll.Add_Click({
     $script:isRunning = $true
     Set-RunControlsEnabled $false
 
+    # 一括実行は単体実行と同じ入力欄を使って1行ずつ実行するため、完了後に単体実行タブの内容を元に戻す
+    $origConfigName = $txtConfigName.Text
+    $origSpaceTemplateId = $txtSpaceTemplateId.Text
+    $origSpaceId = $txtSpaceId.Text
+    $origTemplateSelectedItem = $cmbTemplateName.SelectedItem
+    $origTemplateText = $cmbTemplateName.Text
+
     $resultLines = New-Object System.Collections.Generic.List[string]
     for ($i = 0; $i -lt $rows.Count; $i++) {
         $row = $rows[$i]
@@ -630,6 +639,15 @@ $btnBatchRunAll.Add_Click({
     } else {
         $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkGreen
         $lblBatchStatus.Text = "完了しました（全$($rows.Count)件成功）"
+    }
+
+    $txtConfigName.Text = $origConfigName
+    $txtSpaceTemplateId.Text = $origSpaceTemplateId
+    $txtSpaceId.Text = $origSpaceId
+    if ($origTemplateSelectedItem -and $cmbTemplateName.Items.Contains($origTemplateSelectedItem)) {
+        $cmbTemplateName.SelectedItem = $origTemplateSelectedItem
+    } else {
+        $cmbTemplateName.Text = $origTemplateText
     }
 
     Set-RunControlsEnabled $true
@@ -692,6 +710,7 @@ function Resolve-BrowseStart {
 function Update-TemplateNameList {
     $selected = $cmbTemplateName.SelectedItem
     $cmbTemplateName.Items.Clear()
+    $cmbTemplateName.Items.Add($script:templateNamePlaceholder) | Out-Null
 
     $templatePath = Get-ResolvedVar "COMMON_TEMPLATE_PATH"
     if ($templatePath -and (Test-Path -LiteralPath $templatePath)) {
@@ -705,6 +724,8 @@ function Update-TemplateNameList {
 
     if ($selected -and $cmbTemplateName.Items.Contains($selected)) {
         $cmbTemplateName.SelectedItem = $selected
+    } else {
+        $cmbTemplateName.SelectedItem = $script:templateNamePlaceholder
     }
 }
 
