@@ -18,6 +18,7 @@ if ($MyInvocation.MyCommand.Path) {
 } else {
     $basePath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
+$createSpaceBat = Join-Path $basePath "create-space-from-template.bat"
 $downloadBat = Join-Path $basePath "download-kintone-resources.bat"
 $generateBat = Join-Path $basePath "generate-config-from-template.bat"
 $applyBat = Join-Path $basePath "apply-kintone-resources.bat"
@@ -69,16 +70,16 @@ $tabControl.Add_Selecting({
 
 $runTopPanel = New-Object System.Windows.Forms.Panel
 $runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$runTopPanel.Height = 300
+$runTopPanel.Height = 374
 
-$lblSpaceId = New-Object System.Windows.Forms.Label
-$lblSpaceId.Text = "スペースID"
-$lblSpaceId.AutoSize = $true
-$lblSpaceId.Location = New-Object System.Drawing.Point(20, 17)
+$lblSpaceTemplateId = New-Object System.Windows.Forms.Label
+$lblSpaceTemplateId.Text = "スペーステンプレートID"
+$lblSpaceTemplateId.AutoSize = $true
+$lblSpaceTemplateId.Location = New-Object System.Drawing.Point(20, 17)
 
-$txtSpaceId = New-Object System.Windows.Forms.TextBox
-$txtSpaceId.Location = New-Object System.Drawing.Point(160, 14)
-$txtSpaceId.Size = New-Object System.Drawing.Size(200, 22)
+$txtSpaceTemplateId = New-Object System.Windows.Forms.TextBox
+$txtSpaceTemplateId.Location = New-Object System.Drawing.Point(160, 14)
+$txtSpaceTemplateId.Size = New-Object System.Drawing.Size(200, 22)
 
 $lblConfigName = New-Object System.Windows.Forms.Label
 $lblConfigName.Text = "設定ファイル名"
@@ -89,29 +90,40 @@ $txtConfigName = New-Object System.Windows.Forms.TextBox
 $txtConfigName.Location = New-Object System.Drawing.Point(160, 48)
 $txtConfigName.Size = New-Object System.Drawing.Size(200, 22)
 
+$lblSpaceId = New-Object System.Windows.Forms.Label
+$lblSpaceId.Text = "スペースID"
+$lblSpaceId.AutoSize = $true
+$lblSpaceId.Location = New-Object System.Drawing.Point(20, 85)
+
+$txtSpaceId = New-Object System.Windows.Forms.TextBox
+$txtSpaceId.Location = New-Object System.Drawing.Point(160, 82)
+$txtSpaceId.Size = New-Object System.Drawing.Size(200, 22)
+
 $lblTemplateName = New-Object System.Windows.Forms.Label
-$lblTemplateName.Text = "テンプレート名"
+$lblTemplateName.Text = "設定テンプレート名"
 $lblTemplateName.AutoSize = $true
-$lblTemplateName.Location = New-Object System.Drawing.Point(20, 85)
+$lblTemplateName.Location = New-Object System.Drawing.Point(20, 119)
 
 $cmbTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbTemplateName.Location = New-Object System.Drawing.Point(160, 82)
+$cmbTemplateName.Location = New-Object System.Drawing.Point(160, 116)
 $cmbTemplateName.Size = New-Object System.Drawing.Size(220, 22)
 $cmbTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $btnRunAll = New-Object System.Windows.Forms.Button
 $btnRunAll.Text = "まとめて実行"
-$btnRunAll.Location = New-Object System.Drawing.Point(20, 118)
+$btnRunAll.Location = New-Object System.Drawing.Point(20, 152)
 $btnRunAll.Size = New-Object System.Drawing.Size(120, 26)
 
 $lblOverallStatus = New-Object System.Windows.Forms.Label
 $lblOverallStatus.Text = ""
 $lblOverallStatus.AutoSize = $true
-$lblOverallStatus.Location = New-Object System.Drawing.Point(150, 124)
+$lblOverallStatus.Location = New-Object System.Drawing.Point(150, 158)
 $lblOverallStatus.Font = New-Object System.Drawing.Font($lblOverallStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $runTopPanel.Controls.AddRange(@(
-    $lblSpaceId, $txtSpaceId, $lblConfigName, $txtConfigName,
+    $lblSpaceTemplateId, $txtSpaceTemplateId,
+    $lblConfigName, $txtConfigName,
+    $lblSpaceId, $txtSpaceId,
     $lblTemplateName, $cmbTemplateName,
     $btnRunAll, $lblOverallStatus
 ))
@@ -126,8 +138,10 @@ function Open-KintoneOutputFile {
 }
 
 # 各工程を1行の「カード」として表示する（名前 → 実行ボタン → 状態 → 開くボタン）。
-# 「3. kintoneへ反映」だけは出力ファイルが無いため開くボタンを持たない。
+# 「0. スペース作成」と「3. kintoneへ反映」は出力ファイルが無いため開くボタンを持たない。
+# 「0. スペース作成」はスペースIDが無い状態から始めるため「まとめて実行」の対象には含めない（個別実行のみ）。
 $stepMeta = @(
+    [PSCustomObject]@{ Id = 0; Label = "0. スペース作成" }
     [PSCustomObject]@{ Id = 1; Label = "1. ダウンロード" }
     [PSCustomObject]@{ Id = 2; Label = "2. 設定ファイルの生成" }
     [PSCustomObject]@{ Id = 3; Label = "3. kintoneへ反映" }
@@ -138,7 +152,7 @@ $script:stepRunButtons = @{}
 $script:stepStatusLabels = @{}
 $script:stepOpenButtons = @{}
 
-$stepRowY = 154
+$stepRowY = 188
 foreach ($sm in $stepMeta) {
     $lblStepName = New-Object System.Windows.Forms.Label
     $lblStepName.Text = $sm.Label
@@ -165,7 +179,7 @@ foreach ($sm in $stepMeta) {
     $runTopPanel.Controls.Add($lblStepStatus)
     $script:stepStatusLabels[$sm.Id] = $lblStepStatus
 
-    if ($sm.Id -ne 3) {
+    if ($sm.Id -ne 0 -and $sm.Id -ne 3) {
         $btnStepOpen = New-Object System.Windows.Forms.Button
         $btnStepOpen.Text = "開く"
         $btnStepOpen.Size = New-Object System.Drawing.Size(70, 24)
@@ -203,6 +217,8 @@ function Invoke-BatStep {
         [string[]]$ArgList = @()
     )
 
+    $script:lastStepOutputLines = New-Object System.Collections.Generic.List[string]
+
     $quotedArgs = ($ArgList | ForEach-Object { '"' + $_ + '"' }) -join ' '
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -233,6 +249,7 @@ function Invoke-BatStep {
         $line = $null
         while ($outputQueue.TryDequeue([ref]$line)) {
             Write-Log $line
+            $script:lastStepOutputLines.Add($line)
         }
         [System.Windows.Forms.Application]::DoEvents()
         Start-Sleep -Milliseconds 50
@@ -243,6 +260,7 @@ function Invoke-BatStep {
     $line = $null
     while ($outputQueue.TryDequeue([ref]$line)) {
         Write-Log $line
+        $script:lastStepOutputLines.Add($line)
     }
 
     Unregister-Event -SourceIdentifier $outputEvent.Name
@@ -255,6 +273,7 @@ function Invoke-BatStep {
 function Get-StepBat {
     param([int]$Id)
     switch ($Id) {
+        0 { return $createSpaceBat }
         1 { return $downloadBat }
         2 { return $generateBat }
         3 { return $applyBat }
@@ -265,6 +284,7 @@ function Get-StepBat {
 function Get-StepArgs {
     param([int]$Id, [string]$ConfigName)
     switch ($Id) {
+        0 { return @("-TemplateId", $txtSpaceTemplateId.Text.Trim(), "-SpaceName", $ConfigName) }
         1 { return @("-SpaceId", $txtSpaceId.Text.Trim(), "-ConfigName", $ConfigName) }
         2 { return @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $ConfigName) }
         3 { return @("-ConfigName", $ConfigName) }
@@ -284,12 +304,16 @@ function Get-StepOutputPath {
 
 function Test-StepPrereq {
     param([int]$Id)
+    if ($Id -eq 0 -and !$txtSpaceTemplateId.Text.Trim()) {
+        [System.Windows.Forms.MessageBox]::Show("⓪スペース作成にはスペーステンプレートIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return $false
+    }
     if ($Id -eq 1 -and !$txtSpaceId.Text.Trim()) {
         [System.Windows.Forms.MessageBox]::Show("①ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     if ($Id -eq 2 -and !$cmbTemplateName.Text.Trim()) {
-        [System.Windows.Forms.MessageBox]::Show("②設定ファイルの生成にはテンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("②設定ファイルの生成には設定テンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     return $true
@@ -312,6 +336,7 @@ function Set-RunControlsEnabled {
     $txtConfigName.Enabled = $Enabled
     $txtSpaceId.Enabled = $Enabled
     $cmbTemplateName.Enabled = $Enabled
+    $txtSpaceTemplateId.Enabled = $Enabled
     $btnRunAll.Enabled = $Enabled
     foreach ($btn in $script:stepRunButtons.Values) { $btn.Enabled = $Enabled }
 }
@@ -333,6 +358,12 @@ function Invoke-Step {
     }
 
     Set-StepStatus -Id $Id -Text "成功"
+    if ($Id -eq 0) {
+        $idLine = $script:lastStepOutputLines | Where-Object { $_ -match '作成されたスペースID:\s*(\d+)' } | Select-Object -Last 1
+        if ($idLine -and $idLine -match '作成されたスペースID:\s*(?<id>\d+)') {
+            $txtSpaceId.Text = $Matches.id
+        }
+    }
     if ($script:stepOpenButtons.ContainsKey($Id)) {
         $outputPath = Get-StepOutputPath -Id $Id -ConfigName $ConfigName
         if ($outputPath -and (Test-Path -LiteralPath $outputPath)) {
@@ -382,7 +413,7 @@ $btnRunAll.Add_Click({
     Write-Log "-------------------- $configName --------------------"
 
     $failedLabel = $null
-    foreach ($sm in $stepMeta) {
+    foreach ($sm in ($stepMeta | Where-Object { $_.Id -ne 0 })) {
         if (!(Invoke-Step -Id $sm.Id -ConfigName $configName)) {
             $failedLabel = $sm.Label
             break

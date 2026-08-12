@@ -56,6 +56,9 @@ function Get-KintoneAuthorizationHeader {
             [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
         }
     }
+    # スペーステンプレートからのスペース作成APIはmembers（管理者1名以上）が必須のため、
+    # ログインユーザー自身を管理者として使えるようにscriptスコープに残しておく。
+    $script:kintoneLogin = $login
     $pair = "${login}:${password}"
     return [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
 }
@@ -114,6 +117,32 @@ function ConvertTo-SheetNameArray {
     param([string]$Sheets)
     if (-not $Sheets) { return @() }
     return @($Sheets.Split(",") | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+}
+
+# スペーステンプレート（kintone側で元スペースを「テンプレートとして保存」しておく必要がある。
+# この保存操作自体はAPIには無くkintoneの管理画面のみ）から新しいスペースを作成する。
+# kintoneのAPI仕様上、members（スペース管理者1名以上）を指定しないとエラーになるため、
+# 呼び出し元のログインユーザーを唯一の管理者として設定する。
+# 作成されたスペースIDを返す。
+function New-KintoneSpaceFromTemplate {
+    param(
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$Authorization,
+        [Parameter(Mandatory)][string]$TemplateId,
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$AdminLogin
+    )
+
+    $body = @{
+        id      = [int]$TemplateId
+        name    = $Name
+        members = @(
+            @{ entity = @{ type = "USER"; code = $AdminLogin }; isAdmin = $true }
+        )
+    }
+
+    $resp = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method POST -Path "/k/v1/template/space.json" -Body $body
+    return $resp.id
 }
 
 function Get-CurrentSpace {
