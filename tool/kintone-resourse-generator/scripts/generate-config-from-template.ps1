@@ -15,13 +15,13 @@ param(
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
 
-$templateRoot = $env:KINTONE_TEMPLATE_PATH
-$configRoot = $env:KINTONE_CONFIG_PATH
-$downloadRoot = $env:KINTONE_DOWNLOAD_PATH
-$logRoot = $env:KINTONE_LOG_PATH
+$templateRoot = $env:COMMON_TEMPLATE_PATH
+$configRoot = $env:COMMON_CONFIG_PATH
+$downloadRoot = $env:COMMON_DOWNLOAD_PATH
+$logRoot = $env:COMMON_LOG_PATH
 
 if (-not $templateRoot -or -not $configRoot -or -not $downloadRoot -or -not $logRoot) {
-    Write-Host "KINTONE_TEMPLATE_PATH / KINTONE_CONFIG_PATH / KINTONE_DOWNLOAD_PATH / KINTONE_LOG_PATH を set-env.bat で設定してください"
+    Write-Host "COMMON_TEMPLATE_PATH / COMMON_CONFIG_PATH / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を set-env.bat で設定してください"
     exit 1
 }
 if (-not $TemplateConfigName) {

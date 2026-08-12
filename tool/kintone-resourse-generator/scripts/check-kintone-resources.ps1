@@ -16,12 +16,12 @@ $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
 
 $baseUrl = $env:KINTONE_BASE_URL
-$configRoot = $env:KINTONE_CONFIG_PATH
-$outputRoot = $env:KINTONE_CHECK_OUTPUT_PATH
-$logRoot = $env:KINTONE_LOG_PATH
+$configRoot = $env:COMMON_CONFIG_PATH
+$outputRoot = $env:COMMON_CHECK_OUTPUT_PATH
+$logRoot = $env:COMMON_LOG_PATH
 
 if (-not $baseUrl -or -not $configRoot -or -not $outputRoot -or -not $logRoot) {
-    Write-Host "KINTONE_BASE_URL / KINTONE_CONFIG_PATH / KINTONE_CHECK_OUTPUT_PATH / KINTONE_LOG_PATH を set-env.bat で設定してください"
+    Write-Host "KINTONE_BASE_URL / COMMON_CONFIG_PATH / COMMON_CHECK_OUTPUT_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）"
     exit 1
 }
 if (-not $ConfigName) {

@@ -4,7 +4,7 @@
 # download-kintone-resources.bat → generate-config-from-template.bat →
 # apply-kintone-resources.bat → check-kintone-resources.bat を画面から順番に実行するGUI。
 # 「実行」タブでスペース識別名等を入力し、工程ごとの実行ボタン（個別実行）か「まとめて実行」（全工程を順番に実行）で実行する。
-# 「設定」タブでset-env.batの値（KINTONE_*の各パス・URL）を編集する。
+# 「設定」タブでset-env.batの値（COMMON_*の各パス）とset-kintone.batの値（kintoneの接続情報）を編集する。
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -25,8 +25,12 @@ $applyBat = Join-Path $basePath "apply-kintone-resources.bat"
 $checkBat = Join-Path $basePath "check-kintone-resources.bat"
 $clientsDir = Join-Path $basePath "clients"
 $setEnvBat = Join-Path $clientsDir "set-env.bat"
+$setKintoneBat = Join-Path $clientsDir "set-kintone.bat"
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
+
+# 設定タブの接続テストでInvoke-KintoneRequestを使うため読み込む（$scriptDirはexe化時は未設定になるため$basePath基準で解決する）
+. (Join-Path $basePath "scripts\common.ps1")
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "kintoneリソース生成ツール"
@@ -174,12 +178,12 @@ $stepMeta = @(
     [PSCustomObject]@{
         Id = 1; Label = "1. ダウンロード"; StageKey = "download"; Bat = $downloadBat
         ArgsFn = { param($ConfigName) @("-SpaceId", $txtSpaceId.Text.Trim(), "-ConfigName", $ConfigName) }
-        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "KINTONE_DOWNLOAD_PATH") "${ConfigName}_download.xlsx" }
+        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH") "${ConfigName}_download.xlsx" }
     }
     [PSCustomObject]@{
         Id = 2; Label = "2. 設定ファイルの生成"; StageKey = "generate"; Bat = $generateBat
         ArgsFn = { param($ConfigName) @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $ConfigName) }
-        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "KINTONE_CONFIG_PATH") "${ConfigName}_config.xlsx" }
+        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH") "${ConfigName}_config.xlsx" }
     }
     [PSCustomObject]@{
         Id = 3; Label = "3. kintoneへ反映"; StageKey = "apply"; Bat = $applyBat
@@ -189,7 +193,7 @@ $stepMeta = @(
     [PSCustomObject]@{
         Id = 4; Label = "4. データチェック"; StageKey = "check"; Bat = $checkBat
         ArgsFn = { param($ConfigName) @("-ConfigName", $ConfigName) }
-        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "KINTONE_CHECK_OUTPUT_PATH") "${ConfigName}_check.xlsx" }
+        OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH") "${ConfigName}_check.xlsx" }
     }
 )
 
@@ -633,16 +637,19 @@ $btnBatchRunAll.Add_Click({
 })
 
 # =========================================
-# 共通: set-env.bat の読み書き
+# 共通: 環境変数バッチファイル（set-env.bat・set-kintone.bat）の読み書き
 # =========================================
 
-function Read-SetEnvLines {
-    return [System.IO.File]::ReadAllLines($setEnvBat, $cp932)
+function Read-EnvBatLines {
+    param([string]$Path = $setEnvBat)
+    if (!(Test-Path -LiteralPath $Path)) { return @() }
+    return [System.IO.File]::ReadAllLines($Path, $cp932)
 }
 
-function Get-SetEnvDefaults {
+function Get-EnvBatDefaults {
+    param([string]$Path = $setEnvBat)
     $result = @{}
-    foreach ($line in (Read-SetEnvLines)) {
+    foreach ($line in (Read-EnvBatLines -Path $Path)) {
         $m = $lineRegex.Match($line.Trim())
         if ($m.Success) {
             $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
@@ -667,7 +674,7 @@ function Get-ResolvedVar {
     param([string]$VarName)
     $val = [Environment]::GetEnvironmentVariable($VarName)
     if (!$val) {
-        $defaults = Get-SetEnvDefaults
+        $defaults = Get-EnvBatDefaults
         if ($defaults.ContainsKey($VarName)) {
             $val = $defaults[$VarName]
         }
@@ -686,7 +693,7 @@ function Update-TemplateNameList {
     $selected = $cmbTemplateName.SelectedItem
     $cmbTemplateName.Items.Clear()
 
-    $templatePath = Get-ResolvedVar "KINTONE_TEMPLATE_PATH"
+    $templatePath = Get-ResolvedVar "COMMON_TEMPLATE_PATH"
     if ($templatePath -and (Test-Path -LiteralPath $templatePath)) {
         $names = Get-ChildItem -LiteralPath $templatePath -Filter "*.xlsx" -ErrorAction SilentlyContinue |
             ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) } |
@@ -719,13 +726,49 @@ $btnReload.Text = "再読込"
 $btnReload.Location = New-Object System.Drawing.Point(130, 11)
 $btnReload.Size = New-Object System.Drawing.Size(100, 24)
 
+$btnTestConnection = New-Object System.Windows.Forms.Button
+$btnTestConnection.Text = "接続テスト"
+$btnTestConnection.Location = New-Object System.Drawing.Point(240, 11)
+$btnTestConnection.Size = New-Object System.Drawing.Size(100, 24)
+
 $lblSaveStatus = New-Object System.Windows.Forms.Label
 $lblSaveStatus.Text = ""
 $lblSaveStatus.AutoSize = $true
-$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 17)
+$lblSaveStatus.Location = New-Object System.Drawing.Point(354, 17)
 $lblSaveStatus.Font = New-Object System.Drawing.Font($lblSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$topPanel.Controls.AddRange(@($btnSave, $btnReload, $lblSaveStatus))
+$topPanel.Controls.AddRange(@($btnSave, $btnReload, $btnTestConnection, $lblSaveStatus))
+
+# 「設定」タブの入力欄（保存前の値）を使ってkintoneに接続できるか確認する。set-kintone.batへの保存は行わない。
+$btnTestConnection.Add_Click({
+    $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
+    $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
+    $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
+
+    if (!$baseUrlVal -or !$loginVal -or !$passwordVal) {
+        $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkRed
+        $lblSaveStatus.Text = "接続テスト: kintoneのサイトURL・ログイン名・パスワードをすべて入力してください"
+        return
+    }
+
+    $btnTestConnection.Enabled = $false
+    $lblSaveStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblSaveStatus.Text = "接続テスト中..."
+    [System.Windows.Forms.Application]::DoEvents()
+
+    try {
+        $pair = "${loginVal}:${passwordVal}"
+        $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
+        Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
+        $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+        $lblSaveStatus.Text = "接続テスト: 成功しました"
+    } catch {
+        $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkRed
+        $lblSaveStatus.Text = "接続テスト: 失敗しました（$($_.Exception.Message)）"
+    }
+
+    $btnTestConnection.Enabled = $true
+})
 
 $fieldPanel = New-Object System.Windows.Forms.Panel
 $fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -735,15 +778,20 @@ $tabSettings.Controls.Add($fieldPanel)
 $tabSettings.Controls.Add($topPanel)
 
 $varLabels = [ordered]@{
+    "COMMON_DOWNLOAD_PATH"     = "ダウンロード先のフォルダ"
+    "COMMON_TEMPLATE_PATH"     = "テンプレートファイルのフォルダ"
+    "COMMON_CONFIG_PATH"       = "設定ファイルのフォルダ"
+    "COMMON_CHECK_OUTPUT_PATH" = "チェック結果の出力先フォルダ"
+    "COMMON_LOG_PATH"          = "ログの出力先フォルダ"
     "KINTONE_BASE_URL"         = "kintoneのサイトURL"
-    "KINTONE_DOWNLOAD_PATH"    = "ダウンロード先のフォルダ"
-    "KINTONE_TEMPLATE_PATH"    = "テンプレートファイルのフォルダ"
-    "KINTONE_CONFIG_PATH"      = "設定ファイルのフォルダ"
-    "KINTONE_CHECK_OUTPUT_PATH" = "チェック結果の出力先フォルダ"
-    "KINTONE_LOG_PATH"         = "ログの出力先フォルダ"
+    "KINTONE_LOGIN"            = "ログイン名"
+    "KINTONE_PASSWORD"         = "パスワード"
 }
 
-$folderBrowseVars = @("KINTONE_DOWNLOAD_PATH", "KINTONE_TEMPLATE_PATH", "KINTONE_CONFIG_PATH", "KINTONE_CHECK_OUTPUT_PATH", "KINTONE_LOG_PATH")
+$folderBrowseVars = @("COMMON_DOWNLOAD_PATH", "COMMON_TEMPLATE_PATH", "COMMON_CONFIG_PATH", "COMMON_CHECK_OUTPUT_PATH", "COMMON_LOG_PATH")
+# kintoneの接続情報の3項目はset-env.batではなくset-kintone.batに保存する（未存在の場合は保存時に新規作成する）
+$kintoneVars = @("KINTONE_BASE_URL", "KINTONE_LOGIN", "KINTONE_PASSWORD")
+$passwordVars = @("KINTONE_PASSWORD")
 
 $script:fieldTextBoxes = @{}
 
@@ -751,12 +799,30 @@ function Update-SettingsFields {
     $fieldPanel.Controls.Clear()
     $script:fieldTextBoxes = @{}
 
-    $defaults = Get-SetEnvDefaults
+    $defaults = Get-EnvBatDefaults -Path $setEnvBat
+    $kintoneDefaults = Get-EnvBatDefaults -Path $setKintoneBat
     $y = 10
 
     foreach ($varName in $varLabels.Keys) {
-        if (!$defaults.ContainsKey($varName)) { continue }
-        $varValue = $defaults[$varName]
+        $isKintoneVar = $kintoneVars -contains $varName
+        if ($isKintoneVar) {
+            # set-kintone.batが未存在/未設定でも空欄で入力できるようにする
+            $varValue = if ($kintoneDefaults.ContainsKey($varName)) { $kintoneDefaults[$varName] } else { "" }
+        } else {
+            if (!$defaults.ContainsKey($varName)) { continue }
+            $varValue = $defaults[$varName]
+        }
+
+        if ($varName -eq "KINTONE_BASE_URL") {
+            $y += 8
+            $lblKintoneHeader = New-Object System.Windows.Forms.Label
+            $lblKintoneHeader.Text = "kintoneの接続情報"
+            $lblKintoneHeader.AutoSize = $true
+            $lblKintoneHeader.Location = New-Object System.Drawing.Point(20, $y)
+            $lblKintoneHeader.Font = New-Object System.Drawing.Font($lblKintoneHeader.Font, [System.Drawing.FontStyle]::Bold)
+            $fieldPanel.Controls.Add($lblKintoneHeader)
+            $y += 28
+        }
 
         $lbl = New-Object System.Windows.Forms.Label
         $lbl.Text = $varLabels[$varName]
@@ -798,6 +864,9 @@ function Update-SettingsFields {
             $txt.Location = New-Object System.Drawing.Point(310, ($y - 2))
             $txt.Size = New-Object System.Drawing.Size(380, 22)
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            if ($passwordVars -contains $varName) {
+                $txt.UseSystemPasswordChar = $true
+            }
 
             $fieldPanel.Controls.Add($txt)
             $script:fieldTextBoxes[$varName] = $txt
@@ -813,20 +882,43 @@ $btnReload.Add_Click({
     $lblSaveStatus.Text = "再読込しました"
 })
 
-$btnSave.Add_Click({
-    $newLines = foreach ($line in (Read-SetEnvLines)) {
+function Save-EnvBatFile {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][string[]]$VarNames
+    )
+    $existingLines = Read-EnvBatLines -Path $Path
+    $writtenVars = @{}
+
+    $newLines = @(foreach ($line in $existingLines) {
         $m = $lineRegex.Match($line.Trim())
         $varName = if ($m.Success) { $m.Groups["var"].Value } else { $null }
-        if ($varName -and $script:fieldTextBoxes.ContainsKey($varName)) {
+        if ($varName -and $VarNames -contains $varName -and $script:fieldTextBoxes.ContainsKey($varName)) {
+            $writtenVars[$varName] = $true
             $newVal = $script:fieldTextBoxes[$varName].Text
             "if not defined $varName set `"$varName=$newVal`""
         } else {
             $line
         }
+    })
+
+    # ファイルが未存在、または既存の内容に該当変数の行が無い場合は末尾に追加する
+    foreach ($varName in $VarNames) {
+        if (!$writtenVars.ContainsKey($varName) -and $script:fieldTextBoxes.ContainsKey($varName)) {
+            $newLines += "if not defined $varName set `"$varName=$($script:fieldTextBoxes[$varName].Text)`""
+        }
+    }
+    if ($existingLines.Count -eq 0) {
+        $newLines = @("@echo off", "") + $newLines
     }
 
     $content = ($newLines -join "`r`n") + "`r`n"
-    [System.IO.File]::WriteAllText($setEnvBat, $content, $cp932)
+    [System.IO.File]::WriteAllText($Path, $content, $cp932)
+}
+
+$btnSave.Add_Click({
+    Save-EnvBatFile -Path $setEnvBat -VarNames @($varLabels.Keys | Where-Object { $kintoneVars -notcontains $_ })
+    Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars
 
     $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
     $lblSaveStatus.Text = "保存しました"
@@ -883,7 +975,7 @@ function Update-LogConfigNameList {
     $cmbLogConfigName.Items.Clear()
     $cmbLogConfigName.Items.Add("すべて") | Out-Null
 
-    $logPath = Get-ResolvedVar "KINTONE_LOG_PATH"
+    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
     if ($logPath -and (Test-Path -LiteralPath $logPath)) {
         $stageKeyPattern = ($stepMeta.StageKey -join '|')
         $stagePrefixPattern = "^(?:$stageKeyPattern)_(?<config>.+)_\d{8}_\d{6}$"
@@ -902,7 +994,7 @@ function Update-LogConfigNameList {
 
 function Update-LogView {
     $stage = ($script:logStageRadios.GetEnumerator() | Where-Object { $_.Value.Checked }).Key
-    $logPath = Get-ResolvedVar "KINTONE_LOG_PATH"
+    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
 
     $logContentBox.Text = ""
 

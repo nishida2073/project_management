@@ -4,4 +4,4 @@ checked
 work
 test
 *.exe
-clients/set-credentials.bat
+clients/set-kintone.bat

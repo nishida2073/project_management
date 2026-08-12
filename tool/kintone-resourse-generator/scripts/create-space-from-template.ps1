@@ -14,10 +14,10 @@ $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "common.ps1")
 
 $baseUrl = $env:KINTONE_BASE_URL
-$logRoot = $env:KINTONE_LOG_PATH
+$logRoot = $env:COMMON_LOG_PATH
 
 if (-not $baseUrl -or -not $logRoot) {
-    Write-Host "KINTONE_BASE_URL / KINTONE_LOG_PATH を set-env.bat で設定してください"
+    Write-Host "KINTONE_BASE_URL / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）"
     exit 1
 }
 if (-not $TemplateId) {
