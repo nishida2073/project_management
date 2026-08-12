@@ -178,6 +178,10 @@ $tabRun.Controls.Add($runTopPanel)
 function Write-Log {
     param([string]$Text)
     $txtLog.AppendText("$Text`r`n")
+    $txtLog.SelectionStart = $txtLog.TextLength
+    $txtLog.SelectionLength = 0
+    $txtLog.Focus() | Out-Null
+    $txtLog.ScrollToCaret()
 }
 
 $btnRun.Add_Click({
