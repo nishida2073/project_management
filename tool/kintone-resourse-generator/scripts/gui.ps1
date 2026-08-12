@@ -58,7 +58,7 @@ $tabSingleRun.Text = "単体実行"
 $tabBatchRun = New-Object System.Windows.Forms.TabPage
 $tabBatchRun.Text = "一括実行"
 
-$innerRunTabControl.Controls.AddRange(@($tabSingleRun, $tabBatchRun))
+$innerRunTabControl.Controls.AddRange(@($tabBatchRun, $tabSingleRun))
 $innerRunTabControl.Add_Selecting({
     if ($script:isRunning) { $_.Cancel = $true }
 })
@@ -235,16 +235,19 @@ $script:singleRunCollapsedHeight = 190
 function Update-InnerRunTabHeight {
     if ($innerRunTabControl.SelectedTab -eq $tabBatchRun) {
         $innerRunTabControl.Height = 70
-        return
-    }
-    $stepCardsPanel.Visible = !$script:stepsCollapsed
-    if ($script:stepsCollapsed) {
-        $runTopPanel.Height = $script:singleRunCollapsedHeight
-        $innerRunTabControl.Height = $script:singleRunCollapsedHeight + 30
     } else {
-        $runTopPanel.Height = $script:singleRunExpandedHeight
-        $innerRunTabControl.Height = $script:singleRunExpandedHeight + 30
+        $stepCardsPanel.Visible = !$script:stepsCollapsed
+        if ($script:stepsCollapsed) {
+            $runTopPanel.Height = $script:singleRunCollapsedHeight
+            $innerRunTabControl.Height = $script:singleRunCollapsedHeight + 30
+        } else {
+            $runTopPanel.Height = $script:singleRunExpandedHeight
+            $innerRunTabControl.Height = $script:singleRunExpandedHeight + 30
+        }
     }
+    # フォーム表示前に高さを変えてもtxtLog（Dock=Fill）側の再レイアウトが
+    # 即時に反映されないことがあるため、明示的にレイアウトをやり直す。
+    $tabRun.PerformLayout()
 }
 
 $lnkToggleSteps.Add_LinkClicked({
@@ -264,27 +267,27 @@ $batchPanel.Height = 40
 $lblBatchExcelPath = New-Object System.Windows.Forms.Label
 $lblBatchExcelPath.Text = "実行一覧ファイル"
 $lblBatchExcelPath.AutoSize = $true
-$lblBatchExcelPath.Location = New-Object System.Drawing.Point(20, 10)
+$lblBatchExcelPath.Location = New-Object System.Drawing.Point(20, 17)
 
 $txtBatchExcelPath = New-Object System.Windows.Forms.TextBox
-$txtBatchExcelPath.Location = New-Object System.Drawing.Point(140, 7)
+$txtBatchExcelPath.Location = New-Object System.Drawing.Point(140, 14)
 $txtBatchExcelPath.Size = New-Object System.Drawing.Size(250, 22)
 $txtBatchExcelPath.ReadOnly = $true
 
 $btnBatchBrowse = New-Object System.Windows.Forms.Button
 $btnBatchBrowse.Text = "参照..."
-$btnBatchBrowse.Location = New-Object System.Drawing.Point(400, 6)
+$btnBatchBrowse.Location = New-Object System.Drawing.Point(400, 13)
 $btnBatchBrowse.Size = New-Object System.Drawing.Size(70, 24)
 
 $btnBatchRunAll = New-Object System.Windows.Forms.Button
 $btnBatchRunAll.Text = "実行"
-$btnBatchRunAll.Location = New-Object System.Drawing.Point(480, 5)
+$btnBatchRunAll.Location = New-Object System.Drawing.Point(480, 12)
 $btnBatchRunAll.Size = New-Object System.Drawing.Size(100, 26)
 
 $lblBatchStatus = New-Object System.Windows.Forms.Label
 $lblBatchStatus.Text = ""
 $lblBatchStatus.AutoSize = $true
-$lblBatchStatus.Location = New-Object System.Drawing.Point(600, 11)
+$lblBatchStatus.Location = New-Object System.Drawing.Point(600, 18)
 $lblBatchStatus.Font = New-Object System.Drawing.Font($lblBatchStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $batchPanel.Controls.AddRange(@(
@@ -957,7 +960,9 @@ $tabControl.Add_SelectedIndexChanged({
 Update-TemplateNameList
 Update-LogConfigNameList
 Update-LogView
-Update-InnerRunTabHeight
+# フォーム表示前はTabControlのSelectedTabが正しく解決されないことがあるため、
+# 実際に表示された後（Add_Shown）に高さ調整をやり直す。
+$form.Add_Shown({ Update-InnerRunTabHeight })
 $tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)
