@@ -147,7 +147,10 @@ function Write-RunLogFile {
         throw "TreeRootPath と ItemListPaths は同時に指定できません"
     }
 
-    $logFilePath = Join-Path $LogPath $LogFileName
+    $timestamp = $StartTime.ToString('yyyyMMdd_HHmmss')
+    $logFileExt = [System.IO.Path]::GetExtension($LogFileName)
+    $logFileBase = [System.IO.Path]::GetFileNameWithoutExtension($LogFileName)
+    $logFilePath = Join-Path $LogPath "${logFileBase}_${timestamp}${logFileExt}"
     $logLines = @()
     $logLines += "# 実行情報"
     $logLines += (Get-ClientLogHeaderLines)

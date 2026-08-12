@@ -76,7 +76,7 @@
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | ダウンロードしたファイル一式 | ダウンロード先（`DOWNLOAD_LOCAL_PATH`） | SharePointからダウンロードしたファイル・フォルダ |
-| `<ダウンロード元のフォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（実際のファイル名には`<クライアント名または"デフォルト">_`も挟まる。詳しくは[clients\README.md](clients/README.md)を参照） |
+| `<ダウンロード元のフォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（実際のファイル名には`<クライアント名または"デフォルト">_`も挟まり、末尾には実行開始時刻の`_yyyyMMdd_HHmmss`が付く。詳しくは[clients\README.md](clients/README.md)を参照） |
 
 #### 必要なもの
 
@@ -135,7 +135,7 @@ generate-package.bat "include=対象シート1" "exclude=除外シート1"
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | `<シート名>.zip` | パッケージの出力先（`GENERATE_OUTPUT_PATH`） | コピーしたファイル一式をまとめたパッケージ |
-| `<シート名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（実際のファイル名には`<クライアント名または"デフォルト">_`も挟まる。詳しくは[clients\README.md](clients/README.md)を参照） |
+| `<シート名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（実際のファイル名には`<クライアント名または"デフォルト">_`も挟まり、末尾には実行開始時刻の`_yyyyMMdd_HHmmss`が付く。詳しくは[clients\README.md](clients/README.md)を参照） |
 | パッケージ定義ファイルのコピー | パッケージの出力先（`GENERATE_OUTPUT_PATH`） | 実行時に使われた`GENERATE_CONFIG_PATH`のファイルそのもの |
 
 対象ファイルが1件も無かったシートはパッケージ（ZIP）は作成されないが、ログはその旨を記録した内容で出力される。コピー中に個別のファイルが見つからない・コピーに失敗した場合も、そのシート自体の処理は継続し、ログの「# コピー結果」にエラー内容が記録される。
@@ -192,7 +192,7 @@ upload-folder.bat "include=対象シート1.zip" "exclude=除外シート1.zip"
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | アップロードしたファイル一式 | アップロード先（`UPLOAD_SITE_PATH`、SharePoint側） | ローカルからアップロードしたファイル・フォルダ |
-| `<アップロード先のフォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（実際のファイル名には`<クライアント名または"デフォルト">_`も挟まる。詳しくは[clients\README.md](clients/README.md)を参照） |
+| `<アップロード先のフォルダ名>.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（実際のファイル名には`<クライアント名または"デフォルト">_`も挟まり、末尾には実行開始時刻の`_yyyyMMdd_HHmmss`が付く。詳しくは[clients\README.md](clients/README.md)を参照） |
 
 #### 必要なもの
 
