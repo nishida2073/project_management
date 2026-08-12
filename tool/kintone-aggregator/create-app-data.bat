@@ -38,7 +38,7 @@ for /l %%i in (%Start%,-1,0) do (
             
             call ".\bats\message.bat" "Please wait..." "Green"
             
-            call "%%F" "%%d" > "%LOG_DIR%\%%~nF-%%d-log.txt"
+            call "%%F" "%%d" "%~3" > "%LOG_DIR%\%%~nF-%%d-log.txt"
             
             call ".\bats\message.bat" "Finished %%~nxF {%%d}"
         )

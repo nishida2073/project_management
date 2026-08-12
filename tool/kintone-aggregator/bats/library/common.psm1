@@ -116,7 +116,8 @@ function Convert-ExcelToCsvString {
             $sb = [System.Text.StringBuilder]::new(256)
             $isEmpty = $true
             for ($c = 1; $c -le $cols; $c++) {
-                if ($c -gt 1) { $null = $sb.Append(',') }
+                # タブ区切り: セル内にカンマが含まれる場合に列がずれるのを防ぐ
+                if ($c -gt 1) { $null = $sb.Append("`t") }
                 $value = $data[$r, $c]
                 if ($null -eq $value) { continue }
                 if ($r -gt $HeaderRowIndex -and $isDateCol[$c] -and $value -is [double]) {
@@ -878,37 +879,48 @@ function Transpose-Array {
     return $result
 }
 
+function ConvertTo-MappedRecords {
+    param(
+        [Parameter(Mandatory)]
+        [array]$DataLines,
+        [Parameter(Mandatory)]
+        [hashtable]$HeaderMap
+    )
+    $records = @()
+    $headers = $DataLines[0] -split "`t" | ForEach-Object { $_.Trim() }
+    $bodyLines = $DataLines | Select-Object -Skip 1
+    foreach ($line in $bodyLines) {
+        $parts = $line -split "`t" | ForEach-Object { $_.Trim() }
+        $record = [PSCustomObject]@{}
+        for ($i = 0; $i -lt $headers.Count; $i++) {
+            $header = $headers[$i]
+            $value  = $parts[$i]
+            $record | Add-Member -NotePropertyName $header -NotePropertyValue $value
+            if ($HeaderMap.ContainsKey($header)) {
+                $internalName = $HeaderMap[$header]
+                $record | Add-Member -NotePropertyName $internalName -NotePropertyValue $value -Force
+            }
+        }
+        $records += $record
+    }
+    return $records
+}
+
+
 function Create-CourseDatas {
     param(
         [array]$DataLines
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    $courses = @()
+
     $headerMap = @{
         '科目番号'   = 'courseNo'
         '科目名'     = 'courseName'
         '開始日'     = 'startDate'
         '終了日'     = 'endDate'
     }
-    $headers = $DataLines[0] -split ',' | ForEach-Object { $_.Trim() }
-    $bodyLines = $DataLines | Select-Object -Skip 1
-    foreach ($line in $bodyLines) {
-        $parts = $line -split ',' | ForEach-Object { $_.Trim() }
-        $course = [PSCustomObject]@{}
-        for ($i = 0; $i -lt $headers.Count; $i++) {
-            $header = $headers[$i]
-            $value  = $parts[$i]
-            $course | Add-Member -NotePropertyName $header -NotePropertyValue $value
-            if ($headerMap.ContainsKey($header)) {
-                $internalName = $headerMap[$header]
-                $course | Add-Member -NotePropertyName $internalName -NotePropertyValue $value -Force
-            }
-        }
-        $courses += $course
-    }
-    return $courses
+    return ConvertTo-MappedRecords -DataLines $DataLines -HeaderMap $headerMap
 }
 
 
@@ -919,10 +931,9 @@ function Create-UserDatas {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
+
     $dataLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex 1
-    
-    $bodies = @()
+
     $headerMap = @{
         '通番'     = 'userNo'
         '受講生ID' = 'userCode'
@@ -930,27 +941,8 @@ function Create-UserDatas {
         '会社名'   = 'companyName'
         'クラス名'  = 'className'
     }
-    $headers = $dataLines[0] -split ',' | ForEach-Object { $_.Trim() }
-    $bodyLines = $dataLines | Select-Object -Skip 1
-    foreach ($line in $bodyLines) {
-        $parts = $line -split ',' | ForEach-Object { $_.Trim() }
-        $body = [PSCustomObject]@{}
-        for ($i = 0; $i -lt $headers.Count; $i++) {
-            $header = $headers[$i]
-            $value  = $parts[$i]
-            $body | Add-Member -NotePropertyName $header -NotePropertyValue $value
-            if ($headerMap.ContainsKey($header)) {
-                $internalName = $headerMap[$header]
-                $body | Add-Member -NotePropertyName $internalName -NotePropertyValue $value
-            }
-        }
-        $unUsable = ToBool $body.停止中
-        if ($unUsable) {
-            continue
-        }
-        $bodies += $body
-    }
-    return $bodies
+    $bodies = ConvertTo-MappedRecords -DataLines $dataLines -HeaderMap $headerMap
+    return @($bodies | Where-Object { -not (ToBool $_.停止中) })
 }
 
 function Create-CourseScheduleDatas {
@@ -976,15 +968,21 @@ function Create-CourseScheduleDatas {
     $endDate = [datetime]$lastEnd
     
     $previousWasHoliday = $false
-    
-    # 科目ごとの総登場日数を事前計算
-    $courseTotalDays = @{}
+
+    # 日付ごとの対象科目を事前計算（総登場日数の計算と連番付与の両方で使うため、フィルタ処理は1回だけ行う）
+    $courseForDateByDate = @{}
     for ($date = $startDate; $date -le $endDate; $date = $date.AddDays(1)) {
-        $courseForDate = $courseDatas | Where-Object {
+        $courseForDateByDate[$date.Ticks] = @($courseDatas | Where-Object {
             $start = [datetime]$_.startDate
             $end   = [datetime]$_.endDate
             $date -ge $start -and $date -le $end
-        }
+        })
+    }
+
+    # 科目ごとの総登場日数を事前計算
+    $courseTotalDays = @{}
+    for ($date = $startDate; $date -le $endDate; $date = $date.AddDays(1)) {
+        $courseForDate = $courseForDateByDate[$date.Ticks]
         foreach ($name in ($courseForDate.courseName | Select-Object -Unique)) {
             if (-not $courseTotalDays.ContainsKey($name)) {
                 $courseTotalDays[$name] = 0
@@ -995,11 +993,7 @@ function Create-CourseScheduleDatas {
     # 連番管理
     $courseCounters = @{}
     for ($date = $startDate; $date -le $endDate; $date = $date.AddDays(1)) {
-        $courseForDate = $courseDatas | Where-Object {
-            $start = [datetime]$_.startDate
-            $end   = [datetime]$_.endDate
-            $date -ge $start -and $date -le $end
-        }
+        $courseForDate = $courseForDateByDate[$date.Ticks]
         if ($courseForDate) {
             $todayCourses = $courseForDate.courseName | Select-Object -Unique
             $displayNames = @()
