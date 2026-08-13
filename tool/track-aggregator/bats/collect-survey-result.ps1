@@ -293,8 +293,7 @@ function Export-UserPlainData {
         $rowDatas = @()
         
         $targetPlainSurveyResultDatas = @($PlainSurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
-        $executedSurveyResultData = $targetPlainSurveyResultDatas | Where-Object { $_.isExecute } | Select-Object -First 1
-        $surveyCount = if ($executedSurveyResultData) { [int]$executedSurveyResultData.surveyResult.surveyCount } else { 0 }
+        $surveyCount = if ($targetPlainSurveyResultDatas) { [int]$targetPlainSurveyResultDatas[0].surveyResult.surveyCount } else { 0 }
         
         # 全体
         $targetTotalSummarySurveyResultData = @($TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
@@ -379,8 +378,6 @@ function Export-UserPlainData {
     Remove-Sheet $Workbook $TemplateSheetName
 }
 
-
-
 function Export-GroupSummaryData {
     param(
         $Workbook,
@@ -458,8 +455,122 @@ function Export-CombineSummaryData {
     
     # 初期セル設定
     Set-SheetFirstCell -Sheet $sheet
-    
+
 }
+
+
+function Export-UserSummaryData {
+    param(
+        $Workbook,
+        $SurveyDatas,
+        $TotalSummarySurveyResultDatas,
+        $PlainSurveyResultDatas,
+        $TemplateSheetName
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+
+    $pickedSurveyItems = $primeSurveyItems
+    $columnsPerSet = $pickedSurveyItems.Count
+
+    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
+
+    $dataStartCell = Get-CellByKey $sheet "{アンケートデータ}" -ErrorOnMissing
+    $columsStartIndex = $dataStartCell.Column
+    Expand-ColumnsFromTemplate -Sheet $sheet -TemplateStartColumn $columsStartIndex -TotalSets $SurveyDatas.Count -ColumnsPerSet $columnsPerSet
+
+    $headData = @()
+    foreach ($surveyData in $SurveyDatas) {
+        $headData += $surveyData.surveyName
+        $headData += [string[]]::new($columnsPerSet - 1)
+    }
+    $headDatas = ,$headData
+    Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
+
+    $rowDatas = @()
+
+    # 全体
+    $rowData = @()
+    $rowData += "全体-平均"
+    $rowData += ""
+    $rowData += ""
+    $rowData += ""
+    $rowData += ""
+    foreach ($surveyData in $SurveyDatas) {
+        $targetTotalSummarySurveyResultData = $TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName } | Select-Object -First 1
+        foreach ($pickedSurveyItem in $pickedSurveyItems) {
+            $exists = $targetTotalSummarySurveyResultData | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
+            if ($exists) {
+                $rowData += $targetTotalSummarySurveyResultData.$pickedSurveyItem
+            } else {
+                $rowData += ""
+            }
+        }
+    }
+    $rowDatas += ,$rowData
+
+    # ユーザ別
+    $uniqueUsers = @($PlainSurveyResultDatas |
+        Group-Object -Property { $_.userData.userCode } |
+        ForEach-Object {
+            $first = $_.Group[0].userData
+            [PSCustomObject]@{
+                userCode    = $first.userCode
+                userName    = $first.userName
+                companyName = $first.companyName
+                className   = $first.className
+                rankName    = $first.rankName
+            }
+        })
+    foreach ($uniqueUser in $uniqueUsers) {
+        $rowData = @()
+        $rowData += $uniqueUser.userCode
+        $rowData += $uniqueUser.userName
+        $rowData += $uniqueUser.companyName
+        $rowData += $uniqueUser.className
+        $rowData += $uniqueUser.rankName
+
+        $userSurveyResults = $PlainSurveyResultDatas | Where-Object { $_.userData.userCode -eq $uniqueUser.userCode }
+
+        foreach ($surveyData in $SurveyDatas) {
+            $targetPlainSurveyResultData = $userSurveyResults | Where-Object { $_.surveyName -eq $surveyData.surveyName } | Select-Object -First 1
+            $targetSurveyResult = $targetPlainSurveyResultData.surveyResult
+            foreach ($pickedSurveyItem in $pickedSurveyItems) {
+                $exists = $targetSurveyResult.PSObject.Properties[$pickedSurveyItem]
+                if ($exists) {
+                    $rowData += $targetSurveyResult.$pickedSurveyItem
+                } else {
+                    $rowData += ""
+                }
+            }
+        }
+        $rowDatas += ,$rowData
+    }
+
+    $dataStartCell = Get-CellByKey $sheet "{ユーザーデータ}" -ErrorOnMissing
+    $rowStartIndex = $dataStartCell.Row
+    $columsStartIndex = $dataStartCell.Column
+
+    # 行のコピー
+    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
+
+    # データの書き込み
+    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
+
+    # 初期セル設定
+    Set-SheetFirstCell -Sheet $sheet
+
+    # オートフィルター
+    $headerRange = $sheet.Range(
+        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
+        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count)
+    )
+    Set-AutoFilter $headerRange
+
+    # オートフィット
+    Set-AutoFit $sheet
+}
+
 
 function Export-Excel {
     param(
@@ -488,6 +599,8 @@ function Export-Excel {
         
         Export-CombineSummaryData -Workbook $workbook -CombineSummaryResults $CollectResultDatas.combineSummaryResults -TemplateSheetName "サマリ"
         
+        Export-UserSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -PlainSurveyResultDatas $CollectResultDatas.plainSurveyResults -TemplateSheetName "サマリ-ユーザー別"
+
         Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.companySummarySurveyResults -TemplateSheetName "サマリ-会社別" -TargetUniquePropName "companyName"
         
         Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.classSummarySurveyResults -TemplateSheetName "サマリ-クラス別" -TargetUniquePropName "className"
