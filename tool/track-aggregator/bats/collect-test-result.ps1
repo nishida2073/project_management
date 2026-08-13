@@ -443,8 +443,7 @@ function Export-UserSummaryData {
             if ($testResult.isExecute){
                 $rowData += $testResult.score
             } else {
-                $userUrl = "$BaseUrl/k/#/people/user/$($uniqueUser.userCode)"
-                $rowData += '=HYPERLINK("' + $userUrl + '","督促")'
+                $rowData += ""
             }
         }
         $rowDatas += ,$rowData
