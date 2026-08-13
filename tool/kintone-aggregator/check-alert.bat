@@ -29,7 +29,7 @@ for %%F in (
     
     call ".\bats\message.bat" "Please wait..." "Green"
     
-    call "%%F" "%TargetDate%" > "%LOG_DIR%\%%~nF-%TargetDate%-log.txt"
+    call "%%F" "%TargetDate%" > "%LOG_DIR%\%%~nF-%TargetDate%.log"
     
     call ".\bats\message.bat" "Finished %%~nxF {%TargetDate%}"
 )
