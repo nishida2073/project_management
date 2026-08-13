@@ -58,7 +58,7 @@ function Create-ResultDatas {
                 $obj | Add-Member -NotePropertyName isExecute -NotePropertyValue ($row.status -ne "NotStarted")
                 $surveyCount = ($obj.PSObject.Properties.Name -like 'surveyAnswerValue*').Count
                 $obj | Add-Member -NotePropertyName surveyCount -NotePropertyValue $surveyCount
-                for ($i = 1; $i -le $obj.surveyCount; $i++) {
+                for ($i = 0; $i -lt $obj.surveyCount; $i++) {
                     $propName = "surveyAnswerValue/$i"
                     $propValue = if ($obj.PSObject.Properties.Name -contains $propName){
                         $obj.$propName
@@ -293,7 +293,8 @@ function Export-UserPlainData {
         $rowDatas = @()
         
         $targetPlainSurveyResultDatas = @($PlainSurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
-        $surveyCount = if ($targetPlainSurveyResultDatas) { [int]$targetPlainSurveyResultDatas[0].surveyResult.surveyCount } else { 0 }
+        $executedSurveyResultData = $targetPlainSurveyResultDatas | Where-Object { $_.isExecute } | Select-Object -First 1
+        $surveyCount = if ($executedSurveyResultData) { [int]$executedSurveyResultData.surveyResult.surveyCount } else { 0 }
         
         # 全体
         $targetTotalSummarySurveyResultData = @($TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
@@ -313,7 +314,7 @@ function Export-UserPlainData {
                 $rowData +=""
             }
         }
-        for ($i = 0; $i -le $surveyCount; $i++) {
+        for ($i = 0; $i -lt $surveyCount; $i++) {
             $rowData += ""
         }
         $rowDatas += ,$rowData
@@ -342,7 +343,7 @@ function Export-UserPlainData {
                     $rowData +=""
                 }
             }
-            for ($i = 0; $i -le $surveyCount; $i++) {
+            for ($i = 0; $i -lt $surveyCount; $i++) {
                 $propName = "S$i"
                 $rowData += $targetSurveyResult.$propName
             }
@@ -368,7 +369,7 @@ function Export-UserPlainData {
         # オートフィルター
         $headerRange = $newSheet.Range(
             $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-            $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count)
+            $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
         )
         Set-AutoFilter $headerRange
         
@@ -563,7 +564,7 @@ function Export-UserSummaryData {
     # オートフィルター
     $headerRange = $sheet.Range(
         $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
-        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count)
+        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
     )
     Set-AutoFilter $headerRange
 

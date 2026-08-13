@@ -469,7 +469,7 @@ function Export-UserSummaryData {
     # オートフィルター
     $headerRange = $sheet.Range(
         $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
-        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count)
+        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
     )
     Set-AutoFilter $headerRange
     
@@ -628,7 +628,7 @@ function Export-UserPlainData {
             # オートフィルター
             $headerRange = $newSheet.Range(
                 $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count)
+                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
             )
             Set-AutoFilter $headerRange
             
@@ -734,7 +734,7 @@ function Export-GroupPlainData {
             # オートフィルター
             $headerRange = $newSheet.Range(
                 $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count)
+                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
             )
             Set-AutoFilter $headerRange
             
