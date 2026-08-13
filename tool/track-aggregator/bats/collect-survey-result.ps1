@@ -217,6 +217,8 @@ function Create-SummaryDataByGroup {
 
             # 平均
             if ($isExecute) {
+                $surveyCount = [int]$filtered[0].surveyCount
+                $obj["surveyCount"] = $surveyCount
                 foreach ($primeSurveyItem in $primeSurveyItems) {
                     $propValues = $filtered | Where-Object { $_.isExecute -and $_.PSObject.Properties.Name -contains $primeSurveyItem } | ForEach-Object { $_.$primeSurveyItem }
                     $avgValue = ($propValues | Measure-Object -Average).Average
@@ -293,11 +295,10 @@ function Export-UserPlainData {
         $rowDatas = @()
         
         $targetPlainSurveyResultDatas = @($PlainSurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
-        $executedSurveyResultData = $targetPlainSurveyResultDatas | Where-Object { $_.isExecute } | Select-Object -First 1
-        $surveyCount = if ($executedSurveyResultData) { [int]$executedSurveyResultData.surveyResult.surveyCount } else { 0 }
-        
+
         # 全体
         $targetTotalSummarySurveyResultData = @($TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
+        $surveyCount = if ($targetTotalSummarySurveyResultData) { [int]$targetTotalSummarySurveyResultData[0].surveyCount } else { 0 }
         
         $rowData = @()
         $rowData += "全体-平均"
