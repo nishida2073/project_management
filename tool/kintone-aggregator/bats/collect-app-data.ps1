@@ -20,7 +20,6 @@ function Combine-ArrayHorizontal {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
-    $result = @()
     # 最大行数
     $maxRows = ($Arrays | ForEach-Object {
         if ($_ -is [array] -and $_.Count -gt 0 -and $_[0] -is [array]) {
@@ -29,6 +28,7 @@ function Combine-ArrayHorizontal {
             1
         }
     } | Measure-Object -Maximum).Maximum
+    $result = [System.Collections.Generic.List[object]]::new($maxRows)
     for ($r = 0; $r -lt $maxRows; $r++) {
         $row = @()
         foreach ($arr in $Arrays) {
@@ -49,9 +49,9 @@ function Combine-ArrayHorizontal {
                 }
             }
         }
-        $result += ,$row
+        $result.Add($row)
     }
-    return ,$result
+    return ,$result.ToArray()
 }
 
 function Export-Datas {
@@ -88,7 +88,7 @@ function Export-Datas {
         }
         $allHeaderDatas += ,$headerDatas
         # ボディ
-        $bodyDatas = @()
+        $bodyDatas = [System.Collections.Generic.List[object]]::new($range.Count)
         for ($r = 1; $r -lt $range.Count; $r++) {
             $rowData = @()
             foreach ($def in $columnDefs) {
@@ -98,9 +98,9 @@ function Export-Datas {
                 }
                 $rowData += $val
             }
-            $bodyDatas += ,$rowData
+            $bodyDatas.Add($rowData)
         }
-        $allBodyDatas += ,$bodyDatas
+        $allBodyDatas += ,$bodyDatas.ToArray()
     }
     Write-Message $allHeaderDatas -VarName "allHeaderDatas" -Type "Info" -ForegroundColor Green
     Write-Message $allBodyDatas -VarName "allBodyDatas" -Type "Info" -ForegroundColor Green

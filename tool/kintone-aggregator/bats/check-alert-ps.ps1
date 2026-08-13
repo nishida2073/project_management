@@ -129,6 +129,9 @@ function Add-CheckResults {
         param(
             [array]$values
         )
+        # 対象日が1件で値が空の場合、$valuesが配列でなくnullになる(パイプラインの単一null値の畳み込み)ため、
+        # 範囲インデックス(1..)での例外を避けるためにここで配列化する
+        $values = @($values)
         $latest = $values[0]
         if ($latest -eq "") { return $false }
         if ($latest -eq "NA") { return $false }
@@ -679,7 +682,7 @@ function Export-UserData {
             if($AlertInterventionTerm -gt 0){
                 $targetRecentResultDatas = $targetRecentResultDatas | Select-Object -First $AlertInterventionTerm
             }
-            $alertCount = ($targetRecentResultDatas | Where-Object { (Get-AlertStatus -AlertData $_.alert -Exclude $excludeAlertItems).HasTrue }).Count
+            $alertCount = @($targetRecentResultDatas | Where-Object { (Get-AlertStatus -AlertData $_.alert -Exclude $excludeAlertItems).HasTrue }).Count
             if ($alertCount -ge $AlertInterventionLimit) { 
                 $userUrl = "$BaseUrl/k/#/people/user/$($userData.受講生ID)"
                 $interventionFlagLabel = '=HYPERLINK("' + $userUrl + '","必要")'

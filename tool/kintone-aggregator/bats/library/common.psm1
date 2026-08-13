@@ -720,13 +720,13 @@ function Read-FileToArray {
     )
     $lines = Get-Content -Path $ReadFilePath
     if ($lines.Count -lt 2) { return @() }
-    $result = @()
+    $result = [System.Collections.Generic.List[object]]::new($lines.Count)
     for ($r = 0; $r -lt $lines.Count; $r++) {
         $values = $lines[$r] -split "`t"
         $values = Restore-BreakLine $values
-        $result += ,$values
+        $result.Add($values)
     }
-    return ,$result
+    return ,$result.ToArray()
 }
 
 function Use-Mutex {
