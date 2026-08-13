@@ -32,7 +32,7 @@ set /a Start=%TargetDateTerm%-1
 for /l %%i in (%Start%,-1,0) do (
     for /f %%d in ('powershell -NoProfile -Command "(Get-Date \"%TargetDate%\").AddDays(-%%i).ToString(\"yyyy-MM-dd\")"') do (
         for %%F in (
-            ".\bats\collect-app-data-ps.bat"
+            ".\bats\collect-app-data.bat"
         ) do (
             call ".\bats\message.bat" "Start %%~nxF {%%d}"
             

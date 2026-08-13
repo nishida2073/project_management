@@ -11,13 +11,13 @@ if "%~1"=="" (
     set "TargetDate=%~1"
 )
 
-set "SCRIPT_PATH=%~dp0check-alert-ps.ps1"
+set "SCRIPT_PATH=%~dp0check-alert.ps1"
 
 set "MasterDataRootDir=%MasterDataRootDir%"
 
-set "CollectRootDir=%OutputCollectDataRootDir%\PS"
-set "OutputTargetDir=%OutputAlertRootDir%\PS"
-set "TemplateFilePath=%TemplateRootDir%\アラート検知-PS.xlsx"
+set "CollectRootDir=%OutputCollectDataRootDir%"
+set "OutputTargetDir=%OutputAlertRootDir%"
+set "TemplateFilePath=%TemplateRootDir%\アラート検知.xlsx"
 set "ViewAllCourseSchedule=0"
 set "ViewHolidayCourseSchedule=1"
 set "AlertInterventionTerm=0"
