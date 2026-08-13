@@ -2,7 +2,7 @@
     [string]$SourceRootDir,
     [string]$TargetGroupName,
     [string]$TargetDate,
-    [string]$SourseDataDefs,
+    [string]$SourseDataDefsPath,
     [string]$CollectRootDir,
     [string]$CollectDataNotFoundMessage
 )
@@ -54,6 +54,58 @@ function Combine-ArrayHorizontal {
     return ,$result.ToArray()
 }
 
+function Read-SourseDataDefsFile {
+    param(
+        [Parameter(Mandatory)]
+        [string]$FilePath,
+        [Parameter(Mandatory)]
+        [string]$SourceRootDir,
+        [Parameter(Mandatory)]
+        [string]$TargetGroupName
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+
+    # [ファイル識別子] セクションの下に、1行1列で「列番号[,別名[,型]]」を書く書式
+    $lines = Get-Content -Path $FilePath -Encoding UTF8
+
+    $sourseDataProps = @()
+    $currentFileKey = $null
+    $currentColumnDefs = @()
+
+    foreach ($line in $lines) {
+        $trimmed = $line.Trim()
+        if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
+
+        if ($trimmed -match '^\[(.+)\]$') {
+            if ($currentFileKey) {
+                $sourseDataProps += [PSCustomObject]@{
+                    filePath   = Join-Path $SourceRootDir "$TargetGroupName-$currentFileKey.txt"
+                    columnDefs = $currentColumnDefs
+                }
+            }
+            $currentFileKey = $Matches[1]
+            $currentColumnDefs = @()
+            continue
+        }
+
+        $parts = $trimmed -split ','
+        $currentColumnDefs += [PSCustomObject]@{
+            Index = [int]$parts[0]
+            Alias = if ($parts.Count -ge 2 -and -not [string]::IsNullOrWhiteSpace($parts[1])) { $parts[1] } else { $null }
+            Type  = if ($parts.Count -ge 3 -and -not [string]::IsNullOrWhiteSpace($parts[2])) { $parts[2] } else { $null }
+        }
+    }
+    if ($currentFileKey) {
+        $sourseDataProps += [PSCustomObject]@{
+            filePath   = Join-Path $SourceRootDir "$TargetGroupName-$currentFileKey.txt"
+            columnDefs = $currentColumnDefs
+        }
+    }
+
+    return $sourseDataProps
+}
+
 function Export-Datas {
     param(
         [string]$SourceRootDir,
@@ -66,14 +118,13 @@ function Export-Datas {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
+
     $allHeaderDatas = @()
     $allBodyDatas   = @()
-    
+
     foreach ($sourceDataProp in $SourseDataProps) {
         $sourceFilePath = $sourceDataProp.filePath
-        $sourceDataColumns   = $sourceDataProp.dataColumns
-        $columnDefs = Get-ColumnDefs $sourceDataColumns
+        $columnDefs = $sourceDataProp.columnDefs
         $range = Read-FileToArray $sourceFilePath
         
         # ヘッダー
@@ -127,17 +178,7 @@ if (-not $hasFiles) {
     return
 }
 
-$sourseDataDefsParts = $SourseDataDefs -split ";"
-
-$sourseDataProps = @()
-foreach ($sourseDataDefsPart in $sourseDataDefsParts) {
-    if ([string]::IsNullOrWhiteSpace($sourseDataDefsPart)) { continue }
-    $parts = $sourseDataDefsPart -split '@@'
-    $sourseDataProps += [PSCustomObject]@{
-        filePath    =  Join-Path $SourceRootDir "$TargetGroupName-$($parts[0]).txt"
-        dataColumns  = $parts[1] -split '[,\s]+'
-    }
-}
+$sourseDataProps = Read-SourseDataDefsFile -FilePath $SourseDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName
 
 Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
 

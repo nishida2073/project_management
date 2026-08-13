@@ -19,7 +19,7 @@ if "%~2"=="" (
 set "SCRIPT_PATH=%~dp0collect-app-data.ps1"
 set "MasterDataRootDir=%MasterDataRootDir%"
 
-set "SourseDataDefs=サマリー_業務日誌@@1^|業務日誌提出状況,2,3,4,5,6,8^|^|date,9^|理解度;サマリー_パルスサーベイ@@1^|パルスサーベイ提出状況,9^|人間関係,10^|体調,11^|パルスサーベイフリーコメント"
+set "SourseDataDefsPath=%~dp0collect-data-defs.txt"
 
 set "CollectRootDir=%OutputCollectDataRootDir%"
 set "CollectDataNotFoundMessage="
@@ -37,7 +37,7 @@ for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
       "  -SourceRootDir '%CheckedFileRootDir%'" ^
       "  -TargetGroupName '%%~nF'" ^
       "  -TargetDate '%TargetDate%'" ^
-      "  -SourseDataDefs '%SourseDataDefs%'" ^
+      "  -SourseDataDefsPath '%SourseDataDefsPath%'" ^
       "  -CollectRootDir '%CollectRootDir%'" ^
       "  -CollectDataNotFoundMessage '%CollectDataNotFoundMessage%';" ^
       "Remove-Item -Path '!JOB_FLAG!' -Force;"

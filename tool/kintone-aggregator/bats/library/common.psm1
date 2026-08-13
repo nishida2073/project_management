@@ -618,33 +618,6 @@ function Move-SheetsToFront {
 }
 
 
-function Get-ColumnDefs {
-    param(
-        [Parameter(Mandatory)]
-        [string[]]$SourceColumns
-    )
-
-    $columnDefs = foreach ($s in $SourceColumns) {
-        # ハットをエスケープ
-        $s = $s -replace '\^', ''
-        # パイプで分割
-        $parts = $s -split '\|'
-
-        # 列Indexが数値かチェック
-        if (-not ($parts[0] -as [int])) {
-            throw "列Indexが数値ではありません: $s"
-        }
-
-        # オブジェクト作成
-        [PSCustomObject]@{
-            Index = [int]$parts[0]
-            Alias = if ($parts.Count -eq 2 -and $parts[1]) { $parts[1] } else { $null }
-            Type = if ($parts.Count -eq 3 -and $parts[2]) { $parts[2] } else { $null }
-        }
-    }
-    return $columnDefs
-}
-
 function Export-RangeToFile {
     param(
         [Parameter(Mandatory)]
