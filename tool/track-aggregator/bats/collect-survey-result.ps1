@@ -25,31 +25,12 @@ function Create-SurveyDatas {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    $dataLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex 3
-    
-    $bodies = @()
+
     $headerMap = @{
         '通番'   = 'surveyNo'
         'アンケート名'     = 'surveyName'
     }
-    $headers = $dataLines[0] -split ',' | ForEach-Object { $_.Trim() }
-    $bodyLines = $dataLines | Select-Object -Skip 1
-    foreach ($line in $bodyLines) {
-        $parts = $line -split ',' | ForEach-Object { $_.Trim() }
-        $body = [PSCustomObject]@{}
-        for ($i = 0; $i -lt $headers.Count; $i++) {
-            $header = $headers[$i]
-            $value  = $parts[$i]
-            $body | Add-Member -NotePropertyName $header -NotePropertyValue $value
-            if ($headerMap.ContainsKey($header)) {
-                $internalName = $headerMap[$header]
-                $body | Add-Member -NotePropertyName $internalName -NotePropertyValue $value -Force
-            }
-        }
-        $bodies += $body
-    }
-    return $bodies
+    return Create-MasterDatas -DataFilePath $DataFilePath -SheetIndex 3 -HeaderMap $headerMap
 }
 
 
@@ -210,23 +191,10 @@ function Create-SummaryDataByGroup {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    if (-not $GroupValues) {
-        $GroupValues = @($null)
-    }
-    $results = foreach ($groupValue in $GroupValues) {
-        if ($GroupKey) {
-            $groupUsers = @(
-                $UserDatas |
-                Where-Object { $_.$GroupKey -eq $groupValue }
-            )
-        } else {
-            $groupUsers = $UserDatas
-        }
-        $groupResults = @(
-            $ValidResultDatas |
-            Where-Object userCode -in $groupUsers.userCode
-        )
+
+    $results = foreach ($group in (Get-GroupedResults -UserDatas $UserDatas -ValidResultDatas $ValidResultDatas -GroupValues $GroupValues -GroupKey $GroupKey)) {
+        $groupUsers = $group.GroupUsers
+        $groupResults = $group.GroupResults
         foreach ($surveyData in $SurveyDatas) {
             $filtered = @(
                 $groupResults |
@@ -238,7 +206,7 @@ function Create-SummaryDataByGroup {
             $obj = [ordered]@{}
             # total 以外のみグループキー追加
             if ($GroupKey) {
-                $obj[$GroupKey] = $groupValue
+                $obj[$GroupKey] = $group.GroupValue
             }
             $obj += @{
                 surveyName  = $surveyData.surveyName
@@ -246,19 +214,16 @@ function Create-SummaryDataByGroup {
                 planCount    = $planCount
                 actualCount  = $actualCount
             }
-            
+
             # 平均
             if ($isExecute) {
-                $surveyCount = $filtered[0].surveyCount
                 foreach ($primeSurveyItem in $primeSurveyItems) {
                     $propValues = $filtered | Where-Object { $_.isExecute -and $_.PSObject.Properties.Name -contains $primeSurveyItem } | ForEach-Object { $_.$primeSurveyItem }
                     $avgValue = ($propValues | Measure-Object -Average).Average
                     if ($null -eq $avgValue) {
                         $avgValue = ""
-                    } else {
-                        $avgValue = $avgValue
                     }
-                    $obj[$primeSurveyItem] = if ($avgValue -eq "") { "" } else { $avgValue }
+                    $obj[$primeSurveyItem] = $avgValue
                 }
             }
             [pscustomobject]$obj
@@ -426,79 +391,19 @@ function Export-GroupSummaryData {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
+
     $pickedSurveyItems = @("planCount","actualCount") + $primeSurveyItems
-    
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    
-    $dataStartCell = Get-CellByKey $sheet "{アンケートデータ}" -ErrorOnMissing
-    $rowStartIndex = $dataStartCell.Row
-    $columsStartIndex = $dataStartCell.Column
-    Expand-ColumnsFromTemplate -Sheet $sheet -TemplateStartColumn $columsStartIndex -TotalSets $SurveyDatas.Count -ColumnsPerSet $pickedSurveyItems.Count
-    
-    $headData = @()
-    foreach ($surveyData in $SurveyDatas) {
-        $headData += $surveyData.surveyName
-        $headData += [string[]]::new($pickedSurveyItems.Count-1)
-    }
-    $headDatas = ,$headData
-    Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
-    
-    $rowDatas = @()
-    # 全体
-    $rowData = @()
-    $rowData += "全体"
-    foreach ($surveyData in $SurveyDatas) {
-        $totalResult = $TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName } |
-                      Select-Object -First 1
-        foreach ($pickedSurveyItem in $pickedSurveyItems) {
-            $exists = $totalResult | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
-            if ($exists) {
-                $rowData += $totalResult.$pickedSurveyItem
-            }else{
-                $rowData +=""
-            }
-        }
-    }
-    $rowDatas += ,$rowData
-    
-    
-    # X別
-    $uniqueUseSummaryResults = $UseSummaryResults | Select-Object -Property $TargetUniquePropName -Unique
-    foreach ($uniqueUseSummaryResult in $uniqueUseSummaryResults) {
-        $rowData = @()
-        $rowData += "$($uniqueUseSummaryResult.$TargetUniquePropName)"
-        $surveyResults = $UseSummaryResults | Where-Object { $_.$TargetUniquePropName -eq $uniqueUseSummaryResult.$TargetUniquePropName }
-        foreach ($surveyData in $SurveyDatas) {
-            $surveyResult = $surveyResults | Where-Object { $_.surveyName -eq $surveyData.surveyName } |
-                          Select-Object -First 1
-            foreach ($pickedSurveyItem in $pickedSurveyItems) {
-                $exists = $surveyResult | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
-                if ($exists) {
-                    $rowData += $surveyResult.$pickedSurveyItem
-                }else{
-                    $rowData +=""
-                }
-            }
-        }
-        $rowDatas += ,$rowData
-    }
-    
-    $dataStartCell = Get-CellByKey $sheet "{結果データ}" -ErrorOnMissing
-    $rowStartIndex = $dataStartCell.Row
-    $columsStartIndex = $dataStartCell.Column
-    
-    # 行のコピー
-    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
-    
-    # データの書き込み
-    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-    
-    # 初期セル設定
-    Set-SheetFirstCell -Sheet $sheet
-    
-    # オートフィット
-    Set-AutoFit $sheet
+
+    Export-GroupSummaryDataCore `
+        -Sheet $sheet `
+        -DataItems $SurveyDatas `
+        -ItemNameProperty "surveyName" `
+        -ViewItems $pickedSurveyItems `
+        -TotalResults $TotalSummarySurveyResultDatas `
+        -UseSummaryResults $UseSummaryResults `
+        -TargetUniquePropName $TargetUniquePropName `
+        -DataMarkerKey "{アンケートデータ}" | Out-Null
 }
 
 

@@ -24,31 +24,12 @@ function Create-TestDatas {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    $dataLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex 2
-    
-    $bodies = @()
+
     $headerMap = @{
         '通番'   = 'testNo'
         'テスト名'     = 'testName'
     }
-    $headers = $dataLines[0] -split ',' | ForEach-Object { $_.Trim() }
-    $bodyLines = $dataLines | Select-Object -Skip 1
-    foreach ($line in $bodyLines) {
-        $parts = $line -split ',' | ForEach-Object { $_.Trim() }
-        $body = [PSCustomObject]@{}
-        for ($i = 0; $i -lt $headers.Count; $i++) {
-            $header = $headers[$i]
-            $value  = $parts[$i]
-            $body | Add-Member -NotePropertyName $header -NotePropertyValue $value
-            if ($headerMap.ContainsKey($header)) {
-                $internalName = $headerMap[$header]
-                $body | Add-Member -NotePropertyName $internalName -NotePropertyValue $value -Force
-            }
-        }
-        $bodies += $body
-    }
-    return $bodies
+    return Create-MasterDatas -DataFilePath $DataFilePath -SheetIndex 2 -HeaderMap $headerMap
 }
 
 
@@ -144,23 +125,10 @@ function Create-SummaryDataByGroup {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    if (-not $GroupValues) {
-        $GroupValues = @($null)
-    }
-    $results = foreach ($groupValue in $GroupValues) {
-        if ($GroupKey) {
-            $groupUsers = @(
-                $UserDatas |
-                Where-Object { $_.$GroupKey -eq $groupValue }
-            )
-        } else {
-            $groupUsers = $UserDatas
-        }
-        $groupResults = @(
-            $ValidResultDatas |
-            Where-Object userCode -in $groupUsers.userCode
-        )
+
+    $results = foreach ($group in (Get-GroupedResults -UserDatas $UserDatas -ValidResultDatas $ValidResultDatas -GroupValues $GroupValues -GroupKey $GroupKey)) {
+        $groupUsers = $group.GroupUsers
+        $groupResults = $group.GroupResults
         foreach ($testData in $TestDatas) {
             $filtered = @(
                 $groupResults |
@@ -180,7 +148,7 @@ function Create-SummaryDataByGroup {
             
             $obj = [ordered]@{}
             if ($GroupKey) {
-                $obj[$GroupKey] = $groupValue
+                $obj[$GroupKey] = $group.GroupValue
             }
             $obj += @{
                 テスト名  = $testData.testName
@@ -526,78 +494,25 @@ function Export-GroupSummaryData {
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
+
     $viewItems = @("予定数","実施数","合格数","不合格数","平均点","中央値","修了率","最高点","最低点")
-    
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    
-    $dataStartCell = Get-CellByKey $sheet "{テストデータ}" -ErrorOnMissing
-    $rowStartIndex = $dataStartCell.Row
-    $columsStartIndex = $dataStartCell.Column
-    Expand-ColumnsFromTemplate -Sheet $sheet -TemplateStartColumn $columsStartIndex -TotalSets $TestDatas.Count -ColumnsPerSet $viewItems.Count
-    
-    $headData = @()
-    foreach ($testData in $TestDatas) {
-        $headData += $testData.testName
-        $headData += [string[]]::new($viewItems.Count-1)
-    }
-    $headDatas = ,$headData
-    Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
-    
-    $rowDatas = @()
-    # 全体
-    $rowData = @()
-    $rowData += "全体"
-    foreach ($testData in $TestDatas) {
-        $totalResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName } |
-                      Select-Object -First 1
-        if ($totalResult){
-            foreach($viewItem in $viewItems){
-                $rowData += "$($totalResult.$viewItem)"
-            }
-        } else {
-            $rowData += [string[]]::new($viewItems.Count)
-        }
-    }
-    $rowDatas += ,$rowData
-    
-    # X別
-    $uniqueUseSummaryResults = $UseSummaryResults | Select-Object -Property $TargetUniquePropName -Unique
-    foreach ($uniqueUseSummaryResult in $uniqueUseSummaryResults) {
-        $rowData = @()
-        $rowData += "$($uniqueUseSummaryResult.$TargetUniquePropName)"
-        $testResults = $UseSummaryResults | Where-Object { $_.$TargetUniquePropName -eq $uniqueUseSummaryResult.$TargetUniquePropName }
-        foreach ($testData in $TestDatas) {
-            $testResult = $testResults | Where-Object { $_.testName -eq $testData.testName } |
-                          Select-Object -First 1
-            if ($testResult){
-                foreach($viewItem in $viewItems){
-                    $rowData += "$($testResult.$viewItem)"
-                }
-            } else {
-                $rowData += [string[]]::new($viewItems.Count)
-            }
-        }
-        $rowDatas += ,$rowData
-    }
-    
-    $dataStartCell = Get-CellByKey $sheet "{結果データ}" -ErrorOnMissing
-    $rowStartIndex = $dataStartCell.Row
-    $columsStartIndex = $dataStartCell.Column
-    
-    # 行のコピー
-    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
-    
-    # データの書き込み
-    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-    
-    # 初期セル設定
-    Set-SheetFirstCell -Sheet $sheet
-    
-    # オートフィット
-    Set-AutoFit $sheet
-    
+
+    $result = Export-GroupSummaryDataCore `
+        -Sheet $sheet `
+        -DataItems $TestDatas `
+        -ItemNameProperty "testName" `
+        -ViewItems $viewItems `
+        -TotalResults $TotalSummaryResults `
+        -UseSummaryResults $UseSummaryResults `
+        -TargetUniquePropName $TargetUniquePropName `
+        -DataMarkerKey "{テストデータ}" `
+        -FormatAsText
+
     # セルの色
+    $rowStartIndex = $result.RowStartIndex
+    $columsStartIndex = $result.ColumnStartIndex
+    $rowDatas = $result.RowDatas
     $lastRowIndex = $rowStartIndex + $rowDatas.Count - 1
     $resultRange = $sheet.Range(
         $sheet.Cells($rowStartIndex + 1, $columsStartIndex + 1),
@@ -629,7 +544,7 @@ function Export-UserPlainData {
             $newSheet.Name = $newSheetNameFormat -f $testData.testName
             
             $targetPlainResults = @($PlainResults | Where-Object { $_.testName -eq $testData.testName })
-            $questionCount = if($targetPlainResults.Count -ne 0){ $targetPlainResults[0].testResult.questionCount } else { 0 }
+            $questionCount = if($targetPlainResults.Count -ne 0){ [int]$targetPlainResults[0].testResult.questionCount } else { 0 }
             
             $rowDatas = @()
             $rowData = @()
@@ -756,7 +671,7 @@ function Export-GroupPlainData {
             $newSheet.Name = $newSheetNameFormat -f $testData.testName
             
             $targetUseSummaryResults = @($UseSummaryResults | Where-Object { $_.testName -eq $testData.testName })
-            $questionCount = if($targetUseSummaryResults.Count -ne 0){ $targetUseSummaryResults[0].questionCount } else { 0 }
+            $questionCount = if($targetUseSummaryResults.Count -ne 0){ [int]$targetUseSummaryResults[0].questionCount } else { 0 }
             
             $rowDatas = @()
             $rowData = @()
