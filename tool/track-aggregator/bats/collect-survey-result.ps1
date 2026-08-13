@@ -293,7 +293,8 @@ function Export-UserPlainData {
         $rowDatas = @()
         
         $targetPlainSurveyResultDatas = @($PlainSurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
-        $surveyCount = if ($targetPlainSurveyResultDatas) { [int]$targetPlainSurveyResultDatas[0].surveyResult.surveyCount } else { 0 }
+        $executedSurveyResultData = $targetPlainSurveyResultDatas | Where-Object { $_.isExecute } | Select-Object -First 1
+        $surveyCount = if ($executedSurveyResultData) { [int]$executedSurveyResultData.surveyResult.surveyCount } else { 0 }
         
         # 全体
         $targetTotalSummarySurveyResultData = @($TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })

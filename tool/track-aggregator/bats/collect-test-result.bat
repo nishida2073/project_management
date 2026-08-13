@@ -12,7 +12,7 @@ set "ResultRootDir=%ResultRootDir%\01_テスト"
 set "OutputTargetDir=%OutputTestCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\テスト結果.xlsx"
 set "PassScore=80"
-set "ShowDetail=0"
+set "ShowDetail=1"
 
 for %%F in ("%MasterDataRootDir%\*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"

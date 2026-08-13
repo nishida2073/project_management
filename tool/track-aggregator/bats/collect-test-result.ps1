@@ -544,18 +544,19 @@ function Export-UserPlainData {
             $newSheet.Name = $newSheetNameFormat -f $testData.testName
             
             $targetPlainResults = @($PlainResults | Where-Object { $_.testName -eq $testData.testName })
-            $questionCount = if($targetPlainResults.Count -ne 0){ [int]$targetPlainResults[0].testResult.questionCount } else { 0 }
-            
+            $targetTotalSummaryResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName } | Select-Object -First 1
+            $questionCount = if($targetTotalSummaryResult){ [int]$targetTotalSummaryResult.questionCount } else { 0 }
+
             $rowDatas = @()
             $rowData = @()
             for ($i = 1; $i -le $questionCount; $i++) {
                 $rowData += "問題$i"
             }
-            $rowDatas +=,$rowData
-            
             if($questionCount -eq 0){
-                $rowDatas += ,@("")
+                $rowData += ""
             }
+            $rowDatas +=,$rowData
+
             $dataStartCell = Get-CellByKey $newSheet "{問題データ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
             $columsStartIndex = $dataStartCell.Column
@@ -563,7 +564,7 @@ function Export-UserPlainData {
             Expand-ColumnsFromTemplate -Sheet $newSheet -TemplateStartColumn $columsStartIndex -TotalSets $rowDatas[0].Count
             # データの書き込み
             Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-            
+
             $rowDatas = @()
             # 合計
             $rowData = @()
@@ -573,8 +574,7 @@ function Export-UserPlainData {
             $rowData += ""
             $rowData += ""
             $rowData += ""
-            
-            $targetTotalSummaryResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName }
+
             for ($i = 1; $i -le $questionCount; $i++) {
                 $propName = "Q$i"
                 $propValues = $targetTotalSummaryResult.$propName
@@ -671,18 +671,19 @@ function Export-GroupPlainData {
             $newSheet.Name = $newSheetNameFormat -f $testData.testName
             
             $targetUseSummaryResults = @($UseSummaryResults | Where-Object { $_.testName -eq $testData.testName })
-            $questionCount = if($targetUseSummaryResults.Count -ne 0){ [int]$targetUseSummaryResults[0].questionCount } else { 0 }
-            
+            $targetTotalSummaryResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName } | Select-Object -First 1
+            $questionCount = if($targetTotalSummaryResult){ [int]$targetTotalSummaryResult.questionCount } else { 0 }
+
             $rowDatas = @()
             $rowData = @()
             for ($i = 1; $i -le $questionCount; $i++) {
                 $rowData += "問題$i"
             }
-            $rowDatas +=,$rowData
-            
             if($questionCount -eq 0){
-                $rowDatas += ,@("")
+                $rowData += ""
             }
+            $rowDatas +=,$rowData
+
             $dataStartCell = Get-CellByKey $newSheet "{問題データ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
             $columsStartIndex = $dataStartCell.Column
@@ -690,13 +691,12 @@ function Export-GroupPlainData {
             Expand-ColumnsFromTemplate -Sheet $newSheet -TemplateStartColumn $columsStartIndex -TotalSets $rowDatas[0].Count
             # データの書き込み
             Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-            
+
             $rowDatas = @()
             # 全体
             $rowData = @()
             $rowData += "全体"
-            
-            $targetTotalSummaryResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName }
+
             for ($i = 1; $i -le $questionCount; $i++) {
                 $propName = "Q$i"
                 $propValue = $targetTotalSummaryResult.$propName
