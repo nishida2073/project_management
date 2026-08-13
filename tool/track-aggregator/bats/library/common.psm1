@@ -991,7 +991,7 @@ function Download-File {
         else {
             Write-Message "fail [$Url]" -VarName "message" -Type "Error" -ForegroundColor Red
         }
-        Start-Sleep -Milliseconds 500
+        # Start-Sleep -Milliseconds 500
     }
 }
 
