@@ -1,11 +1,8 @@
 @echo off
 
-
-set "UseMacro=0"
-
 set "MasterDataRootDir=%~dp0..\master"
 
-set "ResultRootDir=%~dp0..\csv-results"
+set "ResultRootDir=%~dp0..\download"
 
 set "OutputRootDir=%~dp0..\output"
 
@@ -17,3 +14,4 @@ set "OutputSurveyCollectDir=%OutputRootDir%\02_アンケート集計結果"
 
 set "AutoHotkeyExePath=%~dp0..\AutoHotkey\v2\AutoHotkey.exe"
 set "AutoHotkeyScriptPath=%~dp0..\AutoHotkey\scripts\download.ahk"
+set "TrackLoginUrl=https://nttdata-univ.train.tracks.run/auth/login"

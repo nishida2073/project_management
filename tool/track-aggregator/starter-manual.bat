@@ -10,8 +10,7 @@ echo - 実行バッチ名
 echo   %BATCH%
 echo.
 echo - 事前準備
-echo   * 実行前に、ブラウザ（Chrome）を起動し、下記URLにログインしてください。
-echo     https://nttdata-univ.train.tracks.run/auth/login
+echo   * 実行前に、starter-chrome.batでブラウザ（Chrome）を起動し、Trackにログインしてください。
 echo.
 echo - 注意事項
 echo   * PCを自動操作するため、PCには触れないでください。
