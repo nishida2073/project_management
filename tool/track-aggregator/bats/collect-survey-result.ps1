@@ -6,8 +6,7 @@
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$TemplateFilePath,
-    [string]$SurveyResultRootDir,
-    [string]$TestResultRootDir
+    [string]$SurveyResultRootDir
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -80,9 +79,7 @@ function Create-CollectResultsDatas {
     param(
         $UserDatas,
         $SurveyDatas,
-        $SurveyResultDatas,
-        $UserTestResultsDatas,
-        $TotalTestResultsDatas
+        $SurveyResultDatas
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -143,31 +140,8 @@ function Create-CollectResultsDatas {
         -SurveyDatas $SurveyDatas `
         -ValidResultDatas $validSurveyResultDatas
     
-    # combine
-    $combineSummaryResults = [ordered]@{}
-    foreach ($t in $TotalTestResultsDatas) {
-        $key = $t.テスト名
-        if (-not $combineSummaryResults.Contains($key)) {
-            $combineSummaryResults[$key] = [ordered]@{}
-        }
-        $combineSummaryResults[$key].Test = $t
-    }
-    foreach ($s in $totalSummarySurveyResults) {
-        $key = $s.surveyName
-        if (-not $combineSummaryResults.Contains($key)) {
-            $combineSummaryResults[$key] = [ordered]@{}
-        }
-        $combineSummaryResults[$key].Survey = $s
-    }
-    
-    # ユーザのテスト結果
-    $userTestResults = $UserTestResultsDatas
-    
     # 全体
     $results = [PSCustomObject]@{
-        userTestResults = $userTestResults
-        combineSummaryResults  = $combineSummaryResults
-        
         plainSurveyResults = $plainSurveyResults
         
         totalSummarySurveyResults = $totalSummarySurveyResults
@@ -235,42 +209,6 @@ function Create-SummaryDataByGroup {
     return $results
 }
 
-function Export-UserTestData {
-    param(
-        $Workbook,
-        $UserTestResultsDatas,
-        $TemplateSheetName
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    
-    $rowDatas = @()
-    if($UserTestResultsDatas.Count -eq 0){
-        $rowDatas += ,@("")
-    } else {
-        $rowData = @($UserTestResultsDatas[0].PSObject.Properties.Name)
-        $rowDatas += ,$rowData
-        foreach ($userTestResultsData in $UserTestResultsDatas) {
-            $rowData = @()
-            foreach ($prop in $userTestResultsData.PSObject.Properties) {
-                $rowData +=  $prop.Value
-            }
-            $rowDatas += ,$rowData
-        }
-    }
-    
-    # データの書き込み
-    $dataStartCell = Get-CellByKey $sheet "{結果データ}" -ErrorOnMissing
-    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-    
-    # 初期セル設定
-    Set-SheetFirstCell -Sheet $sheet
-    
-}
-
-
 function Export-UserPlainData {
     param(
         $Workbook,
@@ -283,23 +221,23 @@ function Export-UserPlainData {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     $newSheetNameParts = $TemplateSheetName -split "-", 2
     $newSheetNameFormat = "$($newSheetNameParts[0])-{0}-$($newSheetNameParts[1])"
-    
+
     $pickedSurveyItems = $primeSurveyItems
-    
+
     foreach ($surveyData in $SurveyDatas) {
         $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
         $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
         $newSheet = $Workbook.ActiveSheet
         $newSheet.Name = $newSheetNameFormat -f $surveyData.surveyName
-        
+
         $rowDatas = @()
-        
+
         $targetPlainSurveyResultDatas = @($PlainSurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
 
         # 全体
         $targetTotalSummarySurveyResultData = @($TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
         $surveyCount = if ($targetTotalSummarySurveyResultData) { [int]$targetTotalSummarySurveyResultData[0].surveyCount } else { 0 }
-        
+
         $rowData = @()
         $rowData += "全体-平均"
         $rowData += ""
@@ -319,7 +257,7 @@ function Export-UserPlainData {
             $rowData += ""
         }
         $rowDatas += ,$rowData
-        
+
         # ユーザ別
         foreach ($targetPlainSurveyResultData in $targetPlainSurveyResultDatas) {
             $targetUserData = $targetPlainSurveyResultData.userData
@@ -350,35 +288,36 @@ function Export-UserPlainData {
             }
             $rowDatas += ,$rowData
         }
-        
+
         if($rowDatas.Count -eq 0){
             $rowDatas += ,@("")
         }
         $dataStartCell = Get-CellByKey $newSheet "{ユーザーデータ}" -ErrorOnMissing
         $rowStartIndex = $dataStartCell.Row
         $columsStartIndex = $dataStartCell.Column
-        
+
         # 行のコピー
         Expand-RowsFromTemplate -Sheet $newSheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
-        
+
         # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-        
+
         # 初期セル設定
         Set-SheetFirstCell -Sheet $newSheet
-        
+
         # オートフィルター
         $headerRange = $newSheet.Range(
             $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
             $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
         )
         Set-AutoFilter $headerRange
-        
+
         # オートフィット
         Set-AutoFit $newSheet
     }
     Remove-Sheet $Workbook $TemplateSheetName
 }
+
 
 function Export-GroupSummaryData {
     param(
@@ -404,60 +343,6 @@ function Export-GroupSummaryData {
         -UseSummaryResults $UseSummaryResults `
         -TargetUniquePropName $TargetUniquePropName `
         -DataMarkerKey "{アンケートデータ}" | Out-Null
-}
-
-
-function Export-CombineSummaryData {
-    param(
-        $Workbook,
-        $CombineSummaryResults,
-        $TemplateSheetName
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    $pickedSurveyItems = $primeSurveyItems
-    
-    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    
-    $rowDatas = @()
-    foreach ($key in $CombineSummaryResults.Keys) {
-        $testResults   = $CombineSummaryResults[$key].Test
-        $surveyResults = $CombineSummaryResults[$key].Survey
-        $rowData = @()
-        $rowData +=  $key
-        if( $testResults ){
-            $rowData +=  if($testResults.平均点 -ne "") { [double] $testResults.平均点 }
-            $rowData +=  if($testResults.中央値 -ne "") { [double] $testResults.中央値 }
-            $rowData +=  if($testResults.修了率 -ne "") { [double] $testResults.修了率/100 }
-        } else {
-            $rowData += @("") * 3
-        }
-        if( $surveyResults ){
-            foreach ($pickedSurveyItem in $pickedSurveyItems) {
-                $exists = $surveyResults | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
-                if ($exists) {
-                    $rowData += $surveyResults.$pickedSurveyItem
-                }else{
-                    $rowData +=""
-                }
-            }
-        } else {
-            $rowData += @("") * $pickedSurveyItems.Count
-        }
-        $rowDatas += ,$rowData
-    }
-    
-    $dataStartCell = Get-CellByKey $sheet "{結果データ}" -ErrorOnMissing
-    $rowStartIndex = $dataStartCell.Row
-    # 行のコピー
-    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
-    # データの書き込み
-    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-    
-    # 初期セル設定
-    Set-SheetFirstCell -Sheet $sheet
-
 }
 
 
@@ -594,13 +479,10 @@ function Export-Excel {
         $excel.EnableEvents = $false
         
         $workbook = $excel.Workbooks.Open($OutputFilePath)
-        # データ作成
-        # Export-UserTestData -Workbook $workbook -UserTestResultsDatas $CollectResultDatas.userTestResults -TemplateSheetName "テスト結果"
-        
+        # サマリ(テスト結果との組み合わせ)は collect-combine-result.ps1 側で出力する
+
         Export-UserPlainData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -PlainSurveyResultDatas $CollectResultDatas.plainSurveyResults -TemplateSheetName "詳細-ユーザ別"
-        
-        Export-CombineSummaryData -Workbook $workbook -CombineSummaryResults $CollectResultDatas.combineSummaryResults -TemplateSheetName "サマリ"
-        
+
         Export-UserSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -PlainSurveyResultDatas $CollectResultDatas.plainSurveyResults -TemplateSheetName "サマリ-ユーザー別"
 
         Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.companySummarySurveyResults -TemplateSheetName "サマリ-会社別" -TargetUniquePropName "companyName"
@@ -627,22 +509,6 @@ function Export-Excel {
 $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
 # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
-$userTestResultsFilePath = Join-Path $TestResultRootDir "$TargetGroupName-ユーザ別.txt"
-$userTestResultsDatas = if ( Test-Path $userTestResultsFilePath ) {
-    Convert-TsvPsObject $userTestResultsFilePath
-}else{
-    @()
-}
-# Write-Message $userTestResultsDatas -VarName "userTestResultsDatas" -Type "Info" 
-
-$totalTestResultsFilePath = Join-Path $TestResultRootDir "$TargetGroupName-全体.txt"
-$totalTestResultsDatas = if ( Test-Path $totalTestResultsFilePath ) {
-    Convert-TsvPsObject $totalTestResultsFilePath
-} else {
-    @()
-}
-# Write-Message $totalTestResultsDatas -VarName "totalTestResultsDatas" -Type "Info" 
-
 New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
 $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
@@ -655,10 +521,10 @@ Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPat
 $surveyResultDatas = Create-ResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
 # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info" 
 
-$collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas -UserTestResultsDatas $userTestResultsDatas -TotalTestResultsDatas $totalTestResultsDatas
+$collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
 # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info" 
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-アンケート結果.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
 Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath

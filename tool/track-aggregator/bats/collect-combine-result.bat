@@ -5,35 +5,37 @@ set "MyName=%~nx0"
 
 call "%~dp0common-env.bat"
 
-set "SCRIPT_PATH=%~dp0collect-survey-result.ps1"
+set "SCRIPT_PATH=%~dp0collect-combine-result.ps1"
 
 set "MasterDataRootDir=%MasterDataRootDir%"
 set "SurveyResultRootDir=%ResultRootDir%\02_アンケート"
-set "OutputTargetDir=%OutputSurveyCollectDir%"
-set "TemplateFilePath=%TemplateRootDir%\アンケート結果.xlsx"
+set "OutputTargetDir=%OutputCombineCollectDir%"
+set "TemplateFilePath=%TemplateRootDir%\統合結果.xlsx"
+set "TestResultRootDir=%ResultRootDir%\01_テスト"
+set "PassScore=80"
 
 for %%F in ("%MasterDataRootDir%\*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"
-    
+
     set "envFile=%MasterDataRootDir%\%%~nF.bat"
     if exist "!envFile!" (
         call "!envFile!"
-        
+
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF_.running"
-        
+
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "& '%SCRIPT_PATH%'" ^
           "   -BaseUrl '!BaseUrl!'" ^
           "   -MasterDataFilePath '%%F'" ^
-          "   -AutoHotkeyExePath '%AutoHotkeyExePath%'" ^
-          "   -AutoHotkeyScriptPath '%AutoHotkeyScriptPath%'" ^
           "   -TargetGroupName '%%~nF'" ^
           "   -OutputRootDir '%OutputTargetDir%'" ^
           "   -TemplateFilePath '!TemplateFilePath!'" ^
-          "   -SurveyResultRootDir '%SurveyResultRootDir%';" ^
+          "   -SurveyResultRootDir '%SurveyResultRootDir%'" ^
+          "   -TestResultRootDir '%TestResultRootDir%'" ^
+          "   -PassScore '%PassScore%';" ^
           "Remove-Item -Path '!JOB_FLAG!' -Force;"
-        
+
     ) else (
         call "%~dp0message.bat" "環境設定ファイルが見つかりません: !envFile!" "Red"
     )

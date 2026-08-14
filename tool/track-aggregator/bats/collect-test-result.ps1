@@ -270,105 +270,6 @@ function Create-CollectResultsDatas {
 
 
 
-function Export-FileUser {
-    param(
-        [array]$PlainResults,
-        [array]$TestDatas,
-        [string]$OutputFilePath
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    if($PlainResults.Count -eq 0){
-        Write-Message "Skip [$OutputFilePath]" -VarName "message" -Type "Info" -ForegroundColor Yellow
-        return
-    }
-    
-    $rowDatas = @()
-    # ユーザー別
-    $uniqueUsers = @($PlainResults |
-        Group-Object -Property { $_.userData.userCode } |
-        ForEach-Object { 
-            $first = $_.Group[0].userData
-            [PSCustomObject]@{
-                userCode    = $first.userCode
-                userName    = $first.userName
-                companyName = $first.companyName
-                className   = $first.className
-                rankName    = $first.rankName
-            }
-        })
-    
-    $rowData = @()
-    $rowData += "受講者ID"
-    $rowData += "会社名"
-    foreach ($testData in $TestDatas) {
-        $rowData += $testData.testName
-    }
-    $rowDatas += ,$rowData
-    
-    foreach ($uniqueUser in $uniqueUsers) {
-        $rowData = @()
-        
-        $rowData += $uniqueUser.userCode
-        $rowData += $uniqueUser.companyName
-        $userTestResults = $PlainResults | Where-Object { $_.userData.userCode -eq $uniqueUser.userCode }
-        
-        foreach ($testData in $TestDatas) {
-            $testResult = $userTestResults | Where-Object { $_.testName -eq $testData.testName } | Select-Object -First 1 -ExpandProperty testResult
-            
-            if ($testResult){
-                $rowData += $testResult.score
-            } else {
-                $rowData += ""
-            }
-        }
-        $rowDatas += ,$rowData
-    }
-    
-    # Write-Message $rowDatas -VarName "rowDatas" -Type "Info" -ForegroundColor Green
-    
-    Export-ArrayToFile $rowDatas $OutputFilePath
-}
-
-
-
-function Export-FileTotal {
-    param(
-        [array]$TotalSummaryResults,
-        [string]$OutputFilePath
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    if($TotalSummaryResults.Count -eq 0){
-        Write-Message "Skip [$OutputFilePath]" -VarName "message" -Type "Info" -ForegroundColor Yellow
-        return
-    }
-    $viewItems = @("テスト名","予定数","実施数","合格数","不合格数","修了率","平均点","中央値","最高点")
-    
-    $rowDatas = @()
-    
-    $rowData = @()
-    foreach ($viewItem in $viewItems) {
-        $rowData += $viewItem
-    }
-    $rowDatas += ,$rowData
-    
-    foreach ($totalResult in $TotalSummaryResults) {
-        $rowData = @()
-        foreach ($viewItem in $viewItems) {
-            $rowData += $totalResult.$viewItem
-        }
-        $rowDatas += ,$rowData
-    }
-    
-    # Write-Message $rowDatas -VarName "rowDatas" -Type "Info" -ForegroundColor Green
-    
-    Export-ArrayToFile $rowDatas $OutputFilePath
-}
-
-
 function Export-UserSummaryData {
     param(
         $Workbook,
@@ -819,13 +720,7 @@ $resultDatas = Create-ResultDatas -ResultRootDir $ResultRootDir -TargetGroupName
 $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
 # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-テスト結果.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
-
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-ユーザ別.txt"
-Export-FileUser -PlainResults $collectResultDatas.plainResults -TestDatas $testDatas -OutputFilePath $outputFilePath
-
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-全体.txt"
-Export-FileTotal -TotalSummaryResults $collectResultDatas.totalSummaryResults -OutputFilePath $outputFilePath
 

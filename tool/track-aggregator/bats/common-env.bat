@@ -8,9 +8,11 @@ set "OutputRootDir=%~dp0..\output"
 
 set "TemplateRootDir=%~dp0..\template"
 
-set "OutputTestCollectDir=%OutputRootDir%\01_テスト集計結果"
+set "OutputTestCollectDir=%OutputRootDir%\集計結果"
 
-set "OutputSurveyCollectDir=%OutputRootDir%\02_アンケート集計結果"
+set "OutputSurveyCollectDir=%OutputRootDir%\集計結果"
+
+set "OutputCombineCollectDir=%OutputRootDir%\集計結果"
 
 set "AutoHotkeyExePath=%~dp0..\AutoHotkey\v2\AutoHotkey.exe"
 set "AutoHotkeyScriptPath=%~dp0..\AutoHotkey\scripts\download.ahk"
