@@ -12,6 +12,7 @@ set "OutputRootDir=%~dp0..\output"
 set "OutputTestCollectDir=%OutputRootDir%\集計結果"
 set "OutputSurveyCollectDir=%OutputRootDir%\集計結果"
 set "OutputCombineCollectDir=%OutputRootDir%\集計結果"
+set "OutputYearComparisonCollectDir=%OutputRootDir%\集計結果"
 
 set "PassScore=80"
 

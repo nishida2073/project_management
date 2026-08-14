@@ -5,31 +5,36 @@ set "MyName=%~nx0"
 
 call "%~dp0common-env.bat"
 
-set "SCRIPT_PATH=%~dp0collect-survey-result.ps1"
+set "SCRIPT_PATH=%~dp0collect-year-comparison-result.ps1"
 
-set "OutputTargetDir=%OutputSurveyCollectDir%"
-set "TemplateFilePath=%TemplateRootDir%\アンケート結果.xlsx"
+set "TargetYear=2026"
+set "ComparePeriod=1"
+set "OutputTargetDir=%OutputYearComparisonCollectDir%"
+set "TemplateFilePath=%TemplateRootDir%\年度比較結果.xlsx"
 
 for %%F in ("%MasterDataRootDir%\*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"
-    
+
     call "%~dp0resolve-env-file.bat" "%%~nF"
     if exist "!envFile!" (
         call "!envFile!"
-        
+
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF_.running"
-        
+
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "& '%SCRIPT_PATH%'" ^
-          "   -BaseUrl '!BaseUrl!'" ^
           "   -MasterDataFilePath '%%F'" ^
           "   -TargetGroupName '%%~nF'" ^
+          "   -TargetYear '%TargetYear%'" ^
+          "   -ComparePeriod '%ComparePeriod%'" ^
           "   -OutputRootDir '%OutputTargetDir%'" ^
           "   -TemplateFilePath '!TemplateFilePath!'" ^
-          "   -SurveyResultRootDir '%SurveyResultRootDir%';" ^
+          "   -SurveyResultRootDir '%SurveyResultRootDir%'" ^
+          "   -TestResultRootDir '%TestResultRootDir%'" ^
+          "   -PassScore '%PassScore%';" ^
           "Remove-Item -Path '!JOB_FLAG!' -Force;"
-        
+
     ) else (
         call "%~dp0message.bat" "環境設定ファイルが見つかりません: !envFile!" "Red"
     )

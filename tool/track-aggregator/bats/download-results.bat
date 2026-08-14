@@ -12,7 +12,7 @@ set "DownloadDetail=1"
 for %%F in ("%MasterDataRootDir%\*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"
     
-    set "envFile=%MasterDataRootDir%\%%~nF.bat"
+    call "%~dp0resolve-env-file.bat" "%%~nF"
     if exist "!envFile!" (
         call "!envFile!"
         
