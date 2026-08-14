@@ -78,7 +78,7 @@ function Get-CourseGroupDatas {
 function Create-YearComparisonDatas {
     param(
         $CourseGroupDatas,
-        [array]$YearSummaryDatasList  # 古い年度→新しい年度の順。各要素は @{ year = <int>; summaryDatas = <Get-YearSummaryDatasの戻り値> }
+        [array]$YearSummaryDatasList  # 新しい年度→古い年度の順。各要素は @{ year = <int>; summaryDatas = <Get-YearSummaryDatasの戻り値> }
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -112,8 +112,8 @@ function Create-YearComparisonDatas {
                 New-YearRow -GroupName $courseGroup.groupName -CourseName $courseName -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
             }
 
-            $oldestRow = $yearRows[0]
-            $newestRow = $yearRows[-1]
+            $newestRow = $yearRows[0]
+            $oldestRow = $yearRows[-1]
             $diffRow = [ordered]@{
                 groupName  = $courseGroup.groupName
                 courseName = $courseName
@@ -173,7 +173,11 @@ function Export-YearComparisonData {
 
             $rowData = @("$groupCellValue", "$courseCellValue", "$($row.yearLabel)")
             foreach ($viewItem in $viewItems) {
-                $rowData += "$($row.$viewItem)"
+                $value = $row.$viewItem
+                if ($viewItem -eq "修了率" -and $null -ne $value -and $value -ne "") {
+                    $value = [double]$value / 100
+                }
+                $rowData += "$value"
             }
             $rowDatas += ,$rowData
         }
@@ -279,8 +283,8 @@ $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
 $courseGroupDatas = Get-CourseGroupDatas
 
-# 古い年度→新しい年度の順で、ComparePeriod年前から現在年度までを集計する
-$yearSummaryDatasList = for ($offset = $ComparePeriod; $offset -ge 0; $offset--) {
+# 新しい年度→古い年度の順で、現在年度からComparePeriod年前までを集計する
+$yearSummaryDatasList = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
     $year = $TargetYear - $offset
     $groupName = "$baseGroupName-$year"
     [PSCustomObject]@{
