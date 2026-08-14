@@ -15,66 +15,6 @@ Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
     Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
 }
 
-$primeSurveyItems = @("S27","S1","S2","S7","S10","S13","S16","S19","S22","S25")
-
-function Create-SurveyDatas {
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$DataFilePath
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $headerMap = @{
-        '通番'   = 'surveyNo'
-        'アンケート名'     = 'surveyName'
-    }
-    return Create-MasterDatas -DataFilePath $DataFilePath -SheetIndex 3 -HeaderMap $headerMap
-}
-
-
-function Create-ResultDatas {
-    param(
-        [string]$SurveyResultRootDir,
-        [string]$TargetGroupName,
-        [array]$SurveyDatas
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-    
-    $allResultDatas = @()
-    foreach($surveyData in $SurveyDatas){
-        $surveyName = $surveyData.surveyName
-        $surveyGroupDir = Join-Path $SurveyResultRootDir $TargetGroupName
-        $surveyResultDir = Join-Path $surveyGroupDir $surveyName
-        $resultFiles = @(Get-ChildItem $surveyResultDir -Filter *.csv)
-        foreach($resultFile in $resultFiles){
-            $csv = Import-Csv $resultFile.FullName
-            foreach ($row in $csv) {
-                $obj = $row | Select-Object *
-                $obj | Add-Member -NotePropertyName surveyName -NotePropertyValue $surveyName
-                $obj | Add-Member -NotePropertyName userCode -NotePropertyValue $row.account
-                $obj | Add-Member -NotePropertyName isExecute -NotePropertyValue ($row.status -ne "NotStarted")
-                $surveyCount = ($obj.PSObject.Properties.Name -like 'surveyAnswerValue*').Count
-                $obj | Add-Member -NotePropertyName surveyCount -NotePropertyValue $surveyCount
-                for ($i = 0; $i -lt $obj.surveyCount; $i++) {
-                    $propName = "surveyAnswerValue/$i"
-                    $propValue = if ($obj.PSObject.Properties.Name -contains $propName){
-                        $obj.$propName
-                    }else {
-                        ""
-                    }
-                    $obj | Add-Member -NotePropertyName "S$i" -NotePropertyValue $propValue
-                }
-                $allResultDatas += $obj
-            }
-        }
-    }
-    # Write-Message $allResultDatas -VarName "allResultDatas" -Type "Info"
-    return $allResultDatas
-}
-
-    
 function Create-CollectResultsDatas {
     param(
         $UserDatas,
@@ -111,13 +51,13 @@ function Create-CollectResultsDatas {
     $RankNames = $UserDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) }
     
     # totalSummary
-    $totalSummarySurveyResults = Create-SummaryDataByGroup `
+    $totalSummarySurveyResults = Create-SurveySummaryDataByGroup `
         -UserDatas $UserDatas `
         -SurveyDatas $SurveyDatas `
         -ValidResultDatas $validSurveyResultDatas
     
     # companySummary
-    $companySummarySurveyResults = Create-SummaryDataByGroup `
+    $companySummarySurveyResults = Create-SurveySummaryDataByGroup `
         -GroupValues $CompanyNames `
         -GroupKey "companyName" `
         -UserDatas $UserDatas `
@@ -125,7 +65,7 @@ function Create-CollectResultsDatas {
         -ValidResultDatas $validSurveyResultDatas
     
     # classSummary
-    $classSummaryResults = Create-SummaryDataByGroup `
+    $classSummaryResults = Create-SurveySummaryDataByGroup `
         -GroupValues $ClassNames `
         -GroupKey "className" `
         -UserDatas $UserDatas `
@@ -133,7 +73,7 @@ function Create-CollectResultsDatas {
         -ValidResultDatas $validSurveyResultDatas
     
     # rankSummary
-    $rankSummaryResults = Create-SummaryDataByGroup `
+    $rankSummaryResults = Create-SurveySummaryDataByGroup `
         -GroupValues $RankNames `
         -GroupKey "rankName" `
         -UserDatas $UserDatas `
@@ -155,60 +95,6 @@ function Create-CollectResultsDatas {
 }
 
 
-function Create-SummaryDataByGroup {
-    param(
-        [array]$ValidResultDatas,
-        [array]$UserDatas,
-        [array]$SurveyDatas,
-        [array]$GroupValues,
-        [string]$GroupKey
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $results = foreach ($group in (Get-GroupedResults -UserDatas $UserDatas -ValidResultDatas $ValidResultDatas -GroupValues $GroupValues -GroupKey $GroupKey)) {
-        $groupUsers = $group.GroupUsers
-        $groupResults = $group.GroupResults
-        foreach ($surveyData in $SurveyDatas) {
-            $filtered = @(
-                $groupResults |
-                Where-Object { $_.surveyName -eq $surveyData.surveyName }
-            )
-            $planCount   = $groupUsers.Count
-            $actualCount = $filtered.Count
-            $isExecute = ($filtered.Count -ne 0)
-            $obj = [ordered]@{}
-            # total 以外のみグループキー追加
-            if ($GroupKey) {
-                $obj[$GroupKey] = $group.GroupValue
-            }
-            $obj += @{
-                surveyName  = $surveyData.surveyName
-                isExecute = $isExecute
-                planCount    = $planCount
-                actualCount  = $actualCount
-            }
-
-            # 平均
-            if ($isExecute) {
-                $surveyCount = [int]$filtered[0].surveyCount
-                $obj["surveyCount"] = $surveyCount
-                foreach ($primeSurveyItem in $primeSurveyItems) {
-                    $propValues = $filtered | Where-Object { $_.isExecute -and $_.PSObject.Properties.Name -contains $primeSurveyItem } | ForEach-Object { $_.$primeSurveyItem }
-                    $avgValue = ($propValues | Measure-Object -Average).Average
-                    if ($null -eq $avgValue) {
-                        $avgValue = ""
-                    }
-                    $obj[$primeSurveyItem] = $avgValue
-                }
-            }
-            [pscustomobject]$obj
-        }
-    }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
-    return $results
-}
-
 function Export-UserPlainData {
     param(
         $Workbook,
@@ -222,7 +108,7 @@ function Export-UserPlainData {
     $newSheetNameParts = $TemplateSheetName -split "-", 2
     $newSheetNameFormat = "$($newSheetNameParts[0])-{0}-$($newSheetNameParts[1])"
 
-    $pickedSurveyItems = $primeSurveyItems
+    $pickedSurveyItems = Get-PrimeSurveyItems
 
     foreach ($surveyData in $SurveyDatas) {
         $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
@@ -331,7 +217,7 @@ function Export-GroupSummaryData {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $pickedSurveyItems = @("planCount","actualCount") + $primeSurveyItems
+    $pickedSurveyItems = @("planCount","actualCount") + (Get-PrimeSurveyItems)
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
 
     Export-GroupSummaryDataCore `
@@ -357,7 +243,7 @@ function Export-UserSummaryData {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $pickedSurveyItems = $primeSurveyItems
+    $pickedSurveyItems = Get-PrimeSurveyItems
     $columnsPerSet = $pickedSurveyItems.Count
 
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
@@ -518,7 +404,7 @@ $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
 Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas  -NameProperty "surveyName"
 
-$surveyResultDatas = Create-ResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+$surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
 # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info" 
 
 $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas

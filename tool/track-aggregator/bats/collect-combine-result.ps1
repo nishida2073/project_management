@@ -15,237 +15,6 @@ Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
     Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
 }
 
-$primeSurveyItems = @("S27","S1","S2","S7","S10","S13","S16","S19","S22","S25")
-
-function Create-SurveyDatas {
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$DataFilePath
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $headerMap = @{
-        '通番'   = 'surveyNo'
-        'アンケート名'     = 'surveyName'
-    }
-    return Create-MasterDatas -DataFilePath $DataFilePath -SheetIndex 3 -HeaderMap $headerMap
-}
-
-
-function Create-ResultDatas {
-    param(
-        [string]$SurveyResultRootDir,
-        [string]$TargetGroupName,
-        [array]$SurveyDatas
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $allResultDatas = @()
-    foreach($surveyData in $SurveyDatas){
-        $surveyName = $surveyData.surveyName
-        $surveyGroupDir = Join-Path $SurveyResultRootDir $TargetGroupName
-        $surveyResultDir = Join-Path $surveyGroupDir $surveyName
-        $resultFiles = @(Get-ChildItem $surveyResultDir -Filter *.csv)
-        foreach($resultFile in $resultFiles){
-            $csv = Import-Csv $resultFile.FullName
-            foreach ($row in $csv) {
-                $obj = $row | Select-Object *
-                $obj | Add-Member -NotePropertyName surveyName -NotePropertyValue $surveyName
-                $obj | Add-Member -NotePropertyName userCode -NotePropertyValue $row.account
-                $obj | Add-Member -NotePropertyName isExecute -NotePropertyValue ($row.status -ne "NotStarted")
-                $surveyCount = ($obj.PSObject.Properties.Name -like 'surveyAnswerValue*').Count
-                $obj | Add-Member -NotePropertyName surveyCount -NotePropertyValue $surveyCount
-                for ($i = 0; $i -lt $obj.surveyCount; $i++) {
-                    $propName = "surveyAnswerValue/$i"
-                    $propValue = if ($obj.PSObject.Properties.Name -contains $propName){
-                        $obj.$propName
-                    }else {
-                        ""
-                    }
-                    $obj | Add-Member -NotePropertyName "S$i" -NotePropertyValue $propValue
-                }
-                $allResultDatas += $obj
-            }
-        }
-    }
-    # Write-Message $allResultDatas -VarName "allResultDatas" -Type "Info"
-    return $allResultDatas
-}
-
-
-function Create-TestDatas {
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$DataFilePath
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $headerMap = @{
-        '通番'   = 'testNo'
-        'テスト名'     = 'testName'
-    }
-    return Create-MasterDatas -DataFilePath $DataFilePath -SheetIndex 2 -HeaderMap $headerMap
-}
-
-
-function Create-TestResultDatas {
-    param(
-        [string]$TestResultRootDir,
-        [string]$TargetGroupName,
-        [array]$TestDatas
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $allResultDatas = @()
-    foreach($testData in $TestDatas){
-        $testName = $testData.testName
-        $testGroupDir = Join-Path $TestResultRootDir $TargetGroupName
-        $testResultDir = Join-Path $testGroupDir $testName
-        $resultFiles = @(Get-ChildItem $testResultDir -Filter *.csv)
-        foreach($resultFile in $resultFiles){
-            $csv = Import-Csv $resultFile.FullName
-            foreach ($row in $csv) {
-                $obj = $row | Select-Object *
-                $obj | Add-Member -NotePropertyName testName -NotePropertyValue $testName
-                $obj | Add-Member -NotePropertyName userCode -NotePropertyValue $row.account
-                $obj | Add-Member -NotePropertyName isExecute -NotePropertyValue ($row.status -ne "NotStarted")
-                if (-not ($obj.PSObject.Properties.Name -contains 'score')) {
-                    $challengeSuccessfulTestcases = [int]$row.challengeSuccessfulTestcases
-                    $challengeTotalTestcases = [int]$row.challengeTotalTestcases
-                    $score = if ($challengeTotalTestcases -ne 0) {
-                        ($challengeSuccessfulTestcases / $challengeTotalTestcases) * 100
-                    } else {
-                        ""
-                    }
-                    $obj | Add-Member -NotePropertyName score -NotePropertyValue $score
-                }
-                if (-not ($obj.PSObject.Properties.Name -contains 'questionCount')) {
-                    $challengeTotalTestcases = [int]$row.challengeTotalTestcases
-                    $obj | Add-Member -NotePropertyName questionCount -NotePropertyValue $challengeTotalTestcases
-                }
-                for ($i = 1; $i -le $obj.questionCount; $i++) {
-                    $propName = "q$i/score"
-                    $propValue = if ($obj.PSObject.Properties.Name -contains $propName){
-                        $obj.$propName
-                    }else {
-                        ""
-                    }
-                    $obj | Add-Member -NotePropertyName "Q$i" -NotePropertyValue $propValue
-                }
-                $obj | Add-Member -NotePropertyName isPass -NotePropertyValue ([int]$obj.score -ge $PassScore)
-                $allResultDatas += $obj
-            }
-        }
-    }
-    # Write-Message $allResultDatas -VarName "allResultDatas" -Type "Info" -ForegroundColor Green
-    return $allResultDatas
-}
-
-
-function Get-TestMedian {
-    param(
-        [array]$values
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-
-    $sorted = $values |
-        Where-Object { $_ -ne $null -and $_ -ne "" } |
-        ForEach-Object { [double]$_ } |
-        Sort-Object
-    $count = $sorted.Count
-    if ($count -eq 0) { return $null }
-    $mid = [math]::Floor($count / 2)
-
-    $median = if ($count % 2 -eq 1) {
-        $sorted[$mid]
-    }
-    else {
-        ($sorted[$mid - 1] + $sorted[$mid]) / 2
-    }
-
-    return $median
-}
-
-
-function Create-TestSummaryDataByGroup {
-    param(
-        [array]$ValidResultDatas,
-        [array]$UserDatas,
-        [array]$TestDatas,
-        [array]$GroupValues,
-        [string]$GroupKey
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $results = foreach ($group in (Get-GroupedResults -UserDatas $UserDatas -ValidResultDatas $ValidResultDatas -GroupValues $GroupValues -GroupKey $GroupKey)) {
-        $groupUsers = $group.GroupUsers
-        $groupResults = $group.GroupResults
-        foreach ($testData in $TestDatas) {
-            $filtered = @(
-                $groupResults |
-                Where-Object { $_.testName -eq $testData.testName }
-            )
-            $planCount   = $groupUsers.Count
-            $actualCount = $filtered.Count
-            $passedCount = @($filtered | Where-Object isPass).Count
-            if ($actualCount -eq 0) {
-                $passedPercentage = 0
-            } else {
-                $passedPercentage = ($passedCount / $actualCount) * 100
-            }
-            $scores = $filtered.score | ForEach-Object { [int]$_ }
-            $stats  = $scores | Measure-Object -Average -Maximum -Minimum
-            $isExecute = ($filtered.Count -ne 0)
-
-            $obj = [ordered]@{}
-            if ($GroupKey) {
-                $obj[$GroupKey] = $group.GroupValue
-            }
-            $obj += @{
-                テスト名  = $testData.testName
-                testName  = $testData.testName
-                isExecute = $isExecute
-                scores    = if ($isExecute) { $scores } else { "" }
-                予定数    = $planCount
-                実施数    = $actualCount
-                合格数    = if ($isExecute) { $passedCount } else { "" }
-                不合格数  = if ($isExecute) { $actualCount - $passedCount } else { "" }
-                修了率    = if ($isExecute) { $passedPercentage } else { "" }
-                平均点    = if ($isExecute) { $stats.Average } else { "" }
-                中央値    = if ($isExecute) { Get-TestMedian $scores } else { "" }
-                最高点    = if ($isExecute) { $stats.Maximum } else { "" }
-                最低点    = if ($isExecute) { $stats.Minimum } else { "" }
-            }
-
-            # 設問正答率
-            if ($isExecute) {
-                $questionCount = [int]$filtered[0].questionCount
-                $obj["questionCount"] = $questionCount
-                for ($i = 1; $i -le $questionCount; $i++) {
-                    $propName = "Q$i"
-                    $propValues = $filtered | Where-Object { $_.isExecute -and $_.PSObject.Properties.Name -contains $propName } | ForEach-Object { $_.$propName }
-                    $avgValue = ($propValues | Measure-Object -Average).Average
-                    if ($null -eq $avgValue) {
-                        $avgValue = 0
-                    } else {
-                        $avgValue = [int]($avgValue * 100)
-                    }
-                    $obj["Q$i"] = $avgValue
-                }
-            }
-            [pscustomobject]$obj
-        }
-    }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
-    return $results
-}
-
-
 function Create-CollectResultsDatas {
     param(
         $UserDatas,
@@ -299,7 +68,7 @@ function Create-CollectResultsDatas {
     $RankNames = $UserDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) }
 
     # totalSummary
-    $totalSummarySurveyResults = Create-SummaryDataByGroup `
+    $totalSummarySurveyResults = Create-SurveySummaryDataByGroup `
         -UserDatas $UserDatas `
         -SurveyDatas $SurveyDatas `
         -ValidResultDatas $validSurveyResultDatas
@@ -336,61 +105,6 @@ function Create-CollectResultsDatas {
 }
 
 
-function Create-SummaryDataByGroup {
-    param(
-        [array]$ValidResultDatas,
-        [array]$UserDatas,
-        [array]$SurveyDatas,
-        [array]$GroupValues,
-        [string]$GroupKey
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $results = foreach ($group in (Get-GroupedResults -UserDatas $UserDatas -ValidResultDatas $ValidResultDatas -GroupValues $GroupValues -GroupKey $GroupKey)) {
-        $groupUsers = $group.GroupUsers
-        $groupResults = $group.GroupResults
-        foreach ($surveyData in $SurveyDatas) {
-            $filtered = @(
-                $groupResults |
-                Where-Object { $_.surveyName -eq $surveyData.surveyName }
-            )
-            $planCount   = $groupUsers.Count
-            $actualCount = $filtered.Count
-            $isExecute = ($filtered.Count -ne 0)
-            $obj = [ordered]@{}
-            # total 以外のみグループキー追加
-            if ($GroupKey) {
-                $obj[$GroupKey] = $group.GroupValue
-            }
-            $obj += @{
-                surveyName  = $surveyData.surveyName
-                isExecute = $isExecute
-                planCount    = $planCount
-                actualCount  = $actualCount
-            }
-
-            # 平均
-            if ($isExecute) {
-                $surveyCount = [int]$filtered[0].surveyCount
-                $obj["surveyCount"] = $surveyCount
-                foreach ($primeSurveyItem in $primeSurveyItems) {
-                    $propValues = $filtered | Where-Object { $_.isExecute -and $_.PSObject.Properties.Name -contains $primeSurveyItem } | ForEach-Object { $_.$primeSurveyItem }
-                    $avgValue = ($propValues | Measure-Object -Average).Average
-                    if ($null -eq $avgValue) {
-                        $avgValue = ""
-                    }
-                    $obj[$primeSurveyItem] = $avgValue
-                }
-            }
-            [pscustomobject]$obj
-        }
-    }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
-    return $results
-}
-
-
 function Export-CombineSummaryData {
     param(
         $Workbook,
@@ -400,7 +114,7 @@ function Export-CombineSummaryData {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $pickedSurveyItems = $primeSurveyItems
+    $pickedSurveyItems = Get-PrimeSurveyItems
 
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
 
@@ -611,7 +325,7 @@ $testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
 $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 # Write-Message $testDatas -VarName "testDatas" -Type "Info"
 
-$testResultDatas = Create-TestResultDatas -TestResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas
+$testResultDatas = Create-TestResultDatas -TestResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
 # Write-Message $testResultDatas -VarName "testResultDatas" -Type "Info"
 
 $testUserCodes = $userDatas.userCode
@@ -629,7 +343,7 @@ $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
 # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
 
-$surveyResultDatas = Create-ResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+$surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
 # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info"
 
 $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas -TestDatas $testDatas -ValidTestResultDatas $validTestResultDatas -TotalTestResultsDatas $totalTestResultsDatas
