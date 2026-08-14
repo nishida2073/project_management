@@ -7,12 +7,8 @@ call "%~dp0common-env.bat"
 
 set "SCRIPT_PATH=%~dp0collect-combine-result.ps1"
 
-set "MasterDataRootDir=%MasterDataRootDir%"
-set "SurveyResultRootDir=%ResultRootDir%\02_アンケート"
 set "OutputTargetDir=%OutputCombineCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\統合結果.xlsx"
-set "TestResultRootDir=%ResultRootDir%\01_テスト"
-set "PassScore=80"
 
 for %%F in ("%MasterDataRootDir%\*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"

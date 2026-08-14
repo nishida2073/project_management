@@ -7,8 +7,6 @@ call "%~dp0common-env.bat"
 
 set "SCRIPT_PATH=%~dp0collect-survey-result.ps1"
 
-set "MasterDataRootDir=%MasterDataRootDir%"
-set "SurveyResultRootDir=%ResultRootDir%\02_アンケート"
 set "OutputTargetDir=%OutputSurveyCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\アンケート結果.xlsx"
 

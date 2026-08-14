@@ -23,7 +23,7 @@ for %%F in (
     
     call .\bats\message.bat "Please wait..." "Green"
     
-    call "%%F" > "%LOG_DIR%\%%~nF-log.txt"
+    call "%%F" > "%LOG_DIR%\%%~nF.log"
     
     call .\bats\message.bat "Finished %%~nxF"
 )

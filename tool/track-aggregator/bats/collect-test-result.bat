@@ -7,11 +7,8 @@ call "%~dp0common-env.bat"
 
 set "SCRIPT_PATH=%~dp0collect-test-result.ps1"
 
-set "MasterDataRootDir=%MasterDataRootDir%"
-set "ResultRootDir=%ResultRootDir%\01_テスト"
 set "OutputTargetDir=%OutputTestCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\テスト結果.xlsx"
-set "PassScore=80"
 set "ShowDetail=1"
 
 for %%F in ("%MasterDataRootDir%\*.xlsx") do (
@@ -32,7 +29,7 @@ for %%F in ("%MasterDataRootDir%\*.xlsx") do (
           "   -AutoHotkeyScriptPath '%AutoHotkeyScriptPath%'" ^
           "   -TargetGroupName '%%~nF'" ^
           "   -OutputRootDir '%OutputTargetDir%'" ^
-          "   -ResultRootDir '!ResultRootDir!'" ^
+          "   -ResultRootDir '!TestResultRootDir!'" ^
           "   -TemplateFilePath '!TemplateFilePath!'" ^
           "   -PassScore '%PassScore%'" ^
           "   -ShowDetail '%ShowDetail%';" ^
