@@ -15,6 +15,7 @@ echo.
 
 for %%F in (
     ".\bats\excel-clean.bat"
+    ".\bats\download-results.bat"
     ".\bats\collect-test-result.bat"
     ".\bats\collect-survey-result.bat"
     ".\bats\collect-combine-result.bat"

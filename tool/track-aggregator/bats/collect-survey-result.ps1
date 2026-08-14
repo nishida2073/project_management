@@ -1,8 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
     [string]$MasterDataFilePath,
-    [string]$AutoHotkeyExePath,
-    [string]$AutoHotkeyScriptPath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$TemplateFilePath,
@@ -401,8 +399,6 @@ $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
 $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
 # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
-
-Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas  -NameProperty "surveyName"
 
 $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
 # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info" 

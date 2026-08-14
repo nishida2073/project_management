@@ -1,8 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
     [string]$MasterDataFilePath,
-    [string]$AutoHotkeyExePath,
-    [string]$AutoHotkeyScriptPath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$ResultRootDir,
@@ -539,8 +537,6 @@ $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
 $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
 # Write-Message $userDatas -VarName "userDatas" -Type "Info"
-
-Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $ResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $showDetail
 
 $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
 # Write-Message $resultDatas -VarName "resultDatas" -Type "Info"

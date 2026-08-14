@@ -25,8 +25,6 @@ for %%F in ("%MasterDataRootDir%\*.xlsx") do (
           "& '%SCRIPT_PATH%'" ^
           "   -BaseUrl '!BaseUrl!'" ^
           "   -MasterDataFilePath '%%F'" ^
-          "   -AutoHotkeyExePath '%AutoHotkeyExePath%'" ^
-          "   -AutoHotkeyScriptPath '%AutoHotkeyScriptPath%'" ^
           "   -TargetGroupName '%%~nF'" ^
           "   -OutputRootDir '%OutputTargetDir%'" ^
           "   -ResultRootDir '!TestResultRootDir!'" ^
