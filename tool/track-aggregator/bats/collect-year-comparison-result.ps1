@@ -148,58 +148,85 @@ function Export-YearComparisonData {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-
     $pickedSurveyItems = Get-PrimeSurveyItems
     $viewItems = @("平均点", "中央値", "修了率") + $pickedSurveyItems
 
-    $dataStartCell = Get-CellByKey $sheet "{コースグループデータ}" -ErrorOnMissing
-    $rowStartIndex = $dataStartCell.Row
+    function Write-YearComparisonRows {
+        param($Sheet, $Rows)
 
-    # 1コースにつき「各年度」＋「差分」の行を1セットとして展開する（行数はComparePeriodに応じて可変）
-    $courseCount = [int]($YearComparisonDatas.Count / $RowsPerCourse)
-    # 行のコピー
-    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -RowsPerSet $RowsPerCourse -TotalSets $courseCount
+        $dataStartCell = Get-CellByKey $Sheet "{コースグループデータ}" -ErrorOnMissing
+        $rowStartIndex = $dataStartCell.Row
 
-    $rowDatas = @()
-    for ($i = 0; $i -lt $YearComparisonDatas.Count; $i++) {
-        $row = $YearComparisonDatas[$i]
-        $isFirstRowOfCourse = ($i % $RowsPerCourse -eq 0)
+        # 1コースにつき「各年度」＋「差分」の行を1セットとして展開する（行数はComparePeriodに応じて可変）
+        $courseCount = [int]($Rows.Count / $RowsPerCourse)
+        # 行のコピー
+        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $RowsPerCourse -TotalSets $courseCount
 
-        # グループ名・コース名列は、コースの現在年度行（先頭行）にのみ書き込む
-        $groupCellValue = if ($isFirstRowOfCourse) { $row.groupName } else { "" }
-        $courseCellValue = if ($isFirstRowOfCourse) { $row.courseName } else { "" }
+        $rowDatas = @()
+        for ($i = 0; $i -lt $Rows.Count; $i++) {
+            $row = $Rows[$i]
+            $isFirstRowOfCourse = ($i % $RowsPerCourse -eq 0)
 
-        $rowData = @("$groupCellValue", "$courseCellValue", "$($row.yearLabel)")
-        foreach ($viewItem in $viewItems) {
-            $rowData += "$($row.$viewItem)"
-        }
-        $rowDatas += ,$rowData
-    }
+            # グループ名・コース名列は、コースの現在年度行（先頭行）にのみ書き込む
+            $groupCellValue = if ($isFirstRowOfCourse) { $row.groupName } else { "" }
+            $courseCellValue = if ($isFirstRowOfCourse) { $row.courseName } else { "" }
 
-    # データの書き込み
-    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-
-    # コースグループ列は、同じグループが連続する範囲を縦に結合する
-    $groupColumnIndex = $dataStartCell.Column
-    $mergeStartRow = $rowStartIndex
-    for ($i = 1; $i -le $YearComparisonDatas.Count; $i++) {
-        $isLastRow = ($i -eq $YearComparisonDatas.Count)
-        $groupChanged = $isLastRow -or ($YearComparisonDatas[$i].groupName -ne $YearComparisonDatas[$i - 1].groupName)
-        if ($groupChanged) {
-            $mergeEndRow = $rowStartIndex + $i - 1
-            if ($mergeEndRow -gt $mergeStartRow) {
-                $sheet.Range($sheet.Cells.Item($mergeStartRow, $groupColumnIndex), $sheet.Cells.Item($mergeEndRow, $groupColumnIndex)).Merge() | Out-Null
+            $rowData = @("$groupCellValue", "$courseCellValue", "$($row.yearLabel)")
+            foreach ($viewItem in $viewItems) {
+                $rowData += "$($row.$viewItem)"
             }
-            $mergeStartRow = $rowStartIndex + $i
+            $rowDatas += ,$rowData
         }
+
+        # データの書き込み
+        Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
+
+        # コースグループ列は、同じグループが連続する範囲を縦に結合する
+        $groupColumnIndex = $dataStartCell.Column
+        $mergeStartRow = $rowStartIndex
+        for ($i = 1; $i -le $Rows.Count; $i++) {
+            $isLastRow = ($i -eq $Rows.Count)
+            $groupChanged = $isLastRow -or ($Rows[$i].groupName -ne $Rows[$i - 1].groupName)
+            if ($groupChanged) {
+                $mergeEndRow = $rowStartIndex + $i - 1
+                if ($mergeEndRow -gt $mergeStartRow) {
+                    $Sheet.Range($Sheet.Cells.Item($mergeStartRow, $groupColumnIndex), $Sheet.Cells.Item($mergeEndRow, $groupColumnIndex)).Merge() | Out-Null
+                }
+                $mergeStartRow = $rowStartIndex + $i
+            }
+        }
+
+        # 初期セル設定
+        Set-SheetFirstCell -Sheet $Sheet
+
+        # オートフィット
+        Set-AutoFit $Sheet
     }
 
-    # 初期セル設定
-    Set-SheetFirstCell -Sheet $sheet
+    # コースグループごとに行をまとめる（出現順を保持）
+    $groupNames = @()
+    $rowsByGroup = [ordered]@{}
+    foreach ($row in $YearComparisonDatas) {
+        if (-not $rowsByGroup.Contains($row.groupName)) {
+            $groupNames += $row.groupName
+            $rowsByGroup[$row.groupName] = @()
+        }
+        $rowsByGroup[$row.groupName] += $row
+    }
 
-    # オートフィット
-    Set-AutoFit $sheet
+    # グループ別シートを、テンプレートのマーカーが残っているうちに先に作成する
+    foreach ($groupName in $groupNames) {
+        $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
+        $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
+        $newSheet = $Workbook.ActiveSheet
+        $newSheet.Name = "$TemplateSheetName-$groupName"
+
+        Write-YearComparisonRows -Sheet $newSheet -Rows $rowsByGroup[$groupName]
+    }
+
+    # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
+    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
+    Write-YearComparisonRows -Sheet $sheet -Rows $YearComparisonDatas
 }
 
 
