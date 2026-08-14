@@ -174,99 +174,96 @@ function Export-ExecutionStatusData {
 
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
 
-    # 名称でテストとアンケートを対にして並べる（同名なら テスト列→アンケート列 の順で隣接させる）
-    $itemNames = [ordered]@{}
+    $columnsPerSet = 2 # テスト・アンケートの2列1セット
+
+    # 名称でテストとアンケートを対にした「コース」の一覧（テスト優先の順で並べる）
+    $courseNames = [ordered]@{}
     foreach ($testData in $TestDatas) {
-        if (-not $itemNames.Contains($testData.testName)) { $itemNames[$testData.testName] = $true }
+        if (-not $courseNames.Contains($testData.testName)) { $courseNames[$testData.testName] = $true }
     }
     foreach ($surveyData in $SurveyDatas) {
-        if (-not $itemNames.Contains($surveyData.surveyName)) { $itemNames[$surveyData.surveyName] = $true }
+        if (-not $courseNames.Contains($surveyData.surveyName)) { $courseNames[$surveyData.surveyName] = $true }
     }
-    $columnSpecs = @()
-    foreach ($itemName in $itemNames.Keys) {
-        if ($TestDatas.testName -contains $itemName) {
-            $columnSpecs += [pscustomobject]@{ Type = "Test"; Name = $itemName }
-        }
-        if ($SurveyDatas.surveyName -contains $itemName) {
-            $columnSpecs += [pscustomobject]@{ Type = "Survey"; Name = $itemName }
-        }
-    }
+    $courseNameList = @($courseNames.Keys)
 
-    $dataStartCell = Get-CellByKey $sheet "{実施データ}" -ErrorOnMissing
-    $columsStartIndex = $dataStartCell.Column
-    # 列のコピー
-    Expand-ColumnsFromTemplate -Sheet $sheet -TemplateStartColumn $columsStartIndex -TotalSets $columnSpecs.Count -ColumnsPerSet 1
+    $courseDataCell = Get-CellByKey $sheet "{コースデータ}" -ErrorOnMissing
+    $columsStartIndex = $courseDataCell.Column
+    # 列のコピー（コースごとに テスト・アンケート の2列セット）
+    Expand-ColumnsFromTemplate -Sheet $sheet -TemplateStartColumn $columsStartIndex -TotalSets $courseNameList.Count -ColumnsPerSet $columnsPerSet
 
     $headData = @()
-    foreach ($columnSpec in $columnSpecs) {
-        if ($columnSpec.Type -eq "Test") {
-            $headData += "$($columnSpec.Name)（テスト）"
-        } else {
-            $headData += "$($columnSpec.Name)（アンケート）"
-        }
+    foreach ($courseName in $courseNameList) {
+        $headData += $courseName
+        $headData += [string[]]::new($columnsPerSet - 1)
     }
     $headDatas = ,$headData
-    Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
+    Write-BodyDatas -StartCell $courseDataCell -Datas $headDatas
+
+    $userDataCell = Get-CellByKey $sheet "{ユーザーデータ}" -ErrorOnMissing
+    $statusDataCell = Get-CellByKey $sheet "{実施データ}" -ErrorOnMissing
 
     # ユーザ別
-    $rowDatas = @()
+    $userRowDatas = @()
+    $statusRowDatas = @()
     foreach ($userData in $UserDatas) {
-        $rowData = @()
-        $rowData += $userData.userCode
-        $rowData += $userData.userName
-        $rowData += $userData.companyName
-        $rowData += $userData.className
-        $rowData += $userData.rankName
+        $userRowDatas += ,@($userData.userCode, $userData.userName, $userData.companyName, $userData.className, $userData.rankName)
 
         $userUrl = "$BaseUrl/k/#/people/user/$($userData.userCode)"
-
         $userTestResults = @($PlainTestResults | Where-Object { $_.userCode -eq $userData.userCode })
         $userSurveyResults = @($PlainSurveyResults | Where-Object { $_.userCode -eq $userData.userCode })
 
-        foreach ($columnSpec in $columnSpecs) {
-            if ($columnSpec.Type -eq "Test") {
-                $result = $userTestResults | Where-Object { $_.testName -eq $columnSpec.Name } | Select-Object -First 1
-                if ($result -and $result.isExecute) {
-                    if ($result.testResult.isPass) {
-                        $rowData += "実施済み"
+        $statusRow = @()
+        foreach ($courseName in $courseNameList) {
+            if ($TestDatas.testName -notcontains $courseName) {
+                $statusRow += ""
+            } else {
+                $testResult = $userTestResults | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
+                if ($testResult -and $testResult.isExecute) {
+                    if ($testResult.testResult.isPass) {
+                        $statusRow += "実施済み"
                     } else {
-                        $rowData += '=HYPERLINK("' + $userUrl + '","督促（不合格）")'
+                        $statusRow += '=HYPERLINK("' + $userUrl + '","督促（不合格）")'
                     }
                 } else {
-                    $rowData += '=HYPERLINK("' + $userUrl + '","督促（未実施）")'
+                    $statusRow += '=HYPERLINK("' + $userUrl + '","督促（未実施）")'
                 }
+            }
+
+            if ($SurveyDatas.surveyName -notcontains $courseName) {
+                $statusRow += ""
             } else {
-                $result = $userSurveyResults | Where-Object { $_.surveyName -eq $columnSpec.Name } | Select-Object -First 1
-                if ($result -and $result.isExecute) {
-                    $rowData += "実施済み"
+                $surveyResult = $userSurveyResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
+                if ($surveyResult -and $surveyResult.isExecute) {
+                    $statusRow += "実施済み"
                 } else {
-                    $rowData += '=HYPERLINK("' + $userUrl + '","督促（未実施）")'
+                    $statusRow += '=HYPERLINK("' + $userUrl + '","督促（未実施）")'
                 }
             }
         }
-        $rowDatas += ,$rowData
+        $statusRowDatas += ,$statusRow
     }
-    if ($rowDatas.Count -eq 0) {
-        $rowDatas += ,@("")
+    if ($userRowDatas.Count -eq 0) {
+        $userRowDatas += ,@("")
+        $statusRowDatas += ,@("")
     }
 
-    $dataStartCell = Get-CellByKey $sheet "{ユーザーデータ}" -ErrorOnMissing
-    $rowStartIndex = $dataStartCell.Row
-    $columsStartIndex = $dataStartCell.Column
+    $rowStartIndex = $userDataCell.Row
 
     # 行のコピー
-    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
+    Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $userRowDatas.Count
 
     # データの書き込み
-    Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
+    Write-BodyDatas -StartCell $userDataCell -Datas $userRowDatas
+    Write-BodyDatas -StartCell $statusDataCell -Datas $statusRowDatas
 
     # 初期セル設定
     Set-SheetFirstCell -Sheet $sheet
 
     # オートフィルター
+    $lastColumnIndex = $statusDataCell.Column + $statusRowDatas[0].Count - 1
     $headerRange = $sheet.Range(
-        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
-        $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
+        $sheet.Cells.Item($rowStartIndex - 1, $userDataCell.Column),
+        $sheet.Cells.Item($rowStartIndex - 1, $lastColumnIndex)
     )
     Set-AutoFilter $headerRange
 
