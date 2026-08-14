@@ -7,12 +7,10 @@ call "%~dp0common-env.bat"
 
 set "SCRIPT_PATH=%~dp0collect-year-comparison-result.ps1"
 
-set "TargetYear=2026"
-set "ComparePeriod=1"
 set "OutputTargetDir=%OutputYearComparisonCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\”N“x”äŠrŒ‹‰Ê.xlsx"
 
-for %%F in ("%MasterDataRootDir%\*.xlsx") do (
+for /f "delims=" %%F in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"
 
     call "%~dp0resolve-env-file.bat" "%%~nF"
@@ -45,7 +43,7 @@ call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for %%F in ("%MasterDataRootDir%\*.xlsx") do (
+for /f "delims=" %%F in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
     set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )

@@ -16,8 +16,8 @@ Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
     Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
 }
 
-# TargetGroupName（例: 地域共催-2026）から年度を除いたベース名を求める
-$baseGroupName = $TargetGroupName -replace "-$TargetYear$", ""
+# TargetGroupName（例: 地域共催-2026）から年度を除いたベース名を求める（TargetYearの値には依存させない）
+$baseGroupName = $TargetGroupName -replace "-\d{4}$", ""
 
 # ComparePeriod年前から現在年度までの各年度分＋差分行で1コースあたりの行数を決める
 $rowsPerCourse = $ComparePeriod + 2
@@ -265,7 +265,7 @@ $yearSummaryDatasList = for ($offset = $ComparePeriod; $offset -ge 0; $offset--)
 $yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList
 # Write-Message $yearComparisonDatas -VarName "yearComparisonDatas" -Type "Info"
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-年度比較結果.xlsx"
+$outputFilePath = Join-Path $OutputRootDir "$baseGroupName-$TargetYear-年度比較結果.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
 Export-Excel -YearComparisonDatas $yearComparisonDatas -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
