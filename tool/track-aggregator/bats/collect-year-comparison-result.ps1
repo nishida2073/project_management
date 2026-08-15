@@ -8,8 +8,7 @@
     [string]$SurveyResultRootDir,
     [string]$TestResultRootDir,
     [int]$PassScore,
-    # コースグループ定義。"グループ名:コース1,コース2;グループ名2:コース3,コース4" の形式
-    [string]$CourseGroupDefs = "",
+    [string]$CourseGroupDefs = "",     # コースグループ定義。"グループ名:コース1,コース2;グループ名2:コース3,コース4" の形式
     [string]$TargetCompanyNames = "",  # カンマ区切り。空の場合は全社を対象とする
     [string]$TargetRankNames = "",     # カンマ区切り。空の場合は全ランクを対象とする
     [string]$TargetClassNames = ""     # カンマ区切り。空の場合は全クラスを対象とする
@@ -21,13 +20,8 @@ Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
     Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
 }
 
-# TargetGroupNameは年度を含まないベース名（例: 地域共催）。年度ごとのマスタファイルは
-# 「$TargetGroupName-年度.xlsx」という命名規則を前提に、このスクリプト自身がTargetYear/ComparePeriodを
-# 使って解決する（どのファイルを読むかをバッチ側の別スクリプトに任せない）。
-
 # ComparePeriod年前から現在年度までの各年度分＋差分行で1コースあたりの行数を決める
 $rowsPerCourse = $ComparePeriod + 2
-
 
 function Get-YearSummaryDatas {
     param(
@@ -72,7 +66,7 @@ function Get-YearSummaryDatas {
 
 function Get-CourseGroupDatas {
     param(
-        [string]$CourseGroupDefs  # "グループ名:コース1,コース2;グループ名2:コース3,コース4" の形式
+        [string]$CourseGroupDefs
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
 
@@ -85,7 +79,6 @@ function Get-CourseGroupDatas {
             courseNames = $courseNames
         }
     }
-    # Write-Message $courseGroups -VarName "courseGroups" -Type "Info" -ForegroundColor Green
     return @($courseGroups)
 }
 
@@ -149,7 +142,6 @@ function Create-YearComparisonDatas {
             [pscustomobject]$diffRow
         }
     }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
     return $results
 }
 
@@ -228,8 +220,36 @@ function Create-DimensionYearComparisonDatas {
             }
         }
     }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
     return $results
+}
+
+
+function Export-GroupedComparisonSheets {
+    param($Workbook, [array]$Rows, $TemplateSheetName, [scriptblock]$WriteRows)
+
+    # コースグループごとに行をまとめる（出現順を保持）
+    $groupNames = @()
+    $rowsByGroup = [ordered]@{}
+    foreach ($row in $Rows) {
+        if (-not $rowsByGroup.Contains($row.groupName)) {
+            $groupNames += $row.groupName
+            $rowsByGroup[$row.groupName] = @()
+        }
+        $rowsByGroup[$row.groupName] += $row
+    }
+
+    # グループ別シートを、テンプレートのマーカーが残っているうちに先に作成する
+    foreach ($groupName in $groupNames) {
+        $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
+        $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
+        $newSheet = $Workbook.ActiveSheet
+        $newSheet.Name = "$TemplateSheetName-$groupName"
+        & $WriteRows $newSheet $rowsByGroup[$groupName]
+    }
+
+    # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
+    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
+    & $WriteRows $sheet $Rows
 }
 
 
@@ -289,7 +309,6 @@ function Export-DimensionYearComparisonData {
             $rowDatas += ,$rowData
         }
 
-        # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
         # コースグループ列・研修コース名列・集計軸列を、それぞれ連続する範囲で縦に結合する
@@ -297,37 +316,11 @@ function Export-DimensionYearComparisonData {
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.$DimensionKey)" }
 
-        # 初期セル設定
         Set-SheetFirstCell -Sheet $Sheet
-
-        # オートフィット
         Set-AutoFit $Sheet
     }
 
-    # コースグループごとに行をまとめる（出現順を保持）
-    $groupNames = @()
-    $rowsByGroup = [ordered]@{}
-    foreach ($row in $DimensionYearComparisonDatas) {
-        if (-not $rowsByGroup.Contains($row.groupName)) {
-            $groupNames += $row.groupName
-            $rowsByGroup[$row.groupName] = @()
-        }
-        $rowsByGroup[$row.groupName] += $row
-    }
-
-    # グループ別シートを、テンプレートのマーカーが残っているうちに先に作成する
-    foreach ($groupName in $groupNames) {
-        $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
-        $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
-        $newSheet = $Workbook.ActiveSheet
-        $newSheet.Name = "$TemplateSheetName-$groupName"
-
-        Write-DimensionYearComparisonRows -Sheet $newSheet -Rows $rowsByGroup[$groupName]
-    }
-
-    # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
-    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    Write-DimensionYearComparisonRows -Sheet $sheet -Rows $DimensionYearComparisonDatas
+    Export-GroupedComparisonSheets -Workbook $Workbook -Rows $DimensionYearComparisonDatas -TemplateSheetName $TemplateSheetName -WriteRows ${function:Write-DimensionYearComparisonRows}
 }
 
 
@@ -378,44 +371,17 @@ function Export-YearComparisonData {
             $rowDatas += ,$rowData
         }
 
-        # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
         # コースグループ列・研修コース名列を、それぞれ連続する範囲で縦に結合する
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
 
-        # 初期セル設定
         Set-SheetFirstCell -Sheet $Sheet
-
-        # オートフィット
         Set-AutoFit $Sheet
     }
 
-    # コースグループごとに行をまとめる（出現順を保持）
-    $groupNames = @()
-    $rowsByGroup = [ordered]@{}
-    foreach ($row in $YearComparisonDatas) {
-        if (-not $rowsByGroup.Contains($row.groupName)) {
-            $groupNames += $row.groupName
-            $rowsByGroup[$row.groupName] = @()
-        }
-        $rowsByGroup[$row.groupName] += $row
-    }
-
-    # グループ別シートを、テンプレートのマーカーが残っているうちに先に作成する
-    foreach ($groupName in $groupNames) {
-        $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
-        $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
-        $newSheet = $Workbook.ActiveSheet
-        $newSheet.Name = "$TemplateSheetName-$groupName"
-
-        Write-YearComparisonRows -Sheet $newSheet -Rows $rowsByGroup[$groupName]
-    }
-
-    # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
-    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    Write-YearComparisonRows -Sheet $sheet -Rows $YearComparisonDatas
+    Export-GroupedComparisonSheets -Workbook $Workbook -Rows $YearComparisonDatas -TemplateSheetName $TemplateSheetName -WriteRows ${function:Write-YearComparisonRows}
 }
 
 
@@ -446,10 +412,7 @@ function Export-Excel {
             Export-DimensionYearComparisonData -Workbook $workbook -DimensionYearComparisonDatas $dimension.Datas -RowsPerCourse $RowsPerCourse -DimensionCount $dimension.Count -DimensionKey $dimension.Key -TemplateSheetName $dimension.SheetName
         }
 
-        # 最初のシートをアクティブに
         Set-FirstVisibleSheet -Workbook $workbook
-
-        # 保存
         $workbook.SaveAs($OutputFilePath, 51)
     }
     finally {
@@ -465,10 +428,9 @@ New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyCo
 
 $courseGroupDatas = Get-CourseGroupDatas -CourseGroupDefs $CourseGroupDefs
 
-# 年度ごとに、その年度自身のマスタファイル（受講生・テスト/アンケート定義）を読み込んでおく。
-# 受講生は年度が変わると全く別人になり得るため、年度ごとに別々のロースターを持たせ、
-# 各年度の実績はその年度自身のロースターで絞り込む（他年度のuserCodeと混同しない）。
-# 該当年度のマスタファイルが無い場合は、その年度を「未実施」相当（データなし）として扱う。
+# 年度ごとに、その年度自身のマスタファイル（受講生・テスト/アンケート定義）を読み込む。
+# 受講生は年度が変わると別人になり得るため、他年度のuserCodeと混同しないよう年度ごとに分けている。
+# 該当年度のマスタファイルが無ければ、その年度は未実施（データなし）として扱う。
 $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
     $year = $TargetYear - $offset
     $yearMasterFilePath = Join-Path $MasterDataRootDir "$TargetGroupName-$year.xlsx"
@@ -496,22 +458,17 @@ $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
     }
 }
 
-# 会社名・ランク・クラスの絞り込み（カンマ区切り。未指定＝空文字の場合は全件が対象）
-# 「全体」「全社」「全ランク」「全クラス」の合計行は、この絞り込みに関わらず常に母集団全体で集計する。
-# 絞り込みが影響するのは、会社別・ランク別・クラス別シートで個別の行を作る対象の値だけ。
+# 会社名・ランク・クラスの絞り込み（カンマ区切り）。
 # 注意: 変数名をパラメーター名（$TargetCompanyNames等）と大文字小文字違いだけにすると、
-# PowerShellは変数名を大文字小文字を区別しないため同一変数とみなし、
-# 自己参照パイプライン（$x = $x | Where-Object {...}）特有の不具合でWhere-Objectのフィルタが正しく効かなくなる。
+# PowerShellは同一変数とみなし、自己参照パイプライン特有の不具合でWhere-Objectのフィルタが効かなくなる。
 # そのため意図的に別名（CompanyNameFilter等）にしている。
 $companyNameFilter = @($TargetCompanyNames -split "," | Where-Object { $_ -ne "" })
 $rankNameFilter = @($TargetRankNames -split "," | Where-Object { $_ -ne "" })
 $classNameFilter = @($TargetClassNames -split "," | Where-Object { $_ -ne "" })
 
-# 会社名・ランク・クラスの一覧（集計軸の構成）は、比較対象の全年度分のロースターを合体してから作る。
-# 現在（最新）年度のロースターだけを基準にすると、過去にしか存在しない会社・ランク・クラスの行が
-# 作られず、そのユーザーの実績が集計から漏れてしまうため。
+# 会社名・ランク・クラスの一覧は全年度分のロースターを合体してから作る。
+# 現在年度のロースターだけを基準にすると、過去にしか存在しない値の行が作られず実績が漏れる。
 $allYearsUserDatas = @($yearDataCache.userDatas | Where-Object { $_ })
-
 $rankOrder = @("S","A","B","C","D","E")
 $companyNames = if ($companyNameFilter.Count -gt 0) { @($companyNameFilter | Select-Object -Unique) } else { @($allYearsUserDatas.companyName | Select-Object -Unique) }
 $rankNames = if ($rankNameFilter.Count -gt 0) { $rankNameFilter } else { $allYearsUserDatas.rankName }
@@ -541,11 +498,9 @@ $yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
 }
 
 $yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList
-# Write-Message $yearComparisonDatas -VarName "yearComparisonDatas" -Type "Info"
 
 $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
     $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names
-    # Write-Message $dimensionDatas -VarName "$($dimensionDef.Key)YearComparisonDatas" -Type "Info"
     [PSCustomObject]@{
         Key       = $dimensionDef.Key
         Datas     = $dimensionDatas
