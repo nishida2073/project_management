@@ -260,10 +260,21 @@ function Export-DimensionYearComparisonData {
         [int]$RowsPerCourse,
         [int]$DimensionCount,
         [string]$DimensionKey,
+        [string]$DimensionHeaderName,      # このシートで使う集計軸の列見出し（例: "会社名"）
+        [string]$SourceTemplateSheetName,  # 会社別・ランク別・クラス別で共通のテンプレートシート名
         $TemplateSheetName
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+
+    # 共通テンプレートシートを複製し、この集計軸専用のシート名にリネームした上で列見出しを設定する
+    $sourceSheet = $Workbook.Worksheets.Item($SourceTemplateSheetName)
+    $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
+    $templateSheet = $Workbook.ActiveSheet
+    $templateSheet.Name = $TemplateSheetName
+
+    $dimensionNameCell = Get-CellByKey $templateSheet "{属性名}" -ErrorOnMissing
+    Write-BodyDatas -StartCell $dimensionNameCell -Datas @($DimensionHeaderName)
 
     $pickedSurveyItems = Get-PrimeSurveyItems
     $viewItems = @("平均点", "中央値", "修了率") + $pickedSurveyItems
@@ -388,7 +399,7 @@ function Export-YearComparisonData {
 function Export-Excel {
     param(
         [array]$YearComparisonDatas,
-        [array]$Dimensions,  # 各要素: @{ Key; Datas; Count; SheetName }
+        [array]$DimensionResults,  # 各要素: @{ Key; Datas; Count; SheetName; HeaderName }
         [int]$RowsPerCourse,
         [string]$OutputFilePath
     )
@@ -408,9 +419,12 @@ function Export-Excel {
 
         Export-YearComparisonData -Workbook $workbook -YearComparisonDatas $YearComparisonDatas -RowsPerCourse $RowsPerCourse -TemplateSheetName "経年比較"
 
-        foreach ($dimension in $Dimensions) {
-            Export-DimensionYearComparisonData -Workbook $workbook -DimensionYearComparisonDatas $dimension.Datas -RowsPerCourse $RowsPerCourse -DimensionCount $dimension.Count -DimensionKey $dimension.Key -TemplateSheetName $dimension.SheetName
+        # 会社別・ランク別・クラス別は共通のテンプレートシートから複製して作るため、複製元は最後に削除する
+        $sourceTemplateSheetName = "経年比較-属性別"
+        foreach ($dimensionResult in $DimensionResults) {
+            Export-DimensionYearComparisonData -Workbook $workbook -DimensionYearComparisonDatas $dimensionResult.Datas -RowsPerCourse $RowsPerCourse -DimensionCount $dimensionResult.Count -DimensionKey $dimensionResult.Key -SourceTemplateSheetName $sourceTemplateSheetName -DimensionHeaderName $dimensionResult.HeaderName -TemplateSheetName $dimensionResult.SheetName
         }
+        $workbook.Worksheets.Item($sourceTemplateSheetName).Delete()
 
         Set-FirstVisibleSheet -Workbook $workbook
         $workbook.SaveAs($OutputFilePath, 51)
@@ -477,9 +491,9 @@ $classNames = if ($classNameFilter.Count -gt 0) { @($classNameFilter | Sort-Obje
 
 # 集計軸の定義。会社別・ランク別・クラス別のシートはすべてこの定義に沿って生成される
 $dimensionDefs = @(
-    [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別" }
-    [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別" }
-    [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別" }
+    [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別";   HeaderName = "会社名" }
+    [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別"; HeaderName = "クラス" }
+    [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別"; HeaderName = "ランク" }
 )
 
 # 新しい年度→古い年度の順で、現在年度からComparePeriod年前までを集計する
@@ -502,14 +516,15 @@ $yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroup
 $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
     $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names
     [PSCustomObject]@{
-        Key       = $dimensionDef.Key
-        Datas     = $dimensionDatas
-        Count     = $dimensionDef.Names.Count + 1
-        SheetName = $dimensionDef.SheetName
+        Key        = $dimensionDef.Key
+        Datas      = $dimensionDatas
+        Count      = $dimensionDef.Names.Count + 1
+        SheetName  = $dimensionDef.SheetName
+        HeaderName = $dimensionDef.HeaderName
     }
 }
 
 $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-年度比較結果.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
-Export-Excel -YearComparisonDatas $yearComparisonDatas -Dimensions $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
+Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
