@@ -112,8 +112,9 @@ function Create-YearComparisonDatas {
                 New-YearRow -GroupName $courseGroup.groupName -CourseName $courseName -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
             }
 
+            # 差分は現在年度と、その1年前（ComparePeriodの範囲に関わらず直前の年度）との比較
             $newestRow = $yearRows[0]
-            $oldestRow = $yearRows[-1]
+            $previousRow = $yearRows[1]
             $diffRow = [ordered]@{
                 groupName  = $courseGroup.groupName
                 courseName = $courseName
@@ -121,7 +122,7 @@ function Create-YearComparisonDatas {
             }
             foreach ($viewItem in (@($testViewItems) + $pickedSurveyItems)) {
                 $currentValue  = $newestRow[$viewItem]
-                $previousValue = $oldestRow[$viewItem]
+                $previousValue = $previousRow[$viewItem]
                 $diffRow[$viewItem] = if ($null -eq $currentValue -and $null -eq $previousValue) {
                     $null
                 } else {
@@ -157,9 +158,12 @@ function Export-YearComparisonData {
         $dataStartCell = Get-CellByKey $Sheet "{コースグループデータ}" -ErrorOnMissing
         $rowStartIndex = $dataStartCell.Row
 
-        # 1コースにつき「各年度」＋「差分」の行を1セットとして展開する（行数はComparePeriodに応じて可変）
+        # テンプレートは年度行1行＋差分行1行の状態なので、まず年度行をComparePeriodに応じた行数まで増やす
+        $yearRowCount = $RowsPerCourse - 1
+        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet 1 -TotalSets $yearRowCount -InsertBeforeCopy
+
+        # 年度行＋差分行を1セットとして、コース数分だけ複製する
         $courseCount = [int]($Rows.Count / $RowsPerCourse)
-        # 行のコピー
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $RowsPerCourse -TotalSets $courseCount
 
         $rowDatas = @()
