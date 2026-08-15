@@ -301,23 +301,6 @@ function Create-RankYearComparisonDatas {
 }
 
 
-function Merge-ConsecutiveColumn {
-    param($Sheet, [int]$RowStartIndex, [array]$Rows, [int]$ColumnIndex, [scriptblock]$KeySelector)
-    $mergeStartRow = $RowStartIndex
-    for ($i = 1; $i -le $Rows.Count; $i++) {
-        $isLastRow = ($i -eq $Rows.Count)
-        $changed = $isLastRow -or ((& $KeySelector $Rows[$i]) -ne (& $KeySelector $Rows[$i - 1]))
-        if ($changed) {
-            $mergeEndRow = $RowStartIndex + $i - 1
-            if ($mergeEndRow -gt $mergeStartRow) {
-                $Sheet.Range($Sheet.Cells.Item($mergeStartRow, $ColumnIndex), $Sheet.Cells.Item($mergeEndRow, $ColumnIndex)).Merge() | Out-Null
-            }
-            $mergeStartRow = $RowStartIndex + $i
-        }
-    }
-}
-
-
 function Export-CompanyYearComparisonData {
     param(
         $Workbook,
