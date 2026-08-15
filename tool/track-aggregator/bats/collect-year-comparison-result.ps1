@@ -189,7 +189,9 @@ function Create-DimensionYearComparisonDatas {
                         $testResult   = $yearSummaryDatas.summaryDatas.totalTestSummaryResults   | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
                         $surveyResult = $yearSummaryDatas.summaryDatas.totalSurveySummaryResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
                     } else {
-                        $dimensionSummaryResults = $yearSummaryDatas.summaryDatas.dimensionSummaryResults[$DimensionKey]
+                        # summaryDatasがnull（対象年度のマスタファイルが無い）の場合、プロパティアクセスは
+                        # 安全にnullを返すが、null配列への添字アクセスは例外になるためガードする
+                        $dimensionSummaryResults = if ($yearSummaryDatas.summaryDatas) { $yearSummaryDatas.summaryDatas.dimensionSummaryResults[$DimensionKey] } else { $null }
                         $testResult   = $dimensionSummaryResults.testSummaryResults   | Where-Object { $_.testName -eq $courseName -and $_.$DimensionKey -eq $dimensionValue } | Select-Object -First 1
                         $surveyResult = $dimensionSummaryResults.surveySummaryResults | Where-Object { $_.surveyName -eq $courseName -and $_.$DimensionKey -eq $dimensionValue } | Select-Object -First 1
                     }
