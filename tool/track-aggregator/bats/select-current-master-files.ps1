@@ -4,6 +4,11 @@
     [int]$ComparePeriod
 )
 
+# どの年度のマスタファイルを実際に読むか（年度ごとの存在確認・フォールバック含む）は
+# collect-year-comparison-result.ps1自身がTargetYear/ComparePeriodを使って解決するため、
+# ここでは「年度を除いたベース名」を重複無く列挙するだけでよい。
+# ただし、TargetYear-ComparePeriod ～ TargetYear の範囲に1件もファイルが無いベース名は、
+# 対象外（今は動いていない過去のプログラム扱い）として除外する。
 $files = Get-ChildItem -Path $MasterDataRootDir -Filter *.xlsx
 
 $withYear = @()
@@ -13,19 +18,15 @@ foreach ($file in $files) {
         $withYear += [pscustomobject]@{
             BaseName = $matches[1]
             Year     = [int]$matches[2]
-            FullName = $file.FullName
         }
     } else {
-        $withoutYear += $file.FullName
+        $withoutYear += $file.BaseName
     }
 }
 
-# ベース名ごとに、TargetYear-ComparePeriod ～ TargetYear の範囲内で最も新しい年度のファイルを選ぶ
-$selectedWithYear = $withYear | Group-Object BaseName | ForEach-Object {
-    $candidates = $_.Group | Where-Object { $_.Year -ge ($TargetYear - $ComparePeriod) -and $_.Year -le $TargetYear }
-    if ($candidates) {
-        ($candidates | Sort-Object Year -Descending | Select-Object -First 1).FullName
-    }
+$selectedBaseNames = $withYear | Group-Object BaseName | ForEach-Object {
+    $hasCandidate = $_.Group | Where-Object { $_.Year -ge ($TargetYear - $ComparePeriod) -and $_.Year -le $TargetYear }
+    if ($hasCandidate) { $_.Name }
 }
 
-@($selectedWithYear) + @($withoutYear) | Where-Object { $_ }
+@($selectedBaseNames) + @($withoutYear) | Where-Object { $_ } | Select-Object -Unique

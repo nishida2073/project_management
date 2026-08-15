@@ -24,20 +24,20 @@ set "SCRIPT_PATH=%~dp0collect-year-comparison-result.ps1"
 set "OutputTargetDir=%OutputYearComparisonCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\年度比較結果.xlsx"
 
-for /f "delims=" %%F in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
-    call "%~dp0message.bat" "Start %MyName% [%%~nF]"
+for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
+    call "%~dp0message.bat" "Start %MyName% [%%G]"
 
-    call "%~dp0resolve-env-file.bat" "%%~nF"
+    call "%~dp0resolve-env-file.bat" "%%G"
     if exist "!envFile!" (
         call "!envFile!"
 
-        set "JOB_FLAG=%TEMP%\%MyName%%%~nF_.running"
+        set "JOB_FLAG=%TEMP%\%MyName%%%G_.running"
 
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "& '%SCRIPT_PATH%'" ^
-          "   -MasterDataFilePath '%%F'" ^
-          "   -TargetGroupName '%%~nF'" ^
+          "   -MasterDataRootDir '%MasterDataRootDir%'" ^
+          "   -TargetGroupName '%%G'" ^
           "   -TargetYear '%TargetYear%'" ^
           "   -ComparePeriod '%ComparePeriod%'" ^
           "   -OutputRootDir '%OutputTargetDir%'" ^
@@ -53,15 +53,15 @@ for /f "delims=" %%F in ('powershell -NoProfile -Command "& '%~dp0select-current
     ) else (
         call "%~dp0message.bat" "環境設定ファイルが見つかりません: !envFile!" "Red"
     )
-    call "%~dp0message.bat" "Finished %MyName% [%%~nF]"
+    call "%~dp0message.bat" "Finished %MyName% [%%G]"
 )
 
 call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for /f "delims=" %%F in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
-    set "JOB_FLAG=%TEMP%\%MyName%%%~nF_.running"
+for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
+    set "JOB_FLAG=%TEMP%\%MyName%%%G_.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
 if !ALL_DONE! EQU 0 (
