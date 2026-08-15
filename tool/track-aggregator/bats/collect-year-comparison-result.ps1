@@ -8,6 +8,8 @@
     [string]$SurveyResultRootDir,
     [string]$TestResultRootDir,
     [int]$PassScore,
+    # コースグループ定義。"グループ名:コース1,コース2;グループ名2:コース3,コース4" の形式
+    [string]$CourseGroupDefs = "",
     [string]$TargetCompanyNames = "",  # カンマ区切り。空の場合は全社を対象とする
     [string]$TargetRankNames = "",     # カンマ区切り。空の場合は全ランクを対象とする
     [string]$TargetClassNames = ""     # カンマ区切り。空の場合は全クラスを対象とする
@@ -69,23 +71,22 @@ function Get-YearSummaryDatas {
 
 
 function Get-CourseGroupDatas {
+    param(
+        [string]$CourseGroupDefs  # "グループ名:コース1,コース2;グループ名2:コース3,コース4" の形式
+    )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
 
-    $courseGroups = @()
-    $i = 1
-    while ($true) {
-        $groupName = [Environment]::GetEnvironmentVariable("CourseGroup${i}Name")
-        if (-not $groupName) { break }
-        $coursesRaw = [Environment]::GetEnvironmentVariable("CourseGroup${i}Courses")
-        $courseNames = @($coursesRaw -split "," | Where-Object { $_ -ne "" })
-        $courseGroups += [pscustomobject]@{
+    $courseGroups = foreach ($groupDef in ($CourseGroupDefs -split ";" | Where-Object { $_ -ne "" })) {
+        $parts = $groupDef -split ":", 2
+        $groupName = $parts[0]
+        $courseNames = if ($parts.Count -gt 1) { @($parts[1] -split "," | Where-Object { $_ -ne "" }) } else { @() }
+        [pscustomobject]@{
             groupName   = $groupName
             courseNames = $courseNames
         }
-        $i++
     }
     # Write-Message $courseGroups -VarName "courseGroups" -Type "Info" -ForegroundColor Green
-    return $courseGroups
+    return @($courseGroups)
 }
 
 
@@ -462,7 +463,7 @@ function Export-Excel {
 
 New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-$courseGroupDatas = Get-CourseGroupDatas
+$courseGroupDatas = Get-CourseGroupDatas -CourseGroupDefs $CourseGroupDefs
 
 # 年度ごとに、その年度自身のマスタファイル（受講生・テスト/アンケート定義）を読み込んでおく。
 # 受講生は年度が変わると全く別人になり得るため、年度ごとに別々のロースターを持たせ、

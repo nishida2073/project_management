@@ -30,9 +30,5 @@ set "TargetCompanyNames="
 set "TargetRankNames="
 set "TargetClassNames="
 
-set "CourseGroup1Name=ビジネス"
-set "CourseGroup1Courses=ビジネス基礎,ビジネス応用"
-set "CourseGroup2Name=IT技術基礎"
-set "CourseGroup2Courses=社会を支えるITサービス,データベース技術入門,Web技術入門"
-set "CourseGroup3Name=プログラミング"
-set "CourseGroup3Courses=アルゴリズム入門,プログラミング基礎,プログラミング応用"
+rem コースグループ定義。「グループ名:コース1,コース2」を ; で連結する形式
+set "CourseGroupDefs=ビジネス:ビジネス基礎,ビジネス応用;IT技術基礎:社会を支えるITサービス,データベース技術入門,Web技術入門;プログラミング:アルゴリズム入門,プログラミング基礎,プログラミング応用"
