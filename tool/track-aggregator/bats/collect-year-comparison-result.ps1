@@ -301,6 +301,23 @@ function Create-RankYearComparisonDatas {
 }
 
 
+function Merge-ConsecutiveColumn {
+    param($Sheet, [int]$RowStartIndex, [array]$Rows, [int]$ColumnIndex, [scriptblock]$KeySelector)
+    $mergeStartRow = $RowStartIndex
+    for ($i = 1; $i -le $Rows.Count; $i++) {
+        $isLastRow = ($i -eq $Rows.Count)
+        $changed = $isLastRow -or ((& $KeySelector $Rows[$i]) -ne (& $KeySelector $Rows[$i - 1]))
+        if ($changed) {
+            $mergeEndRow = $RowStartIndex + $i - 1
+            if ($mergeEndRow -gt $mergeStartRow) {
+                $Sheet.Range($Sheet.Cells.Item($mergeStartRow, $ColumnIndex), $Sheet.Cells.Item($mergeEndRow, $ColumnIndex)).Merge() | Out-Null
+            }
+            $mergeStartRow = $RowStartIndex + $i
+        }
+    }
+}
+
+
 function Export-CompanyYearComparisonData {
     param(
         $Workbook,
@@ -359,26 +376,10 @@ function Export-CompanyYearComparisonData {
         # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-        function Merge-ConsecutiveColumn {
-            param($ColumnIndex, [scriptblock]$KeySelector)
-            $mergeStartRow = $rowStartIndex
-            for ($i = 1; $i -le $Rows.Count; $i++) {
-                $isLastRow = ($i -eq $Rows.Count)
-                $changed = $isLastRow -or ((& $KeySelector $Rows[$i]) -ne (& $KeySelector $Rows[$i - 1]))
-                if ($changed) {
-                    $mergeEndRow = $rowStartIndex + $i - 1
-                    if ($mergeEndRow -gt $mergeStartRow) {
-                        $Sheet.Range($Sheet.Cells.Item($mergeStartRow, $ColumnIndex), $Sheet.Cells.Item($mergeEndRow, $ColumnIndex)).Merge() | Out-Null
-                    }
-                    $mergeStartRow = $rowStartIndex + $i
-                }
-            }
-        }
-
         # コースグループ列・研修コース名列・会社名列を、それぞれ連続する範囲で縦に結合する
-        Merge-ConsecutiveColumn -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
-        Merge-ConsecutiveColumn -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
-        Merge-ConsecutiveColumn -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.companyName)" }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.companyName)" }
 
         # 初期セル設定
         Set-SheetFirstCell -Sheet $Sheet
@@ -472,26 +473,10 @@ function Export-RankYearComparisonData {
         # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-        function Merge-ConsecutiveColumn {
-            param($ColumnIndex, [scriptblock]$KeySelector)
-            $mergeStartRow = $rowStartIndex
-            for ($i = 1; $i -le $Rows.Count; $i++) {
-                $isLastRow = ($i -eq $Rows.Count)
-                $changed = $isLastRow -or ((& $KeySelector $Rows[$i]) -ne (& $KeySelector $Rows[$i - 1]))
-                if ($changed) {
-                    $mergeEndRow = $rowStartIndex + $i - 1
-                    if ($mergeEndRow -gt $mergeStartRow) {
-                        $Sheet.Range($Sheet.Cells.Item($mergeStartRow, $ColumnIndex), $Sheet.Cells.Item($mergeEndRow, $ColumnIndex)).Merge() | Out-Null
-                    }
-                    $mergeStartRow = $rowStartIndex + $i
-                }
-            }
-        }
-
         # コースグループ列・研修コース名列・ランク列を、それぞれ連続する範囲で縦に結合する
-        Merge-ConsecutiveColumn -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
-        Merge-ConsecutiveColumn -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
-        Merge-ConsecutiveColumn -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.rankName)" }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.rankName)" }
 
         # 初期セル設定
         Set-SheetFirstCell -Sheet $Sheet
@@ -577,20 +562,9 @@ function Export-YearComparisonData {
         # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-        # コースグループ列は、同じグループが連続する範囲を縦に結合する
-        $groupColumnIndex = $dataStartCell.Column
-        $mergeStartRow = $rowStartIndex
-        for ($i = 1; $i -le $Rows.Count; $i++) {
-            $isLastRow = ($i -eq $Rows.Count)
-            $groupChanged = $isLastRow -or ($Rows[$i].groupName -ne $Rows[$i - 1].groupName)
-            if ($groupChanged) {
-                $mergeEndRow = $rowStartIndex + $i - 1
-                if ($mergeEndRow -gt $mergeStartRow) {
-                    $Sheet.Range($Sheet.Cells.Item($mergeStartRow, $groupColumnIndex), $Sheet.Cells.Item($mergeEndRow, $groupColumnIndex)).Merge() | Out-Null
-                }
-                $mergeStartRow = $rowStartIndex + $i
-            }
-        }
+        # コースグループ列・研修コース名列を、それぞれ連続する範囲で縦に結合する
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
 
         # 初期セル設定
         Set-SheetFirstCell -Sheet $Sheet
