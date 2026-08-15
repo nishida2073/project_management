@@ -29,9 +29,7 @@ function Get-YearSummaryDatas {
         $TestDatas,
         $SurveyDatas,
         [string]$GroupName,
-        [array]$CompanyNames,
-        [array]$RankNames,
-        [array]$ClassNames
+        [array]$Dimensions  # 各要素: @{ Key = <集計軸のプロパティ名>; Names = <値の一覧> }
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -43,28 +41,25 @@ function Get-YearSummaryDatas {
         Where-Object { $_.isExecute -and $_.userCode -in $userCodes } |
         Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
     $totalTestSummaryResults = Create-TestSummaryDataByGroup -UserDatas $UserDatas -TestDatas $TestDatas -ValidResultDatas $validTestResultDatas
-    $companyTestSummaryResults = Create-TestSummaryDataByGroup -UserDatas $UserDatas -TestDatas $TestDatas -ValidResultDatas $validTestResultDatas -GroupValues $CompanyNames -GroupKey "companyName"
-    $rankTestSummaryResults = Create-TestSummaryDataByGroup -UserDatas $UserDatas -TestDatas $TestDatas -ValidResultDatas $validTestResultDatas -GroupValues $RankNames -GroupKey "rankName"
-    $classTestSummaryResults = Create-TestSummaryDataByGroup -UserDatas $UserDatas -TestDatas $TestDatas -ValidResultDatas $validTestResultDatas -GroupValues $ClassNames -GroupKey "className"
 
     $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $GroupName -SurveyDatas $SurveyDatas
     $validSurveyResultDatas = $surveyResultDatas |
         Where-Object { $_.isExecute -and $_.userCode -in $userCodes } |
         Group-Object userCode, surveyName | ForEach-Object { $_.Group[0] }
     $totalSurveySummaryResults = Create-SurveySummaryDataByGroup -UserDatas $UserDatas -SurveyDatas $SurveyDatas -ValidResultDatas $validSurveyResultDatas
-    $companySurveySummaryResults = Create-SurveySummaryDataByGroup -UserDatas $UserDatas -SurveyDatas $SurveyDatas -ValidResultDatas $validSurveyResultDatas -GroupValues $CompanyNames -GroupKey "companyName"
-    $rankSurveySummaryResults = Create-SurveySummaryDataByGroup -UserDatas $UserDatas -SurveyDatas $SurveyDatas -ValidResultDatas $validSurveyResultDatas -GroupValues $RankNames -GroupKey "rankName"
-    $classSurveySummaryResults = Create-SurveySummaryDataByGroup -UserDatas $UserDatas -SurveyDatas $SurveyDatas -ValidResultDatas $validSurveyResultDatas -GroupValues $ClassNames -GroupKey "className"
+
+    $dimensionSummaryResults = [ordered]@{}
+    foreach ($dimension in $Dimensions) {
+        $dimensionSummaryResults[$dimension.Key] = [PSCustomObject]@{
+            testSummaryResults   = Create-TestSummaryDataByGroup -UserDatas $UserDatas -TestDatas $TestDatas -ValidResultDatas $validTestResultDatas -GroupValues $dimension.Names -GroupKey $dimension.Key
+            surveySummaryResults = Create-SurveySummaryDataByGroup -UserDatas $UserDatas -SurveyDatas $SurveyDatas -ValidResultDatas $validSurveyResultDatas -GroupValues $dimension.Names -GroupKey $dimension.Key
+        }
+    }
 
     return [PSCustomObject]@{
-        totalTestSummaryResults     = $totalTestSummaryResults
-        totalSurveySummaryResults   = $totalSurveySummaryResults
-        companyTestSummaryResults   = $companyTestSummaryResults
-        companySurveySummaryResults = $companySurveySummaryResults
-        rankTestSummaryResults      = $rankTestSummaryResults
-        rankSurveySummaryResults    = $rankSurveySummaryResults
-        classTestSummaryResults     = $classTestSummaryResults
-        classSurveySummaryResults   = $classSurveySummaryResults
+        totalTestSummaryResults   = $totalTestSummaryResults
+        totalSurveySummaryResults = $totalSurveySummaryResults
+        dimensionSummaryResults   = $dimensionSummaryResults
     }
 }
 
@@ -154,11 +149,13 @@ function Create-YearComparisonDatas {
 }
 
 
-function Create-CompanyYearComparisonDatas {
+function Create-DimensionYearComparisonDatas {
     param(
         $CourseGroupDatas,
         [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順
-        [array]$CompanyNames
+        [string]$DimensionKey,         # 行オブジェクト・集計結果上の集計軸プロパティ名（例: "companyName"）
+        [string]$AllLabel,             # 集計軸を問わない合計スコープの表示名（例: "全社"）
+        [array]$DimensionNames
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -166,90 +163,14 @@ function Create-CompanyYearComparisonDatas {
     $pickedSurveyItems = Get-PrimeSurveyItems
     $testViewItems = @("平均点", "中央値", "修了率")
 
-    function New-CompanyYearRow {
-        param($GroupName, $CourseName, $CompanyName, $YearLabel, $TestResult, $SurveyResult)
+    function New-DimensionYearRow {
+        param($GroupName, $CourseName, $DimensionKey, $DimensionValue, $YearLabel, $TestResult, $SurveyResult)
         $row = [ordered]@{
-            groupName   = $GroupName
-            courseName  = $CourseName
-            companyName = $CompanyName
-            yearLabel   = $YearLabel
-        }
-        foreach ($testViewItem in $testViewItems) {
-            $row[$testViewItem] = if ($TestResult -and $TestResult.isExecute) { $TestResult.$testViewItem } else { $null }
-        }
-        foreach ($pickedSurveyItem in $pickedSurveyItems) {
-            $row[$pickedSurveyItem] = if ($SurveyResult -and $SurveyResult.PSObject.Properties[$pickedSurveyItem]) { $SurveyResult.$pickedSurveyItem } else { $null }
-        }
-        return $row
-    }
-
-    $results = foreach ($courseGroup in $CourseGroupDatas) {
-        # コースが1件も無いグループでも、グループ名の行だけは出力する
-        $courseNamesInGroup = if ($courseGroup.courseNames.Count -eq 0) { @($null) } else { $courseGroup.courseNames }
-        foreach ($courseName in $courseNamesInGroup) {
-            # 各コースの先頭に「全社」（会社を問わない合計）のセットを追加し、その後に会社ごとのセットを続ける
-            $companyScopes = @("全社") + $CompanyNames
-            foreach ($companyName in $companyScopes) {
-                $yearRows = foreach ($yearSummaryDatas in $YearSummaryDatasList) {
-                    if ($companyName -eq "全社") {
-                        $testResult   = $yearSummaryDatas.summaryDatas.totalTestSummaryResults   | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
-                        $surveyResult = $yearSummaryDatas.summaryDatas.totalSurveySummaryResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
-                    } else {
-                        $testResult   = $yearSummaryDatas.summaryDatas.companyTestSummaryResults   | Where-Object { $_.testName -eq $courseName -and $_.companyName -eq $companyName } | Select-Object -First 1
-                        $surveyResult = $yearSummaryDatas.summaryDatas.companySurveySummaryResults | Where-Object { $_.surveyName -eq $courseName -and $_.companyName -eq $companyName } | Select-Object -First 1
-                    }
-                    New-CompanyYearRow -GroupName $courseGroup.groupName -CourseName $courseName -CompanyName $companyName -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
-                }
-
-                # 差分は現在年度と、その1年前（ComparePeriodの範囲に関わらず直前の年度）との比較
-                $newestRow = $yearRows[0]
-                $previousRow = $yearRows[1]
-                $diffRow = [ordered]@{
-                    groupName   = $courseGroup.groupName
-                    courseName  = $courseName
-                    companyName = $companyName
-                    yearLabel   = "差分"
-                }
-                foreach ($viewItem in (@($testViewItems) + $pickedSurveyItems)) {
-                    $currentValue  = $newestRow[$viewItem]
-                    $previousValue = $previousRow[$viewItem]
-                    $diffRow[$viewItem] = if ($null -eq $currentValue -and $null -eq $previousValue) {
-                        $null
-                    } else {
-                        [double]($currentValue) - [double]($previousValue)
-                    }
-                }
-
-                foreach ($yearRow in $yearRows) { [pscustomobject]$yearRow }
-                [pscustomobject]$diffRow
-            }
-        }
-    }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
-    return $results
-}
-
-
-function Create-RankYearComparisonDatas {
-    param(
-        $CourseGroupDatas,
-        [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順
-        [array]$RankNames
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $pickedSurveyItems = Get-PrimeSurveyItems
-    $testViewItems = @("平均点", "中央値", "修了率")
-
-    function New-RankYearRow {
-        param($GroupName, $CourseName, $RankName, $YearLabel, $TestResult, $SurveyResult)
-        $row = [ordered]@{
-            groupName  = $GroupName
+            groupName = $GroupName
             courseName = $CourseName
-            rankName   = $RankName
-            yearLabel  = $YearLabel
         }
+        $row[$DimensionKey] = $DimensionValue
+        $row["yearLabel"] = $YearLabel
         foreach ($testViewItem in $testViewItems) {
             $row[$testViewItem] = if ($TestResult -and $TestResult.isExecute) { $TestResult.$testViewItem } else { $null }
         }
@@ -263,29 +184,30 @@ function Create-RankYearComparisonDatas {
         # コースが1件も無いグループでも、グループ名の行だけは出力する
         $courseNamesInGroup = if ($courseGroup.courseNames.Count -eq 0) { @($null) } else { $courseGroup.courseNames }
         foreach ($courseName in $courseNamesInGroup) {
-            # 各コースの先頭に「全ランク」（ランクを問わない合計）のセットを追加し、その後にランクごとのセットを続ける
-            $rankScopes = @("全ランク") + $RankNames
-            foreach ($rankName in $rankScopes) {
+            # 各コースの先頭に集計軸を問わない合計のセットを追加し、その後に集計軸の値ごとのセットを続ける
+            $dimensionScopes = @($AllLabel) + $DimensionNames
+            foreach ($dimensionValue in $dimensionScopes) {
                 $yearRows = foreach ($yearSummaryDatas in $YearSummaryDatasList) {
-                    if ($rankName -eq "全ランク") {
+                    if ($dimensionValue -eq $AllLabel) {
                         $testResult   = $yearSummaryDatas.summaryDatas.totalTestSummaryResults   | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
                         $surveyResult = $yearSummaryDatas.summaryDatas.totalSurveySummaryResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
                     } else {
-                        $testResult   = $yearSummaryDatas.summaryDatas.rankTestSummaryResults   | Where-Object { $_.testName -eq $courseName -and $_.rankName -eq $rankName } | Select-Object -First 1
-                        $surveyResult = $yearSummaryDatas.summaryDatas.rankSurveySummaryResults | Where-Object { $_.surveyName -eq $courseName -and $_.rankName -eq $rankName } | Select-Object -First 1
+                        $dimensionSummaryResults = $yearSummaryDatas.summaryDatas.dimensionSummaryResults[$DimensionKey]
+                        $testResult   = $dimensionSummaryResults.testSummaryResults   | Where-Object { $_.testName -eq $courseName -and $_.$DimensionKey -eq $dimensionValue } | Select-Object -First 1
+                        $surveyResult = $dimensionSummaryResults.surveySummaryResults | Where-Object { $_.surveyName -eq $courseName -and $_.$DimensionKey -eq $dimensionValue } | Select-Object -First 1
                     }
-                    New-RankYearRow -GroupName $courseGroup.groupName -CourseName $courseName -RankName $rankName -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
+                    New-DimensionYearRow -GroupName $courseGroup.groupName -CourseName $courseName -DimensionKey $DimensionKey -DimensionValue $dimensionValue -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
                 }
 
                 # 差分は現在年度と、その1年前（ComparePeriodの範囲に関わらず直前の年度）との比較
                 $newestRow = $yearRows[0]
                 $previousRow = $yearRows[1]
                 $diffRow = [ordered]@{
-                    groupName  = $courseGroup.groupName
+                    groupName = $courseGroup.groupName
                     courseName = $courseName
-                    rankName   = $rankName
-                    yearLabel  = "差分"
                 }
+                $diffRow[$DimensionKey] = $dimensionValue
+                $diffRow["yearLabel"] = "差分"
                 foreach ($viewItem in (@($testViewItems) + $pickedSurveyItems)) {
                     $currentValue  = $newestRow[$viewItem]
                     $previousValue = $previousRow[$viewItem]
@@ -306,88 +228,13 @@ function Create-RankYearComparisonDatas {
 }
 
 
-function Create-ClassYearComparisonDatas {
-    param(
-        $CourseGroupDatas,
-        [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順
-        [array]$ClassNames
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $pickedSurveyItems = Get-PrimeSurveyItems
-    $testViewItems = @("平均点", "中央値", "修了率")
-
-    function New-ClassYearRow {
-        param($GroupName, $CourseName, $ClassName, $YearLabel, $TestResult, $SurveyResult)
-        $row = [ordered]@{
-            groupName  = $GroupName
-            courseName = $CourseName
-            className  = $ClassName
-            yearLabel  = $YearLabel
-        }
-        foreach ($testViewItem in $testViewItems) {
-            $row[$testViewItem] = if ($TestResult -and $TestResult.isExecute) { $TestResult.$testViewItem } else { $null }
-        }
-        foreach ($pickedSurveyItem in $pickedSurveyItems) {
-            $row[$pickedSurveyItem] = if ($SurveyResult -and $SurveyResult.PSObject.Properties[$pickedSurveyItem]) { $SurveyResult.$pickedSurveyItem } else { $null }
-        }
-        return $row
-    }
-
-    $results = foreach ($courseGroup in $CourseGroupDatas) {
-        # コースが1件も無いグループでも、グループ名の行だけは出力する
-        $courseNamesInGroup = if ($courseGroup.courseNames.Count -eq 0) { @($null) } else { $courseGroup.courseNames }
-        foreach ($courseName in $courseNamesInGroup) {
-            # 各コースの先頭に「全クラス」（クラスを問わない合計）のセットを追加し、その後にクラスごとのセットを続ける
-            $classScopes = @("全クラス") + $ClassNames
-            foreach ($className in $classScopes) {
-                $yearRows = foreach ($yearSummaryDatas in $YearSummaryDatasList) {
-                    if ($className -eq "全クラス") {
-                        $testResult   = $yearSummaryDatas.summaryDatas.totalTestSummaryResults   | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
-                        $surveyResult = $yearSummaryDatas.summaryDatas.totalSurveySummaryResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
-                    } else {
-                        $testResult   = $yearSummaryDatas.summaryDatas.classTestSummaryResults   | Where-Object { $_.testName -eq $courseName -and $_.className -eq $className } | Select-Object -First 1
-                        $surveyResult = $yearSummaryDatas.summaryDatas.classSurveySummaryResults | Where-Object { $_.surveyName -eq $courseName -and $_.className -eq $className } | Select-Object -First 1
-                    }
-                    New-ClassYearRow -GroupName $courseGroup.groupName -CourseName $courseName -ClassName $className -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
-                }
-
-                # 差分は現在年度と、その1年前（ComparePeriodの範囲に関わらず直前の年度）との比較
-                $newestRow = $yearRows[0]
-                $previousRow = $yearRows[1]
-                $diffRow = [ordered]@{
-                    groupName  = $courseGroup.groupName
-                    courseName = $courseName
-                    className  = $className
-                    yearLabel  = "差分"
-                }
-                foreach ($viewItem in (@($testViewItems) + $pickedSurveyItems)) {
-                    $currentValue  = $newestRow[$viewItem]
-                    $previousValue = $previousRow[$viewItem]
-                    $diffRow[$viewItem] = if ($null -eq $currentValue -and $null -eq $previousValue) {
-                        $null
-                    } else {
-                        [double]($currentValue) - [double]($previousValue)
-                    }
-                }
-
-                foreach ($yearRow in $yearRows) { [pscustomobject]$yearRow }
-                [pscustomobject]$diffRow
-            }
-        }
-    }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
-    return $results
-}
-
-
-function Export-CompanyYearComparisonData {
+function Export-DimensionYearComparisonData {
     param(
         $Workbook,
-        $CompanyYearComparisonDatas,
+        $DimensionYearComparisonDatas,
         [int]$RowsPerCourse,
-        [int]$CompanyCount,
+        [int]$DimensionCount,
+        [string]$DimensionKey,
         $TemplateSheetName
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
@@ -396,7 +243,7 @@ function Export-CompanyYearComparisonData {
     $pickedSurveyItems = Get-PrimeSurveyItems
     $viewItems = @("平均点", "中央値", "修了率") + $pickedSurveyItems
 
-    function Write-CompanyYearComparisonRows {
+    function Write-DimensionYearComparisonRows {
         param($Sheet, $Rows)
 
         $dataStartCell = Get-CellByKey $Sheet "{コースグループデータ}" -ErrorOnMissing
@@ -406,12 +253,12 @@ function Export-CompanyYearComparisonData {
         $yearRowCount = $RowsPerCourse - 1
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet 1 -TotalSets $yearRowCount -InsertBeforeCopy
 
-        # 年度行＋差分行（1会社分）を、会社数分だけ増やす
-        $rowsPerCompany = $RowsPerCourse
-        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerCompany -TotalSets $CompanyCount
+        # 年度行＋差分行（集計軸の値1つ分）を、集計軸の値の数だけ増やす
+        $rowsPerDimension = $RowsPerCourse
+        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerDimension -TotalSets $DimensionCount
 
-        # 1コース分（会社数分の年度行＋差分行）を、コース数分だけ複製する
-        $rowsPerCourseBlock = $rowsPerCompany * $CompanyCount
+        # 1コース分（集計軸の値の数分の年度行＋差分行）を、コース数分だけ複製する
+        $rowsPerCourseBlock = $rowsPerDimension * $DimensionCount
         $courseCount = [int]($Rows.Count / $rowsPerCourseBlock)
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerCourseBlock -TotalSets $courseCount
 
@@ -419,14 +266,14 @@ function Export-CompanyYearComparisonData {
         for ($i = 0; $i -lt $Rows.Count; $i++) {
             $row = $Rows[$i]
             $isFirstRowOfCourse = ($i % $rowsPerCourseBlock -eq 0)
-            $isFirstRowOfCompany = ($i % $rowsPerCompany -eq 0)
+            $isFirstRowOfDimension = ($i % $rowsPerDimension -eq 0)
 
-            # グループ名・コース名列は、コース内の先頭行にのみ書き込む。会社名列は、会社ブロックの先頭行にのみ書き込む
+            # グループ名・コース名列は、コース内の先頭行にのみ書き込む。集計軸列は、その値のブロックの先頭行にのみ書き込む
             $groupCellValue = if ($isFirstRowOfCourse) { $row.groupName } else { "" }
             $courseCellValue = if ($isFirstRowOfCourse) { $row.courseName } else { "" }
-            $companyCellValue = if ($isFirstRowOfCompany) { $row.companyName } else { "" }
+            $dimensionCellValue = if ($isFirstRowOfDimension) { $row.$DimensionKey } else { "" }
 
-            $rowData = @("$groupCellValue", "$courseCellValue", "$companyCellValue", "$($row.yearLabel)")
+            $rowData = @("$groupCellValue", "$courseCellValue", "$dimensionCellValue", "$($row.yearLabel)")
             foreach ($viewItem in $viewItems) {
                 $value = $row.$viewItem
                 if ($viewItem -eq "修了率" -and $null -ne $value -and $value -ne "") {
@@ -440,10 +287,10 @@ function Export-CompanyYearComparisonData {
         # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-        # コースグループ列・研修コース名列・会社名列を、それぞれ連続する範囲で縦に結合する
+        # コースグループ列・研修コース名列・集計軸列を、それぞれ連続する範囲で縦に結合する
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
-        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.companyName)" }
+        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.$DimensionKey)" }
 
         # 初期セル設定
         Set-SheetFirstCell -Sheet $Sheet
@@ -455,7 +302,7 @@ function Export-CompanyYearComparisonData {
     # コースグループごとに行をまとめる（出現順を保持）
     $groupNames = @()
     $rowsByGroup = [ordered]@{}
-    foreach ($row in $CompanyYearComparisonDatas) {
+    foreach ($row in $DimensionYearComparisonDatas) {
         if (-not $rowsByGroup.Contains($row.groupName)) {
             $groupNames += $row.groupName
             $rowsByGroup[$row.groupName] = @()
@@ -470,206 +317,12 @@ function Export-CompanyYearComparisonData {
         $newSheet = $Workbook.ActiveSheet
         $newSheet.Name = "$TemplateSheetName-$groupName"
 
-        Write-CompanyYearComparisonRows -Sheet $newSheet -Rows $rowsByGroup[$groupName]
+        Write-DimensionYearComparisonRows -Sheet $newSheet -Rows $rowsByGroup[$groupName]
     }
 
     # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    Write-CompanyYearComparisonRows -Sheet $sheet -Rows $CompanyYearComparisonDatas
-}
-
-
-function Export-RankYearComparisonData {
-    param(
-        $Workbook,
-        $RankYearComparisonDatas,
-        [int]$RowsPerCourse,
-        [int]$RankCount,
-        $TemplateSheetName
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $pickedSurveyItems = Get-PrimeSurveyItems
-    $viewItems = @("平均点", "中央値", "修了率") + $pickedSurveyItems
-
-    function Write-RankYearComparisonRows {
-        param($Sheet, $Rows)
-
-        $dataStartCell = Get-CellByKey $Sheet "{コースグループデータ}" -ErrorOnMissing
-        $rowStartIndex = $dataStartCell.Row
-
-        # まず年度行をComparePeriodに応じた行数まで増やす
-        $yearRowCount = $RowsPerCourse - 1
-        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet 1 -TotalSets $yearRowCount -InsertBeforeCopy
-
-        # 年度行＋差分行（1ランク分）を、ランク数分だけ増やす
-        $rowsPerRank = $RowsPerCourse
-        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerRank -TotalSets $RankCount
-
-        # 1コース分（ランク数分の年度行＋差分行）を、コース数分だけ複製する
-        $rowsPerCourseBlock = $rowsPerRank * $RankCount
-        $courseCount = [int]($Rows.Count / $rowsPerCourseBlock)
-        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerCourseBlock -TotalSets $courseCount
-
-        $rowDatas = @()
-        for ($i = 0; $i -lt $Rows.Count; $i++) {
-            $row = $Rows[$i]
-            $isFirstRowOfCourse = ($i % $rowsPerCourseBlock -eq 0)
-            $isFirstRowOfRank = ($i % $rowsPerRank -eq 0)
-
-            # グループ名・コース名列は、コース内の先頭行にのみ書き込む。ランク列は、ランクブロックの先頭行にのみ書き込む
-            $groupCellValue = if ($isFirstRowOfCourse) { $row.groupName } else { "" }
-            $courseCellValue = if ($isFirstRowOfCourse) { $row.courseName } else { "" }
-            $rankCellValue = if ($isFirstRowOfRank) { $row.rankName } else { "" }
-
-            $rowData = @("$groupCellValue", "$courseCellValue", "$rankCellValue", "$($row.yearLabel)")
-            foreach ($viewItem in $viewItems) {
-                $value = $row.$viewItem
-                if ($viewItem -eq "修了率" -and $null -ne $value -and $value -ne "") {
-                    $value = [double]$value / 100
-                }
-                $rowData += "$value"
-            }
-            $rowDatas += ,$rowData
-        }
-
-        # データの書き込み
-        Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-
-        # コースグループ列・研修コース名列・ランク列を、それぞれ連続する範囲で縦に結合する
-        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
-        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
-        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.rankName)" }
-
-        # 初期セル設定
-        Set-SheetFirstCell -Sheet $Sheet
-
-        # オートフィット
-        Set-AutoFit $Sheet
-    }
-
-    # コースグループごとに行をまとめる（出現順を保持）
-    $groupNames = @()
-    $rowsByGroup = [ordered]@{}
-    foreach ($row in $RankYearComparisonDatas) {
-        if (-not $rowsByGroup.Contains($row.groupName)) {
-            $groupNames += $row.groupName
-            $rowsByGroup[$row.groupName] = @()
-        }
-        $rowsByGroup[$row.groupName] += $row
-    }
-
-    # グループ別シートを、テンプレートのマーカーが残っているうちに先に作成する
-    foreach ($groupName in $groupNames) {
-        $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
-        $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
-        $newSheet = $Workbook.ActiveSheet
-        $newSheet.Name = "$TemplateSheetName-$groupName"
-
-        Write-RankYearComparisonRows -Sheet $newSheet -Rows $rowsByGroup[$groupName]
-    }
-
-    # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
-    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    Write-RankYearComparisonRows -Sheet $sheet -Rows $RankYearComparisonDatas
-}
-
-
-function Export-ClassYearComparisonData {
-    param(
-        $Workbook,
-        $ClassYearComparisonDatas,
-        [int]$RowsPerCourse,
-        [int]$ClassCount,
-        $TemplateSheetName
-    )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
-
-    $pickedSurveyItems = Get-PrimeSurveyItems
-    $viewItems = @("平均点", "中央値", "修了率") + $pickedSurveyItems
-
-    function Write-ClassYearComparisonRows {
-        param($Sheet, $Rows)
-
-        $dataStartCell = Get-CellByKey $Sheet "{コースグループデータ}" -ErrorOnMissing
-        $rowStartIndex = $dataStartCell.Row
-
-        # まず年度行をComparePeriodに応じた行数まで増やす
-        $yearRowCount = $RowsPerCourse - 1
-        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet 1 -TotalSets $yearRowCount -InsertBeforeCopy
-
-        # 年度行＋差分行（1クラス分）を、クラス数分だけ増やす
-        $rowsPerClass = $RowsPerCourse
-        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerClass -TotalSets $ClassCount
-
-        # 1コース分（クラス数分の年度行＋差分行）を、コース数分だけ複製する
-        $rowsPerCourseBlock = $rowsPerClass * $ClassCount
-        $courseCount = [int]($Rows.Count / $rowsPerCourseBlock)
-        Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerCourseBlock -TotalSets $courseCount
-
-        $rowDatas = @()
-        for ($i = 0; $i -lt $Rows.Count; $i++) {
-            $row = $Rows[$i]
-            $isFirstRowOfCourse = ($i % $rowsPerCourseBlock -eq 0)
-            $isFirstRowOfClass = ($i % $rowsPerClass -eq 0)
-
-            # グループ名・コース名列は、コース内の先頭行にのみ書き込む。クラス列は、クラスブロックの先頭行にのみ書き込む
-            $groupCellValue = if ($isFirstRowOfCourse) { $row.groupName } else { "" }
-            $courseCellValue = if ($isFirstRowOfCourse) { $row.courseName } else { "" }
-            $classCellValue = if ($isFirstRowOfClass) { $row.className } else { "" }
-
-            $rowData = @("$groupCellValue", "$courseCellValue", "$classCellValue", "$($row.yearLabel)")
-            foreach ($viewItem in $viewItems) {
-                $value = $row.$viewItem
-                if ($viewItem -eq "修了率" -and $null -ne $value -and $value -ne "") {
-                    $value = [double]$value / 100
-                }
-                $rowData += "$value"
-            }
-            $rowDatas += ,$rowData
-        }
-
-        # データの書き込み
-        Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-
-        # コースグループ列・研修コース名列・クラス列を、それぞれ連続する範囲で縦に結合する
-        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
-        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
-        Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.className)" }
-
-        # 初期セル設定
-        Set-SheetFirstCell -Sheet $Sheet
-
-        # オートフィット
-        Set-AutoFit $Sheet
-    }
-
-    # コースグループごとに行をまとめる（出現順を保持）
-    $groupNames = @()
-    $rowsByGroup = [ordered]@{}
-    foreach ($row in $ClassYearComparisonDatas) {
-        if (-not $rowsByGroup.Contains($row.groupName)) {
-            $groupNames += $row.groupName
-            $rowsByGroup[$row.groupName] = @()
-        }
-        $rowsByGroup[$row.groupName] += $row
-    }
-
-    # グループ別シートを、テンプレートのマーカーが残っているうちに先に作成する
-    foreach ($groupName in $groupNames) {
-        $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
-        $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
-        $newSheet = $Workbook.ActiveSheet
-        $newSheet.Name = "$TemplateSheetName-$groupName"
-
-        Write-ClassYearComparisonRows -Sheet $newSheet -Rows $rowsByGroup[$groupName]
-    }
-
-    # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
-    $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
-    Write-ClassYearComparisonRows -Sheet $sheet -Rows $ClassYearComparisonDatas
+    Write-DimensionYearComparisonRows -Sheet $sheet -Rows $DimensionYearComparisonDatas
 }
 
 
@@ -764,13 +417,8 @@ function Export-YearComparisonData {
 function Export-Excel {
     param(
         [array]$YearComparisonDatas,
-        [array]$CompanyYearComparisonDatas,
-        [array]$RankYearComparisonDatas,
-        [array]$ClassYearComparisonDatas,
+        [array]$Dimensions,  # 各要素: @{ Key; Datas; Count; SheetName }
         [int]$RowsPerCourse,
-        [int]$CompanyCount,
-        [int]$RankCount,
-        [int]$ClassCount,
         [string]$OutputFilePath
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
@@ -789,11 +437,9 @@ function Export-Excel {
 
         Export-YearComparisonData -Workbook $workbook -YearComparisonDatas $YearComparisonDatas -RowsPerCourse $RowsPerCourse -TemplateSheetName "経年比較"
 
-        Export-CompanyYearComparisonData -Workbook $workbook -CompanyYearComparisonDatas $CompanyYearComparisonDatas -RowsPerCourse $RowsPerCourse -CompanyCount $CompanyCount -TemplateSheetName "経年比較-会社別"
-
-        Export-RankYearComparisonData -Workbook $workbook -RankYearComparisonDatas $RankYearComparisonDatas -RowsPerCourse $RowsPerCourse -RankCount $RankCount -TemplateSheetName "経年比較-ランク別"
-
-        Export-ClassYearComparisonData -Workbook $workbook -ClassYearComparisonDatas $ClassYearComparisonDatas -RowsPerCourse $RowsPerCourse -ClassCount $ClassCount -TemplateSheetName "経年比較-クラス別"
+        foreach ($dimension in $Dimensions) {
+            Export-DimensionYearComparisonData -Workbook $workbook -DimensionYearComparisonDatas $dimension.Datas -RowsPerCourse $RowsPerCourse -DimensionCount $dimension.Count -DimensionKey $dimension.Key -TemplateSheetName $dimension.SheetName
+        }
 
         # 最初のシートをアクティブに
         Set-FirstVisibleSheet -Workbook $workbook
@@ -826,29 +472,38 @@ $rankOrder = @("S","A","B","C","D","E")
 $rankNames = @($userDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
 $classNames = @($userDatas.className | Sort-Object -Unique)
 
+# 集計軸の定義。会社別・ランク別・クラス別のシートはすべてこの定義に沿って生成される
+$dimensionDefs = @(
+    [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別" }
+    [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別" }
+    [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別" }
+)
+
 # 新しい年度→古い年度の順で、現在年度からComparePeriod年前までを集計する
 $yearSummaryDatasList = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
     $year = $TargetYear - $offset
     $groupName = "$baseGroupName-$year"
     [PSCustomObject]@{
         year         = $year
-        summaryDatas = Get-YearSummaryDatas -UserDatas $userDatas -TestDatas $testDatas -SurveyDatas $surveyDatas -GroupName $groupName -CompanyNames $companyNames -RankNames $rankNames -ClassNames $classNames
+        summaryDatas = Get-YearSummaryDatas -UserDatas $userDatas -TestDatas $testDatas -SurveyDatas $surveyDatas -GroupName $groupName -Dimensions $dimensionDefs
     }
 }
 
 $yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList
 # Write-Message $yearComparisonDatas -VarName "yearComparisonDatas" -Type "Info"
 
-$companyYearComparisonDatas = Create-CompanyYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -CompanyNames $companyNames
-# Write-Message $companyYearComparisonDatas -VarName "companyYearComparisonDatas" -Type "Info"
-
-$rankYearComparisonDatas = Create-RankYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -RankNames $rankNames
-# Write-Message $rankYearComparisonDatas -VarName "rankYearComparisonDatas" -Type "Info"
-
-$classYearComparisonDatas = Create-ClassYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -ClassNames $classNames
-# Write-Message $classYearComparisonDatas -VarName "classYearComparisonDatas" -Type "Info"
+$dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
+    $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names
+    # Write-Message $dimensionDatas -VarName "$($dimensionDef.Key)YearComparisonDatas" -Type "Info"
+    [PSCustomObject]@{
+        Key       = $dimensionDef.Key
+        Datas     = $dimensionDatas
+        Count     = $dimensionDef.Names.Count + 1
+        SheetName = $dimensionDef.SheetName
+    }
+}
 
 $outputFilePath = Join-Path $OutputRootDir "$baseGroupName-$TargetYear-年度比較結果.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
-Export-Excel -YearComparisonDatas $yearComparisonDatas -CompanyYearComparisonDatas $companyYearComparisonDatas -RankYearComparisonDatas $rankYearComparisonDatas -ClassYearComparisonDatas $classYearComparisonDatas -RowsPerCourse $rowsPerCourse -CompanyCount ($companyNames.Count + 1) -RankCount ($rankNames.Count + 1) -ClassCount ($classNames.Count + 1) -OutputFilePath $outputFilePath
+Export-Excel -YearComparisonDatas $yearComparisonDatas -Dimensions $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
