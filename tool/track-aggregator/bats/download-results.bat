@@ -41,7 +41,7 @@ call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 :WAIT_LOOP
 set "ALL_DONE=1"
 for %%F in ("%MasterDataRootDir%\*.xlsx") do (
-    set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
+    set "JOB_FLAG=%TEMP%\%MyName%%%~nF_.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
 if !ALL_DONE! EQU 0 (

@@ -7,7 +7,10 @@
     [string]$TemplateFilePath,
     [string]$SurveyResultRootDir,
     [string]$TestResultRootDir,
-    [int]$PassScore
+    [int]$PassScore,
+    [string]$TargetCompanyNames = "",  # カンマ区切り。空の場合は全社を対象とする
+    [string]$TargetRankNames = "",     # カンマ区切り。空の場合は全ランクを対象とする
+    [string]$TargetClassNames = ""     # カンマ区切り。空の場合は全クラスを対象とする
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -467,10 +470,23 @@ $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
 $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
 $courseGroupDatas = Get-CourseGroupDatas
-$companyNames = @($userDatas.companyName | Select-Object -Unique)
+
+# 会社名・ランク・クラスの絞り込み（カンマ区切り。未指定＝空文字の場合は全件が対象）
+# 「全体」「全社」「全ランク」「全クラス」の合計行は、この絞り込みに関わらず常に母集団全体で集計する。
+# 絞り込みが影響するのは、会社別・ランク別・クラス別シートで個別の行を作る対象の値だけ。
+# 注意: 変数名をパラメーター名（$TargetCompanyNames等）と大文字小文字違いだけにすると、
+# PowerShellは変数名を大文字小文字を区別しないため同一変数とみなし、
+# 自己参照パイプライン（$x = $x | Where-Object {...}）特有の不具合でWhere-Objectのフィルタが正しく効かなくなる。
+# そのため意図的に別名（CompanyNameFilter等）にしている。
+$companyNameFilter = @($TargetCompanyNames -split "," | Where-Object { $_ -ne "" })
+$rankNameFilter = @($TargetRankNames -split "," | Where-Object { $_ -ne "" })
+$classNameFilter = @($TargetClassNames -split "," | Where-Object { $_ -ne "" })
+
 $rankOrder = @("S","A","B","C","D","E")
-$rankNames = @($userDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
-$classNames = @($userDatas.className | Sort-Object -Unique)
+$companyNames = if ($companyNameFilter.Count -gt 0) { @($companyNameFilter | Select-Object -Unique) } else { @($userDatas.companyName | Select-Object -Unique) }
+$rankNames = if ($rankNameFilter.Count -gt 0) { $rankNameFilter } else { $userDatas.rankName }
+$rankNames = @($rankNames | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
+$classNames = if ($classNameFilter.Count -gt 0) { @($classNameFilter | Sort-Object -Unique) } else { @($userDatas.className | Sort-Object -Unique) }
 
 # 集計軸の定義。会社別・ランク別・クラス別のシートはすべてこの定義に沿って生成される
 $dimensionDefs = @(

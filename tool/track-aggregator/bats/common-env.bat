@@ -25,6 +25,11 @@ for /f %%A in ('powershell -NoProfile -Command "(Get-Date).Year"') do set "Targe
 rem set "TargetYear=2025"
 set "ComparePeriod=1"
 
+rem 出力対象の絞り込み（カンマ区切り、複数指定可）。空の場合はすべてを対象とする
+set "TargetCompanyNames="
+set "TargetRankNames="
+set "TargetClassNames="
+
 set "CourseGroup1Name=ビジネス"
 set "CourseGroup1Courses=ビジネス基礎,ビジネス応用"
 set "CourseGroup2Name=IT技術基礎"
