@@ -105,7 +105,7 @@ function Create-YearComparisonDatas {
             $row[$testViewItem] = if ($TestResult -and $TestResult.isExecute) { $TestResult.$testViewItem } else { $null }
         }
         foreach ($pickedSurveyItem in $pickedSurveyItems) {
-            $row[$pickedSurveyItem] = if ($SurveyResult -and $SurveyResult.PSObject.Properties[$pickedSurveyItem]) { $SurveyResult.$pickedSurveyItem } else { $null }
+            $row[$pickedSurveyItem] = if ($SurveyResult -and $SurveyResult.isExecute) { $SurveyResult.$pickedSurveyItem } else { $null }
         }
         return $row
     }
@@ -172,7 +172,7 @@ function Create-DimensionYearComparisonDatas {
             $row[$testViewItem] = if ($TestResult -and $TestResult.isExecute) { $TestResult.$testViewItem } else { $null }
         }
         foreach ($pickedSurveyItem in $pickedSurveyItems) {
-            $row[$pickedSurveyItem] = if ($SurveyResult -and $SurveyResult.PSObject.Properties[$pickedSurveyItem]) { $SurveyResult.$pickedSurveyItem } else { $null }
+            $row[$pickedSurveyItem] = if ($SurveyResult -and $SurveyResult.isExecute) { $SurveyResult.$pickedSurveyItem } else { $null }
         }
         return $row
     }
@@ -451,7 +451,8 @@ $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
     $year = $TargetYear - $offset
     $yearMasterFilePath = Join-Path $MasterDataRootDir "$TargetGroupName-$year.xlsx"
 
-    if (Test-Path $yearMasterFilePath) {
+    $yearIsExecuted = Test-Path $yearMasterFilePath
+    if ($yearIsExecuted) {
         $yearUserDatas = Create-UserDatas -DataFilePath $yearMasterFilePath
 
         $yearTestDatas = Create-TestDatas -DataFilePath $yearMasterFilePath
@@ -468,6 +469,7 @@ $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
 
     [PSCustomObject]@{
         year        = $year
+        isExecuted  = $yearIsExecuted
         userDatas   = $yearUserDatas
         testDatas   = $yearTestDatas
         surveyDatas = $yearSurveyDatas
@@ -501,7 +503,7 @@ $dimensionDefs = @(
 # 新しい年度→古い年度の順で、現在年度からComparePeriod年前までを集計する
 $yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
     $groupName = "$TargetGroupName-$($yearData.year)"
-    $summaryDatas = if ($yearData.userDatas) {
+    $summaryDatas = if ($yearData.isExecuted) {
         Get-YearSummaryDatas -UserDatas $yearData.userDatas -TestDatas $yearData.testDatas -SurveyDatas $yearData.surveyDatas -GroupName $groupName -Dimensions $dimensionDefs
     } else {
         $null
