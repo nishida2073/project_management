@@ -19,11 +19,12 @@ $basePath = Join-Path $rootPath "bats"
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 
 $buttonDefs = @(
-    [PSCustomObject]@{ Id = 0; Label = "データ取得"; Bat = (Join-Path $basePath "download-results.bat"); OutputDirVar = "ResultRootDir" }
-    [PSCustomObject]@{ Id = 3; Label = "実施状況集計"; Bat = (Join-Path $basePath "collect-combine-result.bat"); OutputDirVar = "OutputCombineCollectDir" }
-    [PSCustomObject]@{ Id = 1; Label = "テスト結果集計"; Bat = (Join-Path $basePath "collect-test-result.bat"); OutputDirVar = "OutputTestCollectDir" }
-    [PSCustomObject]@{ Id = 2; Label = "アンケート結果集計"; Bat = (Join-Path $basePath "collect-survey-result.bat"); OutputDirVar = "OutputSurveyCollectDir" }
-    [PSCustomObject]@{ Id = 4; Label = "経年比較集計"; Bat = (Join-Path $basePath "collect-year-comparison-result.bat"); OutputDirVar = "OutputYearComparisonCollectDir" }
+    [PSCustomObject]@{ Label = "データ取得状況確認"; Bat = (Join-Path $basePath "check-download-status.bat"); OutputDirVar = "MasterDataRootDir" }
+    [PSCustomObject]@{ Label = "データ取得"; Bat = (Join-Path $basePath "download-results.bat"); OutputDirVar = "ResultRootDir" }
+    [PSCustomObject]@{ Label = "実施状況集計"; Bat = (Join-Path $basePath "collect-combine-result.bat"); OutputDirVar = "OutputCombineCollectDir" }
+    [PSCustomObject]@{ Label = "テスト結果集計"; Bat = (Join-Path $basePath "collect-test-result.bat"); OutputDirVar = "OutputTestCollectDir" }
+    [PSCustomObject]@{ Label = "アンケート結果集計"; Bat = (Join-Path $basePath "collect-survey-result.bat"); OutputDirVar = "OutputSurveyCollectDir" }
+    [PSCustomObject]@{ Label = "経年比較集計"; Bat = (Join-Path $basePath "collect-year-comparison-result.bat"); OutputDirVar = "OutputYearComparisonCollectDir" }
 )
 
 # common-env.batを実際に呼び出してset済みの環境変数を取り込む（パスの組み立てロジックをこちらで二重管理しない）
@@ -109,7 +110,11 @@ foreach ($bd in $buttonDefs) {
     $btnOpen.Size = New-Object System.Drawing.Size(70, 30)
     $btnOpen.Location = New-Object System.Drawing.Point(290, $buttonY)
     $btnOpen.Tag = $bd
-    $btnOpen.Add_Click({ Open-OutputFolder $script:commonEnvVars[$this.Tag.OutputDirVar] })
+    if ($bd.OutputDirVar) {
+        $btnOpen.Add_Click({ Open-OutputFolder $script:commonEnvVars[$this.Tag.OutputDirVar] })
+    } else {
+        $btnOpen.Enabled = $false
+    }
     $buttonPanel.Controls.Add($btnOpen)
 
     $lblStepStatus = New-Object System.Windows.Forms.Label
@@ -119,14 +124,14 @@ foreach ($bd in $buttonDefs) {
     $lblStepStatus.Location = New-Object System.Drawing.Point(370, ($buttonY + 4))
     $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
     $buttonPanel.Controls.Add($lblStepStatus)
-    $script:stepStatusLabels[$bd.Id] = $lblStepStatus
+    $script:stepStatusLabels[$bd.Label] = $lblStepStatus
 
     $buttonY += 40
 }
 
 function Set-StepStatus {
-    param([int]$Id, [string]$Text)
-    $lbl = $script:stepStatusLabels[$Id]
+    param([string]$Label, [string]$Text)
+    $lbl = $script:stepStatusLabels[$Label]
     $lbl.Text = $Text
     $lbl.ForeColor = switch ($Text) {
         "実行中..." { [System.Drawing.Color]::Black }
@@ -150,6 +155,9 @@ $tabRun.Controls.Add($buttonPanel)
 
 function Write-Log {
     param([string]$Text)
+    $txtLog.SelectionStart = $txtLog.TextLength
+    $txtLog.SelectionLength = 0
+    $txtLog.SelectionColor = $color
     $txtLog.AppendText("$Text`r`n")
     $txtLog.SelectionStart = $txtLog.TextLength
     $txtLog.ScrollToCaret()
@@ -216,7 +224,7 @@ function Invoke-BatButton {
     param($ButtonDef)
 
     Set-RunButtonsEnabled $false
-    Set-StepStatus -Id $ButtonDef.Id -Text "実行中..."
+    Set-StepStatus -Label $ButtonDef.Label -Text "実行中..."
 
     Write-Log ""
     Write-Log "===== $($ButtonDef.Label) ====="
@@ -225,10 +233,10 @@ function Invoke-BatButton {
 
     if ($exitCode -ne 0) {
         Write-Log "----- $($ButtonDef.Label) 失敗（終了コード: $exitCode） -----"
-        Set-StepStatus -Id $ButtonDef.Id -Text "失敗"
+        Set-StepStatus -Label $ButtonDef.Label -Text "失敗"
     } else {
         Write-Log "----- $($ButtonDef.Label) 完了 -----"
-        Set-StepStatus -Id $ButtonDef.Id -Text "成功"
+        Set-StepStatus -Label $ButtonDef.Label -Text "成功"
     }
 
     Set-RunButtonsEnabled $true
