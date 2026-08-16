@@ -4,15 +4,15 @@ set "MasterDataRootDir=%~dp0..\master"
 
 set "TemplateRootDir=%~dp0..\template"
 
-set "ResultRootDir=%~dp0..\download"
+set "ResultRootDir=%~dp0..\output\実施結果"
 set "TestResultRootDir=%ResultRootDir%\01_テスト"
 set "SurveyResultRootDir=%ResultRootDir%\02_アンケート"
 
-set "OutputRootDir=%~dp0..\output"
-set "OutputTestCollectDir=%OutputRootDir%\集計結果"
-set "OutputSurveyCollectDir=%OutputRootDir%\集計結果"
-set "OutputCombineCollectDir=%OutputRootDir%\集計結果"
-set "OutputYearComparisonCollectDir=%OutputRootDir%\集計結果"
+set "OutputRootDir=%~dp0..\output\集計結果"
+set "OutputTestCollectDir=%OutputRootDir%\テスト"
+set "OutputSurveyCollectDir=%OutputRootDir%\アンケート"
+set "OutputCombineCollectDir=%OutputRootDir%\統合データ"
+set "OutputYearComparisonCollectDir=%OutputRootDir%\経年比較"
 
 set "PassScore=80"
 

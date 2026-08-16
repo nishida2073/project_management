@@ -19,12 +19,48 @@ $basePath = Join-Path $rootPath "bats"
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 
 $buttonDefs = @(
-    [PSCustomObject]@{ Id = 0; Label = "データ取得"; Bat = (Join-Path $basePath "download-results.bat") }
-    [PSCustomObject]@{ Id = 3; Label = "実施状況集計"; Bat = (Join-Path $basePath "collect-combine-result.bat") }
-    [PSCustomObject]@{ Id = 1; Label = "テスト結果集計"; Bat = (Join-Path $basePath "collect-test-result.bat") }
-    [PSCustomObject]@{ Id = 2; Label = "アンケート結果集計"; Bat = (Join-Path $basePath "collect-survey-result.bat") }
-    [PSCustomObject]@{ Id = 4; Label = "経年比較集計"; Bat = (Join-Path $basePath "collect-year-comparison-result.bat") }
+    [PSCustomObject]@{ Id = 0; Label = "データ取得"; Bat = (Join-Path $basePath "download-results.bat"); OutputDirVar = "ResultRootDir" }
+    [PSCustomObject]@{ Id = 3; Label = "実施状況集計"; Bat = (Join-Path $basePath "collect-combine-result.bat"); OutputDirVar = "OutputCombineCollectDir" }
+    [PSCustomObject]@{ Id = 1; Label = "テスト結果集計"; Bat = (Join-Path $basePath "collect-test-result.bat"); OutputDirVar = "OutputTestCollectDir" }
+    [PSCustomObject]@{ Id = 2; Label = "アンケート結果集計"; Bat = (Join-Path $basePath "collect-survey-result.bat"); OutputDirVar = "OutputSurveyCollectDir" }
+    [PSCustomObject]@{ Id = 4; Label = "経年比較集計"; Bat = (Join-Path $basePath "collect-year-comparison-result.bat"); OutputDirVar = "OutputYearComparisonCollectDir" }
 )
+
+# common-env.batを実際に呼び出してset済みの環境変数を取り込む（パスの組み立てロジックをこちらで二重管理しない）
+function Get-BatEnvVars {
+    param([string]$BatPath)
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = "cmd.exe"
+    $psi.Arguments = "/c ""call ""$BatPath"" >nul && set"""
+    $psi.WorkingDirectory = Split-Path $BatPath
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.CreateNoWindow = $true
+    $psi.StandardOutputEncoding = $cp932
+
+    $proc = [System.Diagnostics.Process]::Start($psi)
+    $output = $proc.StandardOutput.ReadToEnd()
+    $proc.WaitForExit()
+
+    $vars = @{}
+    foreach ($line in ($output -split "`r?`n")) {
+        if ($line -match "^([^=]+)=(.*)$") {
+            $vars[$Matches[1]] = $Matches[2]
+        }
+    }
+    return $vars
+}
+
+$script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
+
+function Open-OutputFolder {
+    param([string]$Path)
+    if (!$Path -or !(Test-Path -LiteralPath $Path)) {
+        [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    Start-Process -FilePath $Path
+}
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "trackデータ集計ツール"
@@ -68,11 +104,19 @@ foreach ($bd in $buttonDefs) {
     $buttonPanel.Controls.Add($btn)
     $script:runButtons[$bd.Label] = $btn
 
+    $btnOpen = New-Object System.Windows.Forms.Button
+    $btnOpen.Text = "開く"
+    $btnOpen.Size = New-Object System.Drawing.Size(70, 30)
+    $btnOpen.Location = New-Object System.Drawing.Point(290, $buttonY)
+    $btnOpen.Tag = $bd
+    $btnOpen.Add_Click({ Open-OutputFolder $script:commonEnvVars[$this.Tag.OutputDirVar] })
+    $buttonPanel.Controls.Add($btnOpen)
+
     $lblStepStatus = New-Object System.Windows.Forms.Label
     $lblStepStatus.Text = "未実行"
     $lblStepStatus.AutoSize = $false
     $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
-    $lblStepStatus.Location = New-Object System.Drawing.Point(290, ($buttonY + 4))
+    $lblStepStatus.Location = New-Object System.Drawing.Point(370, ($buttonY + 4))
     $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
     $buttonPanel.Controls.Add($lblStepStatus)
     $script:stepStatusLabels[$bd.Id] = $lblStepStatus
