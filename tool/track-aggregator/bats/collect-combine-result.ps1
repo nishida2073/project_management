@@ -177,11 +177,11 @@ function Export-ExecutionStatusData {
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
 
     # データ取得用のリンク
-    $psRootDir = Split-Path -Parent $MyInvocation.PSCommandPath
-    $downloadFilePath = Join-Path $psRootDir "download-results.bat"
-    $downloadValue = '=HYPERLINK("' + $downloadFilePath + '","データ取得")'
-    $downloadCell = Get-CellByKey $sheet "{データ取得}" -ErrorOnMissing
-    Write-BodyDatas -StartCell $downloadCell -Datas @($downloadValue)
+    # $psRootDir = Split-Path -Parent $MyInvocation.PSCommandPath
+    # $downloadFilePath = Join-Path $psRootDir "download-results.bat"
+    # $downloadValue = '=HYPERLINK("' + $downloadFilePath + '","データ取得")'
+    # $downloadCell = Get-CellByKey $sheet "{データ取得}" -ErrorOnMissing
+    # Write-BodyDatas -StartCell $downloadCell -Datas @($downloadValue)
     
     $columnsPerSet = 2 # テスト・アンケートの2列1セット
 
