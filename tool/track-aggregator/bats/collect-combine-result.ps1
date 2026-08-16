@@ -176,6 +176,13 @@ function Export-ExecutionStatusData {
 
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
 
+    # データ取得用のリンク
+    $psRootDir = Split-Path -Parent $MyInvocation.PSCommandPath
+    $downloadFilePath = Join-Path $psRootDir "download-results.bat"
+    $downloadValue = '=HYPERLINK("' + $downloadFilePath + '","データ取得")'
+    $downloadCell = Get-CellByKey $sheet "{データ取得}" -ErrorOnMissing
+    Write-BodyDatas -StartCell $downloadCell -Datas @($downloadValue)
+    
     $columnsPerSet = 2 # テスト・アンケートの2列1セット
 
     # 名称でテストとアンケートを対にした「コース」の一覧（テスト優先の順で並べる）
@@ -223,7 +230,7 @@ function Export-ExecutionStatusData {
             if ($TestDatas.testName -notcontains $courseName) {
                 $statusRow += "対象外"
             } elseif ($testCourseNamesWithResult -notcontains $courseName) {
-                $statusRow += "未集計"
+                $statusRow += "データなし"
             } else {
                 $testResult = $userTestResults | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
                 if ($testResult -and $testResult.isExecute) {
@@ -240,7 +247,7 @@ function Export-ExecutionStatusData {
             if ($SurveyDatas.surveyName -notcontains $courseName) {
                 $statusRow += "対象外"
             } elseif ($surveyCourseNamesWithResult -notcontains $courseName) {
-                $statusRow += "未集計"
+                $statusRow += "データなし"
             } else {
                 $surveyResult = $userSurveyResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
                 if ($surveyResult -and $surveyResult.isExecute) {

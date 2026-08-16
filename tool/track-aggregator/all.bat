@@ -16,9 +16,9 @@ echo.
 for %%F in (
     ".\bats\excel-clean.bat"
     ".\bats\download-results.bat"
+    ".\bats\collect-combine-result.bat"
     ".\bats\collect-test-result.bat"
     ".\bats\collect-survey-result.bat"
-    ".\bats\collect-combine-result.bat"
 ) do (
     call .\bats\message.bat "Start %%~nxF"
     
