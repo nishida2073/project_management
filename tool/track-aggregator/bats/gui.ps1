@@ -8,6 +8,60 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 [System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
 
+# バッチ実行中に外部プロセス（ブラウザ等）へフォーカスが移ると、SetForegroundWindowを
+# 単純に呼ぶだけではWindowsのセキュリティ制限で拒否され、タスクバーの点滅になるだけのため、
+# AttachThreadInputで入力スレッドを一時的に結合してから奪う
+Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public class Win32Focus {
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("kernel32.dll")]
+    public static extern uint GetCurrentThreadId();
+
+    [DllImport("user32.dll")]
+    public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    public static void ForceForeground(IntPtr hWnd) {
+        uint currentThreadId = GetCurrentThreadId();
+        uint dummyProcessId;
+        uint foregroundThreadId = GetWindowThreadProcessId(GetForegroundWindow(), out dummyProcessId);
+
+        bool attached = false;
+        if (foregroundThreadId != currentThreadId) {
+            attached = AttachThreadInput(currentThreadId, foregroundThreadId, true);
+        }
+        try {
+            ShowWindow(hWnd, 9); // SW_RESTORE
+            SetForegroundWindow(hWnd);
+        } finally {
+            if (attached) {
+                AttachThreadInput(currentThreadId, foregroundThreadId, false);
+            }
+        }
+    }
+}
+'@
+
+function Show-FormInForeground {
+    param($Form)
+    if ($Form.WindowState -eq [System.Windows.Forms.FormWindowState]::Minimized) {
+        $Form.WindowState = [System.Windows.Forms.FormWindowState]::Normal
+    }
+    [Win32Focus]::ForceForeground($Form.Handle)
+}
+
 if ($MyInvocation.MyCommand.Path) {
     $scriptDir = Split-Path $MyInvocation.MyCommand.Path
     $rootPath = Split-Path $scriptDir -Parent
@@ -21,15 +75,6 @@ $cp932 = [System.Text.Encoding]::GetEncoding(932)
 # 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
-
-$buttonDefs = @(
-    [PSCustomObject]@{ Label = "データ取得状況確認"; Bat = (Join-Path $basePath "check-download-status.bat"); OutputDirVar = "MasterDataRootDir" }
-    [PSCustomObject]@{ Label = "データ取得"; Bat = (Join-Path $basePath "download-results.bat"); OutputDirVar = "ResultRootDir" }
-    [PSCustomObject]@{ Label = "実施状況集計"; Bat = (Join-Path $basePath "collect-combine-result.bat"); OutputDirVar = "OutputCombineCollectDir" }
-    [PSCustomObject]@{ Label = "テスト結果集計"; Bat = (Join-Path $basePath "collect-test-result.bat"); OutputDirVar = "OutputTestCollectDir" }
-    [PSCustomObject]@{ Label = "アンケート結果集計"; Bat = (Join-Path $basePath "collect-survey-result.bat"); OutputDirVar = "OutputSurveyCollectDir" }
-    [PSCustomObject]@{ Label = "経年比較集計"; Bat = (Join-Path $basePath "collect-year-comparison-result.bat"); OutputDirVar = "OutputYearComparisonCollectDir" }
-)
 
 # common-env.batを実際に呼び出してset済みの環境変数を取り込む（パスの組み立てロジックをこちらで二重管理しない）
 function Get-BatEnvVars {
@@ -58,7 +103,16 @@ function Get-BatEnvVars {
 
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
 
-function Open-OutputFolder {
+$buttonDefs = @(
+    [PSCustomObject]@{ Label = "データ取得状況確認"; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["MasterDataRootDir"] }
+    [PSCustomObject]@{ Label = "データ取得"; BatchPath = (Join-Path $basePath "download-results.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"] }
+    [PSCustomObject]@{ Label = "実施状況集計"; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"] }
+    [PSCustomObject]@{ Label = "テスト結果集計"; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
+    [PSCustomObject]@{ Label = "アンケート結果集計"; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
+    [PSCustomObject]@{ Label = "経年比較集計"; BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat"); TargetDirPath = $script:commonEnvVars["OutputYearComparisonCollectDir"] }
+)
+
+function Open-TargetDir {
     param([string]$Path)
     if (!$Path -or !(Test-Path -LiteralPath $Path)) {
         [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
@@ -109,17 +163,17 @@ foreach ($bd in $buttonDefs) {
     $buttonPanel.Controls.Add($btn)
     $script:runButtons[$bd.Label] = $btn
 
-    $btnOpen = New-Object System.Windows.Forms.Button
-    $btnOpen.Text = "開く"
-    $btnOpen.Size = New-Object System.Drawing.Size(70, 30)
-    $btnOpen.Location = New-Object System.Drawing.Point(290, $buttonY)
-    $btnOpen.Tag = $bd
-    if ($bd.OutputDirVar) {
-        $btnOpen.Add_Click({ Open-OutputFolder $script:commonEnvVars[$this.Tag.OutputDirVar] })
-    } else {
-        $btnOpen.Enabled = $false
+    if ($bd.TargetDirPath) {
+        $lnkOpen = New-Object System.Windows.Forms.LinkLabel
+        $lnkOpen.Text = "開く"
+        $lnkOpen.AutoSize = $false
+        $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        $lnkOpen.Size = New-Object System.Drawing.Size(70, 30)
+        $lnkOpen.Location = New-Object System.Drawing.Point(290, $buttonY)
+        $lnkOpen.Tag = $bd
+        $lnkOpen.Add_LinkClicked({ Open-TargetDir $this.Tag.TargetDirPath })
+        $buttonPanel.Controls.Add($lnkOpen)
     }
-    $buttonPanel.Controls.Add($btnOpen)
 
     $lblStepStatus = New-Object System.Windows.Forms.Label
     $lblStepStatus.Text = "未実行"
@@ -262,7 +316,9 @@ function Invoke-BatButton {
     Write-Log ""
     Write-Log "===== $($ButtonDef.Label) ====="
 
-    $exitCode = Invoke-BatStep -BatPath $ButtonDef.Bat
+    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath
+
+    Show-FormInForeground -Form $form
 
     if ($exitCode -ne 0) {
         Write-Log "----- $($ButtonDef.Label) 失敗（終了コード: $exitCode） -----"
