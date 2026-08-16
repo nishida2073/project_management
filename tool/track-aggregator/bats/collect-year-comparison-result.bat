@@ -48,7 +48,8 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
           "   -TargetCompanyNames '%TargetCompanyNames%'" ^
           "   -TargetRankNames '%TargetRankNames%'" ^
           "   -TargetClassNames '%TargetClassNames%'" ^
-          "   -CourseGroupDefs '%CourseGroupDefs%';" ^
+          "   -CourseGroupDefs '%CourseGroupDefs%'" ^
+          "   -YearOrder '%YearOrder%';" ^
           "Remove-Item -Path '!JOB_FLAG!' -Force;"
 
     ) else (

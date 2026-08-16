@@ -11,7 +11,8 @@
     [string]$CourseGroupDefs = "",     # コースグループ定義。"グループ名:コース1,コース2;グループ名2:コース3,コース4" の形式
     [string]$TargetCompanyNames = "",  # カンマ区切り。空の場合は全社を対象とする
     [string]$TargetRankNames = "",     # カンマ区切り。空の場合は全ランクを対象とする
-    [string]$TargetClassNames = ""     # カンマ区切り。空の場合は全クラスを対象とする
+    [string]$TargetClassNames = "",    # カンマ区切り。空の場合は全クラスを対象とする
+    [int]$YearOrder = 1                # 年度行の表示順。0:昇順（古い→新しい） 1:降順（新しい→古い、既定）
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -86,7 +87,8 @@ function Get-CourseGroupDatas {
 function Create-YearComparisonDatas {
     param(
         $CourseGroupDatas,
-        [array]$YearSummaryDatasList  # 新しい年度→古い年度の順。各要素は @{ year = <int>; summaryDatas = <Get-YearSummaryDatasの戻り値> }
+        [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順。各要素は @{ year = <int>; summaryDatas = <Get-YearSummaryDatasの戻り値> }
+        [int]$YearOrder = 1  # 年度行の表示順（差分計算には影響しない）。0:昇順（古い→新しい） 1:降順（新しい→古い）
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -138,7 +140,9 @@ function Create-YearComparisonDatas {
                 }
             }
 
-            foreach ($yearRow in $yearRows) { [pscustomobject]$yearRow }
+            # 表示順の並び替えは差分計算（直前の年度との比較）の後に行う。差分は常に新しい年度→直前の年度で計算する
+            $displayYearRows = if ($YearOrder -eq 0) { $yearRows[($yearRows.Count - 1)..0] } else { $yearRows }
+            foreach ($yearRow in $displayYearRows) { [pscustomobject]$yearRow }
             [pscustomobject]$diffRow
         }
     }
@@ -152,7 +156,8 @@ function Create-DimensionYearComparisonDatas {
         [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順
         [string]$DimensionKey,         # 行オブジェクト・集計結果上の集計軸プロパティ名（例: "companyName"）
         [string]$AllLabel,             # 集計軸を問わない合計スコープの表示名（例: "全社"）
-        [array]$DimensionNames
+        [array]$DimensionNames,
+        [int]$YearOrder = 1  # 年度行の表示順（差分計算には影響しない）。0:昇順（古い→新しい） 1:降順（新しい→古い）
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -217,7 +222,9 @@ function Create-DimensionYearComparisonDatas {
                     }
                 }
 
-                foreach ($yearRow in $yearRows) { [pscustomobject]$yearRow }
+                # 表示順の並び替えは差分計算（直前の年度との比較）の後に行う。差分は常に新しい年度→直前の年度で計算する
+                $displayYearRows = if ($YearOrder -eq 0) { $yearRows[($yearRows.Count - 1)..0] } else { $yearRows }
+                foreach ($yearRow in $displayYearRows) { [pscustomobject]$yearRow }
                 [pscustomobject]$diffRow
             }
         }
@@ -515,10 +522,10 @@ $yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
     }
 }
 
-$yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList
+$yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -YearOrder $YearOrder
 
 $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
-    $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names
+    $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names -YearOrder $YearOrder
     [PSCustomObject]@{
         Key        = $dimensionDef.Key
         Datas      = $dimensionDatas
