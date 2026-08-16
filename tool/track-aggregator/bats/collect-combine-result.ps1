@@ -188,6 +188,10 @@ function Export-ExecutionStatusData {
     }
     $courseNameList = @($courseNames.Keys)
 
+    # 実施結果が1件でもあるテスト・アンケート名
+    $testCourseNamesWithResult = @($PlainTestResults | Where-Object { $_.testResult } | Select-Object -ExpandProperty testName -Unique)
+    $surveyCourseNamesWithResult = @($PlainSurveyResults | Where-Object { $_.surveyResult } | Select-Object -ExpandProperty surveyName -Unique)
+
     $courseDataCell = Get-CellByKey $sheet "{コースデータ}" -ErrorOnMissing
     $columsStartIndex = $courseDataCell.Column
     # 列のコピー（コースごとに テスト・アンケート の2列セット）
@@ -217,14 +221,16 @@ function Export-ExecutionStatusData {
         $statusRow = @()
         foreach ($courseName in $courseNameList) {
             if ($TestDatas.testName -notcontains $courseName) {
-                $statusRow += ""
+                $statusRow += "対象外"
+            } elseif ($testCourseNamesWithResult -notcontains $courseName) {
+                $statusRow += "未集計"
             } else {
                 $testResult = $userTestResults | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
                 if ($testResult -and $testResult.isExecute) {
                     if ($testResult.testResult.isPass) {
                         $statusRow += "実施済み"
                     } else {
-                        $statusRow += '=HYPERLINK("' + $userUrl + '","督促（不合格）")'
+                        $statusRow += '=HYPERLINK("' + $userUrl + '","督促（再実施）")'
                     }
                 } else {
                     $statusRow += '=HYPERLINK("' + $userUrl + '","督促（未実施）")'
@@ -232,7 +238,9 @@ function Export-ExecutionStatusData {
             }
 
             if ($SurveyDatas.surveyName -notcontains $courseName) {
-                $statusRow += ""
+                $statusRow += "対象外"
+            } elseif ($surveyCourseNamesWithResult -notcontains $courseName) {
+                $statusRow += "未集計"
             } else {
                 $surveyResult = $userSurveyResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
                 if ($surveyResult -and $surveyResult.isExecute) {
