@@ -10,18 +10,31 @@ function Write-Message {
     if ($Type -eq "Debug") {
         return
     }
-    Write-Host "============== [$timestamp] $VarName ==============" -ForegroundColor $ForegroundColor
-    
+
+    # gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
+    # 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
+    $isGuiMode = $env:GUI_LOG_MODE -eq "1"
+    function Write-ColoredLine {
+        param([string]$Text)
+        if ($isGuiMode) {
+            Write-Host "[[COLOR:$ForegroundColor]]$Text"
+        } else {
+            Write-Host $Text -ForegroundColor $ForegroundColor
+        }
+    }
+
+    Write-ColoredLine "============== [$timestamp] $VarName =============="
+
     if( -not $Datas ){
-        Write-Host $Datas -ForegroundColor $ForegroundColor
+        Write-ColoredLine "$Datas"
         return
     }
-    
+
     if ($Datas -is [PSCustomObject] -or $Datas -is [Hashtable] -or $Datas -is [array]) {
-        $Datas | ConvertTo-Json -Depth 10 | ForEach-Object { Write-Host $_ -ForegroundColor $ForegroundColor }
+        $Datas | ConvertTo-Json -Depth 10 | ForEach-Object { Write-ColoredLine $_ }
     }
     else {
-        Write-Host $Datas -ForegroundColor $ForegroundColor
+        Write-ColoredLine "$Datas"
     }
 }
 
