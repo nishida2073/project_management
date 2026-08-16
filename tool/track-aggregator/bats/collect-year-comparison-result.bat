@@ -5,17 +5,16 @@ set "MyName=%~nx0"
 
 call "%~dp0common-env.bat"
 
-rem コマンドラインから名前指定で会社名・ランク・クラスを絞り込む場合（未指定の項目はcommon-env.batの既定値＝空(全体)のまま）
-rem 区切りは = ではなく : を使うこと（cmd.exeは = とカンマを引数の区切り文字として扱うため）。先頭の - は付けても付けなくても可
-rem 1社・1ランク・1クラスだけ指定するならクォート不要。複数値をカンマ区切りで指定する場合は引数ごとに "" で囲むこと
+rem コマンドラインから「環境変数名:値」の形式で、common-env.batの設定値を任意に上書きできる
+rem （例: TargetCompanyNames、TargetRankNames、TargetClassNames、YearOrder など、名前は固定していない）
+rem 区切りは = ではなく : を使うこと（cmd.exeは = とカンマを引数の区切り文字として扱うため）。
+rem 1つだけ指定するならクォート不要。カンマを含む値を指定する場合は引数ごとに "" で囲むこと
 rem 例: collect-year-comparison-result.bat TargetCompanyNames:会社A "TargetRankNames:S,A"
 for %%A in (%*) do (
     set "arg=%%~A"
     if "!arg:~0,1!"=="-" set "arg=!arg:~1!"
     for /f "tokens=1,* delims=:" %%K in ("!arg!") do (
-        if /i "%%K"=="TargetCompanyNames" set "TargetCompanyNames=%%~L"
-        if /i "%%K"=="TargetRankNames" set "TargetRankNames=%%~L"
-        if /i "%%K"=="TargetClassNames" set "TargetClassNames=%%~L"
+        set "%%K=%%~L"
     )
 )
 
