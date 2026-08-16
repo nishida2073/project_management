@@ -124,6 +124,7 @@ foreach ($bd in $buttonDefs) {
     $lblStepStatus = New-Object System.Windows.Forms.Label
     $lblStepStatus.Text = "未実行"
     $lblStepStatus.AutoSize = $false
+    $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
     $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
     $lblStepStatus.Location = New-Object System.Drawing.Point(370, ($buttonY + 4))
     $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray

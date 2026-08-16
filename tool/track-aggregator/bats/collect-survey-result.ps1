@@ -21,7 +21,7 @@ function Create-CollectResultsDatas {
         $SurveyDatas,
         $SurveyResultDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $userCodes = $UserDatas.userCode
@@ -103,7 +103,7 @@ function Export-UserPlainData {
         $PlainSurveyResultDatas,
         $TemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     $newSheetNameParts = $TemplateSheetName -split "-", 2
     $newSheetNameFormat = "$($newSheetNameParts[0])-{0}-$($newSheetNameParts[1])"
@@ -214,7 +214,7 @@ function Export-GroupSummaryData {
         $TemplateSheetName,
         $TargetUniquePropName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $pickedSurveyItems = @("planCount","actualCount") + (Get-PrimeSurveyItems)
@@ -240,7 +240,7 @@ function Export-UserSummaryData {
         $PlainSurveyResultDatas,
         $TemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $pickedSurveyItems = Get-PrimeSurveyItems
@@ -352,7 +352,7 @@ function Export-Excel {
         [object]$CollectResultDatas,
         [string]$OutputFilePath
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $excel = $null

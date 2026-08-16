@@ -23,7 +23,7 @@ function Download-File {
         [string]$AutoHotkeyExePath,
         [string]$AutoHotkeyScriptPath
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     Use-Mutex "Download-File" {
@@ -69,7 +69,7 @@ function Download-TrackResults {
         [string]$NameProperty,
         [bool]$IsDetail = $false
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     $Datas = @($Datas | Where-Object { ToBool $_.DL })
     Use-Mutex "Make-Dir" {

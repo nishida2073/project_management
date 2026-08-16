@@ -23,7 +23,7 @@ function Create-CollectResultsDatas {
         $TestDatas,
         $ResultDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $ClassNames = $UserDatas.className | Sort-Object -Unique
@@ -106,7 +106,7 @@ function Export-UserSummaryData {
         $PlainResults,
         $TemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
@@ -220,7 +220,7 @@ function Export-GroupSummaryData {
         $TemplateSheetName,
         $TargetUniquePropName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $viewItems = @("予定数","実施数","合格数","不合格数","平均点","中央値","修了率","最高点","最低点")
@@ -259,7 +259,7 @@ function Export-UserPlainData {
         $TemplateSheetName,
         $ShowDetail
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     $newSheetNameParts = $TemplateSheetName -split "-", 2
     $newSheetNameFormat = "$($newSheetNameParts[0])-{0}-$($newSheetNameParts[1])"
@@ -385,7 +385,7 @@ function Export-GroupPlainData {
         $TargetUniquePropName,
         $ShowDetail
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     if( $ShowDetail ){
@@ -483,7 +483,7 @@ function Export-Excel {
         [string]$TemplateFilePath,
         [bool]$ShowDetail
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $excel = $null

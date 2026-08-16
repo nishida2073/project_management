@@ -4,7 +4,8 @@ function Write-Message {
         [object]$Datas,
         [string]$VarName = "Debug Message",
         [string]$Type = "Debug",
-        [ConsoleColor]$ForegroundColor = "White"
+        [ConsoleColor]$ForegroundColor = "White",
+        [switch]$NoHeader
     )
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.ff"
     if ($Type -eq "Debug") {
@@ -23,7 +24,9 @@ function Write-Message {
         }
     }
 
-    Write-ColoredLine "============== [$timestamp] $VarName =============="
+    if (-not $NoHeader) {
+        Write-ColoredLine "============== [$timestamp] $VarName =============="
+    }
 
     if( -not $Datas ){
         Write-ColoredLine "$Datas"
@@ -101,7 +104,7 @@ function Convert-ExcelToCsvString {
         [int]$HeaderRowIndex = 1,
         [int[]]$DateColumnIndexes = @()
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $excel = New-Object -ComObject Excel.Application
@@ -174,7 +177,7 @@ function Get-CurrentAppFieldData {
         [string]$BaseUrl,
         [string]$Authorization
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $headers = @{
@@ -220,7 +223,7 @@ function Get-CurrentAppData {
         [string]$TargetDateCodeField,
         [string]$TargetDate
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $headers = @{
@@ -465,7 +468,7 @@ function Write-BodyDatas {
         $StartCell,
         $Datas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     if (-not $Datas) {
@@ -681,7 +684,7 @@ function Move-SheetsToFront {
         [object]$Workbook,
         [string]$Keyword
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $targetSheets = @()
@@ -732,7 +735,7 @@ function Export-RangeToFile {
         [Parameter(Mandatory)]
         [string]$OutputFilePath
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $values = $Range.Value2
@@ -777,7 +780,7 @@ function Export-ArrayToFile {
         [Parameter(Mandatory)]
         [string]$OutputFilePath
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     $Datas = Convert-BreakLine $Datas
     $lines = foreach ($row in $Datas) {
@@ -844,7 +847,7 @@ function Expand-ColumnsFromTemplate {
         [int]$TotalSets,
         [switch]$InsertBeforeCopy
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     if ($TotalSets -le 1) { return }
@@ -901,7 +904,7 @@ function Expand-RowsFromTemplate {
         [switch]$InsertBeforeCopy
     )
     
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     if ($TotalSets -le 1) { return }
@@ -966,7 +969,7 @@ function Transpose-Array {
     param(
         [object[][]]$data
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $rowCount = $data.Count
@@ -1002,7 +1005,7 @@ function Create-MasterDatas {
         [Parameter(Mandatory=$true)]
         [hashtable]$HeaderMap
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $dataLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex $SheetIndex
@@ -1073,7 +1076,7 @@ function Export-GroupSummaryDataCore {
         [string]$DataMarkerKey,
         [switch]$FormatAsText
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $dataStartCell = Get-CellByKey $Sheet $DataMarkerKey -ErrorOnMissing
@@ -1157,7 +1160,7 @@ function Create-UserDatas {
         [Parameter(Mandatory=$true)]
         [string]$DataFilePath
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $headerMap = @{

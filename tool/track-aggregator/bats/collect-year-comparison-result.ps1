@@ -34,7 +34,7 @@ function Get-YearSummaryDatas {
         [string]$GroupName,
         [array]$Dimensions  # 各要素: @{ Key = <集計軸のプロパティ名>; Names = <値の一覧> }
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $userCodes = $UserDatas.userCode
@@ -71,7 +71,7 @@ function Get-CourseGroupDatas {
     param(
         [string]$CourseGroupDefs
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
 
     $courseGroups = foreach ($groupDef in ($CourseGroupDefs -split ";" | Where-Object { $_ -ne "" })) {
         $parts = $groupDef -split ":", 2
@@ -92,7 +92,7 @@ function Create-YearComparisonDatas {
         [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順。各要素は @{ year = <int>; summaryDatas = <Get-YearSummaryDatasの戻り値> }
         [int]$YearOrder = 1  # 年度行の表示順（差分計算には影響しない）。0:昇順（古い→新しい） 1:降順（新しい→古い）
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $pickedSurveyItems = Get-PrimeSurveyItems
@@ -161,7 +161,7 @@ function Create-DimensionYearComparisonDatas {
         [array]$DimensionNames,
         [int]$YearOrder = 1  # 年度行の表示順（差分計算には影響しない）。0:昇順（古い→新しい） 1:降順（新しい→古い）
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $pickedSurveyItems = Get-PrimeSurveyItems
@@ -275,7 +275,7 @@ function Export-DimensionYearComparisonData {
         [string]$SourceTemplateSheetName,  # 会社別・ランク別・クラス別で共通のテンプレートシート名
         $TemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     # 共通テンプレートシートを複製し、この集計軸専用のシート名にリネームした上で列見出しを設定する
@@ -353,7 +353,7 @@ function Export-YearComparisonData {
         [int]$RowsPerCourse,
         $TemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $pickedSurveyItems = Get-PrimeSurveyItems
@@ -414,7 +414,7 @@ function Export-Excel {
         [int]$RowsPerCourse,
         [string]$OutputFilePath
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $excel = $null
