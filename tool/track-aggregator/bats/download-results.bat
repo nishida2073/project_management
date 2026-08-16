@@ -22,12 +22,12 @@ for %%F in ("%MasterDataRootDir%\*.xlsx") do (
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "& '%SCRIPT_PATH%'" ^
           "   -MasterDataFilePath '%%F'" ^
-          "   -AutoHotkeyExePath '%AutoHotkeyExePath%'" ^
-          "   -AutoHotkeyScriptPath '%AutoHotkeyScriptPath%'" ^
+          "   -AutoHotkeyExePath '!AutoHotkeyExePath!'" ^
+          "   -AutoHotkeyScriptPath '!AutoHotkeyScriptPath!'" ^
           "   -TargetGroupName '%%~nF'" ^
-          "   -TestResultRootDir '%TestResultRootDir%'" ^
-          "   -SurveyResultRootDir '%SurveyResultRootDir%'" ^
-          "   -DownloadDetail '%DownloadDetail%';" ^
+          "   -TestResultRootDir '!TestResultRootDir!'" ^
+          "   -SurveyResultRootDir '!SurveyResultRootDir!'" ^
+          "   -DownloadDetail '!DownloadDetail!';" ^
           "Remove-Item -Path '!JOB_FLAG!' -Force;"
         
     ) else (

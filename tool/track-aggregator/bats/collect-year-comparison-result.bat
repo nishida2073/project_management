@@ -21,7 +21,7 @@ for %%A in (%*) do (
 set "SCRIPT_PATH=%~dp0collect-year-comparison-result.ps1"
 
 set "OutputTargetDir=%OutputYearComparisonCollectDir%"
-set "TemplateFilePath=%TemplateRootDir%\”N“x”äŠrŒ‹‰Ê.xlsx"
+set "TemplateFilePath=%TemplateRootDir%\Œo”N”äŠrŒ‹‰Ê.xlsx"
 
 for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
     call "%~dp0message.bat" "Start %MyName% [%%G]"
@@ -35,20 +35,20 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "& '%SCRIPT_PATH%'" ^
-          "   -MasterDataRootDir '%MasterDataRootDir%'" ^
+          "   -MasterDataRootDir '!MasterDataRootDir!'" ^
           "   -TargetGroupName '%%G'" ^
-          "   -TargetYear '%TargetYear%'" ^
-          "   -ComparePeriod '%ComparePeriod%'" ^
-          "   -OutputRootDir '%OutputTargetDir%'" ^
+          "   -TargetYear '!TargetYear!'" ^
+          "   -ComparePeriod '!ComparePeriod!'" ^
+          "   -OutputRootDir '!OutputTargetDir!'" ^
           "   -TemplateFilePath '!TemplateFilePath!'" ^
-          "   -SurveyResultRootDir '%SurveyResultRootDir%'" ^
-          "   -TestResultRootDir '%TestResultRootDir%'" ^
-          "   -PassScore '%PassScore%'" ^
-          "   -TargetCompanyNames '%TargetCompanyNames%'" ^
-          "   -TargetRankNames '%TargetRankNames%'" ^
-          "   -TargetClassNames '%TargetClassNames%'" ^
-          "   -CourseGroupDefs '%CourseGroupDefs%'" ^
-          "   -YearOrder '%YearOrder%';" ^
+          "   -SurveyResultRootDir '!SurveyResultRootDir!'" ^
+          "   -TestResultRootDir '!TestResultRootDir!'" ^
+          "   -PassScore '!PassScore!'" ^
+          "   -TargetCompanyNames '!TargetCompanyNames!'" ^
+          "   -TargetRankNames '!TargetRankNames!'" ^
+          "   -TargetClassNames '!TargetClassNames!'" ^
+          "   -CourseGroupDefs '!CourseGroupDefs!'" ^
+          "   -YearOrder '!YearOrder!';" ^
           "Remove-Item -Path '!JOB_FLAG!' -Force;"
 
     ) else (

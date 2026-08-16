@@ -21,6 +21,8 @@ Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
     Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
 }
 
+$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+
 # ComparePeriod年前から現在年度までの各年度分＋差分行で1コースあたりの行数を決める
 $rowsPerCourse = $ComparePeriod + 2
 
@@ -535,7 +537,7 @@ $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
     }
 }
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-年度比較結果.xlsx"
+$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-経年比較結果.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
 Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath

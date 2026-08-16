@@ -26,11 +26,11 @@ for %%F in ("%MasterDataRootDir%\*.xlsx") do (
           "   -BaseUrl '!BaseUrl!'" ^
           "   -MasterDataFilePath '%%F'" ^
           "   -TargetGroupName '%%~nF'" ^
-          "   -OutputRootDir '%OutputTargetDir%'" ^
+          "   -OutputRootDir '!OutputTargetDir!'" ^
           "   -ResultRootDir '!TestResultRootDir!'" ^
           "   -TemplateFilePath '!TemplateFilePath!'" ^
-          "   -PassScore '%PassScore%'" ^
-          "   -ShowDetail '%ShowDetail%';" ^
+          "   -PassScore '!PassScore!'" ^
+          "   -ShowDetail '!ShowDetail!';" ^
           "Remove-Item -Path '!JOB_FLAG!' -Force;"
         
     ) else (

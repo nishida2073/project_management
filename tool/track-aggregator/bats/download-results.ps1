@@ -14,6 +14,8 @@ Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
     Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
 }
 
+$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+
 function Download-File {
     param(
         [string]$Url,
