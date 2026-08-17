@@ -32,7 +32,9 @@ object UploadLogStore {
         val message: String,
         val smsId: Long?,
         val profileName: String?,
-        val manual: Boolean
+        val manual: Boolean,
+        /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
+        val parsedSms: ParsedSms? = null
     )
 
     private fun prefs(context: Context) =
@@ -48,7 +50,8 @@ object UploadLogStore {
         message: String,
         smsId: Long? = null,
         profileName: String? = null,
-        manual: Boolean = false
+        manual: Boolean = false,
+        parsedSms: ParsedSms? = null
     ) {
         val entries = getAll(context).toMutableList()
         entries.add(
@@ -63,7 +66,8 @@ object UploadLogStore {
                 message = message,
                 smsId = smsId,
                 profileName = profileName,
-                manual = manual
+                manual = manual,
+                parsedSms = parsedSms
             )
         )
 
@@ -80,6 +84,15 @@ object UploadLogStore {
                 .put("smsId", entry.smsId ?: NO_SMS_ID)
                 .put("manual", entry.manual)
             entry.profileName?.let { obj.put("profileName", it) }
+            entry.parsedSms?.let {
+                obj.put(
+                    "parsedSms",
+                    JSONObject()
+                        .put("companyName", it.companyName)
+                        .put("userName", it.userName)
+                        .put("content", it.content)
+                )
+            }
             array.put(obj)
         }
 
@@ -102,7 +115,14 @@ object UploadLogStore {
                 message = obj.optString("message", ""),
                 smsId = if (smsId == NO_SMS_ID) null else smsId,
                 profileName = obj.optString("profileName", "").ifBlank { null },
-                manual = obj.optBoolean("manual", false)
+                manual = obj.optBoolean("manual", false),
+                parsedSms = obj.optJSONObject("parsedSms")?.let {
+                    ParsedSms(
+                        companyName = it.optString("companyName", ""),
+                        userName = it.optString("userName", ""),
+                        content = it.optString("content", "")
+                    )
+                }
             )
         }
     }

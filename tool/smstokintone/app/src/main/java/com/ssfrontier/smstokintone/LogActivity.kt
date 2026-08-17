@@ -118,27 +118,38 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 0, 0, 4)
             }
 
-            // グループ3: 結果（送信完了のみ成功＝緑・失敗＝赤で色付け）
-            val resultView = TextView(this).apply {
-                text = if (entry.type == UploadLogStore.EntryType.SEND_COMPLETE) {
-                    val resultLabel = if (entry.success) {
-                        getString(R.string.log_result_success)
-                    } else {
-                        getString(R.string.log_result_failure)
-                    }
-                    "[$resultLabel] ${entry.message}"
+            // グループ3: 結果（送信完了のみ成功＝緑・失敗＝赤で色付け。ラベルとメッセージは別列に分ける）
+            val resultView: View = if (entry.type == UploadLogStore.EntryType.SEND_COMPLETE) {
+                val resultLabel = if (entry.success) {
+                    getString(R.string.log_result_success)
                 } else {
-                    entry.message
+                    getString(R.string.log_result_failure)
                 }
-                setPadding(0, 16, 0, 4)
-                if (entry.type == UploadLogStore.EntryType.SEND_COMPLETE) {
-                    setTextColor(
-                        ContextCompat.getColor(
-                            this@LogActivity,
-                            if (entry.success) R.color.log_success else R.color.log_failure
-                        )
-                    )
+                val resultColor = ContextCompat.getColor(
+                    this@LogActivity,
+                    if (entry.success) R.color.log_success else R.color.log_failure
+                )
+                buildLabeledMessageRow(resultLabel, entry.message, resultColor, topPadding = 16)
+            } else {
+                TextView(this).apply {
+                    text = entry.message
+                    setPadding(0, 16, 0, 4)
                 }
+            }
+
+            // グループ4: 会社名・氏名・内容の分割結果（送信結果とは別の行で表示。結果の行と同じレイアウト）
+            val splitResultView = entry.parsedSms?.let { parsed ->
+                val succeeded = parsed.companyName.isNotBlank() && parsed.userName.isNotBlank() && parsed.content.isNotBlank()
+                val splitLabel = if (succeeded) {
+                    getString(R.string.log_result_success)
+                } else {
+                    getString(R.string.log_result_failure)
+                }
+                val splitColor = ContextCompat.getColor(
+                    this@LogActivity,
+                    if (succeeded) R.color.log_success else R.color.log_failure
+                )
+                buildLabeledMessageRow(splitLabel, getString(R.string.log_split_label), splitColor, topPadding = 4)
             }
 
             val divider = View(this).apply {
@@ -155,7 +166,25 @@ class LogActivity : AppCompatActivity() {
             binding.llLogContainer.addView(smsTimestampView)
             binding.llLogContainer.addView(bodyView)
             binding.llLogContainer.addView(resultView)
+            splitResultView?.let { binding.llLogContainer.addView(it) }
             binding.llLogContainer.addView(divider)
+        }
+    }
+
+    /** 「[ラベル] メッセージ」を横並びの別列に分けた行を作る */
+    private fun buildLabeledMessageRow(label: String, message: String, color: Int, topPadding: Int): View {
+        return android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            setPadding(0, topPadding, 0, 4)
+            addView(TextView(this@LogActivity).apply {
+                text = "[$label]"
+                setTextColor(color)
+            })
+            addView(TextView(this@LogActivity).apply {
+                text = message
+                setTextColor(color)
+                setPadding(8, 0, 0, 0)
+            })
         }
     }
 }

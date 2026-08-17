@@ -62,22 +62,22 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             contentValue = parsed.content
         )) {
             is KintoneApi.PostResult.Success -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, parsedSms = parsed)
                 Result.success()
             }
             is KintoneApi.PostResult.Skipped -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, parsedSms = parsed)
                 Result.success()
             }
             is KintoneApi.PostResult.HttpFailure -> {
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName, manual = manual)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName, manual = manual, parsedSms = parsed)
                 if (result.code in 500..599) Result.retry() else Result.success()
             }
             is KintoneApi.PostResult.NetworkError -> {
                 Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${result.message}", profileName = profile.displayName, manual = manual)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${result.message}", profileName = profile.displayName, manual = manual, parsedSms = parsed)
                 Result.retry()
             }
         }
@@ -113,7 +113,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         success: Boolean,
         message: String,
         profileName: String?,
-        manual: Boolean
+        manual: Boolean,
+        parsedSms: ParsedSms? = null
     ) {
         UploadLogStore.add(
             applicationContext,
@@ -125,7 +126,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             message = message,
             smsId = smsId,
             profileName = profileName,
-            manual = manual
+            manual = manual,
+            parsedSms = parsedSms
         )
     }
 
