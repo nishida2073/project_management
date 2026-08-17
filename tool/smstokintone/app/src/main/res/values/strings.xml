@@ -75,6 +75,7 @@
     <string name="log_type_receive">受信完了</string>
     <string name="log_type_send_start">送信開始</string>
     <string name="log_type_send_complete">送信完了</string>
+    <string name="log_split_label">原文の分割</string>
     <string name="btn_clear_log">クリア</string>
     <string name="btn_refresh_log">更新</string>
     <string name="confirm_clear_log_title">ログをクリアしますか？</string>
