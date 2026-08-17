@@ -242,7 +242,7 @@
             android:hint="@string/hint_field_company">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFieldCompany"
+                android:id="@+id/etFieldCompanyName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />
@@ -265,10 +265,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="@string/hint_field_reason">
+            android:hint="@string/hint_field_content">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFieldReason"
+                android:id="@+id/etFieldContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text" />

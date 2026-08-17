@@ -35,12 +35,12 @@
     <string name="hint_login_password">パスワード</string>
     <string name="section_field_mapping">フィールドコード</string>
     <string name="hint_field_sender">送信元</string>
-    <string name="hint_field_body">内容</string>
+    <string name="hint_field_body">原文</string>
     <string name="hint_field_datetime">最終受信日時</string>
     <string name="hint_field_type">登録種別</string>
     <string name="hint_field_company">会社名</string>
     <string name="hint_field_user_name">氏名</string>
-    <string name="hint_field_reason">理由</string>
+    <string name="hint_field_content">内容</string>
     <string name="section_update_condition">更新条件</string>
     <string name="hint_update_window_hours">最終受信日時の範囲</string>
     <string name="helper_update_window_hours">送信元が一致し、最終受信日時との差がこの時間の範囲であれば、新規登録ではなく更新にします</string>

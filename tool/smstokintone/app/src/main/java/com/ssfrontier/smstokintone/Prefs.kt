@@ -71,9 +71,9 @@ object Prefs {
         val fieldDatetime: String,
         val fieldType: String,
         val updateWindowHours: Int,
-        val fieldCompany: String = "",
+        val fieldCompanyName: String = "",
         val fieldUserName: String = "",
-        val fieldReason: String = ""
+        val fieldContent: String = ""
     ) {
         val keywordList: List<String>
             get() = keywords.split(",").map { it.trim() }.filter { it.isNotEmpty() }
@@ -113,9 +113,9 @@ object Prefs {
                 fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME,
                 fieldType = Defaults.NEW_PROFILE_FIELD_TYPE,
                 updateWindowHours = Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS,
-                fieldCompany = Defaults.NEW_PROFILE_FIELD_COMPANY,
+                fieldCompanyName = Defaults.NEW_PROFILE_FIELD_COMPANY_NAME,
                 fieldUserName = Defaults.NEW_PROFILE_FIELD_USER_NAME,
-                fieldReason = Defaults.NEW_PROFILE_FIELD_REASON
+                fieldContent = Defaults.NEW_PROFILE_FIELD_CONTENT
             )
         }
     }
@@ -164,9 +164,9 @@ object Prefs {
                     .put("fieldDatetime", profile.fieldDatetime)
                     .put("fieldType", profile.fieldType)
                     .put("updateWindowHours", profile.updateWindowHours)
-                    .put("fieldCompany", profile.fieldCompany)
+                    .put("fieldCompanyName", profile.fieldCompanyName)
                     .put("fieldUserName", profile.fieldUserName)
-                    .put("fieldReason", profile.fieldReason)
+                    .put("fieldContent", profile.fieldContent)
             )
         }
         prefs(context).edit().putString(KEY_KINTONE_PROFILES, array.toString()).apply()
@@ -194,9 +194,9 @@ object Prefs {
                 fieldDatetime = obj.optString("fieldDatetime", ""),
                 fieldType = obj.optString("fieldType", ""),
                 updateWindowHours = obj.optInt("updateWindowHours", Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS),
-                fieldCompany = obj.optString("fieldCompany", ""),
+                fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
-                fieldReason = obj.optString("fieldReason", "")
+                fieldContent = obj.optString("fieldContent", "")
             )
         }
     }

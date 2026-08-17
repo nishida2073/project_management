@@ -33,7 +33,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val profile = Prefs.findProfileForBody(applicationContext, body)
         logStart(sender, body, timestampMillis, smsId, profileName = profile?.displayName, manual = manual)
 
-        // SMS本文から会社名・氏名・理由を抽出（ラベルの表記ゆれ・記述順の違いに対応）
+        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応）
         val parsed = SmsParser.parseSms(body)
 
         if (profile == null || !profile.isValid) {
@@ -57,9 +57,9 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             senderValue = sender,
             bodyValue = body,
             datetimeIsoValue = datetimeIso,
-            companyValue = parsed.company,
+            companyNameValue = parsed.companyName,
             userNameValue = parsed.userName,
-            reasonValue = parsed.reason
+            contentValue = parsed.content
         )) {
             is KintoneApi.PostResult.Success -> {
                 logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)

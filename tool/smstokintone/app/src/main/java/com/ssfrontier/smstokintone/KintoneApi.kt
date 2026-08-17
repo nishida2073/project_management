@@ -41,9 +41,9 @@ object KintoneApi {
         senderValue: String,
         bodyValue: String,
         datetimeIsoValue: String?,
-        companyValue: String = "",
+        companyNameValue: String = "",
         userNameValue: String = "",
-        reasonValue: String = ""
+        contentValue: String = ""
     ): PostResult {
         val entryText = buildEntryText(datetimeIsoValue, bodyValue)
 
@@ -67,10 +67,10 @@ object KintoneApi {
             } else {
                 datetimeIsoValue
             }
-            val record = buildRecord(profile, senderValue, mergedBody, recordDatetimeIsoValue, companyValue, userNameValue, reasonValue)
+            val record = buildRecord(profile, senderValue, mergedBody, recordDatetimeIsoValue, companyNameValue, userNameValue, contentValue)
             updateRecord(profile, existing.id, record)
         } else {
-            val record = buildRecord(profile, senderValue, entryText, datetimeIsoValue, companyValue, userNameValue, reasonValue)
+            val record = buildRecord(profile, senderValue, entryText, datetimeIsoValue, companyNameValue, userNameValue, contentValue)
             insertRecord(profile, record)
         }
     }
@@ -138,9 +138,9 @@ object KintoneApi {
         senderValue: String,
         bodyValue: String,
         datetimeIsoValue: String?,
-        companyValue: String = "",
+        companyNameValue: String = "",
         userNameValue: String = "",
-        reasonValue: String = ""
+        contentValue: String = ""
     ): JSONObject {
         val record = JSONObject()
         if (profile.fieldSender.isNotBlank()) {
@@ -153,16 +153,16 @@ object KintoneApi {
         if (profile.fieldType.isNotBlank()) {
             record.put(profile.fieldType, JSONObject().put("value", Defaults.REGISTRATION_TYPE_VALUE))
         }
-        // SMS本文からパースした会社名・氏名・理由。
+        // SMS本文からパースした会社名・氏名・内容。
         // フィールドコードが未設定（空文字）の場合はkintone側に送らない。
-        if (profile.fieldCompany.isNotBlank() && companyValue.isNotBlank()) {
-            record.put(profile.fieldCompany, JSONObject().put("value", companyValue))
+        if (profile.fieldCompanyName.isNotBlank() && companyNameValue.isNotBlank()) {
+            record.put(profile.fieldCompanyName, JSONObject().put("value", companyNameValue))
         }
         if (profile.fieldUserName.isNotBlank() && userNameValue.isNotBlank()) {
             record.put(profile.fieldUserName, JSONObject().put("value", userNameValue))
         }
-        if (profile.fieldReason.isNotBlank() && reasonValue.isNotBlank()) {
-            record.put(profile.fieldReason, JSONObject().put("value", reasonValue))
+        if (profile.fieldContent.isNotBlank() && contentValue.isNotBlank()) {
+            record.put(profile.fieldContent, JSONObject().put("value", contentValue))
         }
         return record
     }

@@ -4,12 +4,12 @@ package com.ssfrontier.smstokintone
  * SMS本文をパースした結果
  */
 data class ParsedSms(
-    val company: String = "",
+    val companyName: String = "",
     val userName: String = "",
-    val reason: String = ""
+    val content: String = ""
 ) {
     /** 何も抽出できなかったかどうか */
-    fun isEmpty(): Boolean = company.isEmpty() && userName.isEmpty() && reason.isEmpty()
+    fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && content.isEmpty()
 }
 
 /**
@@ -17,16 +17,16 @@ data class ParsedSms(
  *
  * 「会社名：」「会社：」「御社名：」など、ラベルの表記ゆれがあっても、
  * また項目の記述順が入れ替わっていても、正しく項目を認識できるようにしています。
- * 理由のラベル（「理由：」）は省略可能で、氏名・会社名より後に続く自由記述はラベルが
- * 無くても理由として取り込みます。
+ * 内容のラベル（「内容：」）は省略可能で、氏名・会社名より後に続く自由記述はラベルが
+ * 無くても内容として取り込みます。
  *
- * 対応例1（ラベルあり、理由ラベルは省略可）:
+ * 対応例1（ラベルあり、内容ラベルは省略可）:
  * 会社名：XXX
  * 氏名：YYY
- * 理由：
+ * 内容：
  * XXX（複数行OK）
  *
- * 対応例2（ラベルなし、1行目:会社名 2行目:氏名 3行目以降:理由）:
+ * 対応例2（ラベルなし、1行目:会社名 2行目:氏名 3行目以降:内容）:
  * XXX
  * YYY
  * XXX（複数行OK）
@@ -36,9 +36,9 @@ object SmsParser {
     // ラベルのエイリアス（別名）一覧。
     // 新しい表記ゆれが見つかったら、ここに追加するだけで対応できます。
     private val FIELD_ALIASES: Map<String, List<String>> = mapOf(
-        "company" to listOf("会社名", "会社"),
+        "companyName" to listOf("会社名", "会社"),
         "userName" to listOf("氏名", "名前"),
-        "reason" to listOf("理由", "内容","用件")
+        "content" to listOf("理由", "内容","用件")
     )
 
     private data class LabelMatch(val key: String, val value: String)
@@ -76,50 +76,54 @@ object SmsParser {
         if (body.isNullOrBlank()) return ParsedSms()
 
         val normalized = body.replace("\r\n", "\n").replace("\r", "\n").trim()
-        val lines = normalized.split("\n")
+        val contentLines = normalized.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
-        var company = ""
+        // 行数が3行未満（会社名・氏名・内容をそれぞれ1行で書く想定に対して行数が足りない）
+        // 場合は、氏名・会社名を1行でまとめて書く人がいるため抽出せず空のまま返す。
+        // SMS本文自体は別途Bodyフィールドにそのまま登録されるため、ここで内容に詰め直す必要はない
+        if (contentLines.size < 3) {
+            return ParsedSms()
+        }
+
+        var companyName = ""
         var userName = ""
-        var reason = ""
-        // 理由は複数行の値を続けて追記できるようにする
+        var content = ""
+        // 内容は複数行の値を続けて追記できるようにする
         var currentKey: String? = null
 
-        for (rawLine in lines) {
-            val line = rawLine.trim()
-            if (line.isEmpty()) continue
-
+        for (line in contentLines) {
             // ラベル行なら記述順に関係なく値だけを取り出す
             val labelMatch = matchLabelLine(line)
             if (labelMatch != null) {
                 when (labelMatch.key) {
-                    "company" -> company = labelMatch.value
+                    "companyName" -> companyName = labelMatch.value
                     "userName" -> userName = labelMatch.value
-                    "reason" -> reason = labelMatch.value
+                    "content" -> content = labelMatch.value
                 }
-                currentKey = if (labelMatch.key == "reason") "reason" else null
+                currentKey = if (labelMatch.key == "content") "content" else null
                 continue
             }
 
             when {
-                // 理由の続き（複数行対応）
-                currentKey == "reason" -> reason = if (reason.isEmpty()) line else "$reason\n$line"
+                // 内容の続き（複数行対応）
+                currentKey == "content" -> content = if (content.isEmpty()) line else "$content\n$line"
                 // ラベルが省略されている場合は行の位置で判定する（1つ目の未確定項目に会社名、2つ目に氏名を割り当てる）
-                company.isEmpty() -> company = line
+                companyName.isEmpty() -> companyName = line
                 userName.isEmpty() -> userName = line
-                // 氏名・会社名が確定済みなら、以降はラベルが無くても理由として取り込む
+                // 氏名・会社名が確定済みなら、以降はラベルが無くても内容として取り込む
                 else -> {
-                    reason = line
-                    currentKey = "reason"
+                    content = line
+                    currentKey = "content"
                 }
             }
         }
 
-        // 理由の先頭行が空行の場合は除去する
-        val reasonLines = reason.split("\n")
-        if (reasonLines.first().isBlank()) {
-            reason = reasonLines.drop(1).joinToString("\n")
+        // 内容の先頭行が空行の場合は除去する
+        val contentValueLines = content.split("\n")
+        if (contentValueLines.first().isBlank()) {
+            content = contentValueLines.drop(1).joinToString("\n")
         }
 
-        return ParsedSms(company = company, userName = userName, reason = reason)
+        return ParsedSms(companyName = companyName, userName = userName, content = content)
     }
 }
