@@ -80,19 +80,27 @@ function Get-BatEnvVars {
 }
 
 # バッチファイルをcmd.exe経由で実行し、標準出力を1行ずつ$OnOutputLineへ渡す。
+# $BatArgsはバッチファイル自身への追加引数（例: "TargetCompanyNames:ABC,DEF"）。
+# カンマやスペースを含んでいても1つの引数として渡るよう、それぞれ個別にクォートする。
 # $CurrentProcessRefを渡すと、呼び出し側でウィンドウを閉じる際にプロセスを強制終了できるよう
 # 実行中のProcessオブジェクトを書き戻す
 function Invoke-BatStep {
     param(
         [Parameter(Mandatory)][string]$BatPath,
         [Parameter(Mandatory)][string]$WorkingDirectory,
+        [string[]]$BatArgs,
         [scriptblock]$OnOutputLine,
         [ref]$CurrentProcessRef
     )
 
+    $batArgsSegment = ""
+    foreach ($batArg in $BatArgs) {
+        $batArgsSegment += " ""$batArg"""
+    }
+
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "cmd.exe"
-    $psi.Arguments = "/c ""`"$BatPath`" 2>&1"""
+    $psi.Arguments = "/c ""`"$BatPath`"$batArgsSegment 2>&1"""
     $psi.WorkingDirectory = $WorkingDirectory
     $psi.UseShellExecute = $false
     $psi.RedirectStandardOutput = $true

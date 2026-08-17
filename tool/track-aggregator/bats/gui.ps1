@@ -48,7 +48,22 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{ Label = "テスト結果集計"; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
             [PSCustomObject]@{ Label = "アンケート結果集計"; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
-            [PSCustomObject]@{ Label = "経年比較集計"; BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat"); TargetDirPath = $script:commonEnvVars["OutputYearComparisonCollectDir"] }
+            [PSCustomObject]@{
+                Label = "経年比較集計"
+                BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat")
+                TargetDirPath = $script:commonEnvVars["OutputYearComparisonCollectDir"]
+                Inputs = @(
+                    [PSCustomObject]@{ Name = "TargetCompanyNames"; Label = "対象の会社名"; Default = $script:commonEnvVars["TargetCompanyNames"]; LabelWidth = 85; InputWidth = 260 }
+                    [PSCustomObject]@{ Name = "ComparePeriod"; Label = "比較年"; Default = $script:commonEnvVars["ComparePeriod"]; LabelWidth = 50; InputWidth = 40 }
+                    [PSCustomObject]@{
+                        Name = "YearOrder"; Label = "表示順"; Default = $script:commonEnvVars["YearOrder"]; LabelWidth = 55; InputWidth = 70
+                        Options = @(
+                            [PSCustomObject]@{ Text = "昇順"; Value = "0" }
+                            [PSCustomObject]@{ Text = "降順"; Value = "1" }
+                        )
+                    }
+                )
+            }
         )
     }
 )
@@ -74,6 +89,7 @@ $tabResult = New-CategoryTabControl -CategoryDefs $categoryDefs -OnRunClick { pa
 $tabControl = $tabResult.TabControl
 $script:runButtons = $tabResult.RunButtons
 $script:stepStatusLabels = $tabResult.StepStatusLabels
+$script:inputControls = $tabResult.InputControls
 
 function Set-StepStatus {
     param([string]$Label, [string]$Text)
@@ -118,7 +134,15 @@ function Invoke-BatButton {
     Write-Log ""
     Write-Log "===== $($ButtonDef.Label) ====="
 
-    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath `
+    $batArgs = @()
+    $inputMap = $script:inputControls[$ButtonDef.Label]
+    if ($inputMap) {
+        foreach ($inputName in $inputMap.Keys) {
+            $batArgs += "$($inputName):$(Get-InputValue -Control $inputMap[$inputName])"
+        }
+    }
+
+    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
         -OnOutputLine { param($line) Write-Log $line } `
         -CurrentProcessRef ([ref]$script:currentProc)
 

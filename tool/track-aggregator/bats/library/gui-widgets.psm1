@@ -91,6 +91,17 @@ function Set-StatusLabelText {
     $Label.ForeColor = $ForeColor
 }
 
+# New-CategoryTabControlのInputControlsから実際の値を取り出す。
+# ComboBox（Optionsで作られた選択式の入力）は表示テキストではなく選択された項目のValueを返す
+function Get-InputValue {
+    param([Parameter(Mandatory)]$Control)
+    if ($Control -is [System.Windows.Forms.ComboBox]) {
+        if ($Control.SelectedItem) { return "$($Control.SelectedItem.Value)" }
+        return ""
+    }
+    return $Control.Text
+}
+
 # WinFormsのDock仕様: 同じDock方向のコントロールは、後からAddしたものほど外側（画面端側）に配置され、
 # Dock=Fillは常に他のDockが確定した後に残り全域へ解決される。この2点を踏まえないと、
 # 個別にAddした場合にコントロール同士が重なって描画されることがある。
@@ -115,8 +126,12 @@ function Add-StackedDockedControls {
 }
 
 # カテゴリ（タブ）ごとにグループ化されたボタン群を持つTabControlを組み立てる。
-# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, TargetDirPath, ... }] }] の形。
+# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, TargetDirPath, Inputs, ... }] }] の形。
 # ButtonDefの中身は自由（Tagとしてそのままボタン/リンクに渡すだけで、業務ロジックは持たない）。
+# Inputsを指定すると、実行ボタンの上にラベル付きの入力欄を追加できる（その分グループボックスが縦に高くなる）。
+# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options } の形
+# （LabelWidth/InputWidthは省略可。Optionsを指定すると自由入力のTextBoxの代わりに、
+#   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形）。
 # 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-FolderOrWarnを使う。
 function New-CategoryTabControl {
     param(
@@ -126,6 +141,7 @@ function New-CategoryTabControl {
         [int]$GroupHeight = 60,
         [int]$GroupSpacing = 10,
         [int]$TabHeaderAllowance = 45,
+        [int]$InputRowHeight = 30,
         [string]$RunButtonText = "実行",
         [string]$OpenLinkText = "開く",
         [string]$InitialStatusText = "未実行"
@@ -135,14 +151,30 @@ function New-CategoryTabControl {
         $OnOpenClick = { param($path) Open-FolderOrWarn -Path $path }
     }
 
-    $maxButtonCount = ($CategoryDefs | ForEach-Object { $_.ButtonDefs.Count } | Measure-Object -Maximum).Maximum
+    function Get-ButtonGroupHeight {
+        param($ButtonDef)
+        if ($ButtonDef.Inputs) { return $GroupHeight + $InputRowHeight }
+        return $GroupHeight
+    }
+
+    function Get-CategoryPanelHeight {
+        param($ButtonDefs)
+        $total = $GroupSpacing
+        foreach ($bd in $ButtonDefs) {
+            $total += (Get-ButtonGroupHeight -ButtonDef $bd) + $GroupSpacing
+        }
+        return $total
+    }
+
+    $maxPanelHeight = ($CategoryDefs | ForEach-Object { Get-CategoryPanelHeight -ButtonDefs $_.ButtonDefs } | Measure-Object -Maximum).Maximum
 
     $tabControl = New-Object System.Windows.Forms.TabControl
     $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
-    $tabControl.Height = $TabHeaderAllowance + $GroupSpacing + (($GroupHeight + $GroupSpacing) * $maxButtonCount)
+    $tabControl.Height = $TabHeaderAllowance + $maxPanelHeight
 
     $runButtons = @{}
     $stepStatusLabels = @{}
+    $inputControls = @{}
 
     foreach ($cd in $CategoryDefs) {
         $tabPage = New-Object System.Windows.Forms.TabPage
@@ -151,22 +183,71 @@ function New-CategoryTabControl {
 
         $buttonPanel = New-Object System.Windows.Forms.Panel
         $buttonPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-        $buttonPanel.Height = $GroupSpacing + (($GroupHeight + $GroupSpacing) * $cd.ButtonDefs.Count)
+        $buttonPanel.Height = Get-CategoryPanelHeight -ButtonDefs $cd.ButtonDefs
         $tabPage.Controls.Add($buttonPanel)
 
         $groupY = $GroupSpacing
         foreach ($bd in $cd.ButtonDefs) {
+            $bdHeight = Get-ButtonGroupHeight -ButtonDef $bd
+            $contentY = if ($bd.Inputs) { 20 + $InputRowHeight } else { 20 }
+
             $grp = New-Object System.Windows.Forms.GroupBox
             $grp.Text = $bd.Label
             $grp.Location = New-Object System.Drawing.Point(10, $groupY)
-            $grp.Size = New-Object System.Drawing.Size(730, $GroupHeight)
+            $grp.Size = New-Object System.Drawing.Size(730, $bdHeight)
             $grp.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
             $buttonPanel.Controls.Add($grp)
+
+            if ($bd.Inputs) {
+                $inputMap = @{}
+                $inputX = 15
+                # TextBox/ComboBoxは指定したHeightを無視し、フォントに応じた高さに強制されるため、
+                # Labelとの縦の中央を揃えるには生成後の実際のHeightを見て個別にY位置を計算する必要がある
+                $inputRowCenterY = 15 + [int]($InputRowHeight / 2)
+                foreach ($inputDef in $bd.Inputs) {
+                    $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
+                    $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
+
+                    $lblInput = New-Object System.Windows.Forms.Label
+                    $lblInput.Text = "$($inputDef.Label):"
+                    $lblInput.AutoSize = $false
+                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleRight
+                    $lblInput.Size = New-Object System.Drawing.Size($labelWidth, 22)
+                    $lblInput.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($lblInput.Height / 2)))
+                    $grp.Controls.Add($lblInput)
+                    $inputX += $labelWidth + 4
+
+                    if ($inputDef.Options) {
+                        # DataSource経由のバインドはコントロールがフォームに追加されBindingContextが
+                        # 確定するまで反映されない（初期選択が効かない）ため、Itemsへ直接追加する方式にしている
+                        $inputCtrl = New-Object System.Windows.Forms.ComboBox
+                        $inputCtrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+                        $inputCtrl.Width = $inputWidth
+                        $inputCtrl.DisplayMember = "Text"
+                        foreach ($opt in $inputDef.Options) { $inputCtrl.Items.Add($opt) | Out-Null }
+                        $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
+                        if ($selectedOption) {
+                            $inputCtrl.SelectedItem = $selectedOption
+                        } elseif ($inputCtrl.Items.Count -gt 0) {
+                            $inputCtrl.SelectedIndex = 0
+                        }
+                    } else {
+                        $inputCtrl = New-Object System.Windows.Forms.TextBox
+                        $inputCtrl.Width = $inputWidth
+                        $inputCtrl.Text = "$($inputDef.Default)"
+                    }
+                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
+                    $grp.Controls.Add($inputCtrl)
+                    $inputMap[$inputDef.Name] = $inputCtrl
+                    $inputX += $inputWidth + 15
+                }
+                $inputControls[$bd.Label] = $inputMap
+            }
 
             $btn = New-Object System.Windows.Forms.Button
             $btn.Text = $RunButtonText
             $btn.Size = New-Object System.Drawing.Size(100, 30)
-            $btn.Location = New-Object System.Drawing.Point(15, 20)
+            $btn.Location = New-Object System.Drawing.Point(15, $contentY)
             $btn.Tag = $bd
             $btn.Add_Click({ & $OnRunClick $this.Tag }.GetNewClosure())
             $grp.Controls.Add($btn)
@@ -178,7 +259,7 @@ function New-CategoryTabControl {
                 $lnkOpen.AutoSize = $false
                 $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
-                $lnkOpen.Location = New-Object System.Drawing.Point(125, 20)
+                $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
                 $lnkOpen.Tag = $bd
                 $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag.TargetDirPath }.GetNewClosure())
                 $grp.Controls.Add($lnkOpen)
@@ -189,12 +270,12 @@ function New-CategoryTabControl {
             $lblStepStatus.AutoSize = $false
             $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
             $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
-            $lblStepStatus.Location = New-Object System.Drawing.Point(200, 24)
+            $lblStepStatus.Location = New-Object System.Drawing.Point(200, ($contentY + 4))
             $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
             $grp.Controls.Add($lblStepStatus)
             $stepStatusLabels[$bd.Label] = $lblStepStatus
 
-            $groupY += $GroupHeight + $GroupSpacing
+            $groupY += $bdHeight + $GroupSpacing
         }
     }
 
@@ -202,5 +283,6 @@ function New-CategoryTabControl {
         TabControl       = $tabControl
         RunButtons       = $runButtons
         StepStatusLabels = $stepStatusLabels
+        InputControls    = $inputControls
     }
 }
