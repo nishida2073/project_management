@@ -34,6 +34,7 @@ for %%F in ("%MasterDataRootDir%\*.xlsx") do (
           "     -TemplateFilePath '!TemplateFilePath!'" ^
           "     -PassScore '!PassScore!'" ^
           "     -ShowDetail '!ShowDetail!'" ^
+          "     -OutputFileSuffix '!OutputTestResultFileSuffix!'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
           "  throw" ^

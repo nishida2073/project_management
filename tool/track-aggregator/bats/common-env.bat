@@ -10,9 +10,13 @@ set "SurveyResultRootDir=%ResultRootDir%\02_アンケート"
 
 set "OutputRootDir=%~dp0..\tmp\集計結果"
 set "OutputTestCollectDir=%OutputRootDir%\テスト"
+set "OutputTestResultFileSuffix=テスト結果"
 set "OutputSurveyCollectDir=%OutputRootDir%\アンケート"
-set "OutputCombineCollectDir=%OutputRootDir%\統合データ"
+set "OutputSurveyResultFileSuffix=アンケート結果"
+set "OutputCombineCollectDir=%OutputRootDir%\統合"
+set "OutputCombineResultFileSuffix=統合結果"
 set "OutputYearComparisonCollectDir=%OutputRootDir%\経年比較"
+set "OutputYearComparisonResultFileSuffix=経年比較結果"
 
 set "PassScore=80"
 

@@ -31,23 +31,23 @@ $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env
 # GUIのタブ（カテゴリ）とその中に並べるボタンの定義。並べ方や見た目はNew-CategoryTabControl側の責務
 $categoryDefs = @(
     [PSCustomObject]@{
-        Label = "データ取得"
+        Label = "実施データ取得"
         ButtonDefs = @(
             [PSCustomObject]@{ Label = "データ取得"; BatchPath = (Join-Path $basePath "download-results.bat"); TargetDirPath = $script:commonEnvVars["MasterDataRootDir"] }
-            [PSCustomObject]@{ Label = "データ取得状況確認"; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"] }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"] }
         )
     }
     [PSCustomObject]@{
-        Label = "実施状況"
+        Label = "実施状況確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "実施状況集計"; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"] }
+            [PSCustomObject]@{ Label = "テスト・アンケート集計"; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"] }
         )
     }
     [PSCustomObject]@{
-        Label = "集計"
+        Label = "実施結果確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト結果集計"; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
-            [PSCustomObject]@{ Label = "アンケート結果集計"; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
+            [PSCustomObject]@{ Label = "テスト集計"; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
+            [PSCustomObject]@{ Label = "アンケート集計"; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
             [PSCustomObject]@{
                 Label = "経年比較集計"
                 BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat")

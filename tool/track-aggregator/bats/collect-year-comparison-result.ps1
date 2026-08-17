@@ -12,7 +12,8 @@
     [string]$TargetCompanyNames = "",  # カンマ区切り。空の場合は全社を対象とする
     [string]$TargetRankNames = "",     # カンマ区切り。空の場合は全ランクを対象とする
     [string]$TargetClassNames = "",    # カンマ区切り。空の場合は全クラスを対象とする
-    [int]$YearOrder = 1                # 年度行の表示順。0:昇順（古い→新しい） 1:降順（新しい→古い、既定）
+    [int]$YearOrder = 1,                # 年度行の表示順。0:昇順（古い→新しい） 1:降順（新しい→古い、既定）
+    [string]$OutputFileSuffix = "経年比較結果"
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -537,7 +538,7 @@ $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
     }
 }
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-経年比較結果.xlsx"
+$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-$OutputFileSuffix.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
 Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath

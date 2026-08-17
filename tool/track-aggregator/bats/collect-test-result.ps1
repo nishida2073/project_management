@@ -6,7 +6,8 @@
     [string]$ResultRootDir,
     [string]$TemplateFilePath,
     [int]$PassScore,
-    [int]$ShowDetail
+    [int]$ShowDetail,
+    [string]$OutputFileSuffix = "テスト結果"
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -546,7 +547,7 @@ $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetG
 $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
 # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-テスト結果.xlsx"
+$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
 Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
 

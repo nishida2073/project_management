@@ -52,6 +52,7 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
           "     -TargetClassNames '!TargetClassNames!'" ^
           "     -CourseGroupDefs '!CourseGroupDefs!'" ^
           "     -YearOrder '!YearOrder!'" ^
+          "     -OutputFileSuffix '!OutputYearComparisonResultFileSuffix!'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
           "  throw" ^
