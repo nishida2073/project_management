@@ -146,14 +146,20 @@ class SettingsActivity : AppCompatActivity() {
             null
         }
 
+        val testBody = getString(R.string.test_send_body)
+        val parsed = SmsParser.parseSms(testBody)
+
         itemBinding.btnTestSend.isEnabled = false
         CoroutineScope(Dispatchers.Main).launch {
             val result = withContext(Dispatchers.IO) {
                 KintoneApi.postRecord(
                     profile,
                     senderValue = Defaults.TEST_SEND_SENDER,
-                    bodyValue = getString(R.string.test_send_body),
-                    datetimeIsoValue = datetimeIso
+                    bodyValue = testBody,
+                    datetimeIsoValue = datetimeIso,
+                    companyNameValue = parsed.companyName,
+                    userNameValue = parsed.userName,
+                    contentValue = parsed.content
                 )
             }
             itemBinding.btnTestSend.isEnabled = true
