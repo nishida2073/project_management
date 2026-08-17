@@ -10,6 +10,9 @@ object Defaults {
     const val NEW_PROFILE_FIELD_BODY = "content"
     const val NEW_PROFILE_FIELD_DATETIME = "receive_datetime"
     const val NEW_PROFILE_FIELD_TYPE = "registration_type"
+    const val NEW_PROFILE_FIELD_COMPANY = "company_name"
+    const val NEW_PROFILE_FIELD_USER_NAME = "user_name"
+    const val NEW_PROFILE_FIELD_REASON = "reason"
     const val NEW_PROFILE_UPDATE_WINDOW_HOURS = 5
 
     const val TEST_SEND_SENDER = "09000000000"

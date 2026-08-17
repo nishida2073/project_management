@@ -36,7 +36,15 @@ object KintoneApi {
      * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
      * 既存レコードの最終受信日時と完全に一致する場合（同一SMSの重複配信など）は何も送信せずスキップする。
      */
-    fun postRecord(profile: Prefs.KintoneProfile, senderValue: String, bodyValue: String, datetimeIsoValue: String?): PostResult {
+    fun postRecord(
+        profile: Prefs.KintoneProfile,
+        senderValue: String,
+        bodyValue: String,
+        datetimeIsoValue: String?,
+        companyValue: String = "",
+        userNameValue: String = "",
+        reasonValue: String = ""
+    ): PostResult {
         val entryText = buildEntryText(datetimeIsoValue, bodyValue)
 
         val existing = if (profile.fieldSender.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
@@ -59,10 +67,10 @@ object KintoneApi {
             } else {
                 datetimeIsoValue
             }
-            val record = buildRecord(profile, senderValue, mergedBody, recordDatetimeIsoValue)
+            val record = buildRecord(profile, senderValue, mergedBody, recordDatetimeIsoValue, companyValue, userNameValue, reasonValue)
             updateRecord(profile, existing.id, record)
         } else {
-            val record = buildRecord(profile, senderValue, entryText, datetimeIsoValue)
+            val record = buildRecord(profile, senderValue, entryText, datetimeIsoValue, companyValue, userNameValue, reasonValue)
             insertRecord(profile, record)
         }
     }
@@ -125,7 +133,15 @@ object KintoneApi {
         return aMillis / 60_000L == bMillis / 60_000L
     }
 
-    private fun buildRecord(profile: Prefs.KintoneProfile, senderValue: String, bodyValue: String, datetimeIsoValue: String?): JSONObject {
+    private fun buildRecord(
+        profile: Prefs.KintoneProfile,
+        senderValue: String,
+        bodyValue: String,
+        datetimeIsoValue: String?,
+        companyValue: String = "",
+        userNameValue: String = "",
+        reasonValue: String = ""
+    ): JSONObject {
         val record = JSONObject()
         if (profile.fieldSender.isNotBlank()) {
             record.put(profile.fieldSender, JSONObject().put("value", senderValue))
@@ -136,6 +152,17 @@ object KintoneApi {
         }
         if (profile.fieldType.isNotBlank()) {
             record.put(profile.fieldType, JSONObject().put("value", Defaults.REGISTRATION_TYPE_VALUE))
+        }
+        // SMS本文からパースした会社名・氏名・理由。
+        // フィールドコードが未設定（空文字）の場合はkintone側に送らない。
+        if (profile.fieldCompany.isNotBlank() && companyValue.isNotBlank()) {
+            record.put(profile.fieldCompany, JSONObject().put("value", companyValue))
+        }
+        if (profile.fieldUserName.isNotBlank() && userNameValue.isNotBlank()) {
+            record.put(profile.fieldUserName, JSONObject().put("value", userNameValue))
+        }
+        if (profile.fieldReason.isNotBlank() && reasonValue.isNotBlank()) {
+            record.put(profile.fieldReason, JSONObject().put("value", reasonValue))
         }
         return record
     }

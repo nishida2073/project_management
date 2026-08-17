@@ -70,7 +70,10 @@ object Prefs {
         val fieldBody: String,
         val fieldDatetime: String,
         val fieldType: String,
-        val updateWindowHours: Int
+        val updateWindowHours: Int,
+        val fieldCompany: String = "",
+        val fieldUserName: String = "",
+        val fieldReason: String = ""
     ) {
         val keywordList: List<String>
             get() = keywords.split(",").map { it.trim() }.filter { it.isNotEmpty() }
@@ -109,7 +112,10 @@ object Prefs {
                 fieldBody = Defaults.NEW_PROFILE_FIELD_BODY,
                 fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME,
                 fieldType = Defaults.NEW_PROFILE_FIELD_TYPE,
-                updateWindowHours = Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
+                updateWindowHours = Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS,
+                fieldCompany = Defaults.NEW_PROFILE_FIELD_COMPANY,
+                fieldUserName = Defaults.NEW_PROFILE_FIELD_USER_NAME,
+                fieldReason = Defaults.NEW_PROFILE_FIELD_REASON
             )
         }
     }
@@ -158,6 +164,9 @@ object Prefs {
                     .put("fieldDatetime", profile.fieldDatetime)
                     .put("fieldType", profile.fieldType)
                     .put("updateWindowHours", profile.updateWindowHours)
+                    .put("fieldCompany", profile.fieldCompany)
+                    .put("fieldUserName", profile.fieldUserName)
+                    .put("fieldReason", profile.fieldReason)
             )
         }
         prefs(context).edit().putString(KEY_KINTONE_PROFILES, array.toString()).apply()
@@ -184,7 +193,10 @@ object Prefs {
                 fieldBody = obj.optString("fieldBody", ""),
                 fieldDatetime = obj.optString("fieldDatetime", ""),
                 fieldType = obj.optString("fieldType", ""),
-                updateWindowHours = obj.optInt("updateWindowHours", Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS)
+                updateWindowHours = obj.optInt("updateWindowHours", Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS),
+                fieldCompany = obj.optString("fieldCompany", ""),
+                fieldUserName = obj.optString("fieldUserName", ""),
+                fieldReason = obj.optString("fieldReason", "")
             )
         }
     }

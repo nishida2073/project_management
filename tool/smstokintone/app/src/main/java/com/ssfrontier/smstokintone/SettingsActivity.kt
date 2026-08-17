@@ -52,6 +52,9 @@ class SettingsActivity : AppCompatActivity() {
         itemBinding.etFieldBody.setText(profile.fieldBody)
         itemBinding.etFieldDatetime.setText(profile.fieldDatetime)
         itemBinding.etFieldType.setText(profile.fieldType)
+        itemBinding.etFieldCompany.setText(profile.fieldCompany)
+        itemBinding.etFieldUserName.setText(profile.fieldUserName)
+        itemBinding.etFieldReason.setText(profile.fieldReason)
         itemBinding.etUpdateWindowHours.setText(profile.updateWindowHours.toString())
 
         when (profile.authMethod) {
@@ -114,6 +117,9 @@ class SettingsActivity : AppCompatActivity() {
             fieldBody = itemBinding.etFieldBody.text.toString().trim(),
             fieldDatetime = itemBinding.etFieldDatetime.text.toString().trim(),
             fieldType = itemBinding.etFieldType.text.toString().trim(),
+            fieldCompany = itemBinding.etFieldCompany.text.toString().trim(),
+            fieldUserName = itemBinding.etFieldUserName.text.toString().trim(),
+            fieldReason = itemBinding.etFieldReason.text.toString().trim(),
             updateWindowHours = itemBinding.etUpdateWindowHours.text.toString().trim().toIntOrNull()
                 ?: Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
         )

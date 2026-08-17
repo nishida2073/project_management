@@ -33,6 +33,9 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val profile = Prefs.findProfileForBody(applicationContext, body)
         logStart(sender, body, timestampMillis, smsId, profileName = profile?.displayName, manual = manual)
 
+        // SMS本文から会社名・氏名・理由を抽出（ラベルの表記ゆれ・記述順の違いに対応）
+        val parsed = SmsParser.parseSms(body)
+
         if (profile == null || !profile.isValid) {
             logComplete(sender, body, timestampMillis, smsId, success = false, message = "本文に一致するkintoneの接続設定が見つからないか未完了です", profileName = profile?.displayName, manual = manual)
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
@@ -49,7 +52,15 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             null
         }
 
-        when (val result = KintoneApi.postRecord(profile, senderValue = sender, bodyValue = body, datetimeIsoValue = datetimeIso)) {
+        when (val result = KintoneApi.postRecord(
+            profile,
+            senderValue = sender,
+            bodyValue = body,
+            datetimeIsoValue = datetimeIso,
+            companyValue = parsed.company,
+            userNameValue = parsed.userName,
+            reasonValue = parsed.reason
+        )) {
             is KintoneApi.PostResult.Success -> {
                 logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual)
                 Result.success()
