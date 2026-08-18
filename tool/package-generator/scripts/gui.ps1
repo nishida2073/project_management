@@ -98,18 +98,24 @@ $chkUpload.Location = New-Object System.Drawing.Point(20, 92)
 
 $linkDownloadPath = New-Object System.Windows.Forms.LinkLabel
 $linkDownloadPath.Text = "開く"
-$linkDownloadPath.AutoSize = $true
-$linkDownloadPath.Location = New-Object System.Drawing.Point(220, 40)
+$linkDownloadPath.AutoSize = $false
+$linkDownloadPath.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+$linkDownloadPath.Size = New-Object System.Drawing.Size(40, $chkDownload.PreferredSize.Height)
+$linkDownloadPath.Location = New-Object System.Drawing.Point(220, $chkDownload.Location.Y)
 
 $linkGeneratePath = New-Object System.Windows.Forms.LinkLabel
 $linkGeneratePath.Text = "開く"
-$linkGeneratePath.AutoSize = $true
-$linkGeneratePath.Location = New-Object System.Drawing.Point(220, 66)
+$linkGeneratePath.AutoSize = $false
+$linkGeneratePath.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+$linkGeneratePath.Size = New-Object System.Drawing.Size(40, $chkGenerate.PreferredSize.Height)
+$linkGeneratePath.Location = New-Object System.Drawing.Point(220, $chkGenerate.Location.Y)
 
 $linkUploadPath = New-Object System.Windows.Forms.LinkLabel
 $linkUploadPath.Text = "開く"
-$linkUploadPath.AutoSize = $true
-$linkUploadPath.Location = New-Object System.Drawing.Point(220, 92)
+$linkUploadPath.AutoSize = $false
+$linkUploadPath.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+$linkUploadPath.Size = New-Object System.Drawing.Size(40, $chkUpload.PreferredSize.Height)
+$linkUploadPath.Location = New-Object System.Drawing.Point(220, $chkUpload.Location.Y)
 
 function Open-FolderPath {
     param([string]$Path)
@@ -581,13 +587,15 @@ function Update-SettingsFields {
             }
 
             if ($isFileBrowse) {
-                $btnOpen = New-Object System.Windows.Forms.Button
+                $btnOpen = New-Object System.Windows.Forms.LinkLabel
                 $btnOpen.Text = "開く"
-                $btnOpen.Location = New-Object System.Drawing.Point(640, ($y - 3))
-                $btnOpen.Size = New-Object System.Drawing.Size(70, 24)
+                $btnOpen.AutoSize = $false
+                $btnOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+                $btnOpen.Size = New-Object System.Drawing.Size(50, 22)
+                $btnOpen.Location = New-Object System.Drawing.Point(640, ($y - 2))
                 $btnOpen.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
                 $btnOpen.Tag = $txt
-                $btnOpen.Add_Click({
+                $btnOpen.Add_LinkClicked({
                     $targetTxt = $this.Tag
                     $openPath = Resolve-BrowseStart $targetTxt.Text
                     if (Test-Path -LiteralPath $openPath) {
