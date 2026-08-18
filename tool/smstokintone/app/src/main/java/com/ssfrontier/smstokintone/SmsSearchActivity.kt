@@ -214,6 +214,10 @@ class SmsSearchActivity : AppCompatActivity() {
             records.removeAll { findSentEntry(it, completedEntries) != null }
         }
 
+        if (binding.cbSplitFailedOnly.isChecked) {
+            records.removeAll { !isSplitFailed(it.body) }
+        }
+
         when (val profileId = selectedProfileId) {
             null -> Unit
             FILTER_KEY_UNSET -> records.removeAll { Prefs.findProfileForBody(this, it.body) != null }
@@ -243,6 +247,8 @@ class SmsSearchActivity : AppCompatActivity() {
             }
         }
 
+    private fun isSplitFailed(body: String): Boolean = SmsPartsGenerator.generateSmsParts(body).isSplitFailed()
+
     private fun renderSmsList() {
         binding.llSmsListContainer.removeAllViews()
         binding.svSmsList.scrollTo(0, 0)
@@ -267,13 +273,14 @@ class SmsSearchActivity : AppCompatActivity() {
                 )
                 setPadding(0, 16, 0, 16)
                 val sentEntry = findSentEntry(record, completedEntries)
-                if (sentEntry != null) {
-                    val backgroundColor = if (sentEntry.manual) {
-                        R.color.sms_sent_manual_background
-                    } else {
-                        R.color.sms_sent_auto_background
-                    }
-                    setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, backgroundColor))
+                val backgroundColor = when {
+                    isSplitFailed(record.body) -> R.color.sms_split_failed_background
+                    sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
+                    sentEntry != null -> R.color.sms_sent_auto_background
+                    else -> null
+                }
+                backgroundColor?.let {
+                    setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, it))
                 }
             }
 

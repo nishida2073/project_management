@@ -34,7 +34,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         logStart(sender, body, timestampMillis, smsId, profileName = profile?.displayName, manual = manual)
 
         // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応）
-        val parsed = SmsParser.parseSms(body)
+        val smsParts = SmsPartsGenerator.generateSmsParts(body)
 
         if (profile == null || !profile.isValid) {
             logComplete(sender, body, timestampMillis, smsId, success = false, message = "本文に一致するkintoneの接続設定が見つからないか未完了です", profileName = profile?.displayName, manual = manual)
@@ -57,27 +57,27 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             senderValue = sender,
             bodyValue = body,
             datetimeIsoValue = datetimeIso,
-            companyNameValue = parsed.companyName,
-            userNameValue = parsed.userName,
-            contentValue = parsed.content
+            companyNameValue = smsParts.companyName,
+            userNameValue = smsParts.userName,
+            contentValue = smsParts.content
         )) {
             is KintoneApi.PostResult.Success -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, parsedSms = parsed)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, smsParts = smsParts)
                 Result.success()
             }
             is KintoneApi.PostResult.Skipped -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, parsedSms = parsed)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, smsParts = smsParts)
                 Result.success()
             }
             is KintoneApi.PostResult.HttpFailure -> {
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName, manual = manual, parsedSms = parsed)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = "送信失敗: $detail", profileName = profile.displayName, manual = manual, smsParts = smsParts)
                 if (result.code in 500..599) Result.retry() else Result.success()
             }
             is KintoneApi.PostResult.NetworkError -> {
                 Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${result.message}", profileName = profile.displayName, manual = manual, parsedSms = parsed)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = "通信エラー: ${result.message}", profileName = profile.displayName, manual = manual, smsParts = smsParts)
                 Result.retry()
             }
         }
@@ -114,7 +114,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         message: String,
         profileName: String?,
         manual: Boolean,
-        parsedSms: ParsedSms? = null
+        smsParts: SmsParts? = null
     ) {
         UploadLogStore.add(
             applicationContext,
@@ -127,7 +127,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             smsId = smsId,
             profileName = profileName,
             manual = manual,
-            parsedSms = parsedSms
+            smsParts = smsParts
         )
     }
 

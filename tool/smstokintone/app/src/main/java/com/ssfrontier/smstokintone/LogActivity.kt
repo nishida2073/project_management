@@ -138,8 +138,8 @@ class LogActivity : AppCompatActivity() {
             }
 
             // グループ4: 会社名・氏名・内容の分割結果（送信結果とは別の行で表示。結果の行と同じレイアウト）
-            val splitResultView = entry.parsedSms?.let { parsed ->
-                val succeeded = parsed.companyName.isNotBlank() && parsed.userName.isNotBlank() && parsed.content.isNotBlank()
+            val splitResultView = entry.smsParts?.let { smsParts ->
+                val succeeded = !smsParts.isSplitFailed()
                 val splitLabel = if (succeeded) {
                     getString(R.string.log_result_success)
                 } else {

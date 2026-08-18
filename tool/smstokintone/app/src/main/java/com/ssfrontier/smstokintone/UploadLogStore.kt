@@ -34,7 +34,7 @@ object UploadLogStore {
         val profileName: String?,
         val manual: Boolean,
         /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
-        val parsedSms: ParsedSms? = null
+        val smsParts: SmsParts? = null
     )
 
     private fun prefs(context: Context) =
@@ -51,7 +51,7 @@ object UploadLogStore {
         smsId: Long? = null,
         profileName: String? = null,
         manual: Boolean = false,
-        parsedSms: ParsedSms? = null
+        smsParts: SmsParts? = null
     ) {
         val entries = getAll(context).toMutableList()
         entries.add(
@@ -67,7 +67,7 @@ object UploadLogStore {
                 smsId = smsId,
                 profileName = profileName,
                 manual = manual,
-                parsedSms = parsedSms
+                smsParts = smsParts
             )
         )
 
@@ -84,9 +84,9 @@ object UploadLogStore {
                 .put("smsId", entry.smsId ?: NO_SMS_ID)
                 .put("manual", entry.manual)
             entry.profileName?.let { obj.put("profileName", it) }
-            entry.parsedSms?.let {
+            entry.smsParts?.let {
                 obj.put(
-                    "parsedSms",
+                    "smsParts",
                     JSONObject()
                         .put("companyName", it.companyName)
                         .put("userName", it.userName)
@@ -116,8 +116,8 @@ object UploadLogStore {
                 smsId = if (smsId == NO_SMS_ID) null else smsId,
                 profileName = obj.optString("profileName", "").ifBlank { null },
                 manual = obj.optBoolean("manual", false),
-                parsedSms = obj.optJSONObject("parsedSms")?.let {
-                    ParsedSms(
+                smsParts = obj.optJSONObject("smsParts")?.let {
+                    SmsParts(
                         companyName = it.optString("companyName", ""),
                         userName = it.optString("userName", ""),
                         content = it.optString("content", "")

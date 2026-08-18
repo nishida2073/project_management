@@ -147,7 +147,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         val testBody = getString(R.string.test_send_body)
-        val parsed = SmsParser.parseSms(testBody)
+        val smsParts = SmsPartsGenerator.generateSmsParts(testBody)
 
         itemBinding.btnTestSend.isEnabled = false
         CoroutineScope(Dispatchers.Main).launch {
@@ -157,9 +157,9 @@ class SettingsActivity : AppCompatActivity() {
                     senderValue = Defaults.TEST_SEND_SENDER,
                     bodyValue = testBody,
                     datetimeIsoValue = datetimeIso,
-                    companyNameValue = parsed.companyName,
-                    userNameValue = parsed.userName,
-                    contentValue = parsed.content
+                    companyNameValue = smsParts.companyName,
+                    userNameValue = smsParts.userName,
+                    contentValue = smsParts.content
                 )
             }
             itemBinding.btnTestSend.isEnabled = true

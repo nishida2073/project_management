@@ -1,19 +1,22 @@
 package com.ssfrontier.smstokintone
 
 /**
- * SMS本文をパースした結果
+ * SMS本文から生成した部品（会社名・氏名・内容）
  */
-data class ParsedSms(
+data class SmsParts(
     val companyName: String = "",
     val userName: String = "",
     val content: String = ""
 ) {
     /** 何も抽出できなかったかどうか */
     fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && content.isEmpty()
+
+    /** 会社名・氏名・内容のいずれかが空で、分割に失敗したとみなせるかどうか */
+    fun isSplitFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && content.isNotBlank())
 }
 
 /**
- * SMS本文をパースする（ラベルの表記ゆれ・記述順の違い・ラベル省略に対応）
+ * SMS本文から部品（会社名・氏名・内容）を生成する（ラベルの表記ゆれ・記述順の違い・ラベル省略に対応）
  *
  * 「会社名：」「会社：」「御社名：」など、ラベルの表記ゆれがあっても、
  * また項目の記述順が入れ替わっていても、正しく項目を認識できるようにしています。
@@ -31,15 +34,19 @@ data class ParsedSms(
  * YYY
  * XXX（複数行OK）
  */
-object SmsParser {
+object SmsPartsGenerator {
 
-    // ラベルのエイリアス（別名）一覧。
-    // 新しい表記ゆれが見つかったら、ここに追加するだけで対応できます。
-    private val FIELD_ALIASES: Map<String, List<String>> = mapOf(
-        "companyName" to listOf("会社名", "会社"),
-        "userName" to listOf("氏名", "名前"),
-        "content" to listOf("理由", "内容","用件")
-    )
+    /**
+     * 会社名の表記ゆれを吸収し、「[Defaults.SMS_COMPANY_NAME_CANONICAL_PREFIX]<地域名>」の形に強制する。
+     *
+     * 「NTTD四国」「NTTDATA四国」「四国」など、先頭のNTT表記の有無・書き方に関わらず、
+     * 地域名部分（四国など）を残して正式な接頭辞を付け直す。既に正式な接頭辞で始まる場合はそのまま。
+     */
+    private fun normalizeCompanyName(companyName: String): String {
+        if (companyName.isEmpty() || companyName.startsWith(Defaults.SMS_COMPANY_NAME_CANONICAL_PREFIX)) return companyName
+        val rest = Defaults.SMS_COMPANY_NAME_PREFIX_PATTERN.replaceFirst(companyName, "").trim()
+        return "${Defaults.SMS_COMPANY_NAME_CANONICAL_PREFIX}$rest"
+    }
 
     private data class LabelMatch(val key: String, val value: String)
 
@@ -48,7 +55,7 @@ object SmsParser {
      * マッチした場合は LabelMatch を返す。マッチしなければ null。
      */
     private fun matchLabelLine(line: String): LabelMatch? {
-        for ((key, aliases) in FIELD_ALIASES) {
+        for ((key, aliases) in Defaults.SMS_BODY_FIELD_ALIASES) {
             for (alias in aliases) {
                 // ラベルのみでコロンが無い行（値は次行以降に続く）にも対応
                 if (line == alias) {
@@ -70,10 +77,10 @@ object SmsParser {
     }
 
     /**
-     * SMS本文をパースする
+     * SMS本文から部品を生成する
      */
-    fun parseSms(body: String?): ParsedSms {
-        if (body.isNullOrBlank()) return ParsedSms()
+    fun generateSmsParts(body: String?): SmsParts {
+        if (body.isNullOrBlank()) return SmsParts()
 
         val normalized = body.replace("\r\n", "\n").replace("\r", "\n").trim()
         val contentLines = normalized.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
@@ -82,7 +89,7 @@ object SmsParser {
         // 場合は、氏名・会社名を1行でまとめて書く人がいるため抽出せず空のまま返す。
         // SMS本文自体は別途Bodyフィールドにそのまま登録されるため、ここで内容に詰め直す必要はない
         if (contentLines.size < 3) {
-            return ParsedSms()
+            return SmsParts()
         }
 
         var companyName = ""
@@ -124,6 +131,7 @@ object SmsParser {
             content = contentValueLines.drop(1).joinToString("\n")
         }
 
-        return ParsedSms(companyName = companyName, userName = userName, content = content)
+        // return SmsParts(companyName = normalizeCompanyName(companyName), userName = userName, content = content)
+        return SmsParts(companyName = companyName, userName = userName, content = content)
     }
 }

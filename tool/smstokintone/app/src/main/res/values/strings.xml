@@ -90,7 +90,8 @@
     <string name="hint_body_filter">本文に含む文字列（任意）</string>
     <string name="label_profile_filter">送信先で絞り込む（任意）</string>
     <string name="filter_profile_all">すべて</string>
-    <string name="filter_unsent_only">未送信のみ表示</string>
+    <string name="filter_unsent_only">未送信</string>
+    <string name="filter_split_failed_only">分割失敗</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>
     <string name="btn_deselect_all">選択解除</string>

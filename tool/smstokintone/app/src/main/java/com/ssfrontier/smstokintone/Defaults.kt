@@ -17,6 +17,19 @@ object Defaults {
 
     const val TEST_SEND_SENDER = "09000000000"
 
-    /** [Prefs.KintoneProfile.fieldType]に登録・更新のたびに書き込む、本ツール経由であることを示す選択肢値 */
+    /** 本ツール経由であることを示す選択肢値 */
     const val REGISTRATION_TYPE_VALUE = "外部ツール"
+
+    /** 会社名の表記ゆれを正規化する際に付け直す正式な接頭辞 */
+    const val SMS_COMPANY_NAME_CANONICAL_PREFIX = "NTTデータ"
+
+    /** 会社名先頭の表記ゆれを検出する正規表現。表記自体は対象外 */
+    val SMS_COMPANY_NAME_PREFIX_PATTERN = Regex("^NTT[\\s\\-]?(?:DATA|D)", RegexOption.IGNORE_CASE)
+
+    // [SmsPartsGenerator]がラベル行を判定する際に使う、フィールド名とラベル表記ゆれ一覧の対応。
+    val SMS_BODY_FIELD_ALIASES: Map<String, List<String>> = mapOf(
+        "companyName" to listOf("会社名", "会社"),
+        "userName" to listOf("氏名", "名前"),
+        "content" to listOf("理由", "内容", "用件")
+    )
 }
