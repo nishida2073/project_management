@@ -48,7 +48,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end|center_vertical"
+            android:gravity="start|center_vertical"
             android:text="@string/btn_hide_search_filters" />
 
         <LinearLayout
