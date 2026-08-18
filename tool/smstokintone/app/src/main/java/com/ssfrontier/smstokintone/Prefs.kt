@@ -13,6 +13,7 @@ object Prefs {
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     private const val KEY_THEME_MODE = "theme_mode"
+    private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
 
     private const val KEY_KINTONE_PROFILES = "kintone_profiles"
 
@@ -48,7 +49,9 @@ object Prefs {
         val forwardingEnabled: Boolean,
         val autoRefreshEnabled: Boolean,
         val autoRefreshIntervalSeconds: Int,
-        val themeMode: ThemeMode
+        val themeMode: ThemeMode,
+        /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言 */
+        val defaultReplyBody: String
     )
 
     /**
@@ -129,6 +132,7 @@ object Prefs {
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
             .putString(KEY_THEME_MODE, config.themeMode.name)
+            .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .apply()
     }
 
@@ -141,7 +145,8 @@ object Prefs {
                 KEY_AUTO_REFRESH_INTERVAL_SECONDS,
                 Defaults.AUTO_REFRESH_INTERVAL_SECONDS
             ),
-            themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null))
+            themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
+            defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, Defaults.DEFAULT_REPLY_BODY) ?: Defaults.DEFAULT_REPLY_BODY
         )
     }
 

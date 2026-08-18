@@ -2,7 +2,9 @@ package com.ssfrontier.smstokintone
 
 import android.Manifest
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -249,6 +251,24 @@ class SmsSearchActivity : AppCompatActivity() {
 
     private fun isSplitFailed(body: String): Boolean = SmsPartsGenerator.generateSmsParts(body).isSplitFailed()
 
+    /** 標準のSMSアプリの返信（作成）画面を、指定した送信元宛てに開く */
+    private fun openSmsReply(address: String, splitFailed: Boolean) {
+        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$address"))
+        val bodyParts = mutableListOf<String>()
+        Prefs.load(this).defaultReplyBody.takeIf { it.isNotEmpty() }?.let { bodyParts.add(it) }
+        if (splitFailed) {
+            bodyParts.add(Defaults.SPLIT_FAILED_REPLY_ADDITION)
+        }
+        if (bodyParts.isNotEmpty()) {
+            intent.putExtra("sms_body", bodyParts.joinToString("\n"))
+        }
+        try {
+            startActivity(intent)
+        } catch (e: android.content.ActivityNotFoundException) {
+            Toast.makeText(this, "SMSアプリが見つかりませんでした", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun renderSmsList() {
         binding.llSmsListContainer.removeAllViews()
         binding.svSmsList.scrollTo(0, 0)
@@ -281,6 +301,10 @@ class SmsSearchActivity : AppCompatActivity() {
                 }
                 backgroundColor?.let {
                     setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, it))
+                }
+                setOnLongClickListener {
+                    openSmsReply(record.address, isSplitFailed(record.body))
+                    true
                 }
             }
 

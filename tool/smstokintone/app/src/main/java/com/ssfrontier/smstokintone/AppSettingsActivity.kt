@@ -82,6 +82,11 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.btnRequestPermission.setOnClickListener {
             requestPermissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
         }
+
+        binding.etDefaultReplyBody.setText(config.defaultReplyBody)
+        binding.etDefaultReplyBody.addTextChangedListener { text ->
+            Prefs.save(this, Prefs.load(this).copy(defaultReplyBody = text.toString()))
+        }
     }
 
     private fun applyThemeSelection(themeMode: Prefs.ThemeMode) {
