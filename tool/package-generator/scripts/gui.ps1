@@ -96,6 +96,47 @@ $chkUpload.Text = "3. ファイルアップロード"
 $chkUpload.AutoSize = $true
 $chkUpload.Location = New-Object System.Drawing.Point(20, 92)
 
+$linkDownloadPath = New-Object System.Windows.Forms.LinkLabel
+$linkDownloadPath.Text = "開く"
+$linkDownloadPath.AutoSize = $true
+$linkDownloadPath.Location = New-Object System.Drawing.Point(220, 40)
+
+$linkGeneratePath = New-Object System.Windows.Forms.LinkLabel
+$linkGeneratePath.Text = "開く"
+$linkGeneratePath.AutoSize = $true
+$linkGeneratePath.Location = New-Object System.Drawing.Point(220, 66)
+
+$linkUploadPath = New-Object System.Windows.Forms.LinkLabel
+$linkUploadPath.Text = "開く"
+$linkUploadPath.AutoSize = $true
+$linkUploadPath.Location = New-Object System.Drawing.Point(220, 92)
+
+function Open-FolderPath {
+    param([string]$Path)
+    if (!$Path) {
+        [System.Windows.Forms.MessageBox]::Show("パスが設定されていません。", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    if (!(Test-Path -LiteralPath $Path)) {
+        [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    Start-Process explorer.exe -ArgumentList "`"$Path`""
+}
+
+function Open-SharePointFolder {
+    param([string]$SiteUrl, [string]$SitePath)
+    if (!$SiteUrl -or !$SitePath) {
+        [System.Windows.Forms.MessageBox]::Show("URLが設定されていません。", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    $siteUri = [Uri]$SiteUrl
+    $library = ($SitePath -split '/', 2)[0]
+    $serverRelativePath = "$($siteUri.AbsolutePath.TrimEnd('/'))/$SitePath"
+    $url = "$($siteUri.Scheme)://$($siteUri.Authority)$($siteUri.AbsolutePath.TrimEnd('/'))/$([Uri]::EscapeDataString($library))/Forms/AllItems.aspx?id=$([Uri]::EscapeDataString($serverRelativePath))"
+    Start-Process $url
+}
+
 $btnRun = New-Object System.Windows.Forms.Button
 $btnRun.Text = "実行"
 $btnRun.Location = New-Object System.Drawing.Point(20, 126)
@@ -161,7 +202,7 @@ function Get-ClientProfileValues {
     return $result
 }
 
-$runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $btnRun, $lblStatus, $lblClient, $cmbClient))
+$runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $linkDownloadPath, $linkGeneratePath, $linkUploadPath, $btnRun, $lblStatus, $lblClient, $cmbClient))
 
 $txtLog = New-Object System.Windows.Forms.RichTextBox
 $txtLog.Multiline = $true
@@ -797,6 +838,10 @@ function Update-RunCheckboxesFromClient {
 }
 
 $cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-RunCheckboxesFromClient } })
+
+$linkDownloadPath.Add_LinkClicked({ Open-FolderPath (Get-ClientAwareEnabledValue "DOWNLOAD_LOCAL_PATH") })
+$linkGeneratePath.Add_LinkClicked({ Open-FolderPath (Get-ClientAwareEnabledValue "GENERATE_OUTPUT_PATH") })
+$linkUploadPath.Add_LinkClicked({ Open-SharePointFolder (Get-ClientAwareEnabledValue "UPLOAD_SITE_URL") (Get-ClientAwareEnabledValue "UPLOAD_SITE_PATH") })
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
