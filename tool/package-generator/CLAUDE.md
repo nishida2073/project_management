@@ -60,10 +60,19 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     textbox. `Update-RunCheckboxesFromClient` (via `Get-ClientAwareEnabledValue`,
     which reads the selected client's `*_ENABLED` value or falls back to
     `Get-ResolvedVar`, i.e. the *current* `set-env.bat`/env state, not a
-    hardcoded default) sets the checkboxes — called once at true startup and
+    hardcoded default) sets the checkboxes — called once at true startup,
     again whenever the client dropdown's selection actually changes
-    (`$cmbClient.Add_SelectedIndexChanged`). **It is deliberately NOT called
-    just from revisiting this tab.** The `$tabControl.Add_SelectedIndexChanged`
+    (`$cmbClient.Add_SelectedIndexChanged`), and again right after `$btnSave`
+    on the 設定 tab finishes writing (so a saved `*_ENABLED` change is visible
+    immediately without needing to touch the client dropdown — explicit user
+    request; this call only ever *matches* what was just saved when
+    `$cmbSettingsClient`'s selection happens to equal `$cmbClient`'s, since
+    `Update-RunCheckboxesFromClient` always reads through `$cmbClient`'s
+    current selection regardless of which client was being edited — saving a
+    *different* client's settings than the one active in 実行 is a no-op here,
+    which is fine since those checkboxes were never showing that other
+    client's values to begin with). **It is deliberately NOT called just from
+    revisiting this tab.** The `$tabControl.Add_SelectedIndexChanged`
     handler's 実行-tab branch calls only `Update-ClientList` (refreshes the
     client dropdown's *items*) — it used to also call the checkbox-sync
     function on every tab visit (via a `Sync-RunCheckboxes` wrapper, since

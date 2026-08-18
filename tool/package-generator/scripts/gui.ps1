@@ -692,6 +692,7 @@ $btnSave.Add_Click({
 
     $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
     $lblSaveStatus.Text = "保存しました"
+    Update-RunCheckboxesFromClient
 })
 
 function Update-SettingsClientList {
