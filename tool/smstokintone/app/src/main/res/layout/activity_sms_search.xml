@@ -102,21 +102,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <CheckBox
-            android:id="@+id/cbUnsentOnly"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:checked="true"
-            android:text="@string/filter_unsent_only" />
+            android:orientation="horizontal">
 
-        <CheckBox
-            android:id="@+id/cbSplitFailedOnly"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:checked="false"
-            android:text="@string/filter_split_failed_only" />
+            <CheckBox
+                android:id="@+id/cbUnsentOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/filter_unsent_only" />
+
+            <CheckBox
+                android:id="@+id/cbSplitFailedOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:checked="false"
+                android:text="@string/filter_split_failed_only" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSearchSms"
