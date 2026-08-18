@@ -67,7 +67,8 @@
     <string name="permission_status_denied">SMS受信の許可: 未許可</string>
     <string name="btn_request_permission">SMS受信を許可する</string>
     <string name="section_reply">SMS返信</string>
-    <string name="hint_default_reply_body">返信画面に自動入力する文言</string>
+    <string name="hint_sms_standard_reply_body">返信時に自動入力する文言</string>
+    <string name="hint_sms_split_failed_reply_body">返信時に自動入力する文言（分割失敗時）</string>
 
     <!-- ログ画面 -->
     <string name="log_title">ログ</string>

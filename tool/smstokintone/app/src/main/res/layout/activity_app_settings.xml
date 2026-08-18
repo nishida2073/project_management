@@ -204,10 +204,23 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_default_reply_body">
+                    android:hint="@string/hint_sms_standard_reply_body">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDefaultReplyBody"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="@string/hint_sms_split_failed_reply_body">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etSplitFailedReplyAddition"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textMultiLine" />

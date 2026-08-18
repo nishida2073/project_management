@@ -18,10 +18,10 @@ object Defaults {
     const val TEST_SEND_SENDER = "09000000000"
 
     /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言の初期値 */
-    const val DEFAULT_REPLY_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"
+    const val SMS_STANDARD_REPLY_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"
 
-    /** 分割失敗のSMSへの返信時、[DEFAULT_REPLY_BODY]に追加する文言 */
-    const val SPLIT_FAILED_REPLY_ADDITION = "\n下記の形式でご記入のうえ、\n再度SMSのご送信をお願いいたします。\n\n会社名\n氏名\n\n内容"
+    /** 分割失敗のSMSへの返信時、[SMS_STANDARD_REPLY_BODY]の代わりに使う文言 */
+    const val SMS_SPLIT_FAILED_REPLY_BODY = SMS_STANDARD_REPLY_BODY + "下記の形式でご記入のうえ、\n再度SMSのご送信をお願いいたします。\n\n会社名\n氏名\n\n内容"
 
     /** 本ツール経由であることを示す選択肢値 */
     const val REGISTRATION_TYPE_VALUE = "外部ツール"

@@ -14,6 +14,7 @@ object Prefs {
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     private const val KEY_THEME_MODE = "theme_mode"
     private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
+    private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
 
     private const val KEY_KINTONE_PROFILES = "kintone_profiles"
 
@@ -51,7 +52,9 @@ object Prefs {
         val autoRefreshIntervalSeconds: Int,
         val themeMode: ThemeMode,
         /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言 */
-        val defaultReplyBody: String
+        val defaultReplyBody: String,
+        /** 分割失敗のSMSへの返信時、[defaultReplyBody]の代わりに使う文言 */
+        val splitFailedReplyAddition: String
     )
 
     /**
@@ -133,6 +136,7 @@ object Prefs {
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
             .putString(KEY_THEME_MODE, config.themeMode.name)
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
+            .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
             .apply()
     }
 
@@ -146,7 +150,9 @@ object Prefs {
                 Defaults.AUTO_REFRESH_INTERVAL_SECONDS
             ),
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
-            defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, Defaults.DEFAULT_REPLY_BODY) ?: Defaults.DEFAULT_REPLY_BODY
+            defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, Defaults.SMS_STANDARD_REPLY_BODY) ?: Defaults.SMS_STANDARD_REPLY_BODY,
+            splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, Defaults.SMS_SPLIT_FAILED_REPLY_BODY)
+                ?: Defaults.SMS_SPLIT_FAILED_REPLY_BODY
         )
     }
 

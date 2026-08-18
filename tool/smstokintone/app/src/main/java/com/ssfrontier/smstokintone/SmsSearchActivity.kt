@@ -254,13 +254,10 @@ class SmsSearchActivity : AppCompatActivity() {
     /** 標準のSMSアプリの返信（作成）画面を、指定した送信元宛てに開く */
     private fun openSmsReply(address: String, splitFailed: Boolean) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$address"))
-        val bodyParts = mutableListOf<String>()
-        Prefs.load(this).defaultReplyBody.takeIf { it.isNotEmpty() }?.let { bodyParts.add(it) }
-        if (splitFailed) {
-            bodyParts.add(Defaults.SPLIT_FAILED_REPLY_ADDITION)
-        }
-        if (bodyParts.isNotEmpty()) {
-            intent.putExtra("sms_body", bodyParts.joinToString("\n"))
+        val config = Prefs.load(this)
+        val body = if (splitFailed) config.splitFailedReplyAddition else config.defaultReplyBody
+        if (body.isNotEmpty()) {
+            intent.putExtra("sms_body", body)
         }
         try {
             startActivity(intent)

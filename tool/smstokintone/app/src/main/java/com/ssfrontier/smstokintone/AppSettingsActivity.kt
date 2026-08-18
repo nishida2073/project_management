@@ -87,6 +87,11 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.etDefaultReplyBody.addTextChangedListener { text ->
             Prefs.save(this, Prefs.load(this).copy(defaultReplyBody = text.toString()))
         }
+
+        binding.etSplitFailedReplyAddition.setText(config.splitFailedReplyAddition)
+        binding.etSplitFailedReplyAddition.addTextChangedListener { text ->
+            Prefs.save(this, Prefs.load(this).copy(splitFailedReplyAddition = text.toString()))
+        }
     }
 
     private fun applyThemeSelection(themeMode: Prefs.ThemeMode) {
