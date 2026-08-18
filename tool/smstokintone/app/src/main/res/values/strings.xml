@@ -88,6 +88,8 @@
 
     <!-- 受信済みSMS送信画面 -->
     <string name="sms_search_title">受信済みSMS送信</string>
+    <string name="btn_hide_search_filters">▲ 検索条件を隠す</string>
+    <string name="btn_show_search_filters">▼ 検索条件を表示する</string>
     <string name="hint_date_from">開始日</string>
     <string name="hint_date_to">終了日</string>
     <string name="hint_body_filter">本文に含む文字列</string>

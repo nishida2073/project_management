@@ -71,6 +71,7 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.btnRequestReadSmsPermission.setOnClickListener {
             requestReadSmsPermissionLauncher.launch(Manifest.permission.READ_SMS)
         }
+        binding.btnToggleSearchFilters.setOnClickListener { toggleSearchFilters() }
         binding.spProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedProfileId = profileFilterKeys.getOrNull(position)
@@ -114,6 +115,15 @@ class SmsSearchActivity : AppCompatActivity() {
         val granted = hasReadSmsPermission()
         binding.layoutPermissionRequired.visibility = if (granted) View.GONE else View.VISIBLE
         binding.layoutSearchForm.visibility = if (granted) View.VISIBLE else View.GONE
+    }
+
+    /** 検索条件エリアの表示/非表示を切り替え、一覧により多くの領域を割けるようにする */
+    private fun toggleSearchFilters() {
+        val show = binding.llSearchFilters.visibility != View.VISIBLE
+        binding.llSearchFilters.visibility = if (show) View.VISIBLE else View.GONE
+        binding.btnToggleSearchFilters.text = getString(
+            if (show) R.string.btn_hide_search_filters else R.string.btn_show_search_filters
+        )
     }
 
     private fun pickDate(isFrom: Boolean) {
