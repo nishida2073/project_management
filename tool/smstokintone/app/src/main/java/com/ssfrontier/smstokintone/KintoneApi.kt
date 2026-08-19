@@ -31,6 +31,12 @@ object KintoneApi {
 
     private data class ExistingRecord(val id: String, val bodyValue: String, val datetimeValue: String)
 
+    private sealed class ExistingRecordResult {
+        data class Found(val record: ExistingRecord) : ExistingRecordResult()
+        object NotFound : ExistingRecordResult()
+        data class SearchFailed(val result: PostResult) : ExistingRecordResult()
+    }
+
     /**
      * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、最終受信日時（[profile].fieldDatetime）
      * の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、新規登録
@@ -50,10 +56,18 @@ object KintoneApi {
     ): PostResult {
         val entryText = buildEntryText(datetimeIsoValue, bodyValue)
 
-        val existing = if (profile.fieldSender.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
+        val existingResult = if (profile.fieldSender.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
             findExistingRecord(profile, senderValue, datetimeIsoValue)
         } else {
-            null
+            ExistingRecordResult.NotFound
+        }
+
+        val existing = when (existingResult) {
+            is ExistingRecordResult.Found -> existingResult.record
+            ExistingRecordResult.NotFound -> null
+            // 検索自体が失敗した場合、既存レコードなしとみなして新規登録に進むと、本来更新すべき
+            // レコードを見落として重複登録してしまう恐れがあるため、ここで送信失敗として打ち切る
+            is ExistingRecordResult.SearchFailed -> return existingResult.result
         }
 
         val isDuplicate = existing != null && datetimeIsoValue != null &&
@@ -173,14 +187,15 @@ object KintoneApi {
 
     /**
      * 送信元が一致し、最終受信日時の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードを
-     * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。見つからない・検索に失敗した場合は
-     * null
+     * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。見つからない場合は[ExistingRecordResult.NotFound]、
+     * 検索自体が失敗した場合は[ExistingRecordResult.SearchFailed]を返す（新規登録との誤判定を防ぐため、
+     * 検索失敗と未検出を区別する）
      */
-    private fun findExistingRecord(profile: Prefs.KintoneProfile, senderValue: String, datetimeIsoValue: String): ExistingRecord? {
+    private fun findExistingRecord(profile: Prefs.KintoneProfile, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
-        val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return null
+        val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return ExistingRecordResult.NotFound
 
         val windowMillis = profile.updateWindowHours.coerceAtLeast(0) * 3_600_000L
         val rangeStart = isoFormat.format(Date(baseMillis - windowMillis))
@@ -214,19 +229,20 @@ object KintoneApi {
         return try {
             OkHttpClient().newCall(requestBuilder.build()).execute().use { response ->
                 if (!response.isSuccessful) {
-                    Log.w(TAG, "既存レコードの検索に失敗しました: ${response.code} ${response.body?.string() ?: ""}")
-                    return null
+                    val detail = response.body?.string() ?: ""
+                    Log.w(TAG, "既存レコードの検索に失敗しました: ${response.code} $detail")
+                    return ExistingRecordResult.SearchFailed(PostResult.HttpFailure(response.code, detail))
                 }
                 val records = JSONObject(response.body?.string() ?: "{}").optJSONArray("records")
-                val first = records?.optJSONObject(0) ?: return null
+                val first = records?.optJSONObject(0) ?: return ExistingRecordResult.NotFound
                 val id = first.getJSONObject("\$id").getString("value")
                 val bodyValue = first.optJSONObject(profile.fieldBody)?.optString("value", "") ?: ""
                 val datetimeValue = first.optJSONObject(profile.fieldDatetime)?.optString("value", "") ?: ""
-                ExistingRecord(id, bodyValue, datetimeValue)
+                ExistingRecordResult.Found(ExistingRecord(id, bodyValue, datetimeValue))
             }
         } catch (e: IOException) {
             Log.w(TAG, "既存レコードの検索で通信エラーが発生しました: ${e.message}")
-            null
+            ExistingRecordResult.SearchFailed(PostResult.NetworkError(e.message ?: ""))
         }
     }
 

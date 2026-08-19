@@ -77,7 +77,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
                 logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_failure, detail), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
-                if (result.code in 500..599) Result.retry() else Result.success()
+                if (result.code in 500..599 || result.code == 429) Result.retry() else Result.success()
             }
             is KintoneApi.PostResult.NetworkError -> {
                 Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
