@@ -106,13 +106,8 @@ class LogActivity : AppCompatActivity() {
                 setTextColor(ContextCompat.getColor(this@LogActivity, R.color.profile_name))
                 setPadding(0, 16, 0, 4)
             }
-            val senderView = TextView(this).apply {
-                text = entry.sender
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setPadding(0, 0, 0, 4)
-            }
-            val smsTimestampView = TextView(this).apply {
-                text = dateFormat.format(Date(entry.timestampMillis))
+            val senderAndTimestampView = TextView(this).apply {
+                text = "${dateFormat.format(Date(entry.timestampMillis))}　${entry.sender}"
                 setPadding(0, 0, 0, 4)
             }
             val bodyView = TextView(this).apply {
@@ -163,8 +158,7 @@ class LogActivity : AppCompatActivity() {
 
             binding.llLogContainer.addView(typeAndTimestampView)
             binding.llLogContainer.addView(profileView)
-            binding.llLogContainer.addView(senderView)
-            binding.llLogContainer.addView(smsTimestampView)
+            binding.llLogContainer.addView(senderAndTimestampView)
             binding.llLogContainer.addView(bodyView)
             binding.llLogContainer.addView(resultView)
             splitResultView?.let { binding.llLogContainer.addView(it) }

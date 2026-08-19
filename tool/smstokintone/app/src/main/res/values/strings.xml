@@ -71,7 +71,7 @@
     <string name="toast_sms_receive_permission_denied">SMS受信の許可がないと、このアプリは動作しません</string>
     <string name="section_reply">SMS返信</string>
     <string name="hint_sms_standard_reply_body">返信時に自動入力する文言</string>
-    <string name="hint_sms_split_failed_reply_body">返信時に自動入力する文言（分割失敗時）</string>
+    <string name="hint_sms_split_failed_reply_body">返信時に自動入力する文言（形式が不正な場合）</string>
 
     <!-- ログ画面 -->
     <string name="log_title">ログ</string>
@@ -87,7 +87,7 @@
     <string name="log_message_split">本文の分割に成功しました</string>
     <string name="log_message_split_failure">本文の分割に失敗しました</string>
     <string name="log_message_send_start">kintoneへの送信を開始しました</string>
-    <string name="log_message_send_start_profile_unconfigured">kintoneの接続設定がありません</string>
+    <string name="log_message_send_start_profile_unconfigured">kintoneの接続先がありません</string>
     <string name="log_message_send_complete_create_success">登録に成功しました</string>
     <string name="log_message_send_complete_update_success">更新に成功しました</string>
     <string name="log_message_send_complete_forwarding_disabled">kintoneへの自動送信が無効になっています</string>
@@ -111,7 +111,7 @@
     <string name="label_profile_filter">送信先で絞り込む</string>
     <string name="filter_profile_all">すべて</string>
     <string name="filter_unsent_only">未送信</string>
-    <string name="filter_split_failed_only">分割失敗</string>
+    <string name="filter_split_failed_only">形式が不正</string>
     <string name="label_profile_unconfigured_marker">"🚫 "</string>
     <string name="label_split_failed_marker">"⚠️ "</string>
     <string name="btn_search_sms">検索</string>
