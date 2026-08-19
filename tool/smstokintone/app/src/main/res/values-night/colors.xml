@@ -6,6 +6,5 @@
     <color name="log_divider">#616161</color>
     <color name="sms_sent_auto_background">#3D4B57</color>
     <color name="sms_sent_manual_background">#594E2D</color>
-    <color name="sms_split_failed_background">#5C3A3A</color>
     <color name="profile_name">#E0E0E0</color>
 </resources>

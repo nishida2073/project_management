@@ -286,10 +286,20 @@ class SmsSearchActivity : AppCompatActivity() {
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
                 tag = record.id
-                val profileName = Prefs.findProfileForBody(this@SmsSearchActivity, record.body)?.displayName(this@SmsSearchActivity)
-                    ?: getString(R.string.label_profile_none)
+                val profile = Prefs.findProfileForBody(this@SmsSearchActivity, record.body)
+                val profileName = profile?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_profile_none)
+                val isProfileUnconfigured = profile == null || !profile.isValid
                 val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
                 text = buildSpannedString {
+                    if (isProfileUnconfigured) {
+                        append(getString(R.string.label_profile_unconfigured_marker))
+                    }
+                    if (isSplitFailed(record.body)) {
+                        append(getString(R.string.label_split_failed_marker))
+                    }
+                    if (isProfileUnconfigured || isSplitFailed(record.body)) {
+                        append("\n")
+                    }
                     color(profileColor) { bold { append(profileName) } }
                     append("\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
                     append(record.body.take(80))
@@ -301,7 +311,6 @@ class SmsSearchActivity : AppCompatActivity() {
                 setPadding(0, 16, 0, 16)
                 val sentEntry = findSentEntry(record, completedEntries)
                 val backgroundColor = when {
-                    isSplitFailed(record.body) -> R.color.sms_split_failed_background
                     sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
                     sentEntry != null -> R.color.sms_sent_auto_background
                     else -> null
