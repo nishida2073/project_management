@@ -39,7 +39,7 @@ class SmsReceiver : BroadcastReceiver() {
             sender = sender,
             body = body,
             success = true,
-            message = "SMSを受信しました",
+            message = context.getString(R.string.log_message_receive),
             profileName = Prefs.findProfileForBody(context, body)?.displayName
         )
 

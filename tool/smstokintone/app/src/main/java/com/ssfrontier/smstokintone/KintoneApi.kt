@@ -1,5 +1,6 @@
 package com.ssfrontier.smstokintone
 
+import android.content.Context
 import android.util.Base64
 import android.util.Log
 import okhttp3.HttpUrl
@@ -37,6 +38,7 @@ object KintoneApi {
      * 既存レコードの最終受信日時と完全に一致する場合（同一SMSの重複配信など）は何も送信せずスキップする。
      */
     fun postRecord(
+        context: Context,
         profile: Prefs.KintoneProfile,
         senderValue: String,
         bodyValue: String,
@@ -57,7 +59,7 @@ object KintoneApi {
             isSameMinute(existing.datetimeValue, datetimeIsoValue)
 
         return if (isSameMinute) {
-            PostResult.Skipped("最終受信日時と一致するため、スキップしました")
+            PostResult.Skipped(context.getString(R.string.log_message_send_complete_skipped_duplicate))
         } else if (existing != null) {
             val newEntryMillis = datetimeIsoValue?.let { parseIsoDateTime(it) }
             val mergedBody = mergeBody(existing.bodyValue, entryText, newEntryMillis)
@@ -68,10 +70,10 @@ object KintoneApi {
                 datetimeIsoValue
             }
             val record = buildRecord(profile, senderValue, mergedBody, recordDatetimeIsoValue, companyNameValue, userNameValue, contentValue)
-            updateRecord(profile, existing.id, record)
+            updateRecord(context, profile, existing.id, record)
         } else {
             val record = buildRecord(profile, senderValue, entryText, datetimeIsoValue, companyNameValue, userNameValue, contentValue)
-            insertRecord(profile, record)
+            insertRecord(context, profile, record)
         }
     }
 
@@ -229,7 +231,7 @@ object KintoneApi {
     private fun escapeForQuery(value: String): String =
         value.replace("\\", "\\\\").replace("\"", "\\\"")
 
-    private fun insertRecord(profile: Prefs.KintoneProfile, record: JSONObject): PostResult {
+    private fun insertRecord(context: Context, profile: Prefs.KintoneProfile, record: JSONObject): PostResult {
         val payload = JSONObject()
             .put("app", profile.appId)
             .put("record", record)
@@ -239,10 +241,10 @@ object KintoneApi {
             .post(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
         addAuthHeader(requestBuilder, profile)
 
-        return execute(requestBuilder, successMessage = "登録に成功しました")
+        return execute(requestBuilder, successMessage = context.getString(R.string.log_message_send_complete_create_success))
     }
 
-    private fun updateRecord(profile: Prefs.KintoneProfile, recordId: String, record: JSONObject): PostResult {
+    private fun updateRecord(context: Context, profile: Prefs.KintoneProfile, recordId: String, record: JSONObject): PostResult {
         val payload = JSONObject()
             .put("app", profile.appId)
             .put("id", recordId)
@@ -253,7 +255,7 @@ object KintoneApi {
             .put(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
         addAuthHeader(requestBuilder, profile)
 
-        return execute(requestBuilder, successMessage = "更新に成功しました")
+        return execute(requestBuilder, successMessage = context.getString(R.string.log_message_send_complete_update_success))
     }
 
     private fun addAuthHeader(requestBuilder: Request.Builder, profile: Prefs.KintoneProfile) {

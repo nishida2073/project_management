@@ -396,8 +396,10 @@ class SmsSearchActivity : AppCompatActivity() {
     }
 
     private fun onSendBatchFinished(selectedIds: Set<Long>) {
+        // 送信先が未設定の場合は送信開始(SEND_START)のみが記録され送信完了(SEND_COMPLETE)は
+        // 記録されないため、smsIdごとに最新の1件（開始・完了どちらか）を結果として扱う
         val latestCompleteEntryPerSms = UploadLogStore.getAll(this)
-            .filter { it.type == UploadLogStore.EntryType.SEND_COMPLETE && it.smsId in selectedIds }
+            .filter { it.type != UploadLogStore.EntryType.RECEIVE && it.smsId in selectedIds }
             .groupBy { it.smsId }
             .mapValues { it.value.first() }
 

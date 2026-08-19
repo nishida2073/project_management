@@ -153,6 +153,7 @@ class SettingsActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             val result = withContext(Dispatchers.IO) {
                 KintoneApi.postRecord(
+                    applicationContext,
                     profile,
                     senderValue = Defaults.TEST_SEND_SENDER,
                     bodyValue = testBody,
@@ -167,8 +168,8 @@ class SettingsActivity : AppCompatActivity() {
             val message = when (result) {
                 is KintoneApi.PostResult.Success -> result.message
                 is KintoneApi.PostResult.Skipped -> result.message
-                is KintoneApi.PostResult.HttpFailure -> "送信失敗: ${result.code} ${result.detail}"
-                is KintoneApi.PostResult.NetworkError -> "通信エラー: ${result.message}"
+                is KintoneApi.PostResult.HttpFailure -> getString(R.string.log_message_send_complete_failure, "${result.code} ${result.detail}")
+                is KintoneApi.PostResult.NetworkError -> getString(R.string.log_message_send_complete_network_error, result.message)
             }
             AlertDialog.Builder(this@SettingsActivity)
                 .setTitle(R.string.test_send_result_title)
