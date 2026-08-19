@@ -35,7 +35,8 @@ object KintoneApi {
      * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、最終受信日時（[profile].fieldDatetime）
      * の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、新規登録
      * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
-     * 既存レコードの最終受信日時と完全に一致する場合（同一SMSの重複配信など）は何も送信せずスキップする。
+     * 既存レコードの最終受信日時と分単位で一致する場合（kintoneは秒を保持しないため。同一SMSの
+     * 重複配信など）は何も送信せずスキップする。
      */
     fun postRecord(
         context: Context,
@@ -156,7 +157,7 @@ object KintoneApi {
             record.put(profile.fieldType, JSONObject().put("value", Defaults.REGISTRATION_TYPE_VALUE))
         }
         // SMS本文からパースした会社名・氏名・内容。
-        // フィールドコードが未設定（空文字）の場合はkintone側に送らない。
+        // フィールドコードが未設定（空文字）、または抽出できた値が空の場合はkintone側に送らない。
         if (profile.fieldCompanyName.isNotBlank() && companyNameValue.isNotBlank()) {
             record.put(profile.fieldCompanyName, JSONObject().put("value", companyNameValue))
         }

@@ -33,6 +33,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 class SmsSearchActivity : AppCompatActivity() {
 
@@ -222,8 +223,8 @@ class SmsSearchActivity : AppCompatActivity() {
         }
 
         if (binding.cbUnsentOnly.isChecked) {
-            val completedEntries = loadCompletedEntries()
-            records.removeAll { findSentEntry(it, completedEntries) != null }
+            val sentEntries = matchSentEntries(records, loadCompletedEntries())
+            records.removeAll { it.id in sentEntries }
         }
 
         if (binding.cbSplitFailedOnly.isChecked) {
@@ -247,17 +248,43 @@ class SmsSearchActivity : AppCompatActivity() {
             .filter { it.type == UploadLogStore.EntryType.SEND_COMPLETE && it.success }
 
     /**
-     * 手動送信のログはSMS検索画面で特定済みの確実なIDを持つため、そのID一致で判定する。
-     * 自動送信のログはIDを持たないため、送信元とタイムスタンプの近さで判定する（SmsMatching参照）。
+     * ログのエントリとSMSレコードを1対1で対応付ける。手動送信のログはSMS検索画面で特定済みの
+     * 確実なIDを持つため、そのID一致で対応付ける。自動送信のログはIDを持たないため、送信元・
+     * タイムスタンプの近さで対応付ける（SmsMatching参照）が、同じ送信元から似た内容のSMSが
+     * 許容範囲内（アプリ設定画面の「統合範囲」）に複数届いた場合に1件のログが複数のレコードへ
+     * 同時にマッチしてしまうのを防ぐため、時刻が近いレコードから順に、1件のログにつき1件の
+     * レコードだけを貪欲に割り当てる。
      */
-    private fun findSentEntry(record: SmsRecord, completedEntries: List<UploadLogStore.Entry>): UploadLogStore.Entry? =
-        completedEntries.firstOrNull { entry ->
-            if (entry.smsId != null) {
-                entry.smsId == record.id
-            } else {
-                SmsMatching.isLikelySameSms(entry.sender, entry.timestampMillis, record.address, record.dateMillis)
-            }
+    private fun matchSentEntries(
+        records: List<SmsRecord>,
+        completedEntries: List<UploadLogStore.Entry>
+    ): Map<Long, UploadLogStore.Entry> {
+        val result = mutableMapOf<Long, UploadLogStore.Entry>()
+
+        val idMatchedEntries = completedEntries.filter { it.smsId != null }.associateBy { it.smsId }
+        records.forEach { record ->
+            idMatchedEntries[record.id]?.let { result[record.id] = it }
         }
+
+        val toleranceMillis = Prefs.load(this).smsMatchToleranceSeconds * 1_000L
+        val unclaimedEntries = completedEntries.filter { it.smsId == null }.toMutableList()
+        records.filter { it.id !in result }
+            .sortedBy { it.dateMillis }
+            .forEach { record ->
+                val bestIndex = unclaimedEntries.indices
+                    .filter { i ->
+                        val entry = unclaimedEntries[i]
+                        SmsMatching.isLikelySameSms(entry.sender, entry.timestampMillis, record.address, record.dateMillis, toleranceMillis)
+                    }
+                    .minByOrNull { i -> abs(unclaimedEntries[i].timestampMillis - record.dateMillis) }
+                if (bestIndex != null) {
+                    result[record.id] = unclaimedEntries[bestIndex]
+                    unclaimedEntries.removeAt(bestIndex)
+                }
+            }
+
+        return result
+    }
 
     private fun isSplitFailed(body: String): Boolean = SmsPartsGenerator.generateSmsParts(body).isSplitFailed()
 
@@ -281,7 +308,7 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.svSmsList.scrollTo(0, 0)
         binding.tvSmsListEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
 
-        val completedEntries = loadCompletedEntries()
+        val sentEntries = matchSentEntries(records, loadCompletedEntries())
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
@@ -309,7 +336,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 setPadding(0, 16, 0, 16)
-                val sentEntry = findSentEntry(record, completedEntries)
+                val sentEntry = sentEntries[record.id]
                 val backgroundColor = when {
                     sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
                     sentEntry != null -> R.color.sms_sent_auto_background

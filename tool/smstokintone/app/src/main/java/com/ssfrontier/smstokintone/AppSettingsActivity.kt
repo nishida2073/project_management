@@ -53,6 +53,13 @@ class AppSettingsActivity : AppCompatActivity() {
             Prefs.save(this, Prefs.load(this).copy(autoRefreshIntervalSeconds = seconds))
         }
 
+        binding.etSmsMatchToleranceSeconds.setText(config.smsMatchToleranceSeconds.toString())
+        binding.etSmsMatchToleranceSeconds.addTextChangedListener { text ->
+            val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
+            if (seconds < 1) return@addTextChangedListener
+            Prefs.save(this, Prefs.load(this).copy(smsMatchToleranceSeconds = seconds))
+        }
+
         applyThemeSelection(config.themeMode)
 
         binding.swThemeFollowSystem.setOnCheckedChangeListener { _, isChecked ->

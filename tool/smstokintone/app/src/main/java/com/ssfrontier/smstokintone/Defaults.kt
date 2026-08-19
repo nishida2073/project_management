@@ -5,6 +5,9 @@ object Defaults {
 
     const val AUTO_REFRESH_INTERVAL_SECONDS = 30
 
+    /** 自動受信SMSのログとSMSプロバイダ上のSMSを突き合わせる際の許容範囲の初期値（秒） */
+    const val SMS_MATCH_TOLERANCE_SECONDS = 15
+
     const val NEW_PROFILE_SUBDOMAIN = "univ-kyousai-{X}"
     const val NEW_PROFILE_FIELD_SENDER = "sender"
     const val NEW_PROFILE_FIELD_BODY = "body"

@@ -18,7 +18,7 @@ data class SmsParts(
 /**
  * SMS本文から部品（会社名・氏名・内容）を生成する（ラベルの表記ゆれ・記述順の違い・ラベル省略に対応）
  *
- * 「会社名：」「会社：」「御社名：」など、ラベルの表記ゆれがあっても、
+ * 「会社名：」「会社：」など、ラベルの表記ゆれがあっても、
  * また項目の記述順が入れ替わっていても、正しく項目を認識できるようにしています。
  * 内容のラベル（「内容：」）は省略可能で、氏名・会社名より後に続く自由記述はラベルが
  * 無くても内容として取り込みます。
@@ -41,6 +41,7 @@ object SmsPartsGenerator {
      *
      * 「NTTD四国」「NTTDATA四国」「四国」など、先頭のNTT表記の有無・書き方に関わらず、
      * 地域名部分（四国など）を残して正式な接頭辞を付け直す。既に正式な接頭辞で始まる場合はそのまま。
+     * ※現在は呼び出し元（[generateSmsParts]内）がコメントアウトされており未使用。会社名は正規化されずそのまま返る。
      */
     private fun normalizeCompanyName(companyName: String): String {
         if (companyName.isEmpty() || companyName.startsWith(Defaults.SMS_COMPANY_NAME_CANONICAL_PREFIX)) return companyName
