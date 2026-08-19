@@ -88,8 +88,8 @@ object Prefs {
             get() = keywordList.isEmpty()
 
         /** ログ表示用の名称。表示名が未設定の場合のフォールバック文字列を返す */
-        val displayName: String
-            get() = name.ifBlank { "(名称未設定)" }
+        fun displayName(context: Context): String =
+            name.ifBlank { context.getString(R.string.label_profile_name_unset) }
 
         val isValid: Boolean
             get() {

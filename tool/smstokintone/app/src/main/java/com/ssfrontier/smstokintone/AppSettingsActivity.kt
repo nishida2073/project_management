@@ -22,7 +22,7 @@ class AppSettingsActivity : AppCompatActivity() {
             if (!granted) {
                 Toast.makeText(
                     this,
-                    "SMS受信の許可がないと、このアプリは動作しません",
+                    getString(R.string.toast_sms_receive_permission_denied),
                     Toast.LENGTH_LONG
                 ).show()
             }

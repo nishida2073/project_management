@@ -40,7 +40,7 @@ class SmsReceiver : BroadcastReceiver() {
             body = body,
             success = true,
             message = context.getString(R.string.log_message_receive),
-            profileName = Prefs.findProfileForBody(context, body)?.displayName
+            profileName = Prefs.findProfileForBody(context, body)?.displayName(context)
         )
 
         val data = workDataOf(

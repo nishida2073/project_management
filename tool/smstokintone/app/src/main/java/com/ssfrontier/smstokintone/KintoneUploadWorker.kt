@@ -30,16 +30,16 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         if (profile == null || !profile.isValid) {
             // 送信先が特定できず何も開始できていないため、送信完了ではなく送信開始として
             // 失敗を記録する
-            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_start_profile_unconfigured), profileName = profile?.displayName, manual = manual)
+            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_start_profile_unconfigured), profileName = profile?.displayName(applicationContext), manual = manual)
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
             // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
             return@withContext Result.success()
         }
 
-        logStart(sender, body, timestampMillis, smsId, profileName = profile.displayName, manual = manual)
+        logStart(sender, body, timestampMillis, smsId, profileName = profile.displayName(applicationContext), manual = manual)
 
         if (!manual && !config.forwardingEnabled) {
-            logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_forwarding_disabled), profileName = profile.displayName, manual = manual)
+            logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_forwarding_disabled), profileName = profile.displayName(applicationContext), manual = manual)
             return@withContext Result.success()
         }
 
@@ -66,22 +66,22 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             contentValue = smsParts.content
         )) {
             is KintoneApi.PostResult.Success -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
                 Result.success()
             }
             is KintoneApi.PostResult.Skipped -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName, manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
                 Result.success()
             }
             is KintoneApi.PostResult.HttpFailure -> {
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_failure, detail), profileName = profile.displayName, manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_failure, detail), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
                 if (result.code in 500..599) Result.retry() else Result.success()
             }
             is KintoneApi.PostResult.NetworkError -> {
                 Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_network_error, result.message), profileName = profile.displayName, manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_network_error, result.message), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
                 Result.retry()
             }
         }

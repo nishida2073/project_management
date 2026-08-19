@@ -51,7 +51,7 @@ class SmsSearchActivity : AppCompatActivity() {
             if (!granted) {
                 Toast.makeText(
                     this,
-                    "SMSの読み取りを許可しないと、受信済みのSMSは検索できません",
+                    getString(R.string.toast_read_sms_permission_denied),
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -96,7 +96,7 @@ class SmsSearchActivity : AppCompatActivity() {
         val profiles = Prefs.loadProfiles(this)
         profileFilterKeys = listOf(null) + profiles.map { it.id } + FILTER_KEY_UNSET
         val labels = listOf(getString(R.string.filter_profile_all)) +
-            profiles.map { it.displayName } +
+            profiles.map { it.displayName(this) } +
             getString(R.string.label_profile_none)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
@@ -214,11 +214,11 @@ class SmsSearchActivity : AppCompatActivity() {
                         )
                     )
                 }
-            } ?: Toast.makeText(this, "SMSの検索でエラーが発生しました（クエリ結果がnull）", Toast.LENGTH_LONG).show()
+            } ?: Toast.makeText(this, getString(R.string.toast_sms_search_error_null_cursor), Toast.LENGTH_LONG).show()
         } catch (e: SecurityException) {
-            Toast.makeText(this, "SMSの読み取り権限がないため検索できません: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_sms_search_permission_error, e.message ?: ""), Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
-            Toast.makeText(this, "SMSの検索でエラーが発生しました: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_sms_search_error, e.message ?: ""), Toast.LENGTH_LONG).show()
         }
 
         if (binding.cbUnsentOnly.isChecked) {
@@ -237,7 +237,7 @@ class SmsSearchActivity : AppCompatActivity() {
         }
 
         if (showFoundToast) {
-            Toast.makeText(this, "${records.size}件見つかりました", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_sms_search_found, records.size), Toast.LENGTH_SHORT).show()
         }
         renderSmsList()
     }
@@ -272,7 +272,7 @@ class SmsSearchActivity : AppCompatActivity() {
         try {
             startActivity(intent)
         } catch (e: android.content.ActivityNotFoundException) {
-            Toast.makeText(this, "SMSアプリが見つかりませんでした", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_sms_app_not_found), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -286,7 +286,7 @@ class SmsSearchActivity : AppCompatActivity() {
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
                 tag = record.id
-                val profileName = Prefs.findProfileForBody(this@SmsSearchActivity, record.body)?.displayName
+                val profileName = Prefs.findProfileForBody(this@SmsSearchActivity, record.body)?.displayName(this@SmsSearchActivity)
                     ?: getString(R.string.label_profile_none)
                 val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
                 text = buildSpannedString {

@@ -218,7 +218,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         Prefs.saveProfiles(this, newProfiles)
-        Toast.makeText(this, "設定を保存しました", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.toast_settings_saved), Toast.LENGTH_SHORT).show()
         finish()
     }
 }

@@ -20,6 +20,7 @@
     <string name="btn_delete_profile">削除</string>
     <string name="profile_copy_suffix">のコピー</string>
     <string name="label_profile_none">未設定</string>
+    <string name="label_profile_name_unset">(名称未設定)</string>
     <string name="profile_index_format">設定 %1$d</string>
     <string name="toast_no_profiles">設定を1つ以上追加してください</string>
     <string name="section_connection">接続</string>
@@ -47,6 +48,7 @@
     <string name="validation_error_title">入力エラー</string>
     <string name="validation_error">%1$s: 送信先名・サブドメイン・認証方式・アプリID・フィールドコードは必須です</string>
     <string name="btn_save">設定を保存</string>
+    <string name="toast_settings_saved">設定を保存しました</string>
     <string name="btn_test_send">テスト送信</string>
     <string name="test_send_result_title">テスト結果</string>
     <string name="test_send_body">株式会社テスト\nテスト太郎\nこれはアプリからのテスト送信です</string>
@@ -66,6 +68,7 @@
     <string name="permission_status_granted">SMS受信の許可: 許可済み</string>
     <string name="permission_status_denied">SMS受信の許可: 未許可</string>
     <string name="btn_request_permission">SMS受信を許可する</string>
+    <string name="toast_sms_receive_permission_denied">SMS受信の許可がないと、このアプリは動作しません</string>
     <string name="section_reply">SMS返信</string>
     <string name="hint_sms_standard_reply_body">返信時に自動入力する文言</string>
     <string name="hint_sms_split_failed_reply_body">返信時に自動入力する文言（分割失敗時）</string>
@@ -116,6 +119,12 @@
     <string name="sms_search_empty">該当するSMSがありません</string>
     <string name="sms_search_permission_required">受信済みのSMSを読み取るには許可が必要です</string>
     <string name="btn_request_read_sms_permission">SMSの読み取りを許可する</string>
+    <string name="toast_read_sms_permission_denied">SMSの読み取りを許可しないと、受信済みのSMSは検索できません</string>
+    <string name="toast_sms_search_error_null_cursor">SMSの検索でエラーが発生しました（クエリ結果がnull）</string>
+    <string name="toast_sms_search_permission_error">SMSの読み取り権限がないため検索できません: %1$s</string>
+    <string name="toast_sms_search_error">SMSの検索でエラーが発生しました: %1$s</string>
+    <string name="toast_sms_search_found">%1$d件見つかりました</string>
+    <string name="toast_sms_app_not_found">SMSアプリが見つかりませんでした</string>
     <string name="toast_no_selection">送信するSMSを選択してください</string>
     <string name="toast_queued">%1$d件をkintoneへ送信キューに追加しました</string>
     <string name="toast_send_finished">送信処理が完了しました（成功%1$d件 / 失敗%2$d件）</string>
