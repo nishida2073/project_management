@@ -1,5 +1,7 @@
 package com.ssfrontier.smstokintone
 
+import androidx.work.BackoffPolicy
+
 /** アプリ全体で使う初期値・ダミー値をまとめたもの（UI文言はstrings.xmlを参照） */
 object Defaults {
 
@@ -19,6 +21,19 @@ object Defaults {
     const val NEW_PROFILE_UPDATE_WINDOW_HOURS = 5
 
     const val TEST_SEND_SENDER = "09000000000"
+
+    /** kintoneへの送信がレートリミット/サーバーエラー/通信エラーで失敗した際の最大リトライ回数 */
+    const val KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS = 5
+
+    /**
+     * kintoneへの送信リトライ時の初期バックオフ間隔（ミリ秒）。WorkManagerの許容最小値
+     * （[androidx.work.WorkRequest.MIN_BACKOFF_MILLIS]）を下回ると例外になるため、
+     * 変更する場合はその値以上にすること
+     */
+    const val KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS = 10_000L
+
+    /** kintoneへの送信リトライ時のバックオフ方式 */
+    val KINTONE_UPLOAD_RETRY_BACKOFF_POLICY = BackoffPolicy.LINEAR
 
     /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言の初期値 */
     const val SMS_STANDARD_REPLY_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"

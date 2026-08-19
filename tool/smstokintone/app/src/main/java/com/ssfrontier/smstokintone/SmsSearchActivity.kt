@@ -21,11 +21,9 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import androidx.lifecycle.Observer
-import androidx.work.BackoffPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkContinuation
 import androidx.work.WorkManager
-import androidx.work.WorkRequest
 import androidx.work.workDataOf
 import com.ssfrontier.smstokintone.databinding.ActivitySmsSearchBinding
 import java.text.SimpleDateFormat
@@ -397,8 +395,8 @@ class SmsSearchActivity : AppCompatActivity() {
             val request = OneTimeWorkRequestBuilder<KintoneUploadWorker>()
                 .setInputData(data)
                 .setBackoffCriteria(
-                    BackoffPolicy.LINEAR,
-                    WorkRequest.MIN_BACKOFF_MILLIS,
+                    Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_POLICY,
+                    Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS,
                     TimeUnit.MILLISECONDS
                 )
                 .build()

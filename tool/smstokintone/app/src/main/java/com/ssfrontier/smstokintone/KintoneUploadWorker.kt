@@ -77,15 +77,20 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
                 logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_failure, detail), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
-                if (result.code in 500..599 || result.code == 429) Result.retry() else Result.success()
+                if ((result.code in 500..599 || result.code == 429) && shouldRetry()) Result.retry() else Result.success()
             }
             is KintoneApi.PostResult.NetworkError -> {
                 Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
                 logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.log_message_send_complete_network_error, result.message), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
-                Result.retry()
+                if (shouldRetry()) Result.retry() else Result.success()
             }
         }
     }
+
+    // WorkManagerはResult.retry()に回数上限を設けていないため、リトライし続けている間は
+    // 送信バッチが完了扱いにならず、SmsSearchActivity側の完了通知（トースト）が
+    // 表示されないままになる。一定回数で諦めて完了扱いにする
+    private fun shouldRetry(): Boolean = runAttemptCount < Defaults.KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS - 1
 
     private fun logStart(
         sender: String,

@@ -4,10 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
-import androidx.work.BackoffPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.WorkRequest
 import androidx.work.workDataOf
 import java.util.concurrent.TimeUnit
 
@@ -52,8 +50,8 @@ class SmsReceiver : BroadcastReceiver() {
         val request = OneTimeWorkRequestBuilder<KintoneUploadWorker>()
             .setInputData(data)
             .setBackoffCriteria(
-                BackoffPolicy.LINEAR,
-                WorkRequest.MIN_BACKOFF_MILLIS,
+                Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_POLICY,
+                Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS,
                 TimeUnit.MILLISECONDS
             )
             .build()
