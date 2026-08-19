@@ -35,8 +35,8 @@ object KintoneApi {
      * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、最終受信日時（[profile].fieldDatetime）
      * の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、新規登録
      * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
-     * 既存レコードの最終受信日時と分単位で一致する場合（kintoneは秒を保持しないため。同一SMSの
-     * 重複配信など）は何も送信せずスキップする。
+     * 既存レコードの最終受信日時と分単位で一致し（kintoneは秒を保持しないため）、かつ既存レコードの
+     * 本文に今回の本文が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
      */
     fun postRecord(
         context: Context,
@@ -56,10 +56,11 @@ object KintoneApi {
             null
         }
 
-        val isSameMinute = existing != null && datetimeIsoValue != null &&
-            isSameMinute(existing.datetimeValue, datetimeIsoValue)
+        val isDuplicate = existing != null && datetimeIsoValue != null &&
+            isSameMinute(existing.datetimeValue, datetimeIsoValue) &&
+            existing.bodyValue.contains(bodyValue)
 
-        return if (isSameMinute) {
+        return if (isDuplicate) {
             PostResult.Skipped(context.getString(R.string.log_message_send_complete_skipped_duplicate))
         } else if (existing != null) {
             val newEntryMillis = datetimeIsoValue?.let { parseIsoDateTime(it) }

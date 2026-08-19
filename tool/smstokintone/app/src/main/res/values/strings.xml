@@ -95,7 +95,7 @@
     <string name="log_message_send_complete_forwarding_disabled">kintoneへの自動送信が無効になっています</string>
     <string name="log_message_send_complete_failure">送信失敗: %1$s</string>
     <string name="log_message_send_complete_network_error">通信エラー: %1$s</string>
-    <string name="log_message_send_complete_skipped_duplicate">最終受信日時（秒は除く）が一致するため、スキップしました</string>
+    <string name="log_message_send_complete_skipped_duplicate">最終受信日時（秒は除く）と本文が一致するため、スキップしました</string>
     <string name="btn_clear_log">クリア</string>
     <string name="btn_refresh_log">更新</string>
     <string name="confirm_clear_log_title">ログをクリアしますか？</string>
