@@ -231,19 +231,18 @@ foreach ($sm in $stepMeta) {
     $lblStepStatus.Text = "未実行"
     $lblStepStatus.AutoSize = $false
     $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
-    $lblStepStatus.Location = New-Object System.Drawing.Point(300, $stepRowY)
+    $lblStepStatus.Location = New-Object System.Drawing.Point(300, ($stepRowY + 6))
     $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
     $stepCardsPanel.Controls.Add($lblStepStatus)
     $script:stepStatusLabels[$sm.Id] = $lblStepStatus
 
     if ($sm.OutputPathFn) {
-        $btnStepOpen = New-Object System.Windows.Forms.Button
+        $btnStepOpen = New-Object System.Windows.Forms.LinkLabel
         $btnStepOpen.Text = "開く"
-        $btnStepOpen.Size = New-Object System.Drawing.Size(70, 24)
-        $btnStepOpen.Location = New-Object System.Drawing.Point(460, ($stepRowY - 2))
-        $btnStepOpen.Enabled = $false
+        $btnStepOpen.AutoSize = $true
+        $btnStepOpen.Location = New-Object System.Drawing.Point(460, ($stepRowY + 8))
         $btnStepOpen.Tag = $sm.Id
-        $btnStepOpen.Add_Click({ Open-KintoneOutputFile $script:stepOutputPaths[$this.Tag] })
+        $btnStepOpen.Add_LinkClicked({ Open-KintoneOutputFile $script:stepOutputPaths[$this.Tag] })
         $stepCardsPanel.Controls.Add($btnStepOpen)
         $script:stepOpenButtons[$sm.Id] = $btnStepOpen
     }
@@ -496,7 +495,6 @@ function Invoke-Step {
         $outputPath = Get-StepOutputPath -Id $Id -ConfigName $ConfigName
         if ($outputPath -and (Test-Path -LiteralPath $outputPath)) {
             $script:stepOutputPaths[$Id] = $outputPath
-            $script:stepOpenButtons[$Id].Enabled = $true
         }
     }
     return $true
