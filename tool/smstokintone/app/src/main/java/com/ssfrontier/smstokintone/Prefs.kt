@@ -104,7 +104,7 @@ object Prefs {
                 }
             }
 
-        fun matches(body: String): Boolean = keywordList.any { body.contains(it) }
+        fun matches(body: String): Boolean = keywordList.any { body.contains(it, ignoreCase = true) }
 
         companion object {
             fun newEmpty(): KintoneProfile = KintoneProfile(
