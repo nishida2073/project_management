@@ -35,12 +35,13 @@ class KintoneSettingsActivity : AppCompatActivity() {
         SettingsStore.loadProfiles(this).forEach { addProfileCard(it) }
 
         binding.btnAddProfile.setOnClickListener {
-            addProfileCard(SettingsStore.KintoneProfile.newEmpty())
+            val newCardView = addProfileCard(SettingsStore.KintoneProfile.newEmpty())
+            newCardView.post { binding.root.smoothScrollTo(0, topRelativeTo(newCardView, binding.root)) }
         }
         binding.btnSave.setOnClickListener { onSaveClicked() }
     }
 
-    private fun addProfileCard(profile: SettingsStore.KintoneProfile, insertAt: Int = -1) {
+    private fun addProfileCard(profile: SettingsStore.KintoneProfile, insertAt: Int = -1): View {
         val itemBinding = ItemKintoneProfileBinding.inflate(layoutInflater, binding.llProfilesContainer, false)
         val card = ProfileCard(profile.id, itemBinding)
 
@@ -78,7 +79,8 @@ class KintoneSettingsActivity : AppCompatActivity() {
         itemBinding.btnCopyProfile.setOnClickListener {
             val source = readProfileFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
             val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.profile_copy_suffix)
-            addProfileCard(source.copy(name = copyName), insertAt = profileCards.indexOf(card) + 1)
+            val newCardView = addProfileCard(source.copy(name = copyName), insertAt = profileCards.indexOf(card) + 1)
+            newCardView.post { binding.root.smoothScrollTo(0, topRelativeTo(newCardView, binding.root)) }
         }
 
         itemBinding.btnDeleteProfile.setOnClickListener {
@@ -97,6 +99,18 @@ class KintoneSettingsActivity : AppCompatActivity() {
             profileCards.add(insertAt, card)
         }
         renumberCards()
+        return itemBinding.root
+    }
+
+    /** [view]から[ancestor]までの祖先を遡り、[ancestor]の座標系における[view]の上端位置を求める */
+    private fun topRelativeTo(view: View, ancestor: View): Int {
+        var top = 0
+        var current = view
+        while (current !== ancestor) {
+            top += current.top
+            current = current.parent as View
+        }
+        return top
     }
 
     private fun readProfileFromBinding(itemBinding: ItemKintoneProfileBinding, id: String): SettingsStore.KintoneProfile {
