@@ -18,6 +18,9 @@ object AppDefaults {
     const val NEW_PROFILE_FIELD_CONTENT = "content"
     const val NEW_PROFILE_UPDATE_WINDOW_HOURS = 5
 
+    /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲の初期値（日） */
+    const val SMS_SEARCH_DATE_RANGE_DAYS = 3
+
     /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言の初期値 */
     const val SMS_STANDARD_REPLY_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"
 

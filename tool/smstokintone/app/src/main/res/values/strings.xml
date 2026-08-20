@@ -76,6 +76,9 @@
     <string name="permission_status_denied">SMS受信の許可: 未許可</string>
     <string name="btn_request_permission">SMSの受信を許可する</string>
     <string name="toast_sms_receive_permission_denied">SMS受信の許可がないと、このアプリは動作しません</string>
+    <string name="section_sms_search">SMS検索</string>
+    <string name="section_search_range">検索範囲</string>
+    <string name="hint_sms_search_date_range_days">開始日〜終了日の範囲（日）</string>
     <string name="section_reply">返信用の文言</string>
     <string name="section_sms_standard_reply_body">自動入力する文言</string>
     <string name="hint_sms_standard_reply_body">自動入力する文言</string>

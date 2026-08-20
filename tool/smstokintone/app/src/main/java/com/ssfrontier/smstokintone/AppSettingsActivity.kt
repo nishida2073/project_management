@@ -60,6 +60,13 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(smsMatchToleranceSeconds = seconds))
         }
 
+        binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())
+        binding.etSmsSearchDateRangeDays.addTextChangedListener { text ->
+            val days = text.toString().toIntOrNull() ?: return@addTextChangedListener
+            if (days < 1) return@addTextChangedListener
+            SettingsStore.save(this, SettingsStore.load(this).copy(smsSearchDateRangeDays = days))
+        }
+
         applyThemeSelection(config.themeMode)
 
         binding.swThemeFollowSystem.setOnCheckedChangeListener { _, isChecked ->

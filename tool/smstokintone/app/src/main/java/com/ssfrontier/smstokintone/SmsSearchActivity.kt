@@ -79,9 +79,10 @@ class SmsSearchActivity : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
+        val rangeDays = SettingsStore.load(this).smsSearchDateRangeDays
         val today = Calendar.getInstance()
-        val weekAgo = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -7) }
-        applyDateFilter(isFrom = true, calendar = weekAgo)
+        val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -rangeDays) }
+        applyDateFilter(isFrom = true, calendar = rangeStart)
         applyDateFilter(isFrom = false, calendar = today)
     }
 
