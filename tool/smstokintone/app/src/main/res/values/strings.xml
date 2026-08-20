@@ -61,10 +61,12 @@
     <!-- アプリ設定画面 -->
     <string name="app_settings_title">アプリ設定</string>
     <string name="section_forwarding">自動送信</string>
-    <string name="switch_forwarding_enabled">自動送信を有効にする</string>
+    <string name="switch_forwarding_enabled">有効にする</string>
     <string name="section_log">ログ</string>
-    <string name="switch_auto_refresh_enabled">自動更新を有効にする</string>
+    <string name="section_auto_refresh">自動更新</string>
+    <string name="switch_auto_refresh_enabled">有効にする</string>
     <string name="hint_auto_refresh_interval">更新間隔（秒）</string>
+    <string name="section_layout">レイアウト</string>
     <string name="section_theme_mode">表示テーマ</string>
     <string name="switch_theme_follow_system">システム設定を有効にする</string>
     <string name="rb_theme_light">ライト</string>
@@ -77,9 +79,11 @@
     <string name="toast_sms_receive_permission_denied">SMS受信の許可がないと、このアプリは動作しません</string>
     <string name="section_sms_search">SMS検索</string>
     <string name="section_search_range">検索条件</string>
-    <string name="hint_sms_search_date_range_days">開始日〜終了日の範囲（日）</string>
+    <string name="label_sms_search_date_range">受信期間</string>
+    <string name="hint_sms_search_date_range_days">期間（日）</string>
     <string name="label_default_profile_filter">送信先</string>
-    <string name="section_reply">返信時に自動入力する文言</string>
+    <string name="label_sms_match_tolerance_seconds">統合範囲</string>
+    <string name="section_reply">返信時メッセージ</string>
     <string name="section_sms_standard_reply_body">通常</string>
     <string name="hint_sms_standard_reply_body">文言</string>
     <string name="section_sms_split_failed_reply_body">形式が不正な場合</string>

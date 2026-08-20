@@ -34,38 +34,52 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_theme_mode"
+                    android:text="@string/section_layout"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/swThemeFollowSystem"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:checked="true"
-                    android:text="@string/switch_theme_follow_system" />
+                    android:text="@string/section_theme_mode"
+                    android:textSize="14sp" />
 
-                <RadioGroup
-                    android:id="@+id/rgThemeLightDark"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
 
-                    <RadioButton
-                        android:id="@+id/rbThemeLight"
-                        android:layout_width="wrap_content"
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swThemeFollowSystem"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:checked="true"
-                        android:text="@string/rb_theme_light" />
+                        android:text="@string/switch_theme_follow_system" />
 
-                    <RadioButton
-                        android:id="@+id/rbThemeDark"
-                        android:layout_width="wrap_content"
+                    <RadioGroup
+                        android:id="@+id/rgThemeLightDark"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:text="@string/rb_theme_dark" />
-                </RadioGroup>
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/rbThemeLight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/rb_theme_light" />
+
+                        <RadioButton
+                            android:id="@+id/rbThemeDark"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="@string/rb_theme_dark" />
+                    </RadioGroup>
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -90,20 +104,27 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvPermissionStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/permission_status_granted"
-                    android:visibility="gone" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRequestPermission"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/btn_request_permission" />
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvPermissionStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/permission_status_granted"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnRequestPermission"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/btn_request_permission" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -128,28 +149,19 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/swForwardingEnabled"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:checked="true"
-                    android:text="@string/switch_forwarding_enabled" />
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilSmsMatchToleranceSeconds"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/hint_sms_match_tolerance_seconds"
-                    app:helperText="@string/helper_sms_match_tolerance_seconds"
-                    app:helperTextEnabled="true">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etSmsMatchToleranceSeconds"
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swForwardingEnabled"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:checked="true"
+                        android:text="@string/switch_forwarding_enabled" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -174,26 +186,40 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/swAutoRefreshEnabled"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:checked="true"
-                    android:text="@string/switch_auto_refresh_enabled" />
+                    android:text="@string/section_auto_refresh"
+                    android:textSize="14sp" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilAutoRefreshInterval"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_auto_refresh_interval">
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etAutoRefreshInterval"
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swAutoRefreshEnabled"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginBottom="8dp"
+                        android:checked="true"
+                        android:text="@string/switch_auto_refresh_enabled" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilAutoRefreshInterval"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_auto_refresh_interval">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etAutoRefreshInterval"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -225,29 +251,64 @@
                     android:text="@string/section_search_range"
                     android:textSize="14sp" />
 
-                <com.google.android.material.textfield.TextInputLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/hint_sms_search_date_range_days">
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etSmsSearchDateRangeDays"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_sms_search_date_range" />
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:hint="@string/hint_sms_search_date_range_days">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/label_default_profile_filter" />
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSmsSearchDateRangeDays"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                <Spinner
-                    android:id="@+id/spDefaultProfileFilter"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_default_profile_filter" />
+
+                    <Spinner
+                        android:id="@+id/spDefaultProfileFilter"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_sms_match_tolerance_seconds" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tilSmsMatchToleranceSeconds"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_sms_match_tolerance_seconds"
+                        app:helperText="@string/helper_sms_match_tolerance_seconds"
+                        app:helperTextEnabled="true">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etSmsMatchToleranceSeconds"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
