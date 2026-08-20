@@ -15,7 +15,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val config = Prefs.load(applicationContext)
+        val config = SettingsStore.load(applicationContext)
         val sender = inputData.getString(KEY_SENDER) ?: ""
         val body = inputData.getString(KEY_BODY) ?: ""
         val timestampMillis = inputData.getLong(KEY_TIMESTAMP, System.currentTimeMillis())
@@ -25,7 +25,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 近さによって突き合わせる（SmsMatching参照）。
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        val profile = Prefs.findProfileForBody(applicationContext, body)
+        val profile = SettingsStore.findProfileForBody(applicationContext, body)
 
         if (profile == null || !profile.isValid) {
             // 送信先が特定できず何も開始できていないため、送信完了ではなく送信開始として
@@ -90,7 +90,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
     // WorkManagerはResult.retry()に回数上限を設けていないため、リトライし続けている間は
     // 送信バッチが完了扱いにならず、SmsSearchActivity側の完了通知（トースト）が
     // 表示されないままになる。一定回数で諦めて完了扱いにする
-    private fun shouldRetry(): Boolean = runAttemptCount < Defaults.KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS - 1
+    private fun shouldRetry(): Boolean = runAttemptCount < AppConstants.KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS - 1
 
     private fun logStart(
         sender: String,
@@ -102,9 +102,9 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         success: Boolean = true,
         message: String? = null
     ) {
-        UploadLogStore.add(
+        SmsLogStore.add(
             applicationContext,
-            type = UploadLogStore.EntryType.SEND_START,
+            type = SmsLogStore.EntryType.SEND_START,
             timestampMillis = timestampMillis,
             sender = sender,
             body = body,
@@ -127,9 +127,9 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         manual: Boolean,
         smsParts: SmsParts? = null
     ) {
-        UploadLogStore.add(
+        SmsLogStore.add(
             applicationContext,
-            type = UploadLogStore.EntryType.SEND_COMPLETE,
+            type = SmsLogStore.EntryType.SEND_COMPLETE,
             timestampMillis = timestampMillis,
             sender = sender,
             body = body,

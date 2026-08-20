@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.ssfrontier.smstokintone.databinding.ActivitySettingsBinding
+import com.ssfrontier.smstokintone.databinding.ActivityKintoneSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemKintoneProfileBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,9 +16,9 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-class SettingsActivity : AppCompatActivity() {
+class KintoneSettingsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivitySettingsBinding
+    private lateinit var binding: ActivityKintoneSettingsBinding
 
     private class ProfileCard(val id: String, val binding: ItemKintoneProfileBinding)
 
@@ -26,18 +26,18 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        binding = ActivityKintoneSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Prefs.loadProfiles(this).forEach { addProfileCard(it) }
+        SettingsStore.loadProfiles(this).forEach { addProfileCard(it) }
 
         binding.btnAddProfile.setOnClickListener {
-            addProfileCard(Prefs.KintoneProfile.newEmpty())
+            addProfileCard(SettingsStore.KintoneProfile.newEmpty())
         }
         binding.btnSave.setOnClickListener { onSaveClicked() }
     }
 
-    private fun addProfileCard(profile: Prefs.KintoneProfile, insertAt: Int = -1) {
+    private fun addProfileCard(profile: SettingsStore.KintoneProfile, insertAt: Int = -1) {
         val itemBinding = ItemKintoneProfileBinding.inflate(layoutInflater, binding.llProfilesContainer, false)
         val card = ProfileCard(profile.id, itemBinding)
 
@@ -58,16 +58,16 @@ class SettingsActivity : AppCompatActivity() {
         itemBinding.etUpdateWindowHours.setText(profile.updateWindowHours.toString())
 
         when (profile.authMethod) {
-            Prefs.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
-            Prefs.AuthMethod.PASSWORD -> itemBinding.rbAuthPassword.isChecked = true
+            SettingsStore.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
+            SettingsStore.AuthMethod.PASSWORD -> itemBinding.rbAuthPassword.isChecked = true
         }
         updateAuthMethodVisibility(itemBinding, profile.authMethod)
 
         itemBinding.rgAuthMethod.setOnCheckedChangeListener { _, checkedId ->
             val method = if (checkedId == itemBinding.rbAuthPassword.id) {
-                Prefs.AuthMethod.PASSWORD
+                SettingsStore.AuthMethod.PASSWORD
             } else {
-                Prefs.AuthMethod.API_TOKEN
+                SettingsStore.AuthMethod.API_TOKEN
             }
             updateAuthMethodVisibility(itemBinding, method)
         }
@@ -96,14 +96,14 @@ class SettingsActivity : AppCompatActivity() {
         renumberCards()
     }
 
-    private fun readProfileFromBinding(itemBinding: ItemKintoneProfileBinding, id: String): Prefs.KintoneProfile {
+    private fun readProfileFromBinding(itemBinding: ItemKintoneProfileBinding, id: String): SettingsStore.KintoneProfile {
         val authMethod = if (itemBinding.rbAuthPassword.isChecked) {
-            Prefs.AuthMethod.PASSWORD
+            SettingsStore.AuthMethod.PASSWORD
         } else {
-            Prefs.AuthMethod.API_TOKEN
+            SettingsStore.AuthMethod.API_TOKEN
         }
 
-        return Prefs.KintoneProfile(
+        return SettingsStore.KintoneProfile(
             id = id,
             name = itemBinding.etProfileName.text.toString().trim(),
             keywords = itemBinding.etKeywords.text.toString().trim(),
@@ -121,7 +121,7 @@ class SettingsActivity : AppCompatActivity() {
             fieldUserName = itemBinding.etFieldUserName.text.toString().trim(),
             fieldContent = itemBinding.etFieldContent.text.toString().trim(),
             updateWindowHours = itemBinding.etUpdateWindowHours.text.toString().trim().toIntOrNull()
-                ?: Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
+                ?: AppDefaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
         )
     }
 
@@ -155,7 +155,7 @@ class SettingsActivity : AppCompatActivity() {
                 KintoneApi.postRecord(
                     applicationContext,
                     profile,
-                    senderValue = Defaults.TEST_SEND_SENDER,
+                    senderValue = AppConstants.TEST_SEND_SENDER,
                     bodyValue = testBody,
                     datetimeIsoValue = datetimeIso,
                     companyNameValue = smsParts.companyName,
@@ -171,7 +171,7 @@ class SettingsActivity : AppCompatActivity() {
                 is KintoneApi.PostResult.HttpFailure -> getString(R.string.log_message_send_complete_failure, "${result.code} ${result.detail}")
                 is KintoneApi.PostResult.NetworkError -> getString(R.string.log_message_send_complete_network_error, result.message)
             }
-            AlertDialog.Builder(this@SettingsActivity)
+            AlertDialog.Builder(this@KintoneSettingsActivity)
                 .setTitle(R.string.test_send_result_title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
@@ -185,13 +185,13 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateAuthMethodVisibility(itemBinding: ItemKintoneProfileBinding, method: Prefs.AuthMethod) {
-        itemBinding.tilApiToken.visibility = if (method == Prefs.AuthMethod.API_TOKEN) {
+    private fun updateAuthMethodVisibility(itemBinding: ItemKintoneProfileBinding, method: SettingsStore.AuthMethod) {
+        itemBinding.tilApiToken.visibility = if (method == SettingsStore.AuthMethod.API_TOKEN) {
             View.VISIBLE
         } else {
             View.GONE
         }
-        itemBinding.layoutPasswordAuth.visibility = if (method == Prefs.AuthMethod.PASSWORD) {
+        itemBinding.layoutPasswordAuth.visibility = if (method == SettingsStore.AuthMethod.PASSWORD) {
             View.VISIBLE
         } else {
             View.GONE
@@ -199,7 +199,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun onSaveClicked() {
-        val newProfiles = mutableListOf<Prefs.KintoneProfile>()
+        val newProfiles = mutableListOf<SettingsStore.KintoneProfile>()
 
         for ((index, card) in profileCards.withIndex()) {
             val profile = readProfileFromBinding(card.binding, id = card.id)
@@ -217,7 +217,7 @@ class SettingsActivity : AppCompatActivity() {
             newProfiles.add(profile)
         }
 
-        Prefs.saveProfiles(this, newProfiles)
+        SettingsStore.saveProfiles(this, newProfiles)
         Toast.makeText(this, getString(R.string.toast_settings_saved), Toast.LENGTH_SHORT).show()
         finish()
     }

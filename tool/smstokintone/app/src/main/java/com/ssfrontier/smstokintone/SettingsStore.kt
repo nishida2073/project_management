@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.Normalizer
 import java.util.UUID
 
-object Prefs {
+object SettingsStore {
 
     private const val PREFS_NAME = "smstokintone_prefs"
     private const val KEY_FORWARDING_ENABLED = "forwarding_enabled"
@@ -104,27 +105,32 @@ object Prefs {
                 }
             }
 
-        fun matches(body: String): Boolean = keywordList.any { body.contains(it, ignoreCase = true) }
+        // 半角/全角の表記ゆれ（英数字・カタカナ等）を無視して比較するため、NFKC正規化してから
+        // 大文字小文字を無視した部分一致を行う
+        fun matches(body: String): Boolean {
+            val normalizedBody = Normalizer.normalize(body, Normalizer.Form.NFKC)
+            return keywordList.any { normalizedBody.contains(Normalizer.normalize(it, Normalizer.Form.NFKC), ignoreCase = true) }
+        }
 
         companion object {
             fun newEmpty(): KintoneProfile = KintoneProfile(
                 id = UUID.randomUUID().toString(),
                 name = "",
                 keywords = "",
-                subdomain = Defaults.NEW_PROFILE_SUBDOMAIN,
+                subdomain = AppDefaults.NEW_PROFILE_SUBDOMAIN,
                 appId = "",
                 authMethod = AuthMethod.PASSWORD,
                 apiToken = "",
                 loginName = "",
                 loginPassword = "",
-                fieldSender = Defaults.NEW_PROFILE_FIELD_SENDER,
-                fieldBody = Defaults.NEW_PROFILE_FIELD_BODY,
-                fieldDatetime = Defaults.NEW_PROFILE_FIELD_DATETIME,
-                fieldType = Defaults.NEW_PROFILE_FIELD_TYPE,
-                updateWindowHours = Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS,
-                fieldCompanyName = Defaults.NEW_PROFILE_FIELD_COMPANY_NAME,
-                fieldUserName = Defaults.NEW_PROFILE_FIELD_USER_NAME,
-                fieldContent = Defaults.NEW_PROFILE_FIELD_CONTENT
+                fieldSender = AppDefaults.NEW_PROFILE_FIELD_SENDER,
+                fieldBody = AppDefaults.NEW_PROFILE_FIELD_BODY,
+                fieldDatetime = AppDefaults.NEW_PROFILE_FIELD_DATETIME,
+                fieldType = AppDefaults.NEW_PROFILE_FIELD_TYPE,
+                updateWindowHours = AppDefaults.NEW_PROFILE_UPDATE_WINDOW_HOURS,
+                fieldCompanyName = AppDefaults.NEW_PROFILE_FIELD_COMPANY_NAME,
+                fieldUserName = AppDefaults.NEW_PROFILE_FIELD_USER_NAME,
+                fieldContent = AppDefaults.NEW_PROFILE_FIELD_CONTENT
             )
         }
     }
@@ -151,16 +157,16 @@ object Prefs {
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
             autoRefreshIntervalSeconds = p.getInt(
                 KEY_AUTO_REFRESH_INTERVAL_SECONDS,
-                Defaults.AUTO_REFRESH_INTERVAL_SECONDS
+                AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS
             ),
             smsMatchToleranceSeconds = p.getInt(
                 KEY_SMS_MATCH_TOLERANCE_SECONDS,
-                Defaults.SMS_MATCH_TOLERANCE_SECONDS
+                AppDefaults.SMS_MATCH_TOLERANCE_SECONDS
             ),
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
-            defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, Defaults.SMS_STANDARD_REPLY_BODY) ?: Defaults.SMS_STANDARD_REPLY_BODY,
-            splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, Defaults.SMS_SPLIT_FAILED_REPLY_BODY)
-                ?: Defaults.SMS_SPLIT_FAILED_REPLY_BODY
+            defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, AppDefaults.SMS_STANDARD_REPLY_BODY) ?: AppDefaults.SMS_STANDARD_REPLY_BODY,
+            splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY)
+                ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY
         )
     }
 
@@ -212,7 +218,7 @@ object Prefs {
                 fieldBody = obj.optString("fieldBody", ""),
                 fieldDatetime = obj.optString("fieldDatetime", ""),
                 fieldType = obj.optString("fieldType", ""),
-                updateWindowHours = obj.optInt("updateWindowHours", Defaults.NEW_PROFILE_UPDATE_WINDOW_HOURS),
+                updateWindowHours = obj.optInt("updateWindowHours", AppDefaults.NEW_PROFILE_UPDATE_WINDOW_HOURS),
                 fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
                 fieldContent = obj.optString("fieldContent", "")

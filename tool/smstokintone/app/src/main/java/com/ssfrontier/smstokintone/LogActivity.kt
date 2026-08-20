@@ -46,7 +46,7 @@ class LogActivity : AppCompatActivity() {
 
     private fun scheduleAutoRefresh() {
         autoRefreshHandler.removeCallbacks(autoRefreshRunnable)
-        val config = Prefs.load(this)
+        val config = SettingsStore.load(this)
         if (config.autoRefreshEnabled) {
             autoRefreshHandler.postDelayed(
                 autoRefreshRunnable,
@@ -61,23 +61,23 @@ class LogActivity : AppCompatActivity() {
             .setMessage(R.string.confirm_clear_log_message)
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_clear) { _, _ ->
-                UploadLogStore.clear(this)
+                SmsLogStore.clear(this)
                 renderLog()
             }
             .show()
     }
 
     private fun renderLog() {
-        val entries = UploadLogStore.getAll(this)
+        val entries = SmsLogStore.getAll(this)
         binding.llLogContainer.removeAllViews()
         binding.tvLogEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
 
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         entries.forEach { entry ->
             val typeLabel = when (entry.type) {
-                UploadLogStore.EntryType.RECEIVE -> getString(R.string.log_type_receive)
-                UploadLogStore.EntryType.SEND_START -> getString(R.string.log_type_send_start)
-                UploadLogStore.EntryType.SEND_COMPLETE -> getString(R.string.log_type_send_complete)
+                SmsLogStore.EntryType.RECEIVE -> getString(R.string.log_type_receive)
+                SmsLogStore.EntryType.SEND_START -> getString(R.string.log_type_send_start)
+                SmsLogStore.EntryType.SEND_COMPLETE -> getString(R.string.log_type_send_complete)
             }
 
             val modeColor = ContextCompat.getColor(
@@ -89,7 +89,7 @@ class LogActivity : AppCompatActivity() {
             val typeAndTimestampView = TextView(this).apply {
                 text = buildSpannedString {
                     append("[$typeLabel")
-                    if (entry.type != UploadLogStore.EntryType.RECEIVE) {
+                    if (entry.type != SmsLogStore.EntryType.RECEIVE) {
                         color(modeColor) {
                             append(getString(if (entry.manual) R.string.log_type_suffix_manual else R.string.log_type_suffix_auto))
                         }

@@ -4,7 +4,7 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 
-object UploadLogStore {
+object SmsLogStore {
 
     private const val PREFS_NAME = "smstokintone_log"
     private const val KEY_ENTRIES = "entries"

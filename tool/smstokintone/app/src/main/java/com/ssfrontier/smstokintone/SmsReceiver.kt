@@ -30,15 +30,15 @@ class SmsReceiver : BroadcastReceiver() {
         // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
         // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
         // （SmsMatching参照）。
-        UploadLogStore.add(
+        SmsLogStore.add(
             context,
-            type = UploadLogStore.EntryType.RECEIVE,
+            type = SmsLogStore.EntryType.RECEIVE,
             timestampMillis = timestampMillis,
             sender = sender,
             body = body,
             success = true,
             message = context.getString(R.string.log_message_receive),
-            profileName = Prefs.findProfileForBody(context, body)?.displayName(context)
+            profileName = SettingsStore.findProfileForBody(context, body)?.displayName(context)
         )
 
         val data = workDataOf(
@@ -50,8 +50,8 @@ class SmsReceiver : BroadcastReceiver() {
         val request = OneTimeWorkRequestBuilder<KintoneUploadWorker>()
             .setInputData(data)
             .setBackoffCriteria(
-                Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_POLICY,
-                Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS,
+                AppConstants.KINTONE_UPLOAD_RETRY_BACKOFF_POLICY,
+                AppConstants.KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS,
                 TimeUnit.MILLISECONDS
             )
             .build()

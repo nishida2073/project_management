@@ -92,7 +92,7 @@ class SmsSearchActivity : AppCompatActivity() {
     }
 
     private fun refreshProfileFilterOptions() {
-        val profiles = Prefs.loadProfiles(this)
+        val profiles = SettingsStore.loadProfiles(this)
         profileFilterKeys = listOf(null) + profiles.map { it.id } + FILTER_KEY_UNSET
         val labels = listOf(getString(R.string.filter_profile_all)) +
             profiles.map { it.displayName(this) } +
@@ -231,8 +231,8 @@ class SmsSearchActivity : AppCompatActivity() {
 
         when (val profileId = selectedProfileId) {
             null -> Unit
-            FILTER_KEY_UNSET -> records.removeAll { Prefs.findProfileForBody(this, it.body) != null }
-            else -> records.removeAll { Prefs.findProfileForBody(this, it.body)?.id != profileId }
+            FILTER_KEY_UNSET -> records.removeAll { SettingsStore.findProfileForBody(this, it.body) != null }
+            else -> records.removeAll { SettingsStore.findProfileForBody(this, it.body)?.id != profileId }
         }
 
         if (showFoundToast) {
@@ -241,9 +241,9 @@ class SmsSearchActivity : AppCompatActivity() {
         renderSmsList()
     }
 
-    private fun loadCompletedEntries(): List<UploadLogStore.Entry> =
-        UploadLogStore.getAll(this)
-            .filter { it.type == UploadLogStore.EntryType.SEND_COMPLETE && it.success }
+    private fun loadCompletedEntries(): List<SmsLogStore.Entry> =
+        SmsLogStore.getAll(this)
+            .filter { it.type == SmsLogStore.EntryType.SEND_COMPLETE && it.success }
 
     /**
      * ログのエントリとSMSレコードを1対1で対応付ける。手動送信のログはSMS検索画面で特定済みの
@@ -255,16 +255,16 @@ class SmsSearchActivity : AppCompatActivity() {
      */
     private fun matchSentEntries(
         records: List<SmsRecord>,
-        completedEntries: List<UploadLogStore.Entry>
-    ): Map<Long, UploadLogStore.Entry> {
-        val result = mutableMapOf<Long, UploadLogStore.Entry>()
+        completedEntries: List<SmsLogStore.Entry>
+    ): Map<Long, SmsLogStore.Entry> {
+        val result = mutableMapOf<Long, SmsLogStore.Entry>()
 
         val idMatchedEntries = completedEntries.filter { it.smsId != null }.associateBy { it.smsId }
         records.forEach { record ->
             idMatchedEntries[record.id]?.let { result[record.id] = it }
         }
 
-        val toleranceMillis = Prefs.load(this).smsMatchToleranceSeconds * 1_000L
+        val toleranceMillis = SettingsStore.load(this).smsMatchToleranceSeconds * 1_000L
         val unclaimedEntries = completedEntries.filter { it.smsId == null }.toMutableList()
         records.filter { it.id !in result }
             .sortedBy { it.dateMillis }
@@ -289,7 +289,7 @@ class SmsSearchActivity : AppCompatActivity() {
     /** 標準のSMSアプリの返信（作成）画面を、指定した送信元宛てに開く */
     private fun openSmsReply(address: String, splitFailed: Boolean) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$address"))
-        val config = Prefs.load(this)
+        val config = SettingsStore.load(this)
         val body = if (splitFailed) config.splitFailedReplyAddition else config.defaultReplyBody
         if (body.isNotEmpty()) {
             intent.putExtra("sms_body", body)
@@ -311,7 +311,7 @@ class SmsSearchActivity : AppCompatActivity() {
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
                 tag = record.id
-                val profile = Prefs.findProfileForBody(this@SmsSearchActivity, record.body)
+                val profile = SettingsStore.findProfileForBody(this@SmsSearchActivity, record.body)
                 val profileName = profile?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_profile_none)
                 val isProfileUnconfigured = profile == null || !profile.isValid
                 val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
@@ -395,8 +395,8 @@ class SmsSearchActivity : AppCompatActivity() {
             val request = OneTimeWorkRequestBuilder<KintoneUploadWorker>()
                 .setInputData(data)
                 .setBackoffCriteria(
-                    Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_POLICY,
-                    Defaults.KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS,
+                    AppConstants.KINTONE_UPLOAD_RETRY_BACKOFF_POLICY,
+                    AppConstants.KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS,
                     TimeUnit.MILLISECONDS
                 )
                 .build()
@@ -432,8 +432,8 @@ class SmsSearchActivity : AppCompatActivity() {
     private fun onSendBatchFinished(selectedIds: Set<Long>) {
         // 送信先が未設定の場合は送信開始(SEND_START)のみが記録され送信完了(SEND_COMPLETE)は
         // 記録されないため、smsIdごとに最新の1件（開始・完了どちらか）を結果として扱う
-        val latestCompleteEntryPerSms = UploadLogStore.getAll(this)
-            .filter { it.type != UploadLogStore.EntryType.RECEIVE && it.smsId in selectedIds }
+        val latestCompleteEntryPerSms = SmsLogStore.getAll(this)
+            .filter { it.type != SmsLogStore.EntryType.RECEIVE && it.smsId in selectedIds }
             .groupBy { it.smsId }
             .mapValues { it.value.first() }
 

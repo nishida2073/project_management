@@ -16,7 +16,7 @@ class TopActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnOpenKintoneSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+            startActivity(Intent(this, KintoneSettingsActivity::class.java))
         }
         binding.btnOpenAppSettings.setOnClickListener {
             startActivity(Intent(this, AppSettingsActivity::class.java))
@@ -35,7 +35,7 @@ class TopActivity : AppCompatActivity() {
     }
 
     private fun updateModeStatus() {
-        val forwardingEnabled = Prefs.load(this).forwardingEnabled
+        val forwardingEnabled = SettingsStore.load(this).forwardingEnabled
         binding.tvTopStatus.text = getString(
             if (forwardingEnabled) R.string.top_status_mode_auto else R.string.top_status_mode_manual
         )

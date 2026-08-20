@@ -39,14 +39,14 @@ object KintoneApi {
 
     /**
      * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、最終受信日時（[profile].fieldDatetime）
-     * の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、新規登録
+     * の差が[SettingsStore.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、新規登録
      * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
      * 既存レコードの最終受信日時と分単位で一致し（kintoneは秒を保持しないため）、かつ既存レコードの
      * 本文に今回の本文が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
      */
     fun postRecord(
         context: Context,
-        profile: Prefs.KintoneProfile,
+        profile: SettingsStore.KintoneProfile,
         senderValue: String,
         bodyValue: String,
         datetimeIsoValue: String?,
@@ -152,7 +152,7 @@ object KintoneApi {
     }
 
     private fun buildRecord(
-        profile: Prefs.KintoneProfile,
+        profile: SettingsStore.KintoneProfile,
         senderValue: String,
         bodyValue: String,
         datetimeIsoValue: String?,
@@ -169,7 +169,7 @@ object KintoneApi {
             record.put(profile.fieldDatetime, JSONObject().put("value", datetimeIsoValue))
         }
         if (profile.fieldType.isNotBlank()) {
-            record.put(profile.fieldType, JSONObject().put("value", Defaults.REGISTRATION_TYPE_VALUE))
+            record.put(profile.fieldType, JSONObject().put("value", AppConstants.REGISTRATION_TYPE_VALUE))
         }
         // SMS本文からパースした会社名・氏名・内容。
         // フィールドコードが未設定（空文字）、または抽出できた値が空の場合はkintone側に送らない。
@@ -186,12 +186,12 @@ object KintoneApi {
     }
 
     /**
-     * 送信元が一致し、最終受信日時の差が[Prefs.KintoneProfile.updateWindowHours]時間以内の既存レコードを
+     * 送信元が一致し、最終受信日時の差が[SettingsStore.KintoneProfile.updateWindowHours]時間以内の既存レコードを
      * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。見つからない場合は[ExistingRecordResult.NotFound]、
      * 検索自体が失敗した場合は[ExistingRecordResult.SearchFailed]を返す（新規登録との誤判定を防ぐため、
      * 検索失敗と未検出を区別する）
      */
-    private fun findExistingRecord(profile: Prefs.KintoneProfile, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
+    private fun findExistingRecord(profile: SettingsStore.KintoneProfile, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
@@ -202,7 +202,7 @@ object KintoneApi {
         val rangeEnd = isoFormat.format(Date(baseMillis + windowMillis))
 
         val typeCondition = if (profile.fieldType.isNotBlank()) {
-            "${profile.fieldType} in (\"${escapeForQuery(Defaults.REGISTRATION_TYPE_VALUE)}\") and "
+            "${profile.fieldType} in (\"${escapeForQuery(AppConstants.REGISTRATION_TYPE_VALUE)}\") and "
         } else {
             ""
         }
@@ -249,7 +249,7 @@ object KintoneApi {
     private fun escapeForQuery(value: String): String =
         value.replace("\\", "\\\\").replace("\"", "\\\"")
 
-    private fun insertRecord(context: Context, profile: Prefs.KintoneProfile, record: JSONObject): PostResult {
+    private fun insertRecord(context: Context, profile: SettingsStore.KintoneProfile, record: JSONObject): PostResult {
         val payload = JSONObject()
             .put("app", profile.appId)
             .put("record", record)
@@ -262,7 +262,7 @@ object KintoneApi {
         return execute(requestBuilder, successMessage = context.getString(R.string.log_message_send_complete_create_success))
     }
 
-    private fun updateRecord(context: Context, profile: Prefs.KintoneProfile, recordId: String, record: JSONObject): PostResult {
+    private fun updateRecord(context: Context, profile: SettingsStore.KintoneProfile, recordId: String, record: JSONObject): PostResult {
         val payload = JSONObject()
             .put("app", profile.appId)
             .put("id", recordId)
@@ -276,11 +276,11 @@ object KintoneApi {
         return execute(requestBuilder, successMessage = context.getString(R.string.log_message_send_complete_update_success))
     }
 
-    private fun addAuthHeader(requestBuilder: Request.Builder, profile: Prefs.KintoneProfile) {
+    private fun addAuthHeader(requestBuilder: Request.Builder, profile: SettingsStore.KintoneProfile) {
         when (profile.authMethod) {
-            Prefs.AuthMethod.API_TOKEN ->
+            SettingsStore.AuthMethod.API_TOKEN ->
                 requestBuilder.addHeader("X-Cybozu-API-Token", profile.apiToken)
-            Prefs.AuthMethod.PASSWORD -> {
+            SettingsStore.AuthMethod.PASSWORD -> {
                 val credentials = "${profile.loginName}:${profile.loginPassword}"
                 val encoded = Base64.encodeToString(
                     credentials.toByteArray(Charsets.UTF_8),

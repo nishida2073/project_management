@@ -37,16 +37,16 @@ data class SmsParts(
 object SmsPartsGenerator {
 
     /**
-     * 会社名の表記ゆれを吸収し、「[Defaults.SMS_COMPANY_NAME_CANONICAL_PREFIX]<地域名>」の形に強制する。
+     * 会社名の表記ゆれを吸収し、「[AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX]<地域名>」の形に強制する。
      *
      * 「NTTD四国」「NTTDATA四国」「四国」など、先頭のNTT表記の有無・書き方に関わらず、
      * 地域名部分（四国など）を残して正式な接頭辞を付け直す。既に正式な接頭辞で始まる場合はそのまま。
      * ※現在は呼び出し元（[generateSmsParts]内）がコメントアウトされており未使用。会社名は正規化されずそのまま返る。
      */
     private fun normalizeCompanyName(companyName: String): String {
-        if (companyName.isEmpty() || companyName.startsWith(Defaults.SMS_COMPANY_NAME_CANONICAL_PREFIX)) return companyName
-        val rest = Defaults.SMS_COMPANY_NAME_PREFIX_PATTERN.replaceFirst(companyName, "").trim()
-        return "${Defaults.SMS_COMPANY_NAME_CANONICAL_PREFIX}$rest"
+        if (companyName.isEmpty() || companyName.startsWith(AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX)) return companyName
+        val rest = AppConstants.SMS_COMPANY_NAME_PREFIX_PATTERN.replaceFirst(companyName, "").trim()
+        return "${AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX}$rest"
     }
 
     private data class LabelMatch(val key: String, val value: String)
@@ -56,7 +56,7 @@ object SmsPartsGenerator {
      * マッチした場合は LabelMatch を返す。マッチしなければ null。
      */
     private fun matchLabelLine(line: String): LabelMatch? {
-        for ((key, aliases) in Defaults.SMS_BODY_FIELD_ALIASES) {
+        for ((key, aliases) in AppConstants.SMS_BODY_FIELD_ALIASES) {
             for (alias in aliases) {
                 // ラベルのみでコロンが無い行（値は次行以降に続く）にも対応
                 if (line == alias) {

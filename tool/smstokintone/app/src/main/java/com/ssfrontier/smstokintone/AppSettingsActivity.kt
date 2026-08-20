@@ -33,31 +33,31 @@ class AppSettingsActivity : AppCompatActivity() {
         binding = ActivityAppSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.swForwardingEnabled.isChecked = Prefs.load(this).forwardingEnabled
+        binding.swForwardingEnabled.isChecked = SettingsStore.load(this).forwardingEnabled
         binding.swForwardingEnabled.setOnCheckedChangeListener { _, isChecked ->
-            Prefs.save(this, Prefs.load(this).copy(forwardingEnabled = isChecked))
+            SettingsStore.save(this, SettingsStore.load(this).copy(forwardingEnabled = isChecked))
         }
 
-        val config = Prefs.load(this)
+        val config = SettingsStore.load(this)
         binding.swAutoRefreshEnabled.isChecked = config.autoRefreshEnabled
         binding.etAutoRefreshInterval.setText(config.autoRefreshIntervalSeconds.toString())
         binding.tilAutoRefreshInterval.isEnabled = config.autoRefreshEnabled
 
         binding.swAutoRefreshEnabled.setOnCheckedChangeListener { _, isChecked ->
-            Prefs.save(this, Prefs.load(this).copy(autoRefreshEnabled = isChecked))
+            SettingsStore.save(this, SettingsStore.load(this).copy(autoRefreshEnabled = isChecked))
             binding.tilAutoRefreshInterval.isEnabled = isChecked
         }
         binding.etAutoRefreshInterval.addTextChangedListener { text ->
             val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
             if (seconds < 1) return@addTextChangedListener
-            Prefs.save(this, Prefs.load(this).copy(autoRefreshIntervalSeconds = seconds))
+            SettingsStore.save(this, SettingsStore.load(this).copy(autoRefreshIntervalSeconds = seconds))
         }
 
         binding.etSmsMatchToleranceSeconds.setText(config.smsMatchToleranceSeconds.toString())
         binding.etSmsMatchToleranceSeconds.addTextChangedListener { text ->
             val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
             if (seconds < 1) return@addTextChangedListener
-            Prefs.save(this, Prefs.load(this).copy(smsMatchToleranceSeconds = seconds))
+            SettingsStore.save(this, SettingsStore.load(this).copy(smsMatchToleranceSeconds = seconds))
         }
 
         applyThemeSelection(config.themeMode)
@@ -66,23 +66,23 @@ class AppSettingsActivity : AppCompatActivity() {
             binding.rbThemeLight.isEnabled = !isChecked
             binding.rbThemeDark.isEnabled = !isChecked
             val themeMode = if (isChecked) {
-                Prefs.ThemeMode.SYSTEM
+                SettingsStore.ThemeMode.SYSTEM
             } else if (binding.rbThemeDark.isChecked) {
-                Prefs.ThemeMode.DARK
+                SettingsStore.ThemeMode.DARK
             } else {
-                Prefs.ThemeMode.LIGHT
+                SettingsStore.ThemeMode.LIGHT
             }
-            Prefs.save(this, Prefs.load(this).copy(themeMode = themeMode))
+            SettingsStore.save(this, SettingsStore.load(this).copy(themeMode = themeMode))
             AppCompatDelegate.setDefaultNightMode(themeMode.toNightMode())
         }
         binding.rgThemeLightDark.setOnCheckedChangeListener { _, checkedId ->
             if (binding.swThemeFollowSystem.isChecked) return@setOnCheckedChangeListener
             val themeMode = if (checkedId == binding.rbThemeDark.id) {
-                Prefs.ThemeMode.DARK
+                SettingsStore.ThemeMode.DARK
             } else {
-                Prefs.ThemeMode.LIGHT
+                SettingsStore.ThemeMode.LIGHT
             }
-            Prefs.save(this, Prefs.load(this).copy(themeMode = themeMode))
+            SettingsStore.save(this, SettingsStore.load(this).copy(themeMode = themeMode))
             AppCompatDelegate.setDefaultNightMode(themeMode.toNightMode())
         }
 
@@ -92,20 +92,20 @@ class AppSettingsActivity : AppCompatActivity() {
 
         binding.etDefaultReplyBody.setText(config.defaultReplyBody)
         binding.etDefaultReplyBody.addTextChangedListener { text ->
-            Prefs.save(this, Prefs.load(this).copy(defaultReplyBody = text.toString()))
+            SettingsStore.save(this, SettingsStore.load(this).copy(defaultReplyBody = text.toString()))
         }
 
         binding.etSplitFailedReplyAddition.setText(config.splitFailedReplyAddition)
         binding.etSplitFailedReplyAddition.addTextChangedListener { text ->
-            Prefs.save(this, Prefs.load(this).copy(splitFailedReplyAddition = text.toString()))
+            SettingsStore.save(this, SettingsStore.load(this).copy(splitFailedReplyAddition = text.toString()))
         }
     }
 
-    private fun applyThemeSelection(themeMode: Prefs.ThemeMode) {
-        val followSystem = themeMode == Prefs.ThemeMode.SYSTEM
+    private fun applyThemeSelection(themeMode: SettingsStore.ThemeMode) {
+        val followSystem = themeMode == SettingsStore.ThemeMode.SYSTEM
         binding.swThemeFollowSystem.isChecked = followSystem
-        binding.rbThemeDark.isChecked = themeMode == Prefs.ThemeMode.DARK
-        binding.rbThemeLight.isChecked = themeMode != Prefs.ThemeMode.DARK
+        binding.rbThemeDark.isChecked = themeMode == SettingsStore.ThemeMode.DARK
+        binding.rbThemeLight.isChecked = themeMode != SettingsStore.ThemeMode.DARK
         binding.rbThemeLight.isEnabled = !followSystem
         binding.rbThemeDark.isEnabled = !followSystem
     }

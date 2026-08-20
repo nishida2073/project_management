@@ -7,6 +7,6 @@ class SmsToKintoneApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AppCompatDelegate.setDefaultNightMode(Prefs.load(this).themeMode.toNightMode())
+        AppCompatDelegate.setDefaultNightMode(SettingsStore.load(this).themeMode.toNightMode())
     }
 }
