@@ -18,6 +18,7 @@ object SettingsStore {
     private const val KEY_SMS_SEARCH_DATE_RANGE_DAYS = "sms_search_date_range_days"
     private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
     private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
+    private const val KEY_DEFAULT_PROFILE_FILTER_ID = "default_profile_filter_id"
 
     private const val KEY_KINTONE_PROFILES = "kintone_profiles"
 
@@ -61,7 +62,12 @@ object SettingsStore {
         /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言 */
         val defaultReplyBody: String,
         /** 分割失敗のSMSへの返信時、[defaultReplyBody]の代わりに使う文言 */
-        val splitFailedReplyAddition: String
+        val splitFailedReplyAddition: String,
+        /**
+         * SMS検索画面を開いた際に「送信先」フィルタへ初期設定するプロファイルID。
+         * nullは「すべて」、[AppConstants.PROFILE_FILTER_KEY_UNSET]は「未設定」を表す
+         */
+        val defaultProfileFilterId: String?
     )
 
     /**
@@ -142,7 +148,7 @@ object SettingsStore {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun save(context: Context, config: Config) {
-        prefs(context).edit()
+        val editor = prefs(context).edit()
             .putBoolean(KEY_FORWARDING_ENABLED, config.forwardingEnabled)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
@@ -151,7 +157,12 @@ object SettingsStore {
             .putInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, config.smsSearchDateRangeDays)
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
-            .apply()
+        if (config.defaultProfileFilterId != null) {
+            editor.putString(KEY_DEFAULT_PROFILE_FILTER_ID, config.defaultProfileFilterId)
+        } else {
+            editor.remove(KEY_DEFAULT_PROFILE_FILTER_ID)
+        }
+        editor.apply()
     }
 
     fun load(context: Context): Config {
@@ -174,8 +185,21 @@ object SettingsStore {
             ),
             defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, AppDefaults.SMS_STANDARD_REPLY_BODY) ?: AppDefaults.SMS_STANDARD_REPLY_BODY,
             splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY)
-                ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY
+                ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
+            defaultProfileFilterId = p.getString(KEY_DEFAULT_PROFILE_FILTER_ID, null)
         )
+    }
+
+    /**
+     * SMS検索画面・アプリ設定画面の「送信先」選択肢（すべて／各プロファイル／未設定）を
+     * キーと表示ラベルの組で返す。キーがnullの選択肢は「すべて」、
+     * [AppConstants.PROFILE_FILTER_KEY_UNSET]は「未設定」を表す
+     */
+    fun profileFilterOptions(context: Context): List<Pair<String?, String>> {
+        val profiles = loadProfiles(context)
+        return listOf(null to context.getString(R.string.filter_profile_all)) +
+            profiles.map { it.id to it.displayName(context) } +
+            listOf(AppConstants.PROFILE_FILTER_KEY_UNSET to context.getString(R.string.label_profile_none))
     }
 
     fun saveProfiles(context: Context, profiles: List<KintoneProfile>) {

@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +17,8 @@ import com.ssfrontier.smstokintone.databinding.ActivityAppSettingsBinding
 class AppSettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAppSettingsBinding
+
+    private var defaultProfileFilterKeys: List<String?> = emptyList()
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -65,6 +69,15 @@ class AppSettingsActivity : AppCompatActivity() {
             val days = text.toString().toIntOrNull() ?: return@addTextChangedListener
             if (days < 1) return@addTextChangedListener
             SettingsStore.save(this, SettingsStore.load(this).copy(smsSearchDateRangeDays = days))
+        }
+
+        binding.spDefaultProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val profileId = defaultProfileFilterKeys.getOrNull(position)
+                SettingsStore.save(this@AppSettingsActivity, SettingsStore.load(this@AppSettingsActivity).copy(defaultProfileFilterId = profileId))
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         applyThemeSelection(config.themeMode)
@@ -120,6 +133,20 @@ class AppSettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updatePermissionStatus()
+        refreshDefaultProfileFilterOptions()
+    }
+
+    private fun refreshDefaultProfileFilterOptions() {
+        val options = SettingsStore.profileFilterOptions(this)
+        defaultProfileFilterKeys = options.map { it.first }
+        val labels = options.map { it.second }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spDefaultProfileFilter.adapter = adapter
+
+        val selectedIndex = defaultProfileFilterKeys.indexOf(SettingsStore.load(this).defaultProfileFilterId)
+        binding.spDefaultProfileFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
     }
 
     private fun updatePermissionStatus() {

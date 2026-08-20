@@ -7,6 +7,9 @@ object AppConstants {
 
     const val TEST_SEND_SENDER = "09000000000"
 
+    /** 送信先の絞り込みで「未設定（どのプロファイルにも一致しない）」を表す選択肢のキー */
+    const val PROFILE_FILTER_KEY_UNSET = "__filter_key_unset__"
+
     /** kintoneへの送信がレートリミット/サーバーエラー/通信エラーで失敗した際の最大リトライ回数 */
     const val KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS = 5
 

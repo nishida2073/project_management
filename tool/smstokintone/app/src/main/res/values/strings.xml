@@ -77,13 +77,14 @@
     <string name="btn_request_permission">SMSの受信を許可する</string>
     <string name="toast_sms_receive_permission_denied">SMS受信の許可がないと、このアプリは動作しません</string>
     <string name="section_sms_search">SMS検索</string>
-    <string name="section_search_range">検索範囲</string>
+    <string name="section_search_range">検索条件</string>
     <string name="hint_sms_search_date_range_days">開始日〜終了日の範囲（日）</string>
-    <string name="section_reply">返信用の文言</string>
-    <string name="section_sms_standard_reply_body">自動入力する文言</string>
-    <string name="hint_sms_standard_reply_body">自動入力する文言</string>
-    <string name="section_sms_split_failed_reply_body">自動入力する文言（形式が不正な場合）</string>
-    <string name="hint_sms_split_failed_reply_body">自動入力する文言（形式が不正な場合）</string>
+    <string name="label_default_profile_filter">送信先</string>
+    <string name="section_reply">返信時に自動入力する文言</string>
+    <string name="section_sms_standard_reply_body">通常</string>
+    <string name="hint_sms_standard_reply_body">文言</string>
+    <string name="section_sms_split_failed_reply_body">形式が不正な場合</string>
+    <string name="hint_sms_split_failed_reply_body">文言</string>
 
     <!-- ログ画面 -->
     <string name="log_title">ログ</string>
@@ -99,7 +100,7 @@
     <string name="log_message_split">本文の分割に成功しました</string>
     <string name="log_message_split_failure">本文の分割に失敗しました</string>
     <string name="log_message_send_start">kintoneへの送信を開始しました</string>
-    <string name="log_message_send_start_profile_unconfigured">kintoneの接続先がありません</string>
+    <string name="log_message_send_start_profile_unconfigured">送信先が存在しません</string>
     <string name="log_message_send_complete_create_success">登録に成功しました</string>
     <string name="log_message_send_complete_update_success">更新に成功しました</string>
     <string name="log_message_send_complete_forwarding_disabled">kintoneへの自動送信が無効になっています</string>
@@ -115,15 +116,16 @@
 
     <!-- 受信済みSMS送信画面 -->
     <string name="sms_search_title">SMS送信</string>
-    <string name="btn_hide_search_filters">▲ 検索条件を隠す</string>
-    <string name="btn_show_search_filters">▼ 検索条件を表示する</string>
+    <string name="section_search_conditions">検索条件</string>
+    <string name="btn_hide_search_filters">▲ 隠す</string>
+    <string name="btn_show_search_filters">▼ 表示</string>
     <string name="hint_date_from">開始日</string>
     <string name="hint_date_to">終了日</string>
     <string name="hint_body_filter">本文に含む文字列</string>
-    <string name="label_profile_filter">送信先で絞り込む</string>
+    <string name="label_profile_filter">送信先</string>
     <string name="filter_profile_all">すべて</string>
-    <string name="filter_unsent_only">未送信</string>
-    <string name="filter_split_failed_only">形式が不正</string>
+    <string name="filter_unsent_only">🚫 未送信</string>
+    <string name="filter_split_failed_only">⚠️ 形式が不正</string>
     <string name="label_profile_unconfigured_marker">"🚫 "</string>
     <string name="label_split_failed_marker">"⚠️ "</string>
     <string name="btn_search_sms">検索</string>

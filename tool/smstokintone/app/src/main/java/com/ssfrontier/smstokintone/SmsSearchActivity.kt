@@ -79,9 +79,10 @@ class SmsSearchActivity : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        val rangeDays = SettingsStore.load(this).smsSearchDateRangeDays
+        val config = SettingsStore.load(this)
+        selectedProfileId = config.defaultProfileFilterId
         val today = Calendar.getInstance()
-        val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -rangeDays) }
+        val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -config.smsSearchDateRangeDays) }
         applyDateFilter(isFrom = true, calendar = rangeStart)
         applyDateFilter(isFrom = false, calendar = today)
     }
@@ -93,11 +94,9 @@ class SmsSearchActivity : AppCompatActivity() {
     }
 
     private fun refreshProfileFilterOptions() {
-        val profiles = SettingsStore.loadProfiles(this)
-        profileFilterKeys = listOf(null) + profiles.map { it.id } + FILTER_KEY_UNSET
-        val labels = listOf(getString(R.string.filter_profile_all)) +
-            profiles.map { it.displayName(this) } +
-            getString(R.string.label_profile_none)
+        val options = SettingsStore.profileFilterOptions(this)
+        profileFilterKeys = options.map { it.first }
+        val labels = options.map { it.second }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -232,7 +231,7 @@ class SmsSearchActivity : AppCompatActivity() {
 
         when (val profileId = selectedProfileId) {
             null -> Unit
-            FILTER_KEY_UNSET -> records.removeAll { SettingsStore.findProfileForBody(this, it.body) != null }
+            AppConstants.PROFILE_FILTER_KEY_UNSET -> records.removeAll { SettingsStore.findProfileForBody(this, it.body) != null }
             else -> records.removeAll { SettingsStore.findProfileForBody(this, it.body)?.id != profileId }
         }
 
@@ -463,7 +462,6 @@ class SmsSearchActivity : AppCompatActivity() {
     )
 
     companion object {
-        private const val FILTER_KEY_UNSET = "__filter_key_unset__"
         private const val TOAST_LONG_DURATION_MILLIS = 3_500L
     }
 }
