@@ -21,7 +21,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRefreshLog"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
@@ -30,7 +30,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClearLog"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

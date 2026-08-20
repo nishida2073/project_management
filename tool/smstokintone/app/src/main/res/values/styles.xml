@@ -1,0 +1,8 @@
+<resources>
+    <!-- Widget.MaterialComponents.Button.OutlinedButtonの既定の枠線色は低透過のcolorOnSurfaceで、
+         ダークモードでは背景（colorSurface）との明度差が小さく視認しづらいため、枠線をボタン文字と
+         同じcolorPrimaryに変更する -->
+    <style name="AppButton.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">?attr/colorPrimary</item>
+    </style>
+</resources>

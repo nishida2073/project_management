@@ -31,14 +31,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCopyProfile"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/AppButton.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/btn_copy_profile" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDeleteProfile"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/AppButton.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -420,7 +420,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnTestSend"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
