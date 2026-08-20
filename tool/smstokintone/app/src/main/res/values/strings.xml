@@ -4,8 +4,8 @@
     <!-- トップ画面 -->
     <string name="top_status_mode_auto">自動モード</string>
     <string name="top_status_mode_manual">手動モード</string>
-    <string name="btn_open_log">ログを見る</string>
-    <string name="btn_open_sms_search">SMSを検索して送信</string>
+    <string name="btn_open_log">ログの確認</string>
+    <string name="btn_open_sms_search">SMSの送信</string>
     <string name="btn_open_kintone_settings">kintoneの設定</string>
     <string name="btn_open_app_settings">アプリの設定</string>
 
