@@ -11,10 +11,9 @@
 
     <!-- kintone設定画面 -->
     <string name="kintone_settings_title">kintone設定</string>
-    <string name="kintone_settings_description">SMS本文に含まれる言葉によって、送信先のkintone設定を切り替えられます。\n「本文に含まれる言葉」が空欄の設定は、どの言葉にも一致しなかった場合のデフォルトとして使われます。</string>
+    <string name="kintone_settings_description"></string>
+    <string name="section_profile_name">送信先</string>
     <string name="hint_profile_name">送信先名</string>
-    <string name="hint_keywords">本文に含まれる言葉</string>
-    <string name="helper_keywords">カンマ区切りで複数の指定が可能です。\n※空欄の場合はデフォルト設定として扱われます。\n※大文字・小文字の違いは無視されます。</string>
     <string name="btn_add_profile">設定を追加</string>
     <string name="btn_copy_profile">コピー</string>
     <string name="btn_delete_profile">削除</string>
@@ -23,12 +22,16 @@
     <string name="label_profile_name_unset">(名称未設定)</string>
     <string name="profile_index_format">設定 %1$d</string>
     <string name="toast_no_profiles">設定を1つ以上追加してください</string>
-    <string name="section_connection">接続</string>
+    <string name="section_basic_info">基本情報</string>
+    <string name="section_kintone_info">kintone情報</string>
+    <string name="section_connection">接続先</string>
     <string name="section_app">アプリ</string>
-    <string name="section_sms_target">対象のSMS</string>
+    <string name="section_sms_target">対象の絞り込み</string>
+    <string name="hint_keywords">本文に含まれる文字</string>
+    <string name="helper_keywords">カンマ区切りで複数の指定が可能です。\n※空欄の場合はデフォルトの接続先として扱われます。\n※大文字・小文字、全角・半角の違いは無視されます。</string>
     <string name="hint_subdomain">サブドメイン</string>
     <string name="hint_app_id">アプリID</string>
-    <string name="label_auth_method">認証方式</string>
+    <string name="section_auth_info">認証情報</string>
     <string name="rb_auth_api_token">APIトークン</string>
     <string name="rb_auth_password">ID・パスワード</string>
     <string name="hint_api_token">APIトークン</string>
@@ -51,6 +54,8 @@
     <string name="toast_settings_saved">設定を保存しました</string>
     <string name="btn_test_send">テスト送信</string>
     <string name="test_send_result_title">テスト結果</string>
+    <string name="test_send_result_failure">送信失敗: %1$s</string>
+    <string name="test_send_result_network_error">通信エラー: %1$s</string>
     <string name="test_send_body">株式会社テスト\nテスト太郎\nこれはアプリからのテスト送信です</string>
 
     <!-- アプリ設定画面 -->
@@ -60,7 +65,7 @@
     <string name="section_log">ログ</string>
     <string name="switch_auto_refresh_enabled">自動更新を有効にする</string>
     <string name="hint_auto_refresh_interval">更新間隔（秒）</string>
-    <string name="label_theme_mode">表示テーマ</string>
+    <string name="section_theme_mode">表示テーマ</string>
     <string name="switch_theme_follow_system">システム設定を有効にする</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>

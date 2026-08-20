@@ -29,6 +29,9 @@ class KintoneSettingsActivity : AppCompatActivity() {
         binding = ActivityKintoneSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.tvKintoneSettingsDescription.visibility =
+            if (getString(R.string.kintone_settings_description).isBlank()) View.GONE else View.VISIBLE
+
         SettingsStore.loadProfiles(this).forEach { addProfileCard(it) }
 
         binding.btnAddProfile.setOnClickListener {
@@ -168,8 +171,8 @@ class KintoneSettingsActivity : AppCompatActivity() {
             val message = when (result) {
                 is KintoneApi.PostResult.Success -> result.message
                 is KintoneApi.PostResult.Skipped -> result.message
-                is KintoneApi.PostResult.HttpFailure -> getString(R.string.log_message_send_complete_failure, "${result.code} ${result.detail}")
-                is KintoneApi.PostResult.NetworkError -> getString(R.string.log_message_send_complete_network_error, result.message)
+                is KintoneApi.PostResult.HttpFailure -> getString(R.string.test_send_result_failure, "${result.code} ${result.detail}")
+                is KintoneApi.PostResult.NetworkError -> getString(R.string.test_send_result_network_error, result.message)
             }
             AlertDialog.Builder(this@KintoneSettingsActivity)
                 .setTitle(R.string.test_send_result_title)

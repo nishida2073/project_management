@@ -161,7 +161,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/label_theme_mode"
+                    android:text="@string/section_theme_mode"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
