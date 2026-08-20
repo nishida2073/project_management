@@ -83,7 +83,7 @@
     <string name="hint_sms_search_date_range_days">期間（日）</string>
     <string name="label_default_profile_filter">送信先</string>
     <string name="label_sms_match_tolerance_seconds">統合範囲</string>
-    <string name="section_reply">返信時メッセージ</string>
+    <string name="section_reply">返信メッセージ（自動入力）</string>
     <string name="section_sms_standard_reply_body">通常</string>
     <string name="hint_sms_standard_reply_body">文言</string>
     <string name="section_sms_split_failed_reply_body">形式が不正な場合</string>
