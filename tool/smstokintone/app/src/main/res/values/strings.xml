@@ -114,7 +114,7 @@
     <string name="btn_clear">クリア</string>
 
     <!-- 受信済みSMS送信画面 -->
-    <string name="sms_search_title">受信済みSMS送信</string>
+    <string name="sms_search_title">SMS送信</string>
     <string name="btn_hide_search_filters">▲ 検索条件を隠す</string>
     <string name="btn_show_search_filters">▼ 検索条件を表示する</string>
     <string name="hint_date_from">開始日</string>
