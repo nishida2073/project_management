@@ -39,7 +39,7 @@ object KintoneApi {
 
     /**
      * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、最終受信日時（[profile].fieldDatetime）
-     * の差が[SettingsStore.KintoneProfile.updateWindowHours]時間以内の既存レコードが見つかった場合は、新規登録
+     * の差が[SettingsStore.KintoneProfile.updateToleranceHours]時間以内の既存レコードが見つかった場合は、新規登録
      * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
      * 既存レコードの最終受信日時と分単位で一致し（kintoneは秒を保持しないため）、かつ既存レコードの
      * 本文に今回の本文が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
@@ -186,7 +186,7 @@ object KintoneApi {
     }
 
     /**
-     * 送信元が一致し、最終受信日時の差が[SettingsStore.KintoneProfile.updateWindowHours]時間以内の既存レコードを
+     * 送信元が一致し、最終受信日時の差が[SettingsStore.KintoneProfile.updateToleranceHours]時間以内の既存レコードを
      * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。見つからない場合は[ExistingRecordResult.NotFound]、
      * 検索自体が失敗した場合は[ExistingRecordResult.SearchFailed]を返す（新規登録との誤判定を防ぐため、
      * 検索失敗と未検出を区別する）
@@ -197,9 +197,9 @@ object KintoneApi {
         }
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return ExistingRecordResult.NotFound
 
-        val windowMillis = profile.updateWindowHours.coerceAtLeast(0) * 3_600_000L
-        val rangeStart = isoFormat.format(Date(baseMillis - windowMillis))
-        val rangeEnd = isoFormat.format(Date(baseMillis + windowMillis))
+        val toleranceMillis = profile.updateToleranceHours.coerceAtLeast(0) * 3_600_000L
+        val rangeStart = isoFormat.format(Date(baseMillis - toleranceMillis))
+        val rangeEnd = isoFormat.format(Date(baseMillis + toleranceMillis))
 
         val typeCondition = if (profile.fieldType.isNotBlank()) {
             "${profile.fieldType} in (\"${escapeForQuery(AppConstants.REGISTRATION_TYPE_VALUE)}\") and "

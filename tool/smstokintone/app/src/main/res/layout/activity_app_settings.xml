@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/svAppSettings"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -145,7 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_forwarding"
+                    android:text="@string/section_sms_forwarding"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -155,12 +156,26 @@
                     android:layout_marginStart="16dp"
                     android:orientation="vertical">
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/swForwardingEnabled"
+                    <RadioGroup
+                        android:id="@+id/rgForwardingMode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/switch_forwarding_enabled" />
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/rbForwardingManual"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_sms_forwarding_manual" />
+
+                        <RadioButton
+                            android:id="@+id/rbForwardingAuto"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:checked="true"
+                            android:text="@string/rb_sms_forwarding_auto" />
+                    </RadioGroup>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

@@ -138,12 +138,12 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/hint_update_window_hours"
-                        app:helperText="@string/helper_update_window_hours"
+                        android:hint="@string/hint_update_tolerance_hours"
+                        app:helperText="@string/helper_update_tolerance_hours"
                         app:helperTextEnabled="true">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etUpdateWindowHours"
+                            android:id="@+id/etUpdateToleranceHours"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="number" />

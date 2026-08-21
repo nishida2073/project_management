@@ -59,7 +59,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
         itemBinding.etFieldCompanyName.setText(profile.fieldCompanyName)
         itemBinding.etFieldUserName.setText(profile.fieldUserName)
         itemBinding.etFieldContent.setText(profile.fieldContent)
-        itemBinding.etUpdateWindowHours.setText(profile.updateWindowHours.toString())
+        itemBinding.etUpdateToleranceHours.setText(profile.updateToleranceHours.toString())
 
         when (profile.authMethod) {
             SettingsStore.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
@@ -137,8 +137,8 @@ class KintoneSettingsActivity : AppCompatActivity() {
             fieldCompanyName = itemBinding.etFieldCompanyName.text.toString().trim(),
             fieldUserName = itemBinding.etFieldUserName.text.toString().trim(),
             fieldContent = itemBinding.etFieldContent.text.toString().trim(),
-            updateWindowHours = itemBinding.etUpdateWindowHours.text.toString().trim().toIntOrNull()
-                ?: AppDefaults.NEW_PROFILE_UPDATE_WINDOW_HOURS
+            updateToleranceHours = itemBinding.etUpdateToleranceHours.text.toString().trim().toIntOrNull()
+                ?: AppDefaults.UPDATE_TOLERANCE_HOURS
         )
     }
 

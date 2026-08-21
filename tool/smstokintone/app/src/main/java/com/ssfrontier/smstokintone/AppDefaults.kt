@@ -16,7 +16,8 @@ object AppDefaults {
     const val NEW_PROFILE_FIELD_COMPANY_NAME = "company_name"
     const val NEW_PROFILE_FIELD_USER_NAME = "user_name"
     const val NEW_PROFILE_FIELD_CONTENT = "content"
-    const val NEW_PROFILE_UPDATE_WINDOW_HOURS = 5
+
+    const val UPDATE_TOLERANCE_HOURS = 5
 
     /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲の初期値（日） */
     const val SMS_SEARCH_DATE_RANGE_DAYS = 3

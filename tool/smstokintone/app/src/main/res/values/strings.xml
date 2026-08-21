@@ -46,8 +46,8 @@
     <string name="hint_field_user_name">氏名</string>
     <string name="hint_field_content">内容</string>
     <string name="section_update_condition">更新条件</string>
-    <string name="hint_update_window_hours">受信日時の範囲（時間）</string>
-    <string name="helper_update_window_hours">送信元が一致し、過去の受信日時との差が指定時間範囲内の場合は、新規登録ではなく既存データを更新します。</string>
+    <string name="hint_update_tolerance_hours">受信日時の範囲（時間）</string>
+    <string name="helper_update_tolerance_hours">送信元が一致し、過去の受信日時との差が指定時間範囲内の場合は、新規登録ではなく既存データを更新します。</string>
     <string name="validation_error_title">入力エラー</string>
     <string name="validation_error">%1$s: 送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
     <string name="btn_save">設定を保存</string>
@@ -65,8 +65,9 @@
     <string name="switch_theme_follow_system">システム設定を有効にする</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>
-    <string name="section_forwarding">自動送信</string>
-    <string name="switch_forwarding_enabled">有効にする</string>
+    <string name="section_sms_forwarding">SMSの送信方法</string>
+    <string name="rb_sms_forwarding_manual">手動</string>
+    <string name="rb_sms_forwarding_auto">自動</string>
     <string name="section_log">ログ</string>
     <string name="section_auto_refresh">自動更新</string>
     <string name="switch_auto_refresh_enabled">有効にする</string>

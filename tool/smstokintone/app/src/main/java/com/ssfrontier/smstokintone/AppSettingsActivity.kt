@@ -37,9 +37,12 @@ class AppSettingsActivity : AppCompatActivity() {
         binding = ActivityAppSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.swForwardingEnabled.isChecked = SettingsStore.load(this).forwardingEnabled
-        binding.swForwardingEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(forwardingEnabled = isChecked))
+        val forwardingEnabled = SettingsStore.load(this).forwardingEnabled
+        binding.rbForwardingAuto.isChecked = forwardingEnabled
+        binding.rbForwardingManual.isChecked = !forwardingEnabled
+        binding.rgForwardingMode.setOnCheckedChangeListener { _, checkedId ->
+            val enabled = checkedId == binding.rbForwardingAuto.id
+            SettingsStore.save(this, SettingsStore.load(this).copy(forwardingEnabled = enabled))
         }
 
         val config = SettingsStore.load(this)

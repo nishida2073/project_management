@@ -89,7 +89,7 @@ object SettingsStore {
         val fieldBody: String,
         val fieldDatetime: String,
         val fieldType: String,
-        val updateWindowHours: Int,
+        val updateToleranceHours: Int,
         val fieldCompanyName: String = "",
         val fieldUserName: String = "",
         val fieldContent: String = ""
@@ -136,7 +136,7 @@ object SettingsStore {
                 fieldBody = AppDefaults.NEW_PROFILE_FIELD_BODY,
                 fieldDatetime = AppDefaults.NEW_PROFILE_FIELD_DATETIME,
                 fieldType = AppDefaults.NEW_PROFILE_FIELD_TYPE,
-                updateWindowHours = AppDefaults.NEW_PROFILE_UPDATE_WINDOW_HOURS,
+                updateToleranceHours = AppDefaults.UPDATE_TOLERANCE_HOURS,
                 fieldCompanyName = AppDefaults.NEW_PROFILE_FIELD_COMPANY_NAME,
                 fieldUserName = AppDefaults.NEW_PROFILE_FIELD_USER_NAME,
                 fieldContent = AppDefaults.NEW_PROFILE_FIELD_CONTENT
@@ -220,7 +220,7 @@ object SettingsStore {
                     .put("fieldBody", profile.fieldBody)
                     .put("fieldDatetime", profile.fieldDatetime)
                     .put("fieldType", profile.fieldType)
-                    .put("updateWindowHours", profile.updateWindowHours)
+                    .put("updateToleranceHours", profile.updateToleranceHours)
                     .put("fieldCompanyName", profile.fieldCompanyName)
                     .put("fieldUserName", profile.fieldUserName)
                     .put("fieldContent", profile.fieldContent)
@@ -250,7 +250,7 @@ object SettingsStore {
                 fieldBody = obj.optString("fieldBody", ""),
                 fieldDatetime = obj.optString("fieldDatetime", ""),
                 fieldType = obj.optString("fieldType", ""),
-                updateWindowHours = obj.optInt("updateWindowHours", AppDefaults.NEW_PROFILE_UPDATE_WINDOW_HOURS),
+                updateToleranceHours = obj.optInt("updateToleranceHours", AppDefaults.UPDATE_TOLERANCE_HOURS),
                 fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
                 fieldContent = obj.optString("fieldContent", "")
