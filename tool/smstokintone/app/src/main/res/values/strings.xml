@@ -68,6 +68,7 @@
     <string name="section_sms_forwarding">SMSの送信モード</string>
     <string name="rb_sms_forwarding_manual">手動</string>
     <string name="rb_sms_forwarding_auto">自動</string>
+    <string name="switch_forward_split_failed_enabled">形式が不正な場合も送信する</string>
     <string name="section_log">ログ</string>
     <string name="section_auto_refresh">自動更新</string>
     <string name="switch_auto_refresh_enabled">有効にする</string>
@@ -109,6 +110,7 @@
     <string name="message_log_send_complete_create_success">登録に成功しました</string>
     <string name="message_log_send_complete_update_success">更新に成功しました</string>
     <string name="message_log_send_complete_forwarding_disabled">kintoneへの自動送信が無効になっています</string>
+    <string name="message_log_send_start_split_failed_skipped">本文の形式が不正なため、自動送信をスキップしました</string>
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
     <string name="message_log_send_complete_skipped_duplicate">最終受信日時（秒は除く）と本文が一致するため、スキップしました</string>

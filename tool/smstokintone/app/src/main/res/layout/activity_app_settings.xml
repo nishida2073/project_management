@@ -176,6 +176,14 @@
                             android:checked="true"
                             android:text="@string/rb_sms_forwarding_auto" />
                     </RadioGroup>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/swForwardSplitFailedEnabled"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:checked="false"
+                        android:text="@string/switch_forward_split_failed_enabled" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

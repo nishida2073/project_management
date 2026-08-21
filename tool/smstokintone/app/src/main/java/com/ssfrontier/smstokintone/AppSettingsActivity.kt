@@ -40,9 +40,16 @@ class AppSettingsActivity : AppCompatActivity() {
         val forwardingEnabled = SettingsStore.load(this).forwardingEnabled
         binding.rbForwardingAuto.isChecked = forwardingEnabled
         binding.rbForwardingManual.isChecked = !forwardingEnabled
+        binding.swForwardSplitFailedEnabled.isEnabled = forwardingEnabled
         binding.rgForwardingMode.setOnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbForwardingAuto.id
             SettingsStore.save(this, SettingsStore.load(this).copy(forwardingEnabled = enabled))
+            binding.swForwardSplitFailedEnabled.isEnabled = enabled
+        }
+
+        binding.swForwardSplitFailedEnabled.isChecked = SettingsStore.load(this).forwardSplitFailedEnabled
+        binding.swForwardSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(forwardSplitFailedEnabled = isChecked))
         }
 
         val config = SettingsStore.load(this)

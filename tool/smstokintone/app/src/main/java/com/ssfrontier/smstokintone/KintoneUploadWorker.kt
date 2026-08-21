@@ -36,15 +36,21 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             return@withContext Result.success()
         }
 
+        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応）
+        val smsParts = SmsPartsGenerator.generateSmsParts(body)
+
+        if (!manual && smsParts.isSplitFailed() && !config.forwardSplitFailedEnabled) {
+            // 形式が不正で何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
+            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), profileName = profile.displayName(applicationContext), manual = manual)
+            return@withContext Result.success()
+        }
+
         logStart(sender, body, timestampMillis, smsId, profileName = profile.displayName(applicationContext), manual = manual)
 
         if (!manual && !config.forwardingEnabled) {
             logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_forwarding_disabled), profileName = profile.displayName(applicationContext), manual = manual)
             return@withContext Result.success()
         }
-
-        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応）
-        val smsParts = SmsPartsGenerator.generateSmsParts(body)
 
         val datetimeIso = if (profile.fieldDatetime.isNotBlank()) {
             val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {

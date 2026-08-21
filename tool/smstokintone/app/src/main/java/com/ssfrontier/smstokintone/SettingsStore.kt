@@ -11,6 +11,7 @@ object SettingsStore {
 
     private const val PREFS_NAME = "smstokintone_prefs"
     private const val KEY_FORWARDING_ENABLED = "forwarding_enabled"
+    private const val KEY_FORWARD_SPLIT_FAILED_ENABLED = "forward_split_failed_enabled"
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
@@ -52,6 +53,8 @@ object SettingsStore {
     /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[KintoneProfile]を参照） */
     data class Config(
         val forwardingEnabled: Boolean,
+        /** 自動送信時、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
+        val forwardSplitFailedEnabled: Boolean,
         val autoRefreshEnabled: Boolean,
         val autoRefreshIntervalSeconds: Int,
         /** 自動受信SMSのログとSMSプロバイダ上のSMSを突き合わせる際の許容範囲（秒） */
@@ -150,6 +153,7 @@ object SettingsStore {
     fun save(context: Context, config: Config) {
         val editor = prefs(context).edit()
             .putBoolean(KEY_FORWARDING_ENABLED, config.forwardingEnabled)
+            .putBoolean(KEY_FORWARD_SPLIT_FAILED_ENABLED, config.forwardSplitFailedEnabled)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
             .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
@@ -169,6 +173,7 @@ object SettingsStore {
         val p = prefs(context)
         return Config(
             forwardingEnabled = p.getBoolean(KEY_FORWARDING_ENABLED, true),
+            forwardSplitFailedEnabled = p.getBoolean(KEY_FORWARD_SPLIT_FAILED_ENABLED, false),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
             autoRefreshIntervalSeconds = p.getInt(
                 KEY_AUTO_REFRESH_INTERVAL_SECONDS,
