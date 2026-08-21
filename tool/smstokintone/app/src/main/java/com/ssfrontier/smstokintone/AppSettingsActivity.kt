@@ -52,6 +52,11 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(forwardSplitFailedEnabled = isChecked))
         }
 
+        binding.swCompanyNameWidthConversionEnabled.isChecked = SettingsStore.load(this).companyNameWidthConversionEnabled
+        binding.swCompanyNameWidthConversionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(companyNameWidthConversionEnabled = isChecked))
+        }
+
         val config = SettingsStore.load(this)
         binding.swAutoRefreshEnabled.isChecked = config.autoRefreshEnabled
         binding.etAutoRefreshInterval.setText(config.autoRefreshIntervalSeconds.toString())

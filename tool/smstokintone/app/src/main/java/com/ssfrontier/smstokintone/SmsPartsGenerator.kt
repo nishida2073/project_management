@@ -13,6 +13,13 @@ data class SmsParts(
 
     /** 会社名・氏名・内容のいずれかが空で、分割に失敗したとみなせるかどうか */
     fun isSplitFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && content.isNotBlank())
+
+    /**
+     * [companyName]の英字（A-Z, a-z）・数字（0-9）を半角大文字に、それ以外の文字を全角に統一した文字列。
+     * [companyName]が空白の場合は空文字を返す
+     */
+    val companyNameNormalizedWidth: String
+        get() = if (companyName.isNotBlank()) TextNormalization.toMixedWidth(companyName) else ""
 }
 
 /**

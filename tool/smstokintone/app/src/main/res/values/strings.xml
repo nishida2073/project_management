@@ -65,12 +65,6 @@
     <string name="switch_theme_follow_system">システム設定を有効にする</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>
-    <string name="section_sms_forwarding">SMS送信</string>
-    <string name="label_sms_forwarding_mode">送信モード</string>
-    <string name="rb_sms_forwarding_mode_manual">手動</string>
-    <string name="rb_sms_forwarding_mode_auto">自動</string>
-    <string name="section_forward_target">送信対象</string>
-    <string name="switch_forward_split_failed_enabled">形式が不正</string>
     <string name="section_log">ログ</string>
     <string name="section_auto_refresh">自動更新</string>
     <string name="switch_auto_refresh_enabled">有効にする</string>
@@ -94,7 +88,15 @@
     <string name="hint_sms_standard_reply_body">文言</string>
     <string name="section_sms_split_failed_reply_body">形式が不正な場合</string>
     <string name="hint_sms_split_failed_reply_body">文言</string>
-
+    <string name="section_sms_forwarding">SMS送信</string>
+    <string name="label_sms_forwarding_mode">送信モード</string>
+    <string name="rb_sms_forwarding_mode_manual">手動</string>
+    <string name="rb_sms_forwarding_mode_auto">自動</string>
+    <string name="section_forward_target">送信対象</string>
+    <string name="switch_forward_split_failed_enabled">形式が不正</string>
+    <string name="section_company_name_conversion">会社名の変換</string>
+    <string name="switch_company_name_width_conversion_enabled">有効にする</string>
+    
     <!-- ログ画面 -->
     <string name="title_log">ログ</string>
     <string name="message_log_empty">ログがありません</string>

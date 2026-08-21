@@ -165,6 +165,11 @@ class KintoneSettingsActivity : AppCompatActivity() {
 
         val testBody = getString(R.string.test_send_body)
         val smsParts = SmsPartsGenerator.generateSmsParts(testBody)
+        val companyNameValue = if (SettingsStore.load(this).companyNameWidthConversionEnabled) {
+            smsParts.companyNameNormalizedWidth
+        } else {
+            smsParts.companyName
+        }
 
         itemBinding.btnTestSend.isEnabled = false
         CoroutineScope(Dispatchers.Main).launch {
@@ -175,7 +180,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
                     senderValue = AppConstants.TEST_SEND_SENDER,
                     bodyValue = testBody,
                     datetimeIsoValue = datetimeIso,
-                    companyNameValue = smsParts.companyName,
+                    companyNameValue = companyNameValue,
                     userNameValue = smsParts.userName,
                     contentValue = smsParts.content
                 )

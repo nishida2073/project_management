@@ -61,13 +61,19 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             null
         }
 
+        val companyNameValue = if (config.companyNameWidthConversionEnabled) {
+            smsParts.companyNameNormalizedWidth
+        } else {
+            smsParts.companyName
+        }
+
         when (val result = KintoneApi.postRecord(
             applicationContext,
             profile,
             senderValue = sender,
             bodyValue = body,
             datetimeIsoValue = datetimeIso,
-            companyNameValue = smsParts.companyName,
+            companyNameValue = companyNameValue,
             userNameValue = smsParts.userName,
             contentValue = smsParts.content
         )) {

@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import org.json.JSONArray
 import org.json.JSONObject
-import java.text.Normalizer
 import java.util.UUID
 
 object SettingsStore {
@@ -12,6 +11,7 @@ object SettingsStore {
     private const val PREFS_NAME = "smstokintone_prefs"
     private const val KEY_FORWARDING_ENABLED = "forwarding_enabled"
     private const val KEY_FORWARD_SPLIT_FAILED_ENABLED = "forward_split_failed_enabled"
+    private const val KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED = "company_name_width_conversion_enabled"
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
@@ -55,6 +55,9 @@ object SettingsStore {
         val forwardingEnabled: Boolean,
         /** 自動送信時、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
         val forwardSplitFailedEnabled: Boolean,
+        /** kintoneへの送信時、会社名に[SmsParts.companyNameNormalizedWidth]（英数字は半角・それ以外は全角に統一した文字列）を使うかどうか。
+         * falseの場合は[SmsParts.companyName]（変換なし）をそのまま使う */
+        val companyNameWidthConversionEnabled: Boolean,
         val autoRefreshEnabled: Boolean,
         val autoRefreshIntervalSeconds: Int,
         /** 自動受信SMSのログとSMSプロバイダ上のSMSを突き合わせる際の許容範囲（秒） */
@@ -117,12 +120,7 @@ object SettingsStore {
                 }
             }
 
-        // 半角/全角の表記ゆれ（英数字・カタカナ等）を無視して比較するため、NFKC正規化してから
-        // 大文字小文字を無視した部分一致を行う
-        fun matches(body: String): Boolean {
-            val normalizedBody = Normalizer.normalize(body, Normalizer.Form.NFKC)
-            return keywordList.any { normalizedBody.contains(Normalizer.normalize(it, Normalizer.Form.NFKC), ignoreCase = true) }
-        }
+        fun matches(body: String): Boolean = keywordList.any { TextNormalization.matches(body, it) }
 
         companion object {
             fun newEmpty(): KintoneProfile = KintoneProfile(
@@ -154,6 +152,7 @@ object SettingsStore {
         val editor = prefs(context).edit()
             .putBoolean(KEY_FORWARDING_ENABLED, config.forwardingEnabled)
             .putBoolean(KEY_FORWARD_SPLIT_FAILED_ENABLED, config.forwardSplitFailedEnabled)
+            .putBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, config.companyNameWidthConversionEnabled)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
             .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
@@ -174,6 +173,7 @@ object SettingsStore {
         return Config(
             forwardingEnabled = p.getBoolean(KEY_FORWARDING_ENABLED, true),
             forwardSplitFailedEnabled = p.getBoolean(KEY_FORWARD_SPLIT_FAILED_ENABLED, false),
+            companyNameWidthConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, false),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
             autoRefreshIntervalSeconds = p.getInt(
                 KEY_AUTO_REFRESH_INTERVAL_SECONDS,
