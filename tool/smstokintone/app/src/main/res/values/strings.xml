@@ -93,7 +93,7 @@
 
     <!-- ログ画面 -->
     <string name="log_title">ログ</string>
-    <string name="log_empty">ログはまだありません</string>
+    <string name="log_empty">ログがありません</string>
     <string name="log_result_success">成功</string>
     <string name="log_result_failure">失敗</string>
     <string name="log_type_receive">受信完了</string>
