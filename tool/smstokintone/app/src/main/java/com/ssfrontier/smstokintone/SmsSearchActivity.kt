@@ -382,7 +382,7 @@ class SmsSearchActivity : AppCompatActivity() {
 
         val selectedRecords = records.filter { it.id in checkedIds }
         if (selectedRecords.isEmpty()) {
-            Toast.makeText(this, getString(R.string.toast_no_selection), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_sms_send_not_selection), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -422,7 +422,7 @@ class SmsSearchActivity : AppCompatActivity() {
 
         Toast.makeText(
             this,
-            getString(R.string.toast_queued, selectedRecords.size),
+            getString(R.string.toast_sms_send_queued, selectedRecords.size),
             Toast.LENGTH_LONG
         ).show()
 
@@ -443,13 +443,13 @@ class SmsSearchActivity : AppCompatActivity() {
             .mapValues { it.value.first() }
 
         if (latestCompleteEntryPerSms.isEmpty()) {
-            Toast.makeText(this, getString(R.string.toast_send_finished_no_log), Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_sms_send_finished_no_log), Toast.LENGTH_LONG).show()
         } else {
             val successCount = latestCompleteEntryPerSms.values.count { it.success }
             val failureCount = latestCompleteEntryPerSms.size - successCount
             Toast.makeText(
                 this,
-                getString(R.string.toast_send_finished, successCount, failureCount),
+                getString(R.string.toast_sms_send_finished, successCount, failureCount),
                 Toast.LENGTH_LONG
             ).show()
         }

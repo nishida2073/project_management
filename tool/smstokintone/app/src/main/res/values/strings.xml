@@ -153,8 +153,8 @@
     <string name="toast_sms_search_error">SMSの検索でエラーが発生しました: %1$s</string>
     <string name="toast_sms_search_found">%1$d件見つかりました</string>
     <string name="toast_sms_app_not_found">SMSアプリが見つかりませんでした</string>
-    <string name="toast_no_selection">送信するSMSを選択してください</string>
-    <string name="toast_queued">%1$d件をkintoneへ送信キューに追加しました</string>
-    <string name="toast_send_finished">送信処理が完了しました（成功%1$d件 / 失敗%2$d件）</string>
-    <string name="toast_send_finished_no_log">送信処理が完了しました</string>
+    <string name="toast_sms_send_not_selection">送信するSMSを選択してください</string>
+    <string name="toast_sms_send_queued">%1$d件をkintoneへ送信キューに追加しました</string>
+    <string name="toast_sms_send_finished">SMS送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
+    <string name="toast_sms_send_finished_no_log">SMS送信が完了しました</string>
 </resources>
