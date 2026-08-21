@@ -207,6 +207,12 @@
                         android:checked="true"
                         android:text="@string/switch_auto_refresh_enabled" />
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_auto_refresh_interval" />
+
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilAutoRefreshInterval"
                         android:layout_width="match_parent"

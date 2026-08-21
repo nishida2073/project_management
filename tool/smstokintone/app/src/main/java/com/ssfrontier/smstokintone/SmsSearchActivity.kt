@@ -91,6 +91,7 @@ class SmsSearchActivity : AppCompatActivity() {
         super.onResume()
         updatePermissionUi()
         refreshProfileFilterOptions()
+        searchSms(showFoundToast = false)
     }
 
     private fun refreshProfileFilterOptions() {
