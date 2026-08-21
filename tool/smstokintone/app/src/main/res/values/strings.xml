@@ -77,7 +77,7 @@
     <string name="permission_status_granted">SMS受信 : 許可済み</string>
     <string name="toast_sms_receive_permission_denied">SMS受信の許可がないと、このアプリは動作しません</string>
     <string name="section_sms_search">SMS検索</string>
-    <string name="section_search_range">検索条件（デフォルト）</string>
+    <string name="section_search_filter">検索条件（デフォルト）</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>
     <string name="hint_sms_search_date_range_days">日</string>
     <string name="label_default_profile_filter">送信先</string>
