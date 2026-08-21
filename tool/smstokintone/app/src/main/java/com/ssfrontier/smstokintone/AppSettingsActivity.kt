@@ -165,7 +165,7 @@ class AppSettingsActivity : AppCompatActivity() {
             Manifest.permission.RECEIVE_SMS
         ) == PackageManager.PERMISSION_GRANTED
 
-        binding.tvPermissionStatus.text = getString(R.string.permission_status_granted)
+        binding.tvPermissionStatus.text = getString(R.string.label_permission_sms_receive_granted)
         binding.tvPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
         binding.btnRequestPermission.visibility = if (granted) View.GONE else View.VISIBLE
     }

@@ -50,7 +50,7 @@ class SmsSearchActivity : AppCompatActivity() {
             if (!granted) {
                 Toast.makeText(
                     this,
-                    getString(R.string.toast_read_sms_permission_denied),
+                    getString(R.string.toast_sms_read_permission_denied),
                     Toast.LENGTH_LONG
                 ).show()
             }

@@ -60,26 +60,33 @@
                         android:checked="true"
                         android:text="@string/switch_theme_follow_system" />
 
-                    <RadioGroup
-                        android:id="@+id/rgThemeLightDark"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
 
-                        <RadioButton
-                            android:id="@+id/rbThemeLight"
-                            android:layout_width="wrap_content"
+                        <RadioGroup
+                            android:id="@+id/rgThemeLightDark"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="@string/rb_theme_light" />
+                            android:orientation="horizontal">
 
-                        <RadioButton
-                            android:id="@+id/rbThemeDark"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:text="@string/rb_theme_dark" />
-                    </RadioGroup>
+                            <RadioButton
+                                android:id="@+id/rbThemeLight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:text="@string/rb_theme_light" />
+
+                            <RadioButton
+                                android:id="@+id/rbThemeDark"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:text="@string/rb_theme_dark" />
+                        </RadioGroup>
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -112,19 +119,32 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tvPermissionStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/permission_status_granted"
-                        android:visibility="gone" />
+                        android:text="@string/label_sms_receive_permission" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnRequestPermission"
-                        style="@style/AppButton.OutlinedButton"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/btn_request_permission" />
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvPermissionStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/label_permission_sms_receive_granted"
+                            android:visibility="gone" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnRequestPermission"
+                            style="@style/AppButton.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/btn_sms_receive_permission" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -156,34 +176,60 @@
                     android:layout_marginStart="16dp"
                     android:orientation="vertical">
 
-                    <RadioGroup
-                        android:id="@+id/rgForwardingMode"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_sms_forwarding_mode" />
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
 
-                        <RadioButton
-                            android:id="@+id/rbForwardingManual"
-                            android:layout_width="wrap_content"
+                        <RadioGroup
+                            android:id="@+id/rgForwardingMode"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/rb_sms_forwarding_manual" />
+                            android:orientation="horizontal">
 
-                        <RadioButton
-                            android:id="@+id/rbForwardingAuto"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:checked="true"
-                            android:text="@string/rb_sms_forwarding_auto" />
-                    </RadioGroup>
+                            <RadioButton
+                                android:id="@+id/rbForwardingManual"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/rb_sms_forwarding_mode_manual" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/swForwardSplitFailedEnabled"
-                        android:layout_width="match_parent"
+                            <RadioButton
+                                android:id="@+id/rbForwardingAuto"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:checked="true"
+                                android:text="@string/rb_sms_forwarding_mode_auto" />
+                        </RadioGroup>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:checked="false"
-                        android:text="@string/switch_forward_split_failed_enabled" />
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/section_forward_target" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/swForwardSplitFailedEnabled"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:text="@string/switch_forward_split_failed_enabled" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
