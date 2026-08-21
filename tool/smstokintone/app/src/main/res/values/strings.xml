@@ -65,7 +65,7 @@
     <string name="switch_theme_follow_system">システム設定を有効にする</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>
-    <string name="section_sms_forwarding">SMSの送信方法</string>
+    <string name="section_sms_forwarding">SMSの送信モード</string>
     <string name="rb_sms_forwarding_manual">手動</string>
     <string name="rb_sms_forwarding_auto">自動</string>
     <string name="section_log">ログ</string>
