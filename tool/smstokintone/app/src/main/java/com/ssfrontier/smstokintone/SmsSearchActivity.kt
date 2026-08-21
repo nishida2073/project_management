@@ -82,7 +82,7 @@ class SmsSearchActivity : AppCompatActivity() {
         val config = SettingsStore.load(this)
         selectedProfileId = config.defaultProfileFilterId
         val today = Calendar.getInstance()
-        val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -config.smsSearchDateRangeDays) }
+        val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -(config.smsSearchDateRangeDays - 1)) }
         applyDateFilter(isFrom = true, calendar = rangeStart)
         applyDateFilter(isFrom = false, calendar = today)
     }
