@@ -78,7 +78,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
 
         itemBinding.btnCopyProfile.setOnClickListener {
             val source = readProfileFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
-            val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.profile_copy_suffix)
+            val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_profile_copy)
             val newCardView = addProfileCard(source.copy(name = copyName), insertAt = profileCards.indexOf(card) + 1)
             newCardView.post { binding.root.smoothScrollTo(0, topRelativeTo(newCardView, binding.root)) }
         }
@@ -146,10 +146,10 @@ class KintoneSettingsActivity : AppCompatActivity() {
         val profile = readProfileFromBinding(itemBinding, id = card.id)
         if (!profile.isValid) {
             val index = profileCards.indexOf(card)
-            val label = profile.name.ifBlank { getString(R.string.profile_index_format, index + 1) }
+            val label = profile.name.ifBlank { getString(R.string.label_profile_index, index + 1) }
             AlertDialog.Builder(this)
-                .setTitle(R.string.validation_error_title)
-                .setMessage(getString(R.string.validation_error, label))
+                .setTitle(R.string.dialog_title_validation_error)
+                .setMessage(getString(R.string.dialog_message_validation_error, label))
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
             return
@@ -185,11 +185,11 @@ class KintoneSettingsActivity : AppCompatActivity() {
             val message = when (result) {
                 is KintoneApi.PostResult.Success -> result.message
                 is KintoneApi.PostResult.Skipped -> result.message
-                is KintoneApi.PostResult.HttpFailure -> getString(R.string.test_send_result_failure, "${result.code} ${result.detail}")
-                is KintoneApi.PostResult.NetworkError -> getString(R.string.test_send_result_network_error, result.message)
+                is KintoneApi.PostResult.HttpFailure -> getString(R.string.dialog_message_test_send_result_failure, "${result.code} ${result.detail}")
+                is KintoneApi.PostResult.NetworkError -> getString(R.string.dialog_message_test_send_result_network_error, result.message)
             }
             AlertDialog.Builder(this@KintoneSettingsActivity)
-                .setTitle(R.string.test_send_result_title)
+                .setTitle(R.string.dialog_title_test_send_result)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
@@ -198,7 +198,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
 
     private fun renumberCards() {
         profileCards.forEachIndexed { index, card ->
-            card.binding.tvProfileIndex.text = getString(R.string.profile_index_format, index + 1)
+            card.binding.tvProfileIndex.text = getString(R.string.label_profile_index, index + 1)
         }
     }
 
@@ -222,10 +222,10 @@ class KintoneSettingsActivity : AppCompatActivity() {
             val profile = readProfileFromBinding(card.binding, id = card.id)
 
             if (!profile.isValid) {
-                val label = profile.name.ifBlank { getString(R.string.profile_index_format, index + 1) }
+                val label = profile.name.ifBlank { getString(R.string.label_profile_index, index + 1) }
                 AlertDialog.Builder(this)
-                    .setTitle(R.string.validation_error_title)
-                    .setMessage(getString(R.string.validation_error, label))
+                    .setTitle(R.string.dialog_title_validation_error)
+                    .setMessage(getString(R.string.dialog_message_validation_error, label))
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
                 return

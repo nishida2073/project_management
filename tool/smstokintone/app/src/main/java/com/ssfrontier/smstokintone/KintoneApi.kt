@@ -75,7 +75,7 @@ object KintoneApi {
             existing.bodyValue.contains(bodyValue)
 
         return if (isDuplicate) {
-            PostResult.Skipped(context.getString(R.string.log_message_send_complete_skipped_duplicate))
+            PostResult.Skipped(context.getString(R.string.message_log_send_complete_skipped_duplicate))
         } else if (existing != null) {
             val newEntryMillis = datetimeIsoValue?.let { parseIsoDateTime(it) }
             val mergedBody = mergeBody(existing.bodyValue, entryText, newEntryMillis)
@@ -259,7 +259,7 @@ object KintoneApi {
             .post(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
         addAuthHeader(requestBuilder, profile)
 
-        return execute(requestBuilder, successMessage = context.getString(R.string.log_message_send_complete_create_success))
+        return execute(requestBuilder, successMessage = context.getString(R.string.message_log_send_complete_create_success))
     }
 
     private fun updateRecord(context: Context, profile: SettingsStore.KintoneProfile, recordId: String, record: JSONObject): PostResult {
@@ -273,7 +273,7 @@ object KintoneApi {
             .put(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
         addAuthHeader(requestBuilder, profile)
 
-        return execute(requestBuilder, successMessage = context.getString(R.string.log_message_send_complete_update_success))
+        return execute(requestBuilder, successMessage = context.getString(R.string.message_log_send_complete_update_success))
     }
 
     private fun addAuthHeader(requestBuilder: Request.Builder, profile: SettingsStore.KintoneProfile) {

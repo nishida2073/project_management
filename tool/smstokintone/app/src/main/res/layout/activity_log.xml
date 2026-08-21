@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="@string/log_title"
+        android:text="@string/title_log"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -41,7 +41,7 @@
         android:id="@+id/tvLogEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/log_empty"
+        android:text="@string/message_log_empty"
         android:visibility="gone" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

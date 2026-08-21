@@ -61,8 +61,8 @@ class LogActivity : AppCompatActivity() {
 
     private fun onClearClicked() {
         AlertDialog.Builder(this)
-            .setTitle(R.string.confirm_clear_log_title)
-            .setMessage(R.string.confirm_clear_log_message)
+            .setTitle(R.string.dialog_title_confirm_clear_log)
+            .setMessage(R.string.dialog_message_confirm_clear_log)
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_clear) { _, _ ->
                 SmsLogStore.clear(this)
@@ -79,9 +79,9 @@ class LogActivity : AppCompatActivity() {
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         entries.forEach { entry ->
             val typeLabel = when (entry.type) {
-                SmsLogStore.EntryType.RECEIVE -> getString(R.string.log_type_receive)
-                SmsLogStore.EntryType.SEND_START -> getString(R.string.log_type_send_start)
-                SmsLogStore.EntryType.SEND_COMPLETE -> getString(R.string.log_type_send_complete)
+                SmsLogStore.EntryType.RECEIVE -> getString(R.string.label_log_type_receive)
+                SmsLogStore.EntryType.SEND_START -> getString(R.string.label_log_type_send_start)
+                SmsLogStore.EntryType.SEND_COMPLETE -> getString(R.string.label_log_type_send_complete)
             }
 
             val modeColor = ContextCompat.getColor(
@@ -95,7 +95,7 @@ class LogActivity : AppCompatActivity() {
                     append("[$typeLabel")
                     if (entry.type != SmsLogStore.EntryType.RECEIVE) {
                         color(modeColor) {
-                            append(getString(if (entry.manual) R.string.log_type_suffix_manual else R.string.log_type_suffix_auto))
+                            append(getString(if (entry.manual) R.string.label_log_type_suffix_manual else R.string.label_log_type_suffix_auto))
                         }
                     }
                     append("] ${dateFormat.format(Date(entry.loggedAtMillis))}")
@@ -122,9 +122,9 @@ class LogActivity : AppCompatActivity() {
             // グループ3: 結果（受信・送信開始・送信完了共通で成功＝緑・失敗＝赤で色付け。
             // ラベルとメッセージは別列に分ける）
             val resultLabel = if (entry.success) {
-                getString(R.string.log_result_success)
+                getString(R.string.label_log_result_success)
             } else {
-                getString(R.string.log_result_failure)
+                getString(R.string.label_log_result_failure)
             }
             val resultColor = ContextCompat.getColor(
                 this@LogActivity,
@@ -136,18 +136,18 @@ class LogActivity : AppCompatActivity() {
             val splitResultView = entry.smsParts?.let { smsParts ->
                 val succeeded = !smsParts.isSplitFailed()
                 val splitLabel = if (succeeded) {
-                    getString(R.string.log_result_success)
+                    getString(R.string.label_log_result_success)
                 } else {
-                    getString(R.string.log_result_failure)
+                    getString(R.string.label_log_result_failure)
                 }
                 val splitColor = ContextCompat.getColor(
                     this@LogActivity,
                     if (succeeded) R.color.log_success else R.color.log_failure
                 )
                 val splitMessage = if (succeeded) {
-                    getString(R.string.log_message_split)
+                    getString(R.string.message_log_split)
                 } else {
-                    getString(R.string.log_message_split_failure)
+                    getString(R.string.message_log_split_failure)
                 }
                 buildLabeledMessageRow(splitLabel, splitMessage, splitColor, topPadding = 4)
             }

@@ -37,7 +37,7 @@ class SmsReceiver : BroadcastReceiver() {
             sender = sender,
             body = body,
             success = true,
-            message = context.getString(R.string.log_message_receive),
+            message = context.getString(R.string.message_log_receive),
             profileName = SettingsStore.findProfileForBody(context, body)?.displayName(context)
         )
 
