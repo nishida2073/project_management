@@ -19,7 +19,7 @@ data class SmsParts(
      * [companyName]が空白の場合は空文字を返す
      */
     val companyNameNormalizedWidth: String
-        get() = if (companyName.isNotBlank()) TextNormalization.toMixedWidth(companyName) else ""
+        get() = if (companyName.isNotBlank()) TextNormalization.normalizeWidth(companyName) else ""
 }
 
 /**

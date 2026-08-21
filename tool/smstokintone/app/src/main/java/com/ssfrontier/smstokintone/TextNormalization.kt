@@ -21,7 +21,7 @@ object TextNormalization {
      * まずNFKC正規化で全角英数字を半角に、半角カナを全角カナに揃え、
      * その後に残る半角記号・半角スペースを全角に変換する
      */
-    fun toMixedWidth(text: String): String {
+    fun normalizeWidth(text: String): String {
         val nfkc = toNfkc(text)
         val builder = StringBuilder(nfkc.length)
         for (ch in nfkc) {
