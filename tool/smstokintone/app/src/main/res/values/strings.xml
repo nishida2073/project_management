@@ -96,6 +96,7 @@
     <string name="switch_forward_split_failed_enabled">形式が不正</string>
     <string name="section_company_name_conversion">会社名の変換</string>
     <string name="switch_company_name_width_conversion_enabled">有効にする</string>
+    <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
     
     <!-- ログ画面 -->
     <string name="title_log">ログ</string>

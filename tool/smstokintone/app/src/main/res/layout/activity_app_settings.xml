@@ -506,6 +506,14 @@
                             android:layout_height="wrap_content"
                             android:checked="false"
                             android:text="@string/switch_company_name_width_conversion_enabled" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/helper_company_name_width_conversion_enabled"
+                            android:textSize="12sp"
+                            android:textColor="?android:attr/textColorSecondary" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
