@@ -31,6 +31,10 @@ class LogActivity : AppCompatActivity() {
 
         binding.btnRefreshLog.setOnClickListener { renderLog() }
         binding.btnClearLog.setOnClickListener { onClearClicked() }
+        binding.swipeRefreshLog.setOnRefreshListener {
+            renderLog()
+            binding.swipeRefreshLog.isRefreshing = false
+        }
     }
 
     override fun onResume() {

@@ -71,6 +71,10 @@ class SmsSearchActivity : AppCompatActivity() {
             requestReadSmsPermissionLauncher.launch(Manifest.permission.READ_SMS)
         }
         binding.btnToggleSearchFilters.setOnClickListener { toggleSearchFilters() }
+        binding.swipeRefreshSmsList.setOnRefreshListener {
+            searchSms(showFoundToast = false)
+            binding.swipeRefreshSmsList.isRefreshing = false
+        }
         binding.spProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedProfileId = profileFilterKeys.getOrNull(position)
