@@ -35,14 +35,25 @@ class TopActivity : AppCompatActivity() {
     }
 
     private fun updateModeStatus() {
-        val forwardingEnabled = SettingsStore.load(this).forwardingEnabled
-        binding.tvTopStatus.text = getString(
-            if (forwardingEnabled) R.string.label_sms_forwarding_auto else R.string.label_sms_forwarding_manual
+        val config = SettingsStore.load(this)
+
+        binding.tvTopForwardingStatus.text = getString(
+            if (config.forwardingEnabled) R.string.label_top_sms_forwarding_auto else R.string.label_top_sms_forwarding_manual
         )
-        binding.tvTopStatus.setTextColor(
+        binding.tvTopForwardingStatus.setTextColor(
             ContextCompat.getColor(
                 this,
-                if (forwardingEnabled) R.color.status_running else R.color.status_manual
+                if (config.forwardingEnabled) R.color.status_running else R.color.status_manual
+            )
+        )
+
+        binding.tvTopReplyStatus.text = getString(
+            if (config.autoReplySplitFailedEnabled) R.string.label_top_sms_reply_auto else R.string.label_top_sms_reply_manual
+        )
+        binding.tvTopReplyStatus.setTextColor(
+            ContextCompat.getColor(
+                this,
+                if (config.autoReplySplitFailedEnabled) R.color.status_running else R.color.status_manual
             )
         )
     }

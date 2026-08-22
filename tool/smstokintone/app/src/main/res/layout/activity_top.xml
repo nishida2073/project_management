@@ -12,16 +12,43 @@
         android:padding="24dp">
 
         <TextView
-            android:id="@+id/tvTopStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:text="@string/label_top_sms_forwarding"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:id="@+id/tvTopForwardingStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            tools:text="@string/label_top_sms_forwarding_auto"
+            tools:textColor="@color/status_running" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/label_top_sms_reply"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
+            android:id="@+id/tvTopReplyStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
             android:gravity="center"
-            android:textSize="28sp"
+            android:textSize="24sp"
             android:textStyle="bold"
-            tools:text="@string/label_sms_forwarding_auto"
-            tools:textColor="@color/status_running" />
+            tools:text="@string/label_top_sms_reply_manual"
+            tools:textColor="@color/status_manual" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenSmsSearch"
