@@ -9,8 +9,8 @@ import java.util.UUID
 object SettingsStore {
 
     private const val PREFS_NAME = "smstokintone_prefs"
-    private const val KEY_FORWARDING_ENABLED = "forwarding_enabled"
-    private const val KEY_FORWARD_SPLIT_FAILED_ENABLED = "forward_split_failed_enabled"
+    private const val KEY_SEND_ENABLED = "send_enabled"
+    private const val KEY_SEND_SPLIT_FAILED_ENABLED = "send_split_failed_enabled"
     private const val KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED = "auto_reply_split_failed_enabled"
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
     private const val KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED = "company_name_width_conversion_enabled"
@@ -52,9 +52,9 @@ object SettingsStore {
 
     /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[KintoneProfile]を参照） */
     data class Config(
-        val forwardingEnabled: Boolean,
+        val sendEnabled: Boolean,
         /** 自動送信時、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
-        val forwardSplitFailedEnabled: Boolean,
+        val sendSplitFailedEnabled: Boolean,
         /** 自動受信時、本文の形式が不正なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
         val autoReplySplitFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
@@ -154,8 +154,8 @@ object SettingsStore {
 
     fun save(context: Context, config: Config) {
         val editor = prefs(context).edit()
-            .putBoolean(KEY_FORWARDING_ENABLED, config.forwardingEnabled)
-            .putBoolean(KEY_FORWARD_SPLIT_FAILED_ENABLED, config.forwardSplitFailedEnabled)
+            .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
+            .putBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, config.sendSplitFailedEnabled)
             .putBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, config.autoReplySplitFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
             .putBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, config.companyNameWidthConversionEnabled)
@@ -177,8 +177,8 @@ object SettingsStore {
     fun load(context: Context): Config {
         val p = prefs(context)
         return Config(
-            forwardingEnabled = p.getBoolean(KEY_FORWARDING_ENABLED, true),
-            forwardSplitFailedEnabled = p.getBoolean(KEY_FORWARD_SPLIT_FAILED_ENABLED, false),
+            sendEnabled = p.getBoolean(KEY_SEND_ENABLED, true),
+            sendSplitFailedEnabled = p.getBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, false),
             autoReplySplitFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, false),
             autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS),
             companyNameWidthConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, false),

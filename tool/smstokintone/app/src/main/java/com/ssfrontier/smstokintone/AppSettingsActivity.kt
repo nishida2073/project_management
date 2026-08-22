@@ -53,19 +53,19 @@ class AppSettingsActivity : AppCompatActivity() {
         binding = ActivityAppSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val forwardingEnabled = SettingsStore.load(this).forwardingEnabled
-        binding.rbForwardingAuto.isChecked = forwardingEnabled
-        binding.rbForwardingManual.isChecked = !forwardingEnabled
-        binding.swForwardSplitFailedEnabled.isEnabled = forwardingEnabled
-        binding.rgForwardingMode.setOnCheckedChangeListener { _, checkedId ->
-            val enabled = checkedId == binding.rbForwardingAuto.id
-            SettingsStore.save(this, SettingsStore.load(this).copy(forwardingEnabled = enabled))
-            binding.swForwardSplitFailedEnabled.isEnabled = enabled
+        val sendEnabled = SettingsStore.load(this).sendEnabled
+        binding.rbSendAuto.isChecked = sendEnabled
+        binding.rbSendManual.isChecked = !sendEnabled
+        binding.swSendSplitFailedEnabled.isEnabled = sendEnabled
+        binding.rgSendMode.setOnCheckedChangeListener { _, checkedId ->
+            val enabled = checkedId == binding.rbSendAuto.id
+            SettingsStore.save(this, SettingsStore.load(this).copy(sendEnabled = enabled))
+            binding.swSendSplitFailedEnabled.isEnabled = enabled
         }
 
-        binding.swForwardSplitFailedEnabled.isChecked = SettingsStore.load(this).forwardSplitFailedEnabled
-        binding.swForwardSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(forwardSplitFailedEnabled = isChecked))
+        binding.swSendSplitFailedEnabled.isChecked = SettingsStore.load(this).sendSplitFailedEnabled
+        binding.swSendSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(sendSplitFailedEnabled = isChecked))
         }
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する

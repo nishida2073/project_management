@@ -16,19 +16,19 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:gravity="center"
-            android:text="@string/label_top_sms_forwarding"
+            android:text="@string/label_top_sms_send"
             android:textSize="14sp"
             android:textColor="?android:attr/textColorSecondary" />
 
         <TextView
-            android:id="@+id/tvTopForwardingStatus"
+            android:id="@+id/tvTopSendStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
             android:gravity="center"
             android:textSize="24sp"
             android:textStyle="bold"
-            tools:text="@string/label_top_sms_forwarding_auto"
+            tools:text="@string/label_top_sms_send_auto"
             tools:textColor="@color/status_running" />
 
         <TextView

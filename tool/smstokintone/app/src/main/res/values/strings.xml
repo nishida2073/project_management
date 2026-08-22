@@ -2,9 +2,9 @@
     <string name="app_name">S2k</string>
 
     <!-- トップ画面 -->
-    <string name="label_top_sms_forwarding">SMSの送信</string>
-    <string name="label_top_sms_forwarding_auto">自動モード</string>
-    <string name="label_top_sms_forwarding_manual">手動モード</string>
+    <string name="label_top_sms_send">SMSの送信</string>
+    <string name="label_top_sms_send_auto">自動モード</string>
+    <string name="label_top_sms_send_manual">手動モード</string>
     <string name="label_top_sms_reply">SMSの返信</string>
     <string name="label_top_sms_reply_auto">自動モード</string>
     <string name="label_top_sms_reply_manual">手動モード</string>
@@ -97,14 +97,14 @@
     <string name="label_sms_match_tolerance_seconds">統合範囲</string>
     <string name="helper_sms_match_tolerance_seconds">受信したSMSと送信ログの受信日時の統合範囲です</string>
     <string name="hint_sms_match_tolerance_seconds">±秒</string>
-    <string name="section_sms_forwarding">SMSの送信</string>
-    <string name="label_sms_forwarding_mode">送信モード</string>
-    <string name="rb_sms_forwarding_mode_manual">手動</string>
-    <string name="rb_sms_forwarding_mode_auto">自動</string>
-    <string name="helper_sms_forwarding_mode">自動の場合、SMSを受信した際にkintoneへ自動送信します。</string>
-    <string name="section_forward_target">送信対象</string>
-    <string name="switch_forward_split_failed_enabled">「形式が不正」なSMSも含める</string>
-    <string name="helper_forward_split_failed_enabled">自動送信の対象から除外されます</string>
+    <string name="section_sms_send">SMSの送信</string>
+    <string name="label_sms_send_mode">送信モード</string>
+    <string name="rb_sms_send_mode_manual">手動</string>
+    <string name="rb_sms_send_mode_auto">自動</string>
+    <string name="helper_sms_send_mode">自動の場合、SMSを受信した際にkintoneへ自動送信します。</string>
+    <string name="section_send_target">送信対象</string>
+    <string name="switch_send_split_failed_enabled">「形式が不正」なSMSも含める</string>
+    <string name="helper_send_split_failed_enabled">自動送信の対象から除外されます</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>

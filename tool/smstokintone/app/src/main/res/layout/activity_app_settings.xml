@@ -452,7 +452,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_sms_forwarding"
+                    android:text="@string/section_sms_send"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -466,7 +466,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_forwarding_mode" />
+                        android:text="@string/label_sms_send_mode" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -475,24 +475,24 @@
                         android:orientation="vertical">
 
                         <RadioGroup
-                            android:id="@+id/rgForwardingMode"
+                            android:id="@+id/rgSendMode"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
                             <RadioButton
-                                android:id="@+id/rbForwardingManual"
+                                android:id="@+id/rbSendManual"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/rb_sms_forwarding_mode_manual" />
+                                android:text="@string/rb_sms_send_mode_manual" />
 
                             <RadioButton
-                                android:id="@+id/rbForwardingAuto"
+                                android:id="@+id/rbSendAuto"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
                                 android:checked="true"
-                                android:text="@string/rb_sms_forwarding_mode_auto" />
+                                android:text="@string/rb_sms_send_mode_auto" />
                         </RadioGroup>
 
                         <LinearLayout
@@ -505,7 +505,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_forwarding_mode"
+                                android:text="@string/helper_sms_send_mode"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -516,7 +516,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_forward_target" />
+                        android:text="@string/section_send_target" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -525,11 +525,11 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swForwardSplitFailedEnabled"
+                            android:id="@+id/swSendSplitFailedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_forward_split_failed_enabled" />
+                            android:text="@string/switch_send_split_failed_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -541,7 +541,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_forward_split_failed_enabled"
+                                android:text="@string/helper_send_split_failed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>

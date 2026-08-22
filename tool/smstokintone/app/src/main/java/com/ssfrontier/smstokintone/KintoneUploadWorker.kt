@@ -36,7 +36,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             return@withContext Result.success()
         }
 
-        if (!manual && !config.forwardingEnabled) {
+        if (!manual && !config.sendEnabled) {
             // 送信モードが手動の場合、自動受信時はkintoneへの送信を何も試みないため、
             // 受信完了のログのみとし、送信開始・送信完了は記録しない
             return@withContext Result.success()
@@ -45,7 +45,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応）
         val smsParts = SmsPartsGenerator.generateSmsParts(body)
 
-        if (!manual && smsParts.isSplitFailed() && !config.forwardSplitFailedEnabled) {
+        if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
             // 形式が不正で何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
             logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), profileName = profile.displayName(applicationContext), manual = manual)
             return@withContext Result.success()

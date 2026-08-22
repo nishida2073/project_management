@@ -37,13 +37,13 @@ class TopActivity : AppCompatActivity() {
     private fun updateModeStatus() {
         val config = SettingsStore.load(this)
 
-        binding.tvTopForwardingStatus.text = getString(
-            if (config.forwardingEnabled) R.string.label_top_sms_forwarding_auto else R.string.label_top_sms_forwarding_manual
+        binding.tvTopSendStatus.text = getString(
+            if (config.sendEnabled) R.string.label_top_sms_send_auto else R.string.label_top_sms_send_manual
         )
-        binding.tvTopForwardingStatus.setTextColor(
+        binding.tvTopSendStatus.setTextColor(
             ContextCompat.getColor(
                 this,
-                if (config.forwardingEnabled) R.color.status_running else R.color.status_manual
+                if (config.sendEnabled) R.color.status_running else R.color.status_manual
             )
         )
 
