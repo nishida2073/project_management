@@ -20,6 +20,10 @@
 
 アプリ起動時に最初に表示される画面。現在の動作モードを確認し、他の画面へ移動するための入口。
 
+<p float="left">
+  <img src="screenshots/top.png" alt="トップ画面">
+</p>
+
 ### 機能一覧
 
 - 現在の送信モードの表示（自動モード／手動モード）
@@ -38,6 +42,10 @@
 - 自動モード：受信したSMSを自動でkintoneへ送信する設定になっている状態
 - 手動モード：SMS送信画面から手動で選んで送信する設定になっている状態
 
+<p float="left">
+  <img src="screenshots/top_status.png" alt="現在の送信モードの表示">
+</p>
+
 **各画面への移動ボタン**
 
 - 「SMSの送信」：[SMS送信画面](#sms送信画面)を開きます。受信済みのSMSを検索し、手動でkintoneへ送信する画面です。
@@ -45,11 +53,19 @@
 - 「kintoneの設定」：[kintone設定画面](#kintone設定画面)を開きます。kintoneへの接続先（送信先）を設定します。
 - 「アプリの設定」：[アプリ設定画面](#アプリ設定画面)を開きます。送信モードや自動更新間隔など、アプリ全体の動作を設定します。
 
+<p float="left">
+  <img src="screenshots/top_nav_buttons.png" alt="各画面への移動ボタン">
+</p>
+
 ---
 
 ## SMS送信画面
 
 受信済みのSMSを検索し、内容を確認したうえで手動でkintoneへ送信するための画面。「手動モード」で運用する場合の主な操作画面です。
+
+<p float="left">
+  <img src="screenshots/sms_search.png" alt="SMS送信画面">
+</p>
 
 ### 機能一覧
 
@@ -67,9 +83,17 @@
 
 端末のSMS読み取り権限（READ_SMS）が許可されていない場合、検索条件や一覧の代わりに説明文と「SMSの読み取りを許可する」ボタンが表示されます。ボタンを押すと端末の権限確認ダイアログが表示され、許可すると通常の画面に切り替わります。
 
+<p float="left">
+  <img src="screenshots/sms_search_permission.png" alt="SMS読み取り権限のリクエスト">
+</p>
+
 **検索条件の表示・非表示切り替え**
 
 見出し「検索条件」の右にあるボタンで、検索条件の入力欄をまとめて隠す／表示できます。一覧をより広く見たいときに隠すと便利です。
+
+<p float="left">
+  <img src="screenshots/sms_search_filter_toggle.png" alt="検索条件の表示・非表示切り替え">
+</p>
 
 **検索条件**
 
@@ -78,13 +102,25 @@
 - 未送信：チェックすると、まだkintoneへの送信が完了していないSMSだけに絞り込みます（既定でチェック済み）。
 - 形式が不正：チェックすると、本文の形式が正しく解釈できなかった（会社名・氏名・内容に分割できなかった）SMSだけに絞り込みます。
 
+<p float="left">
+  <img src="screenshots/sms_search_conditions.png" alt="検索条件">
+</p>
+
 **検索**
 
 「検索」ボタンを押すと、上記の条件で受信ボックスから該当するSMSを検索し、一覧に表示します。画面を開いた直後や、下に引っ張って更新したときも、同じ条件で自動的に検索されます。
 
+<p float="left">
+  <img src="screenshots/sms_search_search.png" alt="検索">
+</p>
+
 **全選択／選択解除**
 
 一覧に表示されているSMSのチェックボックスを、まとめてON／OFFできます。
+
+<p float="left">
+  <img src="screenshots/sms_search_select_all.png" alt="全選択／選択解除">
+</p>
 
 **SMSの一覧表示**
 
@@ -97,15 +133,27 @@
 
 一覧を下に引っ張ると、現在の検索条件でその場で再検索されます（プルリフレッシュ）。また、1件のSMSを長押しすると、標準のSMSアプリの返信画面が開き、[アプリ設定画面](#アプリ設定画面)で設定した文言（本文の形式が不正な場合は専用の文言）が自動で入力されます。
 
+<p float="left">
+  <img src="screenshots/sms_search_list.png" alt="SMSの一覧表示">
+</p>
+
 **選択したSMSの送信**
 
 チェックを付けたSMSを「選択したSMSを送信」ボタンでkintoneへ送信します。送信中はバックグラウンドで1件ずつ順番に処理され、完了すると成功・失敗件数がメッセージで表示され、一覧が自動的に更新されます。
+
+<p float="left">
+  <img src="screenshots/sms_search_send.png" alt="選択したSMSの送信">
+</p>
 
 ---
 
 ## ログ画面
 
 SMSの受信・kintoneへの送信の履歴を確認するための画面。
+
+<p float="left">
+  <img src="screenshots/log.png" alt="ログ画面">
+</p>
 
 ### 機能一覧
 
@@ -120,13 +168,25 @@ SMSの受信・kintoneへの送信の履歴を確認するための画面。
 
 [アプリ設定画面](#アプリ設定画面)で「自動更新」を有効にしている場合、画面を開いている間は設定した更新間隔（秒）ごとに自動で最新のログを再取得します。
 
+<p float="left">
+  <img src="screenshots/log_auto_refresh.png" alt="ログの自動更新">
+</p>
+
 **手動更新**
 
 「更新」ボタン、または一覧を下に引っ張ることで、その時点の最新のログを表示し直します。
 
+<p float="left">
+  <img src="screenshots/log_manual_refresh.png" alt="手動更新">
+</p>
+
 **ログのクリア**
 
 「クリア」ボタンを押すと確認ダイアログが表示され、OKを押すとログが全件削除されます。この操作は取り消せません。
+
+<p float="left">
+  <img src="screenshots/log_clear.png" alt="ログのクリア">
+</p>
 
 **ログ一覧の表示**
 
@@ -139,11 +199,19 @@ SMSの受信・kintoneへの送信の履歴を確認するための画面。
 - 結果（成功／失敗）とその詳細メッセージ（緑＝成功、赤＝失敗）
 - 本文から会社名・氏名・内容への分割に成功したかどうか（対応するログにのみ表示）
 
+<p float="left">
+  <img src="screenshots/log_list.png" alt="ログ一覧の表示">
+</p>
+
 ---
 
 ## kintone設定画面
 
 kintoneへの接続先（送信先）を設定する画面。SMSの送信元やキーワードごとに、複数の送信先を登録できます。
+
+<p float="left">
+  <img src="screenshots/kintone_settings.png" alt="kintone設定画面">
+</p>
 
 ### 機能一覧
 
@@ -162,6 +230,10 @@ kintoneへの接続先（送信先）を設定する画面。SMSの送信元や�
 
 各カードの見出しには「設定 1」「設定 2」のように連番が表示されます。
 
+<p float="left">
+  <img src="screenshots/kintone_profile_crud.png" alt="送信先プロファイルの追加・コピー・削除">
+</p>
+
 **送信先ごとの設定入力**
 
 各カードは「基本情報」と「kintone情報」の2つの入力欄にまとまっています。
@@ -177,19 +249,35 @@ kintone情報:
 - アプリ（アプリID）
 - フィールドコード：送信元・本文・最終受信日時・登録種別・会社名・氏名・内容の各項目に対応するkintoneのフィールドコードを指定します
 
+<p float="left">
+  <img src="screenshots/kintone_profile_fields.png" alt="送信先ごとの設定入力">
+</p>
+
 **テスト送信**
 
 「テスト送信」ボタンを押すと、ダミーのSMS本文を使ってその場でkintoneへ実際に送信を試せます。必須項目が未入力の場合はエラーが表示され、送信は行われません。結果（成功／失敗の詳細）はダイアログで表示されます。
 
+<p float="left">
+  <img src="screenshots/kintone_test_send.png" alt="テスト送信">
+</p>
+
 **設定の保存**
 
 「設定を保存」ボタンを押すと、すべてのカードの入力内容を検証します。送信先名・サブドメイン・認証情報・アプリID・フィールドコードのいずれかが未入力のカードがあると、そのカード名（または番号）を示すエラーダイアログが表示され、保存は行われません。すべて問題なければ保存され、トップ画面へ戻ります。
+
+<p float="left">
+  <img src="screenshots/kintone_save.png" alt="設定の保存">
+</p>
 
 ---
 
 ## アプリ設定画面
 
 アプリ全体の動作（送信モード、ログの自動更新、SMS検索のデフォルト条件など）を設定する画面。項目を変更すると即座に保存されます（保存ボタンはありません）。
+
+<p float="left">
+  <img src="screenshots/app_settings.png" alt="アプリ設定画面">
+</p>
 
 ### 機能一覧
 
@@ -205,13 +293,25 @@ kintone情報:
 
 ライト／ダークのどちらの配色で表示するかを選べます（ラジオボタン）。
 
+<p float="left">
+  <img src="screenshots/app_layout.png" alt="レイアウト（表示テーマ）">
+</p>
+
 **端末の許可**
 
 SMS受信の許可状況を確認できます。すでに許可されている場合は「SMS受信 : 許可済み」と表示され、未許可の場合は「SMSの受信を許可する」ボタンが表示されます（このアプリはSMS受信の許可がないと動作しません）。
 
+<p float="left">
+  <img src="screenshots/app_permission.png" alt="端末の許可">
+</p>
+
 **ログの自動更新**
 
 「有効にする」をONにすると、[ログ画面](#ログ画面)を開いている間、指定した更新間隔（秒）ごとに自動でログを再取得します。
+
+<p float="left">
+  <img src="screenshots/app_log_auto_refresh.png" alt="ログの自動更新">
+</p>
 
 **SMS検索（デフォルト設定）**
 
@@ -221,6 +321,10 @@ SMS受信の許可状況を確認できます。すでに許可されている�
 - 送信先：デフォルトで絞り込む送信先を選びます（「すべて」も選択可能）
 - 統合範囲（±秒）：自動送信のログはSMSの固有IDを持たないため、送信元と受信日時の近さでSMSと突き合わせます。その際の許容誤差（秒）です。[SMS送信画面](#sms送信画面)の「未送信」フィルタの精度に影響します
 
+<p float="left">
+  <img src="screenshots/app_sms_search_defaults.png" alt="SMS検索（デフォルト設定）">
+</p>
+
 **返信メッセージ（自動入力）**
 
 [SMS送信画面](#sms送信画面)でSMSを長押しして返信画面を開いたときに、自動で入力される文言です。
@@ -228,14 +332,30 @@ SMS受信の許可状況を確認できます。すでに許可されている�
 - 通常：本文の形式が正しく解釈できたSMSに返信する場合の文言
 - 形式が不正な場合：本文の形式が解釈できなかったSMSに返信する場合の文言（訂正を依頼する文言などを想定）
 
+<p float="left">
+  <img src="screenshots/app_reply_message.png" alt="返信メッセージ（自動入力）">
+</p>
+
 **SMSの送信モード**
 
 「手動」「自動」から選びます。自動を選ぶと、SMSを受信した時点で自動的にkintoneへ送信されます（[トップ画面](#トップ画面)の表示にも反映されます）。ただし、本文の形式が不正なSMSについては「送信対象」の設定に応じて送信をスキップできます。手動を選ぶと、[SMS送信画面](#sms送信画面)で選んだSMSだけが送信されます（この場合は「送信対象」の設定に関わらず、選んだSMSは常に送信されます）。
+
+<p float="left">
+  <img src="screenshots/app_forwarding_mode.png" alt="SMSの送信モード">
+</p>
 
 **送信対象**
 
 自動モードのときのみ有効になる設定です。「形式が不正」をONにすると、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったもの）も自動送信の対象に含めます。OFF（既定）の場合、形式が不正なSMSは自動送信をスキップし、その旨がログに記録されます。手動モードのときはグレーアウトして操作できません（手動送信では常に送信対象になります）。
 
+<p float="left">
+  <img src="screenshots/app_forward_target.png" alt="送信対象">
+</p>
+
 **会社名の変換**
 
 「有効にする」をONにすると、kintoneへ送信する会社名について、英字を半角大文字に、数字を半角に、それ以外（かな・カナ・記号など）を全角に統一してから送信します。OFF（既定）の場合は、SMS本文から抽出した会社名をそのまま送信します。
+
+<p float="left">
+  <img src="screenshots/app_company_name_conversion.png" alt="会社名の変換">
+</p>
