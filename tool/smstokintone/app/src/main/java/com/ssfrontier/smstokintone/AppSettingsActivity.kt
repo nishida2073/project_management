@@ -217,6 +217,7 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.tvPermissionStatus.text = getString(R.string.label_permission_sms_receive_granted)
         binding.tvPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
         binding.btnRequestPermission.visibility = if (granted) View.GONE else View.VISIBLE
+        binding.tvReceivePermissionHelper.visibility = if (granted) View.GONE else View.VISIBLE
     }
 
     private fun updateSendPermissionStatus() {
@@ -228,6 +229,7 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.tvSendPermissionStatus.text = getString(R.string.label_permission_sms_send_granted)
         binding.tvSendPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
         binding.btnRequestSendPermission.visibility = if (granted) View.GONE else View.VISIBLE
+        binding.tvSendPermissionHelper.visibility = if (granted) View.GONE else View.VISIBLE
     }
 
     private fun updateReadPermissionStatus() {
@@ -239,5 +241,6 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.tvReadPermissionStatus.text = getString(R.string.label_permission_sms_read_granted)
         binding.tvReadPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
         binding.btnRequestReadPermission.visibility = if (granted) View.GONE else View.VISIBLE
+        binding.tvReadPermissionHelper.visibility = if (granted) View.GONE else View.VISIBLE
     }
 }

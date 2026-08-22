@@ -82,6 +82,7 @@ class LogActivity : AppCompatActivity() {
                 SmsLogStore.EntryType.RECEIVE -> getString(R.string.label_log_type_receive)
                 SmsLogStore.EntryType.SEND_START -> getString(R.string.label_log_type_send_start)
                 SmsLogStore.EntryType.SEND_COMPLETE -> getString(R.string.label_log_type_send_complete)
+                SmsLogStore.EntryType.AUTO_REPLY -> getString(R.string.label_log_type_auto_reply)
             }
 
             val modeColor = ContextCompat.getColor(

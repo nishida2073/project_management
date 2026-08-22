@@ -234,6 +234,10 @@ class SmsSearchActivity : AppCompatActivity() {
         SmsLogStore.getAll(this)
             .filter { it.type == SmsLogStore.EntryType.SEND_COMPLETE && it.success }
 
+    private fun loadAutoReplyEntries(): List<SmsLogStore.Entry> =
+        SmsLogStore.getAll(this)
+            .filter { it.type == SmsLogStore.EntryType.AUTO_REPLY && it.success }
+
     /**
      * ログのエントリとSMSレコードを1対1で対応付ける。手動送信のログはSMS検索画面で特定済みの
      * 確実なIDを持つため、そのID一致で対応付ける。自動送信のログはIDを持たないため、送信元・
@@ -296,6 +300,7 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.tvSmsListEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
 
         val sentEntries = matchSentEntries(records, loadCompletedEntries())
+        val autoRepliedEntries = matchSentEntries(records, loadAutoReplyEntries())
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
@@ -303,6 +308,7 @@ class SmsSearchActivity : AppCompatActivity() {
                 val profile = SettingsStore.findProfileForBody(this@SmsSearchActivity, record.body)
                 val profileName = profile?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_profile_none)
                 val isProfileUnconfigured = profile == null || !profile.isValid
+                val isAutoReplied = record.id in autoRepliedEntries
                 val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
                 text = buildSpannedString {
                     if (isProfileUnconfigured) {
@@ -311,7 +317,10 @@ class SmsSearchActivity : AppCompatActivity() {
                     if (isSplitFailed(record.body)) {
                         append(getString(R.string.label_split_failed_marker))
                     }
-                    if (isProfileUnconfigured || isSplitFailed(record.body)) {
+                    if (isAutoReplied) {
+                        append(getString(R.string.label_auto_replied_marker))
+                    }
+                    if (isProfileUnconfigured || isSplitFailed(record.body) || isAutoReplied) {
                         append("\n")
                     }
                     color(profileColor) { bold { append(profileName) } }

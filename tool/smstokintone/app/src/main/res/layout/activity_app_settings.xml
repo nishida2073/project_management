@@ -72,13 +72,21 @@
                             android:layout_height="wrap_content"
                             android:text="@string/btn_sms_read_permission" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/helper_sms_read_permission"
-                            android:textSize="12sp"
-                            android:textColor="?android:attr/textColorSecondary" />
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvReadPermissionHelper"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_sms_read_permission"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <TextView
@@ -109,13 +117,21 @@
                             android:layout_height="wrap_content"
                             android:text="@string/btn_sms_receive_permission" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/helper_sms_receive_permission"
-                            android:textSize="12sp"
-                            android:textColor="?android:attr/textColorSecondary" />
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvReceivePermissionHelper"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_sms_receive_permission"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <TextView
@@ -146,13 +162,21 @@
                             android:layout_height="wrap_content"
                             android:text="@string/btn_sms_send_permission" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/helper_sms_send_permission"
-                            android:textSize="12sp"
-                            android:textColor="?android:attr/textColorSecondary" />
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvSendPermissionHelper"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_sms_send_permission"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -478,6 +502,21 @@
                                 android:checked="true"
                                 android:text="@string/rb_sms_forwarding_mode_auto" />
                         </RadioGroup>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_sms_forwarding_mode"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <TextView
@@ -499,6 +538,21 @@
                             android:layout_height="wrap_content"
                             android:checked="false"
                             android:text="@string/switch_forward_split_failed_enabled" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_forward_split_failed_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <TextView
@@ -521,13 +575,20 @@
                             android:checked="false"
                             android:text="@string/switch_company_name_width_conversion_enabled" />
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/helper_company_name_width_conversion_enabled"
-                            android:textSize="12sp"
-                            android:textColor="?android:attr/textColorSecondary" />
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_company_name_width_conversion_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -593,13 +654,20 @@
                                 android:text="@string/rb_sms_reply_mode_auto" />
                         </RadioGroup>
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/helper_auto_reply_split_failed_enabled"
-                            android:textSize="12sp"
-                            android:textColor="?android:attr/textColorSecondary" />
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_auto_reply_split_failed_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout

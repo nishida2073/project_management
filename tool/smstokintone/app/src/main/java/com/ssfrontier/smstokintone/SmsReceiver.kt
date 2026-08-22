@@ -35,6 +35,7 @@ class SmsReceiver : BroadcastReceiver() {
         // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
         // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
         // （SmsMatching参照）。
+        val profileName = SettingsStore.findProfileForBody(context, body)?.displayName(context)
         SmsLogStore.add(
             context,
             type = SmsLogStore.EntryType.RECEIVE,
@@ -43,7 +44,7 @@ class SmsReceiver : BroadcastReceiver() {
             body = body,
             success = true,
             message = context.getString(R.string.message_log_receive),
-            profileName = SettingsStore.findProfileForBody(context, body)?.displayName(context)
+            profileName = profileName
         )
 
         // SMS返信はkintoneへの送信設定・送信先プロファイルの有無とは無関係な機能のため、ここで判定する
@@ -52,7 +53,18 @@ class SmsReceiver : BroadcastReceiver() {
         if (smsParts.isSplitFailed() && config.autoReplySplitFailedEnabled && sender.isNotBlank()) {
             val now = System.currentTimeMillis()
             if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
-                sendAutoReply(context, sender, config.splitFailedReplyAddition)
+                if (sendAutoReply(context, sender, config.splitFailedReplyAddition)) {
+                    SmsLogStore.add(
+                        context,
+                        type = SmsLogStore.EntryType.AUTO_REPLY,
+                        timestampMillis = timestampMillis,
+                        sender = sender,
+                        body = body,
+                        success = true,
+                        message = context.getString(R.string.message_log_auto_reply),
+                        profileName = profileName
+                    )
+                }
                 AutoReplyThrottle.recordSent(context, sender, now)
             }
         }
@@ -75,17 +87,19 @@ class SmsReceiver : BroadcastReceiver() {
         WorkManager.getInstance(context).enqueue(request)
     }
 
-    /** [sender]宛てに[body]をSMSで自動返信する */
-    private fun sendAutoReply(context: Context, sender: String, body: String) {
+    /** [sender]宛てに[body]をSMSで自動返信する。送信を試みられたかどうかを返す */
+    private fun sendAutoReply(context: Context, sender: String, body: String): Boolean {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            return
+            return false
         }
-        try {
+        return try {
             val smsManager = SmsManager.getDefault()
             val parts = smsManager.divideMessage(body)
             smsManager.sendMultipartTextMessage(sender, null, parts, null, null)
+            true
         } catch (e: Exception) {
             Log.e(TAG, "自動返信のSMS送信に失敗しました: ${e.message}")
+            false
         }
     }
 

@@ -98,13 +98,15 @@
     <string name="label_sms_forwarding_mode">送信モード</string>
     <string name="rb_sms_forwarding_mode_manual">手動</string>
     <string name="rb_sms_forwarding_mode_auto">自動</string>
+    <string name="helper_sms_forwarding_mode">自動の場合、SMSを受信した際にkintoneへ自動送信します。</string>
     <string name="section_forward_target">送信対象</string>
     <string name="switch_forward_split_failed_enabled">「形式が不正」なSMSも含める</string>
+    <string name="helper_forward_split_failed_enabled">自動送信の対象から除外されます</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>
     <string name="rb_sms_reply_mode_auto">自動</string>
-    <string name="helper_auto_reply_split_failed_enabled">「形式が不正」なSMSを受信した際に自動返信します</string>
+    <string name="helper_auto_reply_split_failed_enabled">自動の場合、「形式が不正」なSMSを受信した際に自動返信します</string>
     <string name="label_auto_reply_cooldown_seconds">同一送信元への送信間隔</string>
     <string name="helper_auto_reply_cooldown_seconds">同じ送信元には、ここで指定した時間が経過するまで自動返信を再送信しません</string>
     <string name="hint_auto_reply_cooldown_seconds">秒</string>
@@ -122,9 +124,10 @@
     <string name="message_log_empty">ログがありません</string>
     <string name="label_log_result_success">成功</string>
     <string name="label_log_result_failure">失敗</string>
-    <string name="label_log_type_receive">受信完了</string>
-    <string name="label_log_type_send_start">送信開始</string>
-    <string name="label_log_type_send_complete">送信完了</string>
+    <string name="label_log_type_receive">SMS受信完了</string>
+    <string name="label_log_type_send_start">SMS送信開始</string>
+    <string name="label_log_type_send_complete">SMS送信完了</string>
+    <string name="label_log_type_auto_reply">SMS返信完了</string>
     <string name="label_log_type_suffix_manual">・手動</string>
     <string name="label_log_type_suffix_auto">・自動</string>
     <string name="message_log_receive">SMSを受信しました</string>
@@ -138,6 +141,7 @@
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
     <string name="message_log_send_complete_skipped_duplicate">最終受信日時（秒は除く）と本文が一致するため、スキップしました</string>
+    <string name="message_log_auto_reply">形式が不正なため、SMSを返信しました</string>
     <string name="btn_clear_log">クリア</string>
     <string name="btn_refresh_log">更新</string>
     <string name="dialog_title_confirm_clear_log">ログをクリアしますか？</string>
@@ -161,6 +165,7 @@
     <string name="cb_split_failed_only">⚠️ 形式が不正</string>
     <string name="label_profile_unconfigured_marker">"🚫 "</string>
     <string name="label_split_failed_marker">"⚠️ "</string>
+    <string name="label_auto_replied_marker">"📨 "</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>
     <string name="btn_deselect_all">選択解除</string>

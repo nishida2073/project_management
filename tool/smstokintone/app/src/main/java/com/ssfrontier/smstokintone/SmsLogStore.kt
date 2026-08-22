@@ -14,7 +14,8 @@ object SmsLogStore {
     enum class EntryType {
         RECEIVE,
         SEND_START,
-        SEND_COMPLETE;
+        SEND_COMPLETE,
+        AUTO_REPLY;
 
         companion object {
             fun fromName(name: String?): EntryType =
