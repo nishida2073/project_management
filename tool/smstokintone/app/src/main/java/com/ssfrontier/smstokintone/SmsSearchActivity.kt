@@ -73,6 +73,11 @@ class SmsSearchActivity : AppCompatActivity() {
         val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -(config.smsSearchDateRangeDays - 1)) }
         applyDateFilter(isFrom = true, calendar = rangeStart)
         applyDateFilter(isFrom = false, calendar = today)
+
+        binding.llSearchFilters.visibility = if (config.searchFiltersVisibleByDefault) View.VISIBLE else View.GONE
+        binding.btnToggleSearchFilters.text = getString(
+            if (config.searchFiltersVisibleByDefault) R.string.btn_hide_search_filters else R.string.btn_show_search_filters
+        )
     }
 
     override fun onResume() {

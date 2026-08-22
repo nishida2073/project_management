@@ -130,6 +130,13 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(smsSearchDateRangeDays = days))
         }
 
+        binding.rbSearchFiltersVisible.isChecked = config.searchFiltersVisibleByDefault
+        binding.rbSearchFiltersHidden.isChecked = !config.searchFiltersVisibleByDefault
+        binding.rgSearchFiltersVisibility.setOnCheckedChangeListener { _, checkedId ->
+            val visible = checkedId == binding.rbSearchFiltersVisible.id
+            SettingsStore.save(this, SettingsStore.load(this).copy(searchFiltersVisibleByDefault = visible))
+        }
+
         binding.spDefaultProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val profileId = defaultProfileFilterKeys.getOrNull(position)

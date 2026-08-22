@@ -90,13 +90,16 @@
     <string name="toast_sms_read_permission_denied">SMSの読み取りの許可がない場合、SMSの検索はできません</string>
     <string name="helper_sms_read_permission">SMSの検索に使用します</string>
     <string name="section_sms_search">SMSの検索</string>
-    <string name="section_search_filter">検索条件（デフォルト）</string>
+    <string name="section_search_filter">検索条件</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>
     <string name="hint_sms_search_date_range_days">日</string>
     <string name="label_default_profile_filter">送信先</string>
     <string name="label_sms_match_tolerance_seconds">統合範囲</string>
     <string name="helper_sms_match_tolerance_seconds">受信したSMSと送信ログの受信日時の統合範囲です</string>
     <string name="hint_sms_match_tolerance_seconds">±秒</string>
+    <string name="label_search_filters_visibility">検索条件の表示</string>
+    <string name="rb_search_filters_visible">表示</string>
+    <string name="rb_search_filters_hidden">隠す</string>
     <string name="label_search_selection_target">選択対象</string>
     <string name="switch_search_profile_unconfigured_enabled">「送信先が未設定」を含める</string>
     <string name="helper_search_profile_unconfigured_enabled">選択対象から除外されます</string>

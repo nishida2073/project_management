@@ -21,6 +21,7 @@ object SettingsStore {
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
     private const val KEY_THEME_MODE = "theme_mode"
     private const val KEY_SMS_SEARCH_DATE_RANGE_DAYS = "sms_search_date_range_days"
+    private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
     private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
     private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
     private const val KEY_DEFAULT_PROFILE_FILTER_ID = "default_profile_filter_id"
@@ -75,6 +76,8 @@ object SettingsStore {
         val themeMode: ThemeMode,
         /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲（日） */
         val smsSearchDateRangeDays: Int,
+        /** SMS検索画面を開いた際に検索条件エリアを表示した状態にするかどうか */
+        val searchFiltersVisibleByDefault: Boolean,
         /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言 */
         val defaultReplyBody: String,
         /** 分割失敗のSMSへの返信時、[defaultReplyBody]の代わりに使う文言 */
@@ -172,6 +175,7 @@ object SettingsStore {
             .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
             .putString(KEY_THEME_MODE, config.themeMode.name)
             .putInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, config.smsSearchDateRangeDays)
+            .putBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, config.searchFiltersVisibleByDefault)
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
         if (config.defaultProfileFilterId != null) {
@@ -206,6 +210,7 @@ object SettingsStore {
                 KEY_SMS_SEARCH_DATE_RANGE_DAYS,
                 AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS
             ),
+            searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, true),
             defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, AppDefaults.SMS_STANDARD_REPLY_BODY) ?: AppDefaults.SMS_STANDARD_REPLY_BODY,
             splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY)
                 ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
