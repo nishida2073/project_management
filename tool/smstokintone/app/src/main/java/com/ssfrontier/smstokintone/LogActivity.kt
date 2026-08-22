@@ -162,11 +162,11 @@ class LogActivity : AppCompatActivity() {
             }
 
             binding.llLogContainer.addView(typeAndTimestampView)
+            binding.llLogContainer.addView(resultView)
+            splitResultView?.let { binding.llLogContainer.addView(it) }
             binding.llLogContainer.addView(profileView)
             binding.llLogContainer.addView(senderAndTimestampView)
             binding.llLogContainer.addView(bodyView)
-            binding.llLogContainer.addView(resultView)
-            splitResultView?.let { binding.llLogContainer.addView(it) }
             binding.llLogContainer.addView(divider)
         }
     }
