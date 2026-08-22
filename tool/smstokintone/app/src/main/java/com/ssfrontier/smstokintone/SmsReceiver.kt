@@ -1,9 +1,14 @@
 package com.ssfrontier.smstokintone
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Telephony
+import android.telephony.SmsManager
+import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -41,6 +46,17 @@ class SmsReceiver : BroadcastReceiver() {
             profileName = SettingsStore.findProfileForBody(context, body)?.displayName(context)
         )
 
+        // SMS返信はkintoneへの送信設定・送信先プロファイルの有無とは無関係な機能のため、ここで判定する
+        val config = SettingsStore.load(context)
+        val smsParts = SmsPartsGenerator.generateSmsParts(body)
+        if (smsParts.isSplitFailed() && config.autoReplySplitFailedEnabled && sender.isNotBlank()) {
+            val now = System.currentTimeMillis()
+            if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
+                sendAutoReply(context, sender, config.splitFailedReplyAddition)
+                AutoReplyThrottle.recordSent(context, sender, now)
+            }
+        }
+
         val data = workDataOf(
             KintoneUploadWorker.KEY_SENDER to sender,
             KintoneUploadWorker.KEY_BODY to body,
@@ -57,5 +73,23 @@ class SmsReceiver : BroadcastReceiver() {
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
+    }
+
+    /** [sender]宛てに[body]をSMSで自動返信する */
+    private fun sendAutoReply(context: Context, sender: String, body: String) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        try {
+            val smsManager = SmsManager.getDefault()
+            val parts = smsManager.divideMessage(body)
+            smsManager.sendMultipartTextMessage(sender, null, parts, null, null)
+        } catch (e: Exception) {
+            Log.e(TAG, "自動返信のSMS送信に失敗しました: ${e.message}")
+        }
+    }
+
+    companion object {
+        private const val TAG = "SmsReceiver"
     }
 }

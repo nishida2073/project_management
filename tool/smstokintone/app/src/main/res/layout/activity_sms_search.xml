@@ -27,13 +27,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:text="@string/label_sms_read_permission_required" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRequestReadSmsPermission"
-            style="@style/AppButton.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_sms_read_permission" />
     </LinearLayout>
 
     <LinearLayout

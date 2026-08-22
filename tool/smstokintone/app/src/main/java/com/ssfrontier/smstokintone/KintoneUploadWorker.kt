@@ -36,6 +36,12 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             return@withContext Result.success()
         }
 
+        if (!manual && !config.forwardingEnabled) {
+            // 送信モードが手動の場合、自動受信時はkintoneへの送信を何も試みないため、
+            // 受信完了のログのみとし、送信開始・送信完了は記録しない
+            return@withContext Result.success()
+        }
+
         // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応）
         val smsParts = SmsPartsGenerator.generateSmsParts(body)
 
@@ -46,11 +52,6 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         }
 
         logStart(sender, body, timestampMillis, smsId, profileName = profile.displayName(applicationContext), manual = manual)
-
-        if (!manual && !config.forwardingEnabled) {
-            logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_forwarding_disabled), profileName = profile.displayName(applicationContext), manual = manual)
-            return@withContext Result.success()
-        }
 
         val datetimeIso = if (profile.fieldDatetime.isNotBlank()) {
             val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {

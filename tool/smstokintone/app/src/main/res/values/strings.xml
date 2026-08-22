@@ -71,11 +71,22 @@
     <string name="label_auto_refresh_interval">更新間隔</string>
     <string name="hint_auto_refresh_interval">秒</string>
     <string name="section_permission">端末の許可</string>
-    <string name="label_sms_receive_permission">SMS受信</string>
-    <string name="btn_sms_receive_permission">SMS受信を許可する</string>
+    <string name="label_sms_receive_permission">SMSの受信</string>
+    <string name="btn_sms_receive_permission">SMSの受信を許可する</string>
     <string name="label_permission_sms_receive_granted">許可済み</string>
-    <string name="toast_sms_receive_permission_denied">SMS受信の許可がないと、このアプリは動作しません</string>
-    <string name="section_sms_search">SMS検索</string>
+    <string name="toast_sms_receive_permission_denied">SMSの受信の許可がない場合、SMSの自動送信・自動返信ができません</string>
+    <string name="helper_sms_receive_permission">SMSの自動操作（自動送信・自動返信）に使用します</string>
+    <string name="label_sms_send_permission">SMSの送信</string>
+    <string name="btn_sms_send_permission">SMSの送信を許可する</string>
+    <string name="label_permission_sms_send_granted">許可済み</string>
+    <string name="toast_sms_send_permission_denied">SMSの送信の許可がない場合、自動返信はできません</string>
+    <string name="helper_sms_send_permission">SMSの自動返信に使用します</string>
+    <string name="label_sms_read_permission">SMSの読み取り</string>
+    <string name="btn_sms_read_permission">SMSの読み取りを許可する</string>
+    <string name="label_permission_sms_read_granted">許可済み</string>
+    <string name="toast_sms_read_permission_denied">SMSの読み取りの許可がない場合、SMSの検索はできません</string>
+    <string name="helper_sms_read_permission">SMSの検索に使用します</string>
+    <string name="section_sms_search">SMSの検索</string>
     <string name="section_search_filter">検索条件（デフォルト）</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>
     <string name="hint_sms_search_date_range_days">日</string>
@@ -83,17 +94,25 @@
     <string name="label_sms_match_tolerance_seconds">統合範囲</string>
     <string name="helper_sms_match_tolerance_seconds">受信したSMSと送信ログの受信日時の統合範囲です</string>
     <string name="hint_sms_match_tolerance_seconds">±秒</string>
-    <string name="section_reply">返信メッセージ（自動入力）</string>
-    <string name="section_sms_standard_reply_body">通常</string>
-    <string name="hint_sms_standard_reply_body">文言</string>
-    <string name="section_sms_split_failed_reply_body">形式が不正な場合</string>
-    <string name="hint_sms_split_failed_reply_body">文言</string>
     <string name="section_sms_forwarding">SMS送信</string>
     <string name="label_sms_forwarding_mode">送信モード</string>
     <string name="rb_sms_forwarding_mode_manual">手動</string>
     <string name="rb_sms_forwarding_mode_auto">自動</string>
     <string name="section_forward_target">送信対象</string>
-    <string name="switch_forward_split_failed_enabled">形式が不正</string>
+    <string name="switch_forward_split_failed_enabled">「形式が不正」なSMSも含める</string>
+    <string name="section_sms_reply">SMSの返信</string>
+    <string name="label_sms_reply_mode">返信モード</string>
+    <string name="rb_sms_reply_mode_manual">手動</string>
+    <string name="rb_sms_reply_mode_auto">自動</string>
+    <string name="helper_auto_reply_split_failed_enabled">「形式が不正」なSMSを受信した際に自動返信します</string>
+    <string name="label_auto_reply_cooldown_seconds">同一送信元への送信間隔</string>
+    <string name="helper_auto_reply_cooldown_seconds">同じ送信元には、ここで指定した時間が経過するまで自動返信を再送信しません</string>
+    <string name="hint_auto_reply_cooldown_seconds">秒</string>
+    <string name="section_reply">返信メッセージ（自動入力）</string>
+    <string name="section_sms_standard_reply_body">通常</string>
+    <string name="hint_sms_standard_reply_body">文言</string>
+    <string name="section_sms_split_failed_reply_body">「形式が不正」な場合</string>
+    <string name="hint_sms_split_failed_reply_body">文言</string>
     <string name="section_company_name_conversion">会社名の変換</string>
     <string name="switch_company_name_width_conversion_enabled">有効にする</string>
     <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
@@ -115,7 +134,6 @@
     <string name="message_log_send_start_profile_unconfigured">送信先が存在しません</string>
     <string name="message_log_send_complete_create_success">登録に成功しました</string>
     <string name="message_log_send_complete_update_success">更新に成功しました</string>
-    <string name="message_log_send_complete_forwarding_disabled">kintoneへの自動送信が無効になっています</string>
     <string name="message_log_send_start_split_failed_skipped">本文の形式が不正なため、自動送信をスキップしました</string>
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
@@ -128,7 +146,7 @@
     <string name="btn_clear">クリア</string>
 
     <!-- 受信済みSMS送信画面 -->
-    <string name="title_sms_search">SMS送信</string>
+    <string name="title_sms_search">SMSの送信</string>
     <string name="section_search_conditions">検索条件</string>
     <string name="btn_hide_search_filters">▲ 隠す</string>
     <string name="btn_show_search_filters">▼ 表示</string>
@@ -148,9 +166,7 @@
     <string name="btn_deselect_all">選択解除</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
-    <string name="label_sms_read_permission_required">受信済みのSMSを読み取るには許可が必要です</string>
-    <string name="btn_sms_read_permission">SMSの読み取りを許可する</string>
-    <string name="toast_sms_read_permission_denied">SMSの読み取りを許可しないと、受信済みのSMSは検索できません</string>
+    <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>
     <string name="toast_sms_search_error_null_cursor">SMSの検索でエラーが発生しました（クエリ結果がnull）</string>
     <string name="toast_sms_search_permission_error">SMSの読み取り権限がないため検索できません: %1$s</string>
     <string name="toast_sms_search_error">SMSの検索でエラーが発生しました: %1$s</string>
@@ -158,6 +174,6 @@
     <string name="toast_sms_app_not_found">SMSアプリが見つかりませんでした</string>
     <string name="toast_sms_send_not_selection">送信するSMSを選択してください</string>
     <string name="toast_sms_send_queued">%1$d件をkintoneへ送信キューに追加しました</string>
-    <string name="toast_sms_send_finished">SMS送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
-    <string name="toast_sms_send_finished_no_log">SMS送信が完了しました</string>
+    <string name="toast_sms_send_finished">SMSの送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
+    <string name="toast_sms_send_finished_no_log">SMSの送信が完了しました</string>
 </resources>

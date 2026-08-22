@@ -14,7 +14,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.bold
@@ -44,18 +43,6 @@ class SmsSearchActivity : AppCompatActivity() {
     private var profileFilterKeys: List<String?> = emptyList()
     private var selectedProfileId: String? = null
 
-    private val requestReadSmsPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            updatePermissionUi()
-            if (!granted) {
-                Toast.makeText(
-                    this,
-                    getString(R.string.toast_sms_read_permission_denied),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySmsSearchBinding.inflate(layoutInflater)
@@ -67,9 +54,6 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.btnSelectAll.setOnClickListener { setAllChecked(true) }
         binding.btnDeselectAll.setOnClickListener { setAllChecked(false) }
         binding.btnSendSelected.setOnClickListener { sendSelected() }
-        binding.btnRequestReadSmsPermission.setOnClickListener {
-            requestReadSmsPermissionLauncher.launch(Manifest.permission.READ_SMS)
-        }
         binding.btnToggleSearchFilters.setOnClickListener { toggleSearchFilters() }
         binding.swipeRefreshSmsList.setOnRefreshListener {
             searchSms(showFoundToast = false)

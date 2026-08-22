@@ -32,6 +32,22 @@ class AppSettingsActivity : AppCompatActivity() {
             }
         }
 
+    private val requestSendSmsPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            updateSendPermissionStatus()
+            if (!granted) {
+                Toast.makeText(this, getString(R.string.toast_sms_send_permission_denied), Toast.LENGTH_LONG).show()
+            }
+        }
+
+    private val requestReadSmsPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            updateReadPermissionStatus()
+            if (!granted) {
+                Toast.makeText(this, getString(R.string.toast_sms_read_permission_denied), Toast.LENGTH_LONG).show()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAppSettingsBinding.inflate(layoutInflater)
@@ -50,6 +66,24 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.swForwardSplitFailedEnabled.isChecked = SettingsStore.load(this).forwardSplitFailedEnabled
         binding.swForwardSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.save(this, SettingsStore.load(this).copy(forwardSplitFailedEnabled = isChecked))
+        }
+
+        // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
+        val autoReplySplitFailedEnabled = SettingsStore.load(this).autoReplySplitFailedEnabled
+        binding.rbSmsReplyModeAuto.isChecked = autoReplySplitFailedEnabled
+        binding.rbSmsReplyModeManual.isChecked = !autoReplySplitFailedEnabled
+        binding.tilAutoReplyCooldownSeconds.isEnabled = autoReplySplitFailedEnabled
+        binding.rgSmsReplyMode.setOnCheckedChangeListener { _, checkedId ->
+            val enabled = checkedId == binding.rbSmsReplyModeAuto.id
+            SettingsStore.save(this, SettingsStore.load(this).copy(autoReplySplitFailedEnabled = enabled))
+            binding.tilAutoReplyCooldownSeconds.isEnabled = enabled
+        }
+
+        binding.etAutoReplyCooldownSeconds.setText(SettingsStore.load(this).autoReplyCooldownSeconds.toString())
+        binding.etAutoReplyCooldownSeconds.addTextChangedListener { text ->
+            val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
+            if (seconds < 1) return@addTextChangedListener
+            SettingsStore.save(this, SettingsStore.load(this).copy(autoReplyCooldownSeconds = seconds))
         }
 
         binding.swCompanyNameWidthConversionEnabled.isChecked = SettingsStore.load(this).companyNameWidthConversionEnabled
@@ -125,6 +159,14 @@ class AppSettingsActivity : AppCompatActivity() {
             requestPermissionLauncher.launch(Manifest.permission.RECEIVE_SMS)
         }
 
+        binding.btnRequestSendPermission.setOnClickListener {
+            requestSendSmsPermissionLauncher.launch(Manifest.permission.SEND_SMS)
+        }
+
+        binding.btnRequestReadPermission.setOnClickListener {
+            requestReadSmsPermissionLauncher.launch(Manifest.permission.READ_SMS)
+        }
+
         binding.etDefaultReplyBody.setText(config.defaultReplyBody)
         binding.etDefaultReplyBody.addTextChangedListener { text ->
             SettingsStore.save(this, SettingsStore.load(this).copy(defaultReplyBody = text.toString()))
@@ -148,6 +190,8 @@ class AppSettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updatePermissionStatus()
+        updateSendPermissionStatus()
+        updateReadPermissionStatus()
         refreshDefaultProfileFilterOptions()
     }
 
@@ -173,5 +217,27 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.tvPermissionStatus.text = getString(R.string.label_permission_sms_receive_granted)
         binding.tvPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
         binding.btnRequestPermission.visibility = if (granted) View.GONE else View.VISIBLE
+    }
+
+    private fun updateSendPermissionStatus() {
+        val granted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.SEND_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        binding.tvSendPermissionStatus.text = getString(R.string.label_permission_sms_send_granted)
+        binding.tvSendPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
+        binding.btnRequestSendPermission.visibility = if (granted) View.GONE else View.VISIBLE
+    }
+
+    private fun updateReadPermissionStatus() {
+        val granted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_SMS
+        ) == PackageManager.PERMISSION_GRANTED
+
+        binding.tvReadPermissionStatus.text = getString(R.string.label_permission_sms_read_granted)
+        binding.tvReadPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
+        binding.btnRequestReadPermission.visibility = if (granted) View.GONE else View.VISIBLE
     }
 }
