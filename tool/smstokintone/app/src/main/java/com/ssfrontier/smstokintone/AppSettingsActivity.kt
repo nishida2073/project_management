@@ -68,6 +68,16 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(sendSplitFailedEnabled = isChecked))
         }
 
+        binding.swSearchSplitFailedEnabled.isChecked = SettingsStore.load(this).searchSplitFailedEnabled
+        binding.swSearchSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(searchSplitFailedEnabled = isChecked))
+        }
+
+        binding.swSearchProfileUnconfiguredEnabled.isChecked = SettingsStore.load(this).searchProfileUnconfiguredEnabled
+        binding.swSearchProfileUnconfiguredEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(searchProfileUnconfiguredEnabled = isChecked))
+        }
+
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
         val autoReplySplitFailedEnabled = SettingsStore.load(this).autoReplySplitFailedEnabled
         binding.rbSmsReplyModeAuto.isChecked = autoReplySplitFailedEnabled

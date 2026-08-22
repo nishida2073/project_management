@@ -301,6 +301,7 @@ class SmsSearchActivity : AppCompatActivity() {
 
         val sentEntries = matchSentEntries(records, loadCompletedEntries())
         val autoRepliedEntries = matchSentEntries(records, loadAutoReplyEntries())
+        val config = SettingsStore.load(this)
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
@@ -332,6 +333,8 @@ class SmsSearchActivity : AppCompatActivity() {
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 setPadding(0, 16, 0, 16)
+                isEnabled = (!isProfileUnconfigured || config.searchProfileUnconfiguredEnabled) &&
+                    (!isSplitFailed(record.body) || config.searchSplitFailedEnabled)
                 val sentEntry = sentEntries[record.id]
                 val backgroundColor = when {
                     sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
@@ -362,7 +365,8 @@ class SmsSearchActivity : AppCompatActivity() {
 
     private fun setAllChecked(checked: Boolean) {
         for (i in 0 until binding.llSmsListContainer.childCount) {
-            (binding.llSmsListContainer.getChildAt(i) as? CheckBox)?.isChecked = checked
+            val checkBox = binding.llSmsListContainer.getChildAt(i) as? CheckBox ?: continue
+            if (checkBox.isEnabled) checkBox.isChecked = checked
         }
     }
 

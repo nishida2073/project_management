@@ -11,6 +11,8 @@ object SettingsStore {
     private const val PREFS_NAME = "smstokintone_prefs"
     private const val KEY_SEND_ENABLED = "send_enabled"
     private const val KEY_SEND_SPLIT_FAILED_ENABLED = "send_split_failed_enabled"
+    private const val KEY_SEARCH_SPLIT_FAILED_ENABLED = "search_split_failed_enabled"
+    private const val KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED = "search_profile_unconfigured_enabled"
     private const val KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED = "auto_reply_split_failed_enabled"
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
     private const val KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED = "company_name_width_conversion_enabled"
@@ -55,6 +57,10 @@ object SettingsStore {
         val sendEnabled: Boolean,
         /** 自動送信時、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
         val sendSplitFailedEnabled: Boolean,
+        /** SMS検索画面で、本文の形式が不正なSMSを選択可能にするかどうか */
+        val searchSplitFailedEnabled: Boolean,
+        /** SMS検索画面で、送信先プロファイルが未設定（一致するプロファイルが無い、または不正）のSMSを選択可能にするかどうか */
+        val searchProfileUnconfiguredEnabled: Boolean,
         /** 自動受信時、本文の形式が不正なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
         val autoReplySplitFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
@@ -156,6 +162,8 @@ object SettingsStore {
         val editor = prefs(context).edit()
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
             .putBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, config.sendSplitFailedEnabled)
+            .putBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, config.searchSplitFailedEnabled)
+            .putBoolean(KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED, config.searchProfileUnconfiguredEnabled)
             .putBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, config.autoReplySplitFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
             .putBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, config.companyNameWidthConversionEnabled)
@@ -179,6 +187,8 @@ object SettingsStore {
         return Config(
             sendEnabled = p.getBoolean(KEY_SEND_ENABLED, true),
             sendSplitFailedEnabled = p.getBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, false),
+            searchSplitFailedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, false),
+            searchProfileUnconfiguredEnabled = p.getBoolean(KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED, false),
             autoReplySplitFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, false),
             autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS),
             companyNameWidthConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, false),
