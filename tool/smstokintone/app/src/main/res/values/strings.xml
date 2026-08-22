@@ -132,7 +132,7 @@
     <string name="message_log_empty">ログがありません</string>
     <string name="label_log_result_success">成功</string>
     <string name="label_log_result_failure">失敗</string>
-    <string name="label_log_type_receive">SMS受信完了</string>
+    <string name="label_log_type_receive">SMSの受信完了</string>
     <string name="label_log_type_send_start">SMSの送信開始</string>
     <string name="label_log_type_send_complete">SMSの送信完了</string>
     <string name="label_log_type_auto_reply">SMSの返信完了</string>
