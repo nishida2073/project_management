@@ -36,19 +36,17 @@ object SettingsStore {
     }
 
     enum class ThemeMode {
-        SYSTEM,
         LIGHT,
         DARK;
 
         fun toNightMode(): Int = when (this) {
-            SYSTEM -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
             DARK -> AppCompatDelegate.MODE_NIGHT_YES
         }
 
         companion object {
             fun fromName(name: String?): ThemeMode =
-                entries.firstOrNull { it.name == name } ?: SYSTEM
+                entries.firstOrNull { it.name == name } ?: LIGHT
         }
     }
 

@@ -216,14 +216,6 @@
                         android:text="@string/section_theme_mode"
                         android:textSize="14sp" />
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/swThemeFollowSystem"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        android:checked="true"
-                        android:text="@string/switch_theme_follow_system" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

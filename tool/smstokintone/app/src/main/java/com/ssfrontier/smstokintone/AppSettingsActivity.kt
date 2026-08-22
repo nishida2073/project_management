@@ -131,21 +131,7 @@ class AppSettingsActivity : AppCompatActivity() {
 
         applyThemeSelection(config.themeMode)
 
-        binding.swThemeFollowSystem.setOnCheckedChangeListener { _, isChecked ->
-            binding.rbThemeLight.isEnabled = !isChecked
-            binding.rbThemeDark.isEnabled = !isChecked
-            val themeMode = if (isChecked) {
-                SettingsStore.ThemeMode.SYSTEM
-            } else if (binding.rbThemeDark.isChecked) {
-                SettingsStore.ThemeMode.DARK
-            } else {
-                SettingsStore.ThemeMode.LIGHT
-            }
-            SettingsStore.save(this, SettingsStore.load(this).copy(themeMode = themeMode))
-            AppCompatDelegate.setDefaultNightMode(themeMode.toNightMode())
-        }
         binding.rgThemeLightDark.setOnCheckedChangeListener { _, checkedId ->
-            if (binding.swThemeFollowSystem.isChecked) return@setOnCheckedChangeListener
             val themeMode = if (checkedId == binding.rbThemeDark.id) {
                 SettingsStore.ThemeMode.DARK
             } else {
@@ -179,12 +165,8 @@ class AppSettingsActivity : AppCompatActivity() {
     }
 
     private fun applyThemeSelection(themeMode: SettingsStore.ThemeMode) {
-        val followSystem = themeMode == SettingsStore.ThemeMode.SYSTEM
-        binding.swThemeFollowSystem.isChecked = followSystem
         binding.rbThemeDark.isChecked = themeMode == SettingsStore.ThemeMode.DARK
         binding.rbThemeLight.isChecked = themeMode != SettingsStore.ThemeMode.DARK
-        binding.rbThemeLight.isEnabled = !followSystem
-        binding.rbThemeDark.isEnabled = !followSystem
     }
 
     override fun onResume() {

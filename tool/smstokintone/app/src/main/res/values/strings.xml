@@ -62,7 +62,6 @@
     <string name="title_app_settings">アプリ設定</string>
     <string name="section_layout">レイアウト</string>
     <string name="section_theme_mode">表示テーマ</string>
-    <string name="switch_theme_follow_system">システム設定を有効にする</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>
     <string name="section_log">ログ</string>
