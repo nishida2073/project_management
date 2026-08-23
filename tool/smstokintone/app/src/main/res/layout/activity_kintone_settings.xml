@@ -15,14 +15,16 @@
             android:layout_height="wrap_content"
             android:text="@string/title_send_settings"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="?attr/colorOnSurface" />
 
         <TextView
             android:id="@+id/tvKintoneSettingsDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="@string/send_settings_description" />
+            android:text="@string/send_settings_description"
+            android:textColor="?android:attr/textColorSecondary" />
 
         <LinearLayout
             android:id="@+id/llProfilesContainer"

@@ -12,7 +12,8 @@
         android:layout_marginBottom="16dp"
         android:text="@string/title_sms_search"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textColor="?attr/colorOnSurface" />
 
     <LinearLayout
         android:id="@+id/layoutPermissionRequired"
@@ -26,7 +27,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="@string/label_sms_read_permission_required" />
+            android:text="@string/label_sms_read_permission_required"
+            android:textColor="?attr/colorOnSurface" />
     </LinearLayout>
 
     <LinearLayout
@@ -49,7 +51,8 @@
                 android:layout_weight="1"
                 android:text="@string/section_search_conditions"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnToggleSearchFilters"
@@ -70,7 +73,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_date_range" />
+                android:text="@string/label_search_date_range"
+                android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -126,7 +130,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/label_profile_filter" />
+                android:text="@string/label_profile_filter"
+                android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -145,7 +150,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_sms_status_filters" />
+                android:text="@string/label_search_sms_status_filters"
+                android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -216,6 +222,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/message_sms_search_empty"
+            android:textColor="?attr/colorOnSurface"
             android:visibility="gone" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
