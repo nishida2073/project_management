@@ -145,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_other_filters" />
+                android:text="@string/label_search_sms_status_filters" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -201,6 +201,14 @@
                 android:layout_weight="1"
                 android:text="@string/btn_deselect_all" />
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/helper_sms_status_legend"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
 
         <TextView
             android:id="@+id/tvSmsListEmpty"

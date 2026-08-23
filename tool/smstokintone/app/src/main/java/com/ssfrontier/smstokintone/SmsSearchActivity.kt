@@ -320,16 +320,16 @@ class SmsSearchActivity : AppCompatActivity() {
                 val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
                 text = buildSpannedString {
                     if (isUnsent) {
-                        append(getString(R.string.label_unsent_marker))
-                    }
-                    if (isProfileUnconfigured) {
-                        append(getString(R.string.label_profile_unconfigured_marker))
+                        append(getString(R.string.label_sms_status_unsent))
                     }
                     if (isSplitFailed(record.body)) {
-                        append(getString(R.string.label_split_failed_marker))
+                        append(getString(R.string.label_sms_status_split_failed))
                     }
                     if (isAutoReplied) {
-                        append(getString(R.string.label_auto_replied_marker))
+                        append(getString(R.string.label_sms_status_auto_replied))
+                    }
+                    if (isProfileUnconfigured) {
+                        append(getString(R.string.label_sms_status_profile_unconfigured))
                     }
                     if (isUnsent || isProfileUnconfigured || isSplitFailed(record.body) || isAutoReplied) {
                         append("\n")
