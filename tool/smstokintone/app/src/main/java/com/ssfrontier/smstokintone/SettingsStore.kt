@@ -15,7 +15,6 @@ object SettingsStore {
     private const val KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED = "search_profile_unconfigured_enabled"
     private const val KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED = "auto_reply_split_failed_enabled"
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
-    private const val KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED = "company_name_width_conversion_enabled"
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
@@ -66,9 +65,6 @@ object SettingsStore {
         val autoReplySplitFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
         val autoReplyCooldownSeconds: Int,
-        /** kintoneへの送信時、会社名に[SmsParts.companyNameNormalizedWidth]（英数字は半角・それ以外は全角に統一した文字列）を使うかどうか。
-         * falseの場合は[SmsParts.companyName]（変換なし）をそのまま使う */
-        val companyNameWidthConversionEnabled: Boolean,
         val autoRefreshEnabled: Boolean,
         val autoRefreshIntervalSeconds: Int,
         /** 自動受信SMSのログとSMSプロバイダ上のSMSを突き合わせる際の許容範囲（秒） */
@@ -111,7 +107,10 @@ object SettingsStore {
         val updateToleranceHours: Int,
         val fieldCompanyName: String = "",
         val fieldUserName: String = "",
-        val fieldContent: String = ""
+        val fieldContent: String = "",
+        /** kintoneへの送信時、会社名に[SmsParts.companyNameNormalizedWidth]（英数字は半角・それ以外は全角に統一した文字列）を使うかどうか。
+         * falseの場合は[SmsParts.companyName]（変換なし）をそのまま使う */
+        val companyNameWidthConversionEnabled: Boolean = false
     ) {
         val keywordList: List<String>
             get() = keywords.split(",").map { it.trim() }.filter { it.isNotEmpty() }
@@ -169,7 +168,6 @@ object SettingsStore {
             .putBoolean(KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED, config.searchProfileUnconfiguredEnabled)
             .putBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, config.autoReplySplitFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
-            .putBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, config.companyNameWidthConversionEnabled)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
             .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
@@ -195,7 +193,6 @@ object SettingsStore {
             searchProfileUnconfiguredEnabled = p.getBoolean(KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED, false),
             autoReplySplitFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, false),
             autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS),
-            companyNameWidthConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, false),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
             autoRefreshIntervalSeconds = p.getInt(
                 KEY_AUTO_REFRESH_INTERVAL_SECONDS,
@@ -252,6 +249,7 @@ object SettingsStore {
                     .put("fieldCompanyName", profile.fieldCompanyName)
                     .put("fieldUserName", profile.fieldUserName)
                     .put("fieldContent", profile.fieldContent)
+                    .put("companyNameWidthConversionEnabled", profile.companyNameWidthConversionEnabled)
             )
         }
         prefs(context).edit().putString(KEY_KINTONE_PROFILES, array.toString()).apply()
@@ -281,7 +279,8 @@ object SettingsStore {
                 updateToleranceHours = obj.optInt("updateToleranceHours", AppDefaults.UPDATE_TOLERANCE_HOURS),
                 fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
-                fieldContent = obj.optString("fieldContent", "")
+                fieldContent = obj.optString("fieldContent", ""),
+                companyNameWidthConversionEnabled = obj.optBoolean("companyNameWidthConversionEnabled", false)
             )
         }
     }

@@ -52,6 +52,9 @@
     <string name="section_update_condition">レコードの更新条件</string>
     <string name="hint_update_tolerance_hours">受信日時の範囲（±時間）</string>
     <string name="helper_update_tolerance_hours">同じ送信元から、指定した時間以内に再度SMSを受信した場合は、新規登録ではなく既存のデータを更新します</string>
+    <string name="section_company_name_conversion">会社名の変換</string>
+    <string name="switch_company_name_width_conversion_enabled">有効にする</string>
+    <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
     <string name="dialog_title_validation_error">入力エラー</string>
     <string name="dialog_message_validation_error">%1$s: 送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
     <string name="btn_save">設定を保存</string>
@@ -126,10 +129,7 @@
     <string name="hint_sms_standard_reply_body">文言</string>
     <string name="section_sms_split_failed_reply_body">「形式が不正」な場合</string>
     <string name="hint_sms_split_failed_reply_body">文言</string>
-    <string name="section_company_name_conversion">会社名の変換</string>
-    <string name="switch_company_name_width_conversion_enabled">有効にする</string>
-    <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
-    
+
     <!-- ログの確認画面 -->
     <string name="title_log">ログ</string>
     <string name="message_log_empty">ログがありません</string>

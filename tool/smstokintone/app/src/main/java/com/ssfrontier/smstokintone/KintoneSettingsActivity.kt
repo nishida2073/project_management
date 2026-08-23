@@ -60,6 +60,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
         itemBinding.etFieldUserName.setText(profile.fieldUserName)
         itemBinding.etFieldContent.setText(profile.fieldContent)
         itemBinding.etUpdateToleranceHours.setText(profile.updateToleranceHours.toString())
+        itemBinding.swCompanyNameWidthConversionEnabled.isChecked = profile.companyNameWidthConversionEnabled
 
         when (profile.authMethod) {
             SettingsStore.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
@@ -138,7 +139,8 @@ class KintoneSettingsActivity : AppCompatActivity() {
             fieldUserName = itemBinding.etFieldUserName.text.toString().trim(),
             fieldContent = itemBinding.etFieldContent.text.toString().trim(),
             updateToleranceHours = itemBinding.etUpdateToleranceHours.text.toString().trim().toIntOrNull()
-                ?: AppDefaults.UPDATE_TOLERANCE_HOURS
+                ?: AppDefaults.UPDATE_TOLERANCE_HOURS,
+            companyNameWidthConversionEnabled = itemBinding.swCompanyNameWidthConversionEnabled.isChecked
         )
     }
 
@@ -165,7 +167,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
 
         val testBody = getString(R.string.test_send_body)
         val smsParts = SmsPartsGenerator.generateSmsParts(testBody)
-        val companyNameValue = if (SettingsStore.load(this).companyNameWidthConversionEnabled) {
+        val companyNameValue = if (profile.companyNameWidthConversionEnabled) {
             smsParts.companyNameNormalizedWidth
         } else {
             smsParts.companyName

@@ -62,7 +62,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             null
         }
 
-        val companyNameValue = if (config.companyNameWidthConversionEnabled) {
+        val companyNameValue = if (profile.companyNameWidthConversionEnabled) {
             smsParts.companyNameNormalizedWidth
         } else {
             smsParts.companyName
