@@ -315,8 +315,13 @@ class SmsSearchActivity : AppCompatActivity() {
                 val profileName = profile?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_profile_none)
                 val isProfileUnconfigured = profile == null || !profile.isValid
                 val isAutoReplied = record.id in autoRepliedEntries
+                val sentEntry = sentEntries[record.id]
+                val isUnsent = sentEntry == null
                 val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
                 text = buildSpannedString {
+                    if (isUnsent) {
+                        append(getString(R.string.label_unsent_marker))
+                    }
                     if (isProfileUnconfigured) {
                         append(getString(R.string.label_profile_unconfigured_marker))
                     }
@@ -326,7 +331,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     if (isAutoReplied) {
                         append(getString(R.string.label_auto_replied_marker))
                     }
-                    if (isProfileUnconfigured || isSplitFailed(record.body) || isAutoReplied) {
+                    if (isUnsent || isProfileUnconfigured || isSplitFailed(record.body) || isAutoReplied) {
                         append("\n")
                     }
                     color(profileColor) { bold { append(profileName) } }
@@ -340,7 +345,6 @@ class SmsSearchActivity : AppCompatActivity() {
                 setPadding(0, 16, 0, 16)
                 isEnabled = (!isProfileUnconfigured || config.searchProfileUnconfiguredEnabled) &&
                     (!isSplitFailed(record.body) || config.searchSplitFailedEnabled)
-                val sentEntry = sentEntries[record.id]
                 val backgroundColor = when {
                     sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
                     sentEntry != null -> R.color.sms_sent_auto_background
