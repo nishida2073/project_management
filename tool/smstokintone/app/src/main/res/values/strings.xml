@@ -29,7 +29,7 @@
     <string name="section_basic_info">基本情報</string>
     <string name="section_kintone_info">kintone情報</string>
     <string name="section_connection">接続先</string>
-    <string name="section_app">アプリ</string>
+    <string name="section_app">連絡アプリ</string>
     <string name="section_sms_target">対象の絞り込み</string>
     <string name="hint_keywords">本文に含まれる文字</string>
     <string name="helper_keywords">カンマ区切りで複数の指定が可能です。\n※空欄の場合はデフォルトの接続先として扱われます。\n※大文字・小文字、全角・半角の違いは無視されます。</string>

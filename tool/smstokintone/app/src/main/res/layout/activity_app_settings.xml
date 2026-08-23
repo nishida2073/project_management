@@ -308,18 +308,25 @@
                             android:layout_marginBottom="8dp"
                             android:text="@string/label_auto_refresh_interval" />
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilAutoRefreshInterval"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_auto_refresh_interval">
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etAutoRefreshInterval"
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilAutoRefreshInterval"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="number" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                                android:hint="@string/hint_auto_refresh_interval">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etAutoRefreshInterval"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -371,17 +378,24 @@
                             android:layout_marginBottom="8dp"
                             android:text="@string/label_sms_search_date_range" />
 
-                        <com.google.android.material.textfield.TextInputLayout
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_sms_search_date_range_days">
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etSmsSearchDateRangeDays"
+                            <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="number" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                                android:hint="@string/hint_sms_search_date_range_days">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etSmsSearchDateRangeDays"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
@@ -416,20 +430,27 @@
                             android:layout_marginBottom="8dp"
                             android:text="@string/label_sms_match_tolerance_seconds" />
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilSmsMatchToleranceSeconds"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_sms_match_tolerance_seconds"
-                            app:helperText="@string/helper_sms_match_tolerance_seconds"
-                            app:helperTextEnabled="true">
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etSmsMatchToleranceSeconds"
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilSmsMatchToleranceSeconds"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="number" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                                android:hint="@string/hint_sms_match_tolerance_seconds"
+                                app:helperText="@string/helper_sms_match_tolerance_seconds"
+                                app:helperTextEnabled="true">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etSmsMatchToleranceSeconds"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <TextView
@@ -771,20 +792,27 @@
                             android:layout_marginBottom="8dp"
                             android:text="@string/label_auto_reply_cooldown_seconds" />
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilAutoReplyCooldownSeconds"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_auto_reply_cooldown_seconds"
-                            app:helperText="@string/helper_auto_reply_cooldown_seconds"
-                            app:helperTextEnabled="true">
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etAutoReplyCooldownSeconds"
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilAutoReplyCooldownSeconds"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="number" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                                android:hint="@string/hint_auto_reply_cooldown_seconds"
+                                app:helperText="@string/helper_auto_reply_cooldown_seconds"
+                                app:helperTextEnabled="true">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etAutoReplyCooldownSeconds"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <TextView
@@ -807,17 +835,24 @@
                             android:text="@string/section_sms_standard_reply_body"
                             android:textSize="14sp" />
 
-                        <com.google.android.material.textfield.TextInputLayout
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_sms_standard_reply_body">
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etDefaultReplyBody"
+                            <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="textMultiLine" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                                android:hint="@string/hint_sms_standard_reply_body">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etDefaultReplyBody"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="textMultiLine" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
@@ -834,17 +869,24 @@
                             android:text="@string/section_sms_split_failed_reply_body"
                             android:textSize="14sp" />
 
-                        <com.google.android.material.textfield.TextInputLayout
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_sms_split_failed_reply_body">
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etSplitFailedReplyAddition"
+                            <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:inputType="textMultiLine" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                                android:hint="@string/hint_sms_split_failed_reply_body">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etSplitFailedReplyAddition"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="textMultiLine" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
