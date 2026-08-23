@@ -36,7 +36,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
 
         binding.btnAddProfile.setOnClickListener {
             val newCardView = addProfileCard(SettingsStore.KintoneProfile.newEmpty())
-            newCardView.post { binding.root.smoothScrollTo(0, topRelativeTo(newCardView, binding.root)) }
+            newCardView.post { binding.svKintoneSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svKintoneSettings)) }
         }
         binding.btnSave.setOnClickListener { onSaveClicked() }
     }
@@ -81,7 +81,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
             val source = readProfileFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
             val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_profile_copy)
             val newCardView = addProfileCard(source.copy(name = copyName), insertAt = profileCards.indexOf(card) + 1)
-            newCardView.post { binding.root.smoothScrollTo(0, topRelativeTo(newCardView, binding.root)) }
+            newCardView.post { binding.svKintoneSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svKintoneSettings)) }
         }
 
         itemBinding.btnDeleteProfile.setOnClickListener {
