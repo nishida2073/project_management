@@ -178,7 +178,7 @@ class LogActivity : AppCompatActivity() {
             orientation = android.widget.LinearLayout.HORIZONTAL
             setPadding(0, topPadding, 0, 4)
             addView(TextView(this@LogActivity).apply {
-                text = "[$label]"
+                text = getString(R.string.label_log_result_bracketed, label)
                 setTextColor(color)
             })
             addView(TextView(this@LogActivity).apply {
