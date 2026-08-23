@@ -28,7 +28,7 @@
     <string name="section_profile_name">送信先</string>
     <string name="hint_profile_name">送信先名</string>
     <string name="section_sms_target">送信先の振り分け</string>
-    <string name="hint_keywords">本文に含まれる文字列（カンマ区切り）</string>
+    <string name="hint_keywords">本文に含まれる文字列</string>
     <string name="helper_keywords">※大文字・小文字、全角・半角の違いは無視されます\n※空欄の場合はデフォルトの送信先として扱われます</string>
     <string name="section_kintone_info">kintoneの設定</string>
     <string name="section_connection">接続先</string>

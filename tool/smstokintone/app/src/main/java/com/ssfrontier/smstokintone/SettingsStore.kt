@@ -113,7 +113,7 @@ object SettingsStore {
         val companyNameWidthConversionEnabled: Boolean = false
     ) {
         val keywordList: List<String>
-            get() = keywords.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+            get() = keywords.split(",", "\n").map { it.trim() }.filter { it.isNotEmpty() }
 
         val isDefault: Boolean
             get() = keywordList.isEmpty()
