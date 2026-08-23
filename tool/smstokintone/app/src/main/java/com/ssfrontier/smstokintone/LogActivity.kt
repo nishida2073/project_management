@@ -93,13 +93,14 @@ class LogActivity : AppCompatActivity() {
             // グループ1: ログ種別＋実行時のタイムスタンプ（種別は無彩色、送信系は自動＝青・手動＝アンバーで末尾に区別を付ける）
             val typeAndTimestampView = TextView(this).apply {
                 text = buildSpannedString {
-                    append("[$typeLabel")
+                    append(getString(R.string.label_log_type_bracketed, typeLabel))
+                    append(" ${dateFormat.format(Date(entry.loggedAtMillis))}")
                     if (entry.type != SmsLogStore.EntryType.RECEIVE) {
+                        append("  ")
                         color(modeColor) {
                             append(getString(if (entry.manual) R.string.label_log_type_suffix_manual else R.string.label_log_type_suffix_auto))
                         }
                     }
-                    append("] ${dateFormat.format(Date(entry.loggedAtMillis))}")
                 }
                 setPadding(0, 24, 0, 4)
             }

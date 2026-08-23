@@ -135,12 +135,13 @@
     <string name="message_log_empty">ログがありません</string>
     <string name="label_log_result_success">成功</string>
     <string name="label_log_result_failure">失敗</string>
+    <string name="label_log_type_bracketed">[%1$s]</string>
     <string name="label_log_type_receive">SMSの受信完了</string>
     <string name="label_log_type_send_start">SMSの送信開始</string>
     <string name="label_log_type_send_complete">SMSの送信完了</string>
     <string name="label_log_type_auto_reply">SMSの返信完了</string>
-    <string name="label_log_type_suffix_manual">・手動</string>
-    <string name="label_log_type_suffix_auto">・自動</string>
+    <string name="label_log_type_suffix_manual">手動</string>
+    <string name="label_log_type_suffix_auto">自動</string>
     <string name="message_log_receive">SMSを受信しました</string>
     <string name="message_log_split">本文の分割に成功しました</string>
     <string name="message_log_split_failure">本文の分割に失敗しました</string>
