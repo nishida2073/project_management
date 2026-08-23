@@ -108,6 +108,7 @@ class LogActivity : AppCompatActivity() {
                     }
                 }
                 setTextColor(itemTextColor)
+                textSize = 16f
                 setPadding(0, 24, 0, 4)
             }
 
