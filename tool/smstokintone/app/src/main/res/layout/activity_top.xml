@@ -11,50 +11,63 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/AppCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:gravity="center"
-            android:text="@string/label_top_sms_send"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:layout_marginTop="32dp">
 
-        <TextView
-            android:id="@+id/tvTopSendStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="@string/label_top_sms_send_auto"
-            tools:textColor="@color/status_running" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="@string/label_top_sms_reply"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/label_top_sms_send"
+                    android:textSize="14sp"
+                    android:textColor="?android:attr/textColorSecondary" />
 
-        <TextView
-            android:id="@+id/tvTopReplyStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="@string/label_top_sms_reply_manual"
-            tools:textColor="@color/status_manual" />
+                <TextView
+                    android:id="@+id/tvTopSendStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:gravity="center"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    tools:text="@string/label_top_sms_send_auto"
+                    tools:textColor="@color/status_running" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/label_top_sms_reply"
+                    android:textSize="14sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/tvTopReplyStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    tools:text="@string/label_top_sms_reply_manual"
+                    tools:textColor="@color/status_manual" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenSmsSearch"
             style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
             android:text="@string/btn_open_sms_search" />
 
         <com.google.android.material.button.MaterialButton

@@ -2,12 +2,12 @@
     <string name="app_name">S2k</string>
 
     <!-- トップ画面 -->
-    <string name="label_top_sms_send">SMSの送信</string>
-    <string name="label_top_sms_send_auto">自動モード</string>
-    <string name="label_top_sms_send_manual">手動モード</string>
-    <string name="label_top_sms_reply">SMSの返信</string>
-    <string name="label_top_sms_reply_auto">自動モード</string>
-    <string name="label_top_sms_reply_manual">手動モード</string>
+    <string name="label_top_sms_send">SMSの送信モード</string>
+    <string name="label_top_sms_send_auto">自動</string>
+    <string name="label_top_sms_send_manual">手動</string>
+    <string name="label_top_sms_reply">SMSの返信モード</string>
+    <string name="label_top_sms_reply_auto">自動</string>
+    <string name="label_top_sms_reply_manual">手動</string>
     <string name="btn_open_log">ログの確認</string>
     <string name="btn_open_sms_search">SMSの検索</string>
     <string name="btn_open_send_settings">送信先の設定</string>
