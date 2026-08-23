@@ -126,9 +126,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_keywords"
-                            app:helperText="@string/helper_keywords"
-                            app:helperTextEnabled="true">
+                            android:hint="@string/hint_keywords">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etKeywords"
@@ -136,6 +134,21 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_keywords"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -462,9 +475,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_update_tolerance_hours"
-                            app:helperText="@string/helper_update_tolerance_hours"
-                            app:helperTextEnabled="true">
+                            android:hint="@string/hint_update_tolerance_hours">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etUpdateToleranceHours"
@@ -472,6 +483,21 @@
                                 android:layout_height="wrap_content"
                                 android:inputType="number" />
                         </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_update_tolerance_hours"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
 

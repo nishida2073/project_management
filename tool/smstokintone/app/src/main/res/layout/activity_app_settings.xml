@@ -339,6 +339,21 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="number" />
                             </com.google.android.material.textfield.TextInputLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="@string/helper_auto_refresh_interval"
+                                    android:textSize="12sp"
+                                    android:textColor="?android:attr/textColorSecondary" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -458,9 +473,7 @@
                                 android:id="@+id/tilSmsMatchToleranceSeconds"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_match_tolerance_seconds"
-                                app:helperText="@string/helper_sms_match_tolerance_seconds"
-                                app:helperTextEnabled="true">
+                                android:hint="@string/hint_sms_match_tolerance_seconds">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/etSmsMatchToleranceSeconds"
@@ -468,6 +481,21 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="number" />
                             </com.google.android.material.textfield.TextInputLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="@string/helper_sms_match_tolerance_seconds"
+                                    android:textSize="12sp"
+                                    android:textColor="?android:attr/textColorSecondary" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
 
@@ -792,9 +820,7 @@
                                 android:id="@+id/tilAutoReplyCooldownSeconds"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_auto_reply_cooldown_seconds"
-                                app:helperText="@string/helper_auto_reply_cooldown_seconds"
-                                app:helperTextEnabled="true">
+                                android:hint="@string/hint_auto_reply_cooldown_seconds">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/etAutoReplyCooldownSeconds"
@@ -802,6 +828,21 @@
                                     android:layout_height="wrap_content"
                                     android:inputType="number" />
                             </com.google.android.material.textfield.TextInputLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="@string/helper_auto_reply_cooldown_seconds"
+                                    android:textSize="12sp"
+                                    android:textColor="?android:attr/textColorSecondary" />
+                            </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
 

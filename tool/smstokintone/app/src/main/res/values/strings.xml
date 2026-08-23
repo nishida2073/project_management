@@ -76,6 +76,7 @@
     <string name="switch_auto_refresh_enabled">有効にする</string>
     <string name="label_auto_refresh_interval">更新間隔</string>
     <string name="hint_auto_refresh_interval">秒</string>
+    <string name="helper_auto_refresh_interval">ログ画面を自動的に再読み込みする間隔です</string>
     <string name="section_permission">端末の許可</string>
     <string name="label_sms_receive_permission">SMSの受信</string>
     <string name="btn_sms_receive_permission">SMSの受信を許可する</string>
