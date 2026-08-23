@@ -150,10 +150,10 @@
     <string name="message_log_send_start_profile_unconfigured">SMSの送信先が存在しません</string>
     <string name="message_log_send_complete_create_success">SMSの登録に成功しました</string>
     <string name="message_log_send_complete_update_success">SMSの更新に成功しました</string>
-    <string name="message_log_send_start_split_failed_skipped">SMSの送信をスキップしました（本文の形式が不正）</string>
+    <string name="message_log_send_start_split_failed_skipped">SMSの送信をスキップしました\n（本文の形式が不正）</string>
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
-    <string name="message_log_send_complete_skipped_duplicate">SMSの送信をスキップしました（最終受信日時（秒は除く）と本文が一致）</string>
+    <string name="message_log_send_complete_skipped_duplicate">SMSの送信をスキップしました\n（最終受信日時（秒は除く）と本文が一致）</string>
     <string name="message_log_auto_reply">形式が不正なため、SMSを返信しました</string>
     <string name="btn_clear_log">クリア</string>
     <string name="btn_refresh_log">更新</string>
