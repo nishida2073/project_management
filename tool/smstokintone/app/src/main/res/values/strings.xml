@@ -37,7 +37,7 @@
     <string name="hint_app_id">アプリID</string>
     <string name="section_auth_info">認証情報</string>
     <string name="rb_auth_api_token">APIトークン</string>
-    <string name="rb_auth_password">ID・パスワード</string>
+    <string name="rb_auth_password">ログイン名・パスワード</string>
     <string name="hint_api_token">APIトークン</string>
     <string name="hint_login_name">ログイン名</string>
     <string name="hint_login_password">パスワード</string>
@@ -181,7 +181,7 @@
     <string name="label_sms_status_split_failed">"⚠️ "</string>
     <string name="label_sms_status_profile_unconfigured">"🚫 "</string>
     <string name="label_sms_status_auto_replied">"📨 "</string>
-    <string name="helper_sms_status_legend">⏳ 未送信　⚠️ 形式が不正\n　📨 自動返信済み　🚫 送信先が未設定</string>
+    <string name="helper_sms_status_legend">"⏳ 未送信　　　　⚠️ 形式が不正\n📨 自動返信済み　🚫 送信先が未設定"</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>
     <string name="btn_deselect_all">選択解除</string>

@@ -317,12 +317,15 @@ class SmsSearchActivity : AppCompatActivity() {
                 val isAutoReplied = record.id in autoRepliedEntries
                 val sentEntry = sentEntries[record.id]
                 val isUnsent = sentEntry == null
+                val isSplitFailedBody = isSplitFailed(record.body)
+                val isSelectable = (!isProfileUnconfigured || config.searchProfileUnconfiguredEnabled) &&
+                    (!isSplitFailedBody || config.searchSplitFailedEnabled)
                 val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
                 text = buildSpannedString {
                     if (isUnsent) {
                         append(getString(R.string.label_sms_status_unsent))
                     }
-                    if (isSplitFailed(record.body)) {
+                    if (isSplitFailedBody) {
                         append(getString(R.string.label_sms_status_split_failed))
                     }
                     if (isAutoReplied) {
@@ -331,10 +334,14 @@ class SmsSearchActivity : AppCompatActivity() {
                     if (isProfileUnconfigured) {
                         append(getString(R.string.label_sms_status_profile_unconfigured))
                     }
-                    if (isUnsent || isProfileUnconfigured || isSplitFailed(record.body) || isAutoReplied) {
+                    if (isUnsent || isProfileUnconfigured || isSplitFailedBody || isAutoReplied) {
                         append("\n")
                     }
-                    color(profileColor) { bold { append(profileName) } }
+                    if (isSelectable) {
+                        color(profileColor) { bold { append(profileName) } }
+                    } else {
+                        bold { append(profileName) }
+                    }
                     append("\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
                     append(record.body.take(80))
                 }
@@ -343,8 +350,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 setPadding(0, 16, 0, 16)
-                isEnabled = (!isProfileUnconfigured || config.searchProfileUnconfiguredEnabled) &&
-                    (!isSplitFailed(record.body) || config.searchSplitFailedEnabled)
+                isEnabled = isSelectable
                 val backgroundColor = when {
                     sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
                     sentEntry != null -> R.color.sms_sent_auto_background
@@ -354,7 +360,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, it))
                 }
                 setOnLongClickListener {
-                    openSmsReply(record.address, isSplitFailed(record.body))
+                    openSmsReply(record.address, isSplitFailedBody)
                     true
                 }
             }
