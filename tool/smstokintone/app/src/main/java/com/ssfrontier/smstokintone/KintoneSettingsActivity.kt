@@ -30,7 +30,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.tvKintoneSettingsDescription.visibility =
-            if (getString(R.string.kintone_settings_description).isBlank()) View.GONE else View.VISIBLE
+            if (getString(R.string.send_settings_description).isBlank()) View.GONE else View.VISIBLE
 
         SettingsStore.loadProfiles(this).forEach { addProfileCard(it) }
 

@@ -10,14 +10,12 @@
     <string name="label_top_sms_reply_manual">手動モード</string>
     <string name="btn_open_log">ログの確認</string>
     <string name="btn_open_sms_search">SMSの検索</string>
-    <string name="btn_open_kintone_settings">kintoneの設定</string>
+    <string name="btn_open_send_settings">送信先の設定</string>
     <string name="btn_open_app_settings">アプリの設定</string>
 
-    <!-- kintoneの設定画面 -->
-    <string name="title_kintone_settings">kintoneの設定</string>
-    <string name="kintone_settings_description"></string>
-    <string name="section_profile_name">送信先</string>
-    <string name="hint_profile_name">送信先名</string>
+    <!-- 送信先の設定画面 -->
+    <string name="title_send_settings">送信先の設定</string>
+    <string name="send_settings_description"></string>
     <string name="btn_add_profile">設定を追加</string>
     <string name="btn_copy_profile">コピー</string>
     <string name="btn_delete_profile">削除</string>
@@ -26,14 +24,16 @@
     <string name="label_profile_name_unset">(名称未設定)</string>
     <string name="label_profile_index">設定 %1$d</string>
     <string name="toast_no_profiles">設定を1つ以上追加してください</string>
-    <string name="section_basic_info">基本情報</string>
-    <string name="section_kintone_info">kintone情報</string>
+    <string name="section_basic_info">基本の設定</string>
+    <string name="section_profile_name">送信先</string>
+    <string name="hint_profile_name">送信先名</string>
+    <string name="section_sms_target">送信先の振り分け</string>
+    <string name="hint_keywords">本文に含まれる文字列（カンマ区切り）</string>
+    <string name="helper_keywords">※大文字・小文字、全角・半角の違いは無視されます\n※空欄の場合はデフォルトの送信先として扱われます</string>
+    <string name="section_kintone_info">kintoneの設定</string>
     <string name="section_connection">接続先</string>
-    <string name="section_app">連絡アプリ</string>
-    <string name="section_sms_target">対象の絞り込み</string>
-    <string name="hint_keywords">本文に含まれる文字</string>
-    <string name="helper_keywords">カンマ区切りで複数の指定が可能です。\n※空欄の場合はデフォルトの接続先として扱われます。\n※大文字・小文字、全角・半角の違いは無視されます。</string>
     <string name="hint_subdomain">サブドメイン</string>
+    <string name="section_app">連絡アプリ</string>
     <string name="hint_app_id">アプリID</string>
     <string name="section_auth_info">認証情報</string>
     <string name="rb_auth_api_token">APIトークン</string>
@@ -49,9 +49,9 @@
     <string name="hint_field_company">会社名</string>
     <string name="hint_field_user_name">氏名</string>
     <string name="hint_field_content">内容</string>
-    <string name="section_update_condition">更新条件</string>
+    <string name="section_update_condition">レコードの更新条件</string>
     <string name="hint_update_tolerance_hours">受信日時の範囲（時間）</string>
-    <string name="helper_update_tolerance_hours">送信元が一致し、過去の受信日時との差が指定時間範囲内の場合は、新規登録ではなく既存データを更新します。</string>
+    <string name="helper_update_tolerance_hours">送信元が一致し、過去の受信日時との差が指定時間範囲内の場合は、既存データを更新します</string>
     <string name="dialog_title_validation_error">入力エラー</string>
     <string name="dialog_message_validation_error">%1$s: 送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
     <string name="btn_save">設定を保存</string>
@@ -100,24 +100,24 @@
     <string name="label_search_filters_visibility">検索条件の表示</string>
     <string name="rb_search_filters_visible">表示</string>
     <string name="rb_search_filters_hidden">隠す</string>
-    <string name="label_search_selection_target">選択対象</string>
+    <string name="label_search_selection_target">SMSの選択可否</string>
     <string name="switch_search_profile_unconfigured_enabled">「送信先が未設定」を含める</string>
-    <string name="helper_search_profile_unconfigured_enabled">選択対象から除外されます</string>
+    <string name="helper_search_profile_unconfigured_enabled">SMSを選択できるようになります</string>
     <string name="switch_search_split_failed_enabled">「形式が不正」を含める</string>
-    <string name="helper_search_split_failed_enabled">選択対象から除外されます</string>
+    <string name="helper_search_split_failed_enabled">SMSを選択できるようになります</string>
     <string name="section_sms_send">SMSの送信</string>
     <string name="label_sms_send_mode">送信モード</string>
     <string name="rb_sms_send_mode_manual">手動</string>
     <string name="rb_sms_send_mode_auto">自動</string>
-    <string name="helper_sms_send_mode">自動の場合、SMSを受信した際にkintoneへ自動送信します。</string>
-    <string name="section_send_target">送信対象</string>
+    <string name="helper_sms_send_mode">SMSを受信した際にkintoneへ自動送信します</string>
+    <string name="section_send_target">自動送信対象</string>
     <string name="switch_send_split_failed_enabled">「形式が不正」を含める</string>
-    <string name="helper_send_split_failed_enabled">送信対象から除外されます</string>
+    <string name="helper_send_split_failed_enabled">SMSを自動送信の対象として含めることができます</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>
     <string name="rb_sms_reply_mode_auto">自動</string>
-    <string name="helper_auto_reply_split_failed_enabled">自動の場合、「形式が不正」なSMSを受信した際に自動返信します</string>
+    <string name="helper_auto_reply_split_failed_enabled">「形式が不正」なSMSを受信した際に返信用のメッセージを自動返信します</string>
     <string name="label_auto_reply_cooldown_seconds">同一送信元への送信間隔</string>
     <string name="helper_auto_reply_cooldown_seconds">同じ送信元には、ここで指定した時間が経過するまで自動返信を再送信しません</string>
     <string name="hint_auto_reply_cooldown_seconds">秒</string>
@@ -150,15 +150,15 @@
     <string name="message_log_send_start_profile_unconfigured">SMSの送信先が存在しません</string>
     <string name="message_log_send_complete_create_success">SMSの登録に成功しました</string>
     <string name="message_log_send_complete_update_success">SMSの更新に成功しました</string>
-    <string name="message_log_send_start_split_failed_skipped">本文の形式が不正なため、SMSの送信をスキップしました</string>
+    <string name="message_log_send_start_split_failed_skipped">SMSの送信をスキップしました（本文の形式が不正）</string>
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
-    <string name="message_log_send_complete_skipped_duplicate">最終受信日時（秒は除く）と本文が一致するため、SMSの送信をスキップしました</string>
+    <string name="message_log_send_complete_skipped_duplicate">SMSの送信をスキップしました（最終受信日時（秒は除く）と本文が一致）</string>
     <string name="message_log_auto_reply">形式が不正なため、SMSを返信しました</string>
     <string name="btn_clear_log">クリア</string>
     <string name="btn_refresh_log">更新</string>
     <string name="dialog_title_confirm_clear_log">ログをクリアしますか？</string>
-    <string name="dialog_message_confirm_clear_log">この操作は取り消せません。</string>
+    <string name="dialog_message_confirm_clear_log">この操作は取り消せません</string>
     <string name="btn_cancel">キャンセル</string>
     <string name="btn_clear">クリア</string>
 
@@ -191,7 +191,7 @@
     <string name="toast_sms_search_found">%1$d件見つかりました</string>
     <string name="toast_sms_app_not_found">SMSアプリが見つかりませんでした</string>
     <string name="toast_sms_send_not_selection">送信するSMSを選択してください</string>
-    <string name="toast_sms_send_queued">%1$d件をkintoneへ送信キューに追加しました</string>
+    <string name="toast_sms_send_queued">%1$d件を送信キューに追加しました</string>
     <string name="toast_sms_send_finished">SMSの送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
     <string name="toast_sms_send_finished_no_log">SMSの送信が完了しました</string>
 </resources>
