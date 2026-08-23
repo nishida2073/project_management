@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
+import com.google.android.material.color.MaterialColors
 import com.ssfrontier.smstokintone.databinding.ActivityLogBinding
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -77,6 +78,10 @@ class LogActivity : AppCompatActivity() {
         binding.tvLogEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
 
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
+        val itemTextColor = MaterialColors.getColor(
+            binding.llLogContainer,
+            com.google.android.material.R.attr.colorOnSurface
+        )
         entries.forEach { entry ->
             val typeLabel = when (entry.type) {
                 SmsLogStore.EntryType.RECEIVE -> getString(R.string.label_log_type_receive)
@@ -102,6 +107,7 @@ class LogActivity : AppCompatActivity() {
                         }
                     }
                 }
+                setTextColor(itemTextColor)
                 setPadding(0, 24, 0, 4)
             }
 
@@ -114,10 +120,12 @@ class LogActivity : AppCompatActivity() {
             }
             val senderAndTimestampView = TextView(this).apply {
                 text = "${dateFormat.format(Date(entry.timestampMillis))}　${entry.sender}"
+                setTextColor(itemTextColor)
                 setPadding(0, 0, 0, 4)
             }
             val bodyView = TextView(this).apply {
                 text = entry.bodyPreview
+                setTextColor(itemTextColor)
                 setPadding(0, 0, 0, 4)
             }
 
