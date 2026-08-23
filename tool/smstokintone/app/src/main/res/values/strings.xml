@@ -44,14 +44,14 @@
     <string name="section_field_mapping">フィールドコード</string>
     <string name="hint_field_sender">送信元</string>
     <string name="hint_field_body">本文</string>
-    <string name="hint_field_datetime">最終受信日時</string>
+    <string name="hint_field_datetime">受信日時</string>
     <string name="hint_field_type">登録種別</string>
     <string name="hint_field_company">会社名</string>
     <string name="hint_field_user_name">氏名</string>
     <string name="hint_field_content">内容</string>
     <string name="section_update_condition">レコードの更新条件</string>
-    <string name="hint_update_tolerance_hours">受信日時の範囲（時間）</string>
-    <string name="helper_update_tolerance_hours">送信元が一致し、過去の受信日時との差が指定時間範囲内の場合は、既存データを更新します</string>
+    <string name="hint_update_tolerance_hours">受信日時の範囲（±時間）</string>
+    <string name="helper_update_tolerance_hours">同じ送信元から、指定した時間以内に再度SMSを受信した場合は、新規登録ではなく既存のデータを更新します</string>
     <string name="dialog_title_validation_error">入力エラー</string>
     <string name="dialog_message_validation_error">%1$s: 送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
     <string name="btn_save">設定を保存</string>
