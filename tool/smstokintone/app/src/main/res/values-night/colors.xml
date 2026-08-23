@@ -1,5 +1,5 @@
 <resources>
-    <color name="status_running">#90CAF9</color>
+    <color name="status_running">#03DAC5</color>
     <color name="status_manual">#FFD54F</color>
     <color name="log_success">#81C784</color>
     <color name="log_failure">#EF9A9A</color>
