@@ -155,6 +155,7 @@ class AppSettingsActivity : AppCompatActivity() {
                 SettingsStore.ThemeMode.LIGHT
             }
             SettingsStore.save(this, SettingsStore.load(this).copy(themeMode = themeMode))
+            pendingScrollY = binding.svAppSettings.scrollY
             AppCompatDelegate.setDefaultNightMode(themeMode.toNightMode())
         }
 
@@ -178,6 +179,13 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.etSplitFailedReplyAddition.setText(config.splitFailedReplyAddition)
         binding.etSplitFailedReplyAddition.addTextChangedListener { text ->
             SettingsStore.save(this, SettingsStore.load(this).copy(splitFailedReplyAddition = text.toString()))
+        }
+
+        // ライト/ダーク切り替え時、AppCompatDelegateがActivityを再生成するためスクロール位置が失われる。
+        // 切り替え直前の位置を復元し、画面が先頭へ飛んで見えないようにする
+        pendingScrollY?.let { y ->
+            pendingScrollY = null
+            binding.svAppSettings.post { binding.svAppSettings.scrollTo(0, y) }
         }
     }
 
@@ -241,5 +249,9 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.tvReadPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
         binding.btnRequestReadPermission.visibility = if (granted) View.GONE else View.VISIBLE
         binding.tvReadPermissionHelper.visibility = if (granted) View.GONE else View.VISIBLE
+    }
+
+    companion object {
+        private var pendingScrollY: Int? = null
     }
 }
