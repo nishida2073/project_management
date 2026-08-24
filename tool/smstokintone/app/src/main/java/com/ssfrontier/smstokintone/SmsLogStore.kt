@@ -35,7 +35,9 @@ object SmsLogStore {
         val profileName: String?,
         val manual: Boolean,
         /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
-        val smsParts: SmsParts? = null
+        val smsParts: SmsParts? = null,
+        /** kintoneへの登録時に会社名の変換（半角大文字・全角統一）を適用したかどうか */
+        val companyNameConverted: Boolean = false
     )
 
     private fun prefs(context: Context) =
@@ -52,7 +54,8 @@ object SmsLogStore {
         smsId: Long? = null,
         profileName: String? = null,
         manual: Boolean = false,
-        smsParts: SmsParts? = null
+        smsParts: SmsParts? = null,
+        companyNameConverted: Boolean = false
     ) {
         val entries = getAll(context).toMutableList()
         entries.add(
@@ -68,7 +71,8 @@ object SmsLogStore {
                 smsId = smsId,
                 profileName = profileName,
                 manual = manual,
-                smsParts = smsParts
+                smsParts = smsParts,
+                companyNameConverted = companyNameConverted
             )
         )
 
@@ -84,6 +88,7 @@ object SmsLogStore {
                 .put("message", entry.message)
                 .put("smsId", entry.smsId ?: NO_SMS_ID)
                 .put("manual", entry.manual)
+                .put("companyNameConverted", entry.companyNameConverted)
             entry.profileName?.let { obj.put("profileName", it) }
             entry.smsParts?.let {
                 obj.put(
@@ -117,6 +122,7 @@ object SmsLogStore {
                 smsId = if (smsId == NO_SMS_ID) null else smsId,
                 profileName = obj.optString("profileName", "").ifBlank { null },
                 manual = obj.optBoolean("manual", false),
+                companyNameConverted = obj.optBoolean("companyNameConverted", false),
                 smsParts = obj.optJSONObject("smsParts")?.let {
                     SmsParts(
                         companyName = it.optString("companyName", ""),

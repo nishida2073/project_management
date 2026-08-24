@@ -107,6 +107,10 @@ class LogActivity : AppCompatActivity() {
                             append(getString(if (entry.manual) R.string.label_log_type_suffix_manual else R.string.label_log_type_suffix_auto))
                         }
                     }
+                    if (entry.companyNameConverted) {
+                        append(" ")
+                        append(getString(R.string.label_log_company_name_converted))
+                    }
                 }
                 setTextColor(itemTextColor)
                 textSize = 16f
@@ -182,7 +186,7 @@ class LogActivity : AppCompatActivity() {
                 addView(bodyView)
                 entry.smsParts?.let { smsParts ->
                     setOnLongClickListener {
-                        showSplitResultDialog(smsParts)
+                        showSplitResultDialog(smsParts, entry.companyNameConverted)
                         true
                     }
                 }
@@ -193,11 +197,17 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    /** 長押しされたログの分割結果（会社名・氏名・内容）をダイアログで表示する */
-    private fun showSplitResultDialog(smsParts: SmsParts) {
+    /** 長押しされたログの分割結果（会社名・氏名・内容）をダイアログで表示する。
+     * 会社名はkintoneへ実際に登録した値（変換適用時は変換後の値）を表示する */
+    private fun showSplitResultDialog(smsParts: SmsParts, companyNameConverted: Boolean) {
+        val companyNameValue = if (companyNameConverted) {
+            smsParts.companyNameNormalizedWidth
+        } else {
+            smsParts.companyName
+        }
         val message = buildSpannedString {
             bold { append(getString(R.string.hint_field_company)) }
-            append("\n　${smsParts.companyName}\n")
+            append("\n　$companyNameValue\n")
             bold { append(getString(R.string.hint_field_user_name)) }
             append("\n　${smsParts.userName}\n")
             bold { append(getString(R.string.hint_field_content)) }

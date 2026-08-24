@@ -79,22 +79,22 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             contentValue = smsParts.content
         )) {
             is KintoneApi.PostResult.Success -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
                 Result.success()
             }
             is KintoneApi.PostResult.Skipped -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
                 Result.success()
             }
             is KintoneApi.PostResult.HttpFailure -> {
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
                 if ((result.code in 500..599 || result.code == 429) && shouldRetry()) Result.retry() else Result.success()
             }
             is KintoneApi.PostResult.NetworkError -> {
                 Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
                 if (shouldRetry()) Result.retry() else Result.success()
             }
         }
@@ -138,7 +138,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         message: String,
         profileName: String?,
         manual: Boolean,
-        smsParts: SmsParts? = null
+        smsParts: SmsParts? = null,
+        companyNameConverted: Boolean = false
     ) {
         SmsLogStore.add(
             applicationContext,
@@ -151,7 +152,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             smsId = smsId,
             profileName = profileName,
             manual = manual,
-            smsParts = smsParts
+            smsParts = smsParts,
+            companyNameConverted = companyNameConverted
         )
     }
 
