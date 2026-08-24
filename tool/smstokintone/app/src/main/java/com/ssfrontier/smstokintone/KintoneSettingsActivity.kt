@@ -166,15 +166,15 @@ class KintoneSettingsActivity : AppCompatActivity() {
         }
 
         val testBody = getString(R.string.test_send_body)
-        val smsParts = SmsPartsGenerator.generateSmsParts(testBody)
-        val companyNameValue = if (profile.companyNameWidthConversionEnabled) {
-            smsParts.companyNameNormalizedWidth
-        } else {
-            smsParts.companyName
-        }
 
         itemBinding.btnTestSend.isEnabled = false
         CoroutineScope(Dispatchers.Main).launch {
+            val smsParts = SmsPartsGenerator.resolveSmsParts(testBody, SettingsStore.load(applicationContext).aiParsingEnabled)
+            val companyNameValue = if (profile.companyNameWidthConversionEnabled) {
+                smsParts.companyNameNormalizedWidth
+            } else {
+                smsParts.companyName
+            }
             val result = withContext(Dispatchers.IO) {
                 KintoneApi.postRecord(
                     applicationContext,

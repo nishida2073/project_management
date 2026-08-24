@@ -117,6 +117,9 @@
     <string name="section_send_target">自動送信対象</string>
     <string name="switch_send_split_failed_enabled">「形式が不正」を含める</string>
     <string name="helper_send_split_failed_enabled">SMSを自動送信の対象として含めることができます</string>
+    <string name="section_ai_parsing">AIによる分割</string>
+    <string name="switch_ai_parsing_enabled">有効にする</string>
+    <string name="helper_ai_parsing_enabled">端末上のAIを使用して会社名・氏名・内容を分割します。\nAIの呼び出しに失敗した場合は、ルールベースの分割を実行します。</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>
@@ -162,6 +165,8 @@
     <string name="dialog_title_confirm_clear_log">ログをクリアしますか？</string>
     <string name="dialog_message_confirm_clear_log">この操作は取り消せません</string>
     <string name="dialog_title_split_result">分割結果</string>
+    <string name="icon_split_result_rule">⚙️</string>
+    <string name="icon_split_result_ai">🤖</string>
     <string name="btn_cancel">キャンセル</string>
     <string name="btn_clear">クリア</string>
 

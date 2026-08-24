@@ -97,6 +97,7 @@ object SmsLogStore {
                         .put("companyName", it.companyName)
                         .put("userName", it.userName)
                         .put("content", it.content)
+                        .put("parsedByAi", it.parsedByAi)
                 )
             }
             array.put(obj)
@@ -127,7 +128,8 @@ object SmsLogStore {
                     SmsParts(
                         companyName = it.optString("companyName", ""),
                         userName = it.optString("userName", ""),
-                        content = it.optString("content", "")
+                        content = it.optString("content", ""),
+                        parsedByAi = it.optBoolean("parsedByAi", false)
                     )
                 }
             )

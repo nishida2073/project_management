@@ -20,11 +20,13 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkContinuation
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.ssfrontier.smstokintone.databinding.ActivitySmsSearchBinding
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -219,20 +221,29 @@ class SmsSearchActivity : AppCompatActivity() {
             records.removeAll { it.id in sentEntries }
         }
 
-        if (binding.cbSplitFailedOnly.isChecked) {
-            records.removeAll { !isSplitFailed(it.body) }
-        }
-
         when (val profileId = selectedProfileId) {
             null -> Unit
             AppConstants.PROFILE_FILTER_KEY_UNSET -> records.removeAll { SettingsStore.findProfileForBody(this, it.body) != null }
             else -> records.removeAll { SettingsStore.findProfileForBody(this, it.body)?.id != profileId }
         }
 
-        if (showFoundToast) {
-            Toast.makeText(this, getString(R.string.toast_sms_search_found, records.size), Toast.LENGTH_SHORT).show()
+        // 形式が不正かどうかの判定はAI解析（端末上のAI呼び出し）を伴う場合があるため、
+        // ここから先はコルーチンで行いUIをブロックしない
+        lifecycleScope.launch {
+            if (binding.cbSplitFailedOnly.isChecked) {
+                val splitFailedRecords = mutableListOf<SmsRecord>()
+                for (record in records) {
+                    if (isSplitFailed(record.body)) splitFailedRecords.add(record)
+                }
+                records.clear()
+                records.addAll(splitFailedRecords)
+            }
+
+            if (showFoundToast) {
+                Toast.makeText(this@SmsSearchActivity, getString(R.string.toast_sms_search_found, records.size), Toast.LENGTH_SHORT).show()
+            }
+            renderSmsList()
         }
-        renderSmsList()
     }
 
     private fun loadCompletedEntries(): List<SmsLogStore.Entry> =
@@ -282,7 +293,9 @@ class SmsSearchActivity : AppCompatActivity() {
         return result
     }
 
-    private fun isSplitFailed(body: String): Boolean = SmsPartsGenerator.generateSmsParts(body).isSplitFailed()
+    private suspend fun isSplitFailed(body: String): Boolean {
+        return SmsPartsGenerator.resolveSmsParts(body, SettingsStore.load(this).aiParsingEnabled).isSplitFailed()
+    }
 
     /** 標準のSMSアプリの返信（作成）画面を、指定した送信元宛てに開く */
     private fun openSmsReply(address: String, splitFailed: Boolean) {
@@ -299,7 +312,7 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun renderSmsList() {
+    private suspend fun renderSmsList() {
         binding.llSmsListContainer.removeAllViews()
         binding.svSmsList.scrollTo(0, 0)
         binding.tvSmsListEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE

@@ -42,8 +42,9 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             return@withContext Result.success()
         }
 
-        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応）
-        val smsParts = SmsPartsGenerator.generateSmsParts(body)
+        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応。送信先がAI解析を
+        // 有効にしている場合は端末上のAIでの解析結果を使う）
+        val smsParts = SmsPartsGenerator.resolveSmsParts(body, config.aiParsingEnabled)
 
         if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
             // 形式が不正で何も開始できていないため、送信完了ではなく送信開始として失敗を記録する

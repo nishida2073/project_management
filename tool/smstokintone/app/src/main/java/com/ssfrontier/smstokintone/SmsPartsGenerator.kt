@@ -1,12 +1,24 @@
 package com.ssfrontier.smstokintone
 
+import android.os.Build
+import android.util.Log
+import com.google.mlkit.genai.common.FeatureStatus
+import com.google.mlkit.genai.common.DownloadStatus
+import com.google.mlkit.genai.prompt.Generation
+import com.google.mlkit.genai.prompt.GenerativeModel
+import com.google.mlkit.genai.prompt.generationConfig
+import kotlinx.coroutines.flow.collect
+import org.json.JSONObject
+
 /**
  * SMS本文から生成した部品（会社名・氏名・内容）
  */
 data class SmsParts(
     val companyName: String = "",
     val userName: String = "",
-    val content: String = ""
+    val content: String = "",
+    /** 端末上のAI（ML Kit GenAI）で抽出した結果かどうか。falseはルールベースでの抽出 */
+    val parsedByAi: Boolean = false
 ) {
     /** 何も抽出できなかったかどうか */
     fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && content.isEmpty()
@@ -42,6 +54,80 @@ data class SmsParts(
  * XXX（複数行OK）
  */
 object SmsPartsGenerator {
+
+    private const val TAG = "SmsPartsGenerator"
+
+    /** 本文をキーにしたAI解析結果のキャッシュ。同じ本文を何度も解析させない */
+    private val aiResultCache = mutableMapOf<String, SmsParts>()
+
+    private var generativeModel: GenerativeModel? = null
+
+    private fun getOrCreateModel(): GenerativeModel =
+        generativeModel ?: Generation.getClient(generationConfig {}).also { generativeModel = it }
+
+    /**
+     * SMS本文から会社名・氏名・内容を解析する。[aiParsingEnabled]（アプリの設定「AIによる分割」）が
+     * 有効な場合は端末上のAI（ML Kit GenAI / Gemini Nano）に解析させ、Android 12未満の端末、
+     * AI解析が無効、非対応端末、またはAI呼び出しに失敗した場合は[generateSmsParts]（ルールベース）の
+     * 結果を返す。同じ本文への問い合わせは[aiResultCache]から即座に返し、AIへの重複した問い合わせを避ける。
+     */
+    suspend fun resolveSmsParts(body: String, aiParsingEnabled: Boolean): SmsParts {
+        if (!aiParsingEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return generateSmsParts(body)
+        }
+
+        aiResultCache[body]?.let { return it }
+
+        val aiResult = requestAiSmsParts(body)
+        val result = aiResult ?: generateSmsParts(body)
+        aiResultCache[body] = result
+        return result
+    }
+
+    /** 端末上のAI（ML Kit GenAI）へSMS本文を渡し、会社名・氏名・内容をJSONで抽出させる。失敗した場合はnullを返す */
+    private suspend fun requestAiSmsParts(body: String): SmsParts? {
+        return try {
+            val model = getOrCreateModel()
+            when (model.checkStatus()) {
+                FeatureStatus.AVAILABLE -> {}
+                FeatureStatus.DOWNLOADABLE -> {
+                    var downloaded = false
+                    model.download().collect { status ->
+                        if (status is DownloadStatus.DownloadCompleted) downloaded = true
+                        if (status is DownloadStatus.DownloadFailed) {
+                            Log.w(TAG, "AIモデルのダウンロードに失敗しました: ${status.e.message}")
+                        }
+                    }
+                    if (!downloaded) return null
+                }
+                else -> return null
+            }
+
+            val prompt = """
+                以下のSMS本文から「会社名」「氏名」「内容」を抽出してください。
+                該当する項目が本文に無い場合は空文字を返してください。
+                出力は次の形式のJSONのみとし、それ以外の文章は含めないでください。
+                {"companyName": "...", "userName": "...", "content": "..."}
+
+                SMS本文:
+                $body
+            """.trimIndent()
+
+            val response = model.generateContent(prompt)
+            val text = response.candidates.firstOrNull()?.text?.trim() ?: return null
+            val jsonText = text.substringAfter("{").substringBeforeLast("}").let { "{$it}" }
+            val parsed = JSONObject(jsonText)
+            SmsParts(
+                companyName = parsed.optString("companyName", ""),
+                userName = parsed.optString("userName", ""),
+                content = parsed.optString("content", ""),
+                parsedByAi = true
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "ML Kit GenAIの呼び出しに失敗しました: ${e.message}")
+            null
+        }
+    }
 
     /**
      * 会社名の表記ゆれを吸収し、「[AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX]<地域名>」の形に強制する。

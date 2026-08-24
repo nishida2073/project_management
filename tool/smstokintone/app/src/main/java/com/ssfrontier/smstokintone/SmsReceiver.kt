@@ -12,6 +12,9 @@ import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 class SmsReceiver : BroadcastReceiver() {
@@ -47,28 +50,6 @@ class SmsReceiver : BroadcastReceiver() {
             profileName = profileName
         )
 
-        // SMS返信はkintoneへの送信設定・送信先プロファイルの有無とは無関係な機能のため、ここで判定する
-        val config = SettingsStore.load(context)
-        val smsParts = SmsPartsGenerator.generateSmsParts(body)
-        if (smsParts.isSplitFailed() && config.autoReplySplitFailedEnabled && sender.isNotBlank()) {
-            val now = System.currentTimeMillis()
-            if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
-                if (sendAutoReply(context, sender, config.splitFailedReplyAddition)) {
-                    SmsLogStore.add(
-                        context,
-                        type = SmsLogStore.EntryType.AUTO_REPLY,
-                        timestampMillis = timestampMillis,
-                        sender = sender,
-                        body = body,
-                        success = true,
-                        message = context.getString(R.string.message_log_auto_reply),
-                        profileName = profileName
-                    )
-                }
-                AutoReplyThrottle.recordSent(context, sender, now)
-            }
-        }
-
         val data = workDataOf(
             KintoneUploadWorker.KEY_SENDER to sender,
             KintoneUploadWorker.KEY_BODY to body,
@@ -85,6 +66,40 @@ class SmsReceiver : BroadcastReceiver() {
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
+
+        // SMS返信はkintoneへの送信設定・送信先プロファイルの有無とは無関係な機能のため、ここで判定する。
+        // 「形式が不正」の判定はAI解析（端末上のAI呼び出し）を伴う場合があり、
+        // BroadcastReceiver#onReceiveの同期的な処理では待てないため、goAsync()で実行時間を延長し
+        // コルーチンで判定・返信を行う
+        val config = SettingsStore.load(context)
+        if (config.autoReplySplitFailedEnabled && sender.isNotBlank()) {
+            val pendingResult = goAsync()
+            CoroutineScope(Dispatchers.Default).launch {
+                try {
+                    val smsParts = SmsPartsGenerator.resolveSmsParts(body, config.aiParsingEnabled)
+                    if (smsParts.isSplitFailed()) {
+                        val now = System.currentTimeMillis()
+                        if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
+                            if (sendAutoReply(context, sender, config.splitFailedReplyAddition)) {
+                                SmsLogStore.add(
+                                    context,
+                                    type = SmsLogStore.EntryType.AUTO_REPLY,
+                                    timestampMillis = timestampMillis,
+                                    sender = sender,
+                                    body = body,
+                                    success = true,
+                                    message = context.getString(R.string.message_log_auto_reply),
+                                    profileName = profileName
+                                )
+                            }
+                            AutoReplyThrottle.recordSent(context, sender, now)
+                        }
+                    }
+                } finally {
+                    pendingResult.finish()
+                }
+            }
+        }
     }
 
     /** [sender]宛てに[body]をSMSで自動返信する。送信を試みられたかどうかを返す */

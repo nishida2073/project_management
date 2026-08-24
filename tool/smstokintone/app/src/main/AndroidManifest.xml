@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- genai-promptライブラリはminSdk 31を要求するが、AI解析はAndroid 12未満の端末では
+         使えないだけで済むようコード側でBuild.VERSION.SDK_INTを見て分岐するため、
+         アプリ全体のminSdkは26のまま、このライブラリの要求だけを上書きする -->
+    <uses-sdk tools:overrideLibrary="com.google.mlkit.genai.prompt,com.google.mlkit.genai.common" />
 
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />

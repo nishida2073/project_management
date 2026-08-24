@@ -24,6 +24,7 @@ object SettingsStore {
     private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
     private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
     private const val KEY_DEFAULT_PROFILE_FILTER_ID = "default_profile_filter_id"
+    private const val KEY_AI_PARSING_ENABLED = "ai_parsing_enabled"
 
     private const val KEY_KINTONE_PROFILES = "kintone_profiles"
 
@@ -82,7 +83,10 @@ object SettingsStore {
          * SMS検索画面を開いた際に「送信先」フィルタへ初期設定するプロファイルID。
          * nullは「すべて」、[AppConstants.PROFILE_FILTER_KEY_UNSET]は「未設定」を表す
          */
-        val defaultProfileFilterId: String?
+        val defaultProfileFilterId: String?,
+        /** 本文からの会社名・氏名・内容の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
+         * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
+        val aiParsingEnabled: Boolean
     )
 
     /**
@@ -176,6 +180,7 @@ object SettingsStore {
             .putBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, config.searchFiltersVisibleByDefault)
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
+            .putBoolean(KEY_AI_PARSING_ENABLED, config.aiParsingEnabled)
         if (config.defaultProfileFilterId != null) {
             editor.putString(KEY_DEFAULT_PROFILE_FILTER_ID, config.defaultProfileFilterId)
         } else {
@@ -211,7 +216,8 @@ object SettingsStore {
             defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, AppDefaults.SMS_STANDARD_REPLY_BODY) ?: AppDefaults.SMS_STANDARD_REPLY_BODY,
             splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY)
                 ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
-            defaultProfileFilterId = p.getString(KEY_DEFAULT_PROFILE_FILTER_ID, null)
+            defaultProfileFilterId = p.getString(KEY_DEFAULT_PROFILE_FILTER_ID, null),
+            aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, false)
         )
     }
 

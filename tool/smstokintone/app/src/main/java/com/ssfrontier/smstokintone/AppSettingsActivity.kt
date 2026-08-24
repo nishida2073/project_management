@@ -68,6 +68,11 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(sendSplitFailedEnabled = isChecked))
         }
 
+        binding.swAiParsingEnabled.isChecked = SettingsStore.load(this).aiParsingEnabled
+        binding.swAiParsingEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(aiParsingEnabled = isChecked))
+        }
+
         binding.swSearchSplitFailedEnabled.isChecked = SettingsStore.load(this).searchSplitFailedEnabled
         binding.swSearchSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.save(this, SettingsStore.load(this).copy(searchSplitFailedEnabled = isChecked))

@@ -206,6 +206,7 @@ class LogActivity : AppCompatActivity() {
             smsParts.companyName
         }
         val message = buildSpannedString {
+            append("\n")
             bold { append(getString(R.string.hint_field_company)) }
             append("\n　$companyNameValue\n")
             bold { append(getString(R.string.hint_field_user_name)) }
@@ -213,8 +214,14 @@ class LogActivity : AppCompatActivity() {
             bold { append(getString(R.string.hint_field_content)) }
             append("\n　${smsParts.content}")
         }
+        val icon = if (smsParts.parsedByAi) {
+            getString(R.string.icon_split_result_ai)
+        } else {
+            getString(R.string.icon_split_result_rule)
+        }
+        val title = "${getString(R.string.dialog_title_split_result)} $icon"
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_split_result)
+            .setTitle(title)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
             .show()
