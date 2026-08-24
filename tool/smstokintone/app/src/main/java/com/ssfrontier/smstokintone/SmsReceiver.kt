@@ -38,7 +38,7 @@ class SmsReceiver : BroadcastReceiver() {
         // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
         // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
         // （SmsMatching参照）。
-        val profileName = SettingsStore.findProfileForBody(context, body)?.displayName(context)
+        val sendTargetName = SettingsStore.findSendTargetForBody(context, body)?.displayName(context)
         SmsLogStore.add(
             context,
             type = SmsLogStore.EntryType.RECEIVE,
@@ -47,7 +47,7 @@ class SmsReceiver : BroadcastReceiver() {
             body = body,
             success = true,
             message = context.getString(R.string.message_log_receive),
-            profileName = profileName
+            sendTargetName = sendTargetName
         )
 
         val data = workDataOf(
@@ -67,7 +67,7 @@ class SmsReceiver : BroadcastReceiver() {
 
         WorkManager.getInstance(context).enqueue(request)
 
-        // SMS返信はkintoneへの送信設定・送信先プロファイルの有無とは無関係な機能のため、ここで判定する。
+        // SMS返信はkintoneへの送信設定・送信先送信先の有無とは無関係な機能のため、ここで判定する。
         // 「形式が不正」の判定はAI解析（端末上のAI呼び出し）を伴う場合があり、
         // BroadcastReceiver#onReceiveの同期的な処理では待てないため、goAsync()で実行時間を延長し
         // コルーチンで判定・返信を行う
@@ -89,7 +89,7 @@ class SmsReceiver : BroadcastReceiver() {
                                     body = body,
                                     success = true,
                                     message = context.getString(R.string.message_log_auto_reply),
-                                    profileName = profileName
+                                    sendTargetName = sendTargetName
                                 )
                             }
                             AutoReplyThrottle.recordSent(context, sender, now)

@@ -25,12 +25,12 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 近さによって突き合わせる（SmsMatching参照）。
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        val profile = SettingsStore.findProfileForBody(applicationContext, body)
+        val sendTarget = SettingsStore.findSendTargetForBody(applicationContext, body)
 
-        if (profile == null || !profile.isValid) {
+        if (sendTarget == null || !sendTarget.isValid) {
             // 送信先が特定できず何も開始できていないため、送信完了ではなく送信開始として
             // 失敗を記録する
-            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_profile_unconfigured), profileName = profile?.displayName(applicationContext), manual = manual)
+            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTarget?.displayName(applicationContext), manual = manual)
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
             // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
             return@withContext Result.success()
@@ -48,13 +48,13 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
 
         if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
             // 形式が不正で何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
-            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), profileName = profile.displayName(applicationContext), manual = manual)
+            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual)
             return@withContext Result.success()
         }
 
-        logStart(sender, body, timestampMillis, smsId, profileName = profile.displayName(applicationContext), manual = manual)
+        logStart(sender, body, timestampMillis, smsId, sendTargetName = sendTarget.displayName(applicationContext), manual = manual)
 
-        val datetimeIso = if (profile.fieldDatetime.isNotBlank()) {
+        val datetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
             val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }
@@ -63,7 +63,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             null
         }
 
-        val companyNameValue = if (profile.companyNameWidthConversionEnabled) {
+        val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
             smsParts.companyNameNormalizedWidth
         } else {
             smsParts.companyName
@@ -71,7 +71,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
 
         when (val result = KintoneApi.postRecord(
             applicationContext,
-            profile,
+            sendTarget,
             senderValue = sender,
             bodyValue = body,
             datetimeIsoValue = datetimeIso,
@@ -80,22 +80,22 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             contentValue = smsParts.content
         )) {
             is KintoneApi.PostResult.Success -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
                 Result.success()
             }
             is KintoneApi.PostResult.Skipped -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
+                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
                 Result.success()
             }
             is KintoneApi.PostResult.HttpFailure -> {
                 val detail = "${result.code} ${result.detail}"
                 Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
                 if ((result.code in 500..599 || result.code == 429) && shouldRetry()) Result.retry() else Result.success()
             }
             is KintoneApi.PostResult.NetworkError -> {
                 Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), profileName = profile.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = profile.companyNameWidthConversionEnabled)
+                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
                 if (shouldRetry()) Result.retry() else Result.success()
             }
         }
@@ -111,7 +111,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         body: String,
         timestampMillis: Long,
         smsId: Long?,
-        profileName: String?,
+        sendTargetName: String?,
         manual: Boolean,
         success: Boolean = true,
         message: String? = null
@@ -125,7 +125,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             success = success,
             message = message ?: applicationContext.getString(R.string.message_log_send_start),
             smsId = smsId,
-            profileName = profileName,
+            sendTargetName = sendTargetName,
             manual = manual
         )
     }
@@ -137,7 +137,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         smsId: Long?,
         success: Boolean,
         message: String,
-        profileName: String?,
+        sendTargetName: String?,
         manual: Boolean,
         smsParts: SmsParts? = null,
         companyNameConverted: Boolean = false
@@ -151,7 +151,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             success = success,
             message = message,
             smsId = smsId,
-            profileName = profileName,
+            sendTargetName = sendTargetName,
             manual = manual,
             smsParts = smsParts,
             companyNameConverted = companyNameConverted

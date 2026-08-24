@@ -130,7 +130,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/label_profile_filter"
+                android:text="@string/label_send_target_filter"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
@@ -140,7 +140,7 @@
                 android:orientation="vertical">
 
                 <Spinner
-                    android:id="@+id/spProfileFilter"
+                    android:id="@+id/spSendTargetFilter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>

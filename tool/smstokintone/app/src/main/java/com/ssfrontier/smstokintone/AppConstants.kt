@@ -7,8 +7,8 @@ object AppConstants {
 
     const val TEST_SEND_SENDER = "09000000000"
 
-    /** 送信先の絞り込みで「未設定（どのプロファイルにも一致しない）」を表す選択肢のキー */
-    const val PROFILE_FILTER_KEY_UNSET = "__filter_key_unset__"
+    /** 送信先の絞り込みで「未設定（どの送信先にも一致しない）」を表す選択肢のキー */
+    const val SEND_TARGET_FILTER_KEY_UNSET = "__filter_key_unset__"
 
     /** kintoneへの送信がレートリミット/サーバーエラー/通信エラーで失敗した際の最大リトライ回数 */
     const val KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS = 5
@@ -25,12 +25,6 @@ object AppConstants {
 
     /** 本ツール経由であることを示す選択肢値 */
     const val REGISTRATION_TYPE_VALUE = "外部ツール"
-
-    /** 会社名の表記ゆれを正規化する際に付け直す正式な接頭辞 */
-    const val SMS_COMPANY_NAME_CANONICAL_PREFIX = "NTTデータ"
-
-    /** 会社名先頭の表記ゆれを検出する正規表現。表記自体は対象外 */
-    val SMS_COMPANY_NAME_PREFIX_PATTERN = Regex("^NTT[\\s\\-]?(?:DATA|D)", RegexOption.IGNORE_CASE)
 
     // [SmsPartsGenerator]がラベル行を判定する際に使う、フィールド名とラベル表記ゆれ一覧の対応。
     val SMS_BODY_FIELD_ALIASES: Map<String, List<String>> = mapOf(

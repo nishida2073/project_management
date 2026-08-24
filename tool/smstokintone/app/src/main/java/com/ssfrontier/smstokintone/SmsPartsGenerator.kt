@@ -9,6 +9,7 @@ import com.google.mlkit.genai.prompt.GenerativeModel
 import com.google.mlkit.genai.prompt.generationConfig
 import kotlinx.coroutines.flow.collect
 import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * SMS本文から生成した部品（会社名・氏名・内容）
@@ -57,11 +58,14 @@ object SmsPartsGenerator {
 
     private const val TAG = "SmsPartsGenerator"
 
-    /** 本文をキーにしたAI解析結果のキャッシュ。同じ本文を何度も解析させない */
-    private val aiResultCache = mutableMapOf<String, SmsParts>()
+    /** 本文をキーにしたAI解析結果のキャッシュ。同じ本文を何度も解析させない。
+     * 受信・送信・検索など複数のスレッドから同時に呼ばれ得るためスレッドセーフなMapを使う */
+    private val aiResultCache = ConcurrentHashMap<String, SmsParts>()
 
+    @Volatile
     private var generativeModel: GenerativeModel? = null
 
+    @Synchronized
     private fun getOrCreateModel(): GenerativeModel =
         generativeModel ?: Generation.getClient(generationConfig {}).also { generativeModel = it }
 
@@ -127,19 +131,6 @@ object SmsPartsGenerator {
             Log.w(TAG, "ML Kit GenAIの呼び出しに失敗しました: ${e.message}")
             null
         }
-    }
-
-    /**
-     * 会社名の表記ゆれを吸収し、「[AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX]<地域名>」の形に強制する。
-     *
-     * 「NTTD四国」「NTTDATA四国」「四国」など、先頭のNTT表記の有無・書き方に関わらず、
-     * 地域名部分（四国など）を残して正式な接頭辞を付け直す。既に正式な接頭辞で始まる場合はそのまま。
-     * ※現在は呼び出し元（[generateSmsParts]内）がコメントアウトされており未使用。会社名は正規化されずそのまま返る。
-     */
-    private fun normalizeCompanyName(companyName: String): String {
-        if (companyName.isEmpty() || companyName.startsWith(AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX)) return companyName
-        val rest = AppConstants.SMS_COMPANY_NAME_PREFIX_PATTERN.replaceFirst(companyName, "").trim()
-        return "${AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX}$rest"
     }
 
     private data class LabelMatch(val key: String, val value: String)
@@ -225,7 +216,6 @@ object SmsPartsGenerator {
             content = contentValueLines.drop(1).joinToString("\n")
         }
 
-        // return SmsParts(companyName = normalizeCompanyName(companyName), userName = userName, content = content)
         return SmsParts(companyName = companyName, userName = userName, content = content)
     }
 }

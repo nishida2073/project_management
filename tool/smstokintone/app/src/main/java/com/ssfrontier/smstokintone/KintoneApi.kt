@@ -38,15 +38,15 @@ object KintoneApi {
     }
 
     /**
-     * レコードを登録する。ただし送信元（[profile].fieldSender）が一致し、最終受信日時（[profile].fieldDatetime）
-     * の差が[SettingsStore.KintoneProfile.updateToleranceHours]時間以内の既存レコードが見つかった場合は、新規登録
+     * レコードを登録する。ただし送信元（[sendTarget].fieldSender）が一致し、最終受信日時（[sendTarget].fieldDatetime）
+     * の差が[SettingsStore.SendTarget.updateToleranceHours]時間以内の既存レコードが見つかった場合は、新規登録
      * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
      * 既存レコードの最終受信日時と分単位で一致し（kintoneは秒を保持しないため）、かつ既存レコードの
      * 本文に今回の本文が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
      */
     fun postRecord(
         context: Context,
-        profile: SettingsStore.KintoneProfile,
+        sendTarget: SettingsStore.SendTarget,
         senderValue: String,
         bodyValue: String,
         datetimeIsoValue: String?,
@@ -56,8 +56,8 @@ object KintoneApi {
     ): PostResult {
         val entryText = buildEntryText(datetimeIsoValue, bodyValue)
 
-        val existingResult = if (profile.fieldSender.isNotBlank() && profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
-            findExistingRecord(profile, senderValue, datetimeIsoValue)
+        val existingResult = if (sendTarget.fieldSender.isNotBlank() && sendTarget.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
+            findExistingRecord(sendTarget, senderValue, datetimeIsoValue)
         } else {
             ExistingRecordResult.NotFound
         }
@@ -85,11 +85,11 @@ object KintoneApi {
             } else {
                 datetimeIsoValue
             }
-            val record = buildRecord(profile, senderValue, mergedBody, recordDatetimeIsoValue, companyNameValue, userNameValue, contentValue)
-            updateRecord(context, profile, existing.id, record)
+            val record = buildRecord(sendTarget, senderValue, mergedBody, recordDatetimeIsoValue, companyNameValue, userNameValue, contentValue)
+            updateRecord(context, sendTarget, existing.id, record)
         } else {
-            val record = buildRecord(profile, senderValue, entryText, datetimeIsoValue, companyNameValue, userNameValue, contentValue)
-            insertRecord(context, profile, record)
+            val record = buildRecord(sendTarget, senderValue, entryText, datetimeIsoValue, companyNameValue, userNameValue, contentValue)
+            insertRecord(context, sendTarget, record)
         }
     }
 
@@ -152,7 +152,7 @@ object KintoneApi {
     }
 
     private fun buildRecord(
-        profile: SettingsStore.KintoneProfile,
+        sendTarget: SettingsStore.SendTarget,
         senderValue: String,
         bodyValue: String,
         datetimeIsoValue: String?,
@@ -161,70 +161,70 @@ object KintoneApi {
         contentValue: String = ""
     ): JSONObject {
         val record = JSONObject()
-        if (profile.fieldSender.isNotBlank()) {
-            record.put(profile.fieldSender, JSONObject().put("value", senderValue))
+        if (sendTarget.fieldSender.isNotBlank()) {
+            record.put(sendTarget.fieldSender, JSONObject().put("value", senderValue))
         }
-        record.put(profile.fieldBody, JSONObject().put("value", bodyValue))
-        if (profile.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
-            record.put(profile.fieldDatetime, JSONObject().put("value", datetimeIsoValue))
+        record.put(sendTarget.fieldBody, JSONObject().put("value", bodyValue))
+        if (sendTarget.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
+            record.put(sendTarget.fieldDatetime, JSONObject().put("value", datetimeIsoValue))
         }
-        if (profile.fieldType.isNotBlank()) {
-            record.put(profile.fieldType, JSONObject().put("value", AppConstants.REGISTRATION_TYPE_VALUE))
+        if (sendTarget.fieldType.isNotBlank()) {
+            record.put(sendTarget.fieldType, JSONObject().put("value", AppConstants.REGISTRATION_TYPE_VALUE))
         }
         // SMS本文からパースした会社名・氏名・内容。
         // フィールドコードが未設定（空文字）、または抽出できた値が空の場合はkintone側に送らない。
-        if (profile.fieldCompanyName.isNotBlank() && companyNameValue.isNotBlank()) {
-            record.put(profile.fieldCompanyName, JSONObject().put("value", companyNameValue))
+        if (sendTarget.fieldCompanyName.isNotBlank() && companyNameValue.isNotBlank()) {
+            record.put(sendTarget.fieldCompanyName, JSONObject().put("value", companyNameValue))
         }
-        if (profile.fieldUserName.isNotBlank() && userNameValue.isNotBlank()) {
-            record.put(profile.fieldUserName, JSONObject().put("value", userNameValue))
+        if (sendTarget.fieldUserName.isNotBlank() && userNameValue.isNotBlank()) {
+            record.put(sendTarget.fieldUserName, JSONObject().put("value", userNameValue))
         }
-        if (profile.fieldContent.isNotBlank() && contentValue.isNotBlank()) {
-            record.put(profile.fieldContent, JSONObject().put("value", contentValue))
+        if (sendTarget.fieldContent.isNotBlank() && contentValue.isNotBlank()) {
+            record.put(sendTarget.fieldContent, JSONObject().put("value", contentValue))
         }
         return record
     }
 
     /**
-     * 送信元が一致し、最終受信日時の差が[SettingsStore.KintoneProfile.updateToleranceHours]時間以内の既存レコードを
+     * 送信元が一致し、最終受信日時の差が[SettingsStore.SendTarget.updateToleranceHours]時間以内の既存レコードを
      * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。見つからない場合は[ExistingRecordResult.NotFound]、
      * 検索自体が失敗した場合は[ExistingRecordResult.SearchFailed]を返す（新規登録との誤判定を防ぐため、
      * 検索失敗と未検出を区別する）
      */
-    private fun findExistingRecord(profile: SettingsStore.KintoneProfile, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
+    private fun findExistingRecord(sendTarget: SettingsStore.SendTarget, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
         val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return ExistingRecordResult.NotFound
 
-        val toleranceMillis = profile.updateToleranceHours.coerceAtLeast(0) * 3_600_000L
+        val toleranceMillis = sendTarget.updateToleranceHours.coerceAtLeast(0) * 3_600_000L
         val rangeStart = isoFormat.format(Date(baseMillis - toleranceMillis))
         val rangeEnd = isoFormat.format(Date(baseMillis + toleranceMillis))
 
-        val typeCondition = if (profile.fieldType.isNotBlank()) {
-            "${profile.fieldType} in (\"${escapeForQuery(AppConstants.REGISTRATION_TYPE_VALUE)}\") and "
+        val typeCondition = if (sendTarget.fieldType.isNotBlank()) {
+            "${sendTarget.fieldType} in (\"${escapeForQuery(AppConstants.REGISTRATION_TYPE_VALUE)}\") and "
         } else {
             ""
         }
         val query = typeCondition +
-            "${profile.fieldSender} = \"${escapeForQuery(senderValue)}\" and " +
-            "${profile.fieldDatetime} >= \"$rangeStart\" and " +
-            "${profile.fieldDatetime} <= \"$rangeEnd\" " +
-            "order by ${profile.fieldDatetime} desc limit 1"
+            "${sendTarget.fieldSender} = \"${escapeForQuery(senderValue)}\" and " +
+            "${sendTarget.fieldDatetime} >= \"$rangeStart\" and " +
+            "${sendTarget.fieldDatetime} <= \"$rangeEnd\" " +
+            "order by ${sendTarget.fieldDatetime} desc limit 1"
 
         val url = HttpUrl.Builder()
             .scheme("https")
-            .host("${profile.subdomain}.cybozu.com")
+            .host("${sendTarget.subdomain}.cybozu.com")
             .addPathSegments("k/v1/records.json")
-            .addQueryParameter("app", profile.appId)
+            .addQueryParameter("app", sendTarget.appId)
             .addQueryParameter("query", query)
             .addQueryParameter("fields[0]", "\$id")
-            .addQueryParameter("fields[1]", profile.fieldBody)
-            .addQueryParameter("fields[2]", profile.fieldDatetime)
+            .addQueryParameter("fields[1]", sendTarget.fieldBody)
+            .addQueryParameter("fields[2]", sendTarget.fieldDatetime)
             .build()
 
         val requestBuilder = Request.Builder().url(url).get()
-        addAuthHeader(requestBuilder, profile)
+        addAuthHeader(requestBuilder, sendTarget)
 
         return try {
             OkHttpClient().newCall(requestBuilder.build()).execute().use { response ->
@@ -236,8 +236,8 @@ object KintoneApi {
                 val records = JSONObject(response.body?.string() ?: "{}").optJSONArray("records")
                 val first = records?.optJSONObject(0) ?: return ExistingRecordResult.NotFound
                 val id = first.getJSONObject("\$id").getString("value")
-                val bodyValue = first.optJSONObject(profile.fieldBody)?.optString("value", "") ?: ""
-                val datetimeValue = first.optJSONObject(profile.fieldDatetime)?.optString("value", "") ?: ""
+                val bodyValue = first.optJSONObject(sendTarget.fieldBody)?.optString("value", "") ?: ""
+                val datetimeValue = first.optJSONObject(sendTarget.fieldDatetime)?.optString("value", "") ?: ""
                 ExistingRecordResult.Found(ExistingRecord(id, bodyValue, datetimeValue))
             }
         } catch (e: IOException) {
@@ -249,39 +249,39 @@ object KintoneApi {
     private fun escapeForQuery(value: String): String =
         value.replace("\\", "\\\\").replace("\"", "\\\"")
 
-    private fun insertRecord(context: Context, profile: SettingsStore.KintoneProfile, record: JSONObject): PostResult {
+    private fun insertRecord(context: Context, sendTarget: SettingsStore.SendTarget, record: JSONObject): PostResult {
         val payload = JSONObject()
-            .put("app", profile.appId)
+            .put("app", sendTarget.appId)
             .put("record", record)
 
         val requestBuilder = Request.Builder()
-            .url("https://${profile.subdomain}.cybozu.com/k/v1/record.json")
+            .url("https://${sendTarget.subdomain}.cybozu.com/k/v1/record.json")
             .post(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
-        addAuthHeader(requestBuilder, profile)
+        addAuthHeader(requestBuilder, sendTarget)
 
         return execute(requestBuilder, successMessage = context.getString(R.string.message_log_send_complete_create_success))
     }
 
-    private fun updateRecord(context: Context, profile: SettingsStore.KintoneProfile, recordId: String, record: JSONObject): PostResult {
+    private fun updateRecord(context: Context, sendTarget: SettingsStore.SendTarget, recordId: String, record: JSONObject): PostResult {
         val payload = JSONObject()
-            .put("app", profile.appId)
+            .put("app", sendTarget.appId)
             .put("id", recordId)
             .put("record", record)
 
         val requestBuilder = Request.Builder()
-            .url("https://${profile.subdomain}.cybozu.com/k/v1/record.json")
+            .url("https://${sendTarget.subdomain}.cybozu.com/k/v1/record.json")
             .put(payload.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
-        addAuthHeader(requestBuilder, profile)
+        addAuthHeader(requestBuilder, sendTarget)
 
         return execute(requestBuilder, successMessage = context.getString(R.string.message_log_send_complete_update_success))
     }
 
-    private fun addAuthHeader(requestBuilder: Request.Builder, profile: SettingsStore.KintoneProfile) {
-        when (profile.authMethod) {
+    private fun addAuthHeader(requestBuilder: Request.Builder, sendTarget: SettingsStore.SendTarget) {
+        when (sendTarget.authMethod) {
             SettingsStore.AuthMethod.API_TOKEN ->
-                requestBuilder.addHeader("X-Cybozu-API-Token", profile.apiToken)
+                requestBuilder.addHeader("X-Cybozu-API-Token", sendTarget.apiToken)
             SettingsStore.AuthMethod.PASSWORD -> {
-                val credentials = "${profile.loginName}:${profile.loginPassword}"
+                val credentials = "${sendTarget.loginName}:${sendTarget.loginPassword}"
                 val encoded = Base64.encodeToString(
                     credentials.toByteArray(Charsets.UTF_8),
                     Base64.NO_WRAP

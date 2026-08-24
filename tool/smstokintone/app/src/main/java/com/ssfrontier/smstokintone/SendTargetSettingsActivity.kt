@@ -5,8 +5,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.ssfrontier.smstokintone.databinding.ActivityKintoneSettingsBinding
-import com.ssfrontier.smstokintone.databinding.ItemKintoneProfileBinding
+import com.ssfrontier.smstokintone.databinding.ActivitySendTargetSettingsBinding
+import com.ssfrontier.smstokintone.databinding.ItemSendTargetBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,57 +16,57 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-class KintoneSettingsActivity : AppCompatActivity() {
+class SendTargetSettingsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityKintoneSettingsBinding
+    private lateinit var binding: ActivitySendTargetSettingsBinding
 
-    private class ProfileCard(val id: String, val binding: ItemKintoneProfileBinding)
+    private class SendTargetCard(val id: String, val binding: ItemSendTargetBinding)
 
-    private val profileCards = mutableListOf<ProfileCard>()
+    private val sendTargetCards = mutableListOf<SendTargetCard>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityKintoneSettingsBinding.inflate(layoutInflater)
+        binding = ActivitySendTargetSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.tvKintoneSettingsDescription.visibility =
-            if (getString(R.string.send_settings_description).isBlank()) View.GONE else View.VISIBLE
+        binding.tvSendTargetSettingsDescription.visibility =
+            if (getString(R.string.send_target_settings_description).isBlank()) View.GONE else View.VISIBLE
 
-        SettingsStore.loadProfiles(this).forEach { addProfileCard(it) }
+        SettingsStore.loadSendTargets(this).forEach { addSendTargetCard(it) }
 
-        binding.btnAddProfile.setOnClickListener {
-            val newCardView = addProfileCard(SettingsStore.KintoneProfile.newEmpty())
-            newCardView.post { binding.svKintoneSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svKintoneSettings)) }
+        binding.btnAddSendTarget.setOnClickListener {
+            val newCardView = addSendTargetCard(SettingsStore.SendTarget.newEmpty())
+            newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
         binding.btnSave.setOnClickListener { onSaveClicked() }
     }
 
-    private fun addProfileCard(profile: SettingsStore.KintoneProfile, insertAt: Int = -1): View {
-        val itemBinding = ItemKintoneProfileBinding.inflate(layoutInflater, binding.llProfilesContainer, false)
-        val card = ProfileCard(profile.id, itemBinding)
+    private fun addSendTargetCard(sendTarget: SettingsStore.SendTarget, insertAt: Int = -1): View {
+        val itemBinding = ItemSendTargetBinding.inflate(layoutInflater, binding.llSendTargetsContainer, false)
+        val card = SendTargetCard(sendTarget.id, itemBinding)
 
-        itemBinding.etProfileName.setText(profile.name)
-        itemBinding.etKeywords.setText(profile.keywords)
-        itemBinding.etSubdomain.setText(profile.subdomain)
-        itemBinding.etAppId.setText(profile.appId)
-        itemBinding.etApiToken.setText(profile.apiToken)
-        itemBinding.etLoginName.setText(profile.loginName)
-        itemBinding.etLoginPassword.setText(profile.loginPassword)
-        itemBinding.etFieldSender.setText(profile.fieldSender)
-        itemBinding.etFieldBody.setText(profile.fieldBody)
-        itemBinding.etFieldDatetime.setText(profile.fieldDatetime)
-        itemBinding.etFieldType.setText(profile.fieldType)
-        itemBinding.etFieldCompanyName.setText(profile.fieldCompanyName)
-        itemBinding.etFieldUserName.setText(profile.fieldUserName)
-        itemBinding.etFieldContent.setText(profile.fieldContent)
-        itemBinding.etUpdateToleranceHours.setText(profile.updateToleranceHours.toString())
-        itemBinding.swCompanyNameWidthConversionEnabled.isChecked = profile.companyNameWidthConversionEnabled
+        itemBinding.etSendTargetName.setText(sendTarget.name)
+        itemBinding.etKeywords.setText(sendTarget.keywords)
+        itemBinding.etSubdomain.setText(sendTarget.subdomain)
+        itemBinding.etAppId.setText(sendTarget.appId)
+        itemBinding.etApiToken.setText(sendTarget.apiToken)
+        itemBinding.etLoginName.setText(sendTarget.loginName)
+        itemBinding.etLoginPassword.setText(sendTarget.loginPassword)
+        itemBinding.etFieldSender.setText(sendTarget.fieldSender)
+        itemBinding.etFieldBody.setText(sendTarget.fieldBody)
+        itemBinding.etFieldDatetime.setText(sendTarget.fieldDatetime)
+        itemBinding.etFieldType.setText(sendTarget.fieldType)
+        itemBinding.etFieldCompanyName.setText(sendTarget.fieldCompanyName)
+        itemBinding.etFieldUserName.setText(sendTarget.fieldUserName)
+        itemBinding.etFieldContent.setText(sendTarget.fieldContent)
+        itemBinding.etUpdateToleranceHours.setText(sendTarget.updateToleranceHours.toString())
+        itemBinding.swCompanyNameWidthConversionEnabled.isChecked = sendTarget.companyNameWidthConversionEnabled
 
-        when (profile.authMethod) {
+        when (sendTarget.authMethod) {
             SettingsStore.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
             SettingsStore.AuthMethod.PASSWORD -> itemBinding.rbAuthPassword.isChecked = true
         }
-        updateAuthMethodVisibility(itemBinding, profile.authMethod)
+        updateAuthMethodVisibility(itemBinding, sendTarget.authMethod)
 
         itemBinding.rgAuthMethod.setOnCheckedChangeListener { _, checkedId ->
             val method = if (checkedId == itemBinding.rbAuthPassword.id) {
@@ -77,27 +77,27 @@ class KintoneSettingsActivity : AppCompatActivity() {
             updateAuthMethodVisibility(itemBinding, method)
         }
 
-        itemBinding.btnCopyProfile.setOnClickListener {
-            val source = readProfileFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
-            val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_profile_copy)
-            val newCardView = addProfileCard(source.copy(name = copyName), insertAt = profileCards.indexOf(card) + 1)
-            newCardView.post { binding.svKintoneSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svKintoneSettings)) }
+        itemBinding.btnCopySendTarget.setOnClickListener {
+            val source = readSendTargetFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
+            val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_send_target_copy)
+            val newCardView = addSendTargetCard(source.copy(name = copyName), insertAt = sendTargetCards.indexOf(card) + 1)
+            newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
 
-        itemBinding.btnDeleteProfile.setOnClickListener {
-            binding.llProfilesContainer.removeView(itemBinding.root)
-            profileCards.remove(card)
+        itemBinding.btnDeleteSendTarget.setOnClickListener {
+            binding.llSendTargetsContainer.removeView(itemBinding.root)
+            sendTargetCards.remove(card)
             renumberCards()
         }
 
         itemBinding.btnTestSend.setOnClickListener { onTestSendClicked(itemBinding, card) }
 
-        if (insertAt < 0 || insertAt >= profileCards.size) {
-            binding.llProfilesContainer.addView(itemBinding.root)
-            profileCards.add(card)
+        if (insertAt < 0 || insertAt >= sendTargetCards.size) {
+            binding.llSendTargetsContainer.addView(itemBinding.root)
+            sendTargetCards.add(card)
         } else {
-            binding.llProfilesContainer.addView(itemBinding.root, insertAt)
-            profileCards.add(insertAt, card)
+            binding.llSendTargetsContainer.addView(itemBinding.root, insertAt)
+            sendTargetCards.add(insertAt, card)
         }
         renumberCards()
         return itemBinding.root
@@ -114,16 +114,16 @@ class KintoneSettingsActivity : AppCompatActivity() {
         return top
     }
 
-    private fun readProfileFromBinding(itemBinding: ItemKintoneProfileBinding, id: String): SettingsStore.KintoneProfile {
+    private fun readSendTargetFromBinding(itemBinding: ItemSendTargetBinding, id: String): SettingsStore.SendTarget {
         val authMethod = if (itemBinding.rbAuthPassword.isChecked) {
             SettingsStore.AuthMethod.PASSWORD
         } else {
             SettingsStore.AuthMethod.API_TOKEN
         }
 
-        return SettingsStore.KintoneProfile(
+        return SettingsStore.SendTarget(
             id = id,
-            name = itemBinding.etProfileName.text.toString().trim(),
+            name = itemBinding.etSendTargetName.text.toString().trim(),
             keywords = itemBinding.etKeywords.text.toString().trim(),
             subdomain = itemBinding.etSubdomain.text.toString().trim(),
             appId = itemBinding.etAppId.text.toString().trim(),
@@ -144,11 +144,11 @@ class KintoneSettingsActivity : AppCompatActivity() {
         )
     }
 
-    private fun onTestSendClicked(itemBinding: ItemKintoneProfileBinding, card: ProfileCard) {
-        val profile = readProfileFromBinding(itemBinding, id = card.id)
-        if (!profile.isValid) {
-            val index = profileCards.indexOf(card)
-            val label = profile.name.ifBlank { getString(R.string.label_profile_index, index + 1) }
+    private fun onTestSendClicked(itemBinding: ItemSendTargetBinding, card: SendTargetCard) {
+        val sendTarget = readSendTargetFromBinding(itemBinding, id = card.id)
+        if (!sendTarget.isValid) {
+            val index = sendTargetCards.indexOf(card)
+            val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
             AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_validation_error)
                 .setMessage(getString(R.string.dialog_message_validation_error, label))
@@ -157,7 +157,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
             return
         }
 
-        val datetimeIso = if (profile.fieldDatetime.isNotBlank()) {
+        val datetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
             SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
             }.format(Date())
@@ -170,7 +170,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
         itemBinding.btnTestSend.isEnabled = false
         CoroutineScope(Dispatchers.Main).launch {
             val smsParts = SmsPartsGenerator.resolveSmsParts(testBody, SettingsStore.load(applicationContext).aiParsingEnabled)
-            val companyNameValue = if (profile.companyNameWidthConversionEnabled) {
+            val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
                 smsParts.companyNameNormalizedWidth
             } else {
                 smsParts.companyName
@@ -178,7 +178,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
             val result = withContext(Dispatchers.IO) {
                 KintoneApi.postRecord(
                     applicationContext,
-                    profile,
+                    sendTarget,
                     senderValue = AppConstants.TEST_SEND_SENDER,
                     bodyValue = testBody,
                     datetimeIsoValue = datetimeIso,
@@ -195,7 +195,7 @@ class KintoneSettingsActivity : AppCompatActivity() {
                 is KintoneApi.PostResult.HttpFailure -> getString(R.string.dialog_message_test_send_result_failure, "${result.code} ${result.detail}")
                 is KintoneApi.PostResult.NetworkError -> getString(R.string.dialog_message_test_send_result_network_error, result.message)
             }
-            AlertDialog.Builder(this@KintoneSettingsActivity)
+            AlertDialog.Builder(this@SendTargetSettingsActivity)
                 .setTitle(R.string.dialog_title_test_send_result)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
@@ -204,12 +204,12 @@ class KintoneSettingsActivity : AppCompatActivity() {
     }
 
     private fun renumberCards() {
-        profileCards.forEachIndexed { index, card ->
-            card.binding.tvProfileIndex.text = getString(R.string.label_profile_index, index + 1)
+        sendTargetCards.forEachIndexed { index, card ->
+            card.binding.tvSendTargetIndex.text = getString(R.string.label_send_target_index, index + 1)
         }
     }
 
-    private fun updateAuthMethodVisibility(itemBinding: ItemKintoneProfileBinding, method: SettingsStore.AuthMethod) {
+    private fun updateAuthMethodVisibility(itemBinding: ItemSendTargetBinding, method: SettingsStore.AuthMethod) {
         itemBinding.tilApiToken.visibility = if (method == SettingsStore.AuthMethod.API_TOKEN) {
             View.VISIBLE
         } else {
@@ -223,13 +223,13 @@ class KintoneSettingsActivity : AppCompatActivity() {
     }
 
     private fun onSaveClicked() {
-        val newProfiles = mutableListOf<SettingsStore.KintoneProfile>()
+        val newSendTargets = mutableListOf<SettingsStore.SendTarget>()
 
-        for ((index, card) in profileCards.withIndex()) {
-            val profile = readProfileFromBinding(card.binding, id = card.id)
+        for ((index, card) in sendTargetCards.withIndex()) {
+            val sendTarget = readSendTargetFromBinding(card.binding, id = card.id)
 
-            if (!profile.isValid) {
-                val label = profile.name.ifBlank { getString(R.string.label_profile_index, index + 1) }
+            if (!sendTarget.isValid) {
+                val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
                 AlertDialog.Builder(this)
                     .setTitle(R.string.dialog_title_validation_error)
                     .setMessage(getString(R.string.dialog_message_validation_error, label))
@@ -238,10 +238,10 @@ class KintoneSettingsActivity : AppCompatActivity() {
                 return
             }
 
-            newProfiles.add(profile)
+            newSendTargets.add(sendTarget)
         }
 
-        SettingsStore.saveProfiles(this, newProfiles)
+        SettingsStore.saveSendTargets(this, newSendTargets)
         Toast.makeText(this, getString(R.string.toast_settings_saved), Toast.LENGTH_SHORT).show()
         finish()
     }

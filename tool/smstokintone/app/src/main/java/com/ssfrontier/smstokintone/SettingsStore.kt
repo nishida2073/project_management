@@ -12,7 +12,7 @@ object SettingsStore {
     private const val KEY_SEND_ENABLED = "send_enabled"
     private const val KEY_SEND_SPLIT_FAILED_ENABLED = "send_split_failed_enabled"
     private const val KEY_SEARCH_SPLIT_FAILED_ENABLED = "search_split_failed_enabled"
-    private const val KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED = "search_profile_unconfigured_enabled"
+    private const val KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED = "search_send_target_unconfigured_enabled"
     private const val KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED = "auto_reply_split_failed_enabled"
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
@@ -23,10 +23,10 @@ object SettingsStore {
     private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
     private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
     private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
-    private const val KEY_DEFAULT_PROFILE_FILTER_ID = "default_profile_filter_id"
+    private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
     private const val KEY_AI_PARSING_ENABLED = "ai_parsing_enabled"
 
-    private const val KEY_KINTONE_PROFILES = "kintone_profiles"
+    private const val KEY_SEND_TARGETS = "send_targets"
 
     enum class AuthMethod {
         API_TOKEN,
@@ -53,15 +53,15 @@ object SettingsStore {
         }
     }
 
-    /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[KintoneProfile]を参照） */
+    /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[SendTarget]を参照） */
     data class Config(
         val sendEnabled: Boolean,
         /** 自動送信時、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
         val sendSplitFailedEnabled: Boolean,
         /** SMS検索画面で、本文の形式が不正なSMSを選択可能にするかどうか */
         val searchSplitFailedEnabled: Boolean,
-        /** SMS検索画面で、送信先プロファイルが未設定（一致するプロファイルが無い、または不正）のSMSを選択可能にするかどうか */
-        val searchProfileUnconfiguredEnabled: Boolean,
+        /** SMS検索画面で、送信先送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
+        val searchSendTargetUnconfiguredEnabled: Boolean,
         /** 自動受信時、本文の形式が不正なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
         val autoReplySplitFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
@@ -80,21 +80,21 @@ object SettingsStore {
         /** 分割失敗のSMSへの返信時、[defaultReplyBody]の代わりに使う文言 */
         val splitFailedReplyAddition: String,
         /**
-         * SMS検索画面を開いた際に「送信先」フィルタへ初期設定するプロファイルID。
-         * nullは「すべて」、[AppConstants.PROFILE_FILTER_KEY_UNSET]は「未設定」を表す
+         * SMS検索画面を開いた際に「送信先」フィルタへ初期設定する送信先ID。
+         * nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す
          */
-        val defaultProfileFilterId: String?,
+        val defaultSendTargetFilterId: String?,
         /** 本文からの会社名・氏名・内容の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
          * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
         val aiParsingEnabled: Boolean
     )
 
     /**
-     * kintoneへの接続設定の1プロファイル。SMS本文に[keywords]のいずれかが含まれる場合にこの
-     * プロファイルが使われる。[keywords]が空の場合はどのプロファイルにも一致しなかった時の
+     * kintoneへの接続設定の1送信先。SMS本文に[keywords]のいずれかが含まれる場合にこの
+     * 送信先が使われる。[keywords]が空の場合はどの送信先にも一致しなかった時の
      * デフォルト（フォールバック）として扱われる。
      */
-    data class KintoneProfile(
+    data class SendTarget(
         val id: String,
         val name: String,
         val keywords: String,
@@ -124,7 +124,7 @@ object SettingsStore {
 
         /** ログ表示用の名称。表示名が未設定の場合のフォールバック文字列を返す */
         fun displayName(context: Context): String =
-            name.ifBlank { context.getString(R.string.label_profile_name_unset) }
+            name.ifBlank { context.getString(R.string.label_send_target_name_unset) }
 
         val isValid: Boolean
             get() {
@@ -139,7 +139,7 @@ object SettingsStore {
         fun matches(body: String): Boolean = keywordList.any { TextNormalization.matches(body, it) }
 
         companion object {
-            fun newEmpty(): KintoneProfile = KintoneProfile(
+            fun newEmpty(): SendTarget = SendTarget(
                 id = UUID.randomUUID().toString(),
                 name = "",
                 keywords = "",
@@ -169,7 +169,7 @@ object SettingsStore {
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
             .putBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, config.sendSplitFailedEnabled)
             .putBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, config.searchSplitFailedEnabled)
-            .putBoolean(KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED, config.searchProfileUnconfiguredEnabled)
+            .putBoolean(KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED, config.searchSendTargetUnconfiguredEnabled)
             .putBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, config.autoReplySplitFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
@@ -181,10 +181,10 @@ object SettingsStore {
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
             .putBoolean(KEY_AI_PARSING_ENABLED, config.aiParsingEnabled)
-        if (config.defaultProfileFilterId != null) {
-            editor.putString(KEY_DEFAULT_PROFILE_FILTER_ID, config.defaultProfileFilterId)
+        if (config.defaultSendTargetFilterId != null) {
+            editor.putString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, config.defaultSendTargetFilterId)
         } else {
-            editor.remove(KEY_DEFAULT_PROFILE_FILTER_ID)
+            editor.remove(KEY_DEFAULT_SEND_TARGET_FILTER_ID)
         }
         editor.apply()
     }
@@ -195,7 +195,7 @@ object SettingsStore {
             sendEnabled = p.getBoolean(KEY_SEND_ENABLED, true),
             sendSplitFailedEnabled = p.getBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, false),
             searchSplitFailedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, false),
-            searchProfileUnconfiguredEnabled = p.getBoolean(KEY_SEARCH_PROFILE_UNCONFIGURED_ENABLED, false),
+            searchSendTargetUnconfiguredEnabled = p.getBoolean(KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED, false),
             autoReplySplitFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, false),
             autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
@@ -216,59 +216,59 @@ object SettingsStore {
             defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, AppDefaults.SMS_STANDARD_REPLY_BODY) ?: AppDefaults.SMS_STANDARD_REPLY_BODY,
             splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY)
                 ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
-            defaultProfileFilterId = p.getString(KEY_DEFAULT_PROFILE_FILTER_ID, null),
+            defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, null),
             aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, false)
         )
     }
 
     /**
-     * SMS検索画面・アプリ設定画面の「送信先」選択肢（すべて／各プロファイル／未設定）を
+     * SMS検索画面・アプリ設定画面の「送信先」選択肢（すべて／各送信先／未設定）を
      * キーと表示ラベルの組で返す。キーがnullの選択肢は「すべて」、
-     * [AppConstants.PROFILE_FILTER_KEY_UNSET]は「未設定」を表す
+     * [AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す
      */
-    fun profileFilterOptions(context: Context): List<Pair<String?, String>> {
-        val profiles = loadProfiles(context)
-        return listOf(null to context.getString(R.string.filter_profile_all)) +
-            profiles.map { it.id to it.displayName(context) } +
-            listOf(AppConstants.PROFILE_FILTER_KEY_UNSET to context.getString(R.string.label_profile_none))
+    fun sendTargetFilterOptions(context: Context): List<Pair<String?, String>> {
+        val sendTargets = loadSendTargets(context)
+        return listOf(null to context.getString(R.string.filter_send_target_all)) +
+            sendTargets.map { it.id to it.displayName(context) } +
+            listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_none))
     }
 
-    fun saveProfiles(context: Context, profiles: List<KintoneProfile>) {
+    fun saveSendTargets(context: Context, sendTargets: List<SendTarget>) {
         val array = JSONArray()
-        profiles.forEach { profile ->
+        sendTargets.forEach { sendTarget ->
             array.put(
                 JSONObject()
-                    .put("id", profile.id)
-                    .put("name", profile.name)
-                    .put("keywords", profile.keywords)
-                    .put("subdomain", profile.subdomain)
-                    .put("appId", profile.appId)
-                    .put("authMethod", profile.authMethod.name)
-                    .put("apiToken", profile.apiToken)
-                    .put("loginName", profile.loginName)
-                    .put("loginPassword", profile.loginPassword)
-                    .put("fieldSender", profile.fieldSender)
-                    .put("fieldBody", profile.fieldBody)
-                    .put("fieldDatetime", profile.fieldDatetime)
-                    .put("fieldType", profile.fieldType)
-                    .put("updateToleranceHours", profile.updateToleranceHours)
-                    .put("fieldCompanyName", profile.fieldCompanyName)
-                    .put("fieldUserName", profile.fieldUserName)
-                    .put("fieldContent", profile.fieldContent)
-                    .put("companyNameWidthConversionEnabled", profile.companyNameWidthConversionEnabled)
+                    .put("id", sendTarget.id)
+                    .put("name", sendTarget.name)
+                    .put("keywords", sendTarget.keywords)
+                    .put("subdomain", sendTarget.subdomain)
+                    .put("appId", sendTarget.appId)
+                    .put("authMethod", sendTarget.authMethod.name)
+                    .put("apiToken", sendTarget.apiToken)
+                    .put("loginName", sendTarget.loginName)
+                    .put("loginPassword", sendTarget.loginPassword)
+                    .put("fieldSender", sendTarget.fieldSender)
+                    .put("fieldBody", sendTarget.fieldBody)
+                    .put("fieldDatetime", sendTarget.fieldDatetime)
+                    .put("fieldType", sendTarget.fieldType)
+                    .put("updateToleranceHours", sendTarget.updateToleranceHours)
+                    .put("fieldCompanyName", sendTarget.fieldCompanyName)
+                    .put("fieldUserName", sendTarget.fieldUserName)
+                    .put("fieldContent", sendTarget.fieldContent)
+                    .put("companyNameWidthConversionEnabled", sendTarget.companyNameWidthConversionEnabled)
             )
         }
-        prefs(context).edit().putString(KEY_KINTONE_PROFILES, array.toString()).apply()
+        prefs(context).edit().putString(KEY_SEND_TARGETS, array.toString()).apply()
     }
 
-    fun loadProfiles(context: Context): List<KintoneProfile> {
-        val json = prefs(context).getString(KEY_KINTONE_PROFILES, null)
-            ?: return createDefaultProfile(context)
+    fun loadSendTargets(context: Context): List<SendTarget> {
+        val json = prefs(context).getString(KEY_SEND_TARGETS, null)
+            ?: return createDefaultSendTarget(context)
 
         val array = JSONArray(json)
         return (0 until array.length()).map { i ->
             val obj = array.getJSONObject(i)
-            KintoneProfile(
+            SendTarget(
                 id = obj.optString("id", UUID.randomUUID().toString()),
                 name = obj.optString("name", ""),
                 keywords = obj.optString("keywords", ""),
@@ -291,21 +291,21 @@ object SettingsStore {
         }
     }
 
-    /** 保存済みのプロファイルが1件もない場合に、初期値のみの空プロファイルを1件作成する */
-    private fun createDefaultProfile(context: Context): List<KintoneProfile> {
-        val profiles = listOf(KintoneProfile.newEmpty())
-        saveProfiles(context, profiles)
-        return profiles
+    /** 保存済みの送信先が1件もない場合に、初期値のみの空送信先を1件作成する */
+    private fun createDefaultSendTarget(context: Context): List<SendTarget> {
+        val sendTargets = listOf(SendTarget.newEmpty())
+        saveSendTargets(context, sendTargets)
+        return sendTargets
     }
 
     /**
-     * SMS本文に一致するプロファイルを探す。キーワードを持つプロファイルのうち本文に一致する
-     * 最初のものを優先し、一致するものがなければキーワード未設定（デフォルト）のプロファイルに
+     * SMS本文に一致する送信先を探す。キーワードを持つ送信先のうち本文に一致する
+     * 最初のものを優先し、一致するものがなければキーワード未設定（デフォルト）の送信先に
      * フォールバックする。該当するものがなければnullを返す。
      */
-    fun findProfileForBody(context: Context, body: String): KintoneProfile? {
-        val profiles = loadProfiles(context)
-        profiles.firstOrNull { !it.isDefault && it.matches(body) }?.let { return it }
-        return profiles.firstOrNull { it.isDefault }
+    fun findSendTargetForBody(context: Context, body: String): SendTarget? {
+        val sendTargets = loadSendTargets(context)
+        sendTargets.firstOrNull { !it.isDefault && it.matches(body) }?.let { return it }
+        return sendTargets.firstOrNull { it.isDefault }
     }
 }

@@ -15,8 +15,8 @@ class TopActivity : AppCompatActivity() {
         binding = ActivityTopBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnOpenKintoneSettings.setOnClickListener {
-            startActivity(Intent(this, KintoneSettingsActivity::class.java))
+        binding.btnOpenSendTargetSettings.setOnClickListener {
+            startActivity(Intent(this, SendTargetSettingsActivity::class.java))
         }
         binding.btnOpenAppSettings.setOnClickListener {
             startActivity(Intent(this, AppSettingsActivity::class.java))

@@ -11,21 +11,21 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/title_send_settings"
+        android:text="@string/title_send_target_settings"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurface" />
 
     <TextView
-        android:id="@+id/tvKintoneSettingsDescription"
+        android:id="@+id/tvSendTargetSettingsDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="@string/send_settings_description"
+        android:text="@string/send_target_settings_description"
         android:textColor="?android:attr/textColorSecondary" />
 
     <ScrollView
-        android:id="@+id/svKintoneSettings"
+        android:id="@+id/svSendTargetSettings"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -39,18 +39,18 @@
             android:paddingBottom="24dp">
 
         <LinearLayout
-            android:id="@+id/llProfilesContainer"
+            android:id="@+id/llSendTargetsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddProfile"
+            android:id="@+id/btnAddSendTarget"
             style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_add_profile" />
+            android:text="@string/btn_add_send_target" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSave"

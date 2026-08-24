@@ -20,7 +20,7 @@
             android:gravity="center_vertical">
 
             <TextView
-                android:id="@+id/tvProfileIndex"
+                android:id="@+id/tvSendTargetIndex"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -30,19 +30,19 @@
                 tools:text="設定 1" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCopyProfile"
+                android:id="@+id/btnCopySendTarget"
                 style="@style/AppButton.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/btn_copy_profile" />
+                android:text="@string/btn_copy_send_target" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDeleteProfile"
+                android:id="@+id/btnDeleteSendTarget"
                 style="@style/AppButton.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="@string/btn_delete_profile" />
+                android:text="@string/btn_delete_send_target" />
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
@@ -76,7 +76,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_profile_name"
+                        android:text="@string/section_send_target_name"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -89,10 +89,10 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_profile_name">
+                            android:hint="@string/hint_send_target_name">
 
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etProfileName"
+                                android:id="@+id/etSendTargetName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="text" />

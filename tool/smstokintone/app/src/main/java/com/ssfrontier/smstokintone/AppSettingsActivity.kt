@@ -18,7 +18,7 @@ class AppSettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAppSettingsBinding
 
-    private var defaultProfileFilterKeys: List<String?> = emptyList()
+    private var defaultSendTargetFilterKeys: List<String?> = emptyList()
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -78,9 +78,9 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(searchSplitFailedEnabled = isChecked))
         }
 
-        binding.swSearchProfileUnconfiguredEnabled.isChecked = SettingsStore.load(this).searchProfileUnconfiguredEnabled
-        binding.swSearchProfileUnconfiguredEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(searchProfileUnconfiguredEnabled = isChecked))
+        binding.swSearchSendTargetUnconfiguredEnabled.isChecked = SettingsStore.load(this).searchSendTargetUnconfiguredEnabled
+        binding.swSearchSendTargetUnconfiguredEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(searchSendTargetUnconfiguredEnabled = isChecked))
         }
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
@@ -137,10 +137,10 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(searchFiltersVisibleByDefault = visible))
         }
 
-        binding.spDefaultProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val profileId = defaultProfileFilterKeys.getOrNull(position)
-                SettingsStore.save(this@AppSettingsActivity, SettingsStore.load(this@AppSettingsActivity).copy(defaultProfileFilterId = profileId))
+                val sendTargetId = defaultSendTargetFilterKeys.getOrNull(position)
+                SettingsStore.save(this@AppSettingsActivity, SettingsStore.load(this@AppSettingsActivity).copy(defaultSendTargetFilterId = sendTargetId))
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -199,20 +199,20 @@ class AppSettingsActivity : AppCompatActivity() {
         updatePermissionStatus()
         updateSendPermissionStatus()
         updateReadPermissionStatus()
-        refreshDefaultProfileFilterOptions()
+        refreshDefaultSendTargetFilterOptions()
     }
 
-    private fun refreshDefaultProfileFilterOptions() {
-        val options = SettingsStore.profileFilterOptions(this)
-        defaultProfileFilterKeys = options.map { it.first }
+    private fun refreshDefaultSendTargetFilterOptions() {
+        val options = SettingsStore.sendTargetFilterOptions(this)
+        defaultSendTargetFilterKeys = options.map { it.first }
         val labels = options.map { it.second }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spDefaultProfileFilter.adapter = adapter
+        binding.spDefaultSendTargetFilter.adapter = adapter
 
-        val selectedIndex = defaultProfileFilterKeys.indexOf(SettingsStore.load(this).defaultProfileFilterId)
-        binding.spDefaultProfileFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
+        val selectedIndex = defaultSendTargetFilterKeys.indexOf(SettingsStore.load(this).defaultSendTargetFilterId)
+        binding.spDefaultSendTargetFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
     }
 
     private fun updatePermissionStatus() {

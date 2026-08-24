@@ -32,7 +32,7 @@ object SmsLogStore {
         val success: Boolean,
         val message: String,
         val smsId: Long?,
-        val profileName: String?,
+        val sendTargetName: String?,
         val manual: Boolean,
         /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
         val smsParts: SmsParts? = null,
@@ -52,7 +52,7 @@ object SmsLogStore {
         success: Boolean,
         message: String,
         smsId: Long? = null,
-        profileName: String? = null,
+        sendTargetName: String? = null,
         manual: Boolean = false,
         smsParts: SmsParts? = null,
         companyNameConverted: Boolean = false
@@ -69,7 +69,7 @@ object SmsLogStore {
                 success = success,
                 message = message,
                 smsId = smsId,
-                profileName = profileName,
+                sendTargetName = sendTargetName,
                 manual = manual,
                 smsParts = smsParts,
                 companyNameConverted = companyNameConverted
@@ -89,7 +89,7 @@ object SmsLogStore {
                 .put("smsId", entry.smsId ?: NO_SMS_ID)
                 .put("manual", entry.manual)
                 .put("companyNameConverted", entry.companyNameConverted)
-            entry.profileName?.let { obj.put("profileName", it) }
+            entry.sendTargetName?.let { obj.put("sendTargetName", it) }
             entry.smsParts?.let {
                 obj.put(
                     "smsParts",
@@ -121,7 +121,7 @@ object SmsLogStore {
                 success = obj.optBoolean("success", false),
                 message = obj.optString("message", ""),
                 smsId = if (smsId == NO_SMS_ID) null else smsId,
-                profileName = obj.optString("profileName", "").ifBlank { null },
+                sendTargetName = obj.optString("sendTargetName", "").ifBlank { null },
                 manual = obj.optBoolean("manual", false),
                 companyNameConverted = obj.optBoolean("companyNameConverted", false),
                 smsParts = obj.optJSONObject("smsParts")?.let {

@@ -447,11 +447,11 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_profile_filter"
+                            android:text="@string/label_default_send_target_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <Spinner
-                            android:id="@+id/spDefaultProfileFilter"
+                            android:id="@+id/spDefaultSendTargetFilter"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
@@ -559,11 +559,11 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSearchProfileUnconfiguredEnabled"
+                            android:id="@+id/swSearchSendTargetUnconfiguredEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_search_profile_unconfigured_enabled" />
+                            android:text="@string/switch_search_send_target_unconfigured_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -575,7 +575,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_profile_unconfigured_enabled"
+                                android:text="@string/helper_search_send_target_unconfigured_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>

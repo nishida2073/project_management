@@ -42,8 +42,8 @@ class SmsSearchActivity : AppCompatActivity() {
     private var toMillis: Long? = null
     private val records = mutableListOf<SmsRecord>()
 
-    private var profileFilterKeys: List<String?> = emptyList()
-    private var selectedProfileId: String? = null
+    private var sendTargetFilterKeys: List<String?> = emptyList()
+    private var selectedSendTargetId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,16 +61,16 @@ class SmsSearchActivity : AppCompatActivity() {
             searchSms(showFoundToast = false)
             binding.swipeRefreshSmsList.isRefreshing = false
         }
-        binding.spProfileFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.spSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedProfileId = profileFilterKeys.getOrNull(position)
+                selectedSendTargetId = sendTargetFilterKeys.getOrNull(position)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         val config = SettingsStore.load(this)
-        selectedProfileId = config.defaultProfileFilterId
+        selectedSendTargetId = config.defaultSendTargetFilterId
         val today = Calendar.getInstance()
         val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -(config.smsSearchDateRangeDays - 1)) }
         applyDateFilter(isFrom = true, calendar = rangeStart)
@@ -85,21 +85,21 @@ class SmsSearchActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updatePermissionUi()
-        refreshProfileFilterOptions()
+        refreshSendTargetFilterOptions()
         searchSms(showFoundToast = false)
     }
 
-    private fun refreshProfileFilterOptions() {
-        val options = SettingsStore.profileFilterOptions(this)
-        profileFilterKeys = options.map { it.first }
+    private fun refreshSendTargetFilterOptions() {
+        val options = SettingsStore.sendTargetFilterOptions(this)
+        sendTargetFilterKeys = options.map { it.first }
         val labels = options.map { it.second }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spProfileFilter.adapter = adapter
+        binding.spSendTargetFilter.adapter = adapter
 
-        val restoreIndex = profileFilterKeys.indexOf(selectedProfileId)
-        binding.spProfileFilter.setSelection(if (restoreIndex >= 0) restoreIndex else 0)
+        val restoreIndex = sendTargetFilterKeys.indexOf(selectedSendTargetId)
+        binding.spSendTargetFilter.setSelection(if (restoreIndex >= 0) restoreIndex else 0)
     }
 
     private fun hasReadSmsPermission(): Boolean =
@@ -221,19 +221,20 @@ class SmsSearchActivity : AppCompatActivity() {
             records.removeAll { it.id in sentEntries }
         }
 
-        when (val profileId = selectedProfileId) {
+        when (val sendTargetId = selectedSendTargetId) {
             null -> Unit
-            AppConstants.PROFILE_FILTER_KEY_UNSET -> records.removeAll { SettingsStore.findProfileForBody(this, it.body) != null }
-            else -> records.removeAll { SettingsStore.findProfileForBody(this, it.body)?.id != profileId }
+            AppConstants.SEND_TARGET_FILTER_KEY_UNSET -> records.removeAll { SettingsStore.findSendTargetForBody(this, it.body) != null }
+            else -> records.removeAll { SettingsStore.findSendTargetForBody(this, it.body)?.id != sendTargetId }
         }
 
         // 形式が不正かどうかの判定はAI解析（端末上のAI呼び出し）を伴う場合があるため、
         // ここから先はコルーチンで行いUIをブロックしない
         lifecycleScope.launch {
             if (binding.cbSplitFailedOnly.isChecked) {
+                val aiParsingEnabled = SettingsStore.load(this@SmsSearchActivity).aiParsingEnabled
                 val splitFailedRecords = mutableListOf<SmsRecord>()
                 for (record in records) {
-                    if (isSplitFailed(record.body)) splitFailedRecords.add(record)
+                    if (isSplitFailed(record.body, aiParsingEnabled)) splitFailedRecords.add(record)
                 }
                 records.clear()
                 records.addAll(splitFailedRecords)
@@ -293,8 +294,8 @@ class SmsSearchActivity : AppCompatActivity() {
         return result
     }
 
-    private suspend fun isSplitFailed(body: String): Boolean {
-        return SmsPartsGenerator.resolveSmsParts(body, SettingsStore.load(this).aiParsingEnabled).isSplitFailed()
+    private suspend fun isSplitFailed(body: String, aiParsingEnabled: Boolean): Boolean {
+        return SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled).isSplitFailed()
     }
 
     /** 標準のSMSアプリの返信（作成）画面を、指定した送信元宛てに開く */
@@ -324,16 +325,16 @@ class SmsSearchActivity : AppCompatActivity() {
         records.forEach { record ->
             val checkBox = CheckBox(this).apply {
                 tag = record.id
-                val profile = SettingsStore.findProfileForBody(this@SmsSearchActivity, record.body)
-                val profileName = profile?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_profile_none)
-                val isProfileUnconfigured = profile == null || !profile.isValid
+                val sendTarget = SettingsStore.findSendTargetForBody(this@SmsSearchActivity, record.body)
+                val sendTargetName = sendTarget?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_send_target_none)
+                val isSendTargetUnconfigured = sendTarget == null || !sendTarget.isValid
                 val isAutoReplied = record.id in autoRepliedEntries
                 val sentEntry = sentEntries[record.id]
                 val isUnsent = sentEntry == null
-                val isSplitFailedBody = isSplitFailed(record.body)
-                val isSelectable = (!isProfileUnconfigured || config.searchProfileUnconfiguredEnabled) &&
+                val isSplitFailedBody = isSplitFailed(record.body, config.aiParsingEnabled)
+                val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
                     (!isSplitFailedBody || config.searchSplitFailedEnabled)
-                val profileColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.profile_name)
+                val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
                 text = buildSpannedString {
                     if (isUnsent) {
                         append(getString(R.string.label_sms_status_unsent))
@@ -344,16 +345,16 @@ class SmsSearchActivity : AppCompatActivity() {
                     if (isAutoReplied) {
                         append(getString(R.string.label_sms_status_auto_replied))
                     }
-                    if (isProfileUnconfigured) {
-                        append(getString(R.string.label_sms_status_profile_unconfigured))
+                    if (isSendTargetUnconfigured) {
+                        append(getString(R.string.label_sms_status_send_target_unconfigured))
                     }
-                    if (isUnsent || isProfileUnconfigured || isSplitFailedBody || isAutoReplied) {
+                    if (isUnsent || isSendTargetUnconfigured || isSplitFailedBody || isAutoReplied) {
                         append("\n")
                     }
                     if (isSelectable) {
-                        color(profileColor) { bold { append(profileName) } }
+                        color(sendTargetColor) { bold { append(sendTargetName) } }
                     } else {
-                        bold { append(profileName) }
+                        bold { append(sendTargetName) }
                     }
                     append("\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
                     append(record.body.take(80))

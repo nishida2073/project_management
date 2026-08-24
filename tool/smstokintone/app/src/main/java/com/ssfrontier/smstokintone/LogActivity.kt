@@ -118,10 +118,10 @@ class LogActivity : AppCompatActivity() {
             }
 
             // グループ2: 設定名／送信元／SMS自体のタイムスタンプ／メッセージ（SMS本文）
-            val profileView = TextView(this).apply {
-                text = entry.profileName ?: getString(R.string.label_profile_none)
+            val sendTargetNameView = TextView(this).apply {
+                text = entry.sendTargetName ?: getString(R.string.label_send_target_none)
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
-                setTextColor(ContextCompat.getColor(this@LogActivity, R.color.profile_name))
+                setTextColor(ContextCompat.getColor(this@LogActivity, R.color.send_target_name))
                 setPadding(0, 16, 0, 4)
             }
             val senderAndTimestampView = TextView(this).apply {
@@ -181,7 +181,7 @@ class LogActivity : AppCompatActivity() {
                 addView(typeAndTimestampView)
                 addView(resultView)
                 splitResultView?.let { addView(it) }
-                addView(profileView)
+                addView(sendTargetNameView)
                 addView(senderAndTimestampView)
                 addView(bodyView)
                 entry.smsParts?.let { smsParts ->
