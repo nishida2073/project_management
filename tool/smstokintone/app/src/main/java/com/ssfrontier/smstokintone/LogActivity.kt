@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import com.google.android.material.color.MaterialColors
@@ -171,14 +172,42 @@ class LogActivity : AppCompatActivity() {
                 )
             }
 
-            binding.llLogContainer.addView(typeAndTimestampView)
-            binding.llLogContainer.addView(resultView)
-            splitResultView?.let { binding.llLogContainer.addView(it) }
-            binding.llLogContainer.addView(profileView)
-            binding.llLogContainer.addView(senderAndTimestampView)
-            binding.llLogContainer.addView(bodyView)
+            val entryView = android.widget.LinearLayout(this).apply {
+                orientation = android.widget.LinearLayout.VERTICAL
+                addView(typeAndTimestampView)
+                addView(resultView)
+                splitResultView?.let { addView(it) }
+                addView(profileView)
+                addView(senderAndTimestampView)
+                addView(bodyView)
+                entry.smsParts?.let { smsParts ->
+                    setOnLongClickListener {
+                        showSplitResultDialog(smsParts)
+                        true
+                    }
+                }
+            }
+
+            binding.llLogContainer.addView(entryView)
             binding.llLogContainer.addView(divider)
         }
+    }
+
+    /** 長押しされたログの分割結果（会社名・氏名・内容）をダイアログで表示する */
+    private fun showSplitResultDialog(smsParts: SmsParts) {
+        val message = buildSpannedString {
+            bold { append(getString(R.string.hint_field_company)) }
+            append("\n　${smsParts.companyName}\n")
+            bold { append(getString(R.string.hint_field_user_name)) }
+            append("\n　${smsParts.userName}\n")
+            bold { append(getString(R.string.hint_field_content)) }
+            append("\n　${smsParts.content}")
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_title_split_result)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     /** 「[ラベル] メッセージ」を横並びの別列に分けた行を作る */
