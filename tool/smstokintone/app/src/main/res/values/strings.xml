@@ -119,7 +119,7 @@
     <string name="helper_send_split_failed_enabled">SMSを自動送信の対象として含めることができます</string>
     <string name="section_ai_parsing">AIによる分割</string>
     <string name="switch_ai_parsing_enabled">有効にする</string>
-    <string name="helper_ai_parsing_enabled">端末上のAIを使用して会社名・氏名・内容を分割します。\nAIの呼び出しに失敗した場合は、ルールベースの分割を実行します。</string>
+    <string name="helper_ai_parsing_enabled">端末上のAIを使用して会社名・氏名・内容を抽出します。\nAIの呼び出しに失敗した場合は、ルールベースの分割を実行します。</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>
