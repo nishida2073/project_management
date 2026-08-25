@@ -49,9 +49,9 @@
     <string name="hint_field_company">会社名</string>
     <string name="hint_field_user_name">氏名</string>
     <string name="hint_field_content">内容</string>
-    <string name="section_update_condition">レコードの更新条件</string>
-    <string name="hint_update_tolerance_hours">受信日時の範囲（±時間）</string>
-    <string name="helper_update_tolerance_hours">指定した時間以内に同じ送信元から再受信した場合は、新規登録ではなく既存のデータを更新します</string>
+    <string name="section_update_tolerance_condition">統合範囲</string>
+    <string name="hint_update_tolerance_hours">±時間</string>
+    <string name="helper_update_tolerance_hours">指定した時間以内に同じ送信元から再度受信した場合は、既存のデータを更新します</string>
     <string name="section_options">オプション</string>
     <string name="section_company_name_conversion">会社名の変換</string>
     <string name="switch_company_name_width_conversion_enabled">有効にする</string>
