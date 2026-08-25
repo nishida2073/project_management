@@ -151,9 +151,10 @@
     <string name="label_log_type_send_start">送信開始</string>
     <string name="label_log_type_send_complete">送信完了</string>
     <string name="label_log_type_auto_reply">返信完了</string>
-    <string name="label_log_type_suffix_manual">✋</string>
-    <string name="label_log_type_suffix_auto">⚡</string>
-    <string name="label_log_company_name_converted">🔄</string>
+    <string name="icon_log_mode_manual">✋</string>
+    <string name="icon_log_mode_auto">⚡</string>
+    <string name="icon_log_company_name_converted">🔄</string>
+    <string name="icon_log_auto_replied">📨</string>
     <string name="label_log_result_bracketed">[%1$s]</string>
     <string name="label_log_result_success">成功</string>
     <string name="label_log_result_failure">失敗</string>
