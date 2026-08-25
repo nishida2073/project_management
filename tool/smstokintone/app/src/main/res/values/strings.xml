@@ -1,13 +1,24 @@
 <resources>
     <string name="app_name">S2k</string>
 
+    <!-- アイコン -->
+    <string name="icon_unsent">⏳</string>
+    <string name="icon_split_failed">⚠️</string>
+    <string name="icon_send_target_unconfigured">🚫</string>
+    <string name="icon_replied">📨</string>
+    <string name="icon_auto">⚡</string>
+    <string name="icon_manual">✋</string>
+    <string name="icon_company_name_converted">🔄</string>
+    <string name="icon_split_rule">⚙️</string>
+    <string name="icon_split_ai">🤖</string>
+
     <!-- トップ画面 -->
     <string name="label_top_sms_send">SMSの送信モード</string>
-    <string name="label_top_sms_send_auto">⚡ 自動</string>
-    <string name="label_top_sms_send_manual">✋ 手動</string>
+    <string name="label_top_sms_send_auto">自動</string>
+    <string name="label_top_sms_send_manual">手動</string>
     <string name="label_top_sms_reply">SMSの返信モード</string>
-    <string name="label_top_sms_reply_auto">⚡ 自動</string>
-    <string name="label_top_sms_reply_manual">✋ 手動</string>
+    <string name="label_top_sms_reply_auto">自動</string>
+    <string name="label_top_sms_reply_manual">手動</string>
     <string name="btn_open_log">ログの確認</string>
     <string name="btn_open_sms_search">SMSの検索</string>
     <string name="btn_open_send_target_settings">送信先の設定</string>
@@ -151,10 +162,10 @@
     <string name="label_log_type_send_start">送信開始</string>
     <string name="label_log_type_send_complete">送信完了</string>
     <string name="label_log_type_auto_reply">返信完了</string>
-    <string name="icon_log_mode_manual">✋</string>
-    <string name="icon_log_mode_auto">⚡</string>
-    <string name="icon_log_company_name_converted">🔄</string>
-    <string name="icon_log_auto_replied">📨</string>
+    <string name="icon_log_mode_manual">@string/icon_manual</string>
+    <string name="icon_log_mode_auto">@string/icon_auto</string>
+    <string name="icon_log_company_name_converted">@string/icon_company_name_converted</string>
+    <string name="icon_log_auto_replied">@string/icon_replied</string>
     <string name="label_log_result_bracketed">[%1$s]</string>
     <string name="label_log_result_success">成功</string>
     <string name="label_log_result_failure">失敗</string>
@@ -175,8 +186,6 @@
     <string name="dialog_title_confirm_clear_log">ログをクリアしますか？</string>
     <string name="dialog_message_confirm_clear_log">この操作は取り消せません</string>
     <string name="dialog_title_split_result">分割結果</string>
-    <string name="icon_split_result_rule">⚙️</string>
-    <string name="icon_split_result_ai">🤖</string>
     <string name="btn_cancel">キャンセル</string>
     <string name="btn_clear">クリア</string>
 
@@ -195,13 +204,13 @@
     <string name="cb_unsent_only">⏳ 未</string>
     <string name="label_search_content_status_filter">内容</string>
     <string name="cb_split_failed_only">⚠️ 形式が不正</string>
-    <string name="label_sms_status_unsent">"⏳ "</string>
-    <string name="label_sms_status_split_failed">"⚠️ "</string>
-    <string name="label_sms_status_send_target_unconfigured">"🚫 "</string>
-    <string name="label_sms_status_auto_replied">"📨 "</string>
-    <string name="label_sms_status_sent_auto">"⚡ "</string>
-    <string name="label_sms_status_sent_manual">"✋ "</string>
-    <string name="helper_sms_status_legend">"内容：⚠️ 形式が不正　🚫 送信先が未設定\n送信：⏳ 未　⚡ 済み（自動）　✋ 済み（手動）\n返信：📨 済み（自動）"</string>
+    <string name="icon_sms_status_unsent">@string/icon_unsent</string>
+    <string name="icon_sms_status_split_failed">@string/icon_split_failed</string>
+    <string name="icon_sms_status_send_target_unconfigured">@string/icon_send_target_unconfigured</string>
+    <string name="icon_sms_status_auto_replied">@string/icon_replied</string>
+    <string name="icon_sms_status_sent_auto">@string/icon_auto</string>
+    <string name="icon_sms_status_sent_manual">@string/icon_manual</string>
+    <string name="helper_sms_status_legend">"内容：🚫 送信先が未設定　⚠️ 形式が不正\n送信：⏳ 未　⚡ 済み（自動）　✋ 済み（手動）\n返信：📨 済み（自動）"</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>
     <string name="btn_deselect_all">選択解除</string>

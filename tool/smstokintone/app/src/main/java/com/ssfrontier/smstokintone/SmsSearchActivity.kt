@@ -338,23 +338,23 @@ class SmsSearchActivity : AppCompatActivity() {
                     (!isSplitFailedBody || config.searchSplitFailedEnabled)
                 val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
                 text = buildSpannedString {
+                    if (isSendTargetUnconfigured) {
+                        append(getString(R.string.icon_sms_status_send_target_unconfigured))
+                    }
                     if (sentEntry == null) {
-                        append(getString(R.string.label_sms_status_unsent))
+                        append(getString(R.string.icon_sms_status_unsent))
                     } else {
                         append(
                             getString(
-                                if (sentEntry.manual) R.string.label_sms_status_sent_manual else R.string.label_sms_status_sent_auto
+                                if (sentEntry.manual) R.string.icon_sms_status_sent_manual else R.string.icon_sms_status_sent_auto
                             )
                         )
                     }
                     if (isSplitFailedBody) {
-                        append(getString(R.string.label_sms_status_split_failed))
+                        append(getString(R.string.icon_sms_status_split_failed))
                     }
                     if (isAutoReplied) {
-                        append(getString(R.string.label_sms_status_auto_replied))
-                    }
-                    if (isSendTargetUnconfigured) {
-                        append(getString(R.string.label_sms_status_send_target_unconfigured))
+                        append(getString(R.string.icon_sms_status_auto_replied))
                     }
                     append("\n")
                     if (isSelectable) {

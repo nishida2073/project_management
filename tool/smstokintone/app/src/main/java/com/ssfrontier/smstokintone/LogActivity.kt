@@ -219,9 +219,9 @@ class LogActivity : AppCompatActivity() {
             append("\n　${smsParts.content}")
         }
         val icon = if (smsParts.parsedByAi) {
-            getString(R.string.icon_split_result_ai)
+            getString(R.string.icon_split_ai)
         } else {
-            getString(R.string.icon_split_result_rule)
+            getString(R.string.icon_split_rule)
         }
         val title = "${getString(R.string.dialog_title_split_result)} $icon"
         AlertDialog.Builder(this)
