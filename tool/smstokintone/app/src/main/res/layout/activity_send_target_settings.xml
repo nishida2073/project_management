@@ -24,6 +24,14 @@
         android:text="@string/send_target_settings_description"
         android:textColor="?android:attr/textColorSecondary" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddSendTarget"
+        style="@style/AppButton.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/btn_add_send_target" />
+
     <ScrollView
         android:id="@+id/svSendTargetSettings"
         android:layout_width="match_parent"
@@ -44,21 +52,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddSendTarget"
-            style="@style/AppButton.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/btn_add_send_target" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/btn_save" />
-
         </LinearLayout>
     </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/btn_save" />
 </LinearLayout>
