@@ -406,7 +406,8 @@ class SmsSearchActivity : AppCompatActivity() {
             if (checkBox.isChecked) checkedIds.add(checkBox.tag as Long)
         }
 
-        val selectedRecords = records.filter { it.id in checkedIds }
+        // 一覧の表示順（新しい順）とは関係なく、送信自体は受信日時の古い順に行う
+        val selectedRecords = records.filter { it.id in checkedIds }.sortedBy { it.dateMillis }
         if (selectedRecords.isEmpty()) {
             Toast.makeText(this, getString(R.string.toast_sms_send_not_selection), Toast.LENGTH_SHORT).show()
             return
