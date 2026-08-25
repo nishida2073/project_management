@@ -51,8 +51,8 @@
     <string name="hint_field_content">内容</string>
     <string name="section_update_condition">レコードの更新条件</string>
     <string name="hint_update_tolerance_hours">受信日時の範囲（±時間）</string>
-    <string name="helper_update_tolerance_hours">同じ送信元から、指定した時間以内に再度SMSを受信した場合は、新規登録ではなく既存のデータを更新します</string>
-    <string name="section_other">その他</string>
+    <string name="helper_update_tolerance_hours">指定した時間以内に同じ送信元から再受信した場合は、新規登録ではなく既存のデータを更新します</string>
+    <string name="section_options">オプション</string>
     <string name="section_company_name_conversion">会社名の変換</string>
     <string name="switch_company_name_width_conversion_enabled">有効にする</string>
     <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
@@ -67,7 +67,7 @@
     <string name="dialog_message_test_send_result_failure">送信失敗: %1$s</string>
     <string name="dialog_message_test_send_result_network_error">通信エラー: %1$s</string>
     <string name="dialog_message_test_send_routing_unmatched">この本文はこの送信先の振り分け条件に一致しないため、送信していません。</string>
-    <string name="test_send_body">株式会社テスト\nテスト太郎\nこれはアプリからのテスト送信です</string>
+    <string name="test_send_body">株式会社テスト\nテスト太郎\n\nこれはアプリからのテスト送信です</string>
   
     <!-- アプリの設定画面 -->
     <string name="title_app_settings">アプリの設定</string>
