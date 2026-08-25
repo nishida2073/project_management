@@ -1,13 +1,17 @@
 package com.ssfrontier.smstokintone
 
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.bold
+import androidx.core.text.buildSpannedString
+import androidx.lifecycle.lifecycleScope
 import com.ssfrontier.smstokintone.databinding.ActivitySendTargetSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemSendTargetBinding
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -157,6 +161,40 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             return
         }
 
+        val editText = EditText(this).apply {
+            setText(getString(R.string.test_send_body))
+            setSelection(text.length)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            minLines = 3
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_title_test_send_body)
+            .setView(editText)
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.btn_test_send_confirm) { _, _ ->
+                confirmRoutingThenSend(itemBinding, sendTarget, editText.text.toString())
+            }
+            .show()
+    }
+
+    /** 本文が[sendTarget]自身の振り分け条件（キーワード、またはデフォルト送信先）に一致しない場合は警告し、一致する場合はそのままテスト送信する */
+    private fun confirmRoutingThenSend(itemBinding: ItemSendTargetBinding, sendTarget: SettingsStore.SendTarget, testBody: String) {
+        if (sendTarget.isDefault || sendTarget.matches(testBody)) {
+            performTestSend(itemBinding, sendTarget, testBody)
+            return
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_title_test_send_result)
+            .setMessage(R.string.dialog_message_test_send_routing_unmatched)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    private fun performTestSend(itemBinding: ItemSendTargetBinding, sendTarget: SettingsStore.SendTarget, testBody: String) {
         val datetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
             SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
                 timeZone = TimeZone.getTimeZone("UTC")
@@ -165,10 +203,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             null
         }
 
-        val testBody = getString(R.string.test_send_body)
-
         itemBinding.btnTestSend.isEnabled = false
-        CoroutineScope(Dispatchers.Main).launch {
+        lifecycleScope.launch {
             val smsParts = SmsPartsGenerator.resolveSmsParts(testBody, SettingsStore.load(applicationContext).aiParsingEnabled)
             val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
                 smsParts.companyNameNormalizedWidth
@@ -189,14 +225,37 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             }
             itemBinding.btnTestSend.isEnabled = true
 
-            val message = when (result) {
+            val sendResultMessage = when (result) {
                 is KintoneApi.PostResult.Success -> result.message
                 is KintoneApi.PostResult.Skipped -> result.message
                 is KintoneApi.PostResult.HttpFailure -> getString(R.string.dialog_message_test_send_result_failure, "${result.code} ${result.detail}")
                 is KintoneApi.PostResult.NetworkError -> getString(R.string.dialog_message_test_send_result_network_error, result.message)
             }
+            val splitMessage = if (smsParts.isSplitFailed()) {
+                getString(R.string.message_log_split_failure)
+            } else {
+                getString(R.string.message_log_split)
+            }
+            val message = buildSpannedString {
+                append(splitMessage)
+                append("\n")
+                append(sendResultMessage)
+                append("\n\n")
+                bold { append(getString(R.string.hint_field_company)) }
+                append("\n　$companyNameValue\n")
+                bold { append(getString(R.string.hint_field_user_name)) }
+                append("\n　${smsParts.userName}\n")
+                bold { append(getString(R.string.hint_field_content)) }
+                append("\n　${smsParts.content}")
+            }
+            val icon = if (smsParts.parsedByAi) {
+                getString(R.string.icon_split_result_ai)
+            } else {
+                getString(R.string.icon_split_result_rule)
+            }
+            val title = "${getString(R.string.dialog_title_test_send_result)} $icon"
             AlertDialog.Builder(this@SendTargetSettingsActivity)
-                .setTitle(R.string.dialog_title_test_send_result)
+                .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
