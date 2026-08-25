@@ -80,6 +80,9 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.btnToggleSearchFilters.text = getString(
             if (config.searchFiltersVisibleByDefault) R.string.btn_hide_search_filters else R.string.btn_show_search_filters
         )
+
+        binding.cbUnsentOnly.isChecked = config.defaultUnsentOnlyEnabled
+        binding.cbSplitFailedOnly.isChecked = config.defaultSplitFailedOnlyEnabled
     }
 
     override fun onResume() {
@@ -330,14 +333,19 @@ class SmsSearchActivity : AppCompatActivity() {
                 val isSendTargetUnconfigured = sendTarget == null || !sendTarget.isValid
                 val isAutoReplied = record.id in autoRepliedEntries
                 val sentEntry = sentEntries[record.id]
-                val isUnsent = sentEntry == null
                 val isSplitFailedBody = isSplitFailed(record.body, config.aiParsingEnabled)
                 val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
                     (!isSplitFailedBody || config.searchSplitFailedEnabled)
                 val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
                 text = buildSpannedString {
-                    if (isUnsent) {
+                    if (sentEntry == null) {
                         append(getString(R.string.label_sms_status_unsent))
+                    } else {
+                        append(
+                            getString(
+                                if (sentEntry.manual) R.string.label_sms_status_sent_manual else R.string.label_sms_status_sent_auto
+                            )
+                        )
                     }
                     if (isSplitFailedBody) {
                         append(getString(R.string.label_sms_status_split_failed))
@@ -348,9 +356,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     if (isSendTargetUnconfigured) {
                         append(getString(R.string.label_sms_status_send_target_unconfigured))
                     }
-                    if (isUnsent || isSendTargetUnconfigured || isSplitFailedBody || isAutoReplied) {
-                        append("\n")
-                    }
+                    append("\n")
                     if (isSelectable) {
                         color(sendTargetColor) { bold { append(sendTargetName) } }
                     } else {

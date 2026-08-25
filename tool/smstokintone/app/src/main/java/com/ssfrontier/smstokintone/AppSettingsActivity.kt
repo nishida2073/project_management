@@ -1,6 +1,7 @@
 package com.ssfrontier.smstokintone
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
@@ -137,6 +139,16 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(searchFiltersVisibleByDefault = visible))
         }
 
+        binding.swDefaultUnsentOnlyEnabled.isChecked = config.defaultUnsentOnlyEnabled
+        binding.swDefaultUnsentOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(defaultUnsentOnlyEnabled = isChecked))
+        }
+
+        binding.swDefaultSplitFailedOnlyEnabled.isChecked = config.defaultSplitFailedOnlyEnabled
+        binding.swDefaultSplitFailedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSplitFailedOnlyEnabled = isChecked))
+        }
+
         binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val sendTargetId = defaultSendTargetFilterKeys.getOrNull(position)
@@ -179,6 +191,24 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.etSplitFailedReplyAddition.setText(config.splitFailedReplyAddition)
         binding.etSplitFailedReplyAddition.addTextChangedListener { text ->
             SettingsStore.save(this, SettingsStore.load(this).copy(splitFailedReplyAddition = text.toString()))
+        }
+
+        binding.btnResetSettings.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_title_confirm_reset_settings)
+                .setMessage(R.string.dialog_message_confirm_reset_settings)
+                .setNegativeButton(R.string.btn_cancel, null)
+                .setPositiveButton(R.string.btn_reset_settings) { _, _ ->
+                    SettingsStore.resetToDefaults(this)
+                    // resetToDefaults()は既定のライトテーマを保存するだけで、実際に適用中の
+                    // AppCompatDelegateの夜間モードまでは切り替えないため、ここで明示的に反映する
+                    AppCompatDelegate.setDefaultNightMode(SettingsStore.ThemeMode.LIGHT.toNightMode())
+                    // recreate()は破棄前の画面状態（ラジオボタンの選択状態など）を復元してしまい、
+                    // リセット直後の値がUIに反映されないため、状態を持ち越さない新しいIntentで開き直す
+                    finish()
+                    startActivity(Intent(this, AppSettingsActivity::class.java))
+                }
+                .show()
         }
 
         // ライト/ダーク切り替え時、AppCompatDelegateがActivityを再生成するためスクロール位置が失われる。

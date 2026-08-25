@@ -450,10 +450,17 @@
                             android:text="@string/label_default_send_target_filter"
                             android:textColor="?attr/colorOnSurface" />
 
-                        <Spinner
-                            android:id="@+id/spDefaultSendTargetFilter"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <Spinner
+                                android:id="@+id/spDefaultSendTargetFilter"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
@@ -467,7 +474,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_sms_match_tolerance_seconds"
+                            android:text="@string/label_default_unsent_only_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -476,44 +483,14 @@
                             android:layout_marginStart="16dp"
                             android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/tilSmsMatchToleranceSeconds"
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/swDefaultUnsentOnlyEnabled"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_match_tolerance_seconds">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etSmsMatchToleranceSeconds"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="number" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="16dp"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="@string/helper_sms_match_tolerance_seconds"
-                                    android:textSize="12sp"
-                                    android:textColor="?android:attr/textColorSecondary" />
-                            </LinearLayout>
+                                android:checked="false"
+                                android:text="@string/switch_default_unsent_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/label_search_filters_visibility"
-                        android:textSize="14sp"
-                        android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -521,26 +498,70 @@
                         android:layout_marginStart="16dp"
                         android:orientation="vertical">
 
-                        <RadioGroup
-                            android:id="@+id/rgSearchFiltersVisibility"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/label_default_split_failed_only_filter"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
 
-                            <RadioButton
-                                android:id="@+id/rbSearchFiltersVisible"
-                                android:layout_width="wrap_content"
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/swDefaultSplitFailedOnlyEnabled"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:checked="true"
-                                android:text="@string/rb_search_filters_visible" />
+                                android:checked="false"
+                                android:text="@string/switch_default_split_failed_only_enabled" />
+                        </LinearLayout>
+                    </LinearLayout>
 
-                            <RadioButton
-                                android:id="@+id/rbSearchFiltersHidden"
-                                android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/label_search_filters_visibility"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <RadioGroup
+                                android:id="@+id/rgSearchFiltersVisibility"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="16dp"
-                                android:text="@string/rb_search_filters_hidden" />
-                        </RadioGroup>
+                                android:orientation="horizontal">
+
+                                <RadioButton
+                                    android:id="@+id/rbSearchFiltersVisible"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:checked="true"
+                                    android:text="@string/rb_search_filters_visible" />
+
+                                <RadioButton
+                                    android:id="@+id/rbSearchFiltersHidden"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="16dp"
+                                    android:text="@string/rb_search_filters_hidden" />
+                            </RadioGroup>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <TextView
@@ -565,21 +586,6 @@
                             android:checked="false"
                             android:text="@string/switch_search_send_target_unconfigured_enabled" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_send_target_unconfigured_enabled"
-                                android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
-                        </LinearLayout>
-
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/swSearchSplitFailedEnabled"
                             android:layout_width="match_parent"
@@ -587,6 +593,35 @@
                             android:layout_marginTop="16dp"
                             android:checked="false"
                             android:text="@string/switch_search_split_failed_enabled" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_sms_match_tolerance_seconds"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilSmsMatchToleranceSeconds"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/hint_sms_match_tolerance_seconds">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etSmsMatchToleranceSeconds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -598,7 +633,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_split_failed_enabled"
+                                android:text="@string/helper_sms_match_tolerance_seconds"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -967,6 +1002,14 @@
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnResetSettings"
+            style="@style/AppButton.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/btn_reset_settings" />
 
         </LinearLayout>
     </ScrollView>

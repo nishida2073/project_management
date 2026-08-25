@@ -3,11 +3,11 @@
 
     <!-- トップ画面 -->
     <string name="label_top_sms_send">SMSの送信モード</string>
-    <string name="label_top_sms_send_auto">自動</string>
-    <string name="label_top_sms_send_manual">手動</string>
+    <string name="label_top_sms_send_auto">⚡ 自動</string>
+    <string name="label_top_sms_send_manual">✋ 手動</string>
     <string name="label_top_sms_reply">SMSの返信モード</string>
-    <string name="label_top_sms_reply_auto">自動</string>
-    <string name="label_top_sms_reply_manual">手動</string>
+    <string name="label_top_sms_reply_auto">⚡ 自動</string>
+    <string name="label_top_sms_reply_manual">✋ 手動</string>
     <string name="btn_open_log">ログの確認</string>
     <string name="btn_open_sms_search">SMSの検索</string>
     <string name="btn_open_send_target_settings">送信先の設定</string>
@@ -71,6 +71,9 @@
   
     <!-- アプリの設定画面 -->
     <string name="title_app_settings">アプリの設定</string>
+    <string name="btn_reset_settings">初期化</string>
+    <string name="dialog_title_confirm_reset_settings">設定を初期化しますか？</string>
+    <string name="dialog_message_confirm_reset_settings">この操作は取り消せません</string>
     <string name="section_layout">レイアウト</string>
     <string name="section_theme_mode">表示テーマ</string>
     <string name="rb_theme_light">ライト</string>
@@ -102,17 +105,19 @@
     <string name="label_sms_search_date_range">受信日の範囲</string>
     <string name="hint_sms_search_date_range_days">日</string>
     <string name="label_default_send_target_filter">送信先</string>
+    <string name="label_default_unsent_only_filter">送信</string>
+    <string name="switch_default_unsent_only_enabled">未送信</string>
+    <string name="label_default_split_failed_only_filter">内容</string>
+    <string name="switch_default_split_failed_only_enabled">形式が不正</string>
     <string name="label_sms_match_tolerance_seconds">統合範囲</string>
     <string name="helper_sms_match_tolerance_seconds">受信したSMSと送信ログの受信日時の統合範囲です</string>
     <string name="hint_sms_match_tolerance_seconds">±秒</string>
-    <string name="label_search_filters_visibility">検索条件の表示</string>
+    <string name="label_search_filters_visibility">表示の切り替え</string>
     <string name="rb_search_filters_visible">表示</string>
     <string name="rb_search_filters_hidden">隠す</string>
     <string name="label_search_selection_target">SMSの選択可否</string>
-    <string name="switch_search_send_target_unconfigured_enabled">「送信先が未設定」を含める</string>
-    <string name="helper_search_send_target_unconfigured_enabled">SMSを選択できるようになります</string>
+    <string name="switch_search_send_target_unconfigured_enabled">「未設定」を含める</string>
     <string name="switch_search_split_failed_enabled">「形式が不正」を含める</string>
-    <string name="helper_search_split_failed_enabled">SMSを選択できるようになります</string>
     <string name="section_sms_send">SMSの送信</string>
     <string name="label_sms_send_mode">送信モード</string>
     <string name="rb_sms_send_mode_manual">手動</string>
@@ -146,8 +151,8 @@
     <string name="label_log_type_send_start">送信開始</string>
     <string name="label_log_type_send_complete">送信完了</string>
     <string name="label_log_type_auto_reply">返信完了</string>
-    <string name="label_log_type_suffix_manual">手動</string>
-    <string name="label_log_type_suffix_auto">自動</string>
+    <string name="label_log_type_suffix_manual">✋ 手動</string>
+    <string name="label_log_type_suffix_auto">⚡ 自動</string>
     <string name="label_log_company_name_converted">🔄</string>
     <string name="label_log_result_bracketed">[%1$s]</string>
     <string name="label_log_result_success">成功</string>
@@ -185,14 +190,17 @@
     <string name="hint_body_filter">本文に含む文字列</string>
     <string name="label_send_target_filter">送信先</string>
     <string name="filter_send_target_all">すべて</string>
-    <string name="label_search_sms_status_filters">SMSの状態</string>
-    <string name="cb_unsent_only">⏳ 未送信</string>
+    <string name="label_search_send_status_filter">送信</string>
+    <string name="cb_unsent_only">⏳ 未</string>
+    <string name="label_search_content_status_filter">内容</string>
     <string name="cb_split_failed_only">⚠️ 形式が不正</string>
     <string name="label_sms_status_unsent">"⏳ "</string>
     <string name="label_sms_status_split_failed">"⚠️ "</string>
     <string name="label_sms_status_send_target_unconfigured">"🚫 "</string>
     <string name="label_sms_status_auto_replied">"📨 "</string>
-    <string name="helper_sms_status_legend">"⏳ 未送信　　　　⚠️ 形式が不正\n📨 自動返信済み　🚫 送信先が未設定"</string>
+    <string name="label_sms_status_sent_auto">"⚡ "</string>
+    <string name="label_sms_status_sent_manual">"✋ "</string>
+    <string name="helper_sms_status_legend">"内容：⚠️ 形式が不正　🚫 送信先が未設定\n送信：⏳ 未　⚡ 済み（自動）　✋ 済み（手動）\n返信：📨 済み（自動）"</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>
     <string name="btn_deselect_all">選択解除</string>

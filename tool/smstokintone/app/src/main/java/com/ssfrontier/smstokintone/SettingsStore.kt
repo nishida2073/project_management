@@ -25,6 +25,8 @@ object SettingsStore {
     private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
     private const val KEY_AI_PARSING_ENABLED = "ai_parsing_enabled"
+    private const val KEY_DEFAULT_UNSENT_ONLY_ENABLED = "default_unsent_only_enabled"
+    private const val KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED = "default_split_failed_only_enabled"
 
     private const val KEY_SEND_TARGETS = "send_targets"
 
@@ -86,7 +88,11 @@ object SettingsStore {
         val defaultSendTargetFilterId: String?,
         /** 本文からの会社名・氏名・内容の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
          * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
-        val aiParsingEnabled: Boolean
+        val aiParsingEnabled: Boolean,
+        /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
+        val defaultUnsentOnlyEnabled: Boolean,
+        /** SMS検索画面を開いた際に「内容」の「形式が不正」チェックボックスを初期状態でONにするかどうか */
+        val defaultSplitFailedOnlyEnabled: Boolean
     )
 
     /**
@@ -181,6 +187,8 @@ object SettingsStore {
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
             .putBoolean(KEY_AI_PARSING_ENABLED, config.aiParsingEnabled)
+            .putBoolean(KEY_DEFAULT_UNSENT_ONLY_ENABLED, config.defaultUnsentOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, config.defaultSplitFailedOnlyEnabled)
         if (config.defaultSendTargetFilterId != null) {
             editor.putString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, config.defaultSendTargetFilterId)
         } else {
@@ -217,7 +225,36 @@ object SettingsStore {
             splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY)
                 ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
             defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, null),
-            aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, false)
+            aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, false),
+            defaultUnsentOnlyEnabled = p.getBoolean(KEY_DEFAULT_UNSENT_ONLY_ENABLED, false),
+            defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, false)
+        )
+    }
+
+    /** アプリの設定（[Config]）をすべて既定値に戻す。送信先の設定（[SendTarget]）は対象外で変更されない */
+    fun resetToDefaults(context: Context) {
+        save(
+            context,
+            Config(
+                sendEnabled = true,
+                sendSplitFailedEnabled = false,
+                searchSplitFailedEnabled = false,
+                searchSendTargetUnconfiguredEnabled = false,
+                autoReplySplitFailedEnabled = false,
+                autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
+                autoRefreshEnabled = true,
+                autoRefreshIntervalSeconds = AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS,
+                smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
+                themeMode = ThemeMode.LIGHT,
+                smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
+                searchFiltersVisibleByDefault = true,
+                defaultReplyBody = AppDefaults.SMS_STANDARD_REPLY_BODY,
+                splitFailedReplyAddition = AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
+                defaultSendTargetFilterId = null,
+                aiParsingEnabled = false,
+                defaultUnsentOnlyEnabled = false,
+                defaultSplitFailedOnlyEnabled = false
+            )
         )
     }
 
