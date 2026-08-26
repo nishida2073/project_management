@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -326,17 +327,27 @@ class SmsSearchActivity : AppCompatActivity() {
         val config = SettingsStore.load(this)
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         records.forEach { record ->
+            val sendTarget = SettingsStore.findSendTargetForBody(this@SmsSearchActivity, record.body)
+            val sendTargetName = sendTarget?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_send_target_none)
+            val isSendTargetUnconfigured = sendTarget == null || !sendTarget.isValid
+            val isAutoReplied = record.id in autoRepliedEntries
+            val sentEntry = sentEntries[record.id]
+            val isSplitFailedBody = isSplitFailed(record.body, config.aiParsingEnabled)
+            val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
+                (!isSplitFailedBody || config.searchSplitFailedEnabled)
+            val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
+
             val checkBox = CheckBox(this).apply {
                 tag = record.id
-                val sendTarget = SettingsStore.findSendTargetForBody(this@SmsSearchActivity, record.body)
-                val sendTargetName = sendTarget?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_send_target_none)
-                val isSendTargetUnconfigured = sendTarget == null || !sendTarget.isValid
-                val isAutoReplied = record.id in autoRepliedEntries
-                val sentEntry = sentEntries[record.id]
-                val isSplitFailedBody = isSplitFailed(record.body, config.aiParsingEnabled)
-                val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
-                    (!isSplitFailedBody || config.searchSplitFailedEnabled)
-                val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
+                isEnabled = isSelectable
+                isClickable = false
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val textView = TextView(this).apply {
                 text = buildSpannedString {
                     if (isSendTargetUnconfigured) {
                         append(getString(R.string.icon_sms_status_send_target_unconfigured))
@@ -366,11 +377,22 @@ class SmsSearchActivity : AppCompatActivity() {
                     append(record.body.take(80))
                 }
                 layoutParams = android.widget.LinearLayout.LayoutParams(
+                    0,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+            }
+
+            val row = android.widget.LinearLayout(this).apply {
+                orientation = android.widget.LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                layoutParams = android.widget.LinearLayout.LayoutParams(
                     android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                     android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 setPadding(0, 16, 0, 16)
-                isEnabled = isSelectable
+                addView(checkBox)
+                addView(textView)
                 val backgroundColor = when {
                     sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
                     sentEntry != null -> R.color.sms_sent_auto_background
@@ -378,6 +400,11 @@ class SmsSearchActivity : AppCompatActivity() {
                 }
                 backgroundColor?.let {
                     setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, it))
+                }
+                setOnClickListener {
+                    if (isSelectable) {
+                        checkBox.isChecked = !checkBox.isChecked
+                    }
                 }
                 setOnLongClickListener {
                     openSmsReply(record.address, isSplitFailedBody)
@@ -393,14 +420,15 @@ class SmsSearchActivity : AppCompatActivity() {
                 )
             }
 
-            binding.llSmsListContainer.addView(checkBox)
+            binding.llSmsListContainer.addView(row)
             binding.llSmsListContainer.addView(divider)
         }
     }
 
     private fun setAllChecked(checked: Boolean) {
         for (i in 0 until binding.llSmsListContainer.childCount) {
-            val checkBox = binding.llSmsListContainer.getChildAt(i) as? CheckBox ?: continue
+            val row = binding.llSmsListContainer.getChildAt(i) as? android.widget.LinearLayout ?: continue
+            val checkBox = row.getChildAt(0) as? CheckBox ?: continue
             if (checkBox.isEnabled) checkBox.isChecked = checked
         }
     }
@@ -408,7 +436,8 @@ class SmsSearchActivity : AppCompatActivity() {
     private fun sendSelected() {
         val checkedIds = mutableSetOf<Long>()
         for (i in 0 until binding.llSmsListContainer.childCount) {
-            val checkBox = binding.llSmsListContainer.getChildAt(i) as? CheckBox ?: continue
+            val row = binding.llSmsListContainer.getChildAt(i) as? android.widget.LinearLayout ?: continue
+            val checkBox = row.getChildAt(0) as? CheckBox ?: continue
             if (checkBox.isChecked) checkedIds.add(checkBox.tag as Long)
         }
 
