@@ -139,13 +139,13 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(searchFiltersVisibleByDefault = visible))
         }
 
-        binding.swDefaultUnsentOnlyEnabled.isChecked = config.defaultUnsentOnlyEnabled
-        binding.swDefaultUnsentOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+        binding.cbDefaultUnsentOnlyEnabled.isChecked = config.defaultUnsentOnlyEnabled
+        binding.cbDefaultUnsentOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.save(this, SettingsStore.load(this).copy(defaultUnsentOnlyEnabled = isChecked))
         }
 
-        binding.swDefaultSplitFailedOnlyEnabled.isChecked = config.defaultSplitFailedOnlyEnabled
-        binding.swDefaultSplitFailedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+        binding.cbDefaultSplitFailedOnlyEnabled.isChecked = config.defaultSplitFailedOnlyEnabled
+        binding.cbDefaultSplitFailedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.save(this, SettingsStore.load(this).copy(defaultSplitFailedOnlyEnabled = isChecked))
         }
 

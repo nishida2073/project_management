@@ -126,20 +126,17 @@
     <string name="label_search_filters_visibility">表示の切り替え</string>
     <string name="rb_search_filters_visible">表示</string>
     <string name="rb_search_filters_hidden">隠す</string>
-    <string name="label_search_selection_target">SMSの選択可否</string>
-    <string name="switch_search_send_target_unconfigured_enabled">「送信先がなし」を含める</string>
-    <string name="switch_search_split_failed_enabled">「形式が不正」を含める</string>
+    <string name="label_search_selection_target">SMS選択の対象</string>
+    <string name="switch_search_send_target_unconfigured_enabled">送信先がなし</string>
+    <string name="switch_search_split_failed_enabled">形式が不正</string>
     <string name="section_sms_send">SMSの送信</string>
     <string name="label_sms_send_mode">送信モード</string>
     <string name="rb_sms_send_mode_manual">手動</string>
     <string name="rb_sms_send_mode_auto">自動</string>
     <string name="helper_sms_send_mode">SMSを受信した際にkintoneへ自動送信します</string>
-    <string name="section_send_target">自動送信対象</string>
-    <string name="switch_send_split_failed_enabled">「形式が不正」を含める</string>
+    <string name="section_send_target">自動送信の対象</string>
+    <string name="switch_send_split_failed_enabled">形式が不正</string>
     <string name="helper_send_split_failed_enabled">SMSを自動送信の対象として含めることができます</string>
-    <string name="section_ai_parsing">AIによる分割</string>
-    <string name="switch_ai_parsing_enabled">有効にする</string>
-    <string name="helper_ai_parsing_enabled">端末上のAIを使用して会社名・氏名・内容を抽出します。\nAIの呼び出しに失敗した場合は、ルールベースの分割を実行します。</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>
@@ -151,9 +148,13 @@
     <string name="section_reply">返信メッセージ（自動入力）</string>
     <string name="section_sms_standard_reply_body">通常</string>
     <string name="hint_sms_standard_reply_body">文言</string>
-    <string name="section_sms_split_failed_reply_body">「形式が不正」な場合</string>
+    <string name="section_sms_split_failed_reply_body">形式が不正な場合</string>
     <string name="hint_sms_split_failed_reply_body">文言</string>
-
+    <string name="section_ai">AI</string>
+    <string name="section_ai_parsing">本文の分割</string>
+    <string name="switch_ai_parsing_enabled">有効にする</string>
+    <string name="helper_ai_parsing_enabled">端末上のAIを使用して会社名・氏名・内容を抽出します。\nAIの呼び出しに失敗した場合は、ルールベースの分割を実行します。</string>
+ 
     <!-- ログの確認画面 -->
     <string name="title_log">ログの一覧</string>
     <string name="message_log_empty">ログがありません</string>
