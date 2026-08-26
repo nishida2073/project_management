@@ -151,30 +151,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_send_status_filter"
-                android:textColor="?attr/colorOnSurface" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <CheckBox
-                    android:id="@+id/cbUnsentOnly"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:checked="true"
-                    android:text="@string/cb_unsent_only" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
                 android:text="@string/label_search_content_status_filter"
                 android:textColor="?attr/colorOnSurface" />
 
@@ -192,6 +168,30 @@
                     android:minHeight="0dp"
                     android:checked="false"
                     android:text="@string/cb_split_failed_only" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_search_send_status_filter"
+                android:textColor="?attr/colorOnSurface" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/cbUnsentOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="0dp"
+                    android:checked="true"
+                    android:text="@string/cb_unsent_only" />
             </LinearLayout>
         </LinearLayout>
 

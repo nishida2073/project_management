@@ -364,6 +364,50 @@
                             </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_sms_match_tolerance_seconds"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilSmsMatchToleranceSeconds"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/hint_sms_match_tolerance_seconds">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etSmsMatchToleranceSeconds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_sms_match_tolerance_seconds"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -593,50 +637,6 @@
                             android:layout_marginTop="16dp"
                             android:checked="false"
                             android:text="@string/switch_search_split_failed_enabled" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_match_tolerance_seconds"
-                        android:textSize="14sp"
-                        android:textColor="?attr/colorOnSurface" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilSmsMatchToleranceSeconds"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/hint_sms_match_tolerance_seconds">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etSmsMatchToleranceSeconds"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="number" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_match_tolerance_seconds"
-                                android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
-                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
