@@ -112,7 +112,7 @@
     <string name="toast_sms_read_permission_denied">SMSの読み取りの許可がない場合、SMSの検索はできません</string>
     <string name="helper_sms_read_permission">SMSの検索に使用します</string>
     <string name="section_sms_search">SMSの検索</string>
-    <string name="section_search_filter">検索条件</string>
+    <string name="section_search_filter">検索条件の初期値</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>
     <string name="hint_sms_search_date_range_days">日</string>
     <string name="label_default_send_target_filter">送信先</string>
