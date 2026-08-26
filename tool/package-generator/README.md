@@ -163,7 +163,7 @@ Excelの書き方は[config\README.md](config/README.md)を参照。
 | `GENERATE_WORK_PATH` | コピー作業用の一時フォルダ | `work` フォルダ |
 | `GENERATE_OUTPUT_PATH` | パッケージの出力先フォルダ | `generated` フォルダ |
 | `GENERATE_SHEETS_INCLUDE` | 処理対象にするシート名パターン（カンマ区切り、複数指定可、ワイルドカード`*`/`?`が使える）。設定時はいずれかのパターンに一致するシートのみ処理する | 空（絞り込みなし＝全シート対象） |
-| `GENERATE_SHEETS_EXCLUDE` | 処理対象から除外するシート名パターン（カンマ区切り、複数指定可、ワイルドカード`*`/`?`が使える） | 空（除外なし） |
+| `GENERATE_SHEETS_EXCLUDE` | 処理対象から除外するシート名パターン（カンマ区切り、複数指定可、ワイルドカード`*`/`?`が使える） | `テンプレート`（`config\package_definition.xlsx`のテンプレート用シートを既定で除外） |
 | `GENERATE_LOG_PREFIX` | ログファイル名（`<シート名>.log`）の先頭に付けるプレフィックス | `パッケージ作成_` |
 
 `GENERATE_SHEETS_INCLUDE` / `GENERATE_SHEETS_EXCLUDE` は `generate-package.bat` の引数でも指定できる（環境変数より優先される）。パターンはシート名に対するワイルドカード一致（`-like`演算子と同じ、大文字小文字は区別しない）で、シート名をそのまま指定するほか、`対象*`のような形式指定でも絞り込める。
