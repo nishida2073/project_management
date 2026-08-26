@@ -82,13 +82,24 @@ foreach ($sheetName in $sheetNames) {
             continue
         }
 
+        $sourceIsFolder = Test-Path -LiteralPath $sourcePath -PathType Container
+
         $storeRootPath = $packageWorkPath
+        $renameFileName = $null
         if ($row.格納先) {
-            $storeRootPath = Join-Path $packageWorkPath $row.格納先
+            if (!$sourceIsFolder -and [System.IO.Path]::HasExtension($row.格納先)) {
+                $storeSubDir = Split-Path $row.格納先 -Parent
+                $renameFileName = Split-Path $row.格納先 -Leaf
+                if ($storeSubDir) {
+                    $storeRootPath = Join-Path $packageWorkPath $storeSubDir
+                }
+            } else {
+                $storeRootPath = Join-Path $packageWorkPath $row.格納先
+            }
         }
         New-Item $storeRootPath -ItemType Directory -Force | Out-Null
 
-        if (Test-Path -LiteralPath $sourcePath -PathType Container) {
+        if ($sourceIsFolder) {
 
             $sourcePathTrimmed = $sourcePath.TrimEnd('\')
 
@@ -133,7 +144,7 @@ foreach ($sheetName in $sheetNames) {
 
         } else {
 
-            $fileName = Split-Path $sourcePath -Leaf
+            $fileName = if ($renameFileName) { $renameFileName } else { Split-Path $sourcePath -Leaf }
             $destinationPath = Join-Path $storeRootPath $fileName
             try {
                 Copy-Item $sourcePath $destinationPath -Force
