@@ -17,6 +17,16 @@ per-client delivery ZIPs from files stored on Teams/SharePoint:
 `all.bat` runs all three in order; each stage can be individually skipped via
 `DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED` in `clients\set-env.bat`.
 
+A separate, optional helper — `generate-config.bat` / `scripts/generate-config.ps1`
+— is not part of the `all.bat` chain (never called from it, must be run on its
+own). It scaffolds the stage-2 input file for a new client: copies
+`config/package_definition.xlsx` to `config/package_definition_<client>.xlsx` and
+fills the first sheet's `取得元（フルパス）` column with every file found
+recursively under `DOWNLOAD_LOCAL_PATH` (relative paths, existing rows in that
+sheet cleared first; other sheets untouched). See `README.md`'s "0. パッケージ
+定義ファイルの下書き生成について" section for the user-facing behavior/flags
+(`client=`, `force=`) — this file only covers the implementation gotchas below.
+
 **`README.md` (this folder) and `config/README.md` are the source of truth** for
 current behavior, env var names/defaults, and the Excel column format — this file
 only covers things useful for *editing* the tool, not for *using* it. Whenever you
@@ -27,14 +37,19 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
 ## Directory layout
 
 - `*.bat` (root) — user-facing entry points: `all.bat`, `download-folder.bat`,
-  `generate-package.bat`, `upload-folder.bat`. Kept flat in the
+  `generate-package.bat`, `generate-config.bat`, `upload-folder.bat`. Kept flat in the
   root by explicit user preference (not moved into a `bats/` subfolder). Each
   does `cd /d %~dp0` then `call clients\set-env.bat` — note the `clients\`
   prefix; `set-env.bat` itself lives one level down (see next bullet), unlike
-  these four which stay in the root.
-- `scripts/*.ps1` — the actual implementation, one per stage, plus `common.ps1`
-  (dot-sourced shared helpers: Azure CLI/Graph auth, tree-view log formatting).
-  Not meant to be run directly by the user.
+  these four which stay in the root. `generate-config.bat` additionally requires
+  a `client=` argument (it errors out without one, unlike the other four where
+  it's optional) since it names the output file.
+- `scripts/*.ps1` — the actual implementation, one per stage plus
+  `generate-config.ps1`, plus `common.ps1` (dot-sourced shared helpers: Azure
+  CLI/Graph auth, tree-view log formatting — `generate-config.ps1` dot-sources
+  it too, purely for the `$scriptDir`/`$basePath` convention below, since it
+  needs neither Azure CLI/Graph nor the log formatting). Not meant to be run
+  directly by the user.
 - `clients/` — `set-env.bat` (the real defaults file, moved here from the
   project root — see `clients/README.md` for why and the resulting
   `BASE_PATH` computation gotcha) plus one `set-env-<client name>.bat` per
@@ -600,6 +615,30 @@ which handles the case-only rename correctly).
 
 - File naming: kebab-case for `.bat`/`.ps1` (`download-folder.bat`, not
   `DownloadFolder.bat` or `download_folder.bat`).
+- **`key=value` `.bat` arguments (`client=`/`include=`/`exclude=`)
+  must always be quoted by the caller** — `generate-package.bat "client=コースA"`,
+  not `generate-package.bat client=コースA`. cmd.exe's batch parameter parser
+  treats an unquoted `=` (also `,`/`;`) as an argument separator, so an
+  unquoted `client=コースA` silently arrives as two params (`%1`=`client`,
+  `%2`=`コースA`) instead of one — the `if /i "%arg:~0,7%"=="client="` check
+  in every entry point's `parse_args` loop then never matches (compares
+  `client` against `client=`) and the value is silently dropped, no error.
+  Confirmed by direct reproduction while adding `generate-config.bat`. Already
+  documented user-facing in `clients/README.md` (all its examples are quoted);
+  this bullet is the "why", for whenever a new `.bat` argument gets added here.
+  `generate-config.bat` deliberately breaks from this `key=value` convention
+  for exactly this reason — explicit user request after hitting the quoting
+  trap firsthand. Its `client:<name>` / `force:1` use `:` instead of `=`
+  (`if /i "%arg:~0,7%"=="client:" ...` / `"%arg:~0,6%"=="force:" ...` in
+  `generate-config.bat`, and the two Write-Host usage messages in
+  `scripts/generate-config.ps1`, all say `client:`/`force:` — keep them in
+  sync if this ever changes again). `:` is not one of cmd's parameter
+  delimiters (confirmed by direct reproduction: `client:コースA` arrives as
+  one token, unquoted, where `client=コースA` would not), so this one entry
+  point can be called without quotes. Don't carry this `:` convention over to
+  the other four entry points' `client=`/`include=`/`exclude=` — those stay
+  `=`-based and quoted, unchanged; this is a one-off exception, not a
+  repo-wide rename.
 - Env vars: `clients\set-env.bat` defines all defaults via `if not defined VAR set "VAR=..."`,
   so external env vars (or values set earlier in the same file) always win.
   `%VAR%` expansion is per-line and order-sensitive — a variable referencing

@@ -6,6 +6,7 @@
 
 1. Teams/SharePoint上の素材をローカルにダウンロード（[1. ファイルダウンロードについて](#1-ファイルダウンロードについて)）
 2. ダウンロードした素材からExcelの設定に従って個別パッケージを作成（[2. 個別パッケージの作成について](#2-個別パッケージの作成について)）
+   - 新しいクライアントの場合、この設定ファイル自体を`generate-config.bat`で下書き生成できる（[0. パッケージ定義ファイルの下書き生成について](#0-パッケージ定義ファイルの下書き生成について)、任意）
 3. 作成したパッケージをTeams/SharePointにアップロード（[3. ファイルアップロードについて](#3-ファイルアップロードについて)）
 
 `all.bat`を実行すると、上記3段階を`clients\set-env.bat`を呼び出した上でこの順に続けて実行する。いずれかの段階が失敗した場合はそこで中断し、後続の段階は実行しない。各段階は`DOWNLOAD_ENABLED` / `GENERATE_ENABLED` / `UPLOAD_ENABLED`で有効/無効を切り替えられる（`UPLOAD_ENABLED`は既定で`0`＝無効、他は既定で`1`＝有効。[環境変数](#環境変数)を参照）。
@@ -17,9 +18,10 @@
 | `all.bat` | 3段階（ダウンロード→パッケージ作成→アップロード）を続けて実行するエントリーポイント |
 | `download-folder.bat` | 「1. ファイルダウンロード」のエントリーポイント |
 | `generate-package.bat` | 「2. 個別パッケージの作成」のエントリーポイント |
+| `generate-config.bat` | 「0. パッケージ定義ファイルの下書き生成」（任意）のエントリーポイント |
 | `upload-folder.bat` | 「3. ファイルアップロード」のエントリーポイント |
-| `scripts\common.ps1` | 3つの`.ps1`が共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
-| `scripts\download-folder.ps1` / `generate-package.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
+| `scripts\common.ps1` | 4つの`.ps1`が共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
+| `scripts\download-folder.ps1` / `generate-package.ps1` / `generate-config.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
 | `build-gui.bat` | GUI版（`コース別パッケージ生成ツール.exe`）をビルドするエントリーポイント。[GUI版](#gui版)を参照 |
 | `scripts\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
@@ -42,6 +44,53 @@
 | `DOWNLOAD_ENABLED` | `all.bat`実行時に「1. ファイルダウンロード」を実行するかどうか（`0`にすると無効化） | `1`（有効） |
 | `GENERATE_ENABLED` | `all.bat`実行時に「2. 個別パッケージの作成」を実行するかどうか（`0`にすると無効化） | `1`（有効） |
 | `UPLOAD_ENABLED` | `all.bat`実行時に「3. ファイルアップロード」を実行するかどうか（`1`にすると有効化） | `0`（無効） |
+
+### 0. パッケージ定義ファイルの下書き生成について
+
+新しいクライアントを始める際、パッケージ定義ファイル（`config\package_definition.xlsx`）を手作業でコピー・リネームしなくても、`generate-config.bat`で下書きを生成できる（任意の一段階。実施しなくても、`config\package_definition.xlsx`を手動でコピーして使ってもよい）。
+
+#### 処理の流れ
+
+1. `generate-config.bat client:<クライアント名>` を実行する
+2. `clients\set-env.bat`（および`clients\set-env-<クライアント名>.bat`が存在すればそれも）が呼び出され、環境変数の初期値がセットされる
+3. `generate-config.ps1` が実行される
+   1. `config\package_definition.xlsx`を`config\package_definition_<クライアント名>.xlsx`としてコピーする
+   2. コピーした先頭シートの既存データ行をクリアし、「取得元（フルパス）」列に`DOWNLOAD_LOCAL_PATH`配下のファイルを再帰的に一覧化する（`.\`始まりの相対パス。`No`列がある場合は連番も入れる）。先頭シート以外のシートは変更しない
+   3. 出力結果をコンソールに表示する
+
+#### 使い方
+
+```bat
+generate-config.bat client:コースA
+generate-config.bat client:コースA force:1
+```
+
+| 引数 | 説明 |
+|---|---|
+| `client:<クライアント名>` | 必須。出力ファイル名（`package_definition_<クライアント名>.xlsx`）と、読み込む`clients\set-env-<クライアント名>.bat`（存在する場合）を決める |
+| `force:1` | 省略可。出力先が既に存在する場合は既定では上書きせずエラー終了するが、`force:1`を指定すると上書きする |
+
+`client=`/`include=`のように`=`で区切る他の`.bat`引数とは異なり、こちらは`:`で区切る（`client:コースA`）。`=`はcmd.exeの引数区切り文字なのでクォートが必須になるが、`:`は区切り文字ではないためクォート無しでそのまま渡せる（`generate-config.bat`固有の書き方で、他の`.bat`の`client=`とは揃っていない）。
+
+#### 出力結果
+
+| ファイル | 出力先 | 内容 |
+|---|---|---|
+| `package_definition_<クライアント名>.xlsx` | `config\package_definition.xlsx`と同じフォルダ（`config`） | テンプレートのコピー＋先頭シートの「取得元（フルパス）」列に`DOWNLOAD_LOCAL_PATH`配下の全ファイルを再帰的に記入したもの |
+
+生成後、`含める形式`/`除外する形式`/`格納先`列や、不要な行の削除・シートの追加などは手動で編集する（書き方は[config\README.md](config/README.md)を参照）。`GENERATE_CONFIG_PATH`をこの出力ファイルのパスに向けるのを忘れないこと（`clients\set-env-<クライアント名>.bat`の`GENERATE_CONFIG_PATH`を設定するか、GUI版の「設定」タブから設定する）。
+
+#### 必要なもの
+
+> PowerShellモジュール「ImportExcel」が必要。未インストールの場合、実行時に自動でインストールされる（初回はインターネット接続とインストール確認が必要）。
+
+#### 注意点
+
+> 対象はテンプレートの**先頭シートのみ**（シート名は問わない）。2枚目以降のシートは変更されない。
+
+> 「取得元（フルパス）」列が先頭シートに見つからない場合はエラー終了する。
+
+> 出力先が既に存在する場合、既定では上書きしない（`force=1`で上書き可能）。誤って既存の編集済みファイルを消さないよう、上書きする前に内容を確認すること。
 
 ### 1. ファイルダウンロードについて
 
