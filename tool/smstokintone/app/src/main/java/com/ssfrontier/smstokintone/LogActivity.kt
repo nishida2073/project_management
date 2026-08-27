@@ -104,16 +104,16 @@ class LogActivity : AppCompatActivity() {
                     if (entry.type != SmsLogStore.EntryType.RECEIVE) {
                         append("  ")
                         color(modeColor) {
-                            append(getString(if (entry.manual) R.string.icon_log_mode_manual else R.string.icon_log_mode_auto))
+                            append(getString(if (entry.manual) R.string.icon_manual else R.string.icon_auto))
                         }
                     }
                     if (entry.companyNameConverted) {
                         append(" ")
-                        append(getString(R.string.icon_log_company_name_converted))
+                        append(getString(R.string.icon_company_name_converted))
                     }
                     if (entry.type == SmsLogStore.EntryType.AUTO_REPLY) {
                         append(" ")
-                        append(getString(R.string.icon_log_auto_replied))
+                        append(getString(R.string.icon_replied))
                     }
                 }
                 setTextColor(itemTextColor)

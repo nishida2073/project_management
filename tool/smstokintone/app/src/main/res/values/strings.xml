@@ -166,10 +166,6 @@
     <string name="label_log_type_send_start">送信開始</string>
     <string name="label_log_type_send_complete">送信完了</string>
     <string name="label_log_type_auto_reply">返信完了</string>
-    <string name="icon_log_mode_manual">@string/icon_manual</string>
-    <string name="icon_log_mode_auto">@string/icon_auto</string>
-    <string name="icon_log_company_name_converted">@string/icon_company_name_converted</string>
-    <string name="icon_log_auto_replied">@string/icon_replied</string>
     <string name="label_log_result_bracketed">[%1$s]</string>
     <string name="label_log_result_success">成功</string>
     <string name="label_log_result_failure">失敗</string>
@@ -210,12 +206,6 @@
     <string name="cb_unsent_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="icon_sms_status_unsent">@string/icon_unsent</string>
-    <string name="icon_sms_status_split_failed">@string/icon_split_failed</string>
-    <string name="icon_sms_status_send_target_unconfigured">@string/icon_send_target_unconfigured</string>
-    <string name="icon_sms_status_auto_replied">@string/icon_replied</string>
-    <string name="icon_sms_status_sent_auto">@string/icon_auto</string>
-    <string name="icon_sms_status_sent_manual">@string/icon_manual</string>
     <string name="helper_sms_status_legend">"送信先：🚫 なし\n内容：❌ 形式が不正\n送信：⬜ 未・✅ 済（自動）・☑️ 済（手動）\n返信：📨 済（自動）"</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>

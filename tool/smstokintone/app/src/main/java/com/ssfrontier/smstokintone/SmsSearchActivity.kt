@@ -362,22 +362,22 @@ class SmsSearchActivity : AppCompatActivity() {
             val textView = TextView(this).apply {
                 text = buildSpannedString {
                     if (isSendTargetUnconfigured) {
-                        append(getString(R.string.icon_sms_status_send_target_unconfigured))
+                        append(getString(R.string.icon_send_target_unconfigured))
                     }
                     if (sentEntry == null) {
-                        append(getString(R.string.icon_sms_status_unsent))
+                        append(getString(R.string.icon_unsent))
                     } else {
                         append(
                             getString(
-                                if (sentEntry.manual) R.string.icon_sms_status_sent_manual else R.string.icon_sms_status_sent_auto
+                                if (sentEntry.manual) R.string.icon_manual else R.string.icon_auto
                             )
                         )
                     }
                     if (isSplitFailedBody) {
-                        append(getString(R.string.icon_sms_status_split_failed))
+                        append(getString(R.string.icon_split_failed))
                     }
                     if (isAutoReplied) {
-                        append(getString(R.string.icon_sms_status_auto_replied))
+                        append(getString(R.string.icon_replied))
                     }
                     append("\n")
                     if (isSelectable) {
