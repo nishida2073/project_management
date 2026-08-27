@@ -6,8 +6,8 @@
     <string name="icon_split_failed">❌</string>
     <string name="icon_send_target_unconfigured">🚫</string>
     <string name="icon_replied">📨</string>
-    <string name="icon_auto">✅</string>
-    <string name="icon_manual">☑️</string>
+    <string name="icon_send_auto">✅</string>
+    <string name="icon_send_manual">☑️</string>
     <string name="icon_company_name_converted">🔄</string>
     <string name="icon_split_rule">⚙️</string>
     <string name="icon_split_ai">🤖</string>

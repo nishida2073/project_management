@@ -369,7 +369,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     } else {
                         append(
                             getString(
-                                if (sentEntry.manual) R.string.icon_manual else R.string.icon_auto
+                                if (sentEntry.manual) R.string.icon_send_manual else R.string.icon_send_auto
                             )
                         )
                     }

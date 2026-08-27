@@ -91,20 +91,19 @@ class LogActivity : AppCompatActivity() {
                 SmsLogStore.EntryType.AUTO_REPLY -> getString(R.string.label_log_type_auto_reply)
             }
 
-            val modeColor = ContextCompat.getColor(
-                this@LogActivity,
-                if (entry.manual) R.color.status_manual else R.color.status_running
-            )
-
             // グループ1: ログ種別＋実行時のタイムスタンプ（種別は無彩色、送信系は自動＝青・手動＝アンバーで末尾に区別を付ける）
             val typeAndTimestampView = TextView(this).apply {
                 text = buildSpannedString {
                     append(getString(R.string.label_log_type_bracketed, typeLabel))
                     append(" ${dateFormat.format(Date(entry.loggedAtMillis))}")
-                    if (entry.type != SmsLogStore.EntryType.RECEIVE) {
+                    if (entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE) {
                         append("  ")
+                        val modeColor = ContextCompat.getColor(
+                            this@LogActivity,
+                            if (entry.manual) R.color.status_manual else R.color.status_running
+                        )
                         color(modeColor) {
-                            append(getString(if (entry.manual) R.string.icon_manual else R.string.icon_auto))
+                            append(getString(if (entry.manual) R.string.icon_send_manual else R.string.icon_send_auto))
                         }
                     }
                     if (entry.companyNameConverted) {
