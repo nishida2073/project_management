@@ -139,9 +139,9 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(searchFiltersVisibleByDefault = visible))
         }
 
-        binding.cbDefaultUnsentOnlyEnabled.isChecked = config.defaultUnsentOnlyEnabled
-        binding.cbDefaultUnsentOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(defaultUnsentOnlyEnabled = isChecked))
+        binding.cbDefaultSendNoneOnlyEnabled.isChecked = config.defaultSendNoneOnlyEnabled
+        binding.cbDefaultSendNoneOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSendNoneOnlyEnabled = isChecked))
         }
 
         binding.cbDefaultSentAutoOnlyEnabled.isChecked = config.defaultSentAutoOnlyEnabled

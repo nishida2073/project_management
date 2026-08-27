@@ -518,7 +518,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_unsent_only_filter"
+                            android:text="@string/label_default_send_status_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -528,12 +528,12 @@
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:id="@+id/cbDefaultUnsentOnlyEnabled"
+                                android:id="@+id/cbDefaultSendNoneOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_unsent_only_enabled" />
+                                android:text="@string/switch_default_send_none_only_enabled" />
 
                             <CheckBox
                                 android:id="@+id/cbDefaultSentAutoOnlyEnabled"
@@ -564,7 +564,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_split_failed_only_filter"
+                            android:text="@string/label_default_content_status_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout

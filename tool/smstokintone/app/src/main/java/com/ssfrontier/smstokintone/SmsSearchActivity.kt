@@ -82,7 +82,7 @@ class SmsSearchActivity : AppCompatActivity() {
             if (config.searchFiltersVisibleByDefault) R.string.btn_hide_search_filters else R.string.btn_show_search_filters
         )
 
-        binding.cbUnsentOnly.isChecked = config.defaultUnsentOnlyEnabled
+        binding.cbSendNoneOnly.isChecked = config.defaultSendNoneOnlyEnabled
         binding.cbSentAutoOnly.isChecked = config.defaultSentAutoOnlyEnabled
         binding.cbSentManualOnly.isChecked = config.defaultSentManualOnlyEnabled
         binding.cbSplitFailedOnly.isChecked = config.defaultSplitFailedOnlyEnabled
@@ -224,12 +224,12 @@ class SmsSearchActivity : AppCompatActivity() {
 
         // ⬜未・✅済（自動）・☑️済（手動）のいずれかがONの場合、チェックされた送信状況のSMSのみを残す。
         // すべてOFFの場合は送信状況による絞り込みを行わない
-        if (binding.cbUnsentOnly.isChecked || binding.cbSentAutoOnly.isChecked || binding.cbSentManualOnly.isChecked) {
+        if (binding.cbSendNoneOnly.isChecked || binding.cbSentAutoOnly.isChecked || binding.cbSentManualOnly.isChecked) {
             val sentEntries = matchSentEntries(records, loadCompletedEntries())
             records.removeAll { record ->
                 val sentEntry = sentEntries[record.id]
                 val matchesFilter = when {
-                    sentEntry == null -> binding.cbUnsentOnly.isChecked
+                    sentEntry == null -> binding.cbSendNoneOnly.isChecked
                     sentEntry.manual -> binding.cbSentManualOnly.isChecked
                     else -> binding.cbSentAutoOnly.isChecked
                 }
@@ -365,7 +365,7 @@ class SmsSearchActivity : AppCompatActivity() {
                         append(getString(R.string.icon_send_target_unconfigured))
                     }
                     if (sentEntry == null) {
-                        append(getString(R.string.icon_unsent))
+                        append(getString(R.string.icon_send_none))
                     } else {
                         append(
                             getString(

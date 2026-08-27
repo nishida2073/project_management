@@ -185,13 +185,13 @@
                 android:orientation="horizontal">
 
                 <CheckBox
-                    android:id="@+id/cbUnsentOnly"
+                    android:id="@+id/cbSendNoneOnly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:minHeight="0dp"
                     android:checked="true"
-                    android:text="@string/cb_unsent_only" />
+                    android:text="@string/cb_send_none_only" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"

@@ -25,7 +25,7 @@ object SettingsStore {
     private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
     private const val KEY_AI_PARSING_ENABLED = "ai_parsing_enabled"
-    private const val KEY_DEFAULT_UNSENT_ONLY_ENABLED = "default_unsent_only_enabled"
+    private const val KEY_DEFAULT_SEND_NONE_ONLY_ENABLED = "default_send_none_only_enabled"
     private const val KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED = "default_split_failed_only_enabled"
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
     private const val KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED = "default_sent_manual_only_enabled"
@@ -92,7 +92,7 @@ object SettingsStore {
          * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
         val aiParsingEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
-        val defaultUnsentOnlyEnabled: Boolean,
+        val defaultSendNoneOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「内容」の「形式が不正」チェックボックスを初期状態でONにするかどうか */
         val defaultSplitFailedOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（自動）」チェックボックスを初期状態でONにするかどうか */
@@ -193,7 +193,7 @@ object SettingsStore {
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
             .putBoolean(KEY_AI_PARSING_ENABLED, config.aiParsingEnabled)
-            .putBoolean(KEY_DEFAULT_UNSENT_ONLY_ENABLED, config.defaultUnsentOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, config.defaultSendNoneOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, config.defaultSplitFailedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
@@ -234,7 +234,7 @@ object SettingsStore {
                 ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
             defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, null),
             aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, false),
-            defaultUnsentOnlyEnabled = p.getBoolean(KEY_DEFAULT_UNSENT_ONLY_ENABLED, false),
+            defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, false),
             defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, false),
             defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, false),
             defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, false)
@@ -262,7 +262,7 @@ object SettingsStore {
                 splitFailedReplyAddition = AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
                 defaultSendTargetFilterId = null,
                 aiParsingEnabled = false,
-                defaultUnsentOnlyEnabled = false,
+                defaultSendNoneOnlyEnabled = false,
                 defaultSplitFailedOnlyEnabled = false,
                 defaultSentAutoOnlyEnabled = false,
                 defaultSentManualOnlyEnabled = false
