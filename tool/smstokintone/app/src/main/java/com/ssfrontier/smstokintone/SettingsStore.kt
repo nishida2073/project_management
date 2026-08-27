@@ -27,6 +27,8 @@ object SettingsStore {
     private const val KEY_AI_PARSING_ENABLED = "ai_parsing_enabled"
     private const val KEY_DEFAULT_UNSENT_ONLY_ENABLED = "default_unsent_only_enabled"
     private const val KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED = "default_split_failed_only_enabled"
+    private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
+    private const val KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED = "default_sent_manual_only_enabled"
 
     private const val KEY_SEND_TARGETS = "send_targets"
 
@@ -92,7 +94,11 @@ object SettingsStore {
         /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
         val defaultUnsentOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「内容」の「形式が不正」チェックボックスを初期状態でONにするかどうか */
-        val defaultSplitFailedOnlyEnabled: Boolean
+        val defaultSplitFailedOnlyEnabled: Boolean,
+        /** SMS検索画面を開いた際に「送信」の「済（自動）」チェックボックスを初期状態でONにするかどうか */
+        val defaultSentAutoOnlyEnabled: Boolean,
+        /** SMS検索画面を開いた際に「送信」の「済（手動）」チェックボックスを初期状態でONにするかどうか */
+        val defaultSentManualOnlyEnabled: Boolean
     )
 
     /**
@@ -189,6 +195,8 @@ object SettingsStore {
             .putBoolean(KEY_AI_PARSING_ENABLED, config.aiParsingEnabled)
             .putBoolean(KEY_DEFAULT_UNSENT_ONLY_ENABLED, config.defaultUnsentOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, config.defaultSplitFailedOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
         if (config.defaultSendTargetFilterId != null) {
             editor.putString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, config.defaultSendTargetFilterId)
         } else {
@@ -227,7 +235,9 @@ object SettingsStore {
             defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, null),
             aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, false),
             defaultUnsentOnlyEnabled = p.getBoolean(KEY_DEFAULT_UNSENT_ONLY_ENABLED, false),
-            defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, false)
+            defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, false),
+            defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, false),
+            defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, false)
         )
     }
 
@@ -253,7 +263,9 @@ object SettingsStore {
                 defaultSendTargetFilterId = null,
                 aiParsingEnabled = false,
                 defaultUnsentOnlyEnabled = false,
-                defaultSplitFailedOnlyEnabled = false
+                defaultSplitFailedOnlyEnabled = false,
+                defaultSentAutoOnlyEnabled = false,
+                defaultSentManualOnlyEnabled = false
             )
         )
     }

@@ -525,8 +525,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:orientation="vertical">
 
                             <CheckBox
                                 android:id="@+id/cbDefaultUnsentOnlyEnabled"
@@ -535,6 +534,22 @@
                                 android:minHeight="0dp"
                                 android:checked="false"
                                 android:text="@string/switch_default_unsent_only_enabled" />
+
+                            <CheckBox
+                                android:id="@+id/cbDefaultSentAutoOnlyEnabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_sent_auto_only_enabled" />
+
+                            <CheckBox
+                                android:id="@+id/cbDefaultSentManualOnlyEnabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_sent_manual_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
 

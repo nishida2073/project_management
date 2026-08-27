@@ -182,16 +182,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:orientation="horizontal">
 
                 <CheckBox
                     android:id="@+id/cbUnsentOnly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
                     android:minHeight="0dp"
                     android:checked="true"
                     android:text="@string/cb_unsent_only" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <CheckBox
+                        android:id="@+id/cbSentAutoOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="0dp"
+                        android:checked="false"
+                        android:text="@string/cb_sent_auto_only" />
+
+                    <CheckBox
+                        android:id="@+id/cbSentManualOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="0dp"
+                        android:checked="false"
+                        android:text="@string/cb_sent_manual_only" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

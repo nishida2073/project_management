@@ -144,6 +144,16 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.save(this, SettingsStore.load(this).copy(defaultUnsentOnlyEnabled = isChecked))
         }
 
+        binding.cbDefaultSentAutoOnlyEnabled.isChecked = config.defaultSentAutoOnlyEnabled
+        binding.cbDefaultSentAutoOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSentAutoOnlyEnabled = isChecked))
+        }
+
+        binding.cbDefaultSentManualOnlyEnabled.isChecked = config.defaultSentManualOnlyEnabled
+        binding.cbDefaultSentManualOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSentManualOnlyEnabled = isChecked))
+        }
+
         binding.cbDefaultSplitFailedOnlyEnabled.isChecked = config.defaultSplitFailedOnlyEnabled
         binding.cbDefaultSplitFailedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.save(this, SettingsStore.load(this).copy(defaultSplitFailedOnlyEnabled = isChecked))

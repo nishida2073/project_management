@@ -83,6 +83,8 @@ class SmsSearchActivity : AppCompatActivity() {
         )
 
         binding.cbUnsentOnly.isChecked = config.defaultUnsentOnlyEnabled
+        binding.cbSentAutoOnly.isChecked = config.defaultSentAutoOnlyEnabled
+        binding.cbSentManualOnly.isChecked = config.defaultSentManualOnlyEnabled
         binding.cbSplitFailedOnly.isChecked = config.defaultSplitFailedOnlyEnabled
     }
 
@@ -220,9 +222,19 @@ class SmsSearchActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.toast_sms_search_error, e.message ?: ""), Toast.LENGTH_LONG).show()
         }
 
-        if (binding.cbUnsentOnly.isChecked) {
+        // ⬜未・✅済（自動）・☑️済（手動）のいずれかがONの場合、チェックされた送信状況のSMSのみを残す。
+        // すべてOFFの場合は送信状況による絞り込みを行わない
+        if (binding.cbUnsentOnly.isChecked || binding.cbSentAutoOnly.isChecked || binding.cbSentManualOnly.isChecked) {
             val sentEntries = matchSentEntries(records, loadCompletedEntries())
-            records.removeAll { it.id in sentEntries }
+            records.removeAll { record ->
+                val sentEntry = sentEntries[record.id]
+                val matchesFilter = when {
+                    sentEntry == null -> binding.cbUnsentOnly.isChecked
+                    sentEntry.manual -> binding.cbSentManualOnly.isChecked
+                    else -> binding.cbSentAutoOnly.isChecked
+                }
+                !matchesFilter
+            }
         }
 
         when (val sendTargetId = selectedSendTargetId) {

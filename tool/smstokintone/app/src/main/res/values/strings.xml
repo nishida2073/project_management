@@ -122,6 +122,8 @@
     <string name="label_default_send_target_filter">送信先</string>
     <string name="label_default_unsent_only_filter">送信</string>
     <string name="switch_default_unsent_only_enabled">未送信</string>
+    <string name="switch_default_sent_auto_only_enabled">済（自動）</string>
+    <string name="switch_default_sent_manual_only_enabled">済（手動）</string>
     <string name="label_default_split_failed_only_filter">内容</string>
     <string name="switch_default_split_failed_only_enabled">形式が不正</string>
     <string name="label_search_filters_visibility">表示の切り替え</string>
@@ -206,6 +208,8 @@
     <string name="cb_split_failed_only">❌ 形式が不正</string>
     <string name="label_search_send_status_filter">送信</string>
     <string name="cb_unsent_only">⬜ 未</string>
+    <string name="cb_sent_auto_only">✅ 済（自動）</string>
+    <string name="cb_sent_manual_only">☑️ 済（手動）</string>
     <string name="icon_sms_status_unsent">@string/icon_unsent</string>
     <string name="icon_sms_status_split_failed">@string/icon_split_failed</string>
     <string name="icon_sms_status_send_target_unconfigured">@string/icon_send_target_unconfigured</string>
