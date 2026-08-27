@@ -3,7 +3,6 @@
 
     <!-- アイコン -->
     <string name="icon_split_failed">❌</string>
-    <string name="icon_send_target_unconfigured">🚫</string>
     <string name="icon_replied">📨</string>
     <string name="icon_send_none">⬜</string>
     <string name="icon_send_auto">✅</string>
@@ -11,7 +10,8 @@
     <string name="icon_company_name_converted">🔄</string>
     <string name="icon_split_rule">⚙️</string>
     <string name="icon_split_ai">🤖</string>
-    <string name="icon_send_target">🏢</string>
+    <string name="icon_send_target_exists">📍</string>
+    <string name="icon_send_target_unconfigured">🚫</string>
 
     <!-- 汎用ボタン -->
     <string name="btn_refresh">更新</string>
@@ -211,7 +211,7 @@
     <string name="cb_send_none_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_status_legend">"送信先：🚫 なし\n内容：❌ 形式が不正\n送信：⬜ 未・✅ 済（自動）・☑️ 済（手動）\n返信：📨 済（自動）"</string>
+    <string name="helper_sms_status_legend">"内容：❌ 形式が不正\n送信：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし"</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>

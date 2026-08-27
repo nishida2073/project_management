@@ -359,6 +359,9 @@ class SmsSearchActivity : AppCompatActivity() {
             val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
                 (!isSplitFailedBody || config.searchSplitFailedEnabled)
             val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
+            val sendTargetIcon = getString(
+                if (isSendTargetUnconfigured) R.string.icon_send_target_unconfigured else R.string.icon_send_target_exists
+            )
 
             val checkBox = CheckBox(this).apply {
                 tag = record.id
@@ -372,9 +375,6 @@ class SmsSearchActivity : AppCompatActivity() {
 
             val textView = TextView(this).apply {
                 text = buildSpannedString {
-                    if (isSendTargetUnconfigured) {
-                        append(getString(R.string.icon_send_target_unconfigured))
-                    }
                     if (sentEntry == null) {
                         append(getString(R.string.icon_send_none))
                     } else {
@@ -385,16 +385,18 @@ class SmsSearchActivity : AppCompatActivity() {
                         )
                     }
                     if (isSplitFailedBody) {
+                        append(" ")
                         append(getString(R.string.icon_split_failed))
                     }
                     if (isAutoReplied) {
+                        append(" ")
                         append(getString(R.string.icon_replied))
                     }
                     append("\n")
                     if (isSelectable) {
-                        color(sendTargetColor) { bold { append(getString(R.string.icon_send_target)); append(" "); append(sendTargetName) } }
+                        color(sendTargetColor) { bold { append(sendTargetIcon); append(" "); append(sendTargetName) } }
                     } else {
-                        bold { append(getString(R.string.icon_send_target)); append(" "); append(sendTargetName) }
+                        bold { append(sendTargetIcon); append(" "); append(sendTargetName) }
                     }
                     append("\n\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
                     append(record.body.take(80))
