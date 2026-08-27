@@ -37,7 +37,9 @@ object SmsLogStore {
         /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
         val smsParts: SmsParts? = null,
         /** kintoneへの登録時に会社名の変換（半角大文字・全角統一）を適用したかどうか */
-        val companyNameConverted: Boolean = false
+        val companyNameConverted: Boolean = false,
+        /** 自動返信（[EntryType.AUTO_REPLY]）で実際に送信した返信本文。それ以外のエントリはnull */
+        val replyBody: String? = null
     )
 
     private fun prefs(context: Context) =
@@ -55,7 +57,8 @@ object SmsLogStore {
         sendTargetName: String? = null,
         manual: Boolean = false,
         smsParts: SmsParts? = null,
-        companyNameConverted: Boolean = false
+        companyNameConverted: Boolean = false,
+        replyBody: String? = null
     ) {
         val entries = getAll(context).toMutableList()
         entries.add(
@@ -72,7 +75,8 @@ object SmsLogStore {
                 sendTargetName = sendTargetName,
                 manual = manual,
                 smsParts = smsParts,
-                companyNameConverted = companyNameConverted
+                companyNameConverted = companyNameConverted,
+                replyBody = replyBody
             )
         )
 
@@ -90,6 +94,7 @@ object SmsLogStore {
                 .put("manual", entry.manual)
                 .put("companyNameConverted", entry.companyNameConverted)
             entry.sendTargetName?.let { obj.put("sendTargetName", it) }
+            entry.replyBody?.let { obj.put("replyBody", it) }
             entry.smsParts?.let {
                 obj.put(
                     "smsParts",
@@ -124,6 +129,7 @@ object SmsLogStore {
                 sendTargetName = obj.optString("sendTargetName", "").ifBlank { null },
                 manual = obj.optBoolean("manual", false),
                 companyNameConverted = obj.optBoolean("companyNameConverted", false),
+                replyBody = obj.optString("replyBody", "").ifBlank { null },
                 smsParts = obj.optJSONObject("smsParts")?.let {
                     SmsParts(
                         companyName = it.optString("companyName", ""),

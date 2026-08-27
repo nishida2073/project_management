@@ -186,6 +186,7 @@
     <string name="dialog_title_confirm_clear_log">ログをクリアしますか？</string>
     <string name="dialog_message_confirm_clear_log">この操作は取り消せません</string>
     <string name="dialog_title_split_result">分割結果</string>
+    <string name="dialog_title_auto_reply_body">返信内容</string>
     <string name="btn_cancel">キャンセル</string>
     <string name="btn_clear">クリア</string>
 

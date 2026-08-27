@@ -195,6 +195,12 @@ class LogActivity : AppCompatActivity() {
                         true
                     }
                 }
+                entry.replyBody?.let { replyBody ->
+                    setOnLongClickListener {
+                        showAutoReplyBodyDialog(replyBody)
+                        true
+                    }
+                }
             }
 
             binding.llLogContainer.addView(entryView)
@@ -228,6 +234,15 @@ class LogActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    /** 長押しされたログの自動返信で実際に送信した返信本文をダイアログで表示する */
+    private fun showAutoReplyBodyDialog(replyBody: String) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_title_auto_reply_body)
+            .setMessage(replyBody)
             .setPositiveButton(android.R.string.ok, null)
             .show()
     }

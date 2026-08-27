@@ -89,7 +89,8 @@ class SmsReceiver : BroadcastReceiver() {
                                     body = body,
                                     success = true,
                                     message = context.getString(R.string.message_log_auto_reply),
-                                    sendTargetName = sendTargetName
+                                    sendTargetName = sendTargetName,
+                                    replyBody = config.splitFailedReplyAddition
                                 )
                             }
                             AutoReplyThrottle.recordSent(context, sender, now)
