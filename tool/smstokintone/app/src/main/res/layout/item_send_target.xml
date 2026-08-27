@@ -34,7 +34,7 @@
                 style="@style/AppButton.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/btn_copy_send_target" />
+                android:text="@string/btn_copy" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDeleteSendTarget"
@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="@string/btn_delete_send_target" />
+                android:text="@string/btn_delete" />
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
@@ -574,7 +574,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_test_send" />
+            android:text="@string/btn_send_test" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

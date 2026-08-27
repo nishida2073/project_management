@@ -174,7 +174,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             .setTitle(R.string.dialog_title_test_send_body)
             .setView(editText)
             .setNegativeButton(R.string.btn_cancel, null)
-            .setPositiveButton(R.string.btn_test_send_confirm) { _, _ ->
+            .setPositiveButton(R.string.btn_send) { _, _ ->
                 confirmRoutingThenSend(itemBinding, sendTarget, editText.text.toString())
             }
             .show()
@@ -282,6 +282,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
     }
 
     private fun onSaveClicked() {
+        if (sendTargetCards.isEmpty()) {
+            Toast.makeText(this, getString(R.string.toast_no_send_targets), Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val newSendTargets = mutableListOf<SettingsStore.SendTarget>()
 
         for ((index, card) in sendTargetCards.withIndex()) {

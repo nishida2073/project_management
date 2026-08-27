@@ -13,6 +13,18 @@
     <string name="icon_split_ai">🤖</string>
     <string name="icon_send_target">🏢</string>
 
+    <!-- 汎用ボタン -->
+    <string name="btn_refresh">更新</string>
+    <string name="btn_cancel">キャンセル</string>
+    <string name="btn_clear">クリア</string>
+    <string name="btn_copy">コピー</string>
+    <string name="btn_delete">削除</string>
+    <string name="btn_send">送信</string>
+    <string name="btn_search">検索</string>
+    <string name="btn_select_all">全選択</string>
+    <string name="btn_deselect_all">選択解除</string>
+    <string name="btn_reset">初期化</string>
+
     <!-- トップ画面 -->
     <string name="label_top_sms_send">SMSの送信モード</string>
     <string name="label_top_sms_send_auto">自動</string>
@@ -29,8 +41,6 @@
     <string name="title_send_target_settings">送信先の設定</string>
     <string name="send_target_settings_description"></string>
     <string name="btn_add_send_target">設定を追加</string>
-    <string name="btn_copy_send_target">コピー</string>
-    <string name="btn_delete_send_target">削除</string>
     <string name="suffix_send_target_copy">のコピー</string>
     <string name="label_send_target_none">なし</string>
     <string name="label_send_target_name_unset">(名称未設定)</string>
@@ -70,11 +80,10 @@
     <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
     <string name="dialog_title_validation_error">入力エラー</string>
     <string name="dialog_message_validation_error">%1$s: 送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
-    <string name="btn_save">設定を保存</string>
+    <string name="btn_save_settings">設定を保存</string>
     <string name="toast_settings_saved">設定を保存しました</string>
-    <string name="btn_test_send">テスト送信</string>
+    <string name="btn_send_test">テスト送信</string>
     <string name="dialog_title_test_send_body">テスト本文</string>
-    <string name="btn_test_send_confirm">送信</string>
     <string name="dialog_title_test_send_result">テスト結果</string>
     <string name="dialog_message_test_send_result_failure">送信失敗: %1$s</string>
     <string name="dialog_message_test_send_result_network_error">通信エラー: %1$s</string>
@@ -83,7 +92,6 @@
   
     <!-- アプリの設定画面 -->
     <string name="title_app_settings">アプリの設定</string>
-    <string name="btn_reset_settings">初期化</string>
     <string name="dialog_title_confirm_reset_settings">設定を初期化しますか？</string>
     <string name="dialog_message_confirm_reset_settings">この操作は取り消せません</string>
     <string name="section_permission">端末の許可</string>
@@ -181,15 +189,11 @@
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
     <string name="message_log_send_complete_skipped_duplicate">SMSの送信をスキップしました\n（最終受信日時（秒は除く）と本文が一致）</string>
     <string name="message_log_auto_reply">形式が不正なため、SMSを返信しました</string>
-    <string name="btn_clear_log">クリア</string>
-    <string name="btn_refresh_log">更新</string>
     <string name="dialog_title_confirm_clear_log">ログをクリアしますか？</string>
     <string name="dialog_message_confirm_clear_log">この操作は取り消せません</string>
     <string name="dialog_title_split_result">分割結果</string>
     <string name="dialog_title_auto_reply_body">返信内容</string>
-    <string name="btn_cancel">キャンセル</string>
-    <string name="btn_clear">クリア</string>
-
+    
     <!-- SMSの検索画面 -->
     <string name="title_sms_search">SMSの検索</string>
     <string name="section_search_conditions">検索条件</string>
@@ -208,9 +212,6 @@
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
     <string name="helper_sms_status_legend">"送信先：🚫 なし\n内容：❌ 形式が不正\n送信：⬜ 未・✅ 済（自動）・☑️ 済（手動）\n返信：📨 済（自動）"</string>
-    <string name="btn_search_sms">検索</string>
-    <string name="btn_select_all">全選択</string>
-    <string name="btn_deselect_all">選択解除</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>

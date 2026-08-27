@@ -208,7 +208,7 @@ class AppSettingsActivity : AppCompatActivity() {
                 .setTitle(R.string.dialog_title_confirm_reset_settings)
                 .setMessage(R.string.dialog_message_confirm_reset_settings)
                 .setNegativeButton(R.string.btn_cancel, null)
-                .setPositiveButton(R.string.btn_reset_settings) { _, _ ->
+                .setPositiveButton(R.string.btn_reset) { _, _ ->
                     SettingsStore.resetToDefaults(this)
                     // resetToDefaults()は既定のライトテーマを保存するだけで、実際に適用中の
                     // AppCompatDelegateの夜間モードまでは切り替えないため、ここで明示的に反映する
