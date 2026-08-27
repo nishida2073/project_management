@@ -243,6 +243,17 @@ class AppSettingsActivity : AppCompatActivity() {
     }
 
     private fun refreshDefaultSendTargetFilterOptions() {
+        // 送信先が1件しかない場合はSMS検索画面側で常に「すべて」に固定されるため、
+        // ここで初期値を設定しても意味を持たない。項目ごと隠して値も「すべて」に揃える
+        if (SettingsStore.loadSendTargets(this).size == 1) {
+            binding.llDefaultSendTargetFilter.visibility = View.GONE
+            if (SettingsStore.load(this).defaultSendTargetFilterId != null) {
+                SettingsStore.save(this, SettingsStore.load(this).copy(defaultSendTargetFilterId = null))
+            }
+            return
+        }
+        binding.llDefaultSendTargetFilter.visibility = View.VISIBLE
+
         val options = SettingsStore.sendTargetFilterOptions(this)
         defaultSendTargetFilterKeys = options.map { it.first }
         val labels = options.map { it.second }

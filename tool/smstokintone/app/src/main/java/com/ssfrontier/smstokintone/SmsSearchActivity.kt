@@ -96,6 +96,17 @@ class SmsSearchActivity : AppCompatActivity() {
     }
 
     private fun refreshSendTargetFilterOptions() {
+        // 送信先が1件しかない場合は「すべて」を選んでも絞り込み結果は変わらないため、
+        // 項目名とリストボックスごと隠して値は「すべて」に固定する
+        if (SettingsStore.loadSendTargets(this).size == 1) {
+            binding.tvSendTargetFilterLabel.visibility = View.GONE
+            binding.llSendTargetFilter.visibility = View.GONE
+            selectedSendTargetId = null
+            return
+        }
+        binding.tvSendTargetFilterLabel.visibility = View.VISIBLE
+        binding.llSendTargetFilter.visibility = View.VISIBLE
+
         val options = SettingsStore.sendTargetFilterOptions(this)
         sendTargetFilterKeys = options.map { it.first }
         val labels = options.map { it.second }

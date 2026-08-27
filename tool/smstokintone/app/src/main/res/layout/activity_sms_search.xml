@@ -127,6 +127,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                android:id="@+id/tvSendTargetFilterLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -135,6 +136,7 @@
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
+                android:id="@+id/llSendTargetFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
