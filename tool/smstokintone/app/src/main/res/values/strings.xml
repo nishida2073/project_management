@@ -2,15 +2,16 @@
     <string name="app_name">S2k</string>
 
     <!-- アイコン -->
-    <string name="icon_unsent">⏳</string>
-    <string name="icon_split_failed">⚠️</string>
+    <string name="icon_unsent">⬜</string>
+    <string name="icon_split_failed">❌</string>
     <string name="icon_send_target_unconfigured">🚫</string>
     <string name="icon_replied">📨</string>
-    <string name="icon_auto">⚡</string>
-    <string name="icon_manual">✋</string>
+    <string name="icon_auto">✅</string>
+    <string name="icon_manual">☑️</string>
     <string name="icon_company_name_converted">🔄</string>
     <string name="icon_split_rule">⚙️</string>
     <string name="icon_split_ai">🤖</string>
+    <string name="icon_send_target">🏢</string>
 
     <!-- トップ画面 -->
     <string name="label_top_sms_send">SMSの送信モード</string>
@@ -85,16 +86,6 @@
     <string name="btn_reset_settings">初期化</string>
     <string name="dialog_title_confirm_reset_settings">設定を初期化しますか？</string>
     <string name="dialog_message_confirm_reset_settings">この操作は取り消せません</string>
-    <string name="section_layout">レイアウト</string>
-    <string name="section_theme_mode">表示テーマ</string>
-    <string name="rb_theme_light">ライト</string>
-    <string name="rb_theme_dark">ダーク</string>
-    <string name="section_log">ログ</string>
-    <string name="section_auto_refresh">自動更新</string>
-    <string name="switch_auto_refresh_enabled">有効にする</string>
-    <string name="label_auto_refresh_interval">更新間隔</string>
-    <string name="hint_auto_refresh_interval">秒</string>
-    <string name="helper_auto_refresh_interval">ログ画面を自動的に再読み込みする間隔です</string>
     <string name="section_permission">端末の許可</string>
     <string name="label_sms_receive_permission">SMSの受信</string>
     <string name="btn_sms_receive_permission">SMSの受信を許可する</string>
@@ -111,6 +102,19 @@
     <string name="label_permission_sms_read_granted">許可済み</string>
     <string name="toast_sms_read_permission_denied">SMSの読み取りの許可がない場合、SMSの検索はできません</string>
     <string name="helper_sms_read_permission">SMSの検索に使用します</string>
+    <string name="section_layout">レイアウト</string>
+    <string name="section_theme_mode">表示テーマ</string>
+    <string name="rb_theme_light">ライト</string>
+    <string name="rb_theme_dark">ダーク</string>
+    <string name="section_log">ログ</string>
+    <string name="section_auto_refresh">自動更新</string>
+    <string name="switch_auto_refresh_enabled">有効にする</string>
+    <string name="label_auto_refresh_interval">更新間隔</string>
+    <string name="hint_auto_refresh_interval">秒</string>
+    <string name="helper_auto_refresh_interval">ログ画面を自動的に再読み込みする間隔です</string>
+    <string name="label_sms_match_tolerance_seconds">統合範囲</string>
+    <string name="helper_sms_match_tolerance_seconds">送信ログと端末のSMSを同じSMSとみなす、時刻のずれの許容範囲です</string>
+    <string name="hint_sms_match_tolerance_seconds">±秒</string>
     <string name="section_sms_search">SMSの検索</string>
     <string name="section_search_filter">検索条件の初期値</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>
@@ -120,9 +124,6 @@
     <string name="switch_default_unsent_only_enabled">未送信</string>
     <string name="label_default_split_failed_only_filter">内容</string>
     <string name="switch_default_split_failed_only_enabled">形式が不正</string>
-    <string name="label_sms_match_tolerance_seconds">統合範囲</string>
-    <string name="helper_sms_match_tolerance_seconds">受信したSMSと送信ログの受信日時の統合範囲です</string>
-    <string name="hint_sms_match_tolerance_seconds">±秒</string>
     <string name="label_search_filters_visibility">表示の切り替え</string>
     <string name="rb_search_filters_visible">表示</string>
     <string name="rb_search_filters_hidden">隠す</string>
@@ -202,16 +203,16 @@
     <string name="label_send_target_filter">送信先</string>
     <string name="filter_send_target_all">すべて</string>
     <string name="label_search_content_status_filter">内容</string>
-    <string name="cb_split_failed_only">⚠️ 形式が不正</string>
+    <string name="cb_split_failed_only">❌ 形式が不正</string>
     <string name="label_search_send_status_filter">送信</string>
-    <string name="cb_unsent_only">⏳ 未</string>
+    <string name="cb_unsent_only">⬜ 未</string>
     <string name="icon_sms_status_unsent">@string/icon_unsent</string>
     <string name="icon_sms_status_split_failed">@string/icon_split_failed</string>
     <string name="icon_sms_status_send_target_unconfigured">@string/icon_send_target_unconfigured</string>
     <string name="icon_sms_status_auto_replied">@string/icon_replied</string>
     <string name="icon_sms_status_sent_auto">@string/icon_auto</string>
     <string name="icon_sms_status_sent_manual">@string/icon_manual</string>
-    <string name="helper_sms_status_legend">"送信先：🚫 なし\n内容：⚠️ 形式が不正\n送信：⏳ 未　⚡ 済（自動）　✋ 済（手動）\n返信：📨 済（自動）"</string>
+    <string name="helper_sms_status_legend">"送信先：🚫 なし\n内容：❌ 形式が不正\n送信：⬜ 未・✅ 済（自動）・☑️ 済（手動）\n返信：📨 済（自動）"</string>
     <string name="btn_search_sms">検索</string>
     <string name="btn_select_all">全選択</string>
     <string name="btn_deselect_all">選択解除</string>

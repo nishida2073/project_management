@@ -123,10 +123,12 @@ class LogActivity : AppCompatActivity() {
 
             // グループ2: 設定名／送信元／SMS自体のタイムスタンプ／メッセージ（SMS本文）
             val sendTargetNameView = TextView(this).apply {
-                text = entry.sendTargetName ?: getString(R.string.label_send_target_none)
+                text = getString(
+                    R.string.icon_send_target
+                ) + " " + (entry.sendTargetName ?: getString(R.string.label_send_target_none))
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
                 setTextColor(ContextCompat.getColor(this@LogActivity, R.color.send_target_name))
-                setPadding(0, 16, 0, 4)
+                setPadding(0, 16, 0, 16)
             }
             val senderAndTimestampView = TextView(this).apply {
                 text = "${dateFormat.format(Date(entry.timestampMillis))}　${entry.sender}"

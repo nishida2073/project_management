@@ -369,11 +369,11 @@ class SmsSearchActivity : AppCompatActivity() {
                     }
                     append("\n")
                     if (isSelectable) {
-                        color(sendTargetColor) { bold { append(sendTargetName) } }
+                        color(sendTargetColor) { bold { append(getString(R.string.icon_send_target)); append(" "); append(sendTargetName) } }
                     } else {
-                        bold { append(sendTargetName) }
+                        bold { append(getString(R.string.icon_send_target)); append(" "); append(sendTargetName) }
                     }
-                    append("\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
+                    append("\n\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
                     append(record.body.take(80))
                 }
                 layoutParams = android.widget.LinearLayout.LayoutParams(
