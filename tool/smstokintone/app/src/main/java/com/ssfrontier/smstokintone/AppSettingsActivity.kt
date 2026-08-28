@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -43,6 +44,18 @@ class AppSettingsActivity : AppCompatActivity() {
 
     private fun showPermissionDeniedToast(messageResId: Int) {
         Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
+    }
+
+    /**
+     * このEditTextの入力が1以上の整数として読み取れたときだけ[onChanged]を呼ぶ。クールダウン秒・
+     * 自動更新間隔・統合範囲・検索日数など、数値設定の入力欄で同じ検証を繰り返さないためのもの
+     */
+    private fun EditText.onPositiveIntChanged(onChanged: (Int) -> Unit) {
+        addTextChangedListener { text ->
+            val value = text.toString().toIntOrNull() ?: return@addTextChangedListener
+            if (value < 1) return@addTextChangedListener
+            onChanged(value)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,9 +105,7 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         binding.etAutoReplyCooldownSeconds.setText(SettingsStore.load(this).autoReplyCooldownSeconds.toString())
-        binding.etAutoReplyCooldownSeconds.addTextChangedListener { text ->
-            val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
-            if (seconds < 1) return@addTextChangedListener
+        binding.etAutoReplyCooldownSeconds.onPositiveIntChanged { seconds ->
             SettingsStore.update(this) { it.copy(autoReplyCooldownSeconds = seconds) }
         }
 
@@ -107,23 +118,17 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(autoRefreshEnabled = isChecked) }
             binding.tilAutoRefreshInterval.isEnabled = isChecked
         }
-        binding.etAutoRefreshInterval.addTextChangedListener { text ->
-            val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
-            if (seconds < 1) return@addTextChangedListener
+        binding.etAutoRefreshInterval.onPositiveIntChanged { seconds ->
             SettingsStore.update(this) { it.copy(autoRefreshIntervalSeconds = seconds) }
         }
 
         binding.etSmsMatchToleranceSeconds.setText(config.smsMatchToleranceSeconds.toString())
-        binding.etSmsMatchToleranceSeconds.addTextChangedListener { text ->
-            val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
-            if (seconds < 1) return@addTextChangedListener
+        binding.etSmsMatchToleranceSeconds.onPositiveIntChanged { seconds ->
             SettingsStore.update(this) { it.copy(smsMatchToleranceSeconds = seconds) }
         }
 
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())
-        binding.etSmsSearchDateRangeDays.addTextChangedListener { text ->
-            val days = text.toString().toIntOrNull() ?: return@addTextChangedListener
-            if (days < 1) return@addTextChangedListener
+        binding.etSmsSearchDateRangeDays.onPositiveIntChanged { days ->
             SettingsStore.update(this) { it.copy(smsSearchDateRangeDays = days) }
         }
 

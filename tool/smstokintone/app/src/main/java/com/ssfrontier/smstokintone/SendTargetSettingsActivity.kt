@@ -155,16 +155,22 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         )
     }
 
+    /** [sendTarget]の必須項目が未入力の場合に警告ダイアログを表示する。[index]はラベル未設定時の表示用（何番目の設定か） */
+    private fun showValidationErrorDialogIfInvalid(index: Int, sendTarget: SettingsStore.SendTarget): Boolean {
+        if (sendTarget.isValid) return false
+
+        val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_title_validation_error)
+            .setMessage(getString(R.string.dialog_message_validation_error, label))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+        return true
+    }
+
     private fun onTestSendClicked(itemBinding: ItemSendTargetBinding, card: SendTargetCard) {
         val sendTarget = readSendTargetFromBinding(itemBinding, id = card.id)
-        if (!sendTarget.isValid) {
-            val index = sendTargetCards.indexOf(card)
-            val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
-            AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_validation_error)
-                .setMessage(getString(R.string.dialog_message_validation_error, label))
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
+        if (showValidationErrorDialogIfInvalid(sendTargetCards.indexOf(card), sendTarget)) {
             return
         }
 
@@ -200,7 +206,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
             // 本文（またはそこから抽出した会社名）が[sendTarget]自身の振り分け条件
             // （キーワード、またはデフォルト送信先）に一致しない場合は警告して送信を中断する。
-            // 実際の登録処理（KintoneUploadWorker、SettingsStore.findSendTarget）と判定基準が
+            // 実際の登録処理（KintoneUploadWorker、SettingsStore.resolveSendTarget）と判定基準が
             // ずれないよう、routesToを使う（デフォルト送信先はここでは常にfalseになるので個別に許可する）
             if (!sendTarget.isDefault && !sendTarget.routesTo(testBody, smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
@@ -298,13 +304,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         for ((index, card) in sendTargetCards.withIndex()) {
             val sendTarget = readSendTargetFromBinding(card.binding, id = card.id)
 
-            if (!sendTarget.isValid) {
-                val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
-                AlertDialog.Builder(this)
-                    .setTitle(R.string.dialog_title_validation_error)
-                    .setMessage(getString(R.string.dialog_message_validation_error, label))
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
+            if (showValidationErrorDialogIfInvalid(index, sendTarget)) {
                 return
             }
 

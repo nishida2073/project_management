@@ -232,39 +232,62 @@ object SettingsStore {
         editor.apply()
     }
 
+    /**
+     * [Config]の既定値。初回起動時（[load]でSharedPreferencesに何も保存されていない場合の
+     * フォールバック）と、設定の初期化（[resetToDefaults]）の両方でここを参照する。
+     * 別々に値を書いていると、片方だけ更新して「初回起動時のデフォルト」と「初期化後の値」が
+     * 食い違う恐れがあるため、必ずこの1箇所にまとめること。
+     */
+    private val DEFAULT_CONFIG = Config(
+        sendEnabled = true,
+        sendSplitFailedEnabled = false,
+        searchSplitFailedEnabled = false,
+        searchSendTargetUnconfiguredEnabled = false,
+        autoReplySplitFailedEnabled = false,
+        autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
+        autoRefreshEnabled = true,
+        autoRefreshIntervalSeconds = AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS,
+        smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
+        themeMode = ThemeMode.LIGHT,
+        smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
+        searchFiltersVisibleByDefault = true,
+        defaultReplyBody = AppDefaults.SMS_STANDARD_REPLY_BODY,
+        splitFailedReplyAddition = AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
+        defaultSendTargetFilterId = null,
+        aiParsingEnabled = false,
+        defaultSendNoneOnlyEnabled = false,
+        defaultSplitFailedOnlyEnabled = false,
+        defaultSentAutoOnlyEnabled = false,
+        defaultSentManualOnlyEnabled = false
+    )
+
     fun load(context: Context): Config {
         val p = prefs(context)
         return Config(
-            sendEnabled = p.getBoolean(KEY_SEND_ENABLED, true),
-            sendSplitFailedEnabled = p.getBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, false),
-            searchSplitFailedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, false),
-            searchSendTargetUnconfiguredEnabled = p.getBoolean(KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED, false),
-            autoReplySplitFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, false),
-            autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS),
-            autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, true),
-            autoRefreshIntervalSeconds = p.getInt(
-                KEY_AUTO_REFRESH_INTERVAL_SECONDS,
-                AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS
+            sendEnabled = p.getBoolean(KEY_SEND_ENABLED, DEFAULT_CONFIG.sendEnabled),
+            sendSplitFailedEnabled = p.getBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.sendSplitFailedEnabled),
+            searchSplitFailedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.searchSplitFailedEnabled),
+            searchSendTargetUnconfiguredEnabled = p.getBoolean(
+                KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED,
+                DEFAULT_CONFIG.searchSendTargetUnconfiguredEnabled
             ),
-            smsMatchToleranceSeconds = p.getInt(
-                KEY_SMS_MATCH_TOLERANCE_SECONDS,
-                AppDefaults.SMS_MATCH_TOLERANCE_SECONDS
-            ),
+            autoReplySplitFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.autoReplySplitFailedEnabled),
+            autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, DEFAULT_CONFIG.autoReplyCooldownSeconds),
+            autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, DEFAULT_CONFIG.autoRefreshEnabled),
+            autoRefreshIntervalSeconds = p.getInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, DEFAULT_CONFIG.autoRefreshIntervalSeconds),
+            smsMatchToleranceSeconds = p.getInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, DEFAULT_CONFIG.smsMatchToleranceSeconds),
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
-            smsSearchDateRangeDays = p.getInt(
-                KEY_SMS_SEARCH_DATE_RANGE_DAYS,
-                AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS
-            ),
-            searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, true),
-            defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, AppDefaults.SMS_STANDARD_REPLY_BODY) ?: AppDefaults.SMS_STANDARD_REPLY_BODY,
-            splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY)
-                ?: AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
-            defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, null),
-            aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, false),
-            defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, false),
-            defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, false),
-            defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, false),
-            defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, false)
+            smsSearchDateRangeDays = p.getInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, DEFAULT_CONFIG.smsSearchDateRangeDays),
+            searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, DEFAULT_CONFIG.searchFiltersVisibleByDefault),
+            defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, DEFAULT_CONFIG.defaultReplyBody) ?: DEFAULT_CONFIG.defaultReplyBody,
+            splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, DEFAULT_CONFIG.splitFailedReplyAddition)
+                ?: DEFAULT_CONFIG.splitFailedReplyAddition,
+            defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, DEFAULT_CONFIG.defaultSendTargetFilterId),
+            aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, DEFAULT_CONFIG.aiParsingEnabled),
+            defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
+            defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitFailedOnlyEnabled),
+            defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
+            defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
         )
     }
 
@@ -278,31 +301,7 @@ object SettingsStore {
 
     /** アプリの設定（[Config]）をすべて既定値に戻す。送信先の設定（[SendTarget]）は対象外で変更されない */
     fun resetToDefaults(context: Context) {
-        save(
-            context,
-            Config(
-                sendEnabled = true,
-                sendSplitFailedEnabled = false,
-                searchSplitFailedEnabled = false,
-                searchSendTargetUnconfiguredEnabled = false,
-                autoReplySplitFailedEnabled = false,
-                autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
-                autoRefreshEnabled = true,
-                autoRefreshIntervalSeconds = AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS,
-                smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
-                themeMode = ThemeMode.LIGHT,
-                smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
-                searchFiltersVisibleByDefault = true,
-                defaultReplyBody = AppDefaults.SMS_STANDARD_REPLY_BODY,
-                splitFailedReplyAddition = AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
-                defaultSendTargetFilterId = null,
-                aiParsingEnabled = false,
-                defaultSendNoneOnlyEnabled = false,
-                defaultSplitFailedOnlyEnabled = false,
-                defaultSentAutoOnlyEnabled = false,
-                defaultSentManualOnlyEnabled = false
-            )
-        )
+        save(context, DEFAULT_CONFIG)
     }
 
     /**
