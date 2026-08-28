@@ -130,12 +130,20 @@ object KintoneApi {
         return SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN).format(Date(baseMillis))
     }
 
-    private fun parseIsoDateTime(datetimeIsoValue: String): Long? {
-        val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
+    /** kintoneの日時フィールド用ISO8601形式（UTC）のフォーマッタ。書き込み側（[formatIsoDateTime]）と
+     * 読み取り側（[parseIsoDateTime]、[findExistingRecord]の検索範囲組み立て）で必ずこれを共有し、
+     * 書式がずれて既存レコードの重複判定が壊れることを防ぐ */
+    private fun isoDateTimeFormat(): SimpleDateFormat =
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
+
+    /** [millis]をkintoneの日時フィールドに送信する形式（ISO8601・UTC）の文字列に変換する */
+    fun formatIsoDateTime(millis: Long): String = isoDateTimeFormat().format(Date(millis))
+
+    private fun parseIsoDateTime(datetimeIsoValue: String): Long? {
         return try {
-            isoFormat.parse(datetimeIsoValue)?.time
+            isoDateTimeFormat().parse(datetimeIsoValue)?.time
         } catch (e: ParseException) {
             null
         }
@@ -192,14 +200,11 @@ object KintoneApi {
      * 検索失敗と未検出を区別する）
      */
     private fun findExistingRecord(sendTarget: SettingsStore.SendTarget, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
-        val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return ExistingRecordResult.NotFound
 
         val toleranceMillis = sendTarget.updateToleranceHours.coerceAtLeast(0) * 3_600_000L
-        val rangeStart = isoFormat.format(Date(baseMillis - toleranceMillis))
-        val rangeEnd = isoFormat.format(Date(baseMillis + toleranceMillis))
+        val rangeStart = formatIsoDateTime(baseMillis - toleranceMillis)
+        val rangeEnd = formatIsoDateTime(baseMillis + toleranceMillis)
 
         val typeCondition = if (sendTarget.fieldType.isNotBlank()) {
             "${sendTarget.fieldType} in (\"${escapeForQuery(AppConstants.REGISTRATION_TYPE_VALUE)}\") and "

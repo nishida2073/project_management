@@ -6,10 +6,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
@@ -53,10 +49,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         logStart(sender, body, timestampMillis, smsId, sendTargetName = sendTarget.displayName(applicationContext), manual = manual)
 
         val datetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
-            val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }
-            isoFormat.format(Date(timestampMillis))
+            KintoneApi.formatIsoDateTime(timestampMillis)
         } else {
             null
         }

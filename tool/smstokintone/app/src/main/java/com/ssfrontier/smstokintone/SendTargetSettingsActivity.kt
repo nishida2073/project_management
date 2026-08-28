@@ -15,10 +15,6 @@ import com.ssfrontier.smstokintone.databinding.ItemSendTargetBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 class SendTargetSettingsActivity : AppCompatActivity() {
 
@@ -193,9 +189,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
     private fun performTestSend(itemBinding: ItemSendTargetBinding, sendTarget: SettingsStore.SendTarget, testBody: String) {
         val datetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
-            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
-            }.format(Date())
+            KintoneApi.formatIsoDateTime(System.currentTimeMillis())
         } else {
             null
         }
@@ -206,9 +200,9 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
             // 本文（またはそこから抽出した会社名）が[sendTarget]自身の振り分け条件
             // （キーワード、またはデフォルト送信先）に一致しない場合は警告して送信を中断する。
-            // 実際の登録処理（KintoneUploadWorker）と抽出方法を揃えるため、上で取得した
-            // [smsParts]の会社名をそのまま使う
-            if (!sendTarget.isDefault && !sendTarget.matches(testBody, smsParts.companyName)) {
+            // 実際の登録処理（KintoneUploadWorker、SettingsStore.findSendTarget）と判定基準が
+            // ずれないよう、routesToを使う（デフォルト送信先はここでは常にfalseになるので個別に許可する）
+            if (!sendTarget.isDefault && !sendTarget.routesTo(testBody, smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
                 AlertDialog.Builder(this@SendTargetSettingsActivity)
                     .setTitle(R.string.dialog_title_test_send_result)

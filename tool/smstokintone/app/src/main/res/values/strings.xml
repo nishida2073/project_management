@@ -190,7 +190,7 @@
     <string name="message_log_send_start_split_failed_skipped">SMSの送信をスキップしました\n（本文の形式が不正）</string>
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
-    <string name="message_log_send_complete_skipped_duplicate">SMSの送信をスキップしました\n（最終受信日時（秒は除く）と本文が一致）</string>
+    <string name="message_log_send_complete_skipped_duplicate">SMSの更新をスキップしました\n（最終受信日時（秒は除く）と本文が一致）</string>
     <string name="message_log_auto_reply">形式が不正なため、SMSを返信しました</string>
     <string name="dialog_title_confirm_clear_log">ログをクリアしますか？</string>
     <string name="dialog_message_confirm_clear_log">この操作は取り消せません</string>

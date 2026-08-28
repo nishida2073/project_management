@@ -168,6 +168,15 @@ object SettingsStore {
             return keywordList.any { TextNormalization.matches(text, it) }
         }
 
+        /**
+         * このSMS（[body]／[companyName]）が、キーワードによる振り分けでこの送信先に実際に
+         * 選ばれるかどうか。デフォルト送信先（[isDefault]、キーワード未設定でフォールバック用）は
+         * ここでは対象外とし、別枠のフォールバックとして扱う（[SettingsStore.findSendTarget]参照）。
+         * 送信先の判定（[SettingsStore.findSendTarget]）とテスト送信のプレビューで判定基準が
+         * ずれないよう、キーワード一致かどうかを見る箇所は必ずこれを使うこと。
+         */
+        fun routesTo(body: String, companyName: String): Boolean = !isDefault && matches(body, companyName)
+
         companion object {
             fun newEmpty(): SendTarget = SendTarget(
                 id = UUID.randomUUID().toString(),
@@ -257,6 +266,14 @@ object SettingsStore {
             defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, false),
             defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, false)
         )
+    }
+
+    /**
+     * 現在の[Config]を読み込み、[change]で一部の項目だけを変更して保存する。設定画面の各項目の
+     * 変更リスナーで繰り返し出てくる「読み込み→copyで1項目だけ変更→保存」を1箇所にまとめたもの
+     */
+    fun update(context: Context, change: (Config) -> Config) {
+        save(context, change(load(context)))
     }
 
     /** アプリの設定（[Config]）をすべて既定値に戻す。送信先の設定（[SendTarget]）は対象外で変更されない */
@@ -376,7 +393,7 @@ object SettingsStore {
      */
     private fun findSendTarget(context: Context, body: String, companyName: String): SendTarget? {
         val sendTargets = loadSendTargets(context)
-        sendTargets.firstOrNull { !it.isDefault && it.matches(body, companyName) }?.let { return it }
+        sendTargets.firstOrNull { it.routesTo(body, companyName) }?.let { return it }
         return sendTargets.firstOrNull { it.isDefault }
     }
 

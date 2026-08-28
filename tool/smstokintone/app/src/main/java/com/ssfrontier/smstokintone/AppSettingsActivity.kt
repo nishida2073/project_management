@@ -61,28 +61,28 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.swSendSplitFailedEnabled.isEnabled = sendEnabled
         binding.rgSendMode.setOnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSendAuto.id
-            SettingsStore.save(this, SettingsStore.load(this).copy(sendEnabled = enabled))
+            SettingsStore.update(this) { it.copy(sendEnabled = enabled) }
             binding.swSendSplitFailedEnabled.isEnabled = enabled
         }
 
         binding.swSendSplitFailedEnabled.isChecked = SettingsStore.load(this).sendSplitFailedEnabled
         binding.swSendSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(sendSplitFailedEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(sendSplitFailedEnabled = isChecked) }
         }
 
         binding.swAiParsingEnabled.isChecked = SettingsStore.load(this).aiParsingEnabled
         binding.swAiParsingEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(aiParsingEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(aiParsingEnabled = isChecked) }
         }
 
         binding.swSearchSplitFailedEnabled.isChecked = SettingsStore.load(this).searchSplitFailedEnabled
         binding.swSearchSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(searchSplitFailedEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(searchSplitFailedEnabled = isChecked) }
         }
 
         binding.swSearchSendTargetUnconfiguredEnabled.isChecked = SettingsStore.load(this).searchSendTargetUnconfiguredEnabled
         binding.swSearchSendTargetUnconfiguredEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(searchSendTargetUnconfiguredEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(searchSendTargetUnconfiguredEnabled = isChecked) }
         }
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
@@ -92,7 +92,7 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.tilAutoReplyCooldownSeconds.isEnabled = autoReplySplitFailedEnabled
         binding.rgSmsReplyMode.setOnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSmsReplyModeAuto.id
-            SettingsStore.save(this, SettingsStore.load(this).copy(autoReplySplitFailedEnabled = enabled))
+            SettingsStore.update(this) { it.copy(autoReplySplitFailedEnabled = enabled) }
             binding.tilAutoReplyCooldownSeconds.isEnabled = enabled
         }
 
@@ -100,7 +100,7 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.etAutoReplyCooldownSeconds.addTextChangedListener { text ->
             val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
             if (seconds < 1) return@addTextChangedListener
-            SettingsStore.save(this, SettingsStore.load(this).copy(autoReplyCooldownSeconds = seconds))
+            SettingsStore.update(this) { it.copy(autoReplyCooldownSeconds = seconds) }
         }
 
         val config = SettingsStore.load(this)
@@ -109,60 +109,60 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.tilAutoRefreshInterval.isEnabled = config.autoRefreshEnabled
 
         binding.swAutoRefreshEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(autoRefreshEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(autoRefreshEnabled = isChecked) }
             binding.tilAutoRefreshInterval.isEnabled = isChecked
         }
         binding.etAutoRefreshInterval.addTextChangedListener { text ->
             val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
             if (seconds < 1) return@addTextChangedListener
-            SettingsStore.save(this, SettingsStore.load(this).copy(autoRefreshIntervalSeconds = seconds))
+            SettingsStore.update(this) { it.copy(autoRefreshIntervalSeconds = seconds) }
         }
 
         binding.etSmsMatchToleranceSeconds.setText(config.smsMatchToleranceSeconds.toString())
         binding.etSmsMatchToleranceSeconds.addTextChangedListener { text ->
             val seconds = text.toString().toIntOrNull() ?: return@addTextChangedListener
             if (seconds < 1) return@addTextChangedListener
-            SettingsStore.save(this, SettingsStore.load(this).copy(smsMatchToleranceSeconds = seconds))
+            SettingsStore.update(this) { it.copy(smsMatchToleranceSeconds = seconds) }
         }
 
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())
         binding.etSmsSearchDateRangeDays.addTextChangedListener { text ->
             val days = text.toString().toIntOrNull() ?: return@addTextChangedListener
             if (days < 1) return@addTextChangedListener
-            SettingsStore.save(this, SettingsStore.load(this).copy(smsSearchDateRangeDays = days))
+            SettingsStore.update(this) { it.copy(smsSearchDateRangeDays = days) }
         }
 
         binding.rbSearchFiltersVisible.isChecked = config.searchFiltersVisibleByDefault
         binding.rbSearchFiltersHidden.isChecked = !config.searchFiltersVisibleByDefault
         binding.rgSearchFiltersVisibility.setOnCheckedChangeListener { _, checkedId ->
             val visible = checkedId == binding.rbSearchFiltersVisible.id
-            SettingsStore.save(this, SettingsStore.load(this).copy(searchFiltersVisibleByDefault = visible))
+            SettingsStore.update(this) { it.copy(searchFiltersVisibleByDefault = visible) }
         }
 
         binding.cbDefaultSendNoneOnlyEnabled.isChecked = config.defaultSendNoneOnlyEnabled
         binding.cbDefaultSendNoneOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSendNoneOnlyEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(defaultSendNoneOnlyEnabled = isChecked) }
         }
 
         binding.cbDefaultSentAutoOnlyEnabled.isChecked = config.defaultSentAutoOnlyEnabled
         binding.cbDefaultSentAutoOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSentAutoOnlyEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(defaultSentAutoOnlyEnabled = isChecked) }
         }
 
         binding.cbDefaultSentManualOnlyEnabled.isChecked = config.defaultSentManualOnlyEnabled
         binding.cbDefaultSentManualOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSentManualOnlyEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(defaultSentManualOnlyEnabled = isChecked) }
         }
 
         binding.cbDefaultSplitFailedOnlyEnabled.isChecked = config.defaultSplitFailedOnlyEnabled
         binding.cbDefaultSplitFailedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(defaultSplitFailedOnlyEnabled = isChecked))
+            SettingsStore.update(this) { it.copy(defaultSplitFailedOnlyEnabled = isChecked) }
         }
 
         binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val sendTargetId = defaultSendTargetFilterKeys.getOrNull(position)
-                SettingsStore.save(this@AppSettingsActivity, SettingsStore.load(this@AppSettingsActivity).copy(defaultSendTargetFilterId = sendTargetId))
+                SettingsStore.update(this@AppSettingsActivity) { it.copy(defaultSendTargetFilterId = sendTargetId) }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -176,7 +176,7 @@ class AppSettingsActivity : AppCompatActivity() {
             } else {
                 SettingsStore.ThemeMode.LIGHT
             }
-            SettingsStore.save(this, SettingsStore.load(this).copy(themeMode = themeMode))
+            SettingsStore.update(this) { it.copy(themeMode = themeMode) }
             pendingScrollY = binding.svAppSettings.scrollY
             AppCompatDelegate.setDefaultNightMode(themeMode.toNightMode())
         }
@@ -195,12 +195,12 @@ class AppSettingsActivity : AppCompatActivity() {
 
         binding.etDefaultReplyBody.setText(config.defaultReplyBody)
         binding.etDefaultReplyBody.addTextChangedListener { text ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(defaultReplyBody = text.toString()))
+            SettingsStore.update(this) { it.copy(defaultReplyBody = text.toString()) }
         }
 
         binding.etSplitFailedReplyAddition.setText(config.splitFailedReplyAddition)
         binding.etSplitFailedReplyAddition.addTextChangedListener { text ->
-            SettingsStore.save(this, SettingsStore.load(this).copy(splitFailedReplyAddition = text.toString()))
+            SettingsStore.update(this) { it.copy(splitFailedReplyAddition = text.toString()) }
         }
 
         binding.btnResetSettings.setOnClickListener {
@@ -248,7 +248,7 @@ class AppSettingsActivity : AppCompatActivity() {
         if (SettingsStore.loadSendTargets(this).size == 1) {
             binding.llDefaultSendTargetFilter.visibility = View.GONE
             if (SettingsStore.load(this).defaultSendTargetFilterId != null) {
-                SettingsStore.save(this, SettingsStore.load(this).copy(defaultSendTargetFilterId = null))
+                SettingsStore.update(this) { it.copy(defaultSendTargetFilterId = null) }
             }
             return
         }
