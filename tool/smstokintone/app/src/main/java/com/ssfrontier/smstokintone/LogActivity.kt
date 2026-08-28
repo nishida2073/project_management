@@ -13,9 +13,7 @@ import androidx.core.text.buildSpannedString
 import androidx.core.text.color
 import com.google.android.material.color.MaterialColors
 import com.ssfrontier.smstokintone.databinding.ActivityLogBinding
-import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 /**
  * SmsLogStoreの全エントリを画面に表示するログ一覧。件数が少ない前提でRecyclerViewは使わず、
@@ -92,7 +90,7 @@ class LogActivity : AppCompatActivity() {
         binding.llLogContainer.removeAllViews()
         binding.tvLogEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
 
-        val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
+        val dateFormat = DateFormats.display()
         val itemTextColor = MaterialColors.getColor(
             binding.llLogContainer,
             com.google.android.material.R.attr.colorOnSurface
@@ -110,6 +108,10 @@ class LogActivity : AppCompatActivity() {
                 text = buildSpannedString {
                     append(getString(R.string.label_log_type_bracketed, typeLabel))
                     append(" ${dateFormat.format(Date(entry.loggedAtMillis))}")
+                    entry.smsParts?.let { smsParts ->
+                        append(" ")
+                        append(getString(if (smsParts.isSplitFailed()) R.string.icon_split_failed else R.string.icon_split_succeeded))
+                    }
                     if (entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE) {
                         append("  ")
                         val modeColor = ContextCompat.getColor(
@@ -171,25 +173,6 @@ class LogActivity : AppCompatActivity() {
             )
             val resultView: View = buildLabeledMessageRow(resultLabel, entry.message, resultColor, topPadding = 16)
 
-            val splitResultView = entry.smsParts?.let { smsParts ->
-                val succeeded = !smsParts.isSplitFailed()
-                val splitLabel = if (succeeded) {
-                    getString(R.string.label_log_result_success)
-                } else {
-                    getString(R.string.label_log_result_failure)
-                }
-                val splitColor = ContextCompat.getColor(
-                    this@LogActivity,
-                    if (succeeded) R.color.log_success else R.color.log_failure
-                )
-                val splitMessage = if (succeeded) {
-                    getString(R.string.message_log_split)
-                } else {
-                    getString(R.string.message_log_split_failure)
-                }
-                buildLabeledMessageRow(splitLabel, splitMessage, splitColor, topPadding = 4)
-            }
-
             val divider = View(this).apply {
                 setBackgroundColor(ContextCompat.getColor(this@LogActivity, R.color.log_divider))
                 layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -202,19 +185,21 @@ class LogActivity : AppCompatActivity() {
                 orientation = android.widget.LinearLayout.VERTICAL
                 addView(typeAndTimestampView)
                 addView(resultView)
-                splitResultView?.let { addView(it) }
                 addView(sendTargetNameView)
                 addView(senderAndTimestampView)
                 addView(bodyView)
-                entry.smsParts?.let { smsParts ->
-                    setOnLongClickListener {
-                        showSplitResultDialog(smsParts, entry.companyNameConverted)
-                        true
-                    }
-                }
-                entry.replyBody?.let { replyBody ->
+                // replyBodyとsmsPartsは両方設定され得る（AUTO_REPLY）ため、setOnLongClickListenerの
+                // 上書きで片方が無効にならないよう、どちらを開くかをここで一つに決める
+                val replyBody = entry.replyBody
+                val smsParts = entry.smsParts
+                if (replyBody != null) {
                     setOnLongClickListener {
                         showAutoReplyBodyDialog(replyBody)
+                        true
+                    }
+                } else if (smsParts != null) {
+                    setOnLongClickListener {
+                        showSplitResultDialog(smsParts, entry.companyNameConverted)
                         true
                     }
                 }
@@ -232,14 +217,17 @@ class LogActivity : AppCompatActivity() {
         } else {
             smsParts.companyName
         }
-        val message = buildSpannedString {
-            append("\n")
-            bold { append(getString(R.string.hint_field_company)) }
-            append("\n　$companyNameValue\n")
-            bold { append(getString(R.string.hint_field_user_name)) }
-            append("\n　${smsParts.userName}\n")
-            bold { append(getString(R.string.hint_field_content)) }
-            append("\n　${smsParts.content}")
+        val message = if (smsParts.isSplitFailed()) {
+            getString(R.string.dialog_message_split_failure)
+        } else {
+            buildSpannedString {
+                bold { append(getString(R.string.hint_field_company)) }
+                append("\n　$companyNameValue\n")
+                bold { append(getString(R.string.hint_field_user_name)) }
+                append("\n　${smsParts.userName}\n")
+                bold { append(getString(R.string.hint_field_content)) }
+                append("\n　${smsParts.content}")
+            }
         }
         val icon = if (smsParts.parsedByAi) {
             getString(R.string.icon_split_ai)

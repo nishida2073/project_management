@@ -48,6 +48,8 @@ object SettingsStore {
     private const val KEY_DEFAULT_SEND_NONE_ONLY_ENABLED = "default_send_none_only_enabled"
     /** [Config.defaultSplitFailedOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED = "default_split_failed_only_enabled"
+    /** [Config.defaultSplitSucceededOnlyEnabled]のキー */
+    private const val KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED = "default_split_succeeded_only_enabled"
     /** [Config.defaultSentAutoOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
     /** [Config.defaultSentManualOnlyEnabled]のキー */
@@ -105,13 +107,13 @@ object SettingsStore {
     data class Config(
         /** trueなら自動送信モード、falseなら手動送信モード（[KintoneUploadWorker]が参照） */
         val sendEnabled: Boolean,
-        /** 自動送信時、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
+        /** 自動送信時、本文の形式が異常なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
         val sendSplitFailedEnabled: Boolean,
-        /** SMS検索画面で、本文の形式が不正なSMSを選択可能にするかどうか */
+        /** SMS検索画面で、本文の形式が異常なSMSを選択可能にするかどうか */
         val searchSplitFailedEnabled: Boolean,
         /** SMS検索画面で、送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
         val searchSendTargetUnconfiguredEnabled: Boolean,
-        /** 自動受信時、本文の形式が不正なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
+        /** 自動受信時、本文の形式が異常なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
         val autoReplySplitFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
         val autoReplyCooldownSeconds: Int,
@@ -141,8 +143,10 @@ object SettingsStore {
         val aiParsingEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
         val defaultSendNoneOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「内容」の「形式が不正」チェックボックスを初期状態でONにするかどうか */
+        /** SMS検索画面を開いた際に「形式」の「異常」チェックボックスを初期状態でONにするかどうか */
         val defaultSplitFailedOnlyEnabled: Boolean,
+        /** SMS検索画面を開いた際に「形式」の「正常」チェックボックスを初期状態でONにするかどうか */
+        val defaultSplitSucceededOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（自動）」チェックボックスを初期状態でONにするかどうか */
         val defaultSentAutoOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（手動）」チェックボックスを初期状態でONにするかどうか */
@@ -280,6 +284,7 @@ object SettingsStore {
             .putBoolean(KEY_AI_PARSING_ENABLED, config.aiParsingEnabled)
             .putBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, config.defaultSendNoneOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, config.defaultSplitFailedOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED, config.defaultSplitSucceededOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
         if (config.defaultSendTargetFilterId != null) {
@@ -313,6 +318,7 @@ object SettingsStore {
         aiParsingEnabled = false,
         defaultSendNoneOnlyEnabled = false,
         defaultSplitFailedOnlyEnabled = false,
+        defaultSplitSucceededOnlyEnabled = false,
         defaultSentAutoOnlyEnabled = false,
         defaultSentManualOnlyEnabled = false
     )
@@ -343,6 +349,7 @@ object SettingsStore {
             aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, DEFAULT_CONFIG.aiParsingEnabled),
             defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
             defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitFailedOnlyEnabled),
+            defaultSplitSucceededOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitSucceededOnlyEnabled),
             defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
             defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
         )

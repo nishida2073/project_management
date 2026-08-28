@@ -13,8 +13,8 @@ import kotlin.math.abs
  *
  * 本文は判定条件には使わない（SMSCタイムスタンプと同様、書き込み時の改行・空白の正規化
  * などで完全一致しないことがあるため）。同じ送信元から似た内容のSMSが許容範囲内に複数届いた場合の
- * 曖昧さは、呼び出し側（[SmsSearchActivity.matchSentEntries]）で1件のログを1件のレコードにしか
- * 割り当てない・時刻が近い方を優先するという方式で軽減している。
+ * 曖昧さは、[matchEntries]が1件のログを1件のレコードにしか割り当てない・時刻が近い方を優先する
+ * という方式で軽減している。
  */
 object SmsMatching {
 
@@ -30,6 +30,47 @@ object SmsMatching {
         toleranceMillis: Long
     ): Boolean =
         isSameSender(senderA, senderB) && abs(timestampA - timestampB) <= toleranceMillis
+
+    /**
+     * [records]と[completedEntries]（[SmsLogStore.Entry]）を1対1対応させ、record.idからEntryへの
+     * マップを返す。手動送信ログは[SmsLogStore.Entry.smsId]一致で対応付け、IDを持たない自動送信ログは
+     * [isLikelySameSms]（送信元・タイムスタンプの近さ）で対応付ける。1件のログが複数レコードに同時
+     * マッチしないよう、時刻が近いレコードから順に貪欲に割り当てる。[id]/[sender]/[timestampMillis]は
+     * [records]の要素からそれぞれの値を取り出すセレクタ（[records]の型を特定のクラスに固定しないため）。
+     */
+    fun <T> matchEntries(
+        records: List<T>,
+        completedEntries: List<SmsLogStore.Entry>,
+        toleranceMillis: Long,
+        id: (T) -> Long,
+        sender: (T) -> String,
+        timestampMillis: (T) -> Long
+    ): Map<Long, SmsLogStore.Entry> {
+        val result = mutableMapOf<Long, SmsLogStore.Entry>()
+
+        val idMatchedEntries = completedEntries.filter { it.smsId != null }.associateBy { it.smsId }
+        records.forEach { record ->
+            idMatchedEntries[id(record)]?.let { result[id(record)] = it }
+        }
+
+        val unclaimedEntries = completedEntries.filter { it.smsId == null }.toMutableList()
+        records.filter { id(it) !in result }
+            .sortedBy { timestampMillis(it) }
+            .forEach { record ->
+                val bestIndex = unclaimedEntries.indices
+                    .filter { i ->
+                        val entry = unclaimedEntries[i]
+                        isLikelySameSms(entry.sender, entry.timestampMillis, sender(record), timestampMillis(record), toleranceMillis)
+                    }
+                    .minByOrNull { i -> abs(unclaimedEntries[i].timestampMillis - timestampMillis(record)) }
+                if (bestIndex != null) {
+                    result[id(record)] = unclaimedEntries[bestIndex]
+                    unclaimedEntries.removeAt(bestIndex)
+                }
+            }
+
+        return result
+    }
 
     private fun isSameSender(a: String, b: String): Boolean = normalizeSenderKey(a) == normalizeSenderKey(b)
 

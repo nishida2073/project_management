@@ -265,22 +265,19 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                 is KintoneApi.PostResult.HttpFailure -> getString(R.string.dialog_message_test_send_result_failure, "${result.code} ${result.detail}")
                 is KintoneApi.PostResult.NetworkError -> getString(R.string.dialog_message_test_send_result_network_error, result.message)
             }
-            val splitMessage = if (smsParts.isSplitFailed()) {
-                getString(R.string.message_log_split_failure)
-            } else {
-                getString(R.string.message_log_split)
-            }
             val message = buildSpannedString {
-                append(splitMessage)
-                append("\n")
                 append(sendResultMessage)
                 append("\n\n")
-                bold { append(getString(R.string.hint_field_company)) }
-                append("\n　$companyNameValue\n")
-                bold { append(getString(R.string.hint_field_user_name)) }
-                append("\n　${smsParts.userName}\n")
-                bold { append(getString(R.string.hint_field_content)) }
-                append("\n　${smsParts.content}")
+                if (smsParts.isSplitFailed()) {
+                    append(getString(R.string.dialog_message_split_failure))
+                } else {
+                    bold { append(getString(R.string.hint_field_company)) }
+                    append("\n　$companyNameValue\n")
+                    bold { append(getString(R.string.hint_field_user_name)) }
+                    append("\n　${smsParts.userName}\n")
+                    bold { append(getString(R.string.hint_field_content)) }
+                    append("\n　${smsParts.content}")
+                }
             }
             val icon = if (smsParts.parsedByAi) {
                 getString(R.string.icon_split_ai)

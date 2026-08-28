@@ -31,7 +31,11 @@ object KintoneApi {
         /** 重複と判定され何も送信しなかった */
         data class Skipped(val message: String) : PostResult()
         /** kintoneがエラーレスポンスを返した。[code]はHTTPステータスコード、[detail]はレスポンスボディ */
-        data class HttpFailure(val code: Int, val detail: String) : PostResult()
+        data class HttpFailure(val code: Int, val detail: String) : PostResult() {
+            /** サーバーエラー（5xx）またはレートリミット（429）は一時的な失敗とみなし、リトライの余地があるとする */
+            val isRetryable: Boolean
+                get() = code in 500..599 || code == 429
+        }
         /** 通信自体が例外で失敗した */
         data class NetworkError(val message: String) : PostResult()
     }
@@ -117,7 +121,7 @@ object KintoneApi {
         val entries = existingBody.split(separator).toMutableList()
         val insertIndex = entries.indexOfFirst { entry ->
             val entryMillis = try {
-                displayDateTimeFormat().parse(entry.substringBefore("\n\n"))?.time
+                DateFormats.display().parse(entry.substringBefore("\n\n"))?.time
             } catch (e: ParseException) {
                 null
             }
@@ -137,13 +141,8 @@ object KintoneApi {
     /** ISO8601（UTC）の[datetimeIsoValue]を、kintoneの本文に書き込む表示用日時文字列に変換する */
     private fun formatDisplayDateTime(datetimeIsoValue: String): String? {
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return null
-        return displayDateTimeFormat().format(Date(baseMillis))
+        return DateFormats.display().format(Date(baseMillis))
     }
-
-    /** kintoneの本文に付与する人が読める日時形式のフォーマッタ。[formatDisplayDateTime]（書き込み側）と
-     * [mergeBody]（読み取り側、既存本文からの日時の再パース）で必ずこれを共有し、書式がずれて
-     * エントリの並び順判定が壊れることを防ぐ */
-    private fun displayDateTimeFormat(): SimpleDateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
 
     /** kintoneの日時フィールド用ISO8601形式（UTC）のフォーマッタ。書き込み側（[formatIsoDateTime]）と
      * 読み取り側（[parseIsoDateTime]、[findExistingRecord]の検索範囲組み立て）で必ずこれを共有し、

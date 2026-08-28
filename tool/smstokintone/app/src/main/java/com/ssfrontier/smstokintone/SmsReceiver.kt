@@ -74,7 +74,9 @@ class SmsReceiver : BroadcastReceiver() {
                     body = body,
                     success = true,
                     message = context.getString(R.string.message_log_receive),
-                    sendTargetName = sendTargetName
+                    sendTargetName = sendTargetName,
+                    smsParts = smsParts,
+                    companyNameConverted = sendTarget?.companyNameWidthConversionEnabled ?: false
                 )
 
                 if (config.autoReplySplitFailedEnabled && sender.isNotBlank() && smsParts.isSplitFailed()) {
@@ -90,6 +92,8 @@ class SmsReceiver : BroadcastReceiver() {
                                 success = true,
                                 message = context.getString(R.string.message_log_auto_reply),
                                 sendTargetName = sendTargetName,
+                                smsParts = smsParts,
+                                companyNameConverted = sendTarget?.companyNameWidthConversionEnabled ?: false,
                                 replyBody = config.splitFailedReplyAddition
                             )
                         }

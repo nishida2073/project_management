@@ -38,7 +38,7 @@ object SmsLogStore {
         }
     }
 
-    /** ログ画面（[LogActivity]）が表示する1件分のログエントリ */
+    /** ログ1件分のレコード。[LogActivity]での一覧表示のほか、[SmsSearchActivity]での送信状況判定にも使う */
     data class Entry(
         /** エントリの種別 */
         val type: EntryType,
@@ -58,9 +58,13 @@ object SmsLogStore {
         val smsId: Long?,
         /** 振り分け先の送信先の表示名。解決できなかった場合はnull */
         val sendTargetName: String?,
-        /** 手動送信（SMS検索画面からの再送信）によるものかどうか。falseは自動受信によるもの */
+        /**
+         * 手動操作によるものかどうか。[EntryType.SEND_START]/[EntryType.SEND_COMPLETE]では、手動再送信
+         * ならtrue、自動受信をトリガーとした送信ならfalse。[EntryType.RECEIVE]/[EntryType.AUTO_REPLY]は
+         * 常にfalse
+         */
         val manual: Boolean,
-        /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
+        /** 本文から抽出した会社名・氏名・内容。全エントリ種別で記録時点の抽出結果が設定される */
         val smsParts: SmsParts? = null,
         /** kintone登録時に会社名へ半角大文字・全角統一の変換を適用したか */
         val companyNameConverted: Boolean = false,

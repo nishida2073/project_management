@@ -153,7 +153,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_content_status_filter"
+                android:text="@string/label_search_split_status_filter"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
@@ -162,6 +162,15 @@
                 android:layout_marginStart="16dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
+
+                <CheckBox
+                    android:id="@+id/cbSplitSucceededOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="0dp"
+                    android:checked="false"
+                    android:text="@string/cb_split_succeeded_only" />
 
                 <CheckBox
                     android:id="@+id/cbSplitFailedOnly"

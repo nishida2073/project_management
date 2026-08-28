@@ -167,6 +167,11 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(defaultSplitFailedOnlyEnabled = isChecked) }
         }
 
+        binding.cbDefaultSplitSucceededOnlyEnabled.isChecked = config.defaultSplitSucceededOnlyEnabled
+        binding.cbDefaultSplitSucceededOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(defaultSplitSucceededOnlyEnabled = isChecked) }
+        }
+
         binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val sendTargetId = defaultSendTargetFilterKeys.getOrNull(position)
