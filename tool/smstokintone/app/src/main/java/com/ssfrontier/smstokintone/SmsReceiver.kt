@@ -22,8 +22,8 @@ class SmsReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
-        // 自動送信の有効/無効・kintone設定の完否はKintoneUploadWorker側で判定しログに残す。
-        // ここで早期returnすると、その判定結果が送信ログ画面に一切表示されなくなるため行わない。
+        // 送信可否やkintone設定の完否はKintoneUploadWorker側で判定しログに残すため、
+        // ここで早期returnすると判定結果が送信ログ画面に表示されなくなる
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         if (messages.isNullOrEmpty()) return
 
@@ -49,25 +49,21 @@ class SmsReceiver : BroadcastReceiver() {
 
         WorkManager.getInstance(context).enqueue(request)
 
-        // 受信ログへの記録・SMS返信の判定は、kintoneへの送信設定・送信先の有無とは無関係にここで行う。
-        // 送信先名の解決とSMS返信の「形式が不正」判定はAI解析（端末上のAI呼び出し）を伴う場合があり、
-        // BroadcastReceiver#onReceiveの同期的な処理では待てないため、goAsync()で実行時間を延長し
-        // コルーチンで判定・記録・返信を行う
+        // 送信先名の解決は端末上のAI呼び出しを伴う場合があり、onReceiveの同期処理内では
+        // 待てないため、goAsync()で実行時間を延長しコルーチンで判定・記録・返信を行う
         val config = SettingsStore.load(context)
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                // SMS本文から会社名を抽出して送信先を判定する（実際の登録処理と抽出方法を揃えることで、
-                // 登録内容と送信先名の食い違いを防ぐ。KintoneUploadWorker参照）
+                // KintoneUploadWorkerの登録処理と同じresolveSendTargetを使い、抽出方法のずれによる
+                // 登録内容と送信先名の食い違いを防ぐ
                 val (smsParts, sendTarget) = SettingsStore.resolveSendTarget(context, body, config.aiParsingEnabled)
                 val sendTargetName = sendTarget?.displayName(context)
 
-                // kintoneへの送信結果を待たず、受信した時点でログへ記録する。
-                // これにより送信ログ画面を見れば、そもそもSMSを受信できているかを確認できる。
-                // SMSプロバイダ上の実IDはこの時点で確実には特定できない（電話番号の表記ゆれや、既定の
-                // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
-                // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
-                // （SmsMatching参照）。
+                // kintoneへの送信結果を待たず受信時点でログ記録することで、送信ログ画面でSMS受信の
+                // 有無を確認できる。smsIdはこの時点では確実に特定できない（電話番号の表記ゆれや
+                // 標準SMSアプリの書き込みタイミング次第で一致しないことがある）ため解決を試みず、
+                // 「受信済みSMS送信」画面側でタイムスタンプ近似により突き合わせる（SmsMatching参照）
                 SmsLogStore.add(
                     context,
                     type = SmsLogStore.EntryType.RECEIVE,
@@ -104,7 +100,7 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
-    /** [sender]宛てに[body]をSMSで自動返信する。送信を試みられたかどうかを返す */
+    /** 戻り値は送信成功ではなく、送信を試みられたかどうか */
     private fun sendAutoReply(context: Context, sender: String, body: String): Boolean {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             return false

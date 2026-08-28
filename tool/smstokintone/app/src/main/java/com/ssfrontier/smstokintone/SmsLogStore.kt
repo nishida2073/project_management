@@ -36,9 +36,9 @@ object SmsLogStore {
         val manual: Boolean,
         /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
         val smsParts: SmsParts? = null,
-        /** kintoneへの登録時に会社名の変換（半角大文字・全角統一）を適用したかどうか */
+        /** kintone登録時に会社名へ半角大文字・全角統一の変換を適用したか */
         val companyNameConverted: Boolean = false,
-        /** 自動返信（[EntryType.AUTO_REPLY]）で実際に送信した返信本文。それ以外のエントリはnull */
+        /** [EntryType.AUTO_REPLY]で実際に送信した返信本文。それ以外のエントリはnull */
         val replyBody: String? = null
     )
 

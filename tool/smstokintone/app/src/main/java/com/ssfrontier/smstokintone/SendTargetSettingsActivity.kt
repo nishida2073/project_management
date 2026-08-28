@@ -108,7 +108,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return itemBinding.root
     }
 
-    /** [view]から[ancestor]までの祖先を遡り、[ancestor]の座標系における[view]の上端位置を求める */
     private fun topRelativeTo(view: View, ancestor: View): Int {
         var top = 0
         var current = view
@@ -155,7 +154,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         )
     }
 
-    /** [sendTarget]の必須項目が未入力の場合に警告ダイアログを表示する。[index]はラベル未設定時の表示用（何番目の設定か） */
+    /** [index]は送信先名が未入力の場合のラベル表示用（何番目の設定か） */
     private fun showValidationErrorDialogIfInvalid(index: Int, sendTarget: SettingsStore.SendTarget): Boolean {
         if (sendTarget.isValid) return false
 

@@ -5,6 +5,7 @@ import androidx.work.BackoffPolicy
 /** ユーザーが変更することのない固定値をまとめたもの（UI文言はstrings.xmlを参照） */
 object AppConstants {
 
+    /** 送信先設定画面の「テスト送信」で、送信元として使うダミーの電話番号 */
     const val TEST_SEND_SENDER = "09000000000"
 
     /** 送信先の絞り込みで「未設定（どの送信先にも一致しない）」を表す選択肢のキー */
@@ -20,13 +21,13 @@ object AppConstants {
      */
     const val KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS = 10_000L
 
-    /** kintoneへの送信リトライ時のバックオフ方式 */
+    /** kintoneへの送信リトライの間隔を、失敗のたびに一定量ずつ増やす方式 */
     val KINTONE_UPLOAD_RETRY_BACKOFF_POLICY = BackoffPolicy.LINEAR
 
-    /** 本ツール経由であることを示す選択肢値 */
+    /** kintoneへ登録する際の「登録種別」フィールドに設定する値。既存レコードの検索条件にも使う */
     const val REGISTRATION_TYPE_VALUE = "外部ツール"
 
-    // [SmsPartsGenerator]がラベル行を判定する際に使う、フィールド名とラベル表記ゆれ一覧の対応。
+    /** SMS本文中のラベル行（例:「会社名：」）を認識するための、内部フィールド名と表記ゆれの対応表。[SmsPartsGenerator]が参照する */
     val SMS_BODY_FIELD_ALIASES: Map<String, List<String>> = mapOf(
         "companyName" to listOf("会社名", "会社"),
         "userName" to listOf("氏名", "名前"),

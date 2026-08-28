@@ -16,7 +16,6 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-/** kintoneへのレコード登録・更新リクエストを組み立てて送信する共通処理 */
 object KintoneApi {
 
     private const val TAG = "KintoneApi"
@@ -65,8 +64,7 @@ object KintoneApi {
         val existing = when (existingResult) {
             is ExistingRecordResult.Found -> existingResult.record
             ExistingRecordResult.NotFound -> null
-            // 検索自体が失敗した場合、既存レコードなしとみなして新規登録に進むと、本来更新すべき
-            // レコードを見落として重複登録してしまう恐れがあるため、ここで送信失敗として打ち切る
+            // 検索失敗をNotFound扱いにすると、更新すべきレコードを見落として重複登録する恐れがあるため打ち切る
             is ExistingRecordResult.SearchFailed -> return existingResult.result
         }
 
@@ -94,9 +92,8 @@ object KintoneApi {
     }
 
     /**
-     * 既存の本文を[ENTRY_SEPARATOR]区切りのエントリに分解し、新しいエントリを受信日時順（古い順）の
-     * 正しい位置に挿入する。新しいエントリの日時が不明、または既存エントリの日時が読み取れない場合は
-     * 末尾に追加する
+     * 本文を[ENTRY_SEPARATOR]区切りのエントリに分解し、受信日時が古い順になる位置に新エントリを挿入する。
+     * 挿入位置が判定できない場合は末尾に追加する
      */
     private fun mergeBody(existingBody: String, newEntryText: String, newEntryMillis: Long?): String {
         if (existingBody.isBlank()) return newEntryText
@@ -118,7 +115,6 @@ object KintoneApi {
         return entries.joinToString(separator)
     }
 
-    /** 受信日時（人が読める形式）と本文を、間に空行を挟んで組み立てる */
     private fun buildEntryText(datetimeIsoValue: String?, bodyValue: String): String {
         val displayDatetime = datetimeIsoValue?.let { formatDisplayDateTime(it) }
         return if (displayDatetime != null) "$displayDatetime\n\n$bodyValue" else bodyValue
@@ -142,7 +138,6 @@ object KintoneApi {
             timeZone = TimeZone.getTimeZone("UTC")
         }
 
-    /** [millis]をkintoneの日時フィールドに送信する形式（ISO8601・UTC）の文字列に変換する */
     fun formatIsoDateTime(millis: Long): String = isoDateTimeFormat().format(Date(millis))
 
     private fun parseIsoDateTime(datetimeIsoValue: String): Long? {
@@ -183,8 +178,6 @@ object KintoneApi {
         if (sendTarget.fieldType.isNotBlank()) {
             record.put(sendTarget.fieldType, JSONObject().put("value", AppConstants.REGISTRATION_TYPE_VALUE))
         }
-        // SMS本文からパースした会社名・氏名・内容。
-        // フィールドコードが未設定（空文字）、または抽出できた値が空の場合はkintone側に送らない。
         if (sendTarget.fieldCompanyName.isNotBlank() && companyNameValue.isNotBlank()) {
             record.put(sendTarget.fieldCompanyName, JSONObject().put("value", companyNameValue))
         }
@@ -199,9 +192,8 @@ object KintoneApi {
 
     /**
      * 送信元が一致し、最終受信日時の差が[SettingsStore.SendTarget.updateToleranceHours]時間以内の既存レコードを
-     * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。見つからない場合は[ExistingRecordResult.NotFound]、
-     * 検索自体が失敗した場合は[ExistingRecordResult.SearchFailed]を返す（新規登録との誤判定を防ぐため、
-     * 検索失敗と未検出を区別する）
+     * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。新規登録との誤判定を防ぐため、
+     * 未検出（[ExistingRecordResult.NotFound]）と検索失敗（[ExistingRecordResult.SearchFailed]）は区別する
      */
     private fun findExistingRecord(sendTarget: SettingsStore.SendTarget, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return ExistingRecordResult.NotFound

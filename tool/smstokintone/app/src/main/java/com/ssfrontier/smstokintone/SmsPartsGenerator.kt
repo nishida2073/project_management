@@ -11,9 +11,6 @@ import kotlinx.coroutines.flow.collect
 import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * SMS本文から生成した部品（会社名・氏名・内容）
- */
 data class SmsParts(
     val companyName: String = "",
     val userName: String = "",
@@ -21,16 +18,12 @@ data class SmsParts(
     /** 端末上のAI（ML Kit GenAI）で抽出した結果かどうか。falseはルールベースでの抽出 */
     val parsedByAi: Boolean = false
 ) {
-    /** 何も抽出できなかったかどうか */
     fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && content.isEmpty()
 
-    /** 会社名・氏名・内容のいずれかが空で、分割に失敗したとみなせるかどうか */
+    /** [isEmpty]とは異なり、一部の項目だけ空でも分割失敗とみなす */
     fun isSplitFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && content.isNotBlank())
 
-    /**
-     * [companyName]の英字（A-Z, a-z）・数字（0-9）を半角大文字に、それ以外の文字を全角に統一した文字列。
-     * [companyName]が空白の場合は空文字を返す
-     */
+    /** [companyName]の英数字を半角大文字、それ以外を全角に統一した文字列（空白なら空文字） */
     val companyNameNormalizedWidth: String
         get() = if (companyName.isNotBlank()) TextNormalization.normalizeWidth(companyName) else ""
 }
@@ -58,8 +51,7 @@ object SmsPartsGenerator {
 
     private const val TAG = "SmsPartsGenerator"
 
-    /** 本文をキーにしたAI解析結果のキャッシュ。同じ本文を何度も解析させない。
-     * 受信・送信・検索など複数のスレッドから同時に呼ばれ得るためスレッドセーフなMapを使う */
+    /** 本文をキーにしたAI解析結果のキャッシュ（同じ本文を何度も解析させない）。複数スレッドから同時に呼ばれ得るためConcurrentHashMap */
     private val aiResultCache = ConcurrentHashMap<String, SmsParts>()
 
     @Volatile
@@ -70,10 +62,8 @@ object SmsPartsGenerator {
         generativeModel ?: Generation.getClient(generationConfig {}).also { generativeModel = it }
 
     /**
-     * SMS本文から会社名・氏名・内容を解析する。[aiParsingEnabled]（アプリの設定「AIによる分割」）が
-     * 有効な場合は端末上のAI（ML Kit GenAI / Gemini Nano）に解析させ、Android 12未満の端末、
-     * AI解析が無効、非対応端末、またはAI呼び出しに失敗した場合は[generateSmsParts]（ルールベース）の
-     * 結果を返す。同じ本文への問い合わせは[aiResultCache]から即座に返し、AIへの重複した問い合わせを避ける。
+     * [aiParsingEnabled]が有効なら端末上のAI（ML Kit GenAI）に解析させ、Android 12未満・非対応端末・
+     * AI呼び出し失敗時は[generateSmsParts]（ルールベース）にフォールバックする
      */
     suspend fun resolveSmsParts(body: String, aiParsingEnabled: Boolean): SmsParts {
         if (!aiParsingEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -88,7 +78,6 @@ object SmsPartsGenerator {
         return result
     }
 
-    /** 端末上のAI（ML Kit GenAI）へSMS本文を渡し、会社名・氏名・内容をJSONで抽出させる。失敗した場合はnullを返す */
     private suspend fun requestAiSmsParts(body: String): SmsParts? {
         return try {
             val model = getOrCreateModel()
@@ -135,10 +124,6 @@ object SmsPartsGenerator {
 
     private data class LabelMatch(val key: String, val value: String)
 
-    /**
-     * 1行が「ラベル：値」の形式かどうかを判定し、
-     * マッチした場合は LabelMatch を返す。マッチしなければ null。
-     */
     private fun matchLabelLine(line: String): LabelMatch? {
         for ((key, aliases) in AppConstants.SMS_BODY_FIELD_ALIASES) {
             for (alias in aliases) {
@@ -146,9 +131,8 @@ object SmsPartsGenerator {
                 if (line == alias) {
                     return LabelMatch(key, "")
                 }
-                // ラベルと値の区切りに対応。
-                // ・記号区切り: ：: ＝= －-—― （前後の空白は全角含め許容）
-                // ・記号が無く空白のみで区切られている場合（例:「会社名　XXX」）にも対応
+                // 区切り記号（：: ＝= －-—―、前後の全角空白も許容）だけでなく、
+                // 記号が無く空白のみで区切られている場合（例:「会社名　XXX」）にも対応
                 val pattern = Regex(
                     "^[\\s　]*${Regex.escape(alias)}(?:[\\s　]*[：:＝=－\\-—―][\\s　]*|[\\s　]+)(.*)$"
                 )
@@ -161,18 +145,14 @@ object SmsPartsGenerator {
         return null
     }
 
-    /**
-     * SMS本文から部品を生成する
-     */
     fun generateSmsParts(body: String?): SmsParts {
         if (body.isNullOrBlank()) return SmsParts()
 
         val normalized = body.replace("\r\n", "\n").replace("\r", "\n").trim()
         val contentLines = normalized.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
-        // 行数が3行未満（会社名・氏名・内容をそれぞれ1行で書く想定に対して行数が足りない）
-        // 場合は、氏名・会社名を1行でまとめて書く人がいるため抽出せず空のまま返す。
-        // SMS本文自体は別途Bodyフィールドにそのまま登録されるため、ここで内容に詰め直す必要はない
+        // 氏名・会社名を1行にまとめて書く人がいるため、3行未満では抽出せず空のまま返す
+        // （本文自体は別途Bodyフィールドにそのまま登録されるので、ここで無理に詰め直す必要はない）
         if (contentLines.size < 3) {
             return SmsParts()
         }
@@ -180,11 +160,9 @@ object SmsPartsGenerator {
         var companyName = ""
         var userName = ""
         var content = ""
-        // 内容は複数行の値を続けて追記できるようにする
-        var currentKey: String? = null
+        var currentKey: String? = null // "content"の間は続く行を内容として追記する
 
         for (line in contentLines) {
-            // ラベル行なら記述順に関係なく値だけを取り出す
             val labelMatch = matchLabelLine(line)
             if (labelMatch != null) {
                 when (labelMatch.key) {
@@ -197,9 +175,8 @@ object SmsPartsGenerator {
             }
 
             when {
-                // 内容の続き（複数行対応）
                 currentKey == "content" -> content = if (content.isEmpty()) line else "$content\n$line"
-                // ラベルが省略されている場合は行の位置で判定する（1つ目の未確定項目に会社名、2つ目に氏名を割り当てる）
+                // ラベル省略時は行の位置で判定する（1つ目の未確定項目が会社名、2つ目が氏名）
                 companyName.isEmpty() -> companyName = line
                 userName.isEmpty() -> userName = line
                 // 氏名・会社名が確定済みなら、以降はラベルが無くても内容として取り込む
@@ -210,7 +187,6 @@ object SmsPartsGenerator {
             }
         }
 
-        // 内容の先頭行が空行の場合は除去する
         val contentValueLines = content.split("\n")
         if (contentValueLines.first().isBlank()) {
             content = contentValueLines.drop(1).joinToString("\n")

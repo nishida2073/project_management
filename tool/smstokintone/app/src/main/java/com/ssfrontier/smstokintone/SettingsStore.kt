@@ -75,7 +75,7 @@ object SettingsStore {
         val sendSplitFailedEnabled: Boolean,
         /** SMS検索画面で、本文の形式が不正なSMSを選択可能にするかどうか */
         val searchSplitFailedEnabled: Boolean,
-        /** SMS検索画面で、送信先送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
+        /** SMS検索画面で、送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
         val searchSendTargetUnconfiguredEnabled: Boolean,
         /** 自動受信時、本文の形式が不正なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
         val autoReplySplitFailedEnabled: Boolean,
@@ -113,10 +113,9 @@ object SettingsStore {
     )
 
     /**
-     * kintoneへの接続設定の1送信先。[matchTarget]で指定した対象（SMS本文そのもの、または
-     * そこから抽出した会社名）に[keywords]のいずれかが含まれる場合にこの送信先が使われる
-     * （[SettingsStore.resolveSendTarget]参照）。[keywords]が空の場合はどの送信先にも
-     * 一致しなかった時のデフォルト（フォールバック）として扱われる。
+     * kintoneへの接続設定の1送信先。[matchTarget]で指定した対象に[keywords]のいずれかが
+     * 含まれる場合にこの送信先が使われる（[SettingsStore.resolveSendTarget]参照）。
+     * [keywords]が空の場合はどの送信先にも一致しなかった時のフォールバックとして扱われる。
      */
     data class SendTarget(
         val id: String,
@@ -148,7 +147,7 @@ object SettingsStore {
         val isDefault: Boolean
             get() = keywordList.isEmpty()
 
-        /** ログ表示用の名称。表示名が未設定の場合のフォールバック文字列を返す */
+        /** 表示名が未設定の場合のフォールバック文字列を返す */
         fun displayName(context: Context): String =
             name.ifBlank { context.getString(R.string.label_send_target_name_unset) }
 
@@ -162,18 +161,16 @@ object SettingsStore {
                 }
             }
 
-        /** [matchTarget]に応じて[body]（SMS本文）または[companyName]（抽出した会社名）を[keywords]と照合する */
+        /** [matchTarget]に応じて[body]か[companyName]のどちらかを[keywords]と照合する */
         fun matches(body: String, companyName: String): Boolean {
             val text = if (matchTarget == MatchTarget.BODY) body else companyName
             return keywordList.any { TextNormalization.matches(text, it) }
         }
 
         /**
-         * このSMS（[body]／[companyName]）が、キーワードによる振り分けでこの送信先に実際に
-         * 選ばれるかどうか。デフォルト送信先（[isDefault]、キーワード未設定でフォールバック用）は
-         * ここでは対象外とし、別枠のフォールバックとして扱う（[SettingsStore.findSendTarget]参照）。
-         * 送信先の判定（[SettingsStore.findSendTarget]）とテスト送信のプレビューで判定基準が
-         * ずれないよう、キーワード一致かどうかを見る箇所は必ずこれを使うこと。
+         * キーワード一致でこの送信先に実際に振り分けられるかどうか。デフォルト送信先（[isDefault]、
+         * キーワード未設定でフォールバック用）は対象外とする。本番の振り分け（[SettingsStore.findSendTarget]）
+         * とテスト送信プレビューで判定基準がずれないよう、一致判定は必ずこれを使うこと。
          */
         fun routesTo(body: String, companyName: String): Boolean = !isDefault && matches(body, companyName)
 
@@ -233,10 +230,8 @@ object SettingsStore {
     }
 
     /**
-     * [Config]の既定値。初回起動時（[load]でSharedPreferencesに何も保存されていない場合の
-     * フォールバック）と、設定の初期化（[resetToDefaults]）の両方でここを参照する。
-     * 別々に値を書いていると、片方だけ更新して「初回起動時のデフォルト」と「初期化後の値」が
-     * 食い違う恐れがあるため、必ずこの1箇所にまとめること。
+     * [Config]の既定値。[load]のフォールバックと[resetToDefaults]の両方が参照する。
+     * 別々に書くと「初回起動時のデフォルト」と「初期化後の値」が食い違う恐れがあるため1箇所にまとめる
      */
     private val DEFAULT_CONFIG = Config(
         sendEnabled = true,
@@ -291,10 +286,7 @@ object SettingsStore {
         )
     }
 
-    /**
-     * 現在の[Config]を読み込み、[change]で一部の項目だけを変更して保存する。設定画面の各項目の
-     * 変更リスナーで繰り返し出てくる「読み込み→copyで1項目だけ変更→保存」を1箇所にまとめたもの
-     */
+    /** 設定画面の変更リスナーで繰り返す「読み込み→copyで1項目だけ変更→保存」をまとめたもの */
     fun update(context: Context, change: (Config) -> Config) {
         save(context, change(load(context)))
     }
@@ -376,7 +368,6 @@ object SettingsStore {
         }
     }
 
-    /** 保存済みの送信先が1件もない場合に、初期値のみの空送信先を1件作成する */
     private fun createDefaultSendTarget(context: Context): List<SendTarget> {
         val sendTargets = listOf(SendTarget.newEmpty())
         saveSendTargets(context, sendTargets)
@@ -384,11 +375,8 @@ object SettingsStore {
     }
 
     /**
-     * [body]（SMS本文）または[companyName]（抽出した会社名）に一致する送信先を探す。
-     * 各送信先の[SendTarget.matchTarget]設定に応じてどちらと照合するかが決まる。
-     * キーワードを持つ送信先のうち一致する最初のものを優先し、一致するものがなければ
-     * キーワード未設定（デフォルト）の送信先にフォールバックする。該当するものがなければ
-     * nullを返す。[resolveSendTarget]専用。
+     * キーワードが一致する送信先のうち最初のものを優先し、無ければキーワード未設定
+     * （デフォルト）の送信先にフォールバックする。該当が無ければnull。[resolveSendTarget]専用
      */
     private fun findSendTarget(context: Context, body: String, companyName: String): SendTarget? {
         val sendTargets = loadSendTargets(context)
@@ -397,12 +385,9 @@ object SettingsStore {
     }
 
     /**
-     * SMS本文から会社名・氏名・内容（[SmsParts]）を抽出し、送信先ごとの[SendTarget.matchTarget]
-     * 設定（本文／会社名のどちらと照合するか）に従って対応する送信先を判定する。実際のkintone
-     * 登録処理（[KintoneUploadWorker]）・受信ログの記録（[SmsReceiver]）・SMS検索画面の
-     * フィルタ／一覧表示・送信先のテスト送信など、抽出結果と送信先の判定を両方必要とする箇所は、
-     * 抽出方法（ルールベース／AI）がずれて登録内容と振り分け結果が食い違うことのないよう、
-     * 必ずこの関数を使うこと。
+     * SMS本文から[SmsParts]を抽出し、対応する送信先を判定する。抽出結果と送信先判定の両方が
+     * 必要な箇所（kintone登録・受信ログ記録・SMS検索画面・テスト送信など）は、抽出方法
+     * （ルールベース／AI）のずれで登録内容と振り分け結果が食い違わないよう必ずこれを使うこと。
      */
     suspend fun resolveSendTarget(context: Context, body: String, aiParsingEnabled: Boolean): Pair<SmsParts, SendTarget?> {
         val smsParts = SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled)

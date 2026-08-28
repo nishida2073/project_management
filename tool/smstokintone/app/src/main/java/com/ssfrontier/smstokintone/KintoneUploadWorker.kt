@@ -16,18 +16,14 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val body = inputData.getString(KEY_BODY) ?: ""
         val timestampMillis = inputData.getLong(KEY_TIMESTAMP, System.currentTimeMillis())
         val manual = inputData.getBoolean(KEY_MANUAL, false)
-        // 手動送信時のみ、検索画面で特定済みの確実なSMSプロバイダ上のIDが渡ってくる。
-        // 自動受信時はここでは解決せず、「受信済みSMS送信」画面側で送信元・タイムスタンプの
-        // 近さによって突き合わせる（SmsMatching参照）。
+        // -1LはKEY_SMS_ID未指定（自動受信）を表す。自動受信時はここで解決せず、
+        // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる（SmsMatching参照）
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応。AI解析が
-        // 有効な場合は端末上のAIでの解析結果を使う）し、その会社名で送信先を判定する
         val (smsParts, sendTarget) = SettingsStore.resolveSendTarget(applicationContext, body, config.aiParsingEnabled)
 
         if (sendTarget == null || !sendTarget.isValid) {
-            // 送信先が特定できず何も開始できていないため、送信完了ではなく送信開始として
-            // 失敗を記録する
+            // 何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
             logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTarget?.displayName(applicationContext), manual = manual)
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
             // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
@@ -35,13 +31,13 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         }
 
         if (!manual && !config.sendEnabled) {
-            // 送信モードが手動の場合、自動受信時はkintoneへの送信を何も試みないため、
-            // 受信完了のログのみとし、送信開始・送信完了は記録しない
+            // 自動送信が無効な場合、自動受信時はkintoneへの送信を何も試みないため、
+            // 受信完了のログのみとし送信開始・送信完了は記録しない
             return@withContext Result.success()
         }
 
         if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
-            // 形式が不正で何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
+            // 何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
             logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual)
             return@withContext Result.success()
         }
@@ -92,9 +88,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         }
     }
 
-    // WorkManagerはResult.retry()に回数上限を設けていないため、リトライし続けている間は
-    // 送信バッチが完了扱いにならず、SmsSearchActivity側の完了通知（トースト）が
-    // 表示されないままになる。一定回数で諦めて完了扱いにする
+    // WorkManagerのResult.retry()に回数上限はなく、リトライし続けている間はSmsSearchActivity側の
+    // 完了通知（トースト）が出ないままになるため、一定回数で諦めて完了扱いにする
     private fun shouldRetry(): Boolean = runAttemptCount < AppConstants.KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS - 1
 
     private fun logStart(

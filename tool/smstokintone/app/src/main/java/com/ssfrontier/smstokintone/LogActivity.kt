@@ -91,7 +91,7 @@ class LogActivity : AppCompatActivity() {
                 SmsLogStore.EntryType.AUTO_REPLY -> getString(R.string.label_log_type_auto_reply)
             }
 
-            // グループ1: ログ種別＋実行時のタイムスタンプ（種別は無彩色、送信系は自動＝青・手動＝アンバーで末尾に区別を付ける）
+            // 送信系ログのみ末尾に自動=青(status_running)/手動=アンバー(status_manual)のアイコンを付ける
             val typeAndTimestampView = TextView(this).apply {
                 text = buildSpannedString {
                     append(getString(R.string.label_log_type_bracketed, typeLabel))
@@ -120,7 +120,6 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 24, 0, 4)
             }
 
-            // グループ2: 設定名／送信元／SMS自体のタイムスタンプ／メッセージ（SMS本文）
             val sendTargetNameView = TextView(this).apply {
                 text = buildSpannedString {
                     append(
@@ -146,8 +145,7 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 0, 0, 4)
             }
 
-            // グループ3: 結果（受信・送信開始・送信完了共通で成功＝緑・失敗＝赤で色付け。
-            // ラベルとメッセージは別列に分ける）
+            // 受信・送信開始・送信完了で共通: 成功=緑(log_success)・失敗=赤(log_failure)
             val resultLabel = if (entry.success) {
                 getString(R.string.label_log_result_success)
             } else {
@@ -159,7 +157,6 @@ class LogActivity : AppCompatActivity() {
             )
             val resultView: View = buildLabeledMessageRow(resultLabel, entry.message, resultColor, topPadding = 16)
 
-            // グループ4: 会社名・氏名・内容の分割結果（送信結果とは別の行で表示。結果の行と同じレイアウト）
             val splitResultView = entry.smsParts?.let { smsParts ->
                 val succeeded = !smsParts.isSplitFailed()
                 val splitLabel = if (succeeded) {
@@ -214,8 +211,7 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    /** 長押しされたログの分割結果（会社名・氏名・内容）をダイアログで表示する。
-     * 会社名はkintoneへ実際に登録した値（変換適用時は変換後の値）を表示する */
+    /** 会社名はkintoneへ実際に登録した値（変換適用時は変換後の値）を表示する */
     private fun showSplitResultDialog(smsParts: SmsParts, companyNameConverted: Boolean) {
         val companyNameValue = if (companyNameConverted) {
             smsParts.companyNameNormalizedWidth
@@ -244,7 +240,6 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
-    /** 長押しされたログの自動返信で実際に送信した返信本文をダイアログで表示する */
     private fun showAutoReplyBodyDialog(replyBody: String) {
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_auto_reply_body)
@@ -253,7 +248,6 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
-    /** 「[ラベル] メッセージ」を横並びの別列に分けた行を作る */
     private fun buildLabeledMessageRow(label: String, message: String, color: Int, topPadding: Int): View {
         return android.widget.LinearLayout(this).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL

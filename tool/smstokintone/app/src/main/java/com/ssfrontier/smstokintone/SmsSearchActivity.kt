@@ -129,7 +129,7 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.layoutSearchForm.visibility = if (granted) View.VISIBLE else View.GONE
     }
 
-    /** 検索条件エリアの表示/非表示を切り替え、一覧により多くの領域を割けるようにする */
+    /** 閉じることで一覧の表示領域を広げられるようにする */
     private fun toggleSearchFilters() {
         val show = binding.llSearchFilters.visibility != View.VISIBLE
         binding.llSearchFilters.visibility = if (show) View.VISIBLE else View.GONE
@@ -233,8 +233,6 @@ class SmsSearchActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.toast_sms_search_error, e.message ?: ""), Toast.LENGTH_LONG).show()
         }
 
-        // ⬜未・✅済（自動）・☑️済（手動）のいずれかがONの場合、チェックされた送信状況のSMSのみを残す。
-        // すべてOFFの場合は送信状況による絞り込みを行わない
         if (binding.cbSendNoneOnly.isChecked || binding.cbSentAutoOnly.isChecked || binding.cbSentManualOnly.isChecked) {
             val sentEntries = matchSentEntries(records, loadCompletedEntries())
             records.removeAll { record ->
@@ -248,13 +246,10 @@ class SmsSearchActivity : AppCompatActivity() {
             }
         }
 
-        // 送信先での絞り込み、形式が不正かどうかの判定はAI解析（端末上のAI呼び出し）を伴う
-        // 場合があるため、ここから先はコルーチンで行いUIをブロックしない
+        // AI解析（端末上のAI呼び出し）を伴う場合があるため、ここから先はコルーチンでUIをブロックしない
         lifecycleScope.launch {
             val aiParsingEnabled = SettingsStore.load(this@SmsSearchActivity).aiParsingEnabled
 
-            // 送信先の判定は、実際の登録処理（KintoneUploadWorker）と抽出方法がずれないよう、
-            // resolveSendTargetを使う
             when (val sendTargetId = selectedSendTargetId) {
                 null -> Unit
                 AppConstants.SEND_TARGET_FILTER_KEY_UNSET -> {
@@ -302,12 +297,9 @@ class SmsSearchActivity : AppCompatActivity() {
             .filter { it.type == SmsLogStore.EntryType.AUTO_REPLY && it.success }
 
     /**
-     * ログのエントリとSMSレコードを1対1で対応付ける。手動送信のログはSMS検索画面で特定済みの
-     * 確実なIDを持つため、そのID一致で対応付ける。自動送信のログはIDを持たないため、送信元・
-     * タイムスタンプの近さで対応付ける（SmsMatching参照）が、同じ送信元から似た内容のSMSが
-     * 許容範囲内（アプリ設定画面の「統合範囲」）に複数届いた場合に1件のログが複数のレコードへ
-     * 同時にマッチしてしまうのを防ぐため、時刻が近いレコードから順に、1件のログにつき1件の
-     * レコードだけを貪欲に割り当てる。
+     * ログとSMSレコードを1対1対応させる。手動送信ログはsmsId一致で対応付け、IDを持たない
+     * 自動送信ログは送信元・タイムスタンプの近さで対応付ける（SmsMatching参照）。1件のログが
+     * 複数レコードに同時マッチしないよう、時刻が近いレコードから順に貪欲に割り当てる。
      */
     private fun matchSentEntries(
         records: List<SmsRecord>,
@@ -344,7 +336,6 @@ class SmsSearchActivity : AppCompatActivity() {
         return SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled).isSplitFailed()
     }
 
-    /** 標準のSMSアプリの返信（作成）画面を、指定した送信元宛てに開く */
     private fun openSmsReply(address: String, splitFailed: Boolean) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$address"))
         val config = SettingsStore.load(this)
