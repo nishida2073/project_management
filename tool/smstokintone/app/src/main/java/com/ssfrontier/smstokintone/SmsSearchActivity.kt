@@ -248,17 +248,36 @@ class SmsSearchActivity : AppCompatActivity() {
             }
         }
 
-        when (val sendTargetId = selectedSendTargetId) {
-            null -> Unit
-            AppConstants.SEND_TARGET_FILTER_KEY_UNSET -> records.removeAll { SettingsStore.findSendTargetForBody(this, it.body) != null }
-            else -> records.removeAll { SettingsStore.findSendTargetForBody(this, it.body)?.id != sendTargetId }
-        }
-
-        // 形式が不正かどうかの判定はAI解析（端末上のAI呼び出し）を伴う場合があるため、
-        // ここから先はコルーチンで行いUIをブロックしない
+        // 送信先での絞り込み、形式が不正かどうかの判定はAI解析（端末上のAI呼び出し）を伴う
+        // 場合があるため、ここから先はコルーチンで行いUIをブロックしない
         lifecycleScope.launch {
+            val aiParsingEnabled = SettingsStore.load(this@SmsSearchActivity).aiParsingEnabled
+
+            // 送信先の判定は、実際の登録処理（KintoneUploadWorker）と抽出方法がずれないよう、
+            // resolveSendTargetを使う
+            when (val sendTargetId = selectedSendTargetId) {
+                null -> Unit
+                AppConstants.SEND_TARGET_FILTER_KEY_UNSET -> {
+                    val matched = mutableListOf<SmsRecord>()
+                    for (record in records) {
+                        val (_, sendTarget) = SettingsStore.resolveSendTarget(this@SmsSearchActivity, record.body, aiParsingEnabled)
+                        if (sendTarget == null) matched.add(record)
+                    }
+                    records.clear()
+                    records.addAll(matched)
+                }
+                else -> {
+                    val matched = mutableListOf<SmsRecord>()
+                    for (record in records) {
+                        val (_, sendTarget) = SettingsStore.resolveSendTarget(this@SmsSearchActivity, record.body, aiParsingEnabled)
+                        if (sendTarget?.id == sendTargetId) matched.add(record)
+                    }
+                    records.clear()
+                    records.addAll(matched)
+                }
+            }
+
             if (binding.cbSplitFailedOnly.isChecked) {
-                val aiParsingEnabled = SettingsStore.load(this@SmsSearchActivity).aiParsingEnabled
                 val splitFailedRecords = mutableListOf<SmsRecord>()
                 for (record in records) {
                     if (isSplitFailed(record.body, aiParsingEnabled)) splitFailedRecords.add(record)
@@ -350,12 +369,12 @@ class SmsSearchActivity : AppCompatActivity() {
         val config = SettingsStore.load(this)
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         records.forEach { record ->
-            val sendTarget = SettingsStore.findSendTargetForBody(this@SmsSearchActivity, record.body)
+            val (smsParts, sendTarget) = SettingsStore.resolveSendTarget(this@SmsSearchActivity, record.body, config.aiParsingEnabled)
             val sendTargetName = sendTarget?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_send_target_none)
             val isSendTargetUnconfigured = sendTarget == null || !sendTarget.isValid
             val isAutoReplied = record.id in autoRepliedEntries
             val sentEntry = sentEntries[record.id]
-            val isSplitFailedBody = isSplitFailed(record.body, config.aiParsingEnabled)
+            val isSplitFailedBody = smsParts.isSplitFailed()
             val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
                 (!isSplitFailedBody || config.searchSplitFailedEnabled)
             val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)

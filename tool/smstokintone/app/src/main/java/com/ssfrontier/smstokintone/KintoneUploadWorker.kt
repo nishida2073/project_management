@@ -25,7 +25,9 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 近さによって突き合わせる（SmsMatching参照）。
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        val sendTarget = SettingsStore.findSendTargetForBody(applicationContext, body)
+        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応。AI解析が
+        // 有効な場合は端末上のAIでの解析結果を使う）し、その会社名で送信先を判定する
+        val (smsParts, sendTarget) = SettingsStore.resolveSendTarget(applicationContext, body, config.aiParsingEnabled)
 
         if (sendTarget == null || !sendTarget.isValid) {
             // 送信先が特定できず何も開始できていないため、送信完了ではなく送信開始として
@@ -41,10 +43,6 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             // 受信完了のログのみとし、送信開始・送信完了は記録しない
             return@withContext Result.success()
         }
-
-        // SMS本文から会社名・氏名・内容を抽出（ラベルの表記ゆれ・記述順の違いに対応。送信先がAI解析を
-        // 有効にしている場合は端末上のAIでの解析結果を使う）
-        val smsParts = SmsPartsGenerator.resolveSmsParts(body, config.aiParsingEnabled)
 
         if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
             // 形式が不正で何も開始できていないため、送信完了ではなく送信開始として失敗を記録する

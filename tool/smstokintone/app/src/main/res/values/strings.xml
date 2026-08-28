@@ -50,8 +50,11 @@
     <string name="section_send_target_name">送信先</string>
     <string name="hint_send_target_name">送信先名</string>
     <string name="section_sms_target">送信先の振り分け</string>
-    <string name="hint_keywords">本文に含まれる文字列</string>
+    <string name="hint_keywords">含まれる文字列</string>
     <string name="helper_keywords">カンマまたは改行区切りで複数指定できます\n※空欄の場合はデフォルトの送信先として扱われます</string>
+    <string name="label_match_target">送信先の比較対象</string>
+    <string name="rb_match_target_body">本文</string>
+    <string name="rb_match_target_company_name">会社名</string>
     <string name="section_kintone_info">kintoneの設定</string>
     <string name="section_connection">接続先</string>
     <string name="hint_subdomain">サブドメイン</string>
@@ -87,7 +90,7 @@
     <string name="dialog_title_test_send_result">テスト結果</string>
     <string name="dialog_message_test_send_result_failure">送信失敗: %1$s</string>
     <string name="dialog_message_test_send_result_network_error">通信エラー: %1$s</string>
-    <string name="dialog_message_test_send_routing_unmatched">この本文はこの送信先の振り分け条件に一致しないため、送信していません。</string>
+    <string name="dialog_message_test_send_routing_unmatched">送信先の振り分け条件に一致しないため、送信していません。</string>
     <string name="test_send_body">株式会社テスト\nテスト太郎\n\nこれはアプリからのテスト送信です</string>
   
     <!-- アプリの設定画面 -->

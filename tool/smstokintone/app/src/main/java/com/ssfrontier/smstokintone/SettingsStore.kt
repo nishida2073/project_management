@@ -42,6 +42,17 @@ object SettingsStore {
         }
     }
 
+    /** 送信先の振り分け（[SendTarget.keywords]）の照合対象。[BODY]はSMS本文そのもの、[COMPANY_NAME]はそこから抽出した会社名 */
+    enum class MatchTarget {
+        BODY,
+        COMPANY_NAME;
+
+        companion object {
+            fun fromName(name: String?): MatchTarget =
+                entries.firstOrNull { it.name == name } ?: BODY
+        }
+    }
+
     enum class ThemeMode {
         LIGHT,
         DARK;
@@ -102,9 +113,10 @@ object SettingsStore {
     )
 
     /**
-     * kintoneへの接続設定の1送信先。SMS本文に[keywords]のいずれかが含まれる場合にこの
-     * 送信先が使われる。[keywords]が空の場合はどの送信先にも一致しなかった時の
-     * デフォルト（フォールバック）として扱われる。
+     * kintoneへの接続設定の1送信先。[matchTarget]で指定した対象（SMS本文そのもの、または
+     * そこから抽出した会社名）に[keywords]のいずれかが含まれる場合にこの送信先が使われる
+     * （[SettingsStore.resolveSendTarget]参照）。[keywords]が空の場合はどの送信先にも
+     * 一致しなかった時のデフォルト（フォールバック）として扱われる。
      */
     data class SendTarget(
         val id: String,
@@ -126,7 +138,9 @@ object SettingsStore {
         val fieldContent: String = "",
         /** kintoneへの送信時、会社名に[SmsParts.companyNameNormalizedWidth]（英数字は半角・それ以外は全角に統一した文字列）を使うかどうか。
          * falseの場合は[SmsParts.companyName]（変換なし）をそのまま使う */
-        val companyNameWidthConversionEnabled: Boolean = false
+        val companyNameWidthConversionEnabled: Boolean = false,
+        /** [keywords]をSMS本文そのものと会社名（抽出結果）のどちらに対して照合するか */
+        val matchTarget: MatchTarget = MatchTarget.BODY
     ) {
         val keywordList: List<String>
             get() = keywords.split(",", "\n").map { it.trim() }.filter { it.isNotEmpty() }
@@ -148,7 +162,11 @@ object SettingsStore {
                 }
             }
 
-        fun matches(body: String): Boolean = keywordList.any { TextNormalization.matches(body, it) }
+        /** [matchTarget]に応じて[body]（SMS本文）または[companyName]（抽出した会社名）を[keywords]と照合する */
+        fun matches(body: String, companyName: String): Boolean {
+            val text = if (matchTarget == MatchTarget.BODY) body else companyName
+            return keywordList.any { TextNormalization.matches(text, it) }
+        }
 
         companion object {
             fun newEmpty(): SendTarget = SendTarget(
@@ -305,6 +323,7 @@ object SettingsStore {
                     .put("fieldUserName", sendTarget.fieldUserName)
                     .put("fieldContent", sendTarget.fieldContent)
                     .put("companyNameWidthConversionEnabled", sendTarget.companyNameWidthConversionEnabled)
+                    .put("matchTarget", sendTarget.matchTarget.name)
             )
         }
         prefs(context).edit().putString(KEY_SEND_TARGETS, array.toString()).apply()
@@ -335,7 +354,8 @@ object SettingsStore {
                 fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
                 fieldContent = obj.optString("fieldContent", ""),
-                companyNameWidthConversionEnabled = obj.optBoolean("companyNameWidthConversionEnabled", false)
+                companyNameWidthConversionEnabled = obj.optBoolean("companyNameWidthConversionEnabled", false),
+                matchTarget = MatchTarget.fromName(obj.optString("matchTarget", ""))
             )
         }
     }
@@ -348,13 +368,28 @@ object SettingsStore {
     }
 
     /**
-     * SMS本文に一致する送信先を探す。キーワードを持つ送信先のうち本文に一致する
-     * 最初のものを優先し、一致するものがなければキーワード未設定（デフォルト）の送信先に
-     * フォールバックする。該当するものがなければnullを返す。
+     * [body]（SMS本文）または[companyName]（抽出した会社名）に一致する送信先を探す。
+     * 各送信先の[SendTarget.matchTarget]設定に応じてどちらと照合するかが決まる。
+     * キーワードを持つ送信先のうち一致する最初のものを優先し、一致するものがなければ
+     * キーワード未設定（デフォルト）の送信先にフォールバックする。該当するものがなければ
+     * nullを返す。[resolveSendTarget]専用。
      */
-    fun findSendTargetForBody(context: Context, body: String): SendTarget? {
+    private fun findSendTarget(context: Context, body: String, companyName: String): SendTarget? {
         val sendTargets = loadSendTargets(context)
-        sendTargets.firstOrNull { !it.isDefault && it.matches(body) }?.let { return it }
+        sendTargets.firstOrNull { !it.isDefault && it.matches(body, companyName) }?.let { return it }
         return sendTargets.firstOrNull { it.isDefault }
+    }
+
+    /**
+     * SMS本文から会社名・氏名・内容（[SmsParts]）を抽出し、送信先ごとの[SendTarget.matchTarget]
+     * 設定（本文／会社名のどちらと照合するか）に従って対応する送信先を判定する。実際のkintone
+     * 登録処理（[KintoneUploadWorker]）・受信ログの記録（[SmsReceiver]）・SMS検索画面の
+     * フィルタ／一覧表示・送信先のテスト送信など、抽出結果と送信先の判定を両方必要とする箇所は、
+     * 抽出方法（ルールベース／AI）がずれて登録内容と振り分け結果が食い違うことのないよう、
+     * 必ずこの関数を使うこと。
+     */
+    suspend fun resolveSendTarget(context: Context, body: String, aiParsingEnabled: Boolean): Pair<SmsParts, SendTarget?> {
+        val smsParts = SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled)
+        return smsParts to findSendTarget(context, body, smsParts.companyName)
     }
 }

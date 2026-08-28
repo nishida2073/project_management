@@ -66,6 +66,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.etUpdateToleranceHours.setText(sendTarget.updateToleranceHours.toString())
         itemBinding.swCompanyNameWidthConversionEnabled.isChecked = sendTarget.companyNameWidthConversionEnabled
 
+        when (sendTarget.matchTarget) {
+            SettingsStore.MatchTarget.BODY -> itemBinding.rbMatchTargetBody.isChecked = true
+            SettingsStore.MatchTarget.COMPANY_NAME -> itemBinding.rbMatchTargetCompanyName.isChecked = true
+        }
+
         when (sendTarget.authMethod) {
             SettingsStore.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
             SettingsStore.AuthMethod.PASSWORD -> itemBinding.rbAuthPassword.isChecked = true
@@ -124,6 +129,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         } else {
             SettingsStore.AuthMethod.API_TOKEN
         }
+        val matchTarget = if (itemBinding.rbMatchTargetBody.isChecked) {
+            SettingsStore.MatchTarget.BODY
+        } else {
+            SettingsStore.MatchTarget.COMPANY_NAME
+        }
 
         return SettingsStore.SendTarget(
             id = id,
@@ -144,7 +154,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             fieldContent = itemBinding.etFieldContent.text.toString().trim(),
             updateToleranceHours = itemBinding.etUpdateToleranceHours.text.toString().trim().toIntOrNull()
                 ?: AppDefaults.UPDATE_TOLERANCE_HOURS,
-            companyNameWidthConversionEnabled = itemBinding.swCompanyNameWidthConversionEnabled.isChecked
+            companyNameWidthConversionEnabled = itemBinding.swCompanyNameWidthConversionEnabled.isChecked,
+            matchTarget = matchTarget
         )
     }
 
@@ -175,22 +186,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             .setView(editText)
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_send) { _, _ ->
-                confirmRoutingThenSend(itemBinding, sendTarget, editText.text.toString())
+                performTestSend(itemBinding, sendTarget, editText.text.toString())
             }
-            .show()
-    }
-
-    /** 本文が[sendTarget]自身の振り分け条件（キーワード、またはデフォルト送信先）に一致しない場合は警告し、一致する場合はそのままテスト送信する */
-    private fun confirmRoutingThenSend(itemBinding: ItemSendTargetBinding, sendTarget: SettingsStore.SendTarget, testBody: String) {
-        if (sendTarget.isDefault || sendTarget.matches(testBody)) {
-            performTestSend(itemBinding, sendTarget, testBody)
-            return
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_test_send_result)
-            .setMessage(R.string.dialog_message_test_send_routing_unmatched)
-            .setPositiveButton(android.R.string.ok, null)
             .show()
     }
 
@@ -206,6 +203,21 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.btnTestSend.isEnabled = false
         lifecycleScope.launch {
             val smsParts = SmsPartsGenerator.resolveSmsParts(testBody, SettingsStore.load(applicationContext).aiParsingEnabled)
+
+            // 本文（またはそこから抽出した会社名）が[sendTarget]自身の振り分け条件
+            // （キーワード、またはデフォルト送信先）に一致しない場合は警告して送信を中断する。
+            // 実際の登録処理（KintoneUploadWorker）と抽出方法を揃えるため、上で取得した
+            // [smsParts]の会社名をそのまま使う
+            if (!sendTarget.isDefault && !sendTarget.matches(testBody, smsParts.companyName)) {
+                itemBinding.btnTestSend.isEnabled = true
+                AlertDialog.Builder(this@SendTargetSettingsActivity)
+                    .setTitle(R.string.dialog_title_test_send_result)
+                    .setMessage(R.string.dialog_message_test_send_routing_unmatched)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+                return@launch
+            }
+
             val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
                 smsParts.companyNameNormalizedWidth
             } else {

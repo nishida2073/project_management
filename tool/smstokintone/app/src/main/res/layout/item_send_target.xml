@@ -149,6 +149,43 @@
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_match_target"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <RadioGroup
+                        android:id="@+id/rgMatchTarget"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/rbMatchTargetBody"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:checked="true"
+                            android:text="@string/rb_match_target_body" />
+                        <RadioButton
+                            android:id="@+id/rbMatchTargetCompanyName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rb_match_target_company_name" />
+                    </RadioGroup>
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

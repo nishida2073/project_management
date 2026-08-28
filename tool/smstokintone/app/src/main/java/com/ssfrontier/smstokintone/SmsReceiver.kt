@@ -32,24 +32,6 @@ class SmsReceiver : BroadcastReceiver() {
         val body = messages.joinToString(separator = "") { it.messageBody ?: "" }
         val timestampMillis = messages[0].timestampMillis
 
-        // kintoneへの送信結果を待たず、受信した時点で即座にログへ記録する。
-        // これにより送信ログ画面を見れば、そもそもSMSを受信できているかを確認できる。
-        // SMSプロバイダ上の実IDはこの時点で確実には特定できない（電話番号の表記ゆれや、既定の
-        // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
-        // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
-        // （SmsMatching参照）。
-        val sendTargetName = SettingsStore.findSendTargetForBody(context, body)?.displayName(context)
-        SmsLogStore.add(
-            context,
-            type = SmsLogStore.EntryType.RECEIVE,
-            timestampMillis = timestampMillis,
-            sender = sender,
-            body = body,
-            success = true,
-            message = context.getString(R.string.message_log_receive),
-            sendTargetName = sendTargetName
-        )
-
         val data = workDataOf(
             KintoneUploadWorker.KEY_SENDER to sender,
             KintoneUploadWorker.KEY_BODY to body,
@@ -67,38 +49,57 @@ class SmsReceiver : BroadcastReceiver() {
 
         WorkManager.getInstance(context).enqueue(request)
 
-        // SMS返信はkintoneへの送信設定・送信先送信先の有無とは無関係な機能のため、ここで判定する。
-        // 「形式が不正」の判定はAI解析（端末上のAI呼び出し）を伴う場合があり、
+        // 受信ログへの記録・SMS返信の判定は、kintoneへの送信設定・送信先の有無とは無関係にここで行う。
+        // 送信先名の解決とSMS返信の「形式が不正」判定はAI解析（端末上のAI呼び出し）を伴う場合があり、
         // BroadcastReceiver#onReceiveの同期的な処理では待てないため、goAsync()で実行時間を延長し
-        // コルーチンで判定・返信を行う
+        // コルーチンで判定・記録・返信を行う
         val config = SettingsStore.load(context)
-        if (config.autoReplySplitFailedEnabled && sender.isNotBlank()) {
-            val pendingResult = goAsync()
-            CoroutineScope(Dispatchers.Default).launch {
-                try {
-                    val smsParts = SmsPartsGenerator.resolveSmsParts(body, config.aiParsingEnabled)
-                    if (smsParts.isSplitFailed()) {
-                        val now = System.currentTimeMillis()
-                        if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
-                            if (sendAutoReply(context, sender, config.splitFailedReplyAddition)) {
-                                SmsLogStore.add(
-                                    context,
-                                    type = SmsLogStore.EntryType.AUTO_REPLY,
-                                    timestampMillis = timestampMillis,
-                                    sender = sender,
-                                    body = body,
-                                    success = true,
-                                    message = context.getString(R.string.message_log_auto_reply),
-                                    sendTargetName = sendTargetName,
-                                    replyBody = config.splitFailedReplyAddition
-                                )
-                            }
-                            AutoReplyThrottle.recordSent(context, sender, now)
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                // SMS本文から会社名を抽出して送信先を判定する（実際の登録処理と抽出方法を揃えることで、
+                // 登録内容と送信先名の食い違いを防ぐ。KintoneUploadWorker参照）
+                val (smsParts, sendTarget) = SettingsStore.resolveSendTarget(context, body, config.aiParsingEnabled)
+                val sendTargetName = sendTarget?.displayName(context)
+
+                // kintoneへの送信結果を待たず、受信した時点でログへ記録する。
+                // これにより送信ログ画面を見れば、そもそもSMSを受信できているかを確認できる。
+                // SMSプロバイダ上の実IDはこの時点で確実には特定できない（電話番号の表記ゆれや、既定の
+                // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
+                // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
+                // （SmsMatching参照）。
+                SmsLogStore.add(
+                    context,
+                    type = SmsLogStore.EntryType.RECEIVE,
+                    timestampMillis = timestampMillis,
+                    sender = sender,
+                    body = body,
+                    success = true,
+                    message = context.getString(R.string.message_log_receive),
+                    sendTargetName = sendTargetName
+                )
+
+                if (config.autoReplySplitFailedEnabled && sender.isNotBlank() && smsParts.isSplitFailed()) {
+                    val now = System.currentTimeMillis()
+                    if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
+                        if (sendAutoReply(context, sender, config.splitFailedReplyAddition)) {
+                            SmsLogStore.add(
+                                context,
+                                type = SmsLogStore.EntryType.AUTO_REPLY,
+                                timestampMillis = timestampMillis,
+                                sender = sender,
+                                body = body,
+                                success = true,
+                                message = context.getString(R.string.message_log_auto_reply),
+                                sendTargetName = sendTargetName,
+                                replyBody = config.splitFailedReplyAddition
+                            )
                         }
+                        AutoReplyThrottle.recordSent(context, sender, now)
                     }
-                } finally {
-                    pendingResult.finish()
                 }
+            } finally {
+                pendingResult.finish()
             }
         }
     }
