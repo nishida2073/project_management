@@ -83,7 +83,7 @@ object SettingsStore {
         val autoReplyCooldownSeconds: Int,
         val autoRefreshEnabled: Boolean,
         val autoRefreshIntervalSeconds: Int,
-        /** 自動受信SMSのログとSMSプロバイダ上のSMSを突き合わせる際の許容範囲（秒） */
+        /** 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒） */
         val smsMatchToleranceSeconds: Int,
         val themeMode: ThemeMode,
         /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲（日） */
