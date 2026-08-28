@@ -17,15 +17,23 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * SmsLogStoreの全エントリを画面に表示するログ一覧。件数が少ない前提でRecyclerViewは使わず、
+ * 都度LinearLayoutへViewを組み立て直す。設定で有効な間はHandlerで一定間隔ごとに自動再描画する。
+ */
 class LogActivity : AppCompatActivity() {
 
+    /** この画面のViewBinding */
     private lateinit var binding: ActivityLogBinding
+    /** [autoRefreshRunnable]のスケジュールに使うHandler */
     private val autoRefreshHandler = Handler(Looper.getMainLooper())
+    /** 再描画のたびに次回分を再スケジュールすることで自動更新を継続させる */
     private val autoRefreshRunnable = Runnable {
         renderLog()
         scheduleAutoRefresh()
     }
 
+    /** ログ一覧の初期表示と、更新/クリアボタン・スワイプ更新の配線を行う */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLogBinding.inflate(layoutInflater)
@@ -39,18 +47,22 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
+    /** 他画面での変更を反映するため表示に戻るたびに再描画し、自動更新のスケジュールを再開する */
     override fun onResume() {
         super.onResume()
         renderLog()
         scheduleAutoRefresh()
     }
 
+    /** 画面が表示されていない間は自動更新を止める */
     override fun onPause() {
         super.onPause()
         autoRefreshHandler.removeCallbacks(autoRefreshRunnable)
     }
 
+    /** 設定で自動更新が有効な場合、次回の[autoRefreshRunnable]実行を予約する */
     private fun scheduleAutoRefresh() {
+        // 既存の予約をキャンセルしてから積み直す（onResumeとrunnable自身の両方から呼ばれるため多重登録を防ぐ）
         autoRefreshHandler.removeCallbacks(autoRefreshRunnable)
         val config = SettingsStore.load(this)
         if (config.autoRefreshEnabled) {
@@ -61,6 +73,7 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
+    /** 確認ダイアログを出し、OKならログを全削除して再描画する */
     private fun onClearClicked() {
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_confirm_clear_log)
@@ -73,6 +86,7 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
+    /** SmsLogStoreの全エントリを読み込み、一覧のViewを組み立て直して表示する */
     private fun renderLog() {
         val entries = SmsLogStore.getAll(this)
         binding.llLogContainer.removeAllViews()
@@ -145,7 +159,7 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 0, 0, 4)
             }
 
-            // 受信・送信開始・送信完了で共通: 成功=緑(log_success)・失敗=赤(log_failure)
+            // 全エントリ共通: 成功=緑(log_success)・失敗=赤(log_failure)
             val resultLabel = if (entry.success) {
                 getString(R.string.label_log_result_success)
             } else {
@@ -240,6 +254,7 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
+    /** 自動返信ログの行を長押しした際に、実際に送信した返信本文をダイアログで表示する */
     private fun showAutoReplyBodyDialog(replyBody: String) {
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_auto_reply_body)
@@ -248,6 +263,7 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
+    /** 結果行・分割結果行の両方で使う「[ラベル] メッセージ」形式の横並び行を組み立てる */
     private fun buildLabeledMessageRow(label: String, message: String, color: Int, topPadding: Int): View {
         return android.widget.LinearLayout(this).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL

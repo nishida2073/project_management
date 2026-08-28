@@ -6,37 +6,64 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
+/** アプリの設定（[Config]）と送信先設定（[SendTarget]）をSharedPreferencesで永続化する */
 object SettingsStore {
 
+    /** SharedPreferencesのファイル名 */
     private const val PREFS_NAME = "smstokintone_prefs"
+    /** SharedPreferencesのキー名。各キーが対応する設定の意味は[Config]の同名フィールドのKDocを参照 */
+    /** [Config.sendEnabled]のキー */
     private const val KEY_SEND_ENABLED = "send_enabled"
+    /** [Config.sendSplitFailedEnabled]のキー */
     private const val KEY_SEND_SPLIT_FAILED_ENABLED = "send_split_failed_enabled"
+    /** [Config.searchSplitFailedEnabled]のキー */
     private const val KEY_SEARCH_SPLIT_FAILED_ENABLED = "search_split_failed_enabled"
+    /** [Config.searchSendTargetUnconfiguredEnabled]のキー */
     private const val KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED = "search_send_target_unconfigured_enabled"
+    /** [Config.autoReplySplitFailedEnabled]のキー */
     private const val KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED = "auto_reply_split_failed_enabled"
+    /** [Config.autoReplyCooldownSeconds]のキー */
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
+    /** [Config.autoRefreshEnabled]のキー */
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
+    /** [Config.autoRefreshIntervalSeconds]のキー */
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
+    /** [Config.smsMatchToleranceSeconds]のキー */
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
+    /** [Config.themeMode]のキー */
     private const val KEY_THEME_MODE = "theme_mode"
+    /** [Config.smsSearchDateRangeDays]のキー */
     private const val KEY_SMS_SEARCH_DATE_RANGE_DAYS = "sms_search_date_range_days"
+    /** [Config.searchFiltersVisibleByDefault]のキー */
     private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
+    /** [Config.defaultReplyBody]のキー */
     private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
+    /** [Config.splitFailedReplyAddition]のキー */
     private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
+    /** [Config.defaultSendTargetFilterId]のキー */
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
+    /** [Config.aiParsingEnabled]のキー */
     private const val KEY_AI_PARSING_ENABLED = "ai_parsing_enabled"
+    /** [Config.defaultSendNoneOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SEND_NONE_ONLY_ENABLED = "default_send_none_only_enabled"
+    /** [Config.defaultSplitFailedOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED = "default_split_failed_only_enabled"
+    /** [Config.defaultSentAutoOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
+    /** [Config.defaultSentManualOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED = "default_sent_manual_only_enabled"
 
+    /** [SendTarget]のリスト全体をJSON配列として保存するキー。[Config]とは別枠で[saveSendTargets]/[loadSendTargets]が読み書きする */
     private const val KEY_SEND_TARGETS = "send_targets"
 
+    /** kintoneへの接続認証方式 */
     enum class AuthMethod {
         API_TOKEN,
         PASSWORD;
 
+        /** [fromName]を提供するコンパニオンオブジェクト */
         companion object {
+            /** 保存値からの復元用。未知の値やnullは[SendTarget.newEmpty]と同じPASSWORDにフォールバックする */
             fun fromName(name: String?): AuthMethod =
                 entries.firstOrNull { it.name == name } ?: PASSWORD
         }
@@ -47,22 +74,28 @@ object SettingsStore {
         BODY,
         COMPANY_NAME;
 
+        /** [fromName]を提供するコンパニオンオブジェクト */
         companion object {
+            /** 保存値からの復元用。未知の値やnullは[SendTarget.matchTarget]の既定値と同じBODYにフォールバックする */
             fun fromName(name: String?): MatchTarget =
                 entries.firstOrNull { it.name == name } ?: BODY
         }
     }
 
+    /** アプリの配色モード */
     enum class ThemeMode {
         LIGHT,
         DARK;
 
+        /** [AppCompatDelegate.setDefaultNightMode]に渡すモード値に変換する */
         fun toNightMode(): Int = when (this) {
             LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
             DARK -> AppCompatDelegate.MODE_NIGHT_YES
         }
 
+        /** [fromName]を提供するコンパニオンオブジェクト */
         companion object {
+            /** 保存値からの復元用。未知の値やnullは[DEFAULT_CONFIG]と同じLIGHTにフォールバックする */
             fun fromName(name: String?): ThemeMode =
                 entries.firstOrNull { it.name == name } ?: LIGHT
         }
@@ -70,6 +103,7 @@ object SettingsStore {
 
     /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[SendTarget]を参照） */
     data class Config(
+        /** trueなら自動送信モード、falseなら手動送信モード（[KintoneUploadWorker]が参照） */
         val sendEnabled: Boolean,
         /** 自動送信時、本文の形式が不正なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
         val sendSplitFailedEnabled: Boolean,
@@ -81,10 +115,13 @@ object SettingsStore {
         val autoReplySplitFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
         val autoReplyCooldownSeconds: Int,
+        /** SMS送信履歴画面（[LogActivity]）を[autoRefreshIntervalSeconds]間隔で自動再読み込みするかどうか */
         val autoRefreshEnabled: Boolean,
+        /** [autoRefreshEnabled]が有効な場合の自動再読み込み間隔（秒） */
         val autoRefreshIntervalSeconds: Int,
         /** 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒） */
         val smsMatchToleranceSeconds: Int,
+        /** アプリの配色モード */
         val themeMode: ThemeMode,
         /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲（日） */
         val smsSearchDateRangeDays: Int,
@@ -118,22 +155,39 @@ object SettingsStore {
      * [keywords]が空の場合はどの送信先にも一致しなかった時のフォールバックとして扱われる。
      */
     data class SendTarget(
+        /** 送信先を一意に識別するID（UUID文字列） */
         val id: String,
+        /** 表示名。空の場合は[displayName]がフォールバック文字列を返す */
         val name: String,
+        /** 振り分け条件のキーワード（カンマまたは改行区切り）。分割済みリストは[keywordList]を参照 */
         val keywords: String,
+        /** kintoneのサブドメイン（https://{subdomain}.cybozu.com のホスト名部分） */
         val subdomain: String,
+        /** kintoneアプリのID */
         val appId: String,
+        /** kintoneへの接続認証方式 */
         val authMethod: AuthMethod,
+        /** APIトークン認証（[AuthMethod.API_TOKEN]）時に使う値。パスワード認証時は未使用 */
         val apiToken: String,
+        /** パスワード認証（[AuthMethod.PASSWORD]）時に使うログイン名。APIトークン認証時は未使用 */
         val loginName: String,
+        /** パスワード認証（[AuthMethod.PASSWORD]）時に使うパスワード。APIトークン認証時は未使用 */
         val loginPassword: String,
+        /** 送信元電話番号を書き込むkintoneフィールドのフィールドコード */
         val fieldSender: String,
+        /** 本文を書き込むkintoneフィールドのフィールドコード */
         val fieldBody: String,
+        /** 最終受信日時を書き込むkintoneフィールドのフィールドコード。既存レコード検索（[KintoneApi.findExistingRecord]）にも使う */
         val fieldDatetime: String,
+        /** 登録種別（[AppConstants.REGISTRATION_TYPE_VALUE]）を書き込むkintoneフィールドのフィールドコード。既存レコード検索の絞り込みにも使う */
         val fieldType: String,
+        /** 同一送信元の既存レコードに追記するか新規登録するかを判定する許容時間（時間単位、[KintoneApi.postRecord]参照） */
         val updateToleranceHours: Int,
+        /** 抽出した会社名を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
         val fieldCompanyName: String = "",
+        /** 抽出した氏名を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
         val fieldUserName: String = "",
+        /** 抽出した内容（用件）を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
         val fieldContent: String = "",
         /** kintoneへの送信時、会社名に[SmsParts.companyNameNormalizedWidth]（英数字は半角・それ以外は全角に統一した文字列）を使うかどうか。
          * falseの場合は[SmsParts.companyName]（変換なし）をそのまま使う */
@@ -141,9 +195,11 @@ object SettingsStore {
         /** [keywords]をSMS本文そのものと会社名（抽出結果）のどちらに対して照合するか */
         val matchTarget: MatchTarget = MatchTarget.BODY
     ) {
+        /** [keywords]をカンマ・改行で分割し、前後の空白を除いた上で空要素を取り除いたリスト */
         val keywordList: List<String>
             get() = keywords.split(",", "\n").map { it.trim() }.filter { it.isNotEmpty() }
 
+        /** [keywords]が未設定で、どの送信先にも一致しなかった場合のフォールバックとして扱われる送信先かどうか */
         val isDefault: Boolean
             get() = keywordList.isEmpty()
 
@@ -151,6 +207,7 @@ object SettingsStore {
         fun displayName(context: Context): String =
             name.ifBlank { context.getString(R.string.label_send_target_name_unset) }
 
+        /** kintoneへの送信に必要な項目（認証情報含む）が揃っているかどうか。[keywords]の有無や[fieldCompanyName]等の任意項目は問わない */
         val isValid: Boolean
             get() {
                 if (name.isBlank() || subdomain.isBlank() || appId.isBlank()) return false
@@ -174,7 +231,9 @@ object SettingsStore {
          */
         fun routesTo(body: String, companyName: String): Boolean = !isDefault && matches(body, companyName)
 
+        /** [newEmpty]を提供するコンパニオンオブジェクト */
         companion object {
+            /** 送信先を新規追加する際の初期値。フィールドコード等の既定値は[AppDefaults]を参照 */
             fun newEmpty(): SendTarget = SendTarget(
                 id = UUID.randomUUID().toString(),
                 name = "",
@@ -197,9 +256,11 @@ object SettingsStore {
         }
     }
 
+    /** 設定の読み書きに使うSharedPreferencesインスタンスを取得する */
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    /** [Config]をSharedPreferencesに保存する。送信先設定（[SendTarget]）は対象外で[saveSendTargets]を使うこと */
     fun save(context: Context, config: Config) {
         val editor = prefs(context).edit()
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
@@ -256,6 +317,7 @@ object SettingsStore {
         defaultSentManualOnlyEnabled = false
     )
 
+    /** [save]で保存した設定を読み込む。未保存のキーは[DEFAULT_CONFIG]の値で補う */
     fun load(context: Context): Config {
         val p = prefs(context)
         return Config(
@@ -308,6 +370,7 @@ object SettingsStore {
             listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_none))
     }
 
+    /** [SendTarget]のリストをJSON配列にシリアライズして保存する。読み込みは[loadSendTargets]を使うこと */
     fun saveSendTargets(context: Context, sendTargets: List<SendTarget>) {
         val array = JSONArray()
         sendTargets.forEach { sendTarget ->
@@ -337,6 +400,7 @@ object SettingsStore {
         prefs(context).edit().putString(KEY_SEND_TARGETS, array.toString()).apply()
     }
 
+    /** [saveSendTargets]で保存した送信先設定を読み込む。未保存（初回起動など）の場合は[createDefaultSendTarget]で1件生成する */
     fun loadSendTargets(context: Context): List<SendTarget> {
         val json = prefs(context).getString(KEY_SEND_TARGETS, null)
             ?: return createDefaultSendTarget(context)
@@ -368,6 +432,7 @@ object SettingsStore {
         }
     }
 
+    /** 送信先が1件も保存されていない場合に、空の送信先を1件作成して保存する（[loadSendTargets]専用） */
     private fun createDefaultSendTarget(context: Context): List<SendTarget> {
         val sendTargets = listOf(SendTarget.newEmpty())
         saveSendTargets(context, sendTargets)

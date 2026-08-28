@@ -26,11 +26,4 @@ object AppConstants {
 
     /** kintoneへ登録する際の「登録種別」フィールドに設定する値。既存レコードの検索条件にも使う */
     const val REGISTRATION_TYPE_VALUE = "外部ツール"
-
-    /** SMS本文中のラベル行（例:「会社名：」）を認識するための、内部フィールド名と表記ゆれの対応表。[SmsPartsGenerator]が参照する */
-    val SMS_BODY_FIELD_ALIASES: Map<String, List<String>> = mapOf(
-        "companyName" to listOf("会社名", "会社"),
-        "userName" to listOf("氏名", "名前"),
-        "content" to listOf("理由", "内容", "用件")
-    )
 }

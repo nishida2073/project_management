@@ -4,35 +4,61 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 
+/**
+ * SMS送受信・自動返信の履歴を1件のJSON配列としてSharedPreferencesに永続化するログストア。
+ * ログ画面（[LogActivity]）表示用で、DBではないため全件を都度読み書きする。
+ */
 object SmsLogStore {
 
+    /** SharedPreferencesのファイル名 */
     private const val PREFS_NAME = "smstokintone_log"
+    /** ログ全件をJSON配列文字列として保存するキー */
     private const val KEY_ENTRIES = "entries"
+    /** [Entry.bodyPreview]として保存する本文の最大文字数 */
     private const val BODY_PREVIEW_LIMIT = 100
+    /** JSON上ではLong?のnullを表現できないため、smsId未解決を表す番兵値として使う */
     private const val NO_SMS_ID = -1L
 
+    /** ログエントリの種別 */
     enum class EntryType {
+        /** SMS受信時に記録するエントリ */
         RECEIVE,
+        /** kintoneへの送信を開始した際に記録するエントリ */
         SEND_START,
+        /** kintoneへの送信が完了（成功/失敗いずれも）した際に記録するエントリ */
         SEND_COMPLETE,
+        /** 分割失敗SMSへの自動返信を送信した際に記録するエントリ */
         AUTO_REPLY;
 
+        /** [fromName]を提供するコンパニオンオブジェクト */
         companion object {
+            /** 不明・欠損（旧データ）の場合はSEND_COMPLETE扱いにフォールバックする */
             fun fromName(name: String?): EntryType =
                 entries.firstOrNull { it.name == name } ?: SEND_COMPLETE
         }
     }
 
+    /** ログ画面（[LogActivity]）が表示する1件分のログエントリ */
     data class Entry(
+        /** エントリの種別 */
         val type: EntryType,
+        /** このログエントリが記録された時刻（SMS自体の日時は[timestampMillis]） */
         val loggedAtMillis: Long,
+        /** SMS本文の受信/送信対象日時。ログの記録時刻は[loggedAtMillis] */
         val timestampMillis: Long,
+        /** 送信元電話番号 */
         val sender: String,
+        /** SMS本文の先頭[BODY_PREVIEW_LIMIT]文字 */
         val bodyPreview: String,
+        /** このエントリが表す処理が成功したかどうか */
         val success: Boolean,
+        /** 画面表示用の結果メッセージ */
         val message: String,
+        /** 端末上のSMSレコードのID。手動送信ログの突き合わせに使う。自動受信フローでは解決しないためnull */
         val smsId: Long?,
+        /** 振り分け先の送信先の表示名。解決できなかった場合はnull */
         val sendTargetName: String?,
+        /** 手動送信（SMS検索画面からの再送信）によるものかどうか。falseは自動受信によるもの */
         val manual: Boolean,
         /** 本文から抽出した会社名・氏名・内容。抽出を試みていないエントリはnull */
         val smsParts: SmsParts? = null,
@@ -42,9 +68,11 @@ object SmsLogStore {
         val replyBody: String? = null
     )
 
+    /** ログの読み書きに使うSharedPreferencesインスタンスを取得する */
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    /** ログエントリを1件追加し、先頭（最新）に挿入したうえで全件を保存し直す */
     fun add(
         context: Context,
         type: EntryType,
@@ -111,6 +139,7 @@ object SmsLogStore {
         prefs(context).edit().putString(KEY_ENTRIES, array.toString()).apply()
     }
 
+    /** 保存済みの全ログエントリを新しい順で返す */
     fun getAll(context: Context): List<Entry> {
         val json = prefs(context).getString(KEY_ENTRIES, null) ?: return emptyList()
         val array = JSONArray(json)
@@ -119,6 +148,7 @@ object SmsLogStore {
             val smsId = obj.optLong("smsId", NO_SMS_ID)
             Entry(
                 type = EntryType.fromName(obj.optString("type", "")),
+                // loggedAt導入前の旧データにはこの項目が無いため、tsで代用する
                 loggedAtMillis = obj.optLong("loggedAt", obj.getLong("ts")),
                 timestampMillis = obj.getLong("ts"),
                 sender = obj.optString("sender", ""),
@@ -142,6 +172,7 @@ object SmsLogStore {
         }
     }
 
+    /** 保存済みの全ログエントリを削除する */
     fun clear(context: Context) {
         prefs(context).edit().remove(KEY_ENTRIES).apply()
     }

@@ -16,23 +16,36 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+/** kintoneのレコードAPI（登録・更新・検索）を呼び出し、SMSの内容をレコードとして登録・追記する */
 object KintoneApi {
 
+    /** [Log]出力に使うタグ */
     private const val TAG = "KintoneApi"
+    /** [mergeBody]で複数エントリを連結する際の本文中の区切り文字列 */
     private const val ENTRY_SEPARATOR = "ーーーー"
 
+    /** [postRecord]の結果。呼び出し側は成功/スキップ/失敗を区別してログ・通知文言を出し分ける */
     sealed class PostResult {
+        /** 新規登録または更新が成功した */
         data class Success(val message: String) : PostResult()
+        /** 重複と判定され何も送信しなかった */
         data class Skipped(val message: String) : PostResult()
+        /** kintoneがエラーレスポンスを返した。[code]はHTTPステータスコード、[detail]はレスポンスボディ */
         data class HttpFailure(val code: Int, val detail: String) : PostResult()
+        /** 通信自体が例外で失敗した */
         data class NetworkError(val message: String) : PostResult()
     }
 
+    /** [findExistingRecord]でヒットした既存レコードの$id・本文・最終受信日時 */
     private data class ExistingRecord(val id: String, val bodyValue: String, val datetimeValue: String)
 
+    /** [findExistingRecord]の結果。検索失敗（[SearchFailed]）を未検出（[NotFound]）と区別し、誤って新規登録扱いにしないためのもの */
     private sealed class ExistingRecordResult {
+        /** 既存レコードが見つかった */
         data class Found(val record: ExistingRecord) : ExistingRecordResult()
+        /** 条件に一致する既存レコードが無かった */
         object NotFound : ExistingRecordResult()
+        /** 検索自体がエラーで失敗した */
         data class SearchFailed(val result: PostResult) : ExistingRecordResult()
     }
 
@@ -115,11 +128,13 @@ object KintoneApi {
         return entries.joinToString(separator)
     }
 
+    /** 受信日時（表示形式）と本文を連結した、kintoneの本文フィールドに書き込む1エントリ分のテキストを組み立てる */
     private fun buildEntryText(datetimeIsoValue: String?, bodyValue: String): String {
         val displayDatetime = datetimeIsoValue?.let { formatDisplayDateTime(it) }
         return if (displayDatetime != null) "$displayDatetime\n\n$bodyValue" else bodyValue
     }
 
+    /** ISO8601（UTC）の[datetimeIsoValue]を、kintoneの本文に書き込む表示用日時文字列に変換する */
     private fun formatDisplayDateTime(datetimeIsoValue: String): String? {
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return null
         return displayDateTimeFormat().format(Date(baseMillis))
@@ -138,8 +153,10 @@ object KintoneApi {
             timeZone = TimeZone.getTimeZone("UTC")
         }
 
+    /** [millis]をkintoneの日時フィールドに書き込めるISO8601（UTC）文字列に変換する */
     fun formatIsoDateTime(millis: Long): String = isoDateTimeFormat().format(Date(millis))
 
+    /** ISO8601（UTC）の[datetimeIsoValue]をエポックミリ秒に変換する。パースできなければnull */
     private fun parseIsoDateTime(datetimeIsoValue: String): Long? {
         return try {
             isoDateTimeFormat().parse(datetimeIsoValue)?.time
@@ -158,6 +175,11 @@ object KintoneApi {
         return aMillis / 60_000L == bMillis / 60_000L
     }
 
+    /**
+     * kintoneのレコード登録/更新用JSONを組み立てる。[sendTarget]でフィールドコードが未設定（空文字）の項目、
+     * および会社名・氏名・内容は値が空の場合はキー自体を含めない（kintone側にフィールドが存在しない場合の
+     * エラーを避けるため）
+     */
     private fun buildRecord(
         sendTarget: SettingsStore.SendTarget,
         senderValue: String,
@@ -247,9 +269,11 @@ object KintoneApi {
         }
     }
 
+    /** kintoneのクエリ言語で文字列リテラルとして安全に埋め込めるよう、バックスラッシュとダブルクォートをエスケープする */
     private fun escapeForQuery(value: String): String =
         value.replace("\\", "\\\\").replace("\"", "\\\"")
 
+    /** レコードを新規登録する（POST /k/v1/record.json） */
     private fun insertRecord(context: Context, sendTarget: SettingsStore.SendTarget, record: JSONObject): PostResult {
         val payload = JSONObject()
             .put("app", sendTarget.appId)
@@ -263,6 +287,7 @@ object KintoneApi {
         return execute(requestBuilder, successMessage = context.getString(R.string.message_log_send_complete_create_success))
     }
 
+    /** 既存レコードを更新する（PUT /k/v1/record.json） */
     private fun updateRecord(context: Context, sendTarget: SettingsStore.SendTarget, recordId: String, record: JSONObject): PostResult {
         val payload = JSONObject()
             .put("app", sendTarget.appId)
@@ -277,6 +302,10 @@ object KintoneApi {
         return execute(requestBuilder, successMessage = context.getString(R.string.message_log_send_complete_update_success))
     }
 
+    /**
+     * kintoneの認証ヘッダーを付与する。APIトークン認証は`X-Cybozu-API-Token`、パスワード認証は
+     * `ログイン名:パスワード`をBase64化した`X-Cybozu-Authorization`と、kintone独自のヘッダー名・形式を使う
+     */
     private fun addAuthHeader(requestBuilder: Request.Builder, sendTarget: SettingsStore.SendTarget) {
         when (sendTarget.authMethod) {
             SettingsStore.AuthMethod.API_TOKEN ->
@@ -292,6 +321,7 @@ object KintoneApi {
         }
     }
 
+    /** [requestBuilder]のリクエストを実行し、成否とレスポンス/例外を[PostResult]に変換する */
     private fun execute(requestBuilder: Request.Builder, successMessage: String): PostResult {
         return try {
             OkHttpClient().newCall(requestBuilder.build()).execute().use { response ->

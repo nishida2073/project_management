@@ -18,30 +18,37 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.ssfrontier.smstokintone.databinding.ActivityAppSettingsBinding
 
+/** アプリの設定画面。各項目は変更すると即座に[SettingsStore]へ保存され、保存ボタンは無い */
 class AppSettingsActivity : AppCompatActivity() {
 
+    /** この画面のビューバインディング */
     private lateinit var binding: ActivityAppSettingsBinding
 
+    /** 「送信先」スピナーの選択位置と対応する送信先ID（[SettingsStore.sendTargetFilterOptions]の並び順）の一覧 */
     private var defaultSendTargetFilterKeys: List<String?> = emptyList()
 
+    /** SMS受信権限（RECEIVE_SMS）のリクエスト結果を受け取り、表示更新と拒否時のトースト表示を行う */
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updatePermissionStatus()
             if (!granted) showPermissionDeniedToast(R.string.toast_sms_receive_permission_denied)
         }
 
+    /** SMS送信権限（SEND_SMS）のリクエスト結果を受け取り、表示更新と拒否時のトースト表示を行う */
     private val requestSendSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateSendPermissionStatus()
             if (!granted) showPermissionDeniedToast(R.string.toast_sms_send_permission_denied)
         }
 
+    /** SMS読み取り権限（READ_SMS）のリクエスト結果を受け取り、表示更新と拒否時のトースト表示を行う */
     private val requestReadSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateReadPermissionStatus()
             if (!granted) showPermissionDeniedToast(R.string.toast_sms_read_permission_denied)
         }
 
+    /** 権限が拒否されたことを示すトーストを表示する */
     private fun showPermissionDeniedToast(messageResId: Int) {
         Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
     }
@@ -58,6 +65,7 @@ class AppSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /** 各設定項目に現在の値を反映し、変更時に[SettingsStore]へ保存するリスナーを登録する */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAppSettingsBinding.inflate(layoutInflater)
@@ -229,11 +237,13 @@ class AppSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /** [themeMode]をライト／ダークのラジオボタンの選択状態に反映する */
     private fun applyThemeSelection(themeMode: SettingsStore.ThemeMode) {
         binding.rbThemeDark.isChecked = themeMode == SettingsStore.ThemeMode.DARK
         binding.rbThemeLight.isChecked = themeMode != SettingsStore.ThemeMode.DARK
     }
 
+    /** 他画面（権限リクエストや送信先の設定画面）から戻ってきた際に、権限状態と送信先の選択肢を最新化する */
     override fun onResume() {
         super.onResume()
         updatePermissionStatus()
@@ -242,6 +252,7 @@ class AppSettingsActivity : AppCompatActivity() {
         refreshDefaultSendTargetFilterOptions()
     }
 
+    /** 「送信先」スピナーの選択肢を最新の送信先一覧で更新する */
     private fun refreshDefaultSendTargetFilterOptions() {
         // 送信先が1件しかない場合はSMS検索画面側で常に「すべて」に固定されるため、
         // ここで初期値を設定しても意味を持たない。項目ごと隠して値も「すべて」に揃える
@@ -286,6 +297,7 @@ class AppSettingsActivity : AppCompatActivity() {
         helperText.visibility = if (granted) View.GONE else View.VISIBLE
     }
 
+    /** SMS受信権限（RECEIVE_SMS）の許可状態を画面に反映する */
     private fun updatePermissionStatus() = updatePermissionUi(
         Manifest.permission.RECEIVE_SMS,
         binding.tvPermissionStatus,
@@ -294,6 +306,7 @@ class AppSettingsActivity : AppCompatActivity() {
         R.string.label_permission_sms_receive_granted
     )
 
+    /** SMS送信権限（SEND_SMS）の許可状態を画面に反映する */
     private fun updateSendPermissionStatus() = updatePermissionUi(
         Manifest.permission.SEND_SMS,
         binding.tvSendPermissionStatus,
@@ -302,6 +315,7 @@ class AppSettingsActivity : AppCompatActivity() {
         R.string.label_permission_sms_send_granted
     )
 
+    /** SMS読み取り権限（READ_SMS）の許可状態を画面に反映する */
     private fun updateReadPermissionStatus() = updatePermissionUi(
         Manifest.permission.READ_SMS,
         binding.tvReadPermissionStatus,
@@ -310,7 +324,10 @@ class AppSettingsActivity : AppCompatActivity() {
         R.string.label_permission_sms_read_granted
     )
 
+    /** [pendingScrollY]を保持するコンパニオンオブジェクト */
     companion object {
+        /** ライト/ダーク切替でActivityが再生成される直前のスクロール位置。破棄・再生成をまたいで
+         * 参照するためcompanion objectに保持する */
         private var pendingScrollY: Int? = null
     }
 }

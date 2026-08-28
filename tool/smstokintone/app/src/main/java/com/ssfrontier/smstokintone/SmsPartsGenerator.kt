@@ -11,13 +11,18 @@ import kotlinx.coroutines.flow.collect
 import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
 
+/** SMS本文から抽出した会社名・氏名・内容と、抽出方法（AI/ルールベース）の結果を保持する */
 data class SmsParts(
+    /** 抽出した会社名 */
     val companyName: String = "",
+    /** 抽出した氏名 */
     val userName: String = "",
+    /** 抽出した内容 */
     val content: String = "",
     /** 端末上のAI（ML Kit GenAI）で抽出した結果かどうか。falseはルールベースでの抽出 */
     val parsedByAi: Boolean = false
 ) {
+    /** [companyName]・[userName]・[content]がすべて空かどうか */
     fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && content.isEmpty()
 
     /** [isEmpty]とは異なり、一部の項目だけ空でも分割失敗とみなす */
@@ -29,34 +34,26 @@ data class SmsParts(
 }
 
 /**
- * SMS本文から部品（会社名・氏名・内容）を生成する（ラベルの表記ゆれ・記述順の違い・ラベル省略に対応）
+ * SMS本文から部品（会社名・氏名・内容）を生成する（1行目:会社名 2行目:氏名 3行目以降:内容の固定位置で判定）
  *
- * 「会社名：」「会社：」など、ラベルの表記ゆれがあっても、
- * また項目の記述順が入れ替わっていても、正しく項目を認識できるようにしています。
- * 内容のラベル（「内容：」）は省略可能で、氏名・会社名より後に続く自由記述はラベルが
- * 無くても内容として取り込みます。
- *
- * 対応例1（ラベルあり、内容ラベルは省略可）:
- * 会社名：XXX
- * 氏名：YYY
- * 内容：
- * XXX（複数行OK）
- *
- * 対応例2（ラベルなし、1行目:会社名 2行目:氏名 3行目以降:内容）:
+ * 対応例:
  * XXX
  * YYY
  * XXX（複数行OK）
  */
 object SmsPartsGenerator {
 
+    /** [Log]出力に使うタグ */
     private const val TAG = "SmsPartsGenerator"
 
     /** 本文をキーにしたAI解析結果のキャッシュ（同じ本文を何度も解析させない）。複数スレッドから同時に呼ばれ得るためConcurrentHashMap */
     private val aiResultCache = ConcurrentHashMap<String, SmsParts>()
 
+    /** 生成コストを避けるため一度作ったモデルを使い回す。@Volatile+@Synchronizedは複数スレッドからの遅延初期化を安全にするため */
     @Volatile
     private var generativeModel: GenerativeModel? = null
 
+    /** [generativeModel]を遅延生成して返す。既に生成済みならそれを再利用する */
     @Synchronized
     private fun getOrCreateModel(): GenerativeModel =
         generativeModel ?: Generation.getClient(generationConfig {}).also { generativeModel = it }
@@ -78,6 +75,7 @@ object SmsPartsGenerator {
         return result
     }
 
+    /** 端末上のAIモデルを呼び出して会社名・氏名・内容を抽出する。モデルが利用不可・ダウンロード失敗・呼び出し失敗の場合はnullを返す */
     private suspend fun requestAiSmsParts(body: String): SmsParts? {
         return try {
             val model = getOrCreateModel()
@@ -108,6 +106,8 @@ object SmsPartsGenerator {
 
             val response = model.generateContent(prompt)
             val text = response.candidates.firstOrNull()?.text?.trim() ?: return null
+            // プロンプトで指示してもモデルが前後に余計な文章やコードフェンスを付けることがあるため、
+            // 外側の中括弧の範囲だけを取り出してから改めて{}で包み直す
             val jsonText = text.substringAfter("{").substringBeforeLast("}").let { "{$it}" }
             val parsed = JSONObject(jsonText)
             SmsParts(
@@ -122,29 +122,7 @@ object SmsPartsGenerator {
         }
     }
 
-    private data class LabelMatch(val key: String, val value: String)
-
-    private fun matchLabelLine(line: String): LabelMatch? {
-        for ((key, aliases) in AppConstants.SMS_BODY_FIELD_ALIASES) {
-            for (alias in aliases) {
-                // ラベルのみでコロンが無い行（値は次行以降に続く）にも対応
-                if (line == alias) {
-                    return LabelMatch(key, "")
-                }
-                // 区切り記号（：: ＝= －-—―、前後の全角空白も許容）だけでなく、
-                // 記号が無く空白のみで区切られている場合（例:「会社名　XXX」）にも対応
-                val pattern = Regex(
-                    "^[\\s　]*${Regex.escape(alias)}(?:[\\s　]*[：:＝=－\\-—―][\\s　]*|[\\s　]+)(.*)$"
-                )
-                val match = pattern.find(line)
-                if (match != null) {
-                    return LabelMatch(key, match.groupValues[1].trim())
-                }
-            }
-        }
-        return null
-    }
-
+    /** 1行目を会社名、2行目を氏名、3行目以降を内容として固定位置で切り出す（ラベル文字列は見ない） */
     fun generateSmsParts(body: String?): SmsParts {
         if (body.isNullOrBlank()) return SmsParts()
 
@@ -157,40 +135,9 @@ object SmsPartsGenerator {
             return SmsParts()
         }
 
-        var companyName = ""
-        var userName = ""
-        var content = ""
-        var currentKey: String? = null // "content"の間は続く行を内容として追記する
-
-        for (line in contentLines) {
-            val labelMatch = matchLabelLine(line)
-            if (labelMatch != null) {
-                when (labelMatch.key) {
-                    "companyName" -> companyName = labelMatch.value
-                    "userName" -> userName = labelMatch.value
-                    "content" -> content = labelMatch.value
-                }
-                currentKey = if (labelMatch.key == "content") "content" else null
-                continue
-            }
-
-            when {
-                currentKey == "content" -> content = if (content.isEmpty()) line else "$content\n$line"
-                // ラベル省略時は行の位置で判定する（1つ目の未確定項目が会社名、2つ目が氏名）
-                companyName.isEmpty() -> companyName = line
-                userName.isEmpty() -> userName = line
-                // 氏名・会社名が確定済みなら、以降はラベルが無くても内容として取り込む
-                else -> {
-                    content = line
-                    currentKey = "content"
-                }
-            }
-        }
-
-        val contentValueLines = content.split("\n")
-        if (contentValueLines.first().isBlank()) {
-            content = contentValueLines.drop(1).joinToString("\n")
-        }
+        val companyName = contentLines[0]
+        val userName = contentLines[1]
+        val content = contentLines.drop(2).joinToString("\n")
 
         return SmsParts(companyName = companyName, userName = userName, content = content)
     }

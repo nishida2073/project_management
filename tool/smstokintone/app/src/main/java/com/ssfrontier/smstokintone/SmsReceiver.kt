@@ -17,8 +17,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
+/** SMS受信をトリガーにKintoneUploadWorkerを起動し、必要に応じて分割失敗時の自動返信も行うBroadcastReceiver */
 class SmsReceiver : BroadcastReceiver() {
 
+    /** SMS受信ブロードキャストを受けてKintoneUploadWorkerを起動し、受信ログの記録と分割失敗時の自動返信を行う */
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
@@ -116,7 +118,9 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
+    /** ログ出力用のタグをまとめたコンパニオンオブジェクト */
     companion object {
+        /** [Log]出力に使うタグ */
         private const val TAG = "SmsReceiver"
     }
 }

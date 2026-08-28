@@ -16,14 +16,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** 送信先（Kintoneアプリ接続先）の一覧を追加・複製・削除・並べ替えしながら編集し、保存する画面 */
 class SendTargetSettingsActivity : AppCompatActivity() {
 
+    /** この画面のViewBinding */
     private lateinit var binding: ActivitySendTargetSettingsBinding
 
+    /**
+     * idはカードの表示順が変わっても（複製・削除・並べ替え）当該送信先を追跡できるよう、
+     * 画面上の並び位置とは別に保持しておく安定な識別子
+     */
     private class SendTargetCard(val id: String, val binding: ItemSendTargetBinding)
 
+    /**
+     * 画面上のカードの並び順（=llSendTargetsContainerの子View順）を保持するリスト。この並び順のまま
+     * 保存され、SettingsStore.resolveSendTargetでのキーワード一致判定も先頭から順に行われるため、
+     * 複数の送信先が同じ本文にマッチし得る場合はここでの並び順が優先順位になる
+     */
     private val sendTargetCards = mutableListOf<SendTargetCard>()
 
+    /** 保存済みの送信先ごとにカードを1枚ずつ復元し、追加/保存ボタンの動作を配線する */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySendTargetSettingsBinding.inflate(layoutInflater)
@@ -41,6 +53,10 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener { onSaveClicked() }
     }
 
+    /**
+     * sendTargetの内容でカードを1枚生成し、insertAtの位置（省略時は末尾）にUIとsendTargetCardsの両方へ挿入する。
+     * 戻り値のViewは追加直後にスクロール位置合わせで使うためのもの
+     */
     private fun addSendTargetCard(sendTarget: SettingsStore.SendTarget, insertAt: Int = -1): View {
         val itemBinding = ItemSendTargetBinding.inflate(layoutInflater, binding.llSendTargetsContainer, false)
         val card = SendTargetCard(sendTarget.id, itemBinding)
@@ -108,6 +124,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return itemBinding.root
     }
 
+    /** ancestor（ScrollView）を基準にしたviewのY座標を、親を辿って足し上げて求める。smoothScrollToへ渡す用 */
     private fun topRelativeTo(view: View, ancestor: View): Int {
         var top = 0
         var current = view
@@ -118,6 +135,10 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return top
     }
 
+    /**
+     * カード内の入力項目一式をSendTargetへ変換する。idは引数で受け取る：既存カードの保存/テスト送信では
+     * card.idをそのまま使い、複製ボタンでは複製先が別の送信先になるよう新しいUUIDを渡す
+     */
     private fun readSendTargetFromBinding(itemBinding: ItemSendTargetBinding, id: String): SettingsStore.SendTarget {
         val authMethod = if (itemBinding.rbAuthPassword.isChecked) {
             SettingsStore.AuthMethod.PASSWORD
@@ -167,6 +188,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return true
     }
 
+    /** カードの現在の入力内容で検証し、問題なければテスト本文を入力するダイアログを出す */
     private fun onTestSendClicked(itemBinding: ItemSendTargetBinding, card: SendTargetCard) {
         val sendTarget = readSendTargetFromBinding(itemBinding, id = card.id)
         if (showValidationErrorDialogIfInvalid(sendTargetCards.indexOf(card), sendTarget)) {
@@ -192,6 +214,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             .show()
     }
 
+    /** [testBody]の振り分け条件を確認したうえでkintoneへテスト送信し、抽出結果と送信結果をダイアログで表示する */
     private fun performTestSend(itemBinding: ItemSendTargetBinding, sendTarget: SettingsStore.SendTarget, testBody: String) {
         val datetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
             KintoneApi.formatIsoDateTime(System.currentTimeMillis())
@@ -273,12 +296,14 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /** カード追加/削除/並べ替えのたびに呼び、各カードの表示上の番号ラベルを現在の並び順に合わせて振り直す */
     private fun renumberCards() {
         sendTargetCards.forEachIndexed { index, card ->
             card.binding.tvSendTargetIndex.text = getString(R.string.label_send_target_index, index + 1)
         }
     }
 
+    /** 選択中の認証方式に応じて、APIトークン欄とID/パスワード欄のどちらか一方だけを表示する */
     private fun updateAuthMethodVisibility(itemBinding: ItemSendTargetBinding, method: SettingsStore.AuthMethod) {
         itemBinding.tilApiToken.visibility = if (method == SettingsStore.AuthMethod.API_TOKEN) {
             View.VISIBLE
@@ -292,6 +317,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /** 全カードを検証してからまとめて保存する。1件でも不正な入力があれば、その時点で中断しどこも保存しない */
     private fun onSaveClicked() {
         if (sendTargetCards.isEmpty()) {
             Toast.makeText(this, getString(R.string.toast_no_send_targets), Toast.LENGTH_SHORT).show()

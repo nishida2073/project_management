@@ -7,9 +7,14 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * SmsReceiverや手動再送UIから渡されたSMS情報をkintoneへ登録するCoroutineWorker。
+ * 送信可否・分割失敗判定・登録結果はいずれもSmsLogStoreへログとして記録する。
+ */
 class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
 
+    /** 入力データから送信先を解決し、送信可否判定・kintoneへの登録・ログ記録までを行う */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val config = SettingsStore.load(applicationContext)
         val sender = inputData.getString(KEY_SENDER) ?: ""
@@ -23,7 +28,6 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val (smsParts, sendTarget) = SettingsStore.resolveSendTarget(applicationContext, body, config.aiParsingEnabled)
 
         if (sendTarget == null || !sendTarget.isValid) {
-            // 何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
             logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTarget?.displayName(applicationContext), manual = manual)
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
             // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
@@ -37,7 +41,6 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         }
 
         if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
-            // 何も開始できていないため、送信完了ではなく送信開始として失敗を記録する
             logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual)
             return@withContext Result.success()
         }
@@ -88,10 +91,16 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         }
     }
 
-    // WorkManagerのResult.retry()に回数上限はなく、リトライし続けている間はSmsSearchActivity側の
-    // 完了通知（トースト）が出ないままになるため、一定回数で諦めて完了扱いにする
+    /**
+     * WorkManagerのResult.retry()に回数上限はなく、リトライし続けている間はSmsSearchActivity側の
+     * 完了通知（トースト）が出ないままになるため、一定回数で諦めて完了扱いにする
+     */
     private fun shouldRetry(): Boolean = runAttemptCount < AppConstants.KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS - 1
 
+    /**
+     * SEND_STARTログを記録する。success/messageのデフォルトは通常の送信開始用で、送信先未設定・
+     * 分割失敗スキップなど送信を行わず終了する場合は呼び出し側でfalseと理由メッセージを指定する
+     */
     private fun logStart(
         sender: String,
         body: String,
@@ -116,6 +125,10 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         )
     }
 
+    /**
+     * SEND_COMPLETEログを記録する。companyNameConvertedは全角統一変換後の会社名を実際に送信したか
+     * どうかを示し、ログ詳細画面（LogActivity）でどちらの表記を表示するかの判定に使われる
+     */
     private fun logComplete(
         sender: String,
         body: String,
@@ -144,12 +157,19 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         )
     }
 
+    /** [inputData]のキー名とログタグをまとめたコンパニオンオブジェクト */
     companion object {
+        /** [Log]出力に使うタグ */
         private const val TAG = "KintoneUploadWorker"
+        /** [inputData]内の送信元電話番号のキー */
         const val KEY_SENDER = "sender"
+        /** [inputData]内のSMS本文のキー */
         const val KEY_BODY = "body"
+        /** [inputData]内の受信/送信対象時刻（ミリ秒）のキー */
         const val KEY_TIMESTAMP = "timestamp"
+        /** [inputData]内の、手動再送かどうかを示すフラグのキー */
         const val KEY_MANUAL = "manual"
+        /** [inputData]内の、突き合わせ対象SMSのIDのキー（未指定時は-1L） */
         const val KEY_SMS_ID = "sms_id"
     }
 }

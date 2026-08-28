@@ -35,17 +35,31 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
+/** 受信箱のSMSを日付・本文・送信状況・送信先で絞り込んで一覧表示し、選択した分をKintoneへ手動送信キューに載せる画面 */
 class SmsSearchActivity : AppCompatActivity() {
 
+    /** この画面のViewBinding */
     private lateinit var binding: ActivitySmsSearchBinding
 
+    /** 日付絞り込みの範囲（inclusive）。applyDateFilterで開始日は00:00:00.000、終了日は23:59:59.999に正規化される */
     private var fromMillis: Long? = null
+    /** [fromMillis]と対をなす終了日時 */
     private var toMillis: Long? = null
+    /** 直近のsearchSmsの結果。一覧描画・全選択/解除・送信対象の特定に共用するため、検索のたびにクリアして詰め直す */
     private val records = mutableListOf<SmsRecord>()
 
+    /**
+     * スピナーの表示位置に対応する送信先ID（sendTargetFilterOptionsと同じ並び）。null=すべて、
+     * AppConstants.SEND_TARGET_FILTER_KEY_UNSET=未設定、それ以外は送信先ID
+     */
     private var sendTargetFilterKeys: List<String?> = emptyList()
+    /** 現在選択中の送信先フィルタのID。[sendTargetFilterKeys]の要素の一つ */
     private var selectedSendTargetId: String? = null
 
+    /**
+     * リスナー登録と、SettingsStoreに保存済みの初期条件（既定の日付範囲・送信先フィルタ・各チェックボックス）の反映のみ行う。
+     * 実際の検索はonResumeで行われる
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySmsSearchBinding.inflate(layoutInflater)
@@ -88,6 +102,10 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.cbSplitFailedOnly.isChecked = config.defaultSplitFailedOnlyEnabled
     }
 
+    /**
+     * 権限が設定画面で後から許可された場合や、送信先設定・検索条件が他画面で変更された場合に
+     * 反映させるため、表示に戻るたびに毎回作り直す
+     */
     override fun onResume() {
         super.onResume()
         updatePermissionUi()
@@ -95,6 +113,10 @@ class SmsSearchActivity : AppCompatActivity() {
         searchSms(showFoundToast = false)
     }
 
+    /**
+     * 送信先設定は他画面で変更され得るため、スピナーの選択肢を毎回作り直す。作り直した後も
+     * 直前まで選ばれていたIDが選択肢に残っていればその位置を復元する
+     */
     private fun refreshSendTargetFilterOptions() {
         // 送信先が1件しかない場合は「すべて」を選んでも絞り込み結果は変わらないため、
         // 項目名とリストボックスごと隠して値は「すべて」に固定する
@@ -119,10 +141,12 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.spSendTargetFilter.setSelection(if (restoreIndex >= 0) restoreIndex else 0)
     }
 
+    /** 受信箱をqueryできるのはREAD_SMSが許可されている場合のみ */
     private fun hasReadSmsPermission(): Boolean =
         ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) ==
             PackageManager.PERMISSION_GRANTED
 
+    /** 未許可の間は検索フォームの代わりに権限依頼レイアウトを表示する */
     private fun updatePermissionUi() {
         val granted = hasReadSmsPermission()
         binding.layoutPermissionRequired.visibility = if (granted) View.GONE else View.VISIBLE
@@ -138,6 +162,7 @@ class SmsSearchActivity : AppCompatActivity() {
         )
     }
 
+    /** 開くたびに現在の選択日（無ければ今日）から初期表示するため、既存の選択値をカレンダーに反映してから開く */
     private fun pickDate(isFrom: Boolean) {
         val currentSelection = if (isFrom) fromMillis else toMillis
         val calendar = Calendar.getInstance().apply {
@@ -155,6 +180,7 @@ class SmsSearchActivity : AppCompatActivity() {
         ).show()
     }
 
+    /** 選んだ日の00:00:00.000〜23:59:59.999に丸めることで、時刻を問わずその日一日分をDATE列の範囲条件として使えるようにする */
     private fun applyDateFilter(isFrom: Boolean, calendar: Calendar) {
         val display = SimpleDateFormat("yyyy/MM/dd", Locale.JAPAN).format(calendar.time)
         if (isFrom) {
@@ -178,6 +204,11 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 絞り込みは (1) DBクエリでの日付・本文、(2) 送信状況（未送信/自動送信済/手動送信済）、
+     * (3) 送信先、(4) 分割失敗、の順に段階的にrecordsを絞っていく。(3)(4)はAI呼び出しを伴い得るため
+     * コルーチン内で行うが、(2)は同期処理のみなのでコルーチンに入る前に済ませている
+     */
     private fun searchSms(showFoundToast: Boolean = true) {
         if (!hasReadSmsPermission()) return
 
@@ -288,10 +319,12 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
+    /** 成功したKintone送信ログのみを対象にする（失敗ログは「未送信」として扱われるべきなので除外） */
     private fun loadCompletedEntries(): List<SmsLogStore.Entry> =
         SmsLogStore.getAll(this)
             .filter { it.type == SmsLogStore.EntryType.SEND_COMPLETE && it.success }
 
+    /** 成功した自動返信ログのみを対象にする */
     private fun loadAutoReplyEntries(): List<SmsLogStore.Entry> =
         SmsLogStore.getAll(this)
             .filter { it.type == SmsLogStore.EntryType.AUTO_REPLY && it.success }
@@ -332,10 +365,15 @@ class SmsSearchActivity : AppCompatActivity() {
         return result
     }
 
+    /** 分割失敗の判定基準はSmsPartsGenerator.isSplitFailed参照 */
     private suspend fun isSplitFailed(body: String, aiParsingEnabled: Boolean): Boolean {
         return SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled).isSplitFailed()
     }
 
+    /**
+     * SMSアプリの返信画面を開く。分割失敗のメッセージには通常の定型文ではなく
+     * splitFailedReplyAddition（分割失敗時専用の文面）を差し込む
+     */
     private fun openSmsReply(address: String, splitFailed: Boolean) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$address"))
         val config = SettingsStore.load(this)
@@ -350,6 +388,10 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * RecyclerViewは使わず、record1件ごとにチェックボックス+テキストの行をLinearLayoutへ直接addViewしていく。
+     * 件数が多くないため簡易実装で足りる
+     */
     private suspend fun renderSmsList() {
         binding.llSmsListContainer.removeAllViews()
         binding.svSmsList.scrollTo(0, 0)
@@ -460,6 +502,7 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
+    /** 送信先未設定/分割失敗などで選択不可(isEnabled=false)にしてある行は対象から除く */
     private fun setAllChecked(checked: Boolean) {
         for (i in 0 until binding.llSmsListContainer.childCount) {
             val row = binding.llSmsListContainer.getChildAt(i) as? android.widget.LinearLayout ?: continue
@@ -468,6 +511,7 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
+    /** チェック済みの行を受信日時の古い順にKintoneUploadWorkerへ手動送信キューとして投入する */
     private fun sendSelected() {
         val checkedIds = mutableSetOf<Long>()
         for (i in 0 until binding.llSmsListContainer.childCount) {
@@ -531,6 +575,7 @@ class SmsSearchActivity : AppCompatActivity() {
         }, TOAST_LONG_DURATION_MILLIS)
     }
 
+    /** [selectedIds]の一括送信が完了した際に、結果をトーストで通知する */
     private fun onSendBatchFinished(selectedIds: Set<Long>) {
         // 送信先が未設定の場合は送信開始(SEND_START)のみが記録され送信完了(SEND_COMPLETE)は
         // 記録されないため、smsIdごとに最新の1件（開始・完了どちらか）を結果として扱う
@@ -556,6 +601,7 @@ class SmsSearchActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({ searchSms(showFoundToast = false) }, TOAST_LONG_DURATION_MILLIS)
     }
 
+    /** Telephony.Sms.CONTENT_URIから読み取った受信SMS1件分（_ID/ADDRESS/BODY/DATE） */
     private data class SmsRecord(
         val id: Long,
         val address: String,
@@ -563,7 +609,9 @@ class SmsSearchActivity : AppCompatActivity() {
         val dateMillis: Long
     )
 
+    /** [TOAST_LONG_DURATION_MILLIS]を保持するコンパニオンオブジェクト */
     companion object {
+        /** Toast.LENGTH_LONGの実際の表示時間はAPIで取得できないため、体感の表示時間に合わせて固定値で待つ */
         private const val TOAST_LONG_DURATION_MILLIS = 3_500L
     }
 }

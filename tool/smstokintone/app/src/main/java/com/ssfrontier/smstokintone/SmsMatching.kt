@@ -18,6 +18,10 @@ import kotlin.math.abs
  */
 object SmsMatching {
 
+    /**
+     * [senderA]/[timestampA]と[senderB]/[timestampB]が同一SMSを指しているとみなせるかを判定する。
+     * 送信元が正規化後に一致し、かつタイムスタンプの差が[toleranceMillis]以内であればtrue。
+     */
     fun isLikelySameSms(
         senderA: String,
         timestampA: Long,
