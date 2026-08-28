@@ -104,11 +104,10 @@ object KintoneApi {
         val separator = "\n\n$ENTRY_SEPARATOR\n\n"
         if (newEntryMillis == null) return "$existingBody$separator$newEntryText"
 
-        val displayFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
         val entries = existingBody.split(separator).toMutableList()
         val insertIndex = entries.indexOfFirst { entry ->
             val entryMillis = try {
-                displayFormat.parse(entry.substringBefore("\n\n"))?.time
+                displayDateTimeFormat().parse(entry.substringBefore("\n\n"))?.time
             } catch (e: ParseException) {
                 null
             }
@@ -127,8 +126,13 @@ object KintoneApi {
 
     private fun formatDisplayDateTime(datetimeIsoValue: String): String? {
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return null
-        return SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN).format(Date(baseMillis))
+        return displayDateTimeFormat().format(Date(baseMillis))
     }
+
+    /** kintoneの本文に付与する人が読める日時形式のフォーマッタ。[formatDisplayDateTime]（書き込み側）と
+     * [mergeBody]（読み取り側、既存本文からの日時の再パース）で必ずこれを共有し、書式がずれて
+     * エントリの並び順判定が壊れることを防ぐ */
+    private fun displayDateTimeFormat(): SimpleDateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPAN)
 
     /** kintoneの日時フィールド用ISO8601形式（UTC）のフォーマッタ。書き込み側（[formatIsoDateTime]）と
      * 読み取り側（[parseIsoDateTime]、[findExistingRecord]の検索範囲組み立て）で必ずこれを共有し、

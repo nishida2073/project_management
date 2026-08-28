@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -25,30 +26,24 @@ class AppSettingsActivity : AppCompatActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updatePermissionStatus()
-            if (!granted) {
-                Toast.makeText(
-                    this,
-                    getString(R.string.toast_sms_receive_permission_denied),
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+            if (!granted) showPermissionDeniedToast(R.string.toast_sms_receive_permission_denied)
         }
 
     private val requestSendSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateSendPermissionStatus()
-            if (!granted) {
-                Toast.makeText(this, getString(R.string.toast_sms_send_permission_denied), Toast.LENGTH_LONG).show()
-            }
+            if (!granted) showPermissionDeniedToast(R.string.toast_sms_send_permission_denied)
         }
 
     private val requestReadSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateReadPermissionStatus()
-            if (!granted) {
-                Toast.makeText(this, getString(R.string.toast_sms_read_permission_denied), Toast.LENGTH_LONG).show()
-            }
+            if (!granted) showPermissionDeniedToast(R.string.toast_sms_read_permission_denied)
         }
+
+    private fun showPermissionDeniedToast(messageResId: Int) {
+        Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -266,41 +261,49 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.spDefaultSendTargetFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
     }
 
-    private fun updatePermissionStatus() {
-        val granted = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.RECEIVE_SMS
-        ) == PackageManager.PERMISSION_GRANTED
+    /**
+     * 権限の許可状態を確認し、ステータス表示・許可ボタン・案内文の表示/非表示を切り替える。
+     * SMSの受信・送信・読み取りの3権限で同じロジックを繰り返さないよう、対象のビュー一式を
+     * 引数で受け取る形にまとめている
+     */
+    private fun updatePermissionUi(
+        permission: String,
+        statusText: TextView,
+        requestButton: View,
+        helperText: View,
+        grantedLabelResId: Int
+    ) {
+        val granted = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
-        binding.tvPermissionStatus.text = getString(R.string.label_permission_sms_receive_granted)
-        binding.tvPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
-        binding.btnRequestPermission.visibility = if (granted) View.GONE else View.VISIBLE
-        binding.tvReceivePermissionHelper.visibility = if (granted) View.GONE else View.VISIBLE
+        statusText.text = getString(grantedLabelResId)
+        statusText.visibility = if (granted) View.VISIBLE else View.GONE
+        requestButton.visibility = if (granted) View.GONE else View.VISIBLE
+        helperText.visibility = if (granted) View.GONE else View.VISIBLE
     }
 
-    private fun updateSendPermissionStatus() {
-        val granted = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.SEND_SMS
-        ) == PackageManager.PERMISSION_GRANTED
+    private fun updatePermissionStatus() = updatePermissionUi(
+        Manifest.permission.RECEIVE_SMS,
+        binding.tvPermissionStatus,
+        binding.btnRequestPermission,
+        binding.tvReceivePermissionHelper,
+        R.string.label_permission_sms_receive_granted
+    )
 
-        binding.tvSendPermissionStatus.text = getString(R.string.label_permission_sms_send_granted)
-        binding.tvSendPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
-        binding.btnRequestSendPermission.visibility = if (granted) View.GONE else View.VISIBLE
-        binding.tvSendPermissionHelper.visibility = if (granted) View.GONE else View.VISIBLE
-    }
+    private fun updateSendPermissionStatus() = updatePermissionUi(
+        Manifest.permission.SEND_SMS,
+        binding.tvSendPermissionStatus,
+        binding.btnRequestSendPermission,
+        binding.tvSendPermissionHelper,
+        R.string.label_permission_sms_send_granted
+    )
 
-    private fun updateReadPermissionStatus() {
-        val granted = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_SMS
-        ) == PackageManager.PERMISSION_GRANTED
-
-        binding.tvReadPermissionStatus.text = getString(R.string.label_permission_sms_read_granted)
-        binding.tvReadPermissionStatus.visibility = if (granted) View.VISIBLE else View.GONE
-        binding.btnRequestReadPermission.visibility = if (granted) View.GONE else View.VISIBLE
-        binding.tvReadPermissionHelper.visibility = if (granted) View.GONE else View.VISIBLE
-    }
+    private fun updateReadPermissionStatus() = updatePermissionUi(
+        Manifest.permission.READ_SMS,
+        binding.tvReadPermissionStatus,
+        binding.btnRequestReadPermission,
+        binding.tvReadPermissionHelper,
+        R.string.label_permission_sms_read_granted
+    )
 
     companion object {
         private var pendingScrollY: Int? = null
