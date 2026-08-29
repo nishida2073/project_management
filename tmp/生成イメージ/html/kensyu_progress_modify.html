@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="kensyu_progress_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=unei" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>研修運営進捗一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>研修運営進捗の更新</h2>
+          <div class="sub">BC02-01-C1　ビジネス基礎研修（受託）　2026/09/02〜09/04　担当：佐藤 一郎</div>
+        </div>
+        <a class="close-x" href="kensyu_progress_list.html">✕</a>
+      </div>
+      <div class="tabs">
+        <div class="tab">事前準備<span class="count">3/4</span></div>
+        <div class="tab active">当日対応<span class="count">0/3</span></div>
+        <div class="tab">実施後処理<span class="count">0/5</span></div>
+        <div class="tab warn">中止処理<span class="count">対象外</span></div>
+      </div>
+      <div class="modal-body">
+        <table class="step-table">
+          <thead>
+            <tr>
+              <th style="width:280px;">工程名</th>
+              <th style="width:120px;">予定日</th>
+              <th style="width:120px;">実施日</th>
+              <th style="width:130px;">担当者</th>
+              <th style="width:130px;">ステータス</th>
+              <th>メモ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="step-name"><span class="step-no">5</span>⑤受講詳細案内発出</td>
+              <td><div class="mini-control">2026/08/31</div></td>
+              <td><div class="mini-control">2026/08/31</div></td>
+              <td><div class="mini-control wide">佐藤 一郎</div></td>
+              <td><div class="status-select done">完了<span class="caret">▾</span></div></td>
+              <td><div class="memo-input">－</div></td>
+            </tr>
+            <tr>
+              <td class="step-name"><span class="step-no">6</span>⑥電子教材送付</td>
+              <td><div class="mini-control">2026/09/01</div></td>
+              <td><div class="mini-control">未実施</div></td>
+              <td><div class="mini-control wide">運営チーム</div></td>
+              <td><div class="status-select progress">対応中<span class="caret">▾</span></div></td>
+              <td><div class="memo-input">2名分の宛先要再確認</div></td>
+            </tr>
+            <tr>
+              <td class="step-name"><span class="step-no">7</span>⑦出欠確認・報告</td>
+              <td><div class="mini-control">2026/09/02</div></td>
+              <td><div class="mini-control">未実施</div></td>
+              <td><div class="mini-control wide">佐藤 一郎</div></td>
+              <td><div class="status-select wait">未着手<span class="caret">▾</span></div></td>
+              <td><div class="memo-input">11時までに送信</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="kensyu_progress_list.html">キャンセル</a>
+        <a class="btn primary" href="kensyu_progress_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

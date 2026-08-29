@@ -1,0 +1,211 @@
+/* ==========================================================
+   共通スタイル（全モックアップ共通）
+   ページ固有のスタイルは各 *.css を参照
+   ========================================================== */
+
+/* Reset & base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1680px; font-family: "Yu Gothic UI", "Meiryo", "Segoe UI", sans-serif; background: #eef1f5; color: #22262b; }
+
+/* App shell */
+.app { display: flex; width: 1680px; min-height: 1040px; }
+
+/* Sidebar */
+.sidebar { width: 220px; background: #1c2b45; color: #cdd7ea; padding: 0 0 20px 0; flex-shrink: 0; }
+.sidebar .logo { padding: 22px 20px; font-size: 16px; font-weight: 700; color: #ffffff; border-bottom: 1px solid #2c3e5c; letter-spacing: 0.5px; }
+.sidebar .logo span { display: block; font-size: 11px; font-weight: 400; color: #8fa2c4; margin-top: 4px; }
+.nav-group-title { font-size: 14px; font-weight: 700; color: #6f83a8; padding: 14px 20px 6px; }
+.nav-item { padding: 8px 20px 8px 28px; font-size: 14px; display: flex; align-items: center; gap: 10px; color: #b7c4dd; cursor: default; border-left: 3px solid transparent; text-decoration: none; }
+a.nav-item { cursor: pointer; }
+.nav-item.active { background: #26385a; color: #ffffff; border-left: 3px solid #4f8cff; font-weight: 700; }
+.nav-item.disabled { color: #5c6c8a; }
+
+/* Main column */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { height: 64px; background: #ffffff; border-bottom: 1px solid #dde3ec; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; }
+.topbar .crumb { font-size: 20px; font-weight: 700; color: #40485a; }
+.topbar .crumb span { color: #9aa4b5; font-weight: 400; margin: 0 6px; }
+.topbar .user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4a5164; margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #4f8cff; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+/* Master category sub-nav */
+.body-area { flex: 1; display: flex; min-width: 0; }
+.subnav { width: 210px; background: #ffffff; border-right: 1px solid #e2e7ef; flex-shrink: 0; padding: 18px 0; overflow-y: auto; }
+.subnav .group-title { font-size: 11px; color: #9aa4b5; font-weight: 700; padding: 10px 20px 6px; letter-spacing: 0.5px; }
+.subnav .m-item { padding: 8px 20px; font-size: 12.5px; color: #4a5164; border-left: 3px solid transparent; cursor: default; }
+.subnav .m-item.active { background: #eef4ff; color: #2f6fed; font-weight: 700; border-left: 3px solid #2f6fed; }
+
+/* Content area */
+.content { flex: 1; padding: 24px 28px 40px; min-width: 0; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.toolbar h1 { font-size: 20px; font-weight: 700; }
+.toolbar .left h1 { font-size: 20px; font-weight: 700; }
+.toolbar .left p { font-size: 12.5px; color: #7c8598; margin-top: 4px; }
+.btn-group { display: flex; gap: 10px; align-items: center; }
+.btn { padding: 9px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 1px solid #d3d9e3; background: #ffffff; color: #40485a; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: default; text-decoration: none; }
+.btn.primary { background: #2f6fed; border-color: #2f6fed; color: #ffffff; }
+a.btn { cursor: pointer; }
+.btn.icon { font-size: 14px; }
+
+/* 遅延のみ表示トグル（コンテナ部分。丸スイッチ本体はページ固有CSS） */
+.toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #40485a; font-weight: 700; background: #fff; border: 1px solid #d3d9e3; border-radius: 6px; padding: 7px 12px; }
+
+/* Filter panel */
+.filter-panel { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 11.5px; color: #6c7688; font-weight: 700; }
+.field .control { height: 34px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 10px; font-size: 13px; color: #333c4d; display: flex; align-items: center; min-width: 130px; }
+.field .control.wide { min-width: 220px; }
+.field .control.small { min-width: 100px; }
+.field .control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
+.search-btn { height: 34px; padding: 0 22px; background: #1c2b45; color: white; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
+.tilde { align-self: flex-end; height: 34px; display: flex; align-items: center; color: #9aa4b5; }
+
+/* 年度バー・年度コピー注記（ベンダーマスタ系） */
+.year-bar { display: flex; align-items: center; gap: 10px; background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 10px 16px; margin-bottom: 18px; }
+.year-bar .label { font-size: 12px; color: #7c8598; font-weight: 700; margin-right: 4px; }
+.year-tab { padding: 7px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 700; color: #7c8598; background: #f2f4f8; }
+.year-tab.active { background: #1c2b45; color: #ffffff; }
+.year-tab.add { color: #2f6fed; background: #eef4ff; }
+.year-bar .note { margin-left: auto; font-size: 11.5px; color: #9aa4b5; }
+.copy-hint { display: flex; align-items: center; gap: 8px; background: #fff9ec; border: 1px solid #f3e3b8; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; font-size: 12px; color: #8a6d1f; }
+.copy-hint b { color: #6b5314; }
+.info-note { display: flex; align-items: center; gap: 8px; background: #f6f8fb; border: 1px solid #e6eaf1; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; font-size: 12px; color: #7c8598; }
+.info-note b { color: #4a5164; }
+
+/* Table card */
+.table-card { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; overflow: hidden; }
+.table-meta { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #eef1f6; font-size: 12.5px; color: #6c7688; }
+.table-meta .count b { color: #1c2b45; font-size: 14px; }
+.table-meta .hint { color: #9aa4b5; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th { background: #f6f8fb; color: #5a6376; text-align: left; padding: 10px 12px; font-weight: 700; border-bottom: 1px solid #e6eaf1; white-space: nowrap; }
+tbody td { padding: 11px 12px; border-bottom: 1px solid #eef1f6; color: #333c4d; white-space: nowrap; }
+tbody tr:hover { background: #f8faff; }
+th.grp-basic { background: #eef4ff !important; color: #2f6fed !important; text-align: center; border-bottom: 1px solid #d7e3fb !important; }
+th.grp-year { background: #fff6e9 !important; color: #b3791a !important; text-align: center; border-bottom: 1px solid #f3e3c0 !important; }
+th.grp-none { background: #f6f8fb !important; }
+
+/* タグ・区分バッジ */
+.tag { display: inline-block; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+.tag.blue { background: #e7f0ff; color: #2f6fed; }
+.tag.orange { background: #fff2e2; color: #d97c1e; }
+.tag.gray { background: #eef0f4; color: #7c8598; }
+.tag.pm { background: #e7f0ff; color: #2f6fed; }
+.tag.pl { background: #fff2e2; color: #d97c1e; }
+.tag.sales { background: #f0e9ff; color: #7c4de0; }
+.tag.ops { background: #e5f6ec; color: #279158; }
+
+/* 稼働状況・有効無効（社員／ベンダーマスタ） */
+.state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+.state .dot { width: 8px; height: 8px; border-radius: 50%; }
+.state.on .dot { background: #33b070; }
+.state.on { color: #279158; }
+.state.off .dot { background: #b7bfcc; }
+.state.off { color: #8992a3; }
+
+/* 進捗ステータス（研修一覧） */
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; }
+.status.prep .dot { background: #b7bfcc; }
+.status.prep { color: #6c7688; }
+.status.progress .dot { background: #2f6fed; }
+.status.progress { color: #2f6fed; }
+.status.done .dot { background: #33b070; }
+.status.done { color: #279158; }
+.status.delay .dot { background: #e5484d; }
+.status.delay { color: #d43c40; }
+
+/* リンクボタン・操作列 */
+.row-actions { display: flex; gap: 8px; }
+.link-btn { font-size: 12px; color: #2f6fed; font-weight: 700; padding: 4px 8px; border: 1px solid #d7e3fb; border-radius: 5px; background: #f4f8ff; text-decoration: none; cursor: default; display: inline-block; }
+.link-btn.secondary { color: #6c7688; border-color: #dfe4ec; background: #fafbfd; }
+a.link-btn { cursor: pointer; }
+
+/* ページネーション */
+.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 14px 20px; font-size: 12.5px; color: #6c7688; }
+.page-btn { width: 28px; height: 28px; border: 1px solid #dde3ec; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: #fff; }
+.page-btn.active { background: #1c2b45; color: white; border-color: #1c2b45; font-weight: 700; }
+
+/* 横スクロール進捗表（社内／運営進捗一覧） */
+.scroll-outer { overflow-x: auto; max-width: 100%; }
+table.scroll-table, .scroll-outer table { border-collapse: separate; border-spacing: 0; font-size: 12px; width: max-content; }
+.scroll-outer thead th { padding: 9px 12px; border-right: 1px solid #eef1f6; }
+.scroll-outer tbody td { padding: 8px 12px; border-right: 1px solid #f2f4f8; vertical-align: middle; }
+.sticky { position: sticky; background: #ffffff; z-index: 2; }
+thead th.sticky { background: #f6f8fb; z-index: 3; }
+.sticky.shadow { box-shadow: 3px 0 6px -3px rgba(20,30,50,0.15); }
+
+.status-chip { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
+.status-chip .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; width: fit-content; }
+.status-chip .dates { font-size: 10.5px; color: #98a1b3; }
+.status-chip .owner { font-size: 10.5px; color: #6c7688; }
+.badge.wait { background: #eef0f4; color: #8992a3; }
+.badge.progress { background: #e7f0ff; color: #2f6fed; }
+.badge.done { background: #e5f6ec; color: #279158; }
+.badge.delay { background: #fdeaea; color: #d43c40; }
+.badge.na { background: #f6f7f9; color: #b7bfcc; border: 1px dashed #dde1e9; }
+
+.overall { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
+.overall .dot { width: 8px; height: 8px; border-radius: 50%; }
+.overall.progress .dot { background: #2f6fed; }
+.overall.progress { color: #2f6fed; }
+.overall.done .dot { background: #33b070; }
+.overall.done { color: #279158; }
+.overall.delay .dot { background: #e5484d; }
+.overall.delay { color: #d43c40; }
+.overall.wait .dot { background: #b7bfcc; }
+.overall.wait { color: #6c7688; }
+
+/* ダイアログ共通（オーバーレイ・モーダル枠） */
+.overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
+.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; }
+.modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
+.modal-header h2 { font-size: 18px; font-weight: 700; }
+.modal-header .sub { font-size: 12.5px; color: #7c8598; margin-top: 6px; }
+.close-x { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 16px; border: 1px solid #e6eaf1; text-decoration: none; cursor: default; }
+a.close-x { cursor: pointer; }
+.modal-footer { padding: 16px 28px; border-top: 1px solid #eef1f6; display: flex; justify-content: flex-end; gap: 10px; background: #fafbfd; }
+
+/* タブ付きダイアログ（社内／運営進捗の更新） */
+.tabs { display: flex; gap: 4px; padding: 0 28px; border-bottom: 1px solid #eef1f6; background: #fafbfd; }
+.tab { padding: 12px 18px; font-size: 13px; font-weight: 700; color: #7c8598; border-bottom: 2px solid transparent; }
+.tab.active { color: #2f6fed; border-bottom: 2px solid #2f6fed; }
+.tab .count { display: inline-block; margin-left: 6px; font-size: 10.5px; background: #e7f0ff; color: #2f6fed; padding: 1px 6px; border-radius: 8px; }
+.tab.warn .count { background: #fdeaea; color: #d43c40; }
+
+.step-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.step-table th { text-align: left; color: #7c8598; font-weight: 700; font-size: 11.5px; padding: 8px 10px; border-bottom: 1px solid #eef1f6; background: #f9fafc; position: sticky; top: 0; z-index: 1; }
+.step-table td { padding: 9px 10px; border-bottom: 1px solid #f1f3f8; vertical-align: middle; }
+.step-name { font-weight: 700; color: #333c4d; display: flex; align-items: center; gap: 8px; }
+.step-no { width: 20px; height: 20px; border-radius: 50%; background: #eef1f6; color: #7c8598; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mini-control { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #333c4d; display: flex; align-items: center; min-width: 100px; }
+.mini-control.wide { min-width: 150px; }
+.status-select { height: 30px; border-radius: 5px; padding: 0 10px; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 100px; }
+.status-select.done { background: #e5f6ec; color: #279158; }
+.status-select.progress { background: #e7f0ff; color: #2f6fed; }
+.status-select.wait { background: #eef0f4; color: #8992a3; }
+.status-select.na { background: #f6f7f9; color: #b7bfcc; }
+.status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
+.memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
+
+/* フォームダイアログ（社員／ベンダーマスタ登録） */
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field.full { grid-column: 1 / span 2; }
+.form-field label { font-size: 12px; color: #5a6376; font-weight: 700; }
+.form-field label .req { color: #e5484d; margin-left: 3px; }
+.form-control { height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 12px; font-size: 13px; color: #333c4d; display: flex; align-items: center; }
+.form-control.textarea { height: 68px; align-items: flex-start; padding-top: 8px; color: #9aa4b5; }
+.form-control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
+
+/* 役割チップ選択（社員マスタ登録） */
+.chip-box { min-height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
+.chip.pm { background: #e7f0ff; color: #2f6fed; }
+.chip.pl { background: #fff2e2; color: #d97c1e; }
+.chip.year { background: #fff2e2; color: #d97c1e; }
+.chip x { font-size: 10px; opacity: .6; }
+.chip-add { font-size: 12px; color: #9aa4b5; padding: 4px 6px; }
+
+/* 年度別セクション（ベンダーマスタ登録） */
+.year-pill { display: inline-flex; align-items: center; gap: 6px; background: #eef4ff; color: #2f6fed; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; width: fit-content; }

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=kensyu" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">研修管理<span>／</span>研修</div>
+      <div class="user">
+        <span>山田 太郎（BD事業部）</span>
+        <div class="avatar">山田</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>研修一覧</h1>
+          <p>お客様と契約した研修の情報を登録・管理します</p>
+        </div>
+        <div class="btn-group">
+          <div class="btn"><span class="icon">⇩</span>登壇依頼書出力</div>
+          <div class="btn"><span class="icon">⇧</span>Excel取込</div>
+          <div class="btn"><span class="icon">⇩</span>Excel出力</div>
+          <a class="btn primary" href="kensyu_regist.html"><span class="icon">＋</span>新規登録</a>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="field">
+          <label>キーワード検索</label>
+          <div class="control wide">コースコード・コース名で検索</div>
+        </div>
+        <div class="field">
+          <label>区分</label>
+          <div class="control small">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>実施形態</label>
+          <div class="control small">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>ベンダー</label>
+          <div class="control">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>開始日</label>
+          <div class="control small">2026/04/01</div>
+        </div>
+        <div class="tilde">〜</div>
+        <div class="field">
+          <label>終了日</label>
+          <div class="control small">2026/09/30</div>
+        </div>
+        <div class="search-btn">検索</div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-meta">
+          <div class="count">全 <b>128</b> 件</div>
+          <div>並び替え：開始日（昇順）　表示件数：20件</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>区分</th>
+              <th>コースコード</th>
+              <th>コース名</th>
+              <th>クラスコード</th>
+              <th>開始日</th>
+              <th>終了日</th>
+              <th>実施形態</th>
+              <th>ベンダー名</th>
+              <th>講師名</th>
+              <th>ロケーション</th>
+              <th>受講者数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag blue">受託</span></td>
+              <td>BC02-01</td>
+              <td>ビジネス基礎研修</td>
+              <td>BC02-01-C1</td>
+              <td>2026/09/02</td>
+              <td>2026/09/04</td>
+              <td>集合</td>
+              <td>株式会社NEUトレーニング</td>
+              <td>佐藤 一郎</td>
+              <td>本社5F 研修室A</td>
+              <td>24</td>
+              <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td><span class="tag orange">公募</span></td>
+              <td>GCD-114</td>
+              <td>グローバル基礎コース</td>
+              <td>GCD-114-C3</td>
+              <td>2026/09/08</td>
+              <td>2026/09/09</td>
+              <td>オンライン</td>
+              <td>NDUパートナーズ</td>
+              <td>鈴木 花子</td>
+              <td>本社5F 研修室C</td>
+              <td>18</td>
+              <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td><span class="tag blue">受託</span></td>
+              <td>NDU-203</td>
+              <td>次世代リーダー育成研修</td>
+              <td>NDU-203-C2</td>
+              <td>2026/09/10</td>
+              <td>2026/09/12</td>
+              <td>集合</td>
+              <td>ユニバ研修サービス</td>
+              <td>高橋 健</td>
+              <td>大阪支社 3F</td>
+              <td>30</td>
+              <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td><span class="tag blue">受託</span></td>
+              <td>BC02-02</td>
+              <td>ビジネス基礎研修</td>
+              <td>BC02-02-C1</td>
+              <td>2026/09/15</td>
+              <td>2026/09/17</td>
+              <td>ハイブリッド</td>
+              <td>株式会社NEUトレーニング</td>
+              <td>佐藤 一郎</td>
+              <td>本社5F 研修室B</td>
+              <td>22</td>
+              <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td><span class="tag orange">公募</span></td>
+              <td>GCD-115</td>
+              <td>グローバル基礎コース</td>
+              <td>GCD-115-C1</td>
+              <td>2026/09/18</td>
+              <td>2026/09/18</td>
+              <td>オンライン</td>
+              <td>NDUパートナーズ</td>
+              <td>伊藤 美咲</td>
+              <td>本社3F 研修室A</td>
+              <td>40</td>
+              <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td><span class="tag blue">受託</span></td>
+              <td>NDU-204</td>
+              <td>次世代リーダー育成研修</td>
+              <td>NDU-204-C1</td>
+              <td>2026/09/24</td>
+              <td>2026/09/26</td>
+              <td>集合</td>
+              <td>ユニバ研修サービス</td>
+              <td>高橋 健</td>
+              <td>大阪支社 3F</td>
+              <td>28</td>
+              <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td><span class="tag blue">受託</span></td>
+              <td>CEC-051</td>
+              <td>マネジメント基礎研修</td>
+              <td>CEC-051-C4</td>
+              <td>2026/09/28</td>
+              <td>2026/09/29</td>
+              <td>集合</td>
+              <td>CECトラスト</td>
+              <td>渡辺 直樹</td>
+              <td>本社5F 研修室A</td>
+              <td>20</td>
+              <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="page-btn">‹</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">…</div>
+          <div class="page-btn">7</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

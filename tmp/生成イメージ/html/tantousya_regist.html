@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tantousya_regist.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=tantousya" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="body-area"><div class="subnav"></div><div class="content"><div class="toolbar"><h1>担当者</h1></div><div class="table-card"></div></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>担当者登録</h2>
+          <div class="sub">新規の担当者情報を登録します</div>
+        </div>
+        <a class="close-x" href="tantousya_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>担当者ID<span class="req">必須</span></label>
+          <div class="form-control">自動採番（TAN-058）</div>
+        </div>
+        <div class="form-field">
+          <label>区分<span class="req">必須</span></label>
+          <div class="form-control">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>氏名<span class="req">必須</span></label>
+          <div class="form-control">例）山田 太郎</div>
+        </div>
+        <div class="form-field">
+          <label>所属チーム<span class="req">必須</span></label>
+          <div class="form-control">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>メールアドレス</label>
+          <div class="form-control">例）yamada@company.co.jp</div>
+        </div>
+        <div class="form-field full">
+          <label>役割（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box">
+            <span class="chip pm">PM <x>✕</x></span>
+            <span class="chip pl">PL <x>✕</x></span>
+            <span class="chip-add">＋ 役割を追加</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="tantousya_list.html">キャンセル</a>
+        <a class="btn primary" href="tantousya_list.html">登録する</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

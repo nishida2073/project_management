@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="kensyu_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=kensyu" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>研修一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>研修編集</h2>
+          <div class="sub">BC02-01-C1　ビジネス基礎研修の情報を編集します</div>
+        </div>
+        <a class="close-x" href="kensyu_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>区分<span class="req">必須</span></label>
+          <div class="form-control">受託<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>コースコード<span class="req">必須</span></label>
+          <div class="form-control">BC02-01</div>
+        </div>
+        <div class="form-field full">
+          <label>コース名<span class="req">必須</span></label>
+          <div class="form-control">ビジネス基礎研修</div>
+        </div>
+        <div class="form-field">
+          <label>クラスコード</label>
+          <div class="form-control">BC02-01-C1</div>
+        </div>
+        <div class="form-field">
+          <label>実施形態<span class="req">必須</span></label>
+          <div class="form-control">集合<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>開始日<span class="req">必須</span></label>
+          <div class="form-control">2026/09/02</div>
+        </div>
+        <div class="form-field">
+          <label>終了日<span class="req">必須</span></label>
+          <div class="form-control">2026/09/04</div>
+        </div>
+        <div class="form-field">
+          <label>ベンダー名</label>
+          <div class="form-control">株式会社NEUトレーニング<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>講師名</label>
+          <div class="form-control">佐藤 一郎</div>
+        </div>
+        <div class="form-field">
+          <label>ロケーション</label>
+          <div class="form-control">本社5F 研修室A</div>
+        </div>
+        <div class="form-field">
+          <label>受講者数</label>
+          <div class="form-control">24</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="kensyu_list.html">キャンセル</a>
+        <a class="btn primary" href="kensyu_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

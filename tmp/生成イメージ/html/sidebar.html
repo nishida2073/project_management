@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<style>
+  html, body { width: auto; height: 100%; margin: 0; }
+  .sidebar { min-height: 100%; }
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo">研修管理システム<span>Training Product Suite（構想中）</span></div>
+<div class="nav-group-title">案件管理</div>
+  <a class="nav-item" data-key="anken" href="anken_list.html" target="_parent">案件</a>
+  <a class="nav-item" data-key="shanai" href="anken_progress_list.html" target="_parent">案件進捗</a>
+<div class="nav-group-title">研修管理</div>
+  <a class="nav-item" data-key="kensyu" href="kensyu_list.html" target="_parent">研修</a>
+  <a class="nav-item" data-key="unei" href="kensyu_progress_list.html" target="_parent">研修運営進捗</a>
+  
+  <div class="nav-group-title">マスタ管理</div>
+  <div class="nav-item disabled">コース</div>
+  <div class="nav-item disabled">ロケーション</div>
+  <div class="nav-item disabled">案件進捗工程</div>
+  <div class="nav-item disabled">研修運営進捗工程</div>
+  <div class="nav-item disabled">顧客</div>
+  <a class="nav-item" data-sub="vendor" href="vendor_list.html" target="_parent">講師ベンダー</a>
+  <a class="nav-item" data-sub="tantousya" href="tantousya_list.html" target="_parent">担当者</a>
+  <div class="nav-group-title">システム管理</div>
+  <div class="nav-item disabled">ユーザー</div>
+</div>
+<script>
+  var params = new URLSearchParams(location.search);
+  var active = params.get('active');
+  var subKey = params.get('sub');
+
+  document.querySelectorAll('.nav-item[data-key]').forEach(function (el) {
+    el.classList.add(el.getAttribute('data-key') === active ? 'active' : 'disabled');
+  });
+
+  document.querySelectorAll('.nav-item[data-sub]').forEach(function (el) {
+    el.classList.add(el.getAttribute('data-sub') === subKey ? 'active' : 'disabled');
+  });
+</script>
+</body>
+</html>

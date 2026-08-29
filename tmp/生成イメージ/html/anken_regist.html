@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="anken_regist.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=anken" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>案件一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>案件新規登録</h2>
+          <div class="sub">新規の案件情報を登録します</div>
+        </div>
+        <a class="close-x" href="anken_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>案件ID<span class="req">必須</span></label>
+          <div class="form-control">自動採番（PJ-2608）</div>
+        </div>
+        <div class="form-field full">
+          <label>案件名<span class="req">必須</span></label>
+          <div class="form-control">例）ビジネス基礎研修 定期開催</div>
+        </div>
+        <div class="form-field">
+          <label>顧客<span class="req">必須</span></label>
+          <div class="form-control">例）株式会社ABC商事</div>
+        </div>
+        <div class="form-field">
+          <label>実施開始月<span class="req">必須</span></label>
+          <div class="form-control">例）2026/09</div>
+        </div>
+        <div class="form-field">
+          <label>PM<span class="req">必須</span></label>
+          <div class="form-control">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>PL</label>
+          <div class="form-control">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <div class="form-control textarea">特記事項があれば入力</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="anken_list.html">キャンセル</a>
+        <a class="btn primary" href="anken_list.html">登録する</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="vendor_list.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=vendor" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">マスタ管理<span>／</span>講師ベンダー</div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+
+    <div class="body-area">
+
+      <div class="content">
+        <div class="toolbar">
+          <div class="left">
+            <h1>ベンダー</h1>
+            <p>研修に登壇するベンダー情報を管理します</p>
+          </div>
+          <div class="btn-group">
+            <a class="btn primary" href="vendor_regist.html">＋ 新規登録</a>
+          </div>
+        </div>
+        <div class="filter-panel">
+          <div class="field"><label>キーワード検索</label><div class="control wide">ベンダーコード・ベンダー名で検索</div></div>
+          <div class="field"><label>契約年度</label><div class="control small">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>契約区分</label><div class="control">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>状態</label><div class="control">すべて<span class="caret">▾</span></div></div>
+          <div class="search-btn">検索</div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-meta"><div class="count">全 <b>18</b> 件</div></div>
+          <table>
+            <thead>
+              <tr>
+                <th>ベンダーコード</th>
+                <th>ベンダー名</th>
+                <th>契約年度</th>
+                <th>契約区分</th>
+                <th>担当窓口</th>
+                <th>連絡先</th>
+                <th>備考</th>
+                <th>状態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>VND-001</td><td>株式会社NEUトレーニング</td><td>2026年度</td><td><span class="tag blue">業務委託</span></td><td>営業部 佐々木様</td><td>03-1234-5678</td><td>ビジネス基礎研修を主に担当</td><td><span class="state on"><span class="dot"></span>有効</span></td><td><a class="link-btn" href="vendor_modify.html">編集</a></td></tr>
+              <tr><td>VND-002</td><td>NDUパートナーズ</td><td>2026年度</td><td><span class="tag blue">業務委託</span></td><td>企画部 木下様</td><td>03-2345-6789</td><td>公募コース全般</td><td><span class="state on"><span class="dot"></span>有効</span></td><td><a class="link-btn" href="vendor_modify.html">編集</a></td></tr>
+              <tr><td>VND-003</td><td>ユニバ研修サービス</td><td>2025年度</td><td><span class="tag blue">業務委託</span></td><td>運営部 江口様</td><td>06-3456-7890</td><td>大阪拠点対応可</td><td><span class="state on"><span class="dot"></span>有効</span></td><td><a class="link-btn" href="vendor_modify.html">編集</a></td></tr>
+              <tr><td>VND-004</td><td>CECトラスト</td><td>2025年度</td><td><span class="tag gray">業務提携</span></td><td>管理部 森様</td><td>03-4567-8901</td><td>マネジメント研修専門</td><td><span class="state on"><span class="dot"></span>有効</span></td><td><a class="link-btn" href="vendor_modify.html">編集</a></td></tr>
+              <tr><td>VND-005</td><td>アムネット株式会社</td><td>2024年度</td><td><span class="tag blue">業務委託</span></td><td>教材部 川口様</td><td>03-5678-9012</td><td>教材発注のみ</td><td><span class="state off"><span class="dot"></span>無効</span></td><td><a class="link-btn" href="vendor_modify.html">編集</a></td></tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div><div class="page-btn">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

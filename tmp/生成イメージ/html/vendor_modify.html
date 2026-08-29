@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="vendor_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=vendor" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>ベンダー編集</h2>
+          <div class="sub">VND-001　株式会社NEUトレーニングの情報を編集します</div>
+        </div>
+        <a class="close-x" href="vendor_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>ベンダーコード<span class="req">必須</span></label>
+          <div class="form-control">VND-001</div>
+        </div>
+        <div class="form-field">
+          <label>ベンダー名<span class="req">必須</span></label>
+          <div class="form-control">株式会社NEUトレーニング</div>
+        </div>
+        <div class="form-field full">
+          <label>住所</label>
+          <div class="form-control">東京都千代田区〇〇1-2-3</div>
+        </div>
+        <div class="form-field full">
+          <label>契約年度（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box">
+            <span class="chip year">2026年度 <x>✕</x></span>
+            <span class="chip-add">＋ 年度を追加</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>契約区分<span class="req">必須</span></label>
+          <div class="form-control">業務委託<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>担当窓口（氏名）</label>
+          <div class="form-control">営業部 佐々木様</div>
+        </div>
+        <div class="form-field">
+          <label>電話番号</label>
+          <div class="form-control">03-1234-5678</div>
+        </div>
+        <div class="form-field">
+          <label>メールアドレス</label>
+          <div class="form-control">sasaki@neu-training.co.jp</div>
+        </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <div class="form-control textarea">ビジネス基礎研修を主に担当</div>
+        </div>
+        <div class="form-field">
+          <label>状態</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>有効</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="vendor_list.html">キャンセル</a>
+        <a class="btn primary" href="vendor_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

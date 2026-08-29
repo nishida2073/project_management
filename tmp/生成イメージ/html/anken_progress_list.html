@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="anken_progress_list.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=shanai" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">案件管理<span>／</span>案件進捗</div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>案件進捗一覧</h1>
+          <p>開発会議から契約・請求までの社内承認プロセスの予実・ステータスを管理します</p>
+        </div>
+        <div class="btn-group">
+          <div class="toggle-wrap"><span>遅延のみ表示</span><div class="toggle"><div class="knob"></div></div></div>
+          <div class="btn">⇧ Excel取込</div>
+          <div class="btn">⇩ Excel出力</div>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="field"><label>キーワード検索</label><div class="control wide">案件名・顧客名で検索</div></div>
+        <div class="field"><label>PM</label><div class="control small">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>総合進捗</label><div class="control small">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実施開始月</label><div class="control small">2026/09</div></div>
+        <div class="tilde">〜</div>
+        <div class="field"><label> </label><div class="control small">2027/03</div></div>
+        <div class="search-btn">検索</div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-meta">
+          <div class="count">全 <b>42</b> 件（うち遅延 <b style="color:#d43c40">3</b> 件）</div>
+          <div class="hint">左側の主要項目は固定表示 ／ 右方向にスクロールすると各承認フェーズの進捗が確認できます</div>
+        </div>
+        <div class="scroll-outer" id="scrollArea">
+          <table>
+            <thead>
+              <tr>
+                <th class="sticky" style="left:0; min-width:150px;">案件ID</th>
+                <th class="sticky" style="left:150px; min-width:220px;">案件名</th>
+                <th class="sticky" style="left:370px; min-width:110px;">顧客</th>
+                <th class="sticky" style="left:480px; min-width:130px;">PM / PL</th>
+                <th class="sticky" style="left:610px; min-width:100px;">実施開始月</th>
+                <th class="sticky shadow" style="left:710px; min-width:120px;">総合進捗</th>
+                <th style="min-width:120px;">①開発会議</th>
+                <th style="min-width:120px;">②見積承認</th>
+                <th style="min-width:120px;">③経営会議<br>(見積承認)</th>
+                <th style="min-width:120px;">④取締役会議<br>(見積承認)</th>
+                <th style="min-width:120px;">⑤受注承認会議</th>
+                <th style="min-width:120px;">⑥経営会議<br>(受注報告)</th>
+                <th style="min-width:120px;">⑦取締役会議<br>(受注報告)</th>
+                <th style="min-width:120px;">⑧顧客契約締結</th>
+                <th style="min-width:120px;">⑨開発実施準備</th>
+                <th style="min-width:120px;">⑩サービス開始</th>
+                <th style="min-width:120px;">⑪報告書提出</th>
+                <th style="min-width:120px;">⑫完了報告</th>
+                <th style="min-width:120px;">⑬請求</th>
+                <th style="min-width:110px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div><div class="page-btn">…</div><div class="page-btn">3</div><div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function chip(status, plan, actual){
+  if (status === 'na') return '<div class="status-chip"><span class="badge na">対象外</span></div>';
+  var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
+  var label = {wait:'未着手', progress:'調整中', done:'完了', delay:'遅延'}[status];
+  var dateLine = actual ? ('予定 '+plan+' / 実績 '+actual) : ('予定 '+plan);
+  return '<div class="status-chip"><span class="badge '+cls+'">'+label+'</span><span class="dates">'+dateLine+'</span></div>';
+}
+function overall(status){
+  var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
+  var label = {wait:'着手前', progress:'承認プロセス中', done:'完了', delay:'遅延あり'}[status];
+  return '<span class="overall '+cls+'"><span class="dot"></span>'+label+'</span>';
+}
+var rows = [
+ {id:'PJ-2601', name:'G新人研修（NTTデータ金融共催）', customer:'NTTデータ金融', pm:'山口 / 細野', month:'2026/09', overall:'progress',
+  steps:['done','na','na','done','na','done','done','progress','wait','wait','wait','wait','wait']},
+ {id:'PJ-2602', name:'ビジネス基礎研修 定期開催', customer:'株式会社ABC商事', pm:'田中 / 木村', month:'2026/09', overall:'delay',
+  steps:['done','delay','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
+ {id:'PJ-2603', name:'次世代リーダー育成プログラム', customer:'DEFホールディングス', pm:'高橋 / 中島', month:'2026/10', overall:'progress',
+  steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
+ {id:'PJ-2604', name:'グローバル基礎コース 公募', customer:'（公募）', pm:'伊藤 / 小林', month:'2026/09', overall:'done',
+  steps:['done','done','done','na','na','done','na','done','done','done','done','progress','wait']},
+ {id:'PJ-2605', name:'マネジメント基礎研修', customer:'CECトラスト', pm:'渡辺 / 松本', month:'2026/10', overall:'wait',
+  steps:['wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
+ {id:'PJ-2606', name:'システム基盤実践研修', customer:'NTTデータUNIV', pm:'山口 / 市村', month:'2026/09', overall:'delay',
+  steps:['done','done','done','done','delay','wait','wait','wait','wait','wait','wait','wait','wait']},
+ {id:'PJ-2607', name:'新人フォローアップ研修', customer:'グループ各社', pm:'佐藤 / 岡田', month:'2026/11', overall:'progress',
+  steps:['done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']}
+];
+var dates = ['08/10','08/20','08/25','08/29','09/03','09/08','09/10','09/17','09/24','10/05','10/20','11/10','11/25'];
+var tbody = document.getElementById('tbody');
+rows.forEach(function(r){
+  var tr = document.createElement('tr');
+  var html = '';
+  html += '<td class="sticky" style="left:0; font-weight:700;">'+r.id+'</td>';
+  html += '<td class="sticky" style="left:150px;">'+r.name+'</td>';
+  html += '<td class="sticky" style="left:370px;">'+r.customer+'</td>';
+  html += '<td class="sticky" style="left:480px;">'+r.pm+'</td>';
+  html += '<td class="sticky" style="left:610px;">'+r.month+'</td>';
+  html += '<td class="sticky shadow" style="left:710px;">'+overall(r.overall)+'</td>';
+  r.steps.forEach(function(s, i){
+    var actual = (s==='done') ? dates[i] : '';
+    html += '<td>'+chip(s, dates[i], actual)+'</td>';
+  });
+  html += '<td class="row-actions"><a class="link-btn" href="anken_progress_modify.html">編集</a></td>';
+  tr.innerHTML = html;
+  tbody.appendChild(tr);
+});
+
+if (location.search.indexOf('scrolled=1') !== -1) {
+  document.getElementById('scrollArea').scrollLeft = 840;
+}
+</script>
+</body>
+</html>
