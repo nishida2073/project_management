@@ -128,9 +128,21 @@ function Export-CombineSummaryData {
         $rowData = @()
         $rowData +=  $key
         if( $testResults ){
-            $rowData +=  if($testResults.平均点 -ne "") { [double] $testResults.平均点 }
-            $rowData +=  if($testResults.中央値 -ne "") { [double] $testResults.中央値 }
-            $rowData +=  if($testResults.修了率 -ne "") { [double] $testResults.修了率/100 }
+            if ($testResults.平均点 -ne "") {
+                $rowData += [double] $testResults.平均点
+            } else {
+                $rowData += ""
+            }
+            if ($testResults.中央値 -ne "") {
+                $rowData += [double] $testResults.中央値
+            } else {
+                $rowData += ""
+            }
+            if ($testResults.修了率 -ne "") {
+                $rowData += [double] $testResults.修了率/100
+            } else {
+                $rowData += ""
+            }
         } else {
             $rowData += @("") * 3
         }
