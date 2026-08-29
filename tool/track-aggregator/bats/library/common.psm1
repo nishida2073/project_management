@@ -25,7 +25,7 @@ function Write-Message {
     }
 
     if (-not $NoHeader) {
-        Write-ColoredLine "============== [$timestamp] $VarName =============="
+        Write-ColoredLine "================ [$timestamp] $VarName ================"
     }
 
     if( -not $Datas ){

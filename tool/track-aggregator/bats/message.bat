@@ -9,4 +9,4 @@ if "%COLOR%"=="" (
 )
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "Import-Module '%~dp0library\common.psm1' -DisableNameChecking; $color = '%COLOR%'; $msg = '%MESSAGE%'; Write-Message ('============== [' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss.ff') + '] ' + $msg + ' ==============') -Type Info -ForegroundColor $color -NoHeader"
+    "Import-Module '%~dp0library\common.psm1' -DisableNameChecking; $color = '%COLOR%'; $msg = '%MESSAGE%'; Write-Message ('================ [' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss.ff') + '] ' + $msg + ' ================') -Type Info -ForegroundColor $color -NoHeader"

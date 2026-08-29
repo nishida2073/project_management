@@ -278,8 +278,7 @@ $btnRun.Add_Click({
     $selectedClient = $cmbClient.SelectedItem
     $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
     Write-Log ""
-    Write-Log "-------------------- $clientDisplayName --------------------"
-    Write-Log ""
+    Write-Log "--------------- $clientDisplayName 開始 ---------------"
 
     $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
     $env:GENERATE_ENABLED = if ($chkGenerate.Checked) { "1" } else { "0" }
@@ -350,9 +349,11 @@ $btnRun.Add_Click({
     Remove-Job -Name $outputEvent.Name -Force
 
     if ($proc.ExitCode -eq 0) {
+        Write-Log "--------------- $clientDisplayName 完了 ---------------"
         $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
         $lblStatus.Text = "完了しました"
     } else {
+        Write-Log "--------------- $clientDisplayName 失敗（終了コード: $($proc.ExitCode)） ---------------"
         $lblStatus.ForeColor = [System.Drawing.Color]::DarkRed
         $lblStatus.Text = "エラーが発生しました（終了コード: $($proc.ExitCode)）"
     }

@@ -132,7 +132,7 @@ function Invoke-BatButton {
     Set-StepStatus -Label $ButtonDef.Label -Text "実行中..."
 
     Write-Log ""
-    Write-Log "===== $($ButtonDef.Label) ====="
+    Write-Log "--------------- $($ButtonDef.Label) 開始 ---------------"
 
     $batArgs = @()
     $inputMap = $script:inputControls[$ButtonDef.Label]
@@ -149,10 +149,10 @@ function Invoke-BatButton {
     Show-FormInForeground -Form $form
 
     if ($exitCode -ne 0) {
-        Write-Log "----- $($ButtonDef.Label) 失敗（終了コード: $exitCode） -----"
+        Write-Log "--------------- $($ButtonDef.Label) 失敗（終了コード: $exitCode） ---------------"
         Set-StepStatus -Label $ButtonDef.Label -Text "失敗"
     } else {
-        Write-Log "----- $($ButtonDef.Label) 完了 -----"
+        Write-Log "--------------- $($ButtonDef.Label) 完了 ---------------"
         Set-StepStatus -Label $ButtonDef.Label -Text "成功"
     }
 

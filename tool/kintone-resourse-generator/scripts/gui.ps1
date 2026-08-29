@@ -513,7 +513,7 @@ function Invoke-Step {
     Set-StepStatus -Id $Id -Text "実行中..."
     $label = ($stepMeta | Where-Object { $_.Id -eq $Id }).Label
     Write-Log ""
-    Write-Log "===== $label ====="
+    Write-Log "--------------- $label 開始 ---------------"
 
     $exitCode = Invoke-BatStep -BatPath (Get-StepBat -Id $Id) -ArgList (Get-StepArgs -Id $Id -ConfigName $ConfigName)
 
@@ -529,12 +529,16 @@ function Invoke-Step {
     # exit 2は「確認が必要な警告あり」を表す専用コード（各scriptsの$script:exitCode = 2参照）。
     # 出力自体は成功しているため、致命的な失敗(それ以外の非0)とは区別して続行する。
     if ($exitCode -ne 0 -and $exitCode -ne 2) {
+        Write-Log "--------------- $label 失敗（終了コード: $exitCode） ---------------"
         Set-StepStatus -Id $Id -Text "失敗"
         return $false
     }
 
     if ($exitCode -eq 2) {
         $script:runHadWarning = $true
+        Write-Log "--------------- $label 完了（警告あり） ---------------"
+    } else {
+        Write-Log "--------------- $label 完了 ---------------"
     }
     Set-StepStatus -Id $Id -Text $(if ($exitCode -eq 2) { "警告" } else { "成功" })
     if ($Id -eq 0) {
