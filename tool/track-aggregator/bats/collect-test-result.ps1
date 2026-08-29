@@ -302,7 +302,6 @@ function Export-UserPlainData {
             $rowData += ""
             $rowData += ""
             $rowData += ""
-            $rowData += ""
 
             for ($i = 1; $i -le $questionCount; $i++) {
                 $propName = "Q$i"
@@ -320,12 +319,6 @@ function Export-UserPlainData {
                 $rowData += $targetUserData.companyName
                 $rowData += $targetUserData.className
                 $rowData += $targetUserData.rankName
-                if ($targetPlainResult.isExecute){
-                    $rowData += ""
-                } else {
-                    $userUrl = "$BaseUrl/k/#/people/user/$($targetUserData.userCode)"
-                    $rowData += '=HYPERLINK("' + $userUrl + '","督促")'
-                }
                 $targetResult = $targetPlainResult.testResult
                 for ($i = 1; $i -le $questionCount; $i++) {
                     $propName = "Q$i"

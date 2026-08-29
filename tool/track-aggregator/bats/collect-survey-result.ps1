@@ -131,7 +131,6 @@ function Export-UserPlainData {
         $rowData += ""
         $rowData += ""
         $rowData += ""
-        $rowData += ""
         foreach ($pickedSurveyItem in $pickedSurveyItems) {
             $exists = $targetTotalSummarySurveyResultData | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
             if ($exists) {
@@ -154,12 +153,6 @@ function Export-UserPlainData {
             $rowData += $targetUserData.companyName
             $rowData += $targetUserData.className
             $rowData += $targetUserData.rankName
-            if ($targetPlainSurveyResultData.isExecute){
-                $rowData += ""
-            } else {
-                $userUrl = "$BaseUrl/k/#/people/user/$($targetUserData.userCode)"
-                $rowData += '=HYPERLINK("' + $userUrl + '","督促")'
-            }
             $targetSurveyResult = $targetPlainSurveyResultData.surveyResult
             foreach ($pickedSurveyItem in $pickedSurveyItems) {
                 $exists = $targetSurveyResult.PSObject.Properties[$pickedSurveyItem]
