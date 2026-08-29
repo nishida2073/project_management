@@ -40,6 +40,7 @@ $form.MinimumSize = New-Object System.Drawing.Size(600, 400)
 
 $script:currentProc = $null
 $script:stepOutputPaths = @{}
+$script:runHadWarning = $false
 $form.Add_FormClosing({
     if ($script:currentProc -and !$script:currentProc.HasExited) {
         & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
@@ -452,6 +453,7 @@ function Set-StepStatus {
     $lbl.ForeColor = switch ($Text) {
         "実行中..." { [System.Drawing.Color]::Black }
         "成功"      { [System.Drawing.Color]::DarkGreen }
+        "警告"      { [System.Drawing.Color]::DarkOrange }
         "失敗"      { [System.Drawing.Color]::DarkRed }
         default     { [System.Drawing.Color]::Gray }
     }
@@ -479,22 +481,30 @@ function Invoke-Step {
 
     $exitCode = Invoke-BatStep -BatPath (Get-StepBat -Id $Id) -ArgList (Get-StepArgs -Id $Id -ConfigName $ConfigName)
 
-    if ($exitCode -ne 0) {
-        Set-StepStatus -Id $Id -Text "失敗"
-        return $false
-    }
-
-    Set-StepStatus -Id $Id -Text "成功"
-    if ($Id -eq 0) {
-        $idLine = $script:lastStepOutputLines | Where-Object { $_ -match '作成されたスペースID:\s*(\d+)' } | Select-Object -Last 1
-        if ($idLine -and $idLine -match '作成されたスペースID:\s*(?<id>\d+)') {
-            $txtSpaceId.Text = $Matches.id
-        }
-    }
+    # exitCodeが非0でも、対応付け確認などの警告のみでファイル自体は生成されていることがあるため、
+    # 「開く」ボタンで開けるよう成否に関わらずファイルの存在を確認してパスを登録する。
     if ($script:stepOpenButtons.ContainsKey($Id)) {
         $outputPath = Get-StepOutputPath -Id $Id -ConfigName $ConfigName
         if ($outputPath -and (Test-Path -LiteralPath $outputPath)) {
             $script:stepOutputPaths[$Id] = $outputPath
+        }
+    }
+
+    # exit 2は「確認が必要な警告あり」を表す専用コード（各scriptsの$script:exitCode = 2参照）。
+    # 出力自体は成功しているため、致命的な失敗(それ以外の非0)とは区別して続行する。
+    if ($exitCode -ne 0 -and $exitCode -ne 2) {
+        Set-StepStatus -Id $Id -Text "失敗"
+        return $false
+    }
+
+    if ($exitCode -eq 2) {
+        $script:runHadWarning = $true
+    }
+    Set-StepStatus -Id $Id -Text $(if ($exitCode -eq 2) { "警告" } else { "成功" })
+    if ($Id -eq 0) {
+        $idLine = $script:lastStepOutputLines | Where-Object { $_ -match '作成されたスペースID:\s*(\d+)' } | Select-Object -Last 1
+        if ($idLine -and $idLine -match '作成されたスペースID:\s*(?<id>\d+)') {
+            $txtSpaceId.Text = $Matches.id
         }
     }
     return $true
@@ -518,8 +528,9 @@ function Invoke-SingleStep {
     $script:isRunning = $false
 }
 
-# 失敗した工程のLabelを返す（全部成功なら$null）。
+# 失敗した工程のLabelを返す（全部成功なら$null。警告のみの場合も$nullで、$script:runHadWarningがtrueになる）。
 function Invoke-AllStepsForCurrentInputs {
+    $script:runHadWarning = $false
     foreach ($sm in $stepMeta) {
         $configName = $txtConfigName.Text.Trim()
         if (!(Test-StepPrereq -Id $sm.Id -ConfigName $configName)) {
@@ -549,6 +560,9 @@ $btnRunAll.Add_Click({
     if ($failedLabel) {
         $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkRed
         $lblOverallStatus.Text = "エラーが発生しました（$failedLabel）"
+    } elseif ($script:runHadWarning) {
+        $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkOrange
+        $lblOverallStatus.Text = "完了しました（警告あり、要確認）"
     } else {
         $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkGreen
         $lblOverallStatus.Text = "完了しました"
@@ -621,6 +635,8 @@ $btnBatchRunAll.Add_Click({
         $failedLabel = Invoke-AllStepsForCurrentInputs
         if ($failedLabel) {
             $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗（$failedLabel）")
+        } elseif ($script:runHadWarning) {
+            $resultLines.Add("行$($i + 2) ($rowConfigName): 成功（警告あり、要確認）")
         } else {
             $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")
         }
@@ -630,10 +646,14 @@ $btnBatchRunAll.Add_Click({
     Write-Log "==================== 一括実行 結果 ===================="
     foreach ($line in $resultLines) { Write-Log $line }
 
-    $failedCount = @($resultLines | Where-Object { $_ -notmatch ": 成功$" }).Count
+    $failedCount = @($resultLines | Where-Object { $_ -match ": 失敗|: スキップ" }).Count
+    $warningCount = @($resultLines | Where-Object { $_ -match "警告あり" }).Count
     if ($failedCount -gt 0) {
         $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkRed
         $lblBatchStatus.Text = "完了（$($rows.Count)件中$failedCount件が失敗/スキップ）"
+    } elseif ($warningCount -gt 0) {
+        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkOrange
+        $lblBatchStatus.Text = "完了しました（$($rows.Count)件中$warningCount件で警告あり、要確認）"
     } else {
         $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkGreen
         $lblBatchStatus.Text = "完了しました（全$($rows.Count)件成功）"

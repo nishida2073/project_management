@@ -425,7 +425,8 @@ $script:exitCode = 0
     Write-Host ""
     Write-Host "チェック結果を出力しました: $outputPath" -ForegroundColor Green
     Write-Host "差分件数: $errorCount / $($allDiffRows.Count)"
-    if ($errorCount -gt 0) { $script:exitCode = 1 }
+    # 差分ありは確認が必要な警告であり、チェック結果自体は正常に出力済みのため致命的エラー(exit 1)とは区別する
+    if ($errorCount -gt 0) { $script:exitCode = 2 }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 

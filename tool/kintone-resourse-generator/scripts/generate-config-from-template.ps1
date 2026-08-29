@@ -311,7 +311,8 @@ $script:exitCode = 0
     Write-Host ""
     Write-Host "設定内容を出力しました: $outputPath" -ForegroundColor Green
     if ($unmatched.Count -gt 0) {
-        $script:exitCode = 1
+        # 対応付け未了の警告のみで設定ファイル自体は生成済みのため、致命的エラー(exit 1)とは区別する
+        $script:exitCode = 2
     }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
