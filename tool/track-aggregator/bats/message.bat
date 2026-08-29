@@ -8,5 +8,5 @@ if "%COLOR%"=="" (
     set "COLOR=White"
 )
 
-powershell -NoProfile -Command ^
-    "$color = '%COLOR%'; $msg = '%MESSAGE%'; Write-Host ('============== [' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss.ff') + '] ' + $msg + ' ==============') -ForegroundColor $color"
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "Import-Module '%~dp0library\common.psm1' -DisableNameChecking; $color = '%COLOR%'; $msg = '%MESSAGE%'; Write-Message ('============== [' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss.ff') + '] ' + $msg + ' ==============') -Type Info -ForegroundColor $color -NoHeader"
