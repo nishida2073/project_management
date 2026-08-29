@@ -4,7 +4,7 @@
 # download-folder.ps1と同じ仕組み（Azure CLIで取得したトークンでMicrosoft Graph APIを直接呼ぶ）の逆方向版。
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "common.ps1")
+. (Join-Path $scriptDir "library\common.ps1")
 $startTime = Get-Date
 
 $siteUrl = $env:UPLOAD_SITE_URL

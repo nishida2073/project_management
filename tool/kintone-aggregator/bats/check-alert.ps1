@@ -15,8 +15,8 @@
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
-Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
-    Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
 }
 
 function Recovery-DailyData {

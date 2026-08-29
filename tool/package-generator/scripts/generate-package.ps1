@@ -3,7 +3,7 @@
 # =========================================
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "common.ps1")
+. (Join-Path $scriptDir "library\common.ps1")
 $startTime = Get-Date
 
 $configPath = $env:GENERATE_CONFIG_PATH

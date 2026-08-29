@@ -13,7 +13,7 @@ param(
 )
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "common.ps1")
+. (Join-Path $scriptDir "library\common.ps1")
 
 $baseUrl = $env:KINTONE_BASE_URL
 $configRoot = $env:COMMON_CONFIG_PATH
@@ -89,7 +89,7 @@ $script:exitCode = 0
             $spaceId = $spaceGroup.Name
             $expectedSpaceRow = $spaceGroup.Group | Select-Object -First 1
             Write-Message ""
-            Write-Message "=== スペースID: $spaceId ($($expectedSpaceRow.'スペース名')) ===" -ForegroundColor Cyan
+            Write-Message "# スペースID: $spaceId ($($expectedSpaceRow.'スペース名'))"
 
             $current = $null
             try {
@@ -167,7 +167,7 @@ $script:exitCode = 0
 
     if ($checkAppList -or $checkAppAcl -or $checkAppRecordAcl) {
         Write-Message ""
-        Write-Message "=== アプリの確認 ===" -ForegroundColor Cyan
+        Write-Message "## アプリの確認"
 
         $allAppIds = @(
             @($(if ($checkAppList) { $appRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } })) +

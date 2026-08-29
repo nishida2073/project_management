@@ -13,7 +13,7 @@ param(
 )
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "common.ps1")
+. (Join-Path $scriptDir "library\common.ps1")
 
 $baseUrl = $env:KINTONE_BASE_URL
 $configRoot = $env:COMMON_CONFIG_PATH
@@ -53,7 +53,7 @@ $script:exitCode = 0
         $spaceRow = $spaceGroup.Group | Select-Object -First 1
 
         Write-Message ""
-        Write-Message "=== スペースID: $spaceId ($($spaceRow.'スペース名')) ===" -ForegroundColor Cyan
+        Write-Message "# スペースID: $spaceId ($($spaceRow.'スペース名'))"
 
         if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-settings") {
             try {
@@ -111,7 +111,7 @@ $script:exitCode = 0
             if (-not $label -and $recordAclRowsForApp.Count -gt 0) { $label = $recordAclRowsForApp[0].'アプリ名' }
 
             Write-Message ""
-            Write-Message "=== アプリID: $appId ($label) ===" -ForegroundColor Cyan
+            Write-Message "## アプリID: $appId ($label) ==="
 
             $appHasError = $false
             $appChanged = $false

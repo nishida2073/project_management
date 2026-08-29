@@ -30,7 +30,7 @@ $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 
 # 設定タブの接続テストでInvoke-KintoneRequestを使うため読み込む（$scriptDirはexe化時は未設定になるため$basePath基準で解決する）
-. (Join-Path $basePath "scripts\common.ps1")
+. (Join-Path $basePath "scripts\library\common.ps1")
 
 # 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
@@ -560,8 +560,6 @@ function Invoke-SingleStep {
     Set-RunControlsEnabled $false
     $lblOverallStatus.Text = ""
 
-    Write-Log ""
-    Write-Log "-------------------- $configName --------------------"
     Invoke-Step -Id $Id -ConfigName $configName | Out-Null
 
     Set-RunControlsEnabled $true
@@ -592,9 +590,7 @@ $btnRunAll.Add_Click({
     $lblOverallStatus.ForeColor = [System.Drawing.Color]::Black
     $lblOverallStatus.Text = "実行中..."
 
-    Write-Log ""
-    Write-Log "-------------------- $configName --------------------"
-
+    
     $failedLabel = Invoke-AllStepsForCurrentInputs
 
     if ($failedLabel) {

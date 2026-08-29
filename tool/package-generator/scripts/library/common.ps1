@@ -199,7 +199,7 @@ function Show-LogFileContent {
     Write-Message ""
     foreach ($line in [System.IO.File]::ReadAllLines($Path, $cp932)) {
         if ($line -match '^#') {
-            Write-Message $line -ForegroundColor Magenta
+            Write-Message $line
         } elseif ($line -match 'エラー|失敗|存在しません') {
             Write-Message $line -ForegroundColor Red
         } else {

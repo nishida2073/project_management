@@ -18,8 +18,8 @@ if ($MyInvocation.MyCommand.Path) {
 $basePath = Join-Path $rootPath "bats"
 
 $libraryDir = Join-Path $basePath "library"
-Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
-    Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
 }
 
 # 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、

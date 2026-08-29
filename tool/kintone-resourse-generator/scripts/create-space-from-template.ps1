@@ -11,7 +11,7 @@ param(
 )
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "common.ps1")
+. (Join-Path $scriptDir "library\common.ps1")
 
 $baseUrl = $env:KINTONE_BASE_URL
 $logRoot = $env:COMMON_LOG_PATH

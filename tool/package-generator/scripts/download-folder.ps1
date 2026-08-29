@@ -6,7 +6,7 @@
 # Microsoft Graph APIで直接ファイルを取得する。
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "common.ps1")
+. (Join-Path $scriptDir "library\common.ps1")
 $startTime = Get-Date
 
 $siteUrl = $env:DOWNLOAD_SITE_URL

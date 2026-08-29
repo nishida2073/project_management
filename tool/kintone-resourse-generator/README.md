@@ -21,7 +21,7 @@
 | `generate-config-from-template.bat` | 「2. 設定ファイルの生成」のエントリーポイント |
 | `apply-kintone-resources.bat` | 「3. kintoneへ反映」のエントリーポイント |
 | `check-kintone-resources.bat` | 「4. データチェック」のエントリーポイント |
-| `scripts\common.ps1` | 5つの`.ps1`が共通で使う関数（kintone REST APIの呼び出し、Excelの読み書き、ログ出力など）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
+| `scripts\library\common.ps1` | 5つの`.ps1`が共通で使う関数（kintone REST APIの呼び出し、Excelの読み書き、ログ出力など）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
 | `scripts\create-space-from-template.ps1` / `download-kintone-resources.ps1` / `generate-config-from-template.ps1` / `apply-kintone-resources.ps1` / `check-kintone-resources.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `template\*.xlsx` | 設定テンプレート（スペース・アプリ名だけで紐づく、共通のメンバー・ACL設定）。書き方は[設定ファイル・テンプレートの構成](#設定ファイルテンプレートの構成)を参照 |
 | `download\<スペース識別名>_download.xlsx` | 「1. ダウンロード」の出力＝「2. 設定ファイルの生成」の入力の一つ |

@@ -1,4 +1,4 @@
-# CLAUDE.md
+﻿# CLAUDE.md
 
 This file provides guidance to Claude Code when working in this directory
 (`tool/package-generator`). It sits inside a larger documentation project; this
@@ -45,11 +45,11 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
   a `client=` argument (it errors out without one, unlike the other four where
   it's optional) since it names the output file.
 - `scripts/*.ps1` — the actual implementation, one per stage plus
-  `generate-config.ps1`, plus `common.ps1` (dot-sourced shared helpers: Azure
-  CLI/Graph auth, tree-view log formatting — `generate-config.ps1` dot-sources
-  it too, purely for the `$scriptDir`/`$basePath` convention below, since it
-  needs neither Azure CLI/Graph nor the log formatting). Not meant to be run
-  directly by the user.
+  `generate-config.ps1`, plus `scripts/library/common.ps1` (dot-sourced shared
+  helpers: Azure CLI/Graph auth, tree-view log formatting — `generate-config.ps1`
+  dot-sources it too, purely for the `$scriptDir`/`$basePath` convention below,
+  since it needs neither Azure CLI/Graph nor the log formatting). Not meant to
+  be run directly by the user.
 - `clients/` — `set-env.bat` (the real defaults file, moved here from the
   project root — see `clients/README.md` for why and the resulting
   `BASE_PATH` computation gotcha) plus one `set-env-<client name>.bat` per
@@ -471,7 +471,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     and, unless it's "すべて", appends `"$logClient" + "_"` to the
     `Get-ChildItem -Filter` pattern — when `$logClient` is `$defaultClientLabel`
     ("デフォルト") this becomes the same `"デフォルト_"` segment
-    `Get-ClientLogSegment` (`scripts\common.ps1`) inserts into log filenames
+    `Get-ClientLogSegment` (`scripts\library\common.ps1`) inserts into log filenames
     for a no-client run, and when it's an actual client name it becomes that
     client's `<name>_` segment — either way `Update-LogView`'s filter and
     `Get-ClientLogSegment`'s filename segment are built from the same
@@ -480,7 +480,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     (`Add_SelectedIndexChanged`, and the ログ tab's `SelectedIndexChanged`
     case in the shared `$tabControl` handler calls both `Update-LogClientList`
     and `Update-LogView`). A sibling helper, `Get-ClientLogHeaderLines` (also
-    `scripts\common.ps1`), returns `@("クライアント: <名前>")` when
+    `scripts\library\common.ps1`), returns `@("クライアント: <名前>")` when
     `$env:CLIENT_NAME` is set, or `@("クライアント: $defaultClientLabel")`
     otherwise — mirroring `Get-ClientLogSegment`'s own `$env:CLIENT_NAME`
     check (`"$($env:CLIENT_NAME)_"` or `"${defaultClientLabel}_"`) so the log
@@ -488,7 +488,7 @@ the actual `.bat`/`.ps1` content, don't assume the README is already right).
     デフォルト) actually ran, even though the two live in separate functions
     (one returns a display line, the other a filename fragment). Both read
     a `$defaultClientLabel = "デフォルト"` defined once near the top of
-    `scripts\common.ps1` (right after `$cp932`) — added after "デフォルト" was
+    `scripts\library\common.ps1` (right after `$cp932`) — added after "デフォルト" was
     found hardcoded independently in both functions (confirmed by user
     report: the literal was scattered across the codebase with no single
     source of truth). Note this is a **separate** constant from `gui.ps1`'s
@@ -676,7 +676,7 @@ which handles the case-only rename correctly).
 Download/upload authenticate via **Azure CLI** (`az login ... --use-device-code
 --allow-no-subscriptions`) and call **Microsoft Graph** (`graph.microsoft.com`)
 directly with the resulting token — see `Get-AzureCliPath` / `Get-GraphToken` in
-`scripts/common.ps1`. This was a deliberate choice after PnP.PowerShell's and
+`scripts/library/common.ps1`. This was a deliberate choice after PnP.PowerShell's and
 Microsoft Graph PowerShell SDK's default multi-tenant apps were both blocked by
 the target tenant's Conditional Access policy (`AADSTS700016`); Azure CLI's own
 app was the one already consented. Raw SharePoint REST (`_api/web`) also 401s in
@@ -704,7 +704,7 @@ a frozen GUI showing only "サインインが必要です..." with no code:
   doubled outer quotes are required cmd.exe syntax when the command being
   redirected is itself a quoted, space-containing path), and only
   `StandardOutput` is read/redirected — no separate `StandardError` loop.
-- `Get-GraphToken` in `scripts/common.ps1` — rather than piping `az login`'s
+- `Get-GraphToken` in `scripts/library/common.ps1` — rather than piping `az login`'s
   output to `Out-Null` and hoping the device-code prompt appears somewhere on
   its own, it launches `az login` the same `cmd.exe /c "... 2>&1"` way,
   reads the merged stream line-by-line, and regex-matches
