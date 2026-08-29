@@ -20,11 +20,11 @@
 | `generate-package.bat` | 「2. 個別パッケージの作成」のエントリーポイント |
 | `generate-config.bat` | 「0. パッケージ定義ファイルの下書き生成」（任意）のエントリーポイント |
 | `upload-folder.bat` | 「3. ファイルアップロード」のエントリーポイント |
-| `scripts\library\common.ps1` | 4つの`.ps1`が共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
-| `scripts\download-folder.ps1` / `generate-package.ps1` / `generate-config.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
+| `bats\library\common.ps1` | 4つの`.ps1`が共通で使う関数（フォルダ構成のツリー表示、Azure CLI/Microsoft Graph関連の処理）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
+| `bats\download-folder.ps1` / `generate-package.ps1` / `generate-config.ps1` / `upload-folder.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `package_definition.xlsx` | パッケージ定義ファイル。書き方は[config\README.md](config/README.md)を参照 |
 | `build-gui.bat` | GUI版（`コース別パッケージ生成ツール.exe`）をビルドするエントリーポイント。[GUI版](#gui版)を参照 |
-| `scripts\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
+| `bats\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `clients\set-env.bat` | 環境変数の初期値をまとめて設定する（他の`.bat`から`call clients\set-env.bat`される） |
 | `clients\set-env-<クライアント名>.bat` | クライアントごとの上書き設定ファイル（GUI版の「実行」「ログ」「設定」タブの「クライアント」ドロップダウンから選ぶ）。書き方は[clients\README.md](clients/README.md)を参照 |
 

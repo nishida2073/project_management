@@ -2,7 +2,7 @@
 
 cd /d %~dp0
 
-powershell -ExecutionPolicy Bypass -File .\scripts\build-gui.ps1
+powershell -ExecutionPolicy Bypass -File .\bats\build-gui.ps1
 set "EXITCODE=%ERRORLEVEL%"
 
 echo.

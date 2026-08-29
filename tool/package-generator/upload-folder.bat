@@ -1,7 +1,5 @@
 @echo off
 
-cd /d %~dp0
-
 set "BATCH_NAME=%~nx0"
 :parse_args
 if "%~1"=="" goto args_done
@@ -12,13 +10,17 @@ if /i "%arg:~0,8%"=="exclude=" set "UPLOAD_ITEMS_EXCLUDE=%arg:~8%"
 shift
 goto parse_args
 :args_done
-call clients\set-env.bat
-if defined CLIENT_NAME if exist "clients\set-env-%CLIENT_NAME%.bat" call clients\set-env-%CLIENT_NAME%.bat
+call "%~dp0clients\set-env.bat"
+if defined CLIENT_NAME if exist "%~dp0clients\set-env-%CLIENT_NAME%.bat" call "%~dp0clients\set-env-%CLIENT_NAME%.bat"
+
+call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File .\scripts\upload-folder.ps1
+ -File "%~dp0bats\upload-folder.ps1"
 set "EXITCODE=%ERRORLEVEL%"
+
+call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"
 
 timeout /t 5 >nul
 

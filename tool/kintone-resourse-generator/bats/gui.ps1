@@ -30,7 +30,7 @@ $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 
 # 設定タブの接続テストでInvoke-KintoneRequestを使うため読み込む（$scriptDirはexe化時は未設定になるため$basePath基準で解決する）
-. (Join-Path $basePath "scripts\library\common.ps1")
+. (Join-Path $basePath "bats\library\common.ps1")
 
 # 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図

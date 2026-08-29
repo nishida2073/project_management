@@ -1,7 +1,5 @@
 @echo off
 
-cd /d %~dp0
-
 set "BATCH_NAME=%~nx0"
 set "FORCE="
 
@@ -20,13 +18,17 @@ if not defined CLIENT_NAME (
     goto end
 )
 
-call clients\set-env.bat
-if exist "clients\set-env-%CLIENT_NAME%.bat" call clients\set-env-%CLIENT_NAME%.bat
+call "%~dp0clients\set-env.bat"
+if exist "%~dp0clients\set-env-%CLIENT_NAME%.bat" call "%~dp0clients\set-env-%CLIENT_NAME%.bat"
+
+call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File .\scripts\generate-config.ps1
+ -File "%~dp0bats\generate-config.ps1"
 set "EXITCODE=%ERRORLEVEL%"
+
+call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"
 
 :end
 timeout /t 5 >nul

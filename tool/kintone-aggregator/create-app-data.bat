@@ -4,9 +4,7 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~n0"
 
-pushd "%~dp0"
-
-set "LOG_DIR=.\logs"
+set "LOG_DIR=%~dp0logs"
 
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
@@ -32,16 +30,16 @@ set /a Start=%TargetDateTerm%-1
 for /l %%i in (%Start%,-1,0) do (
     for /f %%d in ('powershell -NoProfile -Command "(Get-Date \"%TargetDate%\").AddDays(-%%i).ToString(\"yyyy-MM-dd\")"') do (
         for %%F in (
-            ".\bats\create-daily-report.bat"
-            ".\bats\create-pulse-survey.bat"
+            "%~dp0bats\create-daily-report.bat"
+            "%~dp0bats\create-pulse-survey.bat"
         ) do (
-            call ".\bats\message.bat" "Start %%~nxF {%%d}"
+            call "%~dp0bats\message.bat" "Start %%~nxF {%%d}"
             
-            call ".\bats\message.bat" "Please wait..." "Green"
+            call "%~dp0bats\message.bat" "Please wait..." "Green"
             
-            call "%%F" "%%d" "%~3" > "%LOG_DIR%\%%~nF-%%d.log"
+            call %%F "%%d" "%~3" > "%LOG_DIR%\%%~nF-%%d.log"
             
-            call ".\bats\message.bat" "Finished %%~nxF {%%d}"
+            call "%~dp0bats\message.bat" "Finished %%~nxF {%%d}"
         )
     )
 )

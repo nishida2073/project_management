@@ -4,9 +4,7 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~nx0"
 
-pushd "%~dp0"
-
-set "LOG_DIR=.\logs"
+set "LOG_DIR=%~dp0logs"
 
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
@@ -23,15 +21,15 @@ if /i "%TargetDate%"=="now" (
 )
 
 for %%F in (
-    ".\bats\check-alert.bat"
+    "%~dp0bats\check-alert.bat"
 ) do (
-    call ".\bats\message.bat" "Start %%~nxF {%TargetDate%}"
+    call "%~dp0bats\message.bat" "Start %%~nxF {%TargetDate%}"
     
-    call ".\bats\message.bat" "Please wait..." "Green"
+    call "%~dp0bats\message.bat" "Please wait..." "Green"
     
-    call "%%F" "%TargetDate%" > "%LOG_DIR%\%%~nF-%TargetDate%.log"
+    call %%F "%TargetDate%" > "%LOG_DIR%\%%~nF-%TargetDate%.log"
     
-    call ".\bats\message.bat" "Finished %%~nxF {%TargetDate%}"
+    call "%~dp0bats\message.bat" "Finished %%~nxF {%TargetDate%}"
 )
 
 endlocal

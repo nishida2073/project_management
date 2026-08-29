@@ -1,11 +1,13 @@
 @echo off
 
-pushd "%~dp0"
+set "MyName=%~nx0"
 
-call ".\common-env.bat"
+call "%~dp0message.bat" "Start %MyName%"
 
-call "..\create-app-data.bat" "%~1" "" "%~2"
-call "..\collect-app-data.bat" "%~1" "" "%~2"
+call "%~dp0common-env.bat"
 
-popd
+call "%~dp0..\create-app-data.bat" "%~1" "" "%~2"
+call "%~dp0..\collect-app-data.bat" "%~1" "" "%~2"
+
+call "%~dp0message.bat" "Finished %MyName%"
 
