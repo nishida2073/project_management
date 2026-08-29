@@ -185,11 +185,8 @@ function New-CategoryTabControl {
         return $total
     }
 
-    $maxPanelHeight = ($CategoryDefs | ForEach-Object { Get-CategoryPanelHeight -ButtonDefs $_.ButtonDefs } | Measure-Object -Maximum).Maximum
-
     $tabControl = New-Object System.Windows.Forms.TabControl
     $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
-    $tabControl.Height = $TabHeaderAllowance + $maxPanelHeight
 
     $runButtons = @{}
     $stepStatusLabels = @{}
@@ -297,6 +294,19 @@ function New-CategoryTabControl {
             $groupY += $bdHeight + $GroupSpacing
         }
     }
+
+    # タブごとにボタン数が異なるため、選択中のタブの実際の内容量に合わせてtabControl自体の高さを変え、
+    # 下の（Dock=Fillな）ログ欄の開始位置がタブごとに動的に変わるようにする
+    $updateTabHeight = {
+        if ($tabControl.SelectedTab -and $tabControl.SelectedTab.Controls.Count -gt 0) {
+            $tabControl.Height = $TabHeaderAllowance + $tabControl.SelectedTab.Controls[0].Height
+            if ($tabControl.Parent) { $tabControl.Parent.PerformLayout() }
+        }
+    }.GetNewClosure()
+    $tabControl.Add_SelectedIndexChanged($updateTabHeight)
+    # 生成直後はまだ親に追加されておらずSelectedTabが解決できないことがあるため、
+    # 初期表示分だけは先頭タブの高さを直接計算して設定する
+    $tabControl.Height = $TabHeaderAllowance + (Get-CategoryPanelHeight -ButtonDefs $CategoryDefs[0].ButtonDefs)
 
     return [PSCustomObject]@{
         TabControl       = $tabControl
