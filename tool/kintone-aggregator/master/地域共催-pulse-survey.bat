@@ -2,7 +2,7 @@
 
 call "%~dp0’nˆæ‹¤Ã.bat"
 
-set "TargetAppIds=5889"
+set "TargetAppIds=38"
 set "TargetDateCodeField=“ú•t_0"
 set "TargetUserCodeField=ì¬Ò.code"
 set "TargetFixedCodeFields=’Ê”Ô,‰ïĞ–¼,óu¶ID,–¼,‰È–Ú–¼,“ú•t"

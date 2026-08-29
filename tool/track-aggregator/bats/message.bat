@@ -9,4 +9,4 @@ if "%COLOR%"=="" (
 )
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    ". '%~dp0library\common.ps1'; $color = '%COLOR%'; $msg = '%MESSAGE%'; Write-Message ('================ [' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss.ff') + '] ' + $msg + ' ================') -Type Info -ForegroundColor $color -NoHeader"
+    ". '%~dp0library\common.ps1'; $color = '%COLOR%'; $msg = '%MESSAGE%'; Write-Message ('=============== [' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss.ff') + '] ' + $msg + ' ===============') -Type Info -ForegroundColor $color -NoHeader"

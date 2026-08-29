@@ -1,7 +1,7 @@
 @echo off
 
-set "KintoneID="
-set "KintonePW="
-set "Authorization=U3RkMjAyNl9TRlQ6U3RkMjAyNl9TRlQ="
-set "KintoneSubdomain=univ-kyousai-l"
+set "KintoneID=user01"
+set "KintonePW=abcd1234"
+set "Authorization="
+set "KintoneSubdomain=7iw5x87e2mne"
 set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
