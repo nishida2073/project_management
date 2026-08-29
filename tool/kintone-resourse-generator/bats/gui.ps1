@@ -30,7 +30,10 @@ $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 
 # 設定タブの接続テストでInvoke-KintoneRequestを使うため読み込む（$scriptDirはexe化時は未設定になるため$basePath基準で解決する）
-. (Join-Path $basePath "bats\library\common.ps1")
+$libraryDir = Join-Path $basePath "bats\library"
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
+}
 
 # 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
@@ -334,14 +337,7 @@ $btnBatchBrowse.Add_Click({
     }
 })
 
-$txtLog = New-Object System.Windows.Forms.RichTextBox
-$txtLog.Multiline = $true
-$txtLog.ScrollBars = [System.Windows.Forms.RichTextBoxScrollBars]::Vertical
-$txtLog.ReadOnly = $true
-$txtLog.Font = New-Object System.Drawing.Font("Consolas", 9)
-$txtLog.Dock = [System.Windows.Forms.DockStyle]::Fill
-$txtLog.DetectUrls = $true
-$txtLog.Add_LinkClicked({ [System.Diagnostics.Process]::Start($_.LinkText) })
+$txtLog = New-LogTextBox
 
 $tabSingleRun.Controls.Add($runTopPanel)
 $tabBatchRun.Controls.Add($batchPanel)
@@ -349,102 +345,9 @@ $tabBatchRun.Controls.Add($batchPanel)
 $tabRun.Controls.Add($txtLog)
 $tabRun.Controls.Add($innerRunTabControl)
 
-# コンソールカラー名（Write-Messageが使う[[COLOR:xxx]]タグの中身）をSystem.Drawing.Colorへ変換
-function Get-ConsoleColorAsDrawingColor {
-    param([string]$ConsoleColorName)
-    switch ($ConsoleColorName) {
-        "Black"       { [System.Drawing.Color]::Black }
-        "DarkBlue"    { [System.Drawing.Color]::DarkBlue }
-        "DarkGreen"   { [System.Drawing.Color]::DarkGreen }
-        "DarkCyan"    { [System.Drawing.Color]::DarkCyan }
-        "DarkRed"     { [System.Drawing.Color]::DarkRed }
-        "DarkMagenta" { [System.Drawing.Color]::DarkMagenta }
-        "DarkYellow"  { [System.Drawing.Color]::Olive }
-        "Gray"        { [System.Drawing.Color]::Gray }
-        "DarkGray"    { [System.Drawing.Color]::DarkGray }
-        "Blue"        { [System.Drawing.Color]::Blue }
-        "Green"       { [System.Drawing.Color]::Green }
-        "Cyan"        { [System.Drawing.Color]::Cyan }
-        "Red"         { [System.Drawing.Color]::Red }
-        "Magenta"     { [System.Drawing.Color]::Magenta }
-        "Yellow"      { [System.Drawing.Color]::Gold }
-        "White"       { [System.Drawing.Color]::Black } # 白背景のログ欄では白文字が見えなくなるため黒にする
-        default       { [System.Drawing.Color]::Black }
-    }
-}
-
 function Write-Log {
     param([string]$Text)
-    $color = [System.Drawing.Color]::Black
-    if ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
-        $color = Get-ConsoleColorAsDrawingColor -ConsoleColorName $Matches['color']
-        $Text = $Matches['rest']
-    }
-    $txtLog.SelectionStart = $txtLog.TextLength
-    $txtLog.SelectionLength = 0
-    $txtLog.SelectionColor = $color
-    $txtLog.AppendText("$Text`r`n")
-    $txtLog.SelectionStart = $txtLog.TextLength
-    $txtLog.ScrollToCaret()
-}
-
-function Invoke-BatStep {
-    param(
-        [Parameter(Mandatory)][string]$BatPath,
-        [string[]]$ArgList = @()
-    )
-
-    $script:lastStepOutputLines = New-Object System.Collections.Generic.List[string]
-
-    $quotedArgs = ($ArgList | ForEach-Object { '"' + $_ + '"' }) -join ' '
-
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = "cmd.exe"
-    $psi.Arguments = "/c ""`"$BatPath`" $quotedArgs 2>&1"""
-    $psi.WorkingDirectory = $basePath
-    $psi.UseShellExecute = $false
-    $psi.RedirectStandardOutput = $true
-    $psi.CreateNoWindow = $true
-    $psi.StandardOutputEncoding = $cp932
-
-    $proc = New-Object System.Diagnostics.Process
-    $proc.StartInfo = $psi
-
-    $outputQueue = [System.Collections.Concurrent.ConcurrentQueue[string]]::new()
-    $outputAction = {
-        if ($null -ne $EventArgs.Data) {
-            $Event.MessageData.Enqueue($EventArgs.Data)
-        }
-    }
-    $outputEvent = Register-ObjectEvent -InputObject $proc -EventName OutputDataReceived -Action $outputAction -MessageData $outputQueue
-
-    $proc.Start() | Out-Null
-    $script:currentProc = $proc
-    $proc.BeginOutputReadLine()
-
-    while (!$proc.HasExited) {
-        $line = $null
-        while ($outputQueue.TryDequeue([ref]$line)) {
-            Write-Log $line
-            $script:lastStepOutputLines.Add($line)
-        }
-        [System.Windows.Forms.Application]::DoEvents()
-        Start-Sleep -Milliseconds 50
-    }
-
-    $proc.WaitForExit()
-    Start-Sleep -Milliseconds 200
-    $line = $null
-    while ($outputQueue.TryDequeue([ref]$line)) {
-        Write-Log $line
-        $script:lastStepOutputLines.Add($line)
-    }
-
-    Unregister-Event -SourceIdentifier $outputEvent.Name
-    Remove-Job -Name $outputEvent.Name -Force
-    $script:currentProc = $null
-
-    return $proc.ExitCode
+    Write-ColoredLine -TextBox $txtLog -Text $Text
 }
 
 function Get-StepBat {
@@ -519,7 +422,10 @@ function Invoke-Step {
     Write-Log ""
     Write-Log "--------------- $label 開始 ---------------"
 
-    $exitCode = Invoke-BatStep -BatPath (Get-StepBat -Id $Id) -ArgList (Get-StepArgs -Id $Id -ConfigName $ConfigName)
+    $script:lastStepOutputLines = New-Object System.Collections.Generic.List[string]
+    $exitCode = Invoke-BatStep -BatPath (Get-StepBat -Id $Id) -WorkingDirectory $basePath -BatArgs (Get-StepArgs -Id $Id -ConfigName $ConfigName) `
+        -OnOutputLine { param($line) Write-Log $line; $script:lastStepOutputLines.Add($line) } `
+        -CurrentProcessRef ([ref]$script:currentProc)
 
     # exitCodeが非0でも、対応付け確認などの警告のみでファイル自体は生成されていることがあるため、
     # 「開く」ボタンで開けるよう成否に関わらずファイルの存在を確認してパスを登録する。
