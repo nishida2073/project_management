@@ -40,7 +40,7 @@ function Recovery-DailyData {
             if ($UseRecovery -eq 1) {
                 Write-Message "未集計のため集計を実施します。日付: $missingDate" -VarName "message" -Type "Info"
                 # 集計対象は当該グループのみに絞る（全グループ分を再集計する無駄な重複処理を避ける）
-                Start-Process $RecoveryScriptPath -ArgumentList $missingDate, $TargetGroupName -Wait
+                Start-Process $RecoveryScriptPath -ArgumentList $missingDate, $TargetGroupName -WindowStyle Hidden -Wait
             }else{
                 Write-Message "集計データがありません。日付: $missingDate" -VarName "message" -Type "Error" -ForegroundColor Red
             }
