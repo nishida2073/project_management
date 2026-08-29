@@ -37,40 +37,48 @@ set "SummaryTemplateSheetName=サマリー_パルスサーベイ-テンプレート"
 
 for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF] {%TargetDate%}"
-    
+
     set "envFile=%MasterDataRootDir%\%%~nF-pulse-survey.bat"
     if exist "!envFile!" (
         call "!envFile!"
-        
+
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
-        
+        set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.failed"
+        if exist "!ERROR_FLAG!" del /f /q "!ERROR_FLAG!"
+
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
-          "& '%SCRIPT_PATH%'" ^
-          "   -BaseUrl '!BaseUrl!'" ^
-          "   -MasterDataFilePath '%%F'" ^
-          "   -TargetGroupName '%%~nF'" ^
-          "   -KintoneID '!KintoneID!'" ^
-          "   -KintonePW '!KintonePW!'" ^
-          "   -Authorization '!Authorization!'" ^
-          "   -OutputRootDir '%OutputTargetDir%'" ^
-          "   -CreateExcelFile '%CreateExcelFile%'" ^
-          "   -CreateClassSheet '%CreateClassSheet%'" ^
-          "   -CreateReminderLink '%CreateReminderLink%'" ^
-          "   -OutputSheetNameSuffix '%OutputSheetNameSuffix%'" ^
-          "   -SummarySheetNamePrefix '%SummarySheetNamePrefix%'" ^
-          "   -TemplateFilePath '%TemplateFilePath%'" ^
-          "   -ClassTemplateSheetName '%ClassTemplateSheetName%'" ^
-          "   -SummaryTemplateSheetName '%SummaryTemplateSheetName%'" ^
-          "   -TargetDate '%TargetDate%'" ^
-          "   -TargetAppIds '!TargetAppIds!'" ^
-          "   -TargetDateCodeField '!TargetDateCodeField!'" ^
-          "   -TargetUserCodeField '!TargetUserCodeField!'" ^
-          "   -TargetFixedCodeFields '!TargetFixedCodeFields!'" ^
-          "   -TargetAppCodeFields '!TargetAppCodeFields!'" ^
-          "   -TargetSummaryCodeFields '!TargetSummaryCodeFields!';" ^
-          "Remove-Item -Path '!JOB_FLAG!' -Force;"
-       
+          "try {" ^
+          "  & '%SCRIPT_PATH%'" ^
+          "     -BaseUrl '!BaseUrl!'" ^
+          "     -MasterDataFilePath '%%F'" ^
+          "     -TargetGroupName '%%~nF'" ^
+          "     -KintoneID '!KintoneID!'" ^
+          "     -KintonePW '!KintonePW!'" ^
+          "     -Authorization '!Authorization!'" ^
+          "     -OutputRootDir '%OutputTargetDir%'" ^
+          "     -CreateExcelFile '%CreateExcelFile%'" ^
+          "     -CreateClassSheet '%CreateClassSheet%'" ^
+          "     -CreateReminderLink '%CreateReminderLink%'" ^
+          "     -OutputSheetNameSuffix '%OutputSheetNameSuffix%'" ^
+          "     -SummarySheetNamePrefix '%SummarySheetNamePrefix%'" ^
+          "     -TemplateFilePath '%TemplateFilePath%'" ^
+          "     -ClassTemplateSheetName '%ClassTemplateSheetName%'" ^
+          "     -SummaryTemplateSheetName '%SummaryTemplateSheetName%'" ^
+          "     -TargetDate '%TargetDate%'" ^
+          "     -TargetAppIds '!TargetAppIds!'" ^
+          "     -TargetDateCodeField '!TargetDateCodeField!'" ^
+          "     -TargetUserCodeField '!TargetUserCodeField!'" ^
+          "     -TargetFixedCodeFields '!TargetFixedCodeFields!'" ^
+          "     -TargetAppCodeFields '!TargetAppCodeFields!'" ^
+          "     -TargetSummaryCodeFields '!TargetSummaryCodeFields!'" ^
+          "} catch {" ^
+          "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
+          "  throw" ^
+          "} finally {" ^
+          "  Remove-Item -Path '!JOB_FLAG!' -Force" ^
+          "}"
+
     ) else (
         call "%~dp0message.bat" "環境設定ファイルが見つかりません: !envFile!" "Red"
     )
@@ -91,3 +99,14 @@ if !ALL_DONE! EQU 0 (
 )
 
 call "%~dp0message.bat" "Finished Jobs %MyName% ALL {%TargetDate%}"
+
+set "HAS_ERROR=0"
+for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
+    set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.failed"
+    if exist "!ERROR_FLAG!" (
+        set "HAS_ERROR=1"
+        call "%~dp0message.bat" "Failed %MyName% [%%~nF] {%TargetDate%}" "Red"
+        del /f /q "!ERROR_FLAG!"
+    )
+)
+if !HAS_ERROR! EQU 1 exit /b 1
