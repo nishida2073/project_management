@@ -26,6 +26,10 @@ $lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 $defaultClientLabel = "デフォルト"
 $script:suppressComboSync = $false
 
+# 子プロセス（all.bat経由で起動されるps1）のWrite-Messageに、
+# GUIログ向けの色タグ付き出力へ切り替えさせる合図
+$env:GUI_LOG_MODE = "1"
+
 function Get-ClientBatPath {
     param([string]$ClientName)
     return Join-Path $clientsDir "$clientFilePrefix-$ClientName.bat"
@@ -222,11 +226,42 @@ $txtLog.Add_LinkClicked({ [System.Diagnostics.Process]::Start($_.LinkText) })
 $tabRun.Controls.Add($txtLog)
 $tabRun.Controls.Add($runTopPanel)
 
+# コンソールカラー名（Write-Messageが使う[[COLOR:xxx]]タグの中身）をSystem.Drawing.Colorへ変換
+function Get-ConsoleColorAsDrawingColor {
+    param([string]$ConsoleColorName)
+    switch ($ConsoleColorName) {
+        "Black"       { [System.Drawing.Color]::Black }
+        "DarkBlue"    { [System.Drawing.Color]::DarkBlue }
+        "DarkGreen"   { [System.Drawing.Color]::DarkGreen }
+        "DarkCyan"    { [System.Drawing.Color]::DarkCyan }
+        "DarkRed"     { [System.Drawing.Color]::DarkRed }
+        "DarkMagenta" { [System.Drawing.Color]::DarkMagenta }
+        "DarkYellow"  { [System.Drawing.Color]::Olive }
+        "Gray"        { [System.Drawing.Color]::Gray }
+        "DarkGray"    { [System.Drawing.Color]::DarkGray }
+        "Blue"        { [System.Drawing.Color]::Blue }
+        "Green"       { [System.Drawing.Color]::Green }
+        "Cyan"        { [System.Drawing.Color]::Cyan }
+        "Red"         { [System.Drawing.Color]::Red }
+        "Magenta"     { [System.Drawing.Color]::Magenta }
+        "Yellow"      { [System.Drawing.Color]::Gold }
+        "White"       { [System.Drawing.Color]::Black } # 白背景のログ欄では白文字が見えなくなるため黒にする
+        default       { [System.Drawing.Color]::Black }
+    }
+}
+
 function Write-Log {
     param([string]$Text)
-    $txtLog.AppendText("$Text`r`n")
+    $color = [System.Drawing.Color]::Black
+    if ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
+        $color = Get-ConsoleColorAsDrawingColor -ConsoleColorName $Matches['color']
+        $Text = $Matches['rest']
+    }
     $txtLog.SelectionStart = $txtLog.TextLength
     $txtLog.SelectionLength = 0
+    $txtLog.SelectionColor = $color
+    $txtLog.AppendText("$Text`r`n")
+    $txtLog.SelectionStart = $txtLog.TextLength
     $txtLog.Focus() | Out-Null
     $txtLog.ScrollToCaret()
 }

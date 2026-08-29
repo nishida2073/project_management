@@ -12,36 +12,36 @@ $clientName = $env:CLIENT_NAME
 $downloadLocalPath = $env:DOWNLOAD_LOCAL_PATH
 
 if (!$clientName) {
-    Write-Host "CLIENT_NAME が指定されていません（generate-config.bat client:<クライアント名> のように指定してください）"
+    Write-Message "CLIENT_NAME が指定されていません（generate-config.bat client:<クライアント名> のように指定してください）" -ForegroundColor Red
     exit 1
 }
 
 if (!$downloadLocalPath) {
-    Write-Host "DOWNLOAD_LOCAL_PATH を set-env.bat で設定してください"
+    Write-Message "DOWNLOAD_LOCAL_PATH を set-env.bat で設定してください" -ForegroundColor Red
     exit 1
 }
 
 if (!(Test-Path -LiteralPath $downloadLocalPath)) {
-    Write-Host "存在しません：$downloadLocalPath"
+    Write-Message "存在しません：$downloadLocalPath" -ForegroundColor Red
     exit 1
 }
 
 $templatePath = Join-Path $basePath "config\package_definition.xlsx"
 if (!(Test-Path -LiteralPath $templatePath)) {
-    Write-Host "テンプレートが見つかりません：$templatePath"
+    Write-Message "テンプレートが見つかりません：$templatePath" -ForegroundColor Red
     exit 1
 }
 
 $destPath = Join-Path (Split-Path $templatePath -Parent) "package_definition_$clientName.xlsx"
 
 if ((Test-Path -LiteralPath $destPath) -and $env:FORCE -ne "1") {
-    Write-Host "すでに存在します：$destPath"
-    Write-Host "上書きする場合は force:1 を指定してください"
+    Write-Message "すでに存在します：$destPath" -ForegroundColor Red
+    Write-Message "上書きする場合は force:1 を指定してください" -ForegroundColor Red
     exit 1
 }
 
 if (!(Get-Module -ListAvailable ImportExcel)) {
-    Write-Host "ImportExcelをインストールします"
+    Write-Message "ImportExcelをインストールします"
     Install-Module ImportExcel -Scope CurrentUser -Force
 }
 
@@ -97,12 +97,12 @@ try {
             $row++
         }
 
-        Write-Host "作成しました：$destPath（$($files.Count)件）"
+        Write-Message "作成しました：$destPath（$($files.Count)件）" -ForegroundColor Green
     } finally {
         Close-ExcelPackage $pkg
     }
 } catch {
-    Write-Host "処理に失敗しました：$($_.Exception.Message)"
+    Write-Message "処理に失敗しました：$($_.Exception.Message)" -ForegroundColor Red
     exit 1
 } finally {
     $ErrorActionPreference = $prevEap

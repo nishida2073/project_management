@@ -10,6 +10,20 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $defaultClientLabel = "デフォルト"
 
+# gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
+# 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
+function Write-Message {
+    param(
+        [string]$Text = "",
+        [ConsoleColor]$ForegroundColor = "White"
+    )
+    if ($env:GUI_LOG_MODE -eq "1") {
+        Write-Host "[[COLOR:$ForegroundColor]]$Text"
+    } else {
+        Write-Host $Text -ForegroundColor $ForegroundColor
+    }
+}
+
 function Write-LogFile {
     param(
         [string]$Path,
@@ -182,11 +196,17 @@ function Write-RunLogFile {
 function Show-LogFileContent {
     param([string]$Path)
 
-    Write-Host ""
+    Write-Message ""
     foreach ($line in [System.IO.File]::ReadAllLines($Path, $cp932)) {
-        Write-Host $line
+        if ($line -match '^#') {
+            Write-Message $line -ForegroundColor Magenta
+        } elseif ($line -match 'エラー|失敗|存在しません') {
+            Write-Message $line -ForegroundColor Red
+        } else {
+            Write-Message $line
+        }
     }
-    Write-Host ""
+    Write-Message ""
 }
 
 function Get-AzureCliPath {
@@ -195,8 +215,8 @@ function Get-AzureCliPath {
         $az = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
     }
     if (!(Test-Path $az)) {
-        Write-Host "Azure CLIが見つかりません。以下でインストールしてください："
-        Write-Host "  winget install --id Microsoft.AzureCLI"
+        Write-Message "Azure CLIが見つかりません。以下でインストールしてください：" -ForegroundColor Red
+        Write-Message "  winget install --id Microsoft.AzureCLI" -ForegroundColor Red
         exit 1
     }
     return $az
@@ -210,8 +230,8 @@ function Get-GraphToken {
 
     $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     if ($LASTEXITCODE -ne 0 -or !$out) {
-        Write-Host "サインインが必要です。表示されるURLとコードでログインしてください。"
-        Write-Host ""
+        Write-Message "サインインが必要です。表示されるURLとコードでログインしてください。" -ForegroundColor Cyan
+        Write-Message ""
 
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "cmd.exe"
@@ -228,9 +248,9 @@ function Get-GraphToken {
         while (!$loginProc.StandardOutput.EndOfStream) {
             $line = $loginProc.StandardOutput.ReadLine()
             if (!$shown -and $line -match "open the page (?<url>\S+)\s+and enter the code (?<code>[A-Z0-9\-]+)") {
-                Write-Host "URL: $($Matches.url)"
-                Write-Host "コード：$($Matches.code)"
-                Write-Host ""
+                Write-Message "URL: $($Matches.url)" -ForegroundColor Cyan
+                Write-Message "コード：$($Matches.code)" -ForegroundColor Cyan
+                Write-Message ""
                 $shown = $true
             }
         }
@@ -239,7 +259,7 @@ function Get-GraphToken {
         $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     }
     if (!$out) {
-        Write-Host "トークンの取得に失敗しました"
+        Write-Message "トークンの取得に失敗しました" -ForegroundColor Red
         exit 1
     }
     return ($out | Out-String | ConvertFrom-Json).accessToken

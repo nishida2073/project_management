@@ -14,7 +14,7 @@ $sitePath = $env:DOWNLOAD_SITE_PATH
 $tenantId = $env:DOWNLOAD_SITE_TENANT_ID
 
 if (!$siteUrl -or !$sitePath -or !$tenantId) {
-    Write-Host "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_PATH と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください"
+    Write-Message "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_PATH と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください" -ForegroundColor Red
     exit 1
 }
 
@@ -56,7 +56,7 @@ function Get-GraphChildrenRecursive {
         foreach ($item in $page.value) {
             if ($item.file) {
                 $dest = Join-Path $LocalFolder $item.Name
-                Write-Host "操作中：$($item.Name)"
+                Write-Message "操作中：$($item.Name)"
                 try {
                     Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
                     $script:downloadLog += "$RelativePath/$($item.Name) -> $dest"
