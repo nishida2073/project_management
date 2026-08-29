@@ -87,8 +87,8 @@ var PERSON_STEP_INDEXES = [0, 2, 4, 6, 10];
 function chip(status, plan, actual, owner){
   var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
   var label = {wait:'未着手', progress:'対応中', done:'完了', delay:'遅延'}[status];
-  var dateLine = actual ? ('予定 '+plan+' / 実施 '+actual) : ('予定 '+plan);
-  return '<div class="status-chip"><span class="badge '+cls+'">'+label+'</span><span class="dates">'+dateLine+'</span><span class="owner">担当：'+owner+'</span></div>';
+  var dateLine = actual ? ('<span>予定 '+plan+'</span><span>実施 '+actual+'</span>') : ('<span>予定 '+plan+'</span>');
+  return '<div class="status-chip"><div class="badge-row"><span class="badge '+cls+'">'+label+'</span><span class="owner">'+owner+'</span></div><div class="dates">'+dateLine+'</div></div>';
 }
 function overall(status){
   var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
