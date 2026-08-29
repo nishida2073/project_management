@@ -21,7 +21,7 @@ $downloadRoot = $env:COMMON_DOWNLOAD_PATH
 $logRoot = $env:COMMON_LOG_PATH
 
 if (-not $templateRoot -or -not $configRoot -or -not $downloadRoot -or -not $logRoot) {
-    Write-Host "COMMON_TEMPLATE_PATH / COMMON_CONFIG_PATH / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を set-env.bat で設定してください"
+    Write-Message "COMMON_TEMPLATE_PATH / COMMON_CONFIG_PATH / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を set-env.bat で設定してください"
     exit 1
 }
 if (-not $TemplateConfigName) {
@@ -51,7 +51,7 @@ $script:exitCode = 0
     $downloadRecordAclRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl")
 
     if (-not $templateSpaceRow -or -not $downloadSpaceRow) {
-        Write-Host "テンプレートまたはダウンロード結果のspace-settingsが空です" -ForegroundColor Red
+        Write-Message "テンプレートまたはダウンロード結果のspace-settingsが空です" -ForegroundColor Red
         $script:exitCode = 1
         return
     }
@@ -67,13 +67,13 @@ $script:exitCode = 0
 
     $unmatched = @($mapping | Where-Object { $_.Status -ne "対応" })
     if ($unmatched.Count -gt 0) {
-        Write-Host ""
-        Write-Host "=== アプリの対応付けで確認が必要な項目 ===" -ForegroundColor Yellow
+        Write-Message ""
+        Write-Message "=== アプリの対応付けで確認が必要な項目 ===" -ForegroundColor Yellow
         foreach ($m in $unmatched) {
             if (-not $m.DownloadAppId) {
-                Write-Host "  テンプレートのアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow
+                Write-Message "  テンプレートのアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow
             } else {
-                Write-Host "  新スペースのアプリ[$($m.DownloadAppName)](appId=$($m.DownloadAppId))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow
+                Write-Message "  新スペースのアプリ[$($m.DownloadAppName)](appId=$($m.DownloadAppId))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow
             }
         }
     }
@@ -88,10 +88,10 @@ $script:exitCode = 0
         "アプリ作成できるユーザーをスペースの管理者に限定する"           = $templateSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
     }
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-settings" -Rows @($outSpaceRow) -Headers @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する")
-    Write-Host ""
-    Write-Host "=== space-settings ===" -ForegroundColor Cyan
-    Write-Host "  スペースID[$newSpaceId] のスペース名を[$finalSpaceName]に設定"
-    Write-Host "  参加メンバーだけにこのスペースを公開する=$($outSpaceRow.'参加メンバーだけにこのスペースを公開する') スペースのポータルと複数のスレッドを使用する=$($outSpaceRow.'スペースのポータルと複数のスレッドを使用する') スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する=$($outSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') アプリ作成できるユーザーをスペースの管理者に限定する=$($outSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
+    Write-Message ""
+    Write-Message "=== space-settings ===" -ForegroundColor Cyan
+    Write-Message "  スペースID[$newSpaceId] のスペース名を[$finalSpaceName]に設定"
+    Write-Message "  参加メンバーだけにこのスペースを公開する=$($outSpaceRow.'参加メンバーだけにこのスペースを公開する') スペースのポータルと複数のスレッドを使用する=$($outSpaceRow.'スペースのポータルと複数のスレッドを使用する') スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する=$($outSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') アプリ作成できるユーザーをスペースの管理者に限定する=$($outSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
 
     # テンプレートに無い既存メンバー（スペース作成時にkintoneが自動追加する個人ユーザーなど）は
     # ダウンロード結果から引き継ぐ。apply側のSet-SpaceMembersはシートに無いコードのメンバーを
@@ -118,11 +118,11 @@ $script:exitCode = 0
         }
     })
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-member-list" -Rows $outMemberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
-    Write-Host ""
-    Write-Host "=== space-member-list ===" -ForegroundColor Cyan
-    Write-Host "  スペースID[$newSpaceId] にテンプレートのメンバーを設定 ($($templateMemberRows.Count)件)"
+    Write-Message ""
+    Write-Message "=== space-member-list ===" -ForegroundColor Cyan
+    Write-Message "  スペースID[$newSpaceId] にテンプレートのメンバーを設定 ($($templateMemberRows.Count)件)"
     if ($keptMemberRows.Count -gt 0) {
-        Write-Host "  テンプレートに無い既存メンバーを引き継ぎ ($($keptMemberRows.Count)件): $(($keptMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' }) -join ', ')" -ForegroundColor Yellow
+        Write-Message "  テンプレートに無い既存メンバーを引き継ぎ ($($keptMemberRows.Count)件): $(($keptMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' }) -join ', ')" -ForegroundColor Yellow
     }
 
     $matchedApps = @($mapping | Where-Object { $_.TemplateAppName -and $_.DownloadAppId })
@@ -130,16 +130,16 @@ $script:exitCode = 0
         [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
     })
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-list" -Rows $outAppRows -Headers @("アプリID", "アプリ名")
-    Write-Host ""
-    Write-Host "=== space-app-list ===" -ForegroundColor Cyan
+    Write-Message ""
+    Write-Message "=== space-app-list ===" -ForegroundColor Cyan
     foreach ($m in $matchedApps) {
-        Write-Host "  アプリID[$($m.DownloadAppId)] の名前を[$($m.FinalAppName)]に設定"
+        Write-Message "  アプリID[$($m.DownloadAppId)] の名前を[$($m.FinalAppName)]に設定"
     }
 
     $outAclRows = New-Object System.Collections.Generic.List[psobject]
     $aclRowSources = New-Object System.Collections.Generic.List[psobject]
-    Write-Host ""
-    Write-Host "=== space-app-acl ===" -ForegroundColor Cyan
+    Write-Message ""
+    Write-Message "=== space-app-acl ===" -ForegroundColor Cyan
     foreach ($m in $matchedApps) {
         $rows = @($templateAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.TemplateAppName)" })
         foreach ($r in $rows) {
@@ -158,14 +158,14 @@ $script:exitCode = 0
             })
             $aclRowSources.Add([PSCustomObject]@{ DownloadAppName = $m.DownloadAppName; TemplateRow = $r })
         }
-        Write-Host "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のACLを設定 ($($rows.Count)件)"
+        Write-Message "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のACLを設定 ($($rows.Count)件)"
     }
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-acl" -Rows $outAclRows.ToArray() -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
 
     $outRecordAclRows = New-Object System.Collections.Generic.List[psobject]
     $recordAclRowSources = New-Object System.Collections.Generic.List[psobject]
-    Write-Host ""
-    Write-Host "=== space-app-record-acl ===" -ForegroundColor Cyan
+    Write-Message ""
+    Write-Message "=== space-app-record-acl ===" -ForegroundColor Cyan
     foreach ($m in $matchedApps) {
         $rows = @($templateRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.TemplateAppName)" })
         foreach ($r in $rows) {
@@ -181,7 +181,7 @@ $script:exitCode = 0
             })
             $recordAclRowSources.Add([PSCustomObject]@{ DownloadAppName = $m.DownloadAppName; TemplateRow = $r })
         }
-        Write-Host "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のレコードACLを設定 (条件$($rows.Count)件)"
+        Write-Message "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のレコードACLを設定 (条件$($rows.Count)件)"
     }
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-record-acl" -Rows $outRecordAclRows.ToArray() -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除")
 
@@ -308,8 +308,8 @@ $script:exitCode = 0
 
     Close-ExcelPackage $pkg
 
-    Write-Host ""
-    Write-Host "設定内容を出力しました: $outputPath" -ForegroundColor Green
+    Write-Message ""
+    Write-Message "設定内容を出力しました: $outputPath" -ForegroundColor Green
     if ($unmatched.Count -gt 0) {
         # 対応付け未了の警告のみで設定ファイル自体は生成済みのため、致命的エラー(exit 1)とは区別する
         $script:exitCode = 2
@@ -317,6 +317,6 @@ $script:exitCode = 0
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Host ""
-Write-Host "ログを出力しました: $logFilePath" -ForegroundColor Green
+Write-Message ""
+Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green
 exit $script:exitCode

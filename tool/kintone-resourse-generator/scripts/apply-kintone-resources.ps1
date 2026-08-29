@@ -20,7 +20,7 @@ $configRoot = $env:COMMON_CONFIG_PATH
 $logRoot = $env:COMMON_LOG_PATH
 
 if (-not $baseUrl -or -not $configRoot -or -not $logRoot) {
-    Write-Host "KINTONE_BASE_URL / COMMON_CONFIG_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）"
+    Write-Message "KINTONE_BASE_URL / COMMON_CONFIG_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）"
     exit 1
 }
 if (-not $ConfigName) {
@@ -43,7 +43,7 @@ $script:exitCode = 0
 
     $selectedSheets = ConvertTo-SheetNameArray -Sheets $Sheets
     if ($selectedSheets.Count -gt 0) {
-        Write-Host "対象シートを絞り込みます: $($selectedSheets -join ', ')" -ForegroundColor Cyan
+        Write-Message "対象シートを絞り込みます: $($selectedSheets -join ', ')" -ForegroundColor Cyan
     }
 
     $hasError = $false
@@ -52,23 +52,23 @@ $script:exitCode = 0
         $spaceId = $spaceGroup.Name
         $spaceRow = $spaceGroup.Group | Select-Object -First 1
 
-        Write-Host ""
-        Write-Host "=== スペースID: $spaceId ($($spaceRow.'スペース名')) ===" -ForegroundColor Cyan
+        Write-Message ""
+        Write-Message "=== スペースID: $spaceId ($($spaceRow.'スペース名')) ===" -ForegroundColor Cyan
 
         if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-settings") {
             try {
                 if ($WhatIf) {
-                    Write-Host "[WhatIf] スペース設定を設定: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
+                    Write-Message "[WhatIf] スペース設定を設定: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
                 } else {
                     Set-Space -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId `
                         -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
                         -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
                         -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
                         -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')
-                    Write-Host "スペース設定を設定しました: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
+                    Write-Message "スペース設定を設定しました: name=$($spaceRow.'スペース名') isPrivate=$($spaceRow.'参加メンバーだけにこのスペースを公開する') useMultiThread=$($spaceRow.'スペースのポータルと複数のスレッドを使用する') fixedMember=$($spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') createAppAdminOnly=$($spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
                 }
             } catch {
-                Write-Host "スペースID $spaceId のスペース設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Message "スペースID $spaceId のスペース設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                 $hasError = $true
             }
         }
@@ -77,13 +77,13 @@ $script:exitCode = 0
             try {
                 $targetMemberRows = @($memberRows | Where-Object { $_.'スペースID' -eq $spaceId })
                 if ($WhatIf) {
-                    Write-Host "[WhatIf] スペースメンバーを設定: $($targetMemberRows.Count)件"
+                    Write-Message "[WhatIf] スペースメンバーを設定: $($targetMemberRows.Count)件"
                 } else {
                     Set-SpaceMembers -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
-                    Write-Host "スペースメンバーを設定しました ($($targetMemberRows.Count)件)"
+                    Write-Message "スペースメンバーを設定しました ($($targetMemberRows.Count)件)"
                 }
             } catch {
-                Write-Host "スペースID $spaceId のメンバー設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Message "スペースID $spaceId のメンバー設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                 $hasError = $true
             }
         }
@@ -110,8 +110,8 @@ $script:exitCode = 0
             if (-not $label -and $aclRowsForApp.Count -gt 0) { $label = $aclRowsForApp[0].'アプリ名' }
             if (-not $label -and $recordAclRowsForApp.Count -gt 0) { $label = $recordAclRowsForApp[0].'アプリ名' }
 
-            Write-Host ""
-            Write-Host "=== アプリID: $appId ($label) ===" -ForegroundColor Cyan
+            Write-Message ""
+            Write-Message "=== アプリID: $appId ($label) ===" -ForegroundColor Cyan
 
             $appHasError = $false
             $appChanged = $false
@@ -120,14 +120,14 @@ $script:exitCode = 0
                 $finalName = $appNameRow.'アプリ名'
                 try {
                     if ($WhatIf) {
-                        Write-Host "[WhatIf] アプリID[$appId]の名前を[$finalName]に設定"
+                        Write-Message "[WhatIf] アプリID[$appId]の名前を[$finalName]に設定"
                     } else {
                         Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
-                        Write-Host "アプリID[$appId] の名前を[$finalName]に設定しました"
+                        Write-Message "アプリID[$appId] の名前を[$finalName]に設定しました"
                         $appChanged = $true
                     }
                 } catch {
-                    Write-Host "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Message "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                     $hasError = $true
                     $appHasError = $true
                 }
@@ -138,14 +138,14 @@ $script:exitCode = 0
                     $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $baseUrl -Authorization $authorization -Row $_ })
 
                     if ($WhatIf) {
-                        Write-Host "[WhatIf] アプリ[$label](appId=$appId)のACLを設定: $($rights.Count)件"
+                        Write-Message "[WhatIf] アプリ[$label](appId=$appId)のACLを設定: $($rights.Count)件"
                     } else {
                         Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights
-                        Write-Host "アプリ[$label](appId=$appId)のACLを設定しました ($($rights.Count)件)"
+                        Write-Message "アプリ[$label](appId=$appId)のACLを設定しました ($($rights.Count)件)"
                         $appChanged = $true
                     }
                 } catch {
-                    Write-Host "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Message "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                     $hasError = $true
                     $appHasError = $true
                 }
@@ -156,14 +156,14 @@ $script:exitCode = 0
                     $recordRights = New-RecordAclRightsFromRows -BaseUrl $baseUrl -Authorization $authorization -Rows $recordAclRowsForApp
 
                     if ($WhatIf) {
-                        Write-Host "[WhatIf] アプリ[$label](appId=$appId)のレコードACLを設定: 条件$($recordRights.Count)件"
+                        Write-Message "[WhatIf] アプリ[$label](appId=$appId)のレコードACLを設定: 条件$($recordRights.Count)件"
                     } else {
                         Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
-                        Write-Host "アプリ[$label](appId=$appId)のレコードACLを設定しました (条件$($recordRights.Count)件)"
+                        Write-Message "アプリ[$label](appId=$appId)のレコードACLを設定しました (条件$($recordRights.Count)件)"
                         $appChanged = $true
                     }
                 } catch {
-                    Write-Host "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Message "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                     $hasError = $true
                     $appHasError = $true
                 }
@@ -172,12 +172,12 @@ $script:exitCode = 0
             # 成功した項目だけが中途半端に反映されるのを避けるため、1つでも設定に失敗していればデプロイをスキップする
             if ($appChanged) {
                 if ($appHasError) {
-                    Write-Host "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow
+                    Write-Message "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow
                 } elseif (-not $WhatIf) {
                     try {
                         Update-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds @($appId)
                     } catch {
-                        Write-Host "アプリ[$label](appId=$appId)の更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
+                        Write-Message "アプリ[$label](appId=$appId)の更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red
                         $hasError = $true
                     }
                 }
@@ -186,21 +186,21 @@ $script:exitCode = 0
 
         $skippedAppRows = @($appRows | Where-Object { -not $_.'アプリID' })
         if ($applyAppList -and $skippedAppRows.Count -gt 0) {
-            Write-Host ""
-            Write-Host "(アプリIDが空の行($($skippedAppRows.Count)件)はスキップしました。このツールはアプリの新規作成は行いません)" -ForegroundColor Yellow
+            Write-Message ""
+            Write-Message "(アプリIDが空の行($($skippedAppRows.Count)件)はスキップしました。このツールはアプリの新規作成は行いません)" -ForegroundColor Yellow
         }
     }
 
-    Write-Host ""
+    Write-Message ""
     if ($hasError) {
-        Write-Host "一部の処理でエラーが発生しました。" -ForegroundColor Red
+        Write-Message "一部の処理でエラーが発生しました。" -ForegroundColor Red
         $script:exitCode = 1
     } else {
-        Write-Host "すべての反映が完了しました。" -ForegroundColor Green
+        Write-Message "すべての反映が完了しました。" -ForegroundColor Green
     }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Host ""
-Write-Host "ログを出力しました: $logFilePath" -ForegroundColor Green
+Write-Message ""
+Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green
 exit $script:exitCode

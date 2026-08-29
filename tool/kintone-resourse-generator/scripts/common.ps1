@@ -7,6 +7,20 @@
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
+# gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
+# 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
+function Write-Message {
+    param(
+        [string]$Text = "",
+        [ConsoleColor]$ForegroundColor = "White"
+    )
+    if ($env:GUI_LOG_MODE -eq "1") {
+        Write-Host "[[COLOR:$ForegroundColor]]$Text"
+    } else {
+        Write-Host $Text -ForegroundColor $ForegroundColor
+    }
+}
+
 function New-KintoneLogPath {
     param(
         [Parameter(Mandatory)][string]$LogRoot,
@@ -18,11 +32,14 @@ function New-KintoneLogPath {
 }
 
 # Tee-Objectは-Encoding非対応で既定UTF-16LE書き込みになるため、事後にUTF-8へ変換する。
+# GUI経由の実行ではWrite-Messageが行頭に[[COLOR:xxx]]タグを埋め込むため（gui.ps1のWrite-Log用）、
+# ファイルに残るログはこのタグを取り除いたテキストにする。
 function ConvertTo-Utf8LogFile {
     param([Parameter(Mandatory)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) { return }
     $content = Get-Content -LiteralPath $Path -Raw
     if ($null -eq $content) { $content = "" }
+    $content = $content -replace '\[\[COLOR:\w+\]\]', ''
     [System.IO.File]::WriteAllText($Path, $content, (New-Object System.Text.UTF8Encoding($true)))
 }
 
@@ -46,7 +63,7 @@ function Get-KintoneAuthorizationHeader {
         $login = $env:KINTONE_LOGIN
         $password = $env:KINTONE_PASSWORD
     } else {
-        Write-Host "kintoneへログインします: $BaseUrl" -ForegroundColor Cyan
+        Write-Message "kintoneへログインします: $BaseUrl" -ForegroundColor Cyan
         $login = Read-Host "ログイン名"
         $securePassword = Read-Host "パスワード" -AsSecureString
         $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
@@ -155,7 +172,7 @@ function Get-CurrentSpace {
         [bool]$HasMember = $true
     )
 
-    Write-Host "スペース取得 開始: $SpaceId"
+    Write-Message "スペース取得 開始: $SpaceId"
 
     $space = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/space.json?id=$SpaceId"
 
@@ -174,7 +191,7 @@ function Get-CurrentSpace {
                 $acl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/app/acl.json?app=$($app.appId)"
                 $app.rights = @($acl.rights)
             } catch {
-                Write-Host "  アプリ[$($app.name)]のACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
+                Write-Message "  アプリ[$($app.name)]のACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
             }
         }
     }
@@ -185,7 +202,7 @@ function Get-CurrentSpace {
                 $recordAcl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/record/acl.json?app=$($app.appId)"
                 $app.recordRights = @($recordAcl.rights)
             } catch {
-                Write-Host "  アプリ[$($app.name)]のレコードACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
+                Write-Message "  アプリ[$($app.name)]のレコードACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
             }
         }
     }
@@ -196,7 +213,7 @@ function Get-CurrentSpace {
         $members = @($memberResp.members)
     }
 
-    Write-Host "スペース取得 終了: $SpaceId"
+    Write-Message "スペース取得 終了: $SpaceId"
 
     return [PSCustomObject]@{
         spaceId        = $space.id
@@ -222,7 +239,7 @@ function Get-AppCurrentInfo {
         $settings = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/app/settings.json?app=$AppId"
         $name = $settings.name
     } catch {
-        Write-Host "  アプリID[$AppId]の設定取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Message "  アプリID[$AppId]の設定取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
     }
 
     $rights = @()
@@ -230,7 +247,7 @@ function Get-AppCurrentInfo {
         $acl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/app/acl.json?app=$AppId"
         $rights = @($acl.rights)
     } catch {
-        Write-Host "  アプリID[$AppId]のACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Message "  アプリID[$AppId]のACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
     }
 
     $recordRights = @()
@@ -238,7 +255,7 @@ function Get-AppCurrentInfo {
         $recordAcl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/record/acl.json?app=$AppId"
         $recordRights = @($recordAcl.rights)
     } catch {
-        Write-Host "  アプリID[$AppId]のレコードACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Message "  アプリID[$AppId]のレコードACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow
     }
 
     return [PSCustomObject]@{
@@ -502,7 +519,7 @@ function Update-KintoneApps {
     $uniqueIds = @($AppIds | Select-Object -Unique)
     if ($uniqueIds.Count -eq 0) { return }
 
-    Write-Host "アプリの更新開始: $($uniqueIds -join ', ')"
+    Write-Message "アプリの更新開始: $($uniqueIds -join ', ')"
 
     $body = @{ apps = @($uniqueIds | ForEach-Object { @{ app = $_ } }) }
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method POST -Path "/k/v1/preview/app/deploy.json" -Body $body | Out-Null
@@ -519,7 +536,7 @@ function Update-KintoneApps {
             if ($failed.Count -gt 0) {
                 throw "更新に失敗したアプリがあります: $($failed | ConvertTo-Json -Compress)"
             }
-            Write-Host "アプリの更新完了: $($uniqueIds -join ', ')"
+            Write-Message "アプリの更新完了: $($uniqueIds -join ', ')"
             return
         }
         if ((Get-Date) -gt $deadline) {
@@ -553,7 +570,7 @@ function Write-KintoneExcelRows {
     $rowsToWrite = $Rows
     if ($rowsToWrite.Count -eq 0) {
         if ($Headers.Count -eq 0) {
-            Write-Host "  (書き込み対象の行が無いためスキップ: $Path [$WorksheetName])" -ForegroundColor Yellow
+            Write-Message "  (書き込み対象の行が無いためスキップ: $Path [$WorksheetName])" -ForegroundColor Yellow
             return
         }
         $blank = [ordered]@{}
