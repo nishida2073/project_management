@@ -1,8 +1,10 @@
 ﻿# =========================================
 # GUI（コース別パッケージ生成ツール）
 # =========================================
-# all.batを画面から実行するためのGUI。「実行」タブでダウンロード/パッケージ作成/
-# アップロードの有効・無効を切り替えて実行し、「設定」タブでset-env.batの値を編集する。
+# download-folder.bat → generate-package.bat → upload-folder.batを画面から実行するGUI
+# （all.bat自体は呼ばず、チェックされたステージだけをGUI側から個別に実行し、ステージごとの
+# 開始/完了ログを出す）。「実行」タブでダウンロード/パッケージ作成/アップロードの有効・無効を
+# 切り替えて実行し、「設定」タブでset-env.batの値を編集する。
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -16,7 +18,9 @@ if ($MyInvocation.MyCommand.Path) {
 } else {
     $basePath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
-$allBat = Join-Path $basePath "all.bat"
+$downloadBat = Join-Path $basePath "download-folder.bat"
+$generateBat = Join-Path $basePath "generate-package.bat"
+$uploadBat = Join-Path $basePath "upload-folder.bat"
 $clientsDir = Join-Path $basePath "clients"
 $setEnvBat = Join-Path $clientsDir "set-env.bat"
 $clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
@@ -266,48 +270,14 @@ function Write-Log {
     $txtLog.ScrollToCaret()
 }
 
-$btnRun.Add_Click({
-    $script:isRunning = $true
-    $chkDownload.Enabled = $false
-    $chkGenerate.Enabled = $false
-    $chkUpload.Enabled = $false
-    $btnRun.Enabled = $false
-    $cmbClient.Enabled = $false
-    $lblStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblStatus.Text = "実行中..."
-    $selectedClient = $cmbClient.SelectedItem
-    $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
-    Write-Log ""
-    Write-Log "--------------- $clientDisplayName 開始 ---------------"
-
-    $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
-    $env:GENERATE_ENABLED = if ($chkGenerate.Checked) { "1" } else { "0" }
-    $env:UPLOAD_ENABLED = if ($chkUpload.Checked) { "1" } else { "0" }
-
-    foreach ($varName in $script:lastClientVars) {
-        [Environment]::SetEnvironmentVariable($varName, $null)
-    }
-    $script:lastClientVars = @()
-
-    if ($selectedClient -and $selectedClient -ne $defaultClientLabel) {
-        $clientValues = Get-ClientProfileValues $selectedClient
-        $appliedVars = @()
-        foreach ($varName in $clientValues.Keys) {
-            if ($clientRuntimeExcludeVars -contains $varName) {
-                continue
-            }
-            [Environment]::SetEnvironmentVariable($varName, $clientValues[$varName])
-            $appliedVars += $varName
-        }
-        $script:lastClientVars = $appliedVars
-        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $selectedClient)
-    } else {
-        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $null)
-    }
+# 1つのステージ用batをcmd.exe経由で実行し、標準出力をリアルタイムでWrite-Logへ流す。
+# 実行完了後の終了コードを返す。
+function Invoke-StageBat {
+    param([string]$BatPath)
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = "cmd.exe"
-    $psi.Arguments = "/c ""`"$allBat`" 2>&1"""
+    $psi.Arguments = "/c ""`"$BatPath`" 2>&1"""
     $psi.WorkingDirectory = $basePath
     $psi.UseShellExecute = $false
     $psi.RedirectStandardOutput = $true
@@ -347,15 +317,79 @@ $btnRun.Add_Click({
 
     Unregister-Event -SourceIdentifier $outputEvent.Name
     Remove-Job -Name $outputEvent.Name -Force
+    $script:currentProc = $null
 
-    if ($proc.ExitCode -eq 0) {
+    return $proc.ExitCode
+}
+
+$btnRun.Add_Click({
+    $script:isRunning = $true
+    $chkDownload.Enabled = $false
+    $chkGenerate.Enabled = $false
+    $chkUpload.Enabled = $false
+    $btnRun.Enabled = $false
+    $cmbClient.Enabled = $false
+    $lblStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblStatus.Text = "実行中..."
+    $selectedClient = $cmbClient.SelectedItem
+    $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
+    Write-Log ""
+    Write-Log "--------------- $clientDisplayName 開始 ---------------"
+
+    $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
+    $env:GENERATE_ENABLED = if ($chkGenerate.Checked) { "1" } else { "0" }
+    $env:UPLOAD_ENABLED = if ($chkUpload.Checked) { "1" } else { "0" }
+
+    foreach ($varName in $script:lastClientVars) {
+        [Environment]::SetEnvironmentVariable($varName, $null)
+    }
+    $script:lastClientVars = @()
+
+    if ($selectedClient -and $selectedClient -ne $defaultClientLabel) {
+        $clientValues = Get-ClientProfileValues $selectedClient
+        $appliedVars = @()
+        foreach ($varName in $clientValues.Keys) {
+            if ($clientRuntimeExcludeVars -contains $varName) {
+                continue
+            }
+            [Environment]::SetEnvironmentVariable($varName, $clientValues[$varName])
+            $appliedVars += $varName
+        }
+        $script:lastClientVars = $appliedVars
+        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $selectedClient)
+    } else {
+        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $null)
+    }
+
+    # all.bat自体は呼ばず、チェックされたステージだけをGUI側から個別に実行する。
+    # 各ステージの開始/完了（失敗）はチェックボックスのラベルでログに出す。
+    $stages = @()
+    if ($chkDownload.Checked) { $stages += [PSCustomObject]@{ Label = $chkDownload.Text; Bat = $downloadBat } }
+    if ($chkGenerate.Checked) { $stages += [PSCustomObject]@{ Label = $chkGenerate.Text; Bat = $generateBat } }
+    if ($chkUpload.Checked)   { $stages += [PSCustomObject]@{ Label = $chkUpload.Text; Bat = $uploadBat } }
+
+    $hasError = $false
+    $failedExitCode = 0
+    foreach ($stage in $stages) {
+        Write-Log "############### $($stage.Label) 開始 ###############"
+        $exitCode = Invoke-StageBat -BatPath $stage.Bat
+        if ($exitCode -ne 0) {
+            Write-Log "############### $($stage.Label) 失敗（終了コード: $exitCode） ###############"
+            $hasError = $true
+            $failedExitCode = $exitCode
+            break
+        }
+        Write-Log "############### $($stage.Label) 完了 ###############"
+    }
+
+    if (-not $hasError) {
         Write-Log "--------------- $clientDisplayName 完了 ---------------"
         $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
         $lblStatus.Text = "完了しました"
     } else {
-        Write-Log "--------------- $clientDisplayName 失敗（終了コード: $($proc.ExitCode)） ---------------"
+        Write-Log "--------------- $clientDisplayName 失敗（終了コード: $failedExitCode） ---------------"
         $lblStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblStatus.Text = "エラーが発生しました（終了コード: $($proc.ExitCode)）"
+        $lblStatus.Text = "エラーが発生しました（終了コード: $failedExitCode）"
     }
 
     $chkDownload.Enabled = $true
