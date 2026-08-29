@@ -3,10 +3,6 @@
 cd /d %~dp0
 
 set "BATCH_NAME=%~nx0"
-echo ==================================================
-echo %BATCH_NAME% 開始：%date% %time%
-echo ==================================================
-
 set "FORCE="
 
 :parse_args
@@ -33,10 +29,6 @@ powershell.exe ^
 set "EXITCODE=%ERRORLEVEL%"
 
 :end
-echo ==================================================
-echo %BATCH_NAME% 終了：%date% %time%
-echo ==================================================
-
 timeout /t 5 >nul
 
 exit /b %EXITCODE%
