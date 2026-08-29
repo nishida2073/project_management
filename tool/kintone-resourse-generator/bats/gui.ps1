@@ -99,7 +99,7 @@ $tabControl.Add_Selecting({
 
 $runTopPanel = New-Object System.Windows.Forms.Panel
 $runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$runTopPanel.Height = 374
+$runTopPanel.Height = 384
 
 $lblConfigName = New-Object System.Windows.Forms.Label
 $lblConfigName.Text = "スペース識別名"
@@ -211,22 +211,23 @@ $script:stepOpenButtons = @{}
 # 工程カードを専用のパネルにまとめておき、折りたたみ時はこのパネルごとVisible=$falseにする
 # （runTopPanelの高さだけで隠すと、はみ出た分がわずかに見えてしまうため）。
 $stepCardsPanel = New-Object System.Windows.Forms.Panel
-$stepCardsPanel.Location = New-Object System.Drawing.Point(0, 188)
+$stepCardsPanel.Location = New-Object System.Drawing.Point(0, 198)
 $stepCardsPanel.Size = New-Object System.Drawing.Size(760, ($stepMeta.Count * 34))
 
-$stepRowY = 0
+$stepRowY = 2
 foreach ($sm in $stepMeta) {
     $lblStepName = New-Object System.Windows.Forms.Label
     $lblStepName.Text = $sm.Label
     $lblStepName.AutoSize = $false
     $lblStepName.Size = New-Object System.Drawing.Size(180, 22)
-    $lblStepName.Location = New-Object System.Drawing.Point(20, $stepRowY)
+    $lblStepName.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $lblStepName.Location = New-Object System.Drawing.Point(20, ($stepRowY + 4))
     $stepCardsPanel.Controls.Add($lblStepName)
 
     $btnStepRun = New-Object System.Windows.Forms.Button
     $btnStepRun.Text = "実行"
     $btnStepRun.Size = New-Object System.Drawing.Size(70, 24)
-    $btnStepRun.Location = New-Object System.Drawing.Point(210, ($stepRowY - 2))
+    $btnStepRun.Location = New-Object System.Drawing.Point(210, ($stepRowY + 3))
     $btnStepRun.Tag = $sm.Id
     $btnStepRun.Add_Click({ Invoke-SingleStep -Id $this.Tag })
     $stepCardsPanel.Controls.Add($btnStepRun)
@@ -236,7 +237,8 @@ foreach ($sm in $stepMeta) {
     $lblStepStatus.Text = "未実行"
     $lblStepStatus.AutoSize = $false
     $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
-    $lblStepStatus.Location = New-Object System.Drawing.Point(300, ($stepRowY + 6))
+    $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $lblStepStatus.Location = New-Object System.Drawing.Point(300, ($stepRowY + 4))
     $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
     $stepCardsPanel.Controls.Add($lblStepStatus)
     $script:stepStatusLabels[$sm.Id] = $lblStepStatus
@@ -244,8 +246,10 @@ foreach ($sm in $stepMeta) {
     if ($sm.OutputPathFn) {
         $btnStepOpen = New-Object System.Windows.Forms.LinkLabel
         $btnStepOpen.Text = "開く"
-        $btnStepOpen.AutoSize = $true
-        $btnStepOpen.Location = New-Object System.Drawing.Point(460, ($stepRowY + 8))
+        $btnStepOpen.AutoSize = $false
+        $btnStepOpen.Size = New-Object System.Drawing.Size(50, 22)
+        $btnStepOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        $btnStepOpen.Location = New-Object System.Drawing.Point(460, ($stepRowY + 4))
         $btnStepOpen.Tag = $sm.Id
         $btnStepOpen.Add_LinkClicked({ Open-KintoneOutputFile $script:stepOutputPaths[$this.Tag] })
         $stepCardsPanel.Controls.Add($btnStepOpen)
