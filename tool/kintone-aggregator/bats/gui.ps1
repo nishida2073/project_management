@@ -32,7 +32,7 @@ $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
 $dateAndGroupInputs = @(
     [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 55; InputWidth = 90 }
-    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = "*"; LabelWidth = 75; InputWidth = 120 }
+    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 120 }
 )
 $dateOnlyInputs = @(
     [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 55; InputWidth = 90 }
