@@ -31,11 +31,11 @@
 
         <div class="filter-panel">
           <div class="field"><label>キーワード検索</label><div class="control wide">担当者コード・担当者名で検索</div></div>
-          <div class="field"><label>所属</label><div class="control small">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>担当対象</label><div class="control">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>業務区分</label><div class="control">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>役職</label><div class="control">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>稼働状況</label><div class="control">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>所属</label><div class="control small js-select" data-options="すべて,社内,パートナー">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>担当対象</label><div class="control js-select" data-options="すべて,案件,研修">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>業務区分</label><div class="control js-select" data-options="すべて,管理担当者,実施担当者">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>役職</label><div class="control js-select" data-options="すべて,PM,PL,営業,運営担当">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>稼働状況</label><div class="control js-select" data-options="すべて,稼働中,休職中">すべて<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
         </div>
 
@@ -73,5 +73,6 @@
     </div>
   </div>
 </div>
+<script src="js/select.js" defer></script>
 </body>
 </html>

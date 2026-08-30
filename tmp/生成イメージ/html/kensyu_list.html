@@ -40,20 +40,20 @@
         </div>
         <div class="field">
           <label>区分</label>
-          <div class="control small">すべて<span class="caret">▾</span></div>
+          <div class="control small js-select" data-options="すべて,受託,公募">すべて<span class="caret">▾</span></div>
         </div>
         <div class="field">
           <label>開始日</label>
-          <div class="control small">2026/04/01</div>
+          <div class="control small js-date">2026/04/01<span class="caret">▾</span></div>
         </div>
         <div class="tilde">〜</div>
         <div class="field">
           <label>終了日</label>
-          <div class="control small">2026/09/30</div>
+          <div class="control small js-date">2026/09/30<span class="caret">▾</span></div>
         </div>
         <div class="field">
           <label>ベンダー名</label>
-          <div class="control">すべて<span class="caret">▾</span></div>
+          <div class="control js-select" data-options="すべて,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">すべて<span class="caret">▾</span></div>
         </div>
         <div class="search-btn">検索</div>
       </div>
@@ -66,8 +66,7 @@
         <table>
           <thead>
             <tr>
-              <th>コースコード</th>
-              <th>コース名</th>
+              <th>コース名 / コースコード</th>
               <th>クラスコード</th>
               <th>区分</th>
               <th>管理担当者</th>
@@ -83,8 +82,7 @@
           </thead>
           <tbody>
             <tr>
-              <td>BC02-01</td>
-              <td>ビジネス基礎研修</td>
+              <td><div style="font-weight:700;">ビジネス基礎研修</div><div style="font-size:11px;color:#9aa4b5;">BC02-01</div></td>
               <td>BC02-01-C1</td>
               <td><span class="tag blue">受託</span></td>
               <td>佐藤 一郎</td>
@@ -98,8 +96,7 @@
               <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
             </tr>
             <tr>
-              <td>GCD-114</td>
-              <td>グローバル基礎コース</td>
+              <td><div style="font-weight:700;">グローバル基礎コース</div><div style="font-size:11px;color:#9aa4b5;">GCD-114</div></td>
               <td>GCD-114-C3</td>
               <td><span class="tag orange">公募</span></td>
               <td>鈴木 花子</td>
@@ -113,8 +110,7 @@
               <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
             </tr>
             <tr>
-              <td>NDU-203</td>
-              <td>次世代リーダー育成研修</td>
+              <td><div style="font-weight:700;">次世代リーダー育成研修</div><div style="font-size:11px;color:#9aa4b5;">NDU-203</div></td>
               <td>NDU-203-C2</td>
               <td><span class="tag blue">受託</span></td>
               <td>高橋 健</td>
@@ -128,8 +124,7 @@
               <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
             </tr>
             <tr>
-              <td>BC02-02</td>
-              <td>ビジネス基礎研修</td>
+              <td><div style="font-weight:700;">ビジネス基礎研修</div><div style="font-size:11px;color:#9aa4b5;">BC02-02</div></td>
               <td>BC02-02-C1</td>
               <td><span class="tag blue">受託</span></td>
               <td>佐藤 一郎</td>
@@ -143,8 +138,7 @@
               <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
             </tr>
             <tr>
-              <td>GCD-115</td>
-              <td>グローバル基礎コース</td>
+              <td><div style="font-weight:700;">グローバル基礎コース</div><div style="font-size:11px;color:#9aa4b5;">GCD-115</div></td>
               <td>GCD-115-C1</td>
               <td><span class="tag orange">公募</span></td>
               <td>伊藤 美咲</td>
@@ -158,8 +152,7 @@
               <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
             </tr>
             <tr>
-              <td>NDU-204</td>
-              <td>次世代リーダー育成研修</td>
+              <td><div style="font-weight:700;">次世代リーダー育成研修</div><div style="font-size:11px;color:#9aa4b5;">NDU-204</div></td>
               <td>NDU-204-C1</td>
               <td><span class="tag blue">受託</span></td>
               <td>高橋 健</td>
@@ -173,8 +166,7 @@
               <td class="row-actions"><a class="link-btn" href="kensyu_modify.html">編集</a></td>
             </tr>
             <tr>
-              <td>CEC-051</td>
-              <td>マネジメント基礎研修</td>
+              <td><div style="font-weight:700;">マネジメント基礎研修</div><div style="font-size:11px;color:#9aa4b5;">CEC-051</div></td>
               <td>CEC-051-C4</td>
               <td><span class="tag blue">受託</span></td>
               <td>渡辺 直樹</td>
@@ -202,5 +194,7 @@
     </div>
   </div>
 </div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
 </body>
 </html>

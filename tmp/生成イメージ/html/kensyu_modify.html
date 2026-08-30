@@ -25,11 +25,11 @@
       <div class="modal-body">
         <div class="form-field">
           <label>コースコード<span class="req">必須</span></label>
-          <div class="form-control">BC02-01</div>
+          <div class="form-control js-select" data-options="BC02-01,BC02-02,GCD-114,GCD-115,NDU-203,NDU-204,CEC-051" data-target="#courseName" data-map='{"BC02-01":"ビジネス基礎研修","BC02-02":"ビジネス基礎研修","GCD-114":"グローバル基礎コース","GCD-115":"グローバル基礎コース","NDU-203":"次世代リーダー育成研修","NDU-204":"次世代リーダー育成研修","CEC-051":"マネジメント基礎研修"}'>BC02-01<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>コース名<span class="req">必須</span></label>
-          <div class="form-control">ビジネス基礎研修</div>
+          <div class="form-control" id="courseName">ビジネス基礎研修</div>
         </div>
         <div class="form-field">
           <label>クラスコード</label>
@@ -37,33 +37,33 @@
         </div>
         <div class="form-field">
           <label>区分<span class="req">必須</span></label>
-          <div class="form-control">受託<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="受託,公募">受託<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>開始日<span class="req">必須</span></label>
-          <div class="form-control">2026/09/02</div>
+          <div class="form-control js-date">2026/09/02<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>終了日<span class="req">必須</span></label>
-          <div class="form-control">2026/09/04</div>
+          <div class="form-control js-date">2026/09/04<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>管理担当者</label>
-          <div class="form-control">佐藤 一郎<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">佐藤 一郎<span class="caret">▾</span></div>
         </div>
         <div class="form-field"></div>
         <div class="form-field">
           <label>実施形態<span class="req">必須</span></label>
-          <div class="form-control">集合<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="集合,オンライン,ハイブリッド">集合<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>ロケーション名</label>
-          <div class="form-control">本社5F 研修室A<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="本社5F 研修室A,本社5F 研修室B,本社5F 研修室C,本社3F 研修室A,大阪支社 3F">本社5F 研修室A<span class="caret">▾</span></div>
         </div>
         <div class="form-section">メイン</div>
         <div class="form-field">
           <label>ベンダー名</label>
-          <div class="form-control">株式会社NEUトレーニング<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">株式会社NEUトレーニング<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>講師名</label>
@@ -74,7 +74,7 @@
           <div class="sub-grid sub-row-header"><span>ベンダー名</span><span>講師名</span></div>
           <div class="sub-list">
             <div class="sub-grid sub-row">
-              <div class="form-control">NDUパートナーズ<span class="caret">▾</span></div>
+              <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">NDUパートナーズ<span class="caret">▾</span></div>
               <div class="form-control">鈴木 花子</div>
               <div class="sub-remove">✕</div>
             </div>
@@ -83,7 +83,10 @@
         </div>
         <div class="form-field">
           <label>受講者数</label>
-          <div class="form-control">24</div>
+          <div class="form-control number-select" data-options="10,15,20,24,30,35,40,50">
+            <input type="text" inputmode="numeric" value="24">
+            <span class="caret">▾</span>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -93,5 +96,8 @@
     </div>
   </div>
 </div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+<script src="js/number-select.js" defer></script>
 </body>
 </html>

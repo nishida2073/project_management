@@ -33,20 +33,20 @@
         </div>
         <div class="form-field">
           <label>顧客名<span class="req">必須</span></label>
-          <div class="form-control">例）株式会社ABC商事</div>
+          <div class="form-control js-select" data-options="NTTデータ金融,株式会社ABC商事,DEFホールディングス,CECトラスト,NTTデータUNIV,グループ各社,（公募）">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>実施開始月<span class="req">必須</span></label>
-          <div class="form-control">例）2026/09</div>
+          <div class="form-control js-month">例）2026/09<span class="caret">▾</span></div>
         </div>
         <div class="form-section">管理担当者</div>
         <div class="form-field">
           <label>PM<span class="req">必須</span></label>
-          <div class="form-control">選択してください<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="山口,田中,高橋,伊藤,渡辺,佐藤">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>PL</label>
-          <div class="form-control">選択してください<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="細野,木村,中島,小林,松本,市村,岡田">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field full">
           <label>備考</label>
@@ -60,5 +60,7 @@
     </div>
   </div>
 </div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
 </body>
 </html>

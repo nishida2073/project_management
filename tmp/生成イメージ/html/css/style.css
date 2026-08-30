@@ -207,6 +207,37 @@ a.close-x { cursor: pointer; }
 .form-control.textarea { height: 68px; align-items: flex-start; padding-top: 8px; color: #9aa4b5; }
 .form-control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
 
+.js-select { cursor: pointer; position: relative; user-select: none; }
+.js-select .caret { transition: transform .15s; }
+.js-select.open .caret { transform: rotate(180deg); }
+.select-menu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1px solid #d3d9e3; border-radius: 6px; box-shadow: 0 8px 20px rgba(10,16,30,0.15); max-height: 220px; overflow-y: auto; z-index: 50; padding: 4px; list-style: none; margin: 0; }
+.select-menu li { padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333c4d; cursor: pointer; }
+.select-menu li:hover { background: #eef4ff; color: #2f6fed; }
+.select-menu li.selected { background: #eef4ff; color: #2f6fed; font-weight: 700; }
+
+.form-control.number-select { position: relative; padding-right: 8px; }
+.form-control.number-select input { border: none; background: transparent; font: inherit; color: inherit; width: 100%; outline: none; padding: 0; }
+.form-control.number-select .caret { cursor: pointer; padding: 4px; margin-left: auto; transition: transform .15s; }
+.form-control.number-select.open .caret { transform: rotate(180deg); }
+
+.js-date, .js-month { cursor: pointer; position: relative; user-select: none; }
+.js-date .caret, .js-month .caret { transition: transform .15s; }
+.js-date.open .caret, .js-month.open .caret { transform: rotate(180deg); }
+.date-picker { position: absolute; top: calc(100% + 4px); left: 0; background: #ffffff; border: 1px solid #d3d9e3; border-radius: 8px; box-shadow: 0 8px 20px rgba(10,16,30,0.15); z-index: 60; padding: 10px; width: 230px; cursor: default; }
+.date-picker .dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #333c4d; }
+.date-picker .dp-nav { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #7c8598; }
+.date-picker .dp-nav:hover { background: #eef4ff; color: #2f6fed; }
+.date-picker .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.date-picker .dp-dow { font-size: 10px; color: #9aa4b5; text-align: center; padding: 4px 0; }
+.date-picker .dp-day { font-size: 12px; text-align: center; padding: 6px 0; border-radius: 5px; cursor: pointer; color: #333c4d; }
+.date-picker .dp-day:hover { background: #eef4ff; color: #2f6fed; }
+.date-picker .dp-day.muted { color: #c3c9d4; }
+.date-picker .dp-day.selected { background: #2f6fed; color: #fff; font-weight: 700; }
+.date-picker.month-picker .dp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.date-picker .dp-month { font-size: 12px; text-align: center; padding: 10px 0; border-radius: 5px; cursor: pointer; color: #333c4d; }
+.date-picker .dp-month:hover { background: #eef4ff; color: #2f6fed; }
+.date-picker .dp-month.selected { background: #2f6fed; color: #fff; font-weight: 700; }
+
 /* 役職チップ選択（社員マスタ登録） */
 .chip-box { min-height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }

@@ -35,13 +35,13 @@
 
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><div class="control wide">コースコード・コース名で検索</div></div>
-        <div class="field"><label>区分</label><div class="control small">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>総合進捗</label><div class="control small">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>管理担当者</label><div class="control">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>実施担当者</label><div class="control">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>開始日</label><div class="control small">2026/09/01</div></div>
+        <div class="field"><label>区分</label><div class="control small js-select" data-options="すべて,受託,公募">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>総合進捗</label><div class="control small js-select" data-options="すべて,準備前,対応中,手配完了,遅延あり">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>管理担当者</label><div class="control js-select" data-options="すべて,佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実施担当者</label><div class="control js-select" data-options="すべて,佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹,運営チーム">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>開始日</label><div class="control small js-date">2026/09/01<span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
-        <div class="field"><label>終了日</label><div class="control small">2026/09/30</div></div>
+        <div class="field"><label>終了日</label><div class="control small js-date">2026/09/30<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
       </div>
 
@@ -142,5 +142,7 @@ if (location.search.indexOf('scrolled=1') !== -1) {
   document.getElementById('scrollArea').scrollLeft = 1060;
 }
 </script>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
 </body>
 </html>

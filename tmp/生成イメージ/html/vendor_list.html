@@ -31,9 +31,9 @@
         </div>
         <div class="filter-panel">
           <div class="field"><label>キーワード検索</label><div class="control wide">ベンダーコード・ベンダー名で検索</div></div>
-          <div class="field"><label>契約年度</label><div class="control small">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>契約区分</label><div class="control">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>状態</label><div class="control">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>契約年度</label><div class="control small js-select" data-options="すべて,2026年度,2025年度,2024年度">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>契約区分</label><div class="control js-select" data-options="すべて,業務委託,業務提携">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>状態</label><div class="control js-select" data-options="すべて,有効,無効">すべて<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
         </div>
 
@@ -69,5 +69,6 @@
     </div>
   </div>
 </div>
+<script src="js/select.js" defer></script>
 </body>
 </html>
