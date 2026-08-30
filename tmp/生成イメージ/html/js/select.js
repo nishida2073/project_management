@@ -47,6 +47,22 @@
       var map = JSON.parse(mapAttr);
       if (target && map[value] !== undefined) target.textContent = map[value];
     }
+
+    var classMapAttr = el.getAttribute('data-class-map');
+    if (classMapAttr) {
+      var classMap = JSON.parse(classMapAttr);
+      Object.keys(classMap).forEach(function (k) { el.classList.remove(classMap[k]); });
+      if (classMap[value]) el.classList.add(classMap[value]);
+    }
+
+    var optionsMapAttr = el.getAttribute('data-options-map');
+    if (targetSelector && optionsMapAttr) {
+      var chipBox = document.querySelector(targetSelector);
+      var optionsMap = JSON.parse(optionsMapAttr);
+      if (chipBox && optionsMap[value] && window.chipSelectSetOptions) {
+        window.chipSelectSetOptions(chipBox, optionsMap[value]);
+      }
+    }
   }
 
   document.querySelectorAll('.js-select').forEach(function (el) {

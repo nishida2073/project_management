@@ -24,26 +24,26 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>ユーザーコード<span class="req">必須</span></label>
-          <div class="form-control">自動採番（USR-006）</div>
+          <label>ユーザーコード</label>
+          <div class="form-control readonly">自動採番（USR-006）</div>
         </div>
         <div class="form-field">
           <label>氏名<span class="req">必須</span></label>
-          <div class="form-control">例）山田 太郎</div>
+          <input type="text" class="form-control" placeholder="例）山田 太郎">
         </div>
         <div class="form-field full">
           <label>メールアドレス（ログインID）<span class="req">必須</span></label>
-          <div class="form-control">例）yamada@company.co.jp</div>
+          <input type="email" class="form-control" placeholder="例）yamada@company.co.jp">
         </div>
         <div class="form-field full">
           <label>初期パスワード<span class="req">必須</span></label>
-          <div class="form-control">例）********</div>
+          <input type="password" class="form-control" placeholder="例）********">
         </div>
         <div class="form-field">
           <label>権限<span class="req">必須</span></label>
           <div class="form-control js-select" data-options="管理者,一般ユーザー">選択してください<span class="caret">▾</span></div>
         </div>
-        <div class="form-field">
+        <div class="form-field toggle-field">
           <label>稼働状況</label>
           <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
         </div>
@@ -56,5 +56,6 @@
   </div>
 </div>
 <script src="js/select.js" defer></script>
+<script src="js/toggle.js" defer></script>
 </body>
 </html>

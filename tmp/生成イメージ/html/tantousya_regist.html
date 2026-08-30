@@ -24,16 +24,16 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>担当者コード<span class="req">必須</span></label>
-          <div class="form-control">自動採番（TAN-058）</div>
+          <label>担当者コード</label>
+          <div class="form-control readonly">自動採番（TAN-058）</div>
         </div>
         <div class="form-field">
           <label>担当者名<span class="req">必須</span></label>
-          <div class="form-control">例）山田 太郎</div>
+          <input type="text" class="form-control" placeholder="例）山田 太郎">
         </div>
         <div class="form-field">
           <label>メールアドレス</label>
-          <div class="form-control">例）yamada@company.co.jp</div>
+          <input type="email" class="form-control" placeholder="例）yamada@company.co.jp">
         </div>
         <div class="form-field">
           <label>所属<span class="req">必須</span></label>
@@ -41,23 +41,23 @@
         </div>
         <div class="form-field full">
           <label>担当対象（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box">
+          <div class="chip-box js-chip-select" data-options="案件,研修" data-chip-map='{"案件":"anken","研修":"kensyu"}'>
             <span class="chip-add">＋ 担当対象を追加</span>
           </div>
         </div>
         <div class="form-field">
           <label>業務区分<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="管理担当者,実施担当者">選択してください<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="営業担当者,管理担当者,運営担当者" data-target="#roleChipBox" data-options-map='{"営業担当者":["営業"],"管理担当者":["PM","PL"],"運営担当者":["運営"]}'>選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field full">
           <label>役職（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box">
+          <div class="chip-box js-chip-select" id="roleChipBox" data-options="PM,PL,営業,運営" data-chip-map='{"PM":"pm","PL":"pl","営業":"sales","運営":"ops"}'>
             <span class="chip pm">PM <x>✕</x></span>
             <span class="chip pl">PL <x>✕</x></span>
             <span class="chip-add">＋ 役職を追加</span>
           </div>
         </div>
-        <div class="form-field">
+        <div class="form-field toggle-field">
           <label>稼働状況</label>
           <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
         </div>
@@ -70,5 +70,7 @@
   </div>
 </div>
 <script src="js/select.js" defer></script>
+<script src="js/chip-select.js" defer></script>
+<script src="js/toggle.js" defer></script>
 </body>
 </html>

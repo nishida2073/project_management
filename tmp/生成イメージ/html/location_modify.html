@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/location_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=location" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>ロケーション編集</h2>
+          <div class="sub">LOC-001　501教室の情報を編集します</div>
+        </div>
+        <a class="close-x" href="location_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>ロケーションコード</label>
+          <div class="form-control readonly">LOC-001</div>
+        </div>
+        <div class="form-field">
+          <label>ロケーション名<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="501教室">
+        </div>
+        <div class="form-field">
+          <label>ロケーション区分</label>
+          <div class="form-control js-select" data-options="駒場,成城,外部会場">駒場<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>住所</label>
+          <input type="text" class="form-control" value="東京都目黒区駒場4-6-1">
+        </div>
+        <div class="form-field">
+          <label>電話番号</label>
+          <input type="tel" class="form-control" value="03-1111-2222">
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="location_list.html">キャンセル</a>
+        <a class="btn primary" href="location_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+</body>
+</html>

@@ -19,33 +19,38 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>コースコード<span class="req">必須</span></label>
-          <div class="form-control">BC02</div>
+          <label>コースコード</label>
+          <div class="form-control readonly">BC02</div>
         </div>
         <div class="form-field">
           <label>コース名<span class="req">必須</span></label>
-          <div class="form-control">ビジネス基礎研修</div>
+          <input type="text" class="form-control" value="ビジネス基礎研修">
         </div>
         <div class="form-field">
-          <label>推奨実施形態</label>
+          <label>コース区分</label>
+          <div class="form-control js-select" data-options="新CDPB,旧CDPB,新入社員研修">新入社員研修<span class="caret">▾</span></div>
+        </div>
+        <div class="form-section">推奨設定</div>
+        <div class="form-field">
+          <label>実施形態</label>
           <div class="form-control js-select" data-options="集合,オンライン,ハイブリッド">集合<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
-          <label>推奨日数</label>
+          <label>日数</label>
           <div class="form-control number-select" data-options="1,2,3,4,5">
             <input type="text" inputmode="numeric" value="3">
             <span class="caret">▾</span>
           </div>
         </div>
         <div class="form-field">
-          <label>推奨人数</label>
+          <label>人数</label>
           <div class="form-control number-select" data-options="10,15,20,24,30,35,40,50">
             <input type="text" inputmode="numeric" value="24">
             <span class="caret">▾</span>
           </div>
         </div>
         <div class="form-field"></div>
-        <div class="form-field">
+        <div class="form-field toggle-field">
           <label>稼働状況</label>
           <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
         </div>
@@ -59,5 +64,6 @@
 </div>
 <script src="js/select.js" defer></script>
 <script src="js/number-select.js" defer></script>
+<script src="js/toggle.js" defer></script>
 </body>
 </html>

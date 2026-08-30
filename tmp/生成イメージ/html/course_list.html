@@ -30,8 +30,8 @@
 
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><div class="control wide">コースコード・コース名で検索</div></div>
-        <div class="field"><label>推奨実施形態</label><div class="control small js-select" data-options="すべて,集合,オンライン,ハイブリッド">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,休止中">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>コース区分</label><div class="control small js-select" data-options="すべて,新CDPB,旧CDPB,新入社員研修">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
       </div>
 
@@ -42,18 +42,19 @@
             <tr>
               <th>コースコード</th>
               <th>コース名</th>
-              <th>推奨実施形態</th>
-              <th>推奨日数</th>
-              <th>推奨人数</th>
+              <th>コース区分</th>
+              <th>実施形態（推奨）</th>
+              <th>日数（推奨）</th>
+              <th>人数（推奨）</th>
               <th>稼働状況</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>BC02</td><td>ビジネス基礎研修</td><td>集合</td><td>3日</td><td>24名</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
-            <tr><td>GCD</td><td>グローバル基礎コース</td><td>オンライン</td><td>1日</td><td>40名</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
-            <tr><td>NDU</td><td>次世代リーダー育成研修</td><td>集合</td><td>3日</td><td>30名</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
-            <tr><td>CEC</td><td>マネジメント基礎研修</td><td>集合</td><td>2日</td><td>20名</td><td><span class="state off"><span class="dot"></span>休止中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>BC02</td><td>ビジネス基礎研修</td><td><span class="tag orange">新入社員研修</span></td><td><span class="tag onsite">集合</span></td><td>3日</td><td>24名</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>GCD</td><td>グローバル基礎コース</td><td><span class="tag blue">新CDPB</span></td><td><span class="tag online">オンライン</span></td><td>1日</td><td>40名</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>NDU</td><td>次世代リーダー育成研修</td><td><span class="tag blue">新CDPB</span></td><td><span class="tag onsite">集合</span></td><td>3日</td><td>30名</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>CEC</td><td>マネジメント基礎研修</td><td><span class="tag gray">旧CDPB</span></td><td><span class="tag onsite">集合</span></td><td>2日</td><td>20名</td><td><span class="state off"><span class="dot"></span>停止中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
           </tbody>
         </table>
         <div class="pagination">

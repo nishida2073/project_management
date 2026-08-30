@@ -12,28 +12,29 @@
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>ベンダー編集</h2>
+          <h2>講師ベンダー編集</h2>
           <div class="sub">VND-001　株式会社NEUトレーニングの情報を編集します</div>
         </div>
         <a class="close-x" href="vendor_list.html">✕</a>
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>ベンダーコード<span class="req">必須</span></label>
-          <div class="form-control">VND-001</div>
+          <label>講師ベンダーコード</label>
+          <div class="form-control readonly">VND-001</div>
         </div>
         <div class="form-field">
-          <label>ベンダー名<span class="req">必須</span></label>
-          <div class="form-control">株式会社NEUトレーニング</div>
+          <label>講師ベンダー名<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="株式会社NEUトレーニング">
         </div>
         <div class="form-field full">
           <label>住所</label>
-          <div class="form-control">東京都千代田区〇〇1-2-3</div>
+          <input type="text" class="form-control" value="東京都千代田区〇〇1-2-3">
         </div>
         <div class="form-field full">
           <label>契約年度（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box">
-            <span class="chip year">2026年度 <x>✕</x></span>
+          <div class="chip-box js-chip-select" data-options="2024年度,2025年度,2026年度,2027年度" data-chip-map='{"2024年度":"y2024","2025年度":"y2025","2026年度":"y2026","2027年度":"y2027"}'>
+            <span class="chip y2025">2025年度 <x>✕</x></span>
+            <span class="chip y2026">2026年度 <x>✕</x></span>
             <span class="chip-add">＋ 年度を追加</span>
           </div>
         </div>
@@ -43,23 +44,23 @@
         </div>
         <div class="form-field">
           <label>担当窓口（氏名）</label>
-          <div class="form-control">営業部 佐々木様</div>
+          <input type="text" class="form-control" value="営業部 佐々木様">
         </div>
         <div class="form-field">
           <label>電話番号</label>
-          <div class="form-control">03-1234-5678</div>
+          <input type="tel" class="form-control" value="03-1234-5678">
         </div>
         <div class="form-field">
           <label>メールアドレス</label>
-          <div class="form-control">sasaki@neu-training.co.jp</div>
+          <input type="email" class="form-control" value="sasaki@neu-training.co.jp">
         </div>
         <div class="form-field full">
           <label>備考</label>
-          <div class="form-control textarea">ビジネス基礎研修を主に担当</div>
+          <textarea class="form-control textarea">ビジネス基礎研修を主に担当</textarea>
         </div>
-        <div class="form-field">
-          <label>状態</label>
-          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>有効</span></div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -70,5 +71,7 @@
   </div>
 </div>
 <script src="js/select.js" defer></script>
+<script src="js/chip-select.js" defer></script>
+<script src="js/toggle.js" defer></script>
 </body>
 </html>

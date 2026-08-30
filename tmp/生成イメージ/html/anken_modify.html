@@ -3,50 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/anken_regist.css">
+<link rel="stylesheet" href="css/anken_modify.css">
 </head>
 <body>
 <div class="app">
   <iframe src="sidebar.html?active=anken" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
-  <div class="main">
-    <div class="topbar"></div>
-    <div class="content"><div class="toolbar"><h1>案件一覧</h1></div><div class="table-card"></div></div>
-  </div>
-
   <div class="overlay">
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>案件新規登録</h2>
-          <div class="sub">新規の案件情報を登録します</div>
+          <h2>案件編集</h2>
+          <div class="sub">PJ-2601　G新人研修（NTTデータ金融共催）の情報を編集します</div>
         </div>
         <a class="close-x" href="anken_list.html">✕</a>
       </div>
       <div class="modal-body">
         <div class="form-field">
           <label>案件ID</label>
-          <div class="form-control readonly">自動採番（PJ-2608）</div>
+          <div class="form-control readonly">PJ-2601</div>
         </div>
         <div class="form-field full">
           <label>案件名<span class="req">必須</span></label>
-          <input type="text" class="form-control" placeholder="例）ビジネス基礎研修 定期開催">
+          <input type="text" class="form-control" value="G新人研修（NTTデータ金融共催）">
         </div>
         <div class="form-field">
           <label>顧客名<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="NTTデータ金融,株式会社ABC商事,DEFホールディングス,CECトラスト,NTTデータUNIV,グループ各社,（公募）">選択してください<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="NTTデータ金融,株式会社ABC商事,DEFホールディングス,CECトラスト,NTTデータUNIV,グループ各社,（公募）">NTTデータ金融<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>実施開始月<span class="req">必須</span></label>
-          <div class="form-control js-month">例）2026/09<span class="caret">▾</span></div>
+          <div class="form-control js-month">2026/09<span class="caret">▾</span></div>
         </div>
         <div class="form-section">管理担当者</div>
         <div class="form-field">
           <label>PM<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="山口 直人,田中 誠,高橋 健,伊藤 美咲,渡辺 直樹,佐藤 一郎">選択してください<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="山口 直人,田中 誠,高橋 健,伊藤 美咲,渡辺 直樹,佐藤 一郎">山口 直人<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>PL</label>
-          <div class="form-control js-select" data-options="細野 恵美,木村 隆,中島 拓海,小林 由美,松本 健二,市村 拓也,岡田 沙織">選択してください<span class="caret">▾</span></div>
+          <div class="form-control js-select" data-options="細野 恵美,木村 隆,中島 拓海,小林 由美,松本 健二,市村 拓也,岡田 沙織">細野 恵美<span class="caret">▾</span></div>
         </div>
         <div class="form-field full">
           <label>備考</label>
@@ -55,7 +50,7 @@
       </div>
       <div class="modal-footer">
         <a class="btn" href="anken_list.html">キャンセル</a>
-        <a class="btn primary" href="anken_list.html">登録する</a>
+        <a class="btn primary" href="anken_list.html">保存する</a>
       </div>
     </div>
   </div>

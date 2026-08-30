@@ -32,8 +32,8 @@
 
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><div class="control wide">案件名・顧客名で検索</div></div>
-        <div class="field"><label>管理担当者</label><div class="control small js-select" data-options="すべて,山口,細野,田中,木村,高橋,中島,伊藤,小林,渡辺,松本,市村,佐藤,岡田">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>総合進捗</label><div class="control small js-select" data-options="すべて,着手前,承認プロセス中,完了,遅延あり">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>管理担当者</label><div class="control js-select" data-options="すべて,山口 直人,細野 恵美,田中 誠,木村 隆,高橋 健,中島 拓海,伊藤 美咲,小林 由美,渡辺 直樹,松本 健二,市村 拓也,佐藤 一郎,岡田 沙織">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>総合進捗</label><div class="control js-select" data-options="すべて,着手前,承認プロセス中,完了,遅延あり">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>開始月</label><div class="control small js-month">2026/09<span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
         <div class="field"><label> </label><div class="control small js-month">2027/03<span class="caret">▾</span></div></div>
@@ -52,9 +52,9 @@
                 <th class="sticky" style="left:0; min-width:150px;">案件ID</th>
                 <th class="sticky" style="left:150px; min-width:220px;">案件名</th>
                 <th class="sticky" style="left:370px; min-width:110px;">顧客名</th>
-                <th class="sticky" style="left:480px; min-width:130px;">管理担当者</th>
-                <th class="sticky" style="left:610px; min-width:100px;">開始月</th>
-                <th class="sticky shadow" style="left:710px; min-width:120px;">総合進捗</th>
+                <th class="sticky" style="left:480px; min-width:200px;">管理担当者</th>
+                <th class="sticky" style="left:680px; min-width:100px;">開始月</th>
+                <th class="sticky shadow" style="left:780px; min-width:120px;">総合進捗</th>
                 <th style="min-width:120px;">①開発会議</th>
                 <th style="min-width:120px;">②見積承認</th>
                 <th style="min-width:120px;">③経営会議<br>(見積承認)</th>
@@ -96,19 +96,19 @@ function overall(status){
   return '<span class="overall '+cls+'"><span class="dot"></span>'+label+'</span>';
 }
 var rows = [
- {id:'PJ-2601', name:'G新人研修（NTTデータ金融共催）', customer:'NTTデータ金融', pm:'山口 / 細野', month:'2026/09', overall:'progress',
+ {id:'PJ-2601', name:'G新人研修（NTTデータ金融共催）', customer:'NTTデータ金融', pm:'山口 直人 / 細野 恵美', month:'2026/09', overall:'progress',
   steps:['done','na','na','done','na','done','done','progress','wait','wait','wait','wait','wait']},
- {id:'PJ-2602', name:'ビジネス基礎研修 定期開催', customer:'株式会社ABC商事', pm:'田中 / 木村', month:'2026/09', overall:'delay',
+ {id:'PJ-2602', name:'ビジネス基礎研修 定期開催', customer:'株式会社ABC商事', pm:'田中 誠 / 木村 隆', month:'2026/09', overall:'delay',
   steps:['done','delay','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {id:'PJ-2603', name:'次世代リーダー育成プログラム', customer:'DEFホールディングス', pm:'高橋 / 中島', month:'2026/10', overall:'progress',
+ {id:'PJ-2603', name:'次世代リーダー育成プログラム', customer:'DEFホールディングス', pm:'高橋 健 / 中島 拓海', month:'2026/10', overall:'progress',
   steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {id:'PJ-2604', name:'グローバル基礎コース 公募', customer:'（公募）', pm:'伊藤 / 小林', month:'2026/09', overall:'done',
+ {id:'PJ-2604', name:'グローバル基礎コース 公募', customer:'（公募）', pm:'伊藤 美咲 / 小林 由美', month:'2026/09', overall:'done',
   steps:['done','done','done','na','na','done','na','done','done','done','done','progress','wait']},
- {id:'PJ-2605', name:'マネジメント基礎研修', customer:'CECトラスト', pm:'渡辺 / 松本', month:'2026/10', overall:'wait',
+ {id:'PJ-2605', name:'マネジメント基礎研修', customer:'CECトラスト', pm:'渡辺 直樹 / 松本 健二', month:'2026/10', overall:'wait',
   steps:['wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {id:'PJ-2606', name:'システム基盤実践研修', customer:'NTTデータUNIV', pm:'山口 / 市村', month:'2026/09', overall:'delay',
+ {id:'PJ-2606', name:'システム基盤実践研修', customer:'NTTデータUNIV', pm:'山口 直人 / 市村 拓也', month:'2026/09', overall:'delay',
   steps:['done','done','done','done','delay','wait','wait','wait','wait','wait','wait','wait','wait']},
- {id:'PJ-2607', name:'新人フォローアップ研修', customer:'グループ各社', pm:'佐藤 / 岡田', month:'2026/11', overall:'progress',
+ {id:'PJ-2607', name:'新人フォローアップ研修', customer:'グループ各社', pm:'佐藤 一郎 / 岡田 沙織', month:'2026/11', overall:'progress',
   steps:['done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']}
 ];
 var dates = ['08/10','08/20','08/25','08/29','09/03','09/08','09/10','09/17','09/24','10/05','10/20','11/10','11/25'];
@@ -120,8 +120,8 @@ rows.forEach(function(r){
   html += '<td class="sticky" style="left:150px;">'+r.name+'</td>';
   html += '<td class="sticky" style="left:370px;">'+r.customer+'</td>';
   html += '<td class="sticky" style="left:480px;">'+r.pm+'</td>';
-  html += '<td class="sticky" style="left:610px;">'+r.month+'</td>';
-  html += '<td class="sticky shadow" style="left:710px;">'+overall(r.overall)+'</td>';
+  html += '<td class="sticky" style="left:680px;">'+r.month+'</td>';
+  html += '<td class="sticky shadow" style="left:780px;">'+overall(r.overall)+'</td>';
   r.steps.forEach(function(s, i){
     var actual = (s==='done') ? dates[i] : '';
     html += '<td>'+chip(s, dates[i], actual)+'</td>';
@@ -132,7 +132,7 @@ rows.forEach(function(r){
 });
 
 if (location.search.indexOf('scrolled=1') !== -1) {
-  document.getElementById('scrollArea').scrollLeft = 840;
+  document.getElementById('scrollArea').scrollLeft = 910;
 }
 </script>
 <script src="js/select.js" defer></script>

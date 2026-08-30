@@ -28,12 +28,12 @@
           <div class="form-control js-select" data-options="BC02-01,BC02-02,GCD-114,GCD-115,NDU-203,NDU-204,CEC-051" data-target="#courseName" data-map='{"BC02-01":"ビジネス基礎研修","BC02-02":"ビジネス基礎研修","GCD-114":"グローバル基礎コース","GCD-115":"グローバル基礎コース","NDU-203":"次世代リーダー育成研修","NDU-204":"次世代リーダー育成研修","CEC-051":"マネジメント基礎研修"}'>BC02-01<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
-          <label>コース名<span class="req">必須</span></label>
-          <div class="form-control" id="courseName">ビジネス基礎研修</div>
+          <label>コース名</label>
+          <div class="form-control readonly" id="courseName">ビジネス基礎研修</div>
         </div>
         <div class="form-field">
           <label>クラスコード</label>
-          <div class="form-control">BC02-01-C1</div>
+          <div class="form-control readonly">BC02-01-C1</div>
         </div>
         <div class="form-field">
           <label>区分<span class="req">必須</span></label>
@@ -62,12 +62,12 @@
         </div>
         <div class="form-section">メイン</div>
         <div class="form-field">
-          <label>ベンダー名</label>
+          <label>講師ベンダー名</label>
           <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">株式会社NEUトレーニング<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>講師名</label>
-          <div class="form-control">田中 誠</div>
+          <input type="text" class="form-control" value="田中 誠">
         </div>
         <div class="form-section">サブ</div>
         <div class="form-field full">
@@ -75,7 +75,7 @@
           <div class="sub-list">
             <div class="sub-grid sub-row">
               <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">NDUパートナーズ<span class="caret">▾</span></div>
-              <div class="form-control">鈴木 花子</div>
+              <input type="text" class="form-control" value="鈴木 花子">
               <div class="sub-remove">✕</div>
             </div>
           </div>

@@ -100,6 +100,9 @@ th.grp-none { background: #f6f8fb !important; }
 .tag.exec { background: #e3f6f5; color: #0e8a86; }
 .tag.anken { background: #eaf7ec; color: #238a4e; }
 .tag.kensyu { background: #f5eaf7; color: #8a3f96; }
+.tag.onsite { background: #e7f0ff; color: #2f6fed; }
+.tag.online { background: #e3f6f5; color: #0e8a86; }
+.tag.hybrid { background: #f0e9ff; color: #7c4de0; }
 
 /* 稼働状況・有効無効（社員／ベンダーマスタ） */
 .state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
@@ -193,6 +196,7 @@ a.close-x { cursor: pointer; }
 .status-select.done { background: #e5f6ec; color: #279158; }
 .status-select.progress { background: #e7f0ff; color: #2f6fed; }
 .status-select.wait { background: #eef0f4; color: #8992a3; }
+.status-select.delay { background: #fdeaea; color: #d43c40; }
 .status-select.na { background: #f6f7f9; color: #b7bfcc; }
 .status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
 .memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
@@ -204,7 +208,12 @@ a.close-x { cursor: pointer; }
 .form-field label { font-size: 12px; color: #5a6376; font-weight: 700; }
 .form-field label .req { color: #e5484d; margin-left: 3px; }
 .form-control { height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 12px; font-size: 13px; color: #333c4d; display: flex; align-items: center; }
-.form-control.textarea { height: 68px; align-items: flex-start; padding-top: 8px; color: #9aa4b5; }
+.form-control.textarea { height: 68px; align-items: flex-start; padding-top: 8px; color: #333c4d; }
+input.form-control, textarea.form-control { width: 100%; outline: none; font-family: inherit; }
+input.form-control:focus, textarea.form-control:focus { border-color: #2f6fed; }
+textarea.form-control.textarea { resize: vertical; display: block; }
+input.form-control::placeholder, textarea.form-control::placeholder { color: #9aa4b5; }
+.form-control.readonly { background: #f1f2f5; color: #9aa4b5; cursor: not-allowed; }
 .form-control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
 
 .js-select { cursor: pointer; position: relative; user-select: none; }
@@ -240,14 +249,33 @@ a.close-x { cursor: pointer; }
 
 /* 役職チップ選択（社員マスタ登録） */
 .chip-box { min-height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip-box.js-chip-select { position: relative; }
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
 .chip.pm { background: #e7f0ff; color: #2f6fed; }
 .chip.pl { background: #fff2e2; color: #d97c1e; }
 .chip.year { background: #fff2e2; color: #d97c1e; }
+.chip.y2024 { background: #eef0f4; color: #5a6376; }
+.chip.y2025 { background: #e3f6f5; color: #0e8a86; }
+.chip.y2026 { background: #e7f0ff; color: #2f6fed; }
+.chip.y2027 { background: #fff2e2; color: #d97c1e; }
 .chip.anken { background: #eaf7ec; color: #238a4e; }
 .chip.kensyu { background: #f5eaf7; color: #8a3f96; }
-.chip x { font-size: 10px; opacity: .6; }
-.chip-add { font-size: 12px; color: #9aa4b5; padding: 4px 6px; }
+.chip.sales { background: #f0e9ff; color: #7c4de0; }
+.chip.ops { background: #e5f6ec; color: #279158; }
+.chip x { font-size: 10px; opacity: .6; cursor: pointer; }
+.chip x:hover { opacity: 1; }
+.chip-add { font-size: 12px; color: #9aa4b5; padding: 4px 6px; cursor: pointer; border-radius: 5px; }
+.chip-add:hover { background: #eef4ff; color: #2f6fed; }
+.chip-group { display: inline-flex; gap: 4px; flex-wrap: wrap; align-items: center; }
 
 /* 年度別セクション（ベンダーマスタ登録） */
 .year-pill { display: inline-flex; align-items: center; gap: 6px; background: #eef4ff; color: #2f6fed; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; width: fit-content; }
+
+/* 稼働状況トグル */
+.form-field.toggle-field { margin-top: 28px; }
+.toggle-row { display: flex; align-items: center; gap: 10px; height: 36px; cursor: pointer; user-select: none; }
+.toggle { width: 38px; height: 20px; border-radius: 12px; background: #33b070; position: relative; transition: background .15s; }
+.toggle .knob { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left .15s; }
+.toggle.off { background: #c7ccd4; }
+.toggle.off .knob { left: 2px; }
+.toggle-row span { font-size: 13px; color: #333c4d; font-weight: 700; }

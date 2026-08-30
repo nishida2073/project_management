@@ -19,16 +19,16 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>ユーザーコード<span class="req">必須</span></label>
-          <div class="form-control">USR-001</div>
+          <label>ユーザーコード</label>
+          <div class="form-control readonly">USR-001</div>
         </div>
         <div class="form-field">
           <label>氏名<span class="req">必須</span></label>
-          <div class="form-control">山田 太郎</div>
+          <input type="text" class="form-control" value="山田 太郎">
         </div>
         <div class="form-field full">
           <label>メールアドレス（ログインID）<span class="req">必須</span></label>
-          <div class="form-control">yamada@company.co.jp</div>
+          <input type="email" class="form-control" value="yamada@company.co.jp">
         </div>
         <div class="form-field">
           <label>権限<span class="req">必須</span></label>
@@ -36,9 +36,9 @@
         </div>
         <div class="form-field full">
           <label>パスワード</label>
-          <div class="form-control">変更する場合のみ入力</div>
+          <input type="password" class="form-control" placeholder="変更する場合のみ入力">
         </div>
-        <div class="form-field">
+        <div class="form-field toggle-field">
           <label>稼働状況</label>
           <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
         </div>
@@ -51,5 +51,6 @@
   </div>
 </div>
 <script src="js/select.js" defer></script>
+<script src="js/toggle.js" defer></script>
 </body>
 </html>

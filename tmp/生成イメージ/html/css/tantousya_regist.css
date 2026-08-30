@@ -7,8 +7,3 @@
 .modal { width: 720px; }
 .modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 20px; }
 .btn { padding: 10px 20px; }
-
-.toggle-row { display: flex; align-items: center; gap: 10px; height: 36px; }
-.toggle { width: 38px; height: 20px; border-radius: 12px; background: #33b070; position: relative; }
-.toggle .knob { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-.toggle-row span { font-size: 13px; color: #333c4d; font-weight: 700; }
