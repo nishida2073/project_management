@@ -12,7 +12,7 @@
     <div class="topbar">
       <div class="crumb-block">
         <div class="crumb">案件管理<span>／</span>案件</div>
-        <p class="crumb-sub">案件を管理します</p>
+        <p class="crumb-sub">案件情報を管理します</p>
       </div>
       <div class="user">
         <span>山田 太郎（BD事業部）</span>
@@ -34,15 +34,27 @@
 
       <div class="filter-panel">
         <div class="field">
+          <label>年度</label>
+          <div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
           <label>キーワード検索</label>
-          <div class="control wide">案件名・顧客名で検索</div>
+          <input type="text" class="field-control-input" placeholder="案件コード・案件名で検索">
+        </div>
+        <div class="field">
+          <label>販売区分</label>
+          <div class="control small js-select" data-options="すべて,外販,内販">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>参加区分</label>
+          <div class="control small js-select" data-options="すべて,受託,公募">すべて<span class="caret">▾</span></div>
         </div>
         <div class="field">
           <label>管理担当者</label>
           <div class="control js-select" data-options="すべて,山口 直人,細野 恵美,田中 誠,木村 隆,高橋 健,中島 拓海,伊藤 美咲,小林 由美,渡辺 直樹,松本 健二,市村 拓也,佐藤 一郎,岡田 沙織">すべて<span class="caret">▾</span></div>
         </div>
         <div class="field">
-          <label>開始月</label>
+          <label>実施開始月</label>
           <div class="control small js-month">2026/09<span class="caret">▾</span></div>
         </div>
         <div class="tilde">〜</div>
@@ -61,68 +73,92 @@
         <table>
           <thead>
             <tr>
-              <th>案件ID</th>
+              <th>年度</th>
+              <th>案件コード</th>
+              <th>販売区分</th>
+              <th>参加区分</th>
               <th>案件名</th>
               <th>顧客名</th>
               <th>管理担当者</th>
-              <th>開始月</th>
+              <th>実施開始月</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
             <tr>
+              <td>2026年度</td>
               <td>PJ-2601</td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
               <td>G新人研修（NTTデータ金融共催）</td>
               <td>NTTデータ金融</td>
-              <td>山口 直人 / 細野 恵美</td>
+              <td>細野 恵美 / 山口 直人</td>
               <td>2026/09</td>
               <td class="row-actions"><a class="link-btn" href="anken_modify.html">編集</a></td>
             </tr>
             <tr>
+              <td>2026年度</td>
               <td>PJ-2602</td>
+              <td><span class="tag hybrid">内販</span></td>
+              <td><span class="tag blue">受託</span></td>
               <td>ビジネス基礎研修 定期開催</td>
               <td>株式会社ABC商事</td>
-              <td>田中 誠 / 木村 隆</td>
+              <td>木村 隆 / 田中 誠</td>
               <td>2026/09</td>
               <td class="row-actions"><a class="link-btn" href="anken_modify.html">編集</a></td>
             </tr>
             <tr>
+              <td>2026年度</td>
               <td>PJ-2603</td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
               <td>次世代リーダー育成プログラム</td>
               <td>DEFホールディングス</td>
-              <td>高橋 健 / 中島 拓海</td>
+              <td>小林 由美 / 高橋 健・中島 拓海</td>
               <td>2026/10</td>
               <td class="row-actions"><a class="link-btn" href="anken_modify.html">編集</a></td>
             </tr>
             <tr>
+              <td>2026年度</td>
               <td>PJ-2604</td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag orange">公募</span></td>
               <td>グローバル基礎コース 公募</td>
               <td>（公募）</td>
-              <td>伊藤 美咲 / 小林 由美</td>
+              <td>小林 由美 / 伊藤 美咲</td>
               <td>2026/09</td>
               <td class="row-actions"><a class="link-btn" href="anken_modify.html">編集</a></td>
             </tr>
             <tr>
+              <td>2026年度</td>
               <td>PJ-2605</td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
               <td>マネジメント基礎研修</td>
               <td>CECトラスト</td>
-              <td>渡辺 直樹 / 松本 健二</td>
+              <td>松本 健二 / 渡辺 直樹</td>
               <td>2026/10</td>
               <td class="row-actions"><a class="link-btn" href="anken_modify.html">編集</a></td>
             </tr>
             <tr>
+              <td>2026年度</td>
               <td>PJ-2606</td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
               <td>システム基盤実践研修</td>
               <td>NTTデータUNIV</td>
-              <td>山口 直人 / 市村 拓也</td>
+              <td>市村 拓也 / 山口 直人</td>
               <td>2026/09</td>
               <td class="row-actions"><a class="link-btn" href="anken_modify.html">編集</a></td>
             </tr>
             <tr>
+              <td>2026年度</td>
               <td>PJ-2607</td>
+              <td><span class="tag hybrid">内販</span></td>
+              <td><span class="tag blue">受託</span></td>
               <td>新人フォローアップ研修</td>
               <td>グループ各社</td>
-              <td>佐藤 一郎 / 岡田 沙織</td>
+              <td>岡田 沙織 / 佐藤 一郎</td>
               <td>2026/11</td>
               <td class="row-actions"><a class="link-btn" href="anken_modify.html">編集</a></td>
             </tr>

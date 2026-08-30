@@ -22,17 +22,23 @@
           <label>担当者コード</label>
           <div class="form-control readonly">TAN-014</div>
         </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>所属区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="affiliation" value="社内" checked><span class="radio-dot"></span><span class="tag blue">社内</span></label>
+            <label class="radio-option"><input type="radio" name="affiliation" value="パートナー"><span class="radio-dot"></span><span class="tag orange">パートナー</span></label>
+          </div>
+        </div>
+        <div class="form-field"></div>
         <div class="form-field">
           <label>担当者名<span class="req">必須</span></label>
           <input type="text" class="form-control" value="山口 直人">
         </div>
+        <div class="form-field"></div>
         <div class="form-field">
           <label>メールアドレス</label>
           <input type="email" class="form-control" value="yamaguchi@company.co.jp">
-        </div>
-        <div class="form-field">
-          <label>所属<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="社内,パートナー">社内<span class="caret">▾</span></div>
         </div>
         <div class="form-field full">
           <label>担当対象（複数選択可）<span class="req">必須</span></label>
@@ -41,9 +47,13 @@
             <span class="chip-add">＋ 担当対象を追加</span>
           </div>
         </div>
-        <div class="form-field">
+        <div class="form-field full">
           <label>業務区分<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="営業担当者,管理担当者,運営担当者" data-target="#roleChipBox" data-options-map='{"営業担当者":["営業"],"管理担当者":["PM","PL"],"運営担当者":["運営"]}'>管理担当者<span class="caret">▾</span></div>
+          <div class="radio-group" data-target="#roleChipBox" data-options-map='{"営業担当者":["営業"],"管理担当者":["PM","PL"],"運営担当者":["運営"]}'>
+            <label class="radio-option"><input type="radio" name="jobType" value="営業担当者"><span class="radio-dot"></span><span class="tag orange">営業担当者</span></label>
+            <label class="radio-option"><input type="radio" name="jobType" value="管理担当者" checked><span class="radio-dot"></span><span class="tag mgmt">管理担当者</span></label>
+            <label class="radio-option"><input type="radio" name="jobType" value="運営担当者"><span class="radio-dot"></span><span class="tag exec">運営担当者</span></label>
+          </div>
         </div>
         <div class="form-field full">
           <label>役職（複数選択可）<span class="req">必須</span></label>

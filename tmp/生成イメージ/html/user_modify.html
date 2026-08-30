@@ -22,8 +22,9 @@
           <label>ユーザーコード</label>
           <div class="form-control readonly">USR-001</div>
         </div>
+        <div class="form-field"></div>
         <div class="form-field">
-          <label>氏名<span class="req">必須</span></label>
+          <label>ユーザー名<span class="req">必須</span></label>
           <input type="text" class="form-control" value="山田 太郎">
         </div>
         <div class="form-field full">
@@ -32,7 +33,10 @@
         </div>
         <div class="form-field">
           <label>権限<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="管理者,一般ユーザー">管理者<span class="caret">▾</span></div>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="authority" value="管理者" checked><span class="radio-dot"></span><span class="tag blue">管理者</span></label>
+            <label class="radio-option"><input type="radio" name="authority" value="一般ユーザー"><span class="radio-dot"></span><span class="tag gray">一般ユーザー</span></label>
+          </div>
         </div>
         <div class="form-field full">
           <label>パスワード</label>

@@ -24,15 +24,35 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>案件ID</label>
+          <label>年度<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="2024年度,2025年度,2026年度,2027年度">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>案件コード</label>
           <div class="form-control readonly">自動採番（PJ-2608）</div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>販売区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="salesType" value="外販"><span class="radio-dot"></span><span class="tag online">外販</span></label>
+            <label class="radio-option"><input type="radio" name="salesType" value="内販"><span class="radio-dot"></span><span class="tag hybrid">内販</span></label>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>参加区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="participationType" value="受託"><span class="radio-dot"></span><span class="tag blue">受託</span></label>
+            <label class="radio-option"><input type="radio" name="participationType" value="公募"><span class="radio-dot"></span><span class="tag orange">公募</span></label>
+          </div>
         </div>
         <div class="form-field full">
           <label>案件名<span class="req">必須</span></label>
           <input type="text" class="form-control" placeholder="例）ビジネス基礎研修 定期開催">
         </div>
         <div class="form-field">
-          <label>顧客名<span class="req">必須</span></label>
+          <label>顧客名</label>
           <div class="form-control js-select" data-options="NTTデータ金融,株式会社ABC商事,DEFホールディングス,CECトラスト,NTTデータUNIV,グループ各社,（公募）">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
@@ -44,9 +64,12 @@
           <label>PM<span class="req">必須</span></label>
           <div class="form-control js-select" data-options="山口 直人,田中 誠,高橋 健,伊藤 美咲,渡辺 直樹,佐藤 一郎">選択してください<span class="caret">▾</span></div>
         </div>
-        <div class="form-field">
-          <label>PL</label>
-          <div class="form-control js-select" data-options="細野 恵美,木村 隆,中島 拓海,小林 由美,松本 健二,市村 拓也,岡田 沙織">選択してください<span class="caret">▾</span></div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>PL（複数選択可）</label>
+          <div class="chip-box js-chip-select" data-options="細野 恵美,木村 隆,中島 拓海,小林 由美,松本 健二,市村 拓也,岡田 沙織" data-chip-class="pl">
+            <span class="chip-add">＋ PLを追加</span>
+          </div>
         </div>
         <div class="form-field full">
           <label>備考</label>
@@ -62,5 +85,6 @@
 </div>
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
+<script src="js/chip-select.js" defer></script>
 </body>
 </html>

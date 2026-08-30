@@ -27,23 +27,27 @@
           <label>ロケーションコード</label>
           <div class="form-control readonly">自動採番（LOC-005）</div>
         </div>
-        <div class="form-field">
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>ロケーション区分</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="locationType" value="駒場"><span class="radio-dot"></span><span class="tag blue">駒場</span></label>
+            <label class="radio-option"><input type="radio" name="locationType" value="成城"><span class="radio-dot"></span><span class="tag orange">成城</span></label>
+            <label class="radio-option"><input type="radio" name="locationType" value="外部会場"><span class="radio-dot"></span><span class="tag gray">外部会場</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
           <label>ロケーション名<span class="req">必須</span></label>
           <input type="text" class="form-control" placeholder="例）701教室">
         </div>
-        <div class="form-field">
-          <label>ロケーション区分</label>
-          <div class="form-control js-select" data-options="駒場,成城,外部会場">選択してください<span class="caret">▾</span></div>
-        </div>
-        <div class="form-field">
-          <label>住所</label>
-          <input type="text" class="form-control" placeholder="例）東京都目黒区駒場4-6-1">
-        </div>
-        <div class="form-field">
+        <div class="form-field full">
           <label>電話番号</label>
           <input type="tel" class="form-control" placeholder="例）03-0000-0000">
         </div>
-        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>住所</label>
+          <input type="text" class="form-control" placeholder="例）東京都目黒区駒場4-6-1">
+        </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
           <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>

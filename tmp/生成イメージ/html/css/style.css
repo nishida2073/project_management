@@ -59,6 +59,9 @@ a.btn { cursor: pointer; }
 .field .control.wide { min-width: 220px; }
 .field .control.small { min-width: 100px; }
 .field .control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
+input.field-control-input { height: 34px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 10px; font-size: 13px; color: #333c4d; min-width: 220px; outline: none; font-family: inherit; }
+input.field-control-input::placeholder { color: #9aa4b5; }
+input.field-control-input:focus { border-color: #2f6fed; }
 .search-btn { height: 34px; padding: 0 22px; background: #1c2b45; color: white; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
 .tilde { align-self: flex-end; height: 34px; display: flex; align-items: center; color: #9aa4b5; }
 
@@ -103,6 +106,7 @@ th.grp-none { background: #f6f8fb !important; }
 .tag.onsite { background: #e7f0ff; color: #2f6fed; }
 .tag.online { background: #e3f6f5; color: #0e8a86; }
 .tag.hybrid { background: #f0e9ff; color: #7c4de0; }
+.tag.green { background: #e5f6ec; color: #279158; }
 
 /* 稼働状況・有効無効（社員／ベンダーマスタ） */
 .state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
@@ -134,6 +138,10 @@ a.link-btn { cursor: pointer; }
 .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 14px 20px; font-size: 12.5px; color: #6c7688; }
 .page-btn { width: 28px; height: 28px; border: 1px solid #dde3ec; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: #fff; }
 .page-btn.active { background: #1c2b45; color: white; border-color: #1c2b45; font-weight: 700; }
+
+/* 列数が多い一覧表を横スクロール可能にする（sticky列は使わない通常の一覧向け） */
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll table { width: max-content; min-width: 100%; }
 
 /* 横スクロール進捗表（社内／運営進捗一覧） */
 .scroll-outer { overflow-x: auto; max-width: 100%; }
@@ -215,6 +223,18 @@ textarea.form-control.textarea { resize: vertical; display: block; }
 input.form-control::placeholder, textarea.form-control::placeholder { color: #9aa4b5; }
 .form-control.readonly { background: #f1f2f5; color: #9aa4b5; cursor: not-allowed; }
 .form-control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
+
+/* 選択結果を入力欄ではなくラベルのように見せる表示（案件情報／コース情報など） */
+.form-value { min-height: 36px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #1c2b45; padding-left: 12px; }
+
+/* ラジオボタン選択（販売区分など二択項目） */
+.radio-group { display: flex; align-items: center; gap: 24px; height: 36px; }
+.radio-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #333c4d; cursor: pointer; user-select: none; }
+.radio-option input[type="radio"] { position: absolute; width: 0; height: 0; opacity: 0; }
+.radio-option .radio-dot { position: relative; flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #d3d9e3; background: #fbfcfe; transition: border-color .15s; }
+.radio-option .radio-dot::after { content: ''; position: absolute; top: 3px; left: 3px; width: 6px; height: 6px; border-radius: 50%; background: #2f6fed; opacity: 0; transition: opacity .15s; }
+.radio-option input[type="radio"]:checked + .radio-dot { border-color: #2f6fed; }
+.radio-option input[type="radio"]:checked + .radio-dot::after { opacity: 1; }
 
 .js-select { cursor: pointer; position: relative; user-select: none; }
 .js-select .caret { transition: transform .15s; }

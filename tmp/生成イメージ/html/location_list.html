@@ -13,7 +13,7 @@
     <div class="topbar">
       <div class="crumb-block">
         <div class="crumb">マスタ管理<span>／</span>ロケーション</div>
-        <p class="crumb-sub">研修を実施する会場情報を管理します</p>
+        <p class="crumb-sub">ロケーション情報を管理します</p>
       </div>
       <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
     </div>
@@ -29,7 +29,7 @@
       </div>
 
       <div class="filter-panel">
-        <div class="field"><label>キーワード検索</label><div class="control wide">ロケーションコード・ロケーション名で検索</div></div>
+        <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="ロケーションコード・ロケーション名で検索"></div>
         <div class="field"><label>ロケーション区分</label><div class="control small js-select" data-options="すべて,駒場,成城,外部会場">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
@@ -41,19 +41,19 @@
           <thead>
             <tr>
               <th>ロケーションコード</th>
-              <th>ロケーション名</th>
               <th>ロケーション区分</th>
-              <th>住所</th>
+              <th>ロケーション名</th>
               <th>電話番号</th>
+              <th>住所</th>
               <th>稼働状況</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>LOC-001</td><td>501教室</td><td><span class="tag blue">駒場</span></td><td>東京都目黒区駒場4-6-1</td><td>03-1111-2222</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
-            <tr><td>LOC-002</td><td>601教室</td><td><span class="tag blue">駒場</span></td><td>東京都目黒区駒場4-6-1</td><td>03-1111-2222</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
-            <tr><td>LOC-003</td><td>302教室</td><td><span class="tag orange">成城</span></td><td>東京都世田谷区成城6-1-1</td><td>03-2222-3333</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
-            <tr><td>LOC-004</td><td>外部貸会議室A</td><td><span class="tag gray">外部会場</span></td><td>東京都千代田区大手町1-1-1</td><td>03-3333-4444</td><td><span class="state off"><span class="dot"></span>停止中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
+            <tr><td>LOC-001</td><td><span class="tag blue">駒場</span></td><td>501教室</td><td>03-1111-2222</td><td>東京都目黒区駒場4-6-1</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
+            <tr><td>LOC-002</td><td><span class="tag blue">駒場</span></td><td>601教室</td><td>03-1111-2222</td><td>東京都目黒区駒場4-6-1</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
+            <tr><td>LOC-003</td><td><span class="tag orange">成城</span></td><td>302教室</td><td>03-2222-3333</td><td>東京都世田谷区成城6-1-1</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
+            <tr><td>LOC-004</td><td><span class="tag gray">外部会場</span></td><td>外部貸会議室A</td><td>03-3333-4444</td><td>東京都千代田区大手町1-1-1</td><td><span class="state off"><span class="dot"></span>停止中</span></td><td><a class="link-btn" href="location_modify.html">編集</a></td></tr>
           </tbody>
         </table>
         <div class="pagination">

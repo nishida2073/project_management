@@ -22,14 +22,20 @@
           <label>講師ベンダーコード</label>
           <div class="form-control readonly">自動採番（VND-019）</div>
         </div>
+        <div class="form-field"></div>
         <div class="form-field">
           <label>講師ベンダー名<span class="req">必須</span></label>
           <input type="text" class="form-control" placeholder="例）株式会社〇〇トレーニング">
         </div>
-        <div class="form-field full">
-          <label>住所</label>
-          <input type="text" class="form-control" placeholder="例）東京都千代田区〇〇1-2-3">
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>契約区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="contractType" value="業務委託"><span class="radio-dot"></span><span class="tag blue">業務委託</span></label>
+            <label class="radio-option"><input type="radio" name="contractType" value="業務提携"><span class="radio-dot"></span><span class="tag gray">業務提携</span></label>
+          </div>
         </div>
+        <div class="form-field"></div>
         <div class="form-field full">
           <label>契約年度（複数選択可）<span class="req">必須</span></label>
           <div class="chip-box js-chip-select" data-options="2024年度,2025年度,2026年度,2027年度" data-chip-map='{"2024年度":"y2024","2025年度":"y2025","2026年度":"y2026","2027年度":"y2027"}'>
@@ -38,24 +44,26 @@
           </div>
         </div>
         <div class="form-field">
-          <label>契約区分<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="業務委託,業務提携">選択してください<span class="caret">▾</span></div>
-        </div>
-        <div class="form-field">
-          <label>担当窓口（氏名）</label>
-          <input type="text" class="form-control" placeholder="例）営業部 山田様">
-        </div>
-        <div class="form-field">
           <label>電話番号</label>
           <input type="tel" class="form-control" placeholder="例）03-0000-0000">
         </div>
-        <div class="form-field">
-          <label>メールアドレス</label>
-          <input type="email" class="form-control" placeholder="例）contact@vendor.co.jp">
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>住所</label>
+          <input type="text" class="form-control" placeholder="例）東京都千代田区〇〇1-2-3">
         </div>
         <div class="form-field full">
           <label>備考</label>
           <textarea class="form-control textarea" placeholder="対応可能な研修分野や特記事項があれば入力"></textarea>
+        </div>
+        <div class="form-section">担当窓口</div>
+        <div class="form-field">
+          <label>担当者名</label>
+          <input type="text" class="form-control" placeholder="例）営業部 山田様">
+        </div>
+        <div class="form-field">
+          <label>メールアドレス</label>
+          <input type="email" class="form-control" placeholder="例）contact@vendor.co.jp">
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>

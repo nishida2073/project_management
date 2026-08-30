@@ -13,5 +13,6 @@
 .sub-row-header { margin-bottom: 6px; }
 .sub-row-header span { font-size: 12px; color: #5a6376; font-weight: 700; }
 .sub-row { position: relative; }
-.sub-remove { position: absolute; top: 50%; right: -24px; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 11px; border: 1px solid #e6eaf1; cursor: default; }
+.sub-remove { position: absolute; top: 50%; right: -24px; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 11px; border: 1px solid #e6eaf1; cursor: pointer; }
+.sub-remove:hover { background: #eef4ff; color: #2f6fed; border-color: #2f6fed; }
 .add-row { margin-top: 10px; width: fit-content; }

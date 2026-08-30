@@ -27,18 +27,34 @@
           <label>コースコード</label>
           <div class="form-control readonly">自動採番（BC03）</div>
         </div>
-        <div class="form-field">
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>コース区分</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="courseType" value="新CDPB"><span class="radio-dot"></span><span class="tag blue">新CDPB</span></label>
+            <label class="radio-option"><input type="radio" name="courseType" value="旧CDPB"><span class="radio-dot"></span><span class="tag gray">旧CDPB</span></label>
+            <label class="radio-option"><input type="radio" name="courseType" value="新入社員研修"><span class="radio-dot"></span><span class="tag orange">新入社員研修</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
           <label>コース名<span class="req">必須</span></label>
           <input type="text" class="form-control" placeholder="例）ビジネス応用研修">
         </div>
         <div class="form-field">
-          <label>コース区分</label>
-          <div class="form-control js-select" data-options="新CDPB,旧CDPB,新入社員研修">選択してください<span class="caret">▾</span></div>
+          <label>販売区分</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="salesType" value="外販"><span class="radio-dot"></span><span class="tag online">外販</span></label>
+            <label class="radio-option"><input type="radio" name="salesType" value="内販"><span class="radio-dot"></span><span class="tag hybrid">内販</span></label>
+          </div>
         </div>
         <div class="form-section">推奨設定</div>
-        <div class="form-field">
+        <div class="form-field full">
           <label>実施形態</label>
-          <div class="form-control js-select" data-options="集合,オンライン,ハイブリッド">選択してください<span class="caret">▾</span></div>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="deliveryType" value="集合"><span class="radio-dot"></span><span class="tag onsite">集合</span></label>
+            <label class="radio-option"><input type="radio" name="deliveryType" value="オンライン"><span class="radio-dot"></span><span class="tag online">オンライン</span></label>
+            <label class="radio-option"><input type="radio" name="deliveryType" value="ハイブリッド"><span class="radio-dot"></span><span class="tag hybrid">ハイブリッド</span></label>
+          </div>
         </div>
         <div class="form-field">
           <label>日数</label>
@@ -54,7 +70,6 @@
             <span class="caret">▾</span>
           </div>
         </div>
-        <div class="form-field"></div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
           <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
