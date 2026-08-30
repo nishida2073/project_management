@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="anken_progress_list.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/anken_progress_list.css">
 </head>
 <body>
 <div class="app">
@@ -11,7 +11,10 @@
 
   <div class="main">
     <div class="topbar">
-      <div class="crumb">案件管理<span>／</span>案件進捗</div>
+      <div class="crumb-block">
+        <div class="crumb">案件管理<span>／</span>案件進捗</div>
+        <p class="crumb-sub">案件の進捗を管理します</p>
+      </div>
       <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
     </div>
 
@@ -19,7 +22,6 @@
       <div class="toolbar">
         <div class="left">
           <h1>案件進捗一覧</h1>
-          <p>開発会議から契約・請求までの社内承認プロセスの予実・ステータスを管理します</p>
         </div>
         <div class="btn-group">
           <div class="toggle-wrap"><span>遅延のみ表示</span><div class="toggle"><div class="knob"></div></div></div>
@@ -32,7 +34,7 @@
         <div class="field"><label>キーワード検索</label><div class="control wide">案件名・顧客名で検索</div></div>
         <div class="field"><label>PM</label><div class="control small">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>総合進捗</label><div class="control small">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>実施開始月</label><div class="control small">2026/09</div></div>
+        <div class="field"><label>開始月</label><div class="control small">2026/09</div></div>
         <div class="tilde">〜</div>
         <div class="field"><label> </label><div class="control small">2027/03</div></div>
         <div class="search-btn">検索</div>
@@ -41,7 +43,7 @@
       <div class="table-card">
         <div class="table-meta">
           <div class="count">全 <b>42</b> 件（うち遅延 <b style="color:#d43c40">3</b> 件）</div>
-          <div class="hint">左側の主要項目は固定表示 ／ 右方向にスクロールすると各承認フェーズの進捗が確認できます</div>
+          <div class="hint">左側の主要項目は固定表示 ／ 右方向にスクロールすると各工程の進捗が確認できます</div>
         </div>
         <div class="scroll-outer" id="scrollArea">
           <table>
@@ -49,9 +51,9 @@
               <tr>
                 <th class="sticky" style="left:0; min-width:150px;">案件ID</th>
                 <th class="sticky" style="left:150px; min-width:220px;">案件名</th>
-                <th class="sticky" style="left:370px; min-width:110px;">顧客</th>
-                <th class="sticky" style="left:480px; min-width:130px;">PM / PL</th>
-                <th class="sticky" style="left:610px; min-width:100px;">実施開始月</th>
+                <th class="sticky" style="left:370px; min-width:110px;">顧客名</th>
+                <th class="sticky" style="left:480px; min-width:130px;">管理担当者</th>
+                <th class="sticky" style="left:610px; min-width:100px;">開始月</th>
                 <th class="sticky shadow" style="left:710px; min-width:120px;">総合進捗</th>
                 <th style="min-width:120px;">①開発会議</th>
                 <th style="min-width:120px;">②見積承認</th>
@@ -85,8 +87,8 @@ function chip(status, plan, actual){
   if (status === 'na') return '<div class="status-chip"><span class="badge na">対象外</span></div>';
   var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
   var label = {wait:'未着手', progress:'調整中', done:'完了', delay:'遅延'}[status];
-  var dateLine = actual ? ('予定 '+plan+' / 実績 '+actual) : ('予定 '+plan);
-  return '<div class="status-chip"><span class="badge '+cls+'">'+label+'</span><span class="dates">'+dateLine+'</span></div>';
+  var dateLine = actual ? ('<span>予定 '+plan+'</span><span>実績 '+actual+'</span>') : ('<span>予定 '+plan+'</span>');
+  return '<div class="status-chip"><span class="badge '+cls+'">'+label+'</span><div class="dates">'+dateLine+'</div></div>';
 }
 function overall(status){
   var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];

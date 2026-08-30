@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="kensyu_progress_list.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/kensyu_progress_list.css">
 </head>
 <body>
 <div class="app">
@@ -11,7 +11,10 @@
 
   <div class="main">
     <div class="topbar">
-      <div class="crumb">研修管理<span>／</span>研修運営進捗</div>
+      <div class="crumb-block">
+        <div class="crumb">研修管理<span>／</span>研修運営進捗</div>
+        <p class="crumb-sub">研修の運営進捗を管理します</p>
+      </div>
       <div class="user">
         <span>山田 太郎（BD事業部）</span>
         <div class="avatar">山田</div>
@@ -22,7 +25,6 @@
       <div class="toolbar">
         <div class="left">
           <h1>研修運営進捗一覧</h1>
-          <p>研修登録から実施後処理、中止対応までの運営進捗を管理します</p>
         </div>
         <div class="btn-group">
           <div class="toggle-wrap"><span>遅延のみ表示</span><div class="toggle" id="delayToggle"><div class="knob"></div></div></div>
@@ -32,10 +34,11 @@
       </div>
 
       <div class="filter-panel">
-        <div class="field"><label>キーワード検索</label><div class="control wide">コース名・クラスコードで検索</div></div>
+        <div class="field"><label>キーワード検索</label><div class="control wide">コースコード・コース名で検索</div></div>
         <div class="field"><label>区分</label><div class="control small">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>総合進捗</label><div class="control small">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>担当者</label><div class="control">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>管理担当者</label><div class="control">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実施担当者</label><div class="control">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>開始日</label><div class="control small">2026/09/01</div></div>
         <div class="tilde">〜</div>
         <div class="field"><label>終了日</label><div class="control small">2026/09/30</div></div>
@@ -51,11 +54,13 @@
           <table>
             <thead>
               <tr>
-                <th class="sticky" style="left:0; min-width:64px;">区分</th>
-                <th class="sticky" style="left:64px; min-width:190px;">コース名 / コード</th>
-                <th class="sticky" style="left:254px; min-width:110px;">クラスコード</th>
-                <th class="sticky" style="left:364px; min-width:150px;">実施期間</th>
-                <th class="sticky shadow" style="left:514px; min-width:120px;">総合進捗</th>
+                <th class="sticky" style="left:0; min-width:190px;">コース名 / コースコード</th>
+                <th class="sticky" style="left:190px; min-width:110px;">クラスコード</th>
+                <th class="sticky" style="left:300px; min-width:64px;">区分</th>
+                <th class="sticky" style="left:364px; min-width:110px;">管理担当者</th>
+                <th class="sticky" style="left:474px; min-width:120px;">開始日</th>
+                <th class="sticky" style="left:594px; min-width:120px;">終了日</th>
+                <th class="sticky shadow" style="left:714px; min-width:120px;">総合進捗</th>
                 <th style="min-width:130px;">①研修登録</th>
                 <th style="min-width:130px;">②名簿受領督促</th>
                 <th style="min-width:130px;">③講師契約</th>
@@ -96,19 +101,19 @@ function overall(status){
   return '<span class="overall '+cls+'"><span class="dot"></span>'+label+'</span>';
 }
 var rows = [
- {kubun:'受託', kcolor:'blue', course:'ビジネス基礎研修', code:'BC02-01', cls:'BC02-01-C1', period:'09/02〜09/04', overall:'progress', person:'佐藤 一郎',
+ {kubun:'受託', kcolor:'blue', course:'ビジネス基礎研修', code:'BC02-01', cls:'BC02-01-C1', start:'2026/09/02', end:'2026/09/04', overall:'progress', person:'佐藤 一郎',
   steps:['done','done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait']},
- {kubun:'公募', kcolor:'orange', course:'グローバル基礎コース', code:'GCD-114', cls:'GCD-114-C3', period:'09/08〜09/09', overall:'done', person:'鈴木 花子',
+ {kubun:'公募', kcolor:'orange', course:'グローバル基礎コース', code:'GCD-114', cls:'GCD-114-C3', start:'2026/09/08', end:'2026/09/09', overall:'done', person:'鈴木 花子',
   steps:['done','done','done','done','done','done','done','done','done','done','done','wait']},
- {kubun:'受託', kcolor:'blue', course:'次世代リーダー育成研修', code:'NDU-203', cls:'NDU-203-C2', period:'09/10〜09/12', overall:'delay', person:'高橋 健',
+ {kubun:'受託', kcolor:'blue', course:'次世代リーダー育成研修', code:'NDU-203', cls:'NDU-203-C2', start:'2026/09/10', end:'2026/09/12', overall:'delay', person:'高橋 健',
   steps:['done','delay','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {kubun:'受託', kcolor:'blue', course:'ビジネス基礎研修', code:'BC02-02', cls:'BC02-02-C1', period:'09/15〜09/17', overall:'progress', person:'佐藤 一郎',
+ {kubun:'受託', kcolor:'blue', course:'ビジネス基礎研修', code:'BC02-02', cls:'BC02-02-C1', start:'2026/09/15', end:'2026/09/17', overall:'progress', person:'佐藤 一郎',
   steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {kubun:'公募', kcolor:'orange', course:'グローバル基礎コース', code:'GCD-115', cls:'GCD-115-C1', period:'09/18〜09/18', overall:'wait', person:'伊藤 美咲',
+ {kubun:'公募', kcolor:'orange', course:'グローバル基礎コース', code:'GCD-115', cls:'GCD-115-C1', start:'2026/09/18', end:'2026/09/18', overall:'wait', person:'伊藤 美咲',
   steps:['done','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {kubun:'受託', kcolor:'blue', course:'次世代リーダー育成研修', code:'NDU-204', cls:'NDU-204-C1', period:'09/24〜09/26', overall:'done', person:'高橋 健',
+ {kubun:'受託', kcolor:'blue', course:'次世代リーダー育成研修', code:'NDU-204', cls:'NDU-204-C1', start:'2026/09/24', end:'2026/09/26', overall:'done', person:'高橋 健',
   steps:['done','done','done','done','done','done','done','done','done','done','done','progress']},
- {kubun:'受託', kcolor:'blue', course:'マネジメント基礎研修', code:'CEC-051', cls:'CEC-051-C4', period:'09/28〜09/29', overall:'progress', person:'渡辺 直樹',
+ {kubun:'受託', kcolor:'blue', course:'マネジメント基礎研修', code:'CEC-051', cls:'CEC-051-C4', start:'2026/09/28', end:'2026/09/29', overall:'progress', person:'渡辺 直樹',
   steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait']}
 ];
 var dates = ['08/20','08/25','08/27','08/29','09/01','09/03','09/05','09/08','09/10','09/12','09/14','09/16'];
@@ -116,11 +121,13 @@ var tbody = document.getElementById('tbody');
 rows.forEach(function(r){
   var tr = document.createElement('tr');
   var html = '';
-  html += '<td class="sticky" style="left:0;"><span class="tag '+r.kcolor+'">'+r.kubun+'</span></td>';
-  html += '<td class="sticky" style="left:64px;"><div style="font-weight:700;">'+r.course+'</div><div style="font-size:11px;color:#9aa4b5;">'+r.code+'</div></td>';
-  html += '<td class="sticky" style="left:254px;">'+r.cls+'</td>';
-  html += '<td class="sticky" style="left:364px;">'+r.period+'</td>';
-  html += '<td class="sticky shadow" style="left:514px;">'+overall(r.overall)+'</td>';
+  html += '<td class="sticky" style="left:0;"><div style="font-weight:700;">'+r.course+'</div><div style="font-size:11px;color:#9aa4b5;">'+r.code+'</div></td>';
+  html += '<td class="sticky" style="left:190px;">'+r.cls+'</td>';
+  html += '<td class="sticky" style="left:300px;"><span class="tag '+r.kcolor+'">'+r.kubun+'</span></td>';
+  html += '<td class="sticky" style="left:364px;">'+r.person+'</td>';
+  html += '<td class="sticky" style="left:474px;">'+r.start+'</td>';
+  html += '<td class="sticky" style="left:594px;">'+r.end+'</td>';
+  html += '<td class="sticky shadow" style="left:714px;">'+overall(r.overall)+'</td>';
   r.steps.forEach(function(s, i){
     var actual = (s==='done') ? dates[i] : (s==='progress' ? '' : '');
     var owner = (PERSON_STEP_INDEXES.indexOf(i) !== -1) ? r.person : '運営チーム';
@@ -132,7 +139,7 @@ rows.forEach(function(r){
 });
 
 if (location.search.indexOf('scrolled=1') !== -1) {
-  document.getElementById('scrollArea').scrollLeft = 950;
+  document.getElementById('scrollArea').scrollLeft = 1060;
 }
 </script>
 </body>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/user_regist.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=user" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>ユーザー一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>ユーザー新規登録</h2>
+          <div class="sub">新規のユーザーアカウントを登録します</div>
+        </div>
+        <a class="close-x" href="user_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>ユーザーコード<span class="req">必須</span></label>
+          <div class="form-control">自動採番（USR-006）</div>
+        </div>
+        <div class="form-field">
+          <label>氏名<span class="req">必須</span></label>
+          <div class="form-control">例）山田 太郎</div>
+        </div>
+        <div class="form-field full">
+          <label>メールアドレス（ログインID）<span class="req">必須</span></label>
+          <div class="form-control">例）yamada@company.co.jp</div>
+        </div>
+        <div class="form-field full">
+          <label>初期パスワード<span class="req">必須</span></label>
+          <div class="form-control">例）********</div>
+        </div>
+        <div class="form-field">
+          <label>権限<span class="req">必須</span></label>
+          <div class="form-control">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="user_list.html">キャンセル</a>
+        <a class="btn primary" href="user_list.html">登録する</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

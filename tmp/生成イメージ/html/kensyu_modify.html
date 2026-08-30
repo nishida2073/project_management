@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="kensyu_modify.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/kensyu_modify.css">
 </head>
 <body>
 <div class="app">
@@ -24,14 +24,10 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>区分<span class="req">必須</span></label>
-          <div class="form-control">受託<span class="caret">▾</span></div>
-        </div>
-        <div class="form-field">
           <label>コースコード<span class="req">必須</span></label>
           <div class="form-control">BC02-01</div>
         </div>
-        <div class="form-field full">
+        <div class="form-field">
           <label>コース名<span class="req">必須</span></label>
           <div class="form-control">ビジネス基礎研修</div>
         </div>
@@ -40,8 +36,8 @@
           <div class="form-control">BC02-01-C1</div>
         </div>
         <div class="form-field">
-          <label>実施形態<span class="req">必須</span></label>
-          <div class="form-control">集合<span class="caret">▾</span></div>
+          <label>区分<span class="req">必須</span></label>
+          <div class="form-control">受託<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>開始日<span class="req">必須</span></label>
@@ -52,16 +48,38 @@
           <div class="form-control">2026/09/04</div>
         </div>
         <div class="form-field">
+          <label>管理担当者</label>
+          <div class="form-control">佐藤 一郎<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>実施形態<span class="req">必須</span></label>
+          <div class="form-control">集合<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>ロケーション名</label>
+          <div class="form-control">本社5F 研修室A<span class="caret">▾</span></div>
+        </div>
+        <div class="form-section">メイン</div>
+        <div class="form-field">
           <label>ベンダー名</label>
           <div class="form-control">株式会社NEUトレーニング<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>講師名</label>
-          <div class="form-control">佐藤 一郎</div>
+          <div class="form-control">田中 誠</div>
         </div>
-        <div class="form-field">
-          <label>ロケーション</label>
-          <div class="form-control">本社5F 研修室A</div>
+        <div class="form-section">サブ</div>
+        <div class="form-field full">
+          <div class="sub-grid sub-row-header"><span>ベンダー名</span><span>講師名</span></div>
+          <div class="sub-list">
+            <div class="sub-grid sub-row">
+              <div class="form-control">NDUパートナーズ<span class="caret">▾</span></div>
+              <div class="form-control">鈴木 花子</div>
+              <div class="sub-remove">✕</div>
+            </div>
+          </div>
+          <div class="link-btn add-row">＋ サブを追加</div>
         </div>
         <div class="form-field">
           <label>受講者数</label>

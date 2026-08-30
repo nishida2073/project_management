@@ -5,5 +5,5 @@
 .table-card { height: 700px; margin-top: 16px; }
 
 .modal { width: 720px; }
-.modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+.modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 20px; }
 .btn { padding: 10px 20px; }

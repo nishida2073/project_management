@@ -4,8 +4,8 @@
 .content { padding: 24px 28px; }
 .table-card { height: 700px; margin-top: 16px; }
 
-.modal { width: 1180px; max-height: 780px; display: flex; flex-direction: column; }
-.modal-body { padding: 18px 28px; overflow-y: auto; flex: 1; }
+.modal { width: 1180px; }
+.modal-body { padding: 18px 28px; }
 .btn { padding: 10px 20px; }
 
 .mini-control.wide { min-width: 160px; }

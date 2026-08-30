@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="tantousya_regist.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/tantousya_regist.css">
 </head>
 <body>
 <div class="app">
@@ -24,31 +24,37 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>担当者ID<span class="req">必須</span></label>
+          <label>担当者コード<span class="req">必須</span></label>
           <div class="form-control">自動採番（TAN-058）</div>
         </div>
         <div class="form-field">
-          <label>区分<span class="req">必須</span></label>
-          <div class="form-control">選択してください<span class="caret">▾</span></div>
-        </div>
-        <div class="form-field">
-          <label>氏名<span class="req">必須</span></label>
+          <label>担当者名<span class="req">必須</span></label>
           <div class="form-control">例）山田 太郎</div>
-        </div>
-        <div class="form-field">
-          <label>所属チーム<span class="req">必須</span></label>
-          <div class="form-control">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>メールアドレス</label>
           <div class="form-control">例）yamada@company.co.jp</div>
         </div>
+        <div class="form-field">
+          <label>所属<span class="req">必須</span></label>
+          <div class="form-control">選択してください<span class="caret">▾</span></div>
+        </div>
         <div class="form-field full">
-          <label>役割（複数選択可）<span class="req">必須</span></label>
+          <label>担当対象（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box">
+            <span class="chip-add">＋ 担当対象を追加</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>業務区分<span class="req">必須</span></label>
+          <div class="form-control">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>役職（複数選択可）<span class="req">必須</span></label>
           <div class="chip-box">
             <span class="chip pm">PM <x>✕</x></span>
             <span class="chip pl">PL <x>✕</x></span>
-            <span class="chip-add">＋ 役割を追加</span>
+            <span class="chip-add">＋ 役職を追加</span>
           </div>
         </div>
         <div class="form-field">

@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="app">
@@ -10,7 +10,10 @@
 
   <div class="main">
     <div class="topbar">
-      <div class="crumb">案件管理<span>／</span>案件</div>
+      <div class="crumb-block">
+        <div class="crumb">案件管理<span>／</span>案件</div>
+        <p class="crumb-sub">案件を管理します</p>
+      </div>
       <div class="user">
         <span>山田 太郎（BD事業部）</span>
         <div class="avatar">山田</div>
@@ -21,7 +24,6 @@
       <div class="toolbar">
         <div class="left">
           <h1>案件一覧</h1>
-          <p>お客様との研修案件の情報を登録・管理します</p>
         </div>
         <div class="btn-group">
           <div class="btn"><span class="icon">⇧</span>Excel取込</div>
@@ -36,11 +38,11 @@
           <div class="control wide">案件名・顧客名で検索</div>
         </div>
         <div class="field">
-          <label>PM</label>
+          <label>管理担当者</label>
           <div class="control small">すべて<span class="caret">▾</span></div>
         </div>
         <div class="field">
-          <label>実施開始月</label>
+          <label>開始月</label>
           <div class="control small">2026/09</div>
         </div>
         <div class="tilde">〜</div>
@@ -54,16 +56,16 @@
       <div class="table-card">
         <div class="table-meta">
           <div class="count">全 <b>42</b> 件</div>
-          <div>並び替え：実施開始月（昇順）　表示件数：20件</div>
+          <div>並び替え：開始月（昇順）　表示件数：20件</div>
         </div>
         <table>
           <thead>
             <tr>
               <th>案件ID</th>
               <th>案件名</th>
-              <th>顧客</th>
-              <th>PM / PL</th>
-              <th>実施開始月</th>
+              <th>顧客名</th>
+              <th>管理担当者</th>
+              <th>開始月</th>
               <th>操作</th>
             </tr>
           </thead>

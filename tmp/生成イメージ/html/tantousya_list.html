@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="tantousya_list.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/tantousya_list.css">
 </head>
 <body>
 <div class="app">
@@ -11,7 +11,10 @@
 
   <div class="main">
     <div class="topbar">
-      <div class="crumb">マスタ管理<span>／</span>担当者</div>
+      <div class="crumb-block">
+        <div class="crumb">マスタ管理<span>／</span>担当者</div>
+        <p class="crumb-sub">研修案件のPM・PL・営業などの担当者情報を管理します</p>
+      </div>
       <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
     </div>
 
@@ -20,7 +23,6 @@
         <div class="toolbar">
           <div class="left">
             <h1>担当者一覧</h1>
-            <p>研修案件のPM・PL・営業などの担当者情報を管理します</p>
           </div>
           <div class="btn-group">
             <a class="btn primary" href="tantousya_regist.html">＋ 新規登録</a>
@@ -28,10 +30,11 @@
         </div>
 
         <div class="filter-panel">
-          <div class="field"><label>キーワード検索</label><div class="control wide">担当者・氏名で検索</div></div>
-          <div class="field"><label>区分</label><div class="control small">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>所属チーム</label><div class="control">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>役割</label><div class="control">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>キーワード検索</label><div class="control wide">担当者コード・担当者名で検索</div></div>
+          <div class="field"><label>所属</label><div class="control small">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>担当対象</label><div class="control">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>業務区分</label><div class="control">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>役職</label><div class="control">すべて<span class="caret">▾</span></div></div>
           <div class="field"><label>稼働状況</label><div class="control">すべて<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
         </div>
@@ -41,24 +44,25 @@
           <table>
             <thead>
               <tr>
-                <th>担当者ID</th>
-                <th>区分</th>
-                <th>氏名</th>
-                <th>所属チーム</th>
-                <th>役割</th>
+                <th>担当者コード</th>
+                <th>担当者名</th>
                 <th>メールアドレス</th>
+                <th>所属</th>
+                <th>担当対象</th>
+                <th>業務区分</th>
+                <th>役職</th>
                 <th>稼働状況</th>
                 <th>操作</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>TAN-014</td><td><span class="tag blue">社内</span></td><td>山口 直人</td><td>G新人</td><td><span class="tag pm">PM</span></td><td>yamaguchi@company.co.jp</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
-              <tr><td>TAN-021</td><td><span class="tag blue">社内</span></td><td>細野 恵美</td><td>G新人</td><td><span class="tag pl">PL</span></td><td>hosono@company.co.jp</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
-              <tr><td>TAN-021</td><td><span class="tag blue">社内</span></td><td>市村 拓也</td><td>G新人</td><td><span class="tag pl">PL</span></td><td>ichimura@company.co.jp</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
-              <tr><td>TAN-033</td><td><span class="tag blue">社内</span></td><td>荒牧 麻衣</td><td>BD事業部</td><td><span class="tag sales">営業</span></td><td>aramaki@company.co.jp</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
-              <tr><td>TAN-045</td><td><span class="tag blue">社内</span></td><td>佐藤 一郎</td><td>研修運営</td><td><span class="tag ops">運営担当</span></td><td>sato@company.co.jp</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
-              <tr><td>TAN-052</td><td><span class="tag blue">社内</span></td><td>中村 桂</td><td>BD事業部</td><td><span class="tag sales">営業</span></td><td>nakamura@company.co.jp</td><td><span class="state off"><span class="dot"></span>休職中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
-              <tr><td>TAN-060</td><td><span class="tag orange">パートナー</span></td><td>藤井 誠</td><td>－</td><td><span class="tag pl">PL</span></td><td>fujii@neu-training.co.jp</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
+              <tr><td>TAN-014</td><td>山口 直人</td><td>yamaguchi@company.co.jp</td><td><span class="tag blue">社内</span></td><td><span class="tag anken">案件</span></td><td><span class="tag mgmt">管理担当者</span></td><td><span class="tag pm">PM</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
+              <tr><td>TAN-021</td><td>細野 恵美</td><td>hosono@company.co.jp</td><td><span class="tag blue">社内</span></td><td><span class="tag anken">案件</span></td><td><span class="tag mgmt">管理担当者</span></td><td><span class="tag pl">PL</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
+              <tr><td>TAN-021</td><td>市村 拓也</td><td>ichimura@company.co.jp</td><td><span class="tag blue">社内</span></td><td><span class="tag anken">案件</span></td><td><span class="tag mgmt">管理担当者</span></td><td><span class="tag pl">PL</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
+              <tr><td>TAN-033</td><td>荒牧 麻衣</td><td>aramaki@company.co.jp</td><td><span class="tag blue">社内</span></td><td><span class="tag anken">案件</span></td><td><span class="tag mgmt">管理担当者</span></td><td><span class="tag sales">営業</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
+              <tr><td>TAN-045</td><td>佐藤 一郎</td><td>sato@company.co.jp</td><td><span class="tag blue">社内</span></td><td><span class="tag kensyu">研修</span></td><td><span class="tag exec">実施担当者</span></td><td><span class="tag ops">運営担当</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
+              <tr><td>TAN-052</td><td>中村 桂</td><td>nakamura@company.co.jp</td><td><span class="tag blue">社内</span></td><td><span class="tag anken">案件</span></td><td><span class="tag mgmt">管理担当者</span></td><td><span class="tag sales">営業</span></td><td><span class="state off"><span class="dot"></span>休職中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
+              <tr><td>TAN-060</td><td>藤井 誠</td><td>fujii@neu-training.co.jp</td><td><span class="tag orange">パートナー</span></td><td><span class="tag anken">案件</span></td><td><span class="tag mgmt">管理担当者</span></td><td><span class="tag pl">PL</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="tantousya_modify.html">編集</a></td></tr>
             </tbody>
           </table>
           <div class="pagination">

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/user_list.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=user" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb-block">
+        <div class="crumb">システム管理<span>／</span>ユーザー</div>
+        <p class="crumb-sub">システムにログインするユーザーのアカウント情報を管理します</p>
+      </div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>ユーザー一覧</h1>
+        </div>
+        <div class="btn-group">
+          <a class="btn primary" href="user_regist.html">＋ 新規登録</a>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="field"><label>キーワード検索</label><div class="control wide">ユーザーコード・氏名・メールアドレスで検索</div></div>
+        <div class="field"><label>権限</label><div class="control small">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>稼働状況</label><div class="control small">すべて<span class="caret">▾</span></div></div>
+        <div class="search-btn">検索</div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-meta"><div class="count">全 <b>5</b> 件</div></div>
+        <table>
+          <thead>
+            <tr>
+              <th>ユーザーコード</th>
+              <th>氏名</th>
+              <th>メールアドレス</th>
+              <th>権限</th>
+              <th>稼働状況</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>USR-001</td><td>山田 太郎</td><td>yamada@company.co.jp</td><td><span class="tag blue">管理者</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="user_modify.html">編集</a></td></tr>
+            <tr><td>USR-002</td><td>佐藤 一郎</td><td>sato@company.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="user_modify.html">編集</a></td></tr>
+            <tr><td>USR-003</td><td>荒牧 麻衣</td><td>aramaki@company.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="user_modify.html">編集</a></td></tr>
+            <tr><td>USR-004</td><td>中村 桂</td><td>nakamura@company.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state off"><span class="dot"></span>休止中</span></td><td><a class="link-btn" href="user_modify.html">編集</a></td></tr>
+            <tr><td>USR-005</td><td>藤井 誠</td><td>fujii@neu-training.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="user_modify.html">編集</a></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
