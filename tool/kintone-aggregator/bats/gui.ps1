@@ -56,7 +56,7 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "アラート検知"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "アラート検知"; BatchPath = (Join-Path $basePath "check-alert.bat"); TargetDirPath = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateOnlyInputs }
+            [PSCustomObject]@{ Label = "アラート検知"; BatchPath = (Join-Path $basePath "check-alert.bat"); TargetDirPath = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
         )
     }
 )
