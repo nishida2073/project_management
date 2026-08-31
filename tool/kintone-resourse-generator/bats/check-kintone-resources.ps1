@@ -30,7 +30,7 @@ if (-not $ConfigName) {
 
 $configPath = Join-Path $configRoot "${ConfigName}_config.xlsx"
 $outputPath = Join-Path $outputRoot "${ConfigName}_check.xlsx"
-$logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "check_$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "check_$ConfigName"
 
 $script:exitCode = 0
 

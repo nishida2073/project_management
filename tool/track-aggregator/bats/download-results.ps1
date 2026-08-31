@@ -5,7 +5,8 @@
     [string]$TargetGroupName,
     [string]$TestResultRootDir,
     [string]$SurveyResultRootDir,
-    [int]$DownloadDetail
+    [int]$DownloadDetail,
+    [string]$LogNamePrefix
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -14,7 +15,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'download-results' })-$TargetGroupName"
 
 function Download-File {
     param(
@@ -118,14 +119,19 @@ function Download-TrackResults {
 }
 
 
-$downloadDetail = if($DownloadDetail -eq 1){ $true } else { $false }
+& {
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-$testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
-$testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+    $downloadDetail = if($DownloadDetail -eq 1){ $true } else { $false }
 
-$surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
-$surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+    $testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
+    $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
-Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
+    $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
+    $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
+    Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
+
+    Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

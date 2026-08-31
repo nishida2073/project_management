@@ -72,6 +72,7 @@ for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "     -TargetFixedCodeFields '!TargetFixedCodeFields!'" ^
           "     -TargetAppCodeFields '!TargetAppCodeFields!'" ^
           "     -TargetSummaryCodeFields '!TargetSummaryCodeFields!'" ^
+          "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
           "  throw" ^

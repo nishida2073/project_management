@@ -41,6 +41,28 @@ function Write-Message {
     }
 }
 
+# .ps1本体がログファイルを書き出すための共通処理（package-generator/kintone-resourse-generatorと同じ方式）。
+# $env:LOG_DIR（bats\common-env.bat由来。各batが呼び出し前にcallしており、start /bの子プロセスにも継承される）
+# 配下に、呼び出し元・対象グループ・対象日単位でログファイルを作る
+function New-WorkerLogPath {
+    param([Parameter(Mandatory)][string]$Prefix)
+    $logRoot = $env:LOG_DIR
+    New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
+    return Join-Path $logRoot "$Prefix.log"
+}
+
+# Tee-Objectは-Encoding非対応で既定UTF-16LE書き込みになるため、事後にUTF-8へ変換する。
+# GUI経由の実行ではWrite-Messageが行頭に[[COLOR:xxx]]タグを埋め込むため（gui.ps1のWrite-Log用）、
+# ファイルに残るログはこのタグを取り除いたテキストにする
+function ConvertTo-Utf8LogFile {
+    param([Parameter(Mandatory)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { return }
+    $content = Get-Content -LiteralPath $Path -Raw
+    if ($null -eq $content) { $content = "" }
+    $content = $content -replace '\[\[COLOR:\w+\]\]', ''
+    [System.IO.File]::WriteAllText($Path, $content, (New-Object System.Text.UTF8Encoding($true)))
+}
+
 
 $breakLineKeyword = "BRBR"
 function Convert-BreakLine {

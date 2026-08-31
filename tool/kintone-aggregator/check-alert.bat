@@ -4,10 +4,6 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~nx0"
 
-call "%~dp0bats\common-env.bat"
-
-if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
-
 if "%~1"=="" (
     for /f %%i in ('powershell -NoProfile -Command "(Get-Date).AddDays(-1).ToString(\"yyyy-MM-dd\")"') do set "TargetDate=%%i"
 ) else if /i "%~1"=="now" (
@@ -27,7 +23,7 @@ for %%F in (
     
     call "%~dp0bats\message.bat" "Please wait..." "Green"
     
-    call %%F "%TargetDate%" > "%LOG_DIR%\%%~nF-%TargetDate%.log"
+    call %%F "%TargetDate%"
     
     call "%~dp0bats\message.bat" "Finished %%~nxF {%TargetDate%}"
 )

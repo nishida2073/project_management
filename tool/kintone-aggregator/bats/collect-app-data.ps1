@@ -4,13 +4,16 @@
     [string]$TargetDate,
     [string]$SourseDataDefsPath,
     [string]$CollectRootDir,
-    [string]$CollectDataNotFoundMessage
+    [string]$CollectDataNotFoundMessage,
+    [string]$LogNamePrefix
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
+
+$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-app-data' })-$TargetGroupName-$TargetDate"
 
 function Combine-ArrayHorizontal {
     param(
@@ -170,18 +173,21 @@ function Export-Datas {
     Export-ArrayToFile $allDatas $collectFilePath
 }
 
-New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+& {
+    New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-$hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
-if (-not $hasFiles) {
-    Write-Message "集計対象がありません。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
-    return
-}
+    $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
+    if (-not $hasFiles) {
+        Write-Message "集計対象がありません。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        return
+    }
 
-$sourseDataProps = Read-SourseDataDefsFile -FilePath $SourseDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName
+    $sourseDataProps = Read-SourseDataDefsFile -FilePath $SourseDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName
 
-Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
+    Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
 
-$collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
+    $collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
 
-Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName -CollectDataNotFoundMessage $CollectDataNotFoundMessage
+    Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName -CollectDataNotFoundMessage $CollectDataNotFoundMessage
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

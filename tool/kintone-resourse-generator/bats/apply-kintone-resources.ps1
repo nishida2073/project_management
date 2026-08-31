@@ -28,7 +28,7 @@ if (-not $ConfigName) {
 }
 
 $configPath = Join-Path $configRoot "${ConfigName}_config.xlsx"
-$logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "apply_$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "apply_$ConfigName"
 
 $script:exitCode = 0
 

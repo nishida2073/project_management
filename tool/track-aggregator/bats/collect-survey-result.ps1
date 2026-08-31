@@ -5,7 +5,8 @@
     [string]$OutputRootDir,
     [string]$TemplateFilePath,
     [string]$SurveyResultRootDir,
-    [string]$OutputFileSuffix = "アンケート結果"
+    [string]$OutputFileSuffix = "アンケート結果",
+    [string]$LogNamePrefix
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -14,7 +15,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-survey-result' })-$TargetGroupName"
 
 function Create-CollectResultsDatas {
     param(
@@ -386,23 +387,28 @@ function Export-Excel {
 }
 
 
-$userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
-# Write-Message $userDatas -VarName "userDatas" -Type "Info"
+& {
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+    # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
-$surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
-$surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
+    $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
+    $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-$surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
-# Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info" 
+    # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
 
-$collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
-# Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info" 
+    $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+    # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info"
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+    $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
+    # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
 
-Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
+    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+
+    Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

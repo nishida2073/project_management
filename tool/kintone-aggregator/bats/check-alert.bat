@@ -58,6 +58,7 @@ for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "     -AlertInterventionLimit '%AlertInterventionLimit%'" ^
           "     -UseRecovery '%UseRecovery%'" ^
           "     -RecoveryScriptPath '%RecoveryScriptPath%'" ^
+          "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
           "  throw" ^

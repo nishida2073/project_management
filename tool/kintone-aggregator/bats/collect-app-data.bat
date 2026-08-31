@@ -43,6 +43,7 @@ for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
       "     -SourseDataDefsPath '%SourseDataDefsPath%'" ^
       "     -CollectRootDir '%CollectRootDir%'" ^
       "     -CollectDataNotFoundMessage '%CollectDataNotFoundMessage%'" ^
+      "     -LogNamePrefix '%~n0'" ^
       "} catch {" ^
       "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
       "  throw" ^

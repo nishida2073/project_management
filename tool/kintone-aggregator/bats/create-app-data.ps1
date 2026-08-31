@@ -20,13 +20,18 @@
     [string]$TargetUserCodeField,
     [string]$TargetFixedCodeFields,
     [string]$TargetAppCodeFields,
-    [string]$TargetSummaryCodeFields
+    [string]$TargetSummaryCodeFields,
+    [string]$LogNamePrefix
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
+
+# create-daily-report.bat/create-pulse-survey.batの両方がこのps1を共有しているため、
+# ログファイル名で呼び出し元を区別できるよう呼び出し元の.bat名をLogNamePrefixとして受け取る
+$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'create-app-data' })-$TargetGroupName-$TargetDate"
 
 $appDefinedCodeFields = [PSCustomObject]@{
     DateCodeField                = $TargetDateCodeField
@@ -396,67 +401,70 @@ function Export-File {
 
 
 
-$newTargetAppIds = if ([string]::IsNullOrWhiteSpace($TargetAppIds)) {
-    @()
-} else {
-    $TargetAppIds -split '[,\s]+' | Where-Object { $_ }
-}
-
-$fixedCodeFields = $TargetFixedCodeFields -split '[,\s]+'
-if ([string]::IsNullOrWhiteSpace($fixedCodeFields)) {
-    $fixedCodeFields = @()
-}
-
-$appCodeFields = $TargetAppCodeFields -split '[,\s]+'
-if ([string]::IsNullOrWhiteSpace($appCodeFields)) {
-    $appCodeFields = @()
-}
-
-$summaryCodeFields = $TargetSummaryCodeFields -split '[,\s]+'
-if ([string]::IsNullOrWhiteSpace($summaryCodeFields)) {
-    $summaryCodeFields = @()
-}
-
-New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-
-if ([string]::IsNullOrWhiteSpace($Authorization)) {
-    $pair = "${KintoneID}:${KintonePW}"
-    $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
-}
-
-
-$courseScheduleDatas = Create-CourseScheduleDatas -DataFilePath $MasterDataFilePath -CurrentDate $TargetDate
-Write-Message $courseScheduleDatas -VarName "courseScheduleDatas"
-
-$courseScheduleData = $CourseScheduleDatas | Where-Object { $_.date -eq $TargetDate } | Select-Object -First 1
-Write-Message $courseScheduleData -VarName "courseScheduleData"
-
-if(-not $courseScheduleData){
-    Write-Message "対象の科目がありません。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
-    return
-}
-if($courseScheduleData.isHoliday){
-    Write-Message "休日です。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
-    return
-}
-
-$userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
-Write-Message $userDatas -VarName "userDatas"
-
-$appDatas = Get-AppDatas -TargetAppIds $newTargetAppIds -TargetDate $TargetDate -BaseUrl $BaseUrl -Authorization $Authorization
-Write-Message $appDatas -VarName "appDatas"
-
-$checkResults = Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData
-Write-Message $checkResults -VarName "checkResults"
-
-if( $CreateExcelFile -eq 1 ){
-    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
-    if (-not (Test-Path $outputFilePath)) {
-        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath
+& {
+    $newTargetAppIds = if ([string]::IsNullOrWhiteSpace($TargetAppIds)) {
+        @()
+    } else {
+        $TargetAppIds -split '[,\s]+' | Where-Object { $_ }
     }
-    Export-Excel -CheckResults $checkResults -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ClassTemplateSheetName $ClassTemplateSheetName -SummaryTemplateSheetName $SummaryTemplateSheetName
-}
 
-$outputFileName = "$TargetGroupName-$SummarySheetNamePrefix$OutputSheetNameSuffix.txt"
-$outputFilePath = Join-Path $OutputRootDir $outputFileName
-Export-File -CheckResults $checkResults -OutputFilePath $outputFilePath
+    $fixedCodeFields = $TargetFixedCodeFields -split '[,\s]+'
+    if ([string]::IsNullOrWhiteSpace($fixedCodeFields)) {
+        $fixedCodeFields = @()
+    }
+
+    $appCodeFields = $TargetAppCodeFields -split '[,\s]+'
+    if ([string]::IsNullOrWhiteSpace($appCodeFields)) {
+        $appCodeFields = @()
+    }
+
+    $summaryCodeFields = $TargetSummaryCodeFields -split '[,\s]+'
+    if ([string]::IsNullOrWhiteSpace($summaryCodeFields)) {
+        $summaryCodeFields = @()
+    }
+
+    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+
+    if ([string]::IsNullOrWhiteSpace($Authorization)) {
+        $pair = "${KintoneID}:${KintonePW}"
+        $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
+    }
+
+
+    $courseScheduleDatas = Create-CourseScheduleDatas -DataFilePath $MasterDataFilePath -CurrentDate $TargetDate
+    Write-Message $courseScheduleDatas -VarName "courseScheduleDatas"
+
+    $courseScheduleData = $CourseScheduleDatas | Where-Object { $_.date -eq $TargetDate } | Select-Object -First 1
+    Write-Message $courseScheduleData -VarName "courseScheduleData"
+
+    if(-not $courseScheduleData){
+        Write-Message "対象の科目がありません。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        return
+    }
+    if($courseScheduleData.isHoliday){
+        Write-Message "休日です。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        return
+    }
+
+    $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+    Write-Message $userDatas -VarName "userDatas"
+
+    $appDatas = Get-AppDatas -TargetAppIds $newTargetAppIds -TargetDate $TargetDate -BaseUrl $BaseUrl -Authorization $Authorization
+    Write-Message $appDatas -VarName "appDatas"
+
+    $checkResults = Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData
+    Write-Message $checkResults -VarName "checkResults"
+
+    if( $CreateExcelFile -eq 1 ){
+        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+        if (-not (Test-Path $outputFilePath)) {
+            Copy-Item -Path $TemplateFilePath -Destination $outputFilePath
+        }
+        Export-Excel -CheckResults $checkResults -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ClassTemplateSheetName $ClassTemplateSheetName -SummaryTemplateSheetName $SummaryTemplateSheetName
+    }
+
+    $outputFileName = "$TargetGroupName-$SummarySheetNamePrefix$OutputSheetNameSuffix.txt"
+    $outputFilePath = Join-Path $OutputRootDir $outputFileName
+    Export-File -CheckResults $checkResults -OutputFilePath $outputFilePath
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

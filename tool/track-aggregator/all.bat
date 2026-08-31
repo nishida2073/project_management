@@ -3,10 +3,6 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~nx0"
 
-call "%~dp0bats\common-env.bat"
-
-if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
-
 call "%~dp0bats\message.bat" "Start %MyName%"
 echo.
 
@@ -22,7 +18,7 @@ for %%F in (
     
     call "%~dp0bats\message.bat" "Please wait..." "Green"
     
-    call %%F > "%LOG_DIR%\%%~nF.log"
+    call %%F
     
     call "%~dp0bats\message.bat" "Finished %%~nxF"
 )

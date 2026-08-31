@@ -13,6 +13,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "& '%SCRIPT_PATH%'" ^
   "   -MasterDataRootDir '%MasterDataRootDir%'" ^
   "   -TestResultRootDir '%TestResultRootDir%'" ^
-  "   -SurveyResultRootDir '%SurveyResultRootDir%'"
+  "   -SurveyResultRootDir '%SurveyResultRootDir%'" ^
+  "   -LogNamePrefix '%~n0'"
 
 call "%~dp0message.bat" "Finished %MyName%"

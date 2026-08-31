@@ -21,7 +21,7 @@ function Write-Message {
     }
 }
 
-function New-KintoneLogPath {
+function New-WorkerLogPath {
     param(
         [Parameter(Mandatory)][string]$LogRoot,
         [Parameter(Mandatory)][string]$Prefix

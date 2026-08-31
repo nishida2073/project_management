@@ -27,7 +27,7 @@ if (-not $SpaceName) {
     $SpaceName = Read-Host "作成するスペースの名前"
 }
 
-$logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "createspace_$SpaceName"
+$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "createspace_$SpaceName"
 
 $script:exitCode = 0
 $script:newSpaceId = $null

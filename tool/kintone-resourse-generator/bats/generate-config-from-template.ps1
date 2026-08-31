@@ -34,7 +34,7 @@ if (-not $DownloadConfigName) {
 $templatePath = Join-Path $templateRoot "$TemplateConfigName.xlsx"
 $downloadPath = Join-Path $downloadRoot "${DownloadConfigName}_download.xlsx"
 $outputPath = Join-Path $configRoot "${DownloadConfigName}_config.xlsx"
-$logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "generate_$DownloadConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "generate_$DownloadConfigName"
 
 $script:exitCode = 0
 

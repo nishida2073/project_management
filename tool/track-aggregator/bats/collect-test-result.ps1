@@ -7,7 +7,8 @@
     [string]$TemplateFilePath,
     [int]$PassScore,
     [int]$ShowDetail,
-    [string]$OutputFileSuffix = "テスト結果"
+    [string]$OutputFileSuffix = "テスト結果",
+    [string]$LogNamePrefix
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -16,7 +17,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-test-result' })-$TargetGroupName"
 
 function Create-CollectResultsDatas {
     param(
@@ -523,24 +524,29 @@ function Export-Excel {
 }
 
 
-New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+& {
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-$showDetail = if($ShowDetail -eq 1){ $true } else { $false }
+    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-$testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
-$testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
-# Write-Message $testDatas -VarName "testDatas" -Type "Info"
+    $showDetail = if($ShowDetail -eq 1){ $true } else { $false }
 
-$userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
-# Write-Message $userDatas -VarName "userDatas" -Type "Info"
+    $testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
+    $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+    # Write-Message $testDatas -VarName "testDatas" -Type "Info"
 
-$resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
-# Write-Message $resultDatas -VarName "resultDatas" -Type "Info"
+    $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+    # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
-$collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
-# Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
+    $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
+    # Write-Message $resultDatas -VarName "resultDatas" -Type "Info"
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
+    $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
+    # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
+
+    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+    Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath
 

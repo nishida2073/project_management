@@ -29,7 +29,7 @@ if (-not $ConfigName) {
 }
 
 $downloadPath = Join-Path $downloadRoot "${ConfigName}_download.xlsx"
-$logFilePath = New-KintoneLogPath -LogRoot $logRoot -Prefix "download_$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "download_$ConfigName"
 
 $script:exitCode = 0
 

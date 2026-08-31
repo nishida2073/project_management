@@ -26,34 +26,11 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
-# ルート直下の*.bat（check-alert.bat/create-app-data.bat/collect-app-data.bat）はbats\*.batの出力を
-# "%LOG_DIR%\<バッチ名>-<対象日>.log"へリダイレクトしてログファイルを残すが、GUIはbats\*.batを直接
-# 呼ぶためこのリダイレクトを経由せず、今までログファイルが作られていなかった。common-env.bat側の
-# LOG_DIRをそのまま使うことで、出力先をbat/GUIどちらでも共通の1箇所（common-env.bat）で管理する
-function Get-BatLogFilePath {
-    param([string]$BatPath, [string]$TargetDate)
-    $batBaseName = [System.IO.Path]::GetFileNameWithoutExtension($BatPath)
-    $dateForFileName = if ($TargetDate) { $TargetDate } else { (Get-Date).ToString("yyyy-MM-dd") }
-    return Join-Path $logDir "$batBaseName-$dateForFileName.log"
-}
-
-function Start-BatLogWriter {
-    param([string]$LogFilePath)
-    if (-not (Test-Path -LiteralPath $logDir)) {
-        New-Item -Path $logDir -ItemType Directory -Force | Out-Null
-    }
-    # ルート直下の*.bat経由で実行した場合の出力（Write-Messageが素のまま書く文字列）と揃えるため、
-    # 画面向けの[[COLOR:xxx]]タグは書き込まない（Write-BatLogLineで取り除く）
-    return New-Object System.IO.StreamWriter($LogFilePath, $false, (New-Object System.Text.UTF8Encoding($false)))
-}
-
-function Write-BatLogLine {
-    param([System.IO.StreamWriter]$Writer, [string]$Line)
-    $Writer.WriteLine(($Line -replace '^\[\[COLOR:\w+\]\]', ''))
-}
-
+# ログファイルはbats\*.bat経由で起動される各.ps1本体が自分で書き出す
+# （New-WorkerLogPath/Tee-Objectを使う方式。bats\library\common.ps1参照）ため、
+# GUI側では何もしない（以前はここでGUI独自にログファイルを書き出していたが、
+# .ps1側に統一したため不要になった）
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
-$logDir = $script:commonEnvVars["LOG_DIR"]
 
 # 日付入力の既定値は当日（対象グループが空欄の場合のみ各batが内部で全グループとして扱う）
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
@@ -156,8 +133,11 @@ $script:batchInputControls = @{
 
 $batchTopControls = @($lblBatchDate, $txtBatchDate, $lblBatchGroup, $txtBatchGroup)
 
-# ステップごとのチェックボックス＋開くリンク（チェックを外したステップは「まとめて実行」の対象外になる）
-$script:batchStepCheckboxes = @{}
+# ステップごとのチェックボックス＋開くリンク（チェックを外したステップは「まとめて実行」の対象外になる）。
+# チェックボックスはLabelではなく$allButtonDefsと同じ並び順のインデックスで対応付ける
+# （Labelはカテゴリをまたいで重複し得るため、Labelをキーにするとハッシュテーブルで
+# 上書きが起きてチェック状態を取り違える）
+$script:batchStepCheckboxes = @()
 $y = 46
 foreach ($bd in $allButtonDefs) {
     # BatchLabelを指定したButtonDefだけ、一括実行タブでの表示名を実行タブ側のLabelと切り離せる。
@@ -170,7 +150,7 @@ foreach ($bd in $allButtonDefs) {
     $chk.AutoEllipsis = $true
     $chk.Size = New-Object System.Drawing.Size(500, 22)
     $chk.Location = New-Object System.Drawing.Point(20, $y)
-    $script:batchStepCheckboxes[$bd.Label] = $chk
+    $script:batchStepCheckboxes += $chk
     $batchTopControls += $chk
 
     if ($bd.TargetDirPath) {
@@ -221,14 +201,9 @@ function Invoke-BatchStep {
         $batArgs += Get-InputValue -Control $script:batchInputControls[$inputDef.Name]
     }
 
-    $targetDate = Get-InputValue -Control $script:batchInputControls["TargetDate"]
-    $logWriter = Start-BatLogWriter -LogFilePath (Get-BatLogFilePath -BatPath $ButtonDef.BatchPath -TargetDate $targetDate)
-
     $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line; Write-BatLogLine -Writer $logWriter -Line $line } `
+        -OnOutputLine { param($line) Write-Log $line } `
         -CurrentProcessRef ([ref]$script:currentProc)
-
-    $logWriter.Dispose()
 
     Show-FormInForeground -Form $form
 
@@ -243,7 +218,7 @@ function Invoke-BatchStep {
 
 function Invoke-BatchRunAll {
     Set-RunButtonsEnabled $false
-    foreach ($chk in $script:batchStepCheckboxes.Values) { $chk.Enabled = $false }
+    foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $false }
     foreach ($inputCtrl in $script:batchInputControls.Values) { $inputCtrl.Enabled = $false }
     $lblBatchStatus.ForeColor = [System.Drawing.Color]::Black
     $lblBatchStatus.Text = "実行中..."
@@ -254,8 +229,9 @@ function Invoke-BatchRunAll {
     # チェックを外したステップはスキップする。いずれかのステップが失敗しても、
     # 以降のステップは独立した処理のため続行する
     $anyFailed = $false
-    foreach ($bd in $allButtonDefs) {
-        if (-not $script:batchStepCheckboxes[$bd.Label].Checked) {
+    for ($i = 0; $i -lt $allButtonDefs.Count; $i++) {
+        $bd = $allButtonDefs[$i]
+        if (-not $script:batchStepCheckboxes[$i].Checked) {
             Write-Log "$($bd.Label) はチェックが外れているためスキップします。"
             continue
         }
@@ -273,7 +249,7 @@ function Invoke-BatchRunAll {
         $lblBatchStatus.Text = "成功"
     }
 
-    foreach ($chk in $script:batchStepCheckboxes.Values) { $chk.Enabled = $true }
+    foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $true }
     foreach ($inputCtrl in $script:batchInputControls.Values) { $inputCtrl.Enabled = $true }
     Set-RunButtonsEnabled $true
 }
@@ -345,14 +321,9 @@ function Invoke-BatButton {
         }
     }
 
-    $targetDate = if ($inputMap) { Get-InputValue -Control $inputMap["TargetDate"] } else { $null }
-    $logWriter = Start-BatLogWriter -LogFilePath (Get-BatLogFilePath -BatPath $ButtonDef.BatchPath -TargetDate $targetDate)
-
     $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line; Write-BatLogLine -Writer $logWriter -Line $line } `
+        -OnOutputLine { param($line) Write-Log $line } `
         -CurrentProcessRef ([ref]$script:currentProc)
-
-    $logWriter.Dispose()
 
     Show-FormInForeground -Form $form
 
