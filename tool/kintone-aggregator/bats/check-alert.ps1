@@ -20,7 +20,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'check-alert' })-$TargetGroupName-$TargetDate"
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'check-alert' })-$TargetGroupName-$TargetDate"
 
 function Recovery-DailyData {
     param(
@@ -28,7 +28,7 @@ function Recovery-DailyData {
         [string]$TargetGroupName,
         [array]$TargetDates
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Yellow
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     Write-Message $TargetDates -VarName "TargetDates" -Type "Info" -ForegroundColor Green
     
     Use-Mutex "Recovery-DailyData" {
@@ -60,7 +60,7 @@ function Create-DailyUserDatas {
         [string]$TargetGroupName,
         [array]$TargetDates
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     if (-not $TargetDates -or $TargetDates.Count -eq 0) {
@@ -124,7 +124,7 @@ function Add-CheckResults {
         [array]$CourseScheduleDatas,
         [int]$LookbackDays = 3
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     
@@ -251,7 +251,7 @@ function Create-DailySummaryDatas {
     param(
         [array]$CheckedDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dailySummary = @{}
@@ -376,7 +376,7 @@ function Export-Excel {
         [string]$TargetDate,
         [string]$TargetGroupName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $excel = $null
@@ -428,7 +428,7 @@ function Export-DailyResult {
         [array]$UserDatas,
         [string]$TargetDate
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dataStartCell = Get-CellByKey $sheet "{研修データ}" -ErrorOnMissing
@@ -504,7 +504,7 @@ function Export-SummaryData {
         [array]$CourseScheduleDatas,
         [array]$DailySummaryDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dataStartCell = Get-CellByKey $sheet "{集計データ}" -ErrorOnMissing
@@ -623,7 +623,7 @@ function Export-UserData {
         [array]$UserDatas,
         [string]$TargetDate
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     # 特定日の指定
@@ -754,7 +754,7 @@ function Export-TotalResult {
         [array]$CourseScheduleDatas,
         [array]$UserDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $rowDatas = @()
@@ -828,7 +828,7 @@ function Export-SummaryChart {
         $WriteSheet,
         [string]$TargetGroupName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     # -------------------------
@@ -960,7 +960,7 @@ function Export-CourseScheduleData {
         $Sheet,
         [array]$CourseScheduleDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dataStartCell = Get-CellByKey $sheet "{スケジュールデータ}" -ErrorOnMissing

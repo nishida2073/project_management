@@ -18,7 +18,7 @@ $downloadRoot = $env:COMMON_DOWNLOAD_PATH
 $logRoot = $env:COMMON_LOG_PATH
 
 if (-not $baseUrl -or -not $downloadRoot -or -not $logRoot) {
-    Write-Message "KINTONE_BASE_URL / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）"
+    Write-Message "KINTONE_BASE_URL / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）" -Type "Info" -NoHeader
     exit 1
 }
 if (-not $SpaceId) {
@@ -40,12 +40,12 @@ $script:exitCode = 0
     try {
         $space = Get-CurrentSpace -SpaceId $SpaceId -BaseUrl $baseUrl -Authorization $authorization
     } catch {
-        Write-Message "スペース取得に失敗しました: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Message "スペース取得に失敗しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
         $script:exitCode = 1
         return
     }
 
-    Write-Message "スペース名: $($space.spaceName)　アプリ数: $($space.apps.Count)　メンバー数: $($space.members.Count)"
+    Write-Message "スペース名: $($space.spaceName)　アプリ数: $($space.apps.Count)　メンバー数: $($space.members.Count)" -Type "Info" -NoHeader
 
     $spaceListRows = @([PSCustomObject]@{
         "スペースID"                                                     = $space.spaceId
@@ -121,11 +121,11 @@ $script:exitCode = 0
 
     Set-KintoneHeaderRowColor -Path $downloadPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
 
-    Write-Message ""
-    Write-Message "現在の状態を出力しました: $downloadPath" -ForegroundColor Green
+    Write-Message "" -Type "Info" -NoHeader
+    Write-Message "現在の状態を出力しました: $downloadPath" -ForegroundColor Green -Type "Info" -NoHeader
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message ""
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green
+Write-Message "" -Type "Info" -NoHeader
+Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
 exit $script:exitCode

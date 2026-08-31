@@ -10,17 +10,49 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $defaultClientLabel = "デフォルト"
 
-# gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
-# 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
 function Write-Message {
     param(
-        [string]$Text = "",
-        [ConsoleColor]$ForegroundColor = "White"
+        [object]$Datas,
+        [string]$VarName = "Debug Message",
+        [string]$Type = "Debug",
+        [ConsoleColor]$ForegroundColor = "White",
+        [switch]$NoHeader
     )
-    if ($env:GUI_LOG_MODE -eq "1") {
-        Write-Host "[[COLOR:$ForegroundColor]]$Text"
-    } else {
-        Write-Host $Text -ForegroundColor $ForegroundColor
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.ff"
+    if ($Type -eq "Debug") {
+        return
+    }
+    # 一時的措置：functionNameトレースが大量に出てログが読みにくいため、一時的に抑制する
+    if ($VarName -eq "functionName") {
+        return
+    }
+
+    # gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
+    # 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
+    $isGuiMode = $env:GUI_LOG_MODE -eq "1"
+    function Write-ColoredLine {
+        param([string]$Text)
+        if ($isGuiMode) {
+            Write-Host "[[COLOR:$ForegroundColor]]$Text"
+        } else {
+            Write-Host $Text -ForegroundColor $ForegroundColor
+        }
+    }
+
+    if (-not $NoHeader) {
+        Write-ColoredLine "=============== [$timestamp] $VarName ==============="
+    }
+
+    if( -not $Datas ){
+        Write-ColoredLine "$Datas"
+        return
+    }
+
+    if ($Datas -is [PSCustomObject] -or $Datas -is [Hashtable] -or $Datas -is [array]) {
+        $Datas | ConvertTo-Json -Depth 10 | ForEach-Object { Write-ColoredLine $_ }
+    }
+    else {
+        Write-ColoredLine "$Datas"
     }
 }
 
@@ -170,8 +202,8 @@ function Write-RunLogFile {
     $logLines += (Get-ClientLogHeaderLines)
     $logLines += "バッチ名: $($env:BATCH_NAME)"
     $logLines += $ExtraHeaderLines
-    $logLines += "開始時刻: $($StartTime.ToString('yyyy/MM/dd HH:mm:ss'))"
-    $logLines += "終了時刻: $($EndTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+    $logLines += "開始時刻: $($StartTime.ToString('yyyy-MM-dd HH:mm:ss'))"
+    $logLines += "終了時刻: $($EndTime.ToString('yyyy-MM-dd HH:mm:ss'))"
     $logLines += ""
     $logLines += "# $ResultSectionTitle"
     $logLines += $ResultLines
@@ -196,17 +228,17 @@ function Write-RunLogFile {
 function Show-LogFileContent {
     param([string]$Path)
 
-    Write-Message ""
+    Write-Message "" -Type "Info" -NoHeader
     foreach ($line in [System.IO.File]::ReadAllLines($Path, $cp932)) {
         if ($line -match '^#') {
-            Write-Message $line
+            Write-Message $line -Type "Info" -NoHeader
         } elseif ($line -match 'エラー|失敗|存在しません') {
-            Write-Message $line -ForegroundColor Red
+            Write-Message $line -ForegroundColor Red -Type "Info" -NoHeader
         } else {
-            Write-Message $line
+            Write-Message $line -Type "Info" -NoHeader
         }
     }
-    Write-Message ""
+    Write-Message "" -Type "Info" -NoHeader
 }
 
 function Get-AzureCliPath {
@@ -215,8 +247,8 @@ function Get-AzureCliPath {
         $az = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
     }
     if (!(Test-Path $az)) {
-        Write-Message "Azure CLIが見つかりません。以下でインストールしてください：" -ForegroundColor Red
-        Write-Message "  winget install --id Microsoft.AzureCLI" -ForegroundColor Red
+        Write-Message "Azure CLIが見つかりません。以下でインストールしてください：" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-Message "  winget install --id Microsoft.AzureCLI" -ForegroundColor Red -Type "Info" -NoHeader
         exit 1
     }
     return $az
@@ -230,8 +262,8 @@ function Get-GraphToken {
 
     $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     if ($LASTEXITCODE -ne 0 -or !$out) {
-        Write-Message "サインインが必要です。表示されるURLとコードでログインしてください。" -ForegroundColor Cyan
-        Write-Message ""
+        Write-Message "サインインが必要です。表示されるURLとコードでログインしてください。" -ForegroundColor Cyan -Type "Info" -NoHeader
+        Write-Message "" -Type "Info" -NoHeader
 
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = "cmd.exe"
@@ -248,9 +280,9 @@ function Get-GraphToken {
         while (!$loginProc.StandardOutput.EndOfStream) {
             $line = $loginProc.StandardOutput.ReadLine()
             if (!$shown -and $line -match "open the page (?<url>\S+)\s+and enter the code (?<code>[A-Z0-9\-]+)") {
-                Write-Message "URL: $($Matches.url)" -ForegroundColor Cyan
-                Write-Message "コード：$($Matches.code)" -ForegroundColor Cyan
-                Write-Message ""
+                Write-Message "URL: $($Matches.url)" -ForegroundColor Cyan -Type "Info" -NoHeader
+                Write-Message "コード：$($Matches.code)" -ForegroundColor Cyan -Type "Info" -NoHeader
+                Write-Message "" -Type "Info" -NoHeader
                 $shown = $true
             }
         }
@@ -259,7 +291,7 @@ function Get-GraphToken {
         $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     }
     if (!$out) {
-        Write-Message "トークンの取得に失敗しました" -ForegroundColor Red
+        Write-Message "トークンの取得に失敗しました" -ForegroundColor Red -Type "Info" -NoHeader
         exit 1
     }
     return ($out | Out-String | ConvertFrom-Json).accessToken

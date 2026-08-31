@@ -35,7 +35,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-# 子プロセス（all.bat経由で起動されるps1）のWrite-Messageに、
+# 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
@@ -245,7 +245,7 @@ $btnRun.Add_Click({
     $selectedClient = $cmbClient.SelectedItem
     $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
     Write-Log ""
-    Write-Log "--------------- $clientDisplayName 開始 ---------------"
+    Write-Log "==================== 一括実行 開始（$clientDisplayName） ===================="
 
     $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
     $env:GENERATE_ENABLED = if ($chkGenerate.Checked) { "1" } else { "0" }
@@ -272,35 +272,43 @@ $btnRun.Add_Click({
         [Environment]::SetEnvironmentVariable("CLIENT_NAME", $null)
     }
 
-    # all.bat自体は呼ばず、チェックされたステージだけをGUI側から個別に実行する。
-    # 各ステージの開始/完了（失敗）はチェックボックスのラベルでログに出す。
-    $stages = @()
-    if ($chkDownload.Checked) { $stages += [PSCustomObject]@{ Label = $chkDownload.Text; Bat = $downloadBat } }
-    if ($chkGenerate.Checked) { $stages += [PSCustomObject]@{ Label = $chkGenerate.Text; Bat = $generateBat } }
-    if ($chkUpload.Checked)   { $stages += [PSCustomObject]@{ Label = $chkUpload.Text; Bat = $uploadBat } }
+    # all.bat自体は呼ばず、GUI側からステージごとに個別に実行する。
+    # チェックを外したステージはkintone-aggregator/track-aggregatorの一括実行タブと同じ
+    # 「スキップします」表示にする（黙って$stagesから外すのではなく、全ステージを列挙する）。
+    # download→generate→uploadは前段の出力を後段が使う依存関係があるため、
+    # kintone-aggregator側と違い最初の失敗で処理を打ち切る（breakのまま維持）
+    $stages = @(
+        [PSCustomObject]@{ Label = $chkDownload.Text; Bat = $downloadBat; Checked = $chkDownload.Checked }
+        [PSCustomObject]@{ Label = $chkGenerate.Text; Bat = $generateBat; Checked = $chkGenerate.Checked }
+        [PSCustomObject]@{ Label = $chkUpload.Text;   Bat = $uploadBat;   Checked = $chkUpload.Checked }
+    )
 
     $hasError = $false
     $failedExitCode = 0
     foreach ($stage in $stages) {
-        Write-Log "############### $($stage.Label) 開始 ###############"
+        if (-not $stage.Checked) {
+            Write-Log "$($stage.Label) はチェックが外れているためスキップします。"
+            continue
+        }
+        Write-Log "--------------- $($stage.Label) 開始 ---------------"
         $exitCode = Invoke-BatStep -BatPath $stage.Bat -WorkingDirectory $basePath `
             -OnOutputLine { param($line) Write-Log $line } `
             -CurrentProcessRef ([ref]$script:currentProc)
         if ($exitCode -ne 0) {
-            Write-Log "############### $($stage.Label) 失敗（終了コード: $exitCode） ###############"
+            Write-Log "--------------- $($stage.Label) 失敗（終了コード: $exitCode） ---------------"
             $hasError = $true
             $failedExitCode = $exitCode
             break
         }
-        Write-Log "############### $($stage.Label) 完了 ###############"
+        Write-Log "--------------- $($stage.Label) 完了 ---------------"
     }
 
     if (-not $hasError) {
-        Write-Log "--------------- $clientDisplayName 完了 ---------------"
+        Write-Log "==================== 一括実行 完了（$clientDisplayName） ===================="
         $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
         $lblStatus.Text = "完了しました"
     } else {
-        Write-Log "--------------- $clientDisplayName 失敗（終了コード: $failedExitCode） ---------------"
+        Write-Log "==================== 一括実行 失敗（終了コード: $failedExitCode、$clientDisplayName） ===================="
         $lblStatus.ForeColor = [System.Drawing.Color]::DarkRed
         $lblStatus.Text = "エラーが発生しました（終了コード: $failedExitCode）"
     }

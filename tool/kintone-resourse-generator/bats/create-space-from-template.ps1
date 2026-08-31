@@ -17,7 +17,7 @@ $baseUrl = $env:KINTONE_BASE_URL
 $logRoot = $env:COMMON_LOG_PATH
 
 if (-not $baseUrl -or -not $logRoot) {
-    Write-Message "KINTONE_BASE_URL / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）"
+    Write-Message "KINTONE_BASE_URL / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）" -Type "Info" -NoHeader
     exit 1
 }
 if (-not $TemplateId) {
@@ -39,18 +39,18 @@ $script:newSpaceId = $null
     try {
         $newSpaceId = New-KintoneSpaceFromTemplate -BaseUrl $baseUrl -Authorization $authorization -TemplateId $TemplateId -Name $SpaceName -AdminLogin $script:kintoneLogin
     } catch {
-        Write-Message "スペース作成に失敗しました: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Message "スペース作成に失敗しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
         $script:exitCode = 1
         return
     }
 
     $script:newSpaceId = $newSpaceId
-    Write-Message ""
-    Write-Message "スペースを作成しました: スペース名=$SpaceName" -ForegroundColor Green
-    Write-Message "作成されたスペースID: $newSpaceId" -ForegroundColor Green
+    Write-Message "" -Type "Info" -NoHeader
+    Write-Message "スペースを作成しました: スペース名=$SpaceName" -ForegroundColor Green -Type "Info" -NoHeader
+    Write-Message "作成されたスペースID: $newSpaceId" -ForegroundColor Green -Type "Info" -NoHeader
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message ""
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green
+Write-Message "" -Type "Info" -NoHeader
+Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
 exit $script:exitCode

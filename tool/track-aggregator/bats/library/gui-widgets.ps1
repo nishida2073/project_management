@@ -195,9 +195,12 @@ function New-CategoryTabControl {
     }
     $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
 
-    $runButtons = @{}
-    $stepStatusLabels = @{}
-    $inputControls = @{}
+    # 実行ボタン一覧はSet-RunButtonsEnabled側で一括enable/disableに使うだけで、Labelで
+    # 個別に引く用途が無いため単純な配列にする。ステータスラベルと入力欄コントロールは、
+    # Labelがカテゴリをまたいで重複し得るため、Labelをキーにしたハッシュテーブルではなく
+    # 各ButtonDefオブジェクト自身にプロパティとして直接ひも付ける（呼び出し側はButtonDefを
+    # 既に持っているので、Labelでの引き直しが不要になり取り違えが起きない）
+    $runButtons = @()
 
     foreach ($cd in $CategoryDefs) {
         $tabPage = New-Object System.Windows.Forms.TabPage
@@ -264,7 +267,7 @@ function New-CategoryTabControl {
                     $inputMap[$inputDef.Name] = $inputCtrl
                     $inputX += $inputWidth + 15
                 }
-                $inputControls[$bd.Label] = $inputMap
+                $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force
             }
 
             $btn = New-Object System.Windows.Forms.Button
@@ -274,7 +277,7 @@ function New-CategoryTabControl {
             $btn.Tag = $bd
             $btn.Add_Click({ & $OnRunClick $this.Tag }.GetNewClosure())
             $grp.Controls.Add($btn)
-            $runButtons[$bd.Label] = $btn
+            $runButtons += $btn
 
             if ($bd.TargetDirPath) {
                 $lnkOpen = New-Object System.Windows.Forms.LinkLabel
@@ -296,7 +299,7 @@ function New-CategoryTabControl {
             $lblStepStatus.Location = New-Object System.Drawing.Point(200, ($contentY + 4))
             $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
             $grp.Controls.Add($lblStepStatus)
-            $stepStatusLabels[$bd.Label] = $lblStepStatus
+            $bd | Add-Member -NotePropertyName StepStatusLabel -NotePropertyValue $lblStepStatus -Force
 
             $groupY += $bdHeight + $GroupSpacing
         }
@@ -315,10 +318,10 @@ function New-CategoryTabControl {
     # 初期表示分だけは先頭タブの高さを直接計算して設定する
     $tabControl.Height = $TabHeaderAllowance + (Get-CategoryPanelHeight -ButtonDefs $CategoryDefs[0].ButtonDefs)
 
+    # StepStatusLabel/InputControlsは各ButtonDef自身のプロパティとして既に持たせているため、
+    # ここでは返さない（呼び出し側は$ButtonDef.StepStatusLabel/$ButtonDef.InputControlsを直接使う）
     return [PSCustomObject]@{
-        TabControl       = $tabControl
-        RunButtons       = $runButtons
-        StepStatusLabels = $stepStatusLabels
-        InputControls    = $inputControls
+        TabControl = $tabControl
+        RunButtons = $runButtons
     }
 }

@@ -12,36 +12,36 @@ $clientName = $env:CLIENT_NAME
 $downloadLocalPath = $env:DOWNLOAD_LOCAL_PATH
 
 if (!$clientName) {
-    Write-Message "CLIENT_NAME が指定されていません（generate-config.bat client:<クライアント名> のように指定してください）" -ForegroundColor Red
+    Write-Message "CLIENT_NAME が指定されていません（generate-config.bat client:<クライアント名> のように指定してください）" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
 if (!$downloadLocalPath) {
-    Write-Message "DOWNLOAD_LOCAL_PATH を set-env.bat で設定してください" -ForegroundColor Red
+    Write-Message "DOWNLOAD_LOCAL_PATH を set-env.bat で設定してください" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
 if (!(Test-Path -LiteralPath $downloadLocalPath)) {
-    Write-Message "存在しません：$downloadLocalPath" -ForegroundColor Red
+    Write-Message "存在しません：$downloadLocalPath" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
 $templatePath = Join-Path $basePath "config\package_definition.xlsx"
 if (!(Test-Path -LiteralPath $templatePath)) {
-    Write-Message "テンプレートが見つかりません：$templatePath" -ForegroundColor Red
+    Write-Message "テンプレートが見つかりません：$templatePath" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
 $destPath = Join-Path (Split-Path $templatePath -Parent) "package_definition_$clientName.xlsx"
 
 if ((Test-Path -LiteralPath $destPath) -and $env:FORCE -ne "1") {
-    Write-Message "すでに存在します：$destPath" -ForegroundColor Red
-    Write-Message "上書きする場合は force:1 を指定してください" -ForegroundColor Red
+    Write-Message "すでに存在します：$destPath" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-Message "上書きする場合は force:1 を指定してください" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
 if (!(Get-Module -ListAvailable ImportExcel)) {
-    Write-Message "ImportExcelをインストールします"
+    Write-Message "ImportExcelをインストールします" -Type "Info" -NoHeader
     Install-Module ImportExcel -Scope CurrentUser -Force
 }
 
@@ -97,12 +97,12 @@ try {
             $row++
         }
 
-        Write-Message "作成しました：$destPath（$($files.Count)件）" -ForegroundColor Green
+        Write-Message "作成しました：$destPath（$($files.Count)件）" -ForegroundColor Green -Type "Info" -NoHeader
     } finally {
         Close-ExcelPackage $pkg
     }
 } catch {
-    Write-Message "処理に失敗しました：$($_.Exception.Message)" -ForegroundColor Red
+    Write-Message "処理に失敗しました：$($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 } finally {
     $ErrorActionPreference = $prevEap

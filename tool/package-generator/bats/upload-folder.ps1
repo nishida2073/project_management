@@ -13,12 +13,12 @@ $tenantId = $env:UPLOAD_SITE_TENANT_ID
 $localPath = $env:UPLOAD_LOCAL_PATH
 
 if (!$siteUrl -or !$sitePath -or !$tenantId -or !$localPath) {
-    Write-Message "UPLOAD_SITE_URL と UPLOAD_SITE_PATH と UPLOAD_SITE_TENANT_ID と UPLOAD_LOCAL_PATH を set-env.bat で設定してください" -ForegroundColor Red
+    Write-Message "UPLOAD_SITE_URL と UPLOAD_SITE_PATH と UPLOAD_SITE_TENANT_ID と UPLOAD_LOCAL_PATH を set-env.bat で設定してください" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
 if (!(Test-Path -LiteralPath $localPath)) {
-    Write-Message "アップロード元が存在しません：$localPath" -ForegroundColor Red
+    Write-Message "アップロード元が存在しません：$localPath" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
@@ -136,7 +136,7 @@ function Send-Item {
         $currentFile = $Item.FullName
         $currentName = $Item.Name
         $fileSitePath = if ($relativeFolder) { "$relativeFolder/$SubPath" } else { $SubPath }
-        Write-Message "操作中：$currentName"
+        Write-Message "操作中：$currentName" -Type "Info" -NoHeader
         try {
             Send-FileToSharePoint -LocalFile $currentFile -SiteRelativePath $fileSitePath
             $script:uploadLog += "$currentFile -> $sitePath/$SubPath"

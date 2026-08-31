@@ -13,14 +13,14 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-app-data' })-$TargetGroupName-$TargetDate"
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-app-data' })-$TargetGroupName-$TargetDate"
 
 function Combine-ArrayHorizontal {
     param(
         [Parameter(Mandatory)]
         [array[]]$Arrays
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     # 最大行数
@@ -66,7 +66,7 @@ function Read-SourseDataDefsFile {
         [Parameter(Mandatory)]
         [string]$TargetGroupName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     # [ファイル識別子] セクションの下に、1行1列で「列番号[,別名[,型]]」を書く書式
@@ -119,7 +119,7 @@ function Export-Datas {
         [string]$CollectFileName,
         [string]$CollectDataNotFoundMessage
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $allHeaderDatas = @()

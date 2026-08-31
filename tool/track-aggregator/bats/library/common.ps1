@@ -11,6 +11,10 @@ function Write-Message {
     if ($Type -eq "Debug") {
         return
     }
+    # 一時的措置：functionNameトレースが大量に出てログが読みにくいため、一時的に抑制する
+    if ($VarName -eq "functionName") {
+        return
+    }
 
     # gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
     # 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
@@ -25,7 +29,7 @@ function Write-Message {
     }
 
     if (-not $NoHeader) {
-        Write-ColoredLine "================ [$timestamp] $VarName ================"
+        Write-ColoredLine "=============== [$timestamp] $VarName ==============="
     }
 
     if( -not $Datas ){
@@ -41,14 +45,16 @@ function Write-Message {
     }
 }
 
-# .ps1本体がログファイルを書き出すための共通処理（package-generator/kintone-resourse-generatorと同じ方式）。
-# $env:LOG_DIR（bats\common-env.bat由来。各batが呼び出し前にcallしており、start /bの子プロセスにも継承される）
-# 配下に、呼び出し元・対象グループ単位でログファイルを作る
+# .ps1本体がログファイルを書き出すための共通処理（kintone-resourse-generatorと同じシグネチャ：
+# -LogRootを呼び出し元から明示的に受け取る。値は$env:LOG_DIR＝bats\common-env.bat由来で、
+# 各batが呼び出し前にcallしており、start /bの子プロセスにも継承される）
 function New-WorkerLogPath {
-    param([Parameter(Mandatory)][string]$Prefix)
-    $logRoot = $env:LOG_DIR
-    New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
-    return Join-Path $logRoot "$Prefix.log"
+    param(
+        [Parameter(Mandatory)][string]$LogRoot,
+        [Parameter(Mandatory)][string]$Prefix
+    )
+    New-Item -ItemType Directory -Path $LogRoot -Force | Out-Null
+    return Join-Path $LogRoot "$Prefix.log"
 }
 
 # Tee-Objectは-Encoding非対応で既定UTF-16LE書き込みになるため、事後にUTF-8へ変換する。
@@ -845,7 +851,8 @@ function Use-Mutex {
         [string]$Name = "Global",
         [scriptblock]$Action
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+    # 他の関数のfunctionNameトレース（Magenta）とは区別するため、Use-Mutexだけ別の色にする
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Cyan
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $mutex = [System.Threading.Mutex]::new($false, "Global\$Name")

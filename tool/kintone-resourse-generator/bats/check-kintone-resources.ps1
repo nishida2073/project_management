@@ -21,7 +21,7 @@ $outputRoot = $env:COMMON_CHECK_OUTPUT_PATH
 $logRoot = $env:COMMON_LOG_PATH
 
 if (-not $baseUrl -or -not $configRoot -or -not $outputRoot -or -not $logRoot) {
-    Write-Message "KINTONE_BASE_URL / COMMON_CONFIG_PATH / COMMON_CHECK_OUTPUT_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）"
+    Write-Message "KINTONE_BASE_URL / COMMON_CONFIG_PATH / COMMON_CHECK_OUTPUT_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）" -Type "Info" -NoHeader
     exit 1
 }
 if (-not $ConfigName) {
@@ -45,7 +45,7 @@ $script:exitCode = 0
 
     $selectedSheets = ConvertTo-SheetNameArray -Sheets $Sheets
     if ($selectedSheets.Count -gt 0) {
-        Write-Message "対象シートを絞り込みます: $($selectedSheets -join ', ')" -ForegroundColor Cyan
+        Write-Message "対象シートを絞り込みます: $($selectedSheets -join ', ')" -ForegroundColor Cyan -Type "Info" -NoHeader
     }
     $checkSpaceSettings = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-settings"
     $checkSpaceMembers  = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-member-list"
@@ -88,8 +88,8 @@ $script:exitCode = 0
         foreach ($spaceGroup in (Group-RowsBySpaceId -Rows $spaceRows)) {
             $spaceId = $spaceGroup.Name
             $expectedSpaceRow = $spaceGroup.Group | Select-Object -First 1
-            Write-Message ""
-            Write-Message "# スペースID: $spaceId ($($expectedSpaceRow.'スペース名'))"
+            Write-Message "" -Type "Info" -NoHeader
+            Write-Message "# スペースID: $spaceId ($($expectedSpaceRow.'スペース名'))" -Type "Info" -NoHeader
 
             $current = $null
             try {
@@ -166,8 +166,8 @@ $script:exitCode = 0
     }
 
     if ($checkAppList -or $checkAppAcl -or $checkAppRecordAcl) {
-        Write-Message ""
-        Write-Message "## アプリの確認"
+        Write-Message "" -Type "Info" -NoHeader
+        Write-Message "## アプリの確認" -Type "Info" -NoHeader
 
         $allAppIds = @(
             @($(if ($checkAppList) { $appRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } })) +
@@ -177,11 +177,11 @@ $script:exitCode = 0
 
         $skippedAppRows = @($appRows | Where-Object { -not $_.'アプリID' })
         if ($checkAppList -and $skippedAppRows.Count -gt 0) {
-            Write-Message "(アプリIDが空の行($($skippedAppRows.Count)件)は確認対象外です)" -ForegroundColor Yellow
+            Write-Message "(アプリIDが空の行($($skippedAppRows.Count)件)は確認対象外です)" -ForegroundColor Yellow -Type "Info" -NoHeader
         }
 
         foreach ($appId in $allAppIds) {
-            Write-Message "アプリID: $appId を確認中..."
+            Write-Message "アプリID: $appId を確認中..." -Type "Info" -NoHeader
             $current = Get-AppCurrentInfo -BaseUrl $baseUrl -Authorization $authorization -AppId $appId
             $appLabel = $current.name
 
@@ -422,14 +422,14 @@ $script:exitCode = 0
 
     $allDiffRows = @($spaceSettingsDiff) + @($memberDiff) + @($appListDiff) + @($appAclDiff) + @($appRecordAclDiff)
     $errorCount = @($allDiffRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count
-    Write-Message ""
-    Write-Message "チェック結果を出力しました: $outputPath" -ForegroundColor Green
-    Write-Message "差分件数: $errorCount / $($allDiffRows.Count)"
+    Write-Message "" -Type "Info" -NoHeader
+    Write-Message "チェック結果を出力しました: $outputPath" -ForegroundColor Green -Type "Info" -NoHeader
+    Write-Message "差分件数: $errorCount / $($allDiffRows.Count)" -Type "Info" -NoHeader
     # 差分ありは確認が必要な警告であり、チェック結果自体は正常に出力済みのため致命的エラー(exit 1)とは区別する
     if ($errorCount -gt 0) { $script:exitCode = 2 }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message ""
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green
+Write-Message "" -Type "Info" -NoHeader
+Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
 exit $script:exitCode

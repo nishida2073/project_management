@@ -12,7 +12,7 @@ $outputPath = $env:GENERATE_OUTPUT_PATH
 $logPath = $env:COMMON_LOG_PATH
 
 if (!$configPath -or !$workPath -or !$outputPath -or !$logPath) {
-    Write-Message "GENERATE_CONFIG_PATH と GENERATE_WORK_PATH と GENERATE_OUTPUT_PATH と COMMON_LOG_PATH を set-env.bat で設定してください" -ForegroundColor Red
+    Write-Message "GENERATE_CONFIG_PATH と GENERATE_WORK_PATH と GENERATE_OUTPUT_PATH と COMMON_LOG_PATH を set-env.bat で設定してください" -ForegroundColor Red -Type "Info" -NoHeader
     exit 1
 }
 
@@ -22,7 +22,7 @@ New-Item $outputPath -ItemType Directory -Force | Out-Null
 New-Item $logPath -ItemType Directory -Force | Out-Null
 
 if (!(Get-Module -ListAvailable ImportExcel)) {
-    Write-Message "ImportExcelをインストールします"
+    Write-Message "ImportExcelをインストールします" -Type "Info" -NoHeader
     Install-Module ImportExcel -Scope CurrentUser -Force
 }
 
@@ -77,7 +77,7 @@ foreach ($sheetName in $sheetNames) {
         $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
 
         if (!(Test-Path $sourcePath)) {
-            Write-Message "存在しません：$sourcePath" -ForegroundColor Yellow
+            Write-Message "存在しません：$sourcePath" -ForegroundColor Yellow -Type "Info" -NoHeader
             $packageLog += "$sourcePath -> 存在しません"
             continue
         }
@@ -160,14 +160,14 @@ foreach ($sheetName in $sheetNames) {
 
     $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
     if ($packageItems) {
-        Write-Message "操作中：$sheetName.zip"
+        Write-Message "操作中：$sheetName.zip" -Type "Info" -NoHeader
         try {
             Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
         } catch {
             $packageLog += "パッケージ作成エラー: $($_.Exception.Message)"
         }
     } else {
-        Write-Message "$sheetName：対象ファイルが無いためパッケージを作成しませんでした" -ForegroundColor Yellow
+        Write-Message "$sheetName：対象ファイルが無いためパッケージを作成しませんでした" -ForegroundColor Yellow -Type "Info" -NoHeader
         $packageLog += "対象ファイルが無いためパッケージを作成しませんでした"
     }
 

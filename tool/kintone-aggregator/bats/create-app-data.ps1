@@ -31,7 +31,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 # create-daily-report.bat/create-pulse-survey.batの両方がこのps1を共有しているため、
 # ログファイル名で呼び出し元を区別できるよう呼び出し元の.bat名をLogNamePrefixとして受け取る
-$logFilePath = New-WorkerLogPath -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'create-app-data' })-$TargetGroupName-$TargetDate"
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'create-app-data' })-$TargetGroupName-$TargetDate"
 
 $appDefinedCodeFields = [PSCustomObject]@{
     DateCodeField                = $TargetDateCodeField
@@ -46,7 +46,7 @@ function Get-AppDatas {
         [string]$BaseUrl,
         [string]$Authorization
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $resultAllDatas = @()
@@ -96,7 +96,7 @@ function Check-Result {
         [string]$TargetDate,
         [object]$CourseScheduleData
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $checkResults = @()
@@ -140,7 +140,7 @@ function Export-ClassData {
         [PSObject[]]$CheckResults,
         [string]$TemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $classGroupedResults = $CheckResults | Group-Object -Property { $_.userData.クラス名 } | Sort-Object -Property Name
@@ -227,7 +227,7 @@ function Export-SummaryData {
         [PSObject[]]$CheckResults,
         [string]$TemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $sheetName = "$SummarySheetNamePrefix$OutputSheetNameSuffix"
@@ -314,7 +314,7 @@ function Export-Excel {
         [string]$ClassTemplateSheetName,
         [string]$SummaryTemplateSheetName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $excel = $null
@@ -364,7 +364,7 @@ function Export-File {
         [array]$CheckResults,
         [string]$OutputFilePath
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $allDatas = @() 

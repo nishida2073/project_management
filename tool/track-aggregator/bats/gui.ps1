@@ -89,7 +89,7 @@ $form.Add_FormClosing({
 
 # =========================================
 # 一括実行タブ（package-generatorの実行タブUIを参考にしたレイアウト：
-# チェックボックスで対象ステップを選び、1つの実行ボタンでまとめて実行する）
+# チェックボックスで対象ステップを選び、1つの実行ボタンで一括実行する）
 #
 # 先頭タブにするため、TabControlをここで作ってこのタブを最初にAddし、
 # 後段の「実行タブ（カテゴリごと）」ではこのTabControlに追記してもらう形にする。
@@ -107,6 +107,14 @@ foreach ($cd in $categoryDefs) {
     }
 }
 
+# 一括実行タブでの表示名。BatchLabelがあればそれを、無ければ実行タブ側のLabelを使う。
+# チェックボックスの表示名とログの文言が食い違わないよう、一括実行タブ関連のログは
+# 必ずこの関数を通す（$ButtonDef.Labelを直接使わない）
+function Get-BatchDisplayLabel {
+    param($ButtonDef)
+    if ($ButtonDef.BatchLabel) { $ButtonDef.BatchLabel } else { $ButtonDef.Label }
+}
+
 $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
 $tabControl.Controls.Add($tabBatchAll)
@@ -115,7 +123,7 @@ $batchPanel = New-Object System.Windows.Forms.Panel
 $batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $tabBatchAll.Controls.Add($batchPanel)
 
-# ステップごとのチェックボックス＋開くリンク（チェックを外したステップは「まとめて実行」の対象外になる）。
+# ステップごとのチェックボックス＋開くリンク（チェックを外したステップは「一括実行」の対象外になる）。
 # このツールはボタンごとに入力欄の内容が異なり（経年比較集計だけが専用の入力欄を持つ）、
 # 全ボタン共通の入力欄は無いため、一括実行タブには入力欄を置かない。
 # チェックボックスはLabelではなく$allButtonDefsと同じ並び順のインデックスで対応付ける
@@ -130,7 +138,7 @@ foreach ($bd in $allButtonDefs) {
     # BatchLabelの長さはボタンごとに異なるため、AutoSizeで実測幅に合わせると「開く」の位置が
     # ずれて見切れたり画面外に出たりする。チェックボックスを固定幅＋省略表示にして「開く」の位置を固定する
     $chk = New-Object System.Windows.Forms.CheckBox
-    $chk.Text = if ($bd.BatchLabel) { $bd.BatchLabel } else { $bd.Label }
+    $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
     $chk.Checked = if ($bd.Inputs) { $false } else { $true }
     $chk.AutoSize = $false
     $chk.AutoEllipsis = $true
@@ -155,7 +163,7 @@ foreach ($bd in $allButtonDefs) {
 }
 
 $btnRunAll = New-Object System.Windows.Forms.Button
-$btnRunAll.Text = "まとめて実行"
+$btnRunAll.Text = "一括実行"
 $btnRunAll.Location = New-Object System.Drawing.Point(20, ($y + 10))
 $btnRunAll.Size = New-Object System.Drawing.Size(120, 28)
 $batchTopControls += $btnRunAll
@@ -173,12 +181,12 @@ $batchPanel.Height = $y + 10 + 28 + 16
 
 $btnRunAll.Add_Click({ Invoke-BatchRunAll })
 
-# 一括実行タブでの1ステップ分の実行本体（「まとめて実行」から順番に呼ばれる）
+# 一括実行タブでの1ステップ分の実行本体（「一括実行」から順番に呼ばれる）
 function Invoke-BatchStep {
     param($ButtonDef)
 
     Write-Log ""
-    Write-Log "--------------- $($ButtonDef.Label) 開始 ---------------"
+    Write-Log "--------------- $(Get-BatchDisplayLabel -ButtonDef $ButtonDef) 開始 ---------------"
 
     # 一括実行タブには個別タブのような専用入力欄が無いため、Inputsが定義されたステップ
     # （経年比較集計）はcommon-env.bat由来の既定値（Default）をそのまま使う
@@ -194,9 +202,9 @@ function Invoke-BatchStep {
     Show-FormInForeground -Form $form
 
     if ($exitCode -ne 0) {
-        Write-Log "--------------- $($ButtonDef.Label) 失敗（終了コード: $exitCode） ---------------"
+        Write-Log "--------------- $(Get-BatchDisplayLabel -ButtonDef $ButtonDef) 失敗（終了コード: $exitCode） ---------------"
     } else {
-        Write-Log "--------------- $($ButtonDef.Label) 完了 ---------------"
+        Write-Log "--------------- $(Get-BatchDisplayLabel -ButtonDef $ButtonDef) 完了 ---------------"
     }
 
     return $exitCode
@@ -209,7 +217,7 @@ function Invoke-BatchRunAll {
     $lblBatchStatus.Text = "実行中..."
 
     Write-Log ""
-    Write-Log "==================== まとめて実行 開始 ===================="
+    Write-Log "==================== 一括実行 開始 ===================="
 
     # チェックを外したステップはスキップする。いずれかのステップが失敗しても、
     # 以降のステップは独立した処理のため続行する
@@ -217,14 +225,14 @@ function Invoke-BatchRunAll {
     for ($i = 0; $i -lt $allButtonDefs.Count; $i++) {
         $bd = $allButtonDefs[$i]
         if (-not $script:batchStepCheckboxes[$i].Checked) {
-            Write-Log "$($bd.Label) はチェックが外れているためスキップします。"
+            Write-Log "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
             continue
         }
         $exitCode = Invoke-BatchStep -ButtonDef $bd
         if ($exitCode -ne 0) { $anyFailed = $true }
     }
 
-    Write-Log "==================== まとめて実行 完了 ===================="
+    Write-Log "==================== 一括実行 完了 ===================="
 
     if ($anyFailed) {
         $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkRed
@@ -244,23 +252,23 @@ function Invoke-BatchRunAll {
 
 $tabResult = New-CategoryTabControl -TabControl $tabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-BatButton -ButtonDef $bd }
 $script:runButtons = $tabResult.RunButtons
-$script:stepStatusLabels = $tabResult.StepStatusLabels
-$script:inputControls = $tabResult.InputControls
 
 # 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった
 # 初期の$tabControl.Height（実施データ取得タブ基準）をこのタブの内容量に合わせて上書きする。
 # 45はNew-CategoryTabControlの$TabHeaderAllowance既定値
 $tabControl.Height = 45 + $batchPanel.Height
 
+# Labelはカテゴリをまたいで重複し得るため、Labelをキーにした辞書からではなく
+# ButtonDef自身が持つStepStatusLabelプロパティ（New-CategoryTabControlが設定）を直接使う
 function Set-StepStatus {
-    param([string]$Label, [string]$Text)
+    param($ButtonDef, [string]$Text)
     $color = switch ($Text) {
         "実行中..." { [System.Drawing.Color]::Black }
         "成功"      { [System.Drawing.Color]::DarkGreen }
         "失敗"      { [System.Drawing.Color]::DarkRed }
         default     { [System.Drawing.Color]::Gray }
     }
-    Set-StatusLabelText -Label $script:stepStatusLabels[$Label] -Text $Text -ForeColor $color
+    Set-StatusLabelText -Label $ButtonDef.StepStatusLabel -Text $Text -ForeColor $color
 }
 
 # =========================================
@@ -283,7 +291,7 @@ function Write-Log {
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
-    Set-ButtonsEnabled -Buttons $script:runButtons.Values -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
     Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
 }
 
@@ -291,13 +299,13 @@ function Invoke-BatButton {
     param($ButtonDef)
 
     Set-RunButtonsEnabled $false
-    Set-StepStatus -Label $ButtonDef.Label -Text "実行中..."
+    Set-StepStatus -ButtonDef $ButtonDef -Text "実行中..."
 
     Write-Log ""
     Write-Log "--------------- $($ButtonDef.Label) 開始 ---------------"
 
     $batArgs = @()
-    $inputMap = $script:inputControls[$ButtonDef.Label]
+    $inputMap = $ButtonDef.InputControls
     if ($inputMap) {
         foreach ($inputName in $inputMap.Keys) {
             $batArgs += "$($inputName):$(Get-InputValue -Control $inputMap[$inputName])"
@@ -312,10 +320,10 @@ function Invoke-BatButton {
 
     if ($exitCode -ne 0) {
         Write-Log "--------------- $($ButtonDef.Label) 失敗（終了コード: $exitCode） ---------------"
-        Set-StepStatus -Label $ButtonDef.Label -Text "失敗"
+        Set-StepStatus -ButtonDef $ButtonDef -Text "失敗"
     } else {
         Write-Log "--------------- $($ButtonDef.Label) 完了 ---------------"
-        Set-StepStatus -Label $ButtonDef.Label -Text "成功"
+        Set-StepStatus -ButtonDef $ButtonDef -Text "成功"
     }
 
     Set-RunButtonsEnabled $true
