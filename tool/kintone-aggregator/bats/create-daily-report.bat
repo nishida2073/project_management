@@ -35,6 +35,8 @@ set "TemplateFilePath=%TemplateRootDir%\アプリデータ.xlsx"
 set "ClassTemplateSheetName=クラス別_業務日誌-テンプレート"
 set "SummaryTemplateSheetName=サマリー_業務日誌-テンプレート"
 
+call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
+
 for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF] {%TargetDate%}"
 
@@ -86,7 +88,7 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     call "%~dp0message.bat" "Finished %MyName% [%%~nF] {%TargetDate%}"
 )
 
-call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
+call "%~dp0message.bat" "Waiting Jobs %MyName% ALL {%TargetDate%}"
 
 :WAIT_LOOP
 set "ALL_DONE=1"

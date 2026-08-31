@@ -21,6 +21,8 @@ for %%A in (%*) do (
 
 set "SCRIPT_PATH=%~dp0check-download-status.ps1"
 
+call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+
 for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"
 
@@ -47,7 +49,7 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%*.xlsx") do (
     call "%~dp0message.bat" "Finished %MyName% [%%~nF]"
 )
 
-call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+call "%~dp0message.bat" "Waiting Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"

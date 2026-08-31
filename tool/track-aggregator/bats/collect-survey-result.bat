@@ -24,6 +24,8 @@ set "SCRIPT_PATH=%~dp0collect-survey-result.ps1"
 set "OutputTargetDir=%OutputSurveyCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\アンケート結果.xlsx"
 
+call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+
 for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"
     
@@ -60,7 +62,7 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%*.xlsx") do (
     call "%~dp0message.bat" "Finished %MyName% [%%~nF]"
 )
 
-call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+call "%~dp0message.bat" "Waiting Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"

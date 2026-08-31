@@ -30,6 +30,8 @@ set "AlertInterventionLimit=3"
 set "UseRecovery=1"
 set "RecoveryScriptPath=%~dp0recovery-check-alert.bat"
 
+call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
+
 for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF] {%TargetDate%}"
 
@@ -71,7 +73,7 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     call "%~dp0message.bat" "Finished %MyName% [%%~nF] {%TargetDate%}"
 )
 
-call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
+call "%~dp0message.bat" "Waiting Jobs %MyName% ALL {%TargetDate%}"
 
 :WAIT_LOOP
 set "ALL_DONE=1"

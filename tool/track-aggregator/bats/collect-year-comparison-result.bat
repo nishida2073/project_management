@@ -25,6 +25,8 @@ set "SCRIPT_PATH=%~dp0collect-year-comparison-result.ps1"
 set "OutputTargetDir=%OutputYearComparisonCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\Œo”N”äŠrŒ‹‰Ê.xlsx"
 
+call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+
 for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -ClientDataRootDir '%ClientDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod% -TargetGroupNameFilter '%TargetGroupNameFilter%'"') do (
     call "%~dp0message.bat" "Start %MyName% [%%G]"
 
@@ -69,7 +71,7 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
     call "%~dp0message.bat" "Finished %MyName% [%%G]"
 )
 
-call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+call "%~dp0message.bat" "Waiting Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
