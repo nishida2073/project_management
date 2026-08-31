@@ -974,7 +974,10 @@ function Create-CourseScheduleDatas {
     
     $courseLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex -1 -DateColumnIndexes @(3,4)
     $courseDatas = Create-CourseDatas $courseLines
-    
+    if (-not $courseDatas -or @($courseDatas).Count -eq 0) {
+        throw "コーススケジュールのデータが見つかりません。受講生データファイルのスケジュールシートに開始日・終了日が入力されているか確認してください。ファイル: $DataFilePath"
+    }
+
     $results = @()
     
     # 開始日
