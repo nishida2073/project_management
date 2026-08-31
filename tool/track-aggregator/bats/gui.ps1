@@ -33,23 +33,24 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "実施データ取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "データ取得"; BatchPath = (Join-Path $basePath "download-results.bat"); TargetDirPath = $script:commonEnvVars["MasterDataRootDir"] }
-            [PSCustomObject]@{ Label = "取得状況確認"; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"] }
+            [PSCustomObject]@{ Label = "データ取得"; BatchLabel = "1. データ取得"; BatchPath = (Join-Path $basePath "download-results.bat"); TargetDirPath = $script:commonEnvVars["MasterDataRootDir"] }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "2. 取得状況確認"; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"] }
         )
     }
     [PSCustomObject]@{
         Label = "実施状況確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート集計"; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"] }
+            [PSCustomObject]@{ Label = "テスト・アンケート集計"; BatchLabel = "3. テスト・アンケート集計"; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"] }
         )
     }
     [PSCustomObject]@{
         Label = "実施結果確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト集計"; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
-            [PSCustomObject]@{ Label = "アンケート集計"; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
+            [PSCustomObject]@{ Label = "テスト集計"; BatchLabel = "4. テスト集計"; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
+            [PSCustomObject]@{ Label = "アンケート集計"; BatchLabel = "5. アンケート集計"; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
             [PSCustomObject]@{
                 Label = "経年比較集計"
+                BatchLabel = "6. 経年比較集計"
                 BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat")
                 TargetDirPath = $script:commonEnvVars["OutputYearComparisonCollectDir"]
                 Inputs = @(
@@ -82,14 +83,156 @@ $form.Add_FormClosing({
 })
 
 # =========================================
+# 一括実行タブ（package-generatorの実行タブUIを参考にしたレイアウト：
+# チェックボックスで対象ステップを選び、1つの実行ボタンでまとめて実行する）
+#
+# 先頭タブにするため、TabControlをここで作ってこのタブを最初にAddし、
+# 後段の「実行タブ（カテゴリごと）」ではこのTabControlに追記してもらう形にする。
+# ps2exeでビルドした実行ファイルではTabPageCollection.Insert()がNotSupportedExceptionになるため、
+# 後から並び替えるのではなく、最初から最終的な順序でAddしていく必要がある
+# =========================================
+
+$tabControl = New-Object System.Windows.Forms.TabControl
+
+$allButtonDefs = @()
+foreach ($cd in $categoryDefs) { $allButtonDefs += $cd.ButtonDefs }
+
+$tabBatchAll = New-Object System.Windows.Forms.TabPage
+$tabBatchAll.Text = "一括実行"
+$tabControl.Controls.Add($tabBatchAll)
+
+$batchPanel = New-Object System.Windows.Forms.Panel
+$batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$tabBatchAll.Controls.Add($batchPanel)
+
+# ステップごとのチェックボックス＋開くリンク（チェックを外したステップは「まとめて実行」の対象外になる）。
+# このツールはボタンごとに入力欄の内容が異なり（経年比較集計だけが専用の入力欄を持つ）、
+# 全ボタン共通の入力欄は無いため、一括実行タブには入力欄を置かない
+$script:batchStepCheckboxes = @{}
+$batchTopControls = @()
+$y = 20
+foreach ($bd in $allButtonDefs) {
+    $chk = New-Object System.Windows.Forms.CheckBox
+    # Inputsを持つステップ（経年比較集計）は一括実行タブで値を確認・変更できず、
+    # common-env.bat由来の既定値のまま実行されてしまうため、既定はチェックを外しておく
+    $chk.Text = if ($bd.BatchLabel) { $bd.BatchLabel } else { $bd.Label }
+    $chk.Checked = if ($bd.Inputs) { $false } else { $true }
+    $chk.AutoSize = $true
+    $chk.Location = New-Object System.Drawing.Point(20, $y)
+    $script:batchStepCheckboxes[$bd.Label] = $chk
+    $batchTopControls += $chk
+
+    if ($bd.TargetDirPath) {
+        $lnkOpen = New-Object System.Windows.Forms.LinkLabel
+        $lnkOpen.Text = "開く"
+        $lnkOpen.AutoSize = $false
+        $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.PreferredSize.Height)
+        $lnkOpen.Location = New-Object System.Drawing.Point(240, $y)
+        $lnkOpen.Tag = $bd
+        $lnkOpen.Add_LinkClicked({ Open-FolderOrWarn -Path $this.Tag.TargetDirPath })
+        $batchTopControls += $lnkOpen
+    }
+
+    $y += 26
+}
+
+$btnRunAll = New-Object System.Windows.Forms.Button
+$btnRunAll.Text = "まとめて実行"
+$btnRunAll.Location = New-Object System.Drawing.Point(20, ($y + 10))
+$btnRunAll.Size = New-Object System.Drawing.Size(120, 28)
+$batchTopControls += $btnRunAll
+$script:batchRunButtons = @($btnRunAll)
+
+$lblBatchStatus = New-Object System.Windows.Forms.Label
+$lblBatchStatus.Text = ""
+$lblBatchStatus.AutoSize = $true
+$lblBatchStatus.Location = New-Object System.Drawing.Point(154, ($y + 16))
+$lblBatchStatus.Font = New-Object System.Drawing.Font($lblBatchStatus.Font, [System.Drawing.FontStyle]::Bold)
+$batchTopControls += $lblBatchStatus
+
+$batchPanel.Controls.AddRange($batchTopControls)
+$batchPanel.Height = $y + 10 + 28 + 16
+
+$btnRunAll.Add_Click({ Invoke-BatchRunAll })
+
+# 一括実行タブでの1ステップ分の実行本体（「まとめて実行」から順番に呼ばれる）
+function Invoke-BatchStep {
+    param($ButtonDef)
+
+    Write-Log ""
+    Write-Log "--------------- $($ButtonDef.Label) 開始 ---------------"
+
+    # 一括実行タブには個別タブのような専用入力欄が無いため、Inputsが定義されたステップ
+    # （経年比較集計）はcommon-env.bat由来の既定値（Default）をそのまま使う
+    $batArgs = @()
+    foreach ($inputDef in $ButtonDef.Inputs) {
+        $batArgs += "$($inputDef.Name):$($inputDef.Default)"
+    }
+
+    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
+        -OnOutputLine { param($line) Write-Log $line } `
+        -CurrentProcessRef ([ref]$script:currentProc)
+
+    Show-FormInForeground -Form $form
+
+    if ($exitCode -ne 0) {
+        Write-Log "--------------- $($ButtonDef.Label) 失敗（終了コード: $exitCode） ---------------"
+    } else {
+        Write-Log "--------------- $($ButtonDef.Label) 完了 ---------------"
+    }
+
+    return $exitCode
+}
+
+function Invoke-BatchRunAll {
+    Set-RunButtonsEnabled $false
+    foreach ($chk in $script:batchStepCheckboxes.Values) { $chk.Enabled = $false }
+    $lblBatchStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblBatchStatus.Text = "実行中..."
+
+    Write-Log ""
+    Write-Log "==================== まとめて実行 開始 ===================="
+
+    # チェックを外したステップはスキップする。いずれかのステップが失敗しても、
+    # 以降のステップは独立した処理のため続行する
+    $anyFailed = $false
+    foreach ($bd in $allButtonDefs) {
+        if (-not $script:batchStepCheckboxes[$bd.Label].Checked) {
+            Write-Log "$($bd.Label) はチェックが外れているためスキップします。"
+            continue
+        }
+        $exitCode = Invoke-BatchStep -ButtonDef $bd
+        if ($exitCode -ne 0) { $anyFailed = $true }
+    }
+
+    Write-Log "==================== まとめて実行 完了 ===================="
+
+    if ($anyFailed) {
+        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkRed
+        $lblBatchStatus.Text = "失敗のステップあり"
+    } else {
+        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+        $lblBatchStatus.Text = "成功"
+    }
+
+    foreach ($chk in $script:batchStepCheckboxes.Values) { $chk.Enabled = $true }
+    Set-RunButtonsEnabled $true
+}
+
+# =========================================
 # 実行タブ（カテゴリごとに分割）
 # =========================================
 
-$tabResult = New-CategoryTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-BatButton -ButtonDef $bd }
-$tabControl = $tabResult.TabControl
+$tabResult = New-CategoryTabControl -TabControl $tabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-BatButton -ButtonDef $bd }
 $script:runButtons = $tabResult.RunButtons
 $script:stepStatusLabels = $tabResult.StepStatusLabels
 $script:inputControls = $tabResult.InputControls
+
+# 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった
+# 初期の$tabControl.Height（実施データ取得タブ基準）をこのタブの内容量に合わせて上書きする。
+# 45はNew-CategoryTabControlの$TabHeaderAllowance既定値
+$tabControl.Height = 45 + $batchPanel.Height
 
 function Set-StepStatus {
     param([string]$Label, [string]$Text)
@@ -123,6 +266,7 @@ function Write-Log {
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
     Set-ButtonsEnabled -Buttons $script:runButtons.Values -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
 }
 
 function Invoke-BatButton {
@@ -158,5 +302,8 @@ function Invoke-BatButton {
 
     Set-RunButtonsEnabled $true
 }
+
+# ps2exeビルド環境ではタブの既定選択がずれることがあるため明示的に指定する
+$tabControl.SelectedTab = $tabBatchAll
 
 [System.Windows.Forms.Application]::Run($form)

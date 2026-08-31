@@ -157,6 +157,7 @@ function New-CategoryTabControl {
         [Parameter(Mandatory)][array]$CategoryDefs,
         [Parameter(Mandatory)][scriptblock]$OnRunClick,
         [scriptblock]$OnOpenClick,
+        [System.Windows.Forms.TabControl]$TabControl,
         [int]$GroupHeight = 60,
         [int]$GroupSpacing = 10,
         [int]$TabHeaderAllowance = 45,
@@ -185,7 +186,13 @@ function New-CategoryTabControl {
         return $total
     }
 
-    $tabControl = New-Object System.Windows.Forms.TabControl
+    # 呼び出し側が既存のTabControlを渡した場合はそれに追記する（他のタブを先頭に置くなど、
+    # 呼び出し側の都合で並び順を決めたい場合に使う。ps2exeビルドではTabPageCollection.Insert()が
+    # NotSupportedExceptionになるため、後から並び替えず、最初から最終的な順序でAddしていく必要がある）
+    $tabControl = $TabControl
+    if (-not $tabControl) {
+        $tabControl = New-Object System.Windows.Forms.TabControl
+    }
     $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
 
     $runButtons = @{}
