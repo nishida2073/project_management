@@ -443,6 +443,26 @@ function Get-SetLineRawValues {
     return $result
 }
 
+# 設定タブの各フィールドの生の値には、common-env.bat内の%BASE_PATH%や%OutputRootDir%のような
+# %VAR%トークンがそのまま残っている（%~dp0のようなバッチ専用トークンは.NET側では解決できないため、
+# common-env.bat側は%BASE_PATH%を使う方式に統一済み）。$script:commonEnvVars（起動時に
+# common-env.batを実際に実行して解決済みの値）を使って再帰的に展開する
+function Expand-VarTokens {
+    param([string]$Value)
+    if (!$Value) { return $Value }
+    return [regex]::Replace($Value, '%(\w+)%', {
+        param($match)
+        $refVal = $script:commonEnvVars[$match.Groups[1].Value]
+        if ($refVal) { $refVal } else { $match.Value }
+    })
+}
+
+function Resolve-BrowseStart {
+    param([string]$RawValue)
+    if (!$RawValue) { return $rootPath }
+    return Expand-VarTokens $RawValue
+}
+
 # TargetYearはcommon-env.bat内でpowershellコマンドから動的に計算される特殊な行（set "VAR=value"形式
 # ではない）ため、このリストにも$settingsLineRegexにも掛からず編集対象にならない（既存の行はそのまま保持される）
 $commonSettingsVars = @(
@@ -663,7 +683,8 @@ function Update-SettingsFields {
             $btnBrowse.Add_Click({
                 $targetTxt = $this.Tag
                 $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                if ($targetTxt.Text -and (Test-Path -LiteralPath $targetTxt.Text)) { $dlg.SelectedPath = $targetTxt.Text }
+                $startPath = Resolve-BrowseStart $targetTxt.Text
+                if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
                 if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
             })
             $settingsFieldPanel.Controls.Add($btnBrowse)
