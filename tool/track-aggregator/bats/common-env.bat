@@ -4,11 +4,11 @@ set "MasterDataRootDir=%~dp0..\master"
 
 set "TemplateRootDir=%~dp0..\template"
 
-set "ResultRootDir=%~dp0..\tmp\実施結果"
+set "ResultRootDir=%~dp0..\output\実施結果"
 set "TestResultRootDir=%ResultRootDir%\01_テスト"
 set "SurveyResultRootDir=%ResultRootDir%\02_アンケート"
 
-set "OutputRootDir=%~dp0..\tmp\集計結果"
+set "OutputRootDir=%~dp0..\output\集計結果"
 set "OutputTestCollectDir=%OutputRootDir%\テスト"
 set "OutputTestResultFileSuffix=テスト結果"
 set "OutputSurveyCollectDir=%OutputRootDir%\アンケート"
