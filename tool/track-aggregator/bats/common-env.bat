@@ -4,6 +4,8 @@ set "MasterDataRootDir=%~dp0..\master"
 
 set "TemplateRootDir=%~dp0..\template"
 
+set "LOG_DIR=%~dp0..\logs"
+
 set "ResultRootDir=%~dp0..\output\実施結果"
 set "TestResultRootDir=%ResultRootDir%\01_テスト"
 set "SurveyResultRootDir=%ResultRootDir%\02_アンケート"

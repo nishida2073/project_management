@@ -26,7 +26,34 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
+# ルート直下の*.bat（check-alert.bat/create-app-data.bat/collect-app-data.bat）はbats\*.batの出力を
+# "%LOG_DIR%\<バッチ名>-<対象日>.log"へリダイレクトしてログファイルを残すが、GUIはbats\*.batを直接
+# 呼ぶためこのリダイレクトを経由せず、今までログファイルが作られていなかった。common-env.bat側の
+# LOG_DIRをそのまま使うことで、出力先をbat/GUIどちらでも共通の1箇所（common-env.bat）で管理する
+function Get-BatLogFilePath {
+    param([string]$BatPath, [string]$TargetDate)
+    $batBaseName = [System.IO.Path]::GetFileNameWithoutExtension($BatPath)
+    $dateForFileName = if ($TargetDate) { $TargetDate } else { (Get-Date).ToString("yyyy-MM-dd") }
+    return Join-Path $logDir "$batBaseName-$dateForFileName.log"
+}
+
+function Start-BatLogWriter {
+    param([string]$LogFilePath)
+    if (-not (Test-Path -LiteralPath $logDir)) {
+        New-Item -Path $logDir -ItemType Directory -Force | Out-Null
+    }
+    # ルート直下の*.bat経由で実行した場合の出力（Write-Messageが素のまま書く文字列）と揃えるため、
+    # 画面向けの[[COLOR:xxx]]タグは書き込まない（Write-BatLogLineで取り除く）
+    return New-Object System.IO.StreamWriter($LogFilePath, $false, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+function Write-BatLogLine {
+    param([System.IO.StreamWriter]$Writer, [string]$Line)
+    $Writer.WriteLine(($Line -replace '^\[\[COLOR:\w+\]\]', ''))
+}
+
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
+$logDir = $script:commonEnvVars["LOG_DIR"]
 
 # 日付入力の既定値は当日（対象グループが空欄の場合のみ各batが内部で全グループとして扱う）
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
@@ -43,20 +70,20 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "アプリデータ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌作成"; BatchLabel = "1. 業務日誌作成"; BatchPath = (Join-Path $basePath "create-daily-report.bat"); TargetDirPath = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
-            [PSCustomObject]@{ Label = "パルスサーベイ作成"; BatchLabel = "2. パルスサーベイ作成"; BatchPath = (Join-Path $basePath "create-pulse-survey.bat"); TargetDirPath = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "create-daily-report.bat"); TargetDirPath = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "create-pulse-survey.bat"); TargetDirPath = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アプリデータ集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "アプリデータ集計"; BatchLabel = "3. アプリデータ集計"; BatchPath = (Join-Path $basePath "collect-app-data.bat"); TargetDirPath = $script:commonEnvVars["OutputCollectDataRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-app-data.bat"); TargetDirPath = $script:commonEnvVars["OutputCollectDataRootDir"]; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
-        Label = "アラート検知"
+        Label = "アラート集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "アラート検知"; BatchLabel = "4. アラート検知"; BatchPath = (Join-Path $basePath "check-alert.bat"); TargetDirPath = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アラート集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "check-alert.bat"); TargetDirPath = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
         )
     }
 )
@@ -86,8 +113,13 @@ $form.Add_FormClosing({
 
 $tabControl = New-Object System.Windows.Forms.TabControl
 
+# IncludeInBatchを$falseにしたButtonDefだけ、一括実行タブの対象から外せる（実行タブ側には影響しない）
 $allButtonDefs = @()
-foreach ($cd in $categoryDefs) { $allButtonDefs += $cd.ButtonDefs }
+foreach ($cd in $categoryDefs) {
+    foreach ($bd in $cd.ButtonDefs) {
+        if ($bd.IncludeInBatch -ne $false) { $allButtonDefs += $bd }
+    }
+}
 
 $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
@@ -128,11 +160,15 @@ $batchTopControls = @($lblBatchDate, $txtBatchDate, $lblBatchGroup, $txtBatchGro
 $script:batchStepCheckboxes = @{}
 $y = 46
 foreach ($bd in $allButtonDefs) {
-    # BatchLabelを指定したButtonDefだけ、一括実行タブでの表示名を実行タブ側のLabelと切り離せる
+    # BatchLabelを指定したButtonDefだけ、一括実行タブでの表示名を実行タブ側のLabelと切り離せる。
+    # BatchLabelの長さはボタンごとに異なるため、AutoSizeで実測幅に合わせると「開く」の位置がずれて
+    # 見切れたり画面外に出たりする。チェックボックスを固定幅＋省略表示にして「開く」の位置を固定する
     $chk = New-Object System.Windows.Forms.CheckBox
     $chk.Text = if ($bd.BatchLabel) { $bd.BatchLabel } else { $bd.Label }
     $chk.Checked = $true
-    $chk.AutoSize = $true
+    $chk.AutoSize = $false
+    $chk.AutoEllipsis = $true
+    $chk.Size = New-Object System.Drawing.Size(500, 22)
     $chk.Location = New-Object System.Drawing.Point(20, $y)
     $script:batchStepCheckboxes[$bd.Label] = $chk
     $batchTopControls += $chk
@@ -142,8 +178,8 @@ foreach ($bd in $allButtonDefs) {
         $lnkOpen.Text = "開く"
         $lnkOpen.AutoSize = $false
         $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-        $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.PreferredSize.Height)
-        $lnkOpen.Location = New-Object System.Drawing.Point(220, $y)
+        $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
+        $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
         $lnkOpen.Tag = $bd
         $lnkOpen.Add_LinkClicked({ Open-FolderOrWarn -Path $this.Tag.TargetDirPath })
         $batchTopControls += $lnkOpen
@@ -185,9 +221,14 @@ function Invoke-BatchStep {
         $batArgs += Get-InputValue -Control $script:batchInputControls[$inputDef.Name]
     }
 
+    $targetDate = Get-InputValue -Control $script:batchInputControls["TargetDate"]
+    $logWriter = Start-BatLogWriter -LogFilePath (Get-BatLogFilePath -BatPath $ButtonDef.BatchPath -TargetDate $targetDate)
+
     $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line } `
+        -OnOutputLine { param($line) Write-Log $line; Write-BatLogLine -Writer $logWriter -Line $line } `
         -CurrentProcessRef ([ref]$script:currentProc)
+
+    $logWriter.Dispose()
 
     Show-FormInForeground -Form $form
 
@@ -304,9 +345,14 @@ function Invoke-BatButton {
         }
     }
 
+    $targetDate = if ($inputMap) { Get-InputValue -Control $inputMap["TargetDate"] } else { $null }
+    $logWriter = Start-BatLogWriter -LogFilePath (Get-BatLogFilePath -BatPath $ButtonDef.BatchPath -TargetDate $targetDate)
+
     $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line } `
+        -OnOutputLine { param($line) Write-Log $line; Write-BatLogLine -Writer $logWriter -Line $line } `
         -CurrentProcessRef ([ref]$script:currentProc)
+
+    $logWriter.Dispose()
 
     Show-FormInForeground -Form $form
 

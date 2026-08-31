@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~nx0"
 
-set "LOG_DIR=%~dp0logs"
+call "%~dp0bats\common-env.bat"
 
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 

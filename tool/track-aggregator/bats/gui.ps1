@@ -26,31 +26,58 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
+# ルート直下のall.batはbats\*.batの出力を"%LOG_DIR%\<バッチ名>.log"へリダイレクトしてログファイルを
+# 残すが、GUIはbats\*.batを直接呼ぶためこのリダイレクトを経由せず、今までログファイルが作られていな
+# かった。common-env.bat側のLOG_DIRをそのまま使うことで、出力先をbat/GUIどちらでも共通の1箇所
+# （common-env.bat）で管理する。all.batは対象日を持たないため、ログファイル名に日付は付けない
+function Get-BatLogFilePath {
+    param([string]$BatPath)
+    $batBaseName = [System.IO.Path]::GetFileNameWithoutExtension($BatPath)
+    return Join-Path $logDir "$batBaseName.log"
+}
+
+function Start-BatLogWriter {
+    param([string]$LogFilePath)
+    if (-not (Test-Path -LiteralPath $logDir)) {
+        New-Item -Path $logDir -ItemType Directory -Force | Out-Null
+    }
+    # ルート直下のall.bat経由で実行した場合の出力（Write-Messageが素のまま書く文字列）と揃えるため、
+    # 画面向けの[[COLOR:xxx]]タグは書き込まない（Write-BatLogLineで取り除く）
+    return New-Object System.IO.StreamWriter($LogFilePath, $false, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+function Write-BatLogLine {
+    param([System.IO.StreamWriter]$Writer, [string]$Line)
+    $Writer.WriteLine(($Line -replace '^\[\[COLOR:\w+\]\]', ''))
+}
+
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
+$logDir = $script:commonEnvVars["LOG_DIR"]
 
 # GUIのタブ（カテゴリ）とその中に並べるボタンの定義。並べ方や見た目はNew-CategoryTabControl側の責務
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "実施データ取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "データ取得"; BatchLabel = "1. データ取得"; BatchPath = (Join-Path $basePath "download-results.bat"); TargetDirPath = $script:commonEnvVars["MasterDataRootDir"] }
-            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "2. 取得状況確認"; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"] }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "download-results.bat"); TargetDirPath = $script:commonEnvVars["MasterDataRootDir"] }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"] }
         )
     }
     [PSCustomObject]@{
         Label = "実施状況確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート集計"; BatchLabel = "3. テスト・アンケート集計"; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"] }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"] }
         )
     }
     [PSCustomObject]@{
         Label = "実施結果確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト集計"; BatchLabel = "4. テスト集計"; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
-            [PSCustomObject]@{ Label = "アンケート集計"; BatchLabel = "5. アンケート集計"; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"] }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"] }
             [PSCustomObject]@{
-                Label = "経年比較集計"
-                BatchLabel = "6. 経年比較集計"
+                Label = "経年比較"
+                BatchLabel = "実施結果確認-経年比較"
+                IncludeInBatch = $true
                 BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat")
                 TargetDirPath = $script:commonEnvVars["OutputYearComparisonCollectDir"]
                 Inputs = @(
@@ -94,8 +121,13 @@ $form.Add_FormClosing({
 
 $tabControl = New-Object System.Windows.Forms.TabControl
 
+# IncludeInBatchを$falseにしたButtonDefだけ、一括実行タブの対象から外せる（実行タブ側には影響しない）
 $allButtonDefs = @()
-foreach ($cd in $categoryDefs) { $allButtonDefs += $cd.ButtonDefs }
+foreach ($cd in $categoryDefs) {
+    foreach ($bd in $cd.ButtonDefs) {
+        if ($bd.IncludeInBatch -ne $false) { $allButtonDefs += $bd }
+    }
+}
 
 $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
@@ -112,12 +144,16 @@ $script:batchStepCheckboxes = @{}
 $batchTopControls = @()
 $y = 20
 foreach ($bd in $allButtonDefs) {
-    $chk = New-Object System.Windows.Forms.CheckBox
     # Inputsを持つステップ（経年比較集計）は一括実行タブで値を確認・変更できず、
-    # common-env.bat由来の既定値のまま実行されてしまうため、既定はチェックを外しておく
+    # common-env.bat由来の既定値のまま実行されてしまうため、既定はチェックを外しておく。
+    # BatchLabelの長さはボタンごとに異なるため、AutoSizeで実測幅に合わせると「開く」の位置が
+    # ずれて見切れたり画面外に出たりする。チェックボックスを固定幅＋省略表示にして「開く」の位置を固定する
+    $chk = New-Object System.Windows.Forms.CheckBox
     $chk.Text = if ($bd.BatchLabel) { $bd.BatchLabel } else { $bd.Label }
     $chk.Checked = if ($bd.Inputs) { $false } else { $true }
-    $chk.AutoSize = $true
+    $chk.AutoSize = $false
+    $chk.AutoEllipsis = $true
+    $chk.Size = New-Object System.Drawing.Size(500, 22)
     $chk.Location = New-Object System.Drawing.Point(20, $y)
     $script:batchStepCheckboxes[$bd.Label] = $chk
     $batchTopControls += $chk
@@ -127,8 +163,8 @@ foreach ($bd in $allButtonDefs) {
         $lnkOpen.Text = "開く"
         $lnkOpen.AutoSize = $false
         $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-        $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.PreferredSize.Height)
-        $lnkOpen.Location = New-Object System.Drawing.Point(240, $y)
+        $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
+        $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
         $lnkOpen.Tag = $bd
         $lnkOpen.Add_LinkClicked({ Open-FolderOrWarn -Path $this.Tag.TargetDirPath })
         $batchTopControls += $lnkOpen
@@ -170,9 +206,13 @@ function Invoke-BatchStep {
         $batArgs += "$($inputDef.Name):$($inputDef.Default)"
     }
 
+    $logWriter = Start-BatLogWriter -LogFilePath (Get-BatLogFilePath -BatPath $ButtonDef.BatchPath)
+
     $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line } `
+        -OnOutputLine { param($line) Write-Log $line; Write-BatLogLine -Writer $logWriter -Line $line } `
         -CurrentProcessRef ([ref]$script:currentProc)
+
+    $logWriter.Dispose()
 
     Show-FormInForeground -Form $form
 
@@ -286,9 +326,13 @@ function Invoke-BatButton {
         }
     }
 
+    $logWriter = Start-BatLogWriter -LogFilePath (Get-BatLogFilePath -BatPath $ButtonDef.BatchPath)
+
     $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line } `
+        -OnOutputLine { param($line) Write-Log $line; Write-BatLogLine -Writer $logWriter -Line $line } `
         -CurrentProcessRef ([ref]$script:currentProc)
+
+    $logWriter.Dispose()
 
     Show-FormInForeground -Form $form
 
