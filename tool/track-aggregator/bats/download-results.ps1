@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$AutoHotkeyExePath,
     [string]$AutoHotkeyScriptPath,
     [string]$TargetGroupName,
@@ -124,10 +124,10 @@ function Download-TrackResults {
 
     $downloadDetail = if($DownloadDetail -eq 1){ $true } else { $false }
 
-    $testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
+    $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
     $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
-    $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
+    $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
     $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
     Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail

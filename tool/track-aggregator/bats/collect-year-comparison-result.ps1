@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$MasterDataRootDir,
+    [string]$ClientDataRootDir,
     [string]$TargetGroupName,
     [int]$TargetYear,
     [int]$ComparePeriod,
@@ -463,7 +463,7 @@ function Export-Excel {
     # 該当年度のマスタファイルが無ければ、その年度は未実施（データなし）として扱う。
     $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
         $year = $TargetYear - $offset
-        $yearMasterFilePath = Join-Path $MasterDataRootDir "$TargetGroupName-$year.xlsx"
+        $yearMasterFilePath = Join-Path $ClientDataRootDir "$TargetGroupName-$year.xlsx"
 
         $yearIsExecuted = Test-Path $yearMasterFilePath
         if ($yearIsExecuted) {

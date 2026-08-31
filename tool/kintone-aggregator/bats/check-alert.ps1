@@ -1,6 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$TemplateFilePath,
     [string]$CollectRootDir,
@@ -991,9 +991,9 @@ function Export-CourseScheduleData {
 
 & {
     $allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
-        Create-CourseScheduleDatas -DataFilePath $MasterDataFilePath
+        Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath
     } else {
-        Create-CourseScheduleDatas -DataFilePath $MasterDataFilePath -CurrentDate $TargetDate
+        Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
     }
     Write-Message $allCourseScheduleDatas -VarName "allCourseScheduleDatas"
 

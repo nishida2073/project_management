@@ -1,6 +1,6 @@
 @echo off
 
-set "MasterDataRootDir=%~dp0..\master"
+set "ClientDataRootDir=%~dp0..\clients"
 
 set "TemplateRootDir=%~dp0..\template"
 

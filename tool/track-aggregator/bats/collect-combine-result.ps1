@@ -1,6 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$TemplateFilePath,
@@ -349,10 +349,10 @@ function Export-Excel {
 
     New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
     # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
-    $testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
+    $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
     $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
     # Write-Message $testDatas -VarName "testDatas" -Type "Info"
 
@@ -369,7 +369,7 @@ function Export-Excel {
     $totalTestResultsDatas = Create-TestSummaryDataByGroup -UserDatas $userDatas -TestDatas $testDatas -ValidResultDatas $validTestResultDatas
     # Write-Message $totalTestResultsDatas -VarName "totalTestResultsDatas" -Type "Info"
 
-    $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
+    $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
     $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
     # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"

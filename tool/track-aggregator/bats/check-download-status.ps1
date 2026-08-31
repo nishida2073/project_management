@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$MasterDataRootDir,
+    [string]$ClientDataRootDir,
     [string]$TestResultRootDir,
     [string]$SurveyResultRootDir,
     [string]$LogNamePrefix
@@ -53,7 +53,7 @@ function Write-DownloadStatusRows {
 & {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    $masterFiles = Get-ChildItem -Path $MasterDataRootDir -Filter *.xlsx
+    $masterFiles = Get-ChildItem -Path $ClientDataRootDir -Filter *.xlsx
 
     foreach ($masterFile in $masterFiles) {
         Use-Mutex "Test-File" {

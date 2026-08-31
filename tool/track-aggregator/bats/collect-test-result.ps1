@@ -1,6 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$ResultRootDir,
@@ -531,11 +531,11 @@ function Export-Excel {
 
     $showDetail = if($ShowDetail -eq 1){ $true } else { $false }
 
-    $testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
+    $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
     $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
     # Write-Message $testDatas -VarName "testDatas" -Type "Info"
 
-    $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
     # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
     $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore

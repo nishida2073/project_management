@@ -1,6 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$KintoneID,
     [string]$KintonePW,
@@ -431,7 +431,7 @@ function Export-File {
     }
 
 
-    $courseScheduleDatas = Create-CourseScheduleDatas -DataFilePath $MasterDataFilePath -CurrentDate $TargetDate
+    $courseScheduleDatas = Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
     Write-Message $courseScheduleDatas -VarName "courseScheduleDatas"
 
     $courseScheduleData = $CourseScheduleDatas | Where-Object { $_.date -eq $TargetDate } | Select-Object -First 1
@@ -446,7 +446,7 @@ function Export-File {
         return
     }
 
-    $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
     Write-Message $userDatas -VarName "userDatas"
 
     $appDatas = Get-AppDatas -TargetAppIds $newTargetAppIds -TargetDate $TargetDate -BaseUrl $BaseUrl -Authorization $Authorization

@@ -1,7 +1,7 @@
 @echo off
 
 
-set "MasterDataRootDir=%~dp0..\master"
+set "ClientDataRootDir=%~dp0..\clients"
 
 set "OutputRootDir=%~dp0..\output"
 

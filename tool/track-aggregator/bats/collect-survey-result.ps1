@@ -1,6 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$TemplateFilePath,
@@ -390,12 +390,12 @@ function Export-Excel {
 & {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    $userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
+    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
     # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
     New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    $surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
+    $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
     $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
     # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"

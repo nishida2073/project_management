@@ -10,7 +10,7 @@ set "SCRIPT_PATH=%~dp0collect-survey-result.ps1"
 set "OutputTargetDir=%OutputSurveyCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\アンケート結果.xlsx"
 
-for %%F in ("%MasterDataRootDir%\*.xlsx") do (
+for %%F in ("%ClientDataRootDir%\*.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF]"
     
     call "%~dp0resolve-env-file.bat" "%%~nF"
@@ -26,7 +26,7 @@ for %%F in ("%MasterDataRootDir%\*.xlsx") do (
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
           "     -BaseUrl '!BaseUrl!'" ^
-          "     -MasterDataFilePath '%%F'" ^
+          "     -ClientDataFilePath '%%F'" ^
           "     -TargetGroupName '%%~nF'" ^
           "     -OutputRootDir '!OutputTargetDir!'" ^
           "     -TemplateFilePath '!TemplateFilePath!'" ^
@@ -50,7 +50,7 @@ call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for %%F in ("%MasterDataRootDir%\*.xlsx") do (
+for %%F in ("%ClientDataRootDir%\*.xlsx") do (
     set "JOB_FLAG=%TEMP%\%MyName%%%~nF_.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
@@ -62,7 +62,7 @@ if !ALL_DONE! EQU 0 (
 call "%~dp0message.bat" "Finished Jobs %MyName% ALL"
 
 set "HAS_ERROR=0"
-for %%F in ("%MasterDataRootDir%\*.xlsx") do (
+for %%F in ("%ClientDataRootDir%\*.xlsx") do (
     set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_.failed"
     if exist "!ERROR_FLAG!" (
         set "HAS_ERROR=1"

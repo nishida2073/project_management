@@ -20,7 +20,7 @@ set "SOURCE_TYPE=パルスサーベイ"
 
 set "SCRIPT_PATH=%~dp0create-app-data.ps1"
 
-set "MasterDataRootDir=%MasterDataRootDir%"
+set "ClientDataRootDir=%ClientDataRootDir%"
 
 set "OutputTargetDir=%OutputReportDir%\%TargetDate%"
 set "OutputSheetNameSuffix=_%SOURCE_TYPE%"
@@ -35,10 +35,10 @@ set "TemplateFilePath=%TemplateRootDir%\アプリデータ.xlsx"
 set "ClassTemplateSheetName=クラス別_パルスサーベイ-テンプレート"
 set "SummaryTemplateSheetName=サマリー_パルスサーベイ-テンプレート"
 
-for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
+for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF] {%TargetDate%}"
 
-    set "envFile=%MasterDataRootDir%\%%~nF-pulse-survey.bat"
+    set "envFile=%ClientDataRootDir%\%%~nF-pulse-survey.bat"
     if exist "!envFile!" (
         call "!envFile!"
 
@@ -51,7 +51,7 @@ for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
           "     -BaseUrl '!BaseUrl!'" ^
-          "     -MasterDataFilePath '%%F'" ^
+          "     -ClientDataFilePath '%%F'" ^
           "     -TargetGroupName '%%~nF'" ^
           "     -KintoneID '!KintoneID!'" ^
           "     -KintonePW '!KintonePW!'" ^
@@ -90,7 +90,7 @@ call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
+for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
@@ -102,7 +102,7 @@ if !ALL_DONE! EQU 0 (
 call "%~dp0message.bat" "Finished Jobs %MyName% ALL {%TargetDate%}"
 
 set "HAS_ERROR=0"
-for %%F in ("%MasterDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
+for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.failed"
     if exist "!ERROR_FLAG!" (
         set "HAS_ERROR=1"

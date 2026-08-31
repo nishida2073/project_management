@@ -11,7 +11,7 @@ call "%~dp0message.bat" "Start %MyName%"
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "& '%SCRIPT_PATH%'" ^
-  "   -MasterDataRootDir '%MasterDataRootDir%'" ^
+  "   -ClientDataRootDir '%ClientDataRootDir%'" ^
   "   -TestResultRootDir '%TestResultRootDir%'" ^
   "   -SurveyResultRootDir '%SurveyResultRootDir%'" ^
   "   -LogNamePrefix '%~n0'"

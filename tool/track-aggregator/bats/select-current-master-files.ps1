@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$MasterDataRootDir,
+    [string]$ClientDataRootDir,
     [int]$TargetYear,
     [int]$ComparePeriod
 )
@@ -9,7 +9,7 @@
 # ここでは「年度を除いたベース名」を重複無く列挙するだけでよい。
 # ただし、TargetYear-ComparePeriod ～ TargetYear の範囲に1件もファイルが無いベース名は、
 # 対象外（今は動いていない過去のプログラム扱い）として除外する。
-$files = Get-ChildItem -Path $MasterDataRootDir -Filter *.xlsx
+$files = Get-ChildItem -Path $ClientDataRootDir -Filter *.xlsx
 
 $withYear = @()
 $withoutYear = @()
