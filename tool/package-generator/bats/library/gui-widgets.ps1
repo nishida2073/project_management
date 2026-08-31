@@ -83,6 +83,8 @@ function New-LogTextBox {
     $textBox.Multiline = $true
     $textBox.ScrollBars = [System.Windows.Forms.RichTextBoxScrollBars]::Vertical
     $textBox.ReadOnly = $true
+    # ReadOnly=$trueのRichTextBoxはOSのテーマによって背景がグレーになることがあるため、明示的に白にする
+    $textBox.BackColor = [System.Drawing.Color]::White
     $textBox.Font = New-Object System.Drawing.Font($FontFamily, $FontSize)
     $textBox.Dock = [System.Windows.Forms.DockStyle]::Fill
     $textBox.DetectUrls = $true

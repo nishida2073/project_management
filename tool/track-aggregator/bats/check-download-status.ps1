@@ -1,5 +1,6 @@
 ﻿param(
-    [string]$ClientDataRootDir,
+    [string]$ClientDataFilePath,
+    [string]$TargetGroupName,
     [string]$TestResultRootDir,
     [string]$SurveyResultRootDir,
     [string]$LogNamePrefix
@@ -11,7 +12,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'check-download-status' })"
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'check-download-status' })-$TargetGroupName"
 
 function Test-HasResultFiles {
     param(
@@ -35,7 +36,7 @@ function Write-DownloadStatusRows {
         [string]$TargetLabel
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
-    
+
     Write-Message "■$TargetGroupName - $TargetLabel" -VarName "downloadTarget" -Type "Info" -NoHeader
     foreach ($data in $Datas) {
         $name = $data.$NameProperty
@@ -53,18 +54,12 @@ function Write-DownloadStatusRows {
 & {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    $masterFiles = Get-ChildItem -Path $ClientDataRootDir -Filter *.xlsx
+    Use-Mutex "Test-File" {
+        $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+        $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
 
-    foreach ($masterFile in $masterFiles) {
-        Use-Mutex "Test-File" {
-            $targetGroupName = $masterFile.BaseName
-
-            $testDatas = Create-TestDatas -DataFilePath $masterFile.FullName
-            $surveyDatas = Create-SurveyDatas -DataFilePath $masterFile.FullName
-
-            Write-DownloadStatusRows -Datas $testDatas -NameProperty "testName" -ResultRootDir $TestResultRootDir -TargetGroupName $targetGroupName -TargetLabel "テスト"
-            Write-DownloadStatusRows -Datas $surveyDatas -NameProperty "surveyName" -ResultRootDir $SurveyResultRootDir -TargetGroupName $targetGroupName -TargetLabel "アンケート"
-        }
+        Write-DownloadStatusRows -Datas $testDatas -NameProperty "testName" -ResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TargetLabel "テスト"
+        Write-DownloadStatusRows -Datas $surveyDatas -NameProperty "surveyName" -ResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -TargetLabel "アンケート"
     }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath

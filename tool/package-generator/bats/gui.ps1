@@ -776,12 +776,9 @@ $radioUploadLog.Location = New-Object System.Drawing.Point(440, 40)
 
 $logStagePanel.Controls.AddRange(@($lblLogClient, $cmbLogClient, $radioDownloadLog, $radioGenerateLog, $radioUploadLog))
 
-$logContentBox = New-Object System.Windows.Forms.TextBox
-$logContentBox.Multiline = $true
-$logContentBox.ReadOnly = $true
-$logContentBox.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
-$logContentBox.Font = New-Object System.Drawing.Font("Consolas", 9)
-$logContentBox.Dock = [System.Windows.Forms.DockStyle]::Fill
+# 過去ログの静的な表示のみで色分けは使わないが、New-LogTextBoxを流用してReadOnly時の
+# 背景色などのスタイルをtxtLog（実行中ログ）と一本化する
+$logContentBox = New-LogTextBox
 
 $tabLogs.Controls.Add($logContentBox)
 $tabLogs.Controls.Add($logStagePanel)
