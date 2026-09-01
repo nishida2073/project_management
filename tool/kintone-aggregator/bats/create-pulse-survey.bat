@@ -16,14 +16,14 @@ if "%~2"=="" (
     set "TargetGroupNameFilter=%~2"
 )
 
-set "SOURCE_TYPE=パルスサーベイ"
+set "SOURCE_TYPE=%PulseSurveySourceType%"
 
 set "SCRIPT_PATH=%~dp0create-app-data.ps1"
 
 set "ClientDataRootDir=%ClientDataRootDir%"
 
 set "OutputTargetDir=%OutputReportDir%\%TargetDate%"
-set "OutputSheetNameSuffix=_%SOURCE_TYPE%"
+set "OutputFileNameSuffix=_%SOURCE_TYPE%"
 
 set "CreateReminderLink=0"
 
@@ -32,9 +32,13 @@ call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
 for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     call "%~dp0message.bat" "Start %MyName% [%%~nF] {%TargetDate%}"
 
-    set "envFile=%ClientDataRootDir%\%%~nF-pulse-survey.bat"
+    set "envFile=%ClientDataRootDir%\%%~nF.bat"
     if exist "!envFile!" (
         call "!envFile!"
+
+        set "TargetAppIds=!TargetAppIds%PulseSurveySuffix%!"
+        set "TargetDateCodeField=!TargetDateCodeField%PulseSurveySuffix%!"
+        set "TargetUserCodeField=!TargetUserCodeField%PulseSurveySuffix%!"
 
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
         set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.failed"
@@ -52,13 +56,11 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "     -Authorization '!Authorization!'" ^
           "     -OutputRootDir '%OutputTargetDir%'" ^
           "     -CreateReminderLink '%CreateReminderLink%'" ^
-          "     -OutputSheetNameSuffix '%OutputSheetNameSuffix%'" ^
+          "     -OutputFileNameSuffix '%OutputFileNameSuffix%'" ^
           "     -TargetDate '%TargetDate%'" ^
           "     -TargetAppIds '!TargetAppIds!'" ^
           "     -TargetDateCodeField '!TargetDateCodeField!'" ^
           "     -TargetUserCodeField '!TargetUserCodeField!'" ^
-          "     -TargetFixedCodeFields '!TargetFixedCodeFields!'" ^
-          "     -TargetAppCodeFields '!TargetAppCodeFields!'" ^
           "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^

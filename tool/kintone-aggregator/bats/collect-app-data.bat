@@ -22,7 +22,6 @@ set "ClientDataRootDir=%ClientDataRootDir%"
 set "SourseDataDefsPath=%~dp0collect-data-defs.txt"
 
 set "CollectRootDir=%OutputCollectDataRootDir%"
-set "CollectDataNotFoundMessage="
 
 set "CheckedFileRootDir=%OutputReportDir%\%TargetDate%"
 
@@ -44,7 +43,6 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
       "     -TargetDate '%TargetDate%'" ^
       "     -SourseDataDefsPath '%SourseDataDefsPath%'" ^
       "     -CollectRootDir '%CollectRootDir%'" ^
-      "     -CollectDataNotFoundMessage '%CollectDataNotFoundMessage%'" ^
       "     -LogNamePrefix '%~n0'" ^
       "} catch {" ^
       "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^

@@ -6,3 +6,6 @@ set "KintonePW=abcd1234"
 set "Authorization="
 set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
 
+set "TargetAppIds_Daily=39"
+
+set "TargetAppIds_Pulse=38"

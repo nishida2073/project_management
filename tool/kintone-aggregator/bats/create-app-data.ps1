@@ -6,14 +6,12 @@
     [string]$KintonePW,
     [string]$Authorization,
     [string]$OutputRootDir,
-    [string]$OutputSheetNameSuffix,
+    [string]$OutputFileNameSuffix,
     [int]$CreateReminderLink,
     [string]$TargetAppIds,
     [string]$TargetDate,
     [string]$TargetDateCodeField,
     [string]$TargetUserCodeField,
-    [string]$TargetFixedCodeFields,
-    [string]$TargetAppCodeFields,
     [string]$LogNamePrefix
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -31,18 +29,11 @@ $appDefinedCodeFields = [PSCustomObject]@{
     UserCodeField                = $TargetUserCodeField
 }
 
-# TargetFixedCodeFields/TargetAppCodeFields/TargetAppIds共通の
-# パース処理。カンマ・空白区切りの文字列を空要素を除いた配列にする。
-# WildcardExpansionを渡した場合のみ、値が"*"のときにその配列（例: kintoneアプリの全フィールド
-# ラベル）へ展開する（渡さなければ"*"はただの1要素として素通しする＝現状ワイルドカード非対応のまま）
+# TargetAppIds用のパース処理。カンマ・空白区切りの文字列を空要素を除いた配列にする
 function Get-FieldCodeList {
     param(
-        [string]$Value,
-        [array]$WildcardExpansion
+        [string]$Value
     )
-    if ($PSBoundParameters.ContainsKey('WildcardExpansion') -and $Value.Trim() -eq '*') {
-        return @($WildcardExpansion)
-    }
     return @($Value -split '[,\s]+' | Where-Object { $_ })
 }
 
@@ -60,7 +51,7 @@ function Get-AppDatas {
     # アプリの構造（フィールドコード・ラベル）はレコードの有無に関わらず取得できる、
     # レコード取得（Get-CurrentAppData）とは別のAPIのため、ループの外で独立して取得する。
     # 対象日のレコードが1件も無いと、以前はレコードのループが回らず$fieldDatasが
-    # 一度も取得されない（＝TargetAppCodeFields="*"が展開できない）不具合があった
+    # 一度も取得されない（＝集計対象フィールドが展開できない）不具合があった
     $fieldDatas = if ($TargetAppIds.Count -gt 0) {
         Get-CurrentAppFieldData -TargetAppId $TargetAppIds[0] -BaseUrl $BaseUrl -Authorization $Authorization
     } else {
@@ -97,7 +88,7 @@ function Get-AppDatas {
                               Select-Object -First 1
                           })
 
-    # TargetAppCodeFieldsに"*"を指定した場合の展開用。アプリの全フィールドのラベル名から、
+    # 集計対象フィールド（AllFieldLabels）の算出用。アプリの全フィールドのラベル名から、
     # 日付・受講生ID特定に既に使っているフィールド（DateCodeField/UserCodeField）を除いたもの。
     # UserCodeFieldは"作成者.code"のようなネストパス（kintoneのCREATOR等サブテーブル系フィールド）
     # を指定できるため、比較は最初の"."より前のベースのフィールドコードで行う
@@ -236,34 +227,32 @@ function Export-File {
     $appDatas = $appDatasResult.Datas
     Write-Message $appDatas -VarName "appDatas"
 
-    # TargetAppCodeFieldsに"*"を指定すると、kintoneアプリの全フィールド（ラベル名）のうち
-    # 日付・受講生ID特定に使用済みのフィールドを除いた残り全部を対象にする
-    $appCodeFields = Get-FieldCodeList -Value $TargetAppCodeFields -WildcardExpansion $appDatasResult.AllFieldLabels
+    # kintoneアプリの全フィールド（ラベル名）のうち、日付・受講生ID特定に使用済みの
+    # フィールドを除いた残り全部を集計対象にする
+    $appCodeFields = $appDatasResult.AllFieldLabels
     Write-Message $appCodeFields -VarName "appCodeFields"
 
     $checkResults = Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData
     Write-Message $checkResults -VarName "checkResults"
 
-    # TargetFixedCodeFieldsに"*"を指定すると、userData（受講生データにCheck-Resultが
-    # 科目名・日付等を付与した後の最終形）の全プロパティのうち、Create-UserDatas/Check-Resultが
-    # 別名として付与した英語エイリアス（userNo/userCode/userName/companyName/className/
-    # scheduledDate/isHoliday/scheduledCourseName）を除いた残り全部を対象にする。userDataの
-    # プロパティ一覧はCheck-Result実行後でないと日付・科目名を含んだ最終形にならないため、
-    # ここで展開する
+    # userData（受講生データにCheck-Resultが科目名・日付等を付与した後の最終形）の全プロパティのうち、
+    # Create-UserDatas/Check-Resultが別名として付与した英語エイリアス（userNo/userCode/userName/
+    # companyName/className/scheduledDate/isHoliday/scheduledCourseName）を除いた残り全部を
+    # 固定列にする。userDataのプロパティ一覧はCheck-Result実行後でないと日付・科目名を含んだ
+    # 最終形にならないため、ここで算出する
     $userDataAliasFieldCodes = @(
         "userNo", "userCode", "userName", "companyName", "className",
         "scheduledDate", "isHoliday", "scheduledCourseName"
     )
-    $allUserDataFieldLabels = if ($checkResults.Count -gt 0) {
+    $fixedCodeFields = if ($checkResults.Count -gt 0) {
         @($checkResults[0].userData.PSObject.Properties.Name |
             Where-Object { $userDataAliasFieldCodes -notcontains $_ })
     } else {
         @()
     }
-    $fixedCodeFields = Get-FieldCodeList -Value $TargetFixedCodeFields -WildcardExpansion $allUserDataFieldLabels
     Write-Message $fixedCodeFields -VarName "fixedCodeFields"
 
-    $outputFileName = "$TargetGroupName-$($OutputSheetNameSuffix.TrimStart('_')).txt"
+    $outputFileName = "$TargetGroupName-$($OutputFileNameSuffix.TrimStart('_')).txt"
     $outputFilePath = Join-Path $OutputRootDir $outputFileName
     Export-File -CheckResults $checkResults -OutputFilePath $outputFilePath -FixedCodeFields $fixedCodeFields -AppCodeFields $appCodeFields
 } *>&1 | Tee-Object -FilePath $logFilePath

@@ -368,11 +368,13 @@ function Invoke-BatButton {
 
 # =========================================
 # 設定タブ（package-generatorの設定タブUIを参考にしたレイアウト：
-# 対象を切り替えて共通設定/グループ別設定を編集する）
+# 「共通」「グループ別」のサブタブに分けて編集する）
 #
-# 「共通設定」はcommon-env.bat（対象日・対象グループに関わらず共通のパス設定）を直接編集する。
-# グループを選ぶと、そのグループのclients\<グループ名>.bat（認証情報）と
-# clients\<グループ名>-daily-report.bat / clients\<グループ名>-pulse-survey.bat（項目マッピング）を編集する。
+# 「共通」タブはcommon-env.bat（対象日・対象グループに関わらず共通のパス設定に加え、
+# 全グループ共通の業務日誌/パルスサーベイのフィールドコード）を直接編集する。
+# 「グループ別」タブはグループを選ぶと、そのグループのclients\<グループ名>.bat（認証情報＋
+# 業務日誌/パルスサーベイの対象アプリID。業務日誌側/パルスサーベイ側それぞれcommon-env.batの
+# DailyReportSuffix/PulseSurveySuffixを付けた変数名で1ファイルにまとめて持つ）を編集する。
 # 新規グループはclients\template\の内容を初期値として使う（保存するまでファイルは作成しない）
 # =========================================
 
@@ -381,12 +383,9 @@ $tabSettings.Text = "設定"
 $tabControl.Controls.Add($tabSettings)
 
 $clientsTemplateDir = Join-Path $clientsDir "template"
-$defaultSettingsLabel = "共通設定"
 $settingsLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
 
 function Get-GroupBatPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.bat" }
-function Get-GroupDailyReportBatPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName-daily-report.bat" }
-function Get-GroupPulseSurveyBatPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName-pulse-survey.bat" }
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
 # set "VAR=value" 形式の行だけを拾ってVAR→valueのハッシュテーブルにする（common-env.bat・グループ別ファイル共通）
@@ -423,7 +422,14 @@ function Resolve-BrowseStart {
 
 $commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $authVars = @("KintoneSubdomain", "KintoneID", "KintonePW")
-$reportVars = @("TargetAppIds", "TargetDateCodeField", "TargetUserCodeField", "TargetFixedCodeFields", "TargetAppCodeFields")
+# TargetAppIdsは接続先kintoneアプリの番号でグループごとに異なるためグループ別設定、
+# TargetDateCodeField/TargetUserCodeFieldは全グループで共通のアプリ構成を前提にしているため共通設定
+$groupReportVars = @("TargetAppIds")
+$commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
+# 業務日誌/パルスサーベイの変数名サフィックスはcommon-env.bat（create-daily-report.bat/
+# create-pulse-survey.bat側と共通）のDailyReportSuffix/PulseSurveySuffixを唯一の定義元とする
+$dailyReportSuffix = $script:commonEnvVars["DailyReportSuffix"]
+$pulseSurveySuffix = $script:commonEnvVars["PulseSurveySuffix"]
 
 $settingsGroupLabels = @{ "COMMON" = "共通設定"; "AUTH" = "認証情報"; "DAILY" = "業務日誌"; "PULSE" = "パルスサーベイ" }
 $settingsVarLabels = @{
@@ -440,38 +446,97 @@ $settingsVarLabels = @{
     "TargetAppIds"             = "対象アプリID"
     "TargetDateCodeField"      = "日付フィールドコード"
     "TargetUserCodeField"      = "受講生IDフィールドコード"
-    "TargetFixedCodeFields"    = "固定列フィールドコード（カンマ区切り）"
-    "TargetAppCodeFields"      = "集計対象フィールドコード（カンマ区切り）"
 }
 $settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $settingsMaskedVars = @("KintonePW")
 
+# TargetAppIds等はdaily-report/pulse-survey双方で同じ変数名を別の値で使うため、変数名に
+# $dailyReportSuffix/$pulseSurveySuffixを付けて区別して持つ。この関数はそのサフィックス付きの生値を、
+# サフィックスを外した変数名（$VarNamesと同じキー）のハッシュテーブルへ変換する
+function Get-SuffixedRawValues {
+    param([hashtable]$RawValues, [string]$Suffix, [array]$VarNames)
+    $result = @{}
+    foreach ($varName in $VarNames) {
+        $key = "$varName$Suffix"
+        if ($RawValues.ContainsKey($key)) { $result[$varName] = $RawValues[$key] }
+    }
+    return $result
+}
+
 # clients\template\の内容（新規作成の初期値）。一度だけ読み込みキャッシュする。
-# TargetAppIds等はdaily-report/pulse-survey双方で同じ変数名を別の値で使うため、1つのハッシュテーブルに
-# まとめず種別ごとに分けて保持する（まとめるとpulse-surveyの値がdaily-reportの値を上書きしてしまう）
+# グループ別設定（$groupReportVars=TargetAppIds）のみが対象。$commonReportVarsはcommon-env.bat側の
+# 共通設定なのでここには含めない
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
+        $rawTemplate = Get-SetLineRawValues -Path (Join-Path $clientsTemplateDir "client.bat")
         $script:groupTemplateDefaults = [PSCustomObject]@{
-            Auth  = Get-SetLineRawValues -Path (Join-Path $clientsTemplateDir "client.bat")
-            Daily = Get-SetLineRawValues -Path (Join-Path $clientsTemplateDir "client-daily-report.bat")
-            Pulse = Get-SetLineRawValues -Path (Join-Path $clientsTemplateDir "client-pulse-survey.bat")
+            Auth  = $rawTemplate
+            Daily = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $dailyReportSuffix -VarNames $groupReportVars
+            Pulse = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $pulseSurveySuffix -VarNames $groupReportVars
         }
     }
     return $script:groupTemplateDefaults
 }
 
-$settingsTopPanel = New-Object System.Windows.Forms.Panel
-$settingsTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$settingsTopPanel.Height = 70
+# 設定タブ自体は「共通」「グループ別」の2つのサブタブに分ける（共通設定の項目が増えてきて
+# ドロップダウンでの切り替えより独立したタブの方が分かりやすいため）
+$settingsSubTabControl = New-Object System.Windows.Forms.TabControl
+$settingsSubTabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+$tabSettings.Controls.Add($settingsSubTabControl)
 
-$lblSettingsTarget = New-Object System.Windows.Forms.Label
-$lblSettingsTarget.Text = "対象"
-$lblSettingsTarget.AutoSize = $true
+$tabSettingsCommon = New-Object System.Windows.Forms.TabPage
+$tabSettingsCommon.Text = "共通"
+$settingsSubTabControl.Controls.Add($tabSettingsCommon)
 
-$cmbSettingsTarget = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsTarget.Size = New-Object System.Drawing.Size(260, 24)
-$cmbSettingsTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$tabSettingsGroup = New-Object System.Windows.Forms.TabPage
+$tabSettingsGroup.Text = "グループ別"
+$settingsSubTabControl.Controls.Add($tabSettingsGroup)
+
+$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+
+# --- 共通タブ ---
+$settingsCommonTopPanel = New-Object System.Windows.Forms.Panel
+$settingsCommonTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$settingsCommonTopPanel.Height = 40
+
+$btnSettingsCommonSave = New-Object System.Windows.Forms.Button
+$btnSettingsCommonSave.Text = "保存"
+$btnSettingsCommonSave.Location = New-Object System.Drawing.Point(20, 8)
+$btnSettingsCommonSave.Size = New-Object System.Drawing.Size(100, 24)
+
+$btnSettingsCommonReload = New-Object System.Windows.Forms.Button
+$btnSettingsCommonReload.Text = "再読込"
+$btnSettingsCommonReload.Location = New-Object System.Drawing.Point(130, 8)
+$btnSettingsCommonReload.Size = New-Object System.Drawing.Size(100, 24)
+
+$lblSettingsCommonSaveStatus = New-Object System.Windows.Forms.Label
+$lblSettingsCommonSaveStatus.Text = ""
+$lblSettingsCommonSaveStatus.AutoSize = $true
+$lblSettingsCommonSaveStatus.Location = New-Object System.Drawing.Point(244, 14)
+$lblSettingsCommonSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsCommonSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
+
+$settingsCommonTopPanel.Controls.AddRange(@($btnSettingsCommonSave, $btnSettingsCommonReload, $lblSettingsCommonSaveStatus))
+
+$settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
+$settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsCommonFieldPanel.AutoScroll = $true
+
+$tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
+$tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
+
+# --- グループ別タブ ---
+$settingsGroupTopPanel = New-Object System.Windows.Forms.Panel
+$settingsGroupTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$settingsGroupTopPanel.Height = 70
+
+$lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
+$lblSettingsGroupTarget.Text = "対象"
+$lblSettingsGroupTarget.AutoSize = $true
+
+$cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
+$cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
+$cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $btnSettingsNewGroup = New-Object System.Windows.Forms.Button
 $btnSettingsNewGroup.Text = "新規作成"
@@ -481,95 +546,113 @@ $lnkSettingsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsOpenXlsx.Text = "開く"
 $lnkSettingsOpenXlsx.AutoSize = $true
 
-$btnSettingsSave = New-Object System.Windows.Forms.Button
-$btnSettingsSave.Text = "保存"
-$btnSettingsSave.Location = New-Object System.Drawing.Point(20, 44)
-$btnSettingsSave.Size = New-Object System.Drawing.Size(100, 24)
+$btnSettingsGroupSave = New-Object System.Windows.Forms.Button
+$btnSettingsGroupSave.Text = "保存"
+$btnSettingsGroupSave.Location = New-Object System.Drawing.Point(20, 44)
+$btnSettingsGroupSave.Size = New-Object System.Drawing.Size(100, 24)
 
-$btnSettingsReload = New-Object System.Windows.Forms.Button
-$btnSettingsReload.Text = "再読込"
-$btnSettingsReload.Location = New-Object System.Drawing.Point(130, 44)
-$btnSettingsReload.Size = New-Object System.Drawing.Size(100, 24)
+$btnSettingsGroupReload = New-Object System.Windows.Forms.Button
+$btnSettingsGroupReload.Text = "再読込"
+$btnSettingsGroupReload.Location = New-Object System.Drawing.Point(130, 44)
+$btnSettingsGroupReload.Size = New-Object System.Drawing.Size(100, 24)
 
-$lblSettingsSaveStatus = New-Object System.Windows.Forms.Label
-$lblSettingsSaveStatus.Text = ""
-$lblSettingsSaveStatus.AutoSize = $true
-$lblSettingsSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
-$lblSettingsSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
+$lblSettingsGroupSaveStatus = New-Object System.Windows.Forms.Label
+$lblSettingsGroupSaveStatus.Text = ""
+$lblSettingsGroupSaveStatus.AutoSize = $true
+$lblSettingsGroupSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
+$lblSettingsGroupSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsGroupSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$settingsTopPanel.Controls.AddRange(@($lblSettingsTarget, $cmbSettingsTarget, $btnSettingsNewGroup, $lnkSettingsOpenXlsx, $btnSettingsSave, $btnSettingsReload, $lblSettingsSaveStatus))
+$settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsNewGroup, $lnkSettingsOpenXlsx, $btnSettingsGroupSave, $btnSettingsGroupReload, $lblSettingsGroupSaveStatus))
 
 # Label/LinkLabelはAutoSizeによる実際のHeightが親へのAddより前だと仮の値（23）のままで、
 # 親に追加された後でないと正しい値（例: 17）に確定しない。TextBox/ComboBoxも指定したHeightを
 # 無視してフォントに応じた高さに強制されるため、いずれもControls.Addの後で実際のHeightを見て
 # Y位置を計算しないと縦の中央が揃わない（New-CategoryTabControlの入力欄と同じ理由）
 $settingsRow1CenterY = 26
-$lblSettingsTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsTarget.Height / 2)))
-$cmbSettingsTarget.Location = New-Object System.Drawing.Point(90, ($settingsRow1CenterY - [int]($cmbSettingsTarget.Height / 2)))
+$lblSettingsGroupTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsGroupTarget.Height / 2)))
+$cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(90, ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
 $btnSettingsNewGroup.Location = New-Object System.Drawing.Point(360, ($settingsRow1CenterY - [int]($btnSettingsNewGroup.Height / 2)))
 $lnkSettingsOpenXlsx.Location = New-Object System.Drawing.Point(510, ($settingsRow1CenterY - [int]($lnkSettingsOpenXlsx.Height / 2)))
 
-$settingsFieldPanel = New-Object System.Windows.Forms.Panel
-$settingsFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$settingsFieldPanel.AutoScroll = $true
+$settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
+$settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsGroupFieldPanel.AutoScroll = $true
 
-$tabSettings.Controls.Add($settingsFieldPanel)
-$tabSettings.Controls.Add($settingsTopPanel)
-
-$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+$tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 # グループ一覧はclients\直下の*.xlsx（clients\template\は対象外）から拾う。
 # 既存グループの実行対象判定（%TargetGroupNameFilter%.xlsx）と同じ考え方
 function Update-SettingsGroupList {
-    $selected = $cmbSettingsTarget.SelectedItem
+    $selected = $cmbSettingsGroupTarget.SelectedItem
     $script:suppressComboSync = $true
-    $cmbSettingsTarget.Items.Clear()
-    $cmbSettingsTarget.Items.Add($defaultSettingsLabel) | Out-Null
+    $cmbSettingsGroupTarget.Items.Clear()
     foreach ($groupName in (Get-GroupNames)) {
-        $cmbSettingsTarget.Items.Add($groupName) | Out-Null
+        $cmbSettingsGroupTarget.Items.Add($groupName) | Out-Null
     }
-    $cmbSettingsTarget.SelectedIndex = if ($selected -and $cmbSettingsTarget.Items.Contains($selected)) { $cmbSettingsTarget.Items.IndexOf($selected) } else { 0 }
+    if ($selected -and $cmbSettingsGroupTarget.Items.Contains($selected)) {
+        $cmbSettingsGroupTarget.SelectedItem = $selected
+    } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+        $cmbSettingsGroupTarget.SelectedIndex = 0
+    }
     $script:suppressComboSync = $false
 }
 
-function Get-SettingsFieldRows {
-    $target = $cmbSettingsTarget.SelectedItem
-    if (!$target -or $target -eq $defaultSettingsLabel) {
-        $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
-        foreach ($varName in $commonSettingsVars) {
-            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
-        }
-        return
+function Get-CommonSettingsFieldRows {
+    $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
+    foreach ($varName in $commonSettingsVars) {
+        [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
     }
+    # TargetDateCodeField/TargetUserCodeFieldは全グループ共通のためcommon-env.bat側で持つ
+    $rawDaily = Get-SuffixedRawValues -RawValues $raw -Suffix $dailyReportSuffix -VarNames $commonReportVars
+    $rawPulse = Get-SuffixedRawValues -RawValues $raw -Suffix $pulseSurveySuffix -VarNames $commonReportVars
+    foreach ($varName in $commonReportVars) {
+        [PSCustomObject]@{ Key = "DAILY_$varName"; VarName = $varName; Group = "DAILY"; Value = $rawDaily[$varName] }
+    }
+    foreach ($varName in $commonReportVars) {
+        [PSCustomObject]@{ Key = "PULSE_$varName"; VarName = $varName; Group = "PULSE"; Value = $rawPulse[$varName] }
+    }
+}
+
+function Get-GroupSettingsFieldRows {
+    param([string]$GroupName)
+    if (!$GroupName) { return }
 
     $templateDefaults = Get-GroupTemplateDefaults
-    $rawAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $target)
-    $rawDaily = Get-SetLineRawValues -Path (Get-GroupDailyReportBatPath $target)
-    $rawPulse = Get-SetLineRawValues -Path (Get-GroupPulseSurveyBatPath $target)
+    $rawGroup = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $rawDaily = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $dailyReportSuffix -VarNames $groupReportVars
+    $rawPulse = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $pulseSurveySuffix -VarNames $groupReportVars
 
     foreach ($varName in $authVars) {
-        $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } else { $templateDefaults.Auth[$varName] }
+        $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Auth[$varName] }
         [PSCustomObject]@{ Key = "AUTH_$varName"; VarName = $varName; Group = "AUTH"; Value = $value }
     }
-    foreach ($varName in $reportVars) {
+    foreach ($varName in $groupReportVars) {
         $value = if ($rawDaily.ContainsKey($varName)) { $rawDaily[$varName] } else { $templateDefaults.Daily[$varName] }
         [PSCustomObject]@{ Key = "DAILY_$varName"; VarName = $varName; Group = "DAILY"; Value = $value }
     }
-    foreach ($varName in $reportVars) {
+    foreach ($varName in $groupReportVars) {
         $value = if ($rawPulse.ContainsKey($varName)) { $rawPulse[$varName] } else { $templateDefaults.Pulse[$varName] }
         [PSCustomObject]@{ Key = "PULSE_$varName"; VarName = $varName; Group = "PULSE"; Value = $value }
     }
 }
 
-$script:settingsFieldTextBoxes = @{}
+$script:settingsCommonFieldTextBoxes = @{}
+$script:settingsGroupFieldTextBoxes = @{}
 
-function Update-SettingsFields {
-    $settingsFieldPanel.Controls.Clear()
-    $script:settingsFieldTextBoxes = @{}
+# 共通タブ・グループ別タブ共通の描画処理。$TextBoxesへ描画結果（Key→TextBox）を書き戻す
+function Render-SettingsFields {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [array]$Rows,
+        [hashtable]$TextBoxes
+    )
+    $Panel.Controls.Clear()
+    $TextBoxes.Clear()
 
     $y = 10
     $lastGroup = ""
-    foreach ($field in (Get-SettingsFieldRows)) {
+    foreach ($field in $Rows) {
         if ($field.Group -ne $lastGroup) {
             if ($lastGroup -ne "") {
                 $y += 10
@@ -577,7 +660,7 @@ function Update-SettingsFields {
                 $separator.BackColor = [System.Drawing.Color]::LightGray
                 $separator.Location = New-Object System.Drawing.Point(10, $y)
                 $separator.Size = New-Object System.Drawing.Size(690, 2)
-                $settingsFieldPanel.Controls.Add($separator)
+                $Panel.Controls.Add($separator)
                 $y += 14
             }
             $lblGroup = New-Object System.Windows.Forms.Label
@@ -585,7 +668,7 @@ function Update-SettingsFields {
             $lblGroup.AutoSize = $true
             $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
             $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
-            $settingsFieldPanel.Controls.Add($lblGroup)
+            $Panel.Controls.Add($lblGroup)
             $y += 28
             $lastGroup = $field.Group
         }
@@ -596,7 +679,7 @@ function Update-SettingsFields {
         $lbl.Size = New-Object System.Drawing.Size(220, 20)
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
         $settingsToolTip.SetToolTip($lbl, $field.VarName)
-        $settingsFieldPanel.Controls.Add($lbl)
+        $Panel.Controls.Add($lbl)
 
         $txt = New-Object System.Windows.Forms.TextBox
         $txt.Text = "$($field.Value)"
@@ -604,7 +687,7 @@ function Update-SettingsFields {
         $txt.Size = New-Object System.Drawing.Size(300, 22)
         $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
         if ($settingsMaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
-        $settingsFieldPanel.Controls.Add($txt)
+        $Panel.Controls.Add($txt)
 
         if ($settingsFolderBrowseVars -contains $field.VarName) {
             $btnBrowse = New-Object System.Windows.Forms.Button
@@ -620,27 +703,105 @@ function Update-SettingsFields {
                 if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
                 if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
             })
-            $settingsFieldPanel.Controls.Add($btnBrowse)
+            $Panel.Controls.Add($btnBrowse)
         }
 
-        $script:settingsFieldTextBoxes[$field.Key] = $txt
+        # 対象アプリID（グループ別タブの業務日誌/パルスサーベイのみに出現）の行に、現在の画面入力値で
+        # kintone接続を試す「テスト接続」ボタンを添える
+        if ($field.VarName -eq "TargetAppIds" -and ($field.Group -eq "DAILY" -or $field.Group -eq "PULSE")) {
+            $btnTestConnection = New-Object System.Windows.Forms.Button
+            $btnTestConnection.Text = "テスト接続"
+            $btnTestConnection.Location = New-Object System.Drawing.Point(560, ($y - 3))
+            $btnTestConnection.Size = New-Object System.Drawing.Size(90, 24)
+            $btnTestConnection.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            $btnTestConnection.Tag = $field.Group
+            $btnTestConnection.Add_Click({ Test-KintoneConnection -ReportGroup $this.Tag })
+            $Panel.Controls.Add($btnTestConnection)
+        }
+
+        $TextBoxes[$field.Key] = $txt
         $y += 28
     }
 }
 
-function Get-SettingsFieldValue {
+function Update-CommonSettingsFields {
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes
+}
+
+function Update-GroupSettingsFields {
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes
+}
+
+function Get-CommonSettingsFieldValue {
     param([string]$Key)
-    return $script:settingsFieldTextBoxes[$Key].Text
+    return $script:settingsCommonFieldTextBoxes[$Key].Text
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    return $script:settingsGroupFieldTextBoxes[$Key].Text
+}
+
+# 業務日誌/パルスサーベイの各セクションの「テスト接続」ボタン用。画面上の（未保存の）入力値を使って
+# kintoneのフィールド取得APIを呼び、認証情報・対象アプリIDの組み合わせが有効かその場で確認する。
+# TargetAppIdsはcreate-app-data.ps1のGet-FieldCodeListと同じくカンマ・空白区切りで複数指定できるため、
+# 1つずつ個別に呼び分けて成功/失敗をID単位で表示する
+function Test-KintoneConnection {
+    param([string]$ReportGroup)
+
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+    $kintoneId = Get-GroupSettingsFieldValue "AUTH_KintoneID"
+    $kintonePw = Get-GroupSettingsFieldValue "AUTH_KintonePW"
+    $targetAppIdsValue = Get-GroupSettingsFieldValue "${ReportGroup}_TargetAppIds"
+    $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
+
+    if ($targetAppIds.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("対象アプリIDが未入力です。", "テスト接続", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneId}:${kintonePw}"))
+
+    # IDが複数になっても横に長くならないよう、1件1行の縦並びで表示する
+    $resultLines = @()
+    $hasFailure = $false
+    foreach ($targetAppId in $targetAppIds) {
+        try {
+            $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
+            $fieldCount = @($fieldData.PSObject.Properties).Count
+            $resultLines += "[成功] $targetAppId（フィールド数: $fieldCount）"
+        } catch {
+            $hasFailure = $true
+            $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
+        }
+    }
+
+    $icon = if ($hasFailure) { [System.Windows.Forms.MessageBoxIcon]::Error } else { [System.Windows.Forms.MessageBoxIcon]::Information }
+    [System.Windows.Forms.MessageBox]::Show(($resultLines -join "`r`n"), "テスト接続", [System.Windows.Forms.MessageBoxButtons]::OK, $icon) | Out-Null
 }
 
 function Save-CommonSettings {
     $path = Join-Path $basePath "common-env.bat"
+
+    # TargetDateCodeField_Daily等サフィックス付きの実際の行名→画面の入力欄キー（DAILY_xxx/PULSE_xxx）の対応表
+    $reportVarKeyMap = @{}
+    foreach ($varName in $commonReportVars) {
+        $reportVarKeyMap["$varName$dailyReportSuffix"] = "DAILY_$varName"
+        $reportVarKeyMap["$varName$pulseSurveySuffix"] = "PULSE_$varName"
+    }
+
     $newLines = foreach ($line in [System.IO.File]::ReadAllLines($path, $script:cp932Encoding)) {
         $m = $settingsLineRegex.Match($line.Trim())
         if ($m.Success -and ($commonSettingsVars -contains $m.Groups["var"].Value)) {
             $varName = $m.Groups["var"].Value
-            $val = Get-SettingsFieldValue $varName
+            $val = Get-CommonSettingsFieldValue $varName
             "set `"$varName=$val`""
+        } elseif ($m.Success -and $reportVarKeyMap.ContainsKey($m.Groups["var"].Value)) {
+            $rawVarName = $m.Groups["var"].Value
+            $val = Get-CommonSettingsFieldValue $reportVarKeyMap[$rawVarName]
+            "set `"$rawVarName=$val`""
         } else {
             $line
         }
@@ -657,32 +818,26 @@ function Save-GroupSettings {
     $existingAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
     $authorizationValue = if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
 
-    $authLines = @("@echo off", "")
+    $groupLines = @("@echo off", "")
     foreach ($varName in $authVars) {
-        $val = Get-SettingsFieldValue "AUTH_$varName"
-        $authLines += "set `"$varName=$val`""
+        $val = Get-GroupSettingsFieldValue "AUTH_$varName"
+        $groupLines += "set `"$varName=$val`""
     }
-    $authLines += "set `"Authorization=$authorizationValue`""
+    $groupLines += "set `"Authorization=$authorizationValue`""
     # BaseUrlは画面では編集させず、KintoneSubdomainから常に導出する
-    $authLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
-    $authLines += ""
-    [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($authLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
-
-    $dailyLines = @("@echo off", "", "call `"%~dp0$GroupName.bat`"", "")
-    foreach ($varName in $reportVars) {
-        $val = Get-SettingsFieldValue "DAILY_$varName"
-        $dailyLines += "set `"$varName=$val`""
+    $groupLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
+    $groupLines += ""
+    foreach ($varName in $groupReportVars) {
+        $val = Get-GroupSettingsFieldValue "DAILY_$varName"
+        $groupLines += "set `"$varName$dailyReportSuffix=$val`""
     }
-    $dailyLines += ""
-    [System.IO.File]::WriteAllText((Get-GroupDailyReportBatPath $GroupName), (($dailyLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
-
-    $pulseLines = @("@echo off", "", "call `"%~dp0$GroupName.bat`"", "")
-    foreach ($varName in $reportVars) {
-        $val = Get-SettingsFieldValue "PULSE_$varName"
-        $pulseLines += "set `"$varName=$val`""
+    $groupLines += ""
+    foreach ($varName in $groupReportVars) {
+        $val = Get-GroupSettingsFieldValue "PULSE_$varName"
+        $groupLines += "set `"$varName$pulseSurveySuffix=$val`""
     }
-    $pulseLines += ""
-    [System.IO.File]::WriteAllText((Get-GroupPulseSurveyBatPath $GroupName), (($pulseLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
+    $groupLines += ""
+    [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($groupLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
 
     # 受講生データ（xlsx）は既存グループでは上書きしない。新規グループのときだけclients\template\からコピーする
     $xlsxPath = Get-GroupXlsxPath $GroupName
@@ -727,24 +882,34 @@ function Update-GroupDropdowns {
     }
 }
 
-$btnSettingsSave.Add_Click({
-    $target = $cmbSettingsTarget.SelectedItem
-    if (!$target -or $target -eq $defaultSettingsLabel) {
-        Save-CommonSettings
-    } else {
-        Save-GroupSettings -GroupName $target
-    }
-    Update-SettingsGroupList
-    Update-SettingsFields
-    Update-GroupDropdowns
-    $lblSettingsSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-    $lblSettingsSaveStatus.Text = "保存しました"
+$btnSettingsCommonSave.Add_Click({
+    Save-CommonSettings
+    Update-CommonSettingsFields
+    $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+    $lblSettingsCommonSaveStatus.Text = "保存しました"
 })
 
-$btnSettingsReload.Add_Click({
-    Update-SettingsFields
-    $lblSettingsSaveStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblSettingsSaveStatus.Text = "再読込しました"
+$btnSettingsCommonReload.Add_Click({
+    Update-CommonSettingsFields
+    $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblSettingsCommonSaveStatus.Text = "再読込しました"
+})
+
+$btnSettingsGroupSave.Add_Click({
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    if (!$target) { return }
+    Save-GroupSettings -GroupName $target
+    Update-SettingsGroupList
+    Update-GroupSettingsFields
+    Update-GroupDropdowns
+    $lblSettingsGroupSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+    $lblSettingsGroupSaveStatus.Text = "保存しました"
+})
+
+$btnSettingsGroupReload.Add_Click({
+    Update-GroupSettingsFields
+    $lblSettingsGroupSaveStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblSettingsGroupSaveStatus.Text = "再読込しました"
 })
 
 $btnSettingsNewGroup.Add_Click({
@@ -753,26 +918,26 @@ $btnSettingsNewGroup.Add_Click({
     $newName = $newName.Trim()
     if (!$newName) { return }
 
-    if ($cmbSettingsTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
         [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
 
-    $cmbSettingsTarget.Items.Add($newName) | Out-Null
-    $cmbSettingsTarget.SelectedItem = $newName
+    $cmbSettingsGroupTarget.Items.Add($newName) | Out-Null
+    $cmbSettingsGroupTarget.SelectedItem = $newName
 })
 
 $lnkSettingsOpenXlsx.Add_LinkClicked({
-    $target = $cmbSettingsTarget.SelectedItem
-    if (!$target -or $target -eq $defaultSettingsLabel) {
-        [System.Windows.Forms.MessageBox]::Show("共通設定には受講生データがありません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    if (!$target) {
+        [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
     Open-FolderOrWarn -Path (Get-GroupXlsxPath $target)
 })
 
-$cmbSettingsTarget.Add_SelectedIndexChanged({
-    if (!$script:suppressComboSync) { Update-SettingsFields }
+$cmbSettingsGroupTarget.Add_SelectedIndexChanged({
+    if (!$script:suppressComboSync) { Update-GroupSettingsFields }
 })
 
 # 設定タブは実行結果を伴わないため共通ログ欄が不要。設定タブ選択時だけログ欄を隠し、
@@ -791,7 +956,8 @@ $tabControl.Add_SelectedIndexChanged({
 }.GetNewClosure())
 
 Update-SettingsGroupList
-Update-SettingsFields
+Update-CommonSettingsFields
+Update-GroupSettingsFields
 
 # ps2exeビルド環境ではタブの既定選択がずれることがあるため明示的に指定する
 $tabControl.SelectedTab = $tabBatchAll

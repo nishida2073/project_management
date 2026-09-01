@@ -4,7 +4,6 @@
     [string]$TargetDate,
     [string]$SourseDataDefsPath,
     [string]$CollectRootDir,
-    [string]$CollectDataNotFoundMessage,
     [string]$LogNamePrefix
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -116,8 +115,7 @@ function Export-Datas {
         [string]$TargetDate,
         [array]$SourseDataProps,
         [string]$CollectDirPath,
-        [string]$CollectFileName,
-        [string]$CollectDataNotFoundMessage
+        [string]$CollectFileName
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -133,8 +131,7 @@ function Export-Datas {
 
         # 元の列名から列位置を引くためのインデックス。同じ列を複数回引くので事前に1回だけ計算する。
         # 見つからない列はアプリ側のフィールド変更等でずれている可能性があるため、処理は止めずに
-        # 警告を出したうえで該当列を$CollectDataNotFoundMessage扱いにする（-1のままにしておき、
-        # 後段の値取得側で判定する）
+        # 警告を出したうえで該当列を空欄扱いにする（-1のままにしておき、後段の値取得側で判定する）
         $columnIndexes = @($columnDefs | ForEach-Object {
             $index = [array]::IndexOf($headerRow, $_.OrgName)
             if ($index -lt 0) {
@@ -160,9 +157,6 @@ function Export-Datas {
             $rowData = @()
             foreach ($columnIndex in $columnIndexes) {
                 $val = if ($columnIndex -lt 0) { $null } else { $range[$r][$columnIndex] }
-                if ([string]::IsNullOrEmpty($val)) {
-                    $val = $CollectDataNotFoundMessage
-                }
                 $rowData += $val
             }
             $bodyDatas.Add($rowData)
@@ -201,6 +195,6 @@ function Export-Datas {
 
     $collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
 
-    Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName -CollectDataNotFoundMessage $CollectDataNotFoundMessage
+    Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
