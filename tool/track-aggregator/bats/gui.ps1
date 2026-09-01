@@ -389,10 +389,10 @@ function Invoke-BatButton {
 
 # =========================================
 # 設定タブ（kintone-aggregatorの設定タブと同様のレイアウト：
-# 対象を切り替えて共通設定/グループ別設定を編集する）
+# 「共通」「グループ別」のサブタブに分けて編集する）
 #
-# 「共通設定」はcommon-env.bat（対象年度に関わらず共通のパス・既定値設定）を直接編集する。
-# グループを選ぶと、そのグループのclients\<グループ名>.bat（認証情報）を編集する。
+# 「共通」タブはcommon-env.bat（対象年度に関わらず共通のパス・既定値設定）を直接編集する。
+# 「グループ別」タブはグループを選ぶと、そのグループのclients\<グループ名>.bat（認証情報）を編集する。
 # kintone-aggregatorと異なり、このツールには業務日誌・パルスサーベイのような複数種別のマッピング
 # ファイルは無く、グループごとの設定はclients\<グループ名>.bat 1本のみ。
 # 受講生データ（xlsx）はclients\<グループ名>-<年度>.xlsxという年度別ファイルのため、
@@ -407,7 +407,6 @@ $tabControl.Controls.Add($tabSettings)
 
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
-$defaultSettingsLabel = "共通設定"
 $settingsLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
 
 function Get-GroupBatPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.bat" }
@@ -482,6 +481,16 @@ $authVars = @("KintoneSubdomain")
 # 効かなくなるため、「未指定＝共通設定の値を使う」を「行を書かない」で表す）
 $groupOverrideVars = @("ComparePeriod", "YearOrder", "PassScore")
 
+# テキスト入力ではなくラジオボタンで選ばせたい項目の、値とラベルの対応。
+# Render-SettingsFields側はVarNameがこの辞書にあるかどうかだけを見るため、
+# 今後ラジオボタン化したい項目が増えても、ここに1エントリ追加するだけで済む
+$radioVars = @{
+    "YearOrder" = @(
+        [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
+        [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
+    )
+}
+
 $settingsGroupLabels = @{ "COMMON" = "共通設定"; "AUTH" = "認証情報"; "OVERRIDE" = "個別設定（空欄の場合は共通設定の値を使用）" }
 $settingsVarLabels = @{
     "ClientDataRootDir"               = "受講生データのフォルダ"
@@ -525,62 +534,107 @@ function Get-GroupTemplateDefaults {
     return $script:groupTemplateDefaults
 }
 
-$settingsTopPanel = New-Object System.Windows.Forms.Panel
-$settingsTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$settingsTopPanel.Height = 70
+# 設定タブ自体は「共通」「グループ別」の2つのサブタブに分ける（共通設定の項目が増えてきて
+# ドロップダウンでの切り替えより独立したタブの方が分かりやすいため）
+$settingsSubTabControl = New-Object System.Windows.Forms.TabControl
+$settingsSubTabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+$tabSettings.Controls.Add($settingsSubTabControl)
 
-$lblSettingsTarget = New-Object System.Windows.Forms.Label
-$lblSettingsTarget.Text = "対象"
-$lblSettingsTarget.AutoSize = $true
+$tabSettingsCommon = New-Object System.Windows.Forms.TabPage
+$tabSettingsCommon.Text = "共通"
+$settingsSubTabControl.Controls.Add($tabSettingsCommon)
 
-$cmbSettingsTarget = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsTarget.Size = New-Object System.Drawing.Size(260, 24)
-$cmbSettingsTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$tabSettingsGroup = New-Object System.Windows.Forms.TabPage
+$tabSettingsGroup.Text = "グループ別"
+$settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$btnSettingsNewGroup = New-Object System.Windows.Forms.Button
-$btnSettingsNewGroup.Text = "新規作成"
-$btnSettingsNewGroup.Size = New-Object System.Drawing.Size(140, 24)
+$settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
-$lnkSettingsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
-$lnkSettingsOpenXlsx.Text = "開く"
-$lnkSettingsOpenXlsx.AutoSize = $true
+# --- 共通タブ ---
+$settingsCommonTopPanel = New-Object System.Windows.Forms.Panel
+$settingsCommonTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$settingsCommonTopPanel.Height = 40
 
-$btnSettingsSave = New-Object System.Windows.Forms.Button
-$btnSettingsSave.Text = "保存"
-$btnSettingsSave.Location = New-Object System.Drawing.Point(20, 44)
-$btnSettingsSave.Size = New-Object System.Drawing.Size(100, 24)
+$btnSettingsCommonSave = New-Object System.Windows.Forms.Button
+$btnSettingsCommonSave.Text = "保存"
+$btnSettingsCommonSave.Location = New-Object System.Drawing.Point(20, 8)
+$btnSettingsCommonSave.Size = New-Object System.Drawing.Size(100, 24)
 
-$btnSettingsReload = New-Object System.Windows.Forms.Button
-$btnSettingsReload.Text = "再読込"
-$btnSettingsReload.Location = New-Object System.Drawing.Point(130, 44)
-$btnSettingsReload.Size = New-Object System.Drawing.Size(100, 24)
+$btnSettingsCommonReload = New-Object System.Windows.Forms.Button
+$btnSettingsCommonReload.Text = "再読込"
+$btnSettingsCommonReload.Location = New-Object System.Drawing.Point(130, 8)
+$btnSettingsCommonReload.Size = New-Object System.Drawing.Size(100, 24)
 
-$lblSettingsSaveStatus = New-Object System.Windows.Forms.Label
-$lblSettingsSaveStatus.Text = ""
-$lblSettingsSaveStatus.AutoSize = $true
-$lblSettingsSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
-$lblSettingsSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
+$lblSettingsCommonSaveStatus = New-Object System.Windows.Forms.Label
+$lblSettingsCommonSaveStatus.Text = ""
+$lblSettingsCommonSaveStatus.AutoSize = $true
+$lblSettingsCommonSaveStatus.Location = New-Object System.Drawing.Point(244, 14)
+$lblSettingsCommonSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsCommonSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$settingsTopPanel.Controls.AddRange(@($lblSettingsTarget, $cmbSettingsTarget, $btnSettingsNewGroup, $lnkSettingsOpenXlsx, $btnSettingsSave, $btnSettingsReload, $lblSettingsSaveStatus))
+$settingsCommonTopPanel.Controls.AddRange(@($btnSettingsCommonSave, $btnSettingsCommonReload, $lblSettingsCommonSaveStatus))
+
+$settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
+$settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsCommonFieldPanel.AutoScroll = $true
+
+$tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
+$tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
+
+# --- グループ別タブ ---
+$settingsGroupTopPanel = New-Object System.Windows.Forms.Panel
+$settingsGroupTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$settingsGroupTopPanel.Height = 70
+
+$lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
+$lblSettingsGroupTarget.Text = "対象"
+$lblSettingsGroupTarget.AutoSize = $true
+
+$cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
+$cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
+$cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+$btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
+$btnSettingsGroupNewGroup.Text = "新規作成"
+$btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
+
+$lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
+$lnkSettingsGroupOpenXlsx.Text = "開く"
+$lnkSettingsGroupOpenXlsx.AutoSize = $true
+
+$btnSettingsGroupSave = New-Object System.Windows.Forms.Button
+$btnSettingsGroupSave.Text = "保存"
+$btnSettingsGroupSave.Location = New-Object System.Drawing.Point(20, 44)
+$btnSettingsGroupSave.Size = New-Object System.Drawing.Size(100, 24)
+
+$btnSettingsGroupReload = New-Object System.Windows.Forms.Button
+$btnSettingsGroupReload.Text = "再読込"
+$btnSettingsGroupReload.Location = New-Object System.Drawing.Point(130, 44)
+$btnSettingsGroupReload.Size = New-Object System.Drawing.Size(100, 24)
+
+$lblSettingsGroupSaveStatus = New-Object System.Windows.Forms.Label
+$lblSettingsGroupSaveStatus.Text = ""
+$lblSettingsGroupSaveStatus.AutoSize = $true
+$lblSettingsGroupSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
+$lblSettingsGroupSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsGroupSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
+
+$settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx, $btnSettingsGroupSave, $btnSettingsGroupReload, $lblSettingsGroupSaveStatus))
 
 # Label/LinkLabelはAutoSizeによる実際のHeightが親へのAddより前だと仮の値のままで、
 # 親に追加された後でないと正しい値に確定しない。TextBox/ComboBoxも指定したHeightを
 # 無視してフォントに応じた高さに強制されるため、いずれもControls.Addの後で実際のHeightを見て
 # Y位置を計算しないと縦の中央が揃わない（New-CategoryTabControlの入力欄と同じ理由）
 $settingsRow1CenterY = 26
-$lblSettingsTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsTarget.Height / 2)))
-$cmbSettingsTarget.Location = New-Object System.Drawing.Point(90, ($settingsRow1CenterY - [int]($cmbSettingsTarget.Height / 2)))
-$btnSettingsNewGroup.Location = New-Object System.Drawing.Point(360, ($settingsRow1CenterY - [int]($btnSettingsNewGroup.Height / 2)))
-$lnkSettingsOpenXlsx.Location = New-Object System.Drawing.Point(510, ($settingsRow1CenterY - [int]($lnkSettingsOpenXlsx.Height / 2)))
+$lblSettingsGroupTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsGroupTarget.Height / 2)))
+$cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(90, ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
+$btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(360, ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
+$lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(510, ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
 
-$settingsFieldPanel = New-Object System.Windows.Forms.Panel
-$settingsFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$settingsFieldPanel.AutoScroll = $true
+$settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
+$settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsGroupFieldPanel.AutoScroll = $true
 
-$tabSettings.Controls.Add($settingsFieldPanel)
-$tabSettings.Controls.Add($settingsTopPanel)
-
-$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+$tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 # グループ一覧はclients\直下の*.xlsx（clients\template\は対象外）のファイル名から、
 # 末尾の-年度（例: -2026）を除いた名前を重複排除して作る
@@ -594,29 +648,33 @@ function Get-GroupNames {
 }
 
 function Update-SettingsGroupList {
-    $selected = $cmbSettingsTarget.SelectedItem
+    $selected = $cmbSettingsGroupTarget.SelectedItem
     $script:suppressComboSync = $true
-    $cmbSettingsTarget.Items.Clear()
-    $cmbSettingsTarget.Items.Add($defaultSettingsLabel) | Out-Null
+    $cmbSettingsGroupTarget.Items.Clear()
     foreach ($groupName in (Get-GroupNames)) {
-        $cmbSettingsTarget.Items.Add($groupName) | Out-Null
+        $cmbSettingsGroupTarget.Items.Add($groupName) | Out-Null
     }
-    $cmbSettingsTarget.SelectedIndex = if ($selected -and $cmbSettingsTarget.Items.Contains($selected)) { $cmbSettingsTarget.Items.IndexOf($selected) } else { 0 }
+    if ($selected -and $cmbSettingsGroupTarget.Items.Contains($selected)) {
+        $cmbSettingsGroupTarget.SelectedItem = $selected
+    } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+        $cmbSettingsGroupTarget.SelectedIndex = 0
+    }
     $script:suppressComboSync = $false
 }
 
-function Get-SettingsFieldRows {
-    $target = $cmbSettingsTarget.SelectedItem
-    if (!$target -or $target -eq $defaultSettingsLabel) {
-        $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
-        foreach ($varName in $commonSettingsVars) {
-            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
-        }
-        return
+function Get-CommonSettingsFieldRows {
+    $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
+    foreach ($varName in $commonSettingsVars) {
+        [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
     }
+}
+
+function Get-GroupSettingsFieldRows {
+    param([string]$GroupName)
+    if (!$GroupName) { return }
 
     $templateDefaults = Get-GroupTemplateDefaults
-    $rawAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $target)
+    $rawAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
     foreach ($varName in $authVars) {
         $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } else { $templateDefaults.Auth[$varName] }
         [PSCustomObject]@{ Key = "AUTH_$varName"; VarName = $varName; Group = "AUTH"; Value = $value }
@@ -629,15 +687,22 @@ function Get-SettingsFieldRows {
     }
 }
 
-$script:settingsFieldTextBoxes = @{}
+$script:settingsCommonFieldTextBoxes = @{}
+$script:settingsGroupFieldTextBoxes = @{}
 
-function Update-SettingsFields {
-    $settingsFieldPanel.Controls.Clear()
-    $script:settingsFieldTextBoxes = @{}
+# 共通タブ・グループ別タブ共通の描画処理。$TextBoxesへ描画結果（Key→TextBox）を書き戻す
+function Render-SettingsFields {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [array]$Rows,
+        [hashtable]$TextBoxes
+    )
+    $Panel.Controls.Clear()
+    $TextBoxes.Clear()
 
     $y = 10
     $lastGroup = ""
-    foreach ($field in (Get-SettingsFieldRows)) {
+    foreach ($field in $Rows) {
         if ($field.Group -ne $lastGroup) {
             if ($lastGroup -ne "") {
                 $y += 10
@@ -645,7 +710,7 @@ function Update-SettingsFields {
                 $separator.BackColor = [System.Drawing.Color]::LightGray
                 $separator.Location = New-Object System.Drawing.Point(10, $y)
                 $separator.Size = New-Object System.Drawing.Size(690, 2)
-                $settingsFieldPanel.Controls.Add($separator)
+                $Panel.Controls.Add($separator)
                 $y += 14
             }
             $lblGroup = New-Object System.Windows.Forms.Label
@@ -653,7 +718,7 @@ function Update-SettingsFields {
             $lblGroup.AutoSize = $true
             $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
             $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
-            $settingsFieldPanel.Controls.Add($lblGroup)
+            $Panel.Controls.Add($lblGroup)
             $y += 28
             $lastGroup = $field.Group
         }
@@ -664,14 +729,58 @@ function Update-SettingsFields {
         $lbl.Size = New-Object System.Drawing.Size(220, 20)
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
         $settingsToolTip.SetToolTip($lbl, $field.VarName)
-        $settingsFieldPanel.Controls.Add($lbl)
+        $Panel.Controls.Add($lbl)
 
-        $txt = New-Object System.Windows.Forms.TextBox
-        $txt.Text = "$($field.Value)"
-        $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-        $txt.Size = New-Object System.Drawing.Size(300, 22)
-        $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-        $settingsFieldPanel.Controls.Add($txt)
+        if ($radioVars.ContainsKey($field.VarName)) {
+            # テキスト入力ではなくラジオボタンで選ばせる項目（個別設定では未上書きを表す空欄も選べる）。
+            # 実際の値は非表示のTextBoxで保持し、Get-CommonSettingsFieldValue等の既存の
+            # ".Text"読み取り契約をそのまま使えるようにする
+            $txt = New-Object System.Windows.Forms.TextBox
+            $txt.Text = "$($field.Value)"
+            $txt.Visible = $false
+            $Panel.Controls.Add($txt)
+
+            $radioPanel = New-Object System.Windows.Forms.Panel
+            $radioPanel.Location = New-Object System.Drawing.Point(250, ($y - 2))
+            $radioPanel.Size = New-Object System.Drawing.Size(300, 22)
+            $radioPanel.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+
+            $radioX = 0
+            foreach ($opt in $radioVars[$field.VarName]) {
+                $rb = New-Object System.Windows.Forms.RadioButton
+                $rb.Text = $opt.Label
+                $rb.AutoSize = $true
+                $rb.Location = New-Object System.Drawing.Point($radioX, 2)
+                $rb.Tag = [PSCustomObject]@{ TextBox = $txt; Value = $opt.Value }
+                $rb.Checked = ($field.Value -eq $opt.Value)
+                $rb.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.TextBox.Text = $this.Tag.Value } })
+                $radioPanel.Controls.Add($rb)
+                $radioX += 80
+            }
+
+            if ($field.Group -eq "OVERRIDE") {
+                # グループ見出し（"個別設定（空欄の場合は共通設定の値を使用）"）側で説明済みのため、
+                # ラベルは短く「未設定」にしてパネル幅に収まらず切れるのを防ぐ
+                $rbUnset = New-Object System.Windows.Forms.RadioButton
+                $rbUnset.Text = "未設定"
+                $rbUnset.AutoSize = $true
+                $rbUnset.Location = New-Object System.Drawing.Point($radioX, 2)
+                $rbUnset.Tag = $txt
+                $rbUnset.Checked = [string]::IsNullOrEmpty($field.Value)
+                $rbUnset.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.Text = "" } })
+                $settingsToolTip.SetToolTip($rbUnset, "空欄にすると共通設定の値を使用します")
+                $radioPanel.Controls.Add($rbUnset)
+            }
+
+            $Panel.Controls.Add($radioPanel)
+        } else {
+            $txt = New-Object System.Windows.Forms.TextBox
+            $txt.Text = "$($field.Value)"
+            $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
+            $txt.Size = New-Object System.Drawing.Size(300, 22)
+            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            $Panel.Controls.Add($txt)
+        }
 
         if ($settingsFolderBrowseVars -contains $field.VarName) {
             $btnBrowse = New-Object System.Windows.Forms.Button
@@ -687,17 +796,31 @@ function Update-SettingsFields {
                 if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
                 if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
             })
-            $settingsFieldPanel.Controls.Add($btnBrowse)
+            $Panel.Controls.Add($btnBrowse)
         }
 
-        $script:settingsFieldTextBoxes[$field.Key] = $txt
+        $TextBoxes[$field.Key] = $txt
         $y += 28
     }
 }
 
-function Get-SettingsFieldValue {
+function Update-CommonSettingsFields {
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes
+}
+
+function Update-GroupSettingsFields {
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes
+}
+
+function Get-CommonSettingsFieldValue {
     param([string]$Key)
-    return $script:settingsFieldTextBoxes[$Key].Text
+    return $script:settingsCommonFieldTextBoxes[$Key].Text
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    return $script:settingsGroupFieldTextBoxes[$Key].Text
 }
 
 function Save-CommonSettings {
@@ -706,7 +829,7 @@ function Save-CommonSettings {
         $m = $settingsLineRegex.Match($line.Trim())
         if ($m.Success -and ($commonSettingsVars -contains $m.Groups["var"].Value)) {
             $varName = $m.Groups["var"].Value
-            $val = Get-SettingsFieldValue $varName
+            $val = Get-CommonSettingsFieldValue $varName
             "set `"$varName=$val`""
         } else {
             $line
@@ -719,13 +842,13 @@ function Save-CommonSettings {
 function Save-GroupSettings {
     param([string]$GroupName)
 
-    $subdomainValue = Get-SettingsFieldValue "AUTH_KintoneSubdomain"
+    $subdomainValue = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
     # BaseUrlは画面では編集させず、KintoneSubdomainから常に導出する
     $authLines = @("@echo off", "", "set `"KintoneSubdomain=$subdomainValue`"", "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`"")
 
     # 上書き項目は空欄なら行自体を書かない（空文字を上書きすると共通設定側の値が効かなくなるため）
     foreach ($varName in $groupOverrideVars) {
-        $val = Get-SettingsFieldValue "OVERRIDE_$varName"
+        $val = Get-GroupSettingsFieldValue "OVERRIDE_$varName"
         if ($val -ne "") { $authLines += "set `"$varName=$val`"" }
     }
     $authLines += ""
@@ -742,44 +865,54 @@ function Save-GroupSettings {
     }
 }
 
-$btnSettingsSave.Add_Click({
-    $target = $cmbSettingsTarget.SelectedItem
-    if (!$target -or $target -eq $defaultSettingsLabel) {
-        Save-CommonSettings
-    } else {
-        Save-GroupSettings -GroupName $target
-    }
+$btnSettingsCommonSave.Add_Click({
+    Save-CommonSettings
+    Update-CommonSettingsFields
+    $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+    $lblSettingsCommonSaveStatus.Text = "保存しました"
+})
+
+$btnSettingsCommonReload.Add_Click({
+    Update-CommonSettingsFields
+    $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblSettingsCommonSaveStatus.Text = "再読込しました"
+})
+
+$btnSettingsGroupSave.Add_Click({
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    if (!$target) { return }
+    Save-GroupSettings -GroupName $target
     Update-SettingsGroupList
-    Update-SettingsFields
-    $lblSettingsSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-    $lblSettingsSaveStatus.Text = "保存しました"
+    Update-GroupSettingsFields
+    $lblSettingsGroupSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+    $lblSettingsGroupSaveStatus.Text = "保存しました"
 })
 
-$btnSettingsReload.Add_Click({
-    Update-SettingsFields
-    $lblSettingsSaveStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblSettingsSaveStatus.Text = "再読込しました"
+$btnSettingsGroupReload.Add_Click({
+    Update-GroupSettingsFields
+    $lblSettingsGroupSaveStatus.ForeColor = [System.Drawing.Color]::Black
+    $lblSettingsGroupSaveStatus.Text = "再読込しました"
 })
 
-$btnSettingsNewGroup.Add_Click({
+$btnSettingsGroupNewGroup.Add_Click({
     Add-Type -AssemblyName Microsoft.VisualBasic
     $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
     $newName = $newName.Trim()
     if (!$newName) { return }
 
-    if ($cmbSettingsTarget.Items.Contains($newName) -or (Get-GroupXlsxFiles -GroupName $newName).Count -gt 0 -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Get-GroupXlsxFiles -GroupName $newName).Count -gt 0 -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
         [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
 
-    $cmbSettingsTarget.Items.Add($newName) | Out-Null
-    $cmbSettingsTarget.SelectedItem = $newName
+    $cmbSettingsGroupTarget.Items.Add($newName) | Out-Null
+    $cmbSettingsGroupTarget.SelectedItem = $newName
 })
 
-$lnkSettingsOpenXlsx.Add_LinkClicked({
-    $target = $cmbSettingsTarget.SelectedItem
-    if (!$target -or $target -eq $defaultSettingsLabel) {
-        [System.Windows.Forms.MessageBox]::Show("共通設定には受講生データがありません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+$lnkSettingsGroupOpenXlsx.Add_LinkClicked({
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    if (!$target) {
+        [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
     # 同じグループで複数年度のファイルがあり得るため、対象年度（TargetYear）のファイルを優先し、
@@ -798,8 +931,8 @@ $lnkSettingsOpenXlsx.Add_LinkClicked({
     Open-FolderOrWarn -Path $openPath
 })
 
-$cmbSettingsTarget.Add_SelectedIndexChanged({
-    if (!$script:suppressComboSync) { Update-SettingsFields }
+$cmbSettingsGroupTarget.Add_SelectedIndexChanged({
+    if (!$script:suppressComboSync) { Update-GroupSettingsFields }
 })
 
 # 設定タブは実行結果を伴わないため共通ログ欄が不要。設定タブ選択時だけログ欄を隠し、
@@ -818,7 +951,8 @@ $tabControl.Add_SelectedIndexChanged({
 }.GetNewClosure())
 
 Update-SettingsGroupList
-Update-SettingsFields
+Update-CommonSettingsFields
+Update-GroupSettingsFields
 
 # ps2exeビルド環境ではタブの既定選択がずれることがあるため明示的に指定する
 $tabControl.SelectedTab = $tabBatchAll
