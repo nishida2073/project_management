@@ -16,7 +16,7 @@ if "%~2"=="" (
     set "TargetGroupNameFilter=%~2"
 )
 
-set "SOURCE_TYPE=%DailyReportSourceType%"
+set "SOURCE_TYPE=%SourceType_Daily%"
 
 set "SCRIPT_PATH=%~dp0create-app-data.ps1"
 
@@ -36,9 +36,9 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     if exist "!envFile!" (
         call "!envFile!"
 
-        set "TargetAppIds=!TargetAppIds%DailyReportSuffix%!"
-        set "TargetDateCodeField=!TargetDateCodeField%DailyReportSuffix%!"
-        set "TargetUserCodeField=!TargetUserCodeField%DailyReportSuffix%!"
+        set "TargetAppIds=!TargetAppIds_Daily!"
+        set "TargetDateCodeField=!TargetDateCodeField_Daily!"
+        set "TargetUserCodeField=!TargetUserCodeField_Daily!"
 
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
         set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.failed"

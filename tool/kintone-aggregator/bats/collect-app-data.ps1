@@ -72,7 +72,7 @@ function Read-SourseDataDefsFile {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     # [ファイル識別子] セクションの下に、1行1列で「元の列名[,新しい列名]」を書く書式。
-    # ファイル識別子はcommon-env.bat側の*SourceType変数名（DailyReportSourceType等）をそのまま書き、
+    # ファイル識別子はcommon-env.bat側のSourceType_<接尾辞>変数名（SourceType_Daily等）をそのまま書き、
     # 実際の出力ファイル名（create-app-data.ps1がその変数の値から組み立てる"<グループ名>-業務日誌.txt"等）
     # へは$FileKeyMap経由で変換する。値をハードコードすると、common-env.bat側の値を変えたときに
     # ファイル名がずれて気づかずに集計漏れる

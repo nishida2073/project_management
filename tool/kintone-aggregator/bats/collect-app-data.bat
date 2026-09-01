@@ -22,7 +22,7 @@ set "ClientDataRootDir=%ClientDataRootDir%"
 set "CollectDataDefsPath=%~dp0collect-data-defs.txt"
 
 set "CollectRootDir=%OutputCollectDataRootDir%"
-set "SourceTypeFileNameMap=DailyReportSourceType=%DailyReportSourceType%,PulseSurveySourceType=%PulseSurveySourceType%"
+set "SourceTypeFileNameMap=SourceType_Daily=%SourceType_Daily%,SourceType_Pulse=%SourceType_Pulse%"
 
 set "CheckedFileRootDir=%OutputReportDir%\%TargetDate%"
 

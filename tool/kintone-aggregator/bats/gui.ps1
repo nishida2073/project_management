@@ -373,8 +373,8 @@ function Invoke-BatButton {
 # 「共通」タブはcommon-env.bat（対象日・対象グループに関わらず共通のパス設定に加え、
 # 全グループ共通の業務日誌/パルスサーベイのフィールドコード）を直接編集する。
 # 「グループ別」タブはグループを選ぶと、そのグループのclients\<グループ名>.bat（認証情報＋
-# 業務日誌/パルスサーベイの対象アプリID。業務日誌側/パルスサーベイ側それぞれcommon-env.batの
-# DailyReportSuffix/PulseSurveySuffixを付けた変数名で1ファイルにまとめて持つ）を編集する。
+# 業務日誌/パルスサーベイの対象アプリID。種別ごとにcommon-env.bat側のSourceType_<接尾辞>
+# から検出した接尾辞を付けた変数名で1ファイルにまとめて持つ）を編集する。
 # 新規グループはclients\template\の内容を初期値として使う（保存するまでファイルは作成しない）
 # =========================================
 
@@ -426,10 +426,27 @@ $authVars = @("KintoneSubdomain", "KintoneID", "KintonePW")
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
 
-$dailyReportSuffix = $script:commonEnvVars["DailyReportSuffix"]
-$pulseSurveySuffix = $script:commonEnvVars["PulseSurveySuffix"]
+# 業務日誌/パルスサーベイのような「種別」の一覧をcommon-env.batから動的に検出する。
+# common-env.batに"SourceType_<接尾辞>"（例: SourceType_Daily=業務日誌）を追加するだけで、
+# 設定タブに新しい種別のセクションが増えるようにするための仕組み。変数名の"_<接尾辞>"部分が
+# そのままTargetAppIds_<接尾辞>等の変数名サフィックスになる（別にSuffix変数を持つ必要はない）。
+# 新しいcreate-xxx.batを作る場合も、設定タブ側のコード変更は不要
+function Get-ReportTypeDefs {
+    $types = @()
+    foreach ($key in $script:commonEnvVars.Keys) {
+        if ($key -notmatch '^SourceType(_.+)$') { continue }
+        $suffix = $Matches[1]
+        $types += [PSCustomObject]@{
+            Prefix = $suffix.TrimStart('_')
+            Suffix = $suffix
+            Label  = $script:commonEnvVars[$key]
+        }
+    }
+    return @($types | Sort-Object Prefix)
+}
 
-$settingsGroupLabels = @{ "BASE" = "基本設定"; "AUTH" = "認証情報"; "DAILY" = "業務日誌"; "PULSE" = "パルスサーベイ" }
+$settingsGroupLabels = @{ "BASE" = "基本設定"; "AUTH" = "認証情報" }
+foreach ($rt in (Get-ReportTypeDefs)) { $settingsGroupLabels[$rt.Prefix] = $rt.Label }
 $settingsVarLabels = @{
     "ClientDataRootDir"        = "グループデータのフォルダ"
     "OutputRootDir"            = "出力のルートフォルダ"
@@ -448,9 +465,9 @@ $settingsVarLabels = @{
 $settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $settingsMaskedVars = @("KintonePW")
 
-# TargetAppIds等はdaily-report/pulse-survey双方で同じ変数名を別の値で使うため、変数名に
-# $dailyReportSuffix/$pulseSurveySuffixを付けて区別して持つ。この関数はそのサフィックス付きの生値を、
-# サフィックスを外した変数名（$VarNamesと同じキー）のハッシュテーブルへ変換する
+# TargetAppIds等は種別（業務日誌/パルスサーベイ等）ごとに同じ変数名を別の値で使うため、変数名に
+# 各種別のSuffix（Get-ReportTypeDefs参照）を付けて区別して持つ。この関数はそのサフィックス付きの
+# 生値を、サフィックスを外した変数名（$VarNamesと同じキー）のハッシュテーブルへ変換する
 function Get-SuffixedRawValues {
     param([hashtable]$RawValues, [string]$Suffix, [array]$VarNames)
     $result = @{}
@@ -463,15 +480,18 @@ function Get-SuffixedRawValues {
 
 # clients\template\の内容（新規作成の初期値）。一度だけ読み込みキャッシュする。
 # グループ別設定（$groupReportVars=TargetAppIds）のみが対象。$commonReportVarsはcommon-env.bat側の
-# 共通設定なのでここには含めない
+# 共通設定なのでここには含めない。ByTypeは種別のPrefix（例: Daily）をキーにした辞書
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
         $rawTemplate = Get-SetLineRawValues -Path (Join-Path $clientsTemplateDir "client.bat")
+        $byType = @{}
+        foreach ($rt in (Get-ReportTypeDefs)) {
+            $byType[$rt.Prefix] = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $rt.Suffix -VarNames $groupReportVars
+        }
         $script:groupTemplateDefaults = [PSCustomObject]@{
-            Auth  = $rawTemplate
-            Daily = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $dailyReportSuffix -VarNames $groupReportVars
-            Pulse = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $pulseSurveySuffix -VarNames $groupReportVars
+            Auth   = $rawTemplate
+            ByType = $byType
         }
     }
     return $script:groupTemplateDefaults
@@ -534,13 +554,13 @@ $cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
 $cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
 $cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$btnSettingsNewGroup = New-Object System.Windows.Forms.Button
-$btnSettingsNewGroup.Text = "新規作成"
-$btnSettingsNewGroup.Size = New-Object System.Drawing.Size(140, 24)
+$btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
+$btnSettingsGroupNewGroup.Text = "新規作成"
+$btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
 
-$lnkSettingsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
-$lnkSettingsOpenXlsx.Text = "開く"
-$lnkSettingsOpenXlsx.AutoSize = $true
+$lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
+$lnkSettingsGroupOpenXlsx.Text = "開く"
+$lnkSettingsGroupOpenXlsx.AutoSize = $true
 
 $btnSettingsGroupSave = New-Object System.Windows.Forms.Button
 $btnSettingsGroupSave.Text = "保存"
@@ -558,7 +578,7 @@ $lblSettingsGroupSaveStatus.AutoSize = $true
 $lblSettingsGroupSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
 $lblSettingsGroupSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsGroupSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsNewGroup, $lnkSettingsOpenXlsx, $btnSettingsGroupSave, $btnSettingsGroupReload, $lblSettingsGroupSaveStatus))
+$settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx, $btnSettingsGroupSave, $btnSettingsGroupReload, $lblSettingsGroupSaveStatus))
 
 # Label/LinkLabelはAutoSizeによる実際のHeightが親へのAddより前だと仮の値（23）のままで、
 # 親に追加された後でないと正しい値（例: 17）に確定しない。TextBox/ComboBoxも指定したHeightを
@@ -567,8 +587,8 @@ $settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettings
 $settingsRow1CenterY = 26
 $lblSettingsGroupTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsGroupTarget.Height / 2)))
 $cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(90, ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
-$btnSettingsNewGroup.Location = New-Object System.Drawing.Point(360, ($settingsRow1CenterY - [int]($btnSettingsNewGroup.Height / 2)))
-$lnkSettingsOpenXlsx.Location = New-Object System.Drawing.Point(510, ($settingsRow1CenterY - [int]($lnkSettingsOpenXlsx.Height / 2)))
+$btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(360, ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
+$lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(510, ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -599,14 +619,13 @@ function Get-CommonSettingsFieldRows {
     foreach ($varName in $commonSettingsVars) {
         [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "BASE"; Value = $raw[$varName] }
     }
-    # TargetDateCodeField/TargetUserCodeFieldは全グループ共通のためcommon-env.bat側で持つ
-    $rawDaily = Get-SuffixedRawValues -RawValues $raw -Suffix $dailyReportSuffix -VarNames $commonReportVars
-    $rawPulse = Get-SuffixedRawValues -RawValues $raw -Suffix $pulseSurveySuffix -VarNames $commonReportVars
-    foreach ($varName in $commonReportVars) {
-        [PSCustomObject]@{ Key = "DAILY_$varName"; VarName = $varName; Group = "DAILY"; Value = $rawDaily[$varName] }
-    }
-    foreach ($varName in $commonReportVars) {
-        [PSCustomObject]@{ Key = "PULSE_$varName"; VarName = $varName; Group = "PULSE"; Value = $rawPulse[$varName] }
+    # TargetDateCodeField/TargetUserCodeFieldは全グループ共通のためcommon-env.bat側で持つ。
+    # 種別（Get-ReportTypeDefsで検出）ごとにセクションを作る
+    foreach ($rt in (Get-ReportTypeDefs)) {
+        $rawForType = Get-SuffixedRawValues -RawValues $raw -Suffix $rt.Suffix -VarNames $commonReportVars
+        foreach ($varName in $commonReportVars) {
+            [PSCustomObject]@{ Key = "$($rt.Prefix)_$varName"; VarName = $varName; Group = $rt.Prefix; Value = $rawForType[$varName] }
+        }
     }
 }
 
@@ -616,20 +635,18 @@ function Get-GroupSettingsFieldRows {
 
     $templateDefaults = Get-GroupTemplateDefaults
     $rawGroup = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
-    $rawDaily = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $dailyReportSuffix -VarNames $groupReportVars
-    $rawPulse = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $pulseSurveySuffix -VarNames $groupReportVars
 
     foreach ($varName in $authVars) {
         $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Auth[$varName] }
         [PSCustomObject]@{ Key = "AUTH_$varName"; VarName = $varName; Group = "AUTH"; Value = $value }
     }
-    foreach ($varName in $groupReportVars) {
-        $value = if ($rawDaily.ContainsKey($varName)) { $rawDaily[$varName] } else { $templateDefaults.Daily[$varName] }
-        [PSCustomObject]@{ Key = "DAILY_$varName"; VarName = $varName; Group = "DAILY"; Value = $value }
-    }
-    foreach ($varName in $groupReportVars) {
-        $value = if ($rawPulse.ContainsKey($varName)) { $rawPulse[$varName] } else { $templateDefaults.Pulse[$varName] }
-        [PSCustomObject]@{ Key = "PULSE_$varName"; VarName = $varName; Group = "PULSE"; Value = $value }
+    foreach ($rt in (Get-ReportTypeDefs)) {
+        $rawForType = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $rt.Suffix -VarNames $groupReportVars
+        $defaultsForType = $templateDefaults.ByType[$rt.Prefix]
+        foreach ($varName in $groupReportVars) {
+            $value = if ($rawForType.ContainsKey($varName)) { $rawForType[$varName] } else { $defaultsForType[$varName] }
+            [PSCustomObject]@{ Key = "$($rt.Prefix)_$varName"; VarName = $varName; Group = $rt.Prefix; Value = $value }
+        }
     }
 }
 
@@ -702,9 +719,9 @@ function Render-SettingsFields {
             $Panel.Controls.Add($btnBrowse)
         }
 
-        # 対象アプリID（グループ別タブの業務日誌/パルスサーベイのみに出現）の行に、現在の画面入力値で
+        # 対象アプリID（グループ別タブの種別ごとのセクションのみに出現）の行に、現在の画面入力値で
         # kintone接続を試す「テスト接続」ボタンを添える
-        if ($field.VarName -eq "TargetAppIds" -and ($field.Group -eq "DAILY" -or $field.Group -eq "PULSE")) {
+        if ($field.VarName -eq "TargetAppIds") {
             $btnTestConnection = New-Object System.Windows.Forms.Button
             $btnTestConnection.Text = "テスト接続"
             $btnTestConnection.Location = New-Object System.Drawing.Point(560, ($y - 3))
@@ -723,7 +740,7 @@ function Render-SettingsFields {
 
 # collect-data-defs.txt（アプリデータ集計の列定義。[セクション見出し]＋「元の列名[,新しい列名]」の
 # 表形式）を、行の追加・削除ができる表形式のUIで編集する。全グループ共通の内容なので共通タブの末尾に置く。
-# セクション見出しはcommon-env.bat側の*SourceType変数名（例: DailyReportSourceType）をそのまま使う。
+# セクション見出しはcommon-env.bat側のSourceType_<接尾辞>変数名（例: SourceType_Daily）をそのまま使う。
 # 実際の出力ファイル名はその変数の値（業務日誌/パルスサーベイ等）が決めるため、画面の
 # 「ファイル名」欄は値の参照表示のみ（編集不可）にする
 $collectDataDefsPath = Join-Path $basePath "collect-data-defs.txt"
@@ -959,11 +976,12 @@ function Test-KintoneConnection {
 function Save-CommonSettings {
     $path = Join-Path $basePath "common-env.bat"
 
-    # TargetDateCodeField_Daily等サフィックス付きの実際の行名→画面の入力欄キー（DAILY_xxx/PULSE_xxx）の対応表
+    # TargetDateCodeField_Daily等サフィックス付きの実際の行名→画面の入力欄キー（<Prefix>_xxx）の対応表
     $reportVarKeyMap = @{}
-    foreach ($varName in $commonReportVars) {
-        $reportVarKeyMap["$varName$dailyReportSuffix"] = "DAILY_$varName"
-        $reportVarKeyMap["$varName$pulseSurveySuffix"] = "PULSE_$varName"
+    foreach ($rt in (Get-ReportTypeDefs)) {
+        foreach ($varName in $commonReportVars) {
+            $reportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
+        }
     }
 
     $newLines = foreach ($line in [System.IO.File]::ReadAllLines($path, $script:cp932Encoding)) {
@@ -1000,15 +1018,12 @@ function Save-GroupSettings {
     $groupLines += "set `"Authorization=$authorizationValue`""
     # BaseUrlは画面では編集させず、KintoneSubdomainから常に導出する
     $groupLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
-    $groupLines += ""
-    foreach ($varName in $groupReportVars) {
-        $val = Get-GroupSettingsFieldValue "DAILY_$varName"
-        $groupLines += "set `"$varName$dailyReportSuffix=$val`""
-    }
-    $groupLines += ""
-    foreach ($varName in $groupReportVars) {
-        $val = Get-GroupSettingsFieldValue "PULSE_$varName"
-        $groupLines += "set `"$varName$pulseSurveySuffix=$val`""
+    foreach ($rt in (Get-ReportTypeDefs)) {
+        $groupLines += ""
+        foreach ($varName in $groupReportVars) {
+            $val = Get-GroupSettingsFieldValue "$($rt.Prefix)_$varName"
+            $groupLines += "set `"$varName$($rt.Suffix)=$val`""
+        }
     }
     $groupLines += ""
     [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($groupLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
@@ -1089,7 +1104,7 @@ $btnSettingsGroupReload.Add_Click({
     $lblSettingsGroupSaveStatus.Text = "再読込しました"
 })
 
-$btnSettingsNewGroup.Add_Click({
+$btnSettingsGroupNewGroup.Add_Click({
     Add-Type -AssemblyName Microsoft.VisualBasic
     $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
     $newName = $newName.Trim()
@@ -1104,7 +1119,7 @@ $btnSettingsNewGroup.Add_Click({
     $cmbSettingsGroupTarget.SelectedItem = $newName
 })
 
-$lnkSettingsOpenXlsx.Add_LinkClicked({
+$lnkSettingsGroupOpenXlsx.Add_LinkClicked({
     $target = $cmbSettingsGroupTarget.SelectedItem
     if (!$target) {
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
