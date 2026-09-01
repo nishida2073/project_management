@@ -2,8 +2,9 @@
     [string]$SourceRootDir,
     [string]$TargetGroupName,
     [string]$TargetDate,
-    [string]$SourseDataDefsPath,
+    [string]$CollectDataDefsPath,
     [string]$CollectRootDir,
+    [string]$SourceTypeFileNameMap,
     [string]$LogNamePrefix
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -63,12 +64,18 @@ function Read-SourseDataDefsFile {
         [Parameter(Mandatory)]
         [string]$SourceRootDir,
         [Parameter(Mandatory)]
-        [string]$TargetGroupName
+        [string]$TargetGroupName,
+        [Parameter(Mandatory)]
+        [hashtable]$FileKeyMap
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    # [ファイル識別子] セクションの下に、1行1列で「元の列名[,新しい列名]」を書く書式
+    # [ファイル識別子] セクションの下に、1行1列で「元の列名[,新しい列名]」を書く書式。
+    # ファイル識別子はcommon-env.bat側の*SourceType変数名（DailyReportSourceType等）をそのまま書き、
+    # 実際の出力ファイル名（create-app-data.ps1がその変数の値から組み立てる"<グループ名>-業務日誌.txt"等）
+    # へは$FileKeyMap経由で変換する。値をハードコードすると、common-env.bat側の値を変えたときに
+    # ファイル名がずれて気づかずに集計漏れる
     $lines = Get-Content -Path $FilePath -Encoding UTF8
 
     $sourseDataProps = @()
@@ -81,8 +88,9 @@ function Read-SourseDataDefsFile {
 
         if ($trimmed -match '^\[(.+)\]$') {
             if ($currentFileKey) {
+                $sourceType = if ($FileKeyMap.ContainsKey($currentFileKey)) { $FileKeyMap[$currentFileKey] } else { $currentFileKey }
                 $sourseDataProps += [PSCustomObject]@{
-                    filePath   = Join-Path $SourceRootDir "$TargetGroupName-$currentFileKey.txt"
+                    filePath   = Join-Path $SourceRootDir "$TargetGroupName-$sourceType.txt"
                     columnDefs = $currentColumnDefs
                 }
             }
@@ -98,8 +106,9 @@ function Read-SourseDataDefsFile {
         }
     }
     if ($currentFileKey) {
+        $sourceType = if ($FileKeyMap.ContainsKey($currentFileKey)) { $FileKeyMap[$currentFileKey] } else { $currentFileKey }
         $sourseDataProps += [PSCustomObject]@{
-            filePath   = Join-Path $SourceRootDir "$TargetGroupName-$currentFileKey.txt"
+            filePath   = Join-Path $SourceRootDir "$TargetGroupName-$sourceType.txt"
             columnDefs = $currentColumnDefs
         }
     }
@@ -188,7 +197,12 @@ function Export-Datas {
         return
     }
 
-    $sourseDataProps = Read-SourseDataDefsFile -FilePath $SourseDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName
+    $fileKeyMap = @{}
+    foreach ($pair in ($SourceTypeFileNameMap -split ',' | Where-Object { $_ })) {
+        $kv = $pair -split '=', 2
+        if ($kv.Count -eq 2) { $fileKeyMap[$kv[0]] = $kv[1] }
+    }
+    $sourseDataProps = Read-SourseDataDefsFile -FilePath $CollectDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName -FileKeyMap $fileKeyMap
 
     Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
 

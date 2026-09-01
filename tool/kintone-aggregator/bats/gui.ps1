@@ -422,16 +422,14 @@ function Resolve-BrowseStart {
 
 $commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $authVars = @("KintoneSubdomain", "KintoneID", "KintonePW")
-# TargetAppIdsは接続先kintoneアプリの番号でグループごとに異なるためグループ別設定、
-# TargetDateCodeField/TargetUserCodeFieldは全グループで共通のアプリ構成を前提にしているため共通設定
+
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
-# 業務日誌/パルスサーベイの変数名サフィックスはcommon-env.bat（create-daily-report.bat/
-# create-pulse-survey.bat側と共通）のDailyReportSuffix/PulseSurveySuffixを唯一の定義元とする
+
 $dailyReportSuffix = $script:commonEnvVars["DailyReportSuffix"]
 $pulseSurveySuffix = $script:commonEnvVars["PulseSurveySuffix"]
 
-$settingsGroupLabels = @{ "COMMON" = "共通設定"; "AUTH" = "認証情報"; "DAILY" = "業務日誌"; "PULSE" = "パルスサーベイ" }
+$settingsGroupLabels = @{ "BASE" = "基本設定"; "AUTH" = "認証情報"; "DAILY" = "業務日誌"; "PULSE" = "パルスサーベイ" }
 $settingsVarLabels = @{
     "ClientDataRootDir"        = "グループデータのフォルダ"
     "OutputRootDir"            = "出力のルートフォルダ"
@@ -479,8 +477,6 @@ function Get-GroupTemplateDefaults {
     return $script:groupTemplateDefaults
 }
 
-# 設定タブ自体は「共通」「グループ別」の2つのサブタブに分ける（共通設定の項目が増えてきて
-# ドロップダウンでの切り替えより独立したタブの方が分かりやすいため）
 $settingsSubTabControl = New-Object System.Windows.Forms.TabControl
 $settingsSubTabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 $tabSettings.Controls.Add($settingsSubTabControl)
@@ -601,7 +597,7 @@ function Update-SettingsGroupList {
 function Get-CommonSettingsFieldRows {
     $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
     foreach ($varName in $commonSettingsVars) {
-        [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
+        [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "BASE"; Value = $raw[$varName] }
     }
     # TargetDateCodeField/TargetUserCodeFieldは全グループ共通のためcommon-env.bat側で持つ
     $rawDaily = Get-SuffixedRawValues -RawValues $raw -Suffix $dailyReportSuffix -VarNames $commonReportVars
@@ -722,15 +718,215 @@ function Render-SettingsFields {
         $TextBoxes[$field.Key] = $txt
         $y += 28
     }
+    return $y
+}
+
+# collect-data-defs.txt（アプリデータ集計の列定義。[セクション見出し]＋「元の列名[,新しい列名]」の
+# 表形式）を、行の追加・削除ができる表形式のUIで編集する。全グループ共通の内容なので共通タブの末尾に置く。
+# セクション見出しはcommon-env.bat側の*SourceType変数名（例: DailyReportSourceType）をそのまま使う。
+# 実際の出力ファイル名はその変数の値（業務日誌/パルスサーベイ等）が決めるため、画面では
+# 「ファイル名」欄をこの変数名の選択式（ComboBox）にして、値そのものは編集させない
+$collectDataDefsPath = Join-Path $basePath "collect-data-defs.txt"
+# $null=未読込（初回描画時にファイルから読み込む）。以降は編集中の内容をここに保持し、
+# 行追加・削除のたびの再描画でも未保存の入力内容が消えないようにする
+$script:collectDataDefsSections = $null
+$script:collectDataDefsRowControls = @()
+
+function Get-CollectDataDefsSourceTypeVarNames {
+    return @($script:commonEnvVars.Keys | Where-Object { $_ -like '*SourceType' } | Sort-Object)
+}
+
+function ConvertFrom-CollectDataDefsText {
+    param([string]$Text)
+    $sections = [System.Collections.Generic.List[object]]::new()
+    $currentKey = $null
+    $currentRows = $null
+    foreach ($rawLine in ($Text -split "`r`n|`n")) {
+        $trimmed = $rawLine.Trim()
+        if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
+        if ($trimmed -match '^\[(.+)\]$') {
+            if ($currentKey) { $sections.Add([PSCustomObject]@{ Key = $currentKey; Rows = $currentRows }) }
+            $currentKey = $Matches[1]
+            $currentRows = [System.Collections.Generic.List[object]]::new()
+            continue
+        }
+        if ($null -eq $currentRows) { continue }
+        $parts = $trimmed -split ',', 2
+        $currentRows.Add([PSCustomObject]@{
+            OrgName = $parts[0]
+            NewName = if ($parts.Count -ge 2) { $parts[1] } else { "" }
+        })
+    }
+    if ($currentKey) { $sections.Add([PSCustomObject]@{ Key = $currentKey; Rows = $currentRows }) }
+    return $sections
+}
+
+function ConvertTo-CollectDataDefsText {
+    param($Sections)
+    $lines = @()
+    foreach ($section in $Sections) {
+        $lines += "[$($section.Key)]"
+        foreach ($row in $section.Rows) {
+            if ([string]::IsNullOrWhiteSpace($row.OrgName)) { continue }
+            $lines += if ([string]::IsNullOrWhiteSpace($row.NewName)) { $row.OrgName } else { "$($row.OrgName),$($row.NewName)" }
+        }
+        $lines += ""
+    }
+    return ($lines -join "`r`n")
+}
+
+# 描画済みのテキストボックスの現在値を$script:collectDataDefsSectionsへ書き戻す。
+# 再描画（行追加・削除）の直前に必ず呼び、それまでの入力内容を失わないようにする
+function Sync-CollectDataDefsFromControls {
+    foreach ($entry in $script:collectDataDefsRowControls) {
+        $entry.Row.OrgName = $entry.OrgBox.Text
+        $entry.Row.NewName = $entry.NewBox.Text
+    }
+}
+
+function Add-CollectDataDefsEditor {
+    param([int]$StartY)
+
+    if ($null -eq $script:collectDataDefsSections) {
+        $text = if (Test-Path -LiteralPath $collectDataDefsPath) {
+            [System.IO.File]::ReadAllText($collectDataDefsPath, (New-Object System.Text.UTF8Encoding($false)))
+        } else {
+            ""
+        }
+        $script:collectDataDefsSections = ConvertFrom-CollectDataDefsText -Text $text
+    }
+    $script:collectDataDefsRowControls = @()
+
+    $y = $StartY + 10
+    $separator = New-Object System.Windows.Forms.Panel
+    $separator.BackColor = [System.Drawing.Color]::LightGray
+    $separator.Location = New-Object System.Drawing.Point(10, $y)
+    $separator.Size = New-Object System.Drawing.Size(690, 2)
+    $settingsCommonFieldPanel.Controls.Add($separator)
+    $y += 14
+
+    $lblDefs = New-Object System.Windows.Forms.Label
+    $lblDefs.Text = "アプリデータ集計の列定義"
+    $lblDefs.AutoSize = $true
+    $lblDefs.Location = New-Object System.Drawing.Point(10, $y)
+    $lblDefs.Font = New-Object System.Drawing.Font($lblDefs.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
+    $settingsCommonFieldPanel.Controls.Add($lblDefs)
+    $y += 30
+
+    $sourceTypeVarNames = Get-CollectDataDefsSourceTypeVarNames
+
+    foreach ($section in $script:collectDataDefsSections) {
+        $lblFileNameCaption = New-Object System.Windows.Forms.Label
+        $lblFileNameCaption.Text = "ファイル名"
+        $lblFileNameCaption.AutoSize = $false
+        $lblFileNameCaption.Size = New-Object System.Drawing.Size(220, 20)
+        $lblFileNameCaption.Location = New-Object System.Drawing.Point(20, $y)
+        $lblFileNameCaption.Font = New-Object System.Drawing.Font($lblFileNameCaption.Font.FontFamily, 9, [System.Drawing.FontStyle]::Bold)
+        $settingsCommonFieldPanel.Controls.Add($lblFileNameCaption)
+        $y += 22
+
+        $cmbFileName = New-Object System.Windows.Forms.ComboBox
+        $cmbFileName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+        $cmbFileName.Location = New-Object System.Drawing.Point(20, $y)
+        $cmbFileName.Size = New-Object System.Drawing.Size(300, 24)
+        foreach ($varName in $sourceTypeVarNames) {
+            $displayText = if ($script:commonEnvVars.ContainsKey($varName)) { $script:commonEnvVars[$varName] } else { $varName }
+            $cmbFileName.Items.Add([PSCustomObject]@{ VarName = $varName; DisplayText = $displayText }) | Out-Null
+        }
+        $cmbFileName.DisplayMember = "DisplayText"
+        $matchedItem = $cmbFileName.Items | Where-Object { $_.VarName -eq $section.Key } | Select-Object -First 1
+        if ($matchedItem) {
+            $cmbFileName.SelectedItem = $matchedItem
+        } elseif ($cmbFileName.Items.Count -gt 0) {
+            $cmbFileName.SelectedIndex = 0
+        }
+        $cmbFileName.Tag = $section
+        $cmbFileName.Add_SelectedIndexChanged({
+            Sync-CollectDataDefsFromControls
+            $this.Tag.Key = $this.SelectedItem.VarName
+        })
+        $settingsCommonFieldPanel.Controls.Add($cmbFileName)
+        $y += 30
+
+        $lblOrgHeader = New-Object System.Windows.Forms.Label
+        $lblOrgHeader.Text = "変更前"
+        $lblOrgHeader.AutoSize = $false
+        $lblOrgHeader.Size = New-Object System.Drawing.Size(210, 18)
+        $lblOrgHeader.Location = New-Object System.Drawing.Point(20, $y)
+        $settingsCommonFieldPanel.Controls.Add($lblOrgHeader)
+
+        $lblNewHeader = New-Object System.Windows.Forms.Label
+        $lblNewHeader.Text = "変更後"
+        $lblNewHeader.AutoSize = $false
+        $lblNewHeader.Size = New-Object System.Drawing.Size(210, 18)
+        $lblNewHeader.Location = New-Object System.Drawing.Point(240, $y)
+        $settingsCommonFieldPanel.Controls.Add($lblNewHeader)
+        $y += 20
+
+        foreach ($row in @($section.Rows)) {
+            $txtOrg = New-Object System.Windows.Forms.TextBox
+            $txtOrg.Text = "$($row.OrgName)"
+            $txtOrg.Location = New-Object System.Drawing.Point(20, $y)
+            $txtOrg.Size = New-Object System.Drawing.Size(210, 22)
+            $settingsCommonFieldPanel.Controls.Add($txtOrg)
+
+            $txtNew = New-Object System.Windows.Forms.TextBox
+            $txtNew.Text = "$($row.NewName)"
+            $txtNew.Location = New-Object System.Drawing.Point(240, $y)
+            $txtNew.Size = New-Object System.Drawing.Size(210, 22)
+            $settingsCommonFieldPanel.Controls.Add($txtNew)
+
+            $btnDeleteRow = New-Object System.Windows.Forms.Button
+            $btnDeleteRow.Text = "削除"
+            $btnDeleteRow.Location = New-Object System.Drawing.Point(460, ($y - 1))
+            $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
+            $btnDeleteRow.Tag = [PSCustomObject]@{ Section = $section; Row = $row }
+            $btnDeleteRow.Add_Click({
+                Sync-CollectDataDefsFromControls
+                $ctx = $this.Tag
+                $ctx.Section.Rows.Remove($ctx.Row) | Out-Null
+                Update-CommonSettingsFields
+            })
+            $settingsCommonFieldPanel.Controls.Add($btnDeleteRow)
+
+            $script:collectDataDefsRowControls += [PSCustomObject]@{ Section = $section; Row = $row; OrgBox = $txtOrg; NewBox = $txtNew }
+            $y += 26
+        }
+
+        $btnAddRow = New-Object System.Windows.Forms.Button
+        $btnAddRow.Text = "＋ 行を追加"
+        $btnAddRow.Location = New-Object System.Drawing.Point(20, $y)
+        $btnAddRow.Size = New-Object System.Drawing.Size(100, 24)
+        $btnAddRow.Tag = $section
+        $btnAddRow.Add_Click({
+            Sync-CollectDataDefsFromControls
+            $this.Tag.Rows.Add([PSCustomObject]@{ OrgName = ""; NewName = "" })
+            Update-CommonSettingsFields
+        })
+        $settingsCommonFieldPanel.Controls.Add($btnAddRow)
+        $y += 36
+    }
+}
+
+function Save-CollectDataDefs {
+    Sync-CollectDataDefsFromControls
+    $text = ConvertTo-CollectDataDefsText -Sections $script:collectDataDefsSections
+    [System.IO.File]::WriteAllText($collectDataDefsPath, $text, (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes
+    $scrollX = -$settingsCommonFieldPanel.AutoScrollPosition.X
+    $scrollY = -$settingsCommonFieldPanel.AutoScrollPosition.Y
+
+    $endY = Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes
+    Add-CollectDataDefsEditor -StartY $endY
+
+    $settingsCommonFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
 function Update-GroupSettingsFields {
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes | Out-Null
 }
 
 function Get-CommonSettingsFieldValue {
@@ -884,12 +1080,15 @@ function Update-GroupDropdowns {
 
 $btnSettingsCommonSave.Add_Click({
     Save-CommonSettings
+    Save-CollectDataDefs
     Update-CommonSettingsFields
     $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
     $lblSettingsCommonSaveStatus.Text = "保存しました"
 })
 
 $btnSettingsCommonReload.Add_Click({
+    # 未保存の編集内容を破棄してcollect-data-defs.txtをディスクから読み直す
+    $script:collectDataDefsSections = $null
     Update-CommonSettingsFields
     $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::Black
     $lblSettingsCommonSaveStatus.Text = "再読込しました"

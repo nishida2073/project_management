@@ -19,9 +19,10 @@ if "%~2"=="" (
 set "SCRIPT_PATH=%~dp0collect-app-data.ps1"
 set "ClientDataRootDir=%ClientDataRootDir%"
 
-set "SourseDataDefsPath=%~dp0collect-data-defs.txt"
+set "CollectDataDefsPath=%~dp0collect-data-defs.txt"
 
 set "CollectRootDir=%OutputCollectDataRootDir%"
+set "SourceTypeFileNameMap=DailyReportSourceType=%DailyReportSourceType%,PulseSurveySourceType=%PulseSurveySourceType%"
 
 set "CheckedFileRootDir=%OutputReportDir%\%TargetDate%"
 
@@ -41,8 +42,9 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
       "     -SourceRootDir '%CheckedFileRootDir%'" ^
       "     -TargetGroupName '%%~nF'" ^
       "     -TargetDate '%TargetDate%'" ^
-      "     -SourseDataDefsPath '%SourseDataDefsPath%'" ^
+      "     -CollectDataDefsPath '%CollectDataDefsPath%'" ^
       "     -CollectRootDir '%CollectRootDir%'" ^
+      "     -SourceTypeFileNameMap '%SourceTypeFileNameMap%'" ^
       "     -LogNamePrefix '%~n0'" ^
       "} catch {" ^
       "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
