@@ -772,6 +772,7 @@ function Export-TotalResult {
             $dailyResult = $dailyResultMaps[$userData.受講生ID][$targetDate]
             $rowData = @(
                 $targetDate
+                $courseScheduleData.科目名
                 $dailyResult.提出状況_業務日誌
                 $dailyResult.提出状況_パルスサーベイ
                 $userData.通番
