@@ -724,17 +724,13 @@ function Render-SettingsFields {
 # collect-data-defs.txt（アプリデータ集計の列定義。[セクション見出し]＋「元の列名[,新しい列名]」の
 # 表形式）を、行の追加・削除ができる表形式のUIで編集する。全グループ共通の内容なので共通タブの末尾に置く。
 # セクション見出しはcommon-env.bat側の*SourceType変数名（例: DailyReportSourceType）をそのまま使う。
-# 実際の出力ファイル名はその変数の値（業務日誌/パルスサーベイ等）が決めるため、画面では
-# 「ファイル名」欄をこの変数名の選択式（ComboBox）にして、値そのものは編集させない
+# 実際の出力ファイル名はその変数の値（業務日誌/パルスサーベイ等）が決めるため、画面の
+# 「ファイル名」欄は値の参照表示のみ（編集不可）にする
 $collectDataDefsPath = Join-Path $basePath "collect-data-defs.txt"
 # $null=未読込（初回描画時にファイルから読み込む）。以降は編集中の内容をここに保持し、
 # 行追加・削除のたびの再描画でも未保存の入力内容が消えないようにする
 $script:collectDataDefsSections = $null
 $script:collectDataDefsRowControls = @()
-
-function Get-CollectDataDefsSourceTypeVarNames {
-    return @($script:commonEnvVars.Keys | Where-Object { $_ -like '*SourceType' } | Sort-Object)
-}
 
 function ConvertFrom-CollectDataDefsText {
     param([string]$Text)
@@ -813,8 +809,6 @@ function Add-CollectDataDefsEditor {
     $settingsCommonFieldPanel.Controls.Add($lblDefs)
     $y += 30
 
-    $sourceTypeVarNames = Get-CollectDataDefsSourceTypeVarNames
-
     foreach ($section in $script:collectDataDefsSections) {
         $lblFileNameCaption = New-Object System.Windows.Forms.Label
         $lblFileNameCaption.Text = "ファイル名"
@@ -823,30 +817,14 @@ function Add-CollectDataDefsEditor {
         $lblFileNameCaption.Location = New-Object System.Drawing.Point(20, $y)
         $lblFileNameCaption.Font = New-Object System.Drawing.Font($lblFileNameCaption.Font.FontFamily, 9, [System.Drawing.FontStyle]::Bold)
         $settingsCommonFieldPanel.Controls.Add($lblFileNameCaption)
-        $y += 22
 
-        $cmbFileName = New-Object System.Windows.Forms.ComboBox
-        $cmbFileName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-        $cmbFileName.Location = New-Object System.Drawing.Point(20, $y)
-        $cmbFileName.Size = New-Object System.Drawing.Size(300, 24)
-        foreach ($varName in $sourceTypeVarNames) {
-            $displayText = if ($script:commonEnvVars.ContainsKey($varName)) { $script:commonEnvVars[$varName] } else { $varName }
-            $cmbFileName.Items.Add([PSCustomObject]@{ VarName = $varName; DisplayText = $displayText }) | Out-Null
-        }
-        $cmbFileName.DisplayMember = "DisplayText"
-        $matchedItem = $cmbFileName.Items | Where-Object { $_.VarName -eq $section.Key } | Select-Object -First 1
-        if ($matchedItem) {
-            $cmbFileName.SelectedItem = $matchedItem
-        } elseif ($cmbFileName.Items.Count -gt 0) {
-            $cmbFileName.SelectedIndex = 0
-        }
-        $cmbFileName.Tag = $section
-        $cmbFileName.Add_SelectedIndexChanged({
-            Sync-CollectDataDefsFromControls
-            $this.Tag.Key = $this.SelectedItem.VarName
-        })
-        $settingsCommonFieldPanel.Controls.Add($cmbFileName)
-        $y += 30
+        $lblFileNameValue = New-Object System.Windows.Forms.Label
+        $lblFileNameValue.Text = if ($script:commonEnvVars.ContainsKey($section.Key)) { $script:commonEnvVars[$section.Key] } else { $section.Key }
+        $lblFileNameValue.AutoSize = $false
+        $lblFileNameValue.Size = New-Object System.Drawing.Size(300, 20)
+        $lblFileNameValue.Location = New-Object System.Drawing.Point(250, $y)
+        $settingsCommonFieldPanel.Controls.Add($lblFileNameValue)
+        $y += 26
 
         $lblOrgHeader = New-Object System.Windows.Forms.Label
         $lblOrgHeader.Text = "変更前"
@@ -859,7 +837,7 @@ function Add-CollectDataDefsEditor {
         $lblNewHeader.Text = "変更後"
         $lblNewHeader.AutoSize = $false
         $lblNewHeader.Size = New-Object System.Drawing.Size(210, 18)
-        $lblNewHeader.Location = New-Object System.Drawing.Point(240, $y)
+        $lblNewHeader.Location = New-Object System.Drawing.Point(250, $y)
         $settingsCommonFieldPanel.Controls.Add($lblNewHeader)
         $y += 20
 
@@ -872,7 +850,7 @@ function Add-CollectDataDefsEditor {
 
             $txtNew = New-Object System.Windows.Forms.TextBox
             $txtNew.Text = "$($row.NewName)"
-            $txtNew.Location = New-Object System.Drawing.Point(240, $y)
+            $txtNew.Location = New-Object System.Drawing.Point(250, $y)
             $txtNew.Size = New-Object System.Drawing.Size(210, 22)
             $settingsCommonFieldPanel.Controls.Add($txtNew)
 
