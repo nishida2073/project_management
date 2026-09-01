@@ -68,7 +68,7 @@ function Read-SourseDataDefsFile {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    # [ファイル識別子] セクションの下に、1行1列で「元の列名[,新しい列名[,型]]」を書く書式
+    # [ファイル識別子] セクションの下に、1行1列で「元の列名[,新しい列名]」を書く書式
     $lines = Get-Content -Path $FilePath -Encoding UTF8
 
     $sourseDataProps = @()
@@ -95,7 +95,6 @@ function Read-SourseDataDefsFile {
         $currentColumnDefs += [PSCustomObject]@{
             OrgName = $parts[0]
             NewName = if ($parts.Count -ge 2 -and -not [string]::IsNullOrWhiteSpace($parts[1])) { $parts[1] } else { $null }
-            Type    = if ($parts.Count -ge 3 -and -not [string]::IsNullOrWhiteSpace($parts[2])) { $parts[2] } else { $null }
         }
     }
     if ($currentFileKey) {
