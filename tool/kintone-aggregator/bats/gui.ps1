@@ -423,7 +423,7 @@ function Resolve-BrowseStart {
 
 $commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $authVars = @("KintoneSubdomain", "KintoneID", "KintonePW")
-$reportVars = @("TargetAppIds", "TargetDateCodeField", "TargetUserCodeField", "TargetFixedCodeFields", "TargetAppCodeFields", "TargetSummaryCodeFields")
+$reportVars = @("TargetAppIds", "TargetDateCodeField", "TargetUserCodeField", "TargetFixedCodeFields", "TargetAppCodeFields")
 
 $settingsGroupLabels = @{ "COMMON" = "共通設定"; "AUTH" = "認証情報"; "DAILY" = "業務日誌"; "PULSE" = "パルスサーベイ" }
 $settingsVarLabels = @{
@@ -442,7 +442,6 @@ $settingsVarLabels = @{
     "TargetUserCodeField"      = "受講生IDフィールドコード"
     "TargetFixedCodeFields"    = "固定列フィールドコード（カンマ区切り）"
     "TargetAppCodeFields"      = "集計対象フィールドコード（カンマ区切り）"
-    "TargetSummaryCodeFields"  = "サマリー列フィールドコード（カンマ区切り）"
 }
 $settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $settingsMaskedVars = @("KintonePW")

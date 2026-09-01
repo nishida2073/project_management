@@ -76,7 +76,9 @@ function Write-ColoredLine {
 # ログ表示用に設定済みのRichTextBoxを作る（Dock=Fill、等幅フォント、URLクリックで既定ブラウザを開く）
 function New-LogTextBox {
     param(
-        [string]$FontFamily = "Consolas",
+        # Consolasは日本語グリフを持たずOSの代替フォントへ自動フォールバックするため、
+        # 英数字部分と日本語部分でフォントが混在して見える。日本語グリフを持つ固定ピッチフォントに統一する
+        [string]$FontFamily = "MS Gothic",
         [int]$FontSize = 9
     )
     $textBox = New-Object System.Windows.Forms.RichTextBox

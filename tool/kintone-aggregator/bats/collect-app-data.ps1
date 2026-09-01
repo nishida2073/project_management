@@ -69,7 +69,7 @@ function Read-SourseDataDefsFile {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    # [ファイル識別子] セクションの下に、1行1列で「列番号[,別名[,型]]」を書く書式
+    # [ファイル識別子] セクションの下に、1行1列で「元の列名[,新しい列名[,型]]」を書く書式
     $lines = Get-Content -Path $FilePath -Encoding UTF8
 
     $sourseDataProps = @()
@@ -94,9 +94,9 @@ function Read-SourseDataDefsFile {
 
         $parts = $trimmed -split ','
         $currentColumnDefs += [PSCustomObject]@{
-            Index = [int]$parts[0]
-            Alias = if ($parts.Count -ge 2 -and -not [string]::IsNullOrWhiteSpace($parts[1])) { $parts[1] } else { $null }
-            Type  = if ($parts.Count -ge 3 -and -not [string]::IsNullOrWhiteSpace($parts[2])) { $parts[2] } else { $null }
+            OrgName = $parts[0]
+            NewName = if ($parts.Count -ge 2 -and -not [string]::IsNullOrWhiteSpace($parts[1])) { $parts[1] } else { $null }
+            Type    = if ($parts.Count -ge 3 -and -not [string]::IsNullOrWhiteSpace($parts[2])) { $parts[2] } else { $null }
         }
     }
     if ($currentFileKey) {
@@ -129,14 +129,27 @@ function Export-Datas {
         $sourceFilePath = $sourceDataProp.filePath
         $columnDefs = $sourceDataProp.columnDefs
         $range = Read-FileToArray $sourceFilePath
-        
+        $headerRow = $range[0]
+
+        # 元の列名から列位置を引くためのインデックス。同じ列を複数回引くので事前に1回だけ計算する。
+        # 見つからない列はアプリ側のフィールド変更等でずれている可能性があるため、処理は止めずに
+        # 警告を出したうえで該当列を$CollectDataNotFoundMessage扱いにする（-1のままにしておき、
+        # 後段の値取得側で判定する）
+        $columnIndexes = @($columnDefs | ForEach-Object {
+            $index = [array]::IndexOf($headerRow, $_.OrgName)
+            if ($index -lt 0) {
+                Write-Message "列が見つかりません: $($_.OrgName) (ファイル: $sourceFilePath)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+            }
+            $index
+        })
+
         # ヘッダー
         $headerDatas = @()
         foreach ($def in $columnDefs) {
-            $headerName = if (-not [string]::IsNullOrWhiteSpace($def.Alias)) {
-                $def.Alias
+            $headerName = if (-not [string]::IsNullOrWhiteSpace($def.NewName)) {
+                $def.NewName
             } else {
-                $range[0][([int]$def.Index-1)]
+                $def.OrgName
             }
             $headerDatas += ,$headerName
         }
@@ -145,8 +158,8 @@ function Export-Datas {
         $bodyDatas = [System.Collections.Generic.List[object]]::new($range.Count)
         for ($r = 1; $r -lt $range.Count; $r++) {
             $rowData = @()
-            foreach ($def in $columnDefs) {
-                $val = $range[$r][([int]$def.Index-1)]
+            foreach ($columnIndex in $columnIndexes) {
+                $val = if ($columnIndex -lt 0) { $null } else { $range[$r][$columnIndex] }
                 if ([string]::IsNullOrEmpty($val)) {
                     $val = $CollectDataNotFoundMessage
                 }

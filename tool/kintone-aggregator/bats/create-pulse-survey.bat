@@ -25,15 +25,7 @@ set "ClientDataRootDir=%ClientDataRootDir%"
 set "OutputTargetDir=%OutputReportDir%\%TargetDate%"
 set "OutputSheetNameSuffix=_%SOURCE_TYPE%"
 
-set "SummarySheetNamePrefix=サマリー"
-
-set "CreateExcelFile=0"
-set "CreateClassSheet=0"
 set "CreateReminderLink=0"
-
-set "TemplateFilePath=%TemplateRootDir%\アプリデータ.xlsx"
-set "ClassTemplateSheetName=クラス別_パルスサーベイ-テンプレート"
-set "SummaryTemplateSheetName=サマリー_パルスサーベイ-テンプレート"
 
 call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
 
@@ -59,21 +51,14 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "     -KintonePW '!KintonePW!'" ^
           "     -Authorization '!Authorization!'" ^
           "     -OutputRootDir '%OutputTargetDir%'" ^
-          "     -CreateExcelFile '%CreateExcelFile%'" ^
-          "     -CreateClassSheet '%CreateClassSheet%'" ^
           "     -CreateReminderLink '%CreateReminderLink%'" ^
           "     -OutputSheetNameSuffix '%OutputSheetNameSuffix%'" ^
-          "     -SummarySheetNamePrefix '%SummarySheetNamePrefix%'" ^
-          "     -TemplateFilePath '%TemplateFilePath%'" ^
-          "     -ClassTemplateSheetName '%ClassTemplateSheetName%'" ^
-          "     -SummaryTemplateSheetName '%SummaryTemplateSheetName%'" ^
           "     -TargetDate '%TargetDate%'" ^
           "     -TargetAppIds '!TargetAppIds!'" ^
           "     -TargetDateCodeField '!TargetDateCodeField!'" ^
           "     -TargetUserCodeField '!TargetUserCodeField!'" ^
           "     -TargetFixedCodeFields '!TargetFixedCodeFields!'" ^
           "     -TargetAppCodeFields '!TargetAppCodeFields!'" ^
-          "     -TargetSummaryCodeFields '!TargetSummaryCodeFields!'" ^
           "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^

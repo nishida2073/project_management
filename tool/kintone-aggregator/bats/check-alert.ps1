@@ -29,7 +29,7 @@ function Recovery-DailyData {
         [array]$TargetDates
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
-    Write-Message $TargetDates -VarName "TargetDates" -Type "Info" -ForegroundColor Green
+    # Write-Message $TargetDates -VarName "TargetDates" -Type "Info" -ForegroundColor Green
     
     Use-Mutex "Recovery-DailyData" {
         if (Test-Path $CollectRootDir) {
