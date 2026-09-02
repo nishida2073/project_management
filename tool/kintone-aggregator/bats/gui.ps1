@@ -961,8 +961,9 @@ function Test-KintoneConnection {
     foreach ($targetAppId in $targetAppIds) {
         try {
             $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
-            $fieldCount = @($fieldData.PSObject.Properties).Count
-            $resultLines += "[成功] $targetAppId（フィールド数: $fieldCount）"
+            $fieldCodes = @($fieldData.PSObject.Properties.Name)
+            $resultLines += "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
+            $resultLines += "  $($fieldCodes -join ', ')"
         } catch {
             $hasFailure = $true
             $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
