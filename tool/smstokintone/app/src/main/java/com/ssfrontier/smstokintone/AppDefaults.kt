@@ -4,7 +4,7 @@ package com.ssfrontier.smstokintone
 object AppDefaults {
 
     /** ログ画面の自動更新間隔（秒）の初期値 */
-    const val AUTO_REFRESH_INTERVAL_SECONDS = 30
+    const val AUTO_REFRESH_INTERVAL_SECONDS = 5
 
     /** ログとSMSを突き合わせる際の許容範囲（秒）の初期値 */
     const val SMS_MATCH_TOLERANCE_SECONDS = 15
