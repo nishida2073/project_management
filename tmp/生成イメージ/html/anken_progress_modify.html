@@ -36,6 +36,7 @@
               <th style="width:110px;">予定日</th>
               <th style="width:110px;">実績日</th>
               <th style="width:110px;">状態</th>
+              <th style="width:100px;">実施対象</th>
               <th>備考</th>
             </tr>
           </thead>
@@ -43,15 +44,27 @@
             <tr>
               <td class="step-name"><span class="step-no">8</span>顧客契約締結</td>
               <td><div class="mini-control js-date">2026/03/11<span class="caret">▾</span></div></td>
-              <td><div class="mini-control js-date">未実施<span class="caret">▾</span></div></td>
-              <td><div class="status-select progress js-select" data-options="未着手,調整中,完了,遅延" data-class-map='{"未着手":"wait","調整中":"progress","完了":"done","遅延":"delay"}'>調整中<span class="caret">▾</span></div></td>
+              <td><div class="mini-control js-date"><span class="caret">▾</span></div></td>
+              <td><div class="status-select progress js-select" data-options="実施前,実施中,完了" data-class-map='{"実施前":"wait","実施中":"progress","完了":"done"}'>実施中<span class="caret">▾</span></div></td>
+              <td>
+                <div class="toggle-row na-toggle" data-off="対象外" style="height:auto;">
+                  <div class="toggle"><div class="knob"></div></div>
+                  <span style="display:none">対象</span>
+                </div>
+              </td>
               <td><div class="memo-input">契約書ドラフト送付済み、押印待ち</div></td>
             </tr>
             <tr>
               <td class="step-name"><span class="step-no">9</span>開発実施準備</td>
               <td><div class="mini-control js-date">2026/03/20<span class="caret">▾</span></div></td>
-              <td><div class="mini-control js-date">未実施<span class="caret">▾</span></div></td>
-              <td><div class="status-select wait js-select" data-options="未着手,調整中,完了,遅延" data-class-map='{"未着手":"wait","調整中":"progress","完了":"done","遅延":"delay"}'>未着手<span class="caret">▾</span></div></td>
+              <td><div class="mini-control js-date"><span class="caret">▾</span></div></td>
+              <td><div class="status-select wait js-select" data-options="実施前,実施中,完了" data-class-map='{"実施前":"wait","実施中":"progress","完了":"done"}'>実施前<span class="caret">▾</span></div></td>
+              <td>
+                <div class="toggle-row na-toggle" data-off="対象外" style="height:auto;">
+                  <div class="toggle"><div class="knob"></div></div>
+                  <span style="display:none">対象</span>
+                </div>
+              </td>
               <td><div class="memo-input">契約締結後に着手予定</div></td>
             </tr>
           </tbody>
@@ -66,5 +79,37 @@
 </div>
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
+<script src="js/toggle.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.na-toggle').forEach(function (row) {
+    var toggle = row.querySelector('.toggle');
+    var tr = row.closest('tr');
+    var statusEl = tr.querySelector('.status-select');
+    var dateEls = tr.querySelectorAll('.js-date');
+    row.addEventListener('click', function () {
+      var excluded = toggle.classList.contains('off');
+      if (statusEl) {
+        statusEl.style.opacity = excluded ? '0.4' : '';
+        statusEl.style.pointerEvents = excluded ? 'none' : '';
+      }
+      dateEls.forEach(function (dateEl) {
+        dateEl.style.opacity = excluded ? '0.4' : '';
+        dateEl.style.pointerEvents = excluded ? 'none' : '';
+        var textNode = dateEl.childNodes[0];
+        if (excluded) {
+          dateEl.setAttribute('data-saved-value', (textNode && textNode.nodeType === 3) ? textNode.textContent : '');
+          if (textNode && textNode.nodeType === 3) textNode.textContent = '';
+        } else {
+          var saved = dateEl.getAttribute('data-saved-value') || '';
+          if (textNode && textNode.nodeType === 3) textNode.textContent = saved;
+          else dateEl.insertBefore(document.createTextNode(saved), dateEl.firstChild);
+          dateEl.removeAttribute('data-saved-value');
+        }
+      });
+    });
+  });
+});
+</script>
 </body>
 </html>

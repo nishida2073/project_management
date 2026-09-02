@@ -41,23 +41,23 @@
           <input type="email" class="form-control" value="yamaguchi@company.co.jp">
         </div>
         <div class="form-field full">
-          <label>担当対象（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box js-chip-select" data-options="案件,研修" data-chip-map='{"案件":"anken","研修":"kensyu"}'>
+          <label>担当区分（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box js-chip-select" data-options="案件,クラス" data-chip-map='{"案件":"anken","クラス":"class"}'>
             <span class="chip anken">案件 <x>✕</x></span>
-            <span class="chip-add">＋ 担当対象を追加</span>
+            <span class="chip-add">＋ 担当区分を追加</span>
           </div>
         </div>
         <div class="form-field full">
           <label>業務区分<span class="req">必須</span></label>
-          <div class="radio-group" data-target="#roleChipBox" data-options-map='{"営業担当者":["営業"],"管理担当者":["PM","PL"],"運営担当者":["運営"]}'>
-            <label class="radio-option"><input type="radio" name="jobType" value="営業担当者"><span class="radio-dot"></span><span class="tag orange">営業担当者</span></label>
-            <label class="radio-option"><input type="radio" name="jobType" value="管理担当者" checked><span class="radio-dot"></span><span class="tag mgmt">管理担当者</span></label>
-            <label class="radio-option"><input type="radio" name="jobType" value="運営担当者"><span class="radio-dot"></span><span class="tag exec">運営担当者</span></label>
+          <div class="radio-group" data-target="#roleChipBox" data-options-map='{"営業":["-"],"管理":["PM","PL"],"実施":["-"]}'>
+            <label class="radio-option"><input type="radio" name="jobType" value="営業"><span class="radio-dot"></span><span class="tag orange">営業</span></label>
+            <label class="radio-option"><input type="radio" name="jobType" value="管理" checked><span class="radio-dot"></span><span class="tag mgmt">管理</span></label>
+            <label class="radio-option"><input type="radio" name="jobType" value="実施"><span class="radio-dot"></span><span class="tag exec">実施</span></label>
           </div>
         </div>
         <div class="form-field full">
-          <label>役職（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box js-chip-select" id="roleChipBox" data-options="PM,PL" data-chip-map='{"PM":"pm","PL":"pl","営業":"sales","運営":"ops"}'>
+          <label>役職（複数選択可）</label>
+          <div class="chip-box js-chip-select" id="roleChipBox" data-options="PM,PL" data-chip-map='{"PM":"pm","PL":"pl"}'>
             <span class="chip pm">PM <x>✕</x></span>
             <span class="chip-add">＋ 役職を追加</span>
           </div>

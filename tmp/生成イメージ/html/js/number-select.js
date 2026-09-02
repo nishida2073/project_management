@@ -36,6 +36,7 @@
           e2.stopPropagation();
           input.value = opt;
           el.classList.remove('open');
+          menu.remove();
           input.focus();
         });
         menu.appendChild(li);

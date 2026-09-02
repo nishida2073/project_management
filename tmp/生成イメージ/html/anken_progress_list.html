@@ -24,7 +24,6 @@
           <h1>案件進捗一覧</h1>
         </div>
         <div class="btn-group">
-          <div class="toggle-wrap"><span>遅延のみ表示</span><div class="toggle"><div class="knob"></div></div></div>
           <div class="btn">⇧ Excel取込</div>
           <div class="btn">⇩ Excel出力</div>
         </div>
@@ -34,7 +33,7 @@
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="案件名・顧客名で検索"></div>
         <div class="field"><label>管理担当者</label><div class="control js-select" data-options="すべて,山口 直人,細野 恵美,田中 誠,木村 隆,高橋 健,中島 拓海,伊藤 美咲,小林 由美,渡辺 直樹,松本 健二,市村 拓也,佐藤 一郎,岡田 沙織">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>総合進捗</label><div class="control js-select" data-options="すべて,着手前,承認待ち,完了,遅延あり">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>総合進捗</label><div class="control js-select" data-options="すべて,実施前,実施中,完了,遅延あり">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>実施開始月</label><div class="control small js-month">2026/09<span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
         <div class="field"><label> </label><div class="control small js-month">2027/03<span class="caret">▾</span></div></div>
@@ -86,22 +85,25 @@
 
 <script>
 function chip(status, plan, actual){
-  if (status === 'na') return '<div class="status-chip"><span class="badge na">対象外</span></div>';
-  var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
-  var label = {wait:'未着手', progress:'調整中', done:'完了', delay:'遅延'}[status];
+  if (status === 'na') return '<div class="status-chip"><span class="badge na">実施対象</span></div>';
+  var delayed = /-delay$/.test(status);
+  var baseStatus = status.replace('-delay', '');
+  var cls = {wait:'wait', progress:'progress', done:'done'}[baseStatus];
+  var label = {wait:'実施前', progress:'実施中', done:'完了'}[baseStatus];
   var dateLine = actual ? ('<span>予定 '+plan+'</span><span>実績 '+actual+'</span>') : ('<span>予定 '+plan+'</span>');
-  return '<div class="status-chip"><span class="badge '+cls+'">'+label+'</span><div class="dates">'+dateLine+'</div></div>';
+  var delayMark = delayed ? '<span class="badge delay">⚠ 遅延</span>' : '';
+  return '<div class="status-chip"><div class="badge-row"><span class="badge '+cls+'">'+label+'</span>'+delayMark+'</div><div class="dates">'+dateLine+'</div></div>';
 }
 function overall(status){
   var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
-  var label = {wait:'着手前', progress:'承認待ち', done:'完了', delay:'遅延あり'}[status];
+  var label = {wait:'実施前', progress:'実施中', done:'完了', delay:'遅延あり'}[status];
   return '<span class="overall '+cls+'">'+label+'</span>';
 }
 var rows = [
  {year:'2026年度', id:'PJ-2601', name:'G新人研修（NTTデータ金融共催）', customer:'NTTデータ金融', pm:'細野 恵美 / 山口 直人', month:'2026/09', overall:'progress',
   steps:['done','na','na','done','na','done','done','progress','wait','wait','wait','wait','wait']},
  {year:'2026年度', id:'PJ-2602', name:'ビジネス基礎研修 定期開催', customer:'株式会社ABC商事', pm:'木村 隆 / 田中 誠', month:'2026/09', overall:'delay',
-  steps:['done','delay','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
+  steps:['done','wait-delay','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
  {year:'2026年度', id:'PJ-2603', name:'次世代リーダー育成プログラム', customer:'DEFホールディングス', pm:'小林 由美 / 高橋 健・中島 拓海', month:'2026/10', overall:'progress',
   steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
  {year:'2026年度', id:'PJ-2604', name:'グローバル基礎コース 公募', customer:'（公募）', pm:'小林 由美 / 伊藤 美咲', month:'2026/09', overall:'done',
@@ -109,7 +111,7 @@ var rows = [
  {year:'2026年度', id:'PJ-2605', name:'マネジメント基礎研修', customer:'CECトラスト', pm:'松本 健二 / 渡辺 直樹', month:'2026/10', overall:'wait',
   steps:['wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
  {year:'2026年度', id:'PJ-2606', name:'システム基盤実践研修', customer:'NTTデータUNIV', pm:'市村 拓也 / 山口 直人', month:'2026/09', overall:'delay',
-  steps:['done','done','done','done','delay','wait','wait','wait','wait','wait','wait','wait','wait']},
+  steps:['done','done','done','done','wait-delay','wait','wait','wait','wait','wait','wait','wait','wait']},
  {year:'2026年度', id:'PJ-2607', name:'新人フォローアップ研修', customer:'グループ各社', pm:'岡田 沙織 / 佐藤 一郎', month:'2026/11', overall:'progress',
   steps:['done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']}
 ];

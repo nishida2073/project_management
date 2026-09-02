@@ -102,7 +102,7 @@ th.grp-none { background: #f6f8fb !important; }
 .tag.mgmt { background: #eef0ff; color: #4c51bf; }
 .tag.exec { background: #e3f6f5; color: #0e8a86; }
 .tag.anken { background: #eaf7ec; color: #238a4e; }
-.tag.kensyu { background: #f5eaf7; color: #8a3f96; }
+.tag.class { background: #f5eaf7; color: #8a3f96; }
 .tag.onsite { background: #e7f0ff; color: #2f6fed; }
 .tag.online { background: #e3f6f5; color: #0e8a86; }
 .tag.hybrid { background: #f0e9ff; color: #7c4de0; }
@@ -279,7 +279,7 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .chip.y2026 { background: #e7f0ff; color: #2f6fed; }
 .chip.y2027 { background: #fff2e2; color: #d97c1e; }
 .chip.anken { background: #eaf7ec; color: #238a4e; }
-.chip.kensyu { background: #f5eaf7; color: #8a3f96; }
+.chip.class { background: #f5eaf7; color: #8a3f96; }
 .chip.sales { background: #f0e9ff; color: #7c4de0; }
 .chip.ops { background: #e5f6ec; color: #279158; }
 .chip x { font-size: 10px; opacity: .6; cursor: pointer; }

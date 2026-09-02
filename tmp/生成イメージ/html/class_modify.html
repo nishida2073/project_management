@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/kensyu_modify.css">
+<link rel="stylesheet" href="css/class_modify.css">
 </head>
 <body>
 <div class="app">
-  <iframe src="sidebar.html?active=kensyu" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <iframe src="sidebar.html?active=class" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
   <div class="main">
     <div class="topbar"></div>
-    <div class="content"><div class="toolbar"><h1>研修一覧</h1></div><div class="table-card"></div></div>
+    <div class="content"><div class="toolbar"><h1>クラス一覧</h1></div><div class="table-card"></div></div>
   </div>
 
   <div class="overlay">
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>研修編集</h2>
-          <div class="sub">BC02-01-C1　ビジネス基礎研修の情報を編集します</div>
+          <h2>クラス編集</h2>
+          <div class="sub">001　受託_システム開発入門の情報を編集します</div>
         </div>
-        <a class="close-x" href="kensyu_list.html">✕</a>
+        <a class="close-x" href="class_list.html">✕</a>
       </div>
       <div class="modal-body">
         <div class="form-section">案件</div>
@@ -42,23 +42,29 @@
         </div>
         <div class="form-section">コース</div>
         <div class="form-field">
-          <label>コースコード<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="BC02-01,BC02-02,GCD-114,GCD-115,NDU-203,NDU-204,CEC-051" data-target="#courseName" data-map='{"BC02-01":"ビジネス基礎研修","BC02-02":"ビジネス基礎研修","GCD-114":"グローバル基礎コース","GCD-115":"グローバル基礎コース","NDU-203":"次世代リーダー育成研修","NDU-204":"次世代リーダー育成研修","CEC-051":"マネジメント基礎研修"}' data-target2="#courseSalesType" data-map2='{"BC02-01":"内販","BC02-02":"内販","GCD-114":"外販","GCD-115":"外販","NDU-203":"外販","NDU-204":"外販","CEC-051":"外販"}' data-class-map2='{"外販":"online","内販":"hybrid"}'>BC02-01<span class="caret">▾</span></div>
+          <label>年度<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="2024年度,2025年度,2026年度,2027年度" data-target="#courseCode" data-options-map='{"2024年度":[],"2025年度":[],"2026年度":["BC02B","BC07A","BC12B","BC17B","BC22B","BC27A","BC32B","DP08B","DP16A","GC01B","GC06B","BE10A"],"2027年度":[]}'>2026年度<span class="caret">▾</span></div>
         </div>
-        <div class="form-field"></div>
+        <div class="form-field">
+          <label>コースコード<span class="req">必須</span></label>
+          <div class="form-control js-select" id="courseCode" data-options="BC02B,BC07A,BC12B,BC17B,BC22B,BC27A,BC32B,DP08B,DP16A,GC01B,GC06B,BE10A" data-target="#courseName" data-map='{"BC02B":"受託_システム開発入門","BC07A":"公募_基盤技術基礎","BC12B":"受託_AP要件定義基礎","BC17B":"受託_AP設計・製造基礎","BC22B":"受託_AP試験基礎","BC27A":"公募_データモデル設計基礎","BC32B":"受託_基盤構築プロセス基礎","DP08B":"受託_営業基本Ⅰ","DP16A":"公募_営業リスクマネジメントⅠ","GC01B":"受託_IT-PM入門","GC06B":"受託_品質管理入門","BE10A":"公募_システム基盤実践"}' data-target2="#courseParticipationType" data-map2='{"BC02B":"受託","BC07A":"公募","BC12B":"受託","BC17B":"受託","BC22B":"受託","BC27A":"公募","BC32B":"受託","DP08B":"受託","DP16A":"公募","GC01B":"受託","GC06B":"受託","BE10A":"公募"}' data-class-map2='{"公募":"orange","受託":"blue"}' data-target3="#courseDeliveryType" data-map3='{"BC02B":"集合","BC07A":"オンライン","BC12B":"集合","BC17B":"集合","BC22B":"集合","BC27A":"オンライン","BC32B":"集合","DP08B":"集合","DP16A":"オンライン","GC01B":"集合","GC06B":"オンライン","BE10A":"集合"}' data-class-map3='{"集合":"onsite","オンライン":"online","ハイブリッド":"hybrid"}' data-target4="#courseSchedule" data-map4='{"BC02B":"3日・20〜24名","BC07A":"1日・30〜40名","BC12B":"3日・20〜30名","BC17B":"2日・15〜20名","BC22B":"2日・20〜24名","BC27A":"1日・20〜30名","BC32B":"3日・15〜20名","DP08B":"2日・20〜30名","DP16A":"1日・25〜35名","GC01B":"2日・20〜24名","GC06B":"1日・20〜30名","BE10A":"3日・15〜20名"}'>BC02B<span class="caret">▾</span></div>
+        </div>
         <div class="form-field full">
           <label>コース情報</label>
           <div class="form-value">
-            <span id="courseName">ビジネス基礎研修</span>
-            <span class="tag hybrid" id="courseSalesType">内販</span>
+            <span id="courseName">受託_システム開発入門</span>
+            <span class="tag blue" id="courseParticipationType">受託</span>
+            <span style="font-size:12px;color:#9aa4b5;">推奨：<span class="tag onsite" id="courseDeliveryType">集合</span> <span id="courseSchedule">3日・20〜24名</span></span>
           </div>
         </div>
-        <div class="form-section">研修</div>
+        <div class="form-section">クラス</div>
         <div class="form-field">
-          <label>研修コード</label>
-          <div class="form-control readonly">BC02-01-C1</div>
+          <label>クラスコード</label>
+          <div class="form-control readonly">001</div>
         </div>
-        <div class="form-field"></div>
+        <div class="form-field">
+          <div style="font-size:11px;color:#9aa4b5;padding-top:22px;">※同じコースコードの登録がある場合、連番が増加します（002、003…）</div>
+        </div>
         <div class="form-field">
           <label>開始日<span class="req">必須</span></label>
           <div class="form-control js-date">2026/09/02<span class="caret">▾</span></div>
@@ -67,7 +73,7 @@
           <label>終了日<span class="req">必須</span></label>
           <div class="form-control js-date">2026/09/04<span class="caret">▾</span></div>
         </div>
-        <div class="form-field">
+        <div class="form-field full">
           <label>実施形態<span class="req">必須</span></label>
           <div class="radio-group">
             <label class="radio-option"><input type="radio" name="deliveryType" value="集合" checked><span class="radio-dot"></span><span class="tag onsite">集合</span></label>
@@ -75,7 +81,7 @@
             <label class="radio-option"><input type="radio" name="deliveryType" value="ハイブリッド"><span class="radio-dot"></span><span class="tag hybrid">ハイブリッド</span></label>
           </div>
         </div>
-        <div class="form-field">
+        <div class="form-field full">
           <label>受講人数</label>
           <div class="form-control number-select" data-options="10,15,20,24,30,35,40,50">
             <input type="text" inputmode="numeric" value="24">
@@ -129,14 +135,23 @@
           <label>聴講者名</label>
           <input type="text" class="form-control" placeholder="例）〇〇 〇〇">
         </div>
+        <div class="form-section">動機付け</div>
+        <div class="form-field">
+          <label>動機付け会社名</label>
+          <input type="text" class="form-control" placeholder="例）株式会社NEUトレーニング">
+        </div>
+        <div class="form-field">
+          <label>動機付け担当者名</label>
+          <input type="text" class="form-control" placeholder="例）〇〇 〇〇">
+        </div>
         <div class="form-field full">
           <label>備考</label>
           <textarea class="form-control textarea" placeholder="特記事項があれば入力"></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <a class="btn" href="kensyu_list.html">キャンセル</a>
-        <a class="btn primary" href="kensyu_list.html">保存する</a>
+        <a class="btn" href="class_list.html">キャンセル</a>
+        <a class="btn primary" href="class_list.html">保存する</a>
       </div>
     </div>
   </div>

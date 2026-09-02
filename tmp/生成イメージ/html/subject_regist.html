@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/subject_regist.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=subject" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>科目一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>科目新規登録</h2>
+          <div class="sub">新規の科目情報を登録します</div>
+        </div>
+        <a class="close-x" href="subject_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>科目ID</label>
+          <div class="form-control readonly">自動採番（SBJ-013）</div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>科目区分</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="subjectType" value="新CDPB"><span class="radio-dot"></span><span class="tag blue">新CDPB</span></label>
+            <label class="radio-option"><input type="radio" name="subjectType" value="旧CDPB"><span class="radio-dot"></span><span class="tag gray">旧CDPB</span></label>
+            <label class="radio-option"><input type="radio" name="subjectType" value="新入社員研修"><span class="radio-dot"></span><span class="tag orange">新入社員研修</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>科目名<span class="req">必須</span></label>
+          <input type="text" class="form-control" placeholder="例）システム開発入門">
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="subject_list.html">キャンセル</a>
+        <a class="btn primary" href="subject_list.html">登録する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+</body>
+</html>

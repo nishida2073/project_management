@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/kensyu_progress_modify.css">
+<link rel="stylesheet" href="css/class_progress_modify.css">
 </head>
 <body>
 <div class="app">
   <iframe src="sidebar.html?active=unei" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
   <div class="main">
     <div class="topbar"></div>
-    <div class="content"><div class="toolbar"><h1>研修運営進捗一覧</h1></div><div class="table-card"></div></div>
+    <div class="content"><div class="toolbar"><h1>クラス運営進捗一覧</h1></div><div class="table-card"></div></div>
   </div>
 
   <div class="overlay">
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>研修運営進捗の更新</h2>
-          <div class="sub">BC02-01-C1　ビジネス基礎研修（受託）　2026/09/02〜2026/09/04　管理担当者：佐藤 一郎</div>
+          <h2>クラス運営進捗の更新</h2>
+          <div class="sub">001　受託_システム開発入門　2026/09/02〜2026/09/04　管理担当者：佐藤 一郎</div>
         </div>
-        <a class="close-x" href="kensyu_progress_list.html">✕</a>
+        <a class="close-x" href="class_progress_list.html">✕</a>
       </div>
       <div class="tabs">
         <div class="tab">すべて<span class="count">3/12</span></div>
@@ -46,32 +46,32 @@
               <td class="step-name"><span class="step-no">5</span>⑤受講詳細案内発出</td>
               <td><div class="mini-control js-date">2026/08/31<span class="caret">▾</span></div></td>
               <td><div class="mini-control js-date">2026/08/31<span class="caret">▾</span></div></td>
-              <td><div class="mini-control wide">佐藤 一郎</div></td>
-              <td><div class="status-select done js-select" data-options="未着手,対応中,完了,遅延" data-class-map='{"未着手":"wait","対応中":"progress","完了":"done","遅延":"delay"}'>完了<span class="caret">▾</span></div></td>
+              <td><div class="mini-control wide js-select" data-options="佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹,運営チーム">佐藤 一郎<span class="caret">▾</span></div></td>
+              <td><div class="status-select done js-select" data-options="実施前,実施中,完了" data-class-map='{"実施前":"wait","実施中":"progress","完了":"done"}'>完了<span class="caret">▾</span></div></td>
               <td><div class="memo-input">－</div></td>
             </tr>
             <tr>
               <td class="step-name"><span class="step-no">6</span>⑥電子教材送付</td>
               <td><div class="mini-control js-date">2026/09/01<span class="caret">▾</span></div></td>
-              <td><div class="mini-control js-date">未実施<span class="caret">▾</span></div></td>
-              <td><div class="mini-control wide">運営チーム</div></td>
-              <td><div class="status-select progress js-select" data-options="未着手,対応中,完了,遅延" data-class-map='{"未着手":"wait","対応中":"progress","完了":"done","遅延":"delay"}'>対応中<span class="caret">▾</span></div></td>
+              <td><div class="mini-control js-date"><span class="caret">▾</span></div></td>
+              <td><div class="mini-control wide js-select" data-options="佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹,運営チーム">運営チーム<span class="caret">▾</span></div></td>
+              <td><div class="status-select progress js-select" data-options="実施前,実施中,完了" data-class-map='{"実施前":"wait","実施中":"progress","完了":"done"}'>実施中<span class="caret">▾</span></div></td>
               <td><div class="memo-input">2名分の宛先要再確認</div></td>
             </tr>
             <tr>
               <td class="step-name"><span class="step-no">7</span>⑦出欠確認・報告</td>
               <td><div class="mini-control js-date">2026/09/02<span class="caret">▾</span></div></td>
-              <td><div class="mini-control js-date">未実施<span class="caret">▾</span></div></td>
-              <td><div class="mini-control wide">佐藤 一郎</div></td>
-              <td><div class="status-select wait js-select" data-options="未着手,対応中,完了,遅延" data-class-map='{"未着手":"wait","対応中":"progress","完了":"done","遅延":"delay"}'>未着手<span class="caret">▾</span></div></td>
+              <td><div class="mini-control js-date"><span class="caret">▾</span></div></td>
+              <td><div class="mini-control wide js-select" data-options="佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹,運営チーム">佐藤 一郎<span class="caret">▾</span></div></td>
+              <td><div class="status-select wait js-select" data-options="実施前,実施中,完了" data-class-map='{"実施前":"wait","実施中":"progress","完了":"done"}'>実施前<span class="caret">▾</span></div></td>
               <td><div class="memo-input">11時までに送信</div></td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="modal-footer">
-        <a class="btn" href="kensyu_progress_list.html">キャンセル</a>
-        <a class="btn primary" href="kensyu_progress_list.html">保存する</a>
+        <a class="btn" href="class_progress_list.html">キャンセル</a>
+        <a class="btn primary" href="class_progress_list.html">保存する</a>
       </div>
     </div>
   </div>
