@@ -421,7 +421,7 @@ function Resolve-BrowseStart {
 }
 
 $commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
-$authVars = @("KintoneSubdomain", "KintoneID", "KintonePW")
+$authVars = @("KintoneSubdomain", "KintoneLoginName", "KintonePassword")
 
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
@@ -455,15 +455,15 @@ $settingsVarLabels = @{
     "OutputReportDir"          = "業務日誌・パルスサーベイの出力先"
     "OutputCollectDataRootDir" = "アプリデータ集計の出力先"
     "OutputAlertRootDir"       = "アラート検知結果の出力先"
-    "KintoneID"                = "kintoneログインID"
-    "KintonePW"                = "kintoneログインパスワード"
-    "KintoneSubdomain"         = "kintoneサブドメイン"
+    "KintoneLoginName"         = "ログイン名"
+    "KintonePassword"          = "パスワード"
+    "KintoneSubdomain"         = "サブドメイン"
     "TargetAppIds"             = "対象アプリID"
     "TargetDateCodeField"      = "日付フィールドコード"
     "TargetUserCodeField"      = "受講生IDフィールドコード"
 }
 $settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
-$settingsMaskedVars = @("KintonePW")
+$settingsMaskedVars = @("KintonePassword")
 
 # TargetAppIds等は種別（業務日誌/パルスサーベイ等）ごとに同じ変数名を別の値で使うため、変数名に
 # 各種別のSuffix（Get-ReportTypeDefs参照）を付けて区別して持つ。この関数はそのサフィックス付きの
@@ -942,8 +942,8 @@ function Test-KintoneConnection {
     param([string]$ReportGroup)
 
     $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-    $kintoneId = Get-GroupSettingsFieldValue "AUTH_KintoneID"
-    $kintonePw = Get-GroupSettingsFieldValue "AUTH_KintonePW"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
     $targetAppIdsValue = Get-GroupSettingsFieldValue "${ReportGroup}_TargetAppIds"
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
 
@@ -953,7 +953,7 @@ function Test-KintoneConnection {
     }
 
     $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneId}:${kintonePw}"))
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
 
     # IDが複数になっても横に長くならないよう、1件1行の縦並びで表示する
     $resultLines = @()

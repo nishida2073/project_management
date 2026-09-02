@@ -2,8 +2,8 @@
     [string]$BaseUrl,
     [string]$ClientDataFilePath,
     [string]$TargetGroupName,
-    [string]$KintoneID,
-    [string]$KintonePW,
+    [string]$KintoneLoginName,
+    [string]$KintonePassword,
     [string]$Authorization,
     [string]$OutputRootDir,
     [string]$OutputFileNameSuffix,
@@ -200,7 +200,7 @@ function Export-File {
     New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
     if ([string]::IsNullOrWhiteSpace($Authorization)) {
-        $pair = "${KintoneID}:${KintonePW}"
+        $pair = "${KintoneLoginName}:${KintonePassword}"
         $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
     }
 
