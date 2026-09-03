@@ -815,8 +815,8 @@ function Export-TotalResult {
     
     # セルの色
     $resultRange = $sheet.Range(
-        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 2 -1 ), 
-        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 3 -1))
+        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 3 -1 ), 
+        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 4 -1))
     Set-ResultCellColor $resultRange
 }
 
