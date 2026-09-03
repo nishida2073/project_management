@@ -16,8 +16,12 @@ object SettingsStore {
     private const val KEY_SEND_ENABLED = "send_enabled"
     /** [Config.sendSplitFailedEnabled]のキー */
     private const val KEY_SEND_SPLIT_FAILED_ENABLED = "send_split_failed_enabled"
+    /** [Config.sendSplitExcludedEnabled]のキー */
+    private const val KEY_SEND_SPLIT_EXCLUDED_ENABLED = "send_split_excluded_enabled"
     /** [Config.searchSplitFailedEnabled]のキー */
     private const val KEY_SEARCH_SPLIT_FAILED_ENABLED = "search_split_failed_enabled"
+    /** [Config.searchSplitExcludedEnabled]のキー */
+    private const val KEY_SEARCH_SPLIT_EXCLUDED_ENABLED = "search_split_excluded_enabled"
     /** [Config.searchSendTargetUnconfiguredEnabled]のキー */
     private const val KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED = "search_send_target_unconfigured_enabled"
     /** [Config.autoReplySplitFailedEnabled]のキー */
@@ -30,6 +34,10 @@ object SettingsStore {
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     /** [Config.smsMatchToleranceSeconds]のキー */
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
+    /** [Config.continuationEnabled]のキー */
+    private const val KEY_CONTINUATION_ENABLED = "continuation_enabled"
+    /** [Config.continuationScope]のキー */
+    private const val KEY_CONTINUATION_SCOPE = "continuation_scope"
     /** [Config.themeMode]のキー */
     private const val KEY_THEME_MODE = "theme_mode"
     /** [Config.smsSearchDateRangeDays]のキー */
@@ -50,6 +58,8 @@ object SettingsStore {
     private const val KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED = "default_split_failed_only_enabled"
     /** [Config.defaultSplitSucceededOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED = "default_split_succeeded_only_enabled"
+    /** [Config.defaultSplitExcludedOnlyEnabled]のキー */
+    private const val KEY_DEFAULT_SPLIT_EXCLUDED_ONLY_ENABLED = "default_split_excluded_only_enabled"
     /** [Config.defaultSentAutoOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
     /** [Config.defaultSentManualOnlyEnabled]のキー */
@@ -78,9 +88,9 @@ object SettingsStore {
 
         /** [fromName]を提供するコンパニオンオブジェクト */
         companion object {
-            /** 保存値からの復元用。未知の値やnullは[SendTarget.matchTarget]の既定値と同じBODYにフォールバックする */
+            /** 保存値からの復元用。未知の値やnullは[SendTarget.matchTarget]の既定値と同じCOMPANY_NAMEにフォールバックする */
             fun fromName(name: String?): MatchTarget =
-                entries.firstOrNull { it.name == name } ?: BODY
+                entries.firstOrNull { it.name == name } ?: COMPANY_NAME
         }
     }
 
@@ -103,14 +113,35 @@ object SettingsStore {
         }
     }
 
+    /**
+     * 継続SMS（[SmsResolution.isContinuation]）の引き継ぎを、送信元ごとにどこまで遡って有効とするか。
+     * [UNLIMITED]は日付を問わず過去に一度でも形式正常なSMSがあれば常に引き継ぐ。[SAME_DAY]は
+     * 引き継ぎ元のSMSと暦日が同じ場合のみ有効とし、日付が変わると引き継ぎがリセットされる
+     */
+    enum class ContinuationScope {
+        UNLIMITED,
+        SAME_DAY;
+
+        /** [fromName]を提供するコンパニオンオブジェクト */
+        companion object {
+            /** 保存値からの復元用。未知の値やnullは[DEFAULT_CONFIG]と同じSAME_DAYにフォールバックする */
+            fun fromName(name: String?): ContinuationScope =
+                entries.firstOrNull { it.name == name } ?: SAME_DAY
+        }
+    }
+
     /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[SendTarget]を参照） */
     data class Config(
         /** trueなら自動送信モード、falseなら手動送信モード（[KintoneUploadWorker]が参照） */
         val sendEnabled: Boolean,
         /** 自動送信時、本文の形式が異常なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
         val sendSplitFailedEnabled: Boolean,
+        /** 自動送信時、形式が除外（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか */
+        val sendSplitExcludedEnabled: Boolean,
         /** SMS検索画面で、本文の形式が異常なSMSを選択可能にするかどうか */
         val searchSplitFailedEnabled: Boolean,
+        /** SMS検索画面で、形式が除外（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか */
+        val searchSplitExcludedEnabled: Boolean,
         /** SMS検索画面で、送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
         val searchSendTargetUnconfiguredEnabled: Boolean,
         /** 自動受信時、本文の形式が異常なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
@@ -123,6 +154,10 @@ object SettingsStore {
         val autoRefreshIntervalSeconds: Int,
         /** 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒） */
         val smsMatchToleranceSeconds: Int,
+        /** 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）機能自体を有効にするかどうか */
+        val continuationEnabled: Boolean,
+        /** 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）を送信元ごとにどこまで遡って有効とするか */
+        val continuationScope: ContinuationScope,
         /** アプリの配色モード */
         val themeMode: ThemeMode,
         /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲（日） */
@@ -147,6 +182,8 @@ object SettingsStore {
         val defaultSplitFailedOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「形式」の「正常」チェックボックスを初期状態でONにするかどうか */
         val defaultSplitSucceededOnlyEnabled: Boolean,
+        /** SMS検索画面を開いた際に「形式」の「除外」チェックボックスを初期状態でONにするかどうか */
+        val defaultSplitExcludedOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（自動）」チェックボックスを初期状態でONにするかどうか */
         val defaultSentAutoOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（手動）」チェックボックスを初期状態でONにするかどうか */
@@ -197,7 +234,7 @@ object SettingsStore {
          * falseの場合は[SmsParts.companyName]（変換なし）をそのまま使う */
         val companyNameWidthConversionEnabled: Boolean = false,
         /** [keywords]をSMS本文そのものと会社名（抽出結果）のどちらに対して照合するか */
-        val matchTarget: MatchTarget = MatchTarget.BODY
+        val matchTarget: MatchTarget = MatchTarget.COMPANY_NAME
     ) {
         /** [keywords]をカンマ・改行で分割し、前後の空白を除いた上で空要素を取り除いたリスト */
         val keywordList: List<String>
@@ -269,13 +306,17 @@ object SettingsStore {
         val editor = prefs(context).edit()
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
             .putBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, config.sendSplitFailedEnabled)
+            .putBoolean(KEY_SEND_SPLIT_EXCLUDED_ENABLED, config.sendSplitExcludedEnabled)
             .putBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, config.searchSplitFailedEnabled)
+            .putBoolean(KEY_SEARCH_SPLIT_EXCLUDED_ENABLED, config.searchSplitExcludedEnabled)
             .putBoolean(KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED, config.searchSendTargetUnconfiguredEnabled)
             .putBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, config.autoReplySplitFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
             .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
+            .putBoolean(KEY_CONTINUATION_ENABLED, config.continuationEnabled)
+            .putString(KEY_CONTINUATION_SCOPE, config.continuationScope.name)
             .putString(KEY_THEME_MODE, config.themeMode.name)
             .putInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, config.smsSearchDateRangeDays)
             .putBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, config.searchFiltersVisibleByDefault)
@@ -285,6 +326,7 @@ object SettingsStore {
             .putBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, config.defaultSendNoneOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, config.defaultSplitFailedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED, config.defaultSplitSucceededOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_SPLIT_EXCLUDED_ONLY_ENABLED, config.defaultSplitExcludedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
         if (config.defaultSendTargetFilterId != null) {
@@ -302,13 +344,17 @@ object SettingsStore {
     private val DEFAULT_CONFIG = Config(
         sendEnabled = true,
         sendSplitFailedEnabled = false,
+        sendSplitExcludedEnabled = true,
         searchSplitFailedEnabled = false,
+        searchSplitExcludedEnabled = false,
         searchSendTargetUnconfiguredEnabled = false,
         autoReplySplitFailedEnabled = false,
         autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
         autoRefreshEnabled = true,
         autoRefreshIntervalSeconds = AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS,
         smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
+        continuationEnabled = true,
+        continuationScope = ContinuationScope.SAME_DAY,
         themeMode = ThemeMode.LIGHT,
         smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
         searchFiltersVisibleByDefault = true,
@@ -319,6 +365,7 @@ object SettingsStore {
         defaultSendNoneOnlyEnabled = false,
         defaultSplitFailedOnlyEnabled = false,
         defaultSplitSucceededOnlyEnabled = false,
+        defaultSplitExcludedOnlyEnabled = false,
         defaultSentAutoOnlyEnabled = false,
         defaultSentManualOnlyEnabled = false
     )
@@ -329,7 +376,9 @@ object SettingsStore {
         return Config(
             sendEnabled = p.getBoolean(KEY_SEND_ENABLED, DEFAULT_CONFIG.sendEnabled),
             sendSplitFailedEnabled = p.getBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.sendSplitFailedEnabled),
+            sendSplitExcludedEnabled = p.getBoolean(KEY_SEND_SPLIT_EXCLUDED_ENABLED, DEFAULT_CONFIG.sendSplitExcludedEnabled),
             searchSplitFailedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.searchSplitFailedEnabled),
+            searchSplitExcludedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_EXCLUDED_ENABLED, DEFAULT_CONFIG.searchSplitExcludedEnabled),
             searchSendTargetUnconfiguredEnabled = p.getBoolean(
                 KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED,
                 DEFAULT_CONFIG.searchSendTargetUnconfiguredEnabled
@@ -339,6 +388,8 @@ object SettingsStore {
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, DEFAULT_CONFIG.autoRefreshEnabled),
             autoRefreshIntervalSeconds = p.getInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, DEFAULT_CONFIG.autoRefreshIntervalSeconds),
             smsMatchToleranceSeconds = p.getInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, DEFAULT_CONFIG.smsMatchToleranceSeconds),
+            continuationEnabled = p.getBoolean(KEY_CONTINUATION_ENABLED, DEFAULT_CONFIG.continuationEnabled),
+            continuationScope = ContinuationScope.fromName(p.getString(KEY_CONTINUATION_SCOPE, null)),
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
             smsSearchDateRangeDays = p.getInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, DEFAULT_CONFIG.smsSearchDateRangeDays),
             searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, DEFAULT_CONFIG.searchFiltersVisibleByDefault),
@@ -350,6 +401,7 @@ object SettingsStore {
             defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
             defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitFailedOnlyEnabled),
             defaultSplitSucceededOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitSucceededOnlyEnabled),
+            defaultSplitExcludedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_EXCLUDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitExcludedOnlyEnabled),
             defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
             defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
         )
@@ -458,12 +510,72 @@ object SettingsStore {
     }
 
     /**
+     * [resolveSendTargets]の結果。[SmsParts]は本文からの抽出結果のみを表すため、それが継続SMS
+     * （同一送信元の過去の正常なSMSからの引き継ぎ）によるものかどうかという振り分け固有のメタ情報は
+     * ここで別に持つ。[SmsSearchActivity]など[SmsLogStore.Entry]を経由せず端末上のSMSをその場で
+     * 解決する画面でも必要なため、[SmsLogStore.Entry]側だけに寄せることはできない
+     */
+    data class SmsResolution(
+        /** 本文から抽出した会社名・氏名・内容 */
+        val smsParts: SmsParts,
+        /**
+         * 同一送信元が過去に一度でも形式正常なSMSを送っていたため、その直近1件から会社名・氏名と
+         * 送信先を引き継いだ結果かどうか。今回の本文自体が単独で解析できるかどうかは問わない。
+         * trueの場合、形式・送信先のアイコン表示は通常の⭕/❌・📍/🚫ではなく専用のアイコンに切り替える
+         */
+        val isContinuation: Boolean = false,
+        /**
+         * [isContinuation]がtrueの場合の、引き継ぎ元エントリの送信先表示名（[SmsLogStore.Entry.sendTargetName]）。
+         * 引き継ぎ元の送信先がその後削除・変更されて現在の設定から解決できなくなった場合の表示用フォールバック
+         */
+        val inheritedSendTargetName: String? = null
+    )
+
+    /**
      * SMS本文から[SmsParts]を抽出し、対応する送信先（複数一致し得る）を判定する。抽出結果と
      * 送信先判定の両方が必要な箇所（kintone登録・受信ログ記録・SMS検索画面・テスト送信など）は、
      * 抽出方法（ルールベース／AI）のずれで登録内容と振り分け結果が食い違わないよう必ずこれを使うこと。
+     *
+     * [continuationEnabled]がtrueの場合、[sender]と同じ送信元から過去に一度でも形式正常なSMS
+     * （[SmsLogStore.findLatestValidEntry]、[continuationScope]が[ContinuationScope.UNLIMITED]なら
+     * 日付は問わない）が届いていれば、今回のSMS自体の形式（本文単体で解析できるかどうか）に関わらず、
+     * 常にその直近1件から会社名・氏名・送信先を引き継ぐ（内容は今回の本文そのもの）。一度識別できた
+     * 送信元は[continuationScope]の範囲内でずっと同じ会社名・氏名・送信先として扱う（例:
+     * 「NTTデータ／石田直樹／腹痛です」の後に届いた「とても痛いです」を同一人物の追加内容として扱う）。
+     * [continuationEnabled]がfalse、または該当する過去のSMSが無い送信元は、今回の本文を実際に
+     * 解析して振り分ける
      */
-    suspend fun resolveSendTargets(context: Context, body: String, aiParsingEnabled: Boolean): Pair<SmsParts, List<SendTarget>> {
-        val smsParts = SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled)
-        return smsParts to findSendTargets(context, body, smsParts.companyName)
+    suspend fun resolveSendTargets(
+        context: Context,
+        sender: String,
+        body: String,
+        timestampMillis: Long,
+        aiParsingEnabled: Boolean,
+        continuationEnabled: Boolean,
+        continuationScope: ContinuationScope
+    ): Pair<SmsResolution, List<SendTarget>> {
+        val previousEntry = if (continuationEnabled) {
+            SmsLogStore.findLatestValidEntry(context, sender, timestampMillis, sameDayOnly = continuationScope == ContinuationScope.SAME_DAY)
+        } else {
+            null
+        }
+        val previousParts = previousEntry?.smsParts
+        if (previousEntry != null && previousParts != null) {
+            val smsParts = SmsParts(
+                companyName = previousParts.companyName,
+                userName = previousParts.userName,
+                content = body.trim()
+            )
+            val resolution = SmsResolution(
+                smsParts = smsParts,
+                isContinuation = true,
+                inheritedSendTargetName = previousEntry.sendTargetName
+            )
+            // 送信先も本文からのキーワード一致では再現できないため、前回の判定結果をそのまま引き継ぐ
+            val sendTargets = loadSendTargets(context).filter { it.id in previousEntry.sendTargetIds }
+            return resolution to sendTargets
+        }
+        val extracted = SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled)
+        return SmsResolution(smsParts = extracted) to findSendTargets(context, body, extracted.companyName)
     }
 }

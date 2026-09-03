@@ -60,8 +60,12 @@ class SmsReceiver : BroadcastReceiver() {
                 // KintoneUploadWorkerの登録処理と同じresolveSendTargetsを使い、抽出方法のずれによる
                 // 登録内容と送信先名の食い違いを防ぐ。1件のSMSが複数の送信先に一致することがあるため、
                 // 受信ログ・自動返信ログでは名前を連結して表示する（実際の登録はWorker側で送信先ごとに行う）
-                val (smsParts, sendTargets) = SettingsStore.resolveSendTargets(context, body, config.aiParsingEnabled)
+                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiParsingEnabled, config.continuationEnabled, config.continuationScope)
+                val smsParts = resolution.smsParts
+                // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは空になる。
+                // その場合も表示上は引き継ぎ元の名前を出す（実際の登録は行われない）
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
+                    ?: resolution.inheritedSendTargetName
 
                 // kintoneへの送信結果を待たず受信時点でログ記録することで、送信ログ画面でSMS受信の
                 // 有無を確認できる。smsIdはこの時点では確実に特定できない（電話番号の表記ゆれや
@@ -77,7 +81,9 @@ class SmsReceiver : BroadcastReceiver() {
                     message = context.getString(R.string.message_log_receive),
                     sendTargetName = sendTargetName,
                     smsParts = smsParts,
-                    companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false
+                    companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
+                    sendTargetIds = sendTargets.map { it.id },
+                    isContinuation = resolution.isContinuation
                 )
 
                 if (config.autoReplySplitFailedEnabled && sender.isNotBlank() && smsParts.isSplitFailed()) {
@@ -95,7 +101,8 @@ class SmsReceiver : BroadcastReceiver() {
                                 sendTargetName = sendTargetName,
                                 smsParts = smsParts,
                                 companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
-                                replyBody = config.splitFailedReplyAddition
+                                replyBody = config.splitFailedReplyAddition,
+                                isContinuation = resolution.isContinuation
                             )
                         }
                         AutoReplyThrottle.recordSent(context, sender, now)

@@ -75,15 +75,22 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.rbSendAuto.isChecked = sendEnabled
         binding.rbSendManual.isChecked = !sendEnabled
         binding.swSendSplitFailedEnabled.isEnabled = sendEnabled
+        binding.swSendSplitExcludedEnabled.isEnabled = sendEnabled
         binding.rgSendMode.setOnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSendAuto.id
             SettingsStore.update(this) { it.copy(sendEnabled = enabled) }
             binding.swSendSplitFailedEnabled.isEnabled = enabled
+            binding.swSendSplitExcludedEnabled.isEnabled = enabled
         }
 
         binding.swSendSplitFailedEnabled.isChecked = SettingsStore.load(this).sendSplitFailedEnabled
         binding.swSendSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(sendSplitFailedEnabled = isChecked) }
+        }
+
+        binding.swSendSplitExcludedEnabled.isChecked = SettingsStore.load(this).sendSplitExcludedEnabled
+        binding.swSendSplitExcludedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(sendSplitExcludedEnabled = isChecked) }
         }
 
         binding.swAiParsingEnabled.isChecked = SettingsStore.load(this).aiParsingEnabled
@@ -94,6 +101,11 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.swSearchSplitFailedEnabled.isChecked = SettingsStore.load(this).searchSplitFailedEnabled
         binding.swSearchSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(searchSplitFailedEnabled = isChecked) }
+        }
+
+        binding.swSearchSplitExcludedEnabled.isChecked = SettingsStore.load(this).searchSplitExcludedEnabled
+        binding.swSearchSplitExcludedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchSplitExcludedEnabled = isChecked) }
         }
 
         binding.swSearchSendTargetUnconfiguredEnabled.isChecked = SettingsStore.load(this).searchSendTargetUnconfiguredEnabled
@@ -135,6 +147,26 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(smsMatchToleranceSeconds = seconds) }
         }
 
+        binding.swContinuationEnabled.isChecked = config.continuationEnabled
+        binding.rbContinuationScopeUnlimited.isEnabled = config.continuationEnabled
+        binding.rbContinuationScopeSameDay.isEnabled = config.continuationEnabled
+        binding.swContinuationEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(continuationEnabled = isChecked) }
+            binding.rbContinuationScopeUnlimited.isEnabled = isChecked
+            binding.rbContinuationScopeSameDay.isEnabled = isChecked
+        }
+
+        binding.rbContinuationScopeUnlimited.isChecked = config.continuationScope == SettingsStore.ContinuationScope.UNLIMITED
+        binding.rbContinuationScopeSameDay.isChecked = config.continuationScope == SettingsStore.ContinuationScope.SAME_DAY
+        binding.rgContinuationScope.setOnCheckedChangeListener { _, checkedId ->
+            val scope = if (checkedId == binding.rbContinuationScopeSameDay.id) {
+                SettingsStore.ContinuationScope.SAME_DAY
+            } else {
+                SettingsStore.ContinuationScope.UNLIMITED
+            }
+            SettingsStore.update(this) { it.copy(continuationScope = scope) }
+        }
+
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())
         binding.etSmsSearchDateRangeDays.onPositiveIntChanged { days ->
             SettingsStore.update(this) { it.copy(smsSearchDateRangeDays = days) }
@@ -170,6 +202,11 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.cbDefaultSplitSucceededOnlyEnabled.isChecked = config.defaultSplitSucceededOnlyEnabled
         binding.cbDefaultSplitSucceededOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(defaultSplitSucceededOnlyEnabled = isChecked) }
+        }
+
+        binding.cbDefaultSplitExcludedOnlyEnabled.isChecked = config.defaultSplitExcludedOnlyEnabled
+        binding.cbDefaultSplitExcludedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(defaultSplitExcludedOnlyEnabled = isChecked) }
         }
 
         binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

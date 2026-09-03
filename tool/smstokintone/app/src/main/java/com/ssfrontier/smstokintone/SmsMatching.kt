@@ -72,7 +72,8 @@ object SmsMatching {
         return result
     }
 
-    private fun isSameSender(a: String, b: String): Boolean = normalizeSenderKey(a) == normalizeSenderKey(b)
+    /** [a]と[b]を正規化した上で同一の送信元とみなせるかどうか（電話番号表記のゆれを吸収する） */
+    fun isSameSender(a: String, b: String): Boolean = normalizeSenderKey(a) == normalizeSenderKey(b)
 
     /** 電話番号は数字のみに絞り末尾8桁を比較キーにする。数字がほぼ無い送信者ID等はそのまま比較する */
     private fun normalizeSenderKey(address: String): String {

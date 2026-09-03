@@ -60,7 +60,7 @@ class SmsSearchActivity : AppCompatActivity() {
      * 送信先フィルタ・分割失敗フィルタ・一覧描画がいずれも同じrecordに対して抽出結果を必要とするため、
      * AI呼び出しを伴い得る抽出処理を1件のSMSにつき1回で済ませるためのもの。searchSmsのたびに作り直す
      */
-    private var resolvedPartsCache = mutableMapOf<Long, Pair<SmsParts, List<SettingsStore.SendTarget>>>()
+    private var resolvedPartsCache = mutableMapOf<Long, Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>>>()
 
     /**
      * リスナー登録と、SettingsStoreに保存済みの初期条件（既定の日付範囲・送信先フィルタ・各チェックボックス）の反映のみ行う。
@@ -107,6 +107,7 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.cbSentManualOnly.isChecked = config.defaultSentManualOnlyEnabled
         binding.cbSplitFailedOnly.isChecked = config.defaultSplitFailedOnlyEnabled
         binding.cbSplitSucceededOnly.isChecked = config.defaultSplitSucceededOnlyEnabled
+        binding.cbSplitExcludedOnly.isChecked = config.defaultSplitExcludedOnlyEnabled
     }
 
     /**
@@ -286,7 +287,7 @@ class SmsSearchActivity : AppCompatActivity() {
 
         // AI解析（端末上のAI呼び出し）を伴う場合があるため、ここから先はコルーチンでUIをブロックしない
         lifecycleScope.launch {
-            val aiParsingEnabled = SettingsStore.load(this@SmsSearchActivity).aiParsingEnabled
+            val config = SettingsStore.load(this@SmsSearchActivity)
             resolvedPartsCache = mutableMapOf()
 
             when (val sendTargetId = selectedSendTargetId) {
@@ -294,7 +295,7 @@ class SmsSearchActivity : AppCompatActivity() {
                 AppConstants.SEND_TARGET_FILTER_KEY_UNSET -> {
                     val matched = mutableListOf<SmsRecord>()
                     for (record in records) {
-                        val (_, sendTargets) = resolveSendTargetCached(record, aiParsingEnabled)
+                        val (_, sendTargets) = resolveSendTargetCached(record, config)
                         if (sendTargets.isEmpty()) matched.add(record)
                     }
                     records.clear()
@@ -303,7 +304,7 @@ class SmsSearchActivity : AppCompatActivity() {
                 else -> {
                     val matched = mutableListOf<SmsRecord>()
                     for (record in records) {
-                        val (_, sendTargets) = resolveSendTargetCached(record, aiParsingEnabled)
+                        val (_, sendTargets) = resolveSendTargetCached(record, config)
                         if (sendTargets.any { it.id == sendTargetId }) matched.add(record)
                     }
                     records.clear()
@@ -311,14 +312,14 @@ class SmsSearchActivity : AppCompatActivity() {
                 }
             }
 
-            if (binding.cbSplitFailedOnly.isChecked || binding.cbSplitSucceededOnly.isChecked) {
+            if (binding.cbSplitFailedOnly.isChecked || binding.cbSplitSucceededOnly.isChecked || binding.cbSplitExcludedOnly.isChecked) {
                 val matchedSplitStatusRecords = mutableListOf<SmsRecord>()
                 for (record in records) {
-                    val (smsParts, _) = resolveSendTargetCached(record, aiParsingEnabled)
-                    val matchesFilter = if (smsParts.isSplitFailed()) {
-                        binding.cbSplitFailedOnly.isChecked
-                    } else {
-                        binding.cbSplitSucceededOnly.isChecked
+                    val (resolution, _) = resolveSendTargetCached(record, config)
+                    val matchesFilter = when {
+                        resolution.isContinuation -> binding.cbSplitExcludedOnly.isChecked
+                        resolution.smsParts.isSplitFailed() -> binding.cbSplitFailedOnly.isChecked
+                        else -> binding.cbSplitSucceededOnly.isChecked
                     }
                     if (matchesFilter) matchedSplitStatusRecords.add(record)
                 }
@@ -334,8 +335,10 @@ class SmsSearchActivity : AppCompatActivity() {
     }
 
     /** [resolvedPartsCache]を経由してSettingsStore.resolveSendTargetsを呼ぶ。同一recordへの重複呼び出し（AI解析）を避ける */
-    private suspend fun resolveSendTargetCached(record: SmsRecord, aiParsingEnabled: Boolean): Pair<SmsParts, List<SettingsStore.SendTarget>> =
-        resolvedPartsCache.getOrPut(record.id) { SettingsStore.resolveSendTargets(this, record.body, aiParsingEnabled) }
+    private suspend fun resolveSendTargetCached(record: SmsRecord, config: SettingsStore.Config): Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>> =
+        resolvedPartsCache.getOrPut(record.id) {
+            SettingsStore.resolveSendTargets(this, record.address, record.body, record.dateMillis, config.aiParsingEnabled, config.continuationEnabled, config.continuationScope)
+        }
 
     /** 成功したKintone送信ログのみを対象にする（失敗ログは「未送信」として扱われるべきなので除外） */
     private fun loadCompletedEntries(): List<SmsLogStore.Entry> =
@@ -395,18 +398,24 @@ class SmsSearchActivity : AppCompatActivity() {
         val config = SettingsStore.load(this)
         val dateFormat = DateFormats.display()
         records.forEach { record ->
-            val (smsParts, sendTargets) = resolveSendTargetCached(record, config.aiParsingEnabled)
+            val (resolution, sendTargets) = resolveSendTargetCached(record, config)
             val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@SmsSearchActivity) }
+                ?: resolution.inheritedSendTargetName
                 ?: getString(R.string.label_send_target_none)
             val isSendTargetUnconfigured = sendTargets.none { it.isValid }
             val isAutoReplied = record.id in autoRepliedEntries
             val sentEntry = sentEntries[record.id]
-            val isSplitFailedBody = smsParts.isSplitFailed()
+            val isSplitFailedBody = resolution.smsParts.isSplitFailed()
             val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
-                (!isSplitFailedBody || config.searchSplitFailedEnabled)
+                (!isSplitFailedBody || config.searchSplitFailedEnabled) &&
+                (!resolution.isContinuation || config.searchSplitExcludedEnabled)
             val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
             val sendTargetIcon = getString(
-                if (isSendTargetUnconfigured) R.string.icon_send_target_unconfigured else R.string.icon_send_target_exists
+                when {
+                    resolution.isContinuation -> R.string.icon_send_target_inherited
+                    isSendTargetUnconfigured -> R.string.icon_send_target_unconfigured
+                    else -> R.string.icon_send_target_exists
+                }
             )
 
             val checkBox = CheckBox(this).apply {
@@ -421,7 +430,12 @@ class SmsSearchActivity : AppCompatActivity() {
 
             val textView = TextView(this).apply {
                 text = buildSpannedString {
-                    append(getString(if (isSplitFailedBody) R.string.icon_split_failed else R.string.icon_split_succeeded))
+                    val splitIcon = when {
+                        resolution.isContinuation -> R.string.icon_split_excluded
+                        isSplitFailedBody -> R.string.icon_split_failed
+                        else -> R.string.icon_split_succeeded
+                    }
+                    append(getString(splitIcon))
                     append(" ")
                     if (sentEntry == null) {
                         append(getString(R.string.icon_send_none))

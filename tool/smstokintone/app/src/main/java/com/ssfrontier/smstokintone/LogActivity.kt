@@ -110,7 +110,12 @@ class LogActivity : AppCompatActivity() {
                     append(" ${dateFormat.format(Date(entry.loggedAtMillis))}")
                     entry.smsParts?.let { smsParts ->
                         append(" ")
-                        append(getString(if (smsParts.isSplitFailed()) R.string.icon_split_failed else R.string.icon_split_succeeded))
+                        val splitIcon = when {
+                            entry.isContinuation -> R.string.icon_split_excluded
+                            smsParts.isSplitFailed() -> R.string.icon_split_failed
+                            else -> R.string.icon_split_succeeded
+                        }
+                        append(getString(splitIcon))
                     }
                     if (entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE) {
                         append("  ")
@@ -138,11 +143,12 @@ class LogActivity : AppCompatActivity() {
 
             val sendTargetNameView = TextView(this).apply {
                 text = buildSpannedString {
-                    append(
-                        getString(
-                            if (entry.sendTargetName == null) R.string.icon_send_target_unconfigured else R.string.icon_send_target_exists
-                        )
-                    )
+                    val sendTargetIcon = when {
+                        entry.isContinuation -> R.string.icon_send_target_inherited
+                        entry.sendTargetName == null -> R.string.icon_send_target_unconfigured
+                        else -> R.string.icon_send_target_exists
+                    }
+                    append(getString(sendTargetIcon))
                     append(" ")
                     color(ContextCompat.getColor(this@LogActivity, R.color.send_target_name)) {
                         bold { append(entry.sendTargetName ?: getString(R.string.label_send_target_none)) }

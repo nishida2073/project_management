@@ -3,6 +3,7 @@ package com.ssfrontier.smstokintone
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Calendar
 
 /**
  * SMS送受信・自動返信の履歴を1件のJSON配列としてSharedPreferencesに永続化するログストア。
@@ -69,7 +70,19 @@ object SmsLogStore {
         /** kintone登録時に会社名へ半角大文字・全角統一の変換を適用したか */
         val companyNameConverted: Boolean = false,
         /** [EntryType.AUTO_REPLY]で実際に送信した返信本文。それ以外のエントリはnull */
-        val replyBody: String? = null
+        val replyBody: String? = null,
+        /**
+         * 振り分け先となった送信先のID一覧（[SettingsStore.SendTarget.id]）。[EntryType.RECEIVE]で
+         * 記録され、[findLatestValidEntry]経由で継続SMS（[isContinuation]）の
+         * 送信先引き継ぎに使われる。それ以外のエントリ種別では空リスト
+         */
+        val sendTargetIds: List<String> = emptyList(),
+        /**
+         * このエントリが継続SMS（同一送信元の過去の正常なSMSからの引き継ぎ、
+         * [SettingsStore.SmsResolution.isContinuation]参照）によるものかどうか。[smsParts]は
+         * 抽出結果のみを表すためこことは別に持つ
+         */
+        val isContinuation: Boolean = false
     )
 
     /** ログの読み書きに使うSharedPreferencesインスタンスを取得する */
@@ -90,7 +103,9 @@ object SmsLogStore {
         manual: Boolean = false,
         smsParts: SmsParts? = null,
         companyNameConverted: Boolean = false,
-        replyBody: String? = null
+        replyBody: String? = null,
+        sendTargetIds: List<String> = emptyList(),
+        isContinuation: Boolean = false
     ) {
         val entries = getAll(context).toMutableList()
         entries.add(
@@ -108,7 +123,9 @@ object SmsLogStore {
                 manual = manual,
                 smsParts = smsParts,
                 companyNameConverted = companyNameConverted,
-                replyBody = replyBody
+                replyBody = replyBody,
+                sendTargetIds = sendTargetIds,
+                isContinuation = isContinuation
             )
         )
 
@@ -125,6 +142,8 @@ object SmsLogStore {
                 .put("smsId", entry.smsId ?: NO_SMS_ID)
                 .put("manual", entry.manual)
                 .put("companyNameConverted", entry.companyNameConverted)
+                .put("sendTargetIds", JSONArray(entry.sendTargetIds))
+                .put("isContinuation", entry.isContinuation)
             entry.sendTargetName?.let { obj.put("sendTargetName", it) }
             entry.replyBody?.let { obj.put("replyBody", it) }
             entry.smsParts?.let {
@@ -171,7 +190,11 @@ object SmsLogStore {
                         content = it.optString("content", ""),
                         parsedByAi = it.optBoolean("parsedByAi", false)
                     )
-                }
+                },
+                sendTargetIds = obj.optJSONArray("sendTargetIds")?.let { idsArray ->
+                    (0 until idsArray.length()).map { idsArray.getString(it) }
+                } ?: emptyList(),
+                isContinuation = obj.optBoolean("isContinuation", false)
             )
         }
     }
@@ -179,5 +202,40 @@ object SmsLogStore {
     /** 保存済みの全ログエントリを削除する */
     fun clear(context: Context) {
         prefs(context).edit().remove(KEY_ENTRIES).apply()
+    }
+
+    /**
+     * [sender]と同じ送信元（[SmsMatching.isSameSender]で電話番号表記のゆれを吸収して比較）・
+     * [timestampMillis]より前に記録されたログのうち、形式が正常だった直近1件を返す（無ければnull）。
+     * エントリ種別は問わない（自動受信のRECEIVEだけでなく、SMS検索画面からの手動送信によるSEND_START/
+     * SEND_COMPLETEも対象。手動送信のみで運用している場合RECEIVEログが1件も無いこともあるため）。
+     * 同一送信元から一度でも形式正常なSMSが届いていれば、以降のSMS（例:「とても痛いです」のように
+     * 本文単体では会社名・氏名を判定できないものも含め全て）をその送信元から会社名・氏名・送信先を
+     * 引き継ぐ対象とするための検索に使う（[SettingsStore.resolveSendTargets]・[SettingsStore.SmsResolution]参照）。
+     * [sameDayOnly]がtrueの場合、[timestampMillis]と暦日が異なる過去のログは対象外とする
+     * （[SettingsStore.ContinuationScope.SAME_DAY]に対応。SmsLogStoreはSettingsStoreに依存しないよう、
+     * 呼び出し側でBooleanに変換して渡すこと）
+     */
+    fun findLatestValidEntry(
+        context: Context,
+        sender: String,
+        timestampMillis: Long,
+        sameDayOnly: Boolean
+    ): Entry? {
+        return getAll(context)
+            .filter {
+                SmsMatching.isSameSender(it.sender, sender) &&
+                    it.timestampMillis < timestampMillis &&
+                    it.smsParts?.isSplitFailed() == false
+            }
+            .filter { !sameDayOnly || isSameDay(it.timestampMillis, timestampMillis) }
+            .maxByOrNull { it.timestampMillis }
+    }
+
+    /** [aMillis]と[bMillis]が同じ暦日（年・年間通日が一致）かどうか */
+    private fun isSameDay(aMillis: Long, bMillis: Long): Boolean {
+        val a = Calendar.getInstance().apply { timeInMillis = aMillis }
+        val b = Calendar.getInstance().apply { timeInMillis = bMillis }
+        return a.get(Calendar.YEAR) == b.get(Calendar.YEAR) && a.get(Calendar.DAY_OF_YEAR) == b.get(Calendar.DAY_OF_YEAR)
     }
 }

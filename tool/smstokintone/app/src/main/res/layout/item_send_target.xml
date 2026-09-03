@@ -173,17 +173,18 @@
                         android:orientation="horizontal">
 
                         <RadioButton
-                            android:id="@+id/rbMatchTargetBody"
+                            android:id="@+id/rbMatchTargetCompanyName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="16dp"
                             android:checked="true"
-                            android:text="@string/rb_match_target_body" />
+                            android:text="@string/rb_match_target_company_name" />
                         <RadioButton
-                            android:id="@+id/rbMatchTargetCompanyName"
+                            android:id="@+id/rbMatchTargetBody"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/rb_match_target_company_name" />
+                            android:checked="false"
+                            android:text="@string/rb_match_target_body" />
                     </RadioGroup>
                 </LinearLayout>
             </LinearLayout>
