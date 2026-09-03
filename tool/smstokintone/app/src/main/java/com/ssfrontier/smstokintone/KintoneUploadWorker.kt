@@ -25,10 +25,16 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる（SmsMatching参照）
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        val (smsParts, sendTarget) = SettingsStore.resolveSendTarget(applicationContext, body, config.aiParsingEnabled)
+        val (smsParts, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, body, config.aiParsingEnabled)
+        val validSendTargets = sendTargets.filter { it.isValid }
 
-        if (sendTarget == null || !sendTarget.isValid) {
-            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTarget?.displayName(applicationContext), manual = manual, smsParts = smsParts)
+        if (validSendTargets.isEmpty()) {
+            // 一致した送信先自体が無い場合は送信先名なしの1件、一致したが設定不備で無効な場合は
+            // その送信先ごとに1件ずつ「送信先未設定」ログを記録する
+            val unconfiguredTargets: List<SettingsStore.SendTarget?> = if (sendTargets.isEmpty()) listOf(null) else sendTargets
+            unconfiguredTargets.forEach { sendTarget ->
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTarget?.displayName(applicationContext), manual = manual, smsParts = smsParts)
+            }
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
             // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
             return@withContext Result.success()
@@ -40,55 +46,60 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             return@withContext Result.success()
         }
 
-        if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
-            logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
-            return@withContext Result.success()
+        // 一致した送信先ごとに個別にkintoneへ登録し、ログも送信先ごとに分けて記録する。
+        // いずれかの送信先で一時的な失敗（リトライ可能）が発生した場合、ワーカー全体をリトライする
+        // ため、既に成功した送信先へ再度送信されることがあるが、KintoneApi側の重複判定で実害は防げる
+        var shouldRetryAny = false
+        for (sendTarget in validSendTargets) {
+            if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
+                continue
+            }
+
+            logStart(sender, body, timestampMillis, smsId, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
+
+            val targetDatetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
+                KintoneApi.formatIsoDateTime(timestampMillis)
+            } else {
+                null
+            }
+            val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
+                smsParts.companyNameNormalizedWidth
+            } else {
+                smsParts.companyName
+            }
+
+            when (val result = KintoneApi.postRecord(
+                applicationContext,
+                sendTarget,
+                senderValue = sender,
+                bodyValue = body,
+                datetimeIsoValue = targetDatetimeIso,
+                companyNameValue = companyNameValue,
+                userNameValue = smsParts.userName,
+                contentValue = smsParts.content
+            )) {
+                is KintoneApi.PostResult.Success -> {
+                    logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
+                }
+                is KintoneApi.PostResult.Skipped -> {
+                    logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
+                }
+                is KintoneApi.PostResult.HttpFailure -> {
+                    val detail = "${result.code} ${result.detail}"
+                    Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
+                    logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
+                    if (result.isRetryable) shouldRetryAny = true
+                }
+                is KintoneApi.PostResult.NetworkError -> {
+                    Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
+                    logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
+                    shouldRetryAny = true
+                }
+            }
         }
 
-        logStart(sender, body, timestampMillis, smsId, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
-
-        val datetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
-            KintoneApi.formatIsoDateTime(timestampMillis)
-        } else {
-            null
-        }
-
-        val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
-            smsParts.companyNameNormalizedWidth
-        } else {
-            smsParts.companyName
-        }
-
-        when (val result = KintoneApi.postRecord(
-            applicationContext,
-            sendTarget,
-            senderValue = sender,
-            bodyValue = body,
-            datetimeIsoValue = datetimeIso,
-            companyNameValue = companyNameValue,
-            userNameValue = smsParts.userName,
-            contentValue = smsParts.content
-        )) {
-            is KintoneApi.PostResult.Success -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
-                Result.success()
-            }
-            is KintoneApi.PostResult.Skipped -> {
-                logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
-                Result.success()
-            }
-            is KintoneApi.PostResult.HttpFailure -> {
-                val detail = "${result.code} ${result.detail}"
-                Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
-                if (result.isRetryable && shouldRetry()) Result.retry() else Result.success()
-            }
-            is KintoneApi.PostResult.NetworkError -> {
-                Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
-                logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled)
-                if (shouldRetry()) Result.retry() else Result.success()
-            }
-        }
+        if (shouldRetryAny && shouldRetry()) Result.retry() else Result.success()
     }
 
     /**

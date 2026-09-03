@@ -56,11 +56,11 @@ class SmsSearchActivity : AppCompatActivity() {
     private var selectedSendTargetId: String? = null
 
     /**
-     * 直近のsearchSms呼び出し内でのSettingsStore.resolveSendTarget結果をrecord.idごとにキャッシュしたもの。
+     * 直近のsearchSms呼び出し内でのSettingsStore.resolveSendTargets結果をrecord.idごとにキャッシュしたもの。
      * 送信先フィルタ・分割失敗フィルタ・一覧描画がいずれも同じrecordに対して抽出結果を必要とするため、
      * AI呼び出しを伴い得る抽出処理を1件のSMSにつき1回で済ませるためのもの。searchSmsのたびに作り直す
      */
-    private var resolvedPartsCache = mutableMapOf<Long, Pair<SmsParts, SettingsStore.SendTarget?>>()
+    private var resolvedPartsCache = mutableMapOf<Long, Pair<SmsParts, List<SettingsStore.SendTarget>>>()
 
     /**
      * リスナー登録と、SettingsStoreに保存済みの初期条件（既定の日付範囲・送信先フィルタ・各チェックボックス）の反映のみ行う。
@@ -294,8 +294,8 @@ class SmsSearchActivity : AppCompatActivity() {
                 AppConstants.SEND_TARGET_FILTER_KEY_UNSET -> {
                     val matched = mutableListOf<SmsRecord>()
                     for (record in records) {
-                        val (_, sendTarget) = resolveSendTargetCached(record, aiParsingEnabled)
-                        if (sendTarget == null) matched.add(record)
+                        val (_, sendTargets) = resolveSendTargetCached(record, aiParsingEnabled)
+                        if (sendTargets.isEmpty()) matched.add(record)
                     }
                     records.clear()
                     records.addAll(matched)
@@ -303,8 +303,8 @@ class SmsSearchActivity : AppCompatActivity() {
                 else -> {
                     val matched = mutableListOf<SmsRecord>()
                     for (record in records) {
-                        val (_, sendTarget) = resolveSendTargetCached(record, aiParsingEnabled)
-                        if (sendTarget?.id == sendTargetId) matched.add(record)
+                        val (_, sendTargets) = resolveSendTargetCached(record, aiParsingEnabled)
+                        if (sendTargets.any { it.id == sendTargetId }) matched.add(record)
                     }
                     records.clear()
                     records.addAll(matched)
@@ -333,9 +333,9 @@ class SmsSearchActivity : AppCompatActivity() {
         }
     }
 
-    /** [resolvedPartsCache]を経由してSettingsStore.resolveSendTargetを呼ぶ。同一recordへの重複呼び出し（AI解析）を避ける */
-    private suspend fun resolveSendTargetCached(record: SmsRecord, aiParsingEnabled: Boolean): Pair<SmsParts, SettingsStore.SendTarget?> =
-        resolvedPartsCache.getOrPut(record.id) { SettingsStore.resolveSendTarget(this, record.body, aiParsingEnabled) }
+    /** [resolvedPartsCache]を経由してSettingsStore.resolveSendTargetsを呼ぶ。同一recordへの重複呼び出し（AI解析）を避ける */
+    private suspend fun resolveSendTargetCached(record: SmsRecord, aiParsingEnabled: Boolean): Pair<SmsParts, List<SettingsStore.SendTarget>> =
+        resolvedPartsCache.getOrPut(record.id) { SettingsStore.resolveSendTargets(this, record.body, aiParsingEnabled) }
 
     /** 成功したKintone送信ログのみを対象にする（失敗ログは「未送信」として扱われるべきなので除外） */
     private fun loadCompletedEntries(): List<SmsLogStore.Entry> =
@@ -395,9 +395,10 @@ class SmsSearchActivity : AppCompatActivity() {
         val config = SettingsStore.load(this)
         val dateFormat = DateFormats.display()
         records.forEach { record ->
-            val (smsParts, sendTarget) = resolveSendTargetCached(record, config.aiParsingEnabled)
-            val sendTargetName = sendTarget?.displayName(this@SmsSearchActivity) ?: getString(R.string.label_send_target_none)
-            val isSendTargetUnconfigured = sendTarget == null || !sendTarget.isValid
+            val (smsParts, sendTargets) = resolveSendTargetCached(record, config.aiParsingEnabled)
+            val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@SmsSearchActivity) }
+                ?: getString(R.string.label_send_target_none)
+            val isSendTargetUnconfigured = sendTargets.none { it.isValid }
             val isAutoReplied = record.id in autoRepliedEntries
             val sentEntry = sentEntries[record.id]
             val isSplitFailedBody = smsParts.isSplitFailed()

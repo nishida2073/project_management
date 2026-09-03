@@ -155,7 +155,7 @@ object SettingsStore {
 
     /**
      * kintoneへの接続設定の1送信先。[matchTarget]で指定した対象に[keywords]のいずれかが
-     * 含まれる場合にこの送信先が使われる（[SettingsStore.resolveSendTarget]参照）。
+     * 含まれる場合にこの送信先が使われる（[SettingsStore.resolveSendTargets]参照）。
      * [keywords]が空の場合はどの送信先にも一致しなかった時のフォールバックとして扱われる。
      */
     data class SendTarget(
@@ -230,7 +230,7 @@ object SettingsStore {
 
         /**
          * キーワード一致でこの送信先に実際に振り分けられるかどうか。デフォルト送信先（[isDefault]、
-         * キーワード未設定でフォールバック用）は対象外とする。本番の振り分け（[SettingsStore.findSendTarget]）
+         * キーワード未設定でフォールバック用）は対象外とする。本番の振り分け（[SettingsStore.findSendTargets]）
          * とテスト送信プレビューで判定基準がずれないよう、一致判定は必ずこれを使うこと。
          */
         fun routesTo(body: String, companyName: String): Boolean = !isDefault && matches(body, companyName)
@@ -447,22 +447,23 @@ object SettingsStore {
     }
 
     /**
-     * キーワードが一致する送信先のうち最初のものを優先し、無ければキーワード未設定
-     * （デフォルト）の送信先にフォールバックする。該当が無ければnull。[resolveSendTarget]専用
+     * キーワードが一致する送信先を（複数あれば）すべて返す。1件も一致しなければ、キーワード
+     * 未設定（デフォルト）の送信先1件にフォールバックする。該当が無ければ空リスト。[resolveSendTargets]専用
      */
-    private fun findSendTarget(context: Context, body: String, companyName: String): SendTarget? {
+    private fun findSendTargets(context: Context, body: String, companyName: String): List<SendTarget> {
         val sendTargets = loadSendTargets(context)
-        sendTargets.firstOrNull { it.routesTo(body, companyName) }?.let { return it }
-        return sendTargets.firstOrNull { it.isDefault }
+        val matched = sendTargets.filter { it.routesTo(body, companyName) }
+        if (matched.isNotEmpty()) return matched
+        return listOfNotNull(sendTargets.firstOrNull { it.isDefault })
     }
 
     /**
-     * SMS本文から[SmsParts]を抽出し、対応する送信先を判定する。抽出結果と送信先判定の両方が
-     * 必要な箇所（kintone登録・受信ログ記録・SMS検索画面・テスト送信など）は、抽出方法
-     * （ルールベース／AI）のずれで登録内容と振り分け結果が食い違わないよう必ずこれを使うこと。
+     * SMS本文から[SmsParts]を抽出し、対応する送信先（複数一致し得る）を判定する。抽出結果と
+     * 送信先判定の両方が必要な箇所（kintone登録・受信ログ記録・SMS検索画面・テスト送信など）は、
+     * 抽出方法（ルールベース／AI）のずれで登録内容と振り分け結果が食い違わないよう必ずこれを使うこと。
      */
-    suspend fun resolveSendTarget(context: Context, body: String, aiParsingEnabled: Boolean): Pair<SmsParts, SendTarget?> {
+    suspend fun resolveSendTargets(context: Context, body: String, aiParsingEnabled: Boolean): Pair<SmsParts, List<SendTarget>> {
         val smsParts = SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled)
-        return smsParts to findSendTarget(context, body, smsParts.companyName)
+        return smsParts to findSendTargets(context, body, smsParts.companyName)
     }
 }
