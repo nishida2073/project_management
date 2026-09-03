@@ -12,6 +12,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -59,6 +60,10 @@ object KintoneApi {
      * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
      * 既存レコードの最終受信日時と分単位で一致し（kintoneは秒を保持しないため）、かつ既存レコードの
      * 本文に今回の本文が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
+     * 更新時、[contentValue]は今回のSMSの受信日時が既存レコードの最終受信日時より新しい場合のみ上書きする。
+     * 古いSMS（過去に届いたが遅れて処理された等）を送信して統合された場合に、既にこのフィールドへ反映済みの
+     * 新しい内容が古い内容で巻き戻らないようにするため。会社名・氏名は同一送信元であれば変化しない前提のため、
+     * 日時に関わらず常に上書きする
      */
     fun postRecord(
         context: Context,
@@ -100,7 +105,19 @@ object KintoneApi {
             } else {
                 datetimeIsoValue
             }
-            val record = buildRecord(sendTarget, senderValue, mergedBody, recordDatetimeIsoValue, companyNameValue, userNameValue, contentValue)
+            // newEntryMillisはここに到達した時点で既にfindExistingRecord内でパース済み（失敗していればNotFoundとなり
+            // existing != nullに来ない）のため、nullになり得るのは既存レコード側の日時が空/未解析の場合のみ。
+            // その場合は新旧を比較できないため、従来通り上書きする
+            val isNewEntryNewer = existingMillis == null || newEntryMillis == null || newEntryMillis > existingMillis
+            val record = buildRecord(
+                sendTarget,
+                senderValue,
+                mergedBody,
+                recordDatetimeIsoValue,
+                companyNameValue = companyNameValue,
+                userNameValue = userNameValue,
+                contentValue = if (isNewEntryNewer) contentValue else ""
+            )
             updateRecord(context, sendTarget, existing.id, record)
         } else {
             val record = buildRecord(sendTarget, senderValue, entryText, datetimeIsoValue, companyNameValue, userNameValue, contentValue)
@@ -212,16 +229,29 @@ object KintoneApi {
     }
 
     /**
-     * 送信元が一致し、最終受信日時の差が[SettingsStore.SendTarget.updateToleranceHours]時間以内の既存レコードを
-     * 探す。複数件ヒットした場合は最終受信日時が最も新しいものを返す。新規登録との誤判定を防ぐため、
+     * 送信元が一致し、最終受信日時が[SettingsStore.SendTarget.updateToleranceMode]の条件（同一暦日、
+     * または[SettingsStore.SendTarget.updateToleranceHours]時間以内）に収まる既存レコードを探す。
+     * 複数件ヒットした場合は最終受信日時が最も新しいものを返す。新規登録との誤判定を防ぐため、
      * 未検出（[ExistingRecordResult.NotFound]）と検索失敗（[ExistingRecordResult.SearchFailed]）は区別する
      */
     private fun findExistingRecord(sendTarget: SettingsStore.SendTarget, senderValue: String, datetimeIsoValue: String): ExistingRecordResult {
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return ExistingRecordResult.NotFound
 
-        val toleranceMillis = sendTarget.updateToleranceHours.coerceAtLeast(0) * 3_600_000L
-        val rangeStart = formatIsoDateTime(baseMillis - toleranceMillis)
-        val rangeEnd = formatIsoDateTime(baseMillis + toleranceMillis)
+        val rangeStartMillis: Long
+        val rangeEndMillis: Long
+        when (sendTarget.updateToleranceMode) {
+            SettingsStore.UpdateToleranceMode.SAME_DATE -> {
+                rangeStartMillis = startOfDayMillis(baseMillis)
+                rangeEndMillis = endOfDayMillis(baseMillis)
+            }
+            SettingsStore.UpdateToleranceMode.HOURS -> {
+                val toleranceMillis = sendTarget.updateToleranceHours.coerceAtLeast(0) * 3_600_000L
+                rangeStartMillis = baseMillis - toleranceMillis
+                rangeEndMillis = baseMillis + toleranceMillis
+            }
+        }
+        val rangeStart = formatIsoDateTime(rangeStartMillis)
+        val rangeEnd = formatIsoDateTime(rangeEndMillis)
 
         val typeCondition = if (sendTarget.fieldType.isNotBlank()) {
             "${sendTarget.fieldType} in (\"${escapeForQuery(AppConstants.REGISTRATION_TYPE_VALUE)}\") and "
@@ -267,6 +297,26 @@ object KintoneApi {
             ExistingRecordResult.SearchFailed(PostResult.NetworkError(e.message ?: ""))
         }
     }
+
+    /** [millis]が属する暦日（端末のデフォルトタイムゾーン）の開始時刻（00:00:00.000）のエポックミリ秒 */
+    private fun startOfDayMillis(millis: Long): Long =
+        Calendar.getInstance().apply {
+            timeInMillis = millis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+    /** [millis]が属する暦日（端末のデフォルトタイムゾーン）の終了時刻（23:59:59.999）のエポックミリ秒 */
+    private fun endOfDayMillis(millis: Long): Long =
+        Calendar.getInstance().apply {
+            timeInMillis = millis
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }.timeInMillis
 
     /** kintoneのクエリ言語で文字列リテラルとして安全に埋め込めるよう、バックスラッシュとダブルクォートをエスケープする */
     private fun escapeForQuery(value: String): String =

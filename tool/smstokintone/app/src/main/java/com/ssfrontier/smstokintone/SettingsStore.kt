@@ -94,6 +94,23 @@ object SettingsStore {
         }
     }
 
+    /**
+     * 既存レコードに追記するか新規登録するかを判定する条件（[SendTarget.updateToleranceHours]、
+     * [KintoneApi.findExistingRecord]参照）。[SAME_DATE]は最終受信日時が端末の暦日で同じ既存レコードを
+     * 対象にする。[HOURS]は[SendTarget.updateToleranceHours]で指定した時間以内の既存レコードを対象にする
+     */
+    enum class UpdateToleranceMode {
+        SAME_DATE,
+        HOURS;
+
+        /** [fromName]を提供するコンパニオンオブジェクト */
+        companion object {
+            /** 保存値からの復元用。未知の値やnullは[SendTarget.updateToleranceMode]の既定値と同じSAME_DATEにフォールバックする */
+            fun fromName(name: String?): UpdateToleranceMode =
+                entries.firstOrNull { it.name == name } ?: SAME_DATE
+        }
+    }
+
     /** アプリの配色モード */
     enum class ThemeMode {
         LIGHT,
@@ -222,8 +239,13 @@ object SettingsStore {
         val fieldDatetime: String,
         /** 登録種別（[AppConstants.REGISTRATION_TYPE_VALUE]）を書き込むkintoneフィールドのフィールドコード。既存レコード検索の絞り込みにも使う */
         val fieldType: String,
-        /** 同一送信元の既存レコードに追記するか新規登録するかを判定する許容時間（時間単位、[KintoneApi.postRecord]参照） */
+        /**
+         * 同一送信元の既存レコードに追記するか新規登録するかを判定する許容時間（時間単位、[KintoneApi.postRecord]参照）。
+         * [updateToleranceMode]が[UpdateToleranceMode.HOURS]の場合のみ使われる
+         */
         val updateToleranceHours: Int,
+        /** 同一送信元の既存レコードに追記するか新規登録するかを判定する条件 */
+        val updateToleranceMode: UpdateToleranceMode = UpdateToleranceMode.SAME_DATE,
         /** 抽出した会社名を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
         val fieldCompanyName: String = "",
         /** 抽出した氏名を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
@@ -449,6 +471,7 @@ object SettingsStore {
                     .put("fieldDatetime", sendTarget.fieldDatetime)
                     .put("fieldType", sendTarget.fieldType)
                     .put("updateToleranceHours", sendTarget.updateToleranceHours)
+                    .put("updateToleranceMode", sendTarget.updateToleranceMode.name)
                     .put("fieldCompanyName", sendTarget.fieldCompanyName)
                     .put("fieldUserName", sendTarget.fieldUserName)
                     .put("fieldContent", sendTarget.fieldContent)
@@ -482,6 +505,7 @@ object SettingsStore {
                 fieldDatetime = obj.optString("fieldDatetime", ""),
                 fieldType = obj.optString("fieldType", ""),
                 updateToleranceHours = obj.optInt("updateToleranceHours", AppDefaults.UPDATE_TOLERANCE_HOURS),
+                updateToleranceMode = UpdateToleranceMode.fromName(obj.optString("updateToleranceMode", "")),
                 fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
                 fieldContent = obj.optString("fieldContent", ""),

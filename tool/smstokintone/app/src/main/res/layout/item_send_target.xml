@@ -507,7 +507,30 @@
                         android:layout_marginStart="16dp"
                         android:orientation="vertical">
 
+                        <RadioGroup
+                            android:id="@+id/rgUpdateToleranceMode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <RadioButton
+                                android:id="@+id/rbUpdateToleranceModeSameDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="16dp"
+                                android:checked="true"
+                                android:text="@string/rb_update_tolerance_mode_same_date" />
+                            <RadioButton
+                                android:id="@+id/rbUpdateToleranceModeHours"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="false"
+                                android:text="@string/rb_update_tolerance_mode_hours" />
+                        </RadioGroup>
+
                         <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilUpdateToleranceHours"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/hint_update_tolerance_hours">

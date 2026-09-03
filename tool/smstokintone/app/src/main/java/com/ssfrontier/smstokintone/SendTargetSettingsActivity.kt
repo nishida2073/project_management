@@ -83,6 +83,15 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             SettingsStore.MatchTarget.COMPANY_NAME -> itemBinding.rbMatchTargetCompanyName.isChecked = true
         }
 
+        when (sendTarget.updateToleranceMode) {
+            SettingsStore.UpdateToleranceMode.SAME_DATE -> itemBinding.rbUpdateToleranceModeSameDate.isChecked = true
+            SettingsStore.UpdateToleranceMode.HOURS -> itemBinding.rbUpdateToleranceModeHours.isChecked = true
+        }
+        itemBinding.tilUpdateToleranceHours.isEnabled = sendTarget.updateToleranceMode == SettingsStore.UpdateToleranceMode.HOURS
+        itemBinding.rgUpdateToleranceMode.setOnCheckedChangeListener { _, checkedId ->
+            itemBinding.tilUpdateToleranceHours.isEnabled = checkedId == itemBinding.rbUpdateToleranceModeHours.id
+        }
+
         when (sendTarget.authMethod) {
             SettingsStore.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
             SettingsStore.AuthMethod.PASSWORD -> itemBinding.rbAuthPassword.isChecked = true
@@ -150,6 +159,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         } else {
             SettingsStore.MatchTarget.COMPANY_NAME
         }
+        val updateToleranceMode = if (itemBinding.rbUpdateToleranceModeSameDate.isChecked) {
+            SettingsStore.UpdateToleranceMode.SAME_DATE
+        } else {
+            SettingsStore.UpdateToleranceMode.HOURS
+        }
 
         return SettingsStore.SendTarget(
             id = id,
@@ -170,6 +184,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             fieldContent = itemBinding.etFieldContent.text.toString().trim(),
             updateToleranceHours = itemBinding.etUpdateToleranceHours.text.toString().trim().toIntOrNull()
                 ?: AppDefaults.UPDATE_TOLERANCE_HOURS,
+            updateToleranceMode = updateToleranceMode,
             companyNameWidthConversionEnabled = itemBinding.swCompanyNameWidthConversionEnabled.isChecked,
             matchTarget = matchTarget
         )

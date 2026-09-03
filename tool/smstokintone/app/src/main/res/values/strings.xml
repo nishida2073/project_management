@@ -78,6 +78,8 @@
     <string name="hint_field_user_name">氏名</string>
     <string name="hint_field_content">内容</string>
     <string name="section_update_tolerance_condition">統合範囲</string>
+    <string name="rb_update_tolerance_mode_same_date">同一日付</string>
+    <string name="rb_update_tolerance_mode_hours">時間</string>
     <string name="hint_update_tolerance_hours">±時間</string>
     <string name="helper_update_tolerance_hours">指定した時間以内に同じ送信元から再度受信した場合は、既存のデータを更新します</string>
     <string name="section_options">オプション</string>
