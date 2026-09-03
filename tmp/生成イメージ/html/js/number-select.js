@@ -14,7 +14,7 @@
     window.__ddClosers.forEach(function (fn) { fn(); });
   }
 
-  document.querySelectorAll('.number-select').forEach(function (el) {
+  function bindNumberSelect(el) {
     var input = el.querySelector('input');
     var caret = el.querySelector('.caret');
     var options = (el.getAttribute('data-options') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
@@ -44,7 +44,10 @@
       el.appendChild(menu);
       el.classList.add('open');
     });
-  });
+  }
+  window.bindNumberSelect = bindNumberSelect;
+
+  document.querySelectorAll('.number-select').forEach(bindNumberSelect);
 
   document.addEventListener('click', function () {
     closeOthers();

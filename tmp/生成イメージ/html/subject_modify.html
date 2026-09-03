@@ -19,7 +19,7 @@
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>科目ID</label>
+          <label>科目コード</label>
           <div class="form-control readonly">SBJ-001</div>
         </div>
         <div class="form-field"></div>
@@ -35,6 +35,28 @@
           <label>科目名<span class="req">必須</span></label>
           <input type="text" class="form-control" value="システム開発入門">
         </div>
+        <div class="form-field full">
+          <div class="sub-grid sub-row-header"><span>版</span><span>URL</span></div>
+          <div class="sub-list version-list" data-version-options="1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0">
+            <div class="sub-grid sub-row">
+              <div class="form-control number-select" data-options="1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0">
+                <input type="text" inputmode="decimal" value="1.0">
+                <span class="caret">▾</span>
+              </div>
+              <input type="text" class="form-control" value="https://example.com/docs/v1.0">
+              <div class="sub-remove">✕</div>
+            </div>
+            <div class="sub-grid sub-row">
+              <div class="form-control number-select" data-options="1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0">
+                <input type="text" inputmode="decimal" value="1.1">
+                <span class="caret">▾</span>
+              </div>
+              <input type="text" class="form-control" value="https://example.com/docs/v1.1">
+              <div class="sub-remove">✕</div>
+            </div>
+          </div>
+          <div class="link-btn add-row add-version-row">＋ 版を追加</div>
+        </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
           <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
@@ -48,6 +70,8 @@
   </div>
 </div>
 <script src="js/select.js" defer></script>
+<script src="js/number-select.js" defer></script>
+<script src="js/version-rows.js" defer></script>
 <script src="js/toggle.js" defer></script>
 </body>
 </html>

@@ -146,7 +146,21 @@
         </div>
         <div class="form-field full">
           <label>備考</label>
-          <textarea class="form-control textarea" placeholder="特記事項があれば入力"></textarea>
+          <textarea class="form-control textarea" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
+        </div>
+        <div class="form-section">クラス構成</div>
+        <div class="form-field full">
+          <label>関連クラス</label>
+          <div class="sub-list related-class-list" data-related-class-options="002,003,004,005">
+            <div class="sub-row">
+              <div class="form-control number-select" data-options="002,003,004,005">
+                <input type="text" placeholder="例）002">
+                <span class="caret">▾</span>
+              </div>
+              <div class="sub-remove">✕</div>
+            </div>
+          </div>
+          <div class="link-btn add-related-class-row">＋ 関連クラスを追加</div>
         </div>
       </div>
       <div class="modal-footer">
@@ -160,5 +174,6 @@
 <script src="js/datepicker.js" defer></script>
 <script src="js/number-select.js" defer></script>
 <script src="js/sub-rows.js" defer></script>
+<script src="js/related-class-rows.js" defer></script>
 </body>
 </html>

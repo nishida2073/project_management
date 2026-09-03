@@ -56,10 +56,11 @@
                 <th class="sticky" style="left:0; min-width:90px;">年度</th>
                 <th class="sticky" style="left:90px; min-width:190px;">コース名 / コースコード</th>
                 <th class="sticky" style="left:280px; min-width:110px;">クラスコード</th>
-                <th class="sticky" style="left:390px; min-width:120px;">開始日</th>
-                <th class="sticky" style="left:510px; min-width:120px;">終了日</th>
-                <th class="sticky" style="left:630px; min-width:110px;">管理担当者</th>
-                <th class="sticky shadow" style="left:740px; min-width:120px;">総合進捗</th>
+                <th class="sticky" style="left:390px; min-width:130px;">クラスコード（関連）</th>
+                <th class="sticky" style="left:520px; min-width:120px;">開始日</th>
+                <th class="sticky" style="left:640px; min-width:120px;">終了日</th>
+                <th class="sticky" style="left:760px; min-width:110px;">管理担当者</th>
+                <th class="sticky shadow" style="left:870px; min-width:120px;">総合進捗</th>
                 <th style="min-width:130px;">①クラス登録</th>
                 <th style="min-width:130px;">②名簿受領督促</th>
                 <th style="min-width:130px;">③講師契約</th>
@@ -103,19 +104,19 @@ function overall(status){
   return '<span class="overall '+cls+'">'+label+'</span>';
 }
 var rows = [
- {year:'2026年度', course:'受託_システム開発入門', code:'BC02B', cls:'001', start:'2026/09/02', end:'2026/09/04', overall:'progress', person:'佐藤 一郎',
+ {year:'2026年度', course:'受託_システム開発入門', code:'BC02B', cls:'001', related:'002, 003', start:'2026/09/02', end:'2026/09/04', overall:'progress', person:'佐藤 一郎',
   steps:['done','done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'公募_基盤技術基礎', code:'GC01A', cls:'001', start:'2026/09/08', end:'2026/09/09', overall:'done', person:'鈴木 花子',
+ {year:'2026年度', course:'公募_基盤技術基礎', code:'GC01A', cls:'001', related:'-', start:'2026/09/08', end:'2026/09/09', overall:'done', person:'鈴木 花子',
   steps:['done','done','done','done','done','done','done','done','done','done','done','wait']},
- {year:'2026年度', course:'受託_AP要件定義基礎', code:'ND02B', cls:'001', start:'2026/09/10', end:'2026/09/12', overall:'delay', person:'高橋 健',
+ {year:'2026年度', course:'受託_AP要件定義基礎', code:'ND02B', cls:'001', related:'-', start:'2026/09/10', end:'2026/09/12', overall:'delay', person:'高橋 健',
   steps:['done','wait-delay','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'受託_システム開発入門', code:'BC02B', cls:'002', start:'2026/09/15', end:'2026/09/17', overall:'progress', person:'佐藤 一郎',
+ {year:'2026年度', course:'受託_システム開発入門', code:'BC02B', cls:'002', related:'001', start:'2026/09/15', end:'2026/09/17', overall:'progress', person:'佐藤 一郎',
   steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'公募_基盤技術基礎', code:'GC01A', cls:'002', start:'2026/09/18', end:'2026/09/18', overall:'wait', person:'伊藤 美咲',
+ {year:'2026年度', course:'公募_基盤技術基礎', code:'GC01A', cls:'002', related:'001', start:'2026/09/18', end:'2026/09/18', overall:'wait', person:'伊藤 美咲',
   steps:['done','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'受託_AP要件定義基礎', code:'ND02B', cls:'002', start:'2026/09/24', end:'2026/09/26', overall:'done', person:'高橋 健',
+ {year:'2026年度', course:'受託_AP要件定義基礎', code:'ND02B', cls:'002', related:'-', start:'2026/09/24', end:'2026/09/26', overall:'done', person:'高橋 健',
   steps:['done','done','done','done','done','done','done','done','done','done','done','progress']},
- {year:'2026年度', course:'受託_AP設計・製造基礎', code:'CE01B', cls:'001', start:'2026/09/28', end:'2026/09/29', overall:'progress', person:'渡辺 直樹',
+ {year:'2026年度', course:'受託_AP設計・製造基礎', code:'CE01B', cls:'001', related:'-', start:'2026/09/28', end:'2026/09/29', overall:'progress', person:'渡辺 直樹',
   steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait']}
 ];
 var dates = ['08/20','08/25','08/27','08/29','09/01','09/03','09/05','09/08','09/10','09/12','09/14','09/16'];
@@ -126,10 +127,11 @@ rows.forEach(function(r){
   html += '<td class="sticky" style="left:0;">'+r.year+'</td>';
   html += '<td class="sticky" style="left:90px;"><div style="font-weight:700;">'+r.course+'</div><div style="font-size:11px;color:#9aa4b5;">'+r.code+'</div></td>';
   html += '<td class="sticky" style="left:280px;">'+r.cls+'</td>';
-  html += '<td class="sticky" style="left:390px;">'+r.start+'</td>';
-  html += '<td class="sticky" style="left:510px;">'+r.end+'</td>';
-  html += '<td class="sticky" style="left:630px;">'+r.person+'</td>';
-  html += '<td class="sticky shadow" style="left:740px;">'+overall(r.overall)+'</td>';
+  html += '<td class="sticky" style="left:390px;">'+r.related+'</td>';
+  html += '<td class="sticky" style="left:520px;">'+r.start+'</td>';
+  html += '<td class="sticky" style="left:640px;">'+r.end+'</td>';
+  html += '<td class="sticky" style="left:760px;">'+r.person+'</td>';
+  html += '<td class="sticky shadow" style="left:870px;">'+overall(r.overall)+'</td>';
   r.steps.forEach(function(s, i){
     var actual = (s==='done') ? dates[i] : (s==='progress' ? '' : '');
     var owner = (PERSON_STEP_INDEXES.indexOf(i) !== -1) ? r.person : '運営チーム';
@@ -141,7 +143,7 @@ rows.forEach(function(r){
 });
 
 if (location.search.indexOf('scrolled=1') !== -1) {
-  document.getElementById('scrollArea').scrollLeft = 1186;
+  document.getElementById('scrollArea').scrollLeft = 1316;
 }
 </script>
 <script src="js/select.js" defer></script>
