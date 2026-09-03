@@ -67,6 +67,20 @@ class SmsReceiver : BroadcastReceiver() {
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
                     ?: resolution.inheritedSendTargetName
 
+                // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析
+                // できた場合のみ更新する。KintoneUploadWorker側でも同じ条件で更新している
+                if (!resolution.isContinuation && !smsParts.isSplitFailed()) {
+                    ContinuationStore.update(
+                        context,
+                        sender = sender,
+                        companyName = smsParts.companyName,
+                        userName = smsParts.userName,
+                        sendTargetIds = sendTargets.map { it.id },
+                        sendTargetName = sendTargetName,
+                        timestampMillis = timestampMillis
+                    )
+                }
+
                 // kintoneへの送信結果を待たず受信時点でログ記録することで、送信ログ画面でSMS受信の
                 // 有無を確認できる。smsIdはこの時点では確実に特定できない（電話番号の表記ゆれや
                 // 標準SMSアプリの書き込みタイミング次第で一致しないことがある）ため解決を試みず、
@@ -82,7 +96,6 @@ class SmsReceiver : BroadcastReceiver() {
                     sendTargetName = sendTargetName,
                     smsParts = smsParts,
                     companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
-                    sendTargetIds = sendTargets.map { it.id },
                     isContinuation = resolution.isContinuation
                 )
 

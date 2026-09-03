@@ -76,7 +76,7 @@ object SmsMatching {
     fun isSameSender(a: String, b: String): Boolean = normalizeSenderKey(a) == normalizeSenderKey(b)
 
     /** 電話番号は数字のみに絞り末尾8桁を比較キーにする。数字がほぼ無い送信者ID等はそのまま比較する */
-    private fun normalizeSenderKey(address: String): String {
+    fun normalizeSenderKey(address: String): String {
         val digits = address.filter { it.isDigit() }
         return if (digits.length >= 6) digits.takeLast(8) else address.trim()
     }

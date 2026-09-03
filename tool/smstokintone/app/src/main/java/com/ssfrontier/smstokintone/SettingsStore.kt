@@ -561,13 +561,14 @@ object SettingsStore {
      * 抽出方法（ルールベース／AI）のずれで登録内容と振り分け結果が食い違わないよう必ずこれを使うこと。
      *
      * [continuationEnabled]がtrueの場合、[sender]と同じ送信元から過去に一度でも形式正常なSMS
-     * （[SmsLogStore.findLatestValidEntry]、[continuationScope]が[ContinuationScope.UNLIMITED]なら
-     * 日付は問わない）が届いていれば、今回のSMS自体の形式（本文単体で解析できるかどうか）に関わらず、
-     * 常にその直近1件から会社名・氏名・送信先を引き継ぐ（内容は今回の本文そのもの）。一度識別できた
-     * 送信元は[continuationScope]の範囲内でずっと同じ会社名・氏名・送信先として扱う（例:
-     * 「NTTデータ／石田直樹／腹痛です」の後に届いた「とても痛いです」を同一人物の追加内容として扱う）。
+     * （[ContinuationStore]、[continuationScope]が[ContinuationScope.UNLIMITED]なら日付は問わない）
+     * が届いていれば、今回のSMS自体の形式（本文単体で解析できるかどうか）に関わらず、常にその直近1件
+     * から会社名・氏名・送信先を引き継ぐ（内容は今回の本文そのもの）。一度識別できた送信元は
+     * [continuationScope]の範囲内でずっと同じ会社名・氏名・送信先として扱う。
      * [continuationEnabled]がfalse、または該当する過去のSMSが無い送信元は、今回の本文を実際に
-     * 解析して振り分ける
+     * 解析して振り分ける。この関数自体は[ContinuationStore]を更新しない（SMS検索画面のプレビュー表示
+     * など、実際の受信・送信を伴わない呼び出しからも使われるため）。実際に受信・送信を処理する側
+     * （[SmsReceiver]・[KintoneUploadWorker]）が、形式正常だった場合にのみ更新すること
      */
     suspend fun resolveSendTargets(
         context: Context,
@@ -579,15 +580,14 @@ object SettingsStore {
         continuationScope: ContinuationScope
     ): Pair<SmsResolution, List<SendTarget>> {
         val previousEntry = if (continuationEnabled) {
-            SmsLogStore.findLatestValidEntry(context, sender, timestampMillis, sameDayOnly = continuationScope == ContinuationScope.SAME_DAY)
+            ContinuationStore.find(context, sender, timestampMillis, sameDayOnly = continuationScope == ContinuationScope.SAME_DAY)
         } else {
             null
         }
-        val previousParts = previousEntry?.smsParts
-        if (previousEntry != null && previousParts != null) {
+        if (previousEntry != null) {
             val smsParts = SmsParts(
-                companyName = previousParts.companyName,
-                userName = previousParts.userName,
+                companyName = previousEntry.companyName,
+                userName = previousEntry.userName,
                 content = body.trim()
             )
             val resolution = SmsResolution(

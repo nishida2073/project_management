@@ -167,6 +167,18 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(continuationScope = scope) }
         }
 
+        binding.btnClearContinuationData.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_title_confirm_clear_continuation_data)
+                .setMessage(R.string.dialog_message_confirm_reset_settings)
+                .setNegativeButton(R.string.btn_cancel, null)
+                .setPositiveButton(R.string.btn_clear) { _, _ ->
+                    ContinuationStore.clear(this)
+                    Toast.makeText(this, getString(R.string.toast_continuation_data_cleared), Toast.LENGTH_SHORT).show()
+                }
+                .show()
+        }
+
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())
         binding.etSmsSearchDateRangeDays.onPositiveIntChanged { days ->
             SettingsStore.update(this) { it.copy(smsSearchDateRangeDays = days) }

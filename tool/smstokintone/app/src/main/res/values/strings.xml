@@ -181,6 +181,9 @@
     <string name="rb_continuation_scope_unlimited">制限なし</string>
     <string name="rb_continuation_scope_same_day">同一日のみ</string>
     <string name="helper_continuation_scope">同一送信元から形式正常なSMSが届いた場合に、以降のSMSで会社名・氏名・送信先を引き継ぐ範囲です。「同一日のみ」にすると、日付が変わると引き継ぎがリセットされます</string>
+    <string name="btn_clear_continuation_data">クリア</string>
+    <string name="dialog_title_confirm_clear_continuation_data">引継ぎデータをクリアしますか？</string>
+    <string name="toast_continuation_data_cleared">引継ぎデータをクリアしました</string>
     <string name="section_body_split">本文の分割</string>
     <string name="label_ai_split">AIによる分割</string>
     <string name="switch_ai_split_enabled">有効にする</string>
