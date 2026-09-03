@@ -65,7 +65,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.etKeywords.setText(sendTarget.keywords)
         itemBinding.etSubdomain.setText(sendTarget.subdomain)
         itemBinding.etAppId.setText(sendTarget.appId)
-        itemBinding.etApiToken.setText(sendTarget.apiToken)
         itemBinding.etLoginName.setText(sendTarget.loginName)
         itemBinding.etLoginPassword.setText(sendTarget.loginPassword)
         itemBinding.etFieldSender.setText(sendTarget.fieldSender)
@@ -90,21 +89,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.tilUpdateToleranceHours.isEnabled = sendTarget.updateToleranceMode == SettingsStore.UpdateToleranceMode.HOURS
         itemBinding.rgUpdateToleranceMode.setOnCheckedChangeListener { _, checkedId ->
             itemBinding.tilUpdateToleranceHours.isEnabled = checkedId == itemBinding.rbUpdateToleranceModeHours.id
-        }
-
-        when (sendTarget.authMethod) {
-            SettingsStore.AuthMethod.API_TOKEN -> itemBinding.rbAuthApiToken.isChecked = true
-            SettingsStore.AuthMethod.PASSWORD -> itemBinding.rbAuthPassword.isChecked = true
-        }
-        updateAuthMethodVisibility(itemBinding, sendTarget.authMethod)
-
-        itemBinding.rgAuthMethod.setOnCheckedChangeListener { _, checkedId ->
-            val method = if (checkedId == itemBinding.rbAuthPassword.id) {
-                SettingsStore.AuthMethod.PASSWORD
-            } else {
-                SettingsStore.AuthMethod.API_TOKEN
-            }
-            updateAuthMethodVisibility(itemBinding, method)
         }
 
         itemBinding.btnCopySendTarget.setOnClickListener {
@@ -149,11 +133,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
      * card.idをそのまま使い、複製ボタンでは複製先が別の送信先になるよう新しいUUIDを渡す
      */
     private fun readSendTargetFromBinding(itemBinding: ItemSendTargetBinding, id: String): SettingsStore.SendTarget {
-        val authMethod = if (itemBinding.rbAuthPassword.isChecked) {
-            SettingsStore.AuthMethod.PASSWORD
-        } else {
-            SettingsStore.AuthMethod.API_TOKEN
-        }
         val matchTarget = if (itemBinding.rbMatchTargetBody.isChecked) {
             SettingsStore.MatchTarget.BODY
         } else {
@@ -171,8 +150,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             keywords = itemBinding.etKeywords.text.toString().trim(),
             subdomain = itemBinding.etSubdomain.text.toString().trim(),
             appId = itemBinding.etAppId.text.toString().trim(),
-            authMethod = authMethod,
-            apiToken = itemBinding.etApiToken.text.toString().trim(),
+            authMethod = SettingsStore.AuthMethod.PASSWORD,
+            apiToken = "",
             loginName = itemBinding.etLoginName.text.toString().trim(),
             loginPassword = itemBinding.etLoginPassword.text.toString(),
             fieldSender = itemBinding.etFieldSender.text.toString().trim(),
@@ -312,20 +291,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
     private fun renumberCards() {
         sendTargetCards.forEachIndexed { index, card ->
             card.binding.tvSendTargetIndex.text = getString(R.string.label_send_target_index, index + 1)
-        }
-    }
-
-    /** 選択中の認証方式に応じて、APIトークン欄とID/パスワード欄のどちらか一方だけを表示する */
-    private fun updateAuthMethodVisibility(itemBinding: ItemSendTargetBinding, method: SettingsStore.AuthMethod) {
-        itemBinding.tilApiToken.visibility = if (method == SettingsStore.AuthMethod.API_TOKEN) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-        itemBinding.layoutPasswordAuth.visibility = if (method == SettingsStore.AuthMethod.PASSWORD) {
-            View.VISIBLE
-        } else {
-            View.GONE
         }
     }
 

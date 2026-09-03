@@ -64,9 +64,6 @@
     <string name="section_app">連絡用のアプリ</string>
     <string name="hint_app_id">アプリID</string>
     <string name="section_auth_info">認証情報</string>
-    <string name="rb_auth_api_token">APIトークン</string>
-    <string name="rb_auth_password">ログイン名・パスワード</string>
-    <string name="hint_api_token">APIトークン</string>
     <string name="hint_login_name">ログイン名</string>
     <string name="hint_login_password">パスワード</string>
     <string name="section_field_mapping">フィールドコード</string>

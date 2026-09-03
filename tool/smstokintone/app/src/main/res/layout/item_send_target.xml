@@ -260,26 +260,6 @@
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
-                    <RadioGroup
-                        android:id="@+id/rgAuthMethod"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                        <RadioButton
-                            android:id="@+id/rbAuthPassword"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="@string/rb_auth_password" />
-                        <RadioButton
-                            android:id="@+id/rbAuthApiToken"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/rb_auth_api_token" />
-                    </RadioGroup>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -287,54 +267,30 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilApiToken"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/hint_login_name">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etLoginName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:hint="@string/hint_api_token"
+                            android:hint="@string/hint_login_password"
                             app:endIconMode="password_toggle">
 
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etApiToken"
+                                android:id="@+id/etLoginPassword"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="textPassword" />
                         </com.google.android.material.textfield.TextInputLayout>
-
-                        <LinearLayout
-                            android:id="@+id/layoutPasswordAuth"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:visibility="gone">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/hint_login_name">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etLoginName"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="text" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:hint="@string/hint_login_password"
-                                app:endIconMode="password_toggle">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etLoginPassword"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="textPassword" />
-                            </com.google.android.material.textfield.TextInputLayout>
-                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
 
