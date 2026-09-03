@@ -368,7 +368,7 @@ object SettingsStore {
         sendSplitFailedEnabled = false,
         sendSplitExcludedEnabled = true,
         searchSplitFailedEnabled = false,
-        searchSplitExcludedEnabled = false,
+        searchSplitExcludedEnabled = true,
         searchSendTargetUnconfiguredEnabled = false,
         autoReplySplitFailedEnabled = false,
         autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,

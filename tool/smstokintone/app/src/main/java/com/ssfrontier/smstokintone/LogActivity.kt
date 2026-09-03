@@ -118,7 +118,7 @@ class LogActivity : AppCompatActivity() {
                         append(getString(splitIcon))
                     }
                     if (entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE) {
-                        append("  ")
+                        append(" ")
                         val modeColor = ContextCompat.getColor(
                             this@LogActivity,
                             if (entry.manual) R.color.status_manual else R.color.status_running

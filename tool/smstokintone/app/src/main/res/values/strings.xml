@@ -2,9 +2,9 @@
     <string name="app_name">S2k</string>
 
     <!-- アイコン -->
-    <string name="icon_split_succeeded">⭕</string>
-    <string name="icon_split_failed">❌</string>
-    <string name="icon_split_excluded">⏭️</string>
+    <string name="icon_split_succeeded">🆗</string>
+    <string name="icon_split_failed">🆖</string>
+    <string name="icon_split_excluded">❎</string>
     <string name="icon_replied">📨</string>
     <string name="icon_send_none">⬜</string>
     <string name="icon_send_auto">✅</string>
@@ -14,7 +14,7 @@
     <string name="icon_split_ai">🤖</string>
     <string name="icon_send_target_exists">📍</string>
     <string name="icon_send_target_unconfigured">🚫</string>
-    <string name="icon_send_target_inherited">🔗</string>
+    <string name="icon_send_target_inherited">♻️</string>
 
     <!-- 汎用ボタン -->
     <string name="btn_refresh">更新</string>
@@ -226,14 +226,14 @@
     <string name="label_send_target_filter">送信先</string>
     <string name="filter_send_target_all">すべて</string>
     <string name="label_search_split_status_filter">形式</string>
-    <string name="cb_split_succeeded_only">⭕ 正常</string>
-    <string name="cb_split_failed_only">❌ 異常</string>
-    <string name="cb_split_excluded_only">⏭️ 除外</string>
+    <string name="cb_split_succeeded_only">🆗 正常</string>
+    <string name="cb_split_failed_only">🆖 異常</string>
+    <string name="cb_split_excluded_only">❎ 除外</string>
     <string name="label_search_send_status_filter">送信</string>
     <string name="cb_send_none_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_status_legend">"形式：⭕ 正常 ・ ❌ 異常 ・ ⏭️ 除外\n送信：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし ・ 🔗 引継ぎ"</string>
+    <string name="helper_sms_status_legend">"形式：🆗 正常 ・ 🆖 異常 ・ ❎ 除外\n送信：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし ・ ♻️ 引継ぎ"</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>
