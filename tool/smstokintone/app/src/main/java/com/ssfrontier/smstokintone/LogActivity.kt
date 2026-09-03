@@ -90,6 +90,7 @@ class LogActivity : AppCompatActivity() {
         binding.llLogContainer.removeAllViews()
         binding.tvLogEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
 
+        val config = SettingsStore.load(this)
         val dateFormat = DateFormats.display()
         val itemTextColor = MaterialColors.getColor(
             binding.llLogContainer,
@@ -156,8 +157,13 @@ class LogActivity : AppCompatActivity() {
                 }
                 setPadding(0, 16, 0, 16)
             }
+            val senderDisplay = if (entry.isContinuation && config.continuationShowUserNameEnabled && entry.smsParts?.userName?.isNotBlank() == true) {
+                entry.smsParts.userName
+            } else {
+                entry.sender
+            }
             val senderAndTimestampView = TextView(this).apply {
-                text = "${dateFormat.format(Date(entry.timestampMillis))}　${entry.sender}"
+                text = "${dateFormat.format(Date(entry.timestampMillis))}　$senderDisplay"
                 setTextColor(itemTextColor)
                 setPadding(0, 0, 0, 4)
             }

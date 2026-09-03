@@ -9,7 +9,10 @@ import java.util.Calendar
  * 継続SMS（[SettingsStore.SmsResolution.isContinuation]）の引き継ぎに使う、送信元ごとの最新の
  * 形式正常なSMSの抽出結果を保持する専用のストア。SmsLogStore（全履歴のログ）とは別ファイルで
  * 管理し、ログをクリアしても引き継ぎ情報は失われない。送信元ごとに最新1件のみ保持する
- * （継続SMS自体の結果は保存しない。引き継ぎ元と同じ内容の再保存になり意味が無いため）
+ * （継続SMS自体の結果は保存しない。引き継ぎ元と同じ内容の再保存になり意味が無いため）。
+ * [ContinuationDataActivity]から個別の閲覧・編集・削除もできる。編集画面のように読み込みから保存
+ * までに時間が空く操作は[applyIfUnchanged]で楽観的排他制御を行うこと（[lock]は保存時の一致確認と
+ * 書き込みのみを保護し、編集中はロックしない）
  */
 object ContinuationStore {
 
@@ -17,6 +20,13 @@ object ContinuationStore {
     private const val PREFS_NAME = "smstokintone_continuation"
     /** 全件をJSON配列文字列として保存するキー */
     private const val KEY_ENTRIES = "entries"
+    /**
+     * [getAll]・[set]・[delete]・[applyIfUnchanged]の排他制御に使うロック。SmsReceiver・
+     * KintoneUploadWorker（SMS受信・送信時）とContinuationDataActivity（編集画面）が同一プロセス内から
+     * 並行してアクセスし得るため、読み込み→変更→書き込みの間に割り込まれてどちらかの変更が
+     * 失われることを防ぐ
+     */
+    private val lock = Any()
 
     /** 送信元ごとに保持する、最新の形式正常なSMSの抽出結果 */
     data class Entry(
@@ -46,9 +56,44 @@ object ContinuationStore {
         sendTargetName: String?,
         timestampMillis: Long
     ) {
+        set(context, SmsMatching.normalizeSenderKey(sender), Entry(companyName, userName, sendTargetIds, sendTargetName, timestampMillis))
+    }
+
+    /**
+     * 正規化済みの送信元キー[senderKey]に対応するデータを[entry]で上書き保存する。[update]と異なり
+     * [senderKey]は呼び出し側で既に正規化済みであることを前提とする（引継ぎデータの編集画面専用）
+     */
+    fun set(context: Context, senderKey: String, entry: Entry) = synchronized(lock) {
         val entries = getAll(context).toMutableMap()
-        entries[SmsMatching.normalizeSenderKey(sender)] = Entry(companyName, userName, sendTargetIds, sendTargetName, timestampMillis)
+        entries[senderKey] = entry
         save(context, entries)
+    }
+
+    /** 正規化済みの送信元キー[senderKey]のデータを削除する（引継ぎデータの編集画面専用） */
+    fun delete(context: Context, senderKey: String) = synchronized(lock) {
+        val entries = getAll(context).toMutableMap()
+        entries.remove(senderKey)
+        save(context, entries)
+    }
+
+    /**
+     * 引継ぎデータの編集画面専用。編集開始時に読み込んだ内容[expectedSnapshot]が現在の保存内容と
+     * 一致する場合のみ、[changes]でその内容を書き換えて保存する（一致確認と保存を同じロック内で
+     * 行うことでTOCTOU競合を防ぐ）。編集中（画面を開いてから保存するまでの間）はロックを取らない
+     * ため、その間にSMSを受信してもブロックされない。一致しない場合＝編集中にSMS受信などで
+     * 更新されていた場合は、何も保存せずfalseを返す（呼び出し側で保存失敗として案内すること）
+     */
+    fun applyIfUnchanged(
+        context: Context,
+        expectedSnapshot: Map<String, Entry>,
+        changes: (MutableMap<String, Entry>) -> Unit
+    ): Boolean = synchronized(lock) {
+        val current = getAll(context)
+        if (current != expectedSnapshot) return@synchronized false
+        val updated = current.toMutableMap()
+        changes(updated)
+        save(context, updated)
+        true
     }
 
     /**
@@ -61,16 +106,11 @@ object ContinuationStore {
         return entry
     }
 
-    /** 保存済みの全データを削除する */
-    fun clear(context: Context) {
-        prefs(context).edit().remove(KEY_ENTRIES).apply()
-    }
-
     /** 正規化した送信元キーをキーとする全データのマップを返す */
-    private fun getAll(context: Context): Map<String, Entry> {
-        val json = prefs(context).getString(KEY_ENTRIES, null) ?: return emptyMap()
+    fun getAll(context: Context): Map<String, Entry> = synchronized(lock) {
+        val json = prefs(context).getString(KEY_ENTRIES, null) ?: return@synchronized emptyMap()
         val array = JSONArray(json)
-        return (0 until array.length()).associate { i ->
+        (0 until array.length()).associate { i ->
             val obj = array.getJSONObject(i)
             obj.getString("senderKey") to Entry(
                 companyName = obj.optString("companyName", ""),

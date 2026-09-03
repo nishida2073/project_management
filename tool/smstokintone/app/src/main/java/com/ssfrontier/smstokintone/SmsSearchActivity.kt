@@ -456,7 +456,12 @@ class SmsSearchActivity : AppCompatActivity() {
                     } else {
                         bold { append(sendTargetIcon); append(" "); append(sendTargetName) }
                     }
-                    append("\n\n${dateFormat.format(Date(record.dateMillis))}　${record.address}\n")
+                    val senderDisplay = if (resolution.isContinuation && config.continuationShowUserNameEnabled && resolution.smsParts.userName.isNotBlank()) {
+                        resolution.smsParts.userName
+                    } else {
+                        record.address
+                    }
+                    append("\n\n${dateFormat.format(Date(record.dateMillis))}　$senderDisplay\n")
                     append(record.body.take(80))
                 }
                 layoutParams = android.widget.LinearLayout.LayoutParams(

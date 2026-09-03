@@ -150,10 +150,12 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.swContinuationEnabled.isChecked = config.continuationEnabled
         binding.rbContinuationScopeUnlimited.isEnabled = config.continuationEnabled
         binding.rbContinuationScopeSameDay.isEnabled = config.continuationEnabled
+        binding.swContinuationShowUserNameEnabled.isEnabled = config.continuationEnabled
         binding.swContinuationEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(continuationEnabled = isChecked) }
             binding.rbContinuationScopeUnlimited.isEnabled = isChecked
             binding.rbContinuationScopeSameDay.isEnabled = isChecked
+            binding.swContinuationShowUserNameEnabled.isEnabled = isChecked
         }
 
         binding.rbContinuationScopeUnlimited.isChecked = config.continuationScope == SettingsStore.ContinuationScope.UNLIMITED
@@ -167,16 +169,13 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(continuationScope = scope) }
         }
 
-        binding.btnClearContinuationData.setOnClickListener {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_confirm_clear_continuation_data)
-                .setMessage(R.string.dialog_message_confirm_reset_settings)
-                .setNegativeButton(R.string.btn_cancel, null)
-                .setPositiveButton(R.string.btn_clear) { _, _ ->
-                    ContinuationStore.clear(this)
-                    Toast.makeText(this, getString(R.string.toast_continuation_data_cleared), Toast.LENGTH_SHORT).show()
-                }
-                .show()
+        binding.swContinuationShowUserNameEnabled.isChecked = config.continuationShowUserNameEnabled
+        binding.swContinuationShowUserNameEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(continuationShowUserNameEnabled = isChecked) }
+        }
+
+        binding.btnEditContinuationData.setOnClickListener {
+            startActivity(Intent(this, ContinuationDataActivity::class.java))
         }
 
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())

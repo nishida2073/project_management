@@ -40,6 +40,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ContinuationDataActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".LogActivity"
             android:exported="false" />
 

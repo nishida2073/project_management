@@ -38,6 +38,8 @@ object SettingsStore {
     private const val KEY_CONTINUATION_ENABLED = "continuation_enabled"
     /** [Config.continuationScope]のキー */
     private const val KEY_CONTINUATION_SCOPE = "continuation_scope"
+    /** [Config.continuationShowUserNameEnabled]のキー */
+    private const val KEY_CONTINUATION_SHOW_USER_NAME_ENABLED = "continuation_show_user_name_enabled"
     /** [Config.themeMode]のキー */
     private const val KEY_THEME_MODE = "theme_mode"
     /** [Config.smsSearchDateRangeDays]のキー */
@@ -175,6 +177,11 @@ object SettingsStore {
         val continuationEnabled: Boolean,
         /** 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）を送信元ごとにどこまで遡って有効とするか */
         val continuationScope: ContinuationScope,
+        /**
+         * SMS検索画面・ログ画面の一覧で、継続SMS（[SmsResolution.isContinuation]）については
+         * 送信元電話番号の代わりに引き継いだ氏名を表示するかどうか
+         */
+        val continuationShowUserNameEnabled: Boolean,
         /** アプリの配色モード */
         val themeMode: ThemeMode,
         /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲（日） */
@@ -339,6 +346,7 @@ object SettingsStore {
             .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
             .putBoolean(KEY_CONTINUATION_ENABLED, config.continuationEnabled)
             .putString(KEY_CONTINUATION_SCOPE, config.continuationScope.name)
+            .putBoolean(KEY_CONTINUATION_SHOW_USER_NAME_ENABLED, config.continuationShowUserNameEnabled)
             .putString(KEY_THEME_MODE, config.themeMode.name)
             .putInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, config.smsSearchDateRangeDays)
             .putBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, config.searchFiltersVisibleByDefault)
@@ -377,6 +385,7 @@ object SettingsStore {
         smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
         continuationEnabled = true,
         continuationScope = ContinuationScope.SAME_DAY,
+        continuationShowUserNameEnabled = true,
         themeMode = ThemeMode.LIGHT,
         smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
         searchFiltersVisibleByDefault = true,
@@ -412,6 +421,7 @@ object SettingsStore {
             smsMatchToleranceSeconds = p.getInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, DEFAULT_CONFIG.smsMatchToleranceSeconds),
             continuationEnabled = p.getBoolean(KEY_CONTINUATION_ENABLED, DEFAULT_CONFIG.continuationEnabled),
             continuationScope = ContinuationScope.fromName(p.getString(KEY_CONTINUATION_SCOPE, null)),
+            continuationShowUserNameEnabled = p.getBoolean(KEY_CONTINUATION_SHOW_USER_NAME_ENABLED, DEFAULT_CONFIG.continuationShowUserNameEnabled),
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
             smsSearchDateRangeDays = p.getInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, DEFAULT_CONFIG.smsSearchDateRangeDays),
             searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, DEFAULT_CONFIG.searchFiltersVisibleByDefault),
