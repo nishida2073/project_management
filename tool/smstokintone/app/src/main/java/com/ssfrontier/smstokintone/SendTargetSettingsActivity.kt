@@ -30,8 +30,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
     /**
      * 画面上のカードの並び順（=llSendTargetsContainerの子View順）を保持するリスト。この並び順のまま
-     * 保存され、SettingsStore.resolveSendTargetでのキーワード一致判定も先頭から順に行われるため、
-     * 複数の送信先が同じ本文にマッチし得る場合はここでの並び順が優先順位になる
+     * 保存される（SettingsStore.resolveSendTargetsは一致した送信先をすべて返すため、複数の送信先が
+     * 同じ本文にマッチした場合もこの並び順による優先順位は無く、一致した全件が振り分け対象になる）
      */
     private val sendTargetCards = mutableListOf<SendTargetCard>()
 
@@ -243,7 +243,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
             // 本文（またはそこから抽出した会社名）が[sendTarget]自身の振り分け条件
             // （キーワード、またはデフォルト送信先）に一致しない場合は警告して送信を中断する。
-            // 実際の登録処理（KintoneUploadWorker、SettingsStore.resolveSendTarget）と判定基準が
+            // 実際の登録処理（KintoneUploadWorker、SettingsStore.resolveSendTargets）と判定基準が
             // ずれないよう、routesToを使う（デフォルト送信先はここでは常にfalseになるので個別に許可する）
             if (!sendTarget.isDefault && !sendTarget.routesTo(testBody, smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true

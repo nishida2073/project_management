@@ -56,8 +56,9 @@ object KintoneApi {
 
     /**
      * レコードを登録する。ただし送信元（[sendTarget].fieldSender）が一致し、最終受信日時（[sendTarget].fieldDatetime）
-     * の差が[SettingsStore.SendTarget.updateToleranceHours]時間以内の既存レコードが見つかった場合は、新規登録
-     * ではなくそのレコードの本文に追記する形で更新する。本文には受信日時を先頭に付けて記録する。
+     * が[SettingsStore.SendTarget.updateToleranceMode]の条件（同一暦日、または[SettingsStore.SendTarget.updateToleranceHours]
+     * 時間以内）に収まる既存レコードが見つかった場合は、新規登録ではなくそのレコードの本文に追記する形で更新する
+     * （詳細は[findExistingRecord]参照）。本文には受信日時を先頭に付けて記録する。
      * 既存レコードの最終受信日時と分単位で一致し（kintoneは秒を保持しないため）、かつ既存レコードの
      * 本文に今回の本文が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
      * 更新時、[contentValue]は今回のSMSの受信日時が既存レコードの最終受信日時より新しい場合のみ上書きする。
