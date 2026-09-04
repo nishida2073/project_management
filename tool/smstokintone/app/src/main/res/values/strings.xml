@@ -165,14 +165,14 @@
     <string name="section_continuation">SMSの引き継ぎ</string>
     <string name="switch_continuation_enabled">有効にする</string>
     <string name="helper_continuation_enabled">同一送信元から過去に一度でも形式正常なSMSが届いていれば、以降のSMSで会社名・氏名・送信先を引き継ぎます。無効にすると常に今回のSMS本文だけで判定します。</string>
-    <string name="label_continuation_scope">引継ぎの範囲</string>
+    <string name="label_continuation_scope">引き継ぎの範囲</string>
     <string name="rb_continuation_scope_unlimited">制限なし</string>
     <string name="rb_continuation_scope_same_day">同一日のみ</string>
     <string name="helper_continuation_scope">同一送信元から形式正常なSMSが届いた場合に、以降のSMSで会社名・氏名・送信先を引き継ぐ範囲です。「同一日のみ」にすると、日付が変わると引き継ぎがリセットされます</string>
     <string name="label_continuation_show_name">送信元の表示</string>
     <string name="switch_continuation_show_user_name_enabled">氏名を表示にする</string>
     <string name="helper_continuation_show_user_name_enabled">電話番号の代わりに引き継いだ氏名を表示します</string>
-    <string name="btn_edit_continuation_data">編集</string>
+    <string name="btn_edit_continuation_item">編集</string>
     <string name="section_body_extraction">本文の抽出</string>
     <string name="label_ai_extraction">AIによる抽出</string>
     <string name="switch_ai_extraction_enabled">有効にする</string>
@@ -237,7 +237,7 @@
     <string name="cb_send_none_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_status_legend">"形式：🆗 正常 ・ 🆖 異常 ・ ❎ 除外\n送信：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし ・ ♻️ 引継ぎ"</string>
+    <string name="helper_sms_status_legend">"形式：🆗 正常 ・ 🆖 異常 ・ ❎ 除外\n送信：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし ・ ♻️ 引き継ぎ"</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>
@@ -251,11 +251,12 @@
     <string name="toast_sms_send_finished">SMSの送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
     <string name="toast_sms_send_finished_no_log">SMSの送信が完了しました</string>
 
-    <!-- 引継ぎデータの編集画面 -->
-    <string name="title_continuation_data">引継ぎデータの編集</string>
-    <string name="btn_delete_all_continuation_data">すべて削除</string>
-    <string name="message_continuation_data_empty">引継ぎデータがありません</string>
-    <string name="label_continuation_sender_key">送信元: %1$s</string>
-    <string name="dialog_title_continuation_data_save_conflict">保存に失敗しました</string>
-    <string name="dialog_message_continuation_data_save_conflict">編集中にSMSの受信などでデータが更新されたため、保存できませんでした。画面を開き直してやり直してください。</string>
+    <!-- 引き継ぎ項目の編集画面 -->
+    <string name="title_continuation_item">引き継ぎ項目の編集</string>
+    <string name="btn_delete_all_continuation_item">すべて削除</string>
+    <string name="message_continuation_item_empty">引き継ぎ項目がありません</string>
+    <string name="label_continuation_sender">送信元: %1$s</string>
+    <string name="dialog_message_continuation_validation_error">送信元: %1$s\n\n会社名・氏名は必須です</string>
+    <string name="dialog_title_continuation_item_save_conflict">保存に失敗しました</string>
+    <string name="dialog_message_continuation_item_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
 </resources>

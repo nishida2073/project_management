@@ -5,19 +5,19 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.ssfrontier.smstokintone.databinding.ActivityContinuationDataBinding
-import com.ssfrontier.smstokintone.databinding.ItemContinuationDataBinding
+import com.ssfrontier.smstokintone.databinding.ActivityContinuationItemBinding
+import com.ssfrontier.smstokintone.databinding.ItemContinuationItemBinding
 
 /**
- * 送信元ごとの引継ぎデータ（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
+ * 送信元ごとの引き継ぎ項目（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
  * または送信元単位で削除できる画面。送信先は保持せず、会社名から
  * [SettingsStore.findSendTargetsForContinuation]で都度再判定した結果を読み取り専用のラベルとして
  * 表示するのみで、この画面での編集対象にはしない
  */
-class ContinuationDataActivity : AppCompatActivity() {
+class ContinuationItemActivity : AppCompatActivity() {
 
     /** この画面のViewBinding */
-    private lateinit var binding: ActivityContinuationDataBinding
+    private lateinit var binding: ActivityContinuationItemBinding
 
     /**
      * 画面を開いた時点で読み込んだ内容のスナップショット。保存時に[ContinuationStore.applyIfUnchanged]
@@ -31,38 +31,38 @@ class ContinuationDataActivity : AppCompatActivity() {
      */
     private class Card(
         val senderKey: String,
-        val itemBinding: ItemContinuationDataBinding
+        val itemBinding: ItemContinuationItemBinding
     )
 
     private val cards = mutableListOf<Card>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityContinuationDataBinding.inflate(layoutInflater)
+        binding = ActivityContinuationItemBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         loadedSnapshot = ContinuationStore.getAll(this)
         val entries = loadedSnapshot.entries.sortedByDescending { it.value.timestampMillis }
 
-        binding.tvContinuationDataEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
+        binding.tvContinuationItemEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
 
         entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
 
-        binding.btnDeleteAllContinuationData.setOnClickListener {
+        binding.btnDeleteAllContinuationItem.setOnClickListener {
             // 個別の削除ボタンと同様、ここではUI上から一覧をまとめて外すだけでストアはまだ変更しない。
             // 実際にストアから削除されるのは「設定を保存」を押した時点（onSaveClicked）
-            binding.llContinuationDataContainer.removeAllViews()
+            binding.llContinuationItemContainer.removeAllViews()
             cards.clear()
-            binding.tvContinuationDataEmpty.visibility = View.VISIBLE
+            binding.tvContinuationItemEmpty.visibility = View.VISIBLE
         }
 
-        binding.btnSaveContinuationData.setOnClickListener { onSaveClicked() }
+        binding.btnSaveContinuationItem.setOnClickListener { onSaveClicked() }
     }
 
     /** 1件分のカードをUIとcardsの両方へ追加する */
     private fun addCard(senderKey: String, entry: ContinuationStore.Entry) {
-        val itemBinding = ItemContinuationDataBinding.inflate(layoutInflater, binding.llContinuationDataContainer, false)
-        itemBinding.tvSenderKey.text = getString(R.string.label_continuation_sender_key, senderKey)
+        val itemBinding = ItemContinuationItemBinding.inflate(layoutInflater, binding.llContinuationItemContainer, false)
+        itemBinding.tvSenderKey.text = getString(R.string.label_continuation_sender, senderKey)
         itemBinding.etContinuationCompanyName.setText(entry.companyName)
         itemBinding.etContinuationUserName.setText(entry.userName)
 
@@ -72,23 +72,37 @@ class ContinuationDataActivity : AppCompatActivity() {
 
         val card = Card(senderKey, itemBinding)
 
-        itemBinding.btnDeleteContinuationData.setOnClickListener {
-            binding.llContinuationDataContainer.removeView(itemBinding.root)
+        itemBinding.btnDeleteContinuationItem.setOnClickListener {
+            binding.llContinuationItemContainer.removeView(itemBinding.root)
             cards.remove(card)
         }
 
-        binding.llContinuationDataContainer.addView(itemBinding.root)
+        binding.llContinuationItemContainer.addView(itemBinding.root)
         cards.add(card)
     }
 
     /**
-     * 表示中の全カードの内容で[loadedSnapshot]からの差分をストアへ適用する。カードを削除した
-     * 送信元はまとめて削除され、残っているカードは入力内容（会社名・氏名）で更新される。日時は
-     * この画面では編集対象にしないため、元のデータの値をそのまま引き継ぐ。画面を開いてから保存する
-     * までの間にSMS受信などでストアが更新されていた場合は何も保存せず、保存失敗のダイアログを
-     * 表示する（[ContinuationStore.applyIfUnchanged]参照）
+     * 表示中の全カードの内容で[loadedSnapshot]からの差分をストアへ適用する。会社名・氏名の
+     * どちらかが空のカードがあれば保存せずエラーダイアログを表示する（引き継ぎ先の会社名・氏名が
+     * 空のまま次のSMSへ引き継がれてしまうことを防ぐため）。カードを削除した送信元はまとめて削除され、
+     * 残っているカードは入力内容（会社名・氏名）で更新される。日時はこの画面では編集対象にしないため、
+     * 元のデータの値をそのまま引き継ぐ。画面を開いてから保存するまでの間にSMS受信などでストアが
+     * 更新されていた場合は何も保存せず、保存失敗のダイアログを表示する（[ContinuationStore.applyIfUnchanged]参照）
      */
     private fun onSaveClicked() {
+        val invalidCard = cards.firstOrNull {
+            it.itemBinding.etContinuationCompanyName.text.toString().isBlank() ||
+                it.itemBinding.etContinuationUserName.text.toString().isBlank()
+        }
+        if (invalidCard != null) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_title_validation_error)
+                .setMessage(getString(R.string.dialog_message_continuation_validation_error, invalidCard.senderKey))
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
+
         val keptSenderKeys = cards.map { it.senderKey }.toSet()
 
         val success = ContinuationStore.applyIfUnchanged(this, loadedSnapshot) { entries ->
@@ -108,8 +122,8 @@ class ContinuationDataActivity : AppCompatActivity() {
             finish()
         } else {
             AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_continuation_data_save_conflict)
-                .setMessage(R.string.dialog_message_continuation_data_save_conflict)
+                .setTitle(R.string.dialog_title_continuation_item_save_conflict)
+                .setMessage(R.string.dialog_message_continuation_item_save_conflict)
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
         }

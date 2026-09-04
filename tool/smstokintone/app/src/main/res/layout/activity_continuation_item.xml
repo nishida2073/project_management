@@ -11,18 +11,18 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/title_continuation_data"
+        android:text="@string/title_continuation_item"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurface" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDeleteAllContinuationData"
+        android:id="@+id/btnDeleteAllContinuationItem"
         style="@style/AppButton.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/btn_delete_all_continuation_data" />
+        android:text="@string/btn_delete_all_continuation_item" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -38,16 +38,16 @@
             android:paddingBottom="24dp">
 
             <TextView
-                android:id="@+id/tvContinuationDataEmpty"
+                android:id="@+id/tvContinuationItemEmpty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/message_continuation_data_empty"
+                android:text="@string/message_continuation_item_empty"
                 android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/llContinuationDataContainer"
+                android:id="@+id/llContinuationItemContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
@@ -56,7 +56,7 @@
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSaveContinuationData"
+        android:id="@+id/btnSaveContinuationItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

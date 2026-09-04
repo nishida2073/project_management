@@ -30,7 +30,7 @@
                 tools:text="送信元: 12345678" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnDeleteContinuationData"
+                android:id="@+id/btnDeleteContinuationItem"
                 style="@style/AppButton.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
