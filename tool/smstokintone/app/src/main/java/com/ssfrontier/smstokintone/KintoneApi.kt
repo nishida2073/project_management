@@ -41,8 +41,8 @@ object KintoneApi {
         data class NetworkError(val message: String) : PostResult()
     }
 
-    /** [findExistingRecord]でヒットした既存レコードの$id・本文・最終受信日時 */
-    private data class ExistingRecord(val id: String, val bodyValue: String, val datetimeValue: String)
+    /** [findExistingRecord]でヒットした既存レコードの$id・履歴・最終受信日時 */
+    private data class ExistingRecord(val id: String, val historyValue: String, val datetimeValue: String)
 
     /** [findExistingRecord]の結果。検索失敗（[SearchFailed]）を未検出（[NotFound]）と区別し、誤って新規登録扱いにしないためのもの */
     private sealed class ExistingRecordResult {
@@ -57,26 +57,26 @@ object KintoneApi {
     /**
      * レコードを登録する。ただし送信元（[sendTarget].fieldSender）が一致し、最終受信日時（[sendTarget].fieldDatetime）
      * が[SettingsStore.SendTarget.updateToleranceMode]の条件（同一暦日、または[SettingsStore.SendTarget.updateToleranceHours]
-     * 時間以内）に収まる既存レコードが見つかった場合は、新規登録ではなくそのレコードの本文に追記する形で更新する
-     * （詳細は[findExistingRecord]参照）。本文には受信日時を先頭に付けて記録する。
+     * 時間以内）に収まる既存レコードが見つかった場合は、新規登録ではなくそのレコードの履歴に追記する形で更新する
+     * （詳細は[findExistingRecord]参照）。履歴には受信日時を先頭に付けて記録する。
      * 既存レコードの最終受信日時と分単位で一致し（kintoneは秒を保持しないため）、かつ既存レコードの
-     * 本文に今回の本文が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
-     * 更新時、[contentValue]は今回のSMSの受信日時が既存レコードの最終受信日時より新しい場合のみ上書きする。
+     * 履歴に今回の[historyValue]が既に含まれている場合（同一SMSの重複配信など）は何も送信せずスキップする。
+     * 更新時、[bodyValue]は今回のSMSの受信日時が既存レコードの最終受信日時より新しい場合のみ上書きする。
      * 古いSMS（過去に届いたが遅れて処理された等）を送信して統合された場合に、既にこのフィールドへ反映済みの
-     * 新しい内容が古い内容で巻き戻らないようにするため。会社名・氏名は同一送信元であれば変化しない前提のため、
+     * 新しい本文が古い本文で巻き戻らないようにするため。会社名・氏名は同一送信元であれば変化しない前提のため、
      * 日時に関わらず常に上書きする
      */
     fun postRecord(
         context: Context,
         sendTarget: SettingsStore.SendTarget,
         senderValue: String,
-        bodyValue: String,
+        historyValue: String,
         datetimeIsoValue: String?,
         companyNameValue: String = "",
         userNameValue: String = "",
-        contentValue: String = ""
+        bodyValue: String = ""
     ): PostResult {
-        val entryText = buildEntryText(datetimeIsoValue, bodyValue)
+        val entryText = buildEntryText(datetimeIsoValue, historyValue)
 
         val existingResult = if (sendTarget.fieldSender.isNotBlank() && sendTarget.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
             findExistingRecord(sendTarget, senderValue, datetimeIsoValue)
@@ -93,13 +93,13 @@ object KintoneApi {
 
         val isDuplicate = existing != null && datetimeIsoValue != null &&
             isSameMinute(existing.datetimeValue, datetimeIsoValue) &&
-            existing.bodyValue.contains(bodyValue)
+            existing.historyValue.contains(historyValue)
 
         return if (isDuplicate) {
             PostResult.Skipped(context.getString(R.string.message_log_send_complete_skipped_duplicate))
         } else if (existing != null) {
             val newEntryMillis = datetimeIsoValue?.let { parseIsoDateTime(it) }
-            val mergedBody = mergeBody(existing.bodyValue, entryText, newEntryMillis)
+            val mergedHistory = mergeBody(existing.historyValue, entryText, newEntryMillis)
             val existingMillis = parseIsoDateTime(existing.datetimeValue)
             val recordDatetimeIsoValue = if (existingMillis != null && newEntryMillis != null && existingMillis > newEntryMillis) {
                 existing.datetimeValue
@@ -113,30 +113,30 @@ object KintoneApi {
             val record = buildRecord(
                 sendTarget,
                 senderValue,
-                mergedBody,
+                mergedHistory,
                 recordDatetimeIsoValue,
                 companyNameValue = companyNameValue,
                 userNameValue = userNameValue,
-                contentValue = if (isNewEntryNewer) contentValue else ""
+                bodyValue = if (isNewEntryNewer) bodyValue else ""
             )
             updateRecord(context, sendTarget, existing.id, record)
         } else {
-            val record = buildRecord(sendTarget, senderValue, entryText, datetimeIsoValue, companyNameValue, userNameValue, contentValue)
+            val record = buildRecord(sendTarget, senderValue, entryText, datetimeIsoValue, companyNameValue, userNameValue, bodyValue)
             insertRecord(context, sendTarget, record)
         }
     }
 
     /**
-     * 本文を[ENTRY_SEPARATOR]区切りのエントリに分解し、受信日時が古い順になる位置に新エントリを挿入する。
+     * 履歴を[ENTRY_SEPARATOR]区切りのエントリに分解し、受信日時が古い順になる位置に新エントリを挿入する。
      * 挿入位置が判定できない場合は末尾に追加する
      */
-    private fun mergeBody(existingBody: String, newEntryText: String, newEntryMillis: Long?): String {
-        if (existingBody.isBlank()) return newEntryText
+    private fun mergeBody(existingHistory: String, newEntryText: String, newEntryMillis: Long?): String {
+        if (existingHistory.isBlank()) return newEntryText
 
         val separator = "\n\n$ENTRY_SEPARATOR\n\n"
-        if (newEntryMillis == null) return "$existingBody$separator$newEntryText"
+        if (newEntryMillis == null) return "$existingHistory$separator$newEntryText"
 
-        val entries = existingBody.split(separator).toMutableList()
+        val entries = existingHistory.split(separator).toMutableList()
         val insertIndex = entries.indexOfFirst { entry ->
             val entryMillis = try {
                 DateFormats.display().parse(entry.substringBefore("\n\n"))?.time
@@ -150,10 +150,10 @@ object KintoneApi {
         return entries.joinToString(separator)
     }
 
-    /** 受信日時（表示形式）と本文を連結した、kintoneの本文フィールドに書き込む1エントリ分のテキストを組み立てる */
-    private fun buildEntryText(datetimeIsoValue: String?, bodyValue: String): String {
+    /** 受信日時（表示形式）と本文を連結した、kintoneの履歴フィールドに書き込む1エントリ分のテキストを組み立てる */
+    private fun buildEntryText(datetimeIsoValue: String?, historyEntryBody: String): String {
         val displayDatetime = datetimeIsoValue?.let { formatDisplayDateTime(it) }
-        return if (displayDatetime != null) "$displayDatetime\n\n$bodyValue" else bodyValue
+        return if (displayDatetime != null) "$displayDatetime\n\n$historyEntryBody" else historyEntryBody
     }
 
     /** ISO8601（UTC）の[datetimeIsoValue]を、kintoneの本文に書き込む表示用日時文字列に変換する */
@@ -194,23 +194,23 @@ object KintoneApi {
 
     /**
      * kintoneのレコード登録/更新用JSONを組み立てる。[sendTarget]でフィールドコードが未設定（空文字）の項目、
-     * および会社名・氏名・内容は値が空の場合はキー自体を含めない（kintone側にフィールドが存在しない場合の
+     * および会社名・氏名・本文は値が空の場合はキー自体を含めない（kintone側にフィールドが存在しない場合の
      * エラーを避けるため）
      */
     private fun buildRecord(
         sendTarget: SettingsStore.SendTarget,
         senderValue: String,
-        bodyValue: String,
+        historyValue: String,
         datetimeIsoValue: String?,
         companyNameValue: String = "",
         userNameValue: String = "",
-        contentValue: String = ""
+        bodyValue: String = ""
     ): JSONObject {
         val record = JSONObject()
         if (sendTarget.fieldSender.isNotBlank()) {
             record.put(sendTarget.fieldSender, JSONObject().put("value", senderValue))
         }
-        record.put(sendTarget.fieldBody, JSONObject().put("value", bodyValue))
+        record.put(sendTarget.fieldHistory, JSONObject().put("value", historyValue))
         if (sendTarget.fieldDatetime.isNotBlank() && datetimeIsoValue != null) {
             record.put(sendTarget.fieldDatetime, JSONObject().put("value", datetimeIsoValue))
         }
@@ -223,8 +223,8 @@ object KintoneApi {
         if (sendTarget.fieldUserName.isNotBlank() && userNameValue.isNotBlank()) {
             record.put(sendTarget.fieldUserName, JSONObject().put("value", userNameValue))
         }
-        if (sendTarget.fieldContent.isNotBlank() && contentValue.isNotBlank()) {
-            record.put(sendTarget.fieldContent, JSONObject().put("value", contentValue))
+        if (sendTarget.fieldBody.isNotBlank() && bodyValue.isNotBlank()) {
+            record.put(sendTarget.fieldBody, JSONObject().put("value", bodyValue))
         }
         return record
     }
@@ -272,7 +272,7 @@ object KintoneApi {
             .addQueryParameter("app", sendTarget.appId)
             .addQueryParameter("query", query)
             .addQueryParameter("fields[0]", "\$id")
-            .addQueryParameter("fields[1]", sendTarget.fieldBody)
+            .addQueryParameter("fields[1]", sendTarget.fieldHistory)
             .addQueryParameter("fields[2]", sendTarget.fieldDatetime)
             .build()
 
@@ -289,9 +289,9 @@ object KintoneApi {
                 val records = JSONObject(response.body?.string() ?: "{}").optJSONArray("records")
                 val first = records?.optJSONObject(0) ?: return ExistingRecordResult.NotFound
                 val id = first.getJSONObject("\$id").getString("value")
-                val bodyValue = first.optJSONObject(sendTarget.fieldBody)?.optString("value", "") ?: ""
+                val historyValue = first.optJSONObject(sendTarget.fieldHistory)?.optString("value", "") ?: ""
                 val datetimeValue = first.optJSONObject(sendTarget.fieldDatetime)?.optString("value", "") ?: ""
-                ExistingRecordResult.Found(ExistingRecord(id, bodyValue, datetimeValue))
+                ExistingRecordResult.Found(ExistingRecord(id, historyValue, datetimeValue))
             }
         } catch (e: IOException) {
             Log.w(TAG, "既存レコードの検索で通信エラーが発生しました: ${e.message}")

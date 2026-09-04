@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * SmsReceiverや手動再送UIから渡されたSMS情報をkintoneへ登録するCoroutineWorker。
- * 送信可否・分割失敗判定・登録結果はいずれもSmsLogStoreへログとして記録する。形式正常だった場合は
+ * 送信可否・抽出失敗判定・登録結果はいずれもSmsLogStoreへログとして記録する。形式正常だった場合は
  * ContinuationStoreも更新し、以降の継続SMSの引き継ぎに使えるようにする。
  */
 class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
@@ -26,14 +26,14 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる（SmsMatching参照）
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.aiParsingEnabled, config.continuationEnabled, config.continuationScope)
+        val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.aiExtractionEnabled, config.continuationEnabled, config.continuationScope)
         val smsParts = resolution.smsParts
         val validSendTargets = sendTargets.filter { it.isValid }
 
         // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析できた
         // 場合のみ更新する。SmsReceiver側でも同じ条件で更新しており、手動送信のみで運用している場合
         // （SmsReceiverが動かない場合）でもここで引き継ぎ情報を残せるようにする
-        if (!resolution.isContinuation && !smsParts.isSplitFailed()) {
+        if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
             ContinuationStore.update(
                 applicationContext,
                 sender = sender,
@@ -67,13 +67,13 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // ため、既に成功した送信先へ再度送信されることがあるが、KintoneApi側の重複判定で実害は防げる
         var shouldRetryAny = false
         for (sendTarget in validSendTargets) {
-            if (!manual && smsParts.isSplitFailed() && !config.sendSplitFailedEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+            if (!manual && smsParts.isExtractionFailed() && !config.sendExtractionFailedEnabled) {
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
                 continue
             }
 
-            if (!manual && resolution.isContinuation && !config.sendSplitExcludedEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_split_excluded_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+            if (!manual && resolution.isContinuation && !config.sendExtractionExcludedEnabled) {
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_excluded_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
                 continue
             }
 
@@ -94,11 +94,11 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 applicationContext,
                 sendTarget,
                 senderValue = sender,
-                bodyValue = body,
+                historyValue = body,
                 datetimeIsoValue = targetDatetimeIso,
                 companyNameValue = companyNameValue,
                 userNameValue = smsParts.userName,
-                contentValue = smsParts.content
+                bodyValue = smsParts.body
             )) {
                 is KintoneApi.PostResult.Success -> {
                     logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
@@ -131,7 +131,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
 
     /**
      * SEND_STARTログを記録する。success/messageのデフォルトは通常の送信開始用で、送信先未設定・
-     * 分割失敗スキップなど送信を行わず終了する場合は呼び出し側でfalseと理由メッセージを指定する
+     * 抽出失敗スキップなど送信を行わず終了する場合は呼び出し側でfalseと理由メッセージを指定する
      */
     private fun logStart(
         sender: String,

@@ -391,10 +391,10 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_body">
+                                android:hint="@string/hint_field_history">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etFieldBody"
+                                    android:id="@+id/etFieldHistory"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="text" />
@@ -430,10 +430,10 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_content">
+                                android:hint="@string/hint_field_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etFieldContent"
+                                    android:id="@+id/etFieldBody"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="text" />

@@ -68,12 +68,12 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.etLoginName.setText(sendTarget.loginName)
         itemBinding.etLoginPassword.setText(sendTarget.loginPassword)
         itemBinding.etFieldSender.setText(sendTarget.fieldSender)
-        itemBinding.etFieldBody.setText(sendTarget.fieldBody)
+        itemBinding.etFieldHistory.setText(sendTarget.fieldHistory)
         itemBinding.etFieldDatetime.setText(sendTarget.fieldDatetime)
         itemBinding.etFieldType.setText(sendTarget.fieldType)
         itemBinding.etFieldCompanyName.setText(sendTarget.fieldCompanyName)
         itemBinding.etFieldUserName.setText(sendTarget.fieldUserName)
-        itemBinding.etFieldContent.setText(sendTarget.fieldContent)
+        itemBinding.etFieldBody.setText(sendTarget.fieldBody)
         itemBinding.etUpdateToleranceHours.setText(sendTarget.updateToleranceHours.toString())
         itemBinding.swCompanyNameWidthConversionEnabled.isChecked = sendTarget.companyNameWidthConversionEnabled
 
@@ -155,12 +155,12 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             loginName = itemBinding.etLoginName.text.toString().trim(),
             loginPassword = itemBinding.etLoginPassword.text.toString(),
             fieldSender = itemBinding.etFieldSender.text.toString().trim(),
-            fieldBody = itemBinding.etFieldBody.text.toString().trim(),
+            fieldHistory = itemBinding.etFieldHistory.text.toString().trim(),
             fieldDatetime = itemBinding.etFieldDatetime.text.toString().trim(),
             fieldType = itemBinding.etFieldType.text.toString().trim(),
             fieldCompanyName = itemBinding.etFieldCompanyName.text.toString().trim(),
             fieldUserName = itemBinding.etFieldUserName.text.toString().trim(),
-            fieldContent = itemBinding.etFieldContent.text.toString().trim(),
+            fieldBody = itemBinding.etFieldBody.text.toString().trim(),
             updateToleranceHours = itemBinding.etUpdateToleranceHours.text.toString().trim().toIntOrNull()
                 ?: AppDefaults.UPDATE_TOLERANCE_HOURS,
             updateToleranceMode = updateToleranceMode,
@@ -218,7 +218,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
         itemBinding.btnTestSend.isEnabled = false
         lifecycleScope.launch {
-            val smsParts = SmsPartsGenerator.resolveSmsParts(testBody, SettingsStore.load(applicationContext).aiParsingEnabled)
+            val smsParts = SmsPartsGenerator.resolveSmsParts(testBody, SettingsStore.load(applicationContext).aiExtractionEnabled)
 
             // 本文（またはそこから抽出した会社名）が[sendTarget]自身の振り分け条件
             // （キーワード、またはデフォルト送信先）に一致しない場合は警告して送信を中断する。
@@ -244,11 +244,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                     applicationContext,
                     sendTarget,
                     senderValue = AppConstants.TEST_SEND_SENDER,
-                    bodyValue = testBody,
+                    historyValue = testBody,
                     datetimeIsoValue = datetimeIso,
                     companyNameValue = companyNameValue,
                     userNameValue = smsParts.userName,
-                    contentValue = smsParts.content
+                    bodyValue = smsParts.body
                 )
             }
             itemBinding.btnTestSend.isEnabled = true
@@ -262,21 +262,20 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             val message = buildSpannedString {
                 append(sendResultMessage)
                 append("\n\n")
-                if (smsParts.isSplitFailed()) {
-                    append(getString(R.string.dialog_message_split_failure))
+                if (smsParts.isExtractionFailed()) {
+                    append(getString(R.string.dialog_message_extraction_failure))
                 } else {
                     bold { append(getString(R.string.hint_field_company)) }
-                    append("\n　$companyNameValue\n")
+                    append("：$companyNameValue\n")
                     bold { append(getString(R.string.hint_field_user_name)) }
-                    append("\n　${smsParts.userName}\n")
-                    bold { append(getString(R.string.hint_field_content)) }
-                    append("\n　${smsParts.content}")
+                    append("：${smsParts.userName}\n\n")
+                    append(smsParts.body)
                 }
             }
-            val icon = if (smsParts.parsedByAi) {
-                getString(R.string.icon_split_ai)
+            val icon = if (smsParts.extractedByAi) {
+                getString(R.string.icon_extraction_ai)
             } else {
-                getString(R.string.icon_split_rule)
+                getString(R.string.icon_extraction_rule)
             }
             val title = "${getString(R.string.dialog_title_test_send_result)} $icon"
             AlertDialog.Builder(this@SendTargetSettingsActivity)

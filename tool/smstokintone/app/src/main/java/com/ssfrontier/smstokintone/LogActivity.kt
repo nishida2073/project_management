@@ -111,12 +111,12 @@ class LogActivity : AppCompatActivity() {
                     append(" ${dateFormat.format(Date(entry.loggedAtMillis))}")
                     entry.smsParts?.let { smsParts ->
                         append(" ")
-                        val splitIcon = when {
-                            entry.isContinuation -> R.string.icon_split_excluded
-                            smsParts.isSplitFailed() -> R.string.icon_split_failed
-                            else -> R.string.icon_split_succeeded
+                        val extractionIcon = when {
+                            entry.isContinuation -> R.string.icon_extraction_excluded
+                            smsParts.isExtractionFailed() -> R.string.icon_extraction_failed
+                            else -> R.string.icon_extraction_succeeded
                         }
-                        append(getString(splitIcon))
+                        append(getString(extractionIcon))
                     }
                     if (entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE) {
                         append(" ")
@@ -211,7 +211,7 @@ class LogActivity : AppCompatActivity() {
                     }
                 } else if (smsParts != null) {
                     setOnLongClickListener {
-                        showSplitResultDialog(smsParts, entry.companyNameConverted)
+                        showExtractionResultDialog(smsParts, entry.companyNameConverted)
                         true
                     }
                 }
@@ -223,30 +223,29 @@ class LogActivity : AppCompatActivity() {
     }
 
     /** 会社名はkintoneへ実際に登録した値（変換適用時は変換後の値）を表示する */
-    private fun showSplitResultDialog(smsParts: SmsParts, companyNameConverted: Boolean) {
+    private fun showExtractionResultDialog(smsParts: SmsParts, companyNameConverted: Boolean) {
         val companyNameValue = if (companyNameConverted) {
             smsParts.companyNameNormalizedWidth
         } else {
             smsParts.companyName
         }
-        val message = if (smsParts.isSplitFailed()) {
-            getString(R.string.dialog_message_split_failure)
+        val message = if (smsParts.isExtractionFailed()) {
+            getString(R.string.dialog_message_extraction_failure)
         } else {
             buildSpannedString {
                 bold { append(getString(R.string.hint_field_company)) }
-                append("\n　$companyNameValue\n")
+                append("：$companyNameValue\n")
                 bold { append(getString(R.string.hint_field_user_name)) }
-                append("\n　${smsParts.userName}\n")
-                bold { append(getString(R.string.hint_field_content)) }
-                append("\n　${smsParts.content}")
+                append("：${smsParts.userName}\n\n")
+                append(smsParts.body)
             }
         }
-        val icon = if (smsParts.parsedByAi) {
-            getString(R.string.icon_split_ai)
+        val icon = if (smsParts.extractedByAi) {
+            getString(R.string.icon_extraction_ai)
         } else {
-            getString(R.string.icon_split_rule)
+            getString(R.string.icon_extraction_rule)
         }
-        val title = "${getString(R.string.dialog_title_split_result)} $icon"
+        val title = "${getString(R.string.dialog_title_extraction_result)} $icon"
         AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
@@ -263,7 +262,7 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
-    /** 結果行・分割結果行の両方で使う「[ラベル] メッセージ」形式の横並び行を組み立てる */
+    /** 結果行・抽出結果行の両方で使う「[ラベル] メッセージ」形式の横並び行を組み立てる */
     private fun buildLabeledMessageRow(label: String, message: String, color: Int, topPadding: Int): View {
         return android.widget.LinearLayout(this).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL

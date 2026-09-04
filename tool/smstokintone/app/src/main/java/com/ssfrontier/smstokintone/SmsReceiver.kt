@@ -17,10 +17,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-/** SMS受信をトリガーにKintoneUploadWorkerを起動し、必要に応じて分割失敗時の自動返信も行うBroadcastReceiver */
+/** SMS受信をトリガーにKintoneUploadWorkerを起動し、必要に応じて抽出失敗時の自動返信も行うBroadcastReceiver */
 class SmsReceiver : BroadcastReceiver() {
 
-    /** SMS受信ブロードキャストを受けてKintoneUploadWorkerを起動し、受信ログの記録と分割失敗時の自動返信を行う */
+    /** SMS受信ブロードキャストを受けてKintoneUploadWorkerを起動し、受信ログの記録と抽出失敗時の自動返信を行う */
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
@@ -60,7 +60,7 @@ class SmsReceiver : BroadcastReceiver() {
                 // KintoneUploadWorkerの登録処理と同じresolveSendTargetsを使い、抽出方法のずれによる
                 // 登録内容と送信先名の食い違いを防ぐ。1件のSMSが複数の送信先に一致することがあるため、
                 // 受信ログ・自動返信ログでは名前を連結して表示する（実際の登録はWorker側で送信先ごとに行う）
-                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiParsingEnabled, config.continuationEnabled, config.continuationScope)
+                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiExtractionEnabled, config.continuationEnabled, config.continuationScope)
                 val smsParts = resolution.smsParts
                 // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは
                 // 空になり、送信先名は「なし」扱いになる（実際の登録も行われない）
@@ -68,7 +68,7 @@ class SmsReceiver : BroadcastReceiver() {
 
                 // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析
                 // できた場合のみ更新する。KintoneUploadWorker側でも同じ条件で更新している
-                if (!resolution.isContinuation && !smsParts.isSplitFailed()) {
+                if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
                     ContinuationStore.update(
                         context,
                         sender = sender,
@@ -96,10 +96,10 @@ class SmsReceiver : BroadcastReceiver() {
                     isContinuation = resolution.isContinuation
                 )
 
-                if (config.autoReplySplitFailedEnabled && sender.isNotBlank() && smsParts.isSplitFailed()) {
+                if (config.autoReplyExtractionFailedEnabled && sender.isNotBlank() && smsParts.isExtractionFailed()) {
                     val now = System.currentTimeMillis()
                     if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
-                        if (sendAutoReply(context, sender, config.splitFailedReplyAddition)) {
+                        if (sendAutoReply(context, sender, config.extractionFailedReplyAddition)) {
                             SmsLogStore.add(
                                 context,
                                 type = SmsLogStore.EntryType.AUTO_REPLY,
@@ -111,7 +111,7 @@ class SmsReceiver : BroadcastReceiver() {
                                 sendTargetName = sendTargetName,
                                 smsParts = smsParts,
                                 companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
-                                replyBody = config.splitFailedReplyAddition,
+                                replyBody = config.extractionFailedReplyAddition,
                                 isContinuation = resolution.isContinuation
                             )
                         }

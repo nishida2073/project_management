@@ -74,38 +74,38 @@ class AppSettingsActivity : AppCompatActivity() {
         val sendEnabled = SettingsStore.load(this).sendEnabled
         binding.rbSendAuto.isChecked = sendEnabled
         binding.rbSendManual.isChecked = !sendEnabled
-        binding.swSendSplitFailedEnabled.isEnabled = sendEnabled
-        binding.swSendSplitExcludedEnabled.isEnabled = sendEnabled
+        binding.swSendExtractionFailedEnabled.isEnabled = sendEnabled
+        binding.swSendExtractionExcludedEnabled.isEnabled = sendEnabled
         binding.rgSendMode.setOnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSendAuto.id
             SettingsStore.update(this) { it.copy(sendEnabled = enabled) }
-            binding.swSendSplitFailedEnabled.isEnabled = enabled
-            binding.swSendSplitExcludedEnabled.isEnabled = enabled
+            binding.swSendExtractionFailedEnabled.isEnabled = enabled
+            binding.swSendExtractionExcludedEnabled.isEnabled = enabled
         }
 
-        binding.swSendSplitFailedEnabled.isChecked = SettingsStore.load(this).sendSplitFailedEnabled
-        binding.swSendSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(sendSplitFailedEnabled = isChecked) }
+        binding.swSendExtractionFailedEnabled.isChecked = SettingsStore.load(this).sendExtractionFailedEnabled
+        binding.swSendExtractionFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(sendExtractionFailedEnabled = isChecked) }
         }
 
-        binding.swSendSplitExcludedEnabled.isChecked = SettingsStore.load(this).sendSplitExcludedEnabled
-        binding.swSendSplitExcludedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(sendSplitExcludedEnabled = isChecked) }
+        binding.swSendExtractionExcludedEnabled.isChecked = SettingsStore.load(this).sendExtractionExcludedEnabled
+        binding.swSendExtractionExcludedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(sendExtractionExcludedEnabled = isChecked) }
         }
 
-        binding.swAiParsingEnabled.isChecked = SettingsStore.load(this).aiParsingEnabled
-        binding.swAiParsingEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(aiParsingEnabled = isChecked) }
+        binding.swAiExtractionEnabled.isChecked = SettingsStore.load(this).aiExtractionEnabled
+        binding.swAiExtractionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(aiExtractionEnabled = isChecked) }
         }
 
-        binding.swSearchSplitFailedEnabled.isChecked = SettingsStore.load(this).searchSplitFailedEnabled
-        binding.swSearchSplitFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(searchSplitFailedEnabled = isChecked) }
+        binding.swSearchExtractionFailedEnabled.isChecked = SettingsStore.load(this).searchExtractionFailedEnabled
+        binding.swSearchExtractionFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchExtractionFailedEnabled = isChecked) }
         }
 
-        binding.swSearchSplitExcludedEnabled.isChecked = SettingsStore.load(this).searchSplitExcludedEnabled
-        binding.swSearchSplitExcludedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(searchSplitExcludedEnabled = isChecked) }
+        binding.swSearchExtractionExcludedEnabled.isChecked = SettingsStore.load(this).searchExtractionExcludedEnabled
+        binding.swSearchExtractionExcludedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchExtractionExcludedEnabled = isChecked) }
         }
 
         binding.swSearchSendTargetUnconfiguredEnabled.isChecked = SettingsStore.load(this).searchSendTargetUnconfiguredEnabled
@@ -114,13 +114,13 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
-        val autoReplySplitFailedEnabled = SettingsStore.load(this).autoReplySplitFailedEnabled
-        binding.rbSmsReplyModeAuto.isChecked = autoReplySplitFailedEnabled
-        binding.rbSmsReplyModeManual.isChecked = !autoReplySplitFailedEnabled
-        binding.tilAutoReplyCooldownSeconds.isEnabled = autoReplySplitFailedEnabled
+        val autoReplyExtractionFailedEnabled = SettingsStore.load(this).autoReplyExtractionFailedEnabled
+        binding.rbSmsReplyModeAuto.isChecked = autoReplyExtractionFailedEnabled
+        binding.rbSmsReplyModeManual.isChecked = !autoReplyExtractionFailedEnabled
+        binding.tilAutoReplyCooldownSeconds.isEnabled = autoReplyExtractionFailedEnabled
         binding.rgSmsReplyMode.setOnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSmsReplyModeAuto.id
-            SettingsStore.update(this) { it.copy(autoReplySplitFailedEnabled = enabled) }
+            SettingsStore.update(this) { it.copy(autoReplyExtractionFailedEnabled = enabled) }
             binding.tilAutoReplyCooldownSeconds.isEnabled = enabled
         }
 
@@ -205,19 +205,19 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(defaultSentManualOnlyEnabled = isChecked) }
         }
 
-        binding.cbDefaultSplitFailedOnlyEnabled.isChecked = config.defaultSplitFailedOnlyEnabled
-        binding.cbDefaultSplitFailedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultSplitFailedOnlyEnabled = isChecked) }
+        binding.cbDefaultExtractionFailedOnlyEnabled.isChecked = config.defaultExtractionFailedOnlyEnabled
+        binding.cbDefaultExtractionFailedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(defaultExtractionFailedOnlyEnabled = isChecked) }
         }
 
-        binding.cbDefaultSplitSucceededOnlyEnabled.isChecked = config.defaultSplitSucceededOnlyEnabled
-        binding.cbDefaultSplitSucceededOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultSplitSucceededOnlyEnabled = isChecked) }
+        binding.cbDefaultExtractionSucceededOnlyEnabled.isChecked = config.defaultExtractionSucceededOnlyEnabled
+        binding.cbDefaultExtractionSucceededOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(defaultExtractionSucceededOnlyEnabled = isChecked) }
         }
 
-        binding.cbDefaultSplitExcludedOnlyEnabled.isChecked = config.defaultSplitExcludedOnlyEnabled
-        binding.cbDefaultSplitExcludedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultSplitExcludedOnlyEnabled = isChecked) }
+        binding.cbDefaultExtractionExcludedOnlyEnabled.isChecked = config.defaultExtractionExcludedOnlyEnabled
+        binding.cbDefaultExtractionExcludedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(defaultExtractionExcludedOnlyEnabled = isChecked) }
         }
 
         binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -259,9 +259,9 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(defaultReplyBody = text.toString()) }
         }
 
-        binding.etSplitFailedReplyAddition.setText(config.splitFailedReplyAddition)
-        binding.etSplitFailedReplyAddition.addTextChangedListener { text ->
-            SettingsStore.update(this) { it.copy(splitFailedReplyAddition = text.toString()) }
+        binding.etExtractionFailedReplyAddition.setText(config.extractionFailedReplyAddition)
+        binding.etExtractionFailedReplyAddition.addTextChangedListener { text ->
+            SettingsStore.update(this) { it.copy(extractionFailedReplyAddition = text.toString()) }
         }
 
         binding.btnResetSettings.setOnClickListener {

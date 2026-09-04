@@ -27,7 +27,7 @@ object SmsLogStore {
         SEND_START,
         /** kintoneへの送信が完了（成功/失敗いずれも）した際に記録するエントリ */
         SEND_COMPLETE,
-        /** 分割失敗SMSへの自動返信を送信した際に記録するエントリ */
+        /** 抽出失敗SMSへの自動返信を送信した際に記録するエントリ */
         AUTO_REPLY;
 
         /** [fromName]を提供するコンパニオンオブジェクト */
@@ -64,7 +64,7 @@ object SmsLogStore {
          * 常にfalse
          */
         val manual: Boolean,
-        /** 本文から抽出した会社名・氏名・内容。全エントリ種別で記録時点の抽出結果が設定される */
+        /** 本文から抽出した会社名・氏名、および本文全体。全エントリ種別で記録時点の抽出結果が設定される */
         val smsParts: SmsParts? = null,
         /** kintone登録時に会社名へ半角大文字・全角統一の変換を適用したか */
         val companyNameConverted: Boolean = false,
@@ -142,8 +142,8 @@ object SmsLogStore {
                     JSONObject()
                         .put("companyName", it.companyName)
                         .put("userName", it.userName)
-                        .put("content", it.content)
-                        .put("parsedByAi", it.parsedByAi)
+                        .put("body", it.body)
+                        .put("extractedByAi", it.extractedByAi)
                 )
             }
             array.put(obj)
@@ -177,8 +177,8 @@ object SmsLogStore {
                     SmsParts(
                         companyName = it.optString("companyName", ""),
                         userName = it.optString("userName", ""),
-                        content = it.optString("content", ""),
-                        parsedByAi = it.optBoolean("parsedByAi", false)
+                        body = it.optString("body", ""),
+                        extractedByAi = it.optBoolean("extractedByAi", false)
                     )
                 },
                 isContinuation = obj.optBoolean("isContinuation", false)

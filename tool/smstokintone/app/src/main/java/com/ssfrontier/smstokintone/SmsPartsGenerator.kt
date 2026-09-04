@@ -11,22 +11,22 @@ import kotlinx.coroutines.flow.collect
 import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
 
-/** SMS本文から抽出した会社名・氏名・内容と、抽出方法（AI/ルールベース）の結果を保持する */
+/** SMS本文から抽出した会社名・氏名と、本文全体（原文）・抽出方法（AI/ルールベース）の結果を保持する */
 data class SmsParts(
     /** 抽出した会社名 */
     val companyName: String = "",
     /** 抽出した氏名 */
     val userName: String = "",
-    /** 抽出した内容 */
-    val content: String = "",
+    /** SMS本文全体（原文のまま。会社名・氏名の抽出に成功したかどうかに関わらず常に本文全体が入る） */
+    val body: String = "",
     /** 端末上のAI（ML Kit GenAI）で抽出した結果かどうか。falseはルールベースでの抽出 */
-    val parsedByAi: Boolean = false
+    val extractedByAi: Boolean = false
 ) {
-    /** [companyName]・[userName]・[content]がすべて空かどうか */
-    fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && content.isEmpty()
+    /** [companyName]・[userName]・[body]がすべて空かどうか */
+    fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && body.isEmpty()
 
-    /** [isEmpty]とは異なり、一部の項目だけ空でも分割失敗とみなす */
-    fun isSplitFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && content.isNotBlank())
+    /** [isEmpty]とは異なり、一部の項目だけ空でも抽出失敗とみなす */
+    fun isExtractionFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && body.isNotBlank())
 
     /** [companyName]の英数字を半角大文字、それ以外を全角に統一した文字列（空白なら空文字） */
     val companyNameNormalizedWidth: String
@@ -34,7 +34,8 @@ data class SmsParts(
 }
 
 /**
- * SMS本文から部品（会社名・氏名・内容）を生成する（1行目:会社名 2行目:氏名 3行目以降:内容の固定位置で判定）
+ * SMS本文から部品（会社名・氏名）を生成する（1行目:会社名 2行目:氏名の固定位置で判定）。
+ * 本文（[SmsParts.body]）は抽出の成否に関わらず常に本文全体（原文）をそのまま保持する
  *
  * 対応例:
  * XXX
@@ -59,11 +60,11 @@ object SmsPartsGenerator {
         generativeModel ?: Generation.getClient(generationConfig {}).also { generativeModel = it }
 
     /**
-     * [aiParsingEnabled]が有効なら端末上のAI（ML Kit GenAI）に解析させ、Android 12未満・非対応端末・
+     * [aiExtractionEnabled]が有効なら端末上のAI（ML Kit GenAI）に解析させ、Android 12未満・非対応端末・
      * AI呼び出し失敗時は[generateSmsParts]（ルールベース）にフォールバックする
      */
-    suspend fun resolveSmsParts(body: String, aiParsingEnabled: Boolean): SmsParts {
-        if (!aiParsingEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+    suspend fun resolveSmsParts(body: String, aiExtractionEnabled: Boolean): SmsParts {
+        if (!aiExtractionEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             return generateSmsParts(body)
         }
 
@@ -75,7 +76,7 @@ object SmsPartsGenerator {
         return result
     }
 
-    /** 端末上のAIモデルを呼び出して会社名・氏名・内容を抽出する。モデルが利用不可・ダウンロード失敗・呼び出し失敗の場合はnullを返す */
+    /** 端末上のAIモデルを呼び出して会社名・氏名を抽出する。モデルが利用不可・ダウンロード失敗・呼び出し失敗の場合はnullを返す */
     private suspend fun requestAiSmsParts(body: String): SmsParts? {
         return try {
             val model = getOrCreateModel()
@@ -95,10 +96,10 @@ object SmsPartsGenerator {
             }
 
             val prompt = """
-                以下のSMS本文から「会社名」「氏名」「内容」を抽出してください。
+                以下のSMS本文から「会社名」「氏名」を抽出してください。
                 該当する項目が本文に無い場合は空文字を返してください。
                 出力は次の形式のJSONのみとし、それ以外の文章は含めないでください。
-                {"companyName": "...", "userName": "...", "content": "..."}
+                {"companyName": "...", "userName": "..."}
 
                 SMS本文:
                 $body
@@ -113,8 +114,8 @@ object SmsPartsGenerator {
             SmsParts(
                 companyName = parsed.optString("companyName", ""),
                 userName = parsed.optString("userName", ""),
-                content = parsed.optString("content", ""),
-                parsedByAi = true
+                body = body,
+                extractedByAi = true
             )
         } catch (e: Exception) {
             Log.w(TAG, "ML Kit GenAIの呼び出しに失敗しました: ${e.message}")
@@ -122,23 +123,21 @@ object SmsPartsGenerator {
         }
     }
 
-    /** 1行目を会社名、2行目を氏名、3行目以降を内容として固定位置で切り出す（ラベル文字列は見ない） */
+    /** 1行目を会社名、2行目を氏名として固定位置で切り出す（ラベル文字列は見ない）。本文は常に全体をそのまま保持する */
     fun generateSmsParts(body: String?): SmsParts {
         if (body.isNullOrBlank()) return SmsParts()
 
         val normalized = body.replace("\r\n", "\n").replace("\r", "\n").trim()
         val contentLines = normalized.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
-        // 氏名・会社名を1行にまとめて書く人がいるため、3行未満では抽出せず空のまま返す
-        // （本文自体は別途Bodyフィールドにそのまま登録されるので、ここで無理に詰め直す必要はない）
+        // 氏名・会社名を1行にまとめて書く人がいるため、3行未満では会社名・氏名は抽出せず空のまま返す
         if (contentLines.size < 3) {
-            return SmsParts()
+            return SmsParts(body = normalized)
         }
 
         val companyName = contentLines[0]
         val userName = contentLines[1]
-        val content = contentLines.drop(2).joinToString("\n")
 
-        return SmsParts(companyName = companyName, userName = userName, content = content)
+        return SmsParts(companyName = companyName, userName = userName, body = normalized)
     }
 }

@@ -14,18 +14,18 @@ object SettingsStore {
     /** SharedPreferencesのキー名。各キーが対応する設定の意味は[Config]の同名フィールドのKDocを参照 */
     /** [Config.sendEnabled]のキー */
     private const val KEY_SEND_ENABLED = "send_enabled"
-    /** [Config.sendSplitFailedEnabled]のキー */
-    private const val KEY_SEND_SPLIT_FAILED_ENABLED = "send_split_failed_enabled"
-    /** [Config.sendSplitExcludedEnabled]のキー */
-    private const val KEY_SEND_SPLIT_EXCLUDED_ENABLED = "send_split_excluded_enabled"
-    /** [Config.searchSplitFailedEnabled]のキー */
-    private const val KEY_SEARCH_SPLIT_FAILED_ENABLED = "search_split_failed_enabled"
-    /** [Config.searchSplitExcludedEnabled]のキー */
-    private const val KEY_SEARCH_SPLIT_EXCLUDED_ENABLED = "search_split_excluded_enabled"
+    /** [Config.sendExtractionFailedEnabled]のキー */
+    private const val KEY_SEND_EXTRACTION_FAILED_ENABLED = "send_extraction_failed_enabled"
+    /** [Config.sendExtractionExcludedEnabled]のキー */
+    private const val KEY_SEND_EXTRACTION_EXCLUDED_ENABLED = "send_extraction_excluded_enabled"
+    /** [Config.searchExtractionFailedEnabled]のキー */
+    private const val KEY_SEARCH_EXTRACTION_FAILED_ENABLED = "search_extraction_failed_enabled"
+    /** [Config.searchExtractionExcludedEnabled]のキー */
+    private const val KEY_SEARCH_EXTRACTION_EXCLUDED_ENABLED = "search_extraction_excluded_enabled"
     /** [Config.searchSendTargetUnconfiguredEnabled]のキー */
     private const val KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED = "search_send_target_unconfigured_enabled"
-    /** [Config.autoReplySplitFailedEnabled]のキー */
-    private const val KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED = "auto_reply_split_failed_enabled"
+    /** [Config.autoReplyExtractionFailedEnabled]のキー */
+    private const val KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED = "auto_reply_extraction_failed_enabled"
     /** [Config.autoReplyCooldownSeconds]のキー */
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
     /** [Config.autoRefreshEnabled]のキー */
@@ -48,20 +48,20 @@ object SettingsStore {
     private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
     /** [Config.defaultReplyBody]のキー */
     private const val KEY_DEFAULT_REPLY_BODY = "default_reply_body"
-    /** [Config.splitFailedReplyAddition]のキー */
-    private const val KEY_SPLIT_FAILED_REPLY_ADDITION = "split_failed_reply_addition"
+    /** [Config.extractionFailedReplyAddition]のキー */
+    private const val KEY_EXTRACTION_FAILED_REPLY_ADDITION = "extraction_failed_reply_addition"
     /** [Config.defaultSendTargetFilterId]のキー */
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
-    /** [Config.aiParsingEnabled]のキー */
-    private const val KEY_AI_PARSING_ENABLED = "ai_parsing_enabled"
+    /** [Config.aiExtractionEnabled]のキー */
+    private const val KEY_AI_EXTRACTION_ENABLED = "ai_extraction_enabled"
     /** [Config.defaultSendNoneOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SEND_NONE_ONLY_ENABLED = "default_send_none_only_enabled"
-    /** [Config.defaultSplitFailedOnlyEnabled]のキー */
-    private const val KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED = "default_split_failed_only_enabled"
-    /** [Config.defaultSplitSucceededOnlyEnabled]のキー */
-    private const val KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED = "default_split_succeeded_only_enabled"
-    /** [Config.defaultSplitExcludedOnlyEnabled]のキー */
-    private const val KEY_DEFAULT_SPLIT_EXCLUDED_ONLY_ENABLED = "default_split_excluded_only_enabled"
+    /** [Config.defaultExtractionFailedOnlyEnabled]のキー */
+    private const val KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED = "default_extraction_failed_only_enabled"
+    /** [Config.defaultExtractionSucceededOnlyEnabled]のキー */
+    private const val KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED = "default_extraction_succeeded_only_enabled"
+    /** [Config.defaultExtractionExcludedOnlyEnabled]のキー */
+    private const val KEY_DEFAULT_EXTRACTION_EXCLUDED_ONLY_ENABLED = "default_extraction_excluded_only_enabled"
     /** [Config.defaultSentAutoOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
     /** [Config.defaultSentManualOnlyEnabled]のキー */
@@ -153,18 +153,18 @@ object SettingsStore {
     data class Config(
         /** trueなら自動送信モード、falseなら手動送信モード（[KintoneUploadWorker]が参照） */
         val sendEnabled: Boolean,
-        /** 自動送信時、本文の形式が異常なSMS（会社名・氏名・内容に分割できなかったSMS）も送信するかどうか */
-        val sendSplitFailedEnabled: Boolean,
+        /** 自動送信時、本文の形式が異常なSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか */
+        val sendExtractionFailedEnabled: Boolean,
         /** 自動送信時、形式が除外（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか */
-        val sendSplitExcludedEnabled: Boolean,
+        val sendExtractionExcludedEnabled: Boolean,
         /** SMS検索画面で、本文の形式が異常なSMSを選択可能にするかどうか */
-        val searchSplitFailedEnabled: Boolean,
+        val searchExtractionFailedEnabled: Boolean,
         /** SMS検索画面で、形式が除外（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか */
-        val searchSplitExcludedEnabled: Boolean,
+        val searchExtractionExcludedEnabled: Boolean,
         /** SMS検索画面で、送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
         val searchSendTargetUnconfiguredEnabled: Boolean,
-        /** 自動受信時、本文の形式が異常なSMSに対して[splitFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
-        val autoReplySplitFailedEnabled: Boolean,
+        /** 自動受信時、本文の形式が異常なSMSに対して[extractionFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
+        val autoReplyExtractionFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
         val autoReplyCooldownSeconds: Int,
         /** SMS送信履歴画面（[LogActivity]）を[autoRefreshIntervalSeconds]間隔で自動再読み込みするかどうか */
@@ -190,24 +190,24 @@ object SettingsStore {
         val searchFiltersVisibleByDefault: Boolean,
         /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言 */
         val defaultReplyBody: String,
-        /** 分割失敗のSMSへの返信時、[defaultReplyBody]の代わりに使う文言 */
-        val splitFailedReplyAddition: String,
+        /** 抽出失敗のSMSへの返信時、[defaultReplyBody]の代わりに使う文言 */
+        val extractionFailedReplyAddition: String,
         /**
          * SMS検索画面を開いた際に「送信先」フィルタへ初期設定する送信先ID。
          * nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す
          */
         val defaultSendTargetFilterId: String?,
-        /** 本文からの会社名・氏名・内容の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
+        /** 本文からの会社名・氏名の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
          * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
-        val aiParsingEnabled: Boolean,
+        val aiExtractionEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
         val defaultSendNoneOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「形式」の「異常」チェックボックスを初期状態でONにするかどうか */
-        val defaultSplitFailedOnlyEnabled: Boolean,
+        val defaultExtractionFailedOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「形式」の「正常」チェックボックスを初期状態でONにするかどうか */
-        val defaultSplitSucceededOnlyEnabled: Boolean,
+        val defaultExtractionSucceededOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「形式」の「除外」チェックボックスを初期状態でONにするかどうか */
-        val defaultSplitExcludedOnlyEnabled: Boolean,
+        val defaultExtractionExcludedOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（自動）」チェックボックスを初期状態でONにするかどうか */
         val defaultSentAutoOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（手動）」チェックボックスを初期状態でONにするかどうか */
@@ -240,8 +240,8 @@ object SettingsStore {
         val loginPassword: String,
         /** 送信元電話番号を書き込むkintoneフィールドのフィールドコード */
         val fieldSender: String,
-        /** 本文を書き込むkintoneフィールドのフィールドコード */
-        val fieldBody: String,
+        /** 本文（統合範囲内で複数件が連結される場合は履歴として蓄積される）を書き込むkintoneフィールドのフィールドコード */
+        val fieldHistory: String,
         /** 最終受信日時を書き込むkintoneフィールドのフィールドコード。既存レコード検索（[KintoneApi.findExistingRecord]）にも使う */
         val fieldDatetime: String,
         /** 登録種別（[AppConstants.REGISTRATION_TYPE_VALUE]）を書き込むkintoneフィールドのフィールドコード。既存レコード検索の絞り込みにも使う */
@@ -257,8 +257,8 @@ object SettingsStore {
         val fieldCompanyName: String = "",
         /** 抽出した氏名を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
         val fieldUserName: String = "",
-        /** 抽出した内容（用件）を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
-        val fieldContent: String = "",
+        /** SMS本文全体（原文、[SmsParts.body]）を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
+        val fieldBody: String = "",
         /** kintoneへの送信時、会社名に[SmsParts.companyNameNormalizedWidth]（英数字は半角・それ以外は全角に統一した文字列）を使うかどうか。
          * falseの場合は[SmsParts.companyName]（変換なし）をそのまま使う */
         val companyNameWidthConversionEnabled: Boolean = false,
@@ -281,7 +281,7 @@ object SettingsStore {
         val isValid: Boolean
             get() {
                 if (name.isBlank() || subdomain.isBlank() || appId.isBlank()) return false
-                if (fieldSender.isBlank() || fieldBody.isBlank() || fieldDatetime.isBlank() || fieldType.isBlank()) return false
+                if (fieldSender.isBlank() || fieldHistory.isBlank() || fieldDatetime.isBlank() || fieldType.isBlank()) return false
                 return when (authMethod) {
                     AuthMethod.API_TOKEN -> apiToken.isNotBlank()
                     AuthMethod.PASSWORD -> loginName.isNotBlank() && loginPassword.isNotBlank()
@@ -323,13 +323,13 @@ object SettingsStore {
                 loginName = "",
                 loginPassword = "",
                 fieldSender = AppDefaults.NEW_PROFILE_FIELD_SENDER,
-                fieldBody = AppDefaults.NEW_PROFILE_FIELD_BODY,
+                fieldHistory = AppDefaults.NEW_PROFILE_FIELD_HISTORY,
                 fieldDatetime = AppDefaults.NEW_PROFILE_FIELD_DATETIME,
                 fieldType = AppDefaults.NEW_PROFILE_FIELD_TYPE,
                 updateToleranceHours = AppDefaults.UPDATE_TOLERANCE_HOURS,
                 fieldCompanyName = AppDefaults.NEW_PROFILE_FIELD_COMPANY_NAME,
                 fieldUserName = AppDefaults.NEW_PROFILE_FIELD_USER_NAME,
-                fieldContent = AppDefaults.NEW_PROFILE_FIELD_CONTENT
+                fieldBody = AppDefaults.NEW_PROFILE_FIELD_BODY
             )
         }
     }
@@ -342,12 +342,12 @@ object SettingsStore {
     fun save(context: Context, config: Config) {
         val editor = prefs(context).edit()
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
-            .putBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, config.sendSplitFailedEnabled)
-            .putBoolean(KEY_SEND_SPLIT_EXCLUDED_ENABLED, config.sendSplitExcludedEnabled)
-            .putBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, config.searchSplitFailedEnabled)
-            .putBoolean(KEY_SEARCH_SPLIT_EXCLUDED_ENABLED, config.searchSplitExcludedEnabled)
+            .putBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, config.sendExtractionFailedEnabled)
+            .putBoolean(KEY_SEND_EXTRACTION_EXCLUDED_ENABLED, config.sendExtractionExcludedEnabled)
+            .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, config.searchExtractionFailedEnabled)
+            .putBoolean(KEY_SEARCH_EXTRACTION_EXCLUDED_ENABLED, config.searchExtractionExcludedEnabled)
             .putBoolean(KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED, config.searchSendTargetUnconfiguredEnabled)
-            .putBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, config.autoReplySplitFailedEnabled)
+            .putBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, config.autoReplyExtractionFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
@@ -359,12 +359,12 @@ object SettingsStore {
             .putInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, config.smsSearchDateRangeDays)
             .putBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, config.searchFiltersVisibleByDefault)
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
-            .putString(KEY_SPLIT_FAILED_REPLY_ADDITION, config.splitFailedReplyAddition)
-            .putBoolean(KEY_AI_PARSING_ENABLED, config.aiParsingEnabled)
+            .putString(KEY_EXTRACTION_FAILED_REPLY_ADDITION, config.extractionFailedReplyAddition)
+            .putBoolean(KEY_AI_EXTRACTION_ENABLED, config.aiExtractionEnabled)
             .putBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, config.defaultSendNoneOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, config.defaultSplitFailedOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED, config.defaultSplitSucceededOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_SPLIT_EXCLUDED_ONLY_ENABLED, config.defaultSplitExcludedOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, config.defaultExtractionFailedOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, config.defaultExtractionSucceededOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_EXTRACTION_EXCLUDED_ONLY_ENABLED, config.defaultExtractionExcludedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
         if (config.defaultSendTargetFilterId != null) {
@@ -381,12 +381,12 @@ object SettingsStore {
      */
     private val DEFAULT_CONFIG = Config(
         sendEnabled = true,
-        sendSplitFailedEnabled = false,
-        sendSplitExcludedEnabled = true,
-        searchSplitFailedEnabled = false,
-        searchSplitExcludedEnabled = true,
+        sendExtractionFailedEnabled = false,
+        sendExtractionExcludedEnabled = true,
+        searchExtractionFailedEnabled = false,
+        searchExtractionExcludedEnabled = true,
         searchSendTargetUnconfiguredEnabled = false,
-        autoReplySplitFailedEnabled = false,
+        autoReplyExtractionFailedEnabled = false,
         autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
         autoRefreshEnabled = true,
         autoRefreshIntervalSeconds = AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS,
@@ -398,13 +398,13 @@ object SettingsStore {
         smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
         searchFiltersVisibleByDefault = true,
         defaultReplyBody = AppDefaults.SMS_STANDARD_REPLY_BODY,
-        splitFailedReplyAddition = AppDefaults.SMS_SPLIT_FAILED_REPLY_BODY,
+        extractionFailedReplyAddition = AppDefaults.SMS_EXTRACTION_FAILED_REPLY_BODY,
         defaultSendTargetFilterId = null,
-        aiParsingEnabled = false,
+        aiExtractionEnabled = false,
         defaultSendNoneOnlyEnabled = false,
-        defaultSplitFailedOnlyEnabled = false,
-        defaultSplitSucceededOnlyEnabled = false,
-        defaultSplitExcludedOnlyEnabled = false,
+        defaultExtractionFailedOnlyEnabled = false,
+        defaultExtractionSucceededOnlyEnabled = false,
+        defaultExtractionExcludedOnlyEnabled = false,
         defaultSentAutoOnlyEnabled = false,
         defaultSentManualOnlyEnabled = false
     )
@@ -414,15 +414,15 @@ object SettingsStore {
         val p = prefs(context)
         return Config(
             sendEnabled = p.getBoolean(KEY_SEND_ENABLED, DEFAULT_CONFIG.sendEnabled),
-            sendSplitFailedEnabled = p.getBoolean(KEY_SEND_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.sendSplitFailedEnabled),
-            sendSplitExcludedEnabled = p.getBoolean(KEY_SEND_SPLIT_EXCLUDED_ENABLED, DEFAULT_CONFIG.sendSplitExcludedEnabled),
-            searchSplitFailedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.searchSplitFailedEnabled),
-            searchSplitExcludedEnabled = p.getBoolean(KEY_SEARCH_SPLIT_EXCLUDED_ENABLED, DEFAULT_CONFIG.searchSplitExcludedEnabled),
+            sendExtractionFailedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.sendExtractionFailedEnabled),
+            sendExtractionExcludedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_EXCLUDED_ENABLED, DEFAULT_CONFIG.sendExtractionExcludedEnabled),
+            searchExtractionFailedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.searchExtractionFailedEnabled),
+            searchExtractionExcludedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_EXCLUDED_ENABLED, DEFAULT_CONFIG.searchExtractionExcludedEnabled),
             searchSendTargetUnconfiguredEnabled = p.getBoolean(
                 KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED,
                 DEFAULT_CONFIG.searchSendTargetUnconfiguredEnabled
             ),
-            autoReplySplitFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_SPLIT_FAILED_ENABLED, DEFAULT_CONFIG.autoReplySplitFailedEnabled),
+            autoReplyExtractionFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.autoReplyExtractionFailedEnabled),
             autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, DEFAULT_CONFIG.autoReplyCooldownSeconds),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, DEFAULT_CONFIG.autoRefreshEnabled),
             autoRefreshIntervalSeconds = p.getInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, DEFAULT_CONFIG.autoRefreshIntervalSeconds),
@@ -434,14 +434,14 @@ object SettingsStore {
             smsSearchDateRangeDays = p.getInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, DEFAULT_CONFIG.smsSearchDateRangeDays),
             searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, DEFAULT_CONFIG.searchFiltersVisibleByDefault),
             defaultReplyBody = p.getString(KEY_DEFAULT_REPLY_BODY, DEFAULT_CONFIG.defaultReplyBody) ?: DEFAULT_CONFIG.defaultReplyBody,
-            splitFailedReplyAddition = p.getString(KEY_SPLIT_FAILED_REPLY_ADDITION, DEFAULT_CONFIG.splitFailedReplyAddition)
-                ?: DEFAULT_CONFIG.splitFailedReplyAddition,
+            extractionFailedReplyAddition = p.getString(KEY_EXTRACTION_FAILED_REPLY_ADDITION, DEFAULT_CONFIG.extractionFailedReplyAddition)
+                ?: DEFAULT_CONFIG.extractionFailedReplyAddition,
             defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, DEFAULT_CONFIG.defaultSendTargetFilterId),
-            aiParsingEnabled = p.getBoolean(KEY_AI_PARSING_ENABLED, DEFAULT_CONFIG.aiParsingEnabled),
+            aiExtractionEnabled = p.getBoolean(KEY_AI_EXTRACTION_ENABLED, DEFAULT_CONFIG.aiExtractionEnabled),
             defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
-            defaultSplitFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitFailedOnlyEnabled),
-            defaultSplitSucceededOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitSucceededOnlyEnabled),
-            defaultSplitExcludedOnlyEnabled = p.getBoolean(KEY_DEFAULT_SPLIT_EXCLUDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultSplitExcludedOnlyEnabled),
+            defaultExtractionFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionFailedOnlyEnabled),
+            defaultExtractionSucceededOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionSucceededOnlyEnabled),
+            defaultExtractionExcludedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_EXCLUDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionExcludedOnlyEnabled),
             defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
             defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
         )
@@ -485,14 +485,14 @@ object SettingsStore {
                     .put("loginName", sendTarget.loginName)
                     .put("loginPassword", sendTarget.loginPassword)
                     .put("fieldSender", sendTarget.fieldSender)
-                    .put("fieldBody", sendTarget.fieldBody)
+                    .put("fieldHistory", sendTarget.fieldHistory)
                     .put("fieldDatetime", sendTarget.fieldDatetime)
                     .put("fieldType", sendTarget.fieldType)
                     .put("updateToleranceHours", sendTarget.updateToleranceHours)
                     .put("updateToleranceMode", sendTarget.updateToleranceMode.name)
                     .put("fieldCompanyName", sendTarget.fieldCompanyName)
                     .put("fieldUserName", sendTarget.fieldUserName)
-                    .put("fieldContent", sendTarget.fieldContent)
+                    .put("fieldBody", sendTarget.fieldBody)
                     .put("companyNameWidthConversionEnabled", sendTarget.companyNameWidthConversionEnabled)
                     .put("matchTarget", sendTarget.matchTarget.name)
             )
@@ -519,14 +519,14 @@ object SettingsStore {
                 loginName = obj.optString("loginName", ""),
                 loginPassword = obj.optString("loginPassword", ""),
                 fieldSender = obj.optString("fieldSender", ""),
-                fieldBody = obj.optString("fieldBody", ""),
+                fieldHistory = obj.optString("fieldHistory", ""),
                 fieldDatetime = obj.optString("fieldDatetime", ""),
                 fieldType = obj.optString("fieldType", ""),
                 updateToleranceHours = obj.optInt("updateToleranceHours", AppDefaults.UPDATE_TOLERANCE_HOURS),
                 updateToleranceMode = UpdateToleranceMode.fromName(obj.optString("updateToleranceMode", "")),
                 fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
-                fieldContent = obj.optString("fieldContent", ""),
+                fieldBody = obj.optString("fieldBody", ""),
                 companyNameWidthConversionEnabled = obj.optBoolean("companyNameWidthConversionEnabled", false),
                 matchTarget = MatchTarget.fromName(obj.optString("matchTarget", ""))
             )
@@ -571,7 +571,7 @@ object SettingsStore {
      * 解決する画面でも必要なため、[SmsLogStore.Entry]側だけに寄せることはできない
      */
     data class SmsResolution(
-        /** 本文から抽出した会社名・氏名・内容 */
+        /** 本文から抽出した会社名・氏名、および本文全体 */
         val smsParts: SmsParts,
         /**
          * 同一送信元が過去に一度でも形式正常なSMSを送っていたため、その直近1件から会社名・氏名と
@@ -603,7 +603,7 @@ object SettingsStore {
         sender: String,
         body: String,
         timestampMillis: Long,
-        aiParsingEnabled: Boolean,
+        aiExtractionEnabled: Boolean,
         continuationEnabled: Boolean,
         continuationScope: ContinuationScope
     ): Pair<SmsResolution, List<SendTarget>> {
@@ -616,14 +616,14 @@ object SettingsStore {
             val smsParts = SmsParts(
                 companyName = previousEntry.companyName,
                 userName = previousEntry.userName,
-                content = body.trim()
+                body = body.trim()
             )
             val resolution = SmsResolution(smsParts = smsParts, isContinuation = true)
             // 送信先は保持せず、引き継いだ会社名を現在の送信先ルールに通して都度判定する
             val sendTargets = findSendTargetsForContinuation(context, previousEntry.companyName)
             return resolution to sendTargets
         }
-        val extracted = SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled)
+        val extracted = SmsPartsGenerator.resolveSmsParts(body, aiExtractionEnabled)
         return SmsResolution(smsParts = extracted) to findSendTargets(context, body, extracted.companyName)
     }
 }

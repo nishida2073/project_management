@@ -566,7 +566,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_split_status_filter"
+                            android:text="@string/label_default_extraction_status_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -577,30 +577,30 @@
                             android:gravity="center_vertical">
 
                             <CheckBox
-                                android:id="@+id/cbDefaultSplitSucceededOnlyEnabled"
+                                android:id="@+id/cbDefaultExtractionSucceededOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="8dp"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_split_succeeded_only_enabled" />
+                                android:text="@string/switch_default_extraction_succeeded_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultSplitFailedOnlyEnabled"
+                                android:id="@+id/cbDefaultExtractionFailedOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="8dp"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_split_failed_only_enabled" />
+                                android:text="@string/switch_default_extraction_failed_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultSplitExcludedOnlyEnabled"
+                                android:id="@+id/cbDefaultExtractionExcludedOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_split_excluded_only_enabled" />
+                                android:text="@string/switch_default_extraction_excluded_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -670,20 +670,20 @@
                             android:text="@string/switch_search_send_target_unconfigured_enabled" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSearchSplitFailedEnabled"
+                            android:id="@+id/swSearchExtractionFailedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="false"
-                            android:text="@string/switch_search_split_failed_enabled" />
+                            android:text="@string/switch_search_extraction_failed_enabled" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSearchSplitExcludedEnabled"
+                            android:id="@+id/swSearchExtractionExcludedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_search_split_excluded_enabled" />
+                            android:text="@string/switch_search_extraction_excluded_enabled" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -781,11 +781,11 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSendSplitFailedEnabled"
+                            android:id="@+id/swSendExtractionFailedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_send_split_failed_enabled" />
+                            android:text="@string/switch_send_extraction_failed_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -797,18 +797,18 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_send_split_failed_enabled"
+                                android:text="@string/helper_send_extraction_failed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSendSplitExcludedEnabled"
+                            android:id="@+id/swSendExtractionExcludedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_send_split_excluded_enabled" />
+                            android:text="@string/switch_send_extraction_excluded_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -820,7 +820,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_send_split_excluded_enabled"
+                                android:text="@string/helper_send_extraction_excluded_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -900,7 +900,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_auto_reply_split_failed_enabled"
+                                android:text="@string/helper_auto_reply_extraction_failed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1009,7 +1009,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_sms_split_failed_reply_body"
+                            android:text="@string/section_sms_extraction_failed_reply_body"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -1022,10 +1022,10 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_split_failed_reply_body">
+                                android:hint="@string/hint_sms_extraction_failed_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etSplitFailedReplyAddition"
+                                    android:id="@+id/etExtractionFailedReplyAddition"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="textMultiLine" />
@@ -1202,7 +1202,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_body_split"
+                    android:text="@string/section_body_extraction"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -1217,7 +1217,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_ai_split"
+                        android:text="@string/label_ai_extraction"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1228,11 +1228,11 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swAiParsingEnabled"
+                            android:id="@+id/swAiExtractionEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_ai_split_enabled" />
+                            android:text="@string/switch_ai_extraction_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -1244,7 +1244,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_ai_split_enabled"
+                                android:text="@string/helper_ai_extraction_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
