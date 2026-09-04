@@ -34,6 +34,8 @@ object SettingsStore {
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
     /** [Config.smsMatchToleranceSeconds]のキー */
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
+    /** [Config.bodyExcerptLength]のキー */
+    private const val KEY_BODY_EXCERPT_LENGTH = "body_excerpt_length"
     /** [Config.continuationEnabled]のキー */
     private const val KEY_CONTINUATION_ENABLED = "continuation_enabled"
     /** [Config.continuationScope]のキー */
@@ -173,6 +175,8 @@ object SettingsStore {
         val autoRefreshIntervalSeconds: Int,
         /** 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒） */
         val smsMatchToleranceSeconds: Int,
+        /** ログ一覧（[LogActivity]）に表示する本文抜粋（[SmsLogStore.Entry.bodyExcerpt]）の文字数 */
+        val bodyExcerptLength: Int,
         /** 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）機能自体を有効にするかどうか */
         val continuationEnabled: Boolean,
         /** 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）を送信元ごとにどこまで遡って有効とするか */
@@ -352,6 +356,7 @@ object SettingsStore {
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
             .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
             .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
+            .putInt(KEY_BODY_EXCERPT_LENGTH, config.bodyExcerptLength)
             .putBoolean(KEY_CONTINUATION_ENABLED, config.continuationEnabled)
             .putString(KEY_CONTINUATION_SCOPE, config.continuationScope.name)
             .putBoolean(KEY_CONTINUATION_SHOW_USER_NAME_ENABLED, config.continuationShowUserNameEnabled)
@@ -391,6 +396,7 @@ object SettingsStore {
         autoRefreshEnabled = true,
         autoRefreshIntervalSeconds = AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS,
         smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
+        bodyExcerptLength = AppDefaults.BODY_EXCERPT_LENGTH,
         continuationEnabled = true,
         continuationScope = ContinuationScope.SAME_DAY,
         continuationShowUserNameEnabled = true,
@@ -427,6 +433,7 @@ object SettingsStore {
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, DEFAULT_CONFIG.autoRefreshEnabled),
             autoRefreshIntervalSeconds = p.getInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, DEFAULT_CONFIG.autoRefreshIntervalSeconds),
             smsMatchToleranceSeconds = p.getInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, DEFAULT_CONFIG.smsMatchToleranceSeconds),
+            bodyExcerptLength = p.getInt(KEY_BODY_EXCERPT_LENGTH, DEFAULT_CONFIG.bodyExcerptLength),
             continuationEnabled = p.getBoolean(KEY_CONTINUATION_ENABLED, DEFAULT_CONFIG.continuationEnabled),
             continuationScope = ContinuationScope.fromName(p.getString(KEY_CONTINUATION_SCOPE, null)),
             continuationShowUserNameEnabled = p.getBoolean(KEY_CONTINUATION_SHOW_USER_NAME_ENABLED, DEFAULT_CONFIG.continuationShowUserNameEnabled),

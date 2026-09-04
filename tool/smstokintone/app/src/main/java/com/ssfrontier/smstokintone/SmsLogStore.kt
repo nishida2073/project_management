@@ -14,10 +14,14 @@ object SmsLogStore {
     private const val PREFS_NAME = "smstokintone_log"
     /** ログ全件をJSON配列文字列として保存するキー */
     private const val KEY_ENTRIES = "entries"
-    /** [Entry.bodyPreview]として保存する本文の最大文字数 */
-    private const val BODY_PREVIEW_LIMIT = 100
     /** JSON上ではLong?のnullを表現できないため、smsId未解決を表す番兵値として使う */
     private const val NO_SMS_ID = -1L
+    /**
+     * [add]・[getAll]・[clear]の排他制御に使うロック。SmsReceiver（受信時）とKintoneUploadWorker
+     * （送信時）が同一プロセス内から並行して[add]を呼び得るため、読み込み→変更→書き込みの間に
+     * 割り込まれてどちらかのログが失われることを防ぐ（[ContinuationStore]の[lock]と同じ狙い）
+     */
+    private val lock = Any()
 
     /** ログエントリの種別 */
     enum class EntryType {
@@ -48,8 +52,8 @@ object SmsLogStore {
         val timestampMillis: Long,
         /** 送信元電話番号 */
         val sender: String,
-        /** SMS本文の先頭[BODY_PREVIEW_LIMIT]文字 */
-        val bodyPreview: String,
+        /** SMS本文の先頭[SettingsStore.Config.bodyExcerptLength]文字の抜粋（記録時点の設定値で切り出し済み） */
+        val bodyExcerpt: String,
         /** このエントリが表す処理が成功したかどうか */
         val success: Boolean,
         /** 画面表示用の結果メッセージ */
@@ -98,7 +102,7 @@ object SmsLogStore {
         companyNameConverted: Boolean = false,
         replyBody: String? = null,
         isContinuation: Boolean = false
-    ) {
+    ) = synchronized(lock) {
         val entries = getAll(context).toMutableList()
         entries.add(
             0,
@@ -107,7 +111,7 @@ object SmsLogStore {
                 loggedAtMillis = System.currentTimeMillis(),
                 timestampMillis = timestampMillis,
                 sender = sender,
-                bodyPreview = body.take(BODY_PREVIEW_LIMIT),
+                bodyExcerpt = body.take(SettingsStore.load(context).bodyExcerptLength),
                 success = success,
                 message = message,
                 smsId = smsId,
@@ -127,7 +131,7 @@ object SmsLogStore {
                 .put("loggedAt", entry.loggedAtMillis)
                 .put("ts", entry.timestampMillis)
                 .put("sender", entry.sender)
-                .put("body", entry.bodyPreview)
+                .put("body", entry.bodyExcerpt)
                 .put("success", entry.success)
                 .put("message", entry.message)
                 .put("smsId", entry.smsId ?: NO_SMS_ID)
@@ -153,8 +157,8 @@ object SmsLogStore {
     }
 
     /** 保存済みの全ログエントリを新しい順で返す */
-    fun getAll(context: Context): List<Entry> {
-        val json = prefs(context).getString(KEY_ENTRIES, null) ?: return emptyList()
+    fun getAll(context: Context): List<Entry> = synchronized(lock) {
+        val json = prefs(context).getString(KEY_ENTRIES, null) ?: return@synchronized emptyList()
         val array = JSONArray(json)
         return (0 until array.length()).map { i ->
             val obj = array.getJSONObject(i)
@@ -165,7 +169,7 @@ object SmsLogStore {
                 loggedAtMillis = obj.optLong("loggedAt", obj.getLong("ts")),
                 timestampMillis = obj.getLong("ts"),
                 sender = obj.optString("sender", ""),
-                bodyPreview = obj.optString("body", ""),
+                bodyExcerpt = obj.optString("body", ""),
                 success = obj.optBoolean("success", false),
                 message = obj.optString("message", ""),
                 smsId = if (smsId == NO_SMS_ID) null else smsId,
@@ -187,7 +191,7 @@ object SmsLogStore {
     }
 
     /** 保存済みの全ログエントリを削除する */
-    fun clear(context: Context) {
+    fun clear(context: Context) = synchronized(lock) {
         prefs(context).edit().remove(KEY_ENTRIES).apply()
     }
 }

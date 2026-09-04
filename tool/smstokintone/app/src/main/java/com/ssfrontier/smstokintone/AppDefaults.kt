@@ -9,6 +9,9 @@ object AppDefaults {
     /** ログとSMSを突き合わせる際の許容範囲（秒）の初期値 */
     const val SMS_MATCH_TOLERANCE_SECONDS = 15
 
+    /** ログ一覧に表示する本文抜粋の文字数の初期値 */
+    const val BODY_EXCERPT_LENGTH = 100
+
     /** 送信先を新規追加した際の、kintoneサブドメイン欄の初期値 */
     const val NEW_PROFILE_SUBDOMAIN = "univ-kyousai-{X}"
     /** 送信先を新規追加した際の、「送信元」フィールドコード欄の初期値 */

@@ -128,6 +128,9 @@
     <string name="label_sms_match_tolerance_seconds">統合範囲</string>
     <string name="helper_sms_match_tolerance_seconds">送信ログと端末のSMSを同じSMSとみなす、時刻のずれの許容範囲です</string>
     <string name="hint_sms_match_tolerance_seconds">±秒</string>
+    <string name="label_body_excerpt_length">本文の最大表示文字数</string>
+    <string name="helper_body_excerpt_length">ログ一覧に表示する際の本文の最大文字数です</string>
+    <string name="hint_body_excerpt_length">文字数</string>
     <string name="section_sms_search">SMSの検索</string>
     <string name="section_search_filter">検索条件の初期値</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>

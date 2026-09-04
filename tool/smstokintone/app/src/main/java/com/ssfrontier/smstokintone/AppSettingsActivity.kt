@@ -147,6 +147,11 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(smsMatchToleranceSeconds = seconds) }
         }
 
+        binding.etBodyExcerptLength.setText(config.bodyExcerptLength.toString())
+        binding.etBodyExcerptLength.onPositiveIntChanged { length ->
+            SettingsStore.update(this) { it.copy(bodyExcerptLength = length) }
+        }
+
         binding.swContinuationEnabled.isChecked = config.continuationEnabled
         binding.rbContinuationScopeUnlimited.isEnabled = config.continuationEnabled
         binding.rbContinuationScopeSameDay.isEnabled = config.continuationEnabled

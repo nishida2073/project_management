@@ -168,7 +168,7 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 0, 0, 4)
             }
             val bodyView = TextView(this).apply {
-                text = entry.bodyPreview
+                text = entry.bodyExcerpt
                 setTextColor(itemTextColor)
                 setPadding(0, 0, 0, 4)
             }
