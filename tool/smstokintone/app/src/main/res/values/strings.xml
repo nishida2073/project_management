@@ -90,9 +90,9 @@
     <string name="btn_send_test">テスト送信</string>
     <string name="dialog_title_test_send_body">テスト本文</string>
     <string name="dialog_title_test_send_result">テスト結果</string>
-    <string name="dialog_message_test_send_result_failure">送信失敗: %1$s</string>
-    <string name="dialog_message_test_send_result_network_error">通信エラー: %1$s</string>
-    <string name="dialog_message_test_send_routing_unmatched">送信先の振り分け条件に一致しないため、送信していません。</string>
+    <string name="dialog_message_test_send_result_failure">送信失敗\n%1$s</string>
+    <string name="dialog_message_test_send_result_network_error">通信エラー\n%1$s</string>
+    <string name="dialog_message_test_send_routing_unmatched">送信先エラー\n振り分け設定:%1$s \n比較対象: %2$s</string>
     <string name="test_send_body">NTTデータ○○○\nテスト太郎\n\nこれはアプリからのテスト送信です</string>
   
     <!-- アプリの設定画面 -->

@@ -228,7 +228,13 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                 itemBinding.btnTestSend.isEnabled = true
                 AlertDialog.Builder(this@SendTargetSettingsActivity)
                     .setTitle(R.string.dialog_title_test_send_result)
-                    .setMessage(R.string.dialog_message_test_send_routing_unmatched)
+                    .setMessage(
+                        getString(
+                            R.string.dialog_message_test_send_routing_unmatched,
+                            sendTarget.keywords,
+                            getString(if (sendTarget.matchTarget == SettingsStore.MatchTarget.BODY) R.string.rb_match_target_body else R.string.rb_match_target_company_name)
+                        )
+                    )
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
                 return@launch
