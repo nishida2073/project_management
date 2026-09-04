@@ -27,6 +27,8 @@
     <string name="btn_select_all">全選択</string>
     <string name="btn_deselect_all">選択解除</string>
     <string name="btn_reset">初期化</string>
+    <string name="btn_save_settings">設定を保存</string>
+    <string name="toast_settings_saved">設定を保存しました</string>
 
     <!-- トップ画面 -->
     <string name="label_top_sms_send">SMSの送信モード</string>
@@ -85,8 +87,6 @@
     <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
     <string name="dialog_title_validation_error">入力エラー</string>
     <string name="dialog_message_validation_error">%1$s: 送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
-    <string name="btn_save_settings">設定を保存</string>
-    <string name="toast_settings_saved">設定を保存しました</string>
     <string name="btn_send_test">テスト送信</string>
     <string name="dialog_title_test_send_body">テスト本文</string>
     <string name="dialog_title_test_send_result">テスト結果</string>
@@ -115,16 +115,16 @@
     <string name="label_permission_sms_read_granted">許可済み</string>
     <string name="toast_sms_read_permission_denied">SMSの読み取りの許可がない場合、SMSの検索はできません</string>
     <string name="helper_sms_read_permission">SMSの検索に使用します</string>
-    <string name="section_layout">レイアウト</string>
+    <string name="section_layout">レイアウトの変更</string>
     <string name="section_theme_mode">表示テーマ</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>
     <string name="section_sms_search">SMSの検索</string>
-    <string name="section_search_filter">検索条件の初期値</string>
+    <string name="label_search_filter">検索条件の初期値</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>
     <string name="hint_sms_search_date_range_days">日</string>
     <string name="label_default_send_target_filter">送信先</string>
-    <string name="label_default_send_status_filter">送信</string>
+    <string name="label_default_send_status_filter">送信状況</string>
     <string name="switch_default_send_none_only_enabled">未送信</string>
     <string name="switch_default_sent_auto_only_enabled">済（自動）</string>
     <string name="switch_default_sent_manual_only_enabled">済（手動）</string>
@@ -132,7 +132,7 @@
     <string name="switch_default_extraction_succeeded_only_enabled">正常</string>
     <string name="switch_default_extraction_failed_only_enabled">異常</string>
     <string name="switch_default_extraction_excluded_only_enabled">除外</string>
-    <string name="label_search_filters_visibility">表示の切り替え</string>
+    <string name="section_search_filters_visibility">検索条件の表示</string>
     <string name="rb_search_filters_visible">表示</string>
     <string name="rb_search_filters_hidden">隠す</string>
     <string name="label_search_selection_target">SMS選択の対象</string>
@@ -163,14 +163,15 @@
     <string name="section_sms_extraction_failed_reply_body">形式が異常な場合</string>
     <string name="hint_sms_extraction_failed_reply_body">文言</string>
     <string name="section_continuation">SMSの引き継ぎ</string>
+    <string name="label_continuation">引き継ぎ</string>
     <string name="switch_continuation_enabled">有効にする</string>
-    <string name="helper_continuation_enabled">同一送信元から過去に一度でも形式正常なSMSが届いていれば、以降のSMSで会社名・氏名・送信先を引き継ぎます。無効にすると常に今回のSMS本文だけで判定します。</string>
+    <string name="helper_continuation_enabled">同一送信元の過去の正常なSMSから会社名・氏名・送信先を引き継ぎます。無効時は今回の本文だけで判定します。</string>
     <string name="label_continuation_scope">引き継ぎの範囲</string>
     <string name="rb_continuation_scope_unlimited">制限なし</string>
     <string name="rb_continuation_scope_same_day">同一日のみ</string>
-    <string name="helper_continuation_scope">同一送信元から形式正常なSMSが届いた場合に、以降のSMSで会社名・氏名・送信先を引き継ぐ範囲です。「同一日のみ」にすると、日付が変わると引き継ぎがリセットされます</string>
+    <string name="helper_continuation_scope">会社名・氏名・送信先を引き継ぐ範囲です。「同一日のみ」にすると、日付が変わると引き継ぎがリセットされます</string>
     <string name="label_continuation_show_name">送信元の表示</string>
-    <string name="switch_continuation_show_user_name_enabled">氏名を表示にする</string>
+    <string name="switch_continuation_show_user_name_enabled">氏名を表示する</string>
     <string name="helper_continuation_show_user_name_enabled">電話番号の代わりに引き継いだ氏名を表示します</string>
     <string name="btn_edit_continuation_item">編集</string>
     <string name="section_body_extraction">本文の抽出</string>
@@ -233,11 +234,11 @@
     <string name="cb_extraction_succeeded_only">🆗 正常</string>
     <string name="cb_extraction_failed_only">🆖 異常</string>
     <string name="cb_extraction_excluded_only">❎ 除外</string>
-    <string name="label_search_send_status_filter">送信</string>
+    <string name="label_search_send_status_filter">送信状況</string>
     <string name="cb_send_none_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_status_legend">"形式：🆗 正常 ・ 🆖 異常 ・ ❎ 除外\n送信：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし ・ ♻️ 引き継ぎ"</string>
+    <string name="helper_sms_status_legend">"形式：🆗 正常 ・ 🆖 異常 ・ ❎ 除外\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし ・ ♻️ 引き継ぎ"</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>
