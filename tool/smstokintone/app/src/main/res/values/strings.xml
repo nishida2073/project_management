@@ -119,18 +119,6 @@
     <string name="section_theme_mode">表示テーマ</string>
     <string name="rb_theme_light">ライト</string>
     <string name="rb_theme_dark">ダーク</string>
-    <string name="section_log">ログ</string>
-    <string name="section_auto_refresh">自動更新</string>
-    <string name="switch_auto_refresh_enabled">有効にする</string>
-    <string name="label_auto_refresh_interval">更新間隔</string>
-    <string name="hint_auto_refresh_interval">秒</string>
-    <string name="helper_auto_refresh_interval">ログ画面を自動的に再読み込みする間隔です</string>
-    <string name="label_sms_match_tolerance_seconds">統合範囲</string>
-    <string name="helper_sms_match_tolerance_seconds">送信ログと端末のSMSを同じSMSとみなす、時刻のずれの許容範囲です</string>
-    <string name="hint_sms_match_tolerance_seconds">±秒</string>
-    <string name="label_body_excerpt_length">本文の最大表示文字数</string>
-    <string name="helper_body_excerpt_length">ログ一覧に表示する際の本文の最大文字数です</string>
-    <string name="hint_body_excerpt_length">文字数</string>
     <string name="section_sms_search">SMSの検索</string>
     <string name="section_search_filter">検索条件の初期値</string>
     <string name="label_sms_search_date_range">受信日の範囲</string>
@@ -189,6 +177,18 @@
     <string name="label_ai_extraction">AIによる抽出</string>
     <string name="switch_ai_extraction_enabled">有効にする</string>
     <string name="helper_ai_extraction_enabled">端末上のAIを使用して会社名・氏名を抽出します。\nAIの呼び出しに失敗した場合は、ルールベースの抽出を実行します。</string>
+    <string name="section_log">ログ</string>
+    <string name="section_auto_refresh">自動更新</string>
+    <string name="switch_auto_refresh_enabled">有効にする</string>
+    <string name="label_auto_refresh_interval">更新間隔</string>
+    <string name="hint_auto_refresh_interval">秒</string>
+    <string name="helper_auto_refresh_interval">ログ画面を自動的に再読み込みする間隔です</string>
+    <string name="label_sms_match_tolerance_seconds">統合範囲</string>
+    <string name="helper_sms_match_tolerance_seconds">送信ログと端末のSMSを同じSMSとみなす、時刻のずれの許容範囲です</string>
+    <string name="hint_sms_match_tolerance_seconds">±秒</string>
+    <string name="label_body_excerpt_length">本文の最大表示文字数</string>
+    <string name="helper_body_excerpt_length">ログ一覧に表示する際の本文の最大文字数です</string>
+    <string name="hint_body_excerpt_length">文字数</string>
 
     <!-- ログの確認画面 -->
     <string name="title_log">ログの一覧</string>

@@ -23,7 +23,7 @@ object KintoneApi {
     /** [Log]出力に使うタグ */
     private const val TAG = "KintoneApi"
     /** [mergeBody]で複数エントリを連結する際の本文中の区切り文字列 */
-    private const val ENTRY_SEPARATOR = "ーーーー"
+    private const val ENTRY_SEPARATOR = "------------------------------"
 
     /** [postRecord]の結果。呼び出し側は成功/スキップ/失敗を区別してログ・通知文言を出し分ける */
     sealed class PostResult {
