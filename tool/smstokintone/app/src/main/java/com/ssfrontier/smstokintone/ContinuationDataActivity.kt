@@ -10,8 +10,9 @@ import com.ssfrontier.smstokintone.databinding.ItemContinuationDataBinding
 
 /**
  * 送信元ごとの引継ぎデータ（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
- * または送信元単位で削除できる画面。送信先は複数一致し得り編集も複雑になるため、この画面では
- * 変更せず現在の値をラベル表示するのみとする
+ * または送信元単位で削除できる画面。送信先は保持せず、会社名から
+ * [SettingsStore.findSendTargetsForContinuation]で都度再判定した結果を読み取り専用のラベルとして
+ * 表示するのみで、この画面での編集対象にはしない
  */
 class ContinuationDataActivity : AppCompatActivity() {
 
@@ -28,7 +29,10 @@ class ContinuationDataActivity : AppCompatActivity() {
      * [senderKey]は正規化済みの送信元キー（[ContinuationStore]のマップのキー）。この画面では
      * 元の電話番号は保持していないため編集対象にしない
      */
-    private class Card(val senderKey: String, val itemBinding: ItemContinuationDataBinding)
+    private class Card(
+        val senderKey: String,
+        val itemBinding: ItemContinuationDataBinding
+    )
 
     private val cards = mutableListOf<Card>()
 
@@ -61,10 +65,13 @@ class ContinuationDataActivity : AppCompatActivity() {
         itemBinding.tvSenderKey.text = getString(R.string.label_continuation_sender_key, senderKey)
         itemBinding.etContinuationCompanyName.setText(entry.companyName)
         itemBinding.etContinuationUserName.setText(entry.userName)
-        // 複数の送信先に一致していた場合、entry.sendTargetNameは既に「、」区切りで連結済み
-        itemBinding.tvContinuationSendTargetName.text = entry.sendTargetName ?: getString(R.string.label_send_target_none)
+
+        val sendTargets = SettingsStore.findSendTargetsForContinuation(this, entry.companyName)
+        val name = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this) }
+        itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_none)
 
         val card = Card(senderKey, itemBinding)
+
         itemBinding.btnDeleteContinuationData.setOnClickListener {
             binding.llContinuationDataContainer.removeView(itemBinding.root)
             cards.remove(card)
@@ -76,10 +83,10 @@ class ContinuationDataActivity : AppCompatActivity() {
 
     /**
      * 表示中の全カードの内容で[loadedSnapshot]からの差分をストアへ適用する。カードを削除した
-     * 送信元はまとめて削除され、残っているカードは入力内容（会社名・氏名）で更新される。
-     * 送信先・日時はこの画面では編集対象にしないため、元のデータの値をそのまま引き継ぐ。
-     * 画面を開いてから保存するまでの間にSMS受信などでストアが更新されていた場合は何も保存せず、
-     * 保存失敗のダイアログを表示する（[ContinuationStore.applyIfUnchanged]参照）
+     * 送信元はまとめて削除され、残っているカードは入力内容（会社名・氏名）で更新される。日時は
+     * この画面では編集対象にしないため、元のデータの値をそのまま引き継ぐ。画面を開いてから保存する
+     * までの間にSMS受信などでストアが更新されていた場合は何も保存せず、保存失敗のダイアログを
+     * 表示する（[ContinuationStore.applyIfUnchanged]参照）
      */
     private fun onSaveClicked() {
         val keptSenderKeys = cards.map { it.senderKey }.toSet()
@@ -91,8 +98,6 @@ class ContinuationDataActivity : AppCompatActivity() {
                 entries[card.senderKey] = ContinuationStore.Entry(
                     companyName = card.itemBinding.etContinuationCompanyName.text.toString().trim(),
                     userName = card.itemBinding.etContinuationUserName.text.toString().trim(),
-                    sendTargetIds = original?.sendTargetIds ?: emptyList(),
-                    sendTargetName = original?.sendTargetName,
                     timestampMillis = original?.timestampMillis ?: System.currentTimeMillis()
                 )
             }

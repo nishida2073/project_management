@@ -301,6 +301,14 @@ object SettingsStore {
          */
         fun routesTo(body: String, companyName: String): Boolean = !isDefault && matches(body, companyName)
 
+        /**
+         * 継続SMSの送信先判定専用。引き継いだ会社名しか持たない（本文は保持していない）ため、
+         * [matchTarget]の設定（本文／会社名のどちらを比較対象にするか）に関わらず、常に[companyName]
+         * をキーワードと照合する
+         */
+        fun routesToByCompanyNameOnly(companyName: String): Boolean =
+            !isDefault && keywordList.any { TextNormalization.matches(companyName, it) }
+
         /** [newEmpty]を提供するコンパニオンオブジェクト */
         companion object {
             /** 送信先を新規追加する際の初期値。フィールドコード等の既定値は[AppDefaults]を参照 */
@@ -544,6 +552,19 @@ object SettingsStore {
     }
 
     /**
+     * 継続SMS（[SmsResolution.isContinuation]）専用。引き継いだ会社名しか持たない（本文は保持していない）
+     * ため、各送信先の[MatchTarget]設定に関わらず、常に[companyName]をキーワードと照合する
+     * （[SendTarget.routesToByCompanyNameOnly]参照）。1件も一致しなければキーワード未設定
+     * （デフォルト）の送信先にフォールバックする点は[findSendTargets]と同じ
+     */
+    fun findSendTargetsForContinuation(context: Context, companyName: String): List<SendTarget> {
+        val sendTargets = loadSendTargets(context)
+        val matched = sendTargets.filter { it.routesToByCompanyNameOnly(companyName) }
+        if (matched.isNotEmpty()) return matched
+        return listOfNotNull(sendTargets.firstOrNull { it.isDefault })
+    }
+
+    /**
      * [resolveSendTargets]の結果。[SmsParts]は本文からの抽出結果のみを表すため、それが継続SMS
      * （同一送信元の過去の正常なSMSからの引き継ぎ）によるものかどうかという振り分け固有のメタ情報は
      * ここで別に持つ。[SmsSearchActivity]など[SmsLogStore.Entry]を経由せず端末上のSMSをその場で
@@ -557,12 +578,7 @@ object SettingsStore {
          * 送信先を引き継いだ結果かどうか。今回の本文自体が単独で解析できるかどうかは問わない。
          * trueの場合、形式・送信先のアイコン表示は通常の⭕/❌・📍/🚫ではなく専用のアイコンに切り替える
          */
-        val isContinuation: Boolean = false,
-        /**
-         * [isContinuation]がtrueの場合の、引き継ぎ元エントリの送信先表示名（[SmsLogStore.Entry.sendTargetName]）。
-         * 引き継ぎ元の送信先がその後削除・変更されて現在の設定から解決できなくなった場合の表示用フォールバック
-         */
-        val inheritedSendTargetName: String? = null
+        val isContinuation: Boolean = false
     )
 
     /**
@@ -573,8 +589,10 @@ object SettingsStore {
      * [continuationEnabled]がtrueの場合、[sender]と同じ送信元から過去に一度でも形式正常なSMS
      * （[ContinuationStore]、[continuationScope]が[ContinuationScope.UNLIMITED]なら日付は問わない）
      * が届いていれば、今回のSMS自体の形式（本文単体で解析できるかどうか）に関わらず、常にその直近1件
-     * から会社名・氏名・送信先を引き継ぐ（内容は今回の本文そのもの）。一度識別できた送信元は
-     * [continuationScope]の範囲内でずっと同じ会社名・氏名・送信先として扱う。
+     * から会社名・氏名を引き継ぐ（内容は今回の本文そのもの）。送信先はその会社名を現在の送信先
+     * ルールに通して都度判定する（[findSendTargetsForContinuation]）ため、送信先の設定を変更・削除
+     * すれば継続SMSの振り分け先にも即座に反映される。一度識別できた送信元は[continuationScope]の
+     * 範囲内でずっと同じ会社名・氏名として扱う。
      * [continuationEnabled]がfalse、または該当する過去のSMSが無い送信元は、今回の本文を実際に
      * 解析して振り分ける。この関数自体は[ContinuationStore]を更新しない（SMS検索画面のプレビュー表示
      * など、実際の受信・送信を伴わない呼び出しからも使われるため）。実際に受信・送信を処理する側
@@ -600,13 +618,9 @@ object SettingsStore {
                 userName = previousEntry.userName,
                 content = body.trim()
             )
-            val resolution = SmsResolution(
-                smsParts = smsParts,
-                isContinuation = true,
-                inheritedSendTargetName = previousEntry.sendTargetName
-            )
-            // 送信先も本文からのキーワード一致では再現できないため、前回の判定結果をそのまま引き継ぐ
-            val sendTargets = loadSendTargets(context).filter { it.id in previousEntry.sendTargetIds }
+            val resolution = SmsResolution(smsParts = smsParts, isContinuation = true)
+            // 送信先は保持せず、引き継いだ会社名を現在の送信先ルールに通して都度判定する
+            val sendTargets = findSendTargetsForContinuation(context, previousEntry.companyName)
             return resolution to sendTargets
         }
         val extracted = SmsPartsGenerator.resolveSmsParts(body, aiParsingEnabled)

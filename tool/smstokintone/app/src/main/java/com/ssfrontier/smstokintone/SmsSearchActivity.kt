@@ -400,7 +400,6 @@ class SmsSearchActivity : AppCompatActivity() {
         records.forEach { record ->
             val (resolution, sendTargets) = resolveSendTargetCached(record, config)
             val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@SmsSearchActivity) }
-                ?: resolution.inheritedSendTargetName
                 ?: getString(R.string.label_send_target_none)
             val isSendTargetUnconfigured = sendTargets.none { it.isValid }
             val isAutoReplied = record.id in autoRepliedEntries

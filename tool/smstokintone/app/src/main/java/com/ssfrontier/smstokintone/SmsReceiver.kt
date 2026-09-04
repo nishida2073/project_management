@@ -62,10 +62,9 @@ class SmsReceiver : BroadcastReceiver() {
                 // 受信ログ・自動返信ログでは名前を連結して表示する（実際の登録はWorker側で送信先ごとに行う）
                 val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiParsingEnabled, config.continuationEnabled, config.continuationScope)
                 val smsParts = resolution.smsParts
-                // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは空になる。
-                // その場合も表示上は引き継ぎ元の名前を出す（実際の登録は行われない）
+                // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは
+                // 空になり、送信先名は「なし」扱いになる（実際の登録も行われない）
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
-                    ?: resolution.inheritedSendTargetName
 
                 // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析
                 // できた場合のみ更新する。KintoneUploadWorker側でも同じ条件で更新している
@@ -75,8 +74,6 @@ class SmsReceiver : BroadcastReceiver() {
                         sender = sender,
                         companyName = smsParts.companyName,
                         userName = smsParts.userName,
-                        sendTargetIds = sendTargets.map { it.id },
-                        sendTargetName = sendTargetName,
                         timestampMillis = timestampMillis
                     )
                 }

@@ -28,16 +28,16 @@ object ContinuationStore {
      */
     private val lock = Any()
 
-    /** 送信元ごとに保持する、最新の形式正常なSMSの抽出結果 */
+    /**
+     * 送信元ごとに保持する、最新の形式正常なSMSの抽出結果。送信先は保持しない。継続SMSの送信先は
+     * 常にこの会社名を現在の送信先ルールに通して都度判定するため（[SettingsStore.findSendTargetsForContinuation]
+     * 参照）、送信先の設定を変更・削除しても引継ぎデータ側の追随作業は不要になる
+     */
     data class Entry(
         /** 会社名 */
         val companyName: String,
         /** 氏名 */
         val userName: String,
-        /** 振り分け先となった送信先のID一覧（[SettingsStore.SendTarget.id]） */
-        val sendTargetIds: List<String>,
-        /** 振り分け先の表示名。解決できなかった場合はnull */
-        val sendTargetName: String?,
         /** このSMS自体の受信/送信対象日時 */
         val timestampMillis: Long
     )
@@ -52,11 +52,9 @@ object ContinuationStore {
         sender: String,
         companyName: String,
         userName: String,
-        sendTargetIds: List<String>,
-        sendTargetName: String?,
         timestampMillis: Long
     ) {
-        set(context, SmsMatching.normalizeSenderKey(sender), Entry(companyName, userName, sendTargetIds, sendTargetName, timestampMillis))
+        set(context, SmsMatching.normalizeSenderKey(sender), Entry(companyName, userName, timestampMillis))
     }
 
     /**
@@ -115,10 +113,6 @@ object ContinuationStore {
             obj.getString("senderKey") to Entry(
                 companyName = obj.optString("companyName", ""),
                 userName = obj.optString("userName", ""),
-                sendTargetIds = obj.optJSONArray("sendTargetIds")?.let { idsArray ->
-                    (0 until idsArray.length()).map { idsArray.getString(it) }
-                } ?: emptyList(),
-                sendTargetName = obj.optString("sendTargetName", "").ifBlank { null },
                 timestampMillis = obj.getLong("timestampMillis")
             )
         }
@@ -132,9 +126,7 @@ object ContinuationStore {
                 .put("senderKey", senderKey)
                 .put("companyName", entry.companyName)
                 .put("userName", entry.userName)
-                .put("sendTargetIds", JSONArray(entry.sendTargetIds))
                 .put("timestampMillis", entry.timestampMillis)
-            entry.sendTargetName?.let { obj.put("sendTargetName", it) }
             array.put(obj)
         }
         prefs(context).edit().putString(KEY_ENTRIES, array.toString()).apply()

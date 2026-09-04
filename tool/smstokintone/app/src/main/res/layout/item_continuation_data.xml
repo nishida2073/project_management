@@ -64,10 +64,9 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"
             android:text="@string/label_send_target_filter"
             android:textColor="?attr/colorOnSurface" />
 
@@ -75,6 +74,7 @@
             android:id="@+id/tvContinuationSendTargetName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
             android:textStyle="bold"
             android:textColor="@color/send_target_name"

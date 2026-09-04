@@ -39,8 +39,6 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 sender = sender,
                 companyName = smsParts.companyName,
                 userName = smsParts.userName,
-                sendTargetIds = sendTargets.map { it.id },
-                sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(applicationContext) },
                 timestampMillis = timestampMillis
             )
         }
@@ -50,7 +48,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             // その送信先ごとに1件ずつ「送信先未設定」ログを記録する
             val unconfiguredTargets: List<SettingsStore.SendTarget?> = if (sendTargets.isEmpty()) listOf(null) else sendTargets
             unconfiguredTargets.forEach { sendTarget ->
-                val sendTargetName = sendTarget?.displayName(applicationContext) ?: resolution.inheritedSendTargetName
+                val sendTargetName = sendTarget?.displayName(applicationContext)
                 logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTargetName, manual = manual, smsParts = smsParts, isContinuation = resolution.isContinuation)
             }
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
