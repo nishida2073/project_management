@@ -86,13 +86,13 @@
     <string name="switch_company_name_width_conversion_enabled">有効にする</string>
     <string name="helper_company_name_width_conversion_enabled">英数字を半角大文字に、それ以外の文字を全角に変換します</string>
     <string name="dialog_title_validation_error">入力エラー</string>
-    <string name="dialog_message_validation_error">%1$s: 送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
+    <string name="dialog_message_validation_error">%1$s\n\n送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
     <string name="btn_send_test">テスト送信</string>
     <string name="dialog_title_test_send_body">テスト本文</string>
     <string name="dialog_title_test_send_result">テスト結果</string>
-    <string name="dialog_message_test_send_result_failure">送信失敗\n%1$s</string>
-    <string name="dialog_message_test_send_result_network_error">通信エラー\n%1$s</string>
-    <string name="dialog_message_test_send_routing_unmatched">送信先エラー\n振り分け設定:%1$s \n比較対象: %2$s</string>
+    <string name="dialog_message_test_send_result_failure">送信失敗\n\n%1$s</string>
+    <string name="dialog_message_test_send_result_network_error">通信エラー\n\n%1$s</string>
+    <string name="dialog_message_test_send_routing_unmatched">送信先エラー\n\n振り分け設定:%1$s \n比較対象: %2$s</string>
     <string name="test_send_body">NTTデータ○○○\nテスト太郎\n\nこれはアプリからのテスト送信です</string>
   
     <!-- アプリの設定画面 -->
@@ -101,17 +101,17 @@
     <string name="dialog_message_confirm_reset_settings">この操作は取り消せません</string>
     <string name="section_permission">端末の許可</string>
     <string name="label_sms_receive_permission">SMSの受信</string>
-    <string name="btn_sms_receive_permission">SMSの受信を許可する</string>
+    <string name="btn_sms_receive_permission">許可する</string>
     <string name="label_permission_sms_receive_granted">許可済み</string>
     <string name="toast_sms_receive_permission_denied">SMSの受信の許可がない場合、SMSの自動送信・自動返信ができません</string>
     <string name="helper_sms_receive_permission">SMSの自動操作（自動送信・自動返信）に使用します</string>
     <string name="label_sms_send_permission">SMSの送信</string>
-    <string name="btn_sms_send_permission">SMSの送信を許可する</string>
+    <string name="btn_sms_send_permission">許可する</string>
     <string name="label_permission_sms_send_granted">許可済み</string>
     <string name="toast_sms_send_permission_denied">SMSの送信の許可がない場合、自動返信はできません</string>
     <string name="helper_sms_send_permission">SMSの自動返信に使用します</string>
     <string name="label_sms_read_permission">SMSの読み取り</string>
-    <string name="btn_sms_read_permission">SMSの読み取りを許可する</string>
+    <string name="btn_sms_read_permission">許可する</string>
     <string name="label_permission_sms_read_granted">許可済み</string>
     <string name="toast_sms_read_permission_denied">SMSの読み取りの許可がない場合、SMSの検索はできません</string>
     <string name="helper_sms_read_permission">SMSの検索に使用します</string>
