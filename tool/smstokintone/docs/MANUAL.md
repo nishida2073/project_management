@@ -45,7 +45,7 @@
 - 手動：SMSの検索画面から手動で選んで送信する設定になっている状態
 
 <p float="left">
-  <img src="screenshots/top_status.png" alt="現在の送信モードの表示">
+  <img src="screenshots/top_send_status.png" alt="現在の送信モードの表示">
 </p>
 
 **現在の返信モードの表示**
@@ -107,7 +107,8 @@
 見出し「検索条件」の右にあるボタンで、検索条件の入力欄をまとめて隠す／表示できます。一覧をより広く見たいときに隠すと便利です。画面を開いた直後の表示・非表示は、[アプリの設定画面](#アプリの設定画面)の「検索条件の表示」設定に従います。
 
 <p float="left">
-  <img src="screenshots/sms_search_filter_toggle.png" alt="検索条件の表示・非表示切り替え">
+  <img src="screenshots/sms_search_filter_toggle-show.png" alt="検索条件の表示・非表示切り替え">
+  <img src="screenshots/sms_search_filter_toggle-hide.png" alt="検索条件の表示・非表示切り替え">
 </p>
 
 **検索条件**
@@ -134,7 +135,8 @@
 一覧に表示されているSMSのチェックボックスを、まとめてON／OFFできます。選択できない状態（グレーアウト）のSMSは対象になりません。
 
 <p float="left">
-  <img src="screenshots/sms_search_select_all.png" alt="全選択／選択解除">
+  <img src="screenshots/sms_search_select_all_on.png" alt="全選択／選択解除">
+  <img src="screenshots/sms_search_select_all_off.png" alt="全選択／選択解除">
 </p>
 
 **SMSの一覧表示**
@@ -188,37 +190,13 @@ SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画�
 
 ### 機能一覧
 
+- ログの一覧表示
 - ログの手動更新
 - ログの自動更新
 - ログのクリア
-- ログの一覧表示
 - 抽出結果の詳細表示
 
 ### 機能ごとの説明
-
-**ログの自動更新**
-
-[アプリの設定画面](#アプリの設定画面)で「自動更新」を有効にしている場合、画面を開いている間は設定した更新間隔（秒）ごとに自動で最新のログを再取得します。
-
-<p float="left">
-  <img src="screenshots/log_auto_refresh.png" alt="ログの自動更新">
-</p>
-
-**ログの手動更新**
-
-「更新」ボタン、または一覧を下に引っ張ることで、その時点の最新のログを表示し直します。
-
-<p float="left">
-  <img src="screenshots/log_manual_refresh.png" alt="手動更新">
-</p>
-
-**ログのクリア**
-
-「クリア」ボタンを押すと「ログをクリアしますか？」の確認ダイアログが表示され、「クリア」を押すとログが全件削除されます。この操作は取り消せません。
-
-<p float="left">
-  <img src="screenshots/log_clear.png" alt="ログのクリア">
-</p>
 
 **ログの一覧表示**
 
@@ -232,6 +210,28 @@ SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画�
 
 <p float="left">
   <img src="screenshots/log_list.png" alt="ログ一覧の表示">
+</p>
+
+**ログの手動更新**
+
+「更新」ボタン、または一覧を下に引っ張ることで、その時点の最新のログを表示し直します。
+
+<p float="left">
+  <img src="screenshots/log_manual_refresh1.png" alt="手動更新">
+  <img src="screenshots/log_manual_refresh2.png" alt="手動更新">
+</p>
+
+**ログの自動更新**
+
+[アプリの設定画面](#アプリの設定画面)で「自動更新」を有効にしている場合、画面を開いている間は設定した更新間隔（秒）ごとに自動で最新のログを再取得します。
+
+**ログのクリア**
+
+「クリア」ボタンを押すと「ログをクリアしますか？」の確認ダイアログが表示され、「クリア」を押すとログが全件削除されます。この操作は取り消せません。
+
+<p float="left">
+  <img src="screenshots/log_clear1.png" alt="ログのクリア">
+  <img src="screenshots/log_clear2.png" alt="ログのクリア">
 </p>
 
 **抽出結果の詳細表示**
@@ -296,6 +296,10 @@ SMSの送信先を設定する画面。SMSの送信元やキーワードごと�
 - 送信先の振り分け（含まれる文字列）：この送信先を使う条件となるキーワード。カンマまたは改行区切りで複数指定できます。空欄の場合は、どのキーワードにも一致しなかったときのデフォルトの送信先として扱われます。複数の送信先の条件に同時に一致した場合は、その全ての送信先へ登録されます
 - 送信先の比較対象：上記のキーワードを、本文から抽出した会社名と照合するか、SMSの本文そのものと照合するかを選びます（既定は「会社名」）
 
+<p float="left">
+  <img src="screenshots/send_target_fields1.png" alt="送信先の設定（基本の設定）">
+</p>
+
 kintoneの設定:
 - 接続先（サブドメイン）
 - 認証情報：ログイン名・パスワードを入力します
@@ -303,20 +307,45 @@ kintoneの設定:
 - フィールドコード：送信元・履歴・受信日時・登録種別・会社名・氏名・本文の各項目に対応するkintoneのフィールドコードを指定します
 - 統合範囲：新規登録ではなく既存レコードを更新する条件を選びます。「同一日付」（既定）は最終受信日時の暦日が同じ場合、「時間」は指定した時間（±時間）以内の場合に更新します。「時間」を選んだ場合のみ「±時間」の入力欄が使えます
 
+
+<p float="left">
+  <img src="screenshots/send_target_fields2-1.png" alt="送信先の設定（kintoneの設定）">
+  <img src="screenshots/send_target_fields2-2.png" alt="送信先の設定（kintoneの設定）">
+</p>
+
 オプション:
 - 会社名の変換：有効にすると、会社名を英数字を半角大文字に、それ以外の文字を全角に変換してから送信します（既定は無効）
 
 <p float="left">
-  <img src="screenshots/send_target_fields.png" alt="送信先の設定（基本の設定／kintoneの設定／オプション）">
+  <img src="screenshots/send_target_fields3.png" alt="送信先の設定（オプション）">
 </p>
 
 **テスト送信**
 
 「テスト送信」ボタンを押すと、その場でkintoneへ実際に送信を試せます。「設定を保存」を押していなくても、その時点でカードに入力されている内容（未保存分を含む）でテストされます。
 
+<p float="left">
+  <img src="screenshots/send_target_test_send1.png" alt="テスト送信">
+</p>
+
 1. 必須項目が未入力の場合はエラーが表示され、テスト送信は行われません。
+
+<p float="left">
+  <img src="screenshots/send_target_test_send2.png" alt="テスト送信">
+</p>
+
 2. 問題なければ「テスト本文」ダイアログが表示され、送信するSMS本文を入力できます。既定でダミーの文言が入力されており、自由に書き換えられます。「送信」を押すと次に進み、「キャンセル」を押すと中止します。
+
+<p float="left">
+  <img src="screenshots/send_target_test_send3.png" alt="テスト送信">
+</p>
+
 3. 入力した本文（または「送信先の比較対象」が「会社名」の場合はそこから抽出した会社名）が、そのカード自身の「送信先の振り分け」の条件（キーワードに一致するか、条件未設定のデフォルト送信先であるか）に一致しない場合は、テスト送信は行われず「テスト結果」ダイアログに「この本文はこの送信先の振り分け条件に一致しないため、送信していません。」という結果のみが表示されます。
+
+<p float="left">
+  <img src="screenshots/send_target_test_send4.png" alt="テスト送信">
+</p>
+
 4. 条件に一致する場合は実際に送信され、「テスト結果」ダイアログに以下が表示されます。
    - タイトル末尾のアイコン：会社名・氏名の抽出にAI（🤖）を使ったか、ルールベース（⚙️）を使ったか
    - 会社名・氏名の抽出に成功したかどうか
@@ -324,7 +353,7 @@ kintoneの設定:
    - 実際に送信した会社名・氏名・本文の値
 
 <p float="left">
-  <img src="screenshots/send_target_test_send.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send5.png" alt="テスト送信">
 </p>
 
 **設定の保存**
