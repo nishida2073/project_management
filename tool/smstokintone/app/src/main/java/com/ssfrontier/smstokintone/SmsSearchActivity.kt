@@ -461,7 +461,7 @@ class SmsSearchActivity : AppCompatActivity() {
                         record.address
                     }
                     append("\n\n${dateFormat.format(Date(record.dateMillis))}　$senderDisplay\n")
-                    append(record.body.take(80))
+                    append(record.body)
                 }
                 layoutParams = android.widget.LinearLayout.LayoutParams(
                     0,
