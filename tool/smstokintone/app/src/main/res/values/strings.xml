@@ -173,7 +173,7 @@
     <string name="label_continuation_show_name">送信元の表示</string>
     <string name="switch_continuation_show_user_name_enabled">氏名を表示する</string>
     <string name="helper_continuation_show_user_name_enabled">電話番号の代わりに引き継いだ氏名を表示します</string>
-    <string name="btn_edit_continuation_item">編集</string>
+    <string name="btn_edit_continuation_info">編集</string>
     <string name="section_body_extraction">本文の抽出</string>
     <string name="label_ai_extraction">AIによる抽出</string>
     <string name="switch_ai_extraction_enabled">有効にする</string>
@@ -252,12 +252,12 @@
     <string name="toast_sms_send_finished">SMSの送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
     <string name="toast_sms_send_finished_no_log">SMSの送信が完了しました</string>
 
-    <!-- 引き継ぎ項目の編集画面 -->
-    <string name="title_continuation_item">引き継ぎ項目の編集</string>
-    <string name="btn_delete_all_continuation_item">すべて削除</string>
-    <string name="message_continuation_item_empty">引き継ぎ項目がありません</string>
+    <!-- 引き継ぎ情報の編集画面 -->
+    <string name="title_continuation_info">引き継ぎ情報の編集</string>
+    <string name="btn_delete_all_continuation_info">すべて削除</string>
+    <string name="message_continuation_info_empty">引き継ぎ情報がありません</string>
     <string name="label_continuation_sender">送信元: %1$s</string>
     <string name="dialog_message_continuation_validation_error">送信元: %1$s\n\n会社名・氏名は必須です</string>
-    <string name="dialog_title_continuation_item_save_conflict">保存に失敗しました</string>
-    <string name="dialog_message_continuation_item_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
+    <string name="dialog_title_continuation_info_save_conflict">保存に失敗しました</string>
+    <string name="dialog_message_continuation_info_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
 </resources>
