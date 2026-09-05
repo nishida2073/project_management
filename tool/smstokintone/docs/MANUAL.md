@@ -16,7 +16,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 ### 画面の遷移
 
 <p float="left">
-  <img src="screenshots/screen_transition.png" alt="画面遷移図">
+  <img src="screenshots/screen_transition.png" alt="画面遷移図" width="300">
 </p>
 
 送信先の設定画面は「設定を保存」を押すとトップ画面に戻ります。それ以外の画面は、戻るボタン（または端末の戻るボタン）を押すと遷移元の画面に戻ります。
@@ -39,7 +39,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 アプリ起動時に最初に表示される画面。現在の動作モードを確認し、他の画面へ移動するための入口です。
 
 <p float="left">
-  <img src="screenshots/top.png" alt="トップ画面">
+  <img src="screenshots/top.png" alt="トップ画面" width="300">
 </p>
 
 #### 機能一覧
@@ -63,7 +63,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 - 返信モード 手動：自動返信を行わない状態（返信はSMSの検索画面から手動で行います）
 
 <p float="left">
-  <img src="screenshots/top_send_status.png" alt="現在のモードの表示">
+  <img src="screenshots/top_send_status.png" alt="現在のモードの表示" width="300">
 </p>
 
 **各画面への移動**
@@ -74,7 +74,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 - 「アプリの設定」：[アプリの設定画面](#アプリの設定画面)を開きます。送信モードや自動更新間隔など、アプリ全体の動作を設定します。
 
 <p float="left">
-  <img src="screenshots/top_nav_buttons.png" alt="各画面への移動ボタン">
+  <img src="screenshots/top_nav_buttons.png" alt="各画面への移動ボタン" width="300">
 </p>
 
 ---
@@ -84,7 +84,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 受信済みのSMSを検索し、内容を確認したうえで手動でSMSを送信するための画面。「手動モード」で運用する場合の主な操作画面です。
 
 <p float="left">
-  <img src="screenshots/sms_search.png" alt="SMSの検索画面">
+  <img src="screenshots/sms_search.png" alt="SMSの検索画面" width="300">
 </p>
 
 #### 機能一覧
@@ -106,7 +106,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 端末のSMSの読み取り権限（READ_SMS）が許可されていない場合、検索条件や一覧の代わりに「アプリ設定画面の『端末の許可』の『SMSの読み取り』を許可してください」という案内文が表示されます。権限の許可自体は[アプリの設定画面](#アプリの設定画面)の「端末の許可」から行います。許可すると、この画面を開き直したときに通常の画面に切り替わります。
 
 <p float="left">
-  <img src="screenshots/sms_search_permission.png" alt="SMSの読み取り権限が未許可の場合の案内表示">
+  <img src="screenshots/sms_search_permission.png" alt="SMSの読み取り権限が未許可の場合の案内表示" width="300">
 </p>
 
 **検索条件の表示・非表示の切り替え**
@@ -114,8 +114,8 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 見出し「検索条件」の右にあるボタンで、検索条件の入力欄をまとめて隠す／表示できます。一覧をより広く見たいときに隠すと便利です。画面を開いた直後の表示・非表示は、[アプリの設定画面](#アプリの設定画面)の「検索条件の表示」設定に従います。
 
 <p float="left">
-  <img src="screenshots/sms_search_filter_toggle-show.png" alt="検索条件の表示・非表示の切り替え">
-  <img src="screenshots/sms_search_filter_toggle-hide.png" alt="検索条件の表示・非表示の切り替え">
+  <img src="screenshots/sms_search_filter_toggle-show.png" alt="検索条件の表示・非表示の切り替え" width="300">
+  <img src="screenshots/sms_search_filter_toggle-hide.png" alt="検索条件の表示・非表示の切り替え" width="300">
 </p>
 
 **検索条件**
@@ -126,7 +126,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 - 形式「正常」・「異常」・「除外」：チェックした形式判定のSMSだけに絞り込みます（本文から会社名・氏名を抽出できなかった場合が「異常」、過去に届いた形式正常なSMSから会社名・氏名・送信先を引き継いだ場合が「除外」。引き継ぎについては[アプリの設定画面](#アプリの設定画面)の「SMSの引き継ぎ」を参照）。いずれもチェックしない場合は形式による絞り込みを行いません。
 
 <p float="left">
-  <img src="screenshots/sms_search_conditions.png" alt="検索条件">
+  <img src="screenshots/sms_search_conditions.png" alt="検索条件" width="300">
 </p>
 
 **検索**
@@ -134,7 +134,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 「検索」ボタンを押すと、上記の条件で受信ボックスから該当するSMSを検索し、一覧に表示します。画面を開いた直後や、下に引っ張って更新したときも、同じ条件で自動的に検索されます。
 
 <p float="left">
-  <img src="screenshots/sms_search_search.png" alt="検索">
+  <img src="screenshots/sms_search_search.png" alt="検索" width="300">
 </p>
 
 **全選択／選択解除**
@@ -142,8 +142,8 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 一覧に表示されているSMSのチェックボックスを、まとめてON／OFFできます。選択できない状態（グレーアウト）のSMSは対象になりません。
 
 <p float="left">
-  <img src="screenshots/sms_search_select_all_on.png" alt="全選択／選択解除">
-  <img src="screenshots/sms_search_select_all_off.png" alt="全選択／選択解除">
+  <img src="screenshots/sms_search_select_all_on.png" alt="全選択／選択解除" width="300">
+  <img src="screenshots/sms_search_select_all_off.png" alt="全選択／選択解除" width="300">
 </p>
 
 **SMSの一覧表示**
@@ -158,7 +158,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 送信先が未設定、本文の形式が異常、または形式が除外（引き継ぎによるもの）のSMSについて、それぞれチェックボックスで選択できるかどうかは[アプリの設定画面](#アプリの設定画面)の「SMS選択の対象」で切り替えられます。
 
 <p float="left">
-  <img src="screenshots/sms_search_list.png" alt="SMSの一覧表示">
+  <img src="screenshots/sms_search_list.png" alt="SMSの一覧表示" width="300">
 </p>
 
 **SMS一覧の更新**
@@ -166,7 +166,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 一覧を下に引っ張ると、現在の検索条件でその場で再検索されます（プルリフレッシュ）。
 
 <p float="left">
-  <img src="screenshots/sms_search_list_refresh.png" alt="SMS一覧の更新">
+  <img src="screenshots/sms_search_list_refresh.png" alt="SMS一覧の更新" width="300">
 </p>
 
 **SMSの返信**
@@ -174,7 +174,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 1件のSMSを長押しすると、標準のSMSアプリの返信画面が開き、[アプリの設定画面](#アプリの設定画面)で設定した文言（本文の形式が異常な場合は専用の文言）が自動で入力されます。
 
 <p float="left">
-  <img src="screenshots/sms_search_reply.png" alt="SMSの返信">
+  <img src="screenshots/sms_search_reply.png" alt="SMSの返信" width="300">
 </p>
 
 **SMSの送信**
@@ -182,7 +182,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 チェックを付けたSMSを「選択したSMSを送信」ボタンで送信します。一覧の表示順（受信日時が新しい順）に関わらず、送信自体は受信日時が古いものから順に、バックグラウンドで1件ずつ処理されます。完了すると成功・失敗件数がメッセージで表示され、一覧が自動的に更新されます。
 
 <p float="left">
-  <img src="screenshots/sms_search_send.png" alt="SMSの送信">
+  <img src="screenshots/sms_search_send.png" alt="SMSの送信" width="300">
 </p>
 
 ---
@@ -192,7 +192,7 @@ S2kは、受信したSMSをkintoneアプリのレコードとして保存（登�
 SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画面。
 
 <p float="left">
-  <img src="screenshots/log.png" alt="ログの一覧画面">
+  <img src="screenshots/log.png" alt="ログの一覧画面" width="300">
 </p>
 
 #### 機能一覧
@@ -216,7 +216,7 @@ SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画�
 - SMS本文の抜粋
 
 <p float="left">
-  <img src="screenshots/log_list.png" alt="ログの一覧表示">
+  <img src="screenshots/log_list.png" alt="ログの一覧表示" width="300">
 </p>
 
 **ログの手動更新**
@@ -224,8 +224,8 @@ SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画�
 「更新」ボタン、または一覧を下に引っ張ることで、その時点の最新のログを表示し直します。
 
 <p float="left">
-  <img src="screenshots/log_manual_refresh1.png" alt="ログの手動更新">
-  <img src="screenshots/log_manual_refresh2.png" alt="ログの手動更新">
+  <img src="screenshots/log_manual_refresh1.png" alt="ログの手動更新" width="300">
+  <img src="screenshots/log_manual_refresh2.png" alt="ログの手動更新" width="300">
 </p>
 
 **ログの自動更新**
@@ -237,8 +237,8 @@ SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画�
 「クリア」ボタンを押すと「ログをクリアしますか？」の確認ダイアログが表示され、「クリア」を押すとログが全件削除されます。この操作は取り消せません。
 
 <p float="left">
-  <img src="screenshots/log_clear1.png" alt="ログのクリア">
-  <img src="screenshots/log_clear2.png" alt="ログのクリア">
+  <img src="screenshots/log_clear1.png" alt="ログのクリア" width="300">
+  <img src="screenshots/log_clear2.png" alt="ログのクリア" width="300">
 </p>
 
 **抽出結果の詳細表示**
@@ -246,7 +246,7 @@ SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画�
 「送信完了」のログを長押しすると、送信した会社名（会社名の変換を行った場合は変換後の値）・氏名・本文の値をダイアログで確認できます。ダイアログのタイトル末尾には、その抽出にAIを使ったか、ルールベースを使ったかを示すアイコンが表示されます。
 
 <p float="left">
-  <img src="screenshots/log_extraction_result.png" alt="抽出結果の詳細確認（長押し）">
+  <img src="screenshots/log_extraction_result.png" alt="抽出結果の詳細確認（長押し）" width="300">
 </p>
 
 ---
@@ -256,7 +256,7 @@ SMSの受信・SMSの送信・SMSの返信の履歴を確認するための画�
 SMSの送信先を設定する画面。SMSの送信元やキーワードごとに、複数の送信先を登録できます。
 
 <p float="left">
-  <img src="screenshots/send_target_settings.png" alt="送信先の設定画面">
+  <img src="screenshots/send_target_settings.png" alt="送信先の設定画面" width="300">
 </p>
 
 #### 機能一覧
@@ -275,7 +275,7 @@ SMSの送信先を設定する画面。SMSの送信元やキーワードごと�
 新しい送信先の設定を一番下に追加します。このボタンは画面上部に固定表示されており、送信先が何件あってもスクロールせずに押せます。各送信先の見出しには「設定 1」「設定 2」のように連番が表示されます。
 
 <p float="left">
-  <img src="screenshots/send_target_add.png" alt="送信先の追加">
+  <img src="screenshots/send_target_add.png" alt="送信先の追加" width="300">
 </p>
 
 **送信先のコピー**
@@ -283,7 +283,7 @@ SMSの送信先を設定する画面。SMSの送信元やキーワードごと�
 その送信先の内容を複製し、その直後に新しい送信先として追加します（名前の末尾に「のコピー」が付きます）。似た設定を作るときに便利です。
 
 <p float="left">
-  <img src="screenshots/send_target_copy.png" alt="送信先のコピー">
+  <img src="screenshots/send_target_copy.png" alt="送信先のコピー" width="300">
 </p>
 
 **送信先の削除**
@@ -291,7 +291,7 @@ SMSの送信先を設定する画面。SMSの送信元やキーワードごと�
 その送信先の設定を削除します。削除は「設定を保存」を押すまで確定しません。
 
 <p float="left">
-  <img src="screenshots/send_target_delete.png" alt="送信先の削除">
+  <img src="screenshots/send_target_delete.png" alt="送信先の削除" width="300">
 </p>
 
 **送信先の設定（基本の設定・kintoneの設定・オプション）**
@@ -304,7 +304,7 @@ SMSの送信先を設定する画面。SMSの送信元やキーワードごと�
 - 送信先の比較対象：上記のキーワードを、本文から抽出した会社名と照合するか、SMSの本文そのものと照合するかを選びます
 
 <p float="left">
-  <img src="screenshots/send_target_basic.png" alt="送信先の設定（基本の設定）">
+  <img src="screenshots/send_target_basic.png" alt="送信先の設定（基本の設定）" width="300">
 </p>
 
 kintoneの設定:
@@ -315,15 +315,15 @@ kintoneの設定:
 - 統合範囲：新規登録ではなく既存レコードを更新する条件を選びます。「同一日付」は最終受信日時の暦日が同じ場合、「時間」は指定した時間（±時間）以内の場合に更新します。「時間」を選んだ場合のみ「±時間」の入力欄が使えます
 
 <p float="left">
-  <img src="screenshots/send_target_kintone1.png" alt="送信先の設定（kintoneの設定）">
-  <img src="screenshots/send_target_kintone2.png" alt="送信先の設定（kintoneの設定）">
+  <img src="screenshots/send_target_kintone1.png" alt="送信先の設定（kintoneの設定）" width="300">
+  <img src="screenshots/send_target_kintone2.png" alt="送信先の設定（kintoneの設定）" width="300">
 </p>
 
 オプション:
 - 会社名の変換：有効にすると、会社名を英数字を半角大文字に、それ以外の文字を全角に変換してから送信します
 
 <p float="left">
-  <img src="screenshots/send_target_options.png" alt="送信先の設定（オプション）">
+  <img src="screenshots/send_target_options.png" alt="送信先の設定（オプション）" width="300">
 </p>
 
 **テスト送信**
@@ -331,25 +331,25 @@ kintoneの設定:
 「テスト送信」ボタンを押すと、その場でkintoneへ実際に送信を試せます。「設定を保存」を押していなくても、その時点でその送信先に入力されている内容（未保存分を含む）でテストされます。
 
 <p float="left">
-  <img src="screenshots/send_target_test_send1.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send1.png" alt="テスト送信" width="300">
 </p>
 
 1. 必須項目が未入力の場合はエラーが表示され、テスト送信は行われません。
 
 <p float="left">
-  <img src="screenshots/send_target_test_send2.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send2.png" alt="テスト送信" width="300">
 </p>
 
 2. 問題なければ「テスト本文」ダイアログが表示され、送信するSMS本文を入力できます。テスト用の文言があらかじめ入力されており、自由に書き換えられます。「送信」を押すと次に進み、「キャンセル」を押すと中止します。
 
 <p float="left">
-  <img src="screenshots/send_target_test_send3.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send3.png" alt="テスト送信" width="300">
 </p>
 
 3. 入力した本文（または「送信先の比較対象」が「会社名」の場合はそこから抽出した会社名）が、その送信先自身の「送信先の振り分け」の条件（キーワードに一致するか、条件未設定のデフォルト送信先であるか）に一致しない場合は、テスト送信は行われず「テスト結果」ダイアログに「この本文はこの送信先の振り分け条件に一致しないため、送信していません。」という結果のみが表示されます。
 
 <p float="left">
-  <img src="screenshots/send_target_test_send4.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send4.png" alt="テスト送信" width="300">
 </p>
 
 4. 条件に一致する場合は実際に送信され、「テスト結果」ダイアログに以下が表示されます。
@@ -359,7 +359,7 @@ kintoneの設定:
    - 実際に送信した会社名・氏名・本文の値
 
 <p float="left">
-  <img src="screenshots/send_target_test_send5.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send5.png" alt="テスト送信" width="300">
 </p>
 
 **設定の保存**
@@ -367,7 +367,7 @@ kintoneの設定:
 「設定を保存」ボタンは画面下部に固定表示されており、送信先が何件あってもスクロールせずに押せます。押すと、すべての送信先の入力内容を検証します。送信先が1件もない場合は「設定を1つ以上追加してください」というメッセージが表示され、保存は行われません。送信先名・サブドメイン・認証情報・アプリID・フィールドコードのいずれかが未入力の送信先がある場合も、その送信先名（または番号）を示すエラーダイアログが表示され、保存は行われません。すべて問題なければ保存され、トップ画面へ戻ります。
 
 <p float="left">
-  <img src="screenshots/send_target_save.png" alt="設定の保存">
+  <img src="screenshots/send_target_save.png" alt="設定の保存" width="300">
 </p>
 
 ---
@@ -377,7 +377,7 @@ kintoneの設定:
 アプリ全体の動作（端末の権限、送信モード、返信モード、ログの自動更新、SMSの検索のデフォルト条件など）を設定する画面。項目を変更すると即座に保存されます（保存ボタンはありません）。
 
 <p float="left">
-  <img src="screenshots/app_settings.png" alt="アプリの設定画面">
+  <img src="screenshots/app_settings.png" alt="アプリの設定画面" width="300">
 </p>
 
 #### 機能一覧
@@ -398,7 +398,7 @@ kintoneの設定:
 SMSの検索画面での検索に使用します。未許可の場合、SMSの検索画面は使えません。「SMSの読み取りを許可する」ボタンを押すと、端末の権限確認ダイアログが表示されます。すでに許可されている場合は「許可済み」と表示され、ボタンと説明文は隠れます。
 
 <p float="left">
-  <img src="screenshots/app_permission_read.png" alt="端末の許可（SMSの読み取り）">
+  <img src="screenshots/app_permission_read.png" alt="端末の許可（SMSの読み取り）" width="300">
 </p>
 
 **端末の許可（SMSの受信）**
@@ -406,7 +406,7 @@ SMSの検索画面での検索に使用します。未許可の場合、SMSの�
 SMSの自動操作（自動送信・自動返信）に使用します。未許可の場合、SMSを自動検知できないため自動送信・自動返信ともにできません（手動での検索・送信・返信は可能です）。「SMSの受信を許可する」ボタンを押すと、端末の権限確認ダイアログが表示されます。すでに許可されている場合は「許可済み」と表示され、ボタンと説明文は隠れます。
 
 <p float="left">
-  <img src="screenshots/app_permission_receive.png" alt="端末の許可（SMSの受信）">
+  <img src="screenshots/app_permission_receive.png" alt="端末の許可（SMSの受信）" width="300">
 </p>
 
 **端末の許可（SMSの送信）**
@@ -414,7 +414,7 @@ SMSの自動操作（自動送信・自動返信）に使用します。未許�
 SMSの自動返信に使用します。未許可の場合、自動返信はできません。「SMSの送信を許可する」ボタンを押すと、端末の権限確認ダイアログが表示されます。すでに許可されている場合は「許可済み」と表示され、ボタンと説明文は隠れます。
 
 <p float="left">
-  <img src="screenshots/app_permission_send.png" alt="端末の許可（SMSの送信）">
+  <img src="screenshots/app_permission_send.png" alt="端末の許可（SMSの送信）" width="300">
 </p>
 
 **レイアウトの変更（表示テーマ）**
@@ -422,7 +422,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 ライト／ダークのどちらの配色で表示するかを選べます（ラジオボタン）。
 
 <p float="left">
-  <img src="screenshots/app_layout.png" alt="レイアウトの変更（表示テーマ）">
+  <img src="screenshots/app_layout.png" alt="レイアウトの変更（表示テーマ）" width="300">
 </p>
 
 **SMSの検索（検索条件の初期値）**
@@ -435,7 +435,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 - 形式：「正常」「異常」「除外」それぞれのチェックボックスを初期状態でONにするかどうかを設定します
 
 <p float="left">
-  <img src="screenshots/app_sms_search_filters_default.png" alt="SMSの検索（検索条件の初期値）">
+  <img src="screenshots/app_sms_search_filters_default.png" alt="SMSの検索（検索条件の初期値）" width="300">
 </p>
 
 **SMSの検索（検索条件の表示）**
@@ -443,7 +443,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 [SMSの検索画面](#SMSの検索画面)を開いたときに、検索条件の入力欄を表示した状態にするか、隠した状態にするかを選べます。
 
 <p float="left">
-  <img src="screenshots/app_search_filters_visibility.png" alt="SMSの検索（検索条件の表示）">
+  <img src="screenshots/app_search_filters_visibility.png" alt="SMSの検索（検索条件の表示）" width="300">
 </p>
 
 **SMSの検索（SMS選択の対象）**
@@ -455,7 +455,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 - 形式が除外（引き継ぎによるSMS）
 
 <p float="left">
-  <img src="screenshots/app_search_selection_target.png" alt="SMSの検索（SMS選択の対象）">
+  <img src="screenshots/app_search_selection_target.png" alt="SMSの検索（SMS選択の対象）" width="300">
 </p>
 
 **SMSの送信（送信モード）**
@@ -463,7 +463,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「手動」「自動」から選びます。自動を選ぶと、SMSを受信した時点で自動的にSMSが送信されます（[トップ画面](#トップ画面)の表示にも反映されます）。ただし、本文の形式が異常なSMSについては「自動送信対象」の設定に応じて送信をスキップできます。手動を選ぶと、[SMSの検索画面](#SMSの検索画面)で選んだSMSだけが送信されます。
 
 <p float="left">
-  <img src="screenshots/app_send_mode.png" alt="SMSの送信（送信モード）">
+  <img src="screenshots/app_send_mode.png" alt="SMSの送信（送信モード）" width="300">
 </p>
 
 **SMSの送信（自動送信の対象）**
@@ -476,7 +476,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 なお、この設定は自動送信のみに影響します。手動でのSMSの検索画面からの送信については、前述の「SMS選択の対象」の設定が別途適用されます。
 
 <p float="left">
-  <img src="screenshots/app_send_target.png" alt="SMSの送信（自動送信の対象）">
+  <img src="screenshots/app_send_target.png" alt="SMSの送信（自動送信の対象）" width="300">
 </p>
 
 **SMSの返信（返信モード）**
@@ -484,7 +484,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「手動」「自動」から選びます（送信モードとは独立した設定です）。自動を選ぶと、本文の形式が異常なSMSを受信した際に、送信元へ「形式が異常な場合」の返信メッセージを自動でSMS送信します。手動を選ぶと、自動返信は行われません（返信は[SMSの検索画面](#SMSの検索画面)でSMSを長押しして手動で行います）。
 
 <p float="left">
-  <img src="screenshots/app_reply_mode.png" alt="SMSの返信（返信モード）">
+  <img src="screenshots/app_reply_mode.png" alt="SMSの返信（返信モード）" width="300">
 </p>
 
 **SMSの返信（自動返信の間隔）**
@@ -492,7 +492,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 自動返信が有効な場合に、同じ送信元へ再度自動返信するまでの最短間隔を秒単位で指定します。短時間に同じ送信元から形式が異常なSMSを繰り返し受信しても、この間隔内は再送信されません（連投防止）。
 
 <p float="left">
-  <img src="screenshots/app_reply_cooldown.png" alt="SMSの返信（自動返信の間隔）">
+  <img src="screenshots/app_reply_cooldown.png" alt="SMSの返信（自動返信の間隔）" width="300">
 </p>
 
 **SMSの返信（返信メッセージ）**
@@ -503,7 +503,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 - 「形式が異常」な場合：本文の形式が解釈できなかったSMSに返信する場合の文言（訂正を依頼する文言などを想定）。自動返信でもこの文言が使われます
 
 <p float="left">
-  <img src="screenshots/app_reply_message.png" alt="SMSの返信（返信メッセージ）">
+  <img src="screenshots/app_reply_message.png" alt="SMSの返信（返信メッセージ）" width="300">
 </p>
 
 **SMSの引き継ぎ（引き継ぎ）**
@@ -511,7 +511,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 同一の送信元から過去に一度でも会社名・氏名の抽出に成功したSMSが届いていれば、それ以降に届く単体では解釈できないSMS（例：会社名・氏名の記載が無い追加の連絡など）についても、本文単体の形式に関わらず、その直近1件から会社名・氏名・送信先を引き継いで登録します（本文は今回届いたSMSそのもの）。引き継ぎによって処理されたSMSは、一覧やログで通常の正常・異常とは別の「除外」として表示されます。「有効にする」は、この機能自体のON／OFFを切り替えます。OFFにすると、常に今回のSMS本文だけで判定します。
 
 <p float="left">
-  <img src="screenshots/app_continuation_enable.png" alt="SMSの引き継ぎ（引き継ぎ）">
+  <img src="screenshots/app_continuation_enable.png" alt="SMSの引き継ぎ（引き継ぎ）" width="300">
 </p>
 
 **SMSの引き継ぎ（引き継ぎの範囲）**
@@ -519,7 +519,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「制限なし」（同一送信元なら日付を問わず常に引き継ぐ）と「同一日のみ」（日付が変わると引き継ぎがリセットされる）から選びます。「有効にする」がOFFのときは操作できません。
 
 <p float="left">
-  <img src="screenshots/app_sms_continuation_range.png" alt="SMSの引き継ぎ（引き継ぎの範囲）">
+  <img src="screenshots/app_sms_continuation_range.png" alt="SMSの引き継ぎ（引き継ぎの範囲）" width="300">
 </p>
 
 **SMSの引き継ぎ（送信元の表示）**
@@ -527,7 +527,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 引き継ぎによるSMSの送信元表示を、電話番号の代わりに引き継いだ氏名にするかどうかを切り替えます。「有効にする」がOFFのときは操作できません。
 
 <p float="left">
-  <img src="screenshots/app_sms_continuation_name_enable.png" alt="SMSの引き継ぎ（送信元の表示）">
+  <img src="screenshots/app_sms_continuation_name_enable.png" alt="SMSの引き継ぎ（送信元の表示）" width="300">
 </p>
 
 **SMSの引き継ぎ（引き継ぎ情報の編集）**
@@ -535,7 +535,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「編集」を押すと[引き継ぎ情報の編集画面](#引き継ぎ情報の編集画面)が開きます。「有効にする」がOFFのときも操作できます（機能を無効にしていても、過去に記録した引き継ぎ情報の確認・削除は行えます）。
 
 <p float="left">
-  <img src="screenshots/app_sms_continuation_edit.png" alt="SMSの引き継ぎ（引き継ぎ情報の編集）">
+  <img src="screenshots/app_sms_continuation_edit.png" alt="SMSの引き継ぎ（引き継ぎ情報の編集）" width="300">
 </p>
 
 **本文の抽出（AIによる抽出）**
@@ -543,7 +543,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「有効にする」をONにすると、SMS本文から会社名・氏名を抽出する際に、通常のルールベースの解析の代わりに端末上のAI（Gemini Nano）を使用します。対応端末（Pixel 8以降など、対応チップを搭載した一部の機種のみ）が無い場合や、AIの呼び出しに失敗した場合は、自動的にルールベースの解析にフォールバックします。この設定は自動送信・手動送信・[SMSの検索画面](#SMSの検索画面)での「形式が異常」の判定・自動返信のすべてに共通して適用されます（過去のSMSから引き継いだ場合はこの抽出自体を行いません）。
 
 <p float="left">
-  <img src="screenshots/app_ai_extraction.png" alt="本文の抽出（AIによる抽出）">
+  <img src="screenshots/app_ai_extraction.png" alt="本文の抽出（AIによる抽出）" width="300">
 </p>
 
 **ログ（自動更新）**
@@ -551,7 +551,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「有効にする」をONにすると、[ログの一覧画面](#ログの一覧画面)を開いている間、指定した更新間隔（秒）ごとに自動でログを再取得します。
 
 <p float="left">
-  <img src="screenshots/app_log_auto_refresh.png" alt="ログ（自動更新）">
+  <img src="screenshots/app_log_auto_refresh.png" alt="ログ（自動更新）" width="300">
 </p>
 
 **ログ（統合範囲）**
@@ -559,7 +559,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 自動送信のログはSMSの固有IDを持たないため、送信元と受信日時の近さでSMSと突き合わせます。その際の許容誤差（秒）です。[SMSの検索画面](#SMSの検索画面)の「送信状況」の各フィルタの精度に影響します。
 
 <p float="left">
-  <img src="screenshots/app_log_tolerance_condition.png" alt="ログ（統合範囲）">
+  <img src="screenshots/app_log_tolerance_condition.png" alt="ログ（統合範囲）" width="300">
 </p>
 
 **ログ（本文の最大表示文字数）**
@@ -567,7 +567,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 [ログの一覧画面](#ログの一覧画面)の一覧に表示する本文の最大文字数です。ここで指定した文字数を超える部分は表示されません。なお、長押しで確認できる抽出結果の詳細（会社名・氏名・本文）はこの設定と関係なく、常に本文全体が表示されます。
 
 <p float="left">
-  <img src="screenshots/app_log_body_excerpt_length.png" alt="ログ（本文の最大表示文字数）">
+  <img src="screenshots/app_log_body_excerpt_length.png" alt="ログ（本文の最大表示文字数）" width="300">
 </p>
 
 ---
@@ -577,7 +577,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 [アプリの設定画面](#アプリの設定画面)の「SMSの引き継ぎ」にある「編集」ボタンから開く、引き継ぎ情報（送信元ごとに保持している最新の会社名・氏名）を個別に確認・編集・削除するための画面。
 
 <p float="left">
-  <img src="screenshots/continuation_edit.png" alt="引き継ぎ情報の編集画面">
+  <img src="screenshots/continuation_edit.png" alt="引き継ぎ情報の編集画面" width="300">
 </p>
 
 #### 機能一覧
@@ -601,7 +601,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 引き継ぎ情報が1件も無い場合は「引き継ぎ情報がありません」と表示されます。
 
 <p float="left">
-  <img src="screenshots/continuation_view.png" alt="引き継ぎ情報の編集画面">
+  <img src="screenshots/continuation_view.png" alt="引き継ぎ情報の編集画面" width="300">
 </p>
 
 **項目の編集（会社名・氏名）**
@@ -609,7 +609,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 各引き継ぎ情報の会社名・氏名は自由に書き換えられます。送信元と送信先名は読み取り専用で、この画面から編集することはできません。編集内容が実際に反映されるのは「設定を保存」を押した時点です。
 
 <p float="left">
-  <img src="screenshots/continuation_edit_item.png" alt="項目の編集（会社名・氏名）">
+  <img src="screenshots/continuation_edit_item.png" alt="項目の編集（会社名・氏名）" width="300">
 </p>
 
 **個別削除**
@@ -617,7 +617,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 各引き継ぎ情報の「削除」ボタンを押すと、その引き継ぎ情報が一覧から外れます。実際に削除されるのは「設定を保存」を押した時点です。
 
 <p float="left">
-  <img src="screenshots/continuation_edit_delete_one.png" alt="個別削除">
+  <img src="screenshots/continuation_edit_delete_one.png" alt="個別削除" width="300">
 </p>
 
 **全体削除**
@@ -625,7 +625,7 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「すべて削除」ボタンを押すと、表示中の全引き継ぎ情報が一覧から外れます。個別削除と同様、実際に削除されるのは「設定を保存」を押した時点です。
 
 <p float="left">
-  <img src="screenshots/continuation_edit_delete_all.png" alt="全体削除">
+  <img src="screenshots/continuation_edit_delete_all.png" alt="全体削除" width="300">
 </p>
 
 **設定の保存**
@@ -633,5 +633,5 @@ SMSの自動返信に使用します。未許可の場合、自動返信はで�
 「設定を保存」ボタンを押すと、画面を開いてからの変更（会社名・氏名の編集、削除）を反映します。会社名・氏名のどちらかが空欄の引き継ぎ情報が残っている場合は保存されず、該当する送信元を示す入力エラーのダイアログが表示されます。画面を開いてから保存するまでの間に、SMSの受信などで内容が更新されていた場合も何も保存されず、「保存に失敗しました」というダイアログが表示されます（画面を開き直して編集をやり直してください）。
 
 <p float="left">
-  <img src="screenshots/continuation_edit_save.png" alt="設定の保存">
+  <img src="screenshots/continuation_edit_save.png" alt="設定の保存" width="300">
 </p>
