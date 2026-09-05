@@ -5,19 +5,19 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.ssfrontier.smstokintone.databinding.ActivityContinuationInfoBinding
-import com.ssfrontier.smstokintone.databinding.ItemContinuationInfoBinding
+import com.ssfrontier.smstokintone.databinding.ActivitySenderInfoBinding
+import com.ssfrontier.smstokintone.databinding.ItemSenderInfoBinding
 
 /**
- * 送信元ごとの引き継ぎ情報（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
+ * 送信元ごとの送信元情報（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
  * または送信元単位で削除できる画面。送信先は保持せず、会社名から
  * [SettingsStore.findSendTargetsForContinuation]で都度再判定した結果を読み取り専用のラベルとして
  * 表示するのみで、この画面での編集対象にはしない
  */
-class ContinuationInfoActivity : AppCompatActivity() {
+class SenderInfoActivity : AppCompatActivity() {
 
     /** この画面のViewBinding */
-    private lateinit var binding: ActivityContinuationInfoBinding
+    private lateinit var binding: ActivitySenderInfoBinding
 
     /**
      * 画面を開いた時点で読み込んだ内容のスナップショット。保存時に[ContinuationStore.applyIfUnchanged]
@@ -31,37 +31,37 @@ class ContinuationInfoActivity : AppCompatActivity() {
      */
     private class Card(
         val senderKey: String,
-        val itemBinding: ItemContinuationInfoBinding
+        val itemBinding: ItemSenderInfoBinding
     )
 
     private val cards = mutableListOf<Card>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityContinuationInfoBinding.inflate(layoutInflater)
+        binding = ActivitySenderInfoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         loadedSnapshot = ContinuationStore.getAll(this)
         val entries = loadedSnapshot.entries.sortedByDescending { it.value.timestampMillis }
 
-        binding.tvContinuationInfoEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
+        binding.tvSenderInfoEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
 
         entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
 
-        binding.btnDeleteAllContinuationInfo.setOnClickListener {
+        binding.btnDeleteAllSenderInfo.setOnClickListener {
             // 個別の削除ボタンと同様、ここではUI上から一覧をまとめて外すだけでストアはまだ変更しない。
             // 実際にストアから削除されるのは「設定を保存」を押した時点（onSaveClicked）
-            binding.llContinuationInfoContainer.removeAllViews()
+            binding.llSenderInfoContainer.removeAllViews()
             cards.clear()
-            binding.tvContinuationInfoEmpty.visibility = View.VISIBLE
+            binding.tvSenderInfoEmpty.visibility = View.VISIBLE
         }
 
-        binding.btnSaveContinuationInfo.setOnClickListener { onSaveClicked() }
+        binding.btnSaveSenderInfo.setOnClickListener { onSaveClicked() }
     }
 
     /** 1件分のカードをUIとcardsの両方へ追加する */
     private fun addCard(senderKey: String, entry: ContinuationStore.Entry) {
-        val itemBinding = ItemContinuationInfoBinding.inflate(layoutInflater, binding.llContinuationInfoContainer, false)
+        val itemBinding = ItemSenderInfoBinding.inflate(layoutInflater, binding.llSenderInfoContainer, false)
         itemBinding.tvSenderKey.text = getString(R.string.label_continuation_sender, senderKey)
         itemBinding.etContinuationCompanyName.setText(entry.companyName)
         itemBinding.etContinuationUserName.setText(entry.userName)
@@ -72,12 +72,12 @@ class ContinuationInfoActivity : AppCompatActivity() {
 
         val card = Card(senderKey, itemBinding)
 
-        itemBinding.btnDeleteContinuationInfo.setOnClickListener {
-            binding.llContinuationInfoContainer.removeView(itemBinding.root)
+        itemBinding.btnDeleteSenderInfo.setOnClickListener {
+            binding.llSenderInfoContainer.removeView(itemBinding.root)
             cards.remove(card)
         }
 
-        binding.llContinuationInfoContainer.addView(itemBinding.root)
+        binding.llSenderInfoContainer.addView(itemBinding.root)
         cards.add(card)
     }
 
@@ -122,8 +122,8 @@ class ContinuationInfoActivity : AppCompatActivity() {
             finish()
         } else {
             AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_continuation_info_save_conflict)
-                .setMessage(R.string.dialog_message_continuation_info_save_conflict)
+                .setTitle(R.string.dialog_title_sender_info_save_conflict)
+                .setMessage(R.string.dialog_message_sender_info_save_conflict)
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
         }

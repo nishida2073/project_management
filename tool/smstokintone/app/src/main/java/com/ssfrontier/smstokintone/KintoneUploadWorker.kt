@@ -32,7 +32,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
 
         // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析できた
         // 場合のみ更新する。SmsReceiver側でも同じ条件で更新しており、手動送信のみで運用している場合
-        // （SmsReceiverが動かない場合）でもここで引き継ぎ情報を残せるようにする
+        // （SmsReceiverが動かない場合）でもここで送信元情報を残せるようにする
         if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
             ContinuationStore.update(
                 applicationContext,

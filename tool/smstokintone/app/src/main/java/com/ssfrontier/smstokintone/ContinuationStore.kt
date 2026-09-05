@@ -8,9 +8,9 @@ import java.util.Calendar
 /**
  * 継続SMS（[SettingsStore.SmsResolution.isContinuation]）の引き継ぎに使う、送信元ごとの最新の
  * 形式正常なSMSの抽出結果を保持する専用のストア。SmsLogStore（全履歴のログ）とは別ファイルで
- * 管理し、ログをクリアしても引き継ぎ情報は失われない。送信元ごとに最新1件のみ保持する
+ * 管理し、ログをクリアしても送信元情報は失われない。送信元ごとに最新1件のみ保持する
  * （継続SMS自体の結果は保存しない。引き継ぎ元と同じ内容の再保存になり意味が無いため）。
- * [ContinuationInfoActivity]から個別の閲覧・編集・削除もできる。編集画面のように読み込みから保存
+ * [SenderInfoActivity]から個別の閲覧・編集・削除もできる。編集画面のように読み込みから保存
  * までに時間が空く操作は[applyIfUnchanged]で楽観的排他制御を行うこと（[lock]は保存時の一致確認と
  * 書き込みのみを保護し、編集中はロックしない）
  */
@@ -22,7 +22,7 @@ object ContinuationStore {
     private const val KEY_ENTRIES = "entries"
     /**
      * [getAll]・[set]・[delete]・[applyIfUnchanged]の排他制御に使うロック。SmsReceiver・
-     * KintoneUploadWorker（SMS受信・送信時）とContinuationInfoActivity（編集画面）が同一プロセス内から
+     * KintoneUploadWorker（SMS受信・送信時）とSenderInfoActivity（編集画面）が同一プロセス内から
      * 並行してアクセスし得るため、読み込み→変更→書き込みの間に割り込まれてどちらかの変更が
      * 失われることを防ぐ
      */
@@ -31,7 +31,7 @@ object ContinuationStore {
     /**
      * 送信元ごとに保持する、最新の形式正常なSMSの抽出結果。送信先は保持しない。継続SMSの送信先は
      * 常にこの会社名を現在の送信先ルールに通して都度判定するため（[SettingsStore.findSendTargetsForContinuation]
-     * 参照）、送信先の設定を変更・削除しても引き継ぎ情報側の追随作業は不要になる
+     * 参照）、送信先の設定を変更・削除しても送信元情報側の追随作業は不要になる
      */
     data class Entry(
         /** 会社名 */
@@ -59,7 +59,7 @@ object ContinuationStore {
 
     /**
      * 正規化済みの送信元キー[senderKey]に対応するデータを[entry]で上書き保存する。[update]と異なり
-     * [senderKey]は呼び出し側で既に正規化済みであることを前提とする（引き継ぎ情報の編集画面専用）
+     * [senderKey]は呼び出し側で既に正規化済みであることを前提とする（送信元情報の編集画面専用）
      */
     fun set(context: Context, senderKey: String, entry: Entry) = synchronized(lock) {
         val entries = getAll(context).toMutableMap()
@@ -67,7 +67,7 @@ object ContinuationStore {
         save(context, entries)
     }
 
-    /** 正規化済みの送信元キー[senderKey]のデータを削除する（引き継ぎ情報の編集画面専用） */
+    /** 正規化済みの送信元キー[senderKey]のデータを削除する（送信元情報の編集画面専用） */
     fun delete(context: Context, senderKey: String) = synchronized(lock) {
         val entries = getAll(context).toMutableMap()
         entries.remove(senderKey)
@@ -75,7 +75,7 @@ object ContinuationStore {
     }
 
     /**
-     * 引き継ぎ情報の編集画面専用。編集開始時に読み込んだ内容[expectedSnapshot]が現在の保存内容と
+     * 送信元情報の編集画面専用。編集開始時に読み込んだ内容[expectedSnapshot]が現在の保存内容と
      * 一致する場合のみ、[changes]でその内容を書き換えて保存する（一致確認と保存を同じロック内で
      * 行うことでTOCTOU競合を防ぐ）。編集中（画面を開いてから保存するまでの間）はロックを取らない
      * ため、その間にSMSを受信してもブロックされない。一致しない場合＝編集中にSMS受信などで

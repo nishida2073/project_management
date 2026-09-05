@@ -179,8 +179,8 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(continuationShowUserNameEnabled = isChecked) }
         }
 
-        binding.btnEditContinuationInfo.setOnClickListener {
-            startActivity(Intent(this, ContinuationInfoActivity::class.java))
+        binding.btnEditSenderInfo.setOnClickListener {
+            startActivity(Intent(this, SenderInfoActivity::class.java))
         }
 
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())

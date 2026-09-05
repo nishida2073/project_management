@@ -40,7 +40,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".ContinuationInfoActivity"
+            android:name=".SenderInfoActivity"
             android:exported="false" />
 
         <activity

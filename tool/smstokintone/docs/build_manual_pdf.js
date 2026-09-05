@@ -13,8 +13,8 @@ const TOOLS_DIR = 'c:/myrepo/project_management/tools/md2png';
 const { buildHtml } = require(path.join(TOOLS_DIR, 'build-html'));
 const { addBookmarks } = require(path.join(TOOLS_DIR, 'add-bookmarks'));
 
-const mdPath = path.join(__dirname, 'MANUAL.md');
-const outPath = path.join(__dirname, 'MANUAL.pdf');
+const mdPath = path.join(__dirname, 'マニュアル.md');
+const outPath = path.join(__dirname, 'マニュアル.pdf');
 
 const { page, headings, title } = buildHtml(mdPath);
 
