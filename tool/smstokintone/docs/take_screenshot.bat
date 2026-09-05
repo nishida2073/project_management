@@ -10,7 +10,7 @@ rem 初回のペア設定（ペア設定コードの入力）はワイヤレスデバッグの画面を見ながら別
 rem 出力先ディレクトリの決定 (優先順位: 第1引数 > 環境変数 SCREENSHOT_OUTPUT_DIR > docs\screenshots)
 set "OUT_DIR=%~1"
 if not defined OUT_DIR set "OUT_DIR=%SCREENSHOT_OUTPUT_DIR%"
-if not defined OUT_DIR set "OUT_DIR=%~dp0screenshots"
+if not defined OUT_DIR set "OUT_DIR=%~dp0tmp"
 if "%OUT_DIR:~-1%"=="\" set "OUT_DIR=%OUT_DIR:~0,-1%"
 
 echo ============================================

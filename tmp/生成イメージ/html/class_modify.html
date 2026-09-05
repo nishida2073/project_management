@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/class_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=class" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>クラス一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>クラス編集</h2>
+          <div class="sub">001　受託_システム開発入門の情報を編集します</div>
+        </div>
+        <a class="close-x" href="class_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-section">案件</div>
+        <div class="form-field">
+          <label>年度<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="2024年度,2025年度,2026年度,2027年度" data-target="#projectCode" data-options-map='{"2024年度":[],"2025年度":[],"2026年度":["PJ-2601","PJ-2602","PJ-2603","PJ-2604","PJ-2605","PJ-2606","PJ-2607"],"2027年度":[]}'>2026年度<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>案件コード<span class="req">必須</span></label>
+          <div class="form-control js-select" id="projectCode" data-options="PJ-2601,PJ-2602,PJ-2603,PJ-2604,PJ-2605,PJ-2606,PJ-2607" data-target="#projectName" data-map='{"PJ-2601":"G新人研修（NTTデータ金融共催）","PJ-2602":"ビジネス基礎研修 定期開催","PJ-2603":"次世代リーダー育成プログラム","PJ-2604":"グローバル基礎コース 公募","PJ-2605":"マネジメント基礎研修","PJ-2606":"システム基盤実践研修","PJ-2607":"新人フォローアップ研修"}' data-target2="#projectSalesType" data-map2='{"PJ-2601":"外販","PJ-2602":"内販","PJ-2603":"外販","PJ-2604":"外販","PJ-2605":"外販","PJ-2606":"外販","PJ-2607":"内販"}' data-class-map2='{"外販":"online","内販":"hybrid"}' data-target3="#projectParticipationType" data-map3='{"PJ-2601":"受託","PJ-2602":"受託","PJ-2603":"受託","PJ-2604":"公募","PJ-2605":"受託","PJ-2606":"受託","PJ-2607":"受託"}' data-class-map3='{"受託":"blue","公募":"orange"}'>PJ-2602<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>案件情報</label>
+          <div class="form-value">
+            <span id="projectName">ビジネス基礎研修 定期開催</span>
+            <span class="tag hybrid" id="projectSalesType">内販</span>
+            <span class="tag blue" id="projectParticipationType">受託</span>
+          </div>
+        </div>
+        <div class="form-section">コース</div>
+        <div class="form-field">
+          <label>年度<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="2024年度,2025年度,2026年度,2027年度" data-target="#courseCode" data-options-map='{"2024年度":[],"2025年度":[],"2026年度":["BC02B","BC07A","BC12B","BC17B","BC22B","BC27A","BC32B","DP08B","DP16A","GC01B","GC06B","BE10A"],"2027年度":[]}'>2026年度<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>コースコード<span class="req">必須</span></label>
+          <div class="form-control js-select" id="courseCode" data-options="BC02B,BC07A,BC12B,BC17B,BC22B,BC27A,BC32B,DP08B,DP16A,GC01B,GC06B,BE10A" data-target="#courseName" data-map='{"BC02B":"受託_システム開発入門","BC07A":"公募_基盤技術基礎","BC12B":"受託_AP要件定義基礎","BC17B":"受託_AP設計・製造基礎","BC22B":"受託_AP試験基礎","BC27A":"公募_データモデル設計基礎","BC32B":"受託_基盤構築プロセス基礎","DP08B":"受託_営業基本Ⅰ","DP16A":"公募_営業リスクマネジメントⅠ","GC01B":"受託_IT-PM入門","GC06B":"受託_品質管理入門","BE10A":"公募_システム基盤実践"}' data-target2="#courseParticipationType" data-map2='{"BC02B":"受託","BC07A":"公募","BC12B":"受託","BC17B":"受託","BC22B":"受託","BC27A":"公募","BC32B":"受託","DP08B":"受託","DP16A":"公募","GC01B":"受託","GC06B":"受託","BE10A":"公募"}' data-class-map2='{"公募":"orange","受託":"blue"}' data-target3="#courseDeliveryType" data-map3='{"BC02B":"集合","BC07A":"オンライン","BC12B":"集合","BC17B":"集合","BC22B":"集合","BC27A":"オンライン","BC32B":"集合","DP08B":"集合","DP16A":"オンライン","GC01B":"集合","GC06B":"オンライン","BE10A":"集合"}' data-class-map3='{"集合":"onsite","オンライン":"online","ハイブリッド":"hybrid"}' data-target4="#courseSchedule" data-map4='{"BC02B":"3日・20〜24名","BC07A":"1日・30〜40名","BC12B":"3日・20〜30名","BC17B":"2日・15〜20名","BC22B":"2日・20〜24名","BC27A":"1日・20〜30名","BC32B":"3日・15〜20名","DP08B":"2日・20〜30名","DP16A":"1日・25〜35名","GC01B":"2日・20〜24名","GC06B":"1日・20〜30名","BE10A":"3日・15〜20名"}'>BC02B<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>コース情報</label>
+          <div class="form-value">
+            <span id="courseName">受託_システム開発入門</span>
+            <span class="tag blue" id="courseParticipationType">受託</span>
+            <span style="font-size:12px;color:#9aa4b5;">推奨：<span class="tag onsite" id="courseDeliveryType">集合</span> <span id="courseSchedule">3日・20〜24名</span></span>
+          </div>
+        </div>
+        <div class="form-section">クラス</div>
+        <div class="form-field">
+          <label>クラスコード</label>
+          <div class="form-control readonly">001</div>
+        </div>
+        <div class="form-field">
+          <div style="font-size:11px;color:#9aa4b5;padding-top:22px;">※同じコースコードの登録がある場合、連番が増加します（002、003…）</div>
+        </div>
+        <div class="form-field">
+          <label>開始日<span class="req">必須</span></label>
+          <div class="form-control js-date">2026/09/02<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>終了日<span class="req">必須</span></label>
+          <div class="form-control js-date">2026/09/04<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>実施形態<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="deliveryType" value="集合" checked><span class="radio-dot"></span><span class="tag onsite">集合</span></label>
+            <label class="radio-option"><input type="radio" name="deliveryType" value="オンライン"><span class="radio-dot"></span><span class="tag online">オンライン</span></label>
+            <label class="radio-option"><input type="radio" name="deliveryType" value="ハイブリッド"><span class="radio-dot"></span><span class="tag hybrid">ハイブリッド</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>受講人数</label>
+          <div class="form-control number-select" data-options="10,15,20,24,30,35,40,50">
+            <input type="text" inputmode="numeric" value="24">
+            <span class="caret">▾</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>管理担当者</label>
+          <div class="form-control js-select" data-options="佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">佐藤 一郎<span class="caret">▾</span></div>
+        </div>
+        <div class="form-section">ロケーション</div>
+        <div class="form-field full">
+          <label>ロケーション区分</label>
+          <div class="radio-group" data-target="#locationName" data-options-map='{"駒場":["501教室","601教室"],"成城":["302教室"],"外部会場":["外部貸会議室A"]}'>
+            <label class="radio-option"><input type="radio" name="locationType" value="駒場" checked><span class="radio-dot"></span><span class="tag blue">駒場</span></label>
+            <label class="radio-option"><input type="radio" name="locationType" value="成城"><span class="radio-dot"></span><span class="tag orange">成城</span></label>
+            <label class="radio-option"><input type="radio" name="locationType" value="外部会場"><span class="radio-dot"></span><span class="tag gray">外部会場</span></label>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>ロケーション名</label>
+          <div class="form-control js-select" id="locationName" data-options="501教室,601教室">501教室<span class="caret">▾</span></div>
+        </div>
+        <div class="form-section">メイン講師</div>
+        <div class="form-field">
+          <label>講師ベンダー名</label>
+          <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">株式会社NEUトレーニング<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>講師名</label>
+          <input type="text" class="form-control" value="田中 誠">
+        </div>
+        <div class="form-section">サブ講師</div>
+        <div class="form-field full">
+          <div class="sub-grid sub-row-header"><span>講師ベンダー名</span><span>講師名</span></div>
+          <div class="sub-list" data-vendor-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">
+            <div class="sub-grid sub-row">
+              <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">NDUパートナーズ<span class="caret">▾</span></div>
+              <input type="text" class="form-control" value="鈴木 花子">
+              <div class="sub-remove">✕</div>
+            </div>
+          </div>
+          <div class="link-btn add-row">＋ サブ講師を追加</div>
+        </div>
+        <div class="form-section">聴講</div>
+        <div class="form-field">
+          <label>聴講ベンダー名</label>
+          <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>聴講者名</label>
+          <input type="text" class="form-control" placeholder="例）〇〇 〇〇">
+        </div>
+        <div class="form-section">動機付け</div>
+        <div class="form-field">
+          <label>動機付け会社名</label>
+          <input type="text" class="form-control" placeholder="例）株式会社NEUトレーニング">
+        </div>
+        <div class="form-field">
+          <label>動機付け担当者名</label>
+          <input type="text" class="form-control" placeholder="例）〇〇 〇〇">
+        </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
+        </div>
+        <div class="form-section">クラス構成</div>
+        <div class="form-field full">
+          <label>関連クラス</label>
+          <div class="sub-list related-class-list" data-related-class-options="002,003,004,005">
+            <div class="sub-row">
+              <div class="form-control number-select" data-options="002,003,004,005">
+                <input type="text" placeholder="例）002">
+                <span class="caret">▾</span>
+              </div>
+              <div class="sub-remove">✕</div>
+            </div>
+          </div>
+          <div class="link-btn add-related-class-row">＋ 関連クラスを追加</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="class_list.html">キャンセル</a>
+        <a class="btn primary" href="class_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+<script src="js/number-select.js" defer></script>
+<script src="js/sub-rows.js" defer></script>
+<script src="js/related-class-rows.js" defer></script>
+</body>
+</html>

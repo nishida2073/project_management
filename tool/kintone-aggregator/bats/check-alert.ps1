@@ -1,6 +1,6 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$TemplateFilePath,
     [string]$CollectRootDir,
@@ -11,13 +11,16 @@
     [int]$AlertInterventionTerm,
     [int]$AlertInterventionLimit,
     [int]$UseRecovery,
-    [string]$RecoveryScriptPath
+    [string]$RecoveryScriptPath,
+    [string]$LogNamePrefix
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
-Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
-    Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
 }
+
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'check-alert' })-$TargetGroupName-$TargetDate"
 
 function Recovery-DailyData {
     param(
@@ -25,8 +28,8 @@ function Recovery-DailyData {
         [string]$TargetGroupName,
         [array]$TargetDates
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Yellow
-    Write-Message $TargetDates -VarName "TargetDates" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+    # Write-Message $TargetDates -VarName "TargetDates" -Type "Info" -ForegroundColor Green
     
     Use-Mutex "Recovery-DailyData" {
         if (Test-Path $CollectRootDir) {
@@ -40,7 +43,7 @@ function Recovery-DailyData {
             if ($UseRecovery -eq 1) {
                 Write-Message "未集計のため集計を実施します。日付: $missingDate" -VarName "message" -Type "Info"
                 # 集計対象は当該グループのみに絞る（全グループ分を再集計する無駄な重複処理を避ける）
-                Start-Process $RecoveryScriptPath -ArgumentList $missingDate, $TargetGroupName -Wait
+                Start-Process $RecoveryScriptPath -ArgumentList $missingDate, $TargetGroupName -WindowStyle Hidden -Wait
             }else{
                 Write-Message "集計データがありません。日付: $missingDate" -VarName "message" -Type "Error" -ForegroundColor Red
             }
@@ -57,7 +60,7 @@ function Create-DailyUserDatas {
         [string]$TargetGroupName,
         [array]$TargetDates
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     if (-not $TargetDates -or $TargetDates.Count -eq 0) {
@@ -97,8 +100,8 @@ function Create-DailyUserDatas {
                 人間関係                   = $_.人間関係
                 体調                       = $_.体調
                 パルスサーベイフリーコメント = $_.パルスサーベイフリーコメント
-                提出状況_業務日誌             = ToBool $_.業務日誌提出状況
-                提出状況_パルスサーベイ       = ToBool $_.パルスサーベイ提出状況
+                提出状況_業務日誌             = ToBool $_.提出状況_業務日誌
+                提出状況_パルスサーベイ       = ToBool $_.提出状況_パルスサーベイ
             }
         }
         $result += [PSCustomObject]@{
@@ -121,7 +124,7 @@ function Add-CheckResults {
         [array]$CourseScheduleDatas,
         [int]$LookbackDays = 3
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     
@@ -248,7 +251,7 @@ function Create-DailySummaryDatas {
     param(
         [array]$CheckedDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dailySummary = @{}
@@ -373,7 +376,7 @@ function Export-Excel {
         [string]$TargetDate,
         [string]$TargetGroupName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $excel = $null
@@ -425,7 +428,7 @@ function Export-DailyResult {
         [array]$UserDatas,
         [string]$TargetDate
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dataStartCell = Get-CellByKey $sheet "{研修データ}" -ErrorOnMissing
@@ -501,7 +504,7 @@ function Export-SummaryData {
         [array]$CourseScheduleDatas,
         [array]$DailySummaryDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dataStartCell = Get-CellByKey $sheet "{集計データ}" -ErrorOnMissing
@@ -620,7 +623,7 @@ function Export-UserData {
         [array]$UserDatas,
         [string]$TargetDate
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     # 特定日の指定
@@ -751,7 +754,7 @@ function Export-TotalResult {
         [array]$CourseScheduleDatas,
         [array]$UserDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $rowDatas = @()
@@ -769,6 +772,7 @@ function Export-TotalResult {
             $dailyResult = $dailyResultMaps[$userData.受講生ID][$targetDate]
             $rowData = @(
                 $targetDate
+                $courseScheduleData.科目名
                 $dailyResult.提出状況_業務日誌
                 $dailyResult.提出状況_パルスサーベイ
                 $userData.通番
@@ -811,8 +815,8 @@ function Export-TotalResult {
     
     # セルの色
     $resultRange = $sheet.Range(
-        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 2 -1 ), 
-        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 3 -1))
+        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 3 -1 ), 
+        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 4 -1))
     Set-ResultCellColor $resultRange
 }
 
@@ -825,7 +829,7 @@ function Export-SummaryChart {
         $WriteSheet,
         [string]$TargetGroupName
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     # -------------------------
@@ -957,7 +961,7 @@ function Export-CourseScheduleData {
         $Sheet,
         [array]$CourseScheduleDatas
     )
-    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Green
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $dataStartCell = Get-CellByKey $sheet "{スケジュールデータ}" -ErrorOnMissing
@@ -986,48 +990,51 @@ function Export-CourseScheduleData {
 }
 
 
-$allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
-    Create-CourseScheduleDatas -DataFilePath $MasterDataFilePath
-} else {
-    Create-CourseScheduleDatas -DataFilePath $MasterDataFilePath -CurrentDate $TargetDate
-}
-Write-Message $allCourseScheduleDatas -VarName "allCourseScheduleDatas"
+& {
+    $allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
+        Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath
+    } else {
+        Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
+    }
+    Write-Message $allCourseScheduleDatas -VarName "allCourseScheduleDatas"
 
-$targetCourseScheduleDatas = $allCourseScheduleDatas | Where-Object { -not $_.isHoliday }
-Write-Message $targetCourseScheduleDatas -VarName "targetCourseScheduleDatas"
+    $targetCourseScheduleDatas = $allCourseScheduleDatas | Where-Object { -not $_.isHoliday }
+    Write-Message $targetCourseScheduleDatas -VarName "targetCourseScheduleDatas"
 
-$targetDates = @($targetCourseScheduleDatas |
-    Where-Object { $_.日付 -le $TargetDate } |
-    Sort-Object 日付 |
-    ForEach-Object 日付)
-Write-Message $targetDates -VarName "targetDates" -Type "Info"
-if (-not $targetDates -or $targetDates.Count -eq 0) {
-    Write-Message "対象の科目がありません。" -VarName "message" -Type "Warn" -ForegroundColor Yellow
-    return
-}
+    $targetDates = @($targetCourseScheduleDatas |
+        Where-Object { $_.日付 -le $TargetDate } |
+        Sort-Object 日付 |
+        ForEach-Object 日付)
+    Write-Message $targetDates -VarName "targetDates" -Type "Info"
+    if (-not $targetDates -or $targetDates.Count -eq 0) {
+        Write-Message "対象の科目がありません。" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        return
+    }
 
-$dailyUserDatas = Create-DailyUserDatas -TargetGroupName $TargetGroupName -CollectRootDir $CollectRootDir -TargetDates $targetDates
-Write-Message $dailyUserDatas -VarName "dailyUserDatas"
+    $dailyUserDatas = Create-DailyUserDatas -TargetGroupName $TargetGroupName -CollectRootDir $CollectRootDir -TargetDates $targetDates
+    Write-Message $dailyUserDatas -VarName "dailyUserDatas"
 
-$checkedUserDatas = Add-CheckResults $dailyUserDatas $targetCourseScheduleDatas
-Write-Message $checkedUserDatas -VarName "checkedUserDatas"
+    $checkedUserDatas = Add-CheckResults $dailyUserDatas $targetCourseScheduleDatas
+    Write-Message $checkedUserDatas -VarName "checkedUserDatas"
 
-$dailySummaryDatas = Create-DailySummaryDatas $checkedUserDatas
-Write-Message $dailySummaryDatas -VarName "dailySummaryDatas"
+    $dailySummaryDatas = Create-DailySummaryDatas $checkedUserDatas
+    Write-Message $dailySummaryDatas -VarName "dailySummaryDatas"
 
-New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
-Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-$viewCourseScheduleDatas = if ($ViewHolidayCourseSchedule -eq 1) {
-    $allCourseScheduleDatas
-}else{
-    $targetCourseScheduleDatas
-}
-Export-Excel $outputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
+    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+    $viewCourseScheduleDatas = if ($ViewHolidayCourseSchedule -eq 1) {
+        $allCourseScheduleDatas
+    }else{
+        $targetCourseScheduleDatas
+    }
+    Export-Excel $outputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
 
-$backupDirPath = Join-Path $OutputRootDir "backup"
-New-Item -Path $backupDirPath -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    $backupDirPath = Join-Path $OutputRootDir "backup"
+    New-Item -Path $backupDirPath -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-$backupFilePath = Join-Path $backupDirPath "$TargetGroupName-$TargetDate.xlsx"
+    $backupFilePath = Join-Path $backupDirPath "$TargetGroupName-$TargetDate.xlsx"
 
-Copy-Item -Path $outputFilePath -Destination $backupFilePath -Force
+    Copy-Item -Path $outputFilePath -Destination $backupFilePath -Force
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

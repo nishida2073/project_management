@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/location_regist.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=location" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>ロケーション一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>ロケーション新規登録</h2>
+          <div class="sub">新規のロケーション情報を登録します</div>
+        </div>
+        <a class="close-x" href="location_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>ロケーションコード</label>
+          <input type="text" class="form-control" placeholder="例）LOC-005">
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>ロケーション区分</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="locationType" value="駒場"><span class="radio-dot"></span><span class="tag blue">駒場</span></label>
+            <label class="radio-option"><input type="radio" name="locationType" value="成城"><span class="radio-dot"></span><span class="tag orange">成城</span></label>
+            <label class="radio-option"><input type="radio" name="locationType" value="外部会場"><span class="radio-dot"></span><span class="tag gray">外部会場</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>ロケーション名<span class="req">必須</span></label>
+          <input type="text" class="form-control" placeholder="例）701教室">
+        </div>
+        <div class="form-field full">
+          <label>電話番号</label>
+          <input type="tel" class="form-control" placeholder="例）03-0000-0000">
+        </div>
+        <div class="form-field full">
+          <label>住所</label>
+          <input type="text" class="form-control" placeholder="例）東京都目黒区駒場4-6-1">
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="location_list.html">キャンセル</a>
+        <a class="btn primary" href="location_list.html">登録する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/anken_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=anken" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>案件編集</h2>
+          <div class="sub">PJ-2601　G新人研修（NTTデータ金融共催）の情報を編集します</div>
+        </div>
+        <a class="close-x" href="anken_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>年度<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="2024年度,2025年度,2026年度,2027年度">2026年度<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>案件コード</label>
+          <div class="form-control readonly">PJ-2601</div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>販売区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="salesType" value="外販" checked><span class="radio-dot"></span><span class="tag online">外販</span></label>
+            <label class="radio-option"><input type="radio" name="salesType" value="内販"><span class="radio-dot"></span><span class="tag hybrid">内販</span></label>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>参加区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="participationType" value="受託" checked><span class="radio-dot"></span><span class="tag blue">受託</span></label>
+            <label class="radio-option"><input type="radio" name="participationType" value="公募"><span class="radio-dot"></span><span class="tag orange">公募</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>案件名<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="G新人研修（NTTデータ金融共催）">
+        </div>
+        <div class="form-field">
+          <label>顧客名</label>
+          <div class="form-control js-select" data-options="NTTデータ金融,株式会社ABC商事,DEFホールディングス,CECトラスト,NTTデータUNIV,グループ各社,（公募）">NTTデータ金融<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>実施開始月<span class="req">必須</span></label>
+          <div class="form-control js-month">2026/09<span class="caret">▾</span></div>
+        </div>
+        <div class="form-section">管理担当者</div>
+        <div class="form-field">
+          <label>PM<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="山口 直人,田中 誠,高橋 健,伊藤 美咲,渡辺 直樹,佐藤 一郎">山口 直人<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>PL（複数選択可）</label>
+          <div class="chip-box js-chip-select" data-options="細野 恵美,木村 隆,中島 拓海,小林 由美,松本 健二,市村 拓也,岡田 沙織" data-chip-class="pl">
+            <span class="chip pl">細野 恵美 <x>✕</x></span>
+            <span class="chip-add">＋ PLを追加</span>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea" placeholder="例）先方都合により日程変更の可能性あり"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="anken_list.html">キャンセル</a>
+        <a class="btn primary" href="anken_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+<script src="js/chip-select.js" defer></script>
+</body>
+</html>

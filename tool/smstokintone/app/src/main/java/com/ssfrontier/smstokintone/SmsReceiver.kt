@@ -12,15 +12,20 @@ import androidx.core.content.ContextCompat
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
+/** SMS受信をトリガーにKintoneUploadWorkerを起動し、必要に応じて抽出失敗時の自動返信も行うBroadcastReceiver */
 class SmsReceiver : BroadcastReceiver() {
 
+    /** SMS受信ブロードキャストを受けてKintoneUploadWorkerを起動し、受信ログの記録と抽出失敗時の自動返信を行う */
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
-        // 自動送信の有効/無効・kintone設定の完否はKintoneUploadWorker側で判定しログに残す。
-        // ここで早期returnすると、その判定結果が送信ログ画面に一切表示されなくなるため行わない。
+        // 送信可否やkintone設定の完否はKintoneUploadWorker側で判定しログに残すため、
+        // ここで早期returnすると判定結果が送信ログ画面に表示されなくなる
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         if (messages.isNullOrEmpty()) return
 
@@ -28,46 +33,6 @@ class SmsReceiver : BroadcastReceiver() {
         val sender = messages[0].originatingAddress ?: ""
         val body = messages.joinToString(separator = "") { it.messageBody ?: "" }
         val timestampMillis = messages[0].timestampMillis
-
-        // kintoneへの送信結果を待たず、受信した時点で即座にログへ記録する。
-        // これにより送信ログ画面を見れば、そもそもSMSを受信できているかを確認できる。
-        // SMSプロバイダ上の実IDはこの時点で確実には特定できない（電話番号の表記ゆれや、既定の
-        // SMSアプリによる書き込みタイミングにより一致しないことがある）ため解決を試みない。
-        // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる
-        // （SmsMatching参照）。
-        val profileName = SettingsStore.findProfileForBody(context, body)?.displayName(context)
-        SmsLogStore.add(
-            context,
-            type = SmsLogStore.EntryType.RECEIVE,
-            timestampMillis = timestampMillis,
-            sender = sender,
-            body = body,
-            success = true,
-            message = context.getString(R.string.message_log_receive),
-            profileName = profileName
-        )
-
-        // SMS返信はkintoneへの送信設定・送信先プロファイルの有無とは無関係な機能のため、ここで判定する
-        val config = SettingsStore.load(context)
-        val smsParts = SmsPartsGenerator.generateSmsParts(body)
-        if (smsParts.isSplitFailed() && config.autoReplySplitFailedEnabled && sender.isNotBlank()) {
-            val now = System.currentTimeMillis()
-            if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
-                if (sendAutoReply(context, sender, config.splitFailedReplyAddition)) {
-                    SmsLogStore.add(
-                        context,
-                        type = SmsLogStore.EntryType.AUTO_REPLY,
-                        timestampMillis = timestampMillis,
-                        sender = sender,
-                        body = body,
-                        success = true,
-                        message = context.getString(R.string.message_log_auto_reply),
-                        profileName = profileName
-                    )
-                }
-                AutoReplyThrottle.recordSent(context, sender, now)
-            }
-        }
 
         val data = workDataOf(
             KintoneUploadWorker.KEY_SENDER to sender,
@@ -85,9 +50,81 @@ class SmsReceiver : BroadcastReceiver() {
             .build()
 
         WorkManager.getInstance(context).enqueue(request)
+
+        // 送信先名の解決は端末上のAI呼び出しを伴う場合があり、onReceiveの同期処理内では
+        // 待てないため、goAsync()で実行時間を延長しコルーチンで判定・記録・返信を行う
+        val config = SettingsStore.load(context)
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                // KintoneUploadWorkerの登録処理と同じresolveSendTargetsを使い、抽出方法のずれによる
+                // 登録内容と送信先名の食い違いを防ぐ。1件のSMSが複数の送信先に一致することがあるため、
+                // 受信ログ・自動返信ログでは名前を連結して表示する（実際の登録はWorker側で送信先ごとに行う）
+                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiExtractionEnabled, config.continuationEnabled, config.continuationScope)
+                val smsParts = resolution.smsParts
+                // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは
+                // 空になり、送信先名は「なし」扱いになる（実際の登録も行われない）
+                val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
+
+                // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析
+                // できた場合のみ更新する。KintoneUploadWorker側でも同じ条件で更新している
+                if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
+                    ContinuationStore.update(
+                        context,
+                        sender = sender,
+                        companyName = smsParts.companyName,
+                        userName = smsParts.userName,
+                        timestampMillis = timestampMillis
+                    )
+                }
+
+                // kintoneへの送信結果を待たず受信時点でログ記録することで、送信ログ画面でSMS受信の
+                // 有無を確認できる。smsIdはこの時点では確実に特定できない（電話番号の表記ゆれや
+                // 標準SMSアプリの書き込みタイミング次第で一致しないことがある）ため解決を試みず、
+                // 「受信済みSMS送信」画面側でタイムスタンプ近似により突き合わせる（SmsMatching参照）
+                SmsLogStore.add(
+                    context,
+                    type = SmsLogStore.EntryType.RECEIVE,
+                    timestampMillis = timestampMillis,
+                    sender = sender,
+                    body = body,
+                    success = true,
+                    message = context.getString(R.string.message_log_receive),
+                    sendTargetName = sendTargetName,
+                    smsParts = smsParts,
+                    companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
+                    isContinuation = resolution.isContinuation
+                )
+
+                if (config.autoReplyExtractionFailedEnabled && sender.isNotBlank() && smsParts.isExtractionFailed()) {
+                    val now = System.currentTimeMillis()
+                    if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
+                        if (sendAutoReply(context, sender, config.extractionFailedReplyAddition)) {
+                            SmsLogStore.add(
+                                context,
+                                type = SmsLogStore.EntryType.AUTO_REPLY,
+                                timestampMillis = timestampMillis,
+                                sender = sender,
+                                body = body,
+                                success = true,
+                                message = context.getString(R.string.message_log_auto_reply),
+                                sendTargetName = sendTargetName,
+                                smsParts = smsParts,
+                                companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
+                                replyBody = config.extractionFailedReplyAddition,
+                                isContinuation = resolution.isContinuation
+                            )
+                        }
+                        AutoReplyThrottle.recordSent(context, sender, now)
+                    }
+                }
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
-    /** [sender]宛てに[body]をSMSで自動返信する。送信を試みられたかどうかを返す */
+    /** 戻り値は送信成功ではなく、送信を試みられたかどうか */
     private fun sendAutoReply(context: Context, sender: String, body: String): Boolean {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             return false
@@ -103,7 +140,9 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
+    /** ログ出力用のタグをまとめたコンパニオンオブジェクト */
     companion object {
+        /** [Log]出力に使うタグ */
         private const val TAG = "SmsReceiver"
     }
 }

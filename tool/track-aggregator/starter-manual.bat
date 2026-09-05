@@ -1,7 +1,5 @@
 @echo off
 
-pushd "%~dp0"
-
 set "BATCH=all.bat"
 
 echo ===================================================================================================
@@ -31,9 +29,7 @@ echo.
 echo äJén: %BATCH%
 echo.
 
-call %BATCH%
+call "%~dp0%BATCH%"
 
 
 echo èIóπ
-
-popd

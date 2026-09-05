@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/course_list.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=course" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb-block">
+        <div class="crumb">マスタ管理<span>／</span>コース</div>
+        <p class="crumb-sub">コース情報を管理します</p>
+      </div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>コース一覧</h1>
+        </div>
+        <div class="btn-group">
+          <a class="btn primary" href="course_regist.html">＋ 新規登録</a>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
+        <div class="field"><label>参加区分</label><div class="control small js-select" data-options="すべて,公募,受託">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
+        <div class="search-btn">検索</div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-meta"><div class="count">全 <b>12</b> 件</div></div>
+        <table>
+          <thead>
+            <tr>
+              <th>年度</th>
+              <th>コースコード</th>
+              <th>参加区分</th>
+              <th>コース名</th>
+              <th>実施形態（推奨）</th>
+              <th>日数（推奨）</th>
+              <th>最小人数（推奨）</th>
+              <th>最大人数（推奨）</th>
+              <th>クラス数（実施/予定）</th>
+              <th>稼働状況</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>2026年度</td><td>BC02B</td><td><span class="tag blue">受託</span></td><td>受託_システム開発入門</td><td><span class="tag onsite">集合</span></td><td>3日</td><td>20名</td><td>24名</td><td>1/2クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>BC07A</td><td><span class="tag orange">公募</span></td><td>公募_基盤技術基礎</td><td><span class="tag online">オンライン</span></td><td>1日</td><td>30名</td><td>40名</td><td>3/4クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>BC12B</td><td><span class="tag blue">受託</span></td><td>受託_AP要件定義基礎</td><td><span class="tag onsite">集合</span></td><td>3日</td><td>20名</td><td>30名</td><td>2/3クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>BC17B</td><td><span class="tag blue">受託</span></td><td>受託_AP設計・製造基礎</td><td><span class="tag onsite">集合</span></td><td>2日</td><td>15名</td><td>20名</td><td>0/2クラス</td><td><span class="state off"><span class="dot"></span>停止中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>BC22B</td><td><span class="tag blue">受託</span></td><td>受託_AP試験基礎</td><td><span class="tag onsite">集合</span></td><td>2日</td><td>20名</td><td>24名</td><td>2/3クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>BC27A</td><td><span class="tag orange">公募</span></td><td>公募_データモデル設計基礎</td><td><span class="tag online">オンライン</span></td><td>1日</td><td>20名</td><td>30名</td><td>4/5クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>BC32B</td><td><span class="tag blue">受託</span></td><td>受託_基盤構築プロセス基礎</td><td><span class="tag onsite">集合</span></td><td>3日</td><td>15名</td><td>20名</td><td>1/2クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>DP08B</td><td><span class="tag blue">受託</span></td><td>受託_営業基本Ⅰ</td><td><span class="tag onsite">集合</span></td><td>2日</td><td>20名</td><td>30名</td><td>2/3クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>DP16A</td><td><span class="tag orange">公募</span></td><td>公募_営業リスクマネジメントⅠ</td><td><span class="tag online">オンライン</span></td><td>1日</td><td>25名</td><td>35名</td><td>3/4クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>GC01B</td><td><span class="tag blue">受託</span></td><td>受託_IT-PM入門</td><td><span class="tag onsite">集合</span></td><td>2日</td><td>20名</td><td>24名</td><td>1/2クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>GC06B</td><td><span class="tag blue">受託</span></td><td>受託_品質管理入門</td><td><span class="tag online">オンライン</span></td><td>1日</td><td>20名</td><td>30名</td><td>3/4クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+            <tr><td>2026年度</td><td>BE10A</td><td><span class="tag orange">公募</span></td><td>公募_システム基盤実践</td><td><span class="tag onsite">集合</span></td><td>3日</td><td>15名</td><td>20名</td><td>1/2クラス</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="link-btn" href="course_modify.html">編集</a></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+</body>
+</html>

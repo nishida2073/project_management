@@ -282,108 +282,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_log"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/section_auto_refresh"
-                        android:textSize="14sp"
-                        android:textColor="?attr/colorOnSurface" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swAutoRefreshEnabled"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="@string/switch_auto_refresh_enabled" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:text="@string/label_auto_refresh_interval"
-                            android:textColor="?attr/colorOnSurface" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:orientation="vertical">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/tilAutoRefreshInterval"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:hint="@string/hint_auto_refresh_interval">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etAutoRefreshInterval"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="number" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="16dp"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="@string/helper_auto_refresh_interval"
-                                    android:textSize="12sp"
-                                    android:textColor="?android:attr/textColorSecondary" />
-                            </LinearLayout>
-                        </LinearLayout>
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            style="@style/AppCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:text="@string/section_sms_search"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -399,7 +297,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_search_filter"
+                        android:text="@string/label_search_filter"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -437,6 +335,7 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/llDefaultSendTargetFilter"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
@@ -447,13 +346,20 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_profile_filter"
+                            android:text="@string/label_default_send_target_filter"
                             android:textColor="?attr/colorOnSurface" />
 
-                        <Spinner
-                            android:id="@+id/spDefaultProfileFilter"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <Spinner
+                                android:id="@+id/spDefaultSendTargetFilter"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
@@ -467,7 +373,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_sms_match_tolerance_seconds"
+                            android:text="@string/label_default_send_status_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -476,33 +382,78 @@
                             android:layout_marginStart="16dp"
                             android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/tilSmsMatchToleranceSeconds"
-                                android:layout_width="match_parent"
+                            <CheckBox
+                                android:id="@+id/cbDefaultSendNoneOnlyEnabled"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_match_tolerance_seconds">
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_send_none_only_enabled" />
 
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etSmsMatchToleranceSeconds"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="number" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            <CheckBox
+                                android:id="@+id/cbDefaultSentAutoOnlyEnabled"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="16dp"
-                                android:orientation="vertical">
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_sent_auto_only_enabled" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="@string/helper_sms_match_tolerance_seconds"
-                                    android:textSize="12sp"
-                                    android:textColor="?android:attr/textColorSecondary" />
-                            </LinearLayout>
+                            <CheckBox
+                                android:id="@+id/cbDefaultSentManualOnlyEnabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_sent_manual_only_enabled" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/label_default_extraction_status_filter"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <CheckBox
+                                android:id="@+id/cbDefaultExtractionSucceededOnlyEnabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_extraction_succeeded_only_enabled" />
+
+                            <CheckBox
+                                android:id="@+id/cbDefaultExtractionFailedOnlyEnabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_extraction_failed_only_enabled" />
+
+                            <CheckBox
+                                android:id="@+id/cbDefaultExtractionExcludedOnlyEnabled"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minHeight="0dp"
+                                android:checked="false"
+                                android:text="@string/switch_default_extraction_excluded_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -511,7 +462,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_search_filters_visibility"
+                        android:text="@string/section_search_filters_visibility"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -559,49 +510,27 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSearchProfileUnconfiguredEnabled"
+                            android:id="@+id/swSearchSendTargetUnconfiguredEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_search_profile_unconfigured_enabled" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_profile_unconfigured_enabled"
-                                android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
-                        </LinearLayout>
+                            android:text="@string/switch_search_send_target_unconfigured_enabled" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSearchSplitFailedEnabled"
+                            android:id="@+id/swSearchExtractionFailedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="false"
-                            android:text="@string/switch_search_split_failed_enabled" />
+                            android:text="@string/switch_search_extraction_failed_enabled" />
 
-                        <LinearLayout
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/swSearchExtractionExcludedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_split_failed_enabled"
-                                android:textSize="12sp"
-                                android:textColor="?android:attr/textColorSecondary" />
-                        </LinearLayout>
+                            android:layout_marginTop="16dp"
+                            android:checked="true"
+                            android:text="@string/switch_search_extraction_excluded_enabled" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -699,11 +628,11 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSendSplitFailedEnabled"
+                            android:id="@+id/swSendExtractionFailedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_send_split_failed_enabled" />
+                            android:text="@string/switch_send_extraction_failed_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -715,7 +644,30 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_send_split_failed_enabled"
+                                android:text="@string/helper_send_extraction_failed_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/swSendExtractionExcludedEnabled"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:checked="true"
+                            android:text="@string/switch_send_extraction_excluded_enabled" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_send_extraction_excluded_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -795,11 +747,19 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_auto_reply_split_failed_enabled"
+                                android:text="@string/helper_auto_reply_extraction_failed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_auto_reply_cooldown_seconds"
+                        android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -807,13 +767,18 @@
                         android:layout_marginStart="16dp"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilAutoReplyCooldownSeconds"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:layout_marginBottom="8dp"
-                            android:text="@string/label_auto_reply_cooldown_seconds"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:hint="@string/hint_auto_reply_cooldown_seconds">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etAutoReplyCooldownSeconds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -821,33 +786,13 @@
                             android:layout_marginStart="16dp"
                             android:orientation="vertical">
 
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/tilAutoReplyCooldownSeconds"
+                            <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_auto_reply_cooldown_seconds">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etAutoReplyCooldownSeconds"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="number" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="16dp"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="@string/helper_auto_reply_cooldown_seconds"
-                                    android:textSize="12sp"
-                                    android:textColor="?android:attr/textColorSecondary" />
-                            </LinearLayout>
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_auto_reply_cooldown_seconds"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -904,7 +849,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_sms_split_failed_reply_body"
+                            android:text="@string/section_sms_extraction_failed_reply_body"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -917,10 +862,10 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_split_failed_reply_body">
+                                android:hint="@string/hint_sms_extraction_failed_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etSplitFailedReplyAddition"
+                                    android:id="@+id/etExtractionFailedReplyAddition"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="textMultiLine" />
@@ -930,6 +875,437 @@
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/AppCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/section_continuation"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_continuation"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/swContinuationEnabled"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/switch_continuation_enabled" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_continuation_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_continuation_scope"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <RadioGroup
+                            android:id="@+id/rgContinuationScope"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <RadioButton
+                                android:id="@+id/rbContinuationScopeUnlimited"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="16dp"
+                                android:checked="false"
+                                android:text="@string/rb_continuation_scope_unlimited" />
+                            <RadioButton
+                                android:id="@+id/rbContinuationScopeSameDay"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:checked="true"
+                                android:text="@string/rb_continuation_scope_same_day" />
+                        </RadioGroup>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_continuation_scope"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_continuation_show_name"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/swContinuationShowUserNameEnabled"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/switch_continuation_show_user_name_enabled" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_continuation_show_user_name_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnEditContinuationInfo"
+                        style="@style/AppButton.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/btn_edit_continuation_info" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/AppCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/section_body_extraction"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_ai_extraction"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/swAiExtractionEnabled"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:text="@string/switch_ai_extraction_enabled" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_ai_extraction_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/AppCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/section_log"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/section_auto_refresh"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/swAutoRefreshEnabled"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/switch_auto_refresh_enabled" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:text="@string/label_auto_refresh_interval"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilAutoRefreshInterval"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="@string/hint_auto_refresh_interval">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etAutoRefreshInterval"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="number" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="@string/helper_auto_refresh_interval"
+                                    android:textSize="12sp"
+                                    android:textColor="?android:attr/textColorSecondary" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_sms_match_tolerance_seconds"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilSmsMatchToleranceSeconds"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/hint_sms_match_tolerance_seconds">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etSmsMatchToleranceSeconds"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_sms_match_tolerance_seconds"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="@string/label_body_excerpt_length"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/tilBodyExcerptLength"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/hint_body_excerpt_length">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etBodyExcerptLength"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_body_excerpt_length"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnResetSettings"
+            style="@style/AppButton.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/btn_reset" />
 
         </LinearLayout>
     </ScrollView>

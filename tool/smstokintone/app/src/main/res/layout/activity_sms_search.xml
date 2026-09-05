@@ -127,20 +127,23 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                android:id="@+id/tvSendTargetFilterLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/label_profile_filter"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_send_target_filter"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
+                android:id="@+id/llSendTargetFilter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:orientation="vertical">
 
                 <Spinner
-                    android:id="@+id/spProfileFilter"
+                    android:id="@+id/spSendTargetFilter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -150,7 +153,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_sms_status_filters"
+                android:text="@string/label_search_extraction_status_filter"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
@@ -161,19 +164,76 @@
                 android:gravity="center_vertical">
 
                 <CheckBox
-                    android:id="@+id/cbUnsentOnly"
+                    android:id="@+id/cbExtractionSucceededOnly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/cb_unsent_only" />
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="0dp"
+                    android:checked="false"
+                    android:text="@string/cb_extraction_succeeded_only" />
 
                 <CheckBox
-                    android:id="@+id/cbSplitFailedOnly"
+                    android:id="@+id/cbExtractionFailedOnly"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="0dp"
                     android:checked="false"
-                    android:text="@string/cb_split_failed_only" />
+                    android:text="@string/cb_extraction_failed_only" />
+
+                <CheckBox
+                    android:id="@+id/cbExtractionExcludedOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="0dp"
+                    android:checked="false"
+                    android:text="@string/cb_extraction_excluded_only" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_search_send_status_filter"
+                android:textColor="?attr/colorOnSurface" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/cbSendNoneOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:minHeight="0dp"
+                    android:checked="true"
+                    android:text="@string/cb_send_none_only" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <CheckBox
+                        android:id="@+id/cbSentAutoOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="0dp"
+                        android:checked="false"
+                        android:text="@string/cb_sent_auto_only" />
+
+                    <CheckBox
+                        android:id="@+id/cbSentManualOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="0dp"
+                        android:checked="false"
+                        android:text="@string/cb_sent_manual_only" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -182,7 +242,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/btn_search_sms" />
+            android:text="@string/btn_search" />
 
         <LinearLayout
             android:layout_width="match_parent"
