@@ -154,7 +154,7 @@
     <string name="rb_sms_reply_mode_manual">手動</string>
     <string name="rb_sms_reply_mode_auto">自動</string>
     <string name="helper_auto_reply_extraction_failed_enabled">「形式が異常」なSMSを受信した場合、返信用のメッセージを自動返信します</string>
-    <string name="label_auto_reply_cooldown_seconds">同一送信元への送信間隔</string>
+    <string name="label_auto_reply_cooldown_seconds">自動返信の間隔</string>
     <string name="helper_auto_reply_cooldown_seconds">同じ送信元には、ここで指定した時間が経過するまで自動返信を再送信しません</string>
     <string name="hint_auto_reply_cooldown_seconds">秒</string>
     <string name="section_reply">返信メッセージ（自動入力）</string>
