@@ -35,10 +35,15 @@ function buildHtml(mdPath) {
     }
   });
 
+  // 画像などをmdPathからの相対パス（例: screenshots/foo.png）で参照しているMarkdownのために、
+  // そのファイル自身のディレクトリを基準に解決されるよう<base>を注入する
+  const baseDir = path.dirname(path.resolve(mdPath)).replace(/\\/g, '/');
+
   const page = `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
+<base href="file:///${baseDir}/">
 <title>${title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
 <style>
   body {
