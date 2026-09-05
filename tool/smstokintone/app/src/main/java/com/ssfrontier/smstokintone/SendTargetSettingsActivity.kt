@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.View
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import androidx.core.text.buildSpannedString
 import androidx.lifecycle.lifecycleScope
 import com.ssfrontier.smstokintone.databinding.ActivitySendTargetSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemSendTargetBinding
+import com.ssfrontier.smstokintone.databinding.ItemSendTargetKeywordBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,7 +64,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         val card = SendTargetCard(sendTarget.id, itemBinding)
 
         itemBinding.etSendTargetName.setText(sendTarget.name)
-        itemBinding.etKeywords.setText(sendTarget.keywords)
+        sendTarget.keywords.forEach { addKeywordRow(itemBinding.llKeywordsContainer, it) }
+        itemBinding.btnAddKeyword.setOnClickListener { addKeywordRow(itemBinding.llKeywordsContainer, "") }
         itemBinding.etSubdomain.setText(sendTarget.subdomain)
         itemBinding.etAppId.setText(sendTarget.appId)
         itemBinding.etLoginName.setText(sendTarget.loginName)
@@ -117,6 +120,14 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return itemBinding.root
     }
 
+    /** キーワード行を1件containerへ追加する。削除ボタンで自身をUIから取り除けるようにする */
+    private fun addKeywordRow(container: LinearLayout, keyword: String) {
+        val rowBinding = ItemSendTargetKeywordBinding.inflate(layoutInflater, container, false)
+        rowBinding.etKeyword.setText(keyword)
+        rowBinding.btnDeleteKeyword.setOnClickListener { container.removeView(rowBinding.root) }
+        container.addView(rowBinding.root)
+    }
+
     /** ancestor（ScrollView）を基準にしたviewのY座標を、親を辿って足し上げて求める。smoothScrollToへ渡す用 */
     private fun topRelativeTo(view: View, ancestor: View): Int {
         var top = 0
@@ -147,7 +158,9 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return SettingsStore.SendTarget(
             id = id,
             name = itemBinding.etSendTargetName.text.toString().trim(),
-            keywords = itemBinding.etKeywords.text.toString().trim(),
+            keywords = (0 until itemBinding.llKeywordsContainer.childCount).map { index ->
+                itemBinding.llKeywordsContainer.getChildAt(index).findViewById<EditText>(R.id.etKeyword).text.toString().trim()
+            }.filter { it.isNotEmpty() },
             subdomain = itemBinding.etSubdomain.text.toString().trim(),
             appId = itemBinding.etAppId.text.toString().trim(),
             authMethod = SettingsStore.AuthMethod.PASSWORD,
@@ -231,7 +244,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                     .setMessage(
                         getString(
                             R.string.dialog_message_test_send_routing_unmatched,
-                            sendTarget.keywords,
+                            sendTarget.keywords.joinToString("、"),
                             getString(if (sendTarget.matchTarget == SettingsStore.MatchTarget.BODY) R.string.rb_match_target_body else R.string.rb_match_target_company_name)
                         )
                     )

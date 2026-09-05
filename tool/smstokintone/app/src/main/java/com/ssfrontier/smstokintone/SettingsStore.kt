@@ -228,8 +228,8 @@ object SettingsStore {
         val id: String,
         /** 表示名。空の場合は[displayName]がフォールバック文字列を返す */
         val name: String,
-        /** 振り分け条件のキーワード（カンマまたは改行区切り）。分割済みリストは[keywordList]を参照 */
-        val keywords: String,
+        /** 振り分け条件のキーワード。行ごとに1件、UI上で追加・削除できる */
+        val keywords: List<String>,
         /** kintoneのサブドメイン（https://{subdomain}.cybozu.com のホスト名部分） */
         val subdomain: String,
         /** kintoneアプリのID */
@@ -269,13 +269,9 @@ object SettingsStore {
         /** [keywords]をSMS本文そのものと会社名（抽出結果）のどちらに対して照合するか */
         val matchTarget: MatchTarget = MatchTarget.COMPANY_NAME
     ) {
-        /** [keywords]をカンマ・改行で分割し、前後の空白を除いた上で空要素を取り除いたリスト */
-        val keywordList: List<String>
-            get() = keywords.split(",", "\n").map { it.trim() }.filter { it.isNotEmpty() }
-
         /** [keywords]が未設定で、どの送信先にも一致しなかった場合のフォールバックとして扱われる送信先かどうか */
         val isDefault: Boolean
-            get() = keywordList.isEmpty()
+            get() = keywords.isEmpty()
 
         /** 表示名が未設定の場合のフォールバック文字列を返す */
         fun displayName(context: Context): String =
@@ -295,7 +291,7 @@ object SettingsStore {
         /** [matchTarget]に応じて[body]か[companyName]のどちらかを[keywords]と照合する */
         fun matches(body: String, companyName: String): Boolean {
             val text = if (matchTarget == MatchTarget.BODY) body else companyName
-            return keywordList.any { TextNormalization.matches(text, it) }
+            return keywords.any { TextNormalization.matches(text, it) }
         }
 
         /**
@@ -311,7 +307,7 @@ object SettingsStore {
          * をキーワードと照合する
          */
         fun routesToByCompanyNameOnly(companyName: String): Boolean =
-            !isDefault && keywordList.any { TextNormalization.matches(companyName, it) }
+            !isDefault && keywords.any { TextNormalization.matches(companyName, it) }
 
         /** [newEmpty]を提供するコンパニオンオブジェクト */
         companion object {
@@ -319,7 +315,7 @@ object SettingsStore {
             fun newEmpty(): SendTarget = SendTarget(
                 id = UUID.randomUUID().toString(),
                 name = "",
-                keywords = "",
+                keywords = emptyList(),
                 subdomain = AppDefaults.NEW_PROFILE_SUBDOMAIN,
                 appId = "",
                 authMethod = AuthMethod.PASSWORD,
@@ -484,7 +480,7 @@ object SettingsStore {
                 JSONObject()
                     .put("id", sendTarget.id)
                     .put("name", sendTarget.name)
-                    .put("keywords", sendTarget.keywords)
+                    .put("keywords", JSONArray(sendTarget.keywords))
                     .put("subdomain", sendTarget.subdomain)
                     .put("appId", sendTarget.appId)
                     .put("authMethod", sendTarget.authMethod.name)
@@ -518,7 +514,9 @@ object SettingsStore {
             SendTarget(
                 id = obj.optString("id", UUID.randomUUID().toString()),
                 name = obj.optString("name", ""),
-                keywords = obj.optString("keywords", ""),
+                keywords = obj.optJSONArray("keywords")?.let { array ->
+                    (0 until array.length()).map { array.getString(it) }
+                } ?: emptyList(),
                 subdomain = obj.optString("subdomain", ""),
                 appId = obj.optString("appId", ""),
                 authMethod = AuthMethod.fromName(obj.optString("authMethod", "")),
