@@ -34,7 +34,8 @@ with mermaid flowchart diagrams and PDF bookmarks. There is no git repository in
   `PDF/業務フロー図（研修当日：勤怠）.pdf`), rendered from the corresponding file in `業務フロー図/`.
   `md2pdf.bat` and `render-pdf.js` write next to the input `.md` by default, so the output still needs
   to be placed/renamed into `PDF/` to match this convention.
-- `tools/md2png/` — the Node.js/Puppeteer conversion tool (see below). Its `node_modules` is already
+- `tool/md2png/` — the Node.js/Puppeteer conversion tool (see below), shared with the `tool/smstokintone`
+  Android app project (which uses it to render its own manual to PDF). Its `node_modules` is already
   present/committed; only run `npm install` here if dependencies are missing.
 - `md2pdf.bat` — Windows entry point: drag a `.md` file onto it (or run
   `md2pdf.bat "path\to\file.md"`) to produce `path\to\file.pdf` next to it.
@@ -45,7 +46,7 @@ Render a Markdown file (with mermaid code blocks) to a paginated PDF with a book
 generated from its `##`/`###` headings:
 
 ```
-node tools/md2png/render-pdf.js "input.md" "output.pdf"
+node tool/md2png/render-pdf.js "input.md" "output.pdf"
 ```
 
 or via the Windows wrapper:
@@ -58,12 +59,12 @@ Render to a single full-page PNG screenshot instead (no bookmarks) — useful fo
 a diagram's layout before committing to the PDF:
 
 ```
-node tools/md2png/render.js "input.md" "output.png"
+node tool/md2png/render.js "input.md" "output.png"
 ```
 
 There is no lint/test suite (`package.json`'s `test` script is an unused placeholder).
 
-## Rendering pipeline (`tools/md2png/`)
+## Rendering pipeline (`tool/md2png/`)
 
 1. **`build-html.js`** — reads the Markdown, pulls out ` ```mermaid ` blocks into placeholder tokens
    so `marked` doesn't mangle them, runs `marked.parse`, then re-inserts each block as

@@ -21,7 +21,11 @@ function buildHtml(mdPath) {
     const text = inner.replace(/<[^>]+>/g, '').trim();
     headings.push({ level: Number(level), text, token });
     const marker = `<span style="font-size:1px;color:#ffffff;">${token}</span>`;
-    return `<h${level}${attrs}>${marker}${inner}</h${level}>`;
+    // markedは見出しにid属性を付与しないため、同一ドキュメント内の[text](#見出しテキスト)形式の
+    // リンクが何にもジャンプできずリンク自体が生成されない。リンク側は見出しの生テキストをそのまま
+    // フラグメントに使っているため、同じテキストをidとして付与し、対応が取れるようにする
+    const idAttr = ` id="${text.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`;
+    return `<h${level}${attrs}${idAttr}>${marker}${inner}</h${level}>`;
   });
 
   mermaidBlocks.forEach((code, i) => {
