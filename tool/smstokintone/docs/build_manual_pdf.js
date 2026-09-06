@@ -51,7 +51,9 @@ fs.writeFileSync(tmpHtmlPath, pageWithTitle, 'utf8');
     path: tmpPdfPath,
     format: 'A4',
     printBackground: true,
-    margin: { top: '15mm', bottom: '15mm', left: '15mm', right: '15mm' },
+    // 左右は15mmだと、横並びで置いた2枚組の画像（各300px幅）の合計が印刷可能幅にわずかに収まらず、
+    // 2枚目が次の行へ折り返されてしまうため、横幅に余裕を持たせるために8mmに縮めている
+    margin: { top: '15mm', bottom: '15mm', left: '8mm', right: '8mm' },
   });
   await browser.close();
 
