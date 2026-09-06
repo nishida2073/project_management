@@ -16,12 +16,12 @@ object SettingsStore {
     private const val KEY_SEND_ENABLED = "send_enabled"
     /** [Config.sendExtractionFailedEnabled]のキー */
     private const val KEY_SEND_EXTRACTION_FAILED_ENABLED = "send_extraction_failed_enabled"
-    /** [Config.sendExtractionExcludedEnabled]のキー */
-    private const val KEY_SEND_EXTRACTION_EXCLUDED_ENABLED = "send_extraction_excluded_enabled"
+    /** [Config.sendExtractionContinuedEnabled]のキー */
+    private const val KEY_SEND_EXTRACTION_CONTINUED_ENABLED = "send_extraction_continued_enabled"
     /** [Config.searchExtractionFailedEnabled]のキー */
     private const val KEY_SEARCH_EXTRACTION_FAILED_ENABLED = "search_extraction_failed_enabled"
-    /** [Config.searchExtractionExcludedEnabled]のキー */
-    private const val KEY_SEARCH_EXTRACTION_EXCLUDED_ENABLED = "search_extraction_excluded_enabled"
+    /** [Config.searchExtractionContinuedEnabled]のキー */
+    private const val KEY_SEARCH_EXTRACTION_CONTINUED_ENABLED = "search_extraction_continued_enabled"
     /** [Config.searchSendTargetUnconfiguredEnabled]のキー */
     private const val KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED = "search_send_target_unconfigured_enabled"
     /** [Config.autoReplyExtractionFailedEnabled]のキー */
@@ -62,8 +62,8 @@ object SettingsStore {
     private const val KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED = "default_extraction_failed_only_enabled"
     /** [Config.defaultExtractionSucceededOnlyEnabled]のキー */
     private const val KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED = "default_extraction_succeeded_only_enabled"
-    /** [Config.defaultExtractionExcludedOnlyEnabled]のキー */
-    private const val KEY_DEFAULT_EXTRACTION_EXCLUDED_ONLY_ENABLED = "default_extraction_excluded_only_enabled"
+    /** [Config.defaultExtractionContinuedOnlyEnabled]のキー */
+    private const val KEY_DEFAULT_EXTRACTION_CONTINUED_ONLY_ENABLED = "default_extraction_continued_only_enabled"
     /** [Config.defaultSentAutoOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
     /** [Config.defaultSentManualOnlyEnabled]のキー */
@@ -136,7 +136,7 @@ object SettingsStore {
 
     /**
      * 継続SMS（[SmsResolution.isContinuation]）の引き継ぎを、送信元ごとにどこまで遡って有効とするか。
-     * [UNLIMITED]は日付を問わず過去に一度でも形式正常なSMSがあれば常に引き継ぐ。[SAME_DAY]は
+     * [UNLIMITED]は日付を問わず過去に一度でも抽出状況が正常なSMSがあれば常に引き継ぐ。[SAME_DAY]は
      * 引き継ぎ元のSMSと暦日が同じ場合のみ有効とし、日付が変わると引き継ぎがリセットされる
      */
     enum class ContinuationScope {
@@ -155,17 +155,17 @@ object SettingsStore {
     data class Config(
         /** trueなら自動送信モード、falseなら手動送信モード（[KintoneUploadWorker]が参照） */
         val sendEnabled: Boolean,
-        /** 自動送信時、本文の形式が異常なSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか */
+        /** 自動送信時、本文の抽出状況が異常なSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか */
         val sendExtractionFailedEnabled: Boolean,
-        /** 自動送信時、形式が除外（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか */
-        val sendExtractionExcludedEnabled: Boolean,
-        /** SMS検索画面で、本文の形式が異常なSMSを選択可能にするかどうか */
+        /** 自動送信時、抽出状況が継続（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか */
+        val sendExtractionContinuedEnabled: Boolean,
+        /** SMS検索画面で、本文の抽出状況が異常なSMSを選択可能にするかどうか */
         val searchExtractionFailedEnabled: Boolean,
-        /** SMS検索画面で、形式が除外（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか */
-        val searchExtractionExcludedEnabled: Boolean,
+        /** SMS検索画面で、抽出状況が継続（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか */
+        val searchExtractionContinuedEnabled: Boolean,
         /** SMS検索画面で、送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
         val searchSendTargetUnconfiguredEnabled: Boolean,
-        /** 自動受信時、本文の形式が異常なSMSに対して[extractionFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
+        /** 自動受信時、本文の抽出状況が異常なSMSに対して[extractionFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
         val autoReplyExtractionFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
         val autoReplyCooldownSeconds: Int,
@@ -206,12 +206,12 @@ object SettingsStore {
         val aiExtractionEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
         val defaultSendNoneOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「形式」の「異常」チェックボックスを初期状態でONにするかどうか */
+        /** SMS検索画面を開いた際に「抽出状況」の「異常」チェックボックスを初期状態でONにするかどうか */
         val defaultExtractionFailedOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「形式」の「正常」チェックボックスを初期状態でONにするかどうか */
+        /** SMS検索画面を開いた際に「抽出状況」の「正常」チェックボックスを初期状態でONにするかどうか */
         val defaultExtractionSucceededOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「形式」の「除外」チェックボックスを初期状態でONにするかどうか */
-        val defaultExtractionExcludedOnlyEnabled: Boolean,
+        /** SMS検索画面を開いた際に「抽出状況」の「継続」チェックボックスを初期状態でONにするかどうか */
+        val defaultExtractionContinuedOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（自動）」チェックボックスを初期状態でONにするかどうか */
         val defaultSentAutoOnlyEnabled: Boolean,
         /** SMS検索画面を開いた際に「送信」の「済（手動）」チェックボックスを初期状態でONにするかどうか */
@@ -343,9 +343,9 @@ object SettingsStore {
         val editor = prefs(context).edit()
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
             .putBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, config.sendExtractionFailedEnabled)
-            .putBoolean(KEY_SEND_EXTRACTION_EXCLUDED_ENABLED, config.sendExtractionExcludedEnabled)
+            .putBoolean(KEY_SEND_EXTRACTION_CONTINUED_ENABLED, config.sendExtractionContinuedEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, config.searchExtractionFailedEnabled)
-            .putBoolean(KEY_SEARCH_EXTRACTION_EXCLUDED_ENABLED, config.searchExtractionExcludedEnabled)
+            .putBoolean(KEY_SEARCH_EXTRACTION_CONTINUED_ENABLED, config.searchExtractionContinuedEnabled)
             .putBoolean(KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED, config.searchSendTargetUnconfiguredEnabled)
             .putBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, config.autoReplyExtractionFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
@@ -365,7 +365,7 @@ object SettingsStore {
             .putBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, config.defaultSendNoneOnlyEnabled)
             .putBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, config.defaultExtractionFailedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, config.defaultExtractionSucceededOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_EXTRACTION_EXCLUDED_ONLY_ENABLED, config.defaultExtractionExcludedOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_EXTRACTION_CONTINUED_ONLY_ENABLED, config.defaultExtractionContinuedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
         if (config.defaultSendTargetFilterId != null) {
@@ -383,9 +383,9 @@ object SettingsStore {
     private val DEFAULT_CONFIG = Config(
         sendEnabled = true,
         sendExtractionFailedEnabled = false,
-        sendExtractionExcludedEnabled = true,
+        sendExtractionContinuedEnabled = true,
         searchExtractionFailedEnabled = false,
-        searchExtractionExcludedEnabled = true,
+        searchExtractionContinuedEnabled = true,
         searchSendTargetUnconfiguredEnabled = false,
         autoReplyExtractionFailedEnabled = false,
         autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
@@ -406,7 +406,7 @@ object SettingsStore {
         defaultSendNoneOnlyEnabled = false,
         defaultExtractionFailedOnlyEnabled = false,
         defaultExtractionSucceededOnlyEnabled = false,
-        defaultExtractionExcludedOnlyEnabled = false,
+        defaultExtractionContinuedOnlyEnabled = false,
         defaultSentAutoOnlyEnabled = false,
         defaultSentManualOnlyEnabled = false
     )
@@ -417,9 +417,9 @@ object SettingsStore {
         return Config(
             sendEnabled = p.getBoolean(KEY_SEND_ENABLED, DEFAULT_CONFIG.sendEnabled),
             sendExtractionFailedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.sendExtractionFailedEnabled),
-            sendExtractionExcludedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_EXCLUDED_ENABLED, DEFAULT_CONFIG.sendExtractionExcludedEnabled),
+            sendExtractionContinuedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_CONTINUED_ENABLED, DEFAULT_CONFIG.sendExtractionContinuedEnabled),
             searchExtractionFailedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.searchExtractionFailedEnabled),
-            searchExtractionExcludedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_EXCLUDED_ENABLED, DEFAULT_CONFIG.searchExtractionExcludedEnabled),
+            searchExtractionContinuedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_CONTINUED_ENABLED, DEFAULT_CONFIG.searchExtractionContinuedEnabled),
             searchSendTargetUnconfiguredEnabled = p.getBoolean(
                 KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED,
                 DEFAULT_CONFIG.searchSendTargetUnconfiguredEnabled
@@ -444,7 +444,7 @@ object SettingsStore {
             defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
             defaultExtractionFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionFailedOnlyEnabled),
             defaultExtractionSucceededOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionSucceededOnlyEnabled),
-            defaultExtractionExcludedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_EXCLUDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionExcludedOnlyEnabled),
+            defaultExtractionContinuedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_CONTINUED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionContinuedOnlyEnabled),
             defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
             defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
         )
@@ -579,9 +579,9 @@ object SettingsStore {
         /** 本文から抽出した会社名・氏名、および本文全体 */
         val smsParts: SmsParts,
         /**
-         * 同一送信元が過去に一度でも形式正常なSMSを送っていたため、その直近1件から会社名・氏名と
+         * 同一送信元が過去に一度でも抽出状況が正常なSMSを送っていたため、その直近1件から会社名・氏名と
          * 送信先を引き継いだ結果かどうか。今回の本文自体が単独で解析できるかどうかは問わない。
-         * trueの場合、形式・送信先のアイコン表示は通常の⭕/❌・📍/🚫ではなく専用のアイコンに切り替える
+         * trueの場合、抽出・送信先のアイコン表示は通常の⭕/❌・📍/🚫ではなく専用のアイコンに切り替える
          */
         val isContinuation: Boolean = false
     )
@@ -591,9 +591,9 @@ object SettingsStore {
      * 送信先判定の両方が必要な箇所（kintone登録・受信ログ記録・SMS検索画面・テスト送信など）は、
      * 抽出方法（ルールベース／AI）のずれで登録内容と振り分け結果が食い違わないよう必ずこれを使うこと。
      *
-     * [continuationEnabled]がtrueの場合、[sender]と同じ送信元から過去に一度でも形式正常なSMS
+     * [continuationEnabled]がtrueの場合、[sender]と同じ送信元から過去に一度でも抽出状況が正常なSMS
      * （[ContinuationStore]、[continuationScope]が[ContinuationScope.UNLIMITED]なら日付は問わない）
-     * が届いていれば、今回のSMS自体の形式（本文単体で解析できるかどうか）に関わらず、常にその直近1件
+     * が届いていれば、今回のSMS自体の抽出結果（本文単体で解析できるかどうか）に関わらず、常にその直近1件
      * から会社名・氏名を引き継ぐ（内容は今回の本文そのもの）。送信先はその会社名を現在の送信先
      * ルールに通して都度判定する（[findSendTargetsForContinuation]）ため、送信先の設定を変更・削除
      * すれば継続SMSの振り分け先にも即座に反映される。一度識別できた送信元は[continuationScope]の
@@ -601,7 +601,7 @@ object SettingsStore {
      * [continuationEnabled]がfalse、または該当する過去のSMSが無い送信元は、今回の本文を実際に
      * 解析して振り分ける。この関数自体は[ContinuationStore]を更新しない（SMS検索画面のプレビュー表示
      * など、実際の受信・送信を伴わない呼び出しからも使われるため）。実際に受信・送信を処理する側
-     * （[SmsReceiver]・[KintoneUploadWorker]）が、形式正常だった場合にのみ更新すること
+     * （[SmsReceiver]・[KintoneUploadWorker]）が、抽出状況が正常だった場合にのみ更新すること
      */
     suspend fun resolveSendTargets(
         context: Context,

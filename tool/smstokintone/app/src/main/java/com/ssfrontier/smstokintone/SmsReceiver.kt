@@ -66,7 +66,7 @@ class SmsReceiver : BroadcastReceiver() {
                 // 空になり、送信先名は「なし」扱いになる（実際の登録も行われない）
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
 
-                // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析
+                // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で抽出状況が正常に解析
                 // できた場合のみ更新する。KintoneUploadWorker側でも同じ条件で更新している
                 if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
                     ContinuationStore.update(

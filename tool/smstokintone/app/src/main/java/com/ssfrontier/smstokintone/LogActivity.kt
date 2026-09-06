@@ -112,7 +112,7 @@ class LogActivity : AppCompatActivity() {
                     entry.smsParts?.let { smsParts ->
                         append(" ")
                         val extractionIcon = when {
-                            entry.isContinuation -> R.string.icon_extraction_excluded
+                            entry.isContinuation -> R.string.icon_extraction_continued
                             smsParts.isExtractionFailed() -> R.string.icon_extraction_failed
                             else -> R.string.icon_extraction_succeeded
                         }

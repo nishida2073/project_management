@@ -107,7 +107,7 @@ class SmsSearchActivity : AppCompatActivity() {
         binding.cbSentManualOnly.isChecked = config.defaultSentManualOnlyEnabled
         binding.cbExtractionFailedOnly.isChecked = config.defaultExtractionFailedOnlyEnabled
         binding.cbExtractionSucceededOnly.isChecked = config.defaultExtractionSucceededOnlyEnabled
-        binding.cbExtractionExcludedOnly.isChecked = config.defaultExtractionExcludedOnlyEnabled
+        binding.cbExtractionContinuedOnly.isChecked = config.defaultExtractionContinuedOnlyEnabled
     }
 
     /**
@@ -312,12 +312,12 @@ class SmsSearchActivity : AppCompatActivity() {
                 }
             }
 
-            if (binding.cbExtractionFailedOnly.isChecked || binding.cbExtractionSucceededOnly.isChecked || binding.cbExtractionExcludedOnly.isChecked) {
+            if (binding.cbExtractionFailedOnly.isChecked || binding.cbExtractionSucceededOnly.isChecked || binding.cbExtractionContinuedOnly.isChecked) {
                 val matchedExtractionStatusRecords = mutableListOf<SmsRecord>()
                 for (record in records) {
                     val (resolution, _) = resolveSendTargetCached(record, config)
                     val matchesFilter = when {
-                        resolution.isContinuation -> binding.cbExtractionExcludedOnly.isChecked
+                        resolution.isContinuation -> binding.cbExtractionContinuedOnly.isChecked
                         resolution.smsParts.isExtractionFailed() -> binding.cbExtractionFailedOnly.isChecked
                         else -> binding.cbExtractionSucceededOnly.isChecked
                     }
@@ -407,7 +407,7 @@ class SmsSearchActivity : AppCompatActivity() {
             val isExtractionFailedBody = resolution.smsParts.isExtractionFailed()
             val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
                 (!isExtractionFailedBody || config.searchExtractionFailedEnabled) &&
-                (!resolution.isContinuation || config.searchExtractionExcludedEnabled)
+                (!resolution.isContinuation || config.searchExtractionContinuedEnabled)
             val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
             val sendTargetIcon = getString(
                 when {
@@ -430,7 +430,7 @@ class SmsSearchActivity : AppCompatActivity() {
             val textView = TextView(this).apply {
                 text = buildSpannedString {
                     val extractionIcon = when {
-                        resolution.isContinuation -> R.string.icon_extraction_excluded
+                        resolution.isContinuation -> R.string.icon_extraction_continued
                         isExtractionFailedBody -> R.string.icon_extraction_failed
                         else -> R.string.icon_extraction_succeeded
                     }

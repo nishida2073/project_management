@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * SmsReceiverや手動再送UIから渡されたSMS情報をkintoneへ登録するCoroutineWorker。
- * 送信可否・抽出失敗判定・登録結果はいずれもSmsLogStoreへログとして記録する。形式正常だった場合は
+ * 送信可否・抽出失敗判定・登録結果はいずれもSmsLogStoreへログとして記録する。抽出状況が正常だった場合は
  * ContinuationStoreも更新し、以降の継続SMSの引き継ぎに使えるようにする。
  */
 class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
@@ -30,7 +30,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val smsParts = resolution.smsParts
         val validSendTargets = sendTargets.filter { it.isValid }
 
-        // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で形式正常に解析できた
+        // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で抽出状況が正常に解析できた
         // 場合のみ更新する。SmsReceiver側でも同じ条件で更新しており、手動送信のみで運用している場合
         // （SmsReceiverが動かない場合）でもここで送信元情報を残せるようにする
         if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
@@ -72,8 +72,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 continue
             }
 
-            if (!manual && resolution.isContinuation && !config.sendExtractionExcludedEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_excluded_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+            if (!manual && resolution.isContinuation && !config.sendExtractionContinuedEnabled) {
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_continued_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
                 continue
             }
 

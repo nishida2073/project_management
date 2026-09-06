@@ -7,7 +7,7 @@ import java.util.Calendar
 
 /**
  * 継続SMS（[SettingsStore.SmsResolution.isContinuation]）の引き継ぎに使う、送信元ごとの最新の
- * 形式正常なSMSの抽出結果を保持する専用のストア。SmsLogStore（全履歴のログ）とは別ファイルで
+ * 抽出状況が正常なSMSの抽出結果を保持する専用のストア。SmsLogStore（全履歴のログ）とは別ファイルで
  * 管理し、ログをクリアしても送信元情報は失われない。送信元ごとに最新1件のみ保持する
  * （継続SMS自体の結果は保存しない。引き継ぎ元と同じ内容の再保存になり意味が無いため）。
  * [SenderInfoActivity]から個別の閲覧・編集・削除もできる。編集画面のように読み込みから保存
@@ -29,7 +29,7 @@ object ContinuationStore {
     private val lock = Any()
 
     /**
-     * 送信元ごとに保持する、最新の形式正常なSMSの抽出結果。送信先は保持しない。継続SMSの送信先は
+     * 送信元ごとに保持する、最新の抽出状況が正常なSMSの抽出結果。送信先は保持しない。継続SMSの送信先は
      * 常にこの会社名を現在の送信先ルールに通して都度判定するため（[SettingsStore.findSendTargetsForContinuation]
      * 参照）、送信先の設定を変更・削除しても送信元情報側の追随作業は不要になる
      */

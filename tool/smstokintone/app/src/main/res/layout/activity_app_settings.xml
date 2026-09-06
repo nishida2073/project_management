@@ -448,12 +448,12 @@
                                 android:text="@string/switch_default_extraction_failed_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultExtractionExcludedOnlyEnabled"
+                                android:id="@+id/cbDefaultExtractionContinuedOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_extraction_excluded_only_enabled" />
+                                android:text="@string/switch_default_extraction_continued_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -516,6 +516,21 @@
                             android:checked="false"
                             android:text="@string/switch_search_send_target_unconfigured_enabled" />
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_search_send_target_unconfigured_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/swSearchExtractionFailedEnabled"
                             android:layout_width="match_parent"
@@ -524,13 +539,43 @@
                             android:checked="false"
                             android:text="@string/switch_search_extraction_failed_enabled" />
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_search_extraction_failed_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
+
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSearchExtractionExcludedEnabled"
+                            android:id="@+id/swSearchExtractionContinuedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_search_extraction_excluded_enabled" />
+                            android:text="@string/switch_search_extraction_continued_enabled" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/helper_search_extraction_continued_enabled"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
@@ -650,12 +695,12 @@
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSendExtractionExcludedEnabled"
+                            android:id="@+id/swSendExtractionContinuedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_send_extraction_excluded_enabled" />
+                            android:text="@string/switch_send_extraction_continued_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -667,7 +712,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_send_extraction_excluded_enabled"
+                                android:text="@string/helper_send_extraction_continued_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
