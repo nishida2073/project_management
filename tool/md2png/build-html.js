@@ -68,6 +68,7 @@ function buildHtml(mdPath) {
   strong { color: #2b5f73; }
   .mermaid { text-align: center; margin: 1rem 0; break-inside: avoid; }
   h2, h3, h4 { break-after: avoid; }
+  img { vertical-align: top; }
 </style>
 </head>
 <body>
