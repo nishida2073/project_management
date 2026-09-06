@@ -59,15 +59,15 @@ function buildHtml(mdPath) {
     background: #ffffff;
     line-height: 1.8;
   }
-  h1 { font-size: 1.8rem; }
-  h2 { font-size: 1.4rem; margin-top: 2.5rem; border-bottom: 1px solid #d3d9df; padding-bottom: 0.3rem; break-before: page; }
-  h3 { font-size: 1.1rem; margin-top: 1.8rem; color: #2b5f73; }
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.8rem; margin-top: 2.5rem; border-bottom: 1px solid #d3d9df; padding-bottom: 0.3rem; break-before: page; }
+  h3 { font-size: 1.45rem; margin-top: 1.8rem; color: #2b5f73; }
+  h4 { font-size: 1.2rem; margin-top: 1.4rem; color: #2b5f73; }
   hr { border: none; border-top: 1px solid #d3d9df; margin: 2rem 0; }
-  ul { padding-left: 1.4rem; }
   li { margin-bottom: 0.3rem; }
   strong { color: #2b5f73; }
   .mermaid { text-align: center; margin: 1rem 0; break-inside: avoid; }
-  h2, h3 { break-after: avoid; }
+  h2, h3, h4 { break-after: avoid; }
 </style>
 </head>
 <body>
