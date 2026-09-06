@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/course_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=course" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>コース編集</h2>
+          <div class="sub">BC02B　システム開発入門の情報を編集します</div>
+        </div>
+        <a class="close-x" href="course_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-section">科目</div>
+        <div class="form-field">
+          <label>科目名<span class="req">必須</span></label>
+          <div class="form-control js-select" id="subjectSelect" data-options="システム開発入門,基盤技術基礎,AP要件定義基礎,AP設計・製造基礎,AP試験基礎,データモデル設計基礎,基盤構築プロセス基礎,営業基本Ⅰ,営業リスクマネジメントⅠ,IT-PM入門,品質管理入門,システム基盤実践" data-target="#subjectVersionSelect" data-options-map='{"システム開発入門":["1.0","1.1"],"基盤技術基礎":["1.0","1.1"],"AP要件定義基礎":["1.0","1.1"],"AP設計・製造基礎":["1.0","1.1"],"AP試験基礎":["1.0","1.1"],"データモデル設計基礎":["1.0","1.1"],"基盤構築プロセス基礎":["1.0","1.1"],"営業基本Ⅰ":["1.0","1.1"],"営業リスクマネジメントⅠ":["1.0","1.1"],"IT-PM入門":["1.0","1.1"],"品質管理入門":["1.0","1.1"],"システム基盤実践":["1.0","1.1"]}' data-target2="#subjectCode" data-map2='{"システム開発入門":"SBJ-001","基盤技術基礎":"SBJ-002","AP要件定義基礎":"SBJ-003","AP設計・製造基礎":"SBJ-004","AP試験基礎":"SBJ-005","データモデル設計基礎":"SBJ-006","基盤構築プロセス基礎":"SBJ-007","営業基本Ⅰ":"SBJ-008","営業リスクマネジメントⅠ":"SBJ-009","IT-PM入門":"SBJ-010","品質管理入門":"SBJ-011","システム基盤実践":"SBJ-012"}' data-target3="#subjectType" data-map3='{"システム開発入門":"新入社員研修","基盤技術基礎":"新CDPB","AP要件定義基礎":"新CDPB","AP設計・製造基礎":"新CDPB","AP試験基礎":"新CDPB","データモデル設計基礎":"新CDPB","基盤構築プロセス基礎":"新CDPB","営業基本Ⅰ":"旧CDPB","営業リスクマネジメントⅠ":"旧CDPB","IT-PM入門":"新CDPB","品質管理入門":"新CDPB","システム基盤実践":"新CDPB"}' data-class-map3='{"新CDPB":"blue","旧CDPB":"gray","新入社員研修":"orange"}'>システム開発入門<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>版<span class="req">必須</span></label>
+          <div class="form-control js-select" id="subjectVersionSelect" data-options="1.0,1.1">1.0<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>科目情報</label>
+          <div class="form-value">
+            <span id="subjectCode">SBJ-001</span>
+            <span class="tag orange" id="subjectType">新入社員研修</span>
+          </div>
+        </div>
+        <div class="form-section">コース</div>
+        <div class="form-field full">
+          <label>年度<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="2024年度,2025年度,2026年度,2027年度">2026年度<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>コースコード<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="BC02B">
+        </div>
+        <div class="form-field">
+          <label>参加区分</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="participationType" value="公募"><span class="radio-dot"></span><span class="tag orange">公募</span></label>
+            <label class="radio-option"><input type="radio" name="participationType" value="受託" checked><span class="radio-dot"></span><span class="tag blue">受託</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>コース名<span class="req">必須</span></label>
+          <input type="text" class="form-control" id="courseName" value="受託_システム開発入門">
+        </div>
+        <div class="form-section">推奨設定</div>
+        <div class="form-field full">
+          <label>実施形態</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="deliveryType" value="集合" checked><span class="radio-dot"></span><span class="tag onsite">集合</span></label>
+            <label class="radio-option"><input type="radio" name="deliveryType" value="オンライン"><span class="radio-dot"></span><span class="tag online">オンライン</span></label>
+            <label class="radio-option"><input type="radio" name="deliveryType" value="ハイブリッド"><span class="radio-dot"></span><span class="tag hybrid">ハイブリッド</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>日数</label>
+          <div class="form-control number-select" data-options="1,2,3,4,5">
+            <input type="text" inputmode="numeric" value="3">
+            <span class="caret">▾</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>最小人数</label>
+          <div class="form-control number-select" data-options="10,15,20,24,30,35,40,50">
+            <input type="text" inputmode="numeric" value="20">
+            <span class="caret">▾</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>最大人数</label>
+          <div class="form-control number-select" data-options="10,15,20,24,30,35,40,50">
+            <input type="text" inputmode="numeric" value="24">
+            <span class="caret">▾</span>
+          </div>
+        </div>
+        <div class="form-section">予定</div>
+        <div class="form-field full">
+          <label>クラス数（月別）</label>
+          <div class="month-grid">
+            <div class="month-cell"><span class="month-label">4月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">5月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">6月<span class="current-count">（現在：1）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="1"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">7月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">8月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">9月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">10月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="1"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">11月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">12月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">1月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">2月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+            <div class="month-cell"><span class="month-label">3月<span class="current-count">（現在：0）</span></span><div class="form-control number-select sm" data-options="0,1,2,3,4,5"><input type="text" inputmode="numeric" value="0"><span class="caret">▾</span></div></div>
+          </div>
+          <div class="annual-summary">
+            <label>クラス数（年間）</label>
+            <div class="form-value" id="annualClassCount">2クラス</div>
+          </div>
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="course_list.html">キャンセル</a>
+        <a class="btn primary" href="course_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/number-select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var subjectEl = document.getElementById('subjectSelect');
+  var courseNameEl = document.getElementById('courseName');
+  var courseNameEdited = false;
+  courseNameEl.addEventListener('input', function () { courseNameEdited = true; });
+  function updateCourseName() {
+    if (courseNameEdited) return;
+    var participationRadio = document.querySelector('input[name="participationType"]:checked');
+    var participation = participationRadio ? participationRadio.value : '';
+    var subject = subjectEl.getAttribute('data-value') || '';
+    courseNameEl.value = (participation && subject) ? (participation + '_' + subject) : '';
+  }
+  document.querySelectorAll('input[name="participationType"]').forEach(function (r) { r.addEventListener('change', updateCourseName); });
+  new MutationObserver(updateCourseName).observe(subjectEl, { attributes: true, attributeFilter: ['data-value'] });
+
+  var monthGrid = document.querySelector('.month-grid');
+  var annualCountEl = document.getElementById('annualClassCount');
+  if (monthGrid && annualCountEl) {
+    function updateAnnualCount() {
+      var total = 0;
+      monthGrid.querySelectorAll('input').forEach(function (input) {
+        total += parseInt(input.value, 10) || 0;
+      });
+      annualCountEl.textContent = total + 'クラス';
+    }
+    monthGrid.addEventListener('input', updateAnnualCount);
+    document.addEventListener('click', function () { setTimeout(updateAnnualCount, 0); }, true);
+    updateAnnualCount();
+  }
+});
+</script>
+</body>
+</html>

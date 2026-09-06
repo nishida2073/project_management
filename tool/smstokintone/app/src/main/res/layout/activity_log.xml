@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="@string/btn_refresh_log" />
+            android:text="@string/btn_refresh" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnClearLog"
@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/btn_clear_log" />
+            android:text="@string/btn_clear" />
     </LinearLayout>
 
     <TextView

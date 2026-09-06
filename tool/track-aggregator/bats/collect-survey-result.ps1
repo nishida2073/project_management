@@ -1,20 +1,21 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$TemplateFilePath,
     [string]$SurveyResultRootDir,
-    [string]$OutputFileSuffix = "アンケート結果"
+    [string]$OutputFileSuffix = "アンケート結果",
+    [string]$LogNamePrefix
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
-Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
-    Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
 }
 
-$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-survey-result' })-$TargetGroupName"
 
 function Create-CollectResultsDatas {
     param(
@@ -131,7 +132,6 @@ function Export-UserPlainData {
         $rowData += ""
         $rowData += ""
         $rowData += ""
-        $rowData += ""
         foreach ($pickedSurveyItem in $pickedSurveyItems) {
             $exists = $targetTotalSummarySurveyResultData | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
             if ($exists) {
@@ -154,12 +154,6 @@ function Export-UserPlainData {
             $rowData += $targetUserData.companyName
             $rowData += $targetUserData.className
             $rowData += $targetUserData.rankName
-            if ($targetPlainSurveyResultData.isExecute){
-                $rowData += ""
-            } else {
-                $userUrl = "$BaseUrl/k/#/people/user/$($targetUserData.userCode)"
-                $rowData += '=HYPERLINK("' + $userUrl + '","督促")'
-            }
             $targetSurveyResult = $targetPlainSurveyResultData.surveyResult
             foreach ($pickedSurveyItem in $pickedSurveyItems) {
                 $exists = $targetSurveyResult.PSObject.Properties[$pickedSurveyItem]
@@ -393,23 +387,28 @@ function Export-Excel {
 }
 
 
-$userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
-# Write-Message $userDatas -VarName "userDatas" -Type "Info"
+& {
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
+    # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
-$surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
-$surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-# Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
+    $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
+    $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-$surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
-# Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info" 
+    # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
 
-$collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
-# Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info" 
+    $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+    # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info"
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+    $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
+    # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
 
-Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
+    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+
+    Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

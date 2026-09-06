@@ -4,12 +4,6 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~nx0"
 
-pushd "%~dp0"
-
-set "LOG_DIR=.\logs"
-
-if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
-
 if "%~1"=="" (
     for /f %%i in ('powershell -NoProfile -Command "(Get-Date).AddDays(-1).ToString(\"yyyy-MM-dd\")"') do set "TargetDate=%%i"
 ) else if /i "%~1"=="now" (
@@ -32,15 +26,15 @@ set /a Start=%TargetDateTerm%-1
 for /l %%i in (%Start%,-1,0) do (
     for /f %%d in ('powershell -NoProfile -Command "(Get-Date \"%TargetDate%\").AddDays(-%%i).ToString(\"yyyy-MM-dd\")"') do (
         for %%F in (
-            ".\bats\collect-app-data.bat"
+            "%~dp0bats\collect-app-data.bat"
         ) do (
-            call ".\bats\message.bat" "Start %%~nxF {%%d}"
+            call "%~dp0bats\message.bat" "Start %%~nxF {%%d}"
             
-            call ".\bats\message.bat" "Please wait..." "Green"
+            call "%~dp0bats\message.bat" "Please wait..." "Green"
             
-            call "%%F" "%%d" "%~3" > "%LOG_DIR%\%%~nF-%%d.log"
+            call %%F "%%d" "%~3"
             
-            call ".\bats\message.bat" "Finished %%~nxF {%%d}"
+            call "%~dp0bats\message.bat" "Finished %%~nxF {%%d}"
         )
     )
 )

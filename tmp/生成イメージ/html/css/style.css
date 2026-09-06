@@ -1,0 +1,309 @@
+/* ==========================================================
+   共通スタイル（全モックアップ共通）
+   ページ固有のスタイルは各 *.css を参照
+   ========================================================== */
+
+/* Reset & base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1680px; font-family: "Yu Gothic UI", "Meiryo", "Segoe UI", sans-serif; background: #eef1f5; color: #22262b; }
+
+/* App shell */
+.app { display: flex; width: 1680px; min-height: 1040px; }
+
+/* Sidebar */
+.sidebar { width: 220px; background: #1c2b45; color: #cdd7ea; padding: 0 0 20px 0; flex-shrink: 0; }
+.sidebar .logo { padding: 22px 20px; font-size: 16px; font-weight: 700; color: #ffffff; border-bottom: 1px solid #2c3e5c; letter-spacing: 0.5px; }
+.sidebar .logo span { display: block; font-size: 11px; font-weight: 400; color: #8fa2c4; margin-top: 4px; }
+.nav-group-title { font-size: 14px; font-weight: 700; color: #6f83a8; padding: 14px 20px 6px; }
+.nav-item { padding: 8px 20px 8px 28px; font-size: 14px; display: flex; align-items: center; gap: 10px; color: #b7c4dd; cursor: default; border-left: 3px solid transparent; text-decoration: none; }
+a.nav-item { cursor: pointer; }
+.nav-item.active { background: #26385a; color: #ffffff; border-left: 3px solid #4f8cff; font-weight: 700; }
+.nav-item.disabled { color: #5c6c8a; }
+
+/* Main column */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { min-height: 64px; background: #ffffff; border-bottom: 1px solid #dde3ec; display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; }
+.topbar .crumb { font-size: 20px; font-weight: 700; color: #40485a; }
+.topbar .crumb span { color: #9aa4b5; font-weight: 400; margin: 0 6px; }
+.topbar .crumb-sub { font-size: 12.5px; color: #7c8598; margin-top: 4px; }
+.topbar .user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4a5164; margin-left: auto; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #4f8cff; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+/* Master category sub-nav */
+.body-area { flex: 1; display: flex; min-width: 0; }
+.subnav { width: 210px; background: #ffffff; border-right: 1px solid #e2e7ef; flex-shrink: 0; padding: 18px 0; overflow-y: auto; }
+.subnav .group-title { font-size: 11px; color: #9aa4b5; font-weight: 700; padding: 10px 20px 6px; letter-spacing: 0.5px; }
+.subnav .m-item { padding: 8px 20px; font-size: 12.5px; color: #4a5164; border-left: 3px solid transparent; cursor: default; }
+.subnav .m-item.active { background: #eef4ff; color: #2f6fed; font-weight: 700; border-left: 3px solid #2f6fed; }
+
+/* Content area */
+.content { flex: 1; padding: 24px 28px 40px; min-width: 0; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.toolbar h1 { font-size: 20px; font-weight: 700; }
+.toolbar .left h1 { font-size: 20px; font-weight: 700; }
+.toolbar .left p { font-size: 12.5px; color: #7c8598; margin-top: 4px; }
+.btn-group { display: flex; gap: 10px; align-items: center; }
+.btn { padding: 9px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 1px solid #d3d9e3; background: #ffffff; color: #40485a; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: default; text-decoration: none; }
+.btn.primary { background: #2f6fed; border-color: #2f6fed; color: #ffffff; }
+a.btn { cursor: pointer; }
+.btn.icon { font-size: 14px; }
+
+/* 遅延のみ表示トグル（コンテナ部分。丸スイッチ本体はページ固有CSS） */
+.toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #40485a; font-weight: 700; background: #fff; border: 1px solid #d3d9e3; border-radius: 6px; padding: 7px 12px; }
+
+/* Filter panel */
+.filter-panel { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 11.5px; color: #6c7688; font-weight: 700; }
+.field .control { height: 34px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 10px; font-size: 13px; color: #333c4d; display: flex; align-items: center; min-width: 130px; }
+.field .control.wide { min-width: 220px; }
+.field .control.small { min-width: 100px; }
+.field .control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
+input.field-control-input { height: 34px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 10px; font-size: 13px; color: #333c4d; min-width: 220px; outline: none; font-family: inherit; }
+input.field-control-input::placeholder { color: #9aa4b5; }
+input.field-control-input:focus { border-color: #2f6fed; }
+.search-btn { height: 34px; padding: 0 22px; background: #1c2b45; color: white; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
+.tilde { align-self: flex-end; height: 34px; display: flex; align-items: center; color: #9aa4b5; }
+
+/* 年度バー・年度コピー注記（ベンダーマスタ系） */
+.year-bar { display: flex; align-items: center; gap: 10px; background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 10px 16px; margin-bottom: 18px; }
+.year-bar .label { font-size: 12px; color: #7c8598; font-weight: 700; margin-right: 4px; }
+.year-tab { padding: 7px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 700; color: #7c8598; background: #f2f4f8; }
+.year-tab.active { background: #1c2b45; color: #ffffff; }
+.year-tab.add { color: #2f6fed; background: #eef4ff; }
+.year-bar .note { margin-left: auto; font-size: 11.5px; color: #9aa4b5; }
+.copy-hint { display: flex; align-items: center; gap: 8px; background: #fff9ec; border: 1px solid #f3e3b8; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; font-size: 12px; color: #8a6d1f; }
+.copy-hint b { color: #6b5314; }
+.info-note { display: flex; align-items: center; gap: 8px; background: #f6f8fb; border: 1px solid #e6eaf1; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; font-size: 12px; color: #7c8598; }
+.info-note b { color: #4a5164; }
+
+/* Table card */
+.table-card { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; overflow: hidden; }
+.table-meta { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-bottom: 1px solid #eef1f6; font-size: 12.5px; color: #6c7688; }
+.table-meta .count b { color: #1c2b45; font-size: 14px; }
+.table-meta .hint { color: #9aa4b5; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+thead th { background: #f6f8fb; color: #5a6376; text-align: left; padding: 10px 12px; font-weight: 700; border-bottom: 1px solid #e6eaf1; white-space: nowrap; }
+tbody td { padding: 11px 12px; border-bottom: 1px solid #eef1f6; color: #333c4d; white-space: nowrap; }
+tbody tr:hover { background: #f8faff; }
+th.grp-basic { background: #eef4ff !important; color: #2f6fed !important; text-align: center; border-bottom: 1px solid #d7e3fb !important; }
+th.grp-year { background: #fff6e9 !important; color: #b3791a !important; text-align: center; border-bottom: 1px solid #f3e3c0 !important; }
+th.grp-none { background: #f6f8fb !important; }
+
+/* タグ・区分バッジ */
+.tag { display: inline-block; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+.tag.blue { background: #e7f0ff; color: #2f6fed; }
+.tag.orange { background: #fff2e2; color: #d97c1e; }
+.tag.gray { background: #eef0f4; color: #7c8598; }
+.tag.pm { background: #e7f0ff; color: #2f6fed; }
+.tag.pl { background: #fff2e2; color: #d97c1e; }
+.tag.sales { background: #f0e9ff; color: #7c4de0; }
+.tag.ops { background: #e5f6ec; color: #279158; }
+.tag.mgmt { background: #eef0ff; color: #4c51bf; }
+.tag.exec { background: #e3f6f5; color: #0e8a86; }
+.tag.anken { background: #eaf7ec; color: #238a4e; }
+.tag.class { background: #f5eaf7; color: #8a3f96; }
+.tag.onsite { background: #e7f0ff; color: #2f6fed; }
+.tag.online { background: #e3f6f5; color: #0e8a86; }
+.tag.hybrid { background: #f0e9ff; color: #7c4de0; }
+.tag.green { background: #e5f6ec; color: #279158; }
+
+/* 稼働状況・有効無効（社員／ベンダーマスタ） */
+.state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+.state .dot { width: 8px; height: 8px; border-radius: 50%; }
+.state.on .dot { background: #33b070; }
+.state.on { color: #279158; }
+.state.off .dot { background: #b7bfcc; }
+.state.off { color: #8992a3; }
+
+/* 進捗ステータス（研修一覧） */
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; }
+.status.prep .dot { background: #b7bfcc; }
+.status.prep { color: #6c7688; }
+.status.progress .dot { background: #2f6fed; }
+.status.progress { color: #2f6fed; }
+.status.done .dot { background: #33b070; }
+.status.done { color: #279158; }
+.status.delay .dot { background: #e5484d; }
+.status.delay { color: #d43c40; }
+
+/* リンクボタン・操作列 */
+.row-actions { display: flex; gap: 8px; }
+.link-btn { font-size: 12px; color: #2f6fed; font-weight: 700; padding: 4px 8px; border: 1px solid #d7e3fb; border-radius: 5px; background: #f4f8ff; text-decoration: none; cursor: default; display: inline-block; }
+.link-btn.secondary { color: #6c7688; border-color: #dfe4ec; background: #fafbfd; }
+a.link-btn { cursor: pointer; }
+
+/* ページネーション */
+.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 14px 20px; font-size: 12.5px; color: #6c7688; }
+.page-btn { width: 28px; height: 28px; border: 1px solid #dde3ec; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: #fff; }
+.page-btn.active { background: #1c2b45; color: white; border-color: #1c2b45; font-weight: 700; }
+
+/* 列数が多い一覧表を横スクロール可能にする（sticky列は使わない通常の一覧向け） */
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll table { width: max-content; min-width: 100%; }
+
+/* 横スクロール進捗表（社内／運営進捗一覧） */
+.scroll-outer { overflow-x: auto; max-width: 100%; }
+table.scroll-table, .scroll-outer table { border-collapse: separate; border-spacing: 0; font-size: 12px; width: max-content; }
+.scroll-outer thead th { padding: 9px 12px; border-right: 1px solid #eef1f6; }
+.scroll-outer tbody td { padding: 8px 12px; border-right: 1px solid #f2f4f8; vertical-align: middle; }
+.sticky { position: sticky; background: #ffffff; z-index: 2; }
+thead th.sticky { background: #f6f8fb; z-index: 3; }
+.sticky.shadow { box-shadow: 3px 0 6px -3px rgba(20,30,50,0.15); }
+
+.status-chip { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
+.status-chip .badge-row { display: flex; align-items: center; gap: 6px; }
+.status-chip .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; width: fit-content; }
+.status-chip .dates { display: flex; gap: 12px; font-size: 10.5px; color: #98a1b3; }
+.status-chip .owner { font-size: 10.5px; color: #6c7688; }
+.badge.wait { background: #eef0f4; color: #8992a3; }
+.badge.progress { background: #e7f0ff; color: #2f6fed; }
+.badge.done { background: #e5f6ec; color: #279158; }
+.badge.delay { background: #fdeaea; color: #d43c40; }
+.badge.na { background: #f6f7f9; color: #b7bfcc; border: 1px dashed #dde1e9; }
+
+.overall { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
+.overall .dot { width: 8px; height: 8px; border-radius: 50%; }
+.overall.progress .dot { background: #2f6fed; }
+.overall.progress { color: #2f6fed; }
+.overall.done .dot { background: #33b070; }
+.overall.done { color: #279158; }
+.overall.delay .dot { background: #e5484d; }
+.overall.delay { color: #d43c40; }
+.overall.wait .dot { background: #b7bfcc; }
+.overall.wait { color: #6c7688; }
+
+/* ダイアログ共通（オーバーレイ・モーダル枠） */
+.overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
+.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; height: 80vh; display: flex; flex-direction: column; }
+.modal-body { flex: 1; overflow-y: auto; }
+.modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
+.modal-header h2 { font-size: 18px; font-weight: 700; }
+.modal-header .sub { font-size: 12.5px; color: #7c8598; margin-top: 6px; }
+.close-x { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 16px; border: 1px solid #e6eaf1; text-decoration: none; cursor: default; }
+a.close-x { cursor: pointer; }
+.modal-footer { padding: 16px 28px; border-top: 1px solid #eef1f6; display: flex; justify-content: flex-end; gap: 10px; background: #fafbfd; }
+
+/* タブ付きダイアログ（社内／運営進捗の更新） */
+.tabs { display: flex; gap: 4px; padding: 0 28px; border-bottom: 1px solid #eef1f6; background: #fafbfd; }
+.tab { padding: 12px 18px; font-size: 13px; font-weight: 700; color: #7c8598; border-bottom: 2px solid transparent; }
+.tab.active { color: #2f6fed; border-bottom: 2px solid #2f6fed; }
+.tab .count { display: inline-block; margin-left: 6px; font-size: 10.5px; background: #e7f0ff; color: #2f6fed; padding: 1px 6px; border-radius: 8px; }
+.tab.warn .count { background: #fdeaea; color: #d43c40; }
+
+.step-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.step-table th { text-align: left; color: #7c8598; font-weight: 700; font-size: 11.5px; padding: 8px 10px; border-bottom: 1px solid #eef1f6; background: #f9fafc; position: sticky; top: 0; z-index: 1; }
+.step-table td { padding: 9px 10px; border-bottom: 1px solid #f1f3f8; vertical-align: middle; }
+.step-name { font-weight: 700; color: #333c4d; display: flex; align-items: center; gap: 8px; }
+.step-no { width: 20px; height: 20px; border-radius: 50%; background: #eef1f6; color: #7c8598; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mini-control { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #333c4d; display: flex; align-items: center; min-width: 100px; }
+.mini-control .caret { margin-left: auto; color: #9aa4b5; font-size: 9px; }
+.mini-control.wide { min-width: 150px; }
+.status-select { height: 30px; border-radius: 5px; padding: 0 10px; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 100px; }
+.status-select.done { background: #e5f6ec; color: #279158; }
+.status-select.progress { background: #e7f0ff; color: #2f6fed; }
+.status-select.wait { background: #eef0f4; color: #8992a3; }
+.status-select.delay { background: #fdeaea; color: #d43c40; }
+.status-select.na { background: #f6f7f9; color: #b7bfcc; }
+.status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
+.memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
+
+/* フォームダイアログ（社員／ベンダーマスタ登録） */
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field.full { grid-column: 1 / span 2; }
+.form-section { grid-column: 1 / span 2; font-size: 13px; font-weight: 700; color: #40485a; border-top: 1px solid #e6eaf1; padding-top: 12px; margin-top: 4px; }
+.form-field label { font-size: 12px; color: #5a6376; font-weight: 700; }
+.form-field label .req { color: #e5484d; margin-left: 3px; }
+.form-field label .current-count { color: #9aa4b5; font-weight: 400; margin-left: 6px; }
+
+/* 月別数値入力（予定クラス数など） */
+.month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 12px; }
+.month-cell { display: flex; flex-direction: column; gap: 4px; }
+.month-cell .month-label { font-size: 11px; color: #8992a3; font-weight: 600; }
+.form-control.number-select.sm { height: 30px; padding: 0 6px; font-size: 12px; }
+.annual-summary { margin-top: 14px; }
+.form-control { height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 12px; font-size: 13px; color: #333c4d; display: flex; align-items: center; }
+.form-control.textarea { height: 68px; align-items: flex-start; padding-top: 8px; color: #333c4d; }
+input.form-control, textarea.form-control { width: 100%; outline: none; font-family: inherit; }
+input.form-control:focus, textarea.form-control:focus { border-color: #2f6fed; }
+textarea.form-control.textarea { resize: vertical; display: block; }
+input.form-control::placeholder, textarea.form-control::placeholder { color: #9aa4b5; }
+.form-control.readonly { background: #f1f2f5; color: #9aa4b5; cursor: not-allowed; }
+.form-control .caret { margin-left: auto; color: #9aa4b5; font-size: 10px; }
+
+/* 選択結果を入力欄ではなくラベルのように見せる表示（案件情報／コース情報など） */
+.form-value { min-height: 36px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #1c2b45; padding-left: 12px; }
+
+/* ラジオボタン選択（販売区分など二択項目） */
+.radio-group { display: flex; align-items: center; gap: 24px; height: 36px; }
+.radio-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #333c4d; cursor: pointer; user-select: none; }
+.radio-option input[type="radio"] { position: absolute; width: 0; height: 0; opacity: 0; }
+.radio-option .radio-dot { position: relative; flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #d3d9e3; background: #fbfcfe; transition: border-color .15s; }
+.radio-option .radio-dot::after { content: ''; position: absolute; top: 3px; left: 3px; width: 6px; height: 6px; border-radius: 50%; background: #2f6fed; opacity: 0; transition: opacity .15s; }
+.radio-option input[type="radio"]:checked + .radio-dot { border-color: #2f6fed; }
+.radio-option input[type="radio"]:checked + .radio-dot::after { opacity: 1; }
+
+.js-select { cursor: pointer; position: relative; user-select: none; }
+.js-select .caret { transition: transform .15s; }
+.js-select.open .caret { transform: rotate(180deg); }
+.select-menu { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 1px solid #d3d9e3; border-radius: 6px; box-shadow: 0 8px 20px rgba(10,16,30,0.15); max-height: 220px; overflow-y: auto; z-index: 50; padding: 4px; list-style: none; margin: 0; }
+.select-menu li { padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333c4d; cursor: pointer; }
+.select-menu li:hover { background: #eef4ff; color: #2f6fed; }
+.select-menu li.selected { background: #eef4ff; color: #2f6fed; font-weight: 700; }
+
+.form-control.number-select { position: relative; padding-right: 8px; }
+.form-control.number-select input { border: none; background: transparent; font: inherit; color: inherit; width: 100%; outline: none; padding: 0; }
+.form-control.number-select .caret { cursor: pointer; padding: 4px; margin-left: auto; transition: transform .15s; }
+.form-control.number-select.open .caret { transform: rotate(180deg); }
+
+.js-date, .js-month { cursor: pointer; position: relative; user-select: none; }
+.js-date .caret, .js-month .caret { transition: transform .15s; }
+.js-date.open .caret, .js-month.open .caret { transform: rotate(180deg); }
+.date-picker { position: absolute; top: calc(100% + 4px); left: 0; background: #ffffff; border: 1px solid #d3d9e3; border-radius: 8px; box-shadow: 0 8px 20px rgba(10,16,30,0.15); z-index: 60; padding: 10px; width: 230px; cursor: default; }
+.date-picker .dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #333c4d; }
+.date-picker .dp-nav { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #7c8598; }
+.date-picker .dp-nav:hover { background: #eef4ff; color: #2f6fed; }
+.date-picker .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.date-picker .dp-dow { font-size: 10px; color: #9aa4b5; text-align: center; padding: 4px 0; }
+.date-picker .dp-day { font-size: 12px; text-align: center; padding: 6px 0; border-radius: 5px; cursor: pointer; color: #333c4d; }
+.date-picker .dp-day:hover { background: #eef4ff; color: #2f6fed; }
+.date-picker .dp-day.muted { color: #c3c9d4; }
+.date-picker .dp-day.selected { background: #2f6fed; color: #fff; font-weight: 700; }
+.date-picker.month-picker .dp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.date-picker .dp-month { font-size: 12px; text-align: center; padding: 10px 0; border-radius: 5px; cursor: pointer; color: #333c4d; }
+.date-picker .dp-month:hover { background: #eef4ff; color: #2f6fed; }
+.date-picker .dp-month.selected { background: #2f6fed; color: #fff; font-weight: 700; }
+
+/* 役職チップ選択（社員マスタ登録） */
+.chip-box { min-height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip-box.js-chip-select { position: relative; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
+.chip.pm { background: #e7f0ff; color: #2f6fed; }
+.chip.pl { background: #fff2e2; color: #d97c1e; }
+.chip.year { background: #fff2e2; color: #d97c1e; }
+.chip.y2024 { background: #eef0f4; color: #5a6376; }
+.chip.y2025 { background: #e3f6f5; color: #0e8a86; }
+.chip.y2026 { background: #e7f0ff; color: #2f6fed; }
+.chip.y2027 { background: #fff2e2; color: #d97c1e; }
+.chip.anken { background: #eaf7ec; color: #238a4e; }
+.chip.class { background: #f5eaf7; color: #8a3f96; }
+.chip.sales { background: #f0e9ff; color: #7c4de0; }
+.chip.ops { background: #e5f6ec; color: #279158; }
+.chip x { font-size: 10px; opacity: .6; cursor: pointer; }
+.chip x:hover { opacity: 1; }
+.chip-add { font-size: 12px; color: #9aa4b5; padding: 4px 6px; cursor: pointer; border-radius: 5px; }
+.chip-add:hover { background: #eef4ff; color: #2f6fed; }
+.chip-group { display: inline-flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+
+/* 年度別セクション（ベンダーマスタ登録） */
+.year-pill { display: inline-flex; align-items: center; gap: 6px; background: #eef4ff; color: #2f6fed; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; width: fit-content; }
+
+/* 稼働状況トグル */
+.form-field.toggle-field { margin-top: 28px; }
+.toggle-row { display: flex; align-items: center; gap: 10px; height: 36px; cursor: pointer; user-select: none; }
+.toggle { width: 38px; height: 20px; border-radius: 12px; background: #33b070; position: relative; transition: background .15s; }
+.toggle .knob { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left .15s; }
+.toggle.off { background: #c7ccd4; }
+.toggle.off .knob { left: 2px; }
+.toggle-row span { font-size: 13px; color: #333c4d; font-weight: 700; }

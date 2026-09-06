@@ -1,22 +1,23 @@
 ﻿param(
     [string]$BaseUrl,
-    [string]$MasterDataFilePath,
+    [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
     [string]$TemplateFilePath,
     [string]$SurveyResultRootDir,
     [string]$TestResultRootDir,
     [int]$PassScore,
-    [string]$OutputFileSuffix = "統合結果"
+    [string]$OutputFileSuffix = "統合結果",
+    [string]$LogNamePrefix
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
-Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
-    Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
 }
 
-$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-combine-result' })-$TargetGroupName"
 
 function Create-CollectResultsDatas {
     param(
@@ -128,9 +129,21 @@ function Export-CombineSummaryData {
         $rowData = @()
         $rowData +=  $key
         if( $testResults ){
-            $rowData +=  if($testResults.平均点 -ne "") { [double] $testResults.平均点 }
-            $rowData +=  if($testResults.中央値 -ne "") { [double] $testResults.中央値 }
-            $rowData +=  if($testResults.修了率 -ne "") { [double] $testResults.修了率/100 }
+            if ($testResults.平均点 -ne "") {
+                $rowData += [double] $testResults.平均点
+            } else {
+                $rowData += ""
+            }
+            if ($testResults.中央値 -ne "") {
+                $rowData += [double] $testResults.中央値
+            } else {
+                $rowData += ""
+            }
+            if ($testResults.修了率 -ne "") {
+                $rowData += [double] $testResults.修了率/100
+            } else {
+                $rowData += ""
+            }
         } else {
             $rowData += @("") * 3
         }
@@ -331,40 +344,45 @@ function Export-Excel {
 }
 
 
-New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+& {
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-$userDatas = Create-UserDatas -DataFilePath $MasterDataFilePath
-# Write-Message $userDatas -VarName "userDatas" -Type "Info"
+    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-$testDatas = Create-TestDatas -DataFilePath $MasterDataFilePath
-$testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
-# Write-Message $testDatas -VarName "testDatas" -Type "Info"
+    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
+    # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
-$testResultDatas = Create-TestResultDatas -TestResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
-# Write-Message $testResultDatas -VarName "testResultDatas" -Type "Info"
+    $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+    $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+    # Write-Message $testDatas -VarName "testDatas" -Type "Info"
 
-$testUserCodes = $userDatas.userCode
-$validTestResultDatas = $testResultDatas |
-    Where-Object {
-        $_.isExecute -and $_.userCode -in $testUserCodes
-    } |
-    Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
+    $testResultDatas = Create-TestResultDatas -TestResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
+    # Write-Message $testResultDatas -VarName "testResultDatas" -Type "Info"
 
-$totalTestResultsDatas = Create-TestSummaryDataByGroup -UserDatas $userDatas -TestDatas $testDatas -ValidResultDatas $validTestResultDatas
-# Write-Message $totalTestResultsDatas -VarName "totalTestResultsDatas" -Type "Info"
+    $testUserCodes = $userDatas.userCode
+    $validTestResultDatas = $testResultDatas |
+        Where-Object {
+            $_.isExecute -and $_.userCode -in $testUserCodes
+        } |
+        Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
 
-$surveyDatas = Create-SurveyDatas -DataFilePath $MasterDataFilePath
-$surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+    $totalTestResultsDatas = Create-TestSummaryDataByGroup -UserDatas $userDatas -TestDatas $testDatas -ValidResultDatas $validTestResultDatas
+    # Write-Message $totalTestResultsDatas -VarName "totalTestResultsDatas" -Type "Info"
 
-# Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
+    $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
+    $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-$surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
-# Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info"
+    # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
 
-$collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas -TestDatas $testDatas -ValidTestResultDatas $validTestResultDatas -TotalTestResultsDatas $totalTestResultsDatas
-# Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
+    $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+    # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info"
 
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+    $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas -TestDatas $testDatas -ValidTestResultDatas $validTestResultDatas -TotalTestResultsDatas $totalTestResultsDatas
+    # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
 
-Export-Excel -CollectResultDatas $collectResultDatas -UserDatas $userDatas -TestDatas $testDatas -SurveyDatas $surveyDatas -OutputFilePath $outputFilePath
+    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+
+    Export-Excel -CollectResultDatas $collectResultDatas -UserDatas $userDatas -TestDatas $testDatas -SurveyDatas $surveyDatas -OutputFilePath $outputFilePath
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

@@ -1,145 +1,143 @@
 package com.ssfrontier.smstokintone
 
-/**
- * SMS本文から生成した部品（会社名・氏名・内容）
- */
+import android.os.Build
+import android.util.Log
+import com.google.mlkit.genai.common.FeatureStatus
+import com.google.mlkit.genai.common.DownloadStatus
+import com.google.mlkit.genai.prompt.Generation
+import com.google.mlkit.genai.prompt.GenerativeModel
+import com.google.mlkit.genai.prompt.generationConfig
+import kotlinx.coroutines.flow.collect
+import org.json.JSONObject
+import java.util.concurrent.ConcurrentHashMap
+
+/** SMS本文から抽出した会社名・氏名と、本文全体（原文）・抽出方法（AI/ルールベース）の結果を保持する */
 data class SmsParts(
+    /** 抽出した会社名 */
     val companyName: String = "",
+    /** 抽出した氏名 */
     val userName: String = "",
-    val content: String = ""
+    /** SMS本文全体（原文のまま。会社名・氏名の抽出に成功したかどうかに関わらず常に本文全体が入る） */
+    val body: String = "",
+    /** 端末上のAI（ML Kit GenAI）で抽出した結果かどうか。falseはルールベースでの抽出 */
+    val extractedByAi: Boolean = false
 ) {
-    /** 何も抽出できなかったかどうか */
-    fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && content.isEmpty()
+    /** [companyName]・[userName]・[body]がすべて空かどうか */
+    fun isEmpty(): Boolean = companyName.isEmpty() && userName.isEmpty() && body.isEmpty()
 
-    /** 会社名・氏名・内容のいずれかが空で、分割に失敗したとみなせるかどうか */
-    fun isSplitFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && content.isNotBlank())
+    /** [isEmpty]とは異なり、一部の項目だけ空でも抽出失敗とみなす */
+    fun isExtractionFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && body.isNotBlank())
 
-    /**
-     * [companyName]の英字（A-Z, a-z）・数字（0-9）を半角大文字に、それ以外の文字を全角に統一した文字列。
-     * [companyName]が空白の場合は空文字を返す
-     */
+    /** [companyName]の英数字を半角大文字、それ以外を全角に統一した文字列（空白なら空文字） */
     val companyNameNormalizedWidth: String
         get() = if (companyName.isNotBlank()) TextNormalization.normalizeWidth(companyName) else ""
 }
 
 /**
- * SMS本文から部品（会社名・氏名・内容）を生成する（ラベルの表記ゆれ・記述順の違い・ラベル省略に対応）
+ * SMS本文から部品（会社名・氏名）を生成する（1行目:会社名 2行目:氏名の固定位置で判定）。
+ * 本文（[SmsParts.body]）は抽出の成否に関わらず常に本文全体（原文）をそのまま保持する
  *
- * 「会社名：」「会社：」など、ラベルの表記ゆれがあっても、
- * また項目の記述順が入れ替わっていても、正しく項目を認識できるようにしています。
- * 内容のラベル（「内容：」）は省略可能で、氏名・会社名より後に続く自由記述はラベルが
- * 無くても内容として取り込みます。
- *
- * 対応例1（ラベルあり、内容ラベルは省略可）:
- * 会社名：XXX
- * 氏名：YYY
- * 内容：
- * XXX（複数行OK）
- *
- * 対応例2（ラベルなし、1行目:会社名 2行目:氏名 3行目以降:内容）:
+ * 対応例:
  * XXX
  * YYY
  * XXX（複数行OK）
  */
 object SmsPartsGenerator {
 
-    /**
-     * 会社名の表記ゆれを吸収し、「[AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX]<地域名>」の形に強制する。
-     *
-     * 「NTTD四国」「NTTDATA四国」「四国」など、先頭のNTT表記の有無・書き方に関わらず、
-     * 地域名部分（四国など）を残して正式な接頭辞を付け直す。既に正式な接頭辞で始まる場合はそのまま。
-     * ※現在は呼び出し元（[generateSmsParts]内）がコメントアウトされており未使用。会社名は正規化されずそのまま返る。
-     */
-    private fun normalizeCompanyName(companyName: String): String {
-        if (companyName.isEmpty() || companyName.startsWith(AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX)) return companyName
-        val rest = AppConstants.SMS_COMPANY_NAME_PREFIX_PATTERN.replaceFirst(companyName, "").trim()
-        return "${AppConstants.SMS_COMPANY_NAME_CANONICAL_PREFIX}$rest"
-    }
+    /** [Log]出力に使うタグ */
+    private const val TAG = "SmsPartsGenerator"
 
-    private data class LabelMatch(val key: String, val value: String)
+    /** 本文をキーにしたAI解析結果のキャッシュ（同じ本文を何度も解析させない）。複数スレッドから同時に呼ばれ得るためConcurrentHashMap */
+    private val aiResultCache = ConcurrentHashMap<String, SmsParts>()
+
+    /** 生成コストを避けるため一度作ったモデルを使い回す。@Volatile+@Synchronizedは複数スレッドからの遅延初期化を安全にするため */
+    @Volatile
+    private var generativeModel: GenerativeModel? = null
+
+    /** [generativeModel]を遅延生成して返す。既に生成済みならそれを再利用する */
+    @Synchronized
+    private fun getOrCreateModel(): GenerativeModel =
+        generativeModel ?: Generation.getClient(generationConfig {}).also { generativeModel = it }
 
     /**
-     * 1行が「ラベル：値」の形式かどうかを判定し、
-     * マッチした場合は LabelMatch を返す。マッチしなければ null。
+     * [aiExtractionEnabled]が有効なら端末上のAI（ML Kit GenAI）に解析させ、Android 12未満・非対応端末・
+     * AI呼び出し失敗時は[generateSmsParts]（ルールベース）にフォールバックする
      */
-    private fun matchLabelLine(line: String): LabelMatch? {
-        for ((key, aliases) in AppConstants.SMS_BODY_FIELD_ALIASES) {
-            for (alias in aliases) {
-                // ラベルのみでコロンが無い行（値は次行以降に続く）にも対応
-                if (line == alias) {
-                    return LabelMatch(key, "")
-                }
-                // ラベルと値の区切りに対応。
-                // ・記号区切り: ：: ＝= －-—― （前後の空白は全角含め許容）
-                // ・記号が無く空白のみで区切られている場合（例:「会社名　XXX」）にも対応
-                val pattern = Regex(
-                    "^[\\s　]*${Regex.escape(alias)}(?:[\\s　]*[：:＝=－\\-—―][\\s　]*|[\\s　]+)(.*)$"
-                )
-                val match = pattern.find(line)
-                if (match != null) {
-                    return LabelMatch(key, match.groupValues[1].trim())
-                }
-            }
+    suspend fun resolveSmsParts(body: String, aiExtractionEnabled: Boolean): SmsParts {
+        if (!aiExtractionEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return generateSmsParts(body)
         }
-        return null
+
+        aiResultCache[body]?.let { return it }
+
+        val aiResult = requestAiSmsParts(body)
+        val result = aiResult ?: generateSmsParts(body)
+        aiResultCache[body] = result
+        return result
     }
 
-    /**
-     * SMS本文から部品を生成する
-     */
+    /** 端末上のAIモデルを呼び出して会社名・氏名を抽出する。モデルが利用不可・ダウンロード失敗・呼び出し失敗の場合はnullを返す */
+    private suspend fun requestAiSmsParts(body: String): SmsParts? {
+        return try {
+            val model = getOrCreateModel()
+            when (model.checkStatus()) {
+                FeatureStatus.AVAILABLE -> {}
+                FeatureStatus.DOWNLOADABLE -> {
+                    var downloaded = false
+                    model.download().collect { status ->
+                        if (status is DownloadStatus.DownloadCompleted) downloaded = true
+                        if (status is DownloadStatus.DownloadFailed) {
+                            Log.w(TAG, "AIモデルのダウンロードに失敗しました: ${status.e.message}")
+                        }
+                    }
+                    if (!downloaded) return null
+                }
+                else -> return null
+            }
+
+            val prompt = """
+                以下のSMS本文から「会社名」「氏名」を抽出してください。
+                該当する項目が本文に無い場合は空文字を返してください。
+                出力は次の形式のJSONのみとし、それ以外の文章は含めないでください。
+                {"companyName": "...", "userName": "..."}
+
+                SMS本文:
+                $body
+            """.trimIndent()
+
+            val response = model.generateContent(prompt)
+            val text = response.candidates.firstOrNull()?.text?.trim() ?: return null
+            // プロンプトで指示してもモデルが前後に余計な文章やコードフェンスを付けることがあるため、
+            // 外側の中括弧の範囲だけを取り出してから改めて{}で包み直す
+            val jsonText = text.substringAfter("{").substringBeforeLast("}").let { "{$it}" }
+            val parsed = JSONObject(jsonText)
+            SmsParts(
+                companyName = parsed.optString("companyName", ""),
+                userName = parsed.optString("userName", ""),
+                body = body,
+                extractedByAi = true
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "ML Kit GenAIの呼び出しに失敗しました: ${e.message}")
+            null
+        }
+    }
+
+    /** 1行目を会社名、2行目を氏名として固定位置で切り出す（ラベル文字列は見ない）。本文は常に全体をそのまま保持する */
     fun generateSmsParts(body: String?): SmsParts {
         if (body.isNullOrBlank()) return SmsParts()
 
         val normalized = body.replace("\r\n", "\n").replace("\r", "\n").trim()
         val contentLines = normalized.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
-        // 行数が3行未満（会社名・氏名・内容をそれぞれ1行で書く想定に対して行数が足りない）
-        // 場合は、氏名・会社名を1行でまとめて書く人がいるため抽出せず空のまま返す。
-        // SMS本文自体は別途Bodyフィールドにそのまま登録されるため、ここで内容に詰め直す必要はない
+        // 氏名・会社名を1行にまとめて書く人がいるため、3行未満では会社名・氏名は抽出せず空のまま返す
         if (contentLines.size < 3) {
-            return SmsParts()
+            return SmsParts(body = normalized)
         }
 
-        var companyName = ""
-        var userName = ""
-        var content = ""
-        // 内容は複数行の値を続けて追記できるようにする
-        var currentKey: String? = null
+        val companyName = contentLines[0]
+        val userName = contentLines[1]
 
-        for (line in contentLines) {
-            // ラベル行なら記述順に関係なく値だけを取り出す
-            val labelMatch = matchLabelLine(line)
-            if (labelMatch != null) {
-                when (labelMatch.key) {
-                    "companyName" -> companyName = labelMatch.value
-                    "userName" -> userName = labelMatch.value
-                    "content" -> content = labelMatch.value
-                }
-                currentKey = if (labelMatch.key == "content") "content" else null
-                continue
-            }
-
-            when {
-                // 内容の続き（複数行対応）
-                currentKey == "content" -> content = if (content.isEmpty()) line else "$content\n$line"
-                // ラベルが省略されている場合は行の位置で判定する（1つ目の未確定項目に会社名、2つ目に氏名を割り当てる）
-                companyName.isEmpty() -> companyName = line
-                userName.isEmpty() -> userName = line
-                // 氏名・会社名が確定済みなら、以降はラベルが無くても内容として取り込む
-                else -> {
-                    content = line
-                    currentKey = "content"
-                }
-            }
-        }
-
-        // 内容の先頭行が空行の場合は除去する
-        val contentValueLines = content.split("\n")
-        if (contentValueLines.first().isBlank()) {
-            content = contentValueLines.drop(1).joinToString("\n")
-        }
-
-        // return SmsParts(companyName = normalizeCompanyName(companyName), userName = userName, content = content)
-        return SmsParts(companyName = companyName, userName = userName, content = content)
+        return SmsParts(companyName = companyName, userName = userName, body = normalized)
     }
 }

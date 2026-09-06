@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/user_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=user" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>ユーザー編集</h2>
+          <div class="sub">USR-001　山田 太郎の情報を編集します</div>
+        </div>
+        <a class="close-x" href="user_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>ユーザーコード</label>
+          <div class="form-control readonly">USR-001</div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>ユーザー名<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="山田 太郎">
+        </div>
+        <div class="form-field full">
+          <label>メールアドレス（ログインID）<span class="req">必須</span></label>
+          <input type="email" class="form-control" value="yamada@company.co.jp">
+        </div>
+        <div class="form-field">
+          <label>権限<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="authority" value="管理者" checked><span class="radio-dot"></span><span class="tag blue">管理者</span></label>
+            <label class="radio-option"><input type="radio" name="authority" value="一般ユーザー"><span class="radio-dot"></span><span class="tag gray">一般ユーザー</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>パスワード</label>
+          <input type="password" class="form-control" placeholder="変更する場合のみ入力">
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="user_list.html">キャンセル</a>
+        <a class="btn primary" href="user_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+</body>
+</html>

@@ -5,6 +5,8 @@ set "MyName=%~nx0"
 
 call "%~dp0common-env.bat"
 
+set "TargetGroupNameFilter="
+
 rem コマンドラインから「環境変数名:値」の形式で、common-env.batの設定値を任意に上書きできる
 rem （例: TargetCompanyNames、TargetRankNames、TargetClassNames、YearOrder など、名前は固定していない）
 rem 区切りは = ではなく : を使うこと（cmd.exeは = とカンマを引数の区切り文字として扱うため）。
@@ -23,7 +25,9 @@ set "SCRIPT_PATH=%~dp0collect-year-comparison-result.ps1"
 set "OutputTargetDir=%OutputYearComparisonCollectDir%"
 set "TemplateFilePath=%TemplateRootDir%\経年比較結果.xlsx"
 
-for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
+call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+
+for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -ClientDataRootDir '%ClientDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod% -TargetGroupNameFilter '%TargetGroupNameFilter%'"') do (
     call "%~dp0message.bat" "Start %MyName% [%%G]"
 
     call "%~dp0resolve-env-file.bat" "%%G"
@@ -38,7 +42,7 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
-          "     -MasterDataRootDir '!MasterDataRootDir!'" ^
+          "     -ClientDataRootDir '!ClientDataRootDir!'" ^
           "     -TargetGroupName '%%G'" ^
           "     -TargetYear '!TargetYear!'" ^
           "     -ComparePeriod '!ComparePeriod!'" ^
@@ -53,6 +57,7 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
           "     -CourseGroupDefs '!CourseGroupDefs!'" ^
           "     -YearOrder '!YearOrder!'" ^
           "     -OutputFileSuffix '!OutputYearComparisonResultFileSuffix!'" ^
+          "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
           "  throw" ^
@@ -66,11 +71,11 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
     call "%~dp0message.bat" "Finished %MyName% [%%G]"
 )
 
-call "%~dp0message.bat" "Start Jobs %MyName% ALL"
+call "%~dp0message.bat" "Waiting Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
+for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -ClientDataRootDir '%ClientDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod% -TargetGroupNameFilter '%TargetGroupNameFilter%'"') do (
     set "JOB_FLAG=%TEMP%\%MyName%%%G_.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
@@ -82,7 +87,7 @@ if !ALL_DONE! EQU 0 (
 call "%~dp0message.bat" "Finished Jobs %MyName% ALL"
 
 set "HAS_ERROR=0"
-for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -MasterDataRootDir '%MasterDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod%"') do (
+for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -ClientDataRootDir '%ClientDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod% -TargetGroupNameFilter '%TargetGroupNameFilter%'"') do (
     set "ERROR_FLAG=%TEMP%\%MyName%%%G_.failed"
     if exist "!ERROR_FLAG!" (
         set "HAS_ERROR=1"

@@ -3,32 +3,26 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~nx0"
 
-pushd "%~dp0"
-
-set "LOG_DIR=.\logs"
-
-if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
-
-call .\bats\message.bat "Start %MyName%"
+call "%~dp0bats\message.bat" "Start %MyName%"
 echo.
 
 
 for %%F in (
-    ".\bats\excel-clean.bat"
-    ".\bats\download-results.bat"
-    ".\bats\collect-combine-result.bat"
-    ".\bats\collect-test-result.bat"
-    ".\bats\collect-survey-result.bat"
+    "%~dp0bats\excel-clean.bat"
+    "%~dp0bats\download-results.bat"
+    "%~dp0bats\collect-combine-result.bat"
+    "%~dp0bats\collect-test-result.bat"
+    "%~dp0bats\collect-survey-result.bat"
 ) do (
-    call .\bats\message.bat "Start %%~nxF"
+    call "%~dp0bats\message.bat" "Start %%~nxF"
     
-    call .\bats\message.bat "Please wait..." "Green"
+    call "%~dp0bats\message.bat" "Please wait..." "Green"
     
-    call "%%F" > "%LOG_DIR%\%%~nF.log"
+    call %%F
     
-    call .\bats\message.bat "Finished %%~nxF"
+    call "%~dp0bats\message.bat" "Finished %%~nxF"
 )
 
-popd
+call "%~dp0bats\message.bat" "Finished %MyName%"
 
 endlocal

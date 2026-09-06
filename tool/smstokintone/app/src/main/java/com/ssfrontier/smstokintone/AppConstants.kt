@@ -5,10 +5,11 @@ import androidx.work.BackoffPolicy
 /** ユーザーが変更することのない固定値をまとめたもの（UI文言はstrings.xmlを参照） */
 object AppConstants {
 
+    /** 送信先設定画面の「テスト送信」で、送信元として使うダミーの電話番号 */
     const val TEST_SEND_SENDER = "09000000000"
 
-    /** 送信先の絞り込みで「未設定（どのプロファイルにも一致しない）」を表す選択肢のキー */
-    const val PROFILE_FILTER_KEY_UNSET = "__filter_key_unset__"
+    /** 送信先の絞り込みで「未設定（どの送信先にも一致しない）」を表す選択肢のキー */
+    const val SEND_TARGET_FILTER_KEY_UNSET = "__filter_key_unset__"
 
     /** kintoneへの送信がレートリミット/サーバーエラー/通信エラーで失敗した際の最大リトライ回数 */
     const val KINTONE_UPLOAD_MAX_RETRY_ATTEMPTS = 5
@@ -20,22 +21,9 @@ object AppConstants {
      */
     const val KINTONE_UPLOAD_RETRY_BACKOFF_MILLIS = 10_000L
 
-    /** kintoneへの送信リトライ時のバックオフ方式 */
+    /** kintoneへの送信リトライの間隔を、失敗のたびに一定量ずつ増やす方式 */
     val KINTONE_UPLOAD_RETRY_BACKOFF_POLICY = BackoffPolicy.LINEAR
 
-    /** 本ツール経由であることを示す選択肢値 */
+    /** kintoneへ登録する際の「登録種別」フィールドに設定する値。既存レコードの検索条件にも使う */
     const val REGISTRATION_TYPE_VALUE = "外部ツール"
-
-    /** 会社名の表記ゆれを正規化する際に付け直す正式な接頭辞 */
-    const val SMS_COMPANY_NAME_CANONICAL_PREFIX = "NTTデータ"
-
-    /** 会社名先頭の表記ゆれを検出する正規表現。表記自体は対象外 */
-    val SMS_COMPANY_NAME_PREFIX_PATTERN = Regex("^NTT[\\s\\-]?(?:DATA|D)", RegexOption.IGNORE_CASE)
-
-    // [SmsPartsGenerator]がラベル行を判定する際に使う、フィールド名とラベル表記ゆれ一覧の対応。
-    val SMS_BODY_FIELD_ALIASES: Map<String, List<String>> = mapOf(
-        "companyName" to listOf("会社名", "会社"),
-        "userName" to listOf("氏名", "名前"),
-        "content" to listOf("理由", "内容", "用件")
-    )
 }

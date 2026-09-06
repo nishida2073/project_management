@@ -1,0 +1,9 @@
+/* course_regist.html 固有のスタイル */
+.app { position: relative; }
+.main { filter: blur(1.5px) brightness(0.94); }
+.content { padding: 24px 28px; }
+.table-card { height: 700px; margin-top: 16px; }
+
+.modal { width: 640px; }
+.modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 20px; }
+.btn { padding: 10px 20px; }
