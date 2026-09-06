@@ -145,9 +145,9 @@ object SettingsStore {
 
         /** [fromName]を提供するコンパニオンオブジェクト */
         companion object {
-            /** 保存値からの復元用。未知の値やnullは[DEFAULT_CONFIG]と同じSAME_DAYにフォールバックする */
+            /** 保存値からの復元用。未知の値やnullは[DEFAULT_CONFIG]と同じUNLIMITEDにフォールバックする */
             fun fromName(name: String?): ContinuationScope =
-                entries.firstOrNull { it.name == name } ?: SAME_DAY
+                entries.firstOrNull { it.name == name } ?: UNLIMITED
         }
     }
 
@@ -394,7 +394,7 @@ object SettingsStore {
         smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
         bodyExcerptLength = AppDefaults.BODY_EXCERPT_LENGTH,
         continuationEnabled = true,
-        continuationScope = ContinuationScope.SAME_DAY,
+        continuationScope = ContinuationScope.UNLIMITED,
         continuationShowUserNameEnabled = true,
         themeMode = ThemeMode.LIGHT,
         smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
