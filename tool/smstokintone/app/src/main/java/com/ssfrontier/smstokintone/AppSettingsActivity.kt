@@ -75,12 +75,12 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.rbSendAuto.isChecked = sendEnabled
         binding.rbSendManual.isChecked = !sendEnabled
         binding.swSendExtractionFailedEnabled.isEnabled = sendEnabled
-        binding.swSendExtractionContinuedEnabled.isEnabled = sendEnabled
+        binding.swSendExtractionNotPerformedEnabled.isEnabled = sendEnabled
         binding.rgSendMode.setOnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSendAuto.id
             SettingsStore.update(this) { it.copy(sendEnabled = enabled) }
             binding.swSendExtractionFailedEnabled.isEnabled = enabled
-            binding.swSendExtractionContinuedEnabled.isEnabled = enabled
+            binding.swSendExtractionNotPerformedEnabled.isEnabled = enabled
         }
 
         binding.swSendExtractionFailedEnabled.isChecked = SettingsStore.load(this).sendExtractionFailedEnabled
@@ -88,9 +88,9 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(sendExtractionFailedEnabled = isChecked) }
         }
 
-        binding.swSendExtractionContinuedEnabled.isChecked = SettingsStore.load(this).sendExtractionContinuedEnabled
-        binding.swSendExtractionContinuedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(sendExtractionContinuedEnabled = isChecked) }
+        binding.swSendExtractionNotPerformedEnabled.isChecked = SettingsStore.load(this).sendExtractionNotPerformedEnabled
+        binding.swSendExtractionNotPerformedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(sendExtractionNotPerformedEnabled = isChecked) }
         }
 
         binding.swAiExtractionEnabled.isChecked = SettingsStore.load(this).aiExtractionEnabled
@@ -103,9 +103,9 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(searchExtractionFailedEnabled = isChecked) }
         }
 
-        binding.swSearchExtractionContinuedEnabled.isChecked = SettingsStore.load(this).searchExtractionContinuedEnabled
-        binding.swSearchExtractionContinuedEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(searchExtractionContinuedEnabled = isChecked) }
+        binding.swSearchExtractionNotPerformedEnabled.isChecked = SettingsStore.load(this).searchExtractionNotPerformedEnabled
+        binding.swSearchExtractionNotPerformedEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchExtractionNotPerformedEnabled = isChecked) }
         }
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
@@ -215,9 +215,9 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(defaultExtractionSucceededOnlyEnabled = isChecked) }
         }
 
-        binding.cbDefaultExtractionContinuedOnlyEnabled.isChecked = config.defaultExtractionContinuedOnlyEnabled
-        binding.cbDefaultExtractionContinuedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultExtractionContinuedOnlyEnabled = isChecked) }
+        binding.cbDefaultExtractionNotPerformedOnlyEnabled.isChecked = config.defaultExtractionNotPerformedOnlyEnabled
+        binding.cbDefaultExtractionNotPerformedOnlyEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(defaultExtractionNotPerformedOnlyEnabled = isChecked) }
         }
 
         binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

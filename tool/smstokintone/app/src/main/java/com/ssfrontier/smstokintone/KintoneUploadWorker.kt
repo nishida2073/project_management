@@ -72,8 +72,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 continue
             }
 
-            if (!manual && resolution.isContinuation && !config.sendExtractionContinuedEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_continued_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+            if (!manual && resolution.isContinuation && !config.sendExtractionNotPerformedEnabled) {
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_not_performed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
                 continue
             }
 

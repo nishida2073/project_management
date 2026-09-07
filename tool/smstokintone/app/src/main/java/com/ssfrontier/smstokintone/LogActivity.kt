@@ -104,22 +104,29 @@ class LogActivity : AppCompatActivity() {
                 SmsLogStore.EntryType.AUTO_REPLY -> getString(R.string.label_log_type_auto_reply)
             }
 
-            // 送信系ログのみ末尾に自動=青(status_running)/手動=アンバー(status_manual)のアイコンを付ける
             val typeAndTimestampView = TextView(this).apply {
+                text = "${getString(R.string.label_log_type_bracketed, typeLabel)} ${dateFormat.format(Date(entry.loggedAtMillis))}"
+                setTextColor(itemTextColor)
+                textSize = 16f
+                setPadding(0, 24, 0, 4)
+            }
+
+            // SMSの検索画面と同じ並び（抽出→送信→返信）の後に、ログだけが持つ会社名の変換アイコンを最後に加える
+            val hasStatusIcon = entry.smsParts != null ||
+                entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE ||
+                entry.companyNameConverted || entry.type == SmsLogStore.EntryType.AUTO_REPLY
+            val statusIconsView: View? = if (!hasStatusIcon) null else TextView(this).apply {
                 text = buildSpannedString {
-                    append(getString(R.string.label_log_type_bracketed, typeLabel))
-                    append(" ${dateFormat.format(Date(entry.loggedAtMillis))}")
                     entry.smsParts?.let { smsParts ->
-                        append(" ")
                         val extractionIcon = when {
-                            entry.isContinuation -> R.string.icon_extraction_continued
+                            entry.isContinuation -> R.string.icon_extraction_not_performed
                             smsParts.isExtractionFailed() -> R.string.icon_extraction_failed
                             else -> R.string.icon_extraction_succeeded
                         }
                         append(getString(extractionIcon))
                     }
                     if (entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE) {
-                        append(" ")
+                        if (isNotEmpty()) append(" ")
                         val modeColor = ContextCompat.getColor(
                             this@LogActivity,
                             if (entry.manual) R.color.status_manual else R.color.status_running
@@ -128,18 +135,18 @@ class LogActivity : AppCompatActivity() {
                             append(getString(if (entry.manual) R.string.icon_send_manual else R.string.icon_send_auto))
                         }
                     }
-                    if (entry.companyNameConverted) {
-                        append(" ")
-                        append(getString(R.string.icon_company_name_converted))
-                    }
                     if (entry.type == SmsLogStore.EntryType.AUTO_REPLY) {
-                        append(" ")
+                        if (isNotEmpty()) append(" ")
                         append(getString(R.string.icon_replied))
+                    }
+                    if (entry.companyNameConverted) {
+                        if (isNotEmpty()) append(" ")
+                        append(getString(R.string.icon_company_name_converted))
                     }
                 }
                 setTextColor(itemTextColor)
                 textSize = 16f
-                setPadding(0, 24, 0, 4)
+                setPadding(0, 8, 0, 0)
             }
 
             val sendTargetNameView = TextView(this).apply {
@@ -197,6 +204,7 @@ class LogActivity : AppCompatActivity() {
                 orientation = android.widget.LinearLayout.VERTICAL
                 addView(typeAndTimestampView)
                 addView(resultView)
+                statusIconsView?.let { addView(it) }
                 addView(sendTargetNameView)
                 addView(senderAndTimestampView)
                 addView(bodyView)

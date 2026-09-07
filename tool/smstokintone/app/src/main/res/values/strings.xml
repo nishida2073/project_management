@@ -4,7 +4,7 @@
     <!-- アイコン -->
     <string name="icon_extraction_succeeded">🆗</string>
     <string name="icon_extraction_failed">🆖</string>
-    <string name="icon_extraction_continued">🔳</string>
+    <string name="icon_extraction_not_performed">🔳</string>
     <string name="icon_replied">📨</string>
     <string name="icon_send_none">⬜</string>
     <string name="icon_send_auto">✅</string>
@@ -134,15 +134,15 @@
     <string name="label_default_extraction_status_filter">抽出状況</string>
     <string name="switch_default_extraction_succeeded_only_enabled">正常</string>
     <string name="switch_default_extraction_failed_only_enabled">異常</string>
-    <string name="switch_default_extraction_continued_only_enabled">継続</string>
+    <string name="switch_default_extraction_not_performed_only_enabled">未実施</string>
     <string name="section_search_filters_visibility">検索条件の表示</string>
     <string name="rb_search_filters_visible">表示</string>
     <string name="rb_search_filters_hidden">隠す</string>
     <string name="label_search_selection_target">SMS選択の対象</string>
     <string name="switch_search_extraction_failed_enabled">抽出状況が異常</string>
     <string name="helper_search_extraction_failed_enabled">抽出状況が異常なSMSを検索結果で選択できるようにします</string>
-    <string name="switch_search_extraction_continued_enabled">抽出状況が継続</string>
-    <string name="helper_search_extraction_continued_enabled">抽出状況が継続（引き継ぎ）のSMSを検索結果で選択できるようにします</string>
+    <string name="switch_search_extraction_not_performed_enabled">抽出状況が未実施</string>
+    <string name="helper_search_extraction_not_performed_enabled">抽出状況が未実施（引き継ぎ）のSMSを検索結果で選択できるようにします</string>
     <string name="section_sms_send">SMSの送信</string>
     <string name="label_sms_send_mode">送信モード</string>
     <string name="rb_sms_send_mode_manual">手動</string>
@@ -151,8 +151,8 @@
     <string name="section_send_target">自動送信の対象</string>
     <string name="switch_send_extraction_failed_enabled">抽出状況が異常</string>
     <string name="helper_send_extraction_failed_enabled">抽出状況が異常なSMSを自動送信の対象として含めることができます</string>
-    <string name="switch_send_extraction_continued_enabled">抽出状況が継続</string>
-    <string name="helper_send_extraction_continued_enabled">抽出状況が継続（引き継ぎ）のSMSを自動送信の対象として含めることができます</string>
+    <string name="switch_send_extraction_not_performed_enabled">抽出状況が未実施</string>
+    <string name="helper_send_extraction_not_performed_enabled">抽出状況が未実施（引き継ぎ）のSMSを自動送信の対象として含めることができます</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>
@@ -212,7 +212,7 @@
     <string name="message_log_send_complete_create_success">SMSの登録に成功しました</string>
     <string name="message_log_send_complete_update_success">SMSの更新に成功しました</string>
     <string name="message_log_send_start_extraction_failed_skipped">SMSの送信をスキップしました\n（本文の抽出状況が異常）</string>
-    <string name="message_log_send_start_extraction_continued_skipped">SMSの送信をスキップしました\n（抽出状況が継続）</string>
+    <string name="message_log_send_start_extraction_not_performed_skipped">SMSの送信をスキップしました\n（抽出状況が未実施）</string>
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
     <string name="message_log_send_complete_skipped_duplicate">SMSの更新をスキップしました\n（最終受信日時（秒は除く）と本文が一致）</string>
@@ -222,6 +222,7 @@
     <string name="dialog_title_extraction_result">抽出結果</string>
     <string name="dialog_message_extraction_failure">会社名・氏名の抽出に失敗しています</string>
     <string name="dialog_title_auto_reply_body">返信内容</string>
+    <string name="helper_log_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ 🔳 未実施\n送信状況：✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし ・ ♻️ 引き継ぎ\n会社名の変換：🔄 変換あり"</string>
     
     <!-- SMSの検索画面 -->
     <string name="title_sms_search">SMSの検索</string>
@@ -237,12 +238,12 @@
     <string name="label_search_extraction_status_filter">抽出状況</string>
     <string name="cb_extraction_succeeded_only">🆗 正常</string>
     <string name="cb_extraction_failed_only">🆖 異常</string>
-    <string name="cb_extraction_continued_only">🔳 継続</string>
+    <string name="cb_extraction_not_performed_only">🔳 未実施</string>
     <string name="label_search_send_status_filter">送信状況</string>
     <string name="cb_send_none_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ 🔳 継続\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし ・ ♻️ 引き継ぎ"</string>
+    <string name="helper_sms_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ 🔳 未実施\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし ・ ♻️ 引き継ぎ"</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>

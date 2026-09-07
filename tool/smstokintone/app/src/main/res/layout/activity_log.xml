@@ -39,6 +39,14 @@
     </LinearLayout>
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/helper_log_status_legend"
+        android:textSize="12sp"
+        android:textColor="?android:attr/textColorSecondary" />
+
+    <TextView
         android:id="@+id/tvLogEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

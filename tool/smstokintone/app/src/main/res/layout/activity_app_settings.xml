@@ -426,14 +426,12 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:orientation="vertical">
 
                             <CheckBox
                                 android:id="@+id/cbDefaultExtractionSucceededOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
                                 android:minHeight="0dp"
                                 android:checked="false"
                                 android:text="@string/switch_default_extraction_succeeded_only_enabled" />
@@ -442,18 +440,17 @@
                                 android:id="@+id/cbDefaultExtractionFailedOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="8dp"
                                 android:minHeight="0dp"
                                 android:checked="false"
                                 android:text="@string/switch_default_extraction_failed_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultExtractionContinuedOnlyEnabled"
+                                android:id="@+id/cbDefaultExtractionNotPerformedOnlyEnabled"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_extraction_continued_only_enabled" />
+                                android:text="@string/switch_default_extraction_not_performed_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -533,12 +530,12 @@
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSearchExtractionContinuedEnabled"
+                            android:id="@+id/swSearchExtractionNotPerformedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_search_extraction_continued_enabled" />
+                            android:text="@string/switch_search_extraction_not_performed_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -550,7 +547,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_extraction_continued_enabled"
+                                android:text="@string/helper_search_extraction_not_performed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -673,12 +670,12 @@
                         </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swSendExtractionContinuedEnabled"
+                            android:id="@+id/swSendExtractionNotPerformedEnabled"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_send_extraction_continued_enabled" />
+                            android:text="@string/switch_send_extraction_not_performed_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -690,7 +687,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_send_extraction_continued_enabled"
+                                android:text="@string/helper_send_extraction_not_performed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
