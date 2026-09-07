@@ -108,11 +108,6 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(searchExtractionContinuedEnabled = isChecked) }
         }
 
-        binding.swSearchSendTargetUnconfiguredEnabled.isChecked = SettingsStore.load(this).searchSendTargetUnconfiguredEnabled
-        binding.swSearchSendTargetUnconfiguredEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(searchSendTargetUnconfiguredEnabled = isChecked) }
-        }
-
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
         val autoReplyExtractionFailedEnabled = SettingsStore.load(this).autoReplyExtractionFailedEnabled
         binding.rbSmsReplyModeAuto.isChecked = autoReplyExtractionFailedEnabled

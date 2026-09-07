@@ -22,8 +22,6 @@ object SettingsStore {
     private const val KEY_SEARCH_EXTRACTION_FAILED_ENABLED = "search_extraction_failed_enabled"
     /** [Config.searchExtractionContinuedEnabled]のキー */
     private const val KEY_SEARCH_EXTRACTION_CONTINUED_ENABLED = "search_extraction_continued_enabled"
-    /** [Config.searchSendTargetUnconfiguredEnabled]のキー */
-    private const val KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED = "search_send_target_unconfigured_enabled"
     /** [Config.autoReplyExtractionFailedEnabled]のキー */
     private const val KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED = "auto_reply_extraction_failed_enabled"
     /** [Config.autoReplyCooldownSeconds]のキー */
@@ -163,8 +161,6 @@ object SettingsStore {
         val searchExtractionFailedEnabled: Boolean,
         /** SMS検索画面で、抽出状況が継続（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか */
         val searchExtractionContinuedEnabled: Boolean,
-        /** SMS検索画面で、送信先が未設定（一致する送信先が無い、または不正）のSMSを選択可能にするかどうか */
-        val searchSendTargetUnconfiguredEnabled: Boolean,
         /** 自動受信時、本文の抽出状況が異常なSMSに対して[extractionFailedReplyAddition]の文言でSMSへ自動返信するかどうか */
         val autoReplyExtractionFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
@@ -346,7 +342,6 @@ object SettingsStore {
             .putBoolean(KEY_SEND_EXTRACTION_CONTINUED_ENABLED, config.sendExtractionContinuedEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, config.searchExtractionFailedEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_CONTINUED_ENABLED, config.searchExtractionContinuedEnabled)
-            .putBoolean(KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED, config.searchSendTargetUnconfiguredEnabled)
             .putBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, config.autoReplyExtractionFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
@@ -386,7 +381,6 @@ object SettingsStore {
         sendExtractionContinuedEnabled = true,
         searchExtractionFailedEnabled = false,
         searchExtractionContinuedEnabled = true,
-        searchSendTargetUnconfiguredEnabled = false,
         autoReplyExtractionFailedEnabled = false,
         autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
         autoRefreshEnabled = true,
@@ -420,10 +414,6 @@ object SettingsStore {
             sendExtractionContinuedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_CONTINUED_ENABLED, DEFAULT_CONFIG.sendExtractionContinuedEnabled),
             searchExtractionFailedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.searchExtractionFailedEnabled),
             searchExtractionContinuedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_CONTINUED_ENABLED, DEFAULT_CONFIG.searchExtractionContinuedEnabled),
-            searchSendTargetUnconfiguredEnabled = p.getBoolean(
-                KEY_SEARCH_SEND_TARGET_UNCONFIGURED_ENABLED,
-                DEFAULT_CONFIG.searchSendTargetUnconfiguredEnabled
-            ),
             autoReplyExtractionFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.autoReplyExtractionFailedEnabled),
             autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, DEFAULT_CONFIG.autoReplyCooldownSeconds),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, DEFAULT_CONFIG.autoRefreshEnabled),

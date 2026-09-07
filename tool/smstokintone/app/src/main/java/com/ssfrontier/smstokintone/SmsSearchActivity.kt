@@ -405,7 +405,7 @@ class SmsSearchActivity : AppCompatActivity() {
             val isAutoReplied = record.id in autoRepliedEntries
             val sentEntry = sentEntries[record.id]
             val isExtractionFailedBody = resolution.smsParts.isExtractionFailed()
-            val isSelectable = (!isSendTargetUnconfigured || config.searchSendTargetUnconfiguredEnabled) &&
+            val isSelectable = !isSendTargetUnconfigured &&
                 (!isExtractionFailedBody || config.searchExtractionFailedEnabled) &&
                 (!resolution.isContinuation || config.searchExtractionContinuedEnabled)
             val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
@@ -587,8 +587,8 @@ class SmsSearchActivity : AppCompatActivity() {
 
     /** [selectedIds]の一括送信が完了した際に、結果をトーストで通知する */
     private fun onSendBatchFinished(selectedIds: Set<Long>) {
-        // 送信先が未設定の場合は送信開始(SEND_START)のみが記録され送信完了(SEND_COMPLETE)は
-        // 記録されないため、smsIdごとに最新の1件（開始・完了どちらか）を結果として扱う
+        // 送信先が未設定のSMSはこの画面では選択できず送信開始(SEND_START)しか記録されないケースは
+        // 発生しないが、smsIdごとに最新の1件（開始・完了どちらか）を結果として扱うようにしておく
         val latestCompleteEntryPerSms = SmsLogStore.getAll(this)
             .filter { it.type != SmsLogStore.EntryType.RECEIVE && it.smsId in selectedIds }
             .groupBy { it.smsId }
