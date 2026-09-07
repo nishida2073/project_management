@@ -1,6 +1,6 @@
 /* ==================== 全体の設定 ==================== */
 body {
-  font-family: "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  font-family: "Meiryo", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
   max-width: 900px;
   margin: 0 auto;
   padding: 40px;
