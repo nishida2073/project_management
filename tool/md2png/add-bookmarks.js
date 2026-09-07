@@ -247,4 +247,4 @@ async function addBookmarks(inPath, headings, outPath, title) {
   fs.writeFileSync(outPath, outBytes);
 }
 
-module.exports = { addBookmarks };
+module.exports = { addBookmarks, findHeadingPages, buildTree };

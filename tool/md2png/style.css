@@ -1,0 +1,69 @@
+/* ==================== 全体の設定 ==================== */
+body {
+  font-family: "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px;
+  color: #1c232c;
+  background: #ffffff;
+  line-height: 1.8;
+}
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.8rem; margin-top: 2.5rem; border-bottom: 1px solid #d3d9df; padding-bottom: 0.3rem; break-before: page; }
+h3 { font-size: 1.45rem; margin-top: 1.8rem; }
+h4 { font-size: 1.2rem; margin-top: 1.4rem; }
+hr { border: none; border-top: 1px solid #d3d9df; margin: 2rem 0; }
+li { margin-bottom: 0.3rem; }
+strong { color: #2b5f73; }
+.mermaid { text-align: center; margin: 1rem 0; break-inside: avoid; }
+h2, h3, h4 { break-after: avoid; }
+img { vertical-align: top; }
+
+/* ==================== 目次の設定 ==================== */
+/* build_pdf.js --toc: 表紙の直後に挿入する目次ページ */
+.toc-page { height: 267mm; break-after: page; overflow: hidden; }
+/* 通常の見出し用CSS（h2 { break-before: page; ... }）を目次自身の見出しには適用させない */
+.toc-title { margin-top: 0; break-before: avoid; border-bottom: none; }
+.toc-item { display: flex; align-items: baseline; margin: 0.5rem 0; color: inherit; text-decoration: none; }
+.toc-item.toc-h3 { margin-left: 1.6rem; font-size: 0.95rem; }
+/* border-bottom:dottedだと点の間隔をブラウザ任せにしかできないため、間隔を指定できる
+   グラデーションで点線を描く（background-sizeの横幅が点と点の間隔になる） */
+.toc-dots {
+  flex: 1;
+  align-self: center;
+  height: 2px;
+  margin: 0 0.5rem;
+  background-image: radial-gradient(circle, #98a2ad 1px, transparent 1px);
+  background-size: 7px 2px;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+.toc-page-num { min-width: 2em; text-align: right; }
+
+/* ==================== 各ページの設定 ==================== */
+/* <div class="pagebreak"></div>マーカーで強制改ページする */
+.pagebreak { break-before: page; }
+
+/* build_pdf.js --title-page: H1を表紙として単独の1ページに中央揃えで配置する。
+   bodyのpadding:40px（上）が最初の子要素の上に乗るため、267mmそのままだとページの
+   印字可能領域をわずかに超えて余分な白紙ページが挟まることがある。その分を差し引く */
+.title-page {
+  height: calc(267mm - 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  break-after: page;
+}
+.title-page h1 { margin: 0; }
+
+/* ==================== ヘッダー・フッターの設定 ==================== */
+/* build_pdf.js --header: 各ページ左上に出すファイル名。位置（左右の余白）は実行時の
+   マージン設定に応じてbuild_pdf.js側でインラインstyleとして付与するため、ここではそれ
+   以外（文字サイズ・色・フォント）だけを指定する */
+.pdf-header { font-size: 8px; color: #8a929b; font-family: "Yu Gothic UI", "Meiryo", "Hiragino Sans", sans-serif; }
+
+/* build_pdf.js --page-numbers: 各ページ下部中央の「N / 総ページ数」。
+   pdf-libで直接描画するため、ここで指定できるのはcolor・font-size・border-topのみ
+   （font-familyやposition等は反映されない）。border-topは"Npx solid #rrggbb"の形式のみ対応 */
+.pdf-footer { font-size: 9px; color: #8a929b; border-top: 1px solid #d3d9df; }
