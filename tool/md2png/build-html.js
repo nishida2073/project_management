@@ -22,13 +22,7 @@ function buildHtml(mdPath) {
     const token = `ANCHOR-${headings.length}-${Math.random().toString(36).slice(2, 8)}`;
     const text = inner.replace(/<[^>]+>/g, '').trim();
     headings.push({ level: Number(level), text, token });
-    // position:absoluteでフローから外し、見出しの表示位置（左端の開始X座標）に影響しないようにする。
-    // ページ判定（findHeadingPages）はこのトークン文字列がどのページに出力されたかだけを見るため、
-    // 実際の描画位置がどこであっても支障はない
     const marker = `<span style="font-size:1px;color:#ffffff;position:absolute;">${token}</span>`;
-    // markedは見出しにid属性を付与しないため、同一ドキュメント内の[text](#見出しテキスト)形式の
-    // リンクが何にもジャンプできずリンク自体が生成されない。リンク側は見出しの生テキストをそのまま
-    // フラグメントに使っているため、同じテキストをidとして付与し、対応が取れるようにする
     const idAttr = ` id="${text.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`;
     return `<h${level}${attrs}${idAttr}>${marker}${inner}</h${level}>`;
   });
@@ -44,8 +38,6 @@ function buildHtml(mdPath) {
     }
   });
 
-  // 画像などをmdPathからの相対パス（例: screenshots/foo.png）で参照しているMarkdownのために、
-  // そのファイル自身のディレクトリを基準に解決されるよう<base>を注入する
   const baseDir = path.dirname(path.resolve(mdPath)).replace(/\\/g, '/');
 
   const page = `<!doctype html>

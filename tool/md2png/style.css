@@ -17,7 +17,7 @@ li { margin-bottom: 0.3rem; }
 strong { color: #2b5f73; }
 .mermaid { text-align: center; margin: 1rem 0; break-inside: avoid; }
 h2, h3, h4 { break-after: avoid; }
-img { vertical-align: top; }
+img { vertical-align: top; margin-left: 0.5rem; }
 
 /* ==================== 目次の設定 ==================== */
 /* build_pdf.js --toc: 表紙の直後に挿入する目次ページ */

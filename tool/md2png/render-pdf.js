@@ -10,9 +10,6 @@ const outPath = process.argv[3];
 
 const { page, headings, title } = buildHtml(mdPath);
 
-// page.setContent()はabout:blank起源になるため、Markdownからの相対パス（file://）で
-// 参照している画像がChromiumのセキュリティ制限で読み込めない。実ファイルとして書き出し、
-// file://で開くことで、その画像もmermaidと同様に正しく描画されるようにする
 const tmpHtmlPath = path.join(os.tmpdir(), `md2pdf-src-${Date.now()}.html`);
 fs.writeFileSync(tmpHtmlPath, page, 'utf8');
 
