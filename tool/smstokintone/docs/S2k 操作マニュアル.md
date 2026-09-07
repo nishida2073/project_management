@@ -236,6 +236,8 @@
   <img src="screenshots/log.png" alt="ログの一覧画面">
 </p>
 
+<div class="pagebreak"></div>
+
 #### 機能一覧
 
 - ログの一覧表示
@@ -371,6 +373,8 @@
   <img src="screenshots/send_target_basic.png" alt="送信先の設定（基本の設定）">
 </p>
 
+<div class="pagebreak"></div>
+
 kintoneの設定:
 - 接続先（サブドメイン）
 - 認証情報：ログイン名・パスワードを入力します
@@ -382,6 +386,8 @@ kintoneの設定:
   <img src="screenshots/send_target_kintone1.png" alt="送信先の設定（kintoneの設定）">
   <img src="screenshots/send_target_kintone2.png" alt="送信先の設定（kintoneの設定）">
 </p>
+
+<div class="pagebreak"></div>
 
 オプション:
 - 会社名の変換：有効にすると、会社名を英数字を半角大文字に、それ以外の文字を全角に変換してから送信します
@@ -400,11 +406,15 @@ kintoneの設定:
   <img src="screenshots/send_target_test_send1.png" alt="テスト送信">
 </p>
 
+テスト手順:
+
 1. 必須項目が未入力の場合はエラーが表示され、テスト送信は行われません。
 
 <p float="left">
   <img src="screenshots/send_target_test_send2.png" alt="テスト送信">
 </p>
+
+<div class="pagebreak"></div>
 
 2. 問題なければ「テスト本文」ダイアログが表示され、送信するSMS本文を入力できます。テスト用の文言があらかじめ入力されており、自由に書き換えられます。「送信」を押すと次に進み、「キャンセル」を押すと中止します。
 
@@ -417,6 +427,8 @@ kintoneの設定:
 <p float="left">
   <img src="screenshots/send_target_test_send4.png" alt="テスト送信">
 </p>
+
+<div class="pagebreak"></div>
 
 4. 条件に一致する場合は実際に送信され、「テスト結果」ダイアログに以下が表示されます。
    - タイトル末尾のアイコン：会社名・氏名の抽出にAIを使ったか、ルールベースを使ったか
