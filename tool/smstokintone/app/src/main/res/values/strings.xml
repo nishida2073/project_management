@@ -4,7 +4,7 @@
     <!-- アイコン -->
     <string name="icon_extraction_succeeded">🆗</string>
     <string name="icon_extraction_failed">🆖</string>
-    <string name="icon_extraction_continued">❎</string>
+    <string name="icon_extraction_continued">🔳</string>
     <string name="icon_replied">📨</string>
     <string name="icon_send_none">⬜</string>
     <string name="icon_send_auto">✅</string>
@@ -12,8 +12,8 @@
     <string name="icon_company_name_converted">🔄</string>
     <string name="icon_extraction_rule">⚙️</string>
     <string name="icon_extraction_ai">🤖</string>
-    <string name="icon_send_target_exists">📍</string>
-    <string name="icon_send_target_unconfigured">🚫</string>
+    <string name="icon_send_target_exists">🈶</string>
+    <string name="icon_send_target_unconfigured">🈚</string>
     <string name="icon_send_target_inherited">♻️</string>
 
     <!-- 汎用ボタン -->
@@ -237,12 +237,12 @@
     <string name="label_search_extraction_status_filter">抽出状況</string>
     <string name="cb_extraction_succeeded_only">🆗 正常</string>
     <string name="cb_extraction_failed_only">🆖 異常</string>
-    <string name="cb_extraction_continued_only">❎ 継続</string>
+    <string name="cb_extraction_continued_only">🔳 継続</string>
     <string name="label_search_send_status_filter">送信状況</string>
     <string name="cb_send_none_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ ❎ 継続\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：📍 あり ・ 🚫 なし ・ ♻️ 引き継ぎ"</string>
+    <string name="helper_sms_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ 🔳 継続\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし ・ ♻️ 引き継ぎ"</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>
