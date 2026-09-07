@@ -7,6 +7,11 @@ import com.google.mlkit.genai.common.DownloadStatus
 import com.google.mlkit.genai.prompt.Generation
 import com.google.mlkit.genai.prompt.GenerativeModel
 import com.google.mlkit.genai.prompt.generationConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.collect
 import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
@@ -47,8 +52,18 @@ object SmsPartsGenerator {
     /** [Log]出力に使うタグ */
     private const val TAG = "SmsPartsGenerator"
 
-    /** 本文をキーにしたAI解析結果のキャッシュ（同じ本文を何度も解析させない）。複数スレッドから同時に呼ばれ得るためConcurrentHashMap */
-    private val aiResultCache = ConcurrentHashMap<String, SmsParts>()
+    /**
+     * 本文をキーにしたAI解析結果のキャッシュ（同じ本文を何度も解析させない）。値を結果そのものではなく
+     * Deferredで持つことで、同じ本文に対する呼び出しが同時に来た場合（SmsReceiverとKintoneUploadWorkerが
+     * 同じSMSを並行して解決する場合など）も2回目以降はAIを呼ばず1回目の完了を待つだけになる
+     * （computeIfAbsentがキーごとに1回しかマッピング関数を実行しないことを利用）
+     */
+    private val aiResultCache = ConcurrentHashMap<String, Deferred<SmsParts>>()
+
+    /** [aiResultCache]用のAI呼び出しを積むスコープ。呼び出し元（Activity/Worker/BroadcastReceiver）の
+     * ライフサイクルに関わらず、進行中のAI呼び出しを他の呼び出し元が使い回せるようにするため、
+     * SmsPartsGenerator自身が持つ寿命の長いスコープを使う */
+    private val aiScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     /** 生成コストを避けるため一度作ったモデルを使い回す。@Volatile+@Synchronizedは複数スレッドからの遅延初期化を安全にするため */
     @Volatile
@@ -68,12 +83,10 @@ object SmsPartsGenerator {
             return generateSmsParts(body)
         }
 
-        aiResultCache[body]?.let { return it }
-
-        val aiResult = requestAiSmsParts(body)
-        val result = aiResult ?: generateSmsParts(body)
-        aiResultCache[body] = result
-        return result
+        val deferred = aiResultCache.computeIfAbsent(body) {
+            aiScope.async { requestAiSmsParts(body) ?: generateSmsParts(body) }
+        }
+        return deferred.await()
     }
 
     /** 端末上のAIモデルを呼び出して会社名・氏名を抽出する。モデルが利用不可・ダウンロード失敗・呼び出し失敗の場合はnullを返す */
