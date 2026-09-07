@@ -10,7 +10,7 @@ const {
 
 function fixInternalDestLinks(pdfDoc, headingsWithPages, pages) {
   const context = pdfDoc.context;
-  const byText = new Map(headingsWithPages.map((h) => [h.text, h]));
+  const byText = new Map(headingsWithPages.map((h) => [h.id, h]));
 
   for (const page of pdfDoc.getPages()) {
     const annotsObj = page.node.Annots();
@@ -65,18 +65,19 @@ async function findHeadingPages(pdfBytes, headings) {
   });
 }
 
-function buildTree(headingsWithPages) {
+function buildTree(headingsWithPages, maxLevel = 3) {
   const tree = [];
-  let currentH2 = null;
+  const stack = [];
   for (const h of headingsWithPages) {
-    if (h.level === 2) {
-      currentH2 = { ...h, children: [] };
-      tree.push(currentH2);
-    } else if (currentH2) {
-      currentH2.children.push({ ...h, children: [] });
+    if (h.level > maxLevel) continue;
+    const node = { ...h, children: [] };
+    while (stack.length && stack[stack.length - 1].level >= h.level) stack.pop();
+    if (stack.length) {
+      stack[stack.length - 1].node.children.push(node);
     } else {
-      tree.push({ ...h, children: [] });
+      tree.push(node);
     }
+    stack.push({ node, level: h.level });
   }
   return tree;
 }
@@ -87,10 +88,10 @@ function countAll(nodes) {
   return c;
 }
 
-async function addBookmarks(inPath, headings, outPath, title) {
+async function addBookmarks(inPath, headings, outPath, title, maxLevel = 3) {
   const pdfBytes = fs.readFileSync(inPath);
   const headingsWithPages = await findHeadingPages(pdfBytes, headings);
-  const tree = buildTree(headingsWithPages);
+  const tree = buildTree(headingsWithPages, maxLevel);
 
   const pdfDoc = await PDFDocument.load(pdfBytes);
   if (title) {
@@ -153,7 +154,7 @@ async function addBookmarks(inPath, headings, outPath, title) {
   pdfDoc.catalog.delete(PDFName.of('Dests'));
 
   const sortedHeadings = [...headingsWithPages].sort((a, b) =>
-    a.text < b.text ? -1 : a.text > b.text ? 1 : 0
+    a.id < b.id ? -1 : a.id > b.id ? 1 : 0
   );
   const namesArray = PDFArray.withContext(context);
   for (const h of sortedHeadings) {
@@ -161,7 +162,7 @@ async function addBookmarks(inPath, headings, outPath, title) {
     const dest = PDFArray.withContext(context);
     dest.push(page.ref);
     dest.push(PDFName.of('Fit'));
-    namesArray.push(PDFHexString.fromText(h.text));
+    namesArray.push(PDFHexString.fromText(h.id));
     namesArray.push(dest);
   }
   const destsNameTreeRef = context.register(context.obj({ Names: namesArray }));

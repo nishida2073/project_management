@@ -54,9 +54,13 @@ const pageNumbers = flags.includes('--page-numbers');
 const header = flags.includes('--header');
 const imgWidthFlag = flags.find((f) => f.startsWith('--img-width='));
 const imgWidth = imgWidthFlag ? Number(imgWidthFlag.slice('--img-width='.length)) : null;
+const tocDepthFlag = flags.find((f) => f.startsWith('--toc-depth='));
+const tocDepth = tocDepthFlag ? Number(tocDepthFlag.slice('--toc-depth='.length)) : 3;
+const bookmarkDepthFlag = flags.find((f) => f.startsWith('--bookmark-depth='));
+const bookmarkDepth = bookmarkDepthFlag ? Number(bookmarkDepthFlag.slice('--bookmark-depth='.length)) : 3;
 
 if (!mdPath || !outPath) {
-  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--narrow-margins] [--img-width=N] [--toc] [--page-numbers] [--header]');
+  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--narrow-margins] [--img-width=N] [--toc] [--toc-depth=N] [--page-numbers] [--header] [--bookmark-depth=N]');
   process.exit(1);
 }
 
@@ -66,20 +70,23 @@ const pdfMargin = narrowMargins
 
 const frontMatterPageCount = (titlePage ? 1 : 0) + (toc ? 1 : 0);
 
-function tocRow(h, className, displayPage) {
-  const href = `#${encodeURIComponent(h.text)}`;
-  return `<a class="toc-item ${className}" href="${href}"><span class="toc-text">${escapeHtml(h.text)}</span><span class="toc-dots"></span><span class="toc-page-num">${displayPage(h.token)}</span></a>`;
+function tocRow(h, depth, displayPage) {
+  const href = `#${encodeURIComponent(h.id)}`;
+  const className = depth === 0 ? 'toc-h2' : 'toc-h3';
+  const extraIndent = depth > 1 ? ` style="margin-left:${1.6 * depth}rem"` : '';
+  return `<a class="toc-item ${className}" href="${href}"${extraIndent}><span class="toc-text">${escapeHtml(h.text)}</span><span class="toc-dots"></span><span class="toc-page-num">${displayPage(h.token)}</span></a>`;
 }
 
 function buildTocHtml(tree, pageByToken, displayOffset) {
   const displayPage = (token) => pageByToken.get(token) + 2 - displayOffset;
   const rows = [];
-  for (const h2 of tree) {
-    rows.push(tocRow(h2, 'toc-h2', displayPage));
-    for (const h3 of h2.children) {
-      rows.push(tocRow(h3, 'toc-h3', displayPage));
+  function walk(nodes, depth) {
+    for (const node of nodes) {
+      rows.push(tocRow(node, depth, displayPage));
+      walk(node.children, depth + 1);
     }
   }
+  walk(tree, 0);
   return `<div class="toc-page"><h2 class="toc-title">目次</h2>${rows.join('\n')}</div>`;
 }
 
@@ -195,7 +202,7 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
     fs.unlinkSync(draftPdfPath);
 
     const pageByToken = new Map(headingsWithPages.map((h) => [h.token, h.pageIndex]));
-    const tree = buildTree(headingsWithPages);
+    const tree = buildTree(headingsWithPages, tocDepth);
     const tocDisplayOffset = pageNumbers ? frontMatterPageCount : 0;
     const tocHtml = buildTocHtml(tree, pageByToken, tocDisplayOffset);
 
@@ -217,7 +224,7 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
   }
   await browser.close();
 
-  await addBookmarks(tmpPdfPath, headings, outPath, title);
+  await addBookmarks(tmpPdfPath, headings, outPath, title, bookmarkDepth);
   fs.unlinkSync(tmpPdfPath);
 
   if (pageNumbers) {

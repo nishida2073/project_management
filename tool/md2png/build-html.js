@@ -18,13 +18,17 @@ function buildHtml(mdPath) {
   let html = marked.parse(md);
 
   const headings = [];
-  html = html.replace(/<h([23])([^>]*)>(.*?)<\/h\1>/g, (m, level, attrs, inner) => {
+  html = html.replace(/<h([235])([^>]*)>(.*?)<\/h\1>/g, (m, level, attrs, inner) => {
+    const rawText = inner.replace(/<[^>]+>/g, '').trim();
+    const idMatch = rawText.match(/^(.*?)\s*\{#([^}]+)\}$/);
+    const text = idMatch ? idMatch[1] : rawText;
+    const id = idMatch ? idMatch[2] : rawText;
+    const displayInner = idMatch ? inner.replace(/\s*\{#[^}]+\}\s*$/, '') : inner;
     const token = `ANCHOR-${headings.length}-${Math.random().toString(36).slice(2, 8)}`;
-    const text = inner.replace(/<[^>]+>/g, '').trim();
-    headings.push({ level: Number(level), text, token });
+    headings.push({ level: Number(level), text, id, token });
     const marker = `<span style="font-size:1px;color:#ffffff;position:absolute;">${token}</span>`;
-    const idAttr = ` id="${text.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`;
-    return `<h${level}${attrs}${idAttr}>${marker}${inner}</h${level}>`;
+    const idAttr = ` id="${id.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`;
+    return `<h${level}${attrs}${idAttr}>${marker}${displayInner}</h${level}>`;
   });
 
   mermaidBlocks.forEach((code, i) => {
