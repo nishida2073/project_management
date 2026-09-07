@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { marked } = require('marked');
 
-const baseStyle = fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8');
+const defaultStyle = fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8');
 
-function buildHtml(mdPath) {
+function buildHtml(mdPath, anchorLevels = [2, 3, 5], styleCss = defaultStyle) {
   const title = path.basename(mdPath, path.extname(mdPath));
   let md = fs.readFileSync(mdPath, 'utf8');
 
@@ -18,7 +18,8 @@ function buildHtml(mdPath) {
   let html = marked.parse(md);
 
   const headings = [];
-  html = html.replace(/<h([235])([^>]*)>(.*?)<\/h\1>/g, (m, level, attrs, inner) => {
+  const headingRe = new RegExp(`<h([${anchorLevels.join('')}])([^>]*)>(.*?)</h\\1>`, 'g');
+  html = html.replace(headingRe, (m, level, attrs, inner) => {
     const rawText = inner.replace(/<[^>]+>/g, '').trim();
     const idMatch = rawText.match(/^(.*?)\s*\{#([^}]+)\}$/);
     const text = idMatch ? idMatch[1] : rawText;
@@ -51,7 +52,7 @@ function buildHtml(mdPath) {
 <base href="file:///${baseDir}/">
 <title>${title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</title>
 <style>
-${baseStyle}
+${styleCss}
 </style>
 </head>
 <body>

@@ -7,7 +7,7 @@ const { PDFDocument, StandardFonts, rgb } = require('pdf-lib');
 const { buildHtml } = require('./build-html');
 const { addBookmarks, findHeadingPages, buildTree } = require('./add-bookmarks');
 
-const styleCss = fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8');
+let styleCss = fs.readFileSync(path.join(__dirname, 'style.css'), 'utf8');
 
 function escapeHtml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -58,9 +58,18 @@ const tocDepthFlag = flags.find((f) => f.startsWith('--toc-depth='));
 const tocDepth = tocDepthFlag ? Number(tocDepthFlag.slice('--toc-depth='.length)) : 3;
 const bookmarkDepthFlag = flags.find((f) => f.startsWith('--bookmark-depth='));
 const bookmarkDepth = bookmarkDepthFlag ? Number(bookmarkDepthFlag.slice('--bookmark-depth='.length)) : 3;
+const anchorLevelsFlag = flags.find((f) => f.startsWith('--anchor-levels='));
+const anchorLevels = anchorLevelsFlag
+  ? anchorLevelsFlag.slice('--anchor-levels='.length).split(',').map(Number)
+  : [2, 3, 5];
+const extraCssFlag = flags.find((f) => f.startsWith('--extra-css='));
+if (extraCssFlag) {
+  const extraCssPath = path.resolve(extraCssFlag.slice('--extra-css='.length));
+  styleCss += '\n' + fs.readFileSync(extraCssPath, 'utf8');
+}
 
 if (!mdPath || !outPath) {
-  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--narrow-margins] [--img-width=N] [--toc] [--toc-depth=N] [--page-numbers] [--header] [--bookmark-depth=N]');
+  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--narrow-margins] [--img-width=N] [--toc] [--toc-depth=N] [--page-numbers] [--header] [--bookmark-depth=N] [--anchor-levels=2,3,5] [--extra-css=path]');
   process.exit(1);
 }
 
@@ -179,7 +188,7 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
 }
 
 (async () => {
-  const { page, headings, title } = buildHtml(mdPath);
+  const { page, headings, title } = buildHtml(mdPath, anchorLevels, styleCss);
 
   let styledPage = page;
   if (titlePage) {
