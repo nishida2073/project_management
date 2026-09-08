@@ -197,7 +197,7 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
 
   let styledPage = page;
   if (titlePage) {
-    const dateHtml = issueDate && issueDatePosition === 'front' ? `<div class="title-page-date">発行日: ${escapeHtml(issueDate)}</div>` : '';
+    const dateHtml = issueDate && issueDatePosition === 'front' ? `<div class="title-page-date">作成年月: ${escapeHtml(issueDate)}</div>` : '';
     styledPage = styledPage.replace(/<h1>([\s\S]*?)<\/h1>/, `${dateHtml}<div class="title-page"><h1>$1</h1></div>`);
   }
 
@@ -227,7 +227,7 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
   }
 
   if (backMatterPageCount) {
-    const backCoverHtml = `<div class="back-cover-date">発行日: ${escapeHtml(issueDate)}</div>`;
+    const backCoverHtml = `<div class="back-cover-date">作成年月: ${escapeHtml(issueDate)}</div>`;
     finalPage = finalPage.replace('</body>', `${backCoverHtml}</body>`);
   }
 
