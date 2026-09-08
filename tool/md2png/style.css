@@ -60,6 +60,23 @@ th { background: #f3f5f7; }
   break-after: page;
 }
 .title-page h1 { margin: 0; }
+/* build_pdf.js --issue-date: 表紙右上に表示する発行日。title-pageの中に入れるとbreak-after:pageが
+   効かなくなるため、title-pageの外側の兄弟要素として配置している */
+.title-page-date { position: absolute; top: 0; right: 0; font-size: 12px; }
+
+/* build_pdf.js --issue-date-position=back: 発行日だけの裏表紙ページを最後に1枚追加する。
+   絶対配置の子要素をbreak-beforeの箱に入れるとページ分割が崩れるため、テキストは
+   このdiv自身にflexで右下寄せする（子要素として別途持たせない） */
+.back-cover-date {
+  height: calc(267mm + 15mm);
+  margin-bottom: -40px;
+  break-before: page;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-size: 12px;
+}
 
 /* ==================== ヘッダー・フッターの設定 ==================== */
 /* build_pdf.js --header: 各ページ左上に出すファイル名。位置（左右の余白）は実行時の

@@ -17,6 +17,8 @@ node build_pdf.js <input.md> <output.pdf> [オプション...]
 | オプション | 説明 | 既定値 |
 | --- | --- | --- |
 | `--title-page` | 表紙ページを付ける | なし |
+| `--issue-date=text` | 発行日（任意の文字列）を表示する | なし |
+| `--issue-date-position=front\|back` | `front`は表紙の右上に表示（`--title-page`指定時のみ有効）。`back`は発行日だけの裏表紙ページを最後に1枚追加し、その右下に表示する（ページ数が1増える） | `front` |
 | `--narrow-margins` | 余白を狭くする | 通常の余白 |
 | `--img-width=N` | `width` 未指定の`<img>`にNpxの幅を補う | 補わない |
 | `--toc` | 目次ページを付ける | 目次なし |

@@ -62,6 +62,10 @@ const anchorLevelsFlag = flags.find((f) => f.startsWith('--anchor-levels='));
 const anchorLevels = anchorLevelsFlag
   ? anchorLevelsFlag.slice('--anchor-levels='.length).split(',').map(Number)
   : [2, 3, 5];
+const issueDateFlag = flags.find((f) => f.startsWith('--issue-date='));
+const issueDate = issueDateFlag ? issueDateFlag.slice('--issue-date='.length) : null;
+const issueDatePositionFlag = flags.find((f) => f.startsWith('--issue-date-position='));
+const issueDatePosition = issueDatePositionFlag ? issueDatePositionFlag.slice('--issue-date-position='.length) : 'front';
 const extraCssFlag = flags.find((f) => f.startsWith('--extra-css='));
 if (extraCssFlag) {
   const extraCssPath = path.resolve(extraCssFlag.slice('--extra-css='.length));
@@ -69,7 +73,7 @@ if (extraCssFlag) {
 }
 
 if (!mdPath || !outPath) {
-  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--narrow-margins] [--img-width=N] [--toc] [--toc-depth=N] [--page-numbers] [--header] [--bookmark-depth=N] [--anchor-levels=2,3,5] [--extra-css=path]');
+  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--issue-date=text] [--issue-date-position=front|back] [--narrow-margins] [--img-width=N] [--toc] [--toc-depth=N] [--page-numbers] [--header] [--bookmark-depth=N] [--anchor-levels=2,3,5] [--extra-css=path]');
   process.exit(1);
 }
 
@@ -78,6 +82,7 @@ const pdfMargin = narrowMargins
   : { top: '15mm', bottom: '15mm', left: '15mm', right: '15mm' };
 
 const frontMatterPageCount = (titlePage ? 1 : 0) + (toc ? 1 : 0);
+const backMatterPageCount = issueDate && issueDatePosition === 'back' ? 1 : 0;
 
 function tocRow(h, depth, displayPage) {
   const href = `#${encodeURIComponent(h.id)}`;
@@ -127,10 +132,10 @@ async function renderPdf(browser, htmlPage, headerText) {
   return tmpPdfPath;
 }
 
-async function addPageNumbers(pdfPath, frontCount) {
+async function addPageNumbers(pdfPath, frontCount, backCount) {
   const pdfDoc = await PDFDocument.load(fs.readFileSync(pdfPath));
   const pages = pdfDoc.getPages();
-  const contentTotal = pages.length - frontCount;
+  const contentTotal = pages.length - frontCount - backCount;
   if (contentTotal <= 0) return;
 
   const footerRule = readCssRule(styleCss, '.pdf-footer');
@@ -142,7 +147,7 @@ async function addPageNumbers(pdfPath, frontCount) {
   const marginLeft = mmToPt(pdfMargin.left);
   const marginRight = mmToPt(pdfMargin.right);
 
-  for (let i = frontCount; i < pages.length; i++) {
+  for (let i = frontCount; i < pages.length - backCount; i++) {
     const pageObj = pages[i];
     const { width } = pageObj.getSize();
     const label = `${i - frontCount + 1} / ${contentTotal}`;
@@ -192,7 +197,8 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
 
   let styledPage = page;
   if (titlePage) {
-    styledPage = styledPage.replace(/<h1>([\s\S]*?)<\/h1>/, '<div class="title-page"><h1>$1</h1></div>');
+    const dateHtml = issueDate && issueDatePosition === 'front' ? `<div class="title-page-date">発行日: ${escapeHtml(issueDate)}</div>` : '';
+    styledPage = styledPage.replace(/<h1>([\s\S]*?)<\/h1>/, `${dateHtml}<div class="title-page"><h1>$1</h1></div>`);
   }
 
   if (imgWidth) {
@@ -220,6 +226,11 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
       : finalPage.replace('<body>\n', `<body>\n${tocHtml}\n`);
   }
 
+  if (backMatterPageCount) {
+    const backCoverHtml = `<div class="back-cover-date">発行日: ${escapeHtml(issueDate)}</div>`;
+    finalPage = finalPage.replace('</body>', `${backCoverHtml}</body>`);
+  }
+
   let tmpPdfPath;
   if (header && frontMatterPageCount > 0) {
     const noHeaderPath = await renderPdf(browser, finalPage, null);
@@ -237,7 +248,7 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
   fs.unlinkSync(tmpPdfPath);
 
   if (pageNumbers) {
-    await addPageNumbers(outPath, frontMatterPageCount);
+    await addPageNumbers(outPath, frontMatterPageCount, backMatterPageCount);
   }
 
   console.log('done: ' + outPath);
