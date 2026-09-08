@@ -3,5 +3,5 @@ setlocal
 cd /d "%~dp0"
 set "NAME=%~n0"
 set "NAME=%NAME:build_pdf-=%"
-node "..\md2png\build_pdf.js" "%NAME%.md" "%NAME%.pdf" --title-page --narrow-margins --page-numbers --extra-css="%NAME%.css"
+node "..\md2png\build_pdf.js" "%NAME%.md" "%NAME%.pdf" --title-page --narrow-margins --toc --page-numbers --extra-css="%NAME%.css"
 endlocal
