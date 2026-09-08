@@ -19,7 +19,7 @@ strong { color: #2b5f73; }
 .mermaid { text-align: center; margin: 1rem 0; break-inside: avoid; }
 h2, h3, h4, h5 { break-after: avoid; }
 img { vertical-align: top; margin-left: 1rem; border: 1px solid #d3d9df; }
-table { border-collapse: collapse; margin: 1rem 0; }
+table { border-collapse: collapse; margin: 1rem 0 1rem 1rem; }
 th, td { border: 1px solid #d3d9df; padding: 0.4rem 0.8rem; }
 th { background: #f3f5f7; }
 
