@@ -202,8 +202,14 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             return
         }
 
+        val testSendBody = if (sendTarget.keywords.isNotEmpty()) {
+            getString(R.string.test_send_body_template_exists_keywords, sendTarget.keywords.joinToString("、"))
+        } else {
+            getString(R.string.test_send_body_template_no_keywords)
+        }
+
         val editText = EditText(this).apply {
-            setText(getString(R.string.test_send_body))
+            setText(testSendBody)
             setSelection(text.length)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
             minLines = 3
