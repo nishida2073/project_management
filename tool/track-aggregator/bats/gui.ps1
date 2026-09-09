@@ -77,6 +77,7 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
             [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "post-collect-results.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
@@ -474,7 +475,12 @@ $commonSettingsVars = @(
     "CourseGroupDefs",
     "YearOrder"
 )
-$authVars = @("KintoneSubdomain")
+$authVars = @("KintoneLoginName", "KintonePassword", "KintoneSubdomain")
+$postVars = @("SpaceId", "ThreadId", "MentionUserCodes", "CommentTextTemplate")
+$settingsMaskedVars = @("KintonePassword")
+# client.batは1変数1行(set "Var=Value")の形式で改行を持てないため、複数行入力欄は
+# 保存時に実際の改行を"\n"リテラルへ変換して1行に収め、画面表示時・スクリプト側の利用時に戻す
+$settingsMultilineVars = @("CommentTextTemplate")
 # 共通設定（common-env.bat）の既定値をグループ単位で上書きしたい項目。
 # clients\<グループ名>.batはcommon-env.batの後にcallされるため、ここで値を書けばそのグループだけ上書きされる。
 # 空欄のまま保存した場合はこの3行自体を書き出さない（空文字を上書きしてしまうと共通設定側の値が
@@ -491,8 +497,14 @@ $radioVars = @{
     )
 }
 
-$settingsGroupLabels = @{ "COMMON" = "共通設定"; "AUTH" = "認証情報"; "OVERRIDE" = "個別設定（空欄の場合は共通設定の値を使用）" }
+$settingsGroupLabels = @{ "COMMON" = "共通設定"; "AUTH" = "認証情報"; "POST" = "投稿先"; "OVERRIDE" = "個別設定（空欄の場合は共通設定の値を使用）" }
 $settingsVarLabels = @{
+    "KintoneLoginName"                = "ログイン名"
+    "KintonePassword"                 = "パスワード"
+    "SpaceId"                         = "投稿先スペースID"
+    "ThreadId"                        = "投稿先スレッドID"
+    "MentionUserCodes"                = "メンション対象"
+    "CommentTextTemplate"             = "投稿コメント文言"
     "ClientDataRootDir"               = "受講生データのフォルダ"
     "TemplateRootDir"                 = "テンプレートのフォルダ"
     "LOG_DIR"                         = "ログの出力先"
@@ -679,6 +691,10 @@ function Get-GroupSettingsFieldRows {
         $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } else { $templateDefaults.Auth[$varName] }
         [PSCustomObject]@{ Key = "AUTH_$varName"; VarName = $varName; Group = "AUTH"; Value = $value }
     }
+    foreach ($varName in $postVars) {
+        $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } else { $templateDefaults.Auth[$varName] }
+        [PSCustomObject]@{ Key = "POST_$varName"; VarName = $varName; Group = "POST"; Value = $value }
+    }
     # 上書き項目は共通設定・テンプレートの値にはフォールバックしない。「空欄」がそのまま
     # 「このグループでは上書きしていない」を表す（Save-GroupSettings側も参照）
     foreach ($varName in $groupOverrideVars) {
@@ -723,6 +739,11 @@ function Render-SettingsFields {
             $lastGroup = $field.Group
         }
 
+        if ($field.VarName -eq "MentionUserCodes") {
+            $y = Add-MentionsEditor -Panel $Panel -StartY $y -RawValue "$($field.Value)"
+            continue
+        }
+
         $lbl = New-Object System.Windows.Forms.Label
         $lbl.Text = if ($settingsVarLabels.ContainsKey($field.VarName)) { $settingsVarLabels[$field.VarName] } else { $field.VarName }
         $lbl.AutoSize = $false
@@ -730,6 +751,8 @@ function Render-SettingsFields {
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
         $settingsToolTip.SetToolTip($lbl, $field.VarName)
         $Panel.Controls.Add($lbl)
+
+        $isMultiline = $settingsMultilineVars -contains $field.VarName
 
         if ($radioVars.ContainsKey($field.VarName)) {
             # テキスト入力ではなくラジオボタンで選ばせる項目（個別設定では未上書きを表す空欄も選べる）。
@@ -775,10 +798,17 @@ function Render-SettingsFields {
             $Panel.Controls.Add($radioPanel)
         } else {
             $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = "$($field.Value)"
+            $txt.Text = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
             $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            $txt.Size = New-Object System.Drawing.Size(300, 22)
+            if ($isMultiline) {
+                $txt.Multiline = $true
+                $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
+                $txt.Size = New-Object System.Drawing.Size(300, 60)
+            } else {
+                $txt.Size = New-Object System.Drawing.Size(300, 22)
+            }
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            if ($settingsMaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
             $Panel.Controls.Add($txt)
         }
 
@@ -800,17 +830,182 @@ function Render-SettingsFields {
         }
 
         $TextBoxes[$field.Key] = $txt
+        $y += if ($isMultiline) { 66 } else { 28 }
+
+        if ($field.VarName -eq "CommentTextTemplate") {
+            Add-TestPostButton -Panel $Panel -Y $y
+            $y += 34
+        }
+    }
+    return $y
+}
+
+# メンション設定（MentionUserCodes）は"ユーザコード:権限"のペアをカンマ区切りで1行に保持する
+# （client.batは1変数1行のため）。GUI側は行単位で追加・削除できるUIにするため、
+# 選択中のグループの行データだけをメモリ上に保持し（$script:mentionRowsGroupNameで検知）、
+# グループを切り替えたときだけファイルの値から読み直す
+$mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
+$script:mentionRows = @()
+$script:mentionRowsGroupName = $null
+$script:mentionRowControls = @()
+
+function ConvertFrom-MentionUserCodesText {
+    param([string]$Text)
+    $rows = [System.Collections.Generic.List[object]]::new()
+    foreach ($part in ($Text -split ',')) {
+        $trimmed = $part.Trim()
+        if (!$trimmed) { continue }
+        $pair = $trimmed -split ':', 2
+        $code = $pair[0].Trim()
+        if (!$code) { continue }
+        $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
+        if ($mentionTypeOptions -notcontains $type) { $type = "USER" }
+        $rows.Add([PSCustomObject]@{ Code = $code; Type = $type })
+    }
+    return $rows
+}
+
+function ConvertTo-MentionUserCodesText {
+    param($Rows)
+    return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
+}
+
+# 描画済みの行コントロールの現在値を$script:mentionRowsへ書き戻す。
+# 再描画（行追加・削除）の直前に必ず呼び、それまでの入力内容を失わないようにする
+function Sync-MentionRowsFromControls {
+    foreach ($entry in $script:mentionRowControls) {
+        $entry.Row.Code = $entry.CodeBox.Text
+        $entry.Row.Type = $entry.TypeCombo.SelectedItem
+    }
+}
+
+function Add-MentionsEditor {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [int]$StartY,
+        [string]$RawValue
+    )
+    $groupName = $cmbSettingsGroupTarget.SelectedItem
+    if ($script:mentionRowsGroupName -ne $groupName) {
+        # ConvertFrom-MentionUserCodesTextはList[object]を返すため、@()で配列化しないと
+        # 後段の "$script:mentionRows += ..." が配列結合ではなくop_Addition呼び出しになって失敗する
+        $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue)
+        $script:mentionRowsGroupName = $groupName
+    }
+    $script:mentionRowControls = @()
+
+    $y = $StartY
+    $lbl = New-Object System.Windows.Forms.Label
+    $lbl.Text = "メンション対象"
+    $lbl.AutoSize = $false
+    $lbl.Size = New-Object System.Drawing.Size(220, 20)
+    $lbl.Location = New-Object System.Drawing.Point(20, $y)
+    $settingsToolTip.SetToolTip($lbl, "MentionUserCodes")
+    $Panel.Controls.Add($lbl)
+    $y += 24
+
+    foreach ($row in @($script:mentionRows)) {
+        $txtCode = New-Object System.Windows.Forms.TextBox
+        $txtCode.Text = "$($row.Code)"
+        $txtCode.Location = New-Object System.Drawing.Point(40, $y)
+        $txtCode.Size = New-Object System.Drawing.Size(190, 22)
+        $Panel.Controls.Add($txtCode)
+
+        $cmbType = New-Object System.Windows.Forms.ComboBox
+        $cmbType.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+        foreach ($opt in $mentionTypeOptions) { $cmbType.Items.Add($opt) | Out-Null }
+        $cmbType.SelectedItem = if ($mentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
+        $cmbType.Location = New-Object System.Drawing.Point(240, $y)
+        $cmbType.Size = New-Object System.Drawing.Size(120, 22)
+        $Panel.Controls.Add($cmbType)
+
+        $btnDeleteRow = New-Object System.Windows.Forms.Button
+        $btnDeleteRow.Text = "削除"
+        $btnDeleteRow.Location = New-Object System.Drawing.Point(370, ($y - 1))
+        $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
+        $btnDeleteRow.Tag = $row
+        $btnDeleteRow.Add_Click({
+            Sync-MentionRowsFromControls
+            $target = $this.Tag
+            $script:mentionRows = @($script:mentionRows | Where-Object { $_ -ne $target })
+            Update-GroupSettingsFields
+        })
+        $Panel.Controls.Add($btnDeleteRow)
+
+        $script:mentionRowControls += [PSCustomObject]@{ Row = $row; CodeBox = $txtCode; TypeCombo = $cmbType }
         $y += 28
+    }
+
+    $btnAddRow = New-Object System.Windows.Forms.Button
+    $btnAddRow.Text = "＋ 追加"
+    $btnAddRow.Location = New-Object System.Drawing.Point(40, $y)
+    $btnAddRow.Size = New-Object System.Drawing.Size(80, 24)
+    $btnAddRow.Add_Click({
+        Sync-MentionRowsFromControls
+        $script:mentionRows += [PSCustomObject]@{ Code = ""; Type = "USER" }
+        Update-GroupSettingsFields
+    })
+    $Panel.Controls.Add($btnAddRow)
+    $y += 34
+
+    return $y
+}
+
+function Add-TestPostButton {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [int]$Y
+    )
+    $btnTestPost = New-Object System.Windows.Forms.Button
+    $btnTestPost.Text = "テスト投稿"
+    $btnTestPost.Location = New-Object System.Drawing.Point(40, $Y)
+    $btnTestPost.Size = New-Object System.Drawing.Size(90, 24)
+    $btnTestPost.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+    $btnTestPost.Add_Click({ Test-KintonePostSettings })
+    $Panel.Controls.Add($btnTestPost)
+}
+
+# スペースID・スレッドID・メンション設定（投稿先）の妥当性は、スレッド単体を取得するAPIが無く
+# メンション対象の存在確認にも別APIが必要になるため、実際にダミーコメントを投稿してみて確認する
+function Test-KintonePostSettings {
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+    $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+    $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+
+    if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) {
+        [System.Windows.Forms.MessageBox]::Show("スペースIDとスレッドIDを入力してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    Sync-MentionRowsFromControls
+    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+
+    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+
+    try {
+        $response = Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+        [System.Windows.Forms.MessageBox]::Show("投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("投稿に失敗しました。`r`n$($_.Exception.Message)", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
     }
 }
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes | Out-Null
 }
 
 function Update-GroupSettingsFields {
+    # メンション設定の行追加・削除のたびに再描画されるため、スクロール位置がリセットされないよう保存・復元する
+    $scrollX = -$settingsGroupFieldPanel.AutoScrollPosition.X
+    $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
+
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes | Out-Null
+
+    $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
 function Get-CommonSettingsFieldValue {
@@ -842,9 +1037,32 @@ function Save-CommonSettings {
 function Save-GroupSettings {
     param([string]$GroupName)
 
-    $subdomainValue = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+    # Authorizationは画面上の編集項目からは外したが、実行スクリプト側は今も参照するため、
+    # 上書き前の既存の値をそのまま引き継ぐ（新規グループはclients\template\の既定値＝空欄になる）
+    $existingAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $authorizationValue = if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
+
+    $authLines = @("@echo off", "")
+    foreach ($varName in $authVars) {
+        $val = Get-GroupSettingsFieldValue "AUTH_$varName"
+        $authLines += "set `"$varName=$val`""
+    }
+    $authLines += "set `"Authorization=$authorizationValue`""
     # BaseUrlは画面では編集させず、KintoneSubdomainから常に導出する
-    $authLines = @("@echo off", "", "set `"KintoneSubdomain=$subdomainValue`"", "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`"")
+    $authLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
+    $authLines += ""
+
+    Sync-MentionRowsFromControls
+    foreach ($varName in $postVars) {
+        $val = if ($varName -eq "MentionUserCodes") {
+            ConvertTo-MentionUserCodesText -Rows $script:mentionRows
+        } else {
+            Get-GroupSettingsFieldValue "POST_$varName"
+        }
+        if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+        $authLines += "set `"$varName=$val`""
+    }
+    $authLines += ""
 
     # 上書き項目は空欄なら行自体を書かない（空文字を上書きすると共通設定側の値が効かなくなるため）
     foreach ($varName in $groupOverrideVars) {

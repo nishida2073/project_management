@@ -13,6 +13,7 @@ for %%F in (
     "%~dp0bats\collect-combine-result.bat"
     "%~dp0bats\collect-test-result.bat"
     "%~dp0bats\collect-survey-result.bat"
+    "%~dp0bats\post-collect-results.bat"
 ) do (
     call "%~dp0bats\message.bat" "Start %%~nxF"
     

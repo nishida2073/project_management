@@ -302,6 +302,102 @@ function Get-CurrentAppData {
 }
 
 
+function Add-KintoneFile {
+    param(
+        [Parameter(Mandatory)][string]$FilePath,
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$Authorization
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+
+    # Invoke-RestMethod -Form はPowerShell 5.1に存在しないため、multipart/form-dataはHttpClientで組み立てる
+    Add-Type -AssemblyName System.Net.Http
+
+    $Url = "$BaseUrl/k/v1/file.json"
+    $httpClient = [System.Net.Http.HttpClient]::new()
+    try {
+        $httpClient.DefaultRequestHeaders.Add("X-Cybozu-Authorization", $Authorization)
+
+        $fileBytes = [System.IO.File]::ReadAllBytes($FilePath)
+        $fileContent = [System.Net.Http.ByteArrayContent]::new($fileBytes)
+        $fileContent.Headers.ContentType = [System.Net.Http.Headers.MediaTypeHeaderValue]::Parse("application/octet-stream")
+
+        $content = [System.Net.Http.MultipartFormDataContent]::new()
+        $content.Add($fileContent, "file", [System.IO.Path]::GetFileName($FilePath))
+
+        $response = $httpClient.PostAsync($Url, $content).GetAwaiter().GetResult()
+        $responseBody = $response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+        if (-not $response.IsSuccessStatusCode) {
+            throw "ファイルアップロード 失敗: $($response.StatusCode) $responseBody"
+        }
+        $result = $responseBody | ConvertFrom-Json
+        Write-Message $result -VarName "response"
+        return $result.fileKey
+    } catch {
+        throw
+    } finally {
+        $httpClient.Dispose()
+    }
+}
+
+
+function Add-KintoneThreadComment {
+    param(
+        [Parameter(Mandatory)][string]$SpaceId,
+        [Parameter(Mandatory)][string]$ThreadId,
+        [string]$Text,
+        [string[]]$FilePaths = @(),
+        # 例: @(@{ code = "ユーザーコード"; type = "USER" }) ※typeはUSER/GROUP/ORGANIZATION（最大10件）
+        [array]$Mentions = @(),
+        [Parameter(Mandatory)][string]$BaseUrl,
+        [Parameter(Mandatory)][string]$Authorization
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+
+    if ([string]::IsNullOrWhiteSpace($Text) -and $FilePaths.Count -eq 0) {
+        throw "TextとFilePathsのどちらか一方は指定してください。"
+    }
+
+    $files = @($FilePaths | ForEach-Object {
+        @{ fileKey = (Add-KintoneFile -FilePath $_ -BaseUrl $BaseUrl -Authorization $Authorization) }
+    })
+
+    $comment = @{}
+    if ($Text) { $comment.text = $Text }
+    if ($files.Count -gt 0) { $comment.files = $files }
+    if ($Mentions.Count -gt 0) { $comment.mentions = $Mentions }
+
+    $body = @{
+        space   = $SpaceId
+        thread  = $ThreadId
+        comment = $comment
+    }
+
+    $headers = @{
+        "X-Cybozu-Authorization" = $Authorization
+        "Content-Type"           = "application/json; charset=utf-8"
+    }
+    $Url = "$BaseUrl/k/v1/space/thread/comment.json"
+
+    try {
+        # Invoke-RestMethodは-Bodyに文字列を渡すと非ASCII文字を?に潰して送信してしまうため、
+        # JSON文字列をUTF-8バイト列に変換してから渡す
+        $bodyJson = $body | ConvertTo-Json -Depth 10
+        $bodyBytes = [System.Text.Encoding]::UTF8.GetBytes($bodyJson)
+        $response = Invoke-RestMethod -Uri $Url -Headers $headers -Method POST -Body $bodyBytes
+        Write-Message $response -VarName "response"
+        return $response
+    } catch {
+        # kintoneのエラー詳細（"指定したグループが見つかりません"等）は例外メッセージではなく
+        # ErrorDetails.Message（レスポンスボディ）に入っているため、あればそちらを使う
+        $detail = if ($_.ErrorDetails.Message) { $_.ErrorDetails.Message } else { $_.Exception.Message }
+        throw $detail
+    }
+}
+
+
 function Set-ResultCellColorByThreshold {
     param (
         $ResultRange,
