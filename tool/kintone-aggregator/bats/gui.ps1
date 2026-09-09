@@ -63,20 +63,21 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "アプリデータ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "create-daily-report.bat"); TargetDirPath = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
-            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "create-pulse-survey.bat"); TargetDirPath = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "create-daily-report.bat"); OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "create-pulse-survey.bat"); OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アプリデータ集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-app-data.bat"); TargetDirPath = $script:commonEnvVars["OutputCollectDataRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-app-data.bat"); OpenTarget = $script:commonEnvVars["OutputCollectDataRootDir"]; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アラート集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アラート集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "check-alert.bat"); TargetDirPath = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アラート集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "check-alert.bat"); OpenTarget = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "アラート集計-投稿"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "post-alert-result.bat"); OpenTarget = { param($groupName) Get-GroupKintoneThreadUrl -GroupName $groupName }; Inputs = $dateAndGroupInputs }
         )
     }
 )
@@ -173,7 +174,8 @@ foreach ($bd in $allButtonDefs) {
     # 見切れたり画面外に出たりする。チェックボックスを固定幅＋省略表示にして「開く」の位置を固定する
     $chk = New-Object System.Windows.Forms.CheckBox
     $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
-    $chk.Checked = $true
+    # kintoneへの投稿のように副作用のあるステップは、ButtonDef側でDefaultChecked=$falseを指定して既定チェックを外す
+    $chk.Checked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
     $chk.AutoSize = $false
     $chk.AutoEllipsis = $true
     $chk.Size = New-Object System.Drawing.Size(500, 22)
@@ -181,7 +183,7 @@ foreach ($bd in $allButtonDefs) {
     $script:batchStepCheckboxes += $chk
     $batchTopControls += $chk
 
-    if ($bd.TargetDirPath) {
+    if ($bd.OpenTarget) {
         $lnkOpen = New-Object System.Windows.Forms.LinkLabel
         $lnkOpen.Text = "開く"
         $lnkOpen.AutoSize = $false
@@ -189,7 +191,16 @@ foreach ($bd in $allButtonDefs) {
         $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
         $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
         $lnkOpen.Tag = $bd
-        $lnkOpen.Add_LinkClicked({ Open-FolderOrWarn -Path $this.Tag.TargetDirPath })
+        # OpenTargetがスクリプトブロックの場合（投稿ボタンのkintoneスレッドURLなど）は、
+        # 一括実行タブ共通の対象グループ選択（$script:batchInputControls）を渡して解決する
+        $lnkOpen.Add_LinkClicked({
+            $target = $this.Tag.OpenTarget
+            if ($target -is [scriptblock]) {
+                $groupValue = Get-InputValue -Control $script:batchInputControls["TargetGroupNameFilter"]
+                $target = & $target $groupValue
+            }
+            Open-TargetOrWarn -Path $target
+        })
         $batchTopControls += $lnkOpen
     }
 
@@ -400,6 +411,19 @@ function Get-SetLineRawValues {
     return $result
 }
 
+# 実行タブ・一括実行タブの「開く」リンク用。指定グループのclient.batからKintoneSubdomain/SpaceId/ThreadIdを読み、
+# kintoneのスレッドを直接開くURLを組み立てる（いずれか未設定、または対象グループが「すべて」（空欄）なら$null）
+function Get-GroupKintoneThreadUrl {
+    param([string]$GroupName)
+    if (!$GroupName) { return $null }
+    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $subdomain = $raw["KintoneSubdomain"]
+    $spaceId = $raw["SpaceId"]
+    $threadId = $raw["ThreadId"]
+    if (!$subdomain -or !$spaceId -or !$threadId) { return $null }
+    return "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId"
+}
+
 # 設定タブの各フィールドの生の値には、common-env.bat内の%BASE_PATH%や%OutputRootDir%のような
 # %VAR%トークンがそのまま残っている（%~dp0のようなバッチ専用トークンは.NET側では解決できないため、
 # common-env.bat側は%BASE_PATH%を使う方式に統一済み）。$script:commonEnvVars（起動時に
@@ -420,7 +444,7 @@ function Resolve-BrowseStart {
     return Expand-VarTokens $RawValue
 }
 
-$commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
+$commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir", "OutputAlertBackupDir")
 $authVars = @("KintoneSubdomain", "KintoneLoginName", "KintonePassword")
 $postVars = @("SpaceId", "ThreadId", "MentionUserCodes", "CommentTextTemplate")
 
@@ -456,6 +480,7 @@ $settingsVarLabels = @{
     "OutputReportDir"          = "業務日誌・パルスサーベイの出力先"
     "OutputCollectDataRootDir" = "アプリデータ集計の出力先"
     "OutputAlertRootDir"       = "アラート検知結果の出力先"
+    "OutputAlertBackupDir"     = "アラート検知結果のバックアップ先"
     "KintoneLoginName"         = "ログイン名"
     "KintonePassword"          = "パスワード"
     "KintoneSubdomain"         = "サブドメイン"
@@ -467,7 +492,7 @@ $settingsVarLabels = @{
     "TargetDateCodeField"      = "日付フィールドコード"
     "TargetUserCodeField"      = "受講生IDフィールドコード"
 }
-$settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
+$settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir", "OutputAlertBackupDir")
 $settingsMaskedVars = @("KintonePassword")
 # client.batは1変数1行(set "Var=Value")の形式で改行を持てないため、複数行入力欄は
 # 保存時に実際の改行を"\n"リテラルへ変換して1行に収め、画面表示時・check-alert.ps1側の利用時に戻す
@@ -1334,7 +1359,7 @@ $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
-    Open-FolderOrWarn -Path (Get-GroupXlsxPath $target)
+    Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({

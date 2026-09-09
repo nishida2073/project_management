@@ -18,6 +18,7 @@ if /i "%TargetDate%"=="now" (
 
 for %%F in (
     "%~dp0bats\check-alert.bat"
+    "%~dp0bats\post-alert-result.bat"
 ) do (
     call "%~dp0bats\message.bat" "Start %%~nxF {%TargetDate%}"
     

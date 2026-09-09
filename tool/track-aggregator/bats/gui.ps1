@@ -62,22 +62,22 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "実施データ取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "download-results.bat"); TargetDirPath = $script:commonEnvVars["ClientDataRootDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = (Join-Path $basePath "check-download-status.bat"); TargetDirPath = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "download-results.bat"); OpenTarget = $script:commonEnvVars["ClientDataRootDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = (Join-Path $basePath "check-download-status.bat"); OpenTarget = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
         Label = "実施状況確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); TargetDirPath = $script:commonEnvVars["OutputCombineCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-combine-result.bat"); OpenTarget = $script:commonEnvVars["OutputCombineCollectDir"]; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
         Label = "実施結果確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = (Join-Path $basePath "post-collect-results.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-test-result.bat"); OpenTarget = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); OpenTarget = $script:commonEnvVars["OutputSurveyCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = (Join-Path $basePath "post-collect-results.bat"); OpenTarget = { param($groupName) Get-GroupKintoneThreadUrl -GroupName $groupName }; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
@@ -89,7 +89,7 @@ $categoryDefs = @(
                 IncludeInBatch = $true
                 DefaultChecked = $false
                 BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat")
-                TargetDirPath = $script:commonEnvVars["OutputYearComparisonCollectDir"]
+                OpenTarget = $script:commonEnvVars["OutputYearComparisonCollectDir"]
                 Inputs = @(
                     (New-TargetGroupInput)
                     [PSCustomObject]@{ Name = "TargetCompanyNames"; Label = "対象の会社名"; Default = $script:commonEnvVars["TargetCompanyNames"]; LabelWidth = 85; InputWidth = 260; NewRow = $true }
@@ -195,7 +195,7 @@ foreach ($bd in $allButtonDefs) {
     $script:batchStepCheckboxes += $chk
     $batchTopControls += $chk
 
-    if ($bd.TargetDirPath) {
+    if ($bd.OpenTarget) {
         $lnkOpen = New-Object System.Windows.Forms.LinkLabel
         $lnkOpen.Text = "開く"
         $lnkOpen.AutoSize = $false
@@ -203,7 +203,16 @@ foreach ($bd in $allButtonDefs) {
         $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
         $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
         $lnkOpen.Tag = $bd
-        $lnkOpen.Add_LinkClicked({ Open-FolderOrWarn -Path $this.Tag.TargetDirPath })
+        # OpenTargetがスクリプトブロックの場合（投稿ボタンのkintoneスレッドURLなど）は、
+        # 一括実行タブ共通の対象グループ選択（$cmbBatchGroup）を渡して解決する
+        $lnkOpen.Add_LinkClicked({
+            $target = $this.Tag.OpenTarget
+            if ($target -is [scriptblock]) {
+                $groupValue = Get-InputValue -Control $cmbBatchGroup
+                $target = & $target $groupValue
+            }
+            Open-TargetOrWarn -Path $target
+        })
         $batchTopControls += $lnkOpen
     }
 
@@ -439,6 +448,19 @@ function Get-SetLineRawValues {
         if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
     }
     return $result
+}
+
+# 実行タブ・一括実行タブの「開く」リンク用。指定グループのclient.batからKintoneSubdomain/SpaceId/ThreadIdを読み、
+# kintoneのスレッドを直接開くURLを組み立てる（いずれか未設定、または対象グループが「すべて」（空欄）なら$null）
+function Get-GroupKintoneThreadUrl {
+    param([string]$GroupName)
+    if (!$GroupName) { return $null }
+    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $subdomain = $raw["KintoneSubdomain"]
+    $spaceId = $raw["SpaceId"]
+    $threadId = $raw["ThreadId"]
+    if (!$subdomain -or !$spaceId -or !$threadId) { return $null }
+    return "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId"
 }
 
 # 設定タブの各フィールドの生の値には、common-env.bat内の%BASE_PATH%や%OutputRootDir%のような
@@ -1145,7 +1167,7 @@ $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
         if ($latest) { $openPath = $latest.FullName }
     }
     if (!$openPath) { $openPath = Get-GroupXlsxPath $target $currentYear }
-    Open-FolderOrWarn -Path $openPath
+    Open-TargetOrWarn -Path $openPath
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
