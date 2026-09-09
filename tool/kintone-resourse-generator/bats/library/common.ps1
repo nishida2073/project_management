@@ -409,6 +409,17 @@ function Set-SpaceMembers {
 
     $body = @{ id = $SpaceId; members = @($keptMembers + $newMembers) }
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space/members.json" -Body $body | Out-Null
+    return [PSCustomObject]@{
+        TotalCount  = $body.members.Count
+        KeptMembers = @($keptMembers | ForEach-Object {
+            [PSCustomObject]@{
+                Type        = Get-KintoneMemberTypeLabel $_.entity.type
+                Code        = $_.entity.code
+                IsAdmin     = $_.isAdmin
+                IncludeSubs = $_.includeSubs
+            }
+        })
+    }
 }
 
 function Set-AppName {
@@ -551,7 +562,7 @@ function Update-KintoneApps {
     $uniqueIds = @($AppIds | Select-Object -Unique)
     if ($uniqueIds.Count -eq 0) { return }
 
-    Write-Message "アプリの更新開始: $($uniqueIds -join ', ')" -Type "Info" -NoHeader
+    # Write-Message "アプリの更新開始: $($uniqueIds -join ', ')" -Type "Info" -NoHeader
 
     $body = @{ apps = @($uniqueIds | ForEach-Object { @{ app = $_ } }) }
     Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method POST -Path "/k/v1/preview/app/deploy.json" -Body $body | Out-Null
@@ -568,7 +579,7 @@ function Update-KintoneApps {
             if ($failed.Count -gt 0) {
                 throw "更新に失敗したアプリがあります: $($failed | ConvertTo-Json -Compress)"
             }
-            Write-Message "アプリの更新完了: $($uniqueIds -join ', ')" -Type "Info" -NoHeader
+      #      Write-Message "アプリの更新完了: $($uniqueIds -join ', ')" -Type "Info" -NoHeader
             return
         }
         if ((Get-Date) -gt $deadline) {
