@@ -1,8 +1,6 @@
 @echo off
 chcp 932 >nul
 
-pushd "%~dp0"
-
 set "BATCH=all.bat"
 
 echo ===================================================================================================
@@ -42,9 +40,7 @@ echo.
 echo äJén: %BATCH% %ARGS%
 echo.
 
-call %BATCH% %ARGS%
+call "%~dp0%BATCH%" %ARGS%
 
 
 echo èIóπ
-
-popd

@@ -1,0 +1,6 @@
+/* user_modify.html 固有のスタイル */
+.app { position: relative; }
+
+.modal { width: 720px; }
+.modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 20px; }
+.btn { padding: 10px 20px; }

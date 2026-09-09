@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/anken_progress_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=shanai" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>案件進捗一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>案件進捗の更新</h2>
+          <div class="sub">PJ-2601　G新人研修（NTTデータ金融共催）　実施開始月：2026/09　管理担当者　山口 直人／細野 恵美</div>
+        </div>
+        <a class="close-x" href="anken_progress_list.html">✕</a>
+      </div>
+      <div class="tabs">
+        <div class="tab">すべて<span class="count">4/13</span></div>
+        <div class="tab">社内承認<span class="count">4/7</span></div>
+        <div class="tab active">契約・開発準備<span class="count">0/2</span></div>
+        <div class="tab">完了・請求<span class="count">0/4</span></div>
+      </div>
+      <div class="modal-body">
+        <table class="step-table">
+          <thead>
+            <tr>
+              <th style="width:260px;">工程名</th>
+              <th style="width:110px;">予定日</th>
+              <th style="width:110px;">実績日</th>
+              <th style="width:110px;">状態</th>
+              <th style="width:100px;">実施対象</th>
+              <th>備考</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="step-name"><span class="step-no">8</span>顧客契約締結</td>
+              <td><div class="mini-control js-date">2026/03/11<span class="caret">▾</span></div></td>
+              <td><div class="mini-control js-date"><span class="caret">▾</span></div></td>
+              <td><div class="status-select progress js-select" data-options="実施前,実施中,完了" data-class-map='{"実施前":"wait","実施中":"progress","完了":"done"}'>実施中<span class="caret">▾</span></div></td>
+              <td>
+                <div class="toggle-row na-toggle" data-off="対象外" style="height:auto;">
+                  <div class="toggle"><div class="knob"></div></div>
+                  <span style="display:none">対象</span>
+                </div>
+              </td>
+              <td><div class="memo-input">契約書ドラフト送付済み、押印待ち</div></td>
+            </tr>
+            <tr>
+              <td class="step-name"><span class="step-no">9</span>開発実施準備</td>
+              <td><div class="mini-control js-date">2026/03/20<span class="caret">▾</span></div></td>
+              <td><div class="mini-control js-date"><span class="caret">▾</span></div></td>
+              <td><div class="status-select wait js-select" data-options="実施前,実施中,完了" data-class-map='{"実施前":"wait","実施中":"progress","完了":"done"}'>実施前<span class="caret">▾</span></div></td>
+              <td>
+                <div class="toggle-row na-toggle" data-off="対象外" style="height:auto;">
+                  <div class="toggle"><div class="knob"></div></div>
+                  <span style="display:none">対象</span>
+                </div>
+              </td>
+              <td><div class="memo-input">契約締結後に着手予定</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="anken_progress_list.html">キャンセル</a>
+        <a class="btn primary" href="anken_progress_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+<script src="js/toggle.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.na-toggle').forEach(function (row) {
+    var toggle = row.querySelector('.toggle');
+    var tr = row.closest('tr');
+    var statusEl = tr.querySelector('.status-select');
+    var dateEls = tr.querySelectorAll('.js-date');
+    row.addEventListener('click', function () {
+      var excluded = toggle.classList.contains('off');
+      if (statusEl) {
+        statusEl.style.opacity = excluded ? '0.4' : '';
+        statusEl.style.pointerEvents = excluded ? 'none' : '';
+      }
+      dateEls.forEach(function (dateEl) {
+        dateEl.style.opacity = excluded ? '0.4' : '';
+        dateEl.style.pointerEvents = excluded ? 'none' : '';
+        var textNode = dateEl.childNodes[0];
+        if (excluded) {
+          dateEl.setAttribute('data-saved-value', (textNode && textNode.nodeType === 3) ? textNode.textContent : '');
+          if (textNode && textNode.nodeType === 3) textNode.textContent = '';
+        } else {
+          var saved = dateEl.getAttribute('data-saved-value') || '';
+          if (textNode && textNode.nodeType === 3) textNode.textContent = saved;
+          else dateEl.insertBefore(document.createTextNode(saved), dateEl.firstChild);
+          dateEl.removeAttribute('data-saved-value');
+        }
+      });
+    });
+  });
+});
+</script>
+</body>
+</html>

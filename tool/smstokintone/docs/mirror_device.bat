@@ -43,10 +43,28 @@ if defined CONNECT_TARGET (
         echo ============================================
         echo  端末に接続します: %CONNECT_TARGET%
         echo ============================================
-        adb connect "%CONNECT_TARGET%"
-        if errorlevel 1 (
+        set "CONNECT_OK=0"
+        for /f "delims=" %%R in ('adb connect "%CONNECT_TARGET%" 2^>^&1') do (
+            echo %%R
+            echo %%R | findstr /I /c:"connected to" >nul
+            if not errorlevel 1 set "CONNECT_OK=1"
+        )
+        rem adb connectは接続に失敗してもerrorlevelが0のままになることがあるため、
+        rem 出力メッセージ自体（成功時は必ず"connected to"を含む）で成否を判定する
+        if "!CONNECT_OK!"=="0" (
             echo [エラー] 接続に失敗しました。ワイヤレスデバッグの画面のIPアドレスとポートを確認してください。
-            echo 初回のペア設定が済んでいない場合は、先に adb pair での実行が必要です。
+            echo.
+            echo 初回のペア設定がまだの場合は、次の手順が必要です:
+            echo   1. スマホの「ワイヤレスデバッグ」画面で「ペア設定コードによるデバイスのペア設定」を開く
+            echo      （この画面には接続用とは別のIPアドレス:ポートと、6桁のペア設定コードが表示される）
+            echo   2. 次のコマンドを実行する（アドレスは画面の値に置き換える）
+            echo        adb pair ペア設定画面のIPアドレス:ポート
+            echo   3. 表示された6桁のコードを入力してEnter
+            echo      「Successfully paired to ...」と出れば成功
+            echo   4. ワイヤレスデバッグのメイン画面（ペア設定画面ではない方）に表示される
+            echo      接続用のIPアドレス:ポートで、このバッチを再実行する
+            echo.
+            echo   ※ペア設定コードは数秒で切り替わるため、表示されている最新の値を使うこと
             pause
             exit /b 1
         )
@@ -77,6 +95,8 @@ if not defined DEVICE_SERIAL (
     ) else (
         if "!DEVICE_COUNT!"=="0" (
             echo [エラー] 接続されている端末が見つかりません。adb devices で接続状態を確認してください。
+            echo ワイヤレス接続がまだの場合は、このバッチにIPアドレス:ポートを引数で指定して実行してください
+            echo （初回のペア設定手順は、その場合に表示されるエラーメッセージを参照）。
             pause
             exit /b 1
         )

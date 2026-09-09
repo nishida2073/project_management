@@ -4,23 +4,19 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~nx0"
 
-pushd "%~dp0"
+call "%~dp0bats\excel-clean.bat"
 
-call ".\bats\excel-clean.bat" "Start %MyName%"
+call "%~dp0bats\common-env.bat"
 
-call ".\bats\common-env.bat"
-
-call ".\bats\message.bat" "Start %MyName%"
+call "%~dp0bats\message.bat" "Start %MyName%"
 echo.
 
-call ".\create-app-data.bat" "%~1" "%~2"
+call "%~dp0create-app-data.bat" "%~1" "%~2"
 
-call ".\collect-app-data.bat" "%~1" "%~2"
-call ".\check-alert.bat" "%~1"
+call "%~dp0collect-app-data.bat" "%~1" "%~2"
+call "%~dp0check-alert.bat" "%~1"
 
-call ".\bats\message.bat" "Finished %MyName%"
+call "%~dp0bats\message.bat" "Finished %MyName%"
 echo.
-
-popd
 
 endlocal

@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$MasterDataRootDir,
+    [string]$ClientDataRootDir,
     [string]$TargetGroupName,
     [int]$TargetYear,
     [int]$ComparePeriod,
@@ -13,19 +13,17 @@
     [string]$TargetRankNames = "",     # カンマ区切り。空の場合は全ランクを対象とする
     [string]$TargetClassNames = "",    # カンマ区切り。空の場合は全クラスを対象とする
     [int]$YearOrder = 1,                # 年度行の表示順。0:昇順（古い→新しい） 1:降順（新しい→古い、既定）
-    [string]$OutputFileSuffix = "経年比較結果"
+    [string]$OutputFileSuffix = "経年比較結果",
+    [string]$LogNamePrefix
 )
 
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
-Get-ChildItem -Path $libraryDir -Filter *.psm1 -Recurse | ForEach-Object {
-    Import-Module $_.FullName -ErrorAction Stop -DisableNameChecking
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
 }
 
-$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
-
-# ComparePeriod年前から現在年度までの各年度分＋差分行で1コースあたりの行数を決める
-$rowsPerCourse = $ComparePeriod + 2
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-year-comparison-result' })-$TargetGroupName-$TargetYear"
 
 function Get-YearSummaryDatas {
     param(
@@ -450,95 +448,103 @@ function Export-Excel {
 }
 
 
-New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+& {
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-$courseGroupDatas = Get-CourseGroupDatas -CourseGroupDefs $CourseGroupDefs
+    # ComparePeriod年前から現在年度までの各年度分＋差分行で1コースあたりの行数を決める
+    $rowsPerCourse = $ComparePeriod + 2
 
-# 年度ごとに、その年度自身のマスタファイル（受講生・テスト/アンケート定義）を読み込む。
-# 受講生は年度が変わると別人になり得るため、他年度のuserCodeと混同しないよう年度ごとに分けている。
-# 該当年度のマスタファイルが無ければ、その年度は未実施（データなし）として扱う。
-$yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
-    $year = $TargetYear - $offset
-    $yearMasterFilePath = Join-Path $MasterDataRootDir "$TargetGroupName-$year.xlsx"
+    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    $yearIsExecuted = Test-Path $yearMasterFilePath
-    if ($yearIsExecuted) {
-        $yearUserDatas = Create-UserDatas -DataFilePath $yearMasterFilePath
+    $courseGroupDatas = Get-CourseGroupDatas -CourseGroupDefs $CourseGroupDefs
 
-        $yearTestDatas = Create-TestDatas -DataFilePath $yearMasterFilePath
-        $yearTestDatas = @($yearTestDatas | Where-Object { -not (ToBool $_.停止中) })
+    # 年度ごとに、その年度自身のマスタファイル（受講生・テスト/アンケート定義）を読み込む。
+    # 受講生は年度が変わると別人になり得るため、他年度のuserCodeと混同しないよう年度ごとに分けている。
+    # 該当年度のマスタファイルが無ければ、その年度は未実施（データなし）として扱う。
+    $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
+        $year = $TargetYear - $offset
+        $yearMasterFilePath = Join-Path $ClientDataRootDir "$TargetGroupName-$year.xlsx"
 
-        $yearSurveyDatas = Create-SurveyDatas -DataFilePath $yearMasterFilePath
-        $yearSurveyDatas = @($yearSurveyDatas | Where-Object { -not (ToBool $_.停止中) })
-    } else {
-        Write-Message "対象年度のマスタファイルが見つからないため未実施として扱います: $yearMasterFilePath" -VarName "message" -Type "Info" -ForegroundColor Yellow
-        $yearUserDatas = $null
-        $yearTestDatas = $null
-        $yearSurveyDatas = $null
+        $yearIsExecuted = Test-Path $yearMasterFilePath
+        if ($yearIsExecuted) {
+            $yearUserDatas = Create-UserDatas -DataFilePath $yearMasterFilePath
+
+            $yearTestDatas = Create-TestDatas -DataFilePath $yearMasterFilePath
+            $yearTestDatas = @($yearTestDatas | Where-Object { -not (ToBool $_.停止中) })
+
+            $yearSurveyDatas = Create-SurveyDatas -DataFilePath $yearMasterFilePath
+            $yearSurveyDatas = @($yearSurveyDatas | Where-Object { -not (ToBool $_.停止中) })
+        } else {
+            Write-Message "対象年度のマスタファイルが見つからないため未実施として扱います: $yearMasterFilePath" -VarName "message" -Type "Info" -ForegroundColor Yellow
+            $yearUserDatas = $null
+            $yearTestDatas = $null
+            $yearSurveyDatas = $null
+        }
+
+        [PSCustomObject]@{
+            year        = $year
+            isExecuted  = $yearIsExecuted
+            userDatas   = $yearUserDatas
+            testDatas   = $yearTestDatas
+            surveyDatas = $yearSurveyDatas
+        }
     }
 
-    [PSCustomObject]@{
-        year        = $year
-        isExecuted  = $yearIsExecuted
-        userDatas   = $yearUserDatas
-        testDatas   = $yearTestDatas
-        surveyDatas = $yearSurveyDatas
-    }
-}
+    # 会社名・ランク・クラスの絞り込み（カンマ区切り）。
+    # 注意: 変数名をパラメーター名（$TargetCompanyNames等）と大文字小文字違いだけにすると、
+    # PowerShellは同一変数とみなし、自己参照パイプライン特有の不具合でWhere-Objectのフィルタが効かなくなる。
+    # そのため意図的に別名（CompanyNameFilter等）にしている。
+    $companyNameFilter = @($TargetCompanyNames -split "," | Where-Object { $_ -ne "" })
+    $rankNameFilter = @($TargetRankNames -split "," | Where-Object { $_ -ne "" })
+    $classNameFilter = @($TargetClassNames -split "," | Where-Object { $_ -ne "" })
 
-# 会社名・ランク・クラスの絞り込み（カンマ区切り）。
-# 注意: 変数名をパラメーター名（$TargetCompanyNames等）と大文字小文字違いだけにすると、
-# PowerShellは同一変数とみなし、自己参照パイプライン特有の不具合でWhere-Objectのフィルタが効かなくなる。
-# そのため意図的に別名（CompanyNameFilter等）にしている。
-$companyNameFilter = @($TargetCompanyNames -split "," | Where-Object { $_ -ne "" })
-$rankNameFilter = @($TargetRankNames -split "," | Where-Object { $_ -ne "" })
-$classNameFilter = @($TargetClassNames -split "," | Where-Object { $_ -ne "" })
+    # 会社名・ランク・クラスの一覧は全年度分のロースターを合体してから作る。
+    # 現在年度のロースターだけを基準にすると、過去にしか存在しない値の行が作られず実績が漏れる。
+    $allYearsUserDatas = @($yearDataCache.userDatas | Where-Object { $_ })
+    $rankOrder = @("S","A","B","C","D","E")
+    $companyNames = if ($companyNameFilter.Count -gt 0) { @($companyNameFilter | Select-Object -Unique) } else { @($allYearsUserDatas.companyName | Select-Object -Unique) }
+    $rankNames = if ($rankNameFilter.Count -gt 0) { $rankNameFilter } else { $allYearsUserDatas.rankName }
+    $rankNames = @($rankNames | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
+    $classNames = if ($classNameFilter.Count -gt 0) { @($classNameFilter | Sort-Object -Unique) } else { @($allYearsUserDatas.className | Select-Object -Unique | Sort-Object) }
 
-# 会社名・ランク・クラスの一覧は全年度分のロースターを合体してから作る。
-# 現在年度のロースターだけを基準にすると、過去にしか存在しない値の行が作られず実績が漏れる。
-$allYearsUserDatas = @($yearDataCache.userDatas | Where-Object { $_ })
-$rankOrder = @("S","A","B","C","D","E")
-$companyNames = if ($companyNameFilter.Count -gt 0) { @($companyNameFilter | Select-Object -Unique) } else { @($allYearsUserDatas.companyName | Select-Object -Unique) }
-$rankNames = if ($rankNameFilter.Count -gt 0) { $rankNameFilter } else { $allYearsUserDatas.rankName }
-$rankNames = @($rankNames | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
-$classNames = if ($classNameFilter.Count -gt 0) { @($classNameFilter | Sort-Object -Unique) } else { @($allYearsUserDatas.className | Select-Object -Unique | Sort-Object) }
+    # 集計軸の定義。会社別・ランク別・クラス別のシートはすべてこの定義に沿って生成される
+    $dimensionDefs = @(
+        [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別";   HeaderName = "会社名" }
+        [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別"; HeaderName = "クラス" }
+        [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別"; HeaderName = "ランク" }
+    )
 
-# 集計軸の定義。会社別・ランク別・クラス別のシートはすべてこの定義に沿って生成される
-$dimensionDefs = @(
-    [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別";   HeaderName = "会社名" }
-    [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別"; HeaderName = "クラス" }
-    [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別"; HeaderName = "ランク" }
-)
+    # 新しい年度→古い年度の順で、現在年度からComparePeriod年前までを集計する
+    $yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
+        $groupName = "$TargetGroupName-$($yearData.year)"
+        $summaryDatas = if ($yearData.isExecuted) {
+            Get-YearSummaryDatas -UserDatas $yearData.userDatas -TestDatas $yearData.testDatas -SurveyDatas $yearData.surveyDatas -GroupName $groupName -Dimensions $dimensionDefs
+        } else {
+            $null
+        }
 
-# 新しい年度→古い年度の順で、現在年度からComparePeriod年前までを集計する
-$yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
-    $groupName = "$TargetGroupName-$($yearData.year)"
-    $summaryDatas = if ($yearData.isExecuted) {
-        Get-YearSummaryDatas -UserDatas $yearData.userDatas -TestDatas $yearData.testDatas -SurveyDatas $yearData.surveyDatas -GroupName $groupName -Dimensions $dimensionDefs
-    } else {
-        $null
+        [PSCustomObject]@{
+            year         = $yearData.year
+            summaryDatas = $summaryDatas
+        }
     }
 
-    [PSCustomObject]@{
-        year         = $yearData.year
-        summaryDatas = $summaryDatas
+    $yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -YearOrder $YearOrder
+
+    $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
+        $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names -YearOrder $YearOrder
+        [PSCustomObject]@{
+            Key        = $dimensionDef.Key
+            Datas      = $dimensionDatas
+            Count      = $dimensionDef.Names.Count + 1
+            SheetName  = $dimensionDef.SheetName
+            HeaderName = $dimensionDef.HeaderName
+        }
     }
-}
 
-$yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -YearOrder $YearOrder
+    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-$OutputFileSuffix.xlsx"
+    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
-$dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
-    $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names -YearOrder $YearOrder
-    [PSCustomObject]@{
-        Key        = $dimensionDef.Key
-        Datas      = $dimensionDatas
-        Count      = $dimensionDef.Names.Count + 1
-        SheetName  = $dimensionDef.SheetName
-        HeaderName = $dimensionDef.HeaderName
-    }
-}
-
-$outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-$OutputFileSuffix.xlsx"
-Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-
-Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
+    Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath

@@ -1,13 +1,7 @@
 @echo off
 
-cd /d %~dp0
-
 set "BATCH_NAME=%~nx0"
-echo ==================================================
-echo %BATCH_NAME% 開始：%date% %time%
-echo ==================================================
-
-call clients\set-env.bat
+call "%~dp0clients\set-env.bat"
 
 :parse_args
 if "%~1"=="" goto args_done
@@ -18,16 +12,16 @@ if /i "%arg:~0,8%"=="exclude=" set "GENERATE_SHEETS_EXCLUDE=%arg:~8%"
 shift
 goto parse_args
 :args_done
-if defined CLIENT_NAME if exist "clients\set-env-%CLIENT_NAME%.bat" call clients\set-env-%CLIENT_NAME%.bat
+if defined CLIENT_NAME if exist "%~dp0clients\set-env-%CLIENT_NAME%.bat" call "%~dp0clients\set-env-%CLIENT_NAME%.bat"
+
+call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File .\scripts\generate-package.ps1
+ -File "%~dp0bats\generate-package.ps1"
 set "EXITCODE=%ERRORLEVEL%"
 
-echo ==================================================
-echo %BATCH_NAME% 終了：%date% %time%
-echo ==================================================
+call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"
 
 timeout /t 5 >nul
 

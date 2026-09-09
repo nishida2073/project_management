@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=class" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb-block">
+        <div class="crumb">クラス管理<span>／</span>クラス</div>
+        <p class="crumb-sub">クラス情報を管理します</p>
+      </div>
+      <div class="user">
+        <span>山田 太郎（BD事業部）</span>
+        <div class="avatar">山田</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>クラス一覧</h1>
+        </div>
+        <div class="btn-group">
+          <div class="btn"><span class="icon">⇩</span>登壇依頼書出力</div>
+          <div class="btn"><span class="icon">⇧</span>Excel取込</div>
+          <div class="btn"><span class="icon">⇩</span>Excel出力</div>
+          <a class="btn primary" href="class_regist.html"><span class="icon">＋</span>新規登録</a>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="field">
+          <label>年度</label>
+          <div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>キーワード検索（案件）</label>
+          <input type="text" class="field-control-input" placeholder="案件コード・案件名で検索">
+        </div>
+        <div class="field">
+          <label>キーワード検索（コース）</label>
+          <input type="text" class="field-control-input" placeholder="コースコード・コース名で検索">
+        </div>
+        <div class="field">
+          <label>開始日</label>
+          <div class="control small js-date">2026/04/01<span class="caret">▾</span></div>
+        </div>
+        <div class="tilde">〜</div>
+        <div class="field">
+          <label>終了日</label>
+          <div class="control small js-date">2026/09/30<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>実施形態</label>
+          <div class="control small js-select" data-options="すべて,集合,オンライン,ハイブリッド">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>ロケーション区分</label>
+          <div class="control small js-select" data-options="すべて,駒場,成城,外部会場">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
+          <label>講師ベンダー名</label>
+          <div class="control wide js-select" data-options="すべて,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="search-btn">検索</div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-meta">
+          <div class="count">全 <b>128</b> 件</div>
+          <div>並び替え：開始日（昇順）　表示件数：20件</div>
+        </div>
+        <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>年度</th>
+              <th>案件名 / 案件コード</th>
+              <th>販売区分</th>
+              <th>参加区分</th>
+              <th>コース名 / コースコード</th>
+              <th>クラスコード</th>
+              <th>クラスコード（関連）</th>
+              <th>開始日</th>
+              <th>終了日</th>
+              <th>実施形態</th>
+              <th>受講人数</th>
+              <th>管理担当者</th>
+              <th>ロケーション区分</th>
+              <th>ロケーション名</th>
+              <th>講師ベンダー名（メイン）</th>
+              <th>講師名（メイン）</th>
+              <th>講師ベンダー名（サブ１）</th>
+              <th>講師名（サブ１）</th>
+              <th>聴講ベンダー名</th>
+              <th>聴講者名</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">ビジネス基礎研修 定期開催</div><div style="font-size:11px;color:#9aa4b5;">PJ-2602</div></td>
+              <td><span class="tag hybrid">内販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_システム開発入門</div><div style="font-size:11px;color:#9aa4b5;">BC02B</div></td>
+              <td>001</td>
+              <td>002, 003</td>
+              <td>2026/09/02</td>
+              <td>2026/09/04</td>
+              <td><span class="tag onsite">集合</span></td>
+              <td>24</td>
+              <td>佐藤 一郎</td>
+              <td><span class="tag blue">駒場</span></td>
+              <td>501教室</td>
+              <td>株式会社NEUトレーニング</td>
+              <td>田中 誠</td>
+              <td>NDUパートナーズ</td>
+              <td>鈴木 花子</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">ビジネス基礎研修 定期開催</div><div style="font-size:11px;color:#9aa4b5;">PJ-2602</div></td>
+              <td><span class="tag hybrid">内販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_システム開発入門</div><div style="font-size:11px;color:#9aa4b5;">BC02B</div></td>
+              <td>002</td>
+              <td>001, 003</td>
+              <td>2026/09/02</td>
+              <td>2026/09/04</td>
+              <td><span class="tag online">オンライン</span></td>
+              <td>20</td>
+              <td>鈴木 花子</td>
+              <td><span class="tag blue">駒場</span></td>
+              <td>601教室</td>
+              <td>NDUパートナーズ</td>
+              <td>山本 さゆり</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">グローバル基礎コース 公募</div><div style="font-size:11px;color:#9aa4b5;">PJ-2604</div></td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag orange">公募</span></td>
+              <td><div style="font-weight:700;">公募_基盤技術基礎</div><div style="font-size:11px;color:#9aa4b5;">BC07A</div></td>
+              <td>001</td>
+              <td>002</td>
+              <td>2026/09/08</td>
+              <td>2026/09/09</td>
+              <td><span class="tag online">オンライン</span></td>
+              <td>18</td>
+              <td>鈴木 花子</td>
+              <td><span class="tag blue">駒場</span></td>
+              <td>601教室</td>
+              <td>NDUパートナーズ</td>
+              <td>山本 さゆり</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">次世代リーダー育成プログラム</div><div style="font-size:11px;color:#9aa4b5;">PJ-2603</div></td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_AP要件定義基礎</div><div style="font-size:11px;color:#9aa4b5;">ND02B</div></td>
+              <td>001</td>
+              <td>-</td>
+              <td>2026/09/10</td>
+              <td>2026/09/12</td>
+              <td><span class="tag onsite">集合</span></td>
+              <td>30</td>
+              <td>高橋 健</td>
+              <td><span class="tag orange">成城</span></td>
+              <td>302教室</td>
+              <td>ユニバ研修サービス</td>
+              <td>木村 隆</td>
+              <td>-</td>
+              <td>-</td>
+              <td>CECトラスト</td>
+              <td>中村 桂</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">ビジネス基礎研修 定期開催</div><div style="font-size:11px;color:#9aa4b5;">PJ-2602</div></td>
+              <td><span class="tag hybrid">内販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_システム開発入門</div><div style="font-size:11px;color:#9aa4b5;">BC02B</div></td>
+              <td>003</td>
+              <td>001, 002</td>
+              <td>2026/09/15</td>
+              <td>2026/09/17</td>
+              <td><span class="tag hybrid">ハイブリッド</span></td>
+              <td>22</td>
+              <td>佐藤 一郎</td>
+              <td><span class="tag blue">駒場</span></td>
+              <td>501教室</td>
+              <td>株式会社NEUトレーニング</td>
+              <td>田中 誠</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">グローバル基礎コース 公募</div><div style="font-size:11px;color:#9aa4b5;">PJ-2604</div></td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag orange">公募</span></td>
+              <td><div style="font-weight:700;">公募_基盤技術基礎</div><div style="font-size:11px;color:#9aa4b5;">BC07A</div></td>
+              <td>002</td>
+              <td>001</td>
+              <td>2026/09/18</td>
+              <td>2026/09/18</td>
+              <td><span class="tag online">オンライン</span></td>
+              <td>40</td>
+              <td>伊藤 美咲</td>
+              <td><span class="tag gray">外部会場</span></td>
+              <td>外部貸会議室A</td>
+              <td>NDUパートナーズ</td>
+              <td>山本 さゆり</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">次世代リーダー育成プログラム</div><div style="font-size:11px;color:#9aa4b5;">PJ-2603</div></td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_AP要件定義基礎</div><div style="font-size:11px;color:#9aa4b5;">ND02B</div></td>
+              <td>002</td>
+              <td>001, 003</td>
+              <td>2026/09/24</td>
+              <td>2026/09/26</td>
+              <td><span class="tag onsite">集合</span></td>
+              <td>28</td>
+              <td>高橋 健</td>
+              <td><span class="tag orange">成城</span></td>
+              <td>302教室</td>
+              <td>ユニバ研修サービス</td>
+              <td>木村 隆</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">マネジメント基礎研修</div><div style="font-size:11px;color:#9aa4b5;">PJ-2605</div></td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_AP設計・製造基礎</div><div style="font-size:11px;color:#9aa4b5;">CE01B</div></td>
+              <td>001</td>
+              <td>-</td>
+              <td>2026/09/28</td>
+              <td>2026/09/29</td>
+              <td><span class="tag onsite">集合</span></td>
+              <td>20</td>
+              <td>渡辺 直樹</td>
+              <td><span class="tag blue">駒場</span></td>
+              <td>601教室</td>
+              <td>CECトラスト</td>
+              <td>中野 健太</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">次世代リーダー育成プログラム</div><div style="font-size:11px;color:#9aa4b5;">PJ-2603</div></td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_AP要件定義基礎</div><div style="font-size:11px;color:#9aa4b5;">ND02B</div></td>
+              <td>003</td>
+              <td>001, 002</td>
+              <td>2026/09/30</td>
+              <td>2026/10/02</td>
+              <td><span class="tag onsite">集合</span></td>
+              <td>25</td>
+              <td>高橋 健</td>
+              <td><span class="tag blue">駒場</span></td>
+              <td></td>
+              <td>ユニバ研修サービス</td>
+              <td></td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+            <tr>
+              <td>2026年度</td>
+              <td><div style="font-weight:700;">マネジメント基礎研修</div><div style="font-size:11px;color:#9aa4b5;">PJ-2605</div></td>
+              <td><span class="tag online">外販</span></td>
+              <td><span class="tag blue">受託</span></td>
+              <td><div style="font-weight:700;">受託_AP設計・製造基礎</div><div style="font-size:11px;color:#9aa4b5;">CE01B</div></td>
+              <td>002</td>
+              <td>-</td>
+              <td>2026/10/05</td>
+              <td>2026/10/07</td>
+              <td><span class="tag onsite">集合</span></td>
+              <td>18</td>
+              <td>渡辺 直樹</td>
+              <td><span class="tag orange">成城</span></td>
+              <td>302教室</td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td class="row-actions"><a class="link-btn" href="class_modify.html">編集</a></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="pagination">
+          <div class="page-btn">‹</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">…</div>
+          <div class="page-btn">7</div>
+          <div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+</body>
+</html>

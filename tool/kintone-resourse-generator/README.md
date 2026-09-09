@@ -21,15 +21,15 @@
 | `generate-config-from-template.bat` | 「2. 設定ファイルの生成」のエントリーポイント |
 | `apply-kintone-resources.bat` | 「3. kintoneへ反映」のエントリーポイント |
 | `check-kintone-resources.bat` | 「4. データチェック」のエントリーポイント |
-| `scripts\common.ps1` | 5つの`.ps1`が共通で使う関数（kintone REST APIの呼び出し、Excelの読み書き、ログ出力など）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
-| `scripts\create-space-from-template.ps1` / `download-kintone-resources.ps1` / `generate-config-from-template.ps1` / `apply-kintone-resources.ps1` / `check-kintone-resources.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
+| `bats\library\common.ps1` | 5つの`.ps1`が共通で使う関数（kintone REST APIの呼び出し、Excelの読み書き、ログ出力など）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
+| `bats\create-space-from-template.ps1` / `download-kintone-resources.ps1` / `generate-config-from-template.ps1` / `apply-kintone-resources.ps1` / `check-kintone-resources.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `template\*.xlsx` | 設定テンプレート（スペース・アプリ名だけで紐づく、共通のメンバー・ACL設定）。書き方は[設定ファイル・テンプレートの構成](#設定ファイルテンプレートの構成)を参照 |
 | `download\<スペース識別名>_download.xlsx` | 「1. ダウンロード」の出力＝「2. 設定ファイルの生成」の入力の一つ |
 | `config\<スペース識別名>_config.xlsx` | 「2. 設定ファイルの生成」の出力＝「3. kintoneへ反映」「4. データチェック」の入力 |
 | `checked\<スペース識別名>_check.xlsx` | 「4. データチェック」の出力 |
 | `run-list\*.xlsx` | GUI版「一括実行」タブで読み込む実行一覧ファイル（列は[一括実行](#一括実行)を参照） |
 | `build-gui.bat` | GUI版（`kintoneリソース生成ツール.exe`）をビルドするエントリーポイント。[GUI版](#gui版)を参照 |
-| `scripts\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
+| `bats\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
 | `clients\set-env.bat` | ローカルのフォルダパス（`COMMON_*`）の既定値をまとめて設定する（他の`.bat`から`call clients\set-env.bat`される） |
 | `clients\set-kintone.bat` | kintoneの接続情報（サイトURL・ログイン名・パスワード） |
 
@@ -284,7 +284,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 ## GUI版
 
-`.bat`をコマンドプロンプトから実行する代わりに、画面から操作したい場合は`kintoneリソース生成ツール.exe`を使う（`build-gui.bat`でソース（`scripts\gui.ps1`）からビルドできる）。
+`.bat`をコマンドプロンプトから実行する代わりに、画面から操作したい場合は`kintoneリソース生成ツール.exe`を使う（`build-gui.bat`でソース（`bats\gui.ps1`）からビルドできる）。
 
 ### 実施手順
 

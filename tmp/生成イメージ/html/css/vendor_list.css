@@ -1,0 +1,4 @@
+/* vendor_list.html 固有のスタイル */
+.app { overflow: hidden; }
+.toolbar { align-items: flex-start; }
+.field .control.wide { min-width: 240px; }

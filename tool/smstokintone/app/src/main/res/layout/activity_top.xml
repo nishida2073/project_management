@@ -64,7 +64,6 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenSmsSearch"
-            style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="48dp"
@@ -72,22 +71,23 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenLog"
-            style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/btn_open_log" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenKintoneSettings"
+            android:id="@+id/btnOpenSendTargetSettings"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="64dp"
-            android:text="@string/btn_open_send_settings"
+            android:text="@string/btn_open_send_target_settings"
             android:textAllCaps="false" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenAppSettings"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
