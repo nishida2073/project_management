@@ -17,20 +17,10 @@ if "%~2"=="" (
     set "TargetGroupNameFilter=%~2"
 )
 
-set "SCRIPT_PATH=%~dp0check-alert.ps1"
+set "SCRIPT_PATH=%~dp0post-alert-result.ps1"
 
-set "ClientDataRootDir=%ClientDataRootDir%"
 
-set "CollectRootDir=%OutputCollectDataRootDir%"
-set "OutputTargetDir=%OutputAlertRootDir%"
 set "BackupTargetDir=%OutputAlertBackupDir%"
-set "TemplateFilePath=%TemplateRootDir%\アラート検知.xlsx"
-set "ViewAllCourseSchedule=0"
-set "ViewHolidayCourseSchedule=1"
-set "AlertInterventionTerm=0"
-set "AlertInterventionLimit=3"
-set "UseRecovery=1"
-set "RecoveryScriptPath=%~dp0recovery-check-alert.bat"
 
 call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
 
@@ -50,19 +40,16 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
           "     -BaseUrl '!BaseUrl!'" ^
-          "     -ClientDataFilePath '%%F'" ^
           "     -TargetGroupName '%%~nF'" ^
-          "     -TemplateFilePath '%TemplateFilePath%'" ^
-          "     -OutputRootDir '%OutputTargetDir%'" ^
-          "     -BackupRootDir '%BackupTargetDir%'" ^
-          "     -CollectRootDir '%CollectRootDir%'" ^
           "     -TargetDate '%TargetDate%'" ^
-          "     -ViewAllCourseSchedule '%ViewAllCourseSchedule%'" ^
-          "     -ViewHolidayCourseSchedule '%ViewHolidayCourseSchedule%'" ^
-          "     -AlertInterventionTerm '%AlertInterventionTerm%'" ^
-          "     -AlertInterventionLimit '%AlertInterventionLimit%'" ^
-          "     -UseRecovery '%UseRecovery%'" ^
-          "     -RecoveryScriptPath '%RecoveryScriptPath%'" ^
+          "     -BackupRootDir '%BackupTargetDir%'" ^
+          "     -KintoneLoginName '!KintoneLoginName!'" ^
+          "     -KintonePassword '!KintonePassword!'" ^
+          "     -Authorization '!Authorization!'" ^
+          "     -SpaceId '!SpaceId!'" ^
+          "     -ThreadId '!ThreadId!'" ^
+          "     -MentionUserCodes '!MentionUserCodes!'" ^
+          "     -CommentTextTemplate '!CommentTextTemplate!'" ^
           "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^

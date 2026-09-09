@@ -1,11 +1,16 @@
 ﻿# どのGUIツールからでも使い回せる、業務内容に依存しないWinFormsの汎用部品を置く場所。
 # 業務固有のデータ（ボタン定義の中身など）や実行フローはgui.ps1側に残す。
 
-# 指定パスをエクスプローラーで開く。存在しなければ警告ダイアログを出す
-function Open-FolderOrWarn {
+# 指定パスをエクスプローラーで開く。URL（http/https）の場合は既定のブラウザで開く。
+# 存在しない・未指定の場合は警告ダイアログを出す
+function Open-TargetOrWarn {
     param([string]$Path)
+    if ($Path -match '^https?://') {
+        Start-Process -FilePath $Path
+        return
+    }
     if (!$Path -or !(Test-Path -LiteralPath $Path)) {
-        [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("パスが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
     Start-Process -FilePath $Path
@@ -149,7 +154,7 @@ function Add-StackedDockedControls {
 }
 
 # カテゴリ（タブ）ごとにグループ化されたボタン群を持つTabControlを組み立てる。
-# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, TargetDirPath, Inputs, ... }] }] の形。
+# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, OpenTarget, Inputs, ... }] }] の形。
 # ButtonDefの中身は自由（Tagとしてそのままボタン/リンクに渡すだけで、業務ロジックは持たない）。
 # Inputsを指定すると、実行ボタンの上にラベル付きの入力欄を追加できる（その分グループボックスが縦に高くなる）。
 # 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options, NewRow } の形
@@ -157,7 +162,7 @@ function Add-StackedDockedControls {
 #   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形。
 #   NewRow = $trueを指定すると、その入力欄から新しい行に折り返す。1行に収まらないほど
 #   入力欄が多いボタンでのみ使う）。
-# 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-FolderOrWarnを使う。
+# 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-TargetOrWarnを使う。
 function New-CategoryTabControl {
     param(
         [Parameter(Mandatory)][array]$CategoryDefs,
@@ -174,7 +179,7 @@ function New-CategoryTabControl {
     )
 
     if (-not $OnOpenClick) {
-        $OnOpenClick = { param($path) Open-FolderOrWarn -Path $path }
+        $OnOpenClick = { param($path) Open-TargetOrWarn -Path $path }
     }
 
     function Get-InputRowCount {
@@ -303,7 +308,7 @@ function New-CategoryTabControl {
             $grp.Controls.Add($btn)
             $runButtons += $btn
 
-            if ($bd.TargetDirPath) {
+            if ($bd.OpenTarget) {
                 $lnkOpen = New-Object System.Windows.Forms.LinkLabel
                 $lnkOpen.Text = $OpenLinkText
                 $lnkOpen.AutoSize = $false
@@ -311,7 +316,20 @@ function New-CategoryTabControl {
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
                 $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
                 $lnkOpen.Tag = $bd
-                $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag.TargetDirPath }.GetNewClosure())
+                # OpenTargetは固定のフォルダパス文字列の他に、{ param($groupName) ... } という
+                # スクリプトブロックも受け付ける（投稿ボタンのkintoneスレッドURLのように、選択中の
+                # 対象グループによって開き先が変わる場合に使う）。後者の場合はここで対象グループの
+                # 選択値を渡して実際に開くパス/URLへ解決する
+                $lnkOpen.Add_LinkClicked({
+                    $target = $this.Tag.OpenTarget
+                    if ($target -is [scriptblock]) {
+                        $groupValue = if ($this.Tag.InputControls -and $this.Tag.InputControls.ContainsKey("TargetGroupNameFilter")) {
+                            Get-InputValue -Control $this.Tag.InputControls["TargetGroupNameFilter"]
+                        } else { "" }
+                        $target = & $target $groupValue
+                    }
+                    & $OnOpenClick $target
+                }.GetNewClosure())
                 $grp.Controls.Add($lnkOpen)
             }
 
