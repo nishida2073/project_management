@@ -131,17 +131,30 @@ $txtSpaceId = New-Object System.Windows.Forms.TextBox
 $txtSpaceId.Location = New-Object System.Drawing.Point(160, 82)
 $txtSpaceId.Size = New-Object System.Drawing.Size(200, 22)
 
-$lblTemplateName = New-Object System.Windows.Forms.Label
-$lblTemplateName.Text = "設定テンプレート名"
-$lblTemplateName.AutoSize = $true
-$lblTemplateName.Location = New-Object System.Drawing.Point(20, 119)
+$lblBaseTemplateName = New-Object System.Windows.Forms.Label
+$lblBaseTemplateName.Text = "設定テンプレート名（基本）"
+$lblBaseTemplateName.AutoSize = $true
+$lblBaseTemplateName.Location = New-Object System.Drawing.Point(20, 119)
 
-$script:templateNamePlaceholder = "未選択"
+$script:baseTemplateNamePlaceholder = "未選択"
 
-$cmbTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbTemplateName.Location = New-Object System.Drawing.Point(160, 116)
-$cmbTemplateName.Size = New-Object System.Drawing.Size(220, 22)
-$cmbTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbBaseTemplateName = New-Object System.Windows.Forms.ComboBox
+$cmbBaseTemplateName.Location = New-Object System.Drawing.Point(160, 116)
+$cmbBaseTemplateName.Size = New-Object System.Drawing.Size(220, 22)
+$cmbBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+$lblCustomTemplateName = New-Object System.Windows.Forms.Label
+$lblCustomTemplateName.Text = "設定テンプレート名（カスタム）"
+$lblCustomTemplateName.AutoSize = $true
+$lblCustomTemplateName.Location = New-Object System.Drawing.Point(400, 119)
+
+# customTemplateは省略可のため、未選択と紛らわしくないよう別の文言にする
+$script:customTemplateNamePlaceholder = "指定なし"
+
+$cmbCustomTemplateName = New-Object System.Windows.Forms.ComboBox
+$cmbCustomTemplateName.Location = New-Object System.Drawing.Point(545, 116)
+$cmbCustomTemplateName.Size = New-Object System.Drawing.Size(180, 22)
+$cmbCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $btnRunAll = New-Object System.Windows.Forms.Button
 $btnRunAll.Text = "まとめて実行"
@@ -163,7 +176,8 @@ $runTopPanel.Controls.AddRange(@(
     $lblConfigName, $txtConfigName,
     $lblSpaceTemplateId, $txtSpaceTemplateId,
     $lblSpaceId, $txtSpaceId,
-    $lblTemplateName, $cmbTemplateName,
+    $lblBaseTemplateName, $cmbBaseTemplateName,
+    $lblCustomTemplateName, $cmbCustomTemplateName,
     $lnkToggleSteps,
     $btnRunAll, $lblOverallStatus
 ))
@@ -192,7 +206,15 @@ $stepMeta = @(
     }
     [PSCustomObject]@{
         Id = 2; Label = "2. 設定ファイルの生成"; StageKey = "generate"; Bat = $generateBat
-        ArgsFn = { param($ConfigName) @("-TemplateConfigName", $cmbTemplateName.Text.Trim(), "-DownloadConfigName", $ConfigName) }
+        ArgsFn = {
+            param($ConfigName)
+            $stepArgs = @("-BaseTemplateConfigName", $cmbBaseTemplateName.Text.Trim(), "-DownloadConfigName", $ConfigName)
+            $customTemplateName = $cmbCustomTemplateName.Text.Trim()
+            if ($customTemplateName -and $customTemplateName -ne $script:customTemplateNamePlaceholder) {
+                $stepArgs += @("-CustomTemplateConfigName", $customTemplateName)
+            }
+            $stepArgs
+        }
         OutputPathFn = { param($ConfigName) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH") "${ConfigName}_config.xlsx" }
     }
     [PSCustomObject]@{
@@ -382,8 +404,8 @@ function Test-StepPrereq {
         [System.Windows.Forms.MessageBox]::Show("ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
-    if ($Id -eq 2 -and (!$cmbTemplateName.Text.Trim() -or $cmbTemplateName.Text.Trim() -eq $script:templateNamePlaceholder)) {
-        [System.Windows.Forms.MessageBox]::Show("設定ファイルの生成には設定テンプレート名が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+    if ($Id -eq 2 -and (!$cmbBaseTemplateName.Text.Trim() -or $cmbBaseTemplateName.Text.Trim() -eq $script:baseTemplateNamePlaceholder)) {
+        [System.Windows.Forms.MessageBox]::Show("設定ファイルの生成には設定テンプレート名（基本）が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     return $true
@@ -406,7 +428,8 @@ function Set-RunControlsEnabled {
     param([bool]$Enabled)
     $txtConfigName.Enabled = $Enabled
     $txtSpaceId.Enabled = $Enabled
-    $cmbTemplateName.Enabled = $Enabled
+    $cmbBaseTemplateName.Enabled = $Enabled
+    $cmbCustomTemplateName.Enabled = $Enabled
     $txtSpaceTemplateId.Enabled = $Enabled
     $btnRunAll.Enabled = $Enabled
     $btnBatchBrowse.Enabled = $Enabled
@@ -518,7 +541,7 @@ $btnRunAll.Add_Click({
     $script:isRunning = $false
 })
 
-# Excelの列: スペース識別名 / スペーステンプレートID / 設定テンプレート名。
+# Excelの列: スペース識別名 / スペーステンプレートID / 設定テンプレート名（基本） / 設定テンプレート名（カスタム）。
 # 1行につき現在の入力欄へ値をセットしてから0→4を順に実行する。
 $btnBatchRunAll.Add_Click({
     $excelPath = $txtBatchExcelPath.Text.Trim()
@@ -546,15 +569,18 @@ $btnBatchRunAll.Add_Click({
     $origConfigName = $txtConfigName.Text
     $origSpaceTemplateId = $txtSpaceTemplateId.Text
     $origSpaceId = $txtSpaceId.Text
-    $origTemplateSelectedItem = $cmbTemplateName.SelectedItem
-    $origTemplateText = $cmbTemplateName.Text
+    $origBaseTemplateSelectedItem = $cmbBaseTemplateName.SelectedItem
+    $origBaseTemplateText = $cmbBaseTemplateName.Text
+    $origCustomTemplateSelectedItem = $cmbCustomTemplateName.SelectedItem
+    $origCustomTemplateText = $cmbCustomTemplateName.Text
 
     $resultLines = New-Object System.Collections.Generic.List[string]
     for ($i = 0; $i -lt $rows.Count; $i++) {
         $row = $rows[$i]
         $rowConfigName = "$($row.'スペース識別名')".Trim()
         $rowTemplateId = "$($row.'スペーステンプレートID')".Trim()
-        $rowResourceTemplate = "$($row.'設定テンプレート名')".Trim()
+        $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')".Trim()
+        $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')".Trim()
 
         $lblBatchStatus.ForeColor = [System.Drawing.Color]::Black
         $lblBatchStatus.Text = "実行中... ($($i + 1)/$($rows.Count): $rowConfigName)"
@@ -563,8 +589,8 @@ $btnBatchRunAll.Add_Click({
         Write-Log ""
         Write-Log "==================== 一括実行 $($i + 1)/$($rows.Count): $rowConfigName ===================="
 
-        if (!$rowConfigName -or !$rowTemplateId -or !$rowResourceTemplate) {
-            Write-Log "スペース識別名・スペーステンプレートID・設定テンプレート名のいずれかが空のためスキップします。"
+        if (!$rowConfigName -or !$rowTemplateId -or !$rowBaseResourceTemplate) {
+            Write-Log "スペース識別名・スペーステンプレートID・設定テンプレート名（基本）のいずれかが空のためスキップします。"
             $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（必須項目が空）")
             continue
         }
@@ -572,10 +598,17 @@ $btnBatchRunAll.Add_Click({
         $txtConfigName.Text = $rowConfigName
         $txtSpaceTemplateId.Text = $rowTemplateId
         $txtSpaceId.Text = ""
-        if ($cmbTemplateName.Items.Contains($rowResourceTemplate)) {
-            $cmbTemplateName.SelectedItem = $rowResourceTemplate
+        if ($cmbBaseTemplateName.Items.Contains($rowBaseResourceTemplate)) {
+            $cmbBaseTemplateName.SelectedItem = $rowBaseResourceTemplate
         } else {
-            $cmbTemplateName.Text = $rowResourceTemplate
+            $cmbBaseTemplateName.Text = $rowBaseResourceTemplate
+        }
+        if (!$rowCustomResourceTemplate) {
+            $cmbCustomTemplateName.SelectedItem = $script:customTemplateNamePlaceholder
+        } elseif ($cmbCustomTemplateName.Items.Contains($rowCustomResourceTemplate)) {
+            $cmbCustomTemplateName.SelectedItem = $rowCustomResourceTemplate
+        } else {
+            $cmbCustomTemplateName.Text = $rowCustomResourceTemplate
         }
 
         $failedLabel = Invoke-AllStepsForCurrentInputs
@@ -608,10 +641,15 @@ $btnBatchRunAll.Add_Click({
     $txtConfigName.Text = $origConfigName
     $txtSpaceTemplateId.Text = $origSpaceTemplateId
     $txtSpaceId.Text = $origSpaceId
-    if ($origTemplateSelectedItem -and $cmbTemplateName.Items.Contains($origTemplateSelectedItem)) {
-        $cmbTemplateName.SelectedItem = $origTemplateSelectedItem
+    if ($origBaseTemplateSelectedItem -and $cmbBaseTemplateName.Items.Contains($origBaseTemplateSelectedItem)) {
+        $cmbBaseTemplateName.SelectedItem = $origBaseTemplateSelectedItem
     } else {
-        $cmbTemplateName.Text = $origTemplateText
+        $cmbBaseTemplateName.Text = $origBaseTemplateText
+    }
+    if ($origCustomTemplateSelectedItem -and $cmbCustomTemplateName.Items.Contains($origCustomTemplateSelectedItem)) {
+        $cmbCustomTemplateName.SelectedItem = $origCustomTemplateSelectedItem
+    } else {
+        $cmbCustomTemplateName.Text = $origCustomTemplateText
     }
 
     Set-RunControlsEnabled $true
@@ -671,26 +709,36 @@ function Resolve-BrowseStart {
     return Expand-VarTokens $RawValue
 }
 
-function Update-TemplateNameList {
-    $selected = $cmbTemplateName.SelectedItem
-    $cmbTemplateName.Items.Clear()
-    $cmbTemplateName.Items.Add($script:templateNamePlaceholder) | Out-Null
+function Update-TemplateComboItems {
+    param([System.Windows.Forms.ComboBox]$ComboBox, [string]$EnvVarName, [string]$Placeholder)
 
-    $templatePath = Get-ResolvedVar "COMMON_TEMPLATE_PATH"
+    $selected = $ComboBox.SelectedItem
+    $ComboBox.Items.Clear()
+    $ComboBox.Items.Add($Placeholder) | Out-Null
+
+    $templatePath = Get-ResolvedVar $EnvVarName
     if ($templatePath -and (Test-Path -LiteralPath $templatePath)) {
         $names = Get-ChildItem -LiteralPath $templatePath -Filter "*.xlsx" -ErrorAction SilentlyContinue |
             ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) } |
             Sort-Object
         foreach ($name in $names) {
-            $cmbTemplateName.Items.Add($name) | Out-Null
+            $ComboBox.Items.Add($name) | Out-Null
         }
     }
 
-    if ($selected -and $cmbTemplateName.Items.Contains($selected)) {
-        $cmbTemplateName.SelectedItem = $selected
+    if ($selected -and $ComboBox.Items.Contains($selected)) {
+        $ComboBox.SelectedItem = $selected
     } else {
-        $cmbTemplateName.SelectedItem = $script:templateNamePlaceholder
+        $ComboBox.SelectedItem = $Placeholder
     }
+}
+
+function Update-BaseTemplateNameList {
+    Update-TemplateComboItems -ComboBox $cmbBaseTemplateName -EnvVarName "COMMON_BASE_TEMPLATE_PATH" -Placeholder $script:baseTemplateNamePlaceholder
+}
+
+function Update-CustomTemplateNameList {
+    Update-TemplateComboItems -ComboBox $cmbCustomTemplateName -EnvVarName "COMMON_CUSTOM_TEMPLATE_PATH" -Placeholder $script:customTemplateNamePlaceholder
 }
 
 # =========================================
@@ -765,7 +813,8 @@ $tabSettings.Controls.Add($topPanel)
 
 $varLabels = [ordered]@{
     "COMMON_DOWNLOAD_PATH"     = "ダウンロード先のフォルダ"
-    "COMMON_TEMPLATE_PATH"     = "テンプレートファイルのフォルダ"
+    "COMMON_BASE_TEMPLATE_PATH"     = "ベーステンプレートファイルのフォルダ"
+    "COMMON_CUSTOM_TEMPLATE_PATH"   = "カスタムテンプレートファイルのフォルダ"
     "COMMON_CONFIG_PATH"       = "設定ファイルのフォルダ"
     "COMMON_CHECK_OUTPUT_PATH" = "チェック結果の出力先フォルダ"
     "COMMON_LOG_PATH"          = "ログの出力先フォルダ"
@@ -774,7 +823,7 @@ $varLabels = [ordered]@{
     "KINTONE_PASSWORD"         = "パスワード"
 }
 
-$folderBrowseVars = @("COMMON_DOWNLOAD_PATH", "COMMON_TEMPLATE_PATH", "COMMON_CONFIG_PATH", "COMMON_CHECK_OUTPUT_PATH", "COMMON_LOG_PATH")
+$folderBrowseVars = @("COMMON_DOWNLOAD_PATH", "COMMON_BASE_TEMPLATE_PATH", "COMMON_CUSTOM_TEMPLATE_PATH", "COMMON_CONFIG_PATH", "COMMON_CHECK_OUTPUT_PATH", "COMMON_LOG_PATH")
 # kintoneの接続情報の3項目はset-env.batではなくset-kintone.batに保存する（未存在の場合は保存時に新規作成する）
 $kintoneVars = @("KINTONE_BASE_URL", "KINTONE_LOGIN", "KINTONE_PASSWORD")
 $passwordVars = @("KINTONE_PASSWORD")
@@ -1018,7 +1067,8 @@ $cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
-        Update-TemplateNameList
+        Update-BaseTemplateNameList
+        Update-CustomTemplateNameList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-LogConfigNameList
         Update-LogView
@@ -1027,7 +1077,8 @@ $tabControl.Add_SelectedIndexChanged({
     }
 })
 
-Update-TemplateNameList
+Update-BaseTemplateNameList
+Update-CustomTemplateNameList
 Update-LogConfigNameList
 Update-LogView
 # フォーム表示前はTabControlのSelectedTabが正しく解決されないことがあるため、

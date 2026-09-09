@@ -6,51 +6,123 @@
 # 対応付けられなかったアプリはコンソールに一覧表示するので、必要なら手動でconfigに追記する。
 # スペース名・アプリ名の"{PH}"は、kintone側で最終名が決まる前の仮名という運用を想定し、
 # 設定ファイル名に置き換える。kintoneへの書き込みは行わない。
+#
+# CustomTemplateConfigName（省略可）を指定すると、ベーステンプレートに加えてカスタムテンプレートの
+# 内容を組み合わせてconfigを生成する。組み合わせ方はシートによって異なる:
+#   space-settings         : 項目ごとにcustomの値があれば優先し、無ければbaseの値を使う
+#   space-member-list      : base・custom両方の行を残す（追加）。種別+ユーザー/組織/グループが
+#                             重複する場合はcustomの行で上書きする
+#   space-app-list         : base・custom双方をダウンロード結果と個別にマッチングする。同じ
+#                             ダウンロード先アプリに両方が対応した場合、ACLはbase・custom両方の
+#                             テンプレートから取得し、警告表示等の代表テンプレートアプリ名はcustomを優先する
+#   space-app-acl          : マッチしたアプリごとに、base・custom両方のACL行を残す（追加）。
+#   space-app-record-acl     種別+ユーザー／組織／グループ（レコードACLはレコードの条件も含む）が
+#                             重複する場合はcustomの行で上書きする
 
 param(
-    [string]$TemplateConfigName,
+    [string]$BaseTemplateConfigName,
+    [string]$CustomTemplateConfigName,
     [string]$DownloadConfigName
 )
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 . (Join-Path $scriptDir "library\common.ps1")
 
-$templateRoot = $env:COMMON_TEMPLATE_PATH
+$baseTemplateRoot = $env:COMMON_BASE_TEMPLATE_PATH
+$customTemplateRoot = $env:COMMON_CUSTOM_TEMPLATE_PATH
 $configRoot = $env:COMMON_CONFIG_PATH
 $downloadRoot = $env:COMMON_DOWNLOAD_PATH
 $logRoot = $env:COMMON_LOG_PATH
 
-if (-not $templateRoot -or -not $configRoot -or -not $downloadRoot -or -not $logRoot) {
-    Write-Message "COMMON_TEMPLATE_PATH / COMMON_CONFIG_PATH / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を set-env.bat で設定してください" -Type "Info" -NoHeader
+if (-not $baseTemplateRoot -or -not $configRoot -or -not $downloadRoot -or -not $logRoot) {
+    Write-Message "COMMON_BASE_TEMPLATE_PATH / COMMON_CONFIG_PATH / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を set-env.bat で設定してください" -Type "Info" -NoHeader
     exit 1
 }
-if (-not $TemplateConfigName) {
-    $TemplateConfigName = Read-Host "テンプレート名"
+if (-not $BaseTemplateConfigName) {
+    $BaseTemplateConfigName = Read-Host "ベーステンプレート名"
 }
 if (-not $DownloadConfigName) {
     $DownloadConfigName = Read-Host "設定ファイル名"
 }
+if ($CustomTemplateConfigName -and -not $customTemplateRoot) {
+    Write-Message "COMMON_CUSTOM_TEMPLATE_PATH を set-env.bat で設定してください" -Type "Info" -NoHeader
+    exit 1
+}
 
-$templatePath = Join-Path $templateRoot "$TemplateConfigName.xlsx"
+$baseTemplatePath = Join-Path $baseTemplateRoot "$BaseTemplateConfigName.xlsx"
+$customTemplatePath = if ($CustomTemplateConfigName) { Join-Path $customTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
 $downloadPath = Join-Path $downloadRoot "${DownloadConfigName}_download.xlsx"
 $outputPath = Join-Path $configRoot "${DownloadConfigName}_config.xlsx"
 $logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "generate_$DownloadConfigName"
 
 $script:exitCode = 0
 
+# customの値が空でなければcustomを、空ならbaseを返す（space-settingsのフィールド単位のマージに使う）
+function Get-PreferredValue {
+    param($CustomValue, $BaseValue)
+    if ("$CustomValue" -ne "") { return $CustomValue }
+    return $BaseValue
+}
+
+# 複数行シート（メンバー・ACL・レコードACL）のbaseTemplateとcustomTemplateの結合に使う。
+# [KeyProperties]が一致する行はcustomTemplate側で上書きし、一致しない行は両方とも残す（追加）
+function Merge-KintoneRowsByKey {
+    param(
+        [array]$BaseRows,
+        [array]$CustomRows,
+        [string[]]$KeyProperties
+    )
+    $result = New-Object System.Collections.Generic.List[psobject]
+    $indexByKey = @{}
+    # BaseRows/CustomRowsが0件のとき、呼び出し元の「if式の結果を代入」という書き方によって
+    # $null（空配列ではなく）になることがあり、@($null)は要素数1の配列（中身はnull）になってしまうため、
+    # ここでnull行を明示的に除外する
+    foreach ($row in @($BaseRows)) {
+        if ($null -eq $row) { continue }
+        $key = ($KeyProperties | ForEach-Object { "$($row.$_)" }) -join "`u{0}"
+        $indexByKey[$key] = $result.Count
+        $result.Add($row)
+    }
+    foreach ($row in @($CustomRows)) {
+        if ($null -eq $row) { continue }
+        $key = ($KeyProperties | ForEach-Object { "$($row.$_)" }) -join "`u{0}"
+        if ($indexByKey.ContainsKey($key)) {
+            $result[$indexByKey[$key]] = $row
+        } else {
+            $indexByKey[$key] = $result.Count
+            $result.Add($row)
+        }
+    }
+    return $result.ToArray()
+}
+
 & {
-    $templateSpaceRow = Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-settings" | Select-Object -First 1
-    $templateMemberRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-member-list")
-    $templateAppRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-list" | Where-Object { $_.'アプリ名' })
-    $templateAclRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-acl")
-    $templateRecordAclRows = @(Read-KintoneExcelRows -Path $templatePath -WorksheetName "space-app-record-acl")
+    $baseSpaceRow = Read-KintoneExcelRows -Path $baseTemplatePath -WorksheetName "space-settings" | Select-Object -First 1
+    $baseMemberRows = @(Read-KintoneExcelRows -Path $baseTemplatePath -WorksheetName "space-member-list")
+    $baseAppRows = @(Read-KintoneExcelRows -Path $baseTemplatePath -WorksheetName "space-app-list" | Where-Object { $_.'アプリ名' })
+    $baseAclRows = @(Read-KintoneExcelRows -Path $baseTemplatePath -WorksheetName "space-app-acl")
+    $baseRecordAclRows = @(Read-KintoneExcelRows -Path $baseTemplatePath -WorksheetName "space-app-record-acl")
+
+    if ($customTemplatePath) {
+        $customSpaceRow = Read-KintoneExcelRows -Path $customTemplatePath -WorksheetName "space-settings" | Select-Object -First 1
+        $customMemberRows = @(Read-KintoneExcelRows -Path $customTemplatePath -WorksheetName "space-member-list")
+        $customAppRows = @(Read-KintoneExcelRows -Path $customTemplatePath -WorksheetName "space-app-list" | Where-Object { $_.'アプリ名' })
+        $customAclRows = @(Read-KintoneExcelRows -Path $customTemplatePath -WorksheetName "space-app-acl")
+        $customRecordAclRows = @(Read-KintoneExcelRows -Path $customTemplatePath -WorksheetName "space-app-record-acl")
+    } else {
+        $customSpaceRow = $null
+        $customMemberRows = @()
+        $customAppRows = @()
+        $customAclRows = @()
+        $customRecordAclRows = @()
+    }
 
     $downloadSpaceRow = Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-settings" | Select-Object -First 1
     $downloadAppRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-list" | Where-Object { $_.'アプリID' })
     $downloadAclRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-acl")
     $downloadRecordAclRows = @(Read-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl")
 
-    if (-not $templateSpaceRow -or -not $downloadSpaceRow) {
+    if (-not $baseSpaceRow -or -not $downloadSpaceRow) {
         Write-Message "テンプレートまたはダウンロード結果のspace-settingsが空です" -ForegroundColor Red -Type "Info" -NoHeader
         $script:exitCode = 1
         return
@@ -58,23 +130,69 @@ $script:exitCode = 0
     $newSpaceId = $downloadSpaceRow.'スペースID'
     $finalSpaceName = Expand-KintonePlaceholder -Value $downloadSpaceRow.'スペース名' -ConfigName $DownloadConfigName
 
-    $mapping = Get-AppNameMapping -TemplateApps $templateAppRows -DownloadApps $downloadAppRows
-
-    # DownloadAppNameは対応付けに使った元の名前として残すため、{PH}置き換え後の名前は別プロパティに持たせる
-    foreach ($m in $mapping) {
-        $m | Add-Member -NotePropertyName "FinalAppName" -NotePropertyValue (Expand-KintonePlaceholder -Value $m.DownloadAppName -ConfigName $DownloadConfigName)
+    # space-settings: 項目ごとにcustomの値があれば優先し、無ければbaseの値を使う
+    $templateSpaceRow = [PSCustomObject]@{
+        '参加メンバーだけにこのスペースを公開する'                       = Get-PreferredValue $customSpaceRow.'参加メンバーだけにこのスペースを公開する' $baseSpaceRow.'参加メンバーだけにこのスペースを公開する'
+        'スペースのポータルと複数のスレッドを使用する'                   = Get-PreferredValue $customSpaceRow.'スペースのポータルと複数のスレッドを使用する' $baseSpaceRow.'スペースのポータルと複数のスレッドを使用する'
+        'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' = Get-PreferredValue $customSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' $baseSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
+        'アプリ作成できるユーザーをスペースの管理者に限定する'           = Get-PreferredValue $customSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する' $baseSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
     }
 
-    $unmatched = @($mapping | Where-Object { $_.Status -ne "対応" })
-    if ($unmatched.Count -gt 0) {
+    # space-member-list: base・custom両方の行を残し、種別+ユーザー/組織/グループが重複する場合はcustomで上書きする
+    $templateMemberRows = @(Merge-KintoneRowsByKey -BaseRows $baseMemberRows -CustomRows $customMemberRows -KeyProperties @("種別", "ユーザー/組織/グループ"))
+
+    # space-app-list: base・custom双方を個別にダウンロード結果とマッチングし、ダウンロード先アプリIDを軸に統合する。
+    # ACLはbase・custom両方のテンプレートアプリ名から取得するため、統合後も両方のテンプレートアプリ名を保持しておく
+    $baseAppMapping = Get-AppNameMapping -TemplateApps $baseAppRows -DownloadApps $downloadAppRows
+    $customAppMapping = if ($customAppRows.Count -gt 0) { Get-AppNameMapping -TemplateApps $customAppRows -DownloadApps $downloadAppRows } else { @() }
+
+    $matchedByDownloadId = @{}
+    foreach ($m in ($baseAppMapping | Where-Object { $_.DownloadAppId })) {
+        $matchedByDownloadId[$m.DownloadAppId] = [PSCustomObject]@{
+            DownloadAppId         = $m.DownloadAppId
+            DownloadAppName       = $m.DownloadAppName
+            BaseTemplateAppName   = $m.TemplateAppName
+            CustomTemplateAppName = $null
+        }
+    }
+    foreach ($m in ($customAppMapping | Where-Object { $_.DownloadAppId })) {
+        if ($matchedByDownloadId.ContainsKey($m.DownloadAppId)) {
+            $matchedByDownloadId[$m.DownloadAppId].CustomTemplateAppName = $m.TemplateAppName
+        } else {
+            $matchedByDownloadId[$m.DownloadAppId] = [PSCustomObject]@{
+                DownloadAppId         = $m.DownloadAppId
+                DownloadAppName       = $m.DownloadAppName
+                BaseTemplateAppName   = $null
+                CustomTemplateAppName = $m.TemplateAppName
+            }
+        }
+    }
+
+    # TemplateAppNameは対応付けの表示・ACL検索の代表名（customを優先）。DownloadAppNameは対応付けに使った
+    # 元の名前として残すため、{PH}置き換え後の名前は別プロパティ（FinalAppName）に持たせる
+    $matchedApps = @($matchedByDownloadId.Values | ForEach-Object {
+        $finalTemplateAppName = if ($_.CustomTemplateAppName) { $_.CustomTemplateAppName } else { $_.BaseTemplateAppName }
+        $finalAppName = Expand-KintonePlaceholder -Value $_.DownloadAppName -ConfigName $DownloadConfigName
+        $_ | Add-Member -NotePropertyName "TemplateAppName" -NotePropertyValue $finalTemplateAppName -PassThru |
+             Add-Member -NotePropertyName "FinalAppName" -NotePropertyValue $finalAppName -PassThru
+    })
+
+    $unmatchedBaseTemplateApps = @($baseAppMapping | Where-Object { $_.Status -ne "対応" -and $_.TemplateAppName })
+    $unmatchedCustomTemplateApps = @($customAppMapping | Where-Object { $_.Status -ne "対応" -and $_.TemplateAppName })
+    $unmatchedDownloadApps = @($downloadAppRows | Where-Object { -not $matchedByDownloadId.ContainsKey($_.'アプリID') })
+    $hasUnmatched = ($unmatchedBaseTemplateApps.Count -gt 0) -or ($unmatchedCustomTemplateApps.Count -gt 0) -or ($unmatchedDownloadApps.Count -gt 0)
+
+    if ($hasUnmatched) {
         Write-Message "" -Type "Info" -NoHeader
         Write-Message "## アプリの対応付けで確認が必要な項目" -Type "Info" -NoHeader
-        foreach ($m in $unmatched) {
-            if (-not $m.DownloadAppId) {
-                Write-Message "  テンプレートのアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
-            } else {
-                Write-Message "  新スペースのアプリ[$($m.DownloadAppName)](appId=$($m.DownloadAppId))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
-            }
+        foreach ($m in $unmatchedBaseTemplateApps) {
+            Write-Message "  ベーステンプレートのアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+        }
+        foreach ($m in $unmatchedCustomTemplateApps) {
+            Write-Message "  カスタムテンプレートのアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+        }
+        foreach ($m in $unmatchedDownloadApps) {
+            Write-Message "  新スペースのアプリ[$($m.'アプリ名')](appId=$($m.'アプリID'))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
         }
     }
 
@@ -125,7 +243,6 @@ $script:exitCode = 0
         Write-Message "  テンプレートに無い既存メンバーを引き継ぎ ($($keptMemberRows.Count)件): $(($keptMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' }) -join ', ')" -Type "Info" -NoHeader
     }
 
-    $matchedApps = @($mapping | Where-Object { $_.TemplateAppName -and $_.DownloadAppId })
     $outAppRows = @($matchedApps | ForEach-Object {
         [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
     })
@@ -141,7 +258,9 @@ $script:exitCode = 0
     Write-Message "" -Type "Info" -NoHeader
     Write-Message "## space-app-acl" -Type "Info" -NoHeader
     foreach ($m in $matchedApps) {
-        $rows = @($templateAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.TemplateAppName)" })
+        $baseRows = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+        $customRows = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+        $rows = @(Merge-KintoneRowsByKey -BaseRows $baseRows -CustomRows $customRows -KeyProperties @("種別", "ユーザー／組織／グループ"))
         foreach ($r in $rows) {
             $outAclRows.Add([PSCustomObject]@{
                 "アプリID"         = $m.DownloadAppId
@@ -167,7 +286,9 @@ $script:exitCode = 0
     Write-Message "" -Type "Info" -NoHeader
     Write-Message "## space-app-record-acl" -Type "Info" -NoHeader
     foreach ($m in $matchedApps) {
-        $rows = @($templateRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.TemplateAppName)" })
+        $baseRows = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+        $customRows = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+        $rows = @(Merge-KintoneRowsByKey -BaseRows $baseRows -CustomRows $customRows -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
         foreach ($r in $rows) {
             $outRecordAclRows.Add([PSCustomObject]@{
                 "アプリID"                 = $m.DownloadAppId
@@ -310,7 +431,7 @@ $script:exitCode = 0
 
     Write-Message "" -Type "Info" -NoHeader
     Write-Message "設定内容を出力しました: $outputPath" -ForegroundColor Green -Type "Info" -NoHeader
-    if ($unmatched.Count -gt 0) {
+    if ($hasUnmatched) {
         # 対応付け未了の警告のみで設定ファイル自体は生成済みのため、致命的エラー(exit 1)とは区別する
         $script:exitCode = 2
     }
