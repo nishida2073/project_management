@@ -197,12 +197,10 @@ generate-config-from-template.bat -BaseTemplateConfigName class-space -DownloadC
 |---|---|
 | `-ConfigName` | 対象のスペース識別名（`config\<CONFIG_NAME>_config.xlsx`の`<CONFIG_NAME>`） |
 | `-Sheets` | 反映対象シート名（カンマ区切り、複数指定可）。省略時は5シートすべてが対象 |
-| `-WhatIf` | 実際には反映せず、反映する内容だけをコンソール・ログに表示する |
 
 ```bat
 apply-kintone-resources.bat -ConfigName L20
 apply-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl,space-app-record-acl
-apply-kintone-resources.bat -ConfigName L20 -WhatIf
 ```
 
 `-ConfigName`を指定しなかった場合は実行時にコンソールで入力を求められる。
@@ -213,7 +211,7 @@ apply-kintone-resources.bat -ConfigName L20 -WhatIf
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `apply_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（`-WhatIf`指定時は実際には反映されなかった内容として記録される） |
+| `apply_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
 
 #### 注意点
 

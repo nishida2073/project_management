@@ -8,8 +8,7 @@
 
 param(
     [string]$ConfigName,
-    [string]$Sheets,
-    [switch]$WhatIf
+    [string]$Sheets
 )
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
@@ -31,6 +30,18 @@ $configPath = Join-Path $configRoot "${ConfigName}_config.xlsx"
 $logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "apply_$ConfigName"
 
 $script:exitCode = 0
+
+# 「■<ラベル>しました (<件数>)」のヘッダー行＋詳細行の出力を共通化する。CountPhraseは省略可（例: "2件"）。
+function Write-ApplyStepResult {
+    param(
+        [Parameter(Mandatory)][string]$ActionLabel,
+        [string]$CountPhrase = "",
+        [string[]]$DetailLines = @()
+    )
+    $suffix = if ($CountPhrase) { " ($CountPhrase)" } else { "" }
+    Write-Message "■${ActionLabel}しました${suffix}" -Type "Info" -NoHeader
+    foreach ($line in $DetailLines) { Write-Message $line -Type "Info" -NoHeader }
+}
 
 & {
     $spaceRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-settings"
@@ -60,22 +71,13 @@ $script:exitCode = 0
                 $spaceRightLines = @('参加メンバーだけにこのスペースを公開する', 'スペースのポータルと複数のスレッドを使用する', 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する', 'アプリ作成できるユーザーをスペースの管理者に限定する') | ForEach-Object {
                     "　${_}: $($spaceRow.$_)"
                 }
-                if ($WhatIf) {
-                    Write-Message "■[WhatIf] スペース名を設定" -Type "Info" -NoHeader
-                    Write-Message "　$($spaceRow.'スペース名')" -Type "Info" -NoHeader
-                    Write-Message "■[WhatIf] スペース権限を設定" -Type "Info" -NoHeader
-                    foreach ($line in $spaceRightLines) { Write-Message $line -Type "Info" -NoHeader }
-                } else {
-                    Set-Space -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId `
-                        -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
-                        -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
-                        -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
-                        -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')
-                    Write-Message "■スペース名を設定しました" -Type "Info" -NoHeader
-                    Write-Message "　$($spaceRow.'スペース名')" -Type "Info" -NoHeader
-                    Write-Message "■スペース権限を設定しました" -Type "Info" -NoHeader
-                    foreach ($line in $spaceRightLines) { Write-Message $line -Type "Info" -NoHeader }
-                }
+                Set-Space -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId `
+                    -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
+                    -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
+                    -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
+                    -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')
+                Write-ApplyStepResult -ActionLabel "スペース名を設定" -DetailLines @("　$($spaceRow.'スペース名')")
+                Write-ApplyStepResult -ActionLabel "スペース権限を設定" -DetailLines $spaceRightLines
             } catch {
                 Write-Message "スペースID $spaceId のスペース設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                 $hasError = $true
@@ -90,26 +92,22 @@ $script:exitCode = 0
                     $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
                     "　　$($row.'種別'):$($row.'ユーザー/組織/グループ') - $($flags -join ',')"
                 })
-                if ($WhatIf) {
-                    Write-Message "■[WhatIf] スペースメンバーを設定: $($targetMemberRows.Count)件" -Type "Info" -NoHeader
-                    foreach ($line in $targetMemberLines) { Write-Message $line -Type "Info" -NoHeader }
-                } else {
-                    $memberResult = Set-SpaceMembers -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
-                    Write-Message "■スペースメンバーを設定しました ($($memberResult.TotalCount)件)" -Type "Info" -NoHeader
-                    if ($targetMemberRows.Count -gt 0) {
-                        Write-Message "　テンプレート内のメンバー ($($targetMemberRows.Count)件)" -Type "Info" -NoHeader
-                        foreach ($line in $targetMemberLines) { Write-Message $line -Type "Info" -NoHeader }
-                    }
-                    if ($memberResult.KeptMembers.Count -gt 0) {
-                        Write-Message "  テンプレート外のメンバー ($($memberResult.KeptMembers.Count)件)" -Type "Info" -NoHeader
-                        foreach ($m in $memberResult.KeptMembers) {
-                            $flags = @()
-                            if ($m.IsAdmin) { $flags += '管理者' }
-                            if ($m.IncludeSubs) { $flags += '下位組織も含める' }
-                            Write-Message "　　$($m.Type):$($m.Code) - $($flags -join ',')" -Type "Info" -NoHeader
-                        }
-                    }
+                $memberResult = Set-SpaceMembers -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
+                $memberDetailLines = @()
+                if ($targetMemberRows.Count -gt 0) {
+                    $memberDetailLines += "　テンプレート内のメンバー ($($targetMemberRows.Count)件)"
+                    $memberDetailLines += $targetMemberLines
                 }
+                if ($memberResult.KeptMembers.Count -gt 0) {
+                    $memberDetailLines += "  テンプレート外のメンバー ($($memberResult.KeptMembers.Count)件)"
+                    $memberDetailLines += @($memberResult.KeptMembers | ForEach-Object {
+                        $flags = @()
+                        if ($_.IsAdmin) { $flags += '管理者' }
+                        if ($_.IncludeSubs) { $flags += '下位組織も含める' }
+                        "　　$($_.Type):$($_.Code) - $($flags -join ',')"
+                    })
+                }
+                Write-ApplyStepResult -ActionLabel "スペースメンバーを設定" -CountPhrase "$($memberResult.TotalCount)件" -DetailLines $memberDetailLines
             } catch {
                 Write-Message "スペースID $spaceId のメンバー設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                 $hasError = $true
@@ -147,15 +145,9 @@ $script:exitCode = 0
             if ($applyAppList -and $appNameRow) {
                 $finalName = $appNameRow.'アプリ名'
                 try {
-                    if ($WhatIf) {
-                        Write-Message "■[WhatIf] アプリ名を設定" -Type "Info" -NoHeader
-                        Write-Message "　$finalName" -Type "Info" -NoHeader
-                    } else {
-                        Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
-                        Write-Message "■アプリ名を設定しました" -Type "Info" -NoHeader
-                        Write-Message "　$finalName" -Type "Info" -NoHeader
-                        $appChanged = $true
-                    }
+                    Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
+                    $appChanged = $true
+                    Write-ApplyStepResult -ActionLabel "アプリ名を設定" -DetailLines @("　$finalName")
                 } catch {
                     Write-Message "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                     $hasError = $true
@@ -172,20 +164,17 @@ $script:exitCode = 0
                         $grantedRights = @('レコード閲覧', 'レコード追加', 'レコード編集', 'レコード削除', 'アプリ管理', 'ファイル読み込み', 'ファイル書き出し') | Where-Object { ToBool $row.$_ }
                         "　$($row.'種別'):$($row.'ユーザー／組織／グループ') - $($grantedRights -join ',')"
                     })
+                    # kintoneはrightsにCREATOR(appEditable:true)相当が無いとエラーになるため、Set-AppAclが自動的に補う。
+                    # ログ上の件数・対象一覧にもその自動追加分を反映しておく。
                     $hasCreatorManage = [bool]($rights | Where-Object { $_.entity.type -eq "CREATOR" -and $_.appEditable })
                     $aclTotalCount = $rights.Count + $(if ($hasCreatorManage) { 0 } else { 1 })
                     if (-not $hasCreatorManage) {
                         $aclTargetLines += "　アプリ作成者(自動追加) - レコード閲覧,レコード追加,レコード編集,レコード削除,アプリ管理,ファイル読み込み,ファイル書き出し"
                     }
-                    if ($WhatIf) {
-                        Write-Message "■[WhatIf] アプリの権限を設定: $($aclTotalCount)件" -Type "Info" -NoHeader
-                        foreach ($line in $aclTargetLines) { Write-Message $line -Type "Info" -NoHeader }
-                    } else {
-                        Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights | Out-Null
-                        Write-Message "■アプリの権限を設定しました ($($aclTotalCount)件)" -Type "Info" -NoHeader
-                        foreach ($line in $aclTargetLines) { Write-Message $line -Type "Info" -NoHeader }
-                        $appChanged = $true
-                    }
+
+                    Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights
+                    $appChanged = $true
+                    Write-ApplyStepResult -ActionLabel "アプリの権限を設定" -CountPhrase "$($aclTotalCount)件" -DetailLines $aclTargetLines
                 } catch {
                     Write-Message "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                     $hasError = $true
@@ -208,15 +197,10 @@ $script:exitCode = 0
                             "　　　- $($row.'種別'):$($row.'ユーザー／組織／グループ') ($rightsLabel)"
                         }
                     })
-                    if ($WhatIf) {
-                        Write-Message "■[WhatIf] アプリのレコード権限を設定: 条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件" -Type "Info" -NoHeader
-                        foreach ($line in $recordAclTargetLines) { Write-Message $line -Type "Info" -NoHeader }
-                    } else {
-                        Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
-                        Write-Message "■アプリのレコード権限を設定しました (条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件)" -Type "Info" -NoHeader
-                        foreach ($line in $recordAclTargetLines) { Write-Message $line -Type "Info" -NoHeader }
-                        $appChanged = $true
-                    }
+
+                    Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
+                    $appChanged = $true
+                    Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定" -CountPhrase "条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
                 } catch {
                     Write-Message "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                     $hasError = $true
@@ -228,7 +212,7 @@ $script:exitCode = 0
             if ($appChanged) {
                 if ($appHasError) {
                     Write-Message "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow -Type "Info" -NoHeader
-                } elseif (-not $WhatIf) {
+                } else {
                     try {
                         Update-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds @($appId)
                     } catch {
