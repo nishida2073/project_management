@@ -2,7 +2,7 @@
 # 業務固有のデータ（ボタン定義の中身など）や実行フローはgui.ps1側に残す。
 
 # 指定パスをエクスプローラーで開く。存在しなければ警告ダイアログを出す
-function Open-FolderOrWarn {
+function Open-TargetOrWarn {
     param([string]$Path)
     if (!$Path -or !(Test-Path -LiteralPath $Path)) {
         [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
@@ -155,7 +155,7 @@ function Add-StackedDockedControls {
 # 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options } の形
 # （LabelWidth/InputWidthは省略可。Optionsを指定すると自由入力のTextBoxの代わりに、
 #   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形）。
-# 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-FolderOrWarnを使う。
+# 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-TargetOrWarnを使う。
 function New-CategoryTabControl {
     param(
         [Parameter(Mandatory)][array]$CategoryDefs,
@@ -171,7 +171,7 @@ function New-CategoryTabControl {
     )
 
     if (-not $OnOpenClick) {
-        $OnOpenClick = { param($path) Open-FolderOrWarn -Path $path }
+        $OnOpenClick = { param($path) Open-TargetOrWarn -Path $path }
     }
 
     function Get-ButtonGroupHeight {
