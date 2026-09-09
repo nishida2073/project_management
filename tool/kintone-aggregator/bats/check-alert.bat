@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+chcp 932 >nul
 
 set "MyName=%~nx0"
 
@@ -60,6 +61,13 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "     -AlertInterventionLimit '%AlertInterventionLimit%'" ^
           "     -UseRecovery '%UseRecovery%'" ^
           "     -RecoveryScriptPath '%RecoveryScriptPath%'" ^
+          "     -KintoneLoginName '!KintoneLoginName!'" ^
+          "     -KintonePassword '!KintonePassword!'" ^
+          "     -Authorization '!Authorization!'" ^
+          "     -SpaceId '!SpaceId!'" ^
+          "     -ThreadId '!ThreadId!'" ^
+          "     -MentionUserCodes '!MentionUserCodes!'" ^
+          "     -CommentTextTemplate '!CommentTextTemplate!'" ^
           "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^

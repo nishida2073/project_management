@@ -218,7 +218,6 @@ function Get-CurrentAppFieldData {
         Write-Message $response -VarName "response"
         return $response.properties
     } catch {
-        Write-Message "フィールド取得 失敗: $($_.Exception.Message)" -VarName "message" -ForegroundColor Red
         throw
     }
 }
@@ -298,7 +297,6 @@ function Get-CurrentAppData {
         Write-Message $allRecords -VarName "allRecords" -Type "Info"
         return $allRecords
     } catch {
-        Write-Message "アプリデータ取得 失敗: $($_.Exception.Message)" -VarName "message" -Type "Error" -ForegroundColor Red
         throw
     }
 }

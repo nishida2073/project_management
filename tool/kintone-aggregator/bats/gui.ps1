@@ -422,6 +422,7 @@ function Resolve-BrowseStart {
 
 $commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $authVars = @("KintoneSubdomain", "KintoneLoginName", "KintonePassword")
+$postVars = @("SpaceId", "ThreadId", "MentionUserCodes", "CommentTextTemplate")
 
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
@@ -445,7 +446,7 @@ function Get-ReportTypeDefs {
     return @($types | Sort-Object Prefix)
 }
 
-$settingsGroupLabels = @{ "BASE" = "基本設定"; "AUTH" = "認証情報" }
+$settingsGroupLabels = @{ "BASE" = "基本設定"; "AUTH" = "認証情報"; "POST" = "投稿先" }
 foreach ($rt in (Get-ReportTypeDefs)) { $settingsGroupLabels[$rt.Prefix] = $rt.Label }
 $settingsVarLabels = @{
     "ClientDataRootDir"        = "グループデータのフォルダ"
@@ -458,12 +459,24 @@ $settingsVarLabels = @{
     "KintoneLoginName"         = "ログイン名"
     "KintonePassword"          = "パスワード"
     "KintoneSubdomain"         = "サブドメイン"
+    "SpaceId"                  = "投稿先スペースID"
+    "ThreadId"                 = "投稿先スレッドID"
+    "MentionUserCodes"         = "メンション対象"
+    "CommentTextTemplate"      = "投稿コメント文言"
     "TargetAppIds"             = "対象アプリID"
     "TargetDateCodeField"      = "日付フィールドコード"
     "TargetUserCodeField"      = "受講生IDフィールドコード"
 }
 $settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir")
 $settingsMaskedVars = @("KintonePassword")
+# client.batは1変数1行(set "Var=Value")の形式で改行を持てないため、複数行入力欄は
+# 保存時に実際の改行を"\n"リテラルへ変換して1行に収め、画面表示時・check-alert.ps1側の利用時に戻す
+$settingsMultilineVars = @("CommentTextTemplate")
+# このフィールドの次の行にテスト用ボタンを置く。グループ別タブにのみ出現するフィールドを指定すること
+$settingsTrailingButtonVars = @{
+    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-TestConnectionButton -Panel $Panel -Y $Y -ReportGroup $Field.Group }
+    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestPostButton -Panel $Panel -Y $Y }
+}
 
 # TargetAppIds等は種別（業務日誌/パルスサーベイ等）ごとに同じ変数名を別の値で使うため、変数名に
 # 各種別のSuffix（Get-ReportTypeDefs参照）を付けて区別して持つ。この関数はそのサフィックス付きの
@@ -640,6 +653,10 @@ function Get-GroupSettingsFieldRows {
         $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Auth[$varName] }
         [PSCustomObject]@{ Key = "AUTH_$varName"; VarName = $varName; Group = "AUTH"; Value = $value }
     }
+    foreach ($varName in $postVars) {
+        $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Auth[$varName] }
+        [PSCustomObject]@{ Key = "POST_$varName"; VarName = $varName; Group = "POST"; Value = $value }
+    }
     foreach ($rt in (Get-ReportTypeDefs)) {
         $rawForType = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $rt.Suffix -VarNames $groupReportVars
         $defaultsForType = $templateDefaults.ByType[$rt.Prefix]
@@ -686,6 +703,11 @@ function Render-SettingsFields {
             $lastGroup = $field.Group
         }
 
+        if ($field.VarName -eq "MentionUserCodes") {
+            $y = Add-MentionsEditor -Panel $Panel -StartY $y -RawValue "$($field.Value)"
+            continue
+        }
+
         $lbl = New-Object System.Windows.Forms.Label
         $lbl.Text = if ($settingsVarLabels.ContainsKey($field.VarName)) { $settingsVarLabels[$field.VarName] } else { $field.VarName }
         $lbl.AutoSize = $false
@@ -694,10 +716,18 @@ function Render-SettingsFields {
         $settingsToolTip.SetToolTip($lbl, $field.VarName)
         $Panel.Controls.Add($lbl)
 
+        $isMultiline = $settingsMultilineVars -contains $field.VarName
+
         $txt = New-Object System.Windows.Forms.TextBox
-        $txt.Text = "$($field.Value)"
+        $txt.Text = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
         $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-        $txt.Size = New-Object System.Drawing.Size(300, 22)
+        if ($isMultiline) {
+            $txt.Multiline = $true
+            $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
+            $txt.Size = New-Object System.Drawing.Size(300, 60)
+        } else {
+            $txt.Size = New-Object System.Drawing.Size(300, 22)
+        }
         $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
         if ($settingsMaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
         $Panel.Controls.Add($txt)
@@ -719,22 +749,141 @@ function Render-SettingsFields {
             $Panel.Controls.Add($btnBrowse)
         }
 
-        # 対象アプリID（グループ別タブの種別ごとのセクションのみに出現）の行に、現在の画面入力値で
-        # kintone接続を試す「テスト接続」ボタンを添える
-        if ($field.VarName -eq "TargetAppIds") {
-            $btnTestConnection = New-Object System.Windows.Forms.Button
-            $btnTestConnection.Text = "テスト接続"
-            $btnTestConnection.Location = New-Object System.Drawing.Point(560, ($y - 3))
-            $btnTestConnection.Size = New-Object System.Drawing.Size(90, 24)
-            $btnTestConnection.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            $btnTestConnection.Tag = $field.Group
-            $btnTestConnection.Add_Click({ Test-KintoneConnection -ReportGroup $this.Tag })
-            $Panel.Controls.Add($btnTestConnection)
-        }
-
         $TextBoxes[$field.Key] = $txt
+        $y += if ($isMultiline) { 66 } else { 28 }
+
+        if ($settingsTrailingButtonVars.ContainsKey($field.VarName)) {
+            & $settingsTrailingButtonVars[$field.VarName] $Panel $y $field
+            $y += 34
+        }
+    }
+    return $y
+}
+
+function Add-TestConnectionButton {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [int]$Y,
+        [string]$ReportGroup
+    )
+    $btnTestConnection = New-Object System.Windows.Forms.Button
+    $btnTestConnection.Text = "テスト接続"
+    $btnTestConnection.Location = New-Object System.Drawing.Point(40, $Y)
+    $btnTestConnection.Size = New-Object System.Drawing.Size(90, 24)
+    $btnTestConnection.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+    $btnTestConnection.Tag = $ReportGroup
+    $btnTestConnection.Add_Click({ Test-KintoneConnection -ReportGroup $this.Tag })
+    $Panel.Controls.Add($btnTestConnection)
+}
+
+# メンション設定（MentionUserCodes）は"ユーザコード:権限"のペアをカンマ区切りで1行に保持する
+# （client.batは1変数1行のため）。GUI側は行単位で追加・削除できるUIにするため、
+# 選択中のグループの行データだけをメモリ上に保持し（$script:mentionRowsGroupNameで検知）、
+# グループを切り替えたときだけファイルの値から読み直す
+$mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
+$script:mentionRows = @()
+$script:mentionRowsGroupName = $null
+$script:mentionRowControls = @()
+
+function ConvertFrom-MentionUserCodesText {
+    param([string]$Text)
+    $rows = [System.Collections.Generic.List[object]]::new()
+    foreach ($part in ($Text -split ',')) {
+        $trimmed = $part.Trim()
+        if (!$trimmed) { continue }
+        $pair = $trimmed -split ':', 2
+        $code = $pair[0].Trim()
+        if (!$code) { continue }
+        $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
+        if ($mentionTypeOptions -notcontains $type) { $type = "USER" }
+        $rows.Add([PSCustomObject]@{ Code = $code; Type = $type })
+    }
+    return $rows
+}
+
+function ConvertTo-MentionUserCodesText {
+    param($Rows)
+    return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
+}
+
+# 描画済みの行コントロールの現在値を$script:mentionRowsへ書き戻す。
+# 再描画（行追加・削除）の直前に必ず呼び、それまでの入力内容を失わないようにする
+function Sync-MentionRowsFromControls {
+    foreach ($entry in $script:mentionRowControls) {
+        $entry.Row.Code = $entry.CodeBox.Text
+        $entry.Row.Type = $entry.TypeCombo.SelectedItem
+    }
+}
+
+function Add-MentionsEditor {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [int]$StartY,
+        [string]$RawValue
+    )
+    $groupName = $cmbSettingsGroupTarget.SelectedItem
+    if ($script:mentionRowsGroupName -ne $groupName) {
+        # ConvertFrom-MentionUserCodesTextはList[object]を返すため、@()で配列化しないと
+        # 後段の "$script:mentionRows += ..." が配列結合ではなくop_Addition呼び出しになって失敗する
+        $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue)
+        $script:mentionRowsGroupName = $groupName
+    }
+    $script:mentionRowControls = @()
+
+    $y = $StartY
+    $lbl = New-Object System.Windows.Forms.Label
+    $lbl.Text = "メンション対象"
+    $lbl.AutoSize = $false
+    $lbl.Size = New-Object System.Drawing.Size(220, 20)
+    $lbl.Location = New-Object System.Drawing.Point(20, $y)
+    $settingsToolTip.SetToolTip($lbl, "MentionUserCodes")
+    $Panel.Controls.Add($lbl)
+    $y += 24
+
+    foreach ($row in @($script:mentionRows)) {
+        $txtCode = New-Object System.Windows.Forms.TextBox
+        $txtCode.Text = "$($row.Code)"
+        $txtCode.Location = New-Object System.Drawing.Point(40, $y)
+        $txtCode.Size = New-Object System.Drawing.Size(190, 22)
+        $Panel.Controls.Add($txtCode)
+
+        $cmbType = New-Object System.Windows.Forms.ComboBox
+        $cmbType.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+        foreach ($opt in $mentionTypeOptions) { $cmbType.Items.Add($opt) | Out-Null }
+        $cmbType.SelectedItem = if ($mentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
+        $cmbType.Location = New-Object System.Drawing.Point(240, $y)
+        $cmbType.Size = New-Object System.Drawing.Size(120, 22)
+        $Panel.Controls.Add($cmbType)
+
+        $btnDeleteRow = New-Object System.Windows.Forms.Button
+        $btnDeleteRow.Text = "削除"
+        $btnDeleteRow.Location = New-Object System.Drawing.Point(370, ($y - 1))
+        $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
+        $btnDeleteRow.Tag = $row
+        $btnDeleteRow.Add_Click({
+            Sync-MentionRowsFromControls
+            $target = $this.Tag
+            $script:mentionRows = @($script:mentionRows | Where-Object { $_ -ne $target })
+            Update-GroupSettingsFields
+        })
+        $Panel.Controls.Add($btnDeleteRow)
+
+        $script:mentionRowControls += [PSCustomObject]@{ Row = $row; CodeBox = $txtCode; TypeCombo = $cmbType }
         $y += 28
     }
+
+    $btnAddRow = New-Object System.Windows.Forms.Button
+    $btnAddRow.Text = "＋ 追加"
+    $btnAddRow.Location = New-Object System.Drawing.Point(40, $y)
+    $btnAddRow.Size = New-Object System.Drawing.Size(80, 24)
+    $btnAddRow.Add_Click({
+        Sync-MentionRowsFromControls
+        $script:mentionRows += [PSCustomObject]@{ Code = ""; Type = "USER" }
+        Update-GroupSettingsFields
+    })
+    $Panel.Controls.Add($btnAddRow)
+    $y += 34
+
     return $y
 }
 
@@ -920,8 +1069,13 @@ function Update-CommonSettingsFields {
 }
 
 function Update-GroupSettingsFields {
+    $scrollX = -$settingsGroupFieldPanel.AutoScrollPosition.X
+    $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
+
     $target = $cmbSettingsGroupTarget.SelectedItem
     Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes | Out-Null
+
+    $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
 function Get-CommonSettingsFieldValue {
@@ -974,6 +1128,48 @@ function Test-KintoneConnection {
     [System.Windows.Forms.MessageBox]::Show(($resultLines -join "`r`n"), "テスト接続", [System.Windows.Forms.MessageBoxButtons]::OK, $icon) | Out-Null
 }
 
+function Add-TestPostButton {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [int]$Y
+    )
+    $btnTestPost = New-Object System.Windows.Forms.Button
+    $btnTestPost.Text = "テスト投稿"
+    $btnTestPost.Location = New-Object System.Drawing.Point(40, $Y)
+    $btnTestPost.Size = New-Object System.Drawing.Size(90, 24)
+    $btnTestPost.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+    $btnTestPost.Add_Click({ Test-KintonePostSettings })
+    $Panel.Controls.Add($btnTestPost)
+}
+
+# スペースID・スレッドID・メンション設定（投稿先）の妥当性は、スレッド単体を取得するAPIが無く
+# メンション対象の存在確認にも別APIが必要になるため、実際にダミーコメントを投稿してみて確認する
+function Test-KintonePostSettings {
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+    $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+    $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+
+    if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) {
+        [System.Windows.Forms.MessageBox]::Show("スペースIDとスレッドIDを入力してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    Sync-MentionRowsFromControls
+    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+
+    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+
+    try {
+        $response = Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+        [System.Windows.Forms.MessageBox]::Show("投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("投稿に失敗しました。`r`n$($_.Exception.Message)", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+    }
+}
+
 function Save-CommonSettings {
     $path = Join-Path $basePath "common-env.bat"
 
@@ -1019,6 +1215,17 @@ function Save-GroupSettings {
     $groupLines += "set `"Authorization=$authorizationValue`""
     # BaseUrlは画面では編集させず、KintoneSubdomainから常に導出する
     $groupLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
+    $groupLines += ""
+    Sync-MentionRowsFromControls
+    foreach ($varName in $postVars) {
+        $val = if ($varName -eq "MentionUserCodes") {
+            ConvertTo-MentionUserCodesText -Rows $script:mentionRows
+        } else {
+            Get-GroupSettingsFieldValue "POST_$varName"
+        }
+        if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+        $groupLines += "set `"$varName=$val`""
+    }
     foreach ($rt in (Get-ReportTypeDefs)) {
         $groupLines += ""
         foreach ($varName in $groupReportVars) {
