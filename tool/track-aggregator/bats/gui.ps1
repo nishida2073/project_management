@@ -77,7 +77,7 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-test-result.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
             [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "collect-survey-result.bat"); TargetDirPath = $script:commonEnvVars["OutputSurveyCollectDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "post-collect-results.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = (Join-Path $basePath "post-collect-results.bat"); TargetDirPath = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
@@ -87,6 +87,7 @@ $categoryDefs = @(
                 Label = "アンケート・テスト"
                 BatchLabel = "経年比較-アンケート・テスト"
                 IncludeInBatch = $true
+                DefaultChecked = $false
                 BatchPath = (Join-Path $basePath "collect-year-comparison-result.bat")
                 TargetDirPath = $script:commonEnvVars["OutputYearComparisonCollectDir"]
                 Inputs = @(
@@ -180,16 +181,13 @@ $batchTopControls = @()
 $script:batchStepCheckboxes = @()
 $y = 56
 foreach ($bd in $allButtonDefs) {
-    # common-env.bat由来の空でない既定値を持つInputs（経年比較集計のComparePeriod等）は
-    # 一括実行タブで値を確認・変更できないまま実行されてしまうため、既定はチェックを外しておく。
-    # 一方、対象グループの絞り込み（既定は空欄＝全グループ）のように既定値が常に空のInputsは、
-    # チェックを外さなくても安全に一括実行できるため対象外にする
-    $hasNonEmptyInputDefault = @($bd.Inputs | Where-Object { $_.Default }).Count -gt 0
     # BatchLabelの長さはボタンごとに異なるため、AutoSizeで実測幅に合わせると「開く」の位置が
     # ずれて見切れたり画面外に出たりする。チェックボックスを固定幅＋省略表示にして「開く」の位置を固定する
     $chk = New-Object System.Windows.Forms.CheckBox
     $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
-    $chk.Checked = if ($hasNonEmptyInputDefault) { $false } else { $true }
+    # 一括実行タブで値を確認・変更できない入力欄を持つステップや、kintoneへの投稿のように
+    # 副作用のあるステップは、ButtonDef側でDefaultChecked=$falseを指定して既定チェックを外す
+    $chk.Checked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
     $chk.AutoSize = $false
     $chk.AutoEllipsis = $true
     $chk.Size = New-Object System.Drawing.Size(500, 22)
@@ -598,7 +596,7 @@ $settingsGroupTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $settingsGroupTopPanel.Height = 70
 
 $lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
-$lblSettingsGroupTarget.Text = "対象"
+$lblSettingsGroupTarget.Text = "対象グループ"
 $lblSettingsGroupTarget.AutoSize = $true
 
 $cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
@@ -637,9 +635,10 @@ $settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettings
 # Y位置を計算しないと縦の中央が揃わない（New-CategoryTabControlの入力欄と同じ理由）
 $settingsRow1CenterY = 26
 $lblSettingsGroupTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsGroupTarget.Height / 2)))
-$cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(90, ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
-$btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(360, ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
-$lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(510, ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
+# ラベル幅（AutoSize）に応じて後続コントロールを詰めて配置し、ラベルの文言を変えても重ならないようにする
+$cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(($lblSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
+$btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(($cmbSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
+$lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(($btnSettingsGroupNewGroup.Right + 10), ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill

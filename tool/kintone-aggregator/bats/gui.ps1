@@ -560,7 +560,7 @@ $settingsGroupTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $settingsGroupTopPanel.Height = 70
 
 $lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
-$lblSettingsGroupTarget.Text = "対象"
+$lblSettingsGroupTarget.Text = "対象グループ"
 $lblSettingsGroupTarget.AutoSize = $true
 
 $cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
@@ -599,9 +599,10 @@ $settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettings
 # Y位置を計算しないと縦の中央が揃わない（New-CategoryTabControlの入力欄と同じ理由）
 $settingsRow1CenterY = 26
 $lblSettingsGroupTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsGroupTarget.Height / 2)))
-$cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(90, ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
-$btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(360, ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
-$lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(510, ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
+# ラベル幅（AutoSize）に応じて後続コントロールを詰めて配置し、ラベルの文言を変えても重ならないようにする
+$cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(($lblSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
+$btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(($cmbSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
+$lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(($btnSettingsGroupNewGroup.Right + 10), ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
