@@ -1000,6 +1000,34 @@ $cmbLogConfigName.Location = New-Object System.Drawing.Point(160, 14)
 $cmbLogConfigName.Size = New-Object System.Drawing.Size(220, 24)
 $cmbLogConfigName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
+$btnClearLogs = New-Object System.Windows.Forms.Button
+$btnClearLogs.Text = "ログをすべて削除"
+$btnClearLogs.Location = New-Object System.Drawing.Point(420, 13)
+$btnClearLogs.Size = New-Object System.Drawing.Size(140, 26)
+$btnClearLogs.Add_Click({
+    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
+    if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
+
+    $logFiles = @(Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue)
+    if ($logFiles.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("削除対象のログファイルがありません。", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+        return
+    }
+
+    $confirm = [System.Windows.Forms.MessageBox]::Show("ログファイルを$($logFiles.Count)件すべて削除します。よろしいですか？", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
+    if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+
+    foreach ($file in $logFiles) {
+        try {
+            Remove-Item -LiteralPath $file.FullName -Force
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("削除に失敗したファイルがあります: $($file.Name)`r`n$($_.Exception.Message)", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        }
+    }
+    Update-LogConfigNameList
+    Update-LogView
+})
+
 $script:logStageRadios = @{}
 for ($i = 0; $i -lt $stepMeta.Count; $i++) {
     $sm = $stepMeta[$i]
@@ -1014,7 +1042,7 @@ for ($i = 0; $i -lt $stepMeta.Count; $i++) {
     $script:logStageRadios[$sm.StageKey] = $radio
 }
 
-$logStagePanel.Controls.AddRange(@($lblLogConfigName, $cmbLogConfigName))
+$logStagePanel.Controls.AddRange(@($lblLogConfigName, $cmbLogConfigName, $btnClearLogs))
 
 # 過去ログの静的な表示のみで色分けは使わないが、New-LogTextBoxを流用してReadOnly時の
 # 背景色などのスタイルをtxtLog（実行中ログ）と一本化する
