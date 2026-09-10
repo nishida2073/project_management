@@ -49,6 +49,16 @@ Sub ImportFromOtherBook()
 
     ' === ② Otherブックを開く ===
     Set wbOther = Workbooks.Open(f, ReadOnly:=True)
+
+    ' ここ以降のエラーは全て CleanFail で拾い、Otherブックを必ず閉じる
+    On Error GoTo CleanFail
+
+    If Not SheetExists(wbOther, "実績") Then
+        MsgBox "選択したファイルに「実績」シートが見つかりません。" & vbCrLf & _
+               "ファイルが正しいか確認してください。", vbExclamation
+        GoTo CleanExit
+    End If
+
     Set wsOther = wbOther.Sheets("実績")   ' ←読み込み元
     Set wsMain = ThisWorkbook.Sheets("計画算定シート") ' ←貼り付け先
 
@@ -66,8 +76,6 @@ Sub ImportFromOtherBook()
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
-
-    On Error GoTo CleanFail
 
     ' === ⑤ Otherの可変範囲の最終行取得 ===
     lastRow = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
@@ -151,6 +159,21 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object) As Object
     Next r
 
     Set BuildMainIndex = dic
+End Function
+
+
+' ============================
+' 指定した名前のシートがブックに存在するか調べる
+' ============================
+Function SheetExists(wb As Workbook, sheetName As String) As Boolean
+    Dim ws As Worksheet
+    For Each ws In wb.Sheets
+        If ws.Name = sheetName Then
+            SheetExists = True
+            Exit Function
+        End If
+    Next ws
+    SheetExists = False
 End Function
 
 
