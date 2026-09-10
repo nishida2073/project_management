@@ -29,6 +29,7 @@ Sub HandleWorkbookOpen()
     Set wsMain = ThisWorkbook.Sheets("計画算定シート")
 
     If wsMain.Visible = xlSheetVisible Then
+        wsMain.Activate
         wsMain.Range("A1").Select
     End If
 
@@ -185,11 +186,11 @@ Sub ImportFromOtherBook()
 
     If f = False Then Exit Sub
 
+    ' ここ以降のエラーは全て CleanFail で拾う
+    On Error GoTo CleanFail
+
     ' === ② Otherブックを開く ===
     Set wbOther = Workbooks.Open(f, ReadOnly:=True)
-
-    ' ここ以降のエラーは全て CleanFail で拾い、Otherブックを必ず閉じる
-    On Error GoTo CleanFail
 
     If Not SheetExists(wbOther, "実績") Then
         MsgBox "選択したファイルに「実績」シートが見つかりません。" & vbCrLf & _
