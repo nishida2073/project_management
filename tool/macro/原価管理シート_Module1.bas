@@ -428,23 +428,41 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     rs = ws.Range(ws.Cells(1, colR), ws.Cells(lastRow, colR)).Value
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
 
+    Dim rowsByKey As Object
+    Set rowsByKey = CreateObject("Scripting.Dictionary")   ' キー → 該当行番号（カンマ区切り文字列）
+
     Dim r As Long
     For r = 5 To lastRow
         If yojitsus(r, 1) = "実績" Then
             Dim k As String
             k = years(r, 1) & "|" & caseIds(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1)
 
-            If dic.Exists(k) Then
-                Err.Raise vbObjectError + 1001, _
-                          "BuildMainIndex", _
-                          "計画算定シートに、条件が重複する行があります。" & vbCrLf & _
-                          "行" & dic(k) & "と行" & r & "が、年度・案件ID・会計区分1・会計区分2の組み合わせで重複しています。" & vbCrLf & _
-                          "実績反映を行う前に、計画算定シート側の重複を解消してください。"
+            If rowsByKey.Exists(k) Then
+                rowsByKey(k) = rowsByKey(k) & ", " & r
+            Else
+                rowsByKey(k) = CStr(r)
             End If
 
-            dic(k) = r
+            If Not dic.Exists(k) Then dic(k) = r
         End If
     Next r
+
+    ' 重複しているキーをすべて集めて、1回のエラーでまとめて報告する
+    Dim msg As String
+    Dim key As Variant
+    For Each key In rowsByKey.Keys
+        If InStr(rowsByKey(key), ",") > 0 Then
+            msg = msg & "行 " & rowsByKey(key) & vbCrLf
+        End If
+    Next key
+
+    If msg <> "" Then
+        Err.Raise vbObjectError + 1001, _
+                  "BuildMainIndex", _
+                  "計画算定シートに、条件（年度・案件ID・会計区分1・会計区分2）が重複する行があります。" & vbCrLf & vbCrLf & _
+                  msg & vbCrLf & _
+                  "実績反映を行う前に、計画算定シート側の重複を解消してください。"
+    End If
 
     Set BuildMainIndex = dic
 End Function
