@@ -21,7 +21,8 @@ Sub ImportFromOtherBook()
     Dim wbOther As Workbook
     Dim wsOther As Worksheet
     Dim wsMain As Worksheet
-    Dim lastRow As Long
+    Dim lastRowOther As Long
+    Dim lastRowMain As Long
     Dim r As Long
     Dim key1 As Variant, key2 As Variant, key3 As Variant, key4 As Variant
     Dim foundRow As Long
@@ -41,6 +42,10 @@ Sub ImportFromOtherBook()
 
     Dim mainRange As Range, otherRange As Range
     Dim oldVals As Variant, newVals As Variant
+    Dim completed As Boolean
+    Dim matchedRows As Object
+
+    Dim years As Variant, caseIds As Variant, kubuns As Variant, costKubuns As Variant
 
     ' === ① ファイルダイアログで Other を選ぶ ===
     f = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
@@ -73,27 +78,36 @@ Sub ImportFromOtherBook()
     Set mapQ = LoadMappingHorizontal("会計区分1マッピング")
     Set mapR = LoadMappingHorizontal("会計区分2マッピング")
 
-    ' === ④ Main側を1回だけスキャンして検索用インデックスを作る ===
-    Set mainIndex = BuildMainIndex(wsMain, mapMainCol)
+    ' === ④ Main側の最終行を取得し、検索用インデックスを作る ===
+    lastRowMain = wsMain.Cells(wsMain.Rows.Count, mapMainCol("年度")).End(xlUp).Row
+    Set mainIndex = BuildMainIndex(wsMain, mapMainCol, lastRowMain)
 
     ' 今回の実行分のバックアップを新規に用意（前回分は破棄）
     Set gBackupRows = CreateObject("Scripting.Dictionary")
+    Set matchedRows = CreateObject("Scripting.Dictionary")
 
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
 
-    ' === ⑤ Otherの可変範囲の最終行取得 ===
-    lastRow = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
+    ' === ⑤ Otherの可変範囲の最終行を取得し、必要な列を一括で配列に読み込む ===
+    lastRowOther = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
 
-    ' === ⑥ 行ループ ===
-    For r = 2 To lastRow
+    If lastRowOther >= 2 Then
+        years = wsOther.Range(wsOther.Cells(1, mapOtherCol("年度")), wsOther.Cells(lastRowOther, mapOtherCol("年度"))).Value
+        caseIds = wsOther.Range(wsOther.Cells(1, mapOtherCol("案件ID")), wsOther.Cells(lastRowOther, mapOtherCol("案件ID"))).Value
+        kubuns = wsOther.Range(wsOther.Cells(1, mapOtherCol("区分")), wsOther.Cells(lastRowOther, mapOtherCol("区分"))).Value
+        costKubuns = wsOther.Range(wsOther.Cells(1, mapOtherCol("原価区分ID")), wsOther.Cells(lastRowOther, mapOtherCol("原価区分ID"))).Value
+    End If
+
+    ' === ⑥ 行ループ（キーの判定は配列上で行い、一致した行だけシートへアクセスする） ===
+    For r = 2 To lastRowOther
 
         ' キー4つ取得（年度, 案件ID, 区分, 原価区分ID）
-        key1 = wsOther.Cells(r, mapOtherCol("年度")).Value
-        key2 = wsOther.Cells(r, mapOtherCol("案件ID")).Value
-        key3 = Trim(CStr(wsOther.Cells(r, mapOtherCol("区分")).Value))
-        key4 = Trim(CStr(wsOther.Cells(r, mapOtherCol("原価区分ID")).Value))
+        key1 = years(r, 1)
+        key2 = caseIds(r, 1)
+        key3 = Trim(CStr(kubuns(r, 1)))
+        key4 = Trim(CStr(costKubuns(r, 1)))
 
         If mapQ.Exists(key3) And mapR.Exists(key4) Then
 
@@ -105,6 +119,7 @@ Sub ImportFromOtherBook()
             ' === ⑦ Dictionaryで一致する行を即座に取得 ===
             If mainIndex.Exists(idxKey) Then
                 foundRow = mainIndex(idxKey)
+                matchedRows(foundRow) = True
 
                 ' === ⑧ 一致した行に貼り付け（値が変わったセルだけ赤色にする） ===
                 Set mainRange = wsMain.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
@@ -126,12 +141,20 @@ Sub ImportFromOtherBook()
 
     Next r
 
+    ' === ⑨ 一度もマッチしなかった「予実=実績」行をグレー表示にする ===
+    MarkUnmatchedActualRows wsMain, mapMainCol, mapMainRange, matchedRows, gBackupRows, lastRowMain
+
+    completed = True
+
 CleanExit:
     Application.EnableEvents = True
     Application.Calculation = xlCalculationAutomatic
     Application.ScreenUpdating = True
 
     If Not wbOther Is Nothing Then wbOther.Close SaveChanges:=False
+
+    If completed Then MsgBox "実績反映が完了しました。", vbInformation
+
     Exit Sub
 
 CleanFail:
@@ -163,6 +186,7 @@ Sub UndoLastImport()
     Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
 
     Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
 
     Dim key As Variant
@@ -185,6 +209,7 @@ Sub UndoLastImport()
     Next key
 
     Application.EnableEvents = True
+    Application.Calculation = xlCalculationAutomatic
     Application.ScreenUpdating = True
 
     Set gBackupRows = Nothing
@@ -211,6 +236,37 @@ End Function
 
 
 ' ============================
+' 予実=実績だが、今回の実行で一度も実績シート側とマッチしなかった行をグレー表示にする
+' ============================
+Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange As Object, matchedRows As Object, backupRows As Object, lastRow As Long)
+    If lastRow < 5 Then Exit Sub
+
+    Dim colYojitsu As Variant
+    colYojitsu = mapMainCol("予実")
+
+    Dim yojitsus As Variant
+    yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
+
+    Dim r As Long
+    For r = 5 To lastRow
+        If yojitsus(r, 1) = "実績" Then
+            If Not matchedRows.Exists(r) Then
+                Dim rng As Range
+                Set rng = ws.Range(mapMainRange("開始") & r & ":" & mapMainRange("終了") & r)
+
+                ' グレーにする前の値・フォント色をバックアップしておく（元に戻すため）
+                If Not backupRows.Exists(r) Then
+                    backupRows(r) = Array(rng.Value, GetFontColors(rng))
+                End If
+
+                rng.Font.Color = RGB(150, 150, 150)
+            End If
+        End If
+    Next r
+End Sub
+
+
+' ============================
 ' GetFontColors で取得した配列を範囲に書き戻す
 ' ============================
 Sub SetFontColors(rng As Range, colors As Variant)
@@ -224,9 +280,14 @@ End Sub
 ' ============================
 ' Main側の「年度|案件ID|会計区分1|会計区分2」→行番号 の索引を作る
 ' ============================
-Function BuildMainIndex(ws As Worksheet, mapMainCol As Object) As Object
+Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) As Object
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
+
+    If lastRow < 5 Then
+        Set BuildMainIndex = dic
+        Exit Function
+    End If
 
     Dim colYear As Variant, colCase As Variant, colQ As Variant, colR As Variant, colYojitsu As Variant
     colYear = mapMainCol("年度")
@@ -235,14 +296,18 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object) As Object
     colR = mapMainCol("会計区分2")
     colYojitsu = mapMainCol("予実")
 
-    Dim lastRow As Long, r As Long
-    lastRow = ws.Cells(ws.Rows.Count, colYear).End(xlUp).Row
+    Dim years As Variant, caseIds As Variant, qs As Variant, rs As Variant, yojitsus As Variant
+    years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
+    caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
+    qs = ws.Range(ws.Cells(1, colQ), ws.Cells(lastRow, colQ)).Value
+    rs = ws.Range(ws.Cells(1, colR), ws.Cells(lastRow, colR)).Value
+    yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
 
+    Dim r As Long
     For r = 5 To lastRow
-        If ws.Cells(r, colYojitsu).Value = "実績" Then
+        If yojitsus(r, 1) = "実績" Then
             Dim k As String
-            k = ws.Cells(r, colYear).Value & "|" & ws.Cells(r, colCase).Value & "|" & _
-                ws.Cells(r, colQ).Value & "|" & ws.Cells(r, colR).Value
+            k = years(r, 1) & "|" & caseIds(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1)
 
             ' 同一キーが複数行ある場合は最初に見つかった行を採用（元の実装と同じ挙動）
             If Not dic.Exists(k) Then dic(k) = r
@@ -291,7 +356,10 @@ Sub HighlightChangedCells(rng As Range, oldVals As Variant, newVals As Variant)
 
     If IsArray(oldVals) Then
         For i = 1 To rng.Cells.Count
-            If CStr(oldVals(1, i)) <> CStr(newVals(1, i)) Then
+            If CStr(newVals(1, i)) = "" Then
+                ' 実績シート側にその値が存在しなかった
+                rng.Cells(i).Font.Color = RGB(150, 150, 150)
+            ElseIf CStr(oldVals(1, i)) <> CStr(newVals(1, i)) Then
                 rng.Cells(i).Font.Color = vbRed
             Else
                 rng.Cells(i).Font.ColorIndex = xlAutomatic
@@ -299,7 +367,9 @@ Sub HighlightChangedCells(rng As Range, oldVals As Variant, newVals As Variant)
         Next i
     Else
         ' 範囲が1セルだけの場合、Valueは配列でなくスカラーになる
-        If CStr(oldVals) <> CStr(newVals) Then
+        If CStr(newVals) = "" Then
+            rng.Font.Color = RGB(150, 150, 150)
+        ElseIf CStr(oldVals) <> CStr(newVals) Then
             rng.Font.Color = vbRed
         Else
             rng.Font.ColorIndex = xlAutomatic
