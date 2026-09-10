@@ -2,3 +2,4 @@ img { border: none; }
 table { margin-left: 2rem; }
 .img-center { text-align: center; }
 .img-center img { margin-left: 0; }
+.img-left { margin-left: 2rem; }
