@@ -207,9 +207,12 @@ function Merge-KintoneRowsByKey {
     }
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-settings" -Rows @($outSpaceRow) -Headers @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する")
     Write-Message "" -Type "Info" -NoHeader
-    Write-Message "## space-settings" -Type "Info" -NoHeader
-    Write-Message "  スペースID[$newSpaceId] のスペース名を[$finalSpaceName]に設定" -Type "Info" -NoHeader
-    Write-Message "  参加メンバーだけにこのスペースを公開する=$($outSpaceRow.'参加メンバーだけにこのスペースを公開する') スペースのポータルと複数のスレッドを使用する=$($outSpaceRow.'スペースのポータルと複数のスレッドを使用する') スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する=$($outSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') アプリ作成できるユーザーをスペースの管理者に限定する=$($outSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')" -Type "Info" -NoHeader
+    Write-Message "# スペースID: $newSpaceId ($finalSpaceName)" -Type "Info" -NoHeader
+    Write-ApplyStepResult -ActionLabel "スペース名を設定しました" -DetailLines @("　$finalSpaceName")
+    $spaceRightLines = @('参加メンバーだけにこのスペースを公開する', 'スペースのポータルと複数のスレッドを使用する', 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する', 'アプリ作成できるユーザーをスペースの管理者に限定する') | ForEach-Object {
+        "　${_}: $($outSpaceRow.$_)"
+    }
+    Write-ApplyStepResult -ActionLabel "スペース権限を設定しました" -DetailLines $spaceRightLines
 
     # テンプレートに無い既存メンバー（スペース作成時にkintoneが自動追加する個人ユーザーなど）は
     # ダウンロード結果から引き継ぐ。apply側のSet-SpaceMembersはシートに無いコードのメンバーを
@@ -237,31 +240,50 @@ function Merge-KintoneRowsByKey {
     })
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-member-list" -Rows $outMemberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
     Write-Message "" -Type "Info" -NoHeader
-    Write-Message "## space-member-list" -Type "Info" -NoHeader
-    Write-Message "  スペースID[$newSpaceId] にテンプレートのメンバーを設定 ($($templateMemberRows.Count)件)" -Type "Info" -NoHeader
-    if ($keptMemberRows.Count -gt 0) {
-        Write-Message "  テンプレートに無い既存メンバーを引き継ぎ ($($keptMemberRows.Count)件): $(($keptMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' }) -join ', ')" -Type "Info" -NoHeader
+    $memberDetailLines = @()
+    if ($templateMemberRows.Count -gt 0) {
+        $memberDetailLines += "　テンプレート内のメンバー ($($templateMemberRows.Count)件)"
+        $memberDetailLines += @($templateMemberRows | ForEach-Object {
+            $row = $_
+            $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
+            "　　$($row.'種別'):$($row.'ユーザー/組織/グループ') - $($flags -join ',')"
+        })
     }
+    if ($keptMemberRows.Count -gt 0) {
+        $memberDetailLines += "  テンプレート外のメンバー ($($keptMemberRows.Count)件)"
+        $memberDetailLines += @($keptMemberRows | ForEach-Object {
+            $row = $_
+            $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
+            "　　$($row.'種別'):$($row.'ユーザー/組織/グループ') - $($flags -join ',')"
+        })
+    }
+    Write-ApplyStepResult -ActionLabel "スペースメンバーを設定しました" -CountPhrase "$($outMemberRows.Count)件" -DetailLines $memberDetailLines
 
     $outAppRows = @($matchedApps | ForEach-Object {
         [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
     })
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-list" -Rows $outAppRows -Headers @("アプリID", "アプリ名")
-    Write-Message "" -Type "Info" -NoHeader
-    Write-Message "## space-app-list" -Type "Info" -NoHeader
-    foreach ($m in $matchedApps) {
-        Write-Message "  アプリID[$($m.DownloadAppId)] の名前を[$($m.FinalAppName)]に設定" -Type "Info" -NoHeader
-    }
 
     $outAclRows = New-Object System.Collections.Generic.List[psobject]
     $aclRowSources = New-Object System.Collections.Generic.List[psobject]
-    Write-Message "" -Type "Info" -NoHeader
-    Write-Message "## space-app-acl" -Type "Info" -NoHeader
+    $outRecordAclRows = New-Object System.Collections.Generic.List[psobject]
+    $recordAclRowSources = New-Object System.Collections.Generic.List[psobject]
+
     foreach ($m in $matchedApps) {
-        $baseRows = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-        $customRows = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-        $rows = @(Merge-KintoneRowsByKey -BaseRows $baseRows -CustomRows $customRows -KeyProperties @("種別", "ユーザー／組織／グループ"))
-        foreach ($r in $rows) {
+        Write-Message "" -Type "Info" -NoHeader
+        Write-Message "## アプリID: $($m.DownloadAppId) ($($m.FinalAppName)) ===" -Type "Info" -NoHeader
+
+        Write-ApplyStepResult -ActionLabel "アプリ名を設定しました" -DetailLines @("　$($m.FinalAppName)")
+
+        $baseAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+        $customAclRowsForApp = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+        $aclRows = @(Merge-KintoneRowsByKey -BaseRows $baseAclRowsForApp -CustomRows $customAclRowsForApp -KeyProperties @("種別", "ユーザー／組織／グループ"))
+        $aclTargetLines = @($aclRows | ForEach-Object {
+            $row = $_
+            $grantedRights = @('レコード閲覧', 'レコード追加', 'レコード編集', 'レコード削除', 'アプリ管理', 'ファイル読み込み', 'ファイル書き出し') | Where-Object { ToBool $row.$_ }
+            "　$($row.'種別'):$($row.'ユーザー／組織／グループ') - $($grantedRights -join ',')"
+        })
+        foreach ($r in $aclRows) {
             $outAclRows.Add([PSCustomObject]@{
                 "アプリID"         = $m.DownloadAppId
                 "アプリ名"         = $m.FinalAppName
@@ -277,19 +299,24 @@ function Merge-KintoneRowsByKey {
             })
             $aclRowSources.Add([PSCustomObject]@{ DownloadAppName = $m.DownloadAppName; TemplateRow = $r })
         }
-        Write-Message "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のACLを設定 ($($rows.Count)件)" -Type "Info" -NoHeader
-    }
-    Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-acl" -Rows $outAclRows.ToArray() -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
+        Write-ApplyStepResult -ActionLabel "アプリの権限を設定しました" -CountPhrase "$($aclRows.Count)件" -DetailLines $aclTargetLines
 
-    $outRecordAclRows = New-Object System.Collections.Generic.List[psobject]
-    $recordAclRowSources = New-Object System.Collections.Generic.List[psobject]
-    Write-Message "" -Type "Info" -NoHeader
-    Write-Message "## space-app-record-acl" -Type "Info" -NoHeader
-    foreach ($m in $matchedApps) {
-        $baseRows = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-        $customRows = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-        $rows = @(Merge-KintoneRowsByKey -BaseRows $baseRows -CustomRows $customRows -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
-        foreach ($r in $rows) {
+        $baseRecordAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+        $customRecordAclRowsForApp = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+        $recordAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseRecordAclRowsForApp -CustomRows $customRecordAclRowsForApp -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
+        $recordAclCondGroups = @($recordAclRows | Group-Object -Property 'レコードの条件')
+        $recordAclTargetLines = @($recordAclCondGroups | ForEach-Object {
+            $condGroup = $_
+            $condLabel = if ($condGroup.Name) { $condGroup.Name } else { "すべてのレコード" }
+            "　条件: $condLabel"
+            "　　対象"
+            foreach ($row in $condGroup.Group) {
+                $grantedRights = @('閲覧', '編集', '削除') | Where-Object { ToBool $row.$_ }
+                $rightsLabel = if ($grantedRights.Count -gt 0) { $grantedRights -join ',' } else { "権限なし" }
+                "　　　- $($row.'種別'):$($row.'ユーザー／組織／グループ') ($rightsLabel)"
+            }
+        })
+        foreach ($r in $recordAclRows) {
             $outRecordAclRows.Add([PSCustomObject]@{
                 "アプリID"                 = $m.DownloadAppId
                 "アプリ名"                 = $m.FinalAppName
@@ -302,8 +329,10 @@ function Merge-KintoneRowsByKey {
             })
             $recordAclRowSources.Add([PSCustomObject]@{ DownloadAppName = $m.DownloadAppName; TemplateRow = $r })
         }
-        Write-Message "  アプリID[$($m.DownloadAppId)]($($m.FinalAppName)) のレコードACLを設定 (条件$($rows.Count)件)" -Type "Info" -NoHeader
+        Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定しました" -CountPhrase "条件$($recordAclCondGroups.Count)件、対象$($recordAclRows.Count)件" -DetailLines $recordAclTargetLines
     }
+
+    Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-acl" -Rows $outAclRows.ToArray() -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
     Write-KintoneExcelRows -Path $outputPath -WorksheetName "space-app-record-acl" -Rows $outRecordAclRows.ToArray() -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除")
 
     Set-KintoneHeaderRowColor -Path $outputPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))

@@ -614,7 +614,8 @@ function Read-KintoneExcelRows {
     if (-not (Test-Path -LiteralPath $Path)) {
         throw "Excelファイルが見つかりません: $Path"
     }
-    return Import-Excel -Path $Path -WorksheetName $WorksheetName
+    # シートがヘッダー行のみ（データ0件）のときImportExcelが警告を出すが、0件は正常なケースなので抑制する
+    return Import-Excel -Path $Path -WorksheetName $WorksheetName -WarningAction SilentlyContinue
 }
 
 function Write-KintoneExcelRows {
