@@ -423,7 +423,6 @@ $script:exitCode = 0
     $allDiffRows = @($spaceSettingsDiff) + @($memberDiff) + @($appListDiff) + @($appAclDiff) + @($appRecordAclDiff)
     $errorCount = @($allDiffRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count
     Write-Message "" -Type "Info" -NoHeader
-    Write-Message "チェック結果を出力しました: $outputPath" -ForegroundColor Green -Type "Info" -NoHeader
     Write-Message "差分件数: $errorCount / $($allDiffRows.Count)" -Type "Info" -NoHeader
     # シートごとの内訳（結果が「一致」以外の件数と、その種類ごとの件数）を表示する
     foreach ($sheetName in $sheetData.Keys) {
@@ -437,6 +436,7 @@ $script:exitCode = 0
             Write-Message "  ${sheetName}: $sheetErrorCount / $($sheetRows.Count)" -Type "Info" -NoHeader
         }
     }
+    Write-Message "チェック結果を出力しました: $outputPath" -ForegroundColor Green -Type "Info" -NoHeader
     # 差分ありは確認が必要な警告であり、チェック結果自体は正常に出力済みのため致命的エラー(exit 1)とは区別する
     if ($errorCount -gt 0) { $script:exitCode = 2 }
 } *>&1 | Tee-Object -FilePath $logFilePath
