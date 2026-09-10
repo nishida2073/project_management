@@ -1,5 +1,8 @@
 Option Explicit
 
+' 直前の実績反映で上書きした行のバックアップ（行番号 → Array(旧値, 旧フォント色)）
+Private gBackupRows As Object
+
 Sub CloseThisSheet()
     Dim currentSheet As Worksheet
     Set currentSheet = ActiveSheet
@@ -73,6 +76,9 @@ Sub ImportFromOtherBook()
     ' === ④ Main側を1回だけスキャンして検索用インデックスを作る ===
     Set mainIndex = BuildMainIndex(wsMain, mapMainCol)
 
+    ' 今回の実行分のバックアップを新規に用意（前回分は破棄）
+    Set gBackupRows = CreateObject("Scripting.Dictionary")
+
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
@@ -104,9 +110,14 @@ Sub ImportFromOtherBook()
                 Set mainRange = wsMain.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
                 Set otherRange = wsOther.Range(mapOtherRange("開始") & r & ":" & mapOtherRange("終了") & r)
 
+                Dim oldColors As Variant
+                oldColors = GetFontColors(mainRange)   ' 上書き前のフォント色を保持
+
                 oldVals = mainRange.Value          ' 上書き前の値を保持
                 mainRange.Value = otherRange.Value  ' 一括で貼り付け
                 newVals = mainRange.Value
+
+                gBackupRows(foundRow) = Array(oldVals, oldColors)
 
                 HighlightChangedCells mainRange, oldVals, newVals
             End If
@@ -127,6 +138,86 @@ CleanFail:
     MsgBox "エラーが発生しました: " & Err.Description
     Resume CleanExit
 
+End Sub
+
+
+' ============================
+' 直前の実績反映を元に戻す
+' ============================
+Sub UndoLastImport()
+
+    If gBackupRows Is Nothing Then
+        MsgBox "元に戻せる実行履歴がありません。"
+        Exit Sub
+    End If
+
+    If gBackupRows.Count = 0 Then
+        MsgBox "元に戻せる実行履歴がありません。"
+        Exit Sub
+    End If
+
+    Dim wsMain As Worksheet
+    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+
+    Dim mapMainRange As Object
+    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+
+    Dim key As Variant
+    For Each key In gBackupRows.Keys
+        Dim foundRow As Long
+        foundRow = key
+
+        Dim rng As Range
+        Set rng = wsMain.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
+
+        Dim backupData As Variant
+        backupData = gBackupRows(key)
+
+        Dim oldVals As Variant, oldColors As Variant
+        oldVals = backupData(0)
+        oldColors = backupData(1)
+
+        rng.Value = oldVals
+        SetFontColors rng, oldColors
+    Next key
+
+    Application.EnableEvents = True
+    Application.ScreenUpdating = True
+
+    Set gBackupRows = Nothing
+
+    MsgBox "直前の実績反映を元に戻しました。"
+
+End Sub
+
+
+' ============================
+' 範囲内の各セルのフォント色を配列として取得する
+' ============================
+Function GetFontColors(rng As Range) As Variant
+    Dim arr() As Long
+    Dim i As Long
+
+    ReDim arr(1 To rng.Cells.Count)
+    For i = 1 To rng.Cells.Count
+        arr(i) = rng.Cells(i).Font.Color
+    Next i
+
+    GetFontColors = arr
+End Function
+
+
+' ============================
+' GetFontColors で取得した配列を範囲に書き戻す
+' ============================
+Sub SetFontColors(rng As Range, colors As Variant)
+    Dim i As Long
+    For i = 1 To rng.Cells.Count
+        rng.Cells(i).Font.Color = colors(i)
+    Next i
 End Sub
 
 

@@ -13,8 +13,29 @@ Private Sub Workbook_Open()
     ' シートが非表示の間はボタンを作らない（Activate できないため）
     If wsMain.Visible <> xlSheetVisible Then Exit Sub
 
+    CreateButtonFromTemplate wsMain, "MacroProcButton999"
+    CreateButtonFromTemplate wsMain, "UndoProcButton999"
+
+    wsMain.Range("A1").Select
+
+End Sub
+
+
+' ============================
+' システム用シートにある同名テンプレート図形をコピーして
+' wsMain上の同じ位置に貼り付ける
+' ============================
+Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String)
+
     Dim shp As Shape
-    Set shp = Sheets("システム用").Shapes("MacroProcButton999")
+    On Error Resume Next
+    Set shp = Sheets("システム用").Shapes(buttonName)
+    On Error GoTo 0
+
+    If shp Is Nothing Then
+        MsgBox "「システム用」シートにテンプレート「" & buttonName & "」が見つかりません。", vbExclamation
+        Exit Sub
+    End If
 
     Dim x As Single, y As Single
     x = shp.Left
@@ -56,15 +77,13 @@ Private Sub Workbook_Open()
     Next retry
 
     If Not success Then
-        MsgBox "ボタンの貼り付けに失敗しました。", vbExclamation
+        MsgBox "「" & buttonName & "」の貼り付けに失敗しました。", vbExclamation
         Exit Sub
     End If
 
     pasted.Left = x
     pasted.Top = y
-    pasted.Name = "MacroProcButton999"
-
-    wsMain.Range("A1").Select
+    pasted.Name = buttonName
 
 End Sub
 
@@ -90,9 +109,17 @@ End Sub
 
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
 
+    DeleteButtonIfExists "MacroProcButton999"
+    DeleteButtonIfExists "UndoProcButton999"
+
+End Sub
+
+
+Private Sub DeleteButtonIfExists(buttonName As String)
+
     Dim shp As Shape
     On Error Resume Next
-    Set shp = Sheets("計画算定シート").Shapes("MacroProcButton999")
+    Set shp = Sheets("計画算定シート").Shapes(buttonName)
     On Error GoTo 0
 
     If Not shp Is Nothing Then
