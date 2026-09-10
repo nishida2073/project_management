@@ -14,7 +14,7 @@ Private Sub Workbook_Open()
     If wsMain.Visible <> xlSheetVisible Then Exit Sub
 
     CreateButton wsMain, "MacroProcButton999", "D2", "実績反映", "ImportFromOtherBook"
-    CreateButton wsMain, "UndoProcButton999", "F2", "元に戻す", "UndoLastImport"
+    CreateButton wsMain, "UndoProcButton999", "E2", "元に戻す", "UndoLastImport"
 
     wsMain.Range("A1").Select
 
@@ -33,7 +33,7 @@ Sub CreateButton(wsMain As Worksheet, buttonName As String, targetCellAddress As
     Set targetCell = wsMain.Range(targetCellAddress)
 
     Dim btn As Button
-    Set btn = wsMain.Buttons.Add(targetCell.Left, targetCell.Top, 80, 20)
+    Set btn = wsMain.Buttons.Add(targetCell.Left, targetCell.Top, 60, 20)
 
     btn.Name = buttonName
     btn.Caption = caption
