@@ -166,13 +166,12 @@ End Sub
 ' ============================
 Sub UndoLastImport()
 
-    If gBackupRows Is Nothing Then
-        MsgBox "元に戻せる実行履歴がありません。"
-        Exit Sub
-    End If
+    Dim noHistory As Boolean
+    noHistory = (gBackupRows Is Nothing)
+    If Not noHistory Then noHistory = (gBackupRows.Count = 0)
 
-    If gBackupRows.Count = 0 Then
-        MsgBox "元に戻せる実行履歴がありません。"
+    If noHistory Then
+        MsgBox "実行履歴がありません。"
         Exit Sub
     End If
 
