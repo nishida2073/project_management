@@ -50,10 +50,7 @@ Sub ImportFromOtherBook()
     ' === ① ファイルダイアログで Other を選ぶ ===
     f = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
 
-    If f = False Then
-        MsgBox "キャンセルされました"
-        Exit Sub
-    End If
+    If f = False Then Exit Sub
 
     ' === ② Otherブックを開く ===
     Set wbOther = Workbooks.Open(f, ReadOnly:=True)
