@@ -13,8 +13,8 @@ Private Sub Workbook_Open()
     ' シートが非表示の間はボタンを作らない（Activate できないため）
     If wsMain.Visible <> xlSheetVisible Then Exit Sub
 
-    CreateButtonFromTemplate wsMain, "MacroProcButton999"
-    CreateButtonFromTemplate wsMain, "UndoProcButton999"
+    CreateButtonFromTemplate wsMain, "MacroProcButton999", "D2"
+    CreateButtonFromTemplate wsMain, "UndoProcButton999", "F2"
 
     wsMain.Range("A1").Select
 
@@ -23,9 +23,9 @@ End Sub
 
 ' ============================
 ' システム用シートにある同名テンプレート図形をコピーして
-' wsMain上の同じ位置に貼り付ける
+' wsMain上の指定セル（targetCellAddress）の左上に貼り付ける
 ' ============================
-Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String)
+Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String, targetCellAddress As String)
 
     Dim shp As Shape
     On Error Resume Next
@@ -37,9 +37,8 @@ Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String)
         Exit Sub
     End If
 
-    Dim x As Single, y As Single
-    x = shp.Left
-    y = shp.Top
+    Dim targetCell As Range
+    Set targetCell = wsMain.Range(targetCellAddress)
 
     shp.Copy
     DoEvents
@@ -81,8 +80,8 @@ Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String)
         Exit Sub
     End If
 
-    pasted.Left = x
-    pasted.Top = y
+    pasted.Left = targetCell.Left
+    pasted.Top = targetCell.Top
     pasted.Name = buttonName
 
 End Sub
