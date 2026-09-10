@@ -25,6 +25,7 @@ if ($xlsmFiles.Count -eq 0) {
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
 $excel.DisplayAlerts = $false
+$excel.EnableEvents = $false
 
 $doneCount = 0
 $skipCount = 0
@@ -32,7 +33,6 @@ $skipCount = 0
 try {
     foreach ($xlsmFile in $xlsmFiles) {
         try {
-            # .bas file naming rule: "<xlsm base name>_<module name>.bas"
             $xlsmBaseName = $xlsmFile.BaseName
 
             $thisWorkbookFile = Get-ChildItem -Path $MacroDir -Filter "${xlsmBaseName}_ThisWorkbook.bas" | Select-Object -First 1
@@ -49,7 +49,6 @@ try {
                 continue
             }
 
-            # Module name is whatever follows "<xlsm base name>_" in the file name
             $moduleName = $moduleFile.BaseName.Substring($xlsmBaseName.Length + 1)
 
             Write-Host "---"
@@ -74,20 +73,16 @@ try {
                     continue
                 }
 
-                # --- Replace the standard module ---
-                # Read as UTF-8 and inject via AddFromString rather than VBComponents.Import(),
-                # since Import() relies on Excel's own file-encoding detection and can mojibake.
                 foreach ($comp in @($vbproj.VBComponents)) {
                     if ($comp.Name -eq $moduleName) {
                         $vbproj.VBComponents.Remove($comp)
                     }
                 }
                 $moduleCode = Get-Content -Path $moduleFile.FullName -Raw -Encoding UTF8
-                $newComp = $vbproj.VBComponents.Add(1)   # 1 = vbext_ct_StdModule
+                $newComp = $vbproj.VBComponents.Add(1)
                 $newComp.Name = $moduleName
                 $newComp.CodeModule.AddFromString($moduleCode)
 
-                # --- Replace ThisWorkbook code ---
                 $twComp = $vbproj.VBComponents.Item('ThisWorkbook')
                 $codeModule = $twComp.CodeModule
                 if ($codeModule.CountOfLines -gt 0) {
@@ -95,6 +90,24 @@ try {
                 }
                 $newCode = Get-Content -Path $thisWorkbookFile.FullName -Raw -Encoding UTF8
                 $codeModule.AddFromString($newCode)
+
+                $buttonNames = [System.Collections.Generic.HashSet[string]]::new()
+                foreach ($code in @($moduleCode, $newCode)) {
+                    foreach ($m in [regex]::Matches($code, 'CreateButton\s+\S+\s*,\s*"([^"]+)"')) {
+                        [void]$buttonNames.Add($m.Groups[1].Value)
+                    }
+                }
+                if ($buttonNames.Count -gt 0) {
+                    try {
+                        foreach ($sheet in @($wb.Sheets)) {
+                            foreach ($shp in @($sheet.Shapes)) {
+                                if ($buttonNames.Contains($shp.Name)) { $shp.Delete() }
+                            }
+                        }
+                    }
+                    catch {
+                    }
+                }
 
                 $wb.Save()
                 Write-Host "Done: $($xlsmFile.Name)"
