@@ -10,11 +10,11 @@ Private Sub Workbook_Open()
     Dim wsMain As Worksheet
     Set wsMain = Sheets("計画算定シート")
 
-    ' シートが非表示の間はボタンを作らない（Activate できないため）
+    ' シートが非表示の間はボタンを作らない（後段のSelectが失敗するため）
     If wsMain.Visible <> xlSheetVisible Then Exit Sub
 
-    CreateButtonFromTemplate wsMain, "MacroProcButton999", "D2"
-    CreateButtonFromTemplate wsMain, "UndoProcButton999", "F2"
+    CreateButton wsMain, "MacroProcButton999", "D2", "実績反映", "ImportFromOtherBook"
+    CreateButton wsMain, "UndoProcButton999", "F2", "元に戻す", "UndoLastImport"
 
     wsMain.Range("A1").Select
 
@@ -22,20 +22,9 @@ End Sub
 
 
 ' ============================
-' システム用シートにある同名テンプレート図形をコピーして
-' wsMain上の指定セル（targetCellAddress）の左上に貼り付ける
+' フォームコントロールのボタンを作成し、指定セルの左上に配置してマクロを割り当てる
 ' ============================
-Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String, targetCellAddress As String)
-
-    Dim shp As Shape
-    On Error Resume Next
-    Set shp = Sheets("システム用").Shapes(buttonName)
-    On Error GoTo 0
-
-    If shp Is Nothing Then
-        MsgBox "「システム用」シートにテンプレート「" & buttonName & "」が見つかりません。", vbExclamation
-        Exit Sub
-    End If
+Sub CreateButton(wsMain As Worksheet, buttonName As String, targetCellAddress As String, caption As String, macroName As String)
 
     ' 同名の図形が既に残っている場合は先に削除しておく（名前の衝突を防ぐ）
     DeleteButtonIfExists wsMain, buttonName
@@ -43,49 +32,18 @@ Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String, targetCe
     Dim targetCell As Range
     Set targetCell = wsMain.Range(targetCellAddress)
 
-    shp.Copy
-    DoEvents
+    Dim btn As Button
+    Set btn = wsMain.Buttons.Add(targetCell.Left, targetCell.Top, 80, 20)
 
-    wsMain.Activate
+    btn.Name = buttonName
+    btn.Caption = caption
+    btn.OnAction = macroName
 
-    Dim pasted As Shape
-    Dim retry As Integer
-    Dim success As Boolean
-    Dim beforeCount As Long
-    Dim pasteFailed As Boolean
-
-    ' 最大3回リトライ
-    For retry = 1 To 3
-
-        beforeCount = wsMain.Shapes.Count
-
-        On Error Resume Next
-        Err.Clear
-        wsMain.Paste
-        pasteFailed = (Err.Number <> 0)
-        On Error GoTo 0
-
-        DoEvents
-
-        ' 「エラーが出ていない」かつ「図形の数が実際に増えた」ことで成功を判定する
-        If Not pasteFailed And wsMain.Shapes.Count > beforeCount Then
-            Set pasted = wsMain.Shapes(wsMain.Shapes.Count)
-            success = True
-            Exit For
-        End If
-
-        ' 失敗したら少し待つ
-        Application.Wait Now + TimeValue("0:00:01")
-    Next retry
-
-    If Not success Then
-        MsgBox "「" & buttonName & "」の貼り付けに失敗しました。", vbExclamation
-        Exit Sub
-    End If
-
-    pasted.Left = targetCell.Left
-    pasted.Top = targetCell.Top
-    pasted.Name = buttonName
+    With btn.Characters.Font
+        .Name = "Meiryo UI"
+        .Size = 9
+        .Bold = True
+    End With
 
 End Sub
 
