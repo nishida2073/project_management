@@ -14,6 +14,23 @@ Sub CloseThisSheet()
 End Sub
 
 ' ============================
+' Workbook_BeforeCloseでボタンを削除した直後に予約される。
+' 「変更を保存しますか？」でキャンセルされてブックが閉じずに残っていた場合、
+' ボタンを作り直す（標準モジュールに置く必要があるため、Application.OnTimeの呼び出し先はここ）
+' ============================
+Sub RestoreButtonsIfStillOpen()
+
+    Dim wsMain As Worksheet
+    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+
+    If wsMain.Visible <> xlSheetVisible Then Exit Sub
+
+    ThisWorkbook.CreateButton wsMain, "MacroProcButton999", "D2", "実績反映", "ImportFromOtherBook"
+    ThisWorkbook.CreateButton wsMain, "UndoProcButton999", "E2", "元に戻す", "UndoLastImport"
+
+End Sub
+
+' ============================
 ' 実績Excelを読み込んで実績を反映する
 ' ============================
 Sub ImportFromOtherBook()

@@ -75,6 +75,10 @@ Private Sub Workbook_BeforeClose(Cancel As Boolean)
     DeleteButtonIfExists wsMain, "MacroProcButton999"
     DeleteButtonIfExists wsMain, "UndoProcButton999"
 
+    ' このあと「変更を保存しますか？」でキャンセルされ、閉じずに残る場合に備えて
+    ' 少し後にボタンが残っているか確認・復元する処理を予約しておく
+    Application.OnTime Now, "'" & ThisWorkbook.Name & "'!RestoreButtonsIfStillOpen"
+
 End Sub
 
 
