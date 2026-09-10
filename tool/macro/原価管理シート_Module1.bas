@@ -304,13 +304,13 @@ CleanExit:
 
     If completed Then
         MsgBox "実績反映が完了しました。" & vbCrLf & vbCrLf & _
-               "反映件数（実績→計画）：" & reflectedCount & "件" & vbCrLf & _
+               "反映（実績シート→計画算定シート）：" & reflectedCount & "件" & vbCrLf & _
                IIf(reflectedRows = "", "", "　" & reflectedRows & vbCrLf) & _
-               "スキップ件数（実績）：" & skipJissekiOnlyCount & "件" & vbCrLf & _
+               "スキップ（実績シート：計画算定シートにデータなし）：" & skipJissekiOnlyCount & "件" & vbCrLf & _
                IIf(skipJissekiOnlyRows = "", "", "　" & skipJissekiOnlyRows & vbCrLf) & _
-               "スキップ件数（実績重複）：" & skipDupCount & "件" & vbCrLf & _
+               "スキップ（実績シート：データの重複）：" & skipDupCount & "件" & vbCrLf & _
                IIf(skipDupRows = "", "", "　" & skipDupRows & vbCrLf) & _
-               "スキップ件数（計画）：" & skipKeikakuOnlyCount & "件" & _
+               "スキップ（計画シート：実績シートに実績なし）：" & skipKeikakuOnlyCount & "件" & _
                IIf(skipKeikakuOnlyRows = "", "", vbCrLf & "　" & skipKeikakuOnlyRows), vbInformation
     End If
 
