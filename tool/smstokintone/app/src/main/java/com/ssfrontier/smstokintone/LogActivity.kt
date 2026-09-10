@@ -111,10 +111,10 @@ class LogActivity : AppCompatActivity() {
                 setPadding(0, 24, 0, 4)
             }
 
-            // SMSの検索画面と同じ並び（抽出→送信→返信）の後に、ログだけが持つ会社名の変換アイコンを最後に加える
+            // SMSの検索画面と同じ並び（抽出→送信→返信）で表示する
             val hasStatusIcon = entry.smsParts != null ||
                 entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE ||
-                entry.companyNameConverted || entry.type == SmsLogStore.EntryType.AUTO_REPLY
+                entry.type == SmsLogStore.EntryType.AUTO_REPLY
             val statusIconsView: View? = if (!hasStatusIcon) null else TextView(this).apply {
                 text = buildSpannedString {
                     entry.smsParts?.let { smsParts ->
@@ -138,10 +138,6 @@ class LogActivity : AppCompatActivity() {
                     if (entry.type == SmsLogStore.EntryType.AUTO_REPLY) {
                         if (isNotEmpty()) append(" ")
                         append(getString(R.string.icon_replied))
-                    }
-                    if (entry.companyNameConverted) {
-                        if (isNotEmpty()) append(" ")
-                        append(getString(R.string.icon_company_name_converted))
                     }
                 }
                 setTextColor(itemTextColor)
@@ -248,12 +244,20 @@ class LogActivity : AppCompatActivity() {
                 append(smsParts.body)
             }
         }
-        val icon = if (smsParts.extractedByAi) {
+        val extractionMethodIcon = if (smsParts.extractedByAi) {
             getString(R.string.icon_extraction_ai)
         } else {
             getString(R.string.icon_extraction_rule)
         }
-        val title = "${getString(R.string.dialog_title_extraction_result)} $icon"
+        val title = buildString {
+            append(getString(R.string.dialog_title_extraction_result))
+            append(" ")
+            append(extractionMethodIcon)
+            if (!smsParts.isExtractionFailed() && companyNameConverted) {
+                append(" ")
+                append(getString(R.string.icon_company_name_converted))
+            }
+        }
         AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)

@@ -223,7 +223,7 @@
     <string name="dialog_title_extraction_result">抽出結果</string>
     <string name="dialog_message_extraction_failure">会社名・氏名の抽出に失敗しています</string>
     <string name="dialog_title_auto_reply_body">返信内容</string>
-    <string name="helper_log_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ 🔳 未実施\n送信状況：✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし ・ ♻️ 引き継ぎ\n会社名の変換：🔄 変換あり"</string>
+    <string name="helper_log_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ 🔳 未実施\n送信状況：✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし ・ ♻️ 引き継ぎ"</string>
     
     <!-- SMSの検索画面 -->
     <string name="title_sms_search">SMSの検索</string>
