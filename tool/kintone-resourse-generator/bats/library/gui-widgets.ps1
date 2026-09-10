@@ -46,14 +46,19 @@ function Test-NativeErrorLine {
     return $Text -match '^[A-Za-z][\w.-]*\s*:\s' -or $Text -match '^発生場所' -or $Text -match '^\s*\+'
 }
 
-# RichTextBoxへ1行追記する。行頭の"[[COLOR:xxx]]"タグを解釈して色を変え、常に末尾までスクロールする
+# RichTextBoxへ1行追記する。行頭の"[[COLOR:xxx]]"タグを解釈して色を変え、常に末尾までスクロールする。
+# "[[HIDE]]"タグは背景色と同じ色にして、機械可読用の行を視覚的に見えなくする。
 function Write-ColoredLine {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.RichTextBox]$TextBox,
         [string]$Text
     )
     $color = [System.Drawing.Color]::Black
-    if ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
+    if ($Text -match '^\[\[HIDE\]\](?<rest>.*)$') {
+        $color = $TextBox.BackColor
+        $Text = $Matches['rest']
+        $script:isInNativeErrorBlock = $false
+    } elseif ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
         $color = Get-ConsoleColorAsDrawingColor -ConsoleColorName $Matches['color']
         $Text = $Matches['rest']
         $script:isInNativeErrorBlock = $false

@@ -475,8 +475,10 @@ function Invoke-Step {
     }
     Set-StepStatus -Id $Id -Text $(if ($exitCode -eq 2) { "警告" } else { "成功" })
     if ($Id -eq 0) {
-        $idLine = $script:lastStepOutputLines | Where-Object { $_ -match '作成されたスペースID:\s*(\d+)' } | Select-Object -Last 1
-        if ($idLine -and $idLine -match '作成されたスペースID:\s*(?<id>\d+)') {
+        # create-space-from-template.ps1が出力する機械可読な行（人間向けログの文言変更に影響されない）。
+        # GUI経由での実行時は行頭に[[COLOR:xxx]]タグが付くため、前後の文字列は固定せずに検索する。
+        $idLine = $script:lastStepOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
+        if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
             $txtSpaceId.Text = $Matches.id
         }
     }

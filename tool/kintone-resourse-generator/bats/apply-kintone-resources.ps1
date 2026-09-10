@@ -31,18 +31,6 @@ $logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "apply_$ConfigName"
 
 $script:exitCode = 0
 
-# 「■<ラベル>しました (<件数>)」のヘッダー行＋詳細行の出力を共通化する。CountPhraseは省略可（例: "2件"）。
-function Write-ApplyStepResult {
-    param(
-        [Parameter(Mandatory)][string]$ActionLabel,
-        [string]$CountPhrase = "",
-        [string[]]$DetailLines = @()
-    )
-    $suffix = if ($CountPhrase) { " ($CountPhrase)" } else { "" }
-    Write-Message "■${ActionLabel}しました${suffix}" -Type "Info" -NoHeader
-    foreach ($line in $DetailLines) { Write-Message $line -Type "Info" -NoHeader }
-}
-
 & {
     $spaceRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-settings"
     $memberRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-member-list"
@@ -76,8 +64,8 @@ function Write-ApplyStepResult {
                     -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
                     -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
                     -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')
-                Write-ApplyStepResult -ActionLabel "スペース名を設定" -DetailLines @("　$($spaceRow.'スペース名')")
-                Write-ApplyStepResult -ActionLabel "スペース権限を設定" -DetailLines $spaceRightLines
+                Write-ApplyStepResult -ActionLabel "スペース名を設定しました" -DetailLines @("　$($spaceRow.'スペース名')")
+                Write-ApplyStepResult -ActionLabel "スペース権限を設定しました" -DetailLines $spaceRightLines
             } catch {
                 Write-Message "スペースID $spaceId のスペース設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                 $hasError = $true
@@ -107,7 +95,7 @@ function Write-ApplyStepResult {
                         "　　$($_.Type):$($_.Code) - $($flags -join ',')"
                     })
                 }
-                Write-ApplyStepResult -ActionLabel "スペースメンバーを設定" -CountPhrase "$($memberResult.TotalCount)件" -DetailLines $memberDetailLines
+                Write-ApplyStepResult -ActionLabel "スペースメンバーを設定しました" -CountPhrase "$($memberResult.TotalCount)件" -DetailLines $memberDetailLines
             } catch {
                 Write-Message "スペースID $spaceId のメンバー設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                 $hasError = $true
@@ -147,7 +135,7 @@ function Write-ApplyStepResult {
                 try {
                     Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
                     $appChanged = $true
-                    Write-ApplyStepResult -ActionLabel "アプリ名を設定" -DetailLines @("　$finalName")
+                    Write-ApplyStepResult -ActionLabel "アプリ名を設定しました" -DetailLines @("　$finalName")
                 } catch {
                     Write-Message "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                     $hasError = $true
@@ -174,7 +162,7 @@ function Write-ApplyStepResult {
 
                     Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights
                     $appChanged = $true
-                    Write-ApplyStepResult -ActionLabel "アプリの権限を設定" -CountPhrase "$($aclTotalCount)件" -DetailLines $aclTargetLines
+                    Write-ApplyStepResult -ActionLabel "アプリの権限を設定しました" -CountPhrase "$($aclTotalCount)件" -DetailLines $aclTargetLines
                 } catch {
                     Write-Message "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                     $hasError = $true
@@ -200,7 +188,7 @@ function Write-ApplyStepResult {
 
                     Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
                     $appChanged = $true
-                    Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定" -CountPhrase "条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
+                    Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定しました" -CountPhrase "条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
                 } catch {
                     Write-Message "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
                     $hasError = $true

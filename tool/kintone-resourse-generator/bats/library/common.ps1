@@ -13,7 +13,8 @@ function Write-Message {
         [string]$VarName = "Debug Message",
         [string]$Type = "Debug",
         [ConsoleColor]$ForegroundColor = "White",
-        [switch]$NoHeader
+        [switch]$NoHeader,
+        [switch]$Hidden
     )
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.ff"
     if ($Type -eq "Debug") {
@@ -25,12 +26,18 @@ function Write-Message {
     }
 
     # gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
-    # 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
+    # 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）。
+    # -Hiddenは人間向けではない機械可読な行に使い、GUIのログ欄では背景色と同化させて見えなくする
+    # （[[HIDE]]タグ、gui-widgets.ps1のWrite-ColoredLineで解釈する）。
     $isGuiMode = $env:GUI_LOG_MODE -eq "1"
     function Write-ColoredLine {
         param([string]$Text)
         if ($isGuiMode) {
-            Write-Host "[[COLOR:$ForegroundColor]]$Text"
+            if ($Hidden) {
+                Write-Host "[[HIDE]]$Text"
+            } else {
+                Write-Host "[[COLOR:$ForegroundColor]]$Text"
+            }
         } else {
             Write-Host $Text -ForegroundColor $ForegroundColor
         }
@@ -53,6 +60,19 @@ function Write-Message {
     }
 }
 
+function Write-ApplyStepResult {
+    param(
+        [Parameter(Mandatory)][string]$ActionLabel,
+        [string]$CountPhrase = "",
+        [string[]]$DetailLines = @(),
+        [ConsoleColor]$ForegroundColor = "White"
+    )
+    $headerText = "■$ActionLabel"
+    if ($CountPhrase) { $headerText += " ($CountPhrase)" }
+    Write-Message $headerText -ForegroundColor $ForegroundColor -Type "Info" -NoHeader
+    foreach ($line in $DetailLines) { Write-Message $line -ForegroundColor $ForegroundColor -Type "Info" -NoHeader }
+}
+
 function New-WorkerLogPath {
     param(
         [Parameter(Mandatory)][string]$LogRoot,
@@ -64,14 +84,15 @@ function New-WorkerLogPath {
 }
 
 # Tee-Objectは-Encoding非対応で既定UTF-16LE書き込みになるため、事後にUTF-8へ変換する。
-# GUI経由の実行ではWrite-Messageが行頭に[[COLOR:xxx]]タグを埋め込むため（gui.ps1のWrite-Log用）、
-# ファイルに残るログはこのタグを取り除いたテキストにする。
+# GUI経由の実行ではWrite-Messageが行頭に[[COLOR:xxx]]・[[HIDE]]タグを埋め込むため（gui.ps1のWrite-Log用）、
+# ファイルに残るログはこれらのタグを取り除いたテキストにする。
 function ConvertTo-Utf8LogFile {
     param([Parameter(Mandatory)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) { return }
     $content = Get-Content -LiteralPath $Path -Raw
     if ($null -eq $content) { $content = "" }
     $content = $content -replace '\[\[COLOR:\w+\]\]', ''
+    $content = $content -replace '\[\[HIDE\]\]', ''
     [System.IO.File]::WriteAllText($Path, $content, (New-Object System.Text.UTF8Encoding($true)))
 }
 
@@ -204,8 +225,6 @@ function Get-CurrentSpace {
         [bool]$HasMember = $true
     )
 
-    Write-Message "スペース取得 開始: $SpaceId" -Type "Info" -NoHeader
-
     $space = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/space.json?id=$SpaceId"
 
     $apps = @($space.attachedApps | ForEach-Object {
@@ -244,8 +263,6 @@ function Get-CurrentSpace {
         $memberResp = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/space/members.json?id=$SpaceId"
         $members = @($memberResp.members)
     }
-
-    Write-Message "スペース取得 終了: $SpaceId" -Type "Info" -NoHeader
 
     return [PSCustomObject]@{
         spaceId        = $space.id

@@ -46,8 +46,12 @@ $script:newSpaceId = $null
 
     $script:newSpaceId = $newSpaceId
     Write-Message "" -Type "Info" -NoHeader
-    Write-Message "スペースを作成しました: スペース名=$SpaceName" -ForegroundColor Green -Type "Info" -NoHeader
-    Write-Message "作成されたスペースID: $newSpaceId" -ForegroundColor Green -Type "Info" -NoHeader
+    Write-ApplyStepResult -ActionLabel "スペースを作成しました" -DetailLines @(
+        "　スペースID: $newSpaceId"
+        "　スペース名：$SpaceName"
+    )
+    # GUI（gui.ps1）が作成されたスペースIDを取得するための機械可読な行。人間向けログの文言とは独立させておく。
+    Write-Message "　SPACE_ID=$newSpaceId" -Type "Info" -NoHeader -Hidden
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 

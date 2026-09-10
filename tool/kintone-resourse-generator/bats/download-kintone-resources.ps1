@@ -45,7 +45,10 @@ $script:exitCode = 0
         return
     }
 
-    Write-Message "スペース名: $($space.spaceName)　アプリ数: $($space.apps.Count)　メンバー数: $($space.members.Count)" -Type "Info" -NoHeader
+    Write-Message "" -Type "Info" -NoHeader
+    Write-Message "# スペースID: $($space.spaceId) ($($space.spaceName))" -Type "Info" -NoHeader
+
+    Write-ApplyStepResult -ActionLabel "スペース名を取得しました" -DetailLines @("　$($space.spaceName)")
 
     $spaceListRows = @([PSCustomObject]@{
         "スペースID"                                                     = $space.spaceId
@@ -57,6 +60,11 @@ $script:exitCode = 0
     })
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-settings" -Rows $spaceListRows -Headers @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する")
 
+    $spaceRightLines = @('参加メンバーだけにこのスペースを公開する', 'スペースのポータルと複数のスレッドを使用する', 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する', 'アプリ作成できるユーザーをスペースの管理者に限定する') | ForEach-Object {
+        "　${_}: $($spaceListRows[0].$_)"
+    }
+    Write-ApplyStepResult -ActionLabel "スペース権限を取得しました" -DetailLines $spaceRightLines
+
     $memberRows = @($space.members | ForEach-Object {
         [PSCustomObject]@{
             "スペースID"             = $space.spaceId
@@ -67,6 +75,13 @@ $script:exitCode = 0
         }
     })
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-member-list" -Rows $memberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
+
+    $memberLines = @($memberRows | ForEach-Object {
+        $row = $_
+        $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
+        "　　$($row.'種別'):$($row.'ユーザー/組織/グループ') - $($flags -join ',')"
+    })
+    Write-ApplyStepResult -ActionLabel "スペースメンバーを取得しました" -CountPhrase "$($memberRows.Count)件" -DetailLines $memberLines
 
     $appListRows = @($space.apps | ForEach-Object {
         [PSCustomObject]@{
@@ -120,6 +135,36 @@ $script:exitCode = 0
     Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl" -Rows $recordAclRows -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除")
 
     Set-KintoneHeaderRowColor -Path $downloadPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
+
+    foreach ($app in $space.apps) {
+        Write-Message "" -Type "Info" -NoHeader
+        Write-Message "## アプリID: $($app.appId) ($($app.name)) ===" -Type "Info" -NoHeader
+
+        Write-ApplyStepResult -ActionLabel "アプリ名を取得しました" -DetailLines @("　$($app.name)")
+
+        $aclRowsForApp = @($appAclRows | Where-Object { "$($_.'アプリID')" -eq "$($app.appId)" })
+        $aclTargetLines = @($aclRowsForApp | ForEach-Object {
+            $row = $_
+            $grantedRights = @('レコード閲覧', 'レコード追加', 'レコード編集', 'レコード削除', 'アプリ管理', 'ファイル読み込み', 'ファイル書き出し') | Where-Object { ToBool $row.$_ }
+            "　$($row.'種別'):$($row.'ユーザー／組織／グループ') - $($grantedRights -join ',')"
+        })
+        Write-ApplyStepResult -ActionLabel "アプリの権限を取得しました" -CountPhrase "$($aclRowsForApp.Count)件" -DetailLines $aclTargetLines
+
+        $recordAclRowsForApp = @($recordAclRows | Where-Object { "$($_.'アプリID')" -eq "$($app.appId)" })
+        $recordAclCondGroups = @($recordAclRowsForApp | Group-Object -Property 'レコードの条件')
+        $recordAclTargetLines = @($recordAclCondGroups | ForEach-Object {
+            $condGroup = $_
+            $condLabel = if ($condGroup.Name) { $condGroup.Name } else { "すべてのレコード" }
+            "　条件: $condLabel"
+            "　　対象"
+            foreach ($row in $condGroup.Group) {
+                $grantedRights = @('閲覧', '編集', '削除') | Where-Object { ToBool $row.$_ }
+                $rightsLabel = if ($grantedRights.Count -gt 0) { $grantedRights -join ',' } else { "権限なし" }
+                "　　　- $($row.'種別'):$($row.'ユーザー／組織／グループ') ($rightsLabel)"
+            }
+        })
+        Write-ApplyStepResult -ActionLabel "アプリのレコード権限を取得しました" -CountPhrase "条件$($recordAclCondGroups.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
+    }
 
     Write-Message "" -Type "Info" -NoHeader
     Write-Message "現在の状態を出力しました: $downloadPath" -ForegroundColor Green -Type "Info" -NoHeader
