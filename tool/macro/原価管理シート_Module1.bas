@@ -168,6 +168,16 @@ Sub ImportFromOtherBook()
     Dim completed As Boolean
     Dim matchedRows As Object
 
+    Dim reflectedCount As Long           ' 反映件数
+    Dim skipJissekiOnlyCount As Long     ' スキップ件数（実績）：実績シートにはあるが計画算定シートにない
+    Dim skipKeikakuOnlyCount As Long     ' スキップ件数（計画）：計画算定シートにはあるが実績シートにない
+    Dim skipDupCount As Long             ' スキップ件数（実績重複）
+
+    Dim reflectedRows As String          ' 反映した「実績行→計画行」の一覧
+    Dim skipJissekiOnlyRows As String    ' スキップ（実績）の実績シート側行番号の一覧
+    Dim skipKeikakuOnlyRows As String    ' スキップ（計画）の計画算定シート側行番号の一覧
+    Dim skipDupRows As String            ' スキップ（実績重複）の実績シート側行番号の一覧
+
     Dim years As Variant, caseIds As Variant, kubuns As Variant, costKubuns As Variant
 
     ' === ① ファイルダイアログで Other を選ぶ ===
@@ -260,15 +270,27 @@ Sub ImportFromOtherBook()
                     gBackupRows(foundRow) = Array(oldVals, oldColors)
 
                     HighlightChangedCells mainRange, oldVals, newVals
+
+                    reflectedCount = reflectedCount + 1
+                    reflectedRows = AppendItem(reflectedRows, r & "→" & foundRow)
+                Else
+                    skipDupCount = skipDupCount + 1
+                    skipDupRows = AppendItem(skipDupRows, CStr(r))
                 End If
+            Else
+                skipJissekiOnlyCount = skipJissekiOnlyCount + 1
+                skipJissekiOnlyRows = AppendItem(skipJissekiOnlyRows, CStr(r))
             End If
 
+        Else
+            skipJissekiOnlyCount = skipJissekiOnlyCount + 1
+            skipJissekiOnlyRows = AppendItem(skipJissekiOnlyRows, CStr(r))
         End If
 
     Next r
 
     ' === ⑨ 一度もマッチしなかった「予実=実績」行をグレー表示にする ===
-    MarkUnmatchedActualRows wsMain, mapMainCol, mapMainRange, matchedRows, gBackupRows, lastRowMain
+    MarkUnmatchedActualRows wsMain, mapMainCol, mapMainRange, matchedRows, gBackupRows, lastRowMain, skipKeikakuOnlyCount, skipKeikakuOnlyRows
 
     completed = True
 
@@ -279,7 +301,17 @@ CleanExit:
 
     If Not wbOther Is Nothing Then wbOther.Close SaveChanges:=False
 
-    If completed Then MsgBox "実績反映が完了しました。", vbInformation
+    If completed Then
+        MsgBox "実績反映が完了しました。" & vbCrLf & vbCrLf & _
+               "反映件数（実績→計画）：" & reflectedCount & "件" & vbCrLf & _
+               IIf(reflectedRows = "", "", "　" & reflectedRows & vbCrLf) & _
+               "スキップ件数（実績）：" & skipJissekiOnlyCount & "件" & vbCrLf & _
+               IIf(skipJissekiOnlyRows = "", "", "　" & skipJissekiOnlyRows & vbCrLf) & _
+               "スキップ件数（実績重複）：" & skipDupCount & "件" & vbCrLf & _
+               IIf(skipDupRows = "", "", "　" & skipDupRows & vbCrLf) & _
+               "スキップ件数（計画）：" & skipKeikakuOnlyCount & "件" & _
+               IIf(skipKeikakuOnlyRows = "", "", vbCrLf & "　" & skipKeikakuOnlyRows), vbInformation
+    End If
 
     Exit Sub
 
@@ -363,7 +395,10 @@ End Function
 ' ============================
 ' 予実=実績だが、今回の実行で一度も実績シート側とマッチしなかった行をグレー表示にする
 ' ============================
-Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange As Object, matchedRows As Object, backupRows As Object, lastRow As Long)
+Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange As Object, matchedRows As Object, backupRows As Object, lastRow As Long, ByRef unmatchedCount As Long, ByRef unmatchedRows As String)
+    unmatchedCount = 0
+    unmatchedRows = ""
+
     If lastRow < 5 Then Exit Sub
 
     Dim colYojitsu As Variant
@@ -385,10 +420,25 @@ Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange 
                 End If
 
                 rng.Font.Color = RGB(150, 150, 150)
+
+                unmatchedCount = unmatchedCount + 1
+                unmatchedRows = AppendItem(unmatchedRows, CStr(r))
             End If
         End If
     Next r
 End Sub
+
+
+' ============================
+' カンマ区切りリストに項目を追加する
+' ============================
+Function AppendItem(list As String, item As String) As String
+    If list = "" Then
+        AppendItem = item
+    Else
+        AppendItem = list & ", " & item
+    End If
+End Function
 
 
 ' ============================
