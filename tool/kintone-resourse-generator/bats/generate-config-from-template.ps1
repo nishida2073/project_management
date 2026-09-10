@@ -7,7 +7,7 @@
 # スペース名・アプリ名の"{PH}"は、kintone側で最終名が決まる前の仮名という運用を想定し、
 # 設定ファイル名に置き換える。kintoneへの書き込みは行わない。
 #
-# CustomTemplateConfigName（省略可）を指定すると、ベーステンプレートに加えてカスタムテンプレートの
+# CustomTemplateConfigName（省略可）を指定すると、設定テンプレート（基本）に加えて設定テンプレート（カスタム）の
 # 内容を組み合わせてconfigを生成する。組み合わせ方はシートによって異なる:
 #   space-settings         : 項目ごとにcustomの値があれば優先し、無ければbaseの値を使う
 #   space-member-list      : base・custom両方の行を残す（追加）。種別+ユーザー/組織/グループが
@@ -39,7 +39,7 @@ if (-not $baseTemplateRoot -or -not $configRoot -or -not $downloadRoot -or -not 
     exit 1
 }
 if (-not $BaseTemplateConfigName) {
-    $BaseTemplateConfigName = Read-Host "ベーステンプレート名"
+    $BaseTemplateConfigName = Read-Host "設定テンプレート（基本）名"
 }
 if (-not $DownloadConfigName) {
     $DownloadConfigName = Read-Host "設定ファイル名"
@@ -186,10 +186,10 @@ function Merge-KintoneRowsByKey {
         Write-Message "" -Type "Info" -NoHeader
         Write-Message "## アプリの対応付けで確認が必要な項目" -Type "Info" -NoHeader
         foreach ($m in $unmatchedBaseTemplateApps) {
-            Write-Message "  ベーステンプレートのアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+            Write-Message "  設定テンプレート（基本）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
         }
         foreach ($m in $unmatchedCustomTemplateApps) {
-            Write-Message "  カスタムテンプレートのアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+            Write-Message "  設定テンプレート（カスタム）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
         }
         foreach ($m in $unmatchedDownloadApps) {
             Write-Message "  新スペースのアプリ[$($m.'アプリ名')](appId=$($m.'アプリID'))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader

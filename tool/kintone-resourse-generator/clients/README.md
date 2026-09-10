@@ -15,8 +15,8 @@
 |---|---|---|
 | `COMMON_DOWNLOAD_PATH` | ダウンロード先フォルダ（`<スペース識別名>_download.xlsx`の出力先） | `download`フォルダ |
 | `COMMON_CONFIG_PATH` | 設定ファイル（`<スペース識別名>_config.xlsx`）のフォルダ | `config`フォルダ |
-| `COMMON_BASE_TEMPLATE_PATH` | ベース設定テンプレート（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（基本）」ドロップダウンに並ぶ | `base-template`フォルダ |
-| `COMMON_CUSTOM_TEMPLATE_PATH` | カスタム設定テンプレート（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（カスタム）」ドロップダウンに並ぶ（省略可） | `custom-template`フォルダ |
+| `COMMON_BASE_TEMPLATE_PATH` | 設定テンプレート（基本）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（基本）」ドロップダウンに並ぶ | `template\base`フォルダ |
+| `COMMON_CUSTOM_TEMPLATE_PATH` | 設定テンプレート（カスタム）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（カスタム）」ドロップダウンに並ぶ（省略可） | `template\custom`フォルダ |
 | `COMMON_CHECK_OUTPUT_PATH` | データチェック結果（`<スペース識別名>_check.xlsx`）の出力先フォルダ | `checked`フォルダ |
 | `COMMON_LOG_PATH` | 各工程のログの出力先フォルダ | `log`フォルダ |
 

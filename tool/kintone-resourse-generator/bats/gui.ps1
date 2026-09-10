@@ -815,8 +815,8 @@ $tabSettings.Controls.Add($topPanel)
 
 $varLabels = [ordered]@{
     "COMMON_DOWNLOAD_PATH"     = "ダウンロード先のフォルダ"
-    "COMMON_BASE_TEMPLATE_PATH"     = "ベーステンプレートファイルのフォルダ"
-    "COMMON_CUSTOM_TEMPLATE_PATH"   = "カスタムテンプレートファイルのフォルダ"
+    "COMMON_BASE_TEMPLATE_PATH"     = "設定テンプレート（基本）ファイルのフォルダ"
+    "COMMON_CUSTOM_TEMPLATE_PATH"   = "設定テンプレート（カスタム）ファイルのフォルダ"
     "COMMON_CONFIG_PATH"       = "設定ファイルのフォルダ"
     "COMMON_CHECK_OUTPUT_PATH" = "チェック結果の出力先フォルダ"
     "COMMON_LOG_PATH"          = "ログの出力先フォルダ"

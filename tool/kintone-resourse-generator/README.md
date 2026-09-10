@@ -23,8 +23,8 @@
 | `check-kintone-resources.bat` | 「4. データチェック」のエントリーポイント |
 | `bats\library\common.ps1` | 5つの`.ps1`が共通で使う関数（kintone REST APIの呼び出し、Excelの読み書き、ログ出力など）。各`.ps1`の先頭でドットソースして読み込まれる。ユーザーが直接実行するものではない |
 | `bats\create-space-from-template.ps1` / `download-kintone-resources.ps1` / `generate-config-from-template.ps1` / `apply-kintone-resources.ps1` / `check-kintone-resources.ps1` | 各段階の実装本体（`.bat`から呼び出される。ユーザーが直接実行するものではない） |
-| `base-template\*.xlsx` | ベース設定テンプレート（スペース・アプリ名だけで紐づく、共通のメンバー・ACL設定）。書き方は[設定ファイル・テンプレートの構成](#設定ファイルテンプレートの構成)を参照 |
-| `custom-template\*.xlsx` | カスタム設定テンプレート（ベーステンプレートと組み合わせて使う、省略可能な追加設定）。構成は`base-template\*.xlsx`と同じ |
+| `template\base\*.xlsx` | 設定テンプレート（基本）（スペース・アプリ名だけで紐づく、共通のメンバー・ACL設定）。書き方は[設定ファイル・テンプレートの構成](#設定ファイルテンプレートの構成)を参照 |
+| `template\custom\*.xlsx` | 設定テンプレート（カスタム）（設定テンプレート（基本）と組み合わせて使う、省略可能な追加設定）。構成は`template\base\*.xlsx`と同じ |
 | `download\<スペース識別名>_download.xlsx` | 「1. ダウンロード」の出力＝「2. 設定ファイルの生成」の入力の一つ |
 | `config\<スペース識別名>_config.xlsx` | 「2. 設定ファイルの生成」の出力＝「3. kintoneへ反映」「4. データチェック」の入力 |
 | `checked\<スペース識別名>_check.xlsx` | 「4. データチェック」の出力 |
@@ -50,8 +50,8 @@
 |---|---|---|
 | `COMMON_DOWNLOAD_PATH` | 「1. ダウンロード」の出力先フォルダ | `download`フォルダ |
 | `COMMON_CONFIG_PATH` | 設定ファイル（`*_config.xlsx`）のフォルダ | `config`フォルダ |
-| `COMMON_BASE_TEMPLATE_PATH` | ベース設定テンプレート（`base-template\*.xlsx`）のフォルダ | `base-template`フォルダ |
-| `COMMON_CUSTOM_TEMPLATE_PATH` | カスタム設定テンプレート（`custom-template\*.xlsx`）のフォルダ（省略可） | `custom-template`フォルダ |
+| `COMMON_BASE_TEMPLATE_PATH` | 設定テンプレート（基本）（`template\base\*.xlsx`）のフォルダ | `template\base`フォルダ |
+| `COMMON_CUSTOM_TEMPLATE_PATH` | 設定テンプレート（カスタム）（`template\custom\*.xlsx`）のフォルダ（省略可） | `template\custom`フォルダ |
 | `COMMON_CHECK_OUTPUT_PATH` | 「4. データチェック」の出力先フォルダ | `checked`フォルダ |
 | `COMMON_LOG_PATH` | 各段階のログの出力先フォルダ | `log`フォルダ |
 
@@ -130,11 +130,11 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 
 ### 2. 設定ファイルの生成について
 
-ベーステンプレート（`base-template\<設定テンプレート名（基本）>.xlsx`、スペースID・アプリIDを持たずアプリ名だけで紐づく共通のメンバー・ACL設定）と、ダウンロード結果（`download\<スペース識別名>_download.xlsx`、新スペースの実IDを含む）をアプリ名の一致で対応付け、`config\<スペース識別名>_config.xlsx`を生成する。kintoneへの書き込みは行わない（ローカルでのファイル生成のみ）。生成結果は次段階でそのままkintoneに反映されるファイルなので、この段階の後に内容を目視で確認・編集することを想定している。
+設定テンプレート（基本）（`template\base\<設定テンプレート名（基本）>.xlsx`、スペースID・アプリIDを持たずアプリ名だけで紐づく共通のメンバー・ACL設定）と、ダウンロード結果（`download\<スペース識別名>_download.xlsx`、新スペースの実IDを含む）をアプリ名の一致で対応付け、`config\<スペース識別名>_config.xlsx`を生成する。kintoneへの書き込みは行わない（ローカルでのファイル生成のみ）。生成結果は次段階でそのままkintoneに反映されるファイルなので、この段階の後に内容を目視で確認・編集することを想定している。
 
-カスタムテンプレート（`custom-template\<設定テンプレート名（カスタム）>.xlsx`）を指定した場合は、ベーステンプレートと組み合わせた内容でconfigを生成する（詳しい組み合わせ方は[`-CustomTemplateConfigName`](#引数-2)を参照）。省略した場合はベーステンプレートのみで生成する。
+設定テンプレート（カスタム）（`template\custom\<設定テンプレート名（カスタム）>.xlsx`）を指定した場合は、設定テンプレート（基本）と組み合わせた内容でconfigを生成する（詳しい組み合わせ方は[`-CustomTemplateConfigName`](#引数-2)を参照）。省略した場合は設定テンプレート（基本）のみで生成する。
 
-アプリ名の対応付けは「どちらかの名前がどちらかを含むか」で1対1に判定する（カスタムテンプレートを指定した場合は、ベース・カスタムそれぞれ個別にダウンロード結果と対応付ける）。対応付けられなかったアプリがある場合はコンソール・ログに警告を表示するので、必要ならconfigファイルに手動で追記する。
+アプリ名の対応付けは「どちらかの名前がどちらかを含むか」で1対1に判定する（設定テンプレート（カスタム）を指定した場合は、基本・カスタムそれぞれ個別にダウンロード結果と対応付ける）。対応付けられなかったアプリがある場合はコンソール・ログに警告を表示するので、必要ならconfigファイルに手動で追記する。
 
 テンプレートのスペース名・アプリ名に含めた`{PH}`は、この段階でスペース識別名（`-DownloadConfigName`）に置き換えられる（kintone側でスペース・アプリを作成した時点ではまだ最終的な名前が決まらない、という運用を想定した仮の名前用のプレースホルダー）。
 
@@ -143,7 +143,7 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 1. `generate-config-from-template.bat` を実行する
 2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
 3. `generate-config-from-template.ps1` が実行される
-   1. ベーステンプレート（`COMMON_BASE_TEMPLATE_PATH`配下）、指定時はカスタムテンプレート（`COMMON_CUSTOM_TEMPLATE_PATH`配下）、およびダウンロード結果（`COMMON_DOWNLOAD_PATH`配下）を読み込む
+   1. 設定テンプレート（基本）（`COMMON_BASE_TEMPLATE_PATH`配下）、指定時は設定テンプレート（カスタム）（`COMMON_CUSTOM_TEMPLATE_PATH`配下）、およびダウンロード結果（`COMMON_DOWNLOAD_PATH`配下）を読み込む
    2. アプリ名の一致でテンプレートのアプリとダウンロード結果のアプリを対応付ける（対応付けられなかったアプリはコンソールに警告表示）
    3. スペース設定・メンバー・アプリ名・アプリACL・レコードACLをテンプレートの内容（スペース名・アプリ名は`{PH}`をスペース識別名に置き換えた値）で組み立てる
    4. `config\<スペース識別名>_config.xlsx`に書き出す
@@ -153,8 +153,8 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 
 | 引数 | 説明 |
 |---|---|
-| `-BaseTemplateConfigName` | 使用するベース設定テンプレート名（`base-template\<BASE_TEMPLATE_CONFIG_NAME>.xlsx`の`<BASE_TEMPLATE_CONFIG_NAME>`） |
-| `-CustomTemplateConfigName` | 使用するカスタム設定テンプレート名（`custom-template\<CUSTOM_TEMPLATE_CONFIG_NAME>.xlsx`の`<CUSTOM_TEMPLATE_CONFIG_NAME>`）。省略可能で、指定した場合はベーステンプレートと合わせた内容でconfigを生成する（メンバー・ACL・レコードACLは同一キーであればカスタム側の値を優先して結合、対象アプリ名はカスタム側を優先） |
+| `-BaseTemplateConfigName` | 使用する設定テンプレート（基本）名（`template\base\<BASE_TEMPLATE_CONFIG_NAME>.xlsx`の`<BASE_TEMPLATE_CONFIG_NAME>`） |
+| `-CustomTemplateConfigName` | 使用する設定テンプレート（カスタム）名（`template\custom\<CUSTOM_TEMPLATE_CONFIG_NAME>.xlsx`の`<CUSTOM_TEMPLATE_CONFIG_NAME>`）。省略可能で、指定した場合は設定テンプレート（基本）と合わせた内容でconfigを生成する（メンバー・ACL・レコードACLは同一キーであればカスタム側の値を優先して結合、対象アプリ名はカスタム側を優先） |
 | `-DownloadConfigName` | 対象のスペース識別名（`download\<DOWNLOAD_CONFIG_NAME>_download.xlsx`を読み込み、`config\<DOWNLOAD_CONFIG_NAME>_config.xlsx`に出力する） |
 
 ```bat
@@ -273,7 +273,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 ## 設定ファイル・テンプレートの構成
 
-`download\*_download.xlsx`・`config\*_config.xlsx`・`base-template\*.xlsx`・`custom-template\*.xlsx`は同じ5シート構成（`base-template`・`custom-template`は`space-settings`の1行のみ、`space-app-list`はアプリ名の列のみを使う。スペースID・アプリID列は無視される）。
+`download\*_download.xlsx`・`config\*_config.xlsx`・`template\base\*.xlsx`・`template\custom\*.xlsx`は同じ5シート構成（`template\base`・`template\custom`は`space-settings`の1行のみ、`space-app-list`はアプリ名の列のみを使う。スペースID・アプリID列は無視される）。
 
 | シート名 | 内容 |
 |---|---|
@@ -283,7 +283,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 | `space-app-acl` | アプリのアクセス権（組織／グループ／ユーザーごと） |
 | `space-app-record-acl` | レコードのアクセス権（条件＋組織／グループ／ユーザー／作成者ごと） |
 
-`base-template\*.xlsx`のスペース名・アプリ名の列に`{PH}`を含めておくと、「2. 設定ファイルの生成」でスペース識別名に置き換えられる（例：`{PH}用スペース` → `L20用スペース`）。
+`template\base\*.xlsx`のスペース名・アプリ名の列に`{PH}`を含めておくと、「2. 設定ファイルの生成」でスペース識別名に置き換えられる（例：`{PH}用スペース` → `L20用スペース`）。
 
 ## GUI版
 
@@ -329,8 +329,8 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 | 環境変数名 | 表示名 |
 |---|---|
 | `COMMON_DOWNLOAD_PATH` | ダウンロード先のフォルダ |
-| `COMMON_BASE_TEMPLATE_PATH` | ベーステンプレートファイルのフォルダ |
-| `COMMON_CUSTOM_TEMPLATE_PATH` | カスタムテンプレートファイルのフォルダ |
+| `COMMON_BASE_TEMPLATE_PATH` | 設定テンプレート（基本）ファイルのフォルダ |
+| `COMMON_CUSTOM_TEMPLATE_PATH` | 設定テンプレート（カスタム）ファイルのフォルダ |
 | `COMMON_CONFIG_PATH` | 設定ファイルのフォルダ |
 | `COMMON_CHECK_OUTPUT_PATH` | チェック結果の出力先フォルダ |
 | `COMMON_LOG_PATH` | ログの出力先フォルダ |
