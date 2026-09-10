@@ -7,43 +7,14 @@ Private Sub Workbook_Open()
 
     If isBrowser Then Exit Sub
 
+    EnsureButtonsExist
+
     Dim wsMain As Worksheet
     Set wsMain = Sheets("計画算定シート")
 
-    ' シートが非表示の間はボタンを作らない（後段のSelectが失敗するため）
-    If wsMain.Visible <> xlSheetVisible Then Exit Sub
-
-    CreateButton wsMain, "MacroProcButton999", "D2", "実績反映", "ImportFromOtherBook"
-    CreateButton wsMain, "UndoProcButton999", "E2", "元に戻す", "UndoLastImport"
-
-    wsMain.Range("A1").Select
-
-End Sub
-
-
-' ============================
-' フォームコントロールのボタンを作成し、指定セルの左上に配置してマクロを割り当てる
-' ============================
-Sub CreateButton(wsMain As Worksheet, buttonName As String, targetCellAddress As String, caption As String, macroName As String)
-
-    ' 同名の図形が既に残っている場合は先に削除しておく（名前の衝突を防ぐ）
-    DeleteButtonIfExists wsMain, buttonName
-
-    Dim targetCell As Range
-    Set targetCell = wsMain.Range(targetCellAddress)
-
-    Dim btn As Button
-    Set btn = wsMain.Buttons.Add(targetCell.Left, targetCell.Top, 60, 20)
-
-    btn.Name = buttonName
-    btn.Caption = caption
-    btn.OnAction = macroName
-
-    With btn.Characters.Font
-        .Name = "Meiryo UI"
-        .Size = 9
-        .Bold = True
-    End With
+    If wsMain.Visible = xlSheetVisible Then
+        wsMain.Range("A1").Select
+    End If
 
 End Sub
 
@@ -77,20 +48,6 @@ Private Sub Workbook_BeforeClose(Cancel As Boolean)
 
     ' このあと「変更を保存しますか？」でキャンセルされ、閉じずに残る場合に備えて
     ' 少し後にボタンが残っているか確認・復元する処理を予約しておく
-    Application.OnTime Now, "'" & ThisWorkbook.Name & "'!RestoreButtonsIfStillOpen"
-
-End Sub
-
-
-Sub DeleteButtonIfExists(ws As Worksheet, buttonName As String)
-
-    Dim shp As Shape
-    On Error Resume Next
-    Set shp = ws.Shapes(buttonName)
-    On Error GoTo 0
-
-    If Not shp Is Nothing Then
-        shp.Delete
-    End If
+    Application.OnTime Now, "'" & ThisWorkbook.Name & "'!EnsureButtonsExist"
 
 End Sub

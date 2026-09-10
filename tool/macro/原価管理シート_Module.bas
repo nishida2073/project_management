@@ -14,19 +14,64 @@ Sub CloseThisSheet()
 End Sub
 
 ' ============================
-' Workbook_BeforeCloseでボタンを削除した直後に予約される。
-' 「変更を保存しますか？」でキャンセルされてブックが閉じずに残っていた場合、
-' ボタンを作り直す（標準モジュールに置く必要があるため、Application.OnTimeの呼び出し先はここ）
+' 計画算定シートに実績反映・元に戻すボタンが無ければ作成する。
+' Workbook_Open、および Workbook_BeforeClose がボタン削除後に予約する
+' 復元チェック（Application.OnTimeの呼び出し先は標準モジュールである必要があるため、ここに置く）
+' の両方から呼ばれる
 ' ============================
-Sub RestoreButtonsIfStillOpen()
+Sub EnsureButtonsExist()
 
     Dim wsMain As Worksheet
     Set wsMain = ThisWorkbook.Sheets("計画算定シート")
 
     If wsMain.Visible <> xlSheetVisible Then Exit Sub
 
-    ThisWorkbook.CreateButton wsMain, "MacroProcButton999", "D2", "実績反映", "ImportFromOtherBook"
-    ThisWorkbook.CreateButton wsMain, "UndoProcButton999", "E2", "元に戻す", "UndoLastImport"
+    CreateButton wsMain, "MacroProcButton999", "D2", "実績反映", "ImportFromOtherBook"
+    CreateButton wsMain, "UndoProcButton999", "E2", "元に戻す", "UndoLastImport"
+
+End Sub
+
+
+' ============================
+' フォームコントロールのボタンを作成し、指定セルの左上に配置してマクロを割り当てる
+' ============================
+Sub CreateButton(wsMain As Worksheet, buttonName As String, targetCellAddress As String, caption As String, macroName As String)
+
+    ' 同名の図形が既に残っている場合は先に削除しておく（名前の衝突を防ぐ）
+    DeleteButtonIfExists wsMain, buttonName
+
+    Dim targetCell As Range
+    Set targetCell = wsMain.Range(targetCellAddress)
+
+    Dim btn As Button
+    Set btn = wsMain.Buttons.Add(targetCell.Left, targetCell.Top, 60, 20)
+
+    btn.Name = buttonName
+    btn.Caption = caption
+    btn.OnAction = macroName
+
+    With btn.Characters.Font
+        .Name = "Meiryo UI"
+        .Size = 9
+        .Bold = True
+    End With
+
+End Sub
+
+
+' ============================
+' 指定名のボタンがシート上に存在すれば削除する
+' ============================
+Sub DeleteButtonIfExists(ws As Worksheet, buttonName As String)
+
+    Dim shp As Shape
+    On Error Resume Next
+    Set shp = ws.Shapes(buttonName)
+    On Error GoTo 0
+
+    If Not shp Is Nothing Then
+        shp.Delete
+    End If
 
 End Sub
 
