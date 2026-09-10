@@ -14,6 +14,49 @@ Sub CloseThisSheet()
 End Sub
 
 ' ============================
+' Workbook_Openの本体処理
+' ============================
+Sub HandleWorkbookOpen()
+
+    Dim isBrowser As Boolean
+    isBrowser = (Application.OperatingSystem = "")
+
+    If isBrowser Then Exit Sub
+
+    EnsureButtonsExist
+
+    Dim wsMain As Worksheet
+    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+
+    If wsMain.Visible = xlSheetVisible Then
+        wsMain.Range("A1").Select
+    End If
+
+End Sub
+
+
+' ============================
+' Workbook_BeforeSaveの本体処理（貼り付け範囲の黒字化）
+' ============================
+Sub HandleBeforeSave()
+
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("計画算定シート")
+    Dim mapMainRange As Object
+
+    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+
+    Dim lastRow As Long
+    lastRow = ws.Cells.SpecialCells(xlCellTypeLastCell).Row   ' Ctrl+Shift+End と同じ判定
+
+    If lastRow >= 5 Then
+        ws.Range(mapMainRange("開始") & "5:" & mapMainRange("終了") & lastRow).Font.Color = vbBlack
+    End If
+
+End Sub
+
+
+' ============================
 ' 計画算定シートに実績反映・元に戻すボタンが無ければ作成する。
 ' Workbook_Open、および Workbook_BeforeClose がボタン削除後に予約する
 ' 復元チェック（Application.OnTimeの呼び出し先は標準モジュールである必要があるため、ここに置く）
@@ -55,6 +98,24 @@ Sub CreateButton(wsMain As Worksheet, buttonName As String, targetCellAddress As
         .Size = 9
         .Bold = True
     End With
+
+End Sub
+
+
+' ============================
+' Workbook_BeforeCloseの本体処理（ボタン削除＋復元チェックの予約）
+' ============================
+Sub HandleBeforeClose()
+
+    Dim wsMain As Worksheet
+    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+
+    DeleteButtonIfExists wsMain, "MacroProcButton999"
+    DeleteButtonIfExists wsMain, "UndoProcButton999"
+
+    ' このあと「変更を保存しますか？」でキャンセルされ、閉じずに残る場合に備えて
+    ' 少し後にボタンが残っているか確認・復元する処理を予約しておく
+    Application.OnTime Now, "'" & ThisWorkbook.Name & "'!EnsureButtonsExist"
 
 End Sub
 
