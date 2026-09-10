@@ -37,6 +37,9 @@ Sub CreateButtonFromTemplate(wsMain As Worksheet, buttonName As String, targetCe
         Exit Sub
     End If
 
+    ' 同名の図形が既に残っている場合は先に削除しておく（名前の衝突を防ぐ）
+    DeleteButtonIfExists wsMain, buttonName
+
     Dim targetCell As Range
     Set targetCell = wsMain.Range(targetCellAddress)
 
@@ -108,17 +111,20 @@ End Sub
 
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
 
-    DeleteButtonIfExists "MacroProcButton999"
-    DeleteButtonIfExists "UndoProcButton999"
+    Dim wsMain As Worksheet
+    Set wsMain = Sheets("計画算定シート")
+
+    DeleteButtonIfExists wsMain, "MacroProcButton999"
+    DeleteButtonIfExists wsMain, "UndoProcButton999"
 
 End Sub
 
 
-Private Sub DeleteButtonIfExists(buttonName As String)
+Sub DeleteButtonIfExists(ws As Worksheet, buttonName As String)
 
     Dim shp As Shape
     On Error Resume Next
-    Set shp = Sheets("計画算定シート").Shapes(buttonName)
+    Set shp = ws.Shapes(buttonName)
     On Error GoTo 0
 
     If Not shp Is Nothing Then
