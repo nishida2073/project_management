@@ -78,7 +78,7 @@
    </p>
 
 4. 条件に一致した行が転記されるので、内容を確認します。
-   - なお、変更箇所は赤字になります。
+   - なお、転記された箇所はU〜AG列が赤字になります（値が変わったかどうかは判定していません）。
 
    <p class="img-center">
      <img src="screenshots/result_red.png" alt="転記された行が赤字になった状態" width="600">
@@ -87,7 +87,7 @@
 <div class="pagebreak"></div>
 
 5. 問題がなければファイルを保存します。
-   - 以下のダイアログが表示され、「OK」を押下すると赤字はすべて黒字になります。
+   - 以下のダイアログが表示され、「OK」を押下すると赤字はすべて黒字に戻り、「実績反映」ボタンが消えます。
    <p class="img-center">
      <img src="screenshots/save_notice.png" alt="保存時に表示される確認メッセージ" width="300">
      <img src="screenshots/result_black.png" alt="転記された行が黒字になった状態" width="600">

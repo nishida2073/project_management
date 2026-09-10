@@ -7,21 +7,64 @@ Private Sub Workbook_Open()
 
     If isBrowser Then Exit Sub
 
-    On Error Resume Next
-    Sheets("計画算定シート").Shapes("MacroProcButton999").Visible = msoTrue
-    On Error GoTo 0
-
-    DoEvents
-    Application.ScreenUpdating = False
-    Application.ScreenUpdating = True
-
     Dim wsMain As Worksheet
     Set wsMain = Sheets("計画算定シート")
 
-    If wsMain.Visible = xlSheetVisible Then
-        wsMain.Activate
-        wsMain.Range("A1").Select
+    ' シートが非表示の間はボタンを作らない（Activate できないため）
+    If wsMain.Visible <> xlSheetVisible Then Exit Sub
+
+    Dim shp As Shape
+    Set shp = Sheets("システム用").Shapes("MacroProcButton999")
+
+    Dim x As Single, y As Single
+    x = shp.Left
+    y = shp.Top
+
+    shp.Copy
+    DoEvents
+
+    wsMain.Activate
+
+    Dim pasted As Shape
+    Dim retry As Integer
+    Dim success As Boolean
+    Dim beforeCount As Long
+    Dim pasteFailed As Boolean
+
+    ' 最大3回リトライ
+    For retry = 1 To 3
+
+        beforeCount = wsMain.Shapes.Count
+
+        On Error Resume Next
+        Err.Clear
+        wsMain.Paste
+        pasteFailed = (Err.Number <> 0)
+        On Error GoTo 0
+
+        DoEvents
+
+        ' 「エラーが出ていない」かつ「図形の数が実際に増えた」ことで成功を判定する
+        If Not pasteFailed And wsMain.Shapes.Count > beforeCount Then
+            Set pasted = wsMain.Shapes(wsMain.Shapes.Count)
+            success = True
+            Exit For
+        End If
+
+        ' 失敗したら少し待つ
+        Application.Wait Now + TimeValue("0:00:01")
+    Next retry
+
+    If Not success Then
+        MsgBox "ボタンの貼り付けに失敗しました。", vbExclamation
+        Exit Sub
     End If
+
+    pasted.Left = x
+    pasted.Top = y
+    pasted.Name = "MacroProcButton999"
+
+    wsMain.Range("A1").Select
 
 End Sub
 
@@ -47,8 +90,13 @@ End Sub
 
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
 
+    Dim shp As Shape
     On Error Resume Next
-    Sheets("計画算定シート").Shapes("MacroProcButton999").Visible = msoFalse
+    Set shp = Sheets("計画算定シート").Shapes("MacroProcButton999")
     On Error GoTo 0
+
+    If Not shp Is Nothing Then
+        shp.Delete
+    End If
 
 End Sub
