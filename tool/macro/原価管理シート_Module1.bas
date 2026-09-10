@@ -239,22 +239,28 @@ Sub ImportFromOtherBook()
             ' === ⑦ Dictionaryで一致する行を即座に取得 ===
             If mainIndex.Exists(idxKey) Then
                 foundRow = mainIndex(idxKey)
-                matchedRows(foundRow) = True
 
-                ' === ⑧ 一致した行に貼り付け（値が変わったセルだけ赤色にする） ===
-                Set mainRange = wsMain.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
-                Set otherRange = wsOther.Range(mapOtherRange("開始") & r & ":" & mapOtherRange("終了") & r)
+                ' 実績シート側に重複行があり、同じ行へ既に反映済みの場合は再処理しない
+                ' （2回目以降の処理が「1回目で上書きした後の値」を元に比較してしまい、
+                '   正しく付いた赤色やUndo用バックアップが誤って上書きされるため）
+                If Not matchedRows.Exists(foundRow) Then
+                    matchedRows(foundRow) = True
 
-                Dim oldColors As Variant
-                oldColors = GetFontColors(mainRange)   ' 上書き前のフォント色を保持
+                    ' === ⑧ 一致した行に貼り付け（値が変わったセルだけ赤色にする） ===
+                    Set mainRange = wsMain.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
+                    Set otherRange = wsOther.Range(mapOtherRange("開始") & r & ":" & mapOtherRange("終了") & r)
 
-                oldVals = mainRange.Value          ' 上書き前の値を保持
-                mainRange.Value = otherRange.Value  ' 一括で貼り付け
-                newVals = mainRange.Value
+                    Dim oldColors As Variant
+                    oldColors = GetFontColors(mainRange)   ' 上書き前のフォント色を保持
 
-                gBackupRows(foundRow) = Array(oldVals, oldColors)
+                    oldVals = mainRange.Value          ' 上書き前の値を保持
+                    mainRange.Value = otherRange.Value  ' 一括で貼り付け
+                    newVals = mainRange.Value
 
-                HighlightChangedCells mainRange, oldVals, newVals
+                    gBackupRows(foundRow) = Array(oldVals, oldColors)
+
+                    HighlightChangedCells mainRange, oldVals, newVals
+                End If
             End If
 
         End If
@@ -428,8 +434,15 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
             Dim k As String
             k = years(r, 1) & "|" & caseIds(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1)
 
-            ' 同一キーが複数行ある場合は最初に見つかった行を採用（元の実装と同じ挙動）
-            If Not dic.Exists(k) Then dic(k) = r
+            If dic.Exists(k) Then
+                Err.Raise vbObjectError + 1001, _
+                          "BuildMainIndex", _
+                          "計画算定シートに、条件が重複する行があります。" & vbCrLf & _
+                          "行" & dic(k) & "と行" & r & "が、年度・案件ID・会計区分1・会計区分2の組み合わせで重複しています。" & vbCrLf & _
+                          "実績反映を行う前に、計画算定シート側の重複を解消してください。"
+            End If
+
+            dic(k) = r
         End If
     Next r
 
