@@ -11,6 +11,7 @@
 - `import-macros.bat` — 実行用のラッパー（中身は英数字のみ）
 - `import-macros.ps1` — 実際の処理を行うPowerShellスクリプト
 - `../macros/` — `.bas`ファイルを置くサブフォルダ（1つ上の階層。`import-macros.bat`は既定でここを`-MacroDir`として渡します）
+- `backup/` — 実行のたびに作られる、対象`.xlsm`のバックアップを置くサブフォルダ（`import-macros.bat`は既定でここを`-BackupDir`として渡します）
 
 
 ## 基本的な使い方
@@ -33,8 +34,11 @@ import-macros.bat
 
 - `.xlsm`は1つ上のフォルダ（`import-macros.bat`が`-XlsmDir`として渡します）から探します
 - `.bas`ファイルは1つ上の`macros`フォルダ（`import-macros.bat`が`-MacroDir`として渡します）から探します
+- バックアップは自分のフォルダ内の`backup`サブフォルダ（`import-macros.bat`が`-BackupDir`として渡します）に作られます。フォルダが無ければ自動的に作成されます
 
 `-XlsmDir`で指定したフォルダ内にある`.xlsm`を**すべて**処理します（1つずつ順番に開いて上書き保存）。対応する`<xlsm名>_ThisWorkbook.bas`／`<xlsm名>_<モジュール名>.bas`のペアが`-MacroDir`に無い`.xlsm`は、エラーにはならず単にスキップされます。
+
+対応する`.bas`ペアが見つかり、実際に上書きする`.xlsm`だけ、開く前に`-BackupDir`へタイムスタンプ付きのファイル名（例：`原価管理シート_20260911-190530.xlsm`）でバックアップされます（自動削除はしないため、実行するたびに増えていきます）。
 
 `.bas`ファイルを別のフォルダに置きたい場合は`-MacroDir`で上書きできます。
 
@@ -48,4 +52,4 @@ import-macros.bat -MacroDir "C:\path\to\macro-folder"
 import-macros.bat -XlsmDir "C:\path\to\xlsm-folder"
 ```
 
-※`import-macros.bat`は既定で`-MacroDir`を自分のフォルダ内の`macros`に固定して渡すため、`.bat`経由で`-MacroDir`をさらに指定するとエラーになります。`-MacroDir`を変えたい場合は`import-macros.ps1`を直接呼び出してください。
+※`import-macros.bat`は既定で`-MacroDir`・`-XlsmDir`・`-BackupDir`を固定して渡すため、`.bat`経由でこれらをさらに指定するとエラーになります。変えたい場合は`import-macros.ps1`を直接呼び出してください。

@@ -1,6 +1,7 @@
 param(
     [string]$XlsmDir,
-    [string]$MacroDir
+    [string]$MacroDir,
+    [string]$BackupDir
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,6 +16,13 @@ if (-not $XlsmDir) {
     $XlsmDir = $scriptDir
 }
 $XlsmDir = (Resolve-Path -Path $XlsmDir).ProviderPath
+
+if (-not $BackupDir) {
+    $BackupDir = Join-Path $scriptDir 'backup'
+}
+if (-not (Test-Path -Path $BackupDir)) {
+    New-Item -ItemType Directory -Path $BackupDir | Out-Null
+}
 
 $xlsmFiles = Get-ChildItem -Path $XlsmDir -Filter '*.xlsm' | Where-Object { $_.Name -notlike '~$*' }
 if ($xlsmFiles.Count -eq 0) {
@@ -55,6 +63,14 @@ try {
             Write-Host "Target workbook  : $($xlsmFile.FullName)"
             Write-Host "Module source    : $($moduleFile.FullName)  ->  module name: $moduleName"
             Write-Host "ThisWorkbook src : $($thisWorkbookFile.FullName)"
+
+            $backupName = "{0}_{1}{2}" -f `
+                $xlsmFile.BaseName, `
+                (Get-Date -Format 'yyyyMMdd-HHmmss'), `
+                $xlsmFile.Extension
+            $backupPath = Join-Path $BackupDir $backupName
+            Copy-Item -Path $xlsmFile.FullName -Destination $backupPath
+            Write-Host "Backup created   : $backupPath"
 
             $wb = $excel.Workbooks.Open($xlsmFile.FullName)
 
