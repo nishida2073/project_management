@@ -70,10 +70,15 @@ try {
                                     if ($existingSheet.Name -eq $srcSheet.Name) { $exists = $true; break }
                                 }
                                 if (-not $exists) {
-                                    $srcSheet.Copy($null, $wb.Sheets.Item($wb.Sheets.Count))
-                                    $newSheet = $wb.Sheets.Item($wb.Sheets.Count)
+                                    $srcSheet.Copy([Type]::Missing, $wb.Sheets.Item($wb.Sheets.Count))
+                                    $newSheet = $wb.Sheets.Item($srcSheet.Name)
                                     $newSheet.Visible = 0
-                                    Write-Host "Added hidden sheet: $($srcSheet.Name)"
+                                    if ($newSheet.Visible -ne 0) {
+                                        Write-Host "WARN: $($xlsmFile.Name) - could not hide sheet '$($srcSheet.Name)' (Visible=$($newSheet.Visible))"
+                                    }
+                                    else {
+                                        Write-Host "Added hidden sheet: $($srcSheet.Name)"
+                                    }
                                 }
                             }
                         }
