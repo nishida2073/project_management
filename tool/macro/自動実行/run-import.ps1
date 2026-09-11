@@ -1,7 +1,8 @@
 param(
     [string]$DataDir,
     [string]$XlsmPath,
-    [string]$LogDir
+    [string]$LogDir,
+    [string]$BackupDir
 )
 
 $ErrorActionPreference = 'Stop'
@@ -48,6 +49,20 @@ Write-Log "Data files (oldest to newest; newest wins on overlap):"
 foreach ($f in $dataFiles) {
     Write-Log "  $($f.FullName) (LastWriteTime: $($f.LastWriteTime))"
 }
+
+if (-not $BackupDir) {
+    $BackupDir = Join-Path $scriptDir 'backup'
+}
+if (-not (Test-Path -Path $BackupDir)) {
+    New-Item -ItemType Directory -Path $BackupDir | Out-Null
+}
+$backupName = "{0}_{1}{2}" -f `
+    [System.IO.Path]::GetFileNameWithoutExtension($XlsmPath), `
+    (Get-Date -Format 'yyyyMMdd-HHmmss'), `
+    [System.IO.Path]::GetExtension($XlsmPath)
+$backupPath = Join-Path $BackupDir $backupName
+Copy-Item -Path $XlsmPath -Destination $backupPath
+Write-Log "Backup created: $backupPath"
 
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
