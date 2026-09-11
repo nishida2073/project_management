@@ -44,14 +44,27 @@ Sub HandleBeforeSave()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("計画算定シート")
     Dim mapMainRange As Object
+    Dim mapMainCol As Object
 
     Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
 
     Dim lastRow As Long
     lastRow = ws.Cells.SpecialCells(xlCellTypeLastCell).Row   ' Ctrl+Shift+End と同じ判定
 
     If lastRow >= 5 Then
         ws.Range(mapMainRange("開始") & "5:" & mapMainRange("終了") & lastRow).Font.Color = vbBlack
+
+        Dim colYear As Variant, colCase As Variant, colQ As Variant, colR As Variant
+        colYear = mapMainCol("年度")
+        colCase = mapMainCol("案件ID")
+        colQ = mapMainCol("会計区分1")
+        colR = mapMainCol("会計区分2")
+
+        ws.Range(ws.Cells(5, colYear), ws.Cells(lastRow, colYear)).Font.Color = vbBlack
+        ws.Range(ws.Cells(5, colCase), ws.Cells(lastRow, colCase)).Font.Color = vbBlack
+        ws.Range(ws.Cells(5, colQ), ws.Cells(lastRow, colQ)).Font.Color = vbBlack
+        ws.Range(ws.Cells(5, colR), ws.Cells(lastRow, colR)).Font.Color = vbBlack
     End If
 
 End Sub
@@ -507,11 +520,35 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     Next r
 
     ' 重複しているキーをすべて集めて、1回のエラーでまとめて報告する
+    ' 併せて、重複グループごとに赤〜オレンジ系の色を割り当てて対象セルに色を付ける
     Dim msg As String
     Dim key As Variant
+    Dim palette As Variant
+    palette = Array(RGB(255, 0, 0), RGB(255, 69, 0), RGB(255, 140, 0), RGB(220, 20, 60), RGB(178, 34, 34), RGB(255, 99, 71))
+    Dim colorIdx As Long
+
     For Each key In rowsByKey.Keys
         If InStr(rowsByKey(key), ",") > 0 Then
             msg = msg & "行 " & rowsByKey(key) & vbCrLf
+
+            Dim groupColor As Long
+            groupColor = palette(colorIdx Mod (UBound(palette) + 1))
+
+            Dim rowParts() As String
+            rowParts = Split(rowsByKey(key), ",")
+
+            Dim p As Long
+            For p = LBound(rowParts) To UBound(rowParts)
+                Dim dupRow As Long
+                dupRow = CLng(Trim(rowParts(p)))
+
+                ws.Cells(dupRow, colYear).Font.Color = groupColor
+                ws.Cells(dupRow, colCase).Font.Color = groupColor
+                ws.Cells(dupRow, colQ).Font.Color = groupColor
+                ws.Cells(dupRow, colR).Font.Color = groupColor
+            Next p
+
+            colorIdx = colorIdx + 1
         End If
     Next key
 
@@ -569,7 +606,7 @@ Sub HighlightChangedCells(rng As Range, oldVals As Variant, newVals As Variant)
                 ' 実績シート側にその値が存在しなかった
                 rng.Cells(i).Font.Color = RGB(150, 150, 150)
             ElseIf CStr(oldVals(1, i)) <> CStr(newVals(1, i)) Then
-                rng.Cells(i).Font.Color = vbRed
+                rng.Cells(i).Font.Color = RGB(0, 153, 0)
             Else
                 rng.Cells(i).Font.ColorIndex = xlAutomatic
             End If
@@ -579,7 +616,7 @@ Sub HighlightChangedCells(rng As Range, oldVals As Variant, newVals As Variant)
         If CStr(newVals) = "" Then
             rng.Font.Color = RGB(150, 150, 150)
         ElseIf CStr(oldVals) <> CStr(newVals) Then
-            rng.Font.Color = vbRed
+            rng.Font.Color = RGB(0, 153, 0)
         Else
             rng.Font.ColorIndex = xlAutomatic
         End If
