@@ -34,9 +34,13 @@ function Get-BgrColor {
 
 $xlExpression = 2
 
+$msoAutomationSecurityForceDisable = 3
+
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
 $excel.DisplayAlerts = $false
+$excel.AutomationSecurity = $msoAutomationSecurityForceDisable
+$excel.EnableEvents = $false
 
 $wb = $null
 try {
@@ -54,6 +58,9 @@ try {
     $fcActual = $rng.FormatConditions.Add($xlExpression, 0, '=$S5="実績"')
     $fcActual.Interior.Color = Get-BgrColor -R 252 -G 228 -B 214
     $fcActual.StopIfTrue = $false
+
+    $ws.Activate()
+    $ws.Range("A1").Select() | Out-Null
 
     $wb.Save()
     Write-Host "Saved: $XlsmPath"
