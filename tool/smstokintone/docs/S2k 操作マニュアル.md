@@ -691,8 +691,7 @@ kintoneの設定:
 - 固定変換：「変換前」の文字列を「変換後」の文字列に置き換えるルールを複数登録できます。「+」で行を追加、「×」で行を削除でき、複数登録した場合は上から順番に適用されます。自動変換を有効にしている場合、固定変換は自動変換の後に適用されるため、「変換前」は自動変換後の表記（英数字は半角大文字、それ以外は全角）で指定してください
 
 <p float="left">
-  <img src="screenshots/app_company_name_auto_conversion.png" alt="本文の抽出（会社名の変換・自動変換）">
-  <img src="screenshots/app_company_name_fix_conversion.png" alt="本文の抽出（会社名の変換・固定変換）">
+  <img src="screenshots/app_company_name_conversion.png" alt="本文の抽出（会社名の変換）">
 </p>
 
 <div class="pagebreak"></div>
