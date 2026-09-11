@@ -65,6 +65,9 @@ class SmsReceiver : BroadcastReceiver() {
                 // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは
                 // 空になり、送信先名は「なし」扱いになる（実際の登録も行われない）
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
+                // smsParts.companyNameは既に会社名変換が適用済みのため、ここでは記録時点で
+                // 変換が有効だったかどうかのフラグ（ログのアイコン表示用）だけを求める
+                val companyNameConverted = config.companyNameWidthConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
 
                 // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で抽出状況が正常に解析
                 // できた場合のみ更新する。KintoneUploadWorker側でも同じ条件で更新している
@@ -92,7 +95,7 @@ class SmsReceiver : BroadcastReceiver() {
                     message = context.getString(R.string.message_log_receive),
                     sendTargetName = sendTargetName,
                     smsParts = smsParts,
-                    companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
+                    companyNameConverted = companyNameConverted,
                     isContinuation = resolution.isContinuation
                 )
 
@@ -110,7 +113,7 @@ class SmsReceiver : BroadcastReceiver() {
                                 message = context.getString(R.string.message_log_auto_reply),
                                 sendTargetName = sendTargetName,
                                 smsParts = smsParts,
-                                companyNameConverted = sendTargets.firstOrNull()?.companyNameWidthConversionEnabled ?: false,
+                                companyNameConverted = companyNameConverted,
                                 replyBody = config.extractionFailedReplyAddition,
                                 isContinuation = resolution.isContinuation
                             )

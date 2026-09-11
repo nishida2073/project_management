@@ -29,6 +29,9 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.aiExtractionEnabled, config.continuationEnabled, config.continuationScope)
         val smsParts = resolution.smsParts
         val validSendTargets = sendTargets.filter { it.isValid }
+        // smsParts.companyNameはSettingsStore.resolveSendTargetsで既に会社名変換が適用済みのため、
+        // ここでは記録時点で変換が有効だったかどうかのフラグ（ログのアイコン表示用）だけを求める
+        val companyNameConverted = config.companyNameWidthConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
 
         // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で抽出状況が正常に解析できた
         // 場合のみ更新する。SmsReceiver側でも同じ条件で更新しており、手動送信のみで運用している場合
@@ -49,7 +52,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
             val unconfiguredTargets: List<SettingsStore.SendTarget?> = if (sendTargets.isEmpty()) listOf(null) else sendTargets
             unconfiguredTargets.forEach { sendTarget ->
                 val sendTargetName = sendTarget?.displayName(applicationContext)
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTargetName, manual = manual, smsParts = smsParts, isContinuation = resolution.isContinuation)
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTargetName, manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
             }
             // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
             // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
@@ -68,26 +71,21 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         var shouldRetryAny = false
         for (sendTarget in validSendTargets) {
             if (!manual && smsParts.isExtractionFailed() && !config.sendExtractionFailedEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_failed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
                 continue
             }
 
             if (!manual && resolution.isContinuation && !config.sendExtractionNotPerformedEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_not_performed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_not_performed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
                 continue
             }
 
-            logStart(sender, body, timestampMillis, smsId, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+            logStart(sender, body, timestampMillis, smsId, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
 
             val targetDatetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {
                 KintoneApi.formatIsoDateTime(timestampMillis)
             } else {
                 null
-            }
-            val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
-                smsParts.companyNameNormalizedWidth
-            } else {
-                smsParts.companyName
             }
 
             when (val result = KintoneApi.postRecord(
@@ -96,25 +94,25 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 senderValue = sender,
                 historyValue = body,
                 datetimeIsoValue = targetDatetimeIso,
-                companyNameValue = companyNameValue,
+                companyNameValue = smsParts.companyName,
                 userNameValue = smsParts.userName,
                 bodyValue = smsParts.body
             )) {
                 is KintoneApi.PostResult.Success -> {
-                    logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+                    logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
                 }
                 is KintoneApi.PostResult.Skipped -> {
-                    logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+                    logComplete(sender, body, timestampMillis, smsId, success = true, message = result.message, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
                 }
                 is KintoneApi.PostResult.HttpFailure -> {
                     val detail = "${result.code} ${result.detail}"
                     Log.e(TAG, "kintoneへの登録に失敗しました: $detail")
-                    logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+                    logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_failure, detail), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
                     if (result.isRetryable) shouldRetryAny = true
                 }
                 is KintoneApi.PostResult.NetworkError -> {
                     Log.e(TAG, "kintoneへの通信でエラーが発生しました: ${result.message}")
-                    logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = sendTarget.companyNameWidthConversionEnabled, isContinuation = resolution.isContinuation)
+                    logComplete(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_complete_network_error, result.message), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
                     shouldRetryAny = true
                 }
             }
@@ -164,8 +162,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
     }
 
     /**
-     * SEND_COMPLETEログを記録する。companyNameConvertedは全角統一変換後の会社名を実際に送信したか
-     * どうかを示し、ログ詳細画面（LogActivity）でどちらの表記を表示するかの判定に使われる
+     * SEND_COMPLETEログを記録する。companyNameConvertedは記録時点でアプリ全体の会社名変換が
+     * 有効だったかどうかを示し、ログ詳細画面（LogActivity）でのアイコン表示に使われる
      */
     private fun logComplete(
         sender: String,

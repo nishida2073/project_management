@@ -62,7 +62,7 @@ class SenderInfoActivity : AppCompatActivity() {
     /** 1件分のカードをUIとcardsの両方へ追加する */
     private fun addCard(senderKey: String, entry: ContinuationStore.Entry) {
         val itemBinding = ItemSenderInfoBinding.inflate(layoutInflater, binding.llSenderInfoContainer, false)
-        itemBinding.tvSenderKey.text = getString(R.string.label_continuation_sender, senderKey)
+        itemBinding.tvSenderAddress.text = entry.senderAddress.ifBlank { senderKey }
         itemBinding.etContinuationCompanyName.setText(entry.companyName)
         itemBinding.etContinuationUserName.setText(entry.userName)
 
@@ -112,7 +112,8 @@ class SenderInfoActivity : AppCompatActivity() {
                 entries[card.senderKey] = ContinuationStore.Entry(
                     companyName = card.itemBinding.etContinuationCompanyName.text.toString().trim(),
                     userName = card.itemBinding.etContinuationUserName.text.toString().trim(),
-                    timestampMillis = original?.timestampMillis ?: System.currentTimeMillis()
+                    timestampMillis = original?.timestampMillis ?: System.currentTimeMillis(),
+                    senderAddress = original?.senderAddress ?: ""
                 )
             }
         }

@@ -32,10 +32,6 @@ data class SmsParts(
 
     /** [isEmpty]とは異なり、一部の項目だけ空でも抽出失敗とみなす */
     fun isExtractionFailed(): Boolean = !(companyName.isNotBlank() && userName.isNotBlank() && body.isNotBlank())
-
-    /** [companyName]の英数字を半角大文字、それ以外を全角に統一した文字列（空白なら空文字） */
-    val companyNameNormalizedWidth: String
-        get() = if (companyName.isNotBlank()) TextNormalization.normalizeWidth(companyName) else ""
 }
 
 /**

@@ -39,7 +39,13 @@ object ContinuationStore {
         /** 氏名 */
         val userName: String,
         /** このSMS自体の受信/送信対象日時 */
-        val timestampMillis: Long
+        val timestampMillis: Long,
+        /**
+         * 正規化前の元の送信元アドレス（電話番号など）。マップのキー（[SmsMatching.normalizeSenderKey]で
+         * 正規化済み）は表記ゆれ吸収のため末尾8桁などに削られてしまうため、[SenderInfoActivity]での
+         * 表示専用にこちらを別途保持する。マッチング処理自体はこの値を使わずキー側で行う
+         */
+        val senderAddress: String = ""
     )
 
     /** 読み書きに使うSharedPreferencesインスタンスを取得する */
@@ -54,7 +60,7 @@ object ContinuationStore {
         userName: String,
         timestampMillis: Long
     ) {
-        set(context, SmsMatching.normalizeSenderKey(sender), Entry(companyName, userName, timestampMillis))
+        set(context, SmsMatching.normalizeSenderKey(sender), Entry(companyName, userName, timestampMillis, senderAddress = sender))
     }
 
     /**
@@ -113,7 +119,8 @@ object ContinuationStore {
             obj.getString("senderKey") to Entry(
                 companyName = obj.optString("companyName", ""),
                 userName = obj.optString("userName", ""),
-                timestampMillis = obj.getLong("timestampMillis")
+                timestampMillis = obj.getLong("timestampMillis"),
+                senderAddress = obj.optString("senderAddress", "")
             )
         }
     }
@@ -127,6 +134,7 @@ object ContinuationStore {
                 .put("companyName", entry.companyName)
                 .put("userName", entry.userName)
                 .put("timestampMillis", entry.timestampMillis)
+                .put("senderAddress", entry.senderAddress)
             array.put(obj)
         }
         prefs(context).edit().putString(KEY_ENTRIES, array.toString()).apply()

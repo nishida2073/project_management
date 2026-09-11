@@ -226,19 +226,14 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    /** 会社名はkintoneへ実際に登録した値（変換適用時は変換後の値）を表示する */
+    /** 会社名は[SmsParts.companyName]（[SettingsStore.resolveSendTargets]で会社名変換が適用済み）をそのまま表示する */
     private fun showExtractionResultDialog(smsParts: SmsParts, companyNameConverted: Boolean) {
-        val companyNameValue = if (companyNameConverted) {
-            smsParts.companyNameNormalizedWidth
-        } else {
-            smsParts.companyName
-        }
         val message = if (smsParts.isExtractionFailed()) {
             getString(R.string.dialog_message_extraction_failure)
         } else {
             buildSpannedString {
                 bold { append(getString(R.string.hint_field_company)) }
-                append("：$companyNameValue\n")
+                append("：${smsParts.companyName}\n")
                 bold { append(getString(R.string.hint_field_user_name)) }
                 append("：${smsParts.userName}\n\n")
                 append(smsParts.body)

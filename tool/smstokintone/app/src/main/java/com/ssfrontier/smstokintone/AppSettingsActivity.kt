@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import com.ssfrontier.smstokintone.databinding.ActivityAppSettingsBinding
+import com.ssfrontier.smstokintone.databinding.ItemFixedConversionBinding
 
 /** アプリの設定画面。各項目は変更すると即座に[SettingsStore]へ保存され、保存ボタンは無い */
 class AppSettingsActivity : AppCompatActivity() {
@@ -65,6 +67,32 @@ class AppSettingsActivity : AppCompatActivity() {
         }
     }
 
+    /** 固定変換行を1件containerへ追加する。行の内容が変わるたびに[saveFixedConversions]で保存し直す */
+    private fun addFixedConversionRow(container: LinearLayout, from: String, to: String) {
+        val rowBinding = ItemFixedConversionBinding.inflate(layoutInflater, container, false)
+        rowBinding.etFixConversionBefore.setText(from)
+        rowBinding.etFixConversionAfter.setText(to)
+        rowBinding.etFixConversionBefore.addTextChangedListener { saveFixedConversions() }
+        rowBinding.etFixConversionAfter.addTextChangedListener { saveFixedConversions() }
+        rowBinding.btnDeleteFixedConversion.setOnClickListener {
+            container.removeView(rowBinding.root)
+            saveFixedConversions()
+        }
+        container.addView(rowBinding.root)
+    }
+
+    /** llFixedConversionsContainer内の全行の現在の内容で[SettingsStore.Config.companyNameFixedConversions]を保存し直す */
+    private fun saveFixedConversions() {
+        val rules = (0 until binding.llFixedConversionsContainer.childCount).map { index ->
+            val row = binding.llFixedConversionsContainer.getChildAt(index)
+            SettingsStore.FixedConversion(
+                from = row.findViewById<EditText>(R.id.etFixConversionBefore).text.toString().trim(),
+                to = row.findViewById<EditText>(R.id.etFixConversionAfter).text.toString().trim()
+            )
+        }
+        SettingsStore.update(this) { it.copy(companyNameFixedConversions = rules) }
+    }
+
     /** 各設定項目に現在の値を反映し、変更時に[SettingsStore]へ保存するリスナーを登録する */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,6 +125,14 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.swAiExtractionEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(aiExtractionEnabled = isChecked) }
         }
+
+        val bodyExtractionConfig = SettingsStore.load(this)
+        binding.swCompanyNameWidthConversionEnabled.isChecked = bodyExtractionConfig.companyNameWidthConversionEnabled
+        binding.swCompanyNameWidthConversionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(companyNameWidthConversionEnabled = isChecked) }
+        }
+        bodyExtractionConfig.companyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to) }
+        binding.btnAddFixedConversion.setOnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "") }
 
         binding.swSearchExtractionFailedEnabled.isChecked = SettingsStore.load(this).searchExtractionFailedEnabled
         binding.swSearchExtractionFailedEnabled.setOnCheckedChangeListener { _, isChecked ->

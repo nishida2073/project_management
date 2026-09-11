@@ -78,7 +78,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.etFieldUserName.setText(sendTarget.fieldUserName)
         itemBinding.etFieldBody.setText(sendTarget.fieldBody)
         itemBinding.etUpdateToleranceHours.setText(sendTarget.updateToleranceHours.toString())
-        itemBinding.swCompanyNameWidthConversionEnabled.isChecked = sendTarget.companyNameWidthConversionEnabled
 
         when (sendTarget.matchTarget) {
             SettingsStore.MatchTarget.BODY -> itemBinding.rbMatchTargetBody.isChecked = true
@@ -177,7 +176,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             updateToleranceHours = itemBinding.etUpdateToleranceHours.text.toString().trim().toIntOrNull()
                 ?: AppDefaults.UPDATE_TOLERANCE_HOURS,
             updateToleranceMode = updateToleranceMode,
-            companyNameWidthConversionEnabled = itemBinding.swCompanyNameWidthConversionEnabled.isChecked,
             matchTarget = matchTarget
         )
     }
@@ -237,7 +235,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
         itemBinding.btnTestSend.isEnabled = false
         lifecycleScope.launch {
-            val smsParts = SmsPartsGenerator.resolveSmsParts(testBody, SettingsStore.load(applicationContext).aiExtractionEnabled)
+            val config = SettingsStore.load(applicationContext)
+            val extracted = SmsPartsGenerator.resolveSmsParts(testBody, config.aiExtractionEnabled)
+            // SettingsStore.resolveSendTargetsと同じく、抽出直後（送信先の判定より前）に
+            // アプリ全体の会社名変換を適用する
+            val smsParts = extracted.copy(companyName = SettingsStore.applyCompanyNameConversion(extracted.companyName, config))
 
             // 本文（またはそこから抽出した会社名）が[sendTarget]自身の振り分け条件
             // （キーワード、またはデフォルト送信先）に一致しない場合は警告して送信を中断する。
@@ -259,11 +261,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                 return@launch
             }
 
-            val companyNameValue = if (sendTarget.companyNameWidthConversionEnabled) {
-                smsParts.companyNameNormalizedWidth
-            } else {
-                smsParts.companyName
-            }
             val result = withContext(Dispatchers.IO) {
                 KintoneApi.postRecord(
                     applicationContext,
@@ -271,7 +268,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                     senderValue = AppConstants.TEST_SEND_SENDER,
                     historyValue = testBody,
                     datetimeIsoValue = datetimeIso,
-                    companyNameValue = companyNameValue,
+                    companyNameValue = smsParts.companyName,
                     userNameValue = smsParts.userName,
                     bodyValue = smsParts.body
                 )
@@ -291,7 +288,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                     append(getString(R.string.dialog_message_extraction_failure))
                 } else {
                     bold { append(getString(R.string.hint_field_company)) }
-                    append("：$companyNameValue\n")
+                    append("：${smsParts.companyName}\n")
                     bold { append(getString(R.string.hint_field_user_name)) }
                     append("：${smsParts.userName}\n\n")
                     append(smsParts.body)
