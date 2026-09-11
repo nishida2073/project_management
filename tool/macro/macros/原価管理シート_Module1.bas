@@ -153,7 +153,10 @@ End Sub
 ' ============================
 ' 実績Excelを読み込んで実績を反映する
 ' ============================
-Sub ImportFromOtherBook()
+Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
+
+    Dim isInteractive As Boolean
+    isInteractive = IsMissing(otherFilePath)
 
     Dim wbOther As Workbook
     Dim wsOther As Worksheet
@@ -194,10 +197,13 @@ Sub ImportFromOtherBook()
 
     Dim years As Variant, caseIds As Variant, kubuns As Variant, costKubuns As Variant
 
-    ' === ① ファイルダイアログで Other を選ぶ ===
-    f = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
-
-    If f = False Then Exit Sub
+    ' === ① 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
+    If isInteractive Then
+        f = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
+        If f = False Then Exit Function
+    Else
+        f = otherFilePath
+    End If
 
     ' ここ以降のエラーは全て CleanFail で拾う
     On Error GoTo CleanFail
@@ -206,8 +212,9 @@ Sub ImportFromOtherBook()
     Set wbOther = Workbooks.Open(f, ReadOnly:=True)
 
     If Not SheetExists(wbOther, "実績") Then
-        MsgBox "選択したファイルに「実績」シートが見つかりません。" & vbCrLf & _
-               "ファイルが正しいか確認してください。", vbExclamation
+        ImportFromOtherBook = "選択したファイルに「実績」シートが見つかりません。" & vbCrLf & _
+               "ファイルが正しいか確認してください。" & vbCrLf & "対象ファイル: " & f
+        If isInteractive Then MsgBox ImportFromOtherBook, vbExclamation
         GoTo CleanExit
     End If
 
@@ -316,7 +323,7 @@ CleanExit:
     If Not wbOther Is Nothing Then wbOther.Close SaveChanges:=False
 
     If completed Then
-        MsgBox "実績反映が完了しました。" & vbCrLf & vbCrLf & _
+        ImportFromOtherBook = "実績反映が完了しました。" & vbCrLf & vbCrLf & _
                "反映（実績シート→計画算定シート）：" & reflectedCount & "件" & vbCrLf & _
                IIf(reflectedRows = "", "", "　" & reflectedRows & vbCrLf) & _
                "スキップ（実績シート：計画算定シートにデータなし）：" & skipJissekiOnlyCount & "件" & vbCrLf & _
@@ -324,24 +331,29 @@ CleanExit:
                "スキップ（実績シート：データの重複）：" & skipDupCount & "件" & vbCrLf & _
                IIf(skipDupRows = "", "", "　" & skipDupRows & vbCrLf) & _
                "スキップ（計画シート：実績シートに実績なし）：" & skipKeikakuOnlyCount & "件" & _
-               IIf(skipKeikakuOnlyRows = "", "", vbCrLf & "　" & skipKeikakuOnlyRows), vbInformation
+               IIf(skipKeikakuOnlyRows = "", "", vbCrLf & "　" & skipKeikakuOnlyRows)
+
+        If isInteractive Then MsgBox ImportFromOtherBook, vbInformation
     End If
 
-    Exit Sub
+    Exit Function
 
 CleanFail:
     Dim errDescription As String
     errDescription = Err.Description
 
-    On Error Resume Next
-    ThisWorkbook.Activate
-    If Not wsMain Is Nothing Then wsMain.Activate
-    On Error GoTo 0
+    If isInteractive Then
+        On Error Resume Next
+        ThisWorkbook.Activate
+        If Not wsMain Is Nothing Then wsMain.Activate
+        On Error GoTo 0
+    End If
 
-    MsgBox "エラーが発生しました。" & vbCrLf & errDescription
+    ImportFromOtherBook = "エラーが発生しました。" & vbCrLf & errDescription
+    If isInteractive Then MsgBox ImportFromOtherBook
     Resume CleanExit
 
-End Sub
+End Function
 
 
 ' ============================
