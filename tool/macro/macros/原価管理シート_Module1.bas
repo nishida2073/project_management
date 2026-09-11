@@ -325,7 +325,7 @@ CleanFail:
     If Not wsMain Is Nothing Then wsMain.Activate
     On Error GoTo 0
 
-    MsgBox "エラーが発生しました: " & errDescription
+    MsgBox "エラーが発生しました。" & vbCrLf & errDescription
     Resume CleanExit
 
 End Sub
