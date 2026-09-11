@@ -13,7 +13,6 @@
 - `../macros/` — `.bas`ファイルを置くサブフォルダ（1つ上の階層。`import-macros.bat`は既定でここを`-MacroDir`として渡します）
 - `backup/` — 実行のたびに作られる、対象`.xlsm`のバックアップを置くサブフォルダ（`import-macros.bat`は既定でここを`-BackupDir`として渡します）
 
-
 ## 基本的な使い方
 
 ### 事前準備（初回のみ）

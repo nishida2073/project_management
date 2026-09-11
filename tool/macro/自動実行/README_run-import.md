@@ -34,7 +34,6 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 
 ※`run-import.bat`は既定で`-DataDir`・`-LogDir`・`-BackupDir`・`-XlsmPath`をすべて固定して渡すため、`.bat`経由でこれらをさらに指定するとエラーになります。変えたい場合は`run-import.ps1`を直接呼び出してください。
 
-
 ## 定期実行の設定（タスクスケジューラ）
 
 `run-import-task.xml` をWindowsのタスクスケジューラにインポートすると、`run-import.bat`を定期実行するタスクを作成できます。
