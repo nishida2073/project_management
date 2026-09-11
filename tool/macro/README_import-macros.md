@@ -72,8 +72,7 @@ import-macros.bat -XlsmDir "C:\path\to\xlsm-folder"
 3. `<xlsm名>_Append.xlsx`があれば、対象にまだ無いシートだけを非表示で追加
 4. 同名の標準モジュールが既にあれば削除し、`<xlsm名>_<モジュール名>.bas`の内容で新しいモジュールを作成
 5. `ThisWorkbook`モジュールの中身を全削除し、`<xlsm名>_ThisWorkbook.bas`の内容に置き換え
-6. インポートしたコードの中で`CreateButton`により登録されているボタンをブック内から探し、保存前に削除（保存されるファイルにボタンを残さないため）
-7. 上書き保存して閉じる
+6. 上書き保存して閉じる
 
 最後に「Imported: N, Skipped: N」という件数サマリーを表示します。
 
