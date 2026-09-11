@@ -517,7 +517,11 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
 
     Dim r As Long
     For r = 5 To lastRow
-        If yojitsus(r, 1) = "実績" Then
+        If yojitsus(r, 1) = "実績" _
+                And Trim(years(r, 1) & "") <> "" _
+                And Trim(caseIds(r, 1) & "") <> "" _
+                And Trim(qs(r, 1) & "") <> "" _
+                And Trim(rs(r, 1) & "") <> "" Then
             Dim k As String
             k = years(r, 1) & "|" & caseIds(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1)
 
