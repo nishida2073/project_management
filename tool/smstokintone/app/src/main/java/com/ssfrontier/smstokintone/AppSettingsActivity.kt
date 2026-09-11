@@ -127,9 +127,9 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         val bodyExtractionConfig = SettingsStore.load(this)
-        binding.swCompanyNameWidthConversionEnabled.isChecked = bodyExtractionConfig.companyNameWidthConversionEnabled
-        binding.swCompanyNameWidthConversionEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(companyNameWidthConversionEnabled = isChecked) }
+        binding.swCompanyNameAutoConversionEnabled.isChecked = bodyExtractionConfig.companyNameAutoConversionEnabled
+        binding.swCompanyNameAutoConversionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(companyNameAutoConversionEnabled = isChecked) }
         }
         bodyExtractionConfig.companyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to) }
         binding.btnAddFixedConversion.setOnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "") }

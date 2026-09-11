@@ -54,8 +54,8 @@ object SettingsStore {
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
     /** [Config.aiExtractionEnabled]のキー */
     private const val KEY_AI_EXTRACTION_ENABLED = "ai_extraction_enabled"
-    /** [Config.companyNameWidthConversionEnabled]のキー */
-    private const val KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED = "company_name_width_conversion_enabled"
+    /** [Config.companyNameAutoConversionEnabled]のキー */
+    private const val KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED = "company_name_auto_conversion_enabled"
     /** [Config.companyNameFixedConversions]のキー。JSON配列文字列として保存する */
     private const val KEY_COMPANY_NAME_FIXED_CONVERSIONS = "company_name_fixed_conversions"
     /** [Config.defaultSendNoneOnlyEnabled]のキー */
@@ -84,19 +84,6 @@ object SettingsStore {
             /** 保存値からの復元用。未知の値やnullは[SendTarget.newEmpty]と同じPASSWORDにフォールバックする */
             fun fromName(name: String?): AuthMethod =
                 entries.firstOrNull { it.name == name } ?: PASSWORD
-        }
-    }
-
-    /** 送信先の振り分け（[SendTarget.keywords]）の照合対象。[BODY]はSMS本文そのもの、[COMPANY_NAME]はそこから抽出した会社名 */
-    enum class MatchTarget {
-        BODY,
-        COMPANY_NAME;
-
-        /** [fromName]を提供するコンパニオンオブジェクト */
-        companion object {
-            /** 保存値からの復元用。未知の値やnullは[SendTarget.matchTarget]の既定値と同じCOMPANY_NAMEにフォールバックする */
-            fun fromName(name: String?): MatchTarget =
-                entries.firstOrNull { it.name == name } ?: COMPANY_NAME
         }
     }
 
@@ -212,9 +199,9 @@ object SettingsStore {
         val aiExtractionEnabled: Boolean,
         /** 本文からの抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するかどうか。
          * [resolveSendTargets]で抽出直後に適用され、送信先の判定・送信元情報の登録・kintoneへの送信すべてに反映される */
-        val companyNameWidthConversionEnabled: Boolean = false,
+        val companyNameAutoConversionEnabled: Boolean = false,
         /** 本文からの抽出結果の会社名に適用する固定変換。[FixedConversion.from]に一致する部分文字列を
-         * [FixedConversion.to]に置換する。複数件は先頭から順番に、[companyNameWidthConversionEnabled]の後に適用される */
+         * [FixedConversion.to]に置換する。複数件は先頭から順番に、[companyNameAutoConversionEnabled]の後に適用される */
         val companyNameFixedConversions: List<FixedConversion> = emptyList(),
         /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
         val defaultSendNoneOnlyEnabled: Boolean,
@@ -231,8 +218,8 @@ object SettingsStore {
     )
 
     /**
-     * kintoneへの接続設定の1送信先。[matchTarget]で指定した対象に[keywords]のいずれかが
-     * 含まれる場合にこの送信先が使われる（[SettingsStore.resolveSendTargets]参照）。
+     * kintoneへの接続設定の1送信先。会社名に[keywords]のいずれかが含まれる場合にこの送信先が
+     * 使われる（[SettingsStore.resolveSendTargets]参照）。
      * [keywords]が空の場合はどの送信先にも一致しなかった時のフォールバックとして扱われる。
      */
     data class SendTarget(
@@ -274,9 +261,7 @@ object SettingsStore {
         /** 抽出した氏名を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
         val fieldUserName: String = "",
         /** SMS本文全体（原文、[SmsParts.body]）を書き込むkintoneフィールドのフィールドコード。空なら書き込まない */
-        val fieldBody: String = "",
-        /** [keywords]をSMS本文そのものと会社名（抽出結果）のどちらに対して照合するか */
-        val matchTarget: MatchTarget = MatchTarget.COMPANY_NAME
+        val fieldBody: String = ""
     ) {
         /** [keywords]が未設定で、どの送信先にも一致しなかった場合のフォールバックとして扱われる送信先かどうか */
         val isDefault: Boolean
@@ -298,30 +283,18 @@ object SettingsStore {
             }
 
         /**
-         * [matchTarget]に応じて[body]か[companyName]のどちらかを[keywords]と照合する。会社名は
-         * 呼び出し元（[resolveSendTargets]）が渡す時点で、既にアプリ全体の会社名変換
-         * （[Config.companyNameWidthConversionEnabled]・[Config.companyNameFixedConversions]）が
+         * 会社名を[keywords]と照合する。呼び出し元（[resolveSendTargets]）が渡す時点で、既にアプリ全体の
+         * 会社名変換（[Config.companyNameAutoConversionEnabled]・[Config.companyNameFixedConversions]）が
          * 適用済みであることを前提とする
          */
-        fun matches(body: String, companyName: String): Boolean {
-            val text = if (matchTarget == MatchTarget.BODY) body else companyName
-            return keywords.any { TextNormalization.matches(text, it) }
-        }
+        fun matches(companyName: String): Boolean = keywords.any { TextNormalization.matches(companyName, it) }
 
         /**
          * キーワード一致でこの送信先に実際に振り分けられるかどうか。デフォルト送信先（[isDefault]、
          * キーワード未設定でフォールバック用）は対象外とする。本番の振り分け（[SettingsStore.findSendTargets]）
          * とテスト送信プレビューで判定基準がずれないよう、一致判定は必ずこれを使うこと。
          */
-        fun routesTo(body: String, companyName: String): Boolean = !isDefault && matches(body, companyName)
-
-        /**
-         * 継続SMSの送信先判定専用。引き継いだ会社名しか持たない（本文は保持していない）ため、
-         * [matchTarget]の設定（本文／会社名のどちらを比較対象にするか）に関わらず、常に[companyName]
-         * をキーワードと照合する
-         */
-        fun routesToByCompanyNameOnly(companyName: String): Boolean =
-            !isDefault && keywords.any { TextNormalization.matches(companyName, it) }
+        fun routesTo(companyName: String): Boolean = !isDefault && matches(companyName)
 
         /** [newEmpty]を提供するコンパニオンオブジェクト */
         companion object {
@@ -375,7 +348,7 @@ object SettingsStore {
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_EXTRACTION_FAILED_REPLY_ADDITION, config.extractionFailedReplyAddition)
             .putBoolean(KEY_AI_EXTRACTION_ENABLED, config.aiExtractionEnabled)
-            .putBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, config.companyNameWidthConversionEnabled)
+            .putBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, config.companyNameAutoConversionEnabled)
             .putString(
                 KEY_COMPANY_NAME_FIXED_CONVERSIONS,
                 JSONArray().apply {
@@ -424,7 +397,7 @@ object SettingsStore {
         extractionFailedReplyAddition = AppDefaults.SMS_EXTRACTION_FAILED_REPLY_BODY,
         defaultSendTargetFilterId = null,
         aiExtractionEnabled = false,
-        companyNameWidthConversionEnabled = false,
+        companyNameAutoConversionEnabled = false,
         companyNameFixedConversions = emptyList(),
         defaultSendNoneOnlyEnabled = false,
         defaultExtractionFailedOnlyEnabled = false,
@@ -460,7 +433,7 @@ object SettingsStore {
                 ?: DEFAULT_CONFIG.extractionFailedReplyAddition,
             defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, DEFAULT_CONFIG.defaultSendTargetFilterId),
             aiExtractionEnabled = p.getBoolean(KEY_AI_EXTRACTION_ENABLED, DEFAULT_CONFIG.aiExtractionEnabled),
-            companyNameWidthConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_WIDTH_CONVERSION_ENABLED, DEFAULT_CONFIG.companyNameWidthConversionEnabled),
+            companyNameAutoConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, DEFAULT_CONFIG.companyNameAutoConversionEnabled),
             companyNameFixedConversions = p.getString(KEY_COMPANY_NAME_FIXED_CONVERSIONS, null)?.let { json ->
                 val arr = JSONArray(json)
                 (0 until arr.length()).map { i ->
@@ -523,7 +496,6 @@ object SettingsStore {
                     .put("fieldCompanyName", sendTarget.fieldCompanyName)
                     .put("fieldUserName", sendTarget.fieldUserName)
                     .put("fieldBody", sendTarget.fieldBody)
-                    .put("matchTarget", sendTarget.matchTarget.name)
             )
         }
         prefs(context).edit().putString(KEY_SEND_TARGETS, array.toString()).apply()
@@ -557,8 +529,7 @@ object SettingsStore {
                 updateToleranceMode = UpdateToleranceMode.fromName(obj.optString("updateToleranceMode", "")),
                 fieldCompanyName = obj.optString("fieldCompanyName", ""),
                 fieldUserName = obj.optString("fieldUserName", ""),
-                fieldBody = obj.optString("fieldBody", ""),
-                matchTarget = MatchTarget.fromName(obj.optString("matchTarget", ""))
+                fieldBody = obj.optString("fieldBody", "")
             )
         }
     }
@@ -571,42 +542,29 @@ object SettingsStore {
     }
 
     /**
-     * 抽出結果の会社名に、アプリ全体の会社名変換（[Config.companyNameWidthConversionEnabled]の
+     * 抽出結果の会社名に、アプリ全体の会社名変換（[Config.companyNameAutoConversionEnabled]の
      * 幅変換、続いて[Config.companyNameFixedConversions]の固定変換の順）を適用する。[resolveSendTargets]で
      * 抽出直後に一度だけ呼び、以降（送信先の判定・送信元情報の登録・kintoneへの送信・ログ表示）は
      * すべてこの変換済みの値をそのまま使う
      */
     fun applyCompanyNameConversion(companyName: String, config: Config): String {
-        val widthConverted = if (config.companyNameWidthConversionEnabled) {
+        val autoConverted = if (config.companyNameAutoConversionEnabled) {
             TextNormalization.normalizeWidth(companyName)
         } else {
             companyName
         }
-        return config.companyNameFixedConversions.fold(widthConverted) { acc, rule ->
+        return config.companyNameFixedConversions.fold(autoConverted) { acc, rule ->
             if (rule.from.isNotEmpty()) acc.replace(rule.from, rule.to) else acc
         }
     }
 
     /**
-     * キーワードが一致する送信先を（複数あれば）すべて返す。1件も一致しなければ、キーワード
-     * 未設定（デフォルト）の送信先1件にフォールバックする。該当が無ければ空リスト。[resolveSendTargets]専用
+     * 会社名にキーワードが一致する送信先を（複数あれば）すべて返す。1件も一致しなければ、キーワード
+     * 未設定（デフォルト）の送信先1件にフォールバックする。該当が無ければ空リスト
      */
-    private fun findSendTargets(context: Context, body: String, companyName: String): List<SendTarget> {
+    fun findSendTargets(context: Context, companyName: String): List<SendTarget> {
         val sendTargets = loadSendTargets(context)
-        val matched = sendTargets.filter { it.routesTo(body, companyName) }
-        if (matched.isNotEmpty()) return matched
-        return listOfNotNull(sendTargets.firstOrNull { it.isDefault })
-    }
-
-    /**
-     * 継続SMS（[SmsResolution.isContinuation]）専用。引き継いだ会社名しか持たない（本文は保持していない）
-     * ため、各送信先の[MatchTarget]設定に関わらず、常に[companyName]をキーワードと照合する
-     * （[SendTarget.routesToByCompanyNameOnly]参照）。1件も一致しなければキーワード未設定
-     * （デフォルト）の送信先にフォールバックする点は[findSendTargets]と同じ
-     */
-    fun findSendTargetsForContinuation(context: Context, companyName: String): List<SendTarget> {
-        val sendTargets = loadSendTargets(context)
-        val matched = sendTargets.filter { it.routesToByCompanyNameOnly(companyName) }
+        val matched = sendTargets.filter { it.routesTo(companyName) }
         if (matched.isNotEmpty()) return matched
         return listOfNotNull(sendTargets.firstOrNull { it.isDefault })
     }
@@ -637,7 +595,7 @@ object SettingsStore {
      * （[ContinuationStore]、[continuationScope]が[ContinuationScope.UNLIMITED]なら日付は問わない）
      * が届いていれば、今回のSMS自体の抽出結果（本文単体で解析できるかどうか）に関わらず、常にその直近1件
      * から会社名・氏名を引き継ぐ（内容は今回の本文そのもの）。送信先はその会社名を現在の送信先
-     * ルールに通して都度判定する（[findSendTargetsForContinuation]）ため、送信先の設定を変更・削除
+     * ルールに通して都度判定する（[findSendTargets]）ため、送信先の設定を変更・削除
      * すれば継続SMSの振り分け先にも即座に反映される。一度識別できた送信元は[continuationScope]の
      * 範囲内でずっと同じ会社名・氏名として扱う。
      * [continuationEnabled]がfalse、または該当する過去のSMSが無い送信元は、今回の本文を実際に
@@ -670,12 +628,12 @@ object SettingsStore {
             )
             val resolution = SmsResolution(smsParts = smsParts, isContinuation = true)
             // 送信先は保持せず、引き継いだ会社名を現在の送信先ルールに通して都度判定する
-            val sendTargets = findSendTargetsForContinuation(context, previousEntry.companyName)
+            val sendTargets = findSendTargets(context, previousEntry.companyName)
             return resolution to sendTargets
         }
         val extracted = SmsPartsGenerator.resolveSmsParts(body, aiExtractionEnabled)
         val convertedCompanyName = applyCompanyNameConversion(extracted.companyName, load(context))
         val finalParts = extracted.copy(companyName = convertedCompanyName)
-        return SmsResolution(smsParts = finalParts) to findSendTargets(context, body, convertedCompanyName)
+        return SmsResolution(smsParts = finalParts) to findSendTargets(context, convertedCompanyName)
     }
 }

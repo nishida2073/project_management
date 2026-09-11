@@ -30,7 +30,7 @@ object ContinuationStore {
 
     /**
      * 送信元ごとに保持する、最新の抽出状況が正常なSMSの抽出結果。送信先は保持しない。継続SMSの送信先は
-     * 常にこの会社名を現在の送信先ルールに通して都度判定するため（[SettingsStore.findSendTargetsForContinuation]
+     * 常にこの会社名を現在の送信先ルールに通して都度判定するため（[SettingsStore.findSendTargets]
      * 参照）、送信先の設定を変更・削除しても送信元情報側の追随作業は不要になる
      */
     data class Entry(

@@ -79,11 +79,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.etFieldBody.setText(sendTarget.fieldBody)
         itemBinding.etUpdateToleranceHours.setText(sendTarget.updateToleranceHours.toString())
 
-        when (sendTarget.matchTarget) {
-            SettingsStore.MatchTarget.BODY -> itemBinding.rbMatchTargetBody.isChecked = true
-            SettingsStore.MatchTarget.COMPANY_NAME -> itemBinding.rbMatchTargetCompanyName.isChecked = true
-        }
-
         when (sendTarget.updateToleranceMode) {
             SettingsStore.UpdateToleranceMode.SAME_DATE -> itemBinding.rbUpdateToleranceModeSameDate.isChecked = true
             SettingsStore.UpdateToleranceMode.HOURS -> itemBinding.rbUpdateToleranceModeHours.isChecked = true
@@ -143,11 +138,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
      * card.idをそのまま使い、複製ボタンでは複製先が別の送信先になるよう新しいUUIDを渡す
      */
     private fun readSendTargetFromBinding(itemBinding: ItemSendTargetBinding, id: String): SettingsStore.SendTarget {
-        val matchTarget = if (itemBinding.rbMatchTargetBody.isChecked) {
-            SettingsStore.MatchTarget.BODY
-        } else {
-            SettingsStore.MatchTarget.COMPANY_NAME
-        }
         val updateToleranceMode = if (itemBinding.rbUpdateToleranceModeSameDate.isChecked) {
             SettingsStore.UpdateToleranceMode.SAME_DATE
         } else {
@@ -175,8 +165,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             fieldBody = itemBinding.etFieldBody.text.toString().trim(),
             updateToleranceHours = itemBinding.etUpdateToleranceHours.text.toString().trim().toIntOrNull()
                 ?: AppDefaults.UPDATE_TOLERANCE_HOURS,
-            updateToleranceMode = updateToleranceMode,
-            matchTarget = matchTarget
+            updateToleranceMode = updateToleranceMode
         )
     }
 
@@ -241,21 +230,15 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             // アプリ全体の会社名変換を適用する
             val smsParts = extracted.copy(companyName = SettingsStore.applyCompanyNameConversion(extracted.companyName, config))
 
-            // 本文（またはそこから抽出した会社名）が[sendTarget]自身の振り分け条件
-            // （キーワード、またはデフォルト送信先）に一致しない場合は警告して送信を中断する。
-            // 実際の登録処理（KintoneUploadWorker、SettingsStore.resolveSendTargets）と判定基準が
-            // ずれないよう、routesToを使う（デフォルト送信先はここでは常にfalseになるので個別に許可する）
-            if (!sendTarget.isDefault && !sendTarget.routesTo(testBody, smsParts.companyName)) {
+            // 抽出した会社名が[sendTarget]自身の振り分け条件（キーワード、またはデフォルト送信先）に
+            // 一致しない場合は警告して送信を中断する。実際の登録処理（KintoneUploadWorker、
+            // SettingsStore.resolveSendTargets）と判定基準がずれないよう、routesToを使う
+            // （デフォルト送信先はここでは常にfalseになるので個別に許可する）
+            if (!sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
                 AlertDialog.Builder(this@SendTargetSettingsActivity)
                     .setTitle(R.string.dialog_title_test_send_result)
-                    .setMessage(
-                        getString(
-                            R.string.dialog_message_test_send_routing_unmatched,
-                            sendTarget.keywords.joinToString("、"),
-                            getString(if (sendTarget.matchTarget == SettingsStore.MatchTarget.BODY) R.string.rb_match_target_body else R.string.rb_match_target_company_name)
-                        )
-                    )
+                    .setMessage(getString(R.string.dialog_message_test_send_routing_unmatched, sendTarget.keywords.joinToString("、")))
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
                 return@launch

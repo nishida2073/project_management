@@ -71,7 +71,7 @@ object SmsLogStore {
         /**
          * 本文から抽出した会社名・氏名、および本文全体。全エントリ種別で記録時点の抽出結果が設定される。
          * 会社名（[SmsParts.companyName]）は記録時点でアプリ全体の会社名変換
-         * （[SettingsStore.Config.companyNameWidthConversionEnabled]・[SettingsStore.Config.companyNameFixedConversions]）
+         * （[SettingsStore.Config.companyNameAutoConversionEnabled]・[SettingsStore.Config.companyNameFixedConversions]）
          * が適用済みの値（[SettingsStore.resolveSendTargets]参照）
          */
         val smsParts: SmsParts? = null,

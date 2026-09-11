@@ -31,7 +31,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         val validSendTargets = sendTargets.filter { it.isValid }
         // smsParts.companyNameはSettingsStore.resolveSendTargetsで既に会社名変換が適用済みのため、
         // ここでは記録時点で変換が有効だったかどうかのフラグ（ログのアイコン表示用）だけを求める
-        val companyNameConverted = config.companyNameWidthConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
+        val companyNameConverted = config.companyNameAutoConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
 
         // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で抽出状況が正常に解析できた
         // 場合のみ更新する。SmsReceiver側でも同じ条件で更新しており、手動送信のみで運用している場合

@@ -11,7 +11,7 @@ import com.ssfrontier.smstokintone.databinding.ItemSenderInfoBinding
 /**
  * 送信元ごとの送信元情報（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
  * または送信元単位で削除できる画面。送信先は保持せず、会社名から
- * [SettingsStore.findSendTargetsForContinuation]で都度再判定した結果を読み取り専用のラベルとして
+ * [SettingsStore.findSendTargets]で都度再判定した結果を読み取り専用のラベルとして
  * 表示するのみで、この画面での編集対象にはしない
  */
 class SenderInfoActivity : AppCompatActivity() {
@@ -66,7 +66,7 @@ class SenderInfoActivity : AppCompatActivity() {
         itemBinding.etContinuationCompanyName.setText(entry.companyName)
         itemBinding.etContinuationUserName.setText(entry.userName)
 
-        val sendTargets = SettingsStore.findSendTargetsForContinuation(this, entry.companyName)
+        val sendTargets = SettingsStore.findSendTargets(this, entry.companyName)
         val name = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this) }
         itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_none)
 
