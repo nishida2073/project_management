@@ -56,7 +56,7 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 
 `run-import-task.xml` をWindowsのタスクスケジューラにインポートすると、`run-import.bat`を定期実行するタスクを作成できます。
 
-`run-import-task.xml`内の`<Actions><Exec><Command>`と`<WorkingDirectory>`は、`C:\myrepo\project_management\tool\macro\自動実行\...`という絶対パスで固定されています。リポジトリを別の場所や別のPCに置く場合は、インポート前にこのXML内のパスを実際の場所に書き換えるか、インポート後にタスクスケジューラの「操作」タブから編集してください。
+`run-import-task.xml`内の`<Actions><Exec><Command>`と`<WorkingDirectory>`は、現在のこのフォルダの配置場所を前提にした絶対パスで固定されています。リポジトリを別の場所や別のPCに置く場合は、インポート前にこのXML内のパスを実際の場所に書き換えるか、インポート後にタスクスケジューラの「操作」タブから編集してください。
 
 ### 手順
 

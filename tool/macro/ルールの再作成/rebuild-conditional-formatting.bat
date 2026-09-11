@@ -1,4 +1,5 @@
 @echo off
+chcp 932 >nul
 setlocal
 set "SCRIPT_DIR=%~dp0"
 if "%~1"=="" (

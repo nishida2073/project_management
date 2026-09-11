@@ -2,11 +2,13 @@
 
 `.bas`ファイルの内容を、対象のExcelマクロブック（`.xlsm`）のVBAプロジェクトへ書き込むツールです。VBEにコピペする代わりに使えます。
 
+このフォルダ（`マクロの設定`）は、対象の`.xlsm`や`macros`フォルダが置かれているフォルダの**1つ下の階層**にあります。
+
 ## ファイル
 
 - `import-macros.bat` — 実行用のラッパー（中身は英数字のみ）
 - `import-macros.ps1` — 実際の処理を行うPowerShellスクリプト
-- `macros/` — `.bas`ファイルを置くサブフォルダ（`import-macros.bat`は既定でここを`-MacroDir`として渡します）
+- `../macros/` — `.bas`ファイルを置くサブフォルダ（1つ上の階層。`import-macros.bat`は既定でここを`-MacroDir`として渡します）
 
 ## 事前準備（初回のみ）
 
@@ -44,8 +46,8 @@ import-macros.bat
 
 既定では、
 
-- `.xlsm`は`import-macros.ps1`と同じフォルダ（`-XlsmDir`省略時）から探します
-- `.bas`ファイルは`macros`サブフォルダ（`import-macros.bat`が`-MacroDir`として渡します）から探します
+- `.xlsm`は1つ上のフォルダ（`import-macros.bat`が`-XlsmDir`として渡します）から探します
+- `.bas`ファイルは1つ上の`macros`フォルダ（`import-macros.bat`が`-MacroDir`として渡します）から探します
 
 `-XlsmDir`で指定したフォルダ内にある`.xlsm`を**すべて**処理します（1つずつ順番に開いて上書き保存）。対応する`<xlsm名>_ThisWorkbook.bas`／`<xlsm名>_<モジュール名>.bas`のペアが`-MacroDir`に無い`.xlsm`は、エラーにはならず単にスキップされます。
 
