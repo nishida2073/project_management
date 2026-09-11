@@ -59,6 +59,33 @@ try {
             $wb = $excel.Workbooks.Open($xlsmFile.FullName)
 
             try {
+                $appendFile = Get-ChildItem -Path $MacroDir -Filter "${xlsmBaseName}_Append.xlsx" | Select-Object -First 1
+                if ($appendFile) {
+                    try {
+                        $wbAdd = $excel.Workbooks.Open($appendFile.FullName, 0, $true)
+                        try {
+                            foreach ($srcSheet in @($wbAdd.Sheets)) {
+                                $exists = $false
+                                foreach ($existingSheet in @($wb.Sheets)) {
+                                    if ($existingSheet.Name -eq $srcSheet.Name) { $exists = $true; break }
+                                }
+                                if (-not $exists) {
+                                    $srcSheet.Copy($null, $wb.Sheets.Item($wb.Sheets.Count))
+                                    $newSheet = $wb.Sheets.Item($wb.Sheets.Count)
+                                    $newSheet.Visible = 0
+                                    Write-Host "Added hidden sheet: $($srcSheet.Name)"
+                                }
+                            }
+                        }
+                        finally {
+                            $wbAdd.Close($false)
+                        }
+                    }
+                    catch {
+                        Write-Host "WARN: $($xlsmFile.Name) - failed to add sheets from '$($appendFile.Name)': $($_.Exception.Message)"
+                    }
+                }
+
                 $vbproj = $null
                 try {
                     $vbproj = $wb.VBProject

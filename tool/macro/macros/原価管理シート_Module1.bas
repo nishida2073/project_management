@@ -317,7 +317,15 @@ CleanExit:
     Exit Sub
 
 CleanFail:
-    MsgBox "エラーが発生しました: " & Err.Description
+    Dim errDescription As String
+    errDescription = Err.Description
+
+    On Error Resume Next
+    ThisWorkbook.Activate
+    If Not wsMain Is Nothing Then wsMain.Activate
+    On Error GoTo 0
+
+    MsgBox "エラーが発生しました: " & errDescription
     Resume CleanExit
 
 End Sub
