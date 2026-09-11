@@ -2,8 +2,8 @@
 setlocal
 set "SCRIPT_DIR=%~dp0"
 if "%~1"=="" (
-    powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%rebuild-conditional-formatting.ps1" -XlsmPath "%SCRIPT_DIR%..\原価管理シート.xlsm" -Range "D5:AG5000"
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%rebuild-conditional-formatting.ps1" -XlsmPath "%SCRIPT_DIR%..\原価管理シート.xlsm"
 ) else (
-    powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%rebuild-conditional-formatting.ps1" -XlsmPath "%~1" -Range "D5:AG5000"
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%rebuild-conditional-formatting.ps1" -XlsmPath "%~1"
 )
 endlocal

@@ -1,7 +1,10 @@
 ﻿param(
     [string]$XlsmPath,
     [string]$SheetName = "計画算定シート",
-    [string]$Range = "D5:AG5000",
+    [array]$Rules = @(
+        @{ Range = "D5:AG5000"; Formula = '=$Q5="売上"'; Color = "#DDEBF7" },
+        @{ Range = "D5:AG5000"; Formula = '=$S5="実績"'; Color = "#FCE4D6" }
+    ),
     [string]$BackupDir
 )
 
@@ -27,9 +30,13 @@ $backupPath = Join-Path $BackupDir $backupName
 Copy-Item -Path $XlsmPath -Destination $backupPath
 Write-Host "Backup created: $backupPath"
 
-function Get-BgrColor {
-    param([int]$R, [int]$G, [int]$B)
-    return $R + ($G * 256) + ($B * 65536)
+function Get-BgrColorFromHex {
+    param([string]$Hex)
+    $Hex = $Hex.TrimStart('#')
+    $r = [Convert]::ToInt32($Hex.Substring(0, 2), 16)
+    $g = [Convert]::ToInt32($Hex.Substring(2, 2), 16)
+    $b = [Convert]::ToInt32($Hex.Substring(4, 2), 16)
+    return $r + ($g * 256) + ($b * 65536)
 }
 
 $xlExpression = 2
@@ -49,22 +56,19 @@ try {
 
     $ws.Cells.FormatConditions.Delete() | Out-Null
 
-    $rng = $ws.Range($Range)
-
-    $fcSales = $rng.FormatConditions.Add($xlExpression, 0, '=$Q5="売上"')
-    $fcSales.Interior.Color = Get-BgrColor -R 221 -G 235 -B 247
-    $fcSales.StopIfTrue = $false
-
-    $fcActual = $rng.FormatConditions.Add($xlExpression, 0, '=$S5="実績"')
-    $fcActual.Interior.Color = Get-BgrColor -R 252 -G 228 -B 214
-    $fcActual.StopIfTrue = $false
+    foreach ($rule in $Rules) {
+        $rng = $ws.Range($rule.Range)
+        $fc = $rng.FormatConditions.Add($xlExpression, 0, $rule.Formula)
+        $fc.Interior.Color = Get-BgrColorFromHex $rule.Color
+        $fc.StopIfTrue = $false
+    }
 
     $ws.Activate()
     $ws.Range("A1").Select() | Out-Null
 
     $wb.Save()
     Write-Host "Saved: $XlsmPath"
-    Write-Host "FormatConditions count on $SheetName : $($rng.FormatConditions.Count)"
+    Write-Host "FormatConditions count on $SheetName : $($ws.Cells.FormatConditions.Count)"
 }
 catch {
     Write-Host "ERROR: $($_.Exception.Message)"
