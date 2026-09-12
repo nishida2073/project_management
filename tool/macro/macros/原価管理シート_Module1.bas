@@ -545,15 +545,23 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
 
     For Each key In rowsByKey.Keys
         If InStr(rowsByKey(key), ",") > 0 Then
-            msg = msg & "行 " & rowsByKey(key) & vbCrLf
-
-            Dim groupColor As Long
-            groupColor = palette(colorIdx Mod (UBound(palette) + 1))
-
             Dim rowParts() As String
             rowParts = Split(rowsByKey(key), ",")
 
             Dim p As Long
+            Dim dupRows As String
+            dupRows = ""
+            For p = 1 To UBound(rowParts)
+                If dupRows <> "" Then dupRows = dupRows & ","
+                dupRows = dupRows & Trim(rowParts(p))
+            Next p
+
+            msg = msg & "基準行：" & Trim(rowParts(0)) & vbCrLf
+            msg = msg & "重複行：" & dupRows & vbCrLf & vbCrLf
+
+            Dim groupColor As Long
+            groupColor = palette(colorIdx Mod (UBound(palette) + 1))
+
             For p = LBound(rowParts) To UBound(rowParts)
                 Dim dupRow As Long
                 dupRow = CLng(Trim(rowParts(p)))
@@ -572,7 +580,7 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
         Err.Raise vbObjectError + 1001, _
                   "BuildMainIndex", _
                   "計画算定シートに、条件（年度・案件ID・会計区分1・会計区分2）が重複する行があります。" & vbCrLf & vbCrLf & _
-                  msg & vbCrLf & _
+                  msg & _
                   "実績反映を行う前に、計画算定シート側の重複を解消してください。"
     End If
 
