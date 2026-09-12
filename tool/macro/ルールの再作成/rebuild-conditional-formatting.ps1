@@ -77,5 +77,12 @@ catch {
 finally {
     if ($wb) { $wb.Close($false) }
     $excel.Quit()
+
+    # ワークシート等のCOMオブジェクト参照が残っていると、Quit()してもEXCEL.EXEプロセスの終了に
+    # 数秒かかることがあるため、明示的に解放してからガベージコレクションを走らせる
+    if ($ws) { [System.Runtime.Interopservices.Marshal]::ReleaseComObject($ws) | Out-Null }
+    if ($wb) { [System.Runtime.Interopservices.Marshal]::ReleaseComObject($wb) | Out-Null }
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
 }
