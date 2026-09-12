@@ -1,11 +1,16 @@
 ﻿# どのGUIツールからでも使い回せる、業務内容に依存しないWinFormsの汎用部品を置く場所。
 # 業務固有のデータ（ボタン定義の中身など）や実行フローはgui.ps1側に残す。
 
-# 指定パスをエクスプローラーで開く。存在しなければ警告ダイアログを出す
+# 指定パスをエクスプローラーで開く。URL（http/https）の場合は既定のブラウザで開く。
+# 存在しない・未指定の場合は警告ダイアログを出す
 function Open-TargetOrWarn {
     param([string]$Path)
+    if ($Path -match '^https?://') {
+        Start-Process -FilePath $Path
+        return
+    }
     if (!$Path -or !(Test-Path -LiteralPath $Path)) {
-        [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("パスが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
     Start-Process -FilePath $Path
@@ -154,18 +159,22 @@ function Add-StackedDockedControls {
 }
 
 # カテゴリ（タブ）ごとにグループ化されたボタン群を持つTabControlを組み立てる。
-# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, TargetDirPath, Inputs, ... }] }] の形。
+# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, OpenTarget, Inputs, ... }] }] の形。
 # ButtonDefの中身は自由（Tagとしてそのままボタン/リンクに渡すだけで、業務ロジックは持たない）。
-# Inputsを指定すると、実行ボタンの上にラベル付きの入力欄を追加できる（その分グループボックスが縦に高くなる）。
-# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options } の形
+# Inputsを指定すると、実行ボタンの上に1項目1行でラベル付きの入力欄を積み上げられる
+# （その分グループボックスが縦に高くなる）。各Inputsの要素は
+# { Name, Label, Default, LabelWidth, InputWidth, Options, ExistingControl } の形
 # （LabelWidth/InputWidthは省略可。Optionsを指定すると自由入力のTextBoxの代わりに、
-#   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形）。
+#   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形。
+#   ExistingControlを指定すると、新規作成の代わりにそのコントロール（動的に選択肢を再読み込みする
+#   ComboBoxなど、呼び出し側が既に持っているコントロール）をその行へ配置する）。
 # 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-TargetOrWarnを使う。
 function New-CategoryTabControl {
     param(
         [Parameter(Mandatory)][array]$CategoryDefs,
         [Parameter(Mandatory)][scriptblock]$OnRunClick,
         [scriptblock]$OnOpenClick,
+        [System.Windows.Forms.TabControl]$TabControl,
         [int]$GroupHeight = 60,
         [int]$GroupSpacing = 10,
         [int]$TabHeaderAllowance = 45,
@@ -181,7 +190,7 @@ function New-CategoryTabControl {
 
     function Get-ButtonGroupHeight {
         param($ButtonDef)
-        if ($ButtonDef.Inputs) { return $GroupHeight + $InputRowHeight }
+        if ($ButtonDef.Inputs) { return $GroupHeight + ($InputRowHeight * $ButtonDef.Inputs.Count) }
         return $GroupHeight
     }
 
@@ -194,12 +203,21 @@ function New-CategoryTabControl {
         return $total
     }
 
-    $tabControl = New-Object System.Windows.Forms.TabControl
+    # 呼び出し側が既存のTabControlを渡した場合はそれに追記する（他のタブを先頭に置くなど、
+    # 呼び出し側の都合で並び順を決めたい場合に使う。ps2exeビルドではTabPageCollection.Insert()が
+    # NotSupportedExceptionになるため、後から並び替えず、最初から最終的な順序でAddしていく必要がある）
+    $tabControl = $TabControl
+    if (-not $tabControl) {
+        $tabControl = New-Object System.Windows.Forms.TabControl
+    }
     $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
 
-    $runButtons = @{}
-    $stepStatusLabels = @{}
-    $inputControls = @{}
+    # 実行ボタン一覧はSet-RunButtonsEnabled側で一括enable/disableに使うだけで、Labelで
+    # 個別に引く用途が無いため単純な配列にする。ステータスラベルと入力欄コントロールは、
+    # Labelがカテゴリをまたいで重複し得るため、Labelをキーにしたハッシュテーブルではなく
+    # 各ButtonDefオブジェクト自身にプロパティとして直接ひも付ける（呼び出し側はButtonDefを
+    # 既に持っているので、Labelでの引き直しが不要になり取り違えが起きない）
+    $runButtons = @()
 
     foreach ($cd in $CategoryDefs) {
         $tabPage = New-Object System.Windows.Forms.TabPage
@@ -214,7 +232,8 @@ function New-CategoryTabControl {
         $groupY = $GroupSpacing
         foreach ($bd in $cd.ButtonDefs) {
             $bdHeight = Get-ButtonGroupHeight -ButtonDef $bd
-            $contentY = if ($bd.Inputs) { 20 + $InputRowHeight } else { 20 }
+            $inputRowCount = if ($bd.Inputs) { $bd.Inputs.Count } else { 0 }
+            $contentY = 20 + ($InputRowHeight * $inputRowCount)
 
             $grp = New-Object System.Windows.Forms.GroupBox
             $grp.Text = $bd.Label
@@ -225,24 +244,30 @@ function New-CategoryTabControl {
 
             if ($bd.Inputs) {
                 $inputMap = @{}
-                $inputX = 15
-                # TextBox/ComboBoxは指定したHeightを無視し、フォントに応じた高さに強制されるため、
-                # Labelとの縦の中央を揃えるには生成後の実際のHeightを見て個別にY位置を計算する必要がある
-                $inputRowCenterY = 15 + [int]($InputRowHeight / 2)
-                foreach ($inputDef in $bd.Inputs) {
+                # 1項目=1行で縦に積み上げる。TextBox/ComboBoxは指定したHeightを無視し、フォントに応じた
+                # 高さに強制されるため、Labelとの縦の中央を揃えるには生成後の実際のHeightを見て
+                # 個別にY位置を計算する必要がある
+                for ($rowIndex = 0; $rowIndex -lt $bd.Inputs.Count; $rowIndex++) {
+                    $inputDef = $bd.Inputs[$rowIndex]
+                    $inputX = 15
+                    $rowCenterY = 15 + ($InputRowHeight * $rowIndex) + [int]($InputRowHeight / 2)
                     $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
                     $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
                     $lblInput = New-Object System.Windows.Forms.Label
                     $lblInput.Text = "$($inputDef.Label):"
                     $lblInput.AutoSize = $false
-                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleRight
+                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
                     $lblInput.Size = New-Object System.Drawing.Size($labelWidth, 22)
-                    $lblInput.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($lblInput.Height / 2)))
+                    $lblInput.Location = New-Object System.Drawing.Point($inputX, ($rowCenterY - [int]($lblInput.Height / 2)))
                     $grp.Controls.Add($lblInput)
                     $inputX += $labelWidth + 4
 
-                    if ($inputDef.Options) {
+                    if ($inputDef.ExistingControl) {
+                        # 動的に選択肢を再読み込みするComboBoxなど、呼び出し側が既に持っているコントロールを
+                        # そのまま使う（新規作成しない）。呼び出し側が引き続き参照を保持できる
+                        $inputCtrl = $inputDef.ExistingControl
+                    } elseif ($inputDef.Options) {
                         # DataSource経由のバインドはコントロールがフォームに追加されBindingContextが
                         # 確定するまで反映されない（初期選択が効かない）ため、Itemsへ直接追加する方式にしている
                         $inputCtrl = New-Object System.Windows.Forms.ComboBox
@@ -261,12 +286,11 @@ function New-CategoryTabControl {
                         $inputCtrl.Width = $inputWidth
                         $inputCtrl.Text = "$($inputDef.Default)"
                     }
-                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
+                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($rowCenterY - [int]($inputCtrl.Height / 2)))
                     $grp.Controls.Add($inputCtrl)
                     $inputMap[$inputDef.Name] = $inputCtrl
-                    $inputX += $inputWidth + 15
                 }
-                $inputControls[$bd.Label] = $inputMap
+                $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force
             }
 
             $btn = New-Object System.Windows.Forms.Button
@@ -276,9 +300,9 @@ function New-CategoryTabControl {
             $btn.Tag = $bd
             $btn.Add_Click({ & $OnRunClick $this.Tag }.GetNewClosure())
             $grp.Controls.Add($btn)
-            $runButtons[$bd.Label] = $btn
+            $runButtons += $btn
 
-            if ($bd.TargetDirPath) {
+            if ($bd.OpenTarget) {
                 $lnkOpen = New-Object System.Windows.Forms.LinkLabel
                 $lnkOpen.Text = $OpenLinkText
                 $lnkOpen.AutoSize = $false
@@ -286,7 +310,13 @@ function New-CategoryTabControl {
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
                 $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
                 $lnkOpen.Tag = $bd
-                $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag.TargetDirPath }.GetNewClosure())
+                # OpenTargetは固定のパス文字列の他に、引数無しのスクリプトブロックも受け付ける
+                # （実行後でないと開き先が決まらない場合に、クリック時点で遅延評価するために使う）
+                $lnkOpen.Add_LinkClicked({
+                    $target = $this.Tag.OpenTarget
+                    if ($target -is [scriptblock]) { $target = & $target }
+                    & $OnOpenClick $target
+                }.GetNewClosure())
                 $grp.Controls.Add($lnkOpen)
             }
 
@@ -298,7 +328,7 @@ function New-CategoryTabControl {
             $lblStepStatus.Location = New-Object System.Drawing.Point(200, ($contentY + 4))
             $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
             $grp.Controls.Add($lblStepStatus)
-            $stepStatusLabels[$bd.Label] = $lblStepStatus
+            $bd | Add-Member -NotePropertyName StepStatusLabel -NotePropertyValue $lblStepStatus -Force
 
             $groupY += $bdHeight + $GroupSpacing
         }
@@ -317,10 +347,10 @@ function New-CategoryTabControl {
     # 初期表示分だけは先頭タブの高さを直接計算して設定する
     $tabControl.Height = $TabHeaderAllowance + (Get-CategoryPanelHeight -ButtonDefs $CategoryDefs[0].ButtonDefs)
 
+    # StepStatusLabel/InputControlsは各ButtonDef自身のプロパティとして既に持たせているため、
+    # ここでは返さない（呼び出し側は$ButtonDef.StepStatusLabel/$ButtonDef.InputControlsを直接使う）
     return [PSCustomObject]@{
-        TabControl       = $tabControl
-        RunButtons       = $runButtons
-        StepStatusLabels = $stepStatusLabels
-        InputControls    = $inputControls
+        TabControl = $tabControl
+        RunButtons = $runButtons
     }
 }

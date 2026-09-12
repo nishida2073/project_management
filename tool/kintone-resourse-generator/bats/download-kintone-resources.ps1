@@ -24,12 +24,10 @@ if (-not $baseUrl -or -not $downloadRoot -or -not $logRoot) {
 if (-not $SpaceId) {
     $SpaceId = Read-Host "ダウンロード対象のスペースID"
 }
-if (-not $ConfigName) {
-    $ConfigName = Read-Host "設定ファイル名（download\<CONFIG_NAME>_download.xlsx の<CONFIG_NAME>）"
-}
-
-$downloadPath = Join-Path $downloadRoot "${ConfigName}_download.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "download_$ConfigName"
+# 設定ファイル名（ConfigName）は省略可能。未指定の場合はダウンロード対象スペースの現在の名前から
+# 自動で設定するため、ダウンロード先パスの確定はスペース取得後に行う（ログファイル名だけは
+# その時点でConfigNameが未確定のため、代わりにスペースIDを使って先に決めておく）。
+$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "download_$(if ($ConfigName) { $ConfigName } else { "space$SpaceId" })"
 
 $script:exitCode = 0
 
@@ -44,6 +42,14 @@ $script:exitCode = 0
         $script:exitCode = 1
         return
     }
+
+    if (-not $ConfigName) {
+        $invalidChars = [System.IO.Path]::GetInvalidFileNameChars()
+        $ConfigName = -join ($space.spaceName.ToCharArray() | ForEach-Object { if ($invalidChars -contains $_) { "_" } else { $_ } })
+        # GUI（gui.ps1）が自動設定された設定ファイル名を取得するための機械可読な行。人間向けログの文言とは独立させておく。
+        Write-Message "　CONFIG_NAME=$ConfigName" -Type "Info" -NoHeader -Hidden
+    }
+    $downloadPath = Join-Path $downloadRoot "${ConfigName}_download.xlsx"
 
     Write-Message "" -Type "Info" -NoHeader
     Write-Message "# スペースID: $($space.spaceId) ($($space.spaceName))" -Type "Info" -NoHeader
