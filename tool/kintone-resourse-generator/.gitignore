@@ -4,4 +4,5 @@ checked
 work
 test
 *.exe
+config
 clients/set-kintone.bat
