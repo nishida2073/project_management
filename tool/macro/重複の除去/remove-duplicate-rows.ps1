@@ -116,11 +116,11 @@ try {
     }
 
     Write-Log "重複行の削除が完了しました。"
-    Write-Log "削除件数：$removedCount 件"
+    Write-Log "削除行数：$removedCount"
     Write-Log ""
     foreach ($keptRowKey in $deletedRowsByKeptRow.Keys) {
-        Write-Log "残す行：$keptRowKey"
-        Write-Log "削除行：$($deletedRowsByKeptRow[$keptRowKey] -join ',')"
+        Write-Log "残した行：$keptRowKey"
+        Write-Log "削除した行：$($deletedRowsByKeptRow[$keptRowKey] -join ',')"
     }
 
     $wb.Save()
