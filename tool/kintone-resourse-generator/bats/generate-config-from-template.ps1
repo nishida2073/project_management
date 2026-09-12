@@ -176,7 +176,7 @@ function Merge-KintoneRowsByKey {
     # 元の名前として残すため、{PH}置き換え後の名前は別プロパティ（FinalAppName）に持たせる
     $matchedApps = @($matchedByDownloadId.Values | ForEach-Object {
         $finalTemplateAppName = if ($_.CustomTemplateAppName) { $_.CustomTemplateAppName } else { $_.BaseTemplateAppName }
-        $finalAppName = Expand-KintonePlaceholder -Value $_.DownloadAppName -ConfigName $DownloadConfigName
+        $finalAppName = Expand-KintonePlaceholder -Value $finalTemplateAppName -ConfigName $DownloadConfigName
         $_ | Add-Member -NotePropertyName "TemplateAppName" -NotePropertyValue $finalTemplateAppName -PassThru |
              Add-Member -NotePropertyName "FinalAppName" -NotePropertyValue $finalAppName -PassThru
     })
@@ -371,7 +371,7 @@ function Merge-KintoneRowsByKey {
 
         $wsAppList = $pkg.Workbook.Worksheets["space-app-list"]
         for ($i = 0; $i -lt $matchedApps.Count; $i++) {
-            Set-KintonePlaceholderRichText -Cell $wsAppList.Cells[($i + 2), 2] -OriginalValue $matchedApps[$i].DownloadAppName -ConfigName $DownloadConfigName -Color $diffColor
+            Set-KintonePlaceholderRichText -Cell $wsAppList.Cells[($i + 2), 2] -OriginalValue $matchedApps[$i].TemplateAppName -ConfigName $DownloadConfigName -Color $diffColor
         }
 
         $wsMember = $pkg.Workbook.Worksheets["space-member-list"]
