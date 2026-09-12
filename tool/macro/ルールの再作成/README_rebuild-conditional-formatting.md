@@ -11,6 +11,7 @@
 - `rebuild-conditional-formatting.bat` — 実行用のラッパー（ドラッグ＆ドロップ対応）
 - `rebuild-conditional-formatting.ps1` — 実際の処理を行うPowerShellスクリプト
 - `backup/` — 実行のたびに作られる、対象`.xlsm`のバックアップを置くサブフォルダ（自動で作成されます）
+- `logs/` — 実行結果を日付ごとに記録するサブフォルダ（自動で作成されます）
 
 ## 基本的な使い方
 
@@ -41,3 +42,4 @@ rebuild-conditional-formatting.bat
   - `Formula`：条件付き書式の数式（例：`'=$Q5="売上"'`）
   - `Color`：背景色。`#RRGGBB`形式のHex文字列（Excelの「その他の色」ダイアログの「Hex」欄に表示される値をそのまま使えます）
 - `-BackupDir`：バックアップの出力先フォルダ。既定では自分のフォルダ内の`backup`サブフォルダ
+- `-LogDir`：実行ログの出力先フォルダ。既定では自分のフォルダ内の`logs`サブフォルダ

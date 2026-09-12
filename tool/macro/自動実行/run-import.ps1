@@ -8,11 +8,6 @@ param(
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-if (-not $DataDir) {
-    $DataDir = Join-Path $scriptDir '実績データ'
-}
-$DataDir = (Resolve-Path -Path $DataDir).ProviderPath
-
 if (-not $LogDir) {
     $LogDir = Join-Path $scriptDir 'logs'
 }
@@ -26,6 +21,17 @@ function Write-Log {
     $line = "[{0}] {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Message
     Write-Host $line
     Add-Content -Path $LogFile -Value $line -Encoding UTF8
+}
+
+if (-not $DataDir) {
+    $DataDir = Join-Path $scriptDir '実績データ'
+}
+try {
+    $DataDir = (Resolve-Path -Path $DataDir).ProviderPath
+}
+catch {
+    Write-Log "ERROR: DataDir not found: $DataDir"
+    exit 1
 }
 
 if (-not $XlsmPath) {
@@ -92,5 +98,9 @@ catch {
 finally {
     if ($wb) { $wb.Close($false) }
     $excel.Quit()
+
+    if ($wb) { [System.Runtime.Interopservices.Marshal]::ReleaseComObject($wb) | Out-Null }
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
 }

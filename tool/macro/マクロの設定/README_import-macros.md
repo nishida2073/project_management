@@ -12,6 +12,7 @@
 - `import-macros.ps1` — 実際の処理を行うPowerShellスクリプト
 - `../macros/` — `.bas`ファイルを置くサブフォルダ（1つ上の階層。`import-macros.bat`は既定でここを`-MacroDir`として渡します）
 - `backup/` — 実行のたびに作られる、対象`.xlsm`のバックアップを置くサブフォルダ（`import-macros.bat`は既定でここを`-BackupDir`として渡します）
+- `logs/` — 実行結果を日付ごとに記録するサブフォルダ（自動で作成されます）
 
 ## 基本的な使い方
 
@@ -52,3 +53,4 @@ import-macros.bat
 - `-XlsmPath`：対象の`.xlsm`ファイルへの直接パス（省略時は1つ上のフォルダにある`.xlsm`を自動検出）
 - `-MacroDir`：`.bas`ファイルを探すフォルダ（既定値：1つ上の`macros`フォルダ）
 - `-BackupDir`：バックアップの出力先フォルダ（既定値：自分のフォルダ内の`backup`サブフォルダ）
+- `-LogDir`：実行ログの出力先フォルダ（既定値：自分のフォルダ内の`logs`サブフォルダ）

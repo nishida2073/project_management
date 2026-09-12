@@ -5,11 +5,27 @@
         @{ Range = "D5:AG5000"; Formula = '=$Q5="売上"'; Color = "#DDEBF7" },
         @{ Range = "D5:AG5000"; Formula = '=$S5="実績"'; Color = "#FCE4D6" }
     ),
-    [string]$BackupDir
+    [string]$BackupDir,
+    [string]$LogDir
 )
 
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+if (-not $LogDir) {
+    $LogDir = Join-Path $scriptDir 'logs'
+}
+if (-not (Test-Path -Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir | Out-Null
+}
+$LogFile = Join-Path $LogDir ("rebuild-conditional-formatting_{0}.log" -f (Get-Date -Format 'yyyy-MM-dd'))
+
+function Write-Log {
+    param([string]$Message)
+    $line = "[{0}] {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Message
+    Write-Host $line
+    Add-Content -Path $LogFile -Value $line -Encoding UTF8
+}
 
 if (-not $XlsmPath) {
     $XlsmPath = Join-Path (Split-Path -Parent $scriptDir) '原価管理シート.xlsm'
@@ -28,7 +44,7 @@ $backupName = "{0}_{1}{2}" -f `
     [System.IO.Path]::GetExtension($XlsmPath)
 $backupPath = Join-Path $BackupDir $backupName
 Copy-Item -Path $XlsmPath -Destination $backupPath
-Write-Host "Backup created: $backupPath"
+Write-Log "Backup created: $backupPath"
 
 function Get-BgrColorFromHex {
     param([string]$Hex)
@@ -67,11 +83,11 @@ try {
     $ws.Range("A1").Select() | Out-Null
 
     $wb.Save()
-    Write-Host "Saved: $XlsmPath"
-    Write-Host "FormatConditions count on $SheetName : $($ws.Cells.FormatConditions.Count)"
+    Write-Log "Saved: $XlsmPath"
+    Write-Log "FormatConditions count on $SheetName : $($ws.Cells.FormatConditions.Count)"
 }
 catch {
-    Write-Host "ERROR: $($_.Exception.Message)"
+    Write-Log "ERROR: $($_.Exception.Message)"
     exit 1
 }
 finally {

@@ -1,11 +1,27 @@
 param(
     [string]$XlsmPath,
     [string]$MacroDir,
-    [string]$BackupDir
+    [string]$BackupDir,
+    [string]$LogDir
 )
 
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+if (-not $LogDir) {
+    $LogDir = Join-Path $scriptDir 'logs'
+}
+if (-not (Test-Path -Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir | Out-Null
+}
+$LogFile = Join-Path $LogDir ("import-macros_{0}.log" -f (Get-Date -Format 'yyyy-MM-dd'))
+
+function Write-Log {
+    param([string]$Message)
+    $line = "[{0}] {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $Message
+    Write-Host $line
+    Add-Content -Path $LogFile -Value $line -Encoding UTF8
+}
 
 if (-not $MacroDir) {
     $MacroDir = Join-Path $scriptDir '..\macros'
@@ -15,7 +31,7 @@ $MacroDir = (Resolve-Path -Path $MacroDir).ProviderPath
 if (-not $XlsmPath) {
     $xlsmFiles = Get-ChildItem -Path $scriptDir\.. -Filter '*.xlsm' | Where-Object { $_.Name -notlike '~$*' }
     if ($xlsmFiles.Count -ne 1) {
-        Write-Host "ERROR: could not auto-detect a single .xlsm file in $scriptDir\.. (found $($xlsmFiles.Count)). Pass -XlsmPath explicitly."
+        Write-Log "ERROR: could not auto-detect a single .xlsm file in $scriptDir\.. (found $($xlsmFiles.Count)). Pass -XlsmPath explicitly."
         exit 1
     }
     $XlsmPath = $xlsmFiles[0].FullName
@@ -34,21 +50,21 @@ $xlsmBaseName = $xlsmFile.BaseName
 
 $thisWorkbookFile = Get-ChildItem -Path $MacroDir -Filter "${xlsmBaseName}_ThisWorkbook.bas" | Select-Object -First 1
 if (-not $thisWorkbookFile) {
-    Write-Host "ERROR: no '${xlsmBaseName}_ThisWorkbook.bas' in $MacroDir"
+    Write-Log "ERROR: no '${xlsmBaseName}_ThisWorkbook.bas' in $MacroDir"
     exit 1
 }
 
 $moduleFile = Get-ChildItem -Path $MacroDir -Filter "${xlsmBaseName}_*.bas" | Where-Object { $_.FullName -ne $thisWorkbookFile.FullName } | Select-Object -First 1
 if (-not $moduleFile) {
-    Write-Host "ERROR: no '${xlsmBaseName}_<ModuleName>.bas' in $MacroDir"
+    Write-Log "ERROR: no '${xlsmBaseName}_<ModuleName>.bas' in $MacroDir"
     exit 1
 }
 
 $moduleName = $moduleFile.BaseName.Substring($xlsmBaseName.Length + 1)
 
-Write-Host "Target workbook  : $($xlsmFile.FullName)"
-Write-Host "Module source    : $($moduleFile.FullName)  ->  module name: $moduleName"
-Write-Host "ThisWorkbook src : $($thisWorkbookFile.FullName)"
+Write-Log "Target workbook  : $($xlsmFile.FullName)"
+Write-Log "Module source    : $($moduleFile.FullName)  ->  module name: $moduleName"
+Write-Log "ThisWorkbook src : $($thisWorkbookFile.FullName)"
 
 $backupName = "{0}_{1}{2}" -f `
     $xlsmFile.BaseName, `
@@ -56,7 +72,7 @@ $backupName = "{0}_{1}{2}" -f `
     $xlsmFile.Extension
 $backupPath = Join-Path $BackupDir $backupName
 Copy-Item -Path $xlsmFile.FullName -Destination $backupPath
-Write-Host "Backup created   : $backupPath"
+Write-Log "Backup created   : $backupPath"
 
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
@@ -82,10 +98,10 @@ try {
                         $newSheet = $wb.Sheets.Item($srcSheet.Name)
                         $newSheet.Visible = 0
                         if ($newSheet.Visible -ne 0) {
-                            Write-Host "WARN: could not hide sheet '$($srcSheet.Name)' (Visible=$($newSheet.Visible))"
+                            Write-Log "WARN: could not hide sheet '$($srcSheet.Name)' (Visible=$($newSheet.Visible))"
                         }
                         else {
-                            Write-Host "Added hidden sheet: $($srcSheet.Name)"
+                            Write-Log "Added hidden sheet: $($srcSheet.Name)"
                         }
                     }
                 }
@@ -95,7 +111,7 @@ try {
             }
         }
         catch {
-            Write-Host "WARN: failed to add sheets from '$($appendFile.Name)': $($_.Exception.Message)"
+            Write-Log "WARN: failed to add sheets from '$($appendFile.Name)': $($_.Exception.Message)"
         }
     }
 
@@ -108,7 +124,7 @@ try {
     }
 
     if (-not $vbproj) {
-        Write-Host "ERROR: cannot access VBA project (enable 'Trust access to the VBA project object model' in Excel Trust Center)."
+        Write-Log "ERROR: cannot access VBA project (enable 'Trust access to the VBA project object model' in Excel Trust Center)."
         exit 1
     }
 
@@ -149,14 +165,18 @@ try {
     }
 
     $wb.Save()
-    Write-Host "Done: $($xlsmFile.Name)"
+    Write-Log "Done: $($xlsmFile.Name)"
 }
 catch {
-    Write-Host "ERROR: $($xlsmFile.Name) - $($_.Exception.Message)"
+    Write-Log "ERROR: $($xlsmFile.Name) - $($_.Exception.Message)"
     exit 1
 }
 finally {
     if ($wb) { $wb.Close($false) }
     $excel.Quit()
+
+    if ($wb) { [System.Runtime.Interopservices.Marshal]::ReleaseComObject($wb) | Out-Null }
     [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
 }
