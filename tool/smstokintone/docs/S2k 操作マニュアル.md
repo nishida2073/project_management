@@ -459,6 +459,7 @@ kintoneの設定:
 
 #### 機能一覧
 
+- [設定の初期化](#設定の初期化)
 - 端末の許可
   - [SMSの読み取り](#端末の許可（SMSの読み取り）)
   - [SMSの受信](#端末の許可（SMSの受信）)
@@ -491,6 +492,16 @@ kintoneの設定:
 <div class="pagebreak"></div>
 
 #### 機能の詳細
+
+##### 設定の初期化
+
+　このアプリの設定画面の内容を初期状態に戻します。
+
+<p float="left">
+  <img src="screenshots/app_reset_settings.png" alt="設定の初期化">
+</p>
+
+<div class="pagebreak"></div>
 
 ##### 端末の許可（SMSの読み取り）
 
