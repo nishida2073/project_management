@@ -8,7 +8,7 @@
 
 ## 構成
 
-- `import-macros.bat` — 実行用のラッパー（中身は英数字のみ）
+- `import-macros.bat` — 実行用のラッパー（ドラッグ＆ドロップ対応）
 - `import-macros.ps1` — 実際の処理を行うPowerShellスクリプト
 - `../macros/` — `.bas`ファイルを置くサブフォルダ（1つ上の階層。`import-macros.bat`は既定でここを`-MacroDir`として渡します）
 - `backup/` — 実行のたびに作られる、対象`.xlsm`のバックアップを置くサブフォルダ（`import-macros.bat`は既定でここを`-BackupDir`として渡します）
@@ -29,26 +29,26 @@ Excelで以下を有効にしてください。
 import-macros.bat
 ```
 
+ダブルクリックでの実行のほか、**Excelファイル（`.xlsm`）をこの`.bat`にドラッグ＆ドロップ**して実行することもできます。
+
+- 引数なし（ダブルクリック）で実行した場合：1つ上のフォルダにある`原価管理シート.xlsm`が対象になります
+- ファイルをドラッグ＆ドロップした場合：そのドロップしたファイルが対象になります
+
 既定では、
 
-- `.xlsm`は1つ上のフォルダ（`import-macros.bat`が`-XlsmDir`として渡します）から探します
 - `.bas`ファイルは1つ上の`macros`フォルダ（`import-macros.bat`が`-MacroDir`として渡します）から探します
 - バックアップは自分のフォルダ内の`backup`サブフォルダ（`import-macros.bat`が`-BackupDir`として渡します）に作られます。フォルダが無ければ自動的に作成されます
 
-`-XlsmDir`で指定したフォルダ内にある`.xlsm`を**すべて**処理します（1つずつ順番に開いて上書き保存）。対応する`<xlsm名>_ThisWorkbook.bas`／`<xlsm名>_<モジュール名>.bas`のペアが`-MacroDir`に無い`.xlsm`は、エラーにはならず単にスキップされます。
+対象`.xlsm`のベース名（例：`原価管理シート`）に対応する`<xlsm名>_ThisWorkbook.bas`／`<xlsm名>_<モジュール名>.bas`のペアが`-MacroDir`に無い場合はエラーになります。
 
-対応する`.bas`ペアが見つかり、実際に上書きする`.xlsm`だけ、開く前に`-BackupDir`へタイムスタンプ付きのファイル名（例：`原価管理シート_20260911-190530.xlsm`）でバックアップされます（自動削除はしないため、実行するたびに増えていきます）。
+開く前に`-BackupDir`へタイムスタンプ付きのファイル名（例：`原価管理シート_20260911-190530.xlsm`）でバックアップされます（自動削除はしないため、実行するたびに増えていきます）。
 
-`.bas`ファイルを別のフォルダに置きたい場合は`-MacroDir`で上書きできます。
+`.bat`は既定値のまま`.ps1`を呼び出すだけなので、対象ファイル（`-XlsmPath`）や`.bas`の置き場所以外を変えたい場合は`.ps1`を直接呼び出します。
 
-```bat
-import-macros.bat -MacroDir "C:\path\to\macro-folder"
+```powershell
+.\import-macros.ps1 -XlsmPath "C:\path\to\別の原価管理シート.xlsm" -MacroDir "C:\path\to\macro-folder" -BackupDir "C:\path\to\backup-folder"
 ```
 
-対象の`.xlsm`が別のフォルダにある場合は`-XlsmDir`で、そのフォルダを指定します（フォルダ内の`.xlsm`をすべて処理対象にします。ファイルを1つだけ直接指定する形ではありません）。
-
-```bat
-import-macros.bat -XlsmDir "C:\path\to\xlsm-folder"
-```
-
-※`import-macros.bat`は既定で`-MacroDir`・`-XlsmDir`・`-BackupDir`を固定して渡すため、`.bat`経由でこれらをさらに指定するとエラーになります。変えたい場合は`import-macros.ps1`を直接呼び出してください。
+- `-XlsmPath`：対象の`.xlsm`ファイルへの直接パス（省略時は1つ上のフォルダにある`.xlsm`を自動検出）
+- `-MacroDir`：`.bas`ファイルを探すフォルダ（既定値：1つ上の`macros`フォルダ）
+- `-BackupDir`：バックアップの出力先フォルダ（既定値：自分のフォルダ内の`backup`サブフォルダ）
