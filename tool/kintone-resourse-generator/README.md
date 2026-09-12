@@ -136,7 +136,7 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 
 アプリ名の対応付けは「どちらかの名前がどちらかを含むか」で1対1に判定する（設定テンプレート（カスタム）を指定した場合は、基本・カスタムそれぞれ個別にダウンロード結果と対応付ける）。対応付けられなかったアプリがある場合はコンソール・ログに警告を表示するので、必要ならconfigファイルに手動で追記する。
 
-テンプレートのスペース名・アプリ名に含めた`{PH}`は、この段階でスペース識別名（`-DownloadConfigName`）に置き換えられる（kintone側でスペース・アプリを作成した時点ではまだ最終的な名前が決まらない、という運用を想定した仮の名前用のプレースホルダー）。
+テンプレートのスペース名・アプリ名に含めた`{PH}`は、この段階でスペース識別名（`-DownloadConfigName`）に置き換えられる（kintone側でスペース・アプリを作成した時点ではまだ最終的な名前が決まらない、という運用を想定した仮の名前用のプレースホルダー）。スペース名は、設定テンプレート（基本/カスタム）の`space-settings`シートに`スペース名`列があればその値（カスタム優先）を使い、無ければダウンロード結果（新スペースの現在の名前）を使う。
 
 #### 処理の流れ
 
@@ -145,7 +145,7 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 3. `generate-config-from-template.ps1` が実行される
    1. 設定テンプレート（基本）（`COMMON_BASE_TEMPLATE_PATH`配下）、指定時は設定テンプレート（カスタム）（`COMMON_CUSTOM_TEMPLATE_PATH`配下）、およびダウンロード結果（`COMMON_DOWNLOAD_PATH`配下）を読み込む
    2. アプリ名の一致でテンプレートのアプリとダウンロード結果のアプリを対応付ける（対応付けられなかったアプリはコンソールに警告表示）
-   3. スペース設定・メンバー・アプリ名・アプリACL・レコードACLをテンプレートの内容（スペース名・アプリ名は`{PH}`をスペース識別名に置き換えた値）で組み立てる
+   3. スペース設定・メンバー・アプリ名・アプリACL・レコードACLをテンプレートの内容（スペース名・アプリ名は`{PH}`をスペース識別名に置き換えた値。スペース名はテンプレートに列が無ければダウンロード結果の値を使う）で組み立てる
    4. `config\<スペース識別名>_config.xlsx`に書き出す
    5. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
 
@@ -273,7 +273,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 ## 設定ファイル・テンプレートの構成
 
-`download\*_download.xlsx`・`config\*_config.xlsx`・`template\base\*.xlsx`・`template\custom\*.xlsx`は同じ5シート構成（`template\base`・`template\custom`は`space-settings`の1行のみ、`space-app-list`はアプリ名の列のみを使う。スペースID・アプリID列は無視される）。
+`download\*_download.xlsx`・`config\*_config.xlsx`・`template\base\*.xlsx`・`template\custom\*.xlsx`は同じ5シート構成（`template\base`・`template\custom`は`space-settings`の1行のみ、`space-app-list`はアプリ名の列のみを使う。スペースID・アプリID列は無視される）。`template\base`・`template\custom`の`space-settings`に`スペース名`列を追加すると、その値（`{PH}`込み）が「2. 設定ファイルの生成」で使われる（無ければダウンロード結果側の値を使う）。
 
 | シート名 | 内容 |
 |---|---|

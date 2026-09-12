@@ -128,15 +128,19 @@ function Merge-KintoneRowsByKey {
         return
     }
     $newSpaceId = $downloadSpaceRow.'スペースID'
-    $finalSpaceName = Expand-KintonePlaceholder -Value $downloadSpaceRow.'スペース名' -ConfigName $DownloadConfigName
 
     # space-settings: 項目ごとにcustomの値があれば優先し、無ければbaseの値を使う
     $templateSpaceRow = [PSCustomObject]@{
+        'スペース名'                                                      = Get-PreferredValue $customSpaceRow.'スペース名' $baseSpaceRow.'スペース名'
         '参加メンバーだけにこのスペースを公開する'                       = Get-PreferredValue $customSpaceRow.'参加メンバーだけにこのスペースを公開する' $baseSpaceRow.'参加メンバーだけにこのスペースを公開する'
         'スペースのポータルと複数のスレッドを使用する'                   = Get-PreferredValue $customSpaceRow.'スペースのポータルと複数のスレッドを使用する' $baseSpaceRow.'スペースのポータルと複数のスレッドを使用する'
         'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' = Get-PreferredValue $customSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' $baseSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
         'アプリ作成できるユーザーをスペースの管理者に限定する'           = Get-PreferredValue $customSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する' $baseSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
     }
+
+    # スペース名はテンプレート（base/custom）のspace-settingsに列があればそれを優先し、無ければダウンロード結果（新スペースの現在の名前）を使う
+    $spaceNameSource = if ("$($templateSpaceRow.'スペース名')" -ne "") { $templateSpaceRow.'スペース名' } else { $downloadSpaceRow.'スペース名' }
+    $finalSpaceName = Expand-KintonePlaceholder -Value $spaceNameSource -ConfigName $DownloadConfigName
 
     # space-member-list: base・custom両方の行を残し、種別+ユーザー/組織/グループが重複する場合はcustomで上書きする
     $templateMemberRows = @(Merge-KintoneRowsByKey -BaseRows $baseMemberRows -CustomRows $customMemberRows -KeyProperties @("種別", "ユーザー/組織/グループ"))
@@ -196,7 +200,7 @@ function Merge-KintoneRowsByKey {
         }
     }
 
-    # space-settings: スペース名は新スペース側、それ以外はテンプレート側の値を使う
+    # space-settings: スペース名はテンプレート側に列があればそれを、無ければ新スペース側の値を使う。それ以外はテンプレート側の値を使う
     $outSpaceRow = [PSCustomObject]@{
         "スペースID"                                                     = $newSpaceId
         "スペース名"                                                     = $finalSpaceName
@@ -359,7 +363,7 @@ function Merge-KintoneRowsByKey {
 
     if ($applyDiffColoring) {
         $wsSettings = $pkg.Workbook.Worksheets["space-settings"]
-        Set-KintonePlaceholderRichText -Cell $wsSettings.Cells[2, 2] -OriginalValue $downloadSpaceRow.'スペース名' -ConfigName $DownloadConfigName -Color $diffColor
+        Set-KintonePlaceholderRichText -Cell $wsSettings.Cells[2, 2] -OriginalValue $spaceNameSource -ConfigName $DownloadConfigName -Color $diffColor
         Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 3] -DownloadValue "$($downloadSpaceRow.'参加メンバーだけにこのスペースを公開する')" -FinalValue "$($templateSpaceRow.'参加メンバーだけにこのスペースを公開する')"
         Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 4] -DownloadValue "$($downloadSpaceRow.'スペースのポータルと複数のスレッドを使用する')" -FinalValue "$($templateSpaceRow.'スペースのポータルと複数のスレッドを使用する')"
         Set-KintoneCellDiffColor -Cell $wsSettings.Cells[2, 5] -DownloadValue "$($downloadSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')" -FinalValue "$($templateSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')"
