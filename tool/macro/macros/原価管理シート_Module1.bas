@@ -2,9 +2,6 @@
 
 Private Const MAIN_SHEET_NAME As String = "計画算定シート"
 
-' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
-Private Const USE_MONTH_RANGE_DIALOG As Boolean = False
-
 ' 直前の実績反映で上書きした行のバックアップ（行番号 → Array(旧値, 旧フォント色)）
 Private gBackupRows As Object
 
@@ -19,6 +16,14 @@ Private gPasteRangeCached As Boolean
 ' 重複行ハイライトを付ける前の、年度・案件ID・会計区分1・会計区分2列のフォント色
 ' （行番号 → Array(年度の色, 案件IDの色, 会計区分1の色, 会計区分2の色)）
 Private gDuplicateHighlightBackup As Object
+
+' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
+' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
+Function ShouldUseMonthRangeDialog() As Boolean
+    Dim envVal As String
+    envVal = Environ$("USE_MONTH_RANGE_DIALOG")
+    ShouldUseMonthRangeDialog = (UCase$(Trim$(envVal)) = "TRUE" Or Trim$(envVal) = "1")
+End Function
 
 Sub CloseThisSheet()
     Dim currentSheet As Worksheet
@@ -274,7 +279,8 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     End If
 
     ' === ③' 対話実行時のみ、反映する月の範囲を聞く（バッチ実行時は全期間） ===
-    If isInteractive And USE_MONTH_RANGE_DIALOG Then
+    If isInteractive And ShouldUseMonthRangeDialog() Then
+        Dim monthRangeInput As Variant
         Dim monthRangeStr As String
         Dim rangeParts() As String
         Dim startMonthStr As String, endMonthStr As String
@@ -283,8 +289,14 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
         isValidRange = False
 
         Do While Not isValidRange
-            monthRangeStr = InputBox("反映する月の範囲を「開始月-終了月」の形式で入力してください（例：4-9）", "反映月の指定", "4-3")
-            If monthRangeStr = "" Then monthRangeStr = "4-3"   ' 空の場合は全期間として扱う
+            monthRangeInput = Application.InputBox("反映する月の範囲を「開始月-終了月」の形式で入力してください（例：4-9）", "反映月の指定", "4-3", Type:=2)
+            If VarType(monthRangeInput) = vbBoolean Then
+                ' キャンセルされた場合は実績反映そのものを中止する
+                GoTo CleanExit
+            End If
+
+            monthRangeStr = CStr(monthRangeInput)
+            If monthRangeStr = "" Then monthRangeStr = "4-3"   ' 空欄でOKした場合は全期間として扱う
 
             rangeParts = Split(monthRangeStr, "-")
             If UBound(rangeParts) <> 1 Then
@@ -444,7 +456,7 @@ CleanExit:
 
     If completed Then
         Dim monthRangeLine As String
-        If isInteractive And USE_MONTH_RANGE_DIALOG Then
+        If isInteractive And ShouldUseMonthRangeDialog() Then
             monthRangeLine = "反映月：" & startMonth & "月～" & endMonth & "月" & vbCrLf & vbCrLf
         Else
             monthRangeLine = ""
