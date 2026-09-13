@@ -3,6 +3,14 @@ Option Explicit
 ' 直前の実績反映で上書きした行のバックアップ（行番号 → Array(旧値, 旧フォント色)）
 Private gBackupRows As Object
 
+' 実績反映で変更のあった行の旧値・新値（行番号 → Array(旧値の配列, 新値の配列)）
+Private gPendingReviewRows As Object
+
+' 貼付範囲の開始・終了列のキャッシュ（選択変更のたびにLoadMappingHorizontalを呼び直さないため）
+Private gPasteRangeStartCol As Long
+Private gPasteRangeEndCol As Long
+Private gPasteRangeCached As Boolean
+
 Sub CloseThisSheet()
     Dim currentSheet As Worksheet
     Set currentSheet = ActiveSheet
@@ -236,6 +244,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     ' 今回の実行分のバックアップを新規に用意（前回分は破棄）
     Set gBackupRows = CreateObject("Scripting.Dictionary")
     Set matchedRows = CreateObject("Scripting.Dictionary")
+    Set gPendingReviewRows = CreateObject("Scripting.Dictionary")
 
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
@@ -289,6 +298,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
                     newVals = mainRange.Value
 
                     gBackupRows(foundRow) = Array(oldVals, oldColors)
+                    gPendingReviewRows(foundRow) = Array(oldVals, newVals)
 
                     HighlightChangedCells mainRange, oldVals, newVals
 
@@ -404,6 +414,7 @@ Sub UndoLastImport()
     Application.ScreenUpdating = True
 
     Set gBackupRows = Nothing
+    Set gPendingReviewRows = Nothing
 
     MsgBox "直前の実績反映を元に戻しました。"
 
@@ -645,6 +656,55 @@ Sub HighlightChangedCells(rng As Range, oldVals As Variant, newVals As Variant)
             rng.Font.ColorIndex = xlAutomatic
         End If
     End If
+End Sub
+
+
+' ============================
+' Workbook_SheetBeforeDoubleClickの本体処理。
+' 実績反映で変更されたセルをダブルクリックすると、除外（旧値に戻す）⇔解除をトグルする
+' ============================
+Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolean)
+    If gPendingReviewRows Is Nothing Then Exit Sub
+    If Sh.Name <> "計画算定シート" Then Exit Sub
+
+    If Not gPasteRangeCached Then
+        Dim mapMainRange As Object
+        Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+        gPasteRangeStartCol = Sh.Range(mapMainRange("開始") & "1").Column
+        gPasteRangeEndCol = Sh.Range(mapMainRange("終了") & "1").Column
+        gPasteRangeCached = True
+    End If
+
+    If Target.Column < gPasteRangeStartCol Or Target.Column > gPasteRangeEndCol Then Exit Sub
+    If Not gPendingReviewRows.Exists(Target.Row) Then Exit Sub
+
+    Dim info As Variant
+    info = gPendingReviewRows(Target.Row)
+
+    Dim rowOldVals As Variant, rowNewVals As Variant
+    rowOldVals = info(0)
+    rowNewVals = info(1)
+
+    Dim colIdx As Long
+    colIdx = Target.Column - gPasteRangeStartCol + 1
+
+    If CStr(rowNewVals(1, colIdx)) = "" Then Exit Sub
+    If CStr(rowOldVals(1, colIdx)) = CStr(rowNewVals(1, colIdx)) Then Exit Sub
+
+    Dim changedColor As Long
+    changedColor = RGB(0, 153, 0)
+
+    Cancel = True   ' セル編集モードに入らないようにする
+
+    Application.EnableEvents = False
+    If Target.Font.Color = changedColor Then
+        Target.Value = rowOldVals(1, colIdx)
+        Target.Font.ColorIndex = xlAutomatic
+    Else
+        Target.Value = rowNewVals(1, colIdx)
+        Target.Font.Color = changedColor
+    End If
+    Application.EnableEvents = True
 End Sub
 
 
