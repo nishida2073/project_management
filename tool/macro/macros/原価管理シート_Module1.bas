@@ -75,6 +75,8 @@ Sub HandleBeforeSave()
         ws.Range(ws.Cells(5, colR), ws.Cells(lastRow, colR)).Font.Color = vbBlack
     End If
 
+    Set gPendingReviewRows = CreateObject("Scripting.Dictionary")
+
 End Sub
 
 
