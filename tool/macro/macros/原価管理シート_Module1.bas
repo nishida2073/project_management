@@ -1,4 +1,6 @@
-Option Explicit
+﻿Option Explicit
+
+Private Const MAIN_SHEET_NAME As String = "計画算定シート"
 
 ' 直前の実績反映で上書きした行のバックアップ（行番号 → Array(旧値, 旧フォント色)）
 Private gBackupRows As Object
@@ -34,7 +36,7 @@ Sub HandleWorkbookOpen()
     EnsureButtonsExist
 
     Dim wsMain As Worksheet
-    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
     If wsMain.Visible = xlSheetVisible Then
         wsMain.Activate
@@ -50,7 +52,7 @@ End Sub
 Sub HandleBeforeSave()
 
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.Sheets("計画算定シート")
+    Set ws = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
     Dim mapMainRange As Object
     Dim mapMainCol As Object
 
@@ -89,7 +91,7 @@ End Sub
 Sub EnsureButtonsExist()
 
     Dim wsMain As Worksheet
-    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
     If wsMain.Visible <> xlSheetVisible Then Exit Sub
 
@@ -132,7 +134,7 @@ End Sub
 Sub HandleBeforeClose()
 
     Dim wsMain As Worksheet
-    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
     DeleteButtonIfExists wsMain, "MacroProcButton999"
     DeleteButtonIfExists wsMain, "UndoProcButton999"
@@ -229,7 +231,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     End If
 
     Set wsOther = wbOther.Sheets("実績")   ' ←読み込み元
-    Set wsMain = ThisWorkbook.Sheets("計画算定シート") ' ←貼り付け先
+    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME) ' ←貼り付け先
 
     ' === ③ マッピングは1回だけ読み込む ===
     Set mapOtherCol = LoadMappingHorizontal("実績Excel")
@@ -336,9 +338,9 @@ CleanExit:
 
     If completed Then
         ImportFromOtherBook = "実績反映が完了しました。" & vbCrLf & vbCrLf & _
-               "反映（実績シート→計画算定シート）：" & reflectedCount & "件" & vbCrLf & _
+               "反映（実績シート→" & MAIN_SHEET_NAME & "）：" & reflectedCount & "件" & vbCrLf & _
                IIf(reflectedRows = "", "", "　" & reflectedRows & vbCrLf) & _
-               "スキップ（実績シート：計画算定シートにデータなし）：" & skipJissekiOnlyCount & "件" & vbCrLf & _
+               "スキップ（実績シート：" & MAIN_SHEET_NAME & "にデータなし）：" & skipJissekiOnlyCount & "件" & vbCrLf & _
                IIf(skipJissekiOnlyRows = "", "", "　" & skipJissekiOnlyRows & vbCrLf) & _
                "スキップ（実績シート：データの重複）：" & skipDupCount & "件" & vbCrLf & _
                IIf(skipDupRows = "", "", "　" & skipDupRows & vbCrLf) & _
@@ -383,7 +385,7 @@ Sub UndoLastImport()
     End If
 
     Dim wsMain As Worksheet
-    Set wsMain = ThisWorkbook.Sheets("計画算定シート")
+    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
     Dim mapMainRange As Object
     Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
@@ -592,9 +594,9 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     If msg <> "" Then
         Err.Raise vbObjectError + 1001, _
                   "BuildMainIndex", _
-                  "計画算定シートに、条件（年度・案件ID・会計区分1・会計区分2）が重複する行があります。" & vbCrLf & vbCrLf & _
+                  MAIN_SHEET_NAME & "に、条件（年度・案件ID・会計区分1・会計区分2）が重複する行があります。" & vbCrLf & vbCrLf & _
                   msg & _
-                  "実績反映を行う前に、計画算定シート側の重複を解消してください。"
+                  "実績反映を行う前に、" & MAIN_SHEET_NAME & "側の重複を解消してください。"
     End If
 
     Set BuildMainIndex = dic
@@ -667,7 +669,7 @@ End Sub
 ' ============================
 Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolean)
     If gPendingReviewRows Is Nothing Then Exit Sub
-    If Sh.Name <> "計画算定シート" Then Exit Sub
+    If Sh.Name <> MAIN_SHEET_NAME Then Exit Sub
 
     If Not gPasteRangeCached Then
         Dim mapMainRange As Object
