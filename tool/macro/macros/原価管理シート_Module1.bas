@@ -16,6 +16,10 @@ Private gPasteRangeStartCol As Long
 Private gPasteRangeEndCol As Long
 Private gPasteRangeCached As Boolean
 
+' 重複行ハイライトを付ける前の、年度・案件ID・会計区分1・会計区分2列のフォント色
+' （行番号 → Array(年度の色, 案件IDの色, 会計区分1の色, 会計区分2の色)）
+Private gDuplicateHighlightBackup As Object
+
 Sub CloseThisSheet()
     Dim currentSheet As Worksheet
     Set currentSheet = ActiveSheet
@@ -50,7 +54,7 @@ End Sub
 
 
 ' ============================
-' Workbook_BeforeSaveの本体処理（貼り付け範囲の黒字化）
+' Workbook_BeforeSaveの本体処理（反映・ハイライトで色を付けたセルを元の色へ戻す）
 ' ============================
 Sub HandleBeforeSave()
 
@@ -62,22 +66,45 @@ Sub HandleBeforeSave()
     Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
     Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
 
-    Dim lastRow As Long
-    lastRow = ws.Cells.SpecialCells(xlCellTypeLastCell).Row   ' Ctrl+Shift+End と同じ判定
+    ' 実績反映・実績なしグレー化した行は、値はそのままに元のフォント色へ戻す
+    If Not gBackupRows Is Nothing Then
+        Dim key As Variant
+        For Each key In gBackupRows.Keys
+            Dim foundRow As Long
+            foundRow = key
 
-    If lastRow >= 5 Then
-        ws.Range(mapMainRange("開始") & "5:" & mapMainRange("終了") & lastRow).Font.Color = vbBlack
+            Dim rng As Range
+            Set rng = ws.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
 
+            Dim backupData As Variant
+            backupData = gBackupRows(key)
+            SetFontColors rng, backupData(1)   ' (0)=旧値, (1)=旧フォント色。値には触れない
+        Next key
+    End If
+
+    ' 重複行ハイライトも、元のフォント色へ戻す
+    If Not gDuplicateHighlightBackup Is Nothing Then
         Dim colYear As Variant, colCase As Variant, colQ As Variant, colR As Variant
         colYear = mapMainCol("年度")
         colCase = mapMainCol("案件ID")
         colQ = mapMainCol("会計区分1")
         colR = mapMainCol("会計区分2")
 
-        ws.Range(ws.Cells(5, colYear), ws.Cells(lastRow, colYear)).Font.Color = vbBlack
-        ws.Range(ws.Cells(5, colCase), ws.Cells(lastRow, colCase)).Font.Color = vbBlack
-        ws.Range(ws.Cells(5, colQ), ws.Cells(lastRow, colQ)).Font.Color = vbBlack
-        ws.Range(ws.Cells(5, colR), ws.Cells(lastRow, colR)).Font.Color = vbBlack
+        Dim dupKey As Variant
+        For Each dupKey In gDuplicateHighlightBackup.Keys
+            Dim dupRow As Long
+            dupRow = dupKey
+
+            Dim dupColors As Variant
+            dupColors = gDuplicateHighlightBackup(dupKey)
+
+            ws.Cells(dupRow, colYear).Font.Color = dupColors(0)
+            ws.Cells(dupRow, colCase).Font.Color = dupColors(1)
+            ws.Cells(dupRow, colQ).Font.Color = dupColors(2)
+            ws.Cells(dupRow, colR).Font.Color = dupColors(3)
+        Next dupKey
+
+        Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
     End If
 
     Set gPendingReviewRows = CreateObject("Scripting.Dictionary")
@@ -214,7 +241,17 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
 
     Dim startPos As Long, endPos As Long
 
-    ' === ① 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
+    ' ここ以降のエラーは全て CleanFail で拾う
+    On Error GoTo CleanFail
+
+    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
+    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
+
+    ' === ① 対象ファイルを選ぶ前に、計画算定シート側の重複チェックを行う ===
+    lastRowMain = wsMain.Cells(wsMain.Rows.Count, mapMainCol("年度")).End(xlUp).Row
+    Set mainIndex = BuildMainIndex(wsMain, mapMainCol, lastRowMain)
+
+    ' === ② 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
     If isInteractive Then
         f = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
         If f = False Then Exit Function
@@ -222,10 +259,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
         f = otherFilePath
     End If
 
-    ' ここ以降のエラーは全て CleanFail で拾う
-    On Error GoTo CleanFail
-
-    ' === ② Otherブックを開く ===
+    ' === ③ Otherブックを開く ===
     Set wbOther = Workbooks.Open(f, ReadOnly:=True)
 
     If Not SheetExists(wbOther, "実績") Then
@@ -235,7 +269,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
         GoTo CleanExit
     End If
 
-    ' === ②' 対話実行時のみ、反映する月の範囲を聞く（バッチ実行時は全期間） ===
+    ' === ③' 対話実行時のみ、反映する月の範囲を聞く（バッチ実行時は全期間） ===
     If isInteractive And USE_MONTH_RANGE_DIALOG Then
         Dim monthRangeStr As String
         Dim rangeParts() As String
@@ -287,19 +321,13 @@ RetryMonthRange:
     End If
 
     Set wsOther = wbOther.Sheets("実績")   ' ←読み込み元
-    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME) ' ←貼り付け先
 
-    ' === ③ マッピングは1回だけ読み込む ===
+    ' === ④ マッピングは1回だけ読み込む ===
     Set mapOtherCol = LoadMappingHorizontal("実績Excel")
     Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
     Set mapOtherRange = LoadMappingHorizontal("実績Excel貼付範囲")
-    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
     Set mapQ = LoadMappingHorizontal("会計区分1マッピング")
     Set mapR = LoadMappingHorizontal("会計区分2マッピング")
-
-    ' === ④ Main側の最終行を取得し、検索用インデックスを作る ===
-    lastRowMain = wsMain.Cells(wsMain.Rows.Count, mapMainCol("年度")).End(xlUp).Row
-    Set mainIndex = BuildMainIndex(wsMain, mapMainCol, lastRowMain)
 
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
@@ -601,6 +629,10 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
 
+    If gDuplicateHighlightBackup Is Nothing Then
+        Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
+    End If
+
     If lastRow < 5 Then
         Set BuildMainIndex = dic
         Exit Function
@@ -673,6 +705,14 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
             For p = LBound(rowParts) To UBound(rowParts)
                 Dim dupRow As Long
                 dupRow = CLng(Trim(rowParts(p)))
+
+                If Not gDuplicateHighlightBackup.Exists(dupRow) Then
+                    gDuplicateHighlightBackup(dupRow) = Array( _
+                        ws.Cells(dupRow, colYear).Font.Color, _
+                        ws.Cells(dupRow, colCase).Font.Color, _
+                        ws.Cells(dupRow, colQ).Font.Color, _
+                        ws.Cells(dupRow, colR).Font.Color)
+                End If
 
                 ws.Cells(dupRow, colYear).Font.Color = groupColor
                 ws.Cells(dupRow, colCase).Font.Color = groupColor
