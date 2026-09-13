@@ -10,6 +10,7 @@
 
 - `run-import.bat` — 実行用のラッパー（中身は英数字のみ）
 - `run-import.ps1` — 実際の処理を行うPowerShellスクリプト
+- `run-import-hidden.vbs` — タスクスケジューラから`run-import.ps1`を**ウィンドウを表示せずに**呼び出すためのラッパー（下記「定期実行の設定」を参照）
 - `run-import-task.xml` — Windowsタスクスケジューラにインポートするためのタスク定義（下記「定期実行の設定」を参照）
 - `実績データ/` — 実績データの`.xlsx`を置くサブフォルダ（`run-import.bat`は既定でここを`-DataDir`として渡します）
 - `logs/` — 実行ログを日付ごとに出力するサブフォルダ（`run-import.bat`は既定でここを`-LogDir`として渡します）
@@ -36,9 +37,9 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 
 ## 定期実行の設定（タスクスケジューラ）
 
-`run-import-task.xml` をWindowsのタスクスケジューラにインポートすると、`run-import.bat`を定期実行するタスクを作成できます。
+`run-import-task.xml` をWindowsのタスクスケジューラにインポートすると、`run-import-hidden.vbs`経由で`run-import.ps1`を定期実行するタスクを作成できます。`run-import.bat`を直接呼ばず`run-import-hidden.vbs`を経由しているのは、実行時に黒いウィンドウ（コンソール画面）を表示させないためです。
 
-`run-import-task.xml`内の`<Actions><Exec><Command>`と`<WorkingDirectory>`は、現在のこのフォルダの配置場所を前提にした絶対パスで固定されています。リポジトリを別の場所や別のPCに置く場合は、インポート前にこのXML内のパスを実際の場所に書き換えるか、インポート後にタスクスケジューラの「操作」タブから編集してください。
+`run-import-task.xml`内の`<Actions><Exec><Arguments>`と`<WorkingDirectory>`は、現在のこのフォルダの配置場所を前提にした絶対パスで固定されています。リポジトリを別の場所や別のPCに置く場合は、インポート前にこのXML内のパスを実際の場所に書き換えるか、インポート後にタスクスケジューラの「操作」タブから編集してください。
 
 ### 手順
 
@@ -52,6 +53,8 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 4. インポート後、「トリガー」タブから実行時刻・頻度を編集できます（既定では毎日12:00）
 5. 一度手動で「実行」し、`logs\run-import_YYYY-MM-DD.log`にログが出るか、`backup`フォルダにバックアップが作られるかを確認してください
 
+   - 実行してもウィンドウは表示されません。ログの末尾に`Saved: ...`が出ていれば完了です。ウィンドウが出ない分、完了したかどうかが分かりにくいので、「実行」ボタンを押した直後に何度も押さないよう注意してください（連続で実行されてしまいます）
+
 ## SharePointを使った同期
 
 この`自動実行`フォルダは、SharePoint上のドキュメントライブラリと同期されているフォルダとして扱います。他のメンバーがSharePoint側に実績データをアップロードすると、同期によってこのフォルダ内（`実績データ`サブフォルダ）に自動的にファイルが降ってくる、という運用を想定しています。
@@ -63,6 +66,7 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 ├─ 原価管理シート.xlsm
 ├─ run-import.bat
 ├─ run-import.ps1
+├─ run-import-hidden.vbs
 ├─ run-import-task.xml
 ├─ 実績データ/
 ├─ logs/
