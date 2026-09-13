@@ -157,6 +157,7 @@ Sub CreateButton(wsMain As Worksheet, buttonName As String, targetCellAddress As
     btn.Name = buttonName
     btn.Caption = caption
     btn.OnAction = macroName
+    btn.Placement = xlMove   ' セルと一緒に移動はするが、列幅・行高を変えてもサイズは変えない
 
     With btn.Characters.Font
         .Name = "Meiryo UI"
