@@ -10,8 +10,12 @@
 
 - `run-import.bat` — 実行用のラッパー（中身は英数字のみ）
 - `run-import.ps1` — 実際の処理を行うPowerShellスクリプト
-- `run-import-hidden.vbs` — タスクスケジューラから`run-import.ps1`を**ウィンドウを表示せずに**呼び出すためのラッパー（下記「定期実行の設定」を参照）
-- `run-import-task.xml` — Windowsタスクスケジューラにインポートするためのタスク定義（下記「定期実行の設定」を参照）
+- `task/` — タスクスケジューラ関連のファイルをまとめたサブフォルダ（下記「定期実行の設定」を参照）
+  - `run-import-hidden.vbs` — タスクスケジューラから`run-import.ps1`を**ウィンドウを表示せずに**呼び出すためのラッパー
+  - `run-import-task.xml` — Windowsタスクスケジューラに登録するためのタスク定義
+  - `setup-task.bat` — `run-import-task.xml`をタスクスケジューラに登録するバッチ
+  - `run-task.bat` — 登録済みのタスクを手動で即時実行するバッチ（定期実行時刻を待たずに動作確認したい場合に使用）
+  - `remove-task.bat` — 登録済みのタスクをタスクスケジューラから削除するバッチ
 - `実績データ/` — 実績データの`.xlsx`を置くサブフォルダ（`run-import.bat`は既定でここを`-DataDir`として渡します）
 - `logs/` — 実行ログを日付ごとに出力するサブフォルダ（`run-import.bat`は既定でここを`-LogDir`として渡します）
 - `backup/` — 実行のたびに作られる、対象`.xlsm`のバックアップを置くサブフォルダ（`run-import.bat`は既定でここを`-BackupDir`として渡します）
@@ -37,21 +41,19 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 
 ## 定期実行の設定（タスクスケジューラ）
 
-`run-import-task.xml` をWindowsのタスクスケジューラにインポートすると、`run-import-hidden.vbs`経由で`run-import.ps1`を定期実行するタスクを作成できます。
+`task`フォルダ内の`setup-task.bat`を実行すると、同フォルダの`run-import-task.xml`の内容でタスクスケジューラにタスク（名前：`run-import-task`）を登録します。登録されたタスクは、`run-import-hidden.vbs`経由で`run-import.ps1`を定期実行します。
 
-`run-import-task.xml`内の`<Actions><Exec><Arguments>`と`<WorkingDirectory>`は、現在のこのフォルダの配置場所を前提にした絶対パスで固定されています。リポジトリを別の場所や別のPCに置く場合は、インポート前にこのXML内のパスを実際の場所に書き換えるか、インポート後にタスクスケジューラの「操作」タブから編集してください。
+`run-import-task.xml`内の`<Actions><Exec><WorkingDirectory>`は、現在のこの`task`フォルダの配置場所を前提にした絶対パスで固定されています。リポジトリを別の場所や別のPCに置く場合は、`setup-task.bat`実行前にこのXML内のパスを実際の場所に書き換えるか、実行後にタスクスケジューラの「操作」タブから編集してください。
 
 ### 手順
 
-1. `Win + R` → `taskschd.msc` でタスクスケジューラを開く
-2. 右側の「操作」ペインから「**タスクのインポート...**」を選び、`run-import-task.xml`を選択
-3. 「タスクの作成」画面が開くので、「名前(M):」欄に好きな名前（例：`実績反映バッチ`）を入力してから「OK」
+1. `task`フォルダ内の`setup-task.bat`をダブルクリックして実行する
 
-   - この画面の「名前」欄は既定でファイル名（`run-import-task`）が入りますが、そのまま上書きして構いません
-   - 既定では「ユーザーがログオンしているときのみ実行する」になっています。Excelの自動化はサインインしたデスクトップセッションを前提にしているため、基本的にこの設定のまま使ってください
+   - 既に同名のタスクが登録済みの場合は、確認なしで上書き登録されます（何度実行しても安全です）
+   - タスクは既定で「ユーザーがログオンしているときのみ実行する」設定で登録されます。Excelの自動化はサインインしたデスクトップセッションを前提にしているため、この設定のまま使ってください
 
-4. インポート後、「トリガー」タブから実行時刻・頻度を編集できます（既定では毎日12:00）
-5. 一度手動で「実行」し、`logs\run-import_YYYY-MM-DD.log`にログが出るか、`backup`フォルダにバックアップが作られるかを確認してください
+2. 必要に応じて`Win + R` → `taskschd.msc`でタスクスケジューラを開き、対象タスクの「トリガー」タブから実行時刻・頻度を編集する（既定では毎日12:00）
+3. `task`フォルダ内の`run-task.bat`をダブルクリックして一度手動でタスクを実行し、`logs\run-import_YYYY-MM-DD.log`にログが出るか、`backup`フォルダにバックアップが作られるかを確認してください
 
    - 実行してもウィンドウは表示されません。ログの末尾に`Saved: ...`が出ていれば完了です。
    - 計画算定シート側でエラーを返した場合は、ログに記録されるだけでなくポップアップでも通知されます（この場合、保存は行われず処理が中断されます）
@@ -67,12 +69,16 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 ├─ 原価管理シート.xlsm
 ├─ run-import.bat
 ├─ run-import.ps1
-├─ run-import-hidden.vbs
-├─ run-import-task.xml
+├─ task/
+│  ├─ run-import-hidden.vbs
+│  ├─ run-import-task.xml
+│  ├─ setup-task.bat
+│  ├─ run-task.bat
+│  └─ remove-task.bat
 ├─ 実績データ/
 ├─ logs/
 ├─ backup/
-└─ README_run-import.md
+└─ README_自動実行.md
 ```
 
 ### 手順
