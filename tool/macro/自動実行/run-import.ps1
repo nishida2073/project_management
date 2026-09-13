@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$DataDir,
     [string]$XlsmPath,
     [string]$LogDir,
@@ -75,6 +75,17 @@ $excel.Visible = $false
 $excel.DisplayAlerts = $false
 $excel.EnableEvents = $false
 
+function Show-ErrorPopup {
+    param([string]$Message)
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.MessageBox]::Show(
+        $Message,
+        "実績反映バッチでエラーが発生しました",
+        [System.Windows.Forms.MessageBoxButtons]::OK,
+        [System.Windows.Forms.MessageBoxIcon]::Warning
+    ) | Out-Null
+}
+
 $wb = $null
 try {
     $wb = $excel.Workbooks.Open($XlsmPath)
@@ -84,6 +95,13 @@ try {
         Write-Log "Processing: $($dataFile.FullName)"
         $result = $excel.Run("'$($wb.Name)'!ImportFromOtherBook", $dataFile.FullName)
         Write-Log $result
+
+        if ($result -like "エラーが発生しました。*") {
+            # 計画算定シート側の重複エラーなど、対象ファイルを変えても同じ結果になるエラーのため、
+            # ここで打ち切ってポップアップで知らせる（データファイルの数だけポップアップが出るのを防ぐ）
+            Show-ErrorPopup -Message $result
+            exit 1
+        }
     }
     Write-Log "---"
 
@@ -93,6 +111,7 @@ try {
 }
 catch {
     Write-Log "ERROR: $($_.Exception.Message)"
+    Show-ErrorPopup -Message $_.Exception.Message
     exit 1
 }
 finally {
