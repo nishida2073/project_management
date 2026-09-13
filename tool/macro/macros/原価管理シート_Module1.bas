@@ -195,8 +195,6 @@ Sub CheckRowCountAndResetIfChanged(ws As Worksheet, mapMainCol As Object, mapMai
     If gLastKnownMainLastRowValid Then
         If currentLastRow <> gLastKnownMainLastRow Then
             ClearAllUndoState ws, mapMainCol, mapMainRange
-            MsgBox "計画算定シートの行数が変わったことを検知したため、" & vbCrLf & _
-                   "「元に戻す」の履歴・ハイライトの記録をクリアしました。"
         End If
     End If
 
@@ -213,6 +211,22 @@ Sub ClearAllUndoState(ws As Worksheet, mapMainCol As Object, mapMainRange As Obj
     Set gUndoHistory = New Collection
     Set gToggleValuesByRow = CreateObject("Scripting.Dictionary")
     Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
+
+    ' 行番号が信頼できなくなったため、個々の行の「元の色」には戻せない。
+    ' 代わりに、ハイライト対象になり得る列を貼付範囲・重複チェック列とも一括で自動色に戻す
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, mapMainCol("年度")).End(xlUp).Row
+    If lastRow >= 5 Then
+        ws.Range(mapMainRange("開始") & "5:" & mapMainRange("終了") & lastRow).Font.ColorIndex = xlAutomatic
+
+        Dim dupCols As Variant
+        dupCols = Array("年度", "案件ID", "案件名", "会計区分1", "会計区分2", "予実")
+        Dim i As Long
+        For i = LBound(dupCols) To UBound(dupCols)
+            ws.Range(ws.Cells(5, mapMainCol(dupCols(i))), ws.Cells(lastRow, mapMainCol(dupCols(i)))).Font.ColorIndex = xlAutomatic
+        Next i
+    End If
+
     Set gLastSavedSnapshot = BuildFullSheetSnapshot(ws, mapMainCol, mapMainRange)
 End Sub
 
