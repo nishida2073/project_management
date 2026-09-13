@@ -699,7 +699,7 @@ Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolea
     Application.EnableEvents = False
     If Target.Font.Color = changedColor Then
         Target.Value = rowOldVals(1, colIdx)
-        Target.Font.ColorIndex = xlAutomatic
+        Target.Font.Color = RGB(150, 150, 150)
     Else
         Target.Value = rowNewVals(1, colIdx)
         Target.Font.Color = changedColor
