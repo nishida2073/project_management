@@ -2,6 +2,9 @@
 
 Private Const MAIN_SHEET_NAME As String = "計画算定シート"
 
+' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
+Private Const USE_MONTH_RANGE_DIALOG As Boolean = False
+
 ' 直前の実績反映で上書きした行のバックアップ（行番号 → Array(旧値, 旧フォント色)）
 Private gBackupRows As Object
 
@@ -209,6 +212,8 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
 
     Dim years As Variant, caseIds As Variant, kubuns As Variant, costKubuns As Variant
 
+    Dim startPos As Long, endPos As Long
+
     ' === ① 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
     If isInteractive Then
         f = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
@@ -230,6 +235,57 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
         GoTo CleanExit
     End If
 
+    ' === ②' 対話実行時のみ、反映する月の範囲を聞く（バッチ実行時は全期間） ===
+    If isInteractive And USE_MONTH_RANGE_DIALOG Then
+        Dim monthRangeStr As String
+        Dim rangeParts() As String
+        Dim startMonthStr As String, endMonthStr As String
+        Dim startMonth As Long, endMonth As Long
+        Dim isValidRange As Boolean
+        isValidRange = False
+
+        Do While Not isValidRange
+            monthRangeStr = InputBox("反映する月の範囲を「開始月-終了月」の形式で入力してください（例：4-9）", "反映月の指定", "4-3")
+            If monthRangeStr = "" Then monthRangeStr = "4-3"   ' 空の場合は全期間として扱う
+
+            rangeParts = Split(monthRangeStr, "-")
+            If UBound(rangeParts) <> 1 Then
+                MsgBox "月の範囲は「開始月-終了月」の形式（例：4-9）で入力してください。", vbExclamation
+                GoTo RetryMonthRange
+            End If
+
+            startMonthStr = Trim(rangeParts(0))
+            endMonthStr = Trim(rangeParts(1))
+            If startMonthStr = "" Then startMonthStr = "4"   ' 開始月省略時は4月扱い
+            If endMonthStr = "" Then endMonthStr = "3"       ' 終了月省略時は3月扱い
+
+            If Not IsNumeric(startMonthStr) Or Not IsNumeric(endMonthStr) Then
+                MsgBox "月の範囲は「開始月-終了月」の形式（例：4-9）で入力してください。", vbExclamation
+                GoTo RetryMonthRange
+            End If
+
+            startMonth = CLng(startMonthStr)
+            endMonth = CLng(endMonthStr)
+            If startMonth < 1 Or startMonth > 12 Or endMonth < 1 Or endMonth > 12 Then
+                MsgBox "開始月・終了月は1～12の範囲で入力してください。", vbExclamation
+                GoTo RetryMonthRange
+            End If
+
+            startPos = FiscalMonthPosition(startMonth)
+            endPos = FiscalMonthPosition(endMonth)
+            If startPos > endPos Then
+                MsgBox "開始月は終了月と同じか、それより前（4月始まりの年度内）にしてください。", vbExclamation
+                GoTo RetryMonthRange
+            End If
+
+            isValidRange = True
+RetryMonthRange:
+        Loop
+    Else
+        startPos = 1
+        endPos = 12
+    End If
+
     Set wsOther = wbOther.Sheets("実績")   ' ←読み込み元
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME) ' ←貼り付け先
 
@@ -245,14 +301,18 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     lastRowMain = wsMain.Cells(wsMain.Rows.Count, mapMainCol("年度")).End(xlUp).Row
     Set mainIndex = BuildMainIndex(wsMain, mapMainCol, lastRowMain)
 
-    ' 今回の実行分のバックアップを新規に用意（前回分は破棄）
-    Set gBackupRows = CreateObject("Scripting.Dictionary")
-    Set matchedRows = CreateObject("Scripting.Dictionary")
-    Set gPendingReviewRows = CreateObject("Scripting.Dictionary")
-
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
+
+    ' 保存前の前回実行分が残っていれば、今回の反映前に一度元に戻しておく
+    ' （残したまま次を反映すると、前回の反映結果を基準に比較してしまい、ハイライトが正しく付かないため）
+    RevertBackedUpRows wsMain, mapMainRange
+
+    ' 今回の実行分のバックアップを新規に用意
+    Set gBackupRows = CreateObject("Scripting.Dictionary")
+    Set matchedRows = CreateObject("Scripting.Dictionary")
+    Set gPendingReviewRows = CreateObject("Scripting.Dictionary")
 
     ' === ⑤ Otherの可変範囲の最終行を取得し、必要な列を一括で配列に読み込む ===
     lastRowOther = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
@@ -297,8 +357,22 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
                     Dim oldColors As Variant
                     oldColors = GetFontColors(mainRange)   ' 上書き前のフォント色を保持
 
+                    Dim otherVals As Variant
+                    otherVals = otherRange.Value
+
                     oldVals = mainRange.Value          ' 上書き前の値を保持
-                    mainRange.Value = otherRange.Value  ' 一括で貼り付け
+
+                    ' 1列目（過年度）は常に反映し、2列目以降（4月～翌3月）は指定範囲の月だけ反映する
+                    Dim mergedVals As Variant
+                    mergedVals = oldVals
+                    Dim colOffset As Long
+                    For colOffset = 1 To mainRange.Cells.Count
+                        If colOffset = 1 Or ((colOffset - 1) >= startPos And (colOffset - 1) <= endPos) Then
+                            mergedVals(1, colOffset) = otherVals(1, colOffset)
+                        End If
+                    Next colOffset
+
+                    mainRange.Value = mergedVals
                     newVals = mainRange.Value
 
                     gBackupRows(foundRow) = Array(oldVals, oldColors)
@@ -337,7 +411,15 @@ CleanExit:
     If Not wbOther Is Nothing Then wbOther.Close SaveChanges:=False
 
     If completed Then
+        Dim monthRangeLine As String
+        If isInteractive And USE_MONTH_RANGE_DIALOG Then
+            monthRangeLine = "反映月：" & startMonth & "月～" & endMonth & "月" & vbCrLf & vbCrLf
+        Else
+            monthRangeLine = ""
+        End If
+
         ImportFromOtherBook = "実績反映が完了しました。" & vbCrLf & vbCrLf & _
+               monthRangeLine & _
                "反映（実績シート→" & MAIN_SHEET_NAME & "）：" & reflectedCount & "件" & vbCrLf & _
                IIf(reflectedRows = "", "", "　" & reflectedRows & vbCrLf) & _
                "スキップ（実績シート：" & MAIN_SHEET_NAME & "にデータなし）：" & skipJissekiOnlyCount & "件" & vbCrLf & _
@@ -394,13 +476,31 @@ Sub UndoLastImport()
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
 
+    RevertBackedUpRows wsMain, mapMainRange
+
+    Application.EnableEvents = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
+
+    MsgBox "直前の実績反映を元に戻しました。"
+
+End Sub
+
+
+' ============================
+' gBackupRowsに記録されている行を、反映前の値・フォント色に戻す（該当行が無ければ何もしない）
+' ============================
+Sub RevertBackedUpRows(ws As Worksheet, mapMainRange As Object)
+    If gBackupRows Is Nothing Then Exit Sub
+    If gBackupRows.Count = 0 Then Exit Sub
+
     Dim key As Variant
     For Each key In gBackupRows.Keys
         Dim foundRow As Long
         foundRow = key
 
         Dim rng As Range
-        Set rng = wsMain.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
+        Set rng = ws.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
 
         Dim backupData As Variant
         backupData = gBackupRows(key)
@@ -413,15 +513,8 @@ Sub UndoLastImport()
         SetFontColors rng, oldColors
     Next key
 
-    Application.EnableEvents = True
-    Application.Calculation = xlCalculationAutomatic
-    Application.ScreenUpdating = True
-
     Set gBackupRows = Nothing
     Set gPendingReviewRows = Nothing
-
-    MsgBox "直前の実績反映を元に戻しました。"
-
 End Sub
 
 
@@ -551,7 +644,7 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     Next r
 
     ' 重複しているキーをすべて集めて、1回のエラーでまとめて報告する
-    ' 併せて、重複グループごとに赤〜オレンジ系の色を割り当てて対象セルに色を付ける
+    ' 併せて、重複グループごとに赤～オレンジ系の色を割り当てて対象セルに色を付ける
     Dim msg As String
     Dim key As Variant
     Dim palette As Variant
@@ -628,6 +721,18 @@ Function NormalizeYear(k1 As Variant) As Long
         NormalizeYear = CLng(k1)
     Else
         NormalizeYear = -1
+    End If
+End Function
+
+
+' ============================
+' 4月始まりの年度内での月の位置を返す（4月=1 … 3月=12）
+' ============================
+Function FiscalMonthPosition(calendarMonth As Long) As Long
+    If calendarMonth >= 4 Then
+        FiscalMonthPosition = calendarMonth - 3
+    Else
+        FiscalMonthPosition = calendarMonth + 9
     End If
 End Function
 
