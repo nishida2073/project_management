@@ -2,11 +2,15 @@
 
 Private Const MAIN_SHEET_NAME As String = "計画算定シート"
 
-' 直前の実績反映で上書きした行のバックアップ（行番号 → Array(旧値, 旧フォント色)）
-Private gBackupRows As Object
+' 保存前に累積された「本当の元の値・元のフォント色」（行番号 → Array(元値の配列, 元色の配列)）。
+' 行ごとに最初に触られた時点の状態を保持し続け、保存時にクリアする
+Private gUndoBackupRows As Object
 
-' 実績反映で変更のあった行の旧値・新値（行番号 → Array(旧値の配列, 新値の配列)）
-Private gPendingReviewRows As Object
+' 「元に戻す」用の履歴（スタック）。各要素はgUndoBackupRowsのスナップショット（Dictionary）
+Private gUndoHistory As Collection
+
+' 実績反映で変更のあった行の元値・新値（行番号 → Array(元値の配列, 新値の配列)）
+Private gToggleValuesByRow As Object
 
 ' 貼付範囲の開始・終了列のキャッシュ（選択変更のたびにLoadMappingHorizontalを呼び直さないため）
 Private gPasteRangeStartCol As Long
@@ -16,6 +20,15 @@ Private gPasteRangeCached As Boolean
 ' 重複行ハイライトを付ける前の、年度・案件ID・会計区分1・会計区分2列のフォント色
 ' （行番号 → Array(年度の色, 案件IDの色, 会計区分1の色, 会計区分2の色)）
 Private gDuplicateHighlightBackup As Object
+
+' 前回保存時点（＝直近のHandleBeforeSave完了時、なければファイルを開いた時点）の
+' 貼付範囲全行の値・フォント色（行番号 → Array(値の配列, 色の配列)）。
+' 保存のたびにこの内容と現在のシートを比較し、差分があれば（実績反映・手動編集を問わず）履歴に積む
+Private gLastSavedSnapshot As Object
+
+' 前回チェック時点の計画算定シート最終行（行の追加・削除を検知するため）
+Private gLastKnownMainLastRow As Long
+Private gLastKnownMainLastRowValid As Boolean
 
 ' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
 ' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
@@ -50,6 +63,16 @@ Sub HandleWorkbookOpen()
     Dim wsMain As Worksheet
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
+    ' 開いた時点の状態を、保存時の差分比較の基準として記録しておく
+    Dim mapMainCol As Object, mapMainRange As Object
+    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
+    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+    Set gLastSavedSnapshot = BuildFullSheetSnapshot(wsMain, mapMainCol, mapMainRange)
+
+    ' 行の追加・削除検知の基準も、開いた時点の行数にしておく
+    gLastKnownMainLastRow = wsMain.Cells(wsMain.Rows.Count, mapMainCol("年度")).End(xlUp).Row
+    gLastKnownMainLastRowValid = True
+
     If wsMain.Visible = xlSheetVisible Then
         wsMain.Activate
         wsMain.Range("A1").Select
@@ -71,30 +94,37 @@ Sub HandleBeforeSave()
     Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
     Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
 
+    ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
+    CheckRowCountAndResetIfChanged ws, mapMainCol, mapMainRange
+
+    ' 保存時の差分チェックで除外する「実績反映で触った行」の集合
+    Dim touchedRows As Object
+    Set touchedRows = gUndoBackupRows
+    If touchedRows Is Nothing Then Set touchedRows = CreateObject("Scripting.Dictionary")
+
     ' 実績反映・実績なしグレー化した行は、値はそのままに元のフォント色へ戻す
-    If Not gBackupRows Is Nothing Then
-        Dim key As Variant
-        For Each key In gBackupRows.Keys
-            Dim foundRow As Long
-            foundRow = key
+    Dim key As Variant
+    For Each key In touchedRows.Keys
+        Dim foundRow As Long
+        foundRow = key
 
-            Dim rng As Range
-            Set rng = ws.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
+        Dim rng As Range
+        Set rng = ws.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
 
-            Dim backupData As Variant
-            backupData = gBackupRows(key)
-            SetFontColors rng, backupData(1)   ' (0)=旧値, (1)=旧フォント色。値には触れない
-        Next key
-    End If
+        Dim backupData As Variant
+        backupData = touchedRows(key)
+        SetFontColors rng, backupData(1)   ' (0)=元の値, (1)=元のフォント色。値には触れない
+    Next key
+    Set gUndoBackupRows = CreateObject("Scripting.Dictionary")
 
     ' 重複行ハイライトも、元のフォント色へ戻す
     If Not gDuplicateHighlightBackup Is Nothing Then
-        Dim colYear As Variant, colCase As Variant, colName As Variant, colQ As Variant, colR As Variant, colYojitsu As Variant
+        Dim colYear As Variant, colCase As Variant, colName As Variant, colKaikeiKubun1 As Variant, colKaikeiKubun2 As Variant, colYojitsu As Variant
         colYear = mapMainCol("年度")
         colCase = mapMainCol("案件ID")
         colName = mapMainCol("案件名")
-        colQ = mapMainCol("会計区分1")
-        colR = mapMainCol("会計区分2")
+        colKaikeiKubun1 = mapMainCol("会計区分1")
+        colKaikeiKubun2 = mapMainCol("会計区分2")
         colYojitsu = mapMainCol("予実")
 
         Dim dupKey As Variant
@@ -108,16 +138,82 @@ Sub HandleBeforeSave()
             ws.Cells(dupRow, colYear).Font.Color = dupColors(0)
             ws.Cells(dupRow, colCase).Font.Color = dupColors(1)
             ws.Cells(dupRow, colName).Font.Color = dupColors(2)
-            ws.Cells(dupRow, colQ).Font.Color = dupColors(3)
-            ws.Cells(dupRow, colR).Font.Color = dupColors(4)
+            ws.Cells(dupRow, colKaikeiKubun1).Font.Color = dupColors(3)
+            ws.Cells(dupRow, colKaikeiKubun2).Font.Color = dupColors(4)
             ws.Cells(dupRow, colYojitsu).Font.Color = dupColors(5)
         Next dupKey
 
         Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
     End If
 
-    Set gPendingReviewRows = CreateObject("Scripting.Dictionary")
+    ' 前回保存時点からの状態(gLastSavedSnapshot)を、実績反映で触った行を除いて現在の状態と比較し、
+    ' 変化があれば（＝手動でのセル編集があれば）履歴に積む
+    Dim currentSnapshot As Object
+    Set currentSnapshot = BuildFullSheetSnapshot(ws, mapMainCol, mapMainRange)
 
+    PushSaveCheckpoint gLastSavedSnapshot, currentSnapshot, touchedRows
+    Set gLastSavedSnapshot = currentSnapshot
+
+    Set gToggleValuesByRow = CreateObject("Scripting.Dictionary")
+
+End Sub
+
+
+' ============================
+' 貼付範囲の全行（行番号 → Array(値の配列, フォント色の配列)）のスナップショットを作る
+' （実績反映・手動編集を問わず、保存時点でのシート全体の状態を比較するために使う）
+' ============================
+Function BuildFullSheetSnapshot(ws As Worksheet, mapMainCol As Object, mapMainRange As Object) As Object
+    Dim snap As Object
+    Set snap = CreateObject("Scripting.Dictionary")
+
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, mapMainCol("年度")).End(xlUp).Row
+
+    If lastRow >= 5 Then
+        Dim r As Long
+        For r = 5 To lastRow
+            Dim rng As Range
+            Set rng = ws.Range(mapMainRange("開始") & r & ":" & mapMainRange("終了") & r)
+            snap(r) = Array(rng.Value, GetFontColors(rng))
+        Next r
+    End If
+
+    Set BuildFullSheetSnapshot = snap
+End Function
+
+
+' ============================
+' 計画算定シートの最終行が前回チェック時から変わっていないか確認する。
+' 行の追加・削除があると、行番号をキーにしている「元に戻す」履歴やハイライト情報が
+' 別の行を指してしまい危険なため、変化を検知した場合は安全側に倒してすべて破棄する
+' ============================
+Sub CheckRowCountAndResetIfChanged(ws As Worksheet, mapMainCol As Object, mapMainRange As Object)
+    Dim currentLastRow As Long
+    currentLastRow = ws.Cells(ws.Rows.Count, mapMainCol("年度")).End(xlUp).Row
+
+    If gLastKnownMainLastRowValid Then
+        If currentLastRow <> gLastKnownMainLastRow Then
+            ClearAllUndoState ws, mapMainCol, mapMainRange
+            MsgBox "計画算定シートの行数が変わったことを検知したため、" & vbCrLf & _
+                   "「元に戻す」の履歴・ハイライトの記録をクリアしました。"
+        End If
+    End If
+
+    gLastKnownMainLastRow = currentLastRow
+    gLastKnownMainLastRowValid = True
+End Sub
+
+
+' ============================
+' 「元に戻す」履歴・ハイライトに関する記録をすべて破棄し、現在のシート状態を新しい基準にする
+' ============================
+Sub ClearAllUndoState(ws As Worksheet, mapMainCol As Object, mapMainRange As Object)
+    Set gUndoBackupRows = CreateObject("Scripting.Dictionary")
+    Set gUndoHistory = New Collection
+    Set gToggleValuesByRow = CreateObject("Scripting.Dictionary")
+    Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
+    Set gLastSavedSnapshot = BuildFullSheetSnapshot(ws, mapMainCol, mapMainRange)
 End Sub
 
 
@@ -135,7 +231,7 @@ Sub EnsureButtonsExist()
     If wsMain.Visible <> xlSheetVisible Then Exit Sub
 
     CreateButton wsMain, "MacroProcButton999", "D2", "実績反映", "ImportFromOtherBook"
-    CreateButton wsMain, "UndoProcButton999", "E2", "元に戻す", "UndoLastImport"
+    CreateButton wsMain, "UndoProcButton999", "E2", "元に戻す", "UndoLastCheckpoint"
 
 End Sub
 
@@ -215,21 +311,21 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Dim wsMain As Worksheet
     Dim lastRowOther As Long
     Dim lastRowMain As Long
-    Dim r As Long
-    Dim key1 As Variant, key2 As Variant, key3 As Variant, key4 As Variant
+    Dim otherRow As Long
+    Dim otherYearRaw As Variant, otherCaseId As Variant, otherKubunText As Variant, otherCostKubunId As Variant
     Dim foundRow As Long
-    Dim f As Variant
+    Dim otherFilePathToOpen As Variant
 
     Dim mapOtherCol As Object
     Dim mapMainRange As Object
     Dim mapOtherRange As Object
     Dim mapMainCol As Object
-    Dim mapQ As Object
-    Dim mapR As Object
+    Dim mapKaikeiKubun1 As Object
+    Dim mapKaikeiKubun2 As Object
     Dim mainIndex As Object
 
     Dim yOther As Long
-    Dim qMain As String, rMain As String
+    Dim kaikeiKubun1 As String, kaikeiKubun2 As String
     Dim idxKey As String
 
     Dim mainRange As Range, otherRange As Range
@@ -256,30 +352,34 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
 
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
     Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
+    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
 
-    ' === ① 対象ファイルを選ぶ前に、計画算定シート側の重複チェックを行う ===
+    ' === ① 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する ===
+    CheckRowCountAndResetIfChanged wsMain, mapMainCol, mapMainRange
+
+    ' === ② 対象ファイルを選ぶ前に、計画算定シート側の重複チェックを行う ===
     lastRowMain = wsMain.Cells(wsMain.Rows.Count, mapMainCol("年度")).End(xlUp).Row
-    Set mainIndex = BuildMainIndex(wsMain, mapMainCol, lastRowMain)
+    CheckDuplicateRows wsMain, mapMainCol, lastRowMain
 
-    ' === ② 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
+    ' === ③ 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
     If isInteractive Then
-        f = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
-        If f = False Then Exit Function
+        otherFilePathToOpen = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
+        If otherFilePathToOpen = False Then Exit Function
     Else
-        f = otherFilePath
+        otherFilePathToOpen = otherFilePath
     End If
 
-    ' === ③ Otherブックを開く ===
-    Set wbOther = Workbooks.Open(f, ReadOnly:=True)
+    ' === ④ Otherブックを開く ===
+    Set wbOther = Workbooks.Open(otherFilePathToOpen, ReadOnly:=True)
 
     If Not SheetExists(wbOther, "実績") Then
         ImportFromOtherBook = "選択したファイルに「実績」シートが見つかりません。" & vbCrLf & _
-               "ファイルが正しいか確認してください。" & vbCrLf & "対象ファイル: " & f
+               "ファイルが正しいか確認してください。" & vbCrLf & "対象ファイル: " & otherFilePathToOpen
         If isInteractive Then MsgBox ImportFromOtherBook, vbExclamation
         GoTo CleanExit
     End If
 
-    ' === ③' 対話実行時のみ、反映する月の範囲を聞く（バッチ実行時は全期間） ===
+    ' === ④' 対話実行時のみ、反映する月の範囲を聞く（バッチ実行時は全期間） ===
     If isInteractive And ShouldUseMonthRangeDialog() Then
         Dim monthRangeInput As Variant
         Dim monthRangeStr As String
@@ -339,27 +439,41 @@ RetryMonthRange:
 
     Set wsOther = wbOther.Sheets("実績")   ' ←読み込み元
 
-    ' === ④ マッピングは1回だけ読み込む ===
+    ' === ⑤ マッピングは1回だけ読み込む（mapMainRangeは冒頭で読み込み済み） ===
     Set mapOtherCol = LoadMappingHorizontal("実績Excel")
-    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
     Set mapOtherRange = LoadMappingHorizontal("実績Excel貼付範囲")
-    Set mapQ = LoadMappingHorizontal("会計区分1マッピング")
-    Set mapR = LoadMappingHorizontal("会計区分2マッピング")
+    Set mapKaikeiKubun1 = LoadMappingHorizontal("会計区分1マッピング")
+    Set mapKaikeiKubun2 = LoadMappingHorizontal("会計区分2マッピング")
 
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
 
-    ' 保存前の前回実行分が残っていれば、今回の反映前に一度元に戻しておく
-    ' （残したまま次を反映すると、前回の反映結果を基準に比較してしまい、ハイライトが正しく付かないため）
-    RevertBackedUpRows wsMain, mapMainRange
+    ' 前回までの実行で触った行は、一旦「本当の元の色」に戻しておく（値には触れない）
+    If Not gUndoBackupRows Is Nothing Then
+        Dim resetKey As Variant
+        For Each resetKey In gUndoBackupRows.Keys
+            Dim resetRow As Long
+            resetRow = resetKey
+            Dim resetRng As Range
+            Set resetRng = wsMain.Range(mapMainRange("開始") & resetRow & ":" & mapMainRange("終了") & resetRow)
+            Dim resetBackup As Variant
+            resetBackup = gUndoBackupRows(resetKey)
+            SetFontColors resetRng, resetBackup(1)
+        Next resetKey
+    End If
 
-    ' 今回の実行分のバックアップを新規に用意
-    Set gBackupRows = CreateObject("Scripting.Dictionary")
+    ' 保存されるまでの「本当の元の値・元の色」は行ごとに最初に触られたときのみ記録し、
+    ' 以降の実行をまたいで保持し続ける（ハイライト・トグルの比較基準として使うため）
+    If gUndoBackupRows Is Nothing Then Set gUndoBackupRows = CreateObject("Scripting.Dictionary")
+    If gToggleValuesByRow Is Nothing Then Set gToggleValuesByRow = CreateObject("Scripting.Dictionary")
     Set matchedRows = CreateObject("Scripting.Dictionary")
-    Set gPendingReviewRows = CreateObject("Scripting.Dictionary")
 
-    ' === ⑤ Otherの可変範囲の最終行を取得し、必要な列を一括で配列に読み込む ===
+    ' 今回の実行だけを元に戻すための履歴用スナップショット（行番号 → Array(実行前の値, 実行前の色)）
+    Dim stepSnapshot As Object
+    Set stepSnapshot = CreateObject("Scripting.Dictionary")
+
+    ' === ⑥ Otherの可変範囲の最終行を取得し、必要な列を一括で配列に読み込む ===
     lastRowOther = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
 
     If lastRowOther >= 2 Then
@@ -369,23 +483,26 @@ RetryMonthRange:
         costKubuns = wsOther.Range(wsOther.Cells(1, mapOtherCol("原価区分ID")), wsOther.Cells(lastRowOther, mapOtherCol("原価区分ID"))).Value
     End If
 
-    ' === ⑥ 行ループ（キーの判定は配列上で行い、一致した行だけシートへアクセスする） ===
-    For r = 2 To lastRowOther
+    ' 実績反映時の行検索用に、計画算定シート側の索引を作る
+    Set mainIndex = BuildMainIndex(wsMain, mapMainCol, lastRowMain)
+
+    ' === ⑦ 行ループ（キーの判定は配列上で行い、一致した行だけシートへアクセスする） ===
+    For otherRow = 2 To lastRowOther
 
         ' キー4つ取得（年度, 案件ID, 区分, 原価区分ID）
-        key1 = years(r, 1)
-        key2 = caseIds(r, 1)
-        key3 = Trim(CStr(kubuns(r, 1)))
-        key4 = Trim(CStr(costKubuns(r, 1)))
+        otherYearRaw = years(otherRow, 1)
+        otherCaseId = caseIds(otherRow, 1)
+        otherKubunText = Trim(CStr(kubuns(otherRow, 1)))
+        otherCostKubunId = Trim(CStr(costKubuns(otherRow, 1)))
 
-        If mapQ.Exists(key3) And mapR.Exists(key4) Then
+        If mapKaikeiKubun1.Exists(otherKubunText) And mapKaikeiKubun2.Exists(otherCostKubunId) Then
 
-            yOther = NormalizeYear(key1)
-            qMain = mapQ(key3)
-            rMain = mapR(key4)
-            idxKey = yOther & "|" & key2 & "|" & qMain & "|" & rMain
+            yOther = NormalizeYear(otherYearRaw)
+            kaikeiKubun1 = mapKaikeiKubun1(otherKubunText)
+            kaikeiKubun2 = mapKaikeiKubun2(otherCostKubunId)
+            idxKey = yOther & "|" & otherCaseId & "|" & kaikeiKubun1 & "|" & kaikeiKubun2
 
-            ' === ⑦ Dictionaryで一致する行を即座に取得 ===
+            ' === ⑧ Dictionaryで一致する行を即座に取得 ===
             If mainIndex.Exists(idxKey) Then
                 foundRow = mainIndex(idxKey)
 
@@ -395,21 +512,32 @@ RetryMonthRange:
                 If Not matchedRows.Exists(foundRow) Then
                     matchedRows(foundRow) = True
 
-                    ' === ⑧ 一致した行に貼り付け（値が変わったセルだけ赤色にする） ===
+                    ' === ⑨ 一致した行に貼り付け（値が変わったセルだけ赤色にする） ===
                     Set mainRange = wsMain.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
-                    Set otherRange = wsOther.Range(mapOtherRange("開始") & r & ":" & mapOtherRange("終了") & r)
+                    Set otherRange = wsOther.Range(mapOtherRange("開始") & otherRow & ":" & mapOtherRange("終了") & otherRow)
 
-                    Dim oldColors As Variant
-                    oldColors = GetFontColors(mainRange)   ' 上書き前のフォント色を保持
+                    Dim currentColors As Variant
+                    currentColors = GetFontColors(mainRange)   ' 今回の実行開始時点のフォント色
 
                     Dim otherVals As Variant
                     otherVals = otherRange.Value
 
-                    oldVals = mainRange.Value          ' 上書き前の値を保持
+                    Dim currentVals As Variant
+                    currentVals = mainRange.Value       ' 今回の実行開始時点の値（合成のベースにする）
+
+                    ' 今回の実行だけを元に戻すための情報
+                    stepSnapshot(foundRow) = Array(currentVals, currentColors)
+
+                    ' 「本当の元の値・元の色」は最初に触られたときだけ記録する
+                    If Not gUndoBackupRows.Exists(foundRow) Then
+                        gUndoBackupRows(foundRow) = Array(currentVals, currentColors)
+                    End If
+
+                    oldVals = gUndoBackupRows(foundRow)(0)   ' ハイライト・トグル比較用の「本当の元の値」
 
                     ' 1列目（過年度）は常に反映し、2列目以降（4月～翌3月）は指定範囲の月だけ反映する
                     Dim mergedVals As Variant
-                    mergedVals = oldVals
+                    mergedVals = currentVals
                     Dim colOffset As Long
                     For colOffset = 1 To mainRange.Cells.Count
                         If colOffset = 1 Or ((colOffset - 1) >= startPos And (colOffset - 1) <= endPos) Then
@@ -420,31 +548,33 @@ RetryMonthRange:
                     mainRange.Value = mergedVals
                     newVals = mainRange.Value
 
-                    gBackupRows(foundRow) = Array(oldVals, oldColors)
-                    gPendingReviewRows(foundRow) = Array(oldVals, newVals)
+                    gToggleValuesByRow(foundRow) = Array(oldVals, newVals)
 
                     HighlightChangedCells mainRange, oldVals, newVals
 
                     reflectedCount = reflectedCount + 1
-                    reflectedRows = AppendItem(reflectedRows, r & "→" & foundRow)
+                    reflectedRows = AppendItem(reflectedRows, otherRow & "→" & foundRow)
                 Else
                     skipDupCount = skipDupCount + 1
-                    skipDupRows = AppendItem(skipDupRows, CStr(r))
+                    skipDupRows = AppendItem(skipDupRows, CStr(otherRow))
                 End If
             Else
                 skipJissekiOnlyCount = skipJissekiOnlyCount + 1
-                skipJissekiOnlyRows = AppendItem(skipJissekiOnlyRows, CStr(r))
+                skipJissekiOnlyRows = AppendItem(skipJissekiOnlyRows, CStr(otherRow))
             End If
 
         Else
             skipJissekiOnlyCount = skipJissekiOnlyCount + 1
-            skipJissekiOnlyRows = AppendItem(skipJissekiOnlyRows, CStr(r))
+            skipJissekiOnlyRows = AppendItem(skipJissekiOnlyRows, CStr(otherRow))
         End If
 
-    Next r
+    Next otherRow
 
-    ' === ⑨ 一度もマッチしなかった「予実=実績」行をグレー表示にする ===
-    MarkUnmatchedActualRows wsMain, mapMainCol, mapMainRange, matchedRows, gBackupRows, lastRowMain, skipKeikakuOnlyCount, skipKeikakuOnlyRows
+    ' === ⑩ 一度もマッチしなかった「予実=実績」行をグレー表示にする ===
+    MarkUnmatchedActualRows wsMain, mapMainCol, mapMainRange, matchedRows, gUndoBackupRows, stepSnapshot, lastRowMain, skipKeikakuOnlyCount, skipKeikakuOnlyRows
+
+    ' 今回の実行分を「元に戻す」用の履歴に積む（直前と内容が同じなら追加しない）
+    PushUndoHistory stepSnapshot
 
     completed = True
 
@@ -498,69 +628,214 @@ End Function
 
 
 ' ============================
-' 直前の実績反映を元に戻す
+' 履歴を1段階分だけ元に戻す（「元に戻す」ボタンを押すたびに1回分ずつ遡る）
 ' ============================
-Sub UndoLastImport()
+Sub UndoLastCheckpoint()
+
+    Dim wsMain As Worksheet
+    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
+
+    Dim mapMainRange As Object, mapMainCol As Object
+    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
+
+    ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
+    CheckRowCountAndResetIfChanged wsMain, mapMainCol, mapMainRange
 
     Dim noHistory As Boolean
-    noHistory = (gBackupRows Is Nothing)
-    If Not noHistory Then noHistory = (gBackupRows.Count = 0)
+    noHistory = (gUndoHistory Is Nothing)
+    If Not noHistory Then noHistory = (gUndoHistory.Count = 0)
 
     If noHistory Then
         MsgBox "実行履歴がありません。"
         Exit Sub
     End If
 
-    Dim wsMain As Worksheet
-    Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
-
-    Dim mapMainRange As Object
-    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+    Dim snapshot As Object
+    Set snapshot = gUndoHistory(gUndoHistory.Count)
+    gUndoHistory.Remove gUndoHistory.Count
 
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     Application.EnableEvents = False
 
-    RevertBackedUpRows wsMain, mapMainRange
+    ApplyUndoSnapshot wsMain, mapMainRange, snapshot
+
+    ' 元に戻した直後のシートの状態を、次回保存時の比較基準として更新しておく
+    Set gLastSavedSnapshot = BuildFullSheetSnapshot(wsMain, mapMainCol, mapMainRange)
 
     Application.EnableEvents = True
     Application.Calculation = xlCalculationAutomatic
     Application.ScreenUpdating = True
 
-    MsgBox "直前の実績反映を元に戻しました。"
+    MsgBox "直前の状態に戻しました。"
 
 End Sub
 
 
 ' ============================
-' gBackupRowsに記録されている行を、反映前の値・フォント色に戻す（該当行が無ければ何もしない）
+' 指定されたスナップショット（行番号 → Array(値, フォント色)）の内容をシートへ書き戻す
 ' ============================
-Sub RevertBackedUpRows(ws As Worksheet, mapMainRange As Object)
-    If gBackupRows Is Nothing Then Exit Sub
-    If gBackupRows.Count = 0 Then Exit Sub
+Sub ApplyUndoSnapshot(ws As Worksheet, mapMainRange As Object, snapshot As Object)
+    If snapshot Is Nothing Then Exit Sub
 
     Dim key As Variant
-    For Each key In gBackupRows.Keys
+    For Each key In snapshot.Keys
         Dim foundRow As Long
         foundRow = key
 
         Dim rng As Range
         Set rng = ws.Range(mapMainRange("開始") & foundRow & ":" & mapMainRange("終了") & foundRow)
 
-        Dim backupData As Variant
-        backupData = gBackupRows(key)
+        Dim snapData As Variant
+        snapData = snapshot(key)
 
-        Dim oldVals As Variant, oldColors As Variant
-        oldVals = backupData(0)
-        oldColors = backupData(1)
+        rng.Value = snapData(0)
+        SetFontColors rng, snapData(1)
 
-        rng.Value = oldVals
-        SetFontColors rng, oldColors
+        ' 元に戻した行は、ダブルクリックでの除外トグル対象からも外す
+        If Not gToggleValuesByRow Is Nothing Then
+            If gToggleValuesByRow.Exists(foundRow) Then gToggleValuesByRow.Remove foundRow
+        End If
+
+        ' 元に戻した行は「本当の元の値・元の色」の記録も削除する
+        If Not gUndoBackupRows Is Nothing Then
+            If gUndoBackupRows.Exists(foundRow) Then gUndoBackupRows.Remove foundRow
+        End If
+    Next key
+End Sub
+
+
+' ============================
+' 保存時のチェックポイントを履歴に積むかどうかを判定する。
+' oldSnapshot（前回保存時点）とcurrentSnapshot（現在の状態）を、excludeRows（実績反映で
+' 今回触った行。別途stepSnapshotとして既に履歴に積まれている）を除いて比較し、
+' 差があれば（＝手動でのセル編集や新規行の追加があれば）oldSnapshotを履歴に積む
+' ============================
+Sub PushSaveCheckpoint(oldSnapshot As Object, currentSnapshot As Object, excludeRows As Object)
+    Dim hasChange As Boolean
+    hasChange = False
+
+    Dim rowKey As Variant
+    For Each rowKey In currentSnapshot.Keys
+        If Not excludeRows.Exists(rowKey) Then
+            If RowSnapshotToString(oldSnapshot, rowKey) <> RowSnapshotToString(currentSnapshot, rowKey) Then
+                hasChange = True
+                Exit For
+            End If
+        End If
+    Next rowKey
+
+    If Not hasChange And Not oldSnapshot Is Nothing Then
+        For Each rowKey In oldSnapshot.Keys
+            If Not currentSnapshot.Exists(rowKey) And Not excludeRows.Exists(rowKey) Then
+                hasChange = True
+                Exit For
+            End If
+        Next rowKey
+    End If
+
+    If hasChange Then PushUndoHistory oldSnapshot
+End Sub
+
+
+' ============================
+' 履歴スタック（gUndoHistory）に1件積む。直前の履歴と内容が同じ場合は追加しない
+' ============================
+Sub PushUndoHistory(snapshot As Object)
+    If gUndoHistory Is Nothing Then Set gUndoHistory = New Collection
+    If snapshot Is Nothing Then Exit Sub
+    If snapshot.Count = 0 Then Exit Sub
+
+    Dim newSig As String
+    newSig = BuildUndoSignature(snapshot)
+
+    If gUndoHistory.Count > 0 Then
+        If BuildUndoSignature(gUndoHistory(gUndoHistory.Count)) = newSig Then Exit Sub
+    End If
+
+    gUndoHistory.Add CloneRowSnapshot(snapshot)
+End Sub
+
+
+' ============================
+' 行番号→Array(値, フォント色) 形式のDictionaryを複製する
+' ============================
+Function CloneRowSnapshot(dic As Object) As Object
+    Dim newDic As Object
+    Set newDic = CreateObject("Scripting.Dictionary")
+
+    Dim key As Variant
+    For Each key In dic.Keys
+        newDic(key) = dic(key)
     Next key
 
-    Set gBackupRows = Nothing
-    Set gPendingReviewRows = Nothing
-End Sub
+    Set CloneRowSnapshot = newDic
+End Function
+
+
+' ============================
+' 行番号→Array(値, フォント色) 形式のDictionaryの内容を比較用の文字列に変換する
+' （履歴の重複追加を避けるための簡易な内容比較に使う）
+' ============================
+Function BuildUndoSignature(dic As Object) As String
+    If dic Is Nothing Then
+        BuildUndoSignature = ""
+        Exit Function
+    End If
+
+    Dim sig As String
+    Dim key As Variant
+    For Each key In dic.Keys
+        sig = sig & "#" & key & ":" & RowSnapshotToString(dic, key)
+    Next key
+
+    BuildUndoSignature = sig
+End Function
+
+
+' ============================
+' Dictionary内の1行分（Array(値, フォント色)）だけを比較用文字列に変換する。
+' 該当キーが無い場合は空文字列を返す
+' ============================
+Function RowSnapshotToString(dic As Object, key As Variant) As String
+    If dic Is Nothing Then Exit Function
+    If Not dic.Exists(key) Then Exit Function
+
+    Dim data As Variant
+    data = dic(key)
+    RowSnapshotToString = ValsToString(data(0)) & "/" & ColorsToString(data(1))
+End Function
+
+
+' ============================
+' mainRange.Valueで取得した値（配列またはスカラー）を比較用文字列に変換する
+' ============================
+Function ValsToString(vals As Variant) As String
+    Dim s As String
+    If IsArray(vals) Then
+        Dim i As Long
+        For i = LBound(vals, 2) To UBound(vals, 2)
+            s = s & CStr(vals(1, i)) & vbTab
+        Next i
+    Else
+        s = CStr(vals)
+    End If
+    ValsToString = s
+End Function
+
+
+' ============================
+' GetFontColorsで取得した色の配列を比較用文字列に変換する
+' ============================
+Function ColorsToString(colors As Variant) As String
+    Dim s As String
+    Dim i As Long
+    For i = LBound(colors) To UBound(colors)
+        s = s & colors(i) & vbTab
+    Next i
+    ColorsToString = s
+End Function
 
 
 ' ============================
@@ -582,7 +857,7 @@ End Function
 ' ============================
 ' 予実=実績だが、今回の実行で一度も実績シート側とマッチしなかった行をグレー表示にする
 ' ============================
-Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange As Object, matchedRows As Object, backupRows As Object, lastRow As Long, ByRef unmatchedCount As Long, ByRef unmatchedRows As String)
+Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange As Object, matchedRows As Object, backupRows As Object, stepSnapshot As Object, lastRow As Long, ByRef unmatchedCount As Long, ByRef unmatchedRows As String)
     unmatchedCount = 0
     unmatchedRows = ""
 
@@ -601,9 +876,16 @@ Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange 
                 Dim rng As Range
                 Set rng = ws.Range(mapMainRange("開始") & r & ":" & mapMainRange("終了") & r)
 
-                ' グレーにする前の値・フォント色をバックアップしておく（元に戻すため）
+                Dim beforeVals As Variant, beforeColors As Variant
+                beforeVals = rng.Value
+                beforeColors = GetFontColors(rng)
+
+                ' 今回の実行だけを元に戻すための情報
+                stepSnapshot(r) = Array(beforeVals, beforeColors)
+
+                ' グレーにする前の「本当の元の値・元の色」は最初に触られたときだけ記録する
                 If Not backupRows.Exists(r) Then
-                    backupRows(r) = Array(rng.Value, GetFontColors(rng))
+                    backupRows(r) = Array(beforeVals, beforeColors)
                 End If
 
                 rng.Font.Color = RGB(150, 150, 150)
@@ -646,28 +928,83 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
 
-    If gDuplicateHighlightBackup Is Nothing Then
-        Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
-    End If
-
     If lastRow < 5 Then
         Set BuildMainIndex = dic
         Exit Function
     End If
 
-    Dim colYear As Variant, colCase As Variant, colName As Variant, colQ As Variant, colR As Variant, colYojitsu As Variant
+    Dim colYear As Variant, colCase As Variant, colKaikeiKubun1 As Variant, colKaikeiKubun2 As Variant, colYojitsu As Variant
+    colYear = mapMainCol("年度")
+    colCase = mapMainCol("案件ID")
+    colKaikeiKubun1 = mapMainCol("会計区分1")
+    colKaikeiKubun2 = mapMainCol("会計区分2")
+    colYojitsu = mapMainCol("予実")
+
+    Dim years As Variant, caseIds As Variant, kaikeiKubun1s As Variant, kaikeiKubun2s As Variant, yojitsus As Variant
+    years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
+    caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
+    kaikeiKubun1s = ws.Range(ws.Cells(1, colKaikeiKubun1), ws.Cells(lastRow, colKaikeiKubun1)).Value
+    kaikeiKubun2s = ws.Range(ws.Cells(1, colKaikeiKubun2), ws.Cells(lastRow, colKaikeiKubun2)).Value
+    yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
+
+    Dim r As Long
+    For r = 5 To lastRow
+        If yojitsus(r, 1) = "実績" _
+                And Trim(years(r, 1) & "") <> "" _
+                And Trim(caseIds(r, 1) & "") <> "" _
+                And Trim(kaikeiKubun1s(r, 1) & "") <> "" _
+                And Trim(kaikeiKubun2s(r, 1) & "") <> "" Then
+            Dim idxKey As String
+            idxKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & kaikeiKubun1s(r, 1) & "|" & kaikeiKubun2s(r, 1)
+
+            If Not dic.Exists(idxKey) Then dic(idxKey) = r
+        End If
+    Next r
+
+    Set BuildMainIndex = dic
+End Function
+
+
+' ============================
+' 年度・案件ID・案件名・会計区分1・会計区分2・予実（remove-duplicate-rows.ps1と同じキー）の
+' 重複チェックを行う。前回のチェックで付けた重複ハイライトは一旦元の色に戻したうえで判定し直し、
+' 重複が見つかった場合は行をハイライトしたうえでエラーを発生させる
+' ============================
+Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
+    Dim colYear As Variant, colCase As Variant, colName As Variant, colKaikeiKubun1 As Variant, colKaikeiKubun2 As Variant, colYojitsu As Variant
     colYear = mapMainCol("年度")
     colCase = mapMainCol("案件ID")
     colName = mapMainCol("案件名")
-    colQ = mapMainCol("会計区分1")
-    colR = mapMainCol("会計区分2")
+    colKaikeiKubun1 = mapMainCol("会計区分1")
+    colKaikeiKubun2 = mapMainCol("会計区分2")
     colYojitsu = mapMainCol("予実")
 
-    Dim years As Variant, caseIds As Variant, qs As Variant, rs As Variant, yojitsus As Variant, names As Variant
+    ' 前回までのチェックで重複ハイライトを付けた行は、一旦「本当の元の色」に戻す。
+    ' そのうえで記録をクリアし、今回のチェックで改めて重複判定・色付けを行う
+    If Not gDuplicateHighlightBackup Is Nothing Then
+        Dim resetDupKey As Variant
+        For Each resetDupKey In gDuplicateHighlightBackup.Keys
+            Dim resetDupRow As Long
+            resetDupRow = resetDupKey
+            Dim resetDupColors As Variant
+            resetDupColors = gDuplicateHighlightBackup(resetDupKey)
+            ws.Cells(resetDupRow, colYear).Font.Color = resetDupColors(0)
+            ws.Cells(resetDupRow, colCase).Font.Color = resetDupColors(1)
+            ws.Cells(resetDupRow, colName).Font.Color = resetDupColors(2)
+            ws.Cells(resetDupRow, colKaikeiKubun1).Font.Color = resetDupColors(3)
+            ws.Cells(resetDupRow, colKaikeiKubun2).Font.Color = resetDupColors(4)
+            ws.Cells(resetDupRow, colYojitsu).Font.Color = resetDupColors(5)
+        Next resetDupKey
+    End If
+    Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
+
+    If lastRow < 5 Then Exit Sub
+
+    Dim years As Variant, caseIds As Variant, kaikeiKubun1s As Variant, kaikeiKubun2s As Variant, yojitsus As Variant, names As Variant
     years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
     caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
-    qs = ws.Range(ws.Cells(1, colQ), ws.Cells(lastRow, colQ)).Value
-    rs = ws.Range(ws.Cells(1, colR), ws.Cells(lastRow, colR)).Value
+    kaikeiKubun1s = ws.Range(ws.Cells(1, colKaikeiKubun1), ws.Cells(lastRow, colKaikeiKubun1)).Value
+    kaikeiKubun2s = ws.Range(ws.Cells(1, colKaikeiKubun2), ws.Cells(lastRow, colKaikeiKubun2)).Value
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
     names = ws.Range(ws.Cells(1, colName), ws.Cells(lastRow, colName)).Value
 
@@ -676,27 +1013,14 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
 
     Dim r As Long
     For r = 5 To lastRow
-        ' 実績反映用のルックアップ（年度・案件ID・会計区分1・会計区分2、実績行のみ）
-        If yojitsus(r, 1) = "実績" _
-                And Trim(years(r, 1) & "") <> "" _
-                And Trim(caseIds(r, 1) & "") <> "" _
-                And Trim(qs(r, 1) & "") <> "" _
-                And Trim(rs(r, 1) & "") <> "" Then
-            Dim k As String
-            k = years(r, 1) & "|" & caseIds(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1)
-
-            If Not dic.Exists(k) Then dic(k) = r
-        End If
-
-        ' 重複判定用（年度・案件ID・案件名・会計区分1・会計区分2・予実、全行が対象。remove-duplicate-rows.ps1と同じキー）
         If Trim(years(r, 1) & "") <> "" _
                 And Trim(caseIds(r, 1) & "") <> "" _
                 And Trim(names(r, 1) & "") <> "" _
-                And Trim(qs(r, 1) & "") <> "" _
-                And Trim(rs(r, 1) & "") <> "" _
+                And Trim(kaikeiKubun1s(r, 1) & "") <> "" _
+                And Trim(kaikeiKubun2s(r, 1) & "") <> "" _
                 And Trim(yojitsus(r, 1) & "") <> "" Then
             Dim dupKey As String
-            dupKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & names(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1) & "|" & yojitsus(r, 1)
+            dupKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & names(r, 1) & "|" & kaikeiKubun1s(r, 1) & "|" & kaikeiKubun2s(r, 1) & "|" & yojitsus(r, 1)
 
             If rowsByKey.Exists(dupKey) Then
                 rowsByKey(dupKey) = rowsByKey(dupKey) & ", " & r
@@ -742,16 +1066,16 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
                         ws.Cells(dupRow, colYear).Font.Color, _
                         ws.Cells(dupRow, colCase).Font.Color, _
                         ws.Cells(dupRow, colName).Font.Color, _
-                        ws.Cells(dupRow, colQ).Font.Color, _
-                        ws.Cells(dupRow, colR).Font.Color, _
+                        ws.Cells(dupRow, colKaikeiKubun1).Font.Color, _
+                        ws.Cells(dupRow, colKaikeiKubun2).Font.Color, _
                         ws.Cells(dupRow, colYojitsu).Font.Color)
                 End If
 
                 ws.Cells(dupRow, colYear).Font.Color = groupColor
                 ws.Cells(dupRow, colCase).Font.Color = groupColor
                 ws.Cells(dupRow, colName).Font.Color = groupColor
-                ws.Cells(dupRow, colQ).Font.Color = groupColor
-                ws.Cells(dupRow, colR).Font.Color = groupColor
+                ws.Cells(dupRow, colKaikeiKubun1).Font.Color = groupColor
+                ws.Cells(dupRow, colKaikeiKubun2).Font.Color = groupColor
                 ws.Cells(dupRow, colYojitsu).Font.Color = groupColor
             Next p
 
@@ -761,14 +1085,12 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
 
     If msg <> "" Then
         Err.Raise vbObjectError + 1001, _
-                  "BuildMainIndex", _
+                  "CheckDuplicateRows", _
                   MAIN_SHEET_NAME & "に、条件（年度・案件ID・案件名・会計区分1・会計区分2・予実）が重複する行があります。" & vbCrLf & vbCrLf & _
                   msg & _
                   "実績反映を行う前に、" & MAIN_SHEET_NAME & "側の重複を解消してください。"
     End If
-
-    Set BuildMainIndex = dic
-End Function
+End Sub
 
 
 ' ============================
@@ -848,7 +1170,7 @@ End Sub
 ' 実績反映で変更されたセルをダブルクリックすると、除外（旧値に戻す）⇔解除をトグルする
 ' ============================
 Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolean)
-    If gPendingReviewRows Is Nothing Then Exit Sub
+    If gToggleValuesByRow Is Nothing Then Exit Sub
     If Sh.Name <> MAIN_SHEET_NAME Then Exit Sub
 
     If Not gPasteRangeCached Then
@@ -860,10 +1182,10 @@ Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolea
     End If
 
     If Target.Column < gPasteRangeStartCol Or Target.Column > gPasteRangeEndCol Then Exit Sub
-    If Not gPendingReviewRows.Exists(Target.Row) Then Exit Sub
+    If Not gToggleValuesByRow.Exists(Target.Row) Then Exit Sub
 
     Dim info As Variant
-    info = gPendingReviewRows(Target.Row)
+    info = gToggleValuesByRow(Target.Row)
 
     Dim rowOldVals As Variant, rowNewVals As Variant
     rowOldVals = info(0)
