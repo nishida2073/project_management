@@ -11,7 +11,7 @@
 - `run-import.bat` — 実行用のラッパー（中身は英数字のみ）
 - `run-import.ps1` — 実際の処理を行うPowerShellスクリプト
 - `task/` — タスクスケジューラ関連のファイルをまとめたサブフォルダ（下記「定期実行の設定」を参照）
-  - `run-import-hidden.vbs` — タスクスケジューラから`run-import.ps1`を**ウィンドウを表示せずに**呼び出すためのラッパー
+  - `run-import.vbs` — タスクスケジューラから`run-import.ps1`を**ウィンドウを表示せずに**呼び出すためのラッパー
   - `run-import-task.xml` — Windowsタスクスケジューラに登録するためのタスク定義
   - `setup-task.bat` — `run-import-task.xml`をタスクスケジューラに登録するバッチ
   - `run-task.bat` — 登録済みのタスクを手動で即時実行するバッチ（定期実行時刻を待たずに動作確認したい場合に使用）
@@ -41,7 +41,7 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 
 ## 定期実行の設定（タスクスケジューラ）
 
-`task`フォルダ内の`setup-task.bat`を実行すると、同フォルダの`run-import-task.xml`の内容でタスクスケジューラにタスク（名前：`run-import-task`）を登録します。登録されたタスクは、`run-import-hidden.vbs`経由で`run-import.ps1`を定期実行します。
+`task`フォルダ内の`setup-task.bat`を実行すると、同フォルダの`run-import-task.xml`の内容でタスクスケジューラにタスク（名前：`run-import-task`）を登録します。登録されたタスクは、`run-import.vbs`経由で`run-import.ps1`を定期実行します。
 
 `run-import-task.xml`内の`<Actions><Exec><WorkingDirectory>`は、現在のこの`task`フォルダの配置場所を前提にした絶対パスで固定されています。リポジトリを別の場所や別のPCに置く場合は、`setup-task.bat`実行前にこのXML内のパスを実際の場所に書き換えるか、実行後にタスクスケジューラの「操作」タブから編集してください。
 
@@ -70,7 +70,7 @@ run-import.bat -XlsmPath "C:\path\to\別の原価管理シート.xlsm"
 ├─ run-import.bat
 ├─ run-import.ps1
 ├─ task/
-│  ├─ run-import-hidden.vbs
+│  ├─ run-import.vbs
 │  ├─ run-import-task.xml
 │  ├─ setup-task.bat
 │  ├─ run-task.bat
