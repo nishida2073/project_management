@@ -404,18 +404,18 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
         isValidRange = False
 
         Do While Not isValidRange
-            monthRangeInput = Application.InputBox("反映する月の範囲を「開始月-終了月」の形式で入力してください（例：4-9）", "反映月の指定", "4-3", Type:=2)
+            monthRangeInput = Application.InputBox("反映する月の範囲を「開始月～終了月」の形式で入力してください（例：4～9）", "反映月の指定", "4～3", Type:=2)
             If VarType(monthRangeInput) = vbBoolean Then
                 ' キャンセルされた場合は実績反映そのものを中止する
                 GoTo CleanExit
             End If
 
             monthRangeStr = CStr(monthRangeInput)
-            If monthRangeStr = "" Then monthRangeStr = "4-3"   ' 空欄でOKした場合は全期間として扱う
+            If monthRangeStr = "" Then monthRangeStr = "4～3"   ' 空欄でOKした場合は全期間として扱う
 
-            rangeParts = Split(monthRangeStr, "-")
+            rangeParts = Split(monthRangeStr, "～")
             If UBound(rangeParts) <> 1 Then
-                MsgBox "月の範囲は「開始月-終了月」の形式（例：4-9）で入力してください。", vbExclamation
+                MsgBox "月の範囲は「開始月～終了月」の形式（例：4～9）で入力してください。", vbExclamation
                 GoTo RetryMonthRange
             End If
 
@@ -425,7 +425,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
             If endMonthStr = "" Then endMonthStr = "3"       ' 終了月省略時は3月扱い
 
             If Not IsNumeric(startMonthStr) Or Not IsNumeric(endMonthStr) Then
-                MsgBox "月の範囲は「開始月-終了月」の形式（例：4-9）で入力してください。", vbExclamation
+                MsgBox "月の範囲は「開始月～終了月」の形式（例：4～9）で入力してください。", vbExclamation
                 GoTo RetryMonthRange
             End If
 
