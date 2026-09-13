@@ -84,11 +84,13 @@ Sub HandleBeforeSave()
 
     ' 重複行ハイライトも、元のフォント色へ戻す
     If Not gDuplicateHighlightBackup Is Nothing Then
-        Dim colYear As Variant, colCase As Variant, colQ As Variant, colR As Variant
+        Dim colYear As Variant, colCase As Variant, colName As Variant, colQ As Variant, colR As Variant, colYojitsu As Variant
         colYear = mapMainCol("年度")
         colCase = mapMainCol("案件ID")
+        colName = mapMainCol("案件名")
         colQ = mapMainCol("会計区分1")
         colR = mapMainCol("会計区分2")
+        colYojitsu = mapMainCol("予実")
 
         Dim dupKey As Variant
         For Each dupKey In gDuplicateHighlightBackup.Keys
@@ -100,8 +102,10 @@ Sub HandleBeforeSave()
 
             ws.Cells(dupRow, colYear).Font.Color = dupColors(0)
             ws.Cells(dupRow, colCase).Font.Color = dupColors(1)
-            ws.Cells(dupRow, colQ).Font.Color = dupColors(2)
-            ws.Cells(dupRow, colR).Font.Color = dupColors(3)
+            ws.Cells(dupRow, colName).Font.Color = dupColors(2)
+            ws.Cells(dupRow, colQ).Font.Color = dupColors(3)
+            ws.Cells(dupRow, colR).Font.Color = dupColors(4)
+            ws.Cells(dupRow, colYojitsu).Font.Color = dupColors(5)
         Next dupKey
 
         Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
@@ -638,25 +642,28 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
         Exit Function
     End If
 
-    Dim colYear As Variant, colCase As Variant, colQ As Variant, colR As Variant, colYojitsu As Variant
+    Dim colYear As Variant, colCase As Variant, colName As Variant, colQ As Variant, colR As Variant, colYojitsu As Variant
     colYear = mapMainCol("年度")
     colCase = mapMainCol("案件ID")
+    colName = mapMainCol("案件名")
     colQ = mapMainCol("会計区分1")
     colR = mapMainCol("会計区分2")
     colYojitsu = mapMainCol("予実")
 
-    Dim years As Variant, caseIds As Variant, qs As Variant, rs As Variant, yojitsus As Variant
+    Dim years As Variant, caseIds As Variant, qs As Variant, rs As Variant, yojitsus As Variant, names As Variant
     years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
     caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
     qs = ws.Range(ws.Cells(1, colQ), ws.Cells(lastRow, colQ)).Value
     rs = ws.Range(ws.Cells(1, colR), ws.Cells(lastRow, colR)).Value
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
+    names = ws.Range(ws.Cells(1, colName), ws.Cells(lastRow, colName)).Value
 
     Dim rowsByKey As Object
-    Set rowsByKey = CreateObject("Scripting.Dictionary")   ' キー → 該当行番号（カンマ区切り文字列）
+    Set rowsByKey = CreateObject("Scripting.Dictionary")   ' 重複判定キー → 該当行番号（カンマ区切り文字列）
 
     Dim r As Long
     For r = 5 To lastRow
+        ' 実績反映用のルックアップ（年度・案件ID・会計区分1・会計区分2、実績行のみ）
         If yojitsus(r, 1) = "実績" _
                 And Trim(years(r, 1) & "") <> "" _
                 And Trim(caseIds(r, 1) & "") <> "" _
@@ -665,13 +672,24 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
             Dim k As String
             k = years(r, 1) & "|" & caseIds(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1)
 
-            If rowsByKey.Exists(k) Then
-                rowsByKey(k) = rowsByKey(k) & ", " & r
-            Else
-                rowsByKey(k) = CStr(r)
-            End If
-
             If Not dic.Exists(k) Then dic(k) = r
+        End If
+
+        ' 重複判定用（年度・案件ID・案件名・会計区分1・会計区分2・予実、全行が対象。remove-duplicate-rows.ps1と同じキー）
+        If Trim(years(r, 1) & "") <> "" _
+                And Trim(caseIds(r, 1) & "") <> "" _
+                And Trim(names(r, 1) & "") <> "" _
+                And Trim(qs(r, 1) & "") <> "" _
+                And Trim(rs(r, 1) & "") <> "" _
+                And Trim(yojitsus(r, 1) & "") <> "" Then
+            Dim dupKey As String
+            dupKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & names(r, 1) & "|" & qs(r, 1) & "|" & rs(r, 1) & "|" & yojitsus(r, 1)
+
+            If rowsByKey.Exists(dupKey) Then
+                rowsByKey(dupKey) = rowsByKey(dupKey) & ", " & r
+            Else
+                rowsByKey(dupKey) = CStr(r)
+            End If
         End If
     Next r
 
@@ -710,14 +728,18 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
                     gDuplicateHighlightBackup(dupRow) = Array( _
                         ws.Cells(dupRow, colYear).Font.Color, _
                         ws.Cells(dupRow, colCase).Font.Color, _
+                        ws.Cells(dupRow, colName).Font.Color, _
                         ws.Cells(dupRow, colQ).Font.Color, _
-                        ws.Cells(dupRow, colR).Font.Color)
+                        ws.Cells(dupRow, colR).Font.Color, _
+                        ws.Cells(dupRow, colYojitsu).Font.Color)
                 End If
 
                 ws.Cells(dupRow, colYear).Font.Color = groupColor
                 ws.Cells(dupRow, colCase).Font.Color = groupColor
+                ws.Cells(dupRow, colName).Font.Color = groupColor
                 ws.Cells(dupRow, colQ).Font.Color = groupColor
                 ws.Cells(dupRow, colR).Font.Color = groupColor
+                ws.Cells(dupRow, colYojitsu).Font.Color = groupColor
             Next p
 
             colorIdx = colorIdx + 1
@@ -727,7 +749,7 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     If msg <> "" Then
         Err.Raise vbObjectError + 1001, _
                   "BuildMainIndex", _
-                  MAIN_SHEET_NAME & "に、条件（年度・案件ID・会計区分1・会計区分2）が重複する行があります。" & vbCrLf & vbCrLf & _
+                  MAIN_SHEET_NAME & "に、条件（年度・案件ID・案件名・会計区分1・会計区分2・予実）が重複する行があります。" & vbCrLf & vbCrLf & _
                   msg & _
                   "実績反映を行う前に、" & MAIN_SHEET_NAME & "側の重複を解消してください。"
     End If
@@ -867,19 +889,22 @@ Function LoadMappingHorizontal(headerText As String) As Object
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("システム用")
 
+    Const HEADER_ROW As Long = 2
+    Const DATA_START_ROW As Long = HEADER_ROW + 1
+
     Dim lastCol As Long
-    lastCol = ws.Cells(5, ws.Columns.Count).End(xlToLeft).Column
+    lastCol = ws.Cells(HEADER_ROW, ws.Columns.Count).End(xlToLeft).Column
 
     Dim c As Long
     Dim found As Boolean
 
-    ' 5行目の横方向を走査してヘッダーを探す
+    ' ヘッダー行の横方向を走査してヘッダーを探す
     For c = 1 To lastCol
-        If ws.Cells(5, c).Value = headerText Then
+        If ws.Cells(HEADER_ROW, c).Value = headerText Then
             found = True
 
             Dim r As Long
-            r = 6 ' マッピングは6行目から始まる
+            r = DATA_START_ROW
 
             ' 空行に当たるまで読み込む
             Do While ws.Cells(r, c).Value <> ""

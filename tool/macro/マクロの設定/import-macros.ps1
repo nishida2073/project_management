@@ -89,20 +89,22 @@ try {
             $wbAdd = $excel.Workbooks.Open($appendFile.FullName, 0, $true)
             try {
                 foreach ($srcSheet in @($wbAdd.Sheets)) {
-                    $exists = $false
                     foreach ($existingSheet in @($wb.Sheets)) {
-                        if ($existingSheet.Name -eq $srcSheet.Name) { $exists = $true; break }
+                        if ($existingSheet.Name -eq $srcSheet.Name) {
+                            $existingSheet.Delete()
+                            Write-Log "Removed existing sheet: $($srcSheet.Name)"
+                            break
+                        }
                     }
-                    if (-not $exists) {
-                        $srcSheet.Copy([Type]::Missing, $wb.Sheets.Item($wb.Sheets.Count))
-                        $newSheet = $wb.Sheets.Item($srcSheet.Name)
-                        $newSheet.Visible = 0
-                        if ($newSheet.Visible -ne 0) {
-                            Write-Log "WARN: could not hide sheet '$($srcSheet.Name)' (Visible=$($newSheet.Visible))"
-                        }
-                        else {
-                            Write-Log "Added hidden sheet: $($srcSheet.Name)"
-                        }
+
+                    $srcSheet.Copy([Type]::Missing, $wb.Sheets.Item($wb.Sheets.Count))
+                    $newSheet = $wb.Sheets.Item($srcSheet.Name)
+                    $newSheet.Visible = 0
+                    if ($newSheet.Visible -ne 0) {
+                        Write-Log "WARN: could not hide sheet '$($srcSheet.Name)' (Visible=$($newSheet.Visible))"
+                    }
+                    else {
+                        Write-Log "Added hidden sheet: $($srcSheet.Name)"
                     }
                 }
             }
