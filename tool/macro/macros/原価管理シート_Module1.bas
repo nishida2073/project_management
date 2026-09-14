@@ -29,14 +29,10 @@ Private gItemMap As Object
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
 Private gDataMaps As Object
 
-' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
-' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
-Function ShouldUseMonthRangeDialog() As Boolean
-    Dim envVal As String
-    envVal = Environ$("USE_MONTH_RANGE_DIALOG")
-    ShouldUseMonthRangeDialog = (UCase$(Trim$(envVal)) = "TRUE" Or Trim$(envVal) = "1")
-End Function
 
+' ============================
+' 現在のシートを非表示にし、「個人計画Index」シートへ切り替える（利用されていないが元のマクロに存在している）
+' ============================
 Sub CloseThisSheet()
     Dim currentSheet As Worksheet
     Set currentSheet = ActiveSheet
@@ -46,6 +42,17 @@ Sub CloseThisSheet()
         Sheets("個人計画Index").Activate
     End If
 End Sub
+
+
+' ============================
+' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
+' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
+' ============================
+Function ShouldUseMonthRangeDialog() As Boolean
+    Dim envVal As String
+    envVal = Environ$("USE_MONTH_RANGE_DIALOG")
+    ShouldUseMonthRangeDialog = (UCase$(Trim$(envVal)) = "TRUE" Or Trim$(envVal) = "1")
+End Function
 
 ' ============================
 ' Workbook_Openの本体処理
