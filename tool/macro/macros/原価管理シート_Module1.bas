@@ -21,7 +21,7 @@ Private gLastSavedSnapshot As Object
 Private gLastKnownMainLastRow As Long
 Private gLastKnownMainLastRowValid As Boolean
 
-' システム用シート「項目名」表のキャッシュ（項目名 → Array(実績シート値, 計算算定シート値)）。
+' システム用シート「項目マッピング」表のキャッシュ（項目名 → Array(実績シート値, 計算算定シート値)）。
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
 Private gItemMap As Object
 
@@ -1347,7 +1347,7 @@ End Function
 
 
 ' ============================
-' システム用シートの「項目名」表と、区分ごとに分かれた
+' システム用シートの「項目マッピング」表と、区分ごとに分かれた
 ' 「データマッピング-区分1」「データマッピング-区分2」表を、それぞれ1回だけ読み込み、
 ' gItemMap・gKaikeiKubunMapsにキャッシュする
 ' ============================
@@ -1355,7 +1355,7 @@ Sub LoadSystemMappings()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("システム用")
 
-    Set gItemMap = LoadItemMapTable(ws, "項目名")
+    Set gItemMap = LoadItemMapTable(ws, "項目マッピング")
 
     Set gKaikeiKubunMaps = CreateObject("Scripting.Dictionary")
     Set gKaikeiKubunMaps("区分1") = LoadPairMapTable(ws, "データマッピング-区分1")
@@ -1364,30 +1364,32 @@ End Sub
 
 
 ' ============================
-' 「(見出し)｜実績シート｜計算算定シート」という3列の縦持ち表を読み込み、
-' 1列目の値 → Array(実績シート値, 計算算定シート値) の辞書にする
+' 「(タイトル)」の1行下に「項目名｜実績シート｜計算算定シート」という3列の見出しが続く表を読み込み、
+' 項目名 → Array(実績シート値, 計算算定シート値) の辞書にする
 ' ============================
-Function LoadItemMapTable(ws As Worksheet, headerText As String) As Object
-    Dim headerCell As Range
-    Set headerCell = ws.Cells.Find(What:=headerText, LookIn:=xlValues, LookAt:=xlWhole, _
-                                    SearchOrder:=xlByRows, MatchCase:=False)
+Function LoadItemMapTable(ws As Worksheet, titleText As String) As Object
+    Dim titleCell As Range
+    Set titleCell = ws.Cells.Find(What:=titleText, LookIn:=xlValues, LookAt:=xlWhole, _
+                                   SearchOrder:=xlByRows, MatchCase:=False)
 
-    If headerCell Is Nothing Then
+    If titleCell Is Nothing Then
         Err.Raise vbObjectError + 1000, _
                   "LoadItemMapTable", _
-                  "システム用シートにヘッダー「" & headerText & "」が見つかりません。"
+                  "システム用シートに見出し「" & titleText & "」が見つかりません。"
     End If
 
     Dim colItem As Long, colJisseki As Long, colKeisan As Long, headerRow As Long
-    colItem = headerCell.Column
-    headerRow = headerCell.Row
+    colItem = titleCell.Column
     colJisseki = colItem + 1
     colKeisan = colItem + 2
+    headerRow = titleCell.Row + 1   ' タイトルの1行下が「項目名」「実績シート」「計算算定シート」の見出し行
 
-    If ws.Cells(headerRow, colJisseki).Value <> "実績シート" Or ws.Cells(headerRow, colKeisan).Value <> "計算算定シート" Then
+    If ws.Cells(headerRow, colItem).Value <> "項目名" _
+            Or ws.Cells(headerRow, colJisseki).Value <> "実績シート" _
+            Or ws.Cells(headerRow, colKeisan).Value <> "計算算定シート" Then
         Err.Raise vbObjectError + 1000, _
                   "LoadItemMapTable", _
-                  "「" & headerText & "」の右2列が「実績シート」「計算算定シート」になっていません。"
+                  "「" & titleText & "」の1行下が「項目名」「実績シート」「計算算定シート」になっていません。"
     End If
 
     Dim dic As Object
