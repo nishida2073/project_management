@@ -1019,14 +1019,6 @@ End Function
 ' 重複が見つかった場合は行をハイライトしたうえでエラーを発生させる
 ' ============================
 Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
-    Dim colYear As Variant, colProjectId As Variant, colProjectName As Variant, colKubun1 As Variant, colKubun2 As Variant, colYojitsu As Variant
-    colYear = mapMainCol("年度")
-    colProjectId = mapMainCol("案件ID")
-    colProjectName = mapMainCol("案件名")
-    colKubun1 = mapMainCol("区分1")
-    colKubun2 = mapMainCol("区分2")
-    colYojitsu = mapMainCol("予実")
-
     ' 対象6列はこのチェック以外で色を付けることが無いため、判定のたびに一旦すべて
     ' 自動色に戻してから、現在も重複している行だけ塗り直す（これなら重複が解消
     ' されていれば必ず自動色に戻り、「前回の色を覚えておいて戻す」仕組みが不要）
@@ -1037,27 +1029,46 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
 
     If lastRow < dataStartRow Then Exit Sub
 
-    Dim years As Variant, projectIds As Variant, kubun1s As Variant, kubun2s As Variant, yojitsus As Variant, projectNames As Variant
-    years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
-    projectIds = ws.Range(ws.Cells(1, colProjectId), ws.Cells(lastRow, colProjectId)).Value
-    kubun1s = ws.Range(ws.Cells(1, colKubun1), ws.Cells(lastRow, colKubun1)).Value
-    kubun2s = ws.Range(ws.Cells(1, colKubun2), ws.Cells(lastRow, colKubun2)).Value
-    yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
-    projectNames = ws.Range(ws.Cells(1, colProjectName), ws.Cells(lastRow, colProjectName)).Value
+    Dim dupItems As Variant
+    dupItems = DupCheckItemNames()
+
+    ' キー項目ごとの列位置・値を一括で配列に読み込む
+    Dim dupCols() As Variant
+    ReDim dupCols(LBound(dupItems) To UBound(dupItems))
+
+    Dim dupVals() As Variant
+    ReDim dupVals(LBound(dupItems) To UBound(dupItems))
+
+    Dim di As Long
+    For di = LBound(dupItems) To UBound(dupItems)
+        dupCols(di) = mapMainCol(dupItems(di))
+        dupVals(di) = ws.Range(ws.Cells(1, dupCols(di)), ws.Cells(lastRow, dupCols(di))).Value
+    Next di
 
     Dim rowsByKey As Object
     Set rowsByKey = CreateObject("Scripting.Dictionary")   ' 重複判定キー → 該当行番号（カンマ区切り文字列）
 
     Dim r As Long
     For r = dataStartRow To lastRow
-        If Trim(years(r, 1) & "") <> "" _
-                And Trim(projectIds(r, 1) & "") <> "" _
-                And Trim(projectNames(r, 1) & "") <> "" _
-                And Trim(kubun1s(r, 1) & "") <> "" _
-                And Trim(kubun2s(r, 1) & "") <> "" _
-                And Trim(yojitsus(r, 1) & "") <> "" Then
+        Dim allFilled As Boolean
+        allFilled = True
+
+        Dim parts() As String
+        ReDim parts(LBound(dupItems) To UBound(dupItems))
+
+        For di = LBound(dupItems) To UBound(dupItems)
+            Dim v As String
+            v = Trim(dupVals(di)(r, 1) & "")
+            If v = "" Then
+                allFilled = False
+                Exit For
+            End If
+            parts(di) = v
+        Next di
+
+        If allFilled Then
             Dim dupKey As String
-            dupKey = years(r, 1) & "|" & projectIds(r, 1) & "|" & projectNames(r, 1) & "|" & kubun1s(r, 1) & "|" & kubun2s(r, 1) & "|" & yojitsus(r, 1)
+            dupKey = Join(parts, "|")
 
             If rowsByKey.Exists(dupKey) Then
                 rowsByKey(dupKey) = rowsByKey(dupKey) & ", " & r
@@ -1098,12 +1109,9 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
                 Dim dupRow As Long
                 dupRow = CLng(Trim(rowParts(p)))
 
-                ws.Cells(dupRow, colYear).Font.Color = groupColor
-                ws.Cells(dupRow, colProjectId).Font.Color = groupColor
-                ws.Cells(dupRow, colProjectName).Font.Color = groupColor
-                ws.Cells(dupRow, colKubun1).Font.Color = groupColor
-                ws.Cells(dupRow, colKubun2).Font.Color = groupColor
-                ws.Cells(dupRow, colYojitsu).Font.Color = groupColor
+                For di = LBound(dupCols) To UBound(dupCols)
+                    ws.Cells(dupRow, dupCols(di)).Font.Color = groupColor
+                Next di
             Next p
 
             colorIdx = colorIdx + 1
@@ -1113,7 +1121,7 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
     If msg <> "" Then
         Err.Raise vbObjectError + 1001, _
                   "CheckDuplicateRows", _
-                  MAIN_SHEET_NAME & "に、条件（年度・案件ID・案件名・区分1・区分2・予実）が重複する行があります。" & vbCrLf & vbCrLf & _
+                  MAIN_SHEET_NAME & "に、条件（" & Join(dupItems, "・") & "）が重複する行があります。" & vbCrLf & vbCrLf & _
                   msg & _
                   "実績反映を行う前に、" & MAIN_SHEET_NAME & "側の重複を解消してください。"
     End If
@@ -1131,7 +1139,7 @@ Sub ResetDupHighlightColumns(ws As Worksheet, mapMainCol As Object, lastRow As L
     If lastRow < dataStartRow Then Exit Sub
 
     Dim dupCols As Variant
-    dupCols = Array("年度", "案件ID", "案件名", "区分1", "区分2", "予実")
+    dupCols = DupCheckItemNames()
 
     Dim i As Long
     For i = LBound(dupCols) To UBound(dupCols)
@@ -1402,6 +1410,14 @@ End Function
 ' ============================
 Function KeyItemNames() As Variant
     KeyItemNames = Array("年度", "案件ID", "区分1", "区分2")
+End Function
+
+
+' ============================
+' 重複チェック・重複ハイライトの対象となる項目名（remove-duplicate-rows.ps1と同じキー）
+' ============================
+Function DupCheckItemNames() As Variant
+    DupCheckItemNames = Array("年度", "案件ID", "案件名", "区分1", "区分2", "予実")
 End Function
 
 
