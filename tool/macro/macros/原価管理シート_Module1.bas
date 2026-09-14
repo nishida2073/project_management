@@ -447,7 +447,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     ' 列を一括で配列に読み込む ===
     lastRowOther = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
 
-    keyItems = KeyItemNames()
+    keyItems = GetKeyItemNames()
     ReDim otherKeyVals(LBound(keyItems) To UBound(keyItems))
 
     If lastRowOther >= otherDataStartRow Then
@@ -969,7 +969,7 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     ' キー項目（年度・案件ID・区分1・区分2）それぞれの列を、計画算定シート側の値のまま一括で読み込む
     ' （計画算定シート側は既に「変換後」の表記が入っているため、gDataMapsによる変換は不要）
     Dim keyItems As Variant
-    keyItems = KeyItemNames()
+    keyItems = GetKeyItemNames()
 
     Dim keyVals() As Variant
     ReDim keyVals(LBound(keyItems) To UBound(keyItems))
@@ -1030,7 +1030,7 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
     If lastRow < dataStartRow Then Exit Sub
 
     Dim dupItems As Variant
-    dupItems = DupCheckItemNames()
+    dupItems = GetDupCheckItemNames()
 
     ' キー項目ごとの列位置・値を一括で配列に読み込む
     Dim dupCols() As Variant
@@ -1139,7 +1139,7 @@ Sub ResetDupHighlightColumns(ws As Worksheet, mapMainCol As Object, lastRow As L
     If lastRow < dataStartRow Then Exit Sub
 
     Dim dupCols As Variant
-    dupCols = DupCheckItemNames()
+    dupCols = GetDupCheckItemNames()
 
     Dim i As Long
     For i = LBound(dupCols) To UBound(dupCols)
@@ -1404,24 +1404,6 @@ End Function
 
 
 ' ============================
-' 実績反映で行を照合する際のキーを構成する項目名（この並び順でキー文字列を組み立てる）。
-' 各項目名はgItemMapのキーと一致しており、gDataMapsに同じ名前の変換表があれば
-' その項目は実績シート側の値を変換してからキーに使う（無ければ生の値をそのまま使う）
-' ============================
-Function KeyItemNames() As Variant
-    KeyItemNames = Array("年度", "案件ID", "区分1", "区分2")
-End Function
-
-
-' ============================
-' 重複チェック・重複ハイライトの対象となる項目名（remove-duplicate-rows.ps1と同じキー）
-' ============================
-Function DupCheckItemNames() As Variant
-    DupCheckItemNames = Array("年度", "案件ID", "案件名", "区分1", "区分2", "予実")
-End Function
-
-
-' ============================
 ' 計画算定シート側の貼付範囲（開始・終了の列記号）
 ' ============================
 Function GetMainRangeMap() As Object
@@ -1462,6 +1444,24 @@ End Function
 ' ============================
 Function GetOtherDataStartRow() As Long
     GetOtherDataStartRow = CLng(GetItemValue("対象範囲-開始行", False))
+End Function
+
+
+' ============================
+' 実績反映で行を照合する際のキーを構成する項目名（この並び順でキー文字列を組み立てる）。
+' 各項目名はgItemMapのキーと一致しており、gDataMapsに同じ名前の変換表があれば
+' その項目は実績シート側の値を変換してからキーに使う（無ければ生の値をそのまま使う）
+' ============================
+Function GetKeyItemNames() As Variant
+    GetKeyItemNames = Array("年度", "案件ID", "区分1", "区分2")
+End Function
+
+
+' ============================
+' 重複チェック・重複ハイライトの対象となる項目名（remove-duplicate-rows.ps1と同じキー）
+' ============================
+Function GetDupCheckItemNames() As Variant
+    GetDupCheckItemNames = Array("年度", "案件ID", "案件名", "区分1", "区分2", "予実")
 End Function
 
 
