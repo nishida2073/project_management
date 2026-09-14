@@ -1378,19 +1378,13 @@ Function LoadItemMapTable(ws As Worksheet, titleText As String) As Object
                   "システム用シートに見出し「" & titleText & "」が見つかりません。"
     End If
 
-    Dim colItem As Long, colJisseki As Long, colKeisan As Long, headerRow As Long
-    colItem = titleCell.Column
-    colJisseki = colItem + 1
-    colKeisan = colItem + 2
+    Dim headerRow As Long
     headerRow = titleCell.Row + 1   ' タイトルの1行下が「項目名」「実績シート」「計算算定シート」の見出し行
 
-    If ws.Cells(headerRow, colItem).Value <> "項目名" _
-            Or ws.Cells(headerRow, colJisseki).Value <> "実績シート" _
-            Or ws.Cells(headerRow, colKeisan).Value <> "計算算定シート" Then
-        Err.Raise vbObjectError + 1000, _
-                  "LoadItemMapTable", _
-                  "「" & titleText & "」の1行下が「項目名」「実績シート」「計算算定シート」になっていません。"
-    End If
+    Dim colItem As Long, colJisseki As Long, colKeisan As Long
+    colItem = FindHeaderColumn(ws, headerRow, titleCell.Column, "項目名")
+    colJisseki = FindHeaderColumn(ws, headerRow, titleCell.Column, "実績シート")
+    colKeisan = FindHeaderColumn(ws, headerRow, titleCell.Column, "計算算定シート")
 
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
@@ -1431,16 +1425,12 @@ Function LoadPairMapTable(ws As Worksheet, titleText As String) As Object
                   "システム用シートに見出し「" & titleText & "」が見つかりません。"
     End If
 
-    Dim colJisseki As Long, colKeisan As Long, headerRow As Long
-    colJisseki = titleCell.Column
-    colKeisan = colJisseki + 1
+    Dim headerRow As Long
     headerRow = titleCell.Row + 1   ' タイトルの1行下が「実績シート」「計算算定シート」の見出し行
 
-    If ws.Cells(headerRow, colJisseki).Value <> "実績シート" Or ws.Cells(headerRow, colKeisan).Value <> "計算算定シート" Then
-        Err.Raise vbObjectError + 1000, _
-                  "LoadPairMapTable", _
-                  "「" & titleText & "」の1行下が「実績シート」「計算算定シート」になっていません。"
-    End If
+    Dim colJisseki As Long, colKeisan As Long
+    colJisseki = FindHeaderColumn(ws, headerRow, titleCell.Column, "実績シート")
+    colKeisan = FindHeaderColumn(ws, headerRow, titleCell.Column, "計算算定シート")
 
     Dim result As Object
     Set result = CreateObject("Scripting.Dictionary")
@@ -1458,4 +1448,29 @@ Function LoadPairMapTable(ws As Worksheet, titleText As String) As Object
     Loop
 
     Set LoadPairMapTable = result
+End Function
+
+
+' ============================
+' 指定行の中から、指定列以降・数列以内で指定文字列と完全一致するセルの列番号を返す。
+' 検索範囲をタイトル列の近く（数列以内）に絞ることで、同じ行にある他の表の
+' 同名見出し（複数の表が「実績シート」「計算算定シート」を使い回すため）を誤って拾わないようにする
+' ============================
+Function FindHeaderColumn(ws As Worksheet, headerRow As Long, startCol As Long, headerText As String) As Long
+    Const SEARCH_WIDTH As Long = 3
+
+    Dim searchRange As Range
+    Set searchRange = ws.Cells(headerRow, startCol).Resize(1, SEARCH_WIDTH)
+
+    Dim c As Range
+    Set c = searchRange.Find(What:=headerText, LookIn:=xlValues, LookAt:=xlWhole, _
+                              SearchOrder:=xlByColumns, MatchCase:=False)
+
+    If c Is Nothing Then
+        Err.Raise vbObjectError + 1000, _
+                  "FindHeaderColumn", _
+                  headerRow & "行目（" & startCol & "列目から" & SEARCH_WIDTH & "列以内）に見出し「" & headerText & "」が見つかりません。"
+    End If
+
+    FindHeaderColumn = c.Column
 End Function
