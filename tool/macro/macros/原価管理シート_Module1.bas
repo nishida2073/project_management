@@ -12,11 +12,6 @@ Private gUndoHistory As Collection
 ' 実績反映で変更のあった行の元値・新値（行番号 → Array(元値の配列, 新値の配列)）
 Private gToggleValuesByRow As Object
 
-' 貼付範囲の開始・終了列のキャッシュ（選択変更のたびにLoadMappingHorizontalを呼び直さないため）
-Private gPasteRangeStartCol As Long
-Private gPasteRangeEndCol As Long
-Private gPasteRangeCached As Boolean
-
 ' 重複行ハイライトを付ける前の、年度・案件ID・会計区分1・会計区分2列のフォント色
 ' （行番号 → Array(年度の色, 案件IDの色, 会計区分1の色, 会計区分2の色)）
 Private gDuplicateHighlightBackup As Object
@@ -29,6 +24,10 @@ Private gLastSavedSnapshot As Object
 ' 前回チェック時点の計画算定シート最終行（行の追加・削除を検知するため）
 Private gLastKnownMainLastRow As Long
 Private gLastKnownMainLastRowValid As Boolean
+
+' システム用シートのマッピング全体のキャッシュ（ヘッダー名 → Dictionary(キー→値)）。
+' LoadMappingHorizontalを呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
+Private gAllMappings As Object
 
 ' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
 ' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
@@ -65,8 +64,8 @@ Sub HandleWorkbookOpen()
 
     ' 開いた時点の状態を、保存時の差分比較の基準として記録しておく
     Dim mapMainCol As Object, mapMainRange As Object
-    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
-    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
+    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
     Set gLastSavedSnapshot = BuildFullSheetSnapshot(wsMain, mapMainCol, mapMainRange)
 
     ' 行の追加・削除検知の基準も、開いた時点の行数にしておく
@@ -91,8 +90,8 @@ Sub HandleBeforeSave()
     Dim mapMainRange As Object
     Dim mapMainCol As Object
 
-    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
-    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
+    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
+    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
 
     ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
     CheckRowCountAndResetIfChanged ws, mapMainCol, mapMainRange
@@ -365,8 +364,8 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     On Error GoTo CleanFail
 
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
-    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
-    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
+    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
+    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
 
     ' === ① 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する ===
     CheckRowCountAndResetIfChanged wsMain, mapMainCol, mapMainRange
@@ -454,8 +453,8 @@ RetryMonthRange:
     Set wsOther = wbOther.Sheets("実績")   ' ←読み込み元
 
     ' === ⑤ マッピングは1回だけ読み込む（mapMainRangeは冒頭で読み込み済み） ===
-    Set mapOtherCol = LoadMappingHorizontal("実績Excel")
-    Set mapOtherRange = LoadMappingHorizontal("実績Excel貼付範囲")
+    Set mapOtherCol = LoadMappingHorizontal("実績シート-項目")
+    Set mapOtherRange = LoadMappingHorizontal("実績シート-対象範囲")
     Set mapKaikeiKubun1 = LoadMappingHorizontal("会計区分1マッピング")
     Set mapKaikeiKubun2 = LoadMappingHorizontal("会計区分2マッピング")
 
@@ -650,8 +649,8 @@ Sub UndoLastCheckpoint()
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
     Dim mapMainRange As Object, mapMainCol As Object
-    Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
-    Set mapMainCol = LoadMappingHorizontal("原価管理Excel")
+    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
+    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
 
     ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
     CheckRowCountAndResetIfChanged wsMain, mapMainCol, mapMainRange
@@ -1187,15 +1186,13 @@ Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolea
     If gToggleValuesByRow Is Nothing Then Exit Sub
     If Sh.Name <> MAIN_SHEET_NAME Then Exit Sub
 
-    If Not gPasteRangeCached Then
-        Dim mapMainRange As Object
-        Set mapMainRange = LoadMappingHorizontal("原価管理Excel貼付範囲")
-        gPasteRangeStartCol = Sh.Range(mapMainRange("開始") & "1").Column
-        gPasteRangeEndCol = Sh.Range(mapMainRange("終了") & "1").Column
-        gPasteRangeCached = True
-    End If
+    Dim mapMainRange As Object
+    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
+    Dim pasteRangeStartCol As Long, pasteRangeEndCol As Long
+    pasteRangeStartCol = Sh.Range(mapMainRange("開始") & "1").Column
+    pasteRangeEndCol = Sh.Range(mapMainRange("終了") & "1").Column
 
-    If Target.Column < gPasteRangeStartCol Or Target.Column > gPasteRangeEndCol Then Exit Sub
+    If Target.Column < pasteRangeStartCol Or Target.Column > pasteRangeEndCol Then Exit Sub
     If Not gToggleValuesByRow.Exists(Target.Row) Then Exit Sub
 
     Dim info As Variant
@@ -1206,7 +1203,7 @@ Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolea
     rowNewVals = info(1)
 
     Dim colIdx As Long
-    colIdx = Target.Column - gPasteRangeStartCol + 1
+    colIdx = Target.Column - pasteRangeStartCol + 1
 
     If CStr(rowNewVals(1, colIdx)) = "" Then Exit Sub
     If CStr(rowOldVals(1, colIdx)) = CStr(rowNewVals(1, colIdx)) Then Exit Sub
@@ -1229,11 +1226,29 @@ End Sub
 
 
 ' ============================
-' 指定ヘッダーの「下方向2列」を辞書に読み込む
+' 指定ヘッダーの「下方向2列」のマッピングを返す。
+' システム用シートの全ヘッダー分は初回呼び出し時にまとめて読み込み、以降はキャッシュを使い回す
 ' ============================
 Function LoadMappingHorizontal(headerText As String) As Object
-    Dim dic As Object
-    Set dic = CreateObject("Scripting.Dictionary")
+    If gAllMappings Is Nothing Then LoadAllMappings
+
+    ' ★ ヘッダーが見つからなかった場合は強制終了
+    If Not gAllMappings.Exists(headerText) Then
+        Err.Raise vbObjectError + 1000, _
+                  "LoadMappingHorizontal", _
+                  "ヘッダー「" & headerText & "」が見つかりません。"
+    End If
+
+    Set LoadMappingHorizontal = gAllMappings(headerText)
+End Function
+
+
+' ============================
+' システム用シートのヘッダー行（2行目）を1回だけ横方向に走査し、
+' ヘッダー名ごとの下方向マッピングをまとめてgAllMappingsに読み込む
+' ============================
+Sub LoadAllMappings()
+    Set gAllMappings = CreateObject("Scripting.Dictionary")
 
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("システム用")
@@ -1245,12 +1260,14 @@ Function LoadMappingHorizontal(headerText As String) As Object
     lastCol = ws.Cells(HEADER_ROW, ws.Columns.Count).End(xlToLeft).Column
 
     Dim c As Long
-    Dim found As Boolean
-
-    ' ヘッダー行の横方向を走査してヘッダーを探す
     For c = 1 To lastCol
-        If ws.Cells(HEADER_ROW, c).Value = headerText Then
-            found = True
+        Dim headerText As String
+        headerText = ws.Cells(HEADER_ROW, c).Value
+
+        If headerText <> "" Then
+            Dim dic As Object
+            Set dic = CreateObject("Scripting.Dictionary")
+            Set gAllMappings(headerText) = dic
 
             Dim r As Long
             r = DATA_START_ROW
@@ -1267,17 +1284,6 @@ Function LoadMappingHorizontal(headerText As String) As Object
 
                 r = r + 1
             Loop
-
-            Exit For
         End If
     Next c
-
-    ' ★ ヘッダーが見つからなかった場合は強制終了
-    If Not found Then
-        Err.Raise vbObjectError + 1000, _
-                  "LoadMappingHorizontal", _
-                  "ヘッダー「" & headerText & "」が見つかりません。"
-    End If
-
-    Set LoadMappingHorizontal = dic
-End Function
+End Sub
