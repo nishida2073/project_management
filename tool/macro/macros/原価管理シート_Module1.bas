@@ -96,6 +96,9 @@ Sub HandleBeforeSave()
     ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
     CheckRowCountAndResetIfChanged ws, mapMainCol, mapMainRange
 
+    ' ここから先はセル単位でFont.Colorを書き換えるため、1件ごとの再描画を止めておく
+    Application.ScreenUpdating = False
+
     ' 保存時の差分チェックで除外する「実績反映で触った行」の集合
     Dim touchedRows As Object
     Set touchedRows = gUndoBackupRows
@@ -154,6 +157,8 @@ Sub HandleBeforeSave()
     Set gLastSavedSnapshot = currentSnapshot
 
     Set gToggleValuesByRow = CreateObject("Scripting.Dictionary")
+
+    Application.ScreenUpdating = True
 
 End Sub
 
@@ -367,6 +372,12 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
     Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
 
+    ' 重複チェックの色付けはセル単位のFont.Color操作を大量に行うため、
+    ' 画面再描画をここから止めておく（止め忘れるとチェックのたびに1件ずつ描画されて非常に遅くなる）
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    Application.EnableEvents = False
+
     ' === ① 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する ===
     CheckRowCountAndResetIfChanged wsMain, mapMainCol, mapMainRange
 
@@ -377,7 +388,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     ' === ③ 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
     If isInteractive Then
         otherFilePathToOpen = Application.GetOpenFilename("Excelファイル (*.xlsx), *.xlsx")
-        If otherFilePathToOpen = False Then Exit Function
+        If otherFilePathToOpen = False Then GoTo CleanExit
     Else
         otherFilePathToOpen = otherFilePath
     End If
@@ -457,10 +468,6 @@ RetryMonthRange:
     Set mapOtherRange = LoadMappingHorizontal("実績シート-対象範囲")
     Set mapKaikeiKubun1 = LoadMappingHorizontal("会計区分1マッピング")
     Set mapKaikeiKubun2 = LoadMappingHorizontal("会計区分2マッピング")
-
-    Application.ScreenUpdating = False
-    Application.Calculation = xlCalculationManual
-    Application.EnableEvents = False
 
     ' 前回までの実行で触った行は、一旦「本当の元の色」に戻しておく（値には触れない）
     If Not gUndoBackupRows Is Nothing Then
@@ -631,6 +638,9 @@ CleanFail:
         ThisWorkbook.Activate
         If Not wsMain Is Nothing Then wsMain.Activate
         On Error GoTo 0
+
+        ' 重複行の赤色ハイライトなど、ここまでの変更をエラーメッセージより先に見せる
+        Application.ScreenUpdating = True
     End If
 
     ImportFromOtherBook = "エラーが発生しました。" & vbCrLf & errDescription
