@@ -27,7 +27,7 @@ Private gItemMap As Object
 
 ' システム用シート「データマッピング-区分1」「データマッピング-区分2」表のキャッシュ（区分名 → Dictionary(実績シート値 → 計算算定シート値)）。
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
-Private gKaikeiKubunMaps As Object
+Private gKubunMaps As Object
 
 ' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
 ' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
@@ -315,13 +315,13 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Dim mapMainRange As Object
     Dim mapOtherRange As Object
     Dim mapMainCol As Object
-    Dim mapKaikeiKubun1 As Object
-    Dim mapKaikeiKubun2 As Object
+    Dim mapKubun1 As Object
+    Dim mapKubun2 As Object
     Dim mainIndex As Object
     Dim otherDataStartRow As Long
 
     Dim yOther As Long
-    Dim kaikeiKubun1 As String, kaikeiKubun2 As String
+    Dim kubun1 As String, kubun2 As String
     Dim idxKey As String
 
     Dim mainRange As Range, otherRange As Range
@@ -448,8 +448,8 @@ RetryMonthRange:
     ' === ⑤ マッピングは1回だけ読み込む（mapMainRangeは冒頭で読み込み済み） ===
     Set mapOtherCol = GetOtherColMap()
     Set mapOtherRange = GetOtherRangeMap()
-    Set mapKaikeiKubun1 = GetKaikeiKubunMap("区分1")
-    Set mapKaikeiKubun2 = GetKaikeiKubunMap("区分2")
+    Set mapKubun1 = GetKubunMap("区分1")
+    Set mapKubun2 = GetKubunMap("区分2")
     otherDataStartRow = GetOtherDataStartRow()
 
     ' ここから先も再びセル単位でFont.Colorを書き換えるため、画面更新を止め直す
@@ -501,12 +501,12 @@ RetryMonthRange:
         otherKubunText = Trim(CStr(kubuns(otherRow, 1)))
         otherCostKubunId = Trim(CStr(costKubuns(otherRow, 1)))
 
-        If mapKaikeiKubun1.Exists(otherKubunText) And mapKaikeiKubun2.Exists(otherCostKubunId) Then
+        If mapKubun1.Exists(otherKubunText) And mapKubun2.Exists(otherCostKubunId) Then
 
             yOther = NormalizeYear(otherYearRaw)
-            kaikeiKubun1 = mapKaikeiKubun1(otherKubunText)
-            kaikeiKubun2 = mapKaikeiKubun2(otherCostKubunId)
-            idxKey = yOther & "|" & otherCaseId & "|" & kaikeiKubun1 & "|" & kaikeiKubun2
+            kubun1 = mapKubun1(otherKubunText)
+            kubun2 = mapKubun2(otherCostKubunId)
+            idxKey = yOther & "|" & otherCaseId & "|" & kubun1 & "|" & kubun2
 
             ' === ⑧ Dictionaryで一致する行を即座に取得 ===
             If mainIndex.Exists(idxKey) Then
@@ -948,18 +948,18 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
         Exit Function
     End If
 
-    Dim colYear As Variant, colCase As Variant, colKaikeiKubun1 As Variant, colKaikeiKubun2 As Variant, colYojitsu As Variant
+    Dim colYear As Variant, colCase As Variant, colKubun1 As Variant, colKubun2 As Variant, colYojitsu As Variant
     colYear = mapMainCol("年度")
     colCase = mapMainCol("案件ID")
-    colKaikeiKubun1 = mapMainCol("区分1")
-    colKaikeiKubun2 = mapMainCol("区分2")
+    colKubun1 = mapMainCol("区分1")
+    colKubun2 = mapMainCol("区分2")
     colYojitsu = mapMainCol("予実")
 
-    Dim years As Variant, caseIds As Variant, kaikeiKubun1s As Variant, kaikeiKubun2s As Variant, yojitsus As Variant
+    Dim years As Variant, caseIds As Variant, kubun1s As Variant, kubun2s As Variant, yojitsus As Variant
     years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
     caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
-    kaikeiKubun1s = ws.Range(ws.Cells(1, colKaikeiKubun1), ws.Cells(lastRow, colKaikeiKubun1)).Value
-    kaikeiKubun2s = ws.Range(ws.Cells(1, colKaikeiKubun2), ws.Cells(lastRow, colKaikeiKubun2)).Value
+    kubun1s = ws.Range(ws.Cells(1, colKubun1), ws.Cells(lastRow, colKubun1)).Value
+    kubun2s = ws.Range(ws.Cells(1, colKubun2), ws.Cells(lastRow, colKubun2)).Value
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
 
     Dim r As Long
@@ -967,10 +967,10 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
         If yojitsus(r, 1) = "実績" _
                 And Trim(years(r, 1) & "") <> "" _
                 And Trim(caseIds(r, 1) & "") <> "" _
-                And Trim(kaikeiKubun1s(r, 1) & "") <> "" _
-                And Trim(kaikeiKubun2s(r, 1) & "") <> "" Then
+                And Trim(kubun1s(r, 1) & "") <> "" _
+                And Trim(kubun2s(r, 1) & "") <> "" Then
             Dim idxKey As String
-            idxKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & kaikeiKubun1s(r, 1) & "|" & kaikeiKubun2s(r, 1)
+            idxKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & kubun1s(r, 1) & "|" & kubun2s(r, 1)
 
             If Not dic.Exists(idxKey) Then dic(idxKey) = r
         End If
@@ -1255,16 +1255,16 @@ End Function
 ' ============================
 ' 区分（区分1・区分2）の「実績シート値→計算算定シート値」マッピング辞書を返す
 ' ============================
-Function GetKaikeiKubunMap(kubunName As String) As Object
-    If gKaikeiKubunMaps Is Nothing Then LoadSystemMappings
+Function GetKubunMap(kubunName As String) As Object
+    If gKubunMaps Is Nothing Then LoadSystemMappings
 
-    If Not gKaikeiKubunMaps.Exists(kubunName) Then
+    If Not gKubunMaps.Exists(kubunName) Then
         Err.Raise vbObjectError + 1000, _
-                  "GetKaikeiKubunMap", _
+                  "GetKubunMap", _
                   "システム用シートに区分「" & kubunName & "」のデータマッピングが見つかりません。"
     End If
 
-    Set GetKaikeiKubunMap = gKaikeiKubunMaps(kubunName)
+    Set GetKubunMap = gKubunMaps(kubunName)
 End Function
 
 
@@ -1349,7 +1349,7 @@ End Function
 ' ============================
 ' システム用シートの「項目マッピング」表と、区分ごとに分かれた
 ' 「データマッピング-区分1」「データマッピング-区分2」表を、それぞれ1回だけ読み込み、
-' gItemMap・gKaikeiKubunMapsにキャッシュする
+' gItemMap・gKubunMapsにキャッシュする
 ' ============================
 Sub LoadSystemMappings()
     Dim ws As Worksheet
@@ -1357,9 +1357,9 @@ Sub LoadSystemMappings()
 
     Set gItemMap = LoadItemMapTable(ws, "項目マッピング")
 
-    Set gKaikeiKubunMaps = CreateObject("Scripting.Dictionary")
-    Set gKaikeiKubunMaps("区分1") = LoadPairMapTable(ws, "データマッピング-区分1")
-    Set gKaikeiKubunMaps("区分2") = LoadPairMapTable(ws, "データマッピング-区分2")
+    Set gKubunMaps = CreateObject("Scripting.Dictionary")
+    Set gKubunMaps("区分1") = LoadPairMapTable(ws, "データマッピング-区分1")
+    Set gKubunMaps("区分2") = LoadPairMapTable(ws, "データマッピング-区分2")
 End Sub
 
 
