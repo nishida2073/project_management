@@ -354,6 +354,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
 
     ' 反映月の範囲
     Dim startPos As Long, endPos As Long
+    Dim startMonth As Long, endMonth As Long
 
     ' ここ以降のエラーは全て CleanFail で拾う
     On Error GoTo CleanFail
@@ -399,57 +400,10 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
 
     ' === ④' 対話実行時のみ、反映する月の範囲を聞く（バッチ実行時は全期間） ===
     If isInteractive And ShouldUseMonthRangeDialog() Then
-        Dim monthRangeInput As Variant
-        Dim monthRangeStr As String
-        Dim rangeParts() As String
-        Dim startMonthStr As String, endMonthStr As String
-        Dim startMonth As Long, endMonth As Long
-        Dim isValidRange As Boolean
-        isValidRange = False
-
-        Do While Not isValidRange
-            monthRangeInput = Application.InputBox("反映する月の範囲を「開始月～終了月」の形式で入力してください（例：4～9）", "反映月の指定", "4～3", Type:=2)
-            If VarType(monthRangeInput) = vbBoolean Then
-                ' キャンセルされた場合は実績反映そのものを中止する
-                GoTo CleanExit
-            End If
-
-            monthRangeStr = CStr(monthRangeInput)
-            If monthRangeStr = "" Then monthRangeStr = "4～3"   ' 空欄でOKした場合は全期間として扱う
-
-            rangeParts = Split(monthRangeStr, "～")
-            If UBound(rangeParts) <> 1 Then
-                MsgBox "月の範囲は「開始月～終了月」の形式（例：4～9）で入力してください。", vbExclamation
-                GoTo RetryMonthRange
-            End If
-
-            startMonthStr = Trim(rangeParts(0))
-            endMonthStr = Trim(rangeParts(1))
-            If startMonthStr = "" Then startMonthStr = "4"   ' 開始月省略時は4月扱い
-            If endMonthStr = "" Then endMonthStr = "3"       ' 終了月省略時は3月扱い
-
-            If Not IsNumeric(startMonthStr) Or Not IsNumeric(endMonthStr) Then
-                MsgBox "月の範囲は「開始月～終了月」の形式（例：4～9）で入力してください。", vbExclamation
-                GoTo RetryMonthRange
-            End If
-
-            startMonth = CLng(startMonthStr)
-            endMonth = CLng(endMonthStr)
-            If startMonth < 1 Or startMonth > 12 Or endMonth < 1 Or endMonth > 12 Then
-                MsgBox "開始月・終了月は1～12の範囲で入力してください。", vbExclamation
-                GoTo RetryMonthRange
-            End If
-
-            startPos = FiscalMonthPosition(startMonth)
-            endPos = FiscalMonthPosition(endMonth)
-            If startPos > endPos Then
-                MsgBox "開始月は終了月と同じか、それより前（4月始まりの年度内）にしてください。", vbExclamation
-                GoTo RetryMonthRange
-            End If
-
-            isValidRange = True
-RetryMonthRange:
-        Loop
+        If Not PromptMonthRange(startPos, endPos, startMonth, endMonth) Then
+            ' キャンセルされた場合は実績反映そのものを中止する
+            GoTo CleanExit
+        End If
     Else
         startPos = 1
         endPos = 12
@@ -1204,6 +1158,66 @@ Function FiscalMonthPosition(calendarMonth As Long) As Long
     Else
         FiscalMonthPosition = calendarMonth + 9
     End If
+End Function
+
+
+' ============================
+' 反映する月の範囲をダイアログで尋ね、入力を検証してstartPos/endPos/startMonth/endMonthに返す。
+' ダイアログをキャンセルされた場合はFalseを返す（呼び出し側は実績反映そのものを中止する）
+' ============================
+Function PromptMonthRange(ByRef startPos As Long, ByRef endPos As Long, ByRef startMonth As Long, ByRef endMonth As Long) As Boolean
+    Dim monthRangeInput As Variant
+    Dim monthRangeStr As String
+    Dim rangeParts() As String
+    Dim startMonthStr As String, endMonthStr As String
+    Dim isValidRange As Boolean
+    isValidRange = False
+
+    Do While Not isValidRange
+        monthRangeInput = Application.InputBox("反映する月の範囲を「開始月～終了月」の形式で入力してください（例：4～9）", "反映月の指定", "4～3", Type:=2)
+        If VarType(monthRangeInput) = vbBoolean Then
+            PromptMonthRange = False
+            Exit Function
+        End If
+
+        monthRangeStr = CStr(monthRangeInput)
+        If monthRangeStr = "" Then monthRangeStr = "4～3"   ' 空欄でOKした場合は全期間として扱う
+
+        rangeParts = Split(monthRangeStr, "～")
+        If UBound(rangeParts) <> 1 Then
+            MsgBox "月の範囲は「開始月～終了月」の形式（例：4～9）で入力してください。", vbExclamation
+            GoTo RetryMonthRange
+        End If
+
+        startMonthStr = Trim(rangeParts(0))
+        endMonthStr = Trim(rangeParts(1))
+        If startMonthStr = "" Then startMonthStr = "4"   ' 開始月省略時は4月扱い
+        If endMonthStr = "" Then endMonthStr = "3"       ' 終了月省略時は3月扱い
+
+        If Not IsNumeric(startMonthStr) Or Not IsNumeric(endMonthStr) Then
+            MsgBox "月の範囲は「開始月～終了月」の形式（例：4～9）で入力してください。", vbExclamation
+            GoTo RetryMonthRange
+        End If
+
+        startMonth = CLng(startMonthStr)
+        endMonth = CLng(endMonthStr)
+        If startMonth < 1 Or startMonth > 12 Or endMonth < 1 Or endMonth > 12 Then
+            MsgBox "開始月・終了月は1～12の範囲で入力してください。", vbExclamation
+            GoTo RetryMonthRange
+        End If
+
+        startPos = FiscalMonthPosition(startMonth)
+        endPos = FiscalMonthPosition(endMonth)
+        If startPos > endPos Then
+            MsgBox "開始月は終了月と同じか、それより前（4月始まりの年度内）にしてください。", vbExclamation
+            GoTo RetryMonthRange
+        End If
+
+        isValidRange = True
+RetryMonthRange:
+    Loop
+
+    PromptMonthRange = True
 End Function
 
 
