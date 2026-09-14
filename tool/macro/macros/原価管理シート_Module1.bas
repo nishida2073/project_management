@@ -27,7 +27,7 @@ Private gItemMap As Object
 
 ' システム用シート「データマッピング-区分1」「データマッピング-区分2」表のキャッシュ（区分名 → Dictionary(実績シート値 → 計算算定シート値)）。
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
-Private gKubunMaps As Object
+Private gDataMaps As Object
 
 ' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
 ' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
@@ -307,7 +307,6 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Dim lastRowOther As Long
     Dim lastRowMain As Long
     Dim otherRow As Long
-    Dim otherYearRaw As Variant, otherCaseId As Variant, otherKubunText As Variant, otherCostKubunId As Variant
     Dim foundRow As Long
     Dim otherFilePathToOpen As Variant
 
@@ -315,13 +314,9 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Dim mapMainRange As Object
     Dim mapOtherRange As Object
     Dim mapMainCol As Object
-    Dim mapKubun1 As Object
-    Dim mapKubun2 As Object
     Dim mainIndex As Object
     Dim otherDataStartRow As Long
 
-    Dim yOther As Long
-    Dim kubun1 As String, kubun2 As String
     Dim idxKey As String
 
     Dim mainRange As Range, otherRange As Range
@@ -339,7 +334,9 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Dim skipKeikakuOnlyRows As String    ' スキップ（計画）の計画算定シート側行番号の一覧
     Dim skipDupRows As String            ' スキップ（実績重複）の実績シート側行番号の一覧
 
-    Dim years As Variant, caseIds As Variant, kubuns As Variant, costKubuns As Variant
+    Dim keyItems As Variant
+    Dim otherKeyVals() As Variant
+    Dim ki As Long
 
     Dim startPos As Long, endPos As Long
 
@@ -448,8 +445,6 @@ RetryMonthRange:
     ' === ⑤ マッピングは1回だけ読み込む（mapMainRangeは冒頭で読み込み済み） ===
     Set mapOtherCol = GetOtherColMap()
     Set mapOtherRange = GetOtherRangeMap()
-    Set mapKubun1 = GetKubunMap("区分1")
-    Set mapKubun2 = GetKubunMap("区分2")
     otherDataStartRow = GetOtherDataStartRow()
 
     ' ここから先も再びセル単位でFont.Colorを書き換えるため、画面更新を止め直す
@@ -479,14 +474,19 @@ RetryMonthRange:
     Dim stepSnapshot As Object
     Set stepSnapshot = CreateObject("Scripting.Dictionary")
 
-    ' === ⑥ Otherの可変範囲の最終行を取得し、必要な列を一括で配列に読み込む ===
+    ' === ⑥ Otherの可変範囲の最終行を取得し、キー項目（年度・案件ID・区分1・区分2）の
+    ' 列を一括で配列に読み込む ===
     lastRowOther = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
 
+    keyItems = KeyItemNames()
+    ReDim otherKeyVals(LBound(keyItems) To UBound(keyItems))
+
     If lastRowOther >= otherDataStartRow Then
-        years = wsOther.Range(wsOther.Cells(1, mapOtherCol("年度")), wsOther.Cells(lastRowOther, mapOtherCol("年度"))).Value
-        caseIds = wsOther.Range(wsOther.Cells(1, mapOtherCol("案件ID")), wsOther.Cells(lastRowOther, mapOtherCol("案件ID"))).Value
-        kubuns = wsOther.Range(wsOther.Cells(1, mapOtherCol("区分")), wsOther.Cells(lastRowOther, mapOtherCol("区分"))).Value
-        costKubuns = wsOther.Range(wsOther.Cells(1, mapOtherCol("原価区分ID")), wsOther.Cells(lastRowOther, mapOtherCol("原価区分ID"))).Value
+        For ki = LBound(keyItems) To UBound(keyItems)
+            Dim otherCol As Variant
+            otherCol = mapOtherCol(keyItems(ki))
+            otherKeyVals(ki) = wsOther.Range(wsOther.Cells(1, otherCol), wsOther.Cells(lastRowOther, otherCol)).Value
+        Next ki
     End If
 
     ' 実績反映時の行検索用に、計画算定シート側の索引を作る
@@ -495,18 +495,39 @@ RetryMonthRange:
     ' === ⑦ 行ループ（キーの判定は配列上で行い、一致した行だけシートへアクセスする） ===
     For otherRow = otherDataStartRow To lastRowOther
 
-        ' キー4つ取得（年度, 案件ID, 区分, 原価区分ID）
-        otherYearRaw = years(otherRow, 1)
-        otherCaseId = caseIds(otherRow, 1)
-        otherKubunText = Trim(CStr(kubuns(otherRow, 1)))
-        otherCostKubunId = Trim(CStr(costKubuns(otherRow, 1)))
+        ' キー項目ごとに、gDataMapsに同名の変換表があれば変換した値を、
+        ' 無ければ生の値（年度のみ日付/数値からの正規化）をそのままキーに使う
+        Dim allMatched As Boolean
+        allMatched = True
 
-        If mapKubun1.Exists(otherKubunText) And mapKubun2.Exists(otherCostKubunId) Then
+        Dim keyParts() As String
+        ReDim keyParts(LBound(keyItems) To UBound(keyItems))
 
-            yOther = NormalizeYear(otherYearRaw)
-            kubun1 = mapKubun1(otherKubunText)
-            kubun2 = mapKubun2(otherCostKubunId)
-            idxKey = yOther & "|" & otherCaseId & "|" & kubun1 & "|" & kubun2
+        For ki = LBound(keyItems) To UBound(keyItems)
+            Dim keyItemName As String
+            keyItemName = keyItems(ki)
+
+            Dim rawVal As Variant
+            rawVal = otherKeyVals(ki)(otherRow, 1)
+
+            If keyItemName = "年度" Then
+                keyParts(ki) = CStr(NormalizeYear(rawVal))
+            ElseIf gDataMaps.Exists(keyItemName) Then
+                Dim rawText As String
+                rawText = Trim(CStr(rawVal))
+                If gDataMaps(keyItemName).Exists(rawText) Then
+                    keyParts(ki) = gDataMaps(keyItemName)(rawText)
+                Else
+                    allMatched = False
+                    Exit For
+                End If
+            Else
+                keyParts(ki) = Trim(rawVal & "")
+            End If
+        Next ki
+
+        If allMatched Then
+            idxKey = Join(keyParts, "|")
 
             ' === ⑧ Dictionaryで一致する行を即座に取得 ===
             If mainIndex.Exists(idxKey) Then
@@ -948,31 +969,52 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
         Exit Function
     End If
 
-    Dim colYear As Variant, colCase As Variant, colKubun1 As Variant, colKubun2 As Variant, colYojitsu As Variant
-    colYear = mapMainCol("年度")
-    colCase = mapMainCol("案件ID")
-    colKubun1 = mapMainCol("区分1")
-    colKubun2 = mapMainCol("区分2")
+    Dim colYojitsu As Variant
     colYojitsu = mapMainCol("予実")
 
-    Dim years As Variant, caseIds As Variant, kubun1s As Variant, kubun2s As Variant, yojitsus As Variant
-    years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
-    caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
-    kubun1s = ws.Range(ws.Cells(1, colKubun1), ws.Cells(lastRow, colKubun1)).Value
-    kubun2s = ws.Range(ws.Cells(1, colKubun2), ws.Cells(lastRow, colKubun2)).Value
+    Dim yojitsus As Variant
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
+
+    ' キー項目（年度・案件ID・区分1・区分2）それぞれの列を、計画算定シート側の値のまま一括で読み込む
+    ' （計画算定シート側は既に「変換後」の表記が入っているため、gDataMapsによる変換は不要）
+    Dim keyItems As Variant
+    keyItems = KeyItemNames()
+
+    Dim keyVals() As Variant
+    ReDim keyVals(LBound(keyItems) To UBound(keyItems))
+
+    Dim ki As Long
+    For ki = LBound(keyItems) To UBound(keyItems)
+        Dim col As Variant
+        col = mapMainCol(keyItems(ki))
+        keyVals(ki) = ws.Range(ws.Cells(1, col), ws.Cells(lastRow, col)).Value
+    Next ki
 
     Dim r As Long
     For r = dataStartRow To lastRow
-        If yojitsus(r, 1) = "実績" _
-                And Trim(years(r, 1) & "") <> "" _
-                And Trim(caseIds(r, 1) & "") <> "" _
-                And Trim(kubun1s(r, 1) & "") <> "" _
-                And Trim(kubun2s(r, 1) & "") <> "" Then
-            Dim idxKey As String
-            idxKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & kubun1s(r, 1) & "|" & kubun2s(r, 1)
+        If yojitsus(r, 1) = "実績" Then
+            Dim allFilled As Boolean
+            allFilled = True
 
-            If Not dic.Exists(idxKey) Then dic(idxKey) = r
+            Dim parts() As String
+            ReDim parts(LBound(keyItems) To UBound(keyItems))
+
+            For ki = LBound(keyItems) To UBound(keyItems)
+                Dim v As String
+                v = Trim(keyVals(ki)(r, 1) & "")
+                If v = "" Then
+                    allFilled = False
+                    Exit For
+                End If
+                parts(ki) = v
+            Next ki
+
+            If allFilled Then
+                Dim idxKey As String
+                idxKey = Join(parts, "|")
+
+                If Not dic.Exists(idxKey) Then dic(idxKey) = r
+            End If
         End If
     Next r
 
@@ -1253,18 +1295,18 @@ End Function
 
 
 ' ============================
-' 区分（区分1・区分2）の「実績シート値→計算算定シート値」マッピング辞書を返す
+' 項目名（区分1・区分2など）の「実績シート値→計算算定シート値」マッピング辞書を返す
 ' ============================
-Function GetKubunMap(kubunName As String) As Object
-    If gKubunMaps Is Nothing Then LoadSystemMappings
+Function GetDataMap(itemName As String) As Object
+    If gDataMaps Is Nothing Then LoadSystemMappings
 
-    If Not gKubunMaps.Exists(kubunName) Then
+    If Not gDataMaps.Exists(itemName) Then
         Err.Raise vbObjectError + 1000, _
-                  "GetKubunMap", _
-                  "システム用シートに区分「" & kubunName & "」のデータマッピングが見つかりません。"
+                  "GetDataMap", _
+                  "システム用シートに項目「" & itemName & "」のデータマッピングが見つかりません。"
     End If
 
-    Set GetKubunMap = gKubunMaps(kubunName)
+    Set GetDataMap = gDataMaps(itemName)
 End Function
 
 
@@ -1287,7 +1329,7 @@ End Function
 
 
 ' ============================
-' 実績シート側の列マッピング（年度・案件ID・区分・原価区分ID → 列記号）
+' 実績シート側の列マッピング（年度・案件ID・区分1・区分2 → 列記号）
 ' ============================
 Function GetOtherColMap() As Object
     Dim dic As Object
@@ -1295,10 +1337,20 @@ Function GetOtherColMap() As Object
 
     dic("年度") = GetItemValue("年度", False)
     dic("案件ID") = GetItemValue("案件ID", False)
-    dic("区分") = GetItemValue("区分1", False)
-    dic("原価区分ID") = GetItemValue("区分2", False)
+    dic("区分1") = GetItemValue("区分1", False)
+    dic("区分2") = GetItemValue("区分2", False)
 
     Set GetOtherColMap = dic
+End Function
+
+
+' ============================
+' 実績反映で行を照合する際のキーを構成する項目名（この並び順でキー文字列を組み立てる）。
+' 各項目名はgItemMapのキーと一致しており、gDataMapsに同じ名前の変換表があれば
+' その項目は実績シート側の値を変換してからキーに使う（無ければ生の値をそのまま使う）
+' ============================
+Function KeyItemNames() As Variant
+    KeyItemNames = Array("年度", "案件ID", "区分1", "区分2")
 End Function
 
 
@@ -1347,20 +1399,46 @@ End Function
 
 
 ' ============================
-' システム用シートの「項目マッピング」表と、区分ごとに分かれた
-' 「データマッピング-区分1」「データマッピング-区分2」表を、それぞれ1回だけ読み込み、
-' gItemMap・gKubunMapsにキャッシュする
+' システム用シートの「項目マッピング」表と、「データマッピング-XXX」というタイトルの
+' 表をすべて、それぞれ1回だけ読み込み、gItemMap・gDataMapsにキャッシュする。
+' 「データマッピング-XXX」は数がいくつあっても（区分3以降を追加しても）自動的に拾われる
 ' ============================
 Sub LoadSystemMappings()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("システム用")
 
     Set gItemMap = LoadItemMapTable(ws, "項目マッピング")
-
-    Set gKubunMaps = CreateObject("Scripting.Dictionary")
-    Set gKubunMaps("区分1") = LoadPairMapTable(ws, "データマッピング-区分1")
-    Set gKubunMaps("区分2") = LoadPairMapTable(ws, "データマッピング-区分2")
+    Set gDataMaps = LoadAllDataMaps(ws)
 End Sub
+
+
+' ============================
+' システム用シート全体から「データマッピング-XXX」というタイトルのセルをすべて探し、
+' XXXの部分を項目名として、それぞれの表をLoadPairMapTableで読み込む
+' ============================
+Function LoadAllDataMaps(ws As Worksheet) As Object
+    Const TITLE_PREFIX As String = "データマッピング-"
+
+    Dim result As Object
+    Set result = CreateObject("Scripting.Dictionary")
+
+    Dim cell As Range
+    For Each cell In ws.UsedRange.Cells
+        Dim titleText As String
+        titleText = CStr(cell.Value)
+
+        If Left(titleText, Len(TITLE_PREFIX)) = TITLE_PREFIX Then
+            Dim itemName As String
+            itemName = Mid(titleText, Len(TITLE_PREFIX) + 1)
+
+            If itemName <> "" Then
+                Set result(itemName) = LoadPairMapTable(ws, titleText)
+            End If
+        End If
+    Next cell
+
+    Set LoadAllDataMaps = result
+End Function
 
 
 ' ============================
