@@ -12,10 +12,6 @@ Private gUndoHistory As Collection
 ' 実績反映で変更のあった行の元値・新値（行番号 → Array(元値の配列, 新値の配列)）
 Private gToggleValuesByRow As Object
 
-' 重複行ハイライトを付ける前の、年度・案件ID・会計区分1・会計区分2列のフォント色
-' （行番号 → Array(年度の色, 案件IDの色, 会計区分1の色, 会計区分2の色)）
-Private gDuplicateHighlightBackup As Object
-
 ' 前回保存時点（＝直近のHandleBeforeSave完了時、なければファイルを開いた時点）の
 ' 貼付範囲全行の値・フォント色（行番号 → Array(値の配列, 色の配列)）。
 ' 保存のたびにこの内容と現在のシートを比較し、差分があれば（実績反映・手動編集を問わず）履歴に積む
@@ -25,9 +21,13 @@ Private gLastSavedSnapshot As Object
 Private gLastKnownMainLastRow As Long
 Private gLastKnownMainLastRowValid As Boolean
 
-' システム用シートのマッピング全体のキャッシュ（ヘッダー名 → Dictionary(キー→値)）。
-' LoadMappingHorizontalを呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
-Private gAllMappings As Object
+' システム用シート「項目名」表のキャッシュ（項目名 → Array(実績シート値, 計算算定シート値)）。
+' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
+Private gItemMap As Object
+
+' システム用シート「データマッピング-区分1」「データマッピング-区分2」表のキャッシュ（区分名 → Dictionary(実績シート値 → 計算算定シート値)）。
+' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
+Private gKaikeiKubunMaps As Object
 
 ' Trueの場合、実績反映（対話実行）時に反映月の範囲を指定するダイアログを表示する。Falseの場合は常に全期間を反映する
 ' 環境変数USE_MONTH_RANGE_DIALOGから読み込む（"TRUE"または"1"でTrue、それ以外はFalse）
@@ -64,8 +64,8 @@ Sub HandleWorkbookOpen()
 
     ' 開いた時点の状態を、保存時の差分比較の基準として記録しておく
     Dim mapMainCol As Object, mapMainRange As Object
-    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
-    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
+    Set mapMainCol = GetMainColMap()
+    Set mapMainRange = GetMainRangeMap()
     Set gLastSavedSnapshot = BuildFullSheetSnapshot(wsMain, mapMainCol, mapMainRange)
 
     ' 行の追加・削除検知の基準も、開いた時点の行数にしておく
@@ -90,8 +90,8 @@ Sub HandleBeforeSave()
     Dim mapMainRange As Object
     Dim mapMainCol As Object
 
-    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
-    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
+    Set mapMainRange = GetMainRangeMap()
+    Set mapMainCol = GetMainColMap()
 
     ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
     CheckRowCountAndResetIfChanged ws, mapMainCol, mapMainRange
@@ -119,34 +119,10 @@ Sub HandleBeforeSave()
     Next key
     Set gUndoBackupRows = CreateObject("Scripting.Dictionary")
 
-    ' 重複行ハイライトも、元のフォント色へ戻す
-    If Not gDuplicateHighlightBackup Is Nothing Then
-        Dim colYear As Variant, colCase As Variant, colName As Variant, colKaikeiKubun1 As Variant, colKaikeiKubun2 As Variant, colYojitsu As Variant
-        colYear = mapMainCol("年度")
-        colCase = mapMainCol("案件ID")
-        colName = mapMainCol("案件名")
-        colKaikeiKubun1 = mapMainCol("会計区分1")
-        colKaikeiKubun2 = mapMainCol("会計区分2")
-        colYojitsu = mapMainCol("予実")
-
-        Dim dupKey As Variant
-        For Each dupKey In gDuplicateHighlightBackup.Keys
-            Dim dupRow As Long
-            dupRow = dupKey
-
-            Dim dupColors As Variant
-            dupColors = gDuplicateHighlightBackup(dupKey)
-
-            ws.Cells(dupRow, colYear).Font.Color = dupColors(0)
-            ws.Cells(dupRow, colCase).Font.Color = dupColors(1)
-            ws.Cells(dupRow, colName).Font.Color = dupColors(2)
-            ws.Cells(dupRow, colKaikeiKubun1).Font.Color = dupColors(3)
-            ws.Cells(dupRow, colKaikeiKubun2).Font.Color = dupColors(4)
-            ws.Cells(dupRow, colYojitsu).Font.Color = dupColors(5)
-        Next dupKey
-
-        Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
-    End If
+    ' 重複行ハイライトも、自動色へ戻す
+    Dim lastRowForDupReset As Long
+    lastRowForDupReset = ws.Cells(ws.Rows.Count, mapMainCol("年度")).End(xlUp).Row
+    ResetDupHighlightColumns ws, mapMainCol, lastRowForDupReset
 
     ' 前回保存時点からの状態(gLastSavedSnapshot)を、実績反映で触った行を除いて現在の状態と比較し、
     ' 変化があれば（＝手動でのセル編集があれば）履歴に積む
@@ -174,9 +150,12 @@ Function BuildFullSheetSnapshot(ws As Worksheet, mapMainCol As Object, mapMainRa
     Dim lastRow As Long
     lastRow = ws.Cells(ws.Rows.Count, mapMainCol("年度")).End(xlUp).Row
 
-    If lastRow >= 5 Then
+    Dim dataStartRow As Long
+    dataStartRow = GetMainDataStartRow()
+
+    If lastRow >= dataStartRow Then
         Dim r As Long
-        For r = 5 To lastRow
+        For r = dataStartRow To lastRow
             Dim rng As Range
             Set rng = ws.Range(mapMainRange("開始") & r & ":" & mapMainRange("終了") & r)
             snap(r) = Array(rng.Value, GetFontColors(rng))
@@ -214,22 +193,20 @@ Sub ClearAllUndoState(ws As Worksheet, mapMainCol As Object, mapMainRange As Obj
     Set gUndoBackupRows = CreateObject("Scripting.Dictionary")
     Set gUndoHistory = New Collection
     Set gToggleValuesByRow = CreateObject("Scripting.Dictionary")
-    Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
 
     ' 行番号が信頼できなくなったため、個々の行の「元の色」には戻せない。
     ' 代わりに、ハイライト対象になり得る列を貼付範囲・重複チェック列とも一括で自動色に戻す
     Dim lastRow As Long
     lastRow = ws.Cells(ws.Rows.Count, mapMainCol("年度")).End(xlUp).Row
-    If lastRow >= 5 Then
-        ws.Range(mapMainRange("開始") & "5:" & mapMainRange("終了") & lastRow).Font.ColorIndex = xlAutomatic
 
-        Dim dupCols As Variant
-        dupCols = Array("年度", "案件ID", "案件名", "会計区分1", "会計区分2", "予実")
-        Dim i As Long
-        For i = LBound(dupCols) To UBound(dupCols)
-            ws.Range(ws.Cells(5, mapMainCol(dupCols(i))), ws.Cells(lastRow, mapMainCol(dupCols(i)))).Font.ColorIndex = xlAutomatic
-        Next i
+    Dim dataStartRow As Long
+    dataStartRow = GetMainDataStartRow()
+
+    If lastRow >= dataStartRow Then
+        ws.Range(mapMainRange("開始") & dataStartRow & ":" & mapMainRange("終了") & lastRow).Font.ColorIndex = xlAutomatic
     End If
+
+    ResetDupHighlightColumns ws, mapMainCol, lastRow
 
     Set gLastSavedSnapshot = BuildFullSheetSnapshot(ws, mapMainCol, mapMainRange)
 End Sub
@@ -341,6 +318,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Dim mapKaikeiKubun1 As Object
     Dim mapKaikeiKubun2 As Object
     Dim mainIndex As Object
+    Dim otherDataStartRow As Long
 
     Dim yOther As Long
     Dim kaikeiKubun1 As String, kaikeiKubun2 As String
@@ -369,8 +347,8 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     On Error GoTo CleanFail
 
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
-    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
-    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
+    Set mapMainCol = GetMainColMap()
+    Set mapMainRange = GetMainRangeMap()
 
     ' 重複チェックの色付けはセル単位のFont.Color操作を大量に行うため、
     ' 画面再描画をここから止めておく（止め忘れるとチェックのたびに1件ずつ描画されて非常に遅くなる）
@@ -384,6 +362,10 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     ' === ② 対象ファイルを選ぶ前に、計画算定シート側の重複チェックを行う ===
     lastRowMain = wsMain.Cells(wsMain.Rows.Count, mapMainCol("年度")).End(xlUp).Row
     CheckDuplicateRows wsMain, mapMainCol, lastRowMain
+
+    ' 重複が無くなっていれば、直前の重複ハイライト解除がここで既に反映されているはず。
+    ' ファイル選択・月範囲ダイアログより前に画面を更新し、消えたことをすぐ見えるようにする
+    Application.ScreenUpdating = True
 
     ' === ③ 対話実行はファイルダイアログ、バッチ実行は引数のパスを使う ===
     If isInteractive Then
@@ -464,10 +446,14 @@ RetryMonthRange:
     Set wsOther = wbOther.Sheets("実績")   ' ←読み込み元
 
     ' === ⑤ マッピングは1回だけ読み込む（mapMainRangeは冒頭で読み込み済み） ===
-    Set mapOtherCol = LoadMappingHorizontal("実績シート-項目")
-    Set mapOtherRange = LoadMappingHorizontal("実績シート-対象範囲")
-    Set mapKaikeiKubun1 = LoadMappingHorizontal("会計区分1マッピング")
-    Set mapKaikeiKubun2 = LoadMappingHorizontal("会計区分2マッピング")
+    Set mapOtherCol = GetOtherColMap()
+    Set mapOtherRange = GetOtherRangeMap()
+    Set mapKaikeiKubun1 = GetKaikeiKubunMap("区分1")
+    Set mapKaikeiKubun2 = GetKaikeiKubunMap("区分2")
+    otherDataStartRow = GetOtherDataStartRow()
+
+    ' ここから先も再びセル単位でFont.Colorを書き換えるため、画面更新を止め直す
+    Application.ScreenUpdating = False
 
     ' 前回までの実行で触った行は、一旦「本当の元の色」に戻しておく（値には触れない）
     If Not gUndoBackupRows Is Nothing Then
@@ -496,7 +482,7 @@ RetryMonthRange:
     ' === ⑥ Otherの可変範囲の最終行を取得し、必要な列を一括で配列に読み込む ===
     lastRowOther = wsOther.Cells(wsOther.Rows.Count, mapOtherCol("年度")).End(xlUp).Row
 
-    If lastRowOther >= 2 Then
+    If lastRowOther >= otherDataStartRow Then
         years = wsOther.Range(wsOther.Cells(1, mapOtherCol("年度")), wsOther.Cells(lastRowOther, mapOtherCol("年度"))).Value
         caseIds = wsOther.Range(wsOther.Cells(1, mapOtherCol("案件ID")), wsOther.Cells(lastRowOther, mapOtherCol("案件ID"))).Value
         kubuns = wsOther.Range(wsOther.Cells(1, mapOtherCol("区分")), wsOther.Cells(lastRowOther, mapOtherCol("区分"))).Value
@@ -507,7 +493,7 @@ RetryMonthRange:
     Set mainIndex = BuildMainIndex(wsMain, mapMainCol, lastRowMain)
 
     ' === ⑦ 行ループ（キーの判定は配列上で行い、一致した行だけシートへアクセスする） ===
-    For otherRow = 2 To lastRowOther
+    For otherRow = otherDataStartRow To lastRowOther
 
         ' キー4つ取得（年度, 案件ID, 区分, 原価区分ID）
         otherYearRaw = years(otherRow, 1)
@@ -659,8 +645,8 @@ Sub UndoLastCheckpoint()
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
     Dim mapMainRange As Object, mapMainCol As Object
-    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
-    Set mapMainCol = LoadMappingHorizontal("計算算定シート-項目")
+    Set mapMainRange = GetMainRangeMap()
+    Set mapMainCol = GetMainColMap()
 
     ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
     CheckRowCountAndResetIfChanged wsMain, mapMainCol, mapMainRange
@@ -884,7 +870,10 @@ Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange 
     unmatchedCount = 0
     unmatchedRows = ""
 
-    If lastRow < 5 Then Exit Sub
+    Dim dataStartRow As Long
+    dataStartRow = GetMainDataStartRow()
+
+    If lastRow < dataStartRow Then Exit Sub
 
     Dim colYojitsu As Variant
     colYojitsu = mapMainCol("予実")
@@ -893,7 +882,7 @@ Sub MarkUnmatchedActualRows(ws As Worksheet, mapMainCol As Object, mapMainRange 
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
 
     Dim r As Long
-    For r = 5 To lastRow
+    For r = dataStartRow To lastRow
         If yojitsus(r, 1) = "実績" Then
             If Not matchedRows.Exists(r) Then
                 Dim rng As Range
@@ -945,13 +934,16 @@ End Sub
 
 
 ' ============================
-' Main側の「年度|案件ID|会計区分1|会計区分2」→行番号 の索引を作る
+' Main側の「年度|案件ID|区分1|区分2」→行番号 の索引を作る
 ' ============================
 Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) As Object
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
 
-    If lastRow < 5 Then
+    Dim dataStartRow As Long
+    dataStartRow = GetMainDataStartRow()
+
+    If lastRow < dataStartRow Then
         Set BuildMainIndex = dic
         Exit Function
     End If
@@ -959,8 +951,8 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     Dim colYear As Variant, colCase As Variant, colKaikeiKubun1 As Variant, colKaikeiKubun2 As Variant, colYojitsu As Variant
     colYear = mapMainCol("年度")
     colCase = mapMainCol("案件ID")
-    colKaikeiKubun1 = mapMainCol("会計区分1")
-    colKaikeiKubun2 = mapMainCol("会計区分2")
+    colKaikeiKubun1 = mapMainCol("区分1")
+    colKaikeiKubun2 = mapMainCol("区分2")
     colYojitsu = mapMainCol("予実")
 
     Dim years As Variant, caseIds As Variant, kaikeiKubun1s As Variant, kaikeiKubun2s As Variant, yojitsus As Variant
@@ -971,7 +963,7 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
 
     Dim r As Long
-    For r = 5 To lastRow
+    For r = dataStartRow To lastRow
         If yojitsus(r, 1) = "実績" _
                 And Trim(years(r, 1) & "") <> "" _
                 And Trim(caseIds(r, 1) & "") <> "" _
@@ -989,45 +981,34 @@ End Function
 
 
 ' ============================
-' 年度・案件ID・案件名・会計区分1・会計区分2・予実（remove-duplicate-rows.ps1と同じキー）の
+' 年度・案件ID・案件名・区分1・区分2・予実（remove-duplicate-rows.ps1と同じキー）の
 ' 重複チェックを行う。前回のチェックで付けた重複ハイライトは一旦元の色に戻したうえで判定し直し、
 ' 重複が見つかった場合は行をハイライトしたうえでエラーを発生させる
 ' ============================
 Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
-    Dim colYear As Variant, colCase As Variant, colName As Variant, colKaikeiKubun1 As Variant, colKaikeiKubun2 As Variant, colYojitsu As Variant
+    Dim colYear As Variant, colCase As Variant, colName As Variant, colKubun1 As Variant, colKubun2 As Variant, colYojitsu As Variant
     colYear = mapMainCol("年度")
     colCase = mapMainCol("案件ID")
     colName = mapMainCol("案件名")
-    colKaikeiKubun1 = mapMainCol("会計区分1")
-    colKaikeiKubun2 = mapMainCol("会計区分2")
+    colKubun1 = mapMainCol("区分1")
+    colKubun2 = mapMainCol("区分2")
     colYojitsu = mapMainCol("予実")
 
-    ' 前回までのチェックで重複ハイライトを付けた行は、一旦「本当の元の色」に戻す。
-    ' そのうえで記録をクリアし、今回のチェックで改めて重複判定・色付けを行う
-    If Not gDuplicateHighlightBackup Is Nothing Then
-        Dim resetDupKey As Variant
-        For Each resetDupKey In gDuplicateHighlightBackup.Keys
-            Dim resetDupRow As Long
-            resetDupRow = resetDupKey
-            Dim resetDupColors As Variant
-            resetDupColors = gDuplicateHighlightBackup(resetDupKey)
-            ws.Cells(resetDupRow, colYear).Font.Color = resetDupColors(0)
-            ws.Cells(resetDupRow, colCase).Font.Color = resetDupColors(1)
-            ws.Cells(resetDupRow, colName).Font.Color = resetDupColors(2)
-            ws.Cells(resetDupRow, colKaikeiKubun1).Font.Color = resetDupColors(3)
-            ws.Cells(resetDupRow, colKaikeiKubun2).Font.Color = resetDupColors(4)
-            ws.Cells(resetDupRow, colYojitsu).Font.Color = resetDupColors(5)
-        Next resetDupKey
-    End If
-    Set gDuplicateHighlightBackup = CreateObject("Scripting.Dictionary")
+    ' 対象6列はこのチェック以外で色を付けることが無いため、判定のたびに一旦すべて
+    ' 自動色に戻してから、現在も重複している行だけ塗り直す（これなら重複が解消
+    ' されていれば必ず自動色に戻り、「前回の色を覚えておいて戻す」仕組みが不要）
+    ResetDupHighlightColumns ws, mapMainCol, lastRow
 
-    If lastRow < 5 Then Exit Sub
+    Dim dataStartRow As Long
+    dataStartRow = GetMainDataStartRow()
 
-    Dim years As Variant, caseIds As Variant, kaikeiKubun1s As Variant, kaikeiKubun2s As Variant, yojitsus As Variant, names As Variant
+    If lastRow < dataStartRow Then Exit Sub
+
+    Dim years As Variant, caseIds As Variant, kubun1s As Variant, kubun2s As Variant, yojitsus As Variant, names As Variant
     years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
     caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
-    kaikeiKubun1s = ws.Range(ws.Cells(1, colKaikeiKubun1), ws.Cells(lastRow, colKaikeiKubun1)).Value
-    kaikeiKubun2s = ws.Range(ws.Cells(1, colKaikeiKubun2), ws.Cells(lastRow, colKaikeiKubun2)).Value
+    kubun1s = ws.Range(ws.Cells(1, colKubun1), ws.Cells(lastRow, colKubun1)).Value
+    kubun2s = ws.Range(ws.Cells(1, colKubun2), ws.Cells(lastRow, colKubun2)).Value
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
     names = ws.Range(ws.Cells(1, colName), ws.Cells(lastRow, colName)).Value
 
@@ -1035,15 +1016,15 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
     Set rowsByKey = CreateObject("Scripting.Dictionary")   ' 重複判定キー → 該当行番号（カンマ区切り文字列）
 
     Dim r As Long
-    For r = 5 To lastRow
+    For r = dataStartRow To lastRow
         If Trim(years(r, 1) & "") <> "" _
                 And Trim(caseIds(r, 1) & "") <> "" _
                 And Trim(names(r, 1) & "") <> "" _
-                And Trim(kaikeiKubun1s(r, 1) & "") <> "" _
-                And Trim(kaikeiKubun2s(r, 1) & "") <> "" _
+                And Trim(kubun1s(r, 1) & "") <> "" _
+                And Trim(kubun2s(r, 1) & "") <> "" _
                 And Trim(yojitsus(r, 1) & "") <> "" Then
             Dim dupKey As String
-            dupKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & names(r, 1) & "|" & kaikeiKubun1s(r, 1) & "|" & kaikeiKubun2s(r, 1) & "|" & yojitsus(r, 1)
+            dupKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & names(r, 1) & "|" & kubun1s(r, 1) & "|" & kubun2s(r, 1) & "|" & yojitsus(r, 1)
 
             If rowsByKey.Exists(dupKey) Then
                 rowsByKey(dupKey) = rowsByKey(dupKey) & ", " & r
@@ -1084,21 +1065,11 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
                 Dim dupRow As Long
                 dupRow = CLng(Trim(rowParts(p)))
 
-                If Not gDuplicateHighlightBackup.Exists(dupRow) Then
-                    gDuplicateHighlightBackup(dupRow) = Array( _
-                        ws.Cells(dupRow, colYear).Font.Color, _
-                        ws.Cells(dupRow, colCase).Font.Color, _
-                        ws.Cells(dupRow, colName).Font.Color, _
-                        ws.Cells(dupRow, colKaikeiKubun1).Font.Color, _
-                        ws.Cells(dupRow, colKaikeiKubun2).Font.Color, _
-                        ws.Cells(dupRow, colYojitsu).Font.Color)
-                End If
-
                 ws.Cells(dupRow, colYear).Font.Color = groupColor
                 ws.Cells(dupRow, colCase).Font.Color = groupColor
                 ws.Cells(dupRow, colName).Font.Color = groupColor
-                ws.Cells(dupRow, colKaikeiKubun1).Font.Color = groupColor
-                ws.Cells(dupRow, colKaikeiKubun2).Font.Color = groupColor
+                ws.Cells(dupRow, colKubun1).Font.Color = groupColor
+                ws.Cells(dupRow, colKubun2).Font.Color = groupColor
                 ws.Cells(dupRow, colYojitsu).Font.Color = groupColor
             Next p
 
@@ -1109,10 +1080,32 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
     If msg <> "" Then
         Err.Raise vbObjectError + 1001, _
                   "CheckDuplicateRows", _
-                  MAIN_SHEET_NAME & "に、条件（年度・案件ID・案件名・会計区分1・会計区分2・予実）が重複する行があります。" & vbCrLf & vbCrLf & _
+                  MAIN_SHEET_NAME & "に、条件（年度・案件ID・案件名・区分1・区分2・予実）が重複する行があります。" & vbCrLf & vbCrLf & _
                   msg & _
                   "実績反映を行う前に、" & MAIN_SHEET_NAME & "側の重複を解消してください。"
     End If
+End Sub
+
+
+' ============================
+' 重複チェック対象の6列（年度・案件ID・案件名・区分1・区分2・予実）を、
+' 指定範囲ぶん自動色に戻す
+' ============================
+Sub ResetDupHighlightColumns(ws As Worksheet, mapMainCol As Object, lastRow As Long)
+    Dim dataStartRow As Long
+    dataStartRow = GetMainDataStartRow()
+
+    If lastRow < dataStartRow Then Exit Sub
+
+    Dim dupCols As Variant
+    dupCols = Array("年度", "案件ID", "案件名", "区分1", "区分2", "予実")
+
+    Dim i As Long
+    For i = LBound(dupCols) To UBound(dupCols)
+        Dim col As Variant
+        col = mapMainCol(dupCols(i))
+        ws.Range(ws.Cells(dataStartRow, col), ws.Cells(lastRow, col)).Font.ColorIndex = xlAutomatic
+    Next i
 End Sub
 
 
@@ -1197,7 +1190,7 @@ Sub HandleSheetBeforeDoubleClick(Sh As Object, Target As Range, Cancel As Boolea
     If Sh.Name <> MAIN_SHEET_NAME Then Exit Sub
 
     Dim mapMainRange As Object
-    Set mapMainRange = LoadMappingHorizontal("計算算定シート-対象範囲")
+    Set mapMainRange = GetMainRangeMap()
     Dim pasteRangeStartCol As Long, pasteRangeEndCol As Long
     pasteRangeStartCol = Sh.Range(mapMainRange("開始") & "1").Column
     pasteRangeEndCol = Sh.Range(mapMainRange("終了") & "1").Column
@@ -1236,64 +1229,231 @@ End Sub
 
 
 ' ============================
-' 指定ヘッダーの「下方向2列」のマッピングを返す。
-' システム用シートの全ヘッダー分は初回呼び出し時にまとめて読み込み、以降はキャッシュを使い回す
+' 項目名（年度・案件ID・対象範囲-開始行など）に対応する、
+' 実績シート側 or 計算算定シート側の値を返す
 ' ============================
-Function LoadMappingHorizontal(headerText As String) As Object
-    If gAllMappings Is Nothing Then LoadAllMappings
+Function GetItemValue(itemName As String, isMain As Boolean) As String
+    If gItemMap Is Nothing Then LoadSystemMappings
 
-    ' ★ ヘッダーが見つからなかった場合は強制終了
-    If Not gAllMappings.Exists(headerText) Then
+    If Not gItemMap.Exists(itemName) Then
         Err.Raise vbObjectError + 1000, _
-                  "LoadMappingHorizontal", _
-                  "ヘッダー「" & headerText & "」が見つかりません。"
+                  "GetItemValue", _
+                  "システム用シートに項目「" & itemName & "」が見つかりません。"
     End If
 
-    Set LoadMappingHorizontal = gAllMappings(headerText)
+    Dim arr As Variant
+    arr = gItemMap(itemName)
+
+    If isMain Then
+        GetItemValue = arr(1)
+    Else
+        GetItemValue = arr(0)
+    End If
 End Function
 
 
 ' ============================
-' システム用シートのヘッダー行（2行目）を1回だけ横方向に走査し、
-' ヘッダー名ごとの下方向マッピングをまとめてgAllMappingsに読み込む
+' 区分（区分1・区分2）の「実績シート値→計算算定シート値」マッピング辞書を返す
 ' ============================
-Sub LoadAllMappings()
-    Set gAllMappings = CreateObject("Scripting.Dictionary")
+Function GetKaikeiKubunMap(kubunName As String) As Object
+    If gKaikeiKubunMaps Is Nothing Then LoadSystemMappings
 
+    If Not gKaikeiKubunMaps.Exists(kubunName) Then
+        Err.Raise vbObjectError + 1000, _
+                  "GetKaikeiKubunMap", _
+                  "システム用シートに区分「" & kubunName & "」のデータマッピングが見つかりません。"
+    End If
+
+    Set GetKaikeiKubunMap = gKaikeiKubunMaps(kubunName)
+End Function
+
+
+' ============================
+' 計画算定シート側の列マッピング（年度・案件ID・案件名・区分1・区分2・予実 → 列記号）
+' ============================
+Function GetMainColMap() As Object
+    Dim dic As Object
+    Set dic = CreateObject("Scripting.Dictionary")
+
+    dic("年度") = GetItemValue("年度", True)
+    dic("案件ID") = GetItemValue("案件ID", True)
+    dic("案件名") = GetItemValue("案件名", True)
+    dic("区分1") = GetItemValue("区分1", True)
+    dic("区分2") = GetItemValue("区分2", True)
+    dic("予実") = GetItemValue("予実", True)
+
+    Set GetMainColMap = dic
+End Function
+
+
+' ============================
+' 実績シート側の列マッピング（年度・案件ID・区分・原価区分ID → 列記号）
+' ============================
+Function GetOtherColMap() As Object
+    Dim dic As Object
+    Set dic = CreateObject("Scripting.Dictionary")
+
+    dic("年度") = GetItemValue("年度", False)
+    dic("案件ID") = GetItemValue("案件ID", False)
+    dic("区分") = GetItemValue("区分1", False)
+    dic("原価区分ID") = GetItemValue("区分2", False)
+
+    Set GetOtherColMap = dic
+End Function
+
+
+' ============================
+' 計画算定シート側の貼付範囲（開始・終了の列記号）
+' ============================
+Function GetMainRangeMap() As Object
+    Dim dic As Object
+    Set dic = CreateObject("Scripting.Dictionary")
+
+    dic("開始") = GetItemValue("対象範囲-開始列", True)
+    dic("終了") = GetItemValue("対象範囲-終了列", True)
+
+    Set GetMainRangeMap = dic
+End Function
+
+
+' ============================
+' 実績シート側の貼付範囲（開始・終了の列記号）
+' ============================
+Function GetOtherRangeMap() As Object
+    Dim dic As Object
+    Set dic = CreateObject("Scripting.Dictionary")
+
+    dic("開始") = GetItemValue("対象範囲-開始列", False)
+    dic("終了") = GetItemValue("対象範囲-終了列", False)
+
+    Set GetOtherRangeMap = dic
+End Function
+
+
+' ============================
+' 計画算定シート側のデータ開始行
+' ============================
+Function GetMainDataStartRow() As Long
+    GetMainDataStartRow = CLng(GetItemValue("対象範囲-開始行", True))
+End Function
+
+
+' ============================
+' 実績シート側のデータ開始行
+' ============================
+Function GetOtherDataStartRow() As Long
+    GetOtherDataStartRow = CLng(GetItemValue("対象範囲-開始行", False))
+End Function
+
+
+' ============================
+' システム用シートの「項目名」表と、区分ごとに分かれた
+' 「データマッピング-区分1」「データマッピング-区分2」表を、それぞれ1回だけ読み込み、
+' gItemMap・gKaikeiKubunMapsにキャッシュする
+' ============================
+Sub LoadSystemMappings()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("システム用")
 
-    Const HEADER_ROW As Long = 2
-    Const DATA_START_ROW As Long = HEADER_ROW + 1
+    Set gItemMap = LoadItemMapTable(ws, "項目名")
 
-    Dim lastCol As Long
-    lastCol = ws.Cells(HEADER_ROW, ws.Columns.Count).End(xlToLeft).Column
-
-    Dim c As Long
-    For c = 1 To lastCol
-        Dim headerText As String
-        headerText = ws.Cells(HEADER_ROW, c).Value
-
-        If headerText <> "" Then
-            Dim dic As Object
-            Set dic = CreateObject("Scripting.Dictionary")
-            Set gAllMappings(headerText) = dic
-
-            Dim r As Long
-            r = DATA_START_ROW
-
-            ' 空行に当たるまで読み込む
-            Do While ws.Cells(r, c).Value <> ""
-                Dim key As String
-                Dim val As String
-
-                key = ws.Cells(r, c).Value
-                val = ws.Cells(r, c + 1).Value ' 右隣の列が値
-
-                If key <> "" Then dic(key) = val
-
-                r = r + 1
-            Loop
-        End If
-    Next c
+    Set gKaikeiKubunMaps = CreateObject("Scripting.Dictionary")
+    Set gKaikeiKubunMaps("区分1") = LoadPairMapTable(ws, "データマッピング-区分1")
+    Set gKaikeiKubunMaps("区分2") = LoadPairMapTable(ws, "データマッピング-区分2")
 End Sub
+
+
+' ============================
+' 「(見出し)｜実績シート｜計算算定シート」という3列の縦持ち表を読み込み、
+' 1列目の値 → Array(実績シート値, 計算算定シート値) の辞書にする
+' ============================
+Function LoadItemMapTable(ws As Worksheet, headerText As String) As Object
+    Dim headerCell As Range
+    Set headerCell = ws.Cells.Find(What:=headerText, LookIn:=xlValues, LookAt:=xlWhole, _
+                                    SearchOrder:=xlByRows, MatchCase:=False)
+
+    If headerCell Is Nothing Then
+        Err.Raise vbObjectError + 1000, _
+                  "LoadItemMapTable", _
+                  "システム用シートにヘッダー「" & headerText & "」が見つかりません。"
+    End If
+
+    Dim colItem As Long, colJisseki As Long, colKeisan As Long, headerRow As Long
+    colItem = headerCell.Column
+    headerRow = headerCell.Row
+    colJisseki = colItem + 1
+    colKeisan = colItem + 2
+
+    If ws.Cells(headerRow, colJisseki).Value <> "実績シート" Or ws.Cells(headerRow, colKeisan).Value <> "計算算定シート" Then
+        Err.Raise vbObjectError + 1000, _
+                  "LoadItemMapTable", _
+                  "「" & headerText & "」の右2列が「実績シート」「計算算定シート」になっていません。"
+    End If
+
+    Dim dic As Object
+    Set dic = CreateObject("Scripting.Dictionary")
+
+    Dim r As Long
+    r = headerRow + 1
+
+    ' 空行に当たるまで読み込む
+    Do While ws.Cells(r, colItem).Value <> ""
+        Dim itemName As String
+        Dim jissekiVal As String, keisanVal As String
+
+        itemName = ws.Cells(r, colItem).Value
+        jissekiVal = ws.Cells(r, colJisseki).Value
+        keisanVal = ws.Cells(r, colKeisan).Value
+
+        dic(itemName) = Array(jissekiVal, keisanVal)
+
+        r = r + 1
+    Loop
+
+    Set LoadItemMapTable = dic
+End Function
+
+
+' ============================
+' 「(タイトル)」の1行下に「実績シート｜計算算定シート」という2列の見出しが続く表を読み込み、
+' 「実績シート値→計算算定シート値」の辞書にする
+' ============================
+Function LoadPairMapTable(ws As Worksheet, titleText As String) As Object
+    Dim titleCell As Range
+    Set titleCell = ws.Cells.Find(What:=titleText, LookIn:=xlValues, LookAt:=xlWhole, _
+                                   SearchOrder:=xlByRows, MatchCase:=False)
+
+    If titleCell Is Nothing Then
+        Err.Raise vbObjectError + 1000, _
+                  "LoadPairMapTable", _
+                  "システム用シートに見出し「" & titleText & "」が見つかりません。"
+    End If
+
+    Dim colJisseki As Long, colKeisan As Long, headerRow As Long
+    colJisseki = titleCell.Column
+    colKeisan = colJisseki + 1
+    headerRow = titleCell.Row + 1   ' タイトルの1行下が「実績シート」「計算算定シート」の見出し行
+
+    If ws.Cells(headerRow, colJisseki).Value <> "実績シート" Or ws.Cells(headerRow, colKeisan).Value <> "計算算定シート" Then
+        Err.Raise vbObjectError + 1000, _
+                  "LoadPairMapTable", _
+                  "「" & titleText & "」の1行下が「実績シート」「計算算定シート」になっていません。"
+    End If
+
+    Dim result As Object
+    Set result = CreateObject("Scripting.Dictionary")
+
+    Dim r As Long
+    r = headerRow + 1
+
+    ' 空行に当たるまで読み込む
+    Do While ws.Cells(r, colJisseki).Value <> ""
+        Dim jissekiKey As String
+        jissekiKey = ws.Cells(r, colJisseki).Value
+        If jissekiKey <> "" Then result(jissekiKey) = ws.Cells(r, colKeisan).Value
+
+        r = r + 1
+    Loop
+
+    Set LoadPairMapTable = result
+End Function
