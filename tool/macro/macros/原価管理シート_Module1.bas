@@ -25,9 +25,9 @@ Private gLastKnownMainLastRowValid As Boolean
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
 Private gItemMap As Object
 
-' システム用シート「データマッピング-区分1」「データマッピング-区分2」表のキャッシュ（区分名 → Dictionary(実績シート値 → 計算算定シート値)）。
+' システム用シート「変換マッピング-区分1」「変換マッピング-区分2」表のキャッシュ（区分名 → Dictionary(実績シート値 → 計算算定シート値)）。
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
-Private gDataMaps As Object
+Private gConversionMaps As Object
 
 
 ' ============================
@@ -464,7 +464,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     ' === ⑦ 行ループ（キーの判定は配列上で行い、一致した行だけシートへアクセスする） ===
     For otherRow = otherDataStartRow To lastRowOther
 
-        ' キー項目ごとに、gDataMapsに同名の変換表があれば変換した値を、
+        ' キー項目ごとに、gConversionMapsに同名の変換表があれば変換した値を、
         ' 無ければ生の値（年度のみ日付/数値からの正規化）をそのままキーに使う
         Dim allMatched As Boolean
         allMatched = True
@@ -481,11 +481,11 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
 
             If keyItemName = "年度" Then
                 keyParts(ki) = CStr(NormalizeYear(rawVal))
-            ElseIf gDataMaps.Exists(keyItemName) Then
+            ElseIf gConversionMaps.Exists(keyItemName) Then
                 Dim rawText As String
                 rawText = Trim(CStr(rawVal))
-                If gDataMaps(keyItemName).Exists(rawText) Then
-                    keyParts(ki) = gDataMaps(keyItemName)(rawText)
+                If gConversionMaps(keyItemName).Exists(rawText) Then
+                    keyParts(ki) = gConversionMaps(keyItemName)(rawText)
                 Else
                     allMatched = False
                     Exit For
@@ -967,7 +967,7 @@ Function BuildMainIndex(ws As Worksheet, mapMainCol As Object, lastRow As Long) 
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
 
     ' キー項目（年度・案件ID・区分1・区分2）それぞれの列を、計画算定シート側の値のまま一括で読み込む
-    ' （計画算定シート側は既に「変換後」の表記が入っているため、gDataMapsによる変換は不要）
+    ' （計画算定シート側は既に「変換後」の表記が入っているため、gConversionMapsによる変換は不要）
     Dim keyItems As Variant
     keyItems = GetKeyItemNames()
 
@@ -1356,16 +1356,16 @@ End Function
 ' ============================
 ' 項目名（区分1・区分2など）の「実績シート値→計算算定シート値」マッピング辞書を返す
 ' ============================
-Function GetDataMap(itemName As String) As Object
-    If gDataMaps Is Nothing Then LoadSystemMappings
+Function GetConversionMap(itemName As String) As Object
+    If gConversionMaps Is Nothing Then LoadSystemMappings
 
-    If Not gDataMaps.Exists(itemName) Then
+    If Not gConversionMaps.Exists(itemName) Then
         Err.Raise vbObjectError + 1000, _
-                  "GetDataMap", _
-                  "システム用シートに項目「" & itemName & "」のデータマッピングが見つかりません。"
+                  "GetConversionMap", _
+                  "システム用シートに項目「" & itemName & "」の変換マッピングが見つかりません。"
     End If
 
-    Set GetDataMap = gDataMaps(itemName)
+    Set GetConversionMap = gConversionMaps(itemName)
 End Function
 
 
@@ -1453,7 +1453,7 @@ End Function
 
 ' ============================
 ' 実績反映で行を照合する際のキーを構成する項目名（この並び順でキー文字列を組み立てる）。
-' 各項目名はgItemMapのキーと一致しており、gDataMapsに同じ名前の変換表があれば
+' 各項目名はgItemMapのキーと一致しており、gConversionMapsに同じ名前の変換表があれば
 ' その項目は実績シート側の値を変換してからキーに使う（無ければ生の値をそのまま使う）
 ' ============================
 Function GetKeyItemNames() As Variant
@@ -1471,9 +1471,9 @@ End Function
 
 ' ============================
 ' システム用シートの「範囲マッピング」表・「項目マッピング」表（両方ともgItemMapへマージ）と、
-' 「データマッピング-XXX」というタイトルの表をすべて、それぞれ1回だけ読み込み、
-' gItemMap・gDataMapsにキャッシュする。
-' 「データマッピング-XXX」は数がいくつあっても（区分3以降を追加しても）自動的に拾われる
+' 「変換マッピング-XXX」というタイトルの表をすべて、それぞれ1回だけ読み込み、
+' gItemMap・gConversionMapsにキャッシュする。
+' 「変換マッピング-XXX」は数がいくつあっても（区分3以降を追加しても）自動的に拾われる
 ' ============================
 Sub LoadSystemMappings()
     Dim ws As Worksheet
@@ -1494,16 +1494,16 @@ Sub LoadSystemMappings()
         gItemMap(key) = itemMap(key)
     Next key
 
-    Set gDataMaps = LoadAllDataMaps(ws)
+    Set gConversionMaps = LoadAllConversionMaps(ws)
 End Sub
 
 
 ' ============================
-' システム用シート全体から「データマッピング-XXX」というタイトルのセルをすべて探し、
+' システム用シート全体から「変換マッピング-XXX」というタイトルのセルをすべて探し、
 ' XXXの部分を項目名として、それぞれの表をLoadPairMapTableで読み込む
 ' ============================
-Function LoadAllDataMaps(ws As Worksheet) As Object
-    Const TITLE_PREFIX As String = "データマッピング-"
+Function LoadAllConversionMaps(ws As Worksheet) As Object
+    Const TITLE_PREFIX As String = "変換マッピング-"
 
     Dim result As Object
     Set result = CreateObject("Scripting.Dictionary")
@@ -1523,7 +1523,7 @@ Function LoadAllDataMaps(ws As Worksheet) As Object
         End If
     Next cell
 
-    Set LoadAllDataMaps = result
+    Set LoadAllConversionMaps = result
 End Function
 
 
