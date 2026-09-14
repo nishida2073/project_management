@@ -52,7 +52,7 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
     }
 
     if ($filePaths.Count -eq 0) {
-        Write-Message "添付できるファイルがないため、投稿を中止します。" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        Write-Message "添付できるファイルがないため、投稿を中止します。" -VarName "message" -Type "Error" -ForegroundColor Red
         return
     }
 

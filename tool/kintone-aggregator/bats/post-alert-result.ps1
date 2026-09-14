@@ -36,7 +36,7 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
     # 過去の特定日を指定して単独で投稿し直しても内容が食い違わないよう、backupの日付付きファイルを使う
     $backupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
     if (-not (Test-Path -LiteralPath $backupFilePath)) {
-        Write-Message "アラート結果ファイルが見つかりません: $backupFilePath" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        Write-Message "アラート結果ファイルが見つかりません: $backupFilePath" -VarName "message" -Type "Error" -ForegroundColor Red
         return
     }
 
