@@ -1479,10 +1479,10 @@ Sub LoadSystemMappings()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("システム用")
 
-    Set gItemMap = LoadItemMapTable(ws, "範囲マッピング")
+    Set gItemMap = LoadNamedPairMapTable(ws, "範囲マッピング")
 
     Dim itemMap As Object
-    Set itemMap = LoadItemMapTable(ws, "項目マッピング")
+    Set itemMap = LoadNamedPairMapTable(ws, "項目マッピング")
 
     Dim key As Variant
     For Each key In itemMap.Keys
@@ -1531,14 +1531,14 @@ End Function
 ' 「(タイトル)」の1行下に「項目名｜実績シート｜計算算定シート」という3列の見出しが続く表を読み込み、
 ' 項目名 → Array(実績シート値, 計算算定シート値) の辞書にする
 ' ============================
-Function LoadItemMapTable(ws As Worksheet, titleText As String) As Object
+Function LoadNamedPairMapTable(ws As Worksheet, titleText As String) As Object
     Dim titleCell As Range
     Set titleCell = ws.Cells.Find(What:=titleText, LookIn:=xlValues, LookAt:=xlWhole, _
                                    SearchOrder:=xlByRows, MatchCase:=False)
 
     If titleCell Is Nothing Then
         Err.Raise vbObjectError + 1000, _
-                  "LoadItemMapTable", _
+                  "LoadNamedPairMapTable", _
                   "システム用シートに見出し「" & titleText & "」が見つかりません。"
     End If
 
@@ -1570,7 +1570,7 @@ Function LoadItemMapTable(ws As Worksheet, titleText As String) As Object
         r = r + 1
     Loop
 
-    Set LoadItemMapTable = dic
+    Set LoadNamedPairMapTable = dic
 End Function
 
 
