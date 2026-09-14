@@ -82,6 +82,7 @@ $excel.EnableEvents = $false
 $wb = $null
 try {
     $wb = $excel.Workbooks.Open($xlsmFile.FullName)
+    $originalActiveSheetName = $wb.ActiveSheet.Name
 
     $appendFile = Get-ChildItem -Path $MacroDir -Filter "${xlsmBaseName}_Append.xlsx" | Select-Object -First 1
     if ($appendFile) {
@@ -164,6 +165,13 @@ try {
         }
         catch {
         }
+    }
+
+    try {
+        $wb.Sheets.Item($originalActiveSheetName).Activate()
+    }
+    catch {
+        Write-Log "WARN: could not restore original active sheet '$originalActiveSheetName': $($_.Exception.Message)"
     }
 
     $wb.Save()

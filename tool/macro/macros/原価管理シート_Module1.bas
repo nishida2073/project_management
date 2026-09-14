@@ -87,11 +87,11 @@ Sub HandleBeforeSave()
 
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
-    Dim mapMainRange As Object
     Dim mapMainCol As Object
+    Dim mapMainRange As Object
 
-    Set mapMainRange = GetMainRangeMap()
     Set mapMainCol = GetMainColMap()
+    Set mapMainRange = GetMainRangeMap()
 
     ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
     CheckRowCountAndResetIfChanged ws, mapMainCol, mapMainRange
@@ -301,43 +301,51 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     Dim isInteractive As Boolean
     isInteractive = IsMissing(otherFilePath)
 
+    ' ブック・シート
     Dim wbOther As Workbook
     Dim wsOther As Worksheet
     Dim wsMain As Worksheet
-    Dim lastRowOther As Long
-    Dim lastRowMain As Long
-    Dim otherRow As Long
-    Dim foundRow As Long
     Dim otherFilePathToOpen As Variant
 
-    Dim mapOtherCol As Object
-    Dim mapMainRange As Object
-    Dim mapOtherRange As Object
+    ' マッピング（列位置・貼付範囲・データ開始行）
     Dim mapMainCol As Object
-    Dim mainIndex As Object
+    Dim mapMainRange As Object
+    Dim mapOtherCol As Object
+    Dim mapOtherRange As Object
     Dim otherDataStartRow As Long
 
-    Dim idxKey As String
+    ' 行番号
+    Dim lastRowMain As Long
+    Dim lastRowOther As Long
+    Dim otherRow As Long
+    Dim foundRow As Long
 
+    ' 照合キー
+    Dim mainIndex As Object
+    Dim keyItems As Variant
+    Dim otherKeyVals() As Variant
+    Dim ki As Long
+    Dim idxKey As String
+    Dim matchedRows As Object
+
+    ' 反映処理（値・色の書き換え）
     Dim mainRange As Range, otherRange As Range
     Dim oldVals As Variant, newVals As Variant
     Dim completed As Boolean
-    Dim matchedRows As Object
 
+    ' 集計（件数）
     Dim reflectedCount As Long           ' 反映件数
     Dim skipJissekiOnlyCount As Long     ' スキップ件数（実績）：実績シートにはあるが計画算定シートにない
     Dim skipKeikakuOnlyCount As Long     ' スキップ件数（計画）：計画算定シートにはあるが実績シートにない
     Dim skipDupCount As Long             ' スキップ件数（実績重複）
 
+    ' 集計（行番号一覧）
     Dim reflectedRows As String          ' 反映した「実績行→計画行」の一覧
     Dim skipJissekiOnlyRows As String    ' スキップ（実績）の実績シート側行番号の一覧
     Dim skipKeikakuOnlyRows As String    ' スキップ（計画）の計画算定シート側行番号の一覧
     Dim skipDupRows As String            ' スキップ（実績重複）の実績シート側行番号の一覧
 
-    Dim keyItems As Variant
-    Dim otherKeyVals() As Variant
-    Dim ki As Long
-
+    ' 反映月の範囲
     Dim startPos As Long, endPos As Long
 
     ' ここ以降のエラーは全て CleanFail で拾う
@@ -665,9 +673,9 @@ Sub UndoLastCheckpoint()
     Dim wsMain As Worksheet
     Set wsMain = ThisWorkbook.Sheets(MAIN_SHEET_NAME)
 
-    Dim mapMainRange As Object, mapMainCol As Object
-    Set mapMainRange = GetMainRangeMap()
+    Dim mapMainCol As Object, mapMainRange As Object
     Set mapMainCol = GetMainColMap()
+    Set mapMainRange = GetMainRangeMap()
 
     ' 前回チェック時から行の追加・削除がないか確認し、あれば履歴・ハイライトの記録を破棄する
     CheckRowCountAndResetIfChanged wsMain, mapMainCol, mapMainRange
