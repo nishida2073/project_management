@@ -1330,7 +1330,7 @@ End Sub
 
 
 ' ============================
-' 項目名（年度・案件ID・対象範囲-開始行など）に対応する、
+' 項目名（年度・案件ID・開始行など）に対応する、
 ' 実績シート側 or 計算算定シート側の値を返す
 ' ============================
 Function GetItemValue(ByVal itemName As String, isMain As Boolean) As String
@@ -1414,8 +1414,8 @@ Function GetMainRangeMap() As Object
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
 
-    dic("開始") = GetItemValue("対象範囲-開始列", True)
-    dic("終了") = GetItemValue("対象範囲-終了列", True)
+    dic("開始") = GetItemValue("開始列", True)
+    dic("終了") = GetItemValue("終了列", True)
 
     Set GetMainRangeMap = dic
 End Function
@@ -1428,8 +1428,8 @@ Function GetOtherRangeMap() As Object
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
 
-    dic("開始") = GetItemValue("対象範囲-開始列", False)
-    dic("終了") = GetItemValue("対象範囲-終了列", False)
+    dic("開始") = GetItemValue("開始列", False)
+    dic("終了") = GetItemValue("終了列", False)
 
     Set GetOtherRangeMap = dic
 End Function
@@ -1439,7 +1439,7 @@ End Function
 ' 計画算定シート側のデータ開始行
 ' ============================
 Function GetMainDataStartRow() As Long
-    GetMainDataStartRow = CLng(GetItemValue("対象範囲-開始行", True))
+    GetMainDataStartRow = CLng(GetItemValue("開始行", True))
 End Function
 
 
@@ -1447,7 +1447,7 @@ End Function
 ' 実績シート側のデータ開始行
 ' ============================
 Function GetOtherDataStartRow() As Long
-    GetOtherDataStartRow = CLng(GetItemValue("対象範囲-開始行", False))
+    GetOtherDataStartRow = CLng(GetItemValue("開始行", False))
 End Function
 
 
@@ -1470,15 +1470,30 @@ End Function
 
 
 ' ============================
-' システム用シートの「項目マッピング」表と、「データマッピング-XXX」というタイトルの
-' 表をすべて、それぞれ1回だけ読み込み、gItemMap・gDataMapsにキャッシュする。
+' システム用シートの「範囲マッピング」表・「項目マッピング」表（両方ともgItemMapへマージ）と、
+' 「データマッピング-XXX」というタイトルの表をすべて、それぞれ1回だけ読み込み、
+' gItemMap・gDataMapsにキャッシュする。
 ' 「データマッピング-XXX」は数がいくつあっても（区分3以降を追加しても）自動的に拾われる
 ' ============================
 Sub LoadSystemMappings()
     Dim ws As Worksheet
     Set ws = ThisWorkbook.Sheets("システム用")
 
-    Set gItemMap = LoadItemMapTable(ws, "項目マッピング")
+    Set gItemMap = LoadItemMapTable(ws, "範囲マッピング")
+
+    Dim itemMap As Object
+    Set itemMap = LoadItemMapTable(ws, "項目マッピング")
+
+    Dim key As Variant
+    For Each key In itemMap.Keys
+        If gItemMap.Exists(key) Then
+            Err.Raise vbObjectError + 1000, _
+                      "LoadSystemMappings", _
+                      "項目名「" & key & "」が「範囲マッピング」と「項目マッピング」の両方にあります。どちらか一方だけにしてください。"
+        End If
+        gItemMap(key) = itemMap(key)
+    Next key
+
     Set gDataMaps = LoadAllDataMaps(ws)
 End Sub
 
