@@ -1043,10 +1043,10 @@ End Function
 ' 重複が見つかった場合は行をハイライトしたうえでエラーを発生させる
 ' ============================
 Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
-    Dim colYear As Variant, colCase As Variant, colName As Variant, colKubun1 As Variant, colKubun2 As Variant, colYojitsu As Variant
+    Dim colYear As Variant, colProjectId As Variant, colProjectName As Variant, colKubun1 As Variant, colKubun2 As Variant, colYojitsu As Variant
     colYear = mapMainCol("年度")
-    colCase = mapMainCol("案件ID")
-    colName = mapMainCol("案件名")
+    colProjectId = mapMainCol("案件ID")
+    colProjectName = mapMainCol("案件名")
     colKubun1 = mapMainCol("区分1")
     colKubun2 = mapMainCol("区分2")
     colYojitsu = mapMainCol("予実")
@@ -1061,13 +1061,13 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
 
     If lastRow < dataStartRow Then Exit Sub
 
-    Dim years As Variant, caseIds As Variant, kubun1s As Variant, kubun2s As Variant, yojitsus As Variant, names As Variant
+    Dim years As Variant, projectIds As Variant, kubun1s As Variant, kubun2s As Variant, yojitsus As Variant, projectNames As Variant
     years = ws.Range(ws.Cells(1, colYear), ws.Cells(lastRow, colYear)).Value
-    caseIds = ws.Range(ws.Cells(1, colCase), ws.Cells(lastRow, colCase)).Value
+    projectIds = ws.Range(ws.Cells(1, colProjectId), ws.Cells(lastRow, colProjectId)).Value
     kubun1s = ws.Range(ws.Cells(1, colKubun1), ws.Cells(lastRow, colKubun1)).Value
     kubun2s = ws.Range(ws.Cells(1, colKubun2), ws.Cells(lastRow, colKubun2)).Value
     yojitsus = ws.Range(ws.Cells(1, colYojitsu), ws.Cells(lastRow, colYojitsu)).Value
-    names = ws.Range(ws.Cells(1, colName), ws.Cells(lastRow, colName)).Value
+    projectNames = ws.Range(ws.Cells(1, colProjectName), ws.Cells(lastRow, colProjectName)).Value
 
     Dim rowsByKey As Object
     Set rowsByKey = CreateObject("Scripting.Dictionary")   ' 重複判定キー → 該当行番号（カンマ区切り文字列）
@@ -1075,13 +1075,13 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
     Dim r As Long
     For r = dataStartRow To lastRow
         If Trim(years(r, 1) & "") <> "" _
-                And Trim(caseIds(r, 1) & "") <> "" _
-                And Trim(names(r, 1) & "") <> "" _
+                And Trim(projectIds(r, 1) & "") <> "" _
+                And Trim(projectNames(r, 1) & "") <> "" _
                 And Trim(kubun1s(r, 1) & "") <> "" _
                 And Trim(kubun2s(r, 1) & "") <> "" _
                 And Trim(yojitsus(r, 1) & "") <> "" Then
             Dim dupKey As String
-            dupKey = years(r, 1) & "|" & caseIds(r, 1) & "|" & names(r, 1) & "|" & kubun1s(r, 1) & "|" & kubun2s(r, 1) & "|" & yojitsus(r, 1)
+            dupKey = years(r, 1) & "|" & projectIds(r, 1) & "|" & projectNames(r, 1) & "|" & kubun1s(r, 1) & "|" & kubun2s(r, 1) & "|" & yojitsus(r, 1)
 
             If rowsByKey.Exists(dupKey) Then
                 rowsByKey(dupKey) = rowsByKey(dupKey) & ", " & r
@@ -1123,8 +1123,8 @@ Sub CheckDuplicateRows(ws As Worksheet, mapMainCol As Object, lastRow As Long)
                 dupRow = CLng(Trim(rowParts(p)))
 
                 ws.Cells(dupRow, colYear).Font.Color = groupColor
-                ws.Cells(dupRow, colCase).Font.Color = groupColor
-                ws.Cells(dupRow, colName).Font.Color = groupColor
+                ws.Cells(dupRow, colProjectId).Font.Color = groupColor
+                ws.Cells(dupRow, colProjectName).Font.Color = groupColor
                 ws.Cells(dupRow, colKubun1).Font.Color = groupColor
                 ws.Cells(dupRow, colKubun2).Font.Color = groupColor
                 ws.Cells(dupRow, colYojitsu).Font.Color = groupColor
