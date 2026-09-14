@@ -1333,7 +1333,7 @@ End Sub
 ' 項目名（年度・案件ID・対象範囲-開始行など）に対応する、
 ' 実績シート側 or 計算算定シート側の値を返す
 ' ============================
-Function GetItemValue(itemName As String, isMain As Boolean) As String
+Function GetItemValue(ByVal itemName As String, isMain As Boolean) As String
     If gItemMap Is Nothing Then LoadSystemMappings
 
     If Not gItemMap.Exists(itemName) Then
@@ -1376,12 +1376,13 @@ Function GetMainColMap() As Object
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
 
-    dic("年度") = GetItemValue("年度", True)
-    dic("案件ID") = GetItemValue("案件ID", True)
-    dic("案件名") = GetItemValue("案件名", True)
-    dic("区分1") = GetItemValue("区分1", True)
-    dic("区分2") = GetItemValue("区分2", True)
-    dic("予実") = GetItemValue("予実", True)
+    Dim itemNames As Variant
+    itemNames = Array("年度", "案件ID", "案件名", "区分1", "区分2", "予実")
+
+    Dim i As Long
+    For i = LBound(itemNames) To UBound(itemNames)
+        dic(itemNames(i)) = GetItemValue(itemNames(i), True)
+    Next i
 
     Set GetMainColMap = dic
 End Function
@@ -1394,10 +1395,13 @@ Function GetOtherColMap() As Object
     Dim dic As Object
     Set dic = CreateObject("Scripting.Dictionary")
 
-    dic("年度") = GetItemValue("年度", False)
-    dic("案件ID") = GetItemValue("案件ID", False)
-    dic("区分1") = GetItemValue("区分1", False)
-    dic("区分2") = GetItemValue("区分2", False)
+    Dim itemNames As Variant
+    itemNames = Array("年度", "案件ID", "区分1", "区分2")
+
+    Dim i As Long
+    For i = LBound(itemNames) To UBound(itemNames)
+        dic(itemNames(i)) = GetItemValue(itemNames(i), False)
+    Next i
 
     Set GetOtherColMap = dic
 End Function
