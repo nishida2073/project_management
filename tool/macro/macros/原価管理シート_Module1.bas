@@ -394,7 +394,7 @@ Function ImportFromOtherBook(Optional otherFilePath As Variant) As String
     If Not SheetExists(wbOther, "実績") Then
         ImportFromOtherBook = "選択したファイルに「実績」シートが見つかりません。" & vbCrLf & _
                "ファイルが正しいか確認してください。" & vbCrLf & "対象ファイル: " & otherFilePathToOpen
-        If isInteractive Then MsgBox ImportFromOtherBook, vbExclamation
+        If isInteractive Then MsgBox TruncateForMsgBox(ImportFromOtherBook), vbExclamation
         GoTo CleanExit
     End If
 
@@ -600,7 +600,7 @@ CleanExit:
                "スキップ（計画シート：実績シートに実績なし）：" & skipKeikakuOnlyCount & "件" & _
                IIf(skipKeikakuOnlyRows = "", "", vbCrLf & "　" & skipKeikakuOnlyRows)
 
-        If isInteractive Then MsgBox ImportFromOtherBook, vbInformation
+        If isInteractive Then MsgBox TruncateForMsgBox(ImportFromOtherBook), vbInformation
     End If
 
     Exit Function
@@ -620,7 +620,7 @@ CleanFail:
     End If
 
     ImportFromOtherBook = "エラーが発生しました。" & vbCrLf & errDescription
-    If isInteractive Then MsgBox ImportFromOtherBook
+    If isInteractive Then MsgBox TruncateForMsgBox(ImportFromOtherBook)
     Resume CleanExit
 
 End Function
@@ -908,6 +908,28 @@ Function AppendItem(list As String, item As String) As String
         AppendItem = item
     Else
         AppendItem = list & ", " & item
+    End If
+End Function
+
+
+' ============================
+' MsgBoxは行数が多すぎると（環境によっては）ダイアログが画面に収まらず、
+' OKボタンが押せなくなることがあるため、表示直前に長すぎる分を省略する
+' （戻り値・ログ等に使う元の文字列自体は変更しない）
+' ============================
+Function TruncateForMsgBox(msg As String, Optional maxLines As Long = 30) As String
+    Dim allLines() As String
+    allLines = Split(msg, vbCrLf)
+
+    If UBound(allLines) < maxLines Then
+        TruncateForMsgBox = msg
+    Else
+        Dim i As Long
+        Dim result As String
+        For i = 0 To maxLines - 1
+            result = result & allLines(i) & vbCrLf
+        Next i
+        TruncateForMsgBox = result & vbCrLf & "…長すぎるため以下省略しました。"
     End If
 End Function
 
