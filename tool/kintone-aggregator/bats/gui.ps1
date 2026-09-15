@@ -338,8 +338,8 @@ $settingsMaskedVars = @("KintonePassword")
 $settingsMultilineVars = @("CommentTextTemplate")
 # このフィールドの次の行にテスト用ボタンを置く。グループ別タブにのみ出現するフィールドを指定すること
 $settingsTrailingButtonVars = @{
-    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-TestConnectionButton -Panel $Panel -Y $Y -ReportGroup $Field.Group }
-    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestPostButton -Panel $Panel -Y $Y -OnClick { Test-KintonePostSettings } }
+    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group }.GetNewClosure() }
+    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick { Test-KintonePostSettings } }
 }
 
 # TargetAppIds等は種別（業務日誌/パルスサーベイ等）ごとに同じ変数名を別の値で使うため、変数名に
@@ -517,22 +517,6 @@ function Get-GroupSettingsFieldRows {
 
 $script:settingsCommonFieldTextBoxes = @{}
 $script:settingsGroupFieldTextBoxes = @{}
-
-function Add-TestConnectionButton {
-    param(
-        [System.Windows.Forms.Panel]$Panel,
-        [int]$Y,
-        [string]$ReportGroup
-    )
-    $btnTestConnection = New-Object System.Windows.Forms.Button
-    $btnTestConnection.Text = "テスト接続"
-    $btnTestConnection.Location = New-Object System.Drawing.Point(40, $Y)
-    $btnTestConnection.Size = New-Object System.Drawing.Size(90, 24)
-    $btnTestConnection.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-    $btnTestConnection.Tag = $ReportGroup
-    $btnTestConnection.Add_Click({ Test-KintoneConnection -ReportGroup $this.Tag })
-    $Panel.Controls.Add($btnTestConnection)
-}
 
 # メンション設定（MentionUserCodes）は"ユーザコード:権限"のペアをカンマ区切りで1行に保持する
 # （client.batは1変数1行のため）。GUI側は行単位で追加・削除できるUIにするため、

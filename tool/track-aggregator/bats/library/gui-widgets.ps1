@@ -859,19 +859,20 @@ function Add-MentionsEditor {
     return $y
 }
 
-function Add-TestPostButton {
+function Add-TestActionButton {
     param(
         [System.Windows.Forms.Panel]$Panel,
         [int]$Y,
+        [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick
     )
-    $btnTestPost = New-Object System.Windows.Forms.Button
-    $btnTestPost.Text = "テスト投稿"
-    $btnTestPost.Location = New-Object System.Drawing.Point(40, $Y)
-    $btnTestPost.Size = New-Object System.Drawing.Size(90, 24)
-    $btnTestPost.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-    $btnTestPost.Add_Click({ & $OnClick }.GetNewClosure())
-    $Panel.Controls.Add($btnTestPost)
+    $btn = New-Object System.Windows.Forms.Button
+    $btn.Text = $Text
+    $btn.Location = New-Object System.Drawing.Point(40, $Y)
+    $btn.Size = New-Object System.Drawing.Size(90, 24)
+    $btn.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+    $btn.Add_Click({ & $OnClick }.GetNewClosure())
+    $Panel.Controls.Add($btn)
 }
 
 function Render-SettingsFields {
