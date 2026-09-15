@@ -578,9 +578,37 @@ function Update-GroupSettingsFields {
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestPostButton -Panel $Panel -Y $Y -ToolName "track-aggregator" } } | Out-Null
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestPostButton -Panel $Panel -Y $Y -OnClick { Test-KintonePostSettings } } } | Out-Null
 
     $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+}
+
+# スペースID・スレッドID・メンション設定（投稿先）の妥当性は、スレッド単体を取得するAPIが無く
+# メンション対象の存在確認にも別APIが必要になるため、実際にダミーコメントを投稿してみて確認する
+function Test-KintonePostSettings {
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+    $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+    $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+
+    if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) {
+        [System.Windows.Forms.MessageBox]::Show("スペースIDとスレッドIDを入力してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    Sync-MentionRowsFromControls
+    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+
+    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+
+    try {
+        $response = Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+        [System.Windows.Forms.MessageBox]::Show("投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("投稿に失敗しました。`r`n$($_.Exception.Message)", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+    }
 }
 
 function Save-CommonSettings {
