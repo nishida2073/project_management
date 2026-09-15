@@ -14,7 +14,7 @@ echo.
 call "%~dp0create-app-data.bat" "%~1" "%~2"
 
 call "%~dp0collect-app-data.bat" "%~1" "%~2"
-call "%~dp0check-alert.bat" "%~1"
+call "%~dp0check-and-post-alert.bat" "%~1"
 
 call "%~dp0bats\message.bat" "Finished %MyName%"
 echo.

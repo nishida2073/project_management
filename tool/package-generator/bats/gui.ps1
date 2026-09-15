@@ -80,9 +80,22 @@ $tabControl.Add_Selecting({
     }
 })
 
+# 実行タブの中を「一括実行」「ファイルダウンロード」「個別パッケージの作成」「ファイルアップロード」の
+# 4タブに分ける（kintone-aggregator/kintone-resourse-generatorと同じ構成）。ps2exeビルドでは
+# TabPageCollection.Insert()がNotSupportedExceptionになるため、後から並び替えるのではなく、
+# 最初から最終的な順序でAddしていく必要がある（一括実行タブを先にAddし、個別タブは
+# New-CategoryTabControlに-TabControlで同じ$runTabControlを渡して追記させる）
+$runTabControl = New-Object System.Windows.Forms.TabControl
+$runTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
+
+$tabBatchAll = New-Object System.Windows.Forms.TabPage
+$tabBatchAll.Text = "一括実行"
+$runTabControl.Controls.Add($tabBatchAll)
+
 $runTopPanel = New-Object System.Windows.Forms.Panel
 $runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $runTopPanel.Height = 176
+$tabBatchAll.Controls.Add($runTopPanel)
 
 $lblClient = New-Object System.Windows.Forms.Label
 $lblClient.Text = "クライアント"
@@ -93,6 +106,18 @@ $cmbClient = New-Object System.Windows.Forms.ComboBox
 $cmbClient.Location = New-Object System.Drawing.Point(100, 14)
 $cmbClient.Size = New-Object System.Drawing.Size(260, 24)
 $cmbClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+# ファイルダウンロード／個別パッケージの作成／ファイルアップロードの各個別実行タブは、
+# New-CategoryTabControlのInputs（ExistingControl）へこれらのComboBoxをそのまま渡す。
+# クライアント一覧はUpdate-ClientListが$cmbClientと合わせて4つまとめて更新する
+$cmbDownloadClient = New-Object System.Windows.Forms.ComboBox
+$cmbDownloadClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+$cmbGenerateClient = New-Object System.Windows.Forms.ComboBox
+$cmbGenerateClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+$cmbUploadClient = New-Object System.Windows.Forms.ComboBox
+$cmbUploadClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $chkDownload = New-Object System.Windows.Forms.CheckBox
 $chkDownload.Text = "1. ファイルダウンロード"
@@ -143,16 +168,22 @@ function Open-FolderPath {
     Start-Process explorer.exe -ArgumentList "`"$Path`""
 }
 
-function Open-SharePointFolder {
+function Get-SharePointFolderUrl {
     param([string]$SiteUrl, [string]$SitePath)
-    if (!$SiteUrl -or !$SitePath) {
-        [System.Windows.Forms.MessageBox]::Show("URLが設定されていません。", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
+    if (!$SiteUrl -or !$SitePath) { return $null }
     $siteUri = [Uri]$SiteUrl
     $library = ($SitePath -split '/', 2)[0]
     $serverRelativePath = "$($siteUri.AbsolutePath.TrimEnd('/'))/$SitePath"
-    $url = "$($siteUri.Scheme)://$($siteUri.Authority)$($siteUri.AbsolutePath.TrimEnd('/'))/$([Uri]::EscapeDataString($library))/Forms/AllItems.aspx?id=$([Uri]::EscapeDataString($serverRelativePath))"
+    return "$($siteUri.Scheme)://$($siteUri.Authority)$($siteUri.AbsolutePath.TrimEnd('/'))/$([Uri]::EscapeDataString($library))/Forms/AllItems.aspx?id=$([Uri]::EscapeDataString($serverRelativePath))"
+}
+
+function Open-SharePointFolder {
+    param([string]$SiteUrl, [string]$SitePath)
+    $url = Get-SharePointFolderUrl -SiteUrl $SiteUrl -SitePath $SitePath
+    if (!$url) {
+        [System.Windows.Forms.MessageBox]::Show("URLが設定されていません。", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
     Start-Process $url
 }
 
@@ -188,6 +219,9 @@ function Update-ClientComboItems {
 
 function Update-ClientList {
     Update-ClientComboItems -ComboBox $cmbClient -FixedItems @($defaultClientLabel)
+    Update-ClientComboItems -ComboBox $cmbDownloadClient -FixedItems @($defaultClientLabel)
+    Update-ClientComboItems -ComboBox $cmbGenerateClient -FixedItems @($defaultClientLabel)
+    Update-ClientComboItems -ComboBox $cmbUploadClient -FixedItems @($defaultClientLabel)
 }
 Update-ClientList
 
@@ -226,7 +260,7 @@ $runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $linkDo
 $txtLog = New-LogTextBox
 
 $tabRun.Controls.Add($txtLog)
-$tabRun.Controls.Add($runTopPanel)
+$tabRun.Controls.Add($runTabControl)
 
 function Write-Log {
     param([string]$Text)
@@ -235,11 +269,7 @@ function Write-Log {
 
 $btnRun.Add_Click({
     $script:isRunning = $true
-    $chkDownload.Enabled = $false
-    $chkGenerate.Enabled = $false
-    $chkUpload.Enabled = $false
-    $btnRun.Enabled = $false
-    $cmbClient.Enabled = $false
+    Set-RunButtonsEnabled $false
     $lblStatus.ForeColor = [System.Drawing.Color]::Black
     $lblStatus.Text = "実行中..."
     $selectedClient = $cmbClient.SelectedItem
@@ -313,11 +343,7 @@ $btnRun.Add_Click({
         $lblStatus.Text = "エラーが発生しました（終了コード: $failedExitCode）"
     }
 
-    $chkDownload.Enabled = $true
-    $chkGenerate.Enabled = $true
-    $chkUpload.Enabled = $true
-    $btnRun.Enabled = $true
-    $cmbClient.Enabled = $true
+    Set-RunButtonsEnabled $true
     $script:isRunning = $false
     $script:currentProc = $null
 })
@@ -816,16 +842,20 @@ $radioGenerateLog.Add_CheckedChanged({ if ($radioGenerateLog.Checked) { Update-L
 $radioUploadLog.Add_CheckedChanged({ if ($radioUploadLog.Checked) { Update-LogView } })
 $cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
 
-function Get-ClientAwareEnabledValue {
-    param([string]$VarName)
-    $client = $cmbClient.SelectedItem
-    if ($client -and $client -ne $defaultClientLabel) {
-        $clientValues = Get-ClientProfileValues $client
+function Get-ValueForClient {
+    param([string]$ClientName, [string]$VarName)
+    if ($ClientName -and $ClientName -ne $defaultClientLabel) {
+        $clientValues = Get-ClientProfileValues $ClientName
         if ($clientValues.ContainsKey($VarName)) {
             return $clientValues[$VarName]
         }
     }
     return Get-ResolvedVar $VarName
+}
+
+function Get-ClientAwareEnabledValue {
+    param([string]$VarName)
+    return Get-ValueForClient -ClientName $cmbClient.SelectedItem -VarName $VarName
 }
 
 function Update-RunCheckboxesFromClient {
@@ -839,6 +869,130 @@ $cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-R
 $linkDownloadPath.Add_LinkClicked({ Open-FolderPath (Get-ClientAwareEnabledValue "DOWNLOAD_LOCAL_PATH") })
 $linkGeneratePath.Add_LinkClicked({ Open-FolderPath (Get-ClientAwareEnabledValue "GENERATE_OUTPUT_PATH") })
 $linkUploadPath.Add_LinkClicked({ Open-SharePointFolder (Get-ClientAwareEnabledValue "UPLOAD_SITE_URL") (Get-ClientAwareEnabledValue "UPLOAD_SITE_PATH") })
+
+# =========================================
+# ファイルダウンロード／個別パッケージの作成／ファイルアップロードの個別実行タブ
+# （kintone-aggregator/kintone-resourse-generatorと同じ、1タブ1ステージの構成）。
+# 各batはclient=引数を自分で解釈する（parse_args）ため、一括実行タブのように環境変数を
+# 差し替える必要はなく、選択したクライアント名をそのままbatへ渡すだけでよい
+# =========================================
+
+function Get-ClientArgValue {
+    param([System.Windows.Forms.ComboBox]$ComboBox)
+    $value = $ComboBox.Text.Trim()
+    if ($value -and $value -ne $defaultClientLabel) { return $value }
+    return ""
+}
+
+function New-ClientInputDef {
+    param([System.Windows.Forms.ComboBox]$Combo)
+    return @([PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $Combo; LabelWidth = 80; InputWidth = 220 })
+}
+
+$individualCategoryDefs = @(
+    [PSCustomObject]@{
+        Label = "ファイルダウンロード"
+        ButtonDefs = @(
+            [PSCustomObject]@{
+                Label      = "ファイルダウンロード"
+                BatchPath  = $downloadBat
+                Inputs     = New-ClientInputDef -Combo $cmbDownloadClient
+                OpenTarget = { Get-ValueForClient -ClientName $cmbDownloadClient.Text -VarName "DOWNLOAD_LOCAL_PATH" }.GetNewClosure()
+            }
+        )
+    }
+    [PSCustomObject]@{
+        Label = "個別パッケージの作成"
+        ButtonDefs = @(
+            [PSCustomObject]@{
+                Label      = "個別パッケージの作成"
+                BatchPath  = $generateBat
+                Inputs     = New-ClientInputDef -Combo $cmbGenerateClient
+                OpenTarget = { Get-ValueForClient -ClientName $cmbGenerateClient.Text -VarName "GENERATE_OUTPUT_PATH" }.GetNewClosure()
+            }
+        )
+    }
+    [PSCustomObject]@{
+        Label = "ファイルアップロード"
+        ButtonDefs = @(
+            [PSCustomObject]@{
+                Label      = "ファイルアップロード"
+                BatchPath  = $uploadBat
+                Inputs     = New-ClientInputDef -Combo $cmbUploadClient
+                OpenTarget = {
+                    Get-SharePointFolderUrl `
+                        -SiteUrl (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_URL") `
+                        -SitePath (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_PATH")
+                }.GetNewClosure()
+            }
+        )
+    }
+)
+
+function Set-StepStatus {
+    param($ButtonDef, [string]$Text)
+    $color = switch ($Text) {
+        "実行中..." { [System.Drawing.Color]::Black }
+        "成功"      { [System.Drawing.Color]::DarkGreen }
+        "失敗"      { [System.Drawing.Color]::DarkRed }
+        default     { [System.Drawing.Color]::Gray }
+    }
+    Set-StatusLabelText -Label $ButtonDef.StepStatusLabel -Text $Text -ForeColor $color
+}
+
+function Set-RunButtonsEnabled {
+    param([bool]$Enabled)
+    $chkDownload.Enabled = $Enabled
+    $chkGenerate.Enabled = $Enabled
+    $chkUpload.Enabled = $Enabled
+    $btnRun.Enabled = $Enabled
+    $cmbClient.Enabled = $Enabled
+    $cmbDownloadClient.Enabled = $Enabled
+    $cmbGenerateClient.Enabled = $Enabled
+    $cmbUploadClient.Enabled = $Enabled
+    Set-ButtonsEnabled -Buttons $script:individualRunButtons -Enabled $Enabled
+}
+
+function Invoke-IndividualStep {
+    param($ButtonDef)
+
+    # download/upload側のAzureサインイン待ちでURL・コードが表示されている間に実行タブを
+    # 離れられてしまわないよう、一括実行と同じ$script:isRunningで外側タブの切り替えをブロックする
+    $script:isRunning = $true
+    Set-RunButtonsEnabled $false
+    Set-StepStatus -ButtonDef $ButtonDef -Text "実行中..."
+
+    $clientArg = Get-ClientArgValue -ComboBox $ButtonDef.InputControls['Client']
+    $batArgs = if ($clientArg) { @("client=$clientArg") } else { @() }
+
+    Write-Log ""
+    Write-Log "--------------- $($ButtonDef.Label) 開始 ---------------"
+
+    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
+        -OnOutputLine { param($line) Write-Log $line } `
+        -CurrentProcessRef ([ref]$script:currentProc)
+
+    Show-FormInForeground -Form $form
+
+    if ($exitCode -ne 0) {
+        Write-Log "--------------- $($ButtonDef.Label) 失敗（終了コード: $exitCode） ---------------"
+        Set-StepStatus -ButtonDef $ButtonDef -Text "失敗"
+    } else {
+        Write-Log "--------------- $($ButtonDef.Label) 完了 ---------------"
+        Set-StepStatus -ButtonDef $ButtonDef -Text "成功"
+    }
+
+    Set-RunButtonsEnabled $true
+    $script:isRunning = $false
+}
+
+$individualTabResult = New-CategoryTabControl -TabControl $runTabControl -CategoryDefs $individualCategoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd }
+$script:individualRunButtons = $individualTabResult.RunButtons
+
+# 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった
+# 初期の$runTabControl.Height（個別タブ基準）をこのタブの内容量に合わせて上書きする。
+# 45はNew-CategoryTabControlの$TabHeaderAllowance既定値
+$runTabControl.Height = 45 + $runTopPanel.Height
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
@@ -855,6 +1009,9 @@ Update-ClientList
 Update-RunCheckboxesFromClient
 Update-LogClientList
 Update-LogView
+# 既定でtabControlが「設定」タブを表示してしまうps2exeの不具合（原因不明、ビルド後のみ再現）と同様の
+# 問題が$runTabControlでも起き得るため、念のため一括実行タブを明示的に選択しておく
+$runTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)

@@ -51,14 +51,19 @@ function Test-NativeErrorLine {
     return $Text -match '^[A-Za-z][\w.-]*\s*:\s' -or $Text -match '^発生場所' -or $Text -match '^\s*\+'
 }
 
-# RichTextBoxへ1行追記する。行頭の"[[COLOR:xxx]]"タグを解釈して色を変え、常に末尾までスクロールする
+# RichTextBoxへ1行追記する。行頭の"[[COLOR:xxx]]"タグを解釈して色を変え、常に末尾までスクロールする。
+# "[[HIDE]]"タグは背景色と同じ色にして、機械可読用の行を視覚的に見えなくする。
 function Write-ColoredLine {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.RichTextBox]$TextBox,
         [string]$Text
     )
     $color = [System.Drawing.Color]::Black
-    if ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
+    if ($Text -match '^\[\[HIDE\]\](?<rest>.*)$') {
+        $color = $TextBox.BackColor
+        $Text = $Matches['rest']
+        $script:isInNativeErrorBlock = $false
+    } elseif ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
         $color = Get-ConsoleColorAsDrawingColor -ConsoleColorName $Matches['color']
         $Text = $Matches['rest']
         $script:isInNativeErrorBlock = $false
@@ -157,9 +162,11 @@ function Add-StackedDockedControls {
 # $CategoryDefsは [{ Label, ButtonDefs: [{ Label, OpenTarget, Inputs, ... }] }] の形。
 # ButtonDefの中身は自由（Tagとしてそのままボタン/リンクに渡すだけで、業務ロジックは持たない）。
 # Inputsを指定すると、実行ボタンの上にラベル付きの入力欄を追加できる（その分グループボックスが縦に高くなる）。
-# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options, NewRow } の形
+# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options, ExistingControl, NewRow } の形
 # （LabelWidth/InputWidthは省略可。Optionsを指定すると自由入力のTextBoxの代わりに、
 #   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形。
+#   ExistingControlを指定すると、新規作成の代わりにそのコントロール（動的に選択肢を再読み込みする
+#   ComboBoxなど、呼び出し側が既に持っているコントロール）をその行へ配置する。
 #   NewRow = $trueを指定すると、その入力欄から新しい行に折り返す。1行に収まらないほど
 #   入力欄が多いボタンでのみ使う）。
 # 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-TargetOrWarnを使う。
@@ -272,7 +279,12 @@ function New-CategoryTabControl {
                     $grp.Controls.Add($lblInput)
                     $inputX += $labelWidth + 4
 
-                    if ($inputDef.Options) {
+                    if ($inputDef.ExistingControl) {
+                        # 動的に選択肢を再読み込みするComboBoxなど、呼び出し側が既に持っているコントロールを
+                        # そのまま使う（新規作成しない）。呼び出し側が引き続き参照を保持できる
+                        $inputCtrl = $inputDef.ExistingControl
+                        $inputCtrl.Width = $inputWidth
+                    } elseif ($inputDef.Options) {
                         # DataSource経由のバインドはコントロールがフォームに追加されBindingContextが
                         # 確定するまで反映されない（初期選択が効かない）ため、Itemsへ直接追加する方式にしている
                         $inputCtrl = New-Object System.Windows.Forms.ComboBox

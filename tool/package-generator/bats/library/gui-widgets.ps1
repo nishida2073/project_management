@@ -1,11 +1,16 @@
 ﻿# どのGUIツールからでも使い回せる、業務内容に依存しないWinFormsの汎用部品を置く場所。
 # 業務固有のデータ（ボタン定義の中身など）や実行フローはgui.ps1側に残す。
 
-# 指定パスをエクスプローラーで開く。存在しなければ警告ダイアログを出す
+# 指定パスをエクスプローラーで開く。URL（http/https）の場合は既定のブラウザで開く。
+# 存在しない・未指定の場合は警告ダイアログを出す
 function Open-TargetOrWarn {
     param([string]$Path)
+    if ($Path -match '^https?://') {
+        Start-Process -FilePath $Path
+        return
+    }
     if (!$Path -or !(Test-Path -LiteralPath $Path)) {
-        [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("パスが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
     Start-Process -FilePath $Path
@@ -46,14 +51,19 @@ function Test-NativeErrorLine {
     return $Text -match '^[A-Za-z][\w.-]*\s*:\s' -or $Text -match '^発生場所' -or $Text -match '^\s*\+'
 }
 
-# RichTextBoxへ1行追記する。行頭の"[[COLOR:xxx]]"タグを解釈して色を変え、常に末尾までスクロールする
+# RichTextBoxへ1行追記する。行頭の"[[COLOR:xxx]]"タグを解釈して色を変え、常に末尾までスクロールする。
+# "[[HIDE]]"タグは背景色と同じ色にして、機械可読用の行を視覚的に見えなくする。
 function Write-ColoredLine {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.RichTextBox]$TextBox,
         [string]$Text
     )
     $color = [System.Drawing.Color]::Black
-    if ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
+    if ($Text -match '^\[\[HIDE\]\](?<rest>.*)$') {
+        $color = $TextBox.BackColor
+        $Text = $Matches['rest']
+        $script:isInNativeErrorBlock = $false
+    } elseif ($Text -match '^\[\[COLOR:(?<color>\w+)\]\](?<rest>.*)$') {
         $color = Get-ConsoleColorAsDrawingColor -ConsoleColorName $Matches['color']
         $Text = $Matches['rest']
         $script:isInNativeErrorBlock = $false
@@ -149,18 +159,23 @@ function Add-StackedDockedControls {
 }
 
 # カテゴリ（タブ）ごとにグループ化されたボタン群を持つTabControlを組み立てる。
-# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, TargetDirPath, Inputs, ... }] }] の形。
+# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, OpenTarget, Inputs, ... }] }] の形。
 # ButtonDefの中身は自由（Tagとしてそのままボタン/リンクに渡すだけで、業務ロジックは持たない）。
 # Inputsを指定すると、実行ボタンの上にラベル付きの入力欄を追加できる（その分グループボックスが縦に高くなる）。
-# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options } の形
+# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options, ExistingControl, NewRow } の形
 # （LabelWidth/InputWidthは省略可。Optionsを指定すると自由入力のTextBoxの代わりに、
-#   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形）。
+#   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形。
+#   ExistingControlを指定すると、新規作成の代わりにそのコントロール（動的に選択肢を再読み込みする
+#   ComboBoxなど、呼び出し側が既に持っているコントロール）をその行へ配置する。
+#   NewRow = $trueを指定すると、その入力欄から新しい行に折り返す。1行に収まらないほど
+#   入力欄が多いボタンでのみ使う）。
 # 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-TargetOrWarnを使う。
 function New-CategoryTabControl {
     param(
         [Parameter(Mandatory)][array]$CategoryDefs,
         [Parameter(Mandatory)][scriptblock]$OnRunClick,
         [scriptblock]$OnOpenClick,
+        [System.Windows.Forms.TabControl]$TabControl,
         [int]$GroupHeight = 60,
         [int]$GroupSpacing = 10,
         [int]$TabHeaderAllowance = 45,
@@ -174,9 +189,20 @@ function New-CategoryTabControl {
         $OnOpenClick = { param($path) Open-TargetOrWarn -Path $path }
     }
 
+    function Get-InputRowCount {
+        param($Inputs)
+        if (-not $Inputs) { return 0 }
+        $rows = 1
+        foreach ($inputDef in $Inputs) {
+            if ($inputDef.NewRow) { $rows++ }
+        }
+        return $rows
+    }
+
     function Get-ButtonGroupHeight {
         param($ButtonDef)
-        if ($ButtonDef.Inputs) { return $GroupHeight + $InputRowHeight }
+        $rowCount = Get-InputRowCount -Inputs $ButtonDef.Inputs
+        if ($rowCount -gt 0) { return $GroupHeight + ($InputRowHeight * $rowCount) }
         return $GroupHeight
     }
 
@@ -189,12 +215,21 @@ function New-CategoryTabControl {
         return $total
     }
 
-    $tabControl = New-Object System.Windows.Forms.TabControl
+    # 呼び出し側が既存のTabControlを渡した場合はそれに追記する（他のタブを先頭に置くなど、
+    # 呼び出し側の都合で並び順を決めたい場合に使う。ps2exeビルドではTabPageCollection.Insert()が
+    # NotSupportedExceptionになるため、後から並び替えず、最初から最終的な順序でAddしていく必要がある）
+    $tabControl = $TabControl
+    if (-not $tabControl) {
+        $tabControl = New-Object System.Windows.Forms.TabControl
+    }
     $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
 
-    $runButtons = @{}
-    $stepStatusLabels = @{}
-    $inputControls = @{}
+    # 実行ボタン一覧はSet-RunButtonsEnabled側で一括enable/disableに使うだけで、Labelで
+    # 個別に引く用途が無いため単純な配列にする。ステータスラベルと入力欄コントロールは、
+    # Labelがカテゴリをまたいで重複し得るため、Labelをキーにしたハッシュテーブルではなく
+    # 各ButtonDefオブジェクト自身にプロパティとして直接ひも付ける（呼び出し側はButtonDefを
+    # 既に持っているので、Labelでの引き直しが不要になり取り違えが起きない）
+    $runButtons = @()
 
     foreach ($cd in $CategoryDefs) {
         $tabPage = New-Object System.Windows.Forms.TabPage
@@ -209,7 +244,8 @@ function New-CategoryTabControl {
         $groupY = $GroupSpacing
         foreach ($bd in $cd.ButtonDefs) {
             $bdHeight = Get-ButtonGroupHeight -ButtonDef $bd
-            $contentY = if ($bd.Inputs) { 20 + $InputRowHeight } else { 20 }
+            $inputRowCount = Get-InputRowCount -Inputs $bd.Inputs
+            $contentY = if ($inputRowCount -gt 0) { 20 + ($InputRowHeight * $inputRowCount) } else { 20 }
 
             $grp = New-Object System.Windows.Forms.GroupBox
             $grp.Text = $bd.Label
@@ -221,10 +257,16 @@ function New-CategoryTabControl {
             if ($bd.Inputs) {
                 $inputMap = @{}
                 $inputX = 15
+                $currentInputRow = 0
                 # TextBox/ComboBoxは指定したHeightを無視し、フォントに応じた高さに強制されるため、
                 # Labelとの縦の中央を揃えるには生成後の実際のHeightを見て個別にY位置を計算する必要がある
-                $inputRowCenterY = 15 + [int]($InputRowHeight / 2)
                 foreach ($inputDef in $bd.Inputs) {
+                    if ($inputDef.NewRow) {
+                        $currentInputRow++
+                        $inputX = 15
+                    }
+                    $inputRowCenterY = 15 + ($InputRowHeight * $currentInputRow) + [int]($InputRowHeight / 2)
+
                     $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
                     $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
@@ -237,7 +279,12 @@ function New-CategoryTabControl {
                     $grp.Controls.Add($lblInput)
                     $inputX += $labelWidth + 4
 
-                    if ($inputDef.Options) {
+                    if ($inputDef.ExistingControl) {
+                        # 動的に選択肢を再読み込みするComboBoxなど、呼び出し側が既に持っているコントロールを
+                        # そのまま使う（新規作成しない）。呼び出し側が引き続き参照を保持できる
+                        $inputCtrl = $inputDef.ExistingControl
+                        $inputCtrl.Width = $inputWidth
+                    } elseif ($inputDef.Options) {
                         # DataSource経由のバインドはコントロールがフォームに追加されBindingContextが
                         # 確定するまで反映されない（初期選択が効かない）ため、Itemsへ直接追加する方式にしている
                         $inputCtrl = New-Object System.Windows.Forms.ComboBox
@@ -261,7 +308,7 @@ function New-CategoryTabControl {
                     $inputMap[$inputDef.Name] = $inputCtrl
                     $inputX += $inputWidth + 15
                 }
-                $inputControls[$bd.Label] = $inputMap
+                $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force
             }
 
             $btn = New-Object System.Windows.Forms.Button
@@ -271,9 +318,9 @@ function New-CategoryTabControl {
             $btn.Tag = $bd
             $btn.Add_Click({ & $OnRunClick $this.Tag }.GetNewClosure())
             $grp.Controls.Add($btn)
-            $runButtons[$bd.Label] = $btn
+            $runButtons += $btn
 
-            if ($bd.TargetDirPath) {
+            if ($bd.OpenTarget) {
                 $lnkOpen = New-Object System.Windows.Forms.LinkLabel
                 $lnkOpen.Text = $OpenLinkText
                 $lnkOpen.AutoSize = $false
@@ -281,7 +328,20 @@ function New-CategoryTabControl {
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
                 $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
                 $lnkOpen.Tag = $bd
-                $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag.TargetDirPath }.GetNewClosure())
+                # OpenTargetは固定のフォルダパス文字列の他に、{ param($groupName) ... } という
+                # スクリプトブロックも受け付ける（投稿ボタンのkintoneスレッドURLのように、選択中の
+                # 対象グループによって開き先が変わる場合に使う）。後者の場合はここで対象グループの
+                # 選択値を渡して実際に開くパス/URLへ解決する
+                $lnkOpen.Add_LinkClicked({
+                    $target = $this.Tag.OpenTarget
+                    if ($target -is [scriptblock]) {
+                        $groupValue = if ($this.Tag.InputControls -and $this.Tag.InputControls.ContainsKey("TargetGroupNameFilter")) {
+                            Get-InputValue -Control $this.Tag.InputControls["TargetGroupNameFilter"]
+                        } else { "" }
+                        $target = & $target $groupValue
+                    }
+                    & $OnOpenClick $target
+                }.GetNewClosure())
                 $grp.Controls.Add($lnkOpen)
             }
 
@@ -293,7 +353,7 @@ function New-CategoryTabControl {
             $lblStepStatus.Location = New-Object System.Drawing.Point(200, ($contentY + 4))
             $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
             $grp.Controls.Add($lblStepStatus)
-            $stepStatusLabels[$bd.Label] = $lblStepStatus
+            $bd | Add-Member -NotePropertyName StepStatusLabel -NotePropertyValue $lblStepStatus -Force
 
             $groupY += $bdHeight + $GroupSpacing
         }
@@ -312,10 +372,10 @@ function New-CategoryTabControl {
     # 初期表示分だけは先頭タブの高さを直接計算して設定する
     $tabControl.Height = $TabHeaderAllowance + (Get-CategoryPanelHeight -ButtonDefs $CategoryDefs[0].ButtonDefs)
 
+    # StepStatusLabel/InputControlsは各ButtonDef自身のプロパティとして既に持たせているため、
+    # ここでは返さない（呼び出し側は$ButtonDef.StepStatusLabel/$ButtonDef.InputControlsを直接使う）
     return [PSCustomObject]@{
-        TabControl       = $tabControl
-        RunButtons       = $runButtons
-        StepStatusLabels = $stepStatusLabels
-        InputControls    = $inputControls
+        TabControl = $tabControl
+        RunButtons = $runButtons
     }
 }

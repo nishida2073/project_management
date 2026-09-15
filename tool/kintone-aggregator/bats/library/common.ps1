@@ -5,7 +5,8 @@ function Write-Message {
         [string]$VarName = "Debug Message",
         [string]$Type = "Debug",
         [ConsoleColor]$ForegroundColor = "White",
-        [switch]$NoHeader
+        [switch]$NoHeader,
+        [switch]$Hidden
     )
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.ff"
     if ($Type -eq "Debug") {
@@ -17,12 +18,18 @@ function Write-Message {
     }
 
     # gui.ps1から起動された場合はcmd.exe経由の標準出力リダイレクトで色情報が失われるため、
-    # 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）
+    # 行頭に色タグを埋め込んで渡す（gui.ps1側のWrite-Logで解釈して着色し直す）。
+    # -Hiddenは人間向けではない機械可読な行に使い、GUIのログ欄では背景色と同化させて見えなくする
+    # （[[HIDE]]タグ、gui-widgets.ps1のWrite-ColoredLineで解釈する）。
     $isGuiMode = $env:GUI_LOG_MODE -eq "1"
     function Write-ColoredLine {
         param([string]$Text)
         if ($isGuiMode) {
-            Write-Host "[[COLOR:$ForegroundColor]]$Text"
+            if ($Hidden) {
+                Write-Host "[[HIDE]]$Text"
+            } else {
+                Write-Host "[[COLOR:$ForegroundColor]]$Text"
+            }
         } else {
             Write-Host $Text -ForegroundColor $ForegroundColor
         }
@@ -47,25 +54,28 @@ function Write-Message {
 
 # .ps1本体がログファイルを書き出すための共通処理（kintone-resourse-generatorと同じシグネチャ：
 # -LogRootを呼び出し元から明示的に受け取る。値は$env:LOG_DIR＝bats\common-env.bat由来で、
-# 各batが呼び出し前にcallしており、start /bの子プロセスにも継承される）
+# 各batが呼び出し前にcallしており、start /bの子プロセスにも継承される）。
+# ファイル名にタイムスタンプを付与し、同じPrefixでの再実行が前回のログを上書きしないようにする
 function New-WorkerLogPath {
     param(
         [Parameter(Mandatory)][string]$LogRoot,
         [Parameter(Mandatory)][string]$Prefix
     )
     New-Item -ItemType Directory -Path $LogRoot -Force | Out-Null
-    return Join-Path $LogRoot "$Prefix.log"
+    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    return Join-Path $LogRoot "${Prefix}_${timestamp}.log"
 }
 
 # Tee-Objectは-Encoding非対応で既定UTF-16LE書き込みになるため、事後にUTF-8へ変換する。
-# GUI経由の実行ではWrite-Messageが行頭に[[COLOR:xxx]]タグを埋め込むため（gui.ps1のWrite-Log用）、
-# ファイルに残るログはこのタグを取り除いたテキストにする
+# GUI経由の実行ではWrite-Messageが行頭に[[COLOR:xxx]]・[[HIDE]]タグを埋め込むため（gui.ps1のWrite-Log用）、
+# ファイルに残るログはこれらのタグを取り除いたテキストにする
 function ConvertTo-Utf8LogFile {
     param([Parameter(Mandatory)][string]$Path)
     if (-not (Test-Path -LiteralPath $Path)) { return }
     $content = Get-Content -LiteralPath $Path -Raw
     if ($null -eq $content) { $content = "" }
     $content = $content -replace '\[\[COLOR:\w+\]\]', ''
+    $content = $content -replace '\[\[HIDE\]\]', ''
     [System.IO.File]::WriteAllText($Path, $content, (New-Object System.Text.UTF8Encoding($true)))
 }
 

@@ -172,11 +172,21 @@ foreach ($sheetName in $sheetNames) {
     }
 
     $sheetEndTime = Get-Date
-    $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log" `
-        -ExtraHeaderLines @("シート名: $sheetName") `
-        -StartTime $sheetStartTime -EndTime $sheetEndTime `
-        -ResultSectionTitle "パッケージ結果" -ResultLines $packageLog `
-        -TreeRootPath $packagePath
+    $runLogArgs = @{
+        LogPath            = $logPath
+        LogFileName        = "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log"
+        ExtraHeaderLines   = @("シート名: $sheetName")
+        StartTime          = $sheetStartTime
+        EndTime            = $sheetEndTime
+        ResultSectionTitle = "パッケージ結果"
+        ResultLines        = $packageLog
+    }
+    # パッケージが作成されなかった場合（対象ファイル無し／圧縮エラー）はpackagePathが存在しないため、
+    # -TreeRootPathを渡さず「# 構成」セクション自体を出さない（理由は上のパッケージ結果に既に出ている）
+    if (Test-Path -LiteralPath $packagePath) {
+        $runLogArgs["TreeRootPath"] = $packagePath
+    }
+    $logFilePath = Write-RunLogFile @runLogArgs
     Show-LogFileContent -Path $logFilePath
 }
 

@@ -161,13 +161,14 @@ function Add-StackedDockedControls {
 # カテゴリ（タブ）ごとにグループ化されたボタン群を持つTabControlを組み立てる。
 # $CategoryDefsは [{ Label, ButtonDefs: [{ Label, OpenTarget, Inputs, ... }] }] の形。
 # ButtonDefの中身は自由（Tagとしてそのままボタン/リンクに渡すだけで、業務ロジックは持たない）。
-# Inputsを指定すると、実行ボタンの上に1項目1行でラベル付きの入力欄を積み上げられる
-# （その分グループボックスが縦に高くなる）。各Inputsの要素は
-# { Name, Label, Default, LabelWidth, InputWidth, Options, ExistingControl } の形
+# Inputsを指定すると、実行ボタンの上にラベル付きの入力欄を追加できる（その分グループボックスが縦に高くなる）。
+# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options, ExistingControl, NewRow } の形
 # （LabelWidth/InputWidthは省略可。Optionsを指定すると自由入力のTextBoxの代わりに、
 #   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形。
 #   ExistingControlを指定すると、新規作成の代わりにそのコントロール（動的に選択肢を再読み込みする
-#   ComboBoxなど、呼び出し側が既に持っているコントロール）をその行へ配置する）。
+#   ComboBoxなど、呼び出し側が既に持っているコントロール）をその行へ配置する。
+#   NewRow = $trueを指定すると、その入力欄から新しい行に折り返す。1行に収まらないほど
+#   入力欄が多いボタンでのみ使う）。
 # 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-TargetOrWarnを使う。
 function New-CategoryTabControl {
     param(
@@ -188,9 +189,20 @@ function New-CategoryTabControl {
         $OnOpenClick = { param($path) Open-TargetOrWarn -Path $path }
     }
 
+    function Get-InputRowCount {
+        param($Inputs)
+        if (-not $Inputs) { return 0 }
+        $rows = 1
+        foreach ($inputDef in $Inputs) {
+            if ($inputDef.NewRow) { $rows++ }
+        }
+        return $rows
+    }
+
     function Get-ButtonGroupHeight {
         param($ButtonDef)
-        if ($ButtonDef.Inputs) { return $GroupHeight + ($InputRowHeight * $ButtonDef.Inputs.Count) }
+        $rowCount = Get-InputRowCount -Inputs $ButtonDef.Inputs
+        if ($rowCount -gt 0) { return $GroupHeight + ($InputRowHeight * $rowCount) }
         return $GroupHeight
     }
 
@@ -232,8 +244,8 @@ function New-CategoryTabControl {
         $groupY = $GroupSpacing
         foreach ($bd in $cd.ButtonDefs) {
             $bdHeight = Get-ButtonGroupHeight -ButtonDef $bd
-            $inputRowCount = if ($bd.Inputs) { $bd.Inputs.Count } else { 0 }
-            $contentY = 20 + ($InputRowHeight * $inputRowCount)
+            $inputRowCount = Get-InputRowCount -Inputs $bd.Inputs
+            $contentY = if ($inputRowCount -gt 0) { 20 + ($InputRowHeight * $inputRowCount) } else { 20 }
 
             $grp = New-Object System.Windows.Forms.GroupBox
             $grp.Text = $bd.Label
@@ -244,22 +256,26 @@ function New-CategoryTabControl {
 
             if ($bd.Inputs) {
                 $inputMap = @{}
-                # 1項目=1行で縦に積み上げる。TextBox/ComboBoxは指定したHeightを無視し、フォントに応じた
-                # 高さに強制されるため、Labelとの縦の中央を揃えるには生成後の実際のHeightを見て
-                # 個別にY位置を計算する必要がある
-                for ($rowIndex = 0; $rowIndex -lt $bd.Inputs.Count; $rowIndex++) {
-                    $inputDef = $bd.Inputs[$rowIndex]
-                    $inputX = 15
-                    $rowCenterY = 15 + ($InputRowHeight * $rowIndex) + [int]($InputRowHeight / 2)
+                $inputX = 15
+                $currentInputRow = 0
+                # TextBox/ComboBoxは指定したHeightを無視し、フォントに応じた高さに強制されるため、
+                # Labelとの縦の中央を揃えるには生成後の実際のHeightを見て個別にY位置を計算する必要がある
+                foreach ($inputDef in $bd.Inputs) {
+                    if ($inputDef.NewRow) {
+                        $currentInputRow++
+                        $inputX = 15
+                    }
+                    $inputRowCenterY = 15 + ($InputRowHeight * $currentInputRow) + [int]($InputRowHeight / 2)
+
                     $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
                     $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
                     $lblInput = New-Object System.Windows.Forms.Label
                     $lblInput.Text = "$($inputDef.Label):"
                     $lblInput.AutoSize = $false
-                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleRight
                     $lblInput.Size = New-Object System.Drawing.Size($labelWidth, 22)
-                    $lblInput.Location = New-Object System.Drawing.Point($inputX, ($rowCenterY - [int]($lblInput.Height / 2)))
+                    $lblInput.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($lblInput.Height / 2)))
                     $grp.Controls.Add($lblInput)
                     $inputX += $labelWidth + 4
 
@@ -267,6 +283,7 @@ function New-CategoryTabControl {
                         # 動的に選択肢を再読み込みするComboBoxなど、呼び出し側が既に持っているコントロールを
                         # そのまま使う（新規作成しない）。呼び出し側が引き続き参照を保持できる
                         $inputCtrl = $inputDef.ExistingControl
+                        $inputCtrl.Width = $inputWidth
                     } elseif ($inputDef.Options) {
                         # DataSource経由のバインドはコントロールがフォームに追加されBindingContextが
                         # 確定するまで反映されない（初期選択が効かない）ため、Itemsへ直接追加する方式にしている
@@ -286,9 +303,10 @@ function New-CategoryTabControl {
                         $inputCtrl.Width = $inputWidth
                         $inputCtrl.Text = "$($inputDef.Default)"
                     }
-                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($rowCenterY - [int]($inputCtrl.Height / 2)))
+                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
                     $grp.Controls.Add($inputCtrl)
                     $inputMap[$inputDef.Name] = $inputCtrl
+                    $inputX += $inputWidth + 15
                 }
                 $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force
             }
@@ -310,11 +328,18 @@ function New-CategoryTabControl {
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
                 $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
                 $lnkOpen.Tag = $bd
-                # OpenTargetは固定のパス文字列の他に、引数無しのスクリプトブロックも受け付ける
-                # （実行後でないと開き先が決まらない場合に、クリック時点で遅延評価するために使う）
+                # OpenTargetは固定のフォルダパス文字列の他に、{ param($groupName) ... } という
+                # スクリプトブロックも受け付ける（投稿ボタンのkintoneスレッドURLのように、選択中の
+                # 対象グループによって開き先が変わる場合に使う）。後者の場合はここで対象グループの
+                # 選択値を渡して実際に開くパス/URLへ解決する
                 $lnkOpen.Add_LinkClicked({
                     $target = $this.Tag.OpenTarget
-                    if ($target -is [scriptblock]) { $target = & $target }
+                    if ($target -is [scriptblock]) {
+                        $groupValue = if ($this.Tag.InputControls -and $this.Tag.InputControls.ContainsKey("TargetGroupNameFilter")) {
+                            Get-InputValue -Control $this.Tag.InputControls["TargetGroupNameFilter"]
+                        } else { "" }
+                        $target = & $target $groupValue
+                    }
                     & $OnOpenClick $target
                 }.GetNewClosure())
                 $grp.Controls.Add($lnkOpen)
