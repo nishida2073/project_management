@@ -121,16 +121,30 @@ $form.Add_FormClosing({
 })
 
 # =========================================
-# 一括実行タブ（package-generatorの実行タブUIを参考にしたレイアウト：
-# チェックボックスで対象ステップを選び、1つの実行ボタンで一括実行する）
-#
-# 先頭タブにするため、TabControlをここで作ってこのタブを最初にAddし、
-# 後段の「実行タブ（カテゴリごと）」ではこのTabControlに追記してもらう形にする。
+# 外側タブ（実行／ログ／設定。package-generator/kintone-resourse-generatorと同じ構成）。
 # ps2exeでビルドした実行ファイルではTabPageCollection.Insert()がNotSupportedExceptionになるため、
 # 後から並び替えるのではなく、最初から最終的な順序でAddしていく必要がある
 # =========================================
 
 $tabControl = New-Object System.Windows.Forms.TabControl
+$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+
+$tabRun = New-Object System.Windows.Forms.TabPage
+$tabRun.Text = "実行"
+$tabControl.Controls.Add($tabRun)
+
+$form.Controls.Add($tabControl)
+
+# =========================================
+# 一括実行タブ（package-generatorの実行タブUIを参考にしたレイアウト：
+# チェックボックスで対象ステップを選び、1つの実行ボタンで一括実行する）
+#
+# 「実行」タブの中を一括実行タブ＋カテゴリごとのタブに分けるため、TabControlをここで作って
+# このタブを最初にAddし、後段の「実行タブ（カテゴリごと）」ではこのTabControlに追記してもらう形にする。
+# 同じくps2exeのInsert()制限のため、最初から最終的な順序でAddしていく必要がある
+# =========================================
+
+$execTabControl = New-Object System.Windows.Forms.TabControl
 
 # IncludeInBatchを$falseにしたButtonDefだけ、一括実行タブの対象から外せる（実行タブ側には影響しない）
 $allButtonDefs = @()
@@ -150,7 +164,7 @@ function Get-BatchDisplayLabel {
 
 $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
-$tabControl.Controls.Add($tabBatchAll)
+$execTabControl.Controls.Add($tabBatchAll)
 
 $batchPanel = New-Object System.Windows.Forms.Panel
 $batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
@@ -316,13 +330,13 @@ function Invoke-BatchRunAll {
 # 実行タブ（カテゴリごとに分割）
 # =========================================
 
-$tabResult = New-CategoryTabControl -TabControl $tabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-BatButton -ButtonDef $bd }
+$tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-BatButton -ButtonDef $bd }
 $script:runButtons = $tabResult.RunButtons
 
 # 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった
-# 初期の$tabControl.Height（実施データ取得タブ基準）をこのタブの内容量に合わせて上書きする。
+# 初期の$execTabControl.Height（実施データ取得タブ基準）をこのタブの内容量に合わせて上書きする。
 # 45はNew-CategoryTabControlの$TabHeaderAllowance既定値
-$tabControl.Height = 45 + $batchPanel.Height
+$execTabControl.Height = 45 + $batchPanel.Height
 
 # Labelはカテゴリをまたいで重複し得るため、Labelをキーにした辞書からではなく
 # ButtonDef自身が持つStepStatusLabelプロパティ（New-CategoryTabControlが設定）を直接使う
@@ -338,7 +352,7 @@ function Set-StepStatus {
 }
 
 # =========================================
-# ログ（タブ切替に関わらず常に表示）
+# ログ（「実行」タブの中で常に表示。ログ／設定タブへ切り替えると見えなくなる）
 # =========================================
 
 $logSpacer = New-Object System.Windows.Forms.Panel
@@ -347,8 +361,8 @@ $logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
 
 $txtLog = New-LogTextBox
 
-# 視覚的な上→下の並び: tabControl → logSpacer → txtLog（Dock=Fillで残り全域を埋める）
-Add-StackedDockedControls -Container $form -ControlsTopToBottom @($tabControl, $logSpacer, $txtLog)
+# 視覚的な上→下の並び: execTabControl → logSpacer → txtLog（Dock=Fillで残り全域を埋める）
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $logSpacer, $txtLog)
 
 function Write-Log {
     param([string]$Text)
@@ -394,6 +408,112 @@ function Invoke-BatButton {
 
     Set-RunButtonsEnabled $true
 }
+
+# =========================================
+# ログタブ（package-generator/kintone-resourse-generatorの「ログ」タブを参考にしたレイアウト：
+# 対象グループ・工程で絞り込んで過去ログを閲覧する）。
+# 実行中ログ（txtLog）は「実行」タブの中にしかないため、このタブに来ると自動的に見えなくなる。
+# このタブ自身はDock=Top/Fillの組み合わせを直下に置くだけでよい
+# =========================================
+
+$tabLogs = New-Object System.Windows.Forms.TabPage
+$tabLogs.Text = "ログ"
+$tabControl.Controls.Add($tabLogs)
+
+# ログの閲覧対象は一括実行の対象外（IncludeInBatch=$false）も含めた全ButtonDef
+$allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+
+$logContentBox = New-LogTextBox
+$tabLogs.Controls.Add($logContentBox)
+
+$logStagePanel = New-Object System.Windows.Forms.Panel
+$logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$logStagePanel.Height = 40 + 24 * $allButtonDefsForLog.Count
+$tabLogs.Controls.Add($logStagePanel)
+
+$lblLogGroup = New-Object System.Windows.Forms.Label
+$lblLogGroup.Text = "対象グループ"
+$lblLogGroup.AutoSize = $true
+$lblLogGroup.Location = New-Object System.Drawing.Point(20, 17)
+$logStagePanel.Controls.Add($lblLogGroup)
+
+$cmbLogGroup = New-Object System.Windows.Forms.ComboBox
+$cmbLogGroup.Location = New-Object System.Drawing.Point(100, 14)
+$cmbLogGroup.Size = New-Object System.Drawing.Size(150, 24)
+$cmbLogGroup.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbLogGroup.DisplayMember = "Text"
+foreach ($opt in $groupOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
+if ($cmbLogGroup.Items.Count -gt 0) { $cmbLogGroup.SelectedIndex = 0 }
+$logStagePanel.Controls.Add($cmbLogGroup)
+
+$btnClearLogs = New-Object System.Windows.Forms.Button
+$btnClearLogs.Text = "ログをすべて削除"
+$btnClearLogs.Location = New-Object System.Drawing.Point(260, 13)
+$btnClearLogs.Size = New-Object System.Drawing.Size(140, 26)
+$logStagePanel.Controls.Add($btnClearLogs)
+
+# ラベルはカテゴリをまたいで重複し得るため、一括実行タブと同じGet-BatchDisplayLabelを通し、
+# Tagに保持したButtonDef自身からログファイル名の接頭辞を導く
+$script:logStageRadios = @()
+for ($i = 0; $i -lt $allButtonDefsForLog.Count; $i++) {
+    $bd = $allButtonDefsForLog[$i]
+    $radio = New-Object System.Windows.Forms.RadioButton
+    $radio.Text = Get-BatchDisplayLabel -ButtonDef $bd
+    $radio.AutoSize = $true
+    $radio.Tag = $bd
+    $radio.Checked = ($i -eq 0)
+    $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
+    $logStagePanel.Controls.Add($radio)
+    $script:logStageRadios += $radio
+}
+
+# 各.ps1はNew-WorkerLogPathで「<バッチ名>-<対象グループ>[-<対象年>]_<timestamp>.log」という
+# ファイル名で書き出す（bats\library\common.ps1参照）。<バッチ名>はButtonDef.BatchPathの
+# ファイル名（拡張子無し）と一致するため、それをそのままフィルタの接頭辞に使う
+function Update-LogView {
+    $selectedRadio = $script:logStageRadios | Where-Object { $_.Checked } | Select-Object -First 1
+    if (-not $selectedRadio) { return }
+    $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
+    $logPath = $script:commonEnvVars["LOG_DIR"]
+
+    $logContentBox.Text = ""
+    if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
+
+    $groupValue = if ($cmbLogGroup.SelectedItem) { "$($cmbLogGroup.SelectedItem.Value)" } else { "" }
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$groupValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    $sections = foreach ($file in $files) { [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding) }
+    $logContentBox.Text = $sections -join "`r`n`r`n"
+}
+
+foreach ($radio in $script:logStageRadios) {
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+}
+$cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView })
+
+$btnClearLogs.Add_Click({
+    $logPath = $script:commonEnvVars["LOG_DIR"]
+    if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
+
+    $logFiles = @(Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue)
+    if ($logFiles.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("削除対象のログファイルがありません。", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+        return
+    }
+
+    $confirm = [System.Windows.Forms.MessageBox]::Show("ログファイルを$($logFiles.Count)件すべて削除します。よろしいですか？", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
+    if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+
+    foreach ($file in $logFiles) {
+        try {
+            Remove-Item -LiteralPath $file.FullName -Force
+        } catch {
+            [System.Windows.Forms.MessageBox]::Show("削除に失敗したファイルがあります: $($file.Name)`r`n$($_.Exception.Message)", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        }
+    }
+    Update-LogView
+})
+
+Update-LogView
 
 # =========================================
 # 設定タブ（kintone-aggregatorの設定タブと同様のレイアウト：
@@ -1174,26 +1294,22 @@ $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
     if (!$script:suppressComboSync) { Update-GroupSettingsFields }
 })
 
-# 設定タブは実行結果を伴わないため共通ログ欄が不要。設定タブ選択時だけログ欄を隠し、
-# その分タブの表示領域を広げる（他のタブでは高さ計算をNew-CategoryTabControl側の
-# $updateTabHeight closureに任せているため、ここでは触らない）
+# 外側タブ（実行/ログ/設定）はDock=Fillで常にフォーム全高を使うため、ここでは表示切り替えは不要で、
+# タブ選択のたびに内容を最新化するだけでよい
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsGroupList
-        $logSpacer.Visible = $false
-        $txtLog.Visible = $false
-        $tabControl.Height = $form.ClientSize.Height
-    } else {
-        $logSpacer.Visible = $true
-        $txtLog.Visible = $true
+    } elseif ($tabControl.SelectedTab -eq $tabLogs) {
+        Update-LogView
     }
-}.GetNewClosure())
+})
 
 Update-SettingsGroupList
 Update-CommonSettingsFields
 Update-GroupSettingsFields
 
 # ps2exeビルド環境ではタブの既定選択がずれることがあるため明示的に指定する
-$tabControl.SelectedTab = $tabBatchAll
+$execTabControl.SelectedTab = $tabBatchAll
+$tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)

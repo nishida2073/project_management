@@ -119,53 +119,120 @@ $cmbGenerateClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDow
 $cmbUploadClient = New-Object System.Windows.Forms.ComboBox
 $cmbUploadClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$chkDownload = New-Object System.Windows.Forms.CheckBox
-$chkDownload.Text = "1. ファイルダウンロード"
-$chkDownload.AutoSize = $true
-$chkDownload.Location = New-Object System.Drawing.Point(20, 40)
+# 一括実行タブのチェックボックス／開くリンク、個別実行タブ、ログタブのラジオボタンすべてが
+# ここで定義する$categoryDefsから生成される（kintone-aggregator/track-aggregatorと同じ、
+# 単一の定義元からUIを組み立てる方式）。各プロパティの役割：
+#   Label            個別実行タブのグループボックス見出し／実行中ログに使う名称
+#   BatchLabel       一括実行タブのチェックボックス・ログタブのラジオボタンに使う名称（連番付き）
+#   BatchPath        実行するbatのパス
+#   EnabledVarName   一括実行時にDOWNLOAD_ENABLED等として渡す環境変数名
+#   LogPrefixVarName ログタブでの絞り込みに使うログファイル名接頭辞の環境変数名
+#   LocalPathVarName／(SiteUrlVarName+SitePathVarName)　「開く」リンクの開き先を解決する変数名
+#     （一括実行タブの開くリンクはGet-BatchOpenTarget経由でこれを使う。個別実行タブは各タブ自身の
+#     クライアント選択欄を直接閉じ込めたOpenTargetスクリプトブロックを使うため、変数名としては
+#     重複するが、開く先の対象クライアントが一括実行タブ（$cmbClient）と個別実行タブ
+#     （$cmbDownloadClient等）とで異なるため、素朴な使い回しができず已む無く分けている）
+#   Inputs           個別実行タブに出すクライアント選択欄（ExistingControlでコンボボックスをそのまま渡す）
+#   OpenTarget       個別実行タブの「開く」リンクの開き先
+function New-ClientInputDef {
+    param([System.Windows.Forms.ComboBox]$Combo)
+    return @([PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $Combo; LabelWidth = 80; InputWidth = 220 })
+}
 
-$chkGenerate = New-Object System.Windows.Forms.CheckBox
-$chkGenerate.Text = "2. 個別パッケージの作成"
-$chkGenerate.AutoSize = $true
-$chkGenerate.Location = New-Object System.Drawing.Point(20, 66)
-
-$chkUpload = New-Object System.Windows.Forms.CheckBox
-$chkUpload.Text = "3. ファイルアップロード"
-$chkUpload.AutoSize = $true
-$chkUpload.Location = New-Object System.Drawing.Point(20, 92)
-
-$linkDownloadPath = New-Object System.Windows.Forms.LinkLabel
-$linkDownloadPath.Text = "開く"
-$linkDownloadPath.AutoSize = $false
-$linkDownloadPath.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$linkDownloadPath.Size = New-Object System.Drawing.Size(40, $chkDownload.PreferredSize.Height)
-$linkDownloadPath.Location = New-Object System.Drawing.Point(220, $chkDownload.Location.Y)
-
-$linkGeneratePath = New-Object System.Windows.Forms.LinkLabel
-$linkGeneratePath.Text = "開く"
-$linkGeneratePath.AutoSize = $false
-$linkGeneratePath.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$linkGeneratePath.Size = New-Object System.Drawing.Size(40, $chkGenerate.PreferredSize.Height)
-$linkGeneratePath.Location = New-Object System.Drawing.Point(220, $chkGenerate.Location.Y)
-
-$linkUploadPath = New-Object System.Windows.Forms.LinkLabel
-$linkUploadPath.Text = "開く"
-$linkUploadPath.AutoSize = $false
-$linkUploadPath.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-$linkUploadPath.Size = New-Object System.Drawing.Size(40, $chkUpload.PreferredSize.Height)
-$linkUploadPath.Location = New-Object System.Drawing.Point(220, $chkUpload.Location.Y)
-
-function Open-FolderPath {
-    param([string]$Path)
-    if (!$Path) {
-        [System.Windows.Forms.MessageBox]::Show("パスが設定されていません。", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
+$categoryDefs = @(
+    [PSCustomObject]@{
+        Label = "ファイルダウンロード"
+        ButtonDefs = @(
+            [PSCustomObject]@{
+                Label            = "ファイルダウンロード"
+                BatchLabel       = "ファイルダウンロード"
+                BatchPath        = $downloadBat
+                EnabledVarName   = "DOWNLOAD_ENABLED"
+                LogPrefixVarName = "DOWNLOAD_LOG_PREFIX"
+                LocalPathVarName = "DOWNLOAD_LOCAL_PATH"
+                Inputs           = New-ClientInputDef -Combo $cmbDownloadClient
+                OpenTarget       = { Get-ValueForClient -ClientName $cmbDownloadClient.Text -VarName "DOWNLOAD_LOCAL_PATH" }.GetNewClosure()
+            }
+        )
     }
-    if (!(Test-Path -LiteralPath $Path)) {
-        [System.Windows.Forms.MessageBox]::Show("フォルダが見つかりません:`r`n$Path", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
+    [PSCustomObject]@{
+        Label = "個別パッケージの作成"
+        ButtonDefs = @(
+            [PSCustomObject]@{
+                Label            = "個別パッケージの作成"
+                BatchLabel       = "個別パッケージの作成"
+                BatchPath        = $generateBat
+                EnabledVarName   = "GENERATE_ENABLED"
+                LogPrefixVarName = "GENERATE_LOG_PREFIX"
+                LocalPathVarName = "GENERATE_OUTPUT_PATH"
+                Inputs           = New-ClientInputDef -Combo $cmbGenerateClient
+                OpenTarget       = { Get-ValueForClient -ClientName $cmbGenerateClient.Text -VarName "GENERATE_OUTPUT_PATH" }.GetNewClosure()
+            }
+        )
     }
-    Start-Process explorer.exe -ArgumentList "`"$Path`""
+    [PSCustomObject]@{
+        Label = "ファイルアップロード"
+        ButtonDefs = @(
+            [PSCustomObject]@{
+                Label            = "ファイルアップロード"
+                BatchLabel       = "ファイルアップロード"
+                BatchPath        = $uploadBat
+                EnabledVarName   = "UPLOAD_ENABLED"
+                LogPrefixVarName = "UPLOAD_LOG_PREFIX"
+                SiteUrlVarName   = "UPLOAD_SITE_URL"
+                SitePathVarName  = "UPLOAD_SITE_PATH"
+                Inputs           = New-ClientInputDef -Combo $cmbUploadClient
+                OpenTarget       = {
+                    Get-SharePointFolderUrl `
+                        -SiteUrl (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_URL") `
+                        -SitePath (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_PATH")
+                }.GetNewClosure()
+            }
+        )
+    }
+)
+$allButtonDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+
+# 一括実行タブでの表示名。BatchLabelがあればそれを、無ければLabelを使う
+function Get-BatchDisplayLabel {
+    param($ButtonDef)
+    if ($ButtonDef.BatchLabel) { $ButtonDef.BatchLabel } else { $ButtonDef.Label }
+}
+
+# 一括実行タブの「開く」リンク用。個別実行タブと違い対象クライアントは$cmbClient（共通の1つ）なので、
+# ButtonDefが持つ変数名（LocalPathVarName、またはSiteUrlVarName+SitePathVarName）から解決する
+function Get-BatchOpenTarget {
+    param($ButtonDef, [string]$ClientName)
+    if ($ButtonDef.SiteUrlVarName) {
+        return Get-SharePointFolderUrl `
+            -SiteUrl (Get-ValueForClient -ClientName $ClientName -VarName $ButtonDef.SiteUrlVarName) `
+            -SitePath (Get-ValueForClient -ClientName $ClientName -VarName $ButtonDef.SitePathVarName)
+    }
+    return Get-ValueForClient -ClientName $ClientName -VarName $ButtonDef.LocalPathVarName
+}
+
+$script:batchStepCheckboxes = @()
+$script:batchLinkControls = @()
+for ($i = 0; $i -lt $allButtonDefs.Count; $i++) {
+    $bd = $allButtonDefs[$i]
+    $y = 40 + 26 * $i
+
+    $chk = New-Object System.Windows.Forms.CheckBox
+    $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
+    $chk.AutoSize = $true
+    $chk.Tag = $bd
+    $chk.Location = New-Object System.Drawing.Point(20, $y)
+    $script:batchStepCheckboxes += $chk
+
+    $lnk = New-Object System.Windows.Forms.LinkLabel
+    $lnk.Text = "開く"
+    $lnk.AutoSize = $false
+    $lnk.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $lnk.Size = New-Object System.Drawing.Size(40, $chk.PreferredSize.Height)
+    $lnk.Location = New-Object System.Drawing.Point(220, $y)
+    $lnk.Tag = $bd
+    $lnk.Add_LinkClicked({ Open-TargetOrWarn -Path (Get-BatchOpenTarget -ButtonDef $this.Tag -ClientName $cmbClient.SelectedItem) })
+    $script:batchLinkControls += $lnk
 }
 
 function Get-SharePointFolderUrl {
@@ -175,16 +242,6 @@ function Get-SharePointFolderUrl {
     $library = ($SitePath -split '/', 2)[0]
     $serverRelativePath = "$($siteUri.AbsolutePath.TrimEnd('/'))/$SitePath"
     return "$($siteUri.Scheme)://$($siteUri.Authority)$($siteUri.AbsolutePath.TrimEnd('/'))/$([Uri]::EscapeDataString($library))/Forms/AllItems.aspx?id=$([Uri]::EscapeDataString($serverRelativePath))"
-}
-
-function Open-SharePointFolder {
-    param([string]$SiteUrl, [string]$SitePath)
-    $url = Get-SharePointFolderUrl -SiteUrl $SiteUrl -SitePath $SitePath
-    if (!$url) {
-        [System.Windows.Forms.MessageBox]::Show("URLが設定されていません。", "フォルダを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-    Start-Process $url
 }
 
 $btnRun = New-Object System.Windows.Forms.Button
@@ -255,7 +312,7 @@ function Get-ClientProfileValues {
     return $result
 }
 
-$runTopPanel.Controls.AddRange(@($chkDownload, $chkGenerate, $chkUpload, $linkDownloadPath, $linkGeneratePath, $linkUploadPath, $btnRun, $lblStatus, $lblClient, $cmbClient))
+$runTopPanel.Controls.AddRange(@($script:batchStepCheckboxes + $script:batchLinkControls + @($btnRun, $lblStatus, $lblClient, $cmbClient)))
 
 $txtLog = New-LogTextBox
 
@@ -277,9 +334,9 @@ $btnRun.Add_Click({
     Write-Log ""
     Write-Log "==================== 一括実行 開始（$clientDisplayName） ===================="
 
-    $env:DOWNLOAD_ENABLED = if ($chkDownload.Checked) { "1" } else { "0" }
-    $env:GENERATE_ENABLED = if ($chkGenerate.Checked) { "1" } else { "0" }
-    $env:UPLOAD_ENABLED = if ($chkUpload.Checked) { "1" } else { "0" }
+    foreach ($chk in $script:batchStepCheckboxes) {
+        Set-Item -Path "env:$($chk.Tag.EnabledVarName)" -Value $(if ($chk.Checked) { "1" } else { "0" })
+    }
 
     foreach ($varName in $script:lastClientVars) {
         [Environment]::SetEnvironmentVariable($varName, $null)
@@ -307,11 +364,7 @@ $btnRun.Add_Click({
     # 「スキップします」表示にする（黙って$stagesから外すのではなく、全ステージを列挙する）。
     # download→generate→uploadは前段の出力を後段が使う依存関係があるため、
     # kintone-aggregator側と違い最初の失敗で処理を打ち切る（breakのまま維持）
-    $stages = @(
-        [PSCustomObject]@{ Label = $chkDownload.Text; Bat = $downloadBat; Checked = $chkDownload.Checked }
-        [PSCustomObject]@{ Label = $chkGenerate.Text; Bat = $generateBat; Checked = $chkGenerate.Checked }
-        [PSCustomObject]@{ Label = $chkUpload.Text;   Bat = $uploadBat;   Checked = $chkUpload.Checked }
-    )
+    $stages = @($script:batchStepCheckboxes | ForEach-Object { [PSCustomObject]@{ Label = $_.Text; Bat = $_.Tag.BatchPath; Checked = $_.Checked } })
 
     $hasError = $false
     $failedExitCode = 0
@@ -768,7 +821,7 @@ function Get-ResolvedVar {
 
 $logStagePanel = New-Object System.Windows.Forms.Panel
 $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$logStagePanel.Height = 66
+$logStagePanel.Height = 40 + 24 * $allButtonDefs.Count
 
 $lblLogClient = New-Object System.Windows.Forms.Label
 $lblLogClient.Text = "クライアント"
@@ -812,23 +865,22 @@ $btnClearLogs.Add_Click({
     Update-LogView
 })
 
-$radioDownloadLog = New-Object System.Windows.Forms.RadioButton
-$radioDownloadLog.Text = "1. ファイルダウンロード"
-$radioDownloadLog.AutoSize = $true
-$radioDownloadLog.Checked = $true
-$radioDownloadLog.Location = New-Object System.Drawing.Point(20, 40)
+# $categoryDefs（一括実行タブと共通）から動的に生成する（他3ツールと同じ、単一の定義元からの生成方式）
+$script:logStageRadios = @()
+for ($i = 0; $i -lt $allButtonDefs.Count; $i++) {
+    $bd = $allButtonDefs[$i]
+    $radio = New-Object System.Windows.Forms.RadioButton
+    $radio.Text = Get-BatchDisplayLabel -ButtonDef $bd
+    $radio.AutoSize = $true
+    $radio.Tag = $bd
+    $radio.Checked = ($i -eq 0)
+    $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+    $logStagePanel.Controls.Add($radio)
+    $script:logStageRadios += $radio
+}
 
-$radioGenerateLog = New-Object System.Windows.Forms.RadioButton
-$radioGenerateLog.Text = "2. 個別パッケージの作成"
-$radioGenerateLog.AutoSize = $true
-$radioGenerateLog.Location = New-Object System.Drawing.Point(220, 40)
-
-$radioUploadLog = New-Object System.Windows.Forms.RadioButton
-$radioUploadLog.Text = "3. ファイルアップロード"
-$radioUploadLog.AutoSize = $true
-$radioUploadLog.Location = New-Object System.Drawing.Point(440, 40)
-
-$logStagePanel.Controls.AddRange(@($lblLogClient, $cmbLogClient, $btnClearLogs, $radioDownloadLog, $radioGenerateLog, $radioUploadLog))
+$logStagePanel.Controls.AddRange(@($lblLogClient, $cmbLogClient, $btnClearLogs))
 
 # 過去ログの静的な表示のみで色分けは使わないが、New-LogTextBoxを流用してReadOnly時の
 # 背景色などのスタイルをtxtLog（実行中ログ）と一本化する
@@ -837,19 +889,11 @@ $logContentBox = New-LogTextBox
 $tabLogs.Controls.Add($logContentBox)
 $tabLogs.Controls.Add($logStagePanel)
 
-function Get-LogPrefixForStage {
-    param([string]$Stage)
-    switch ($Stage) {
-        "download" { return Get-ResolvedVar "DOWNLOAD_LOG_PREFIX" }
-        "generate" { return Get-ResolvedVar "GENERATE_LOG_PREFIX" }
-        "upload"   { return Get-ResolvedVar "UPLOAD_LOG_PREFIX" }
-    }
-}
-
 function Update-LogView {
-    $stage = if ($radioDownloadLog.Checked) { "download" } elseif ($radioGenerateLog.Checked) { "generate" } else { "upload" }
+    $selectedRadio = $script:logStageRadios | Where-Object { $_.Checked } | Select-Object -First 1
+    if (-not $selectedRadio) { return }
     $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-    $prefix = Get-LogPrefixForStage $stage
+    $prefix = Get-ResolvedVar $selectedRadio.Tag.LogPrefixVarName
 
     $logContentBox.Text = ""
 
@@ -865,9 +909,6 @@ function Update-LogView {
     $logContentBox.Text = $sections -join "`r`n`r`n"
 }
 
-$radioDownloadLog.Add_CheckedChanged({ if ($radioDownloadLog.Checked) { Update-LogView } })
-$radioGenerateLog.Add_CheckedChanged({ if ($radioGenerateLog.Checked) { Update-LogView } })
-$radioUploadLog.Add_CheckedChanged({ if ($radioUploadLog.Checked) { Update-LogView } })
 $cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
 
 function Get-ValueForClient {
@@ -887,16 +928,12 @@ function Get-ClientAwareEnabledValue {
 }
 
 function Update-RunCheckboxesFromClient {
-    $chkDownload.Checked = (Get-ClientAwareEnabledValue "DOWNLOAD_ENABLED") -eq "1"
-    $chkGenerate.Checked = (Get-ClientAwareEnabledValue "GENERATE_ENABLED") -eq "1"
-    $chkUpload.Checked = (Get-ClientAwareEnabledValue "UPLOAD_ENABLED") -eq "1"
+    foreach ($chk in $script:batchStepCheckboxes) {
+        $chk.Checked = (Get-ClientAwareEnabledValue $chk.Tag.EnabledVarName) -eq "1"
+    }
 }
 
 $cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-RunCheckboxesFromClient } })
-
-$linkDownloadPath.Add_LinkClicked({ Open-FolderPath (Get-ClientAwareEnabledValue "DOWNLOAD_LOCAL_PATH") })
-$linkGeneratePath.Add_LinkClicked({ Open-FolderPath (Get-ClientAwareEnabledValue "GENERATE_OUTPUT_PATH") })
-$linkUploadPath.Add_LinkClicked({ Open-SharePointFolder (Get-ClientAwareEnabledValue "UPLOAD_SITE_URL") (Get-ClientAwareEnabledValue "UPLOAD_SITE_PATH") })
 
 # =========================================
 # ファイルダウンロード／個別パッケージの作成／ファイルアップロードの個別実行タブ
@@ -912,51 +949,6 @@ function Get-ClientArgValue {
     return ""
 }
 
-function New-ClientInputDef {
-    param([System.Windows.Forms.ComboBox]$Combo)
-    return @([PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $Combo; LabelWidth = 80; InputWidth = 220 })
-}
-
-$individualCategoryDefs = @(
-    [PSCustomObject]@{
-        Label = "ファイルダウンロード"
-        ButtonDefs = @(
-            [PSCustomObject]@{
-                Label      = "ファイルダウンロード"
-                BatchPath  = $downloadBat
-                Inputs     = New-ClientInputDef -Combo $cmbDownloadClient
-                OpenTarget = { Get-ValueForClient -ClientName $cmbDownloadClient.Text -VarName "DOWNLOAD_LOCAL_PATH" }.GetNewClosure()
-            }
-        )
-    }
-    [PSCustomObject]@{
-        Label = "個別パッケージの作成"
-        ButtonDefs = @(
-            [PSCustomObject]@{
-                Label      = "個別パッケージの作成"
-                BatchPath  = $generateBat
-                Inputs     = New-ClientInputDef -Combo $cmbGenerateClient
-                OpenTarget = { Get-ValueForClient -ClientName $cmbGenerateClient.Text -VarName "GENERATE_OUTPUT_PATH" }.GetNewClosure()
-            }
-        )
-    }
-    [PSCustomObject]@{
-        Label = "ファイルアップロード"
-        ButtonDefs = @(
-            [PSCustomObject]@{
-                Label      = "ファイルアップロード"
-                BatchPath  = $uploadBat
-                Inputs     = New-ClientInputDef -Combo $cmbUploadClient
-                OpenTarget = {
-                    Get-SharePointFolderUrl `
-                        -SiteUrl (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_URL") `
-                        -SitePath (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_PATH")
-                }.GetNewClosure()
-            }
-        )
-    }
-)
-
 function Set-StepStatus {
     param($ButtonDef, [string]$Text)
     $color = switch ($Text) {
@@ -970,9 +962,7 @@ function Set-StepStatus {
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
-    $chkDownload.Enabled = $Enabled
-    $chkGenerate.Enabled = $Enabled
-    $chkUpload.Enabled = $Enabled
+    foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $Enabled }
     $btnRun.Enabled = $Enabled
     $cmbClient.Enabled = $Enabled
     $cmbDownloadClient.Enabled = $Enabled
@@ -1014,7 +1004,7 @@ function Invoke-IndividualStep {
     $script:isRunning = $false
 }
 
-$individualTabResult = New-CategoryTabControl -TabControl $runTabControl -CategoryDefs $individualCategoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd }
+$individualTabResult = New-CategoryTabControl -TabControl $runTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd }
 $script:individualRunButtons = $individualTabResult.RunButtons
 
 # 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった

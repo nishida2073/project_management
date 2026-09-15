@@ -985,7 +985,7 @@ Update-SettingsFields
 
 $logStagePanel = New-Object System.Windows.Forms.Panel
 $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$logStagePanel.Height = 90
+$logStagePanel.Height = 40 + 24 * $stepMeta.Count
 
 $lblLogConfigName = New-Object System.Windows.Forms.Label
 $lblLogConfigName.Text = "スペース識別名"
@@ -1033,7 +1033,7 @@ for ($i = 0; $i -lt $stepMeta.Count; $i++) {
     $radio.AutoSize = $true
     $radio.Tag = $sm.StageKey
     $radio.Checked = ($sm.Id -eq 0)
-    $radio.Location = New-Object System.Drawing.Point((20 + 140 * ($i % 3)), (40 + 24 * [Math]::Floor($i / 3)))
+    $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
     $logStagePanel.Controls.Add($radio)
     $script:logStageRadios[$sm.StageKey] = $radio
