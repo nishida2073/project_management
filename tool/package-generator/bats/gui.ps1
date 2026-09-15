@@ -1,11 +1,4 @@
-﻿# =========================================
-# GUI（コース別パッケージ生成ツール）
-# =========================================
-# download-folder.bat → generate-package.bat → upload-folder.batを画面から実行するGUI
-# （all.bat自体は呼ばず、チェックされたステージだけをGUI側から個別に実行し、ステージごとの
-# 開始/完了ログを出す）。「実行」タブでダウンロード/パッケージ作成/アップロードの有効・無効を
-# 切り替えて実行し、「設定」タブでset-env.batの値を編集する。
-
+﻿
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -14,28 +7,25 @@ Add-Type -AssemblyName System.Drawing
 
 if ($MyInvocation.MyCommand.Path) {
     $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-    $basePath = Split-Path $scriptDir -Parent
+    $rootPath = Split-Path $scriptDir -Parent
 } else {
-    $basePath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
+    $rootPath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
-$downloadBat = Join-Path $basePath "download-folder.bat"
-$generateBat = Join-Path $basePath "generate-package.bat"
-$uploadBat = Join-Path $basePath "upload-folder.bat"
-$clientsDir = Join-Path $basePath "clients"
+$downloadBat = Join-Path $rootPath "download-folder.bat"
+$generateBat = Join-Path $rootPath "generate-package.bat"
+$uploadBat = Join-Path $rootPath "upload-folder.bat"
+$clientsDir = Join-Path $rootPath "clients"
 $setEnvBat = Join-Path $clientsDir "set-env.bat"
 $clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
-$cp932 = [System.Text.Encoding]::GetEncoding(932)
 $clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
 $defaultClientLabel = "デフォルト"
 $script:suppressComboSync = $false
 
-$libraryDir = Join-Path $basePath "bats\library"
+$libraryDir = Join-Path $rootPath "bats\library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-# 子プロセス（Invoke-BatProcess経由で起動するbat/ps1）のWrite-Messageに、
-# GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
 function Get-ClientBatPath {
@@ -79,24 +69,16 @@ $tabControl.Add_Selecting({
     }
 })
 
-# 実行タブの中を「一括実行」「ファイルダウンロード」「個別パッケージの作成」「ファイルアップロード」の
-# 4タブに分ける（kintone-aggregator/kintone-resourse-generatorと同じ構成）。ps2exeビルドでは
-# TabPageCollection.Insert()がNotSupportedExceptionになるため、後から並び替えるのではなく、
-# 最初から最終的な順序でAddしていく必要がある（一括実行タブを先にAddし、個別タブは
-# New-CategoryTabControlに-TabControlで同じ$runTabControlを渡して追記させる）
-$runTabControl = New-Object System.Windows.Forms.TabControl
-$runTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
+$execTabControl = New-Object System.Windows.Forms.TabControl
+$execTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
 
 $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
-$runTabControl.Controls.Add($tabBatchAll)
+$execTabControl.Controls.Add($tabBatchAll)
 
 $cmbClient = New-Object System.Windows.Forms.ComboBox
 $cmbClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-# ファイルダウンロード／個別パッケージの作成／ファイルアップロードの各個別実行タブは、
-# New-CategoryTabControlのInputs（ExistingControl）へこれらのComboBoxをそのまま渡す。
-# クライアント一覧はUpdate-ClientListが$cmbClientと合わせて4つまとめて更新する
 $cmbDownloadClient = New-Object System.Windows.Forms.ComboBox
 $cmbDownloadClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
@@ -106,21 +88,6 @@ $cmbGenerateClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDow
 $cmbUploadClient = New-Object System.Windows.Forms.ComboBox
 $cmbUploadClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-# 一括実行タブのチェックボックス／開くリンク、個別実行タブ、ログタブのラジオボタンすべてが
-# ここで定義する$categoryDefsから生成される（kintone-aggregator/track-aggregatorと同じ、
-# 単一の定義元からUIを組み立てる方式）。各プロパティの役割：
-#   Label            個別実行タブのグループボックス見出し／実行中ログに使う名称
-#   BatchLabel       一括実行タブのチェックボックス・ログタブのラジオボタンに使う名称（連番付き）
-#   BatchPath        実行するbatのパス
-#   EnabledVarName   一括実行時にDOWNLOAD_ENABLED等として渡す環境変数名
-#   LogPrefixVarName ログタブでの絞り込みに使うログファイル名接頭辞の環境変数名
-#   LocalPathVarName／(SiteUrlVarName+SitePathVarName)　「開く」リンクの開き先を解決する変数名
-#     （一括実行タブの開くリンクはGet-BatchOpenTarget経由でこれを使う。個別実行タブは各タブ自身の
-#     クライアント選択欄を直接閉じ込めたOpenTargetスクリプトブロックを使うため、変数名としては
-#     重複するが、開く先の対象クライアントが一括実行タブ（$cmbClient）と個別実行タブ
-#     （$cmbDownloadClient等）とで異なるため、素朴な使い回しができず已む無く分けている）
-#   Inputs           個別実行タブに出すクライアント選択欄（ExistingControlでコンボボックスをそのまま渡す）
-#   OpenTarget       個別実行タブの「開く」リンクの開き先
 function New-ClientInputDef {
     param([System.Windows.Forms.ComboBox]$Combo)
     return @([PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $Combo; LabelWidth = 80; InputWidth = 220 })
@@ -180,8 +147,6 @@ $categoryDefs = @(
 )
 $allButtonDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
-# 一括実行タブの「開く」リンク用。個別実行タブと違い対象クライアントは$cmbClient（共通の1つ）なので、
-# ButtonDefが持つ変数名（LocalPathVarName、またはSiteUrlVarName+SitePathVarName）から解決する
 function Get-BatchOpenTarget {
     param($ButtonDef, [string]$ClientName)
     if ($ButtonDef.SiteUrlVarName) {
@@ -211,9 +176,9 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs -Ru
         Open-TargetOrWarn -Path (Get-BatchOpenTarget -ButtonDef $bd -ClientName $inputControls["Client"].SelectedItem)
     }
 
-$runTopPanel = $batchTab.Panel
+$batchPanel = $batchTab.Panel
 $script:batchStepCheckboxes = $batchTab.CheckBoxes
-$btnRun = $batchTab.RunButton
+$btnRunAll = $batchTab.RunButton
 $lblStatus = $batchTab.StatusLabel
 
 function Update-ClientComboItems {
@@ -250,7 +215,7 @@ function Get-ClientProfileRawValues {
     if (!(Test-Path -LiteralPath $clientBat)) {
         return $result
     }
-    foreach ($line in [System.IO.File]::ReadAllLines($clientBat, $cp932)) {
+    foreach ($line in [System.IO.File]::ReadAllLines($clientBat, $script:cp932Encoding)) {
         $trimmed = $line.Trim()
         $m = $clientLineRegex.Match($trimmed)
         if (!$m.Success) {
@@ -268,7 +233,7 @@ function Get-ClientProfileValues {
     $raw = Get-ClientProfileRawValues $ClientName
     $result = @{}
     foreach ($varName in $raw.Keys) {
-        $result[$varName] = Expand-VarTokens -Value $raw[$varName] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+        $result[$varName] = Expand-VarTokens -Value $raw[$varName] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
     }
     return $result
 }
@@ -276,7 +241,7 @@ function Get-ClientProfileValues {
 $txtLog = New-LogTextBox
 
 $tabRun.Controls.Add($txtLog)
-$tabRun.Controls.Add($runTabControl)
+$tabRun.Controls.Add($execTabControl)
 
 function Start-BatchRunAll {
     $selectedClient = $cmbClient.SelectedItem
@@ -307,15 +272,13 @@ function Start-BatchRunAll {
         [Environment]::SetEnvironmentVariable("CLIENT_NAME", $null)
     }
 
-    # download→generate→uploadは前段の出力を後段が使う依存関係があるため、
-    # kintone-aggregator/track-aggregator側と違い最初の失敗で処理を打ち切る（-StopOnFailure）
     $script:isRunning = $true
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
         -StatusLabel $lblStatus -StopOnFailure -HeaderSuffix "（$clientDisplayName）" `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -InvokeStep {
             param($bd)
-            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $rootPath -Form $form `
                 -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
                 -GetBatArgs { param($bd) @() }
         }
@@ -324,7 +287,7 @@ function Start-BatchRunAll {
     $script:currentProc = $null
 }
 
-$btnRun.Add_Click({ Start-BatchRunAll })
+$btnRunAll.Add_Click({ Start-BatchRunAll })
 
 
 $topPanel = New-Object System.Windows.Forms.Panel
@@ -373,14 +336,14 @@ $tabSettings.Controls.Add($topPanel)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
-$groupLabels = @{
+$settingsGroupLabels = @{
     "COMMON" = "共通"
     "DOWNLOAD" = "ダウンロード"
     "GENERATE" = "パッケージ作成"
     "UPLOAD" = "アップロード"
 }
 
-$varLabels = @{
+$settingsVarLabels = @{
     "COMMON_LOG_PATH" = "ログの出力先"
     "DOWNLOAD_ENABLED" = "機能の有効化"
     "DOWNLOAD_SITE_URL" = "ダウンロード元のサイトURL"
@@ -410,7 +373,7 @@ $script:fieldTextBoxes = @{}
 $script:fieldRadios = @{}
 
 $enabledVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
-$folderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_PATH", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_PATH")
+$settingsFolderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_PATH", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_PATH")
 $fileBrowseVars = @("GENERATE_CONFIG_PATH")
 
 $clientOverridableVars = @(
@@ -477,7 +440,7 @@ function Update-SettingsFields {
             }
 
             $lblGroup = New-Object System.Windows.Forms.Label
-            $lblGroup.Text = if ($groupLabels.ContainsKey($group)) { $groupLabels[$group] } else { $group }
+            $lblGroup.Text = if ($settingsGroupLabels.ContainsKey($group)) { $settingsGroupLabels[$group] } else { $group }
             $lblGroup.AutoSize = $true
             $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
             $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
@@ -487,7 +450,7 @@ function Update-SettingsFields {
         }
 
         $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = if ($varLabels.ContainsKey($varName)) { $varLabels[$varName] } else { $varName }
+        $lbl.Text = if ($settingsVarLabels.ContainsKey($varName)) { $settingsVarLabels[$varName] } else { $varName }
         $lbl.AutoSize = $false
         $lbl.Size = New-Object System.Drawing.Size(220, 20)
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
@@ -514,7 +477,7 @@ function Update-SettingsFields {
             $radioGroupPanel.Controls.AddRange(@($radioEnabled, $radioDisabled))
             $fieldPanel.Controls.Add($radioGroupPanel)
             $script:fieldRadios[$varName] = $radioEnabled
-        } elseif ($folderBrowseVars -contains $varName -or $fileBrowseVars -contains $varName) {
+        } elseif ($settingsFolderBrowseVars -contains $varName -or $fileBrowseVars -contains $varName) {
             $isFileBrowse = $fileBrowseVars -contains $varName
 
             $txt = New-Object System.Windows.Forms.TextBox
@@ -530,11 +493,11 @@ function Update-SettingsFields {
             $btnBrowse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
             $btnBrowse.Tag = $txt
 
-            if ($folderBrowseVars -contains $varName) {
+            if ($settingsFolderBrowseVars -contains $varName) {
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
                     if (Test-Path -LiteralPath $startPath) {
                         $dlg.SelectedPath = $startPath
                     }
@@ -547,7 +510,7 @@ function Update-SettingsFields {
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.OpenFileDialog
                     $dlg.Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*"
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
                     if (Test-Path -LiteralPath $startPath) {
                         $dlg.InitialDirectory = Split-Path $startPath -Parent
                         $dlg.FileName = Split-Path $startPath -Leaf
@@ -569,7 +532,7 @@ function Update-SettingsFields {
                 $btnOpen.Tag = $txt
                 $btnOpen.Add_LinkClicked({
                     $targetTxt = $this.Tag
-                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
                     if (Test-Path -LiteralPath $openPath) {
                         Start-Process -FilePath $openPath
                     } else {
@@ -625,12 +588,12 @@ function Save-ClientProfile {
         }
     }
     $content = ($newLines -join "`r`n") + "`r`n"
-    [System.IO.File]::WriteAllText($clientBat, $content, $cp932)
+    [System.IO.File]::WriteAllText($clientBat, $content, $script:cp932Encoding)
 
     if ($isNewClient) {
         $defaults = Get-SetEnvDefaults -Path $setEnvBat
-        $defaultConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
-        $newConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+        $defaultConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+        $newConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
         if ($newConfigPath -ne $defaultConfigPath -and (Test-Path -LiteralPath $defaultConfigPath) -and !(Test-Path -LiteralPath $newConfigPath)) {
             New-Item (Split-Path $newConfigPath -Parent) -ItemType Directory -Force | Out-Null
             Copy-Item -LiteralPath $defaultConfigPath -Destination $newConfigPath
@@ -714,7 +677,7 @@ function Update-LogView {
 
     $sections = foreach ($file in $files) {
         try {
-            [System.IO.File]::ReadAllText($file.FullName, $cp932)
+            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
         } catch {
             "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
         }
@@ -751,12 +714,6 @@ function Update-RunCheckboxesFromClient {
 
 $cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-RunCheckboxesFromClient } })
 
-# =========================================
-# ファイルダウンロード／個別パッケージの作成／ファイルアップロードの個別実行タブ
-# （kintone-aggregator/kintone-resourse-generatorと同じ、1タブ1ステージの構成）。
-# 各batはclient=引数を自分で解釈する（parse_args）ため、一括実行タブのように環境変数を
-# 差し替える必要はなく、選択したクライアント名をそのままbatへ渡すだけでよい
-# =========================================
 
 function Get-ClientArgValue {
     param([System.Windows.Forms.ComboBox]$ComboBox)
@@ -768,21 +725,19 @@ function Get-ClientArgValue {
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
     foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $Enabled }
-    $btnRun.Enabled = $Enabled
+    $btnRunAll.Enabled = $Enabled
     $cmbClient.Enabled = $Enabled
     $cmbDownloadClient.Enabled = $Enabled
     $cmbGenerateClient.Enabled = $Enabled
     $cmbUploadClient.Enabled = $Enabled
-    Set-ButtonsEnabled -Buttons $script:individualRunButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
 }
 
 function Invoke-IndividualStep {
     param($ButtonDef)
 
-    # download/upload側のAzureサインイン待ちでURL・コードが表示されている間に実行タブを
-    # 離れられてしまわないよう、一括実行と同じ$script:isRunningで外側タブの切り替えをブロックする
     $script:isRunning = $true
-    Invoke-BatButton -ButtonDef $ButtonDef -WorkingDirectory $basePath -Form $form `
+    Invoke-BatButton -ButtonDef $ButtonDef -WorkingDirectory $rootPath -Form $form `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -CurrentProcessRef ([ref]$script:currentProc) `
         -GetBatArgs {
@@ -793,13 +748,10 @@ function Invoke-IndividualStep {
     $script:isRunning = $false
 }
 
-$individualTabResult = New-CategoryTabControl -TabControl $runTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd }
-$script:individualRunButtons = $individualTabResult.RunButtons
+$tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd }
+$script:runButtons = $tabResult.RunButtons
 
-# 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった
-# 初期の$runTabControl.Height（個別タブ基準）をこのタブの内容量に合わせて上書きする。
-# 45はNew-CategoryTabControlの$TabHeaderAllowance既定値
-$runTabControl.Height = 45 + $runTopPanel.Height
+$execTabControl.Height = 45 + $batchPanel.Height
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
@@ -816,9 +768,7 @@ Update-ClientList
 Update-RunCheckboxesFromClient
 Update-LogClientList
 Update-LogView
-# 既定でtabControlが「設定」タブを表示してしまうps2exeの不具合（原因不明、ビルド後のみ再現）と同様の
-# 問題が$runTabControlでも起き得るため、念のため一括実行タブを明示的に選択しておく
-$runTabControl.SelectedTab = $tabBatchAll
+$execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)

@@ -55,7 +55,7 @@ function Get-ResolvedVar {
         }
     }
     if (!$val) { return $val }
-    return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+    return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
 }
 
 function Save-EnvBatFile {
@@ -143,9 +143,6 @@ function ConvertTo-MentionUserCodesText {
     return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
 }
 
-# バッチ実行中に外部プロセス（ブラウザ等）へフォーカスが移ると、SetForegroundWindowを
-# 単純に呼ぶだけではWindowsのセキュリティ制限で拒否され、タスクバーの点滅になるだけのため、
-# AttachThreadInputで入力スレッドを一時的に結合してから奪う
 Add-Type @'
 using System;
 using System.Runtime.InteropServices;
@@ -193,7 +190,6 @@ function Show-FormInForeground {
     [Win32Focus]::ForceForeground($Form.Handle)
 }
 
-# common-env.batを実際に呼び出してset済みの環境変数を取り込む（パスの組み立てロジックをこちらで二重管理しない）
 function Get-BatEnvVars {
     param([string]$BatPath)
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -218,11 +214,6 @@ function Get-BatEnvVars {
     return $vars
 }
 
-# バッチファイルをcmd.exe経由で実行し、標準出力を1行ずつ$OnOutputLineへ渡す。
-# $BatArgsはバッチファイル自身への追加引数（例: "TargetCompanyNames:ABC,DEF"）。
-# カンマやスペースを含んでいても1つの引数として渡るよう、それぞれ個別にクォートする。
-# $CurrentProcessRefを渡すと、呼び出し側でウィンドウを閉じる際にプロセスを強制終了できるよう
-# 実行中のProcessオブジェクトを書き戻す
 function Invoke-BatProcess {
     param(
         [Parameter(Mandatory)][string]$BatPath,

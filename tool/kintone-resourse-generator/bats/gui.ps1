@@ -1,11 +1,4 @@
-﻿# =========================================
-# GUI（kintoneリソース生成ツール）
-# =========================================
-# download-kintone-resources.bat → generate-config-from-template.bat →
-# apply-kintone-resources.bat → check-kintone-resources.bat を画面から順番に実行するGUI。
-# 「実行」タブでスペース識別名等を入力し、工程ごとの実行ボタン（個別実行）か「一括実行」（全工程を順番に実行）で実行する。
-# 「設定」タブでset-env.batの値（COMMON_*の各パス）とset-kintone.batの値（kintoneの接続情報）を編集する。
-
+﻿
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -14,21 +7,20 @@ Add-Type -AssemblyName System.Drawing
 
 if ($MyInvocation.MyCommand.Path) {
     $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-    $basePath = Split-Path $scriptDir -Parent
+    $rootPath = Split-Path $scriptDir -Parent
 } else {
-    $basePath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
+    $rootPath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
-$createSpaceBat = Join-Path $basePath "create-space-from-template.bat"
-$downloadBat = Join-Path $basePath "download-kintone-resources.bat"
-$generateBat = Join-Path $basePath "generate-config-from-template.bat"
-$applyBat = Join-Path $basePath "apply-kintone-resources.bat"
-$checkBat = Join-Path $basePath "check-kintone-resources.bat"
-$clientsDir = Join-Path $basePath "clients"
+$createSpaceBat = Join-Path $rootPath "create-space-from-template.bat"
+$downloadBat = Join-Path $rootPath "download-kintone-resources.bat"
+$generateBat = Join-Path $rootPath "generate-config-from-template.bat"
+$applyBat = Join-Path $rootPath "apply-kintone-resources.bat"
+$checkBat = Join-Path $rootPath "check-kintone-resources.bat"
+$clientsDir = Join-Path $rootPath "clients"
 $setEnvBat = Join-Path $clientsDir "set-env.bat"
 $setKintoneBat = Join-Path $clientsDir "set-kintone.bat"
-$cp932 = [System.Text.Encoding]::GetEncoding(932)
 
-$libraryDir = Join-Path $basePath "bats\library"
+$libraryDir = Join-Path $rootPath "bats\library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
@@ -106,12 +98,8 @@ $cmbCustomTemplateName.Size = New-Object System.Drawing.Size(180, 22)
 $cmbCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $configNameInputDef = [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200 }
-# ConfigName以外は常にInputsの2番目以降（新しい行）として使うため、NewRow=$trueを付けて
-# 1項目1行で縦に積み上げる（New-CategoryTabControlの既定は1行に横並びのため、明示指定が必要）
 $spaceTemplateIdInputDef = [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 151; InputWidth = 200; NewRow = $true }
 $spaceIdInputDef = [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 151; InputWidth = 200; NewRow = $true }
-# BaseTemplateName/CustomTemplateNameはファイル一覧からの動的な再読み込み（Update-BaseTemplateNameList等）が
-# 必要なため、ExistingControlで既存のComboBoxインスタンスをそのまま行に配置する（新規作成しない）
 $baseTemplateNameInputDef = [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 151; ExistingControl = $cmbBaseTemplateName; NewRow = $true }
 $customTemplateNameInputDef = [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 151; ExistingControl = $cmbCustomTemplateName; NewRow = $true }
 
@@ -122,8 +110,6 @@ $stepMeta = @(
         ArgsFn = { param($ic) @("-TemplateId", $ic['SpaceTemplateId'].Text.Trim(), "-SpaceName", $ic['ConfigName'].Text.Trim()) }
         OutputPathFn = $null
         OpenTargetFn = { $script:createdSpaceUrl }
-        # 成功時に出力されるSPACE_IDを次工程（ダウンロード）のスペースID欄へ引き継ぎ、
-        # 「開く」リンク（このスペース自身と「kintoneへ反映」タブの両方が使う）のURLも組み立てる
         OnSuccessFn = {
             param($ic, $lastOutputLines)
             $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
@@ -140,8 +126,6 @@ $stepMeta = @(
         Inputs = @($configNameInputDef, $spaceIdInputDef)
         ArgsFn = { param($ic) @("-SpaceId", $ic['SpaceId'].Text.Trim(), "-ConfigName", $ic['ConfigName'].Text.Trim()) }
         OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH") "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
-        # スペース識別名を未入力で実行した場合、ダウンロードしたスペース名から自動設定された
-        # 値（CONFIG_NAME=行）でこの工程自身のスペース識別名欄を更新する
         OnSuccessFn = {
             param($ic, $lastOutputLines)
             $configLine = $lastOutputLines | Where-Object { $_ -match 'CONFIG_NAME=(.+)$' } | Select-Object -Last 1
@@ -196,11 +180,11 @@ $categoryDefs = @($stepMeta | ForEach-Object {
     }
 })
 
-$stepTabControl = New-Object System.Windows.Forms.TabControl
+$execTabControl = New-Object System.Windows.Forms.TabControl
 
-$tabRunAll = New-Object System.Windows.Forms.TabPage
-$tabRunAll.Text = "一括実行"
-$stepTabControl.Controls.Add($tabRunAll)
+$tabBatchAll = New-Object System.Windows.Forms.TabPage
+$tabBatchAll.Text = "一括実行"
+$execTabControl.Controls.Add($tabBatchAll)
 
 $cmbRunAllBaseTemplateName = New-Object System.Windows.Forms.ComboBox
 $cmbRunAllBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
@@ -208,7 +192,7 @@ $cmbRunAllBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]:
 $cmbRunAllCustomTemplateName = New-Object System.Windows.Forms.ComboBox
 $cmbRunAllCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$batchTab = New-BatchRunTab -TabPage $tabRunAll -ButtonDefs @() -RunButtonText "実行" `
+$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs @() -RunButtonText "実行" `
     -Inputs @(
         [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200 }
         [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true }
@@ -216,13 +200,13 @@ $batchTab = New-BatchRunTab -TabPage $tabRunAll -ButtonDefs @() -RunButtonText "
         [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 180; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true }
     )
 
-$runAllPanel = $batchTab.Panel
+$batchPanel = $batchTab.Panel
 $txtRunAllConfigName = $batchTab.InputControls["ConfigName"]
 $txtRunAllSpaceTemplateId = $batchTab.InputControls["SpaceTemplateId"]
 $btnRunAll = $batchTab.RunButton
 $lblOverallStatus = $batchTab.StatusLabel
 
-$stepTabResult = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $stepTabControl `
+$tabResult = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
     -OnRunClick { param($bd) Invoke-SingleStep -Id $bd.Id }
 
 $script:stepStatusLabels = @{}
@@ -233,31 +217,31 @@ foreach ($cd in $categoryDefs) {
     $script:stepInputControls[$bd.Id] = $bd.InputControls
 }
 
-$stepTabControl.Dock = [System.Windows.Forms.DockStyle]::None
-$stepTabControl.Location = New-Object System.Drawing.Point(0, 0)
-$stepTabControl.Width = 760
-$runTopPanel.Controls.Add($stepTabControl)
+$execTabControl.Dock = [System.Windows.Forms.DockStyle]::None
+$execTabControl.Location = New-Object System.Drawing.Point(0, 0)
+$execTabControl.Width = 760
+$runTopPanel.Controls.Add($execTabControl)
 
-$stepTabControl.Height = 45 + $runAllPanel.Height
+$execTabControl.Height = 45 + $batchPanel.Height
 
-$stepTabControl.Add_SelectedIndexChanged({
-    $runTopPanel.Height = $stepTabControl.Top + $stepTabControl.Height
+$execTabControl.Add_SelectedIndexChanged({
+    $runTopPanel.Height = $execTabControl.Top + $execTabControl.Height
     Update-InnerRunTabHeight
 })
-$runTopPanel.Height = $stepTabControl.Top + $stepTabControl.Height
+$runTopPanel.Height = $execTabControl.Top + $execTabControl.Height
 
 function Update-InnerRunTabHeight {
     if ($innerRunTabControl.SelectedTab -eq $tabBatchRun) {
-        $innerRunTabControl.Height = $batchPanel.Height + 30
+        $innerRunTabControl.Height = $batchExcelPanel.Height + 30
     } else {
         $innerRunTabControl.Height = $runTopPanel.Height + 30
     }
     $tabRun.PerformLayout()
 }
 
-$batchPanel = New-Object System.Windows.Forms.Panel
-$batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$batchPanel.Height = 90
+$batchExcelPanel = New-Object System.Windows.Forms.Panel
+$batchExcelPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$batchExcelPanel.Height = 90
 
 $lblBatchExcelPath = New-Object System.Windows.Forms.Label
 $lblBatchExcelPath.Text = "実行一覧ファイル"
@@ -285,7 +269,7 @@ $lblBatchStatus.AutoSize = $true
 $lblBatchStatus.Location = New-Object System.Drawing.Point(130, 56)
 $lblBatchStatus.Font = New-Object System.Drawing.Font($lblBatchStatus.Font, [System.Drawing.FontStyle]::Bold)
 
-$batchPanel.Controls.AddRange(@(
+$batchExcelPanel.Controls.AddRange(@(
     $lblBatchExcelPath, $txtBatchExcelPath, $btnBatchBrowse, $btnBatchRunAll, $lblBatchStatus
 ))
 
@@ -301,15 +285,10 @@ $btnBatchBrowse.Add_Click({
 $txtLog = New-LogTextBox
 
 $tabSingleRun.Controls.Add($runTopPanel)
-$tabBatchRun.Controls.Add($batchPanel)
+$tabBatchRun.Controls.Add($batchExcelPanel)
 
 $tabRun.Controls.Add($txtLog)
 $tabRun.Controls.Add($innerRunTabControl)
-
-function Get-StepBat {
-    param([int]$Id)
-    return $script:stepMetaById[$Id].Bat
-}
 
 function Get-StepArgs {
     param([int]$Id)
@@ -359,7 +338,7 @@ function Set-RunControlsEnabled {
     $btnRunAll.Enabled = $Enabled
     $btnBatchBrowse.Enabled = $Enabled
     $btnBatchRunAll.Enabled = $Enabled
-    foreach ($btn in $stepTabResult.RunButtons) { $btn.Enabled = $Enabled }
+    foreach ($btn in $tabResult.RunButtons) { $btn.Enabled = $Enabled }
 }
 
 function Sync-NextStepConfigName {
@@ -378,7 +357,7 @@ function Invoke-Step {
 
     $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $sm.Bat }) `
         -GetBatArgs { param($bd) Get-StepArgs -Id $Id } `
-        -WorkingDirectory $basePath -Form $form `
+        -WorkingDirectory $rootPath -Form $form `
         -WriteLog { param($msg) Write-Log $msg } `
         -OnOutputLine { param($line) Write-Log $line; $script:lastStepOutputLines.Add($line) } `
         -CurrentProcessRef ([ref]$script:currentProc) `
@@ -625,8 +604,6 @@ function Set-ComboItems {
     }
 }
 
-# 「2. 設定ファイルの生成」タブと「一括実行」タブの両方に同名コンボがあるため、
-# 一覧取得（ファイルI/O）は1回だけ行い、結果を両方のコンボへ適用する
 function Update-BaseTemplateNameList {
     $names = Get-TemplateFileNames -EnvVarName "COMMON_BASE_TEMPLATE_PATH"
     Set-ComboItems -ComboBox $cmbBaseTemplateName -Names $names -Placeholder $script:baseTemplateNamePlaceholder
@@ -703,7 +680,7 @@ $fieldPanel.AutoScroll = $true
 $tabSettings.Controls.Add($fieldPanel)
 $tabSettings.Controls.Add($topPanel)
 
-$varLabels = [ordered]@{
+$settingsVarLabels = [ordered]@{
     "COMMON_DOWNLOAD_PATH"     = "ダウンロード先のフォルダ"
     "COMMON_BASE_TEMPLATE_PATH"     = "設定テンプレート（基本）ファイルのフォルダ"
     "COMMON_CUSTOM_TEMPLATE_PATH"   = "設定テンプレート（カスタム）ファイルのフォルダ"
@@ -715,10 +692,10 @@ $varLabels = [ordered]@{
     "KINTONE_PASSWORD"         = "パスワード"
 }
 
-$folderBrowseVars = @("COMMON_DOWNLOAD_PATH", "COMMON_BASE_TEMPLATE_PATH", "COMMON_CUSTOM_TEMPLATE_PATH", "COMMON_CONFIG_PATH", "COMMON_CHECK_OUTPUT_PATH", "COMMON_LOG_PATH")
+$settingsFolderBrowseVars = @("COMMON_DOWNLOAD_PATH", "COMMON_BASE_TEMPLATE_PATH", "COMMON_CUSTOM_TEMPLATE_PATH", "COMMON_CONFIG_PATH", "COMMON_CHECK_OUTPUT_PATH", "COMMON_LOG_PATH")
 
 $kintoneVars = @("KINTONE_BASE_URL", "KINTONE_LOGIN", "KINTONE_PASSWORD")
-$passwordVars = @("KINTONE_PASSWORD")
+$settingsMaskedVars = @("KINTONE_PASSWORD")
 
 $script:fieldTextBoxes = @{}
 
@@ -730,7 +707,7 @@ function Update-SettingsFields {
     $kintoneDefaults = Get-SetEnvDefaults -Path $setKintoneBat
     $y = 10
 
-    foreach ($varName in $varLabels.Keys) {
+    foreach ($varName in $settingsVarLabels.Keys) {
         $isKintoneVar = $kintoneVars -contains $varName
         if ($isKintoneVar) {
             $varValue = if ($kintoneDefaults.ContainsKey($varName)) { $kintoneDefaults[$varName] } else { "" }
@@ -751,13 +728,13 @@ function Update-SettingsFields {
         }
 
         $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = $varLabels[$varName]
+        $lbl.Text = $settingsVarLabels[$varName]
         $lbl.AutoSize = $false
         $lbl.Size = New-Object System.Drawing.Size(280, 20)
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
         $fieldPanel.Controls.Add($lbl)
 
-        if ($folderBrowseVars -contains $varName) {
+        if ($settingsFolderBrowseVars -contains $varName) {
             $txt = New-Object System.Windows.Forms.TextBox
             $txt.Text = $varValue
             $txt.Location = New-Object System.Drawing.Point(310, ($y - 2))
@@ -773,7 +750,7 @@ function Update-SettingsFields {
             $btnBrowse.Add_Click({
                 $targetTxt = $this.Tag
                 $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+                $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
                 if (Test-Path -LiteralPath $startPath) {
                     $dlg.SelectedPath = $startPath
                 }
@@ -790,7 +767,7 @@ function Update-SettingsFields {
             $txt.Location = New-Object System.Drawing.Point(310, ($y - 2))
             $txt.Size = New-Object System.Drawing.Size(380, 22)
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            if ($passwordVars -contains $varName) {
+            if ($settingsMaskedVars -contains $varName) {
                 $txt.UseSystemPasswordChar = $true
             }
 
@@ -831,7 +808,7 @@ $script:saveEnvBatGetValueFn = { param($name) $script:fieldTextBoxes[$name].Text
 $script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 
 $btnSave.Add_Click({
-    Save-EnvBatFile -Path $setEnvBat -VarNames @($varLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+    Save-EnvBatFile -Path $setEnvBat -VarNames @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
     Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
 
     $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
@@ -890,7 +867,7 @@ function Update-LogView {
 
     $sections = foreach ($file in $files) {
         try {
-            [System.IO.File]::ReadAllText($file.FullName, $cp932)
+            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
         } catch {
             "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
         }

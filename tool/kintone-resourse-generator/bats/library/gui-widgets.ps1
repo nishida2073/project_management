@@ -1,9 +1,4 @@
-﻿# どのGUIツールからでも使い回せる、業務内容に依存しないWinFormsの汎用部品を置く場所。
-# 業務固有のデータ（ボタン定義の中身など）や実行フローはgui.ps1側に残す。
-
-# 指定パスをエクスプローラーで開く。URL（http/https）の場合は既定のブラウザで開く。
-# 存在しない・未指定の場合は警告ダイアログを出す
-function Open-TargetOrWarn {
+﻿function Open-TargetOrWarn {
     param([string]$Path)
     if ($Path -match '^https?://') {
         Start-Process -FilePath $Path
@@ -16,7 +11,6 @@ function Open-TargetOrWarn {
     Start-Process -FilePath $Path
 }
 
-# コンソールカラー名（Write-Messageが使う[[COLOR:xxx]]タグの中身）をSystem.Drawing.Colorへ変換
 function Get-ConsoleColorAsDrawingColor {
     param([string]$ConsoleColorName)
     switch ($ConsoleColorName) {
@@ -35,24 +29,17 @@ function Get-ConsoleColorAsDrawingColor {
         "Red"         { [System.Drawing.Color]::Red }
         "Magenta"     { [System.Drawing.Color]::Magenta }
         "Yellow"      { [System.Drawing.Color]::Gold }
-        "White"       { [System.Drawing.Color]::Black } # 白背景のログ欄では白文字が見えなくなるため黒にする
+        "White"       { [System.Drawing.Color]::Black }
         default       { [System.Drawing.Color]::Black }
     }
 }
 
-# 未捕捉の例外がbat/ps1の外まで伝播すると、PowerShell自身が「発生場所」「CategoryInfo」
-# 「FullyQualifiedErrorId」を含む既定のエラー表示をそのまま標準出力に書く。これはWrite-Message
-# を経由しないため[[COLOR:xxx]]タグが付かず、無視すると常に無色（黒）になってしまう。
-# そこで見た目のパターンから「PowerShell既定のエラー表示らしき行」を検出し、赤で表示する。
-# （最初の行だけでなく、後続の"発生場所"や"+ ..."の継続行もまとめて赤くするため状態を持つ）
 $script:isInNativeErrorBlock = $false
 function Test-NativeErrorLine {
     param([string]$Text)
     return $Text -match '^[A-Za-z][\w.-]*\s*:\s' -or $Text -match '^発生場所' -or $Text -match '^\s*\+'
 }
 
-# RichTextBoxへ1行追記する。行頭の"[[COLOR:xxx]]"タグを解釈して色を変え、常に末尾までスクロールする。
-# "[[HIDE]]"タグは背景色と同じ色にして、機械可読用の行を視覚的に見えなくする。
 function Write-ColoredLine {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.RichTextBox]$TextBox,
@@ -88,11 +75,8 @@ function Write-Log {
     Write-ColoredLine -TextBox $txtLog -Text $Text
 }
 
-# ログ表示用に設定済みのRichTextBoxを作る（Dock=Fill、等幅フォント、URLクリックで既定ブラウザを開く）
 function New-LogTextBox {
     param(
-        # Consolasは日本語グリフを持たずOSの代替フォントへ自動フォールバックするため、
-        # 英数字部分と日本語部分でフォントが混在して見える。日本語グリフを持つ固定ピッチフォントに統一する
         [string]$FontFamily = "MS Gothic",
         [int]$FontSize = 9
     )
@@ -100,7 +84,6 @@ function New-LogTextBox {
     $textBox.Multiline = $true
     $textBox.ScrollBars = [System.Windows.Forms.RichTextBoxScrollBars]::Vertical
     $textBox.ReadOnly = $true
-    # ReadOnly=$trueのRichTextBoxはOSのテーマによって背景がグレーになることがあるため、明示的に白にする
     $textBox.BackColor = [System.Drawing.Color]::White
     $textBox.Font = New-Object System.Drawing.Font($FontFamily, $FontSize)
     $textBox.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -109,7 +92,6 @@ function New-LogTextBox {
     return $textBox
 }
 
-# ボタン群のEnabledを一括切り替え
 function Set-ButtonsEnabled {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.Button[]]$Buttons,
@@ -118,7 +100,6 @@ function Set-ButtonsEnabled {
     foreach ($btn in $Buttons) { $btn.Enabled = $Enabled }
 }
 
-# ステータス表示用ラベルのテキストと文字色をまとめて設定
 function Set-StatusLabelText {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.Label]$Label,
@@ -129,8 +110,6 @@ function Set-StatusLabelText {
     $Label.ForeColor = $ForeColor
 }
 
-# New-CategoryTabControlのInputControlsから実際の値を取り出す。
-# ComboBox（Optionsで作られた選択式の入力）は表示テキストではなく選択された項目のValueを返す
 function Get-InputValue {
     param([Parameter(Mandatory)]$Control)
     if ($Control -is [System.Windows.Forms.ComboBox]) {
@@ -140,10 +119,6 @@ function Get-InputValue {
     return $Control.Text
 }
 
-# WinFormsのDock仕様: 同じDock方向のコントロールは、後からAddしたものほど外側（画面端側）に配置され、
-# Dock=Fillは常に他のDockが確定した後に残り全域へ解決される。この2点を踏まえないと、
-# 個別にAddした場合にコントロール同士が重なって描画されることがある。
-# $ControlsTopToBottomは「画面の上→下」の視覚的な並び順で渡す（最後の要素がDock=Fillで残り全域を埋める想定）。
 function Add-StackedDockedControls {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.Control]$Container,
@@ -155,7 +130,6 @@ function Add-StackedDockedControls {
     $topControls = @($ControlsTopToBottom | Where-Object { $_.Dock -ne [System.Windows.Forms.DockStyle]::Fill })
 
     foreach ($fillControl in $fillControls) { $Container.Controls.Add($fillControl) }
-    # 視覚的に上に来るものほど後にAdd（＝逆順でAdd）することで、意図した上→下の並びになる
     for ($i = $topControls.Count - 1; $i -ge 0; $i--) {
         $Container.Controls.Add($topControls[$i])
     }
@@ -163,18 +137,6 @@ function Add-StackedDockedControls {
     $Container.ResumeLayout($true)
 }
 
-# カテゴリ（タブ）ごとにグループ化されたボタン群を持つTabControlを組み立てる。
-# $CategoryDefsは [{ Label, ButtonDefs: [{ Label, OpenTarget, Inputs, ... }] }] の形。
-# ButtonDefの中身は自由（Tagとしてそのままボタン/リンクに渡すだけで、業務ロジックは持たない）。
-# Inputsを指定すると、実行ボタンの上にラベル付きの入力欄を追加できる（その分グループボックスが縦に高くなる）。
-# 各Inputsの要素は { Name, Label, Default, LabelWidth, InputWidth, Options, ExistingControl, NewRow } の形
-# （LabelWidth/InputWidthは省略可。Optionsを指定すると自由入力のTextBoxの代わりに、
-#   Optionsの中から選ぶだけのComboBox（DropDownList）になる。Optionsの要素は { Text, Value } の形。
-#   ExistingControlを指定すると、新規作成の代わりにそのコントロール（動的に選択肢を再読み込みする
-#   ComboBoxなど、呼び出し側が既に持っているコントロール）をその行へ配置する。
-#   NewRow = $trueを指定すると、その入力欄から新しい行に折り返す。1行に収まらないほど
-#   入力欄が多いボタンでのみ使う）。
-# 実行ボタンクリック時に$OnRunClickへButtonDefを渡す。$OnOpenClickを省略するとOpen-TargetOrWarnを使う。
 function New-CategoryTabControl {
     param(
         [Parameter(Mandatory)][array]$CategoryDefs,
@@ -220,20 +182,12 @@ function New-CategoryTabControl {
         return $total
     }
 
-    # 呼び出し側が既存のTabControlを渡した場合はそれに追記する（他のタブを先頭に置くなど、
-    # 呼び出し側の都合で並び順を決めたい場合に使う。ps2exeビルドではTabPageCollection.Insert()が
-    # NotSupportedExceptionになるため、後から並び替えず、最初から最終的な順序でAddしていく必要がある）
     $tabControl = $TabControl
     if (-not $tabControl) {
         $tabControl = New-Object System.Windows.Forms.TabControl
     }
     $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
 
-    # 実行ボタン一覧はSet-RunButtonsEnabled側で一括enable/disableに使うだけで、Labelで
-    # 個別に引く用途が無いため単純な配列にする。ステータスラベルと入力欄コントロールは、
-    # Labelがカテゴリをまたいで重複し得るため、Labelをキーにしたハッシュテーブルではなく
-    # 各ButtonDefオブジェクト自身にプロパティとして直接ひも付ける（呼び出し側はButtonDefを
-    # 既に持っているので、Labelでの引き直しが不要になり取り違えが起きない）
     $runButtons = @()
 
     foreach ($cd in $CategoryDefs) {
@@ -263,8 +217,6 @@ function New-CategoryTabControl {
                 $inputMap = @{}
                 $inputX = 15
                 $currentInputRow = 0
-                # TextBox/ComboBoxは指定したHeightを無視し、フォントに応じた高さに強制されるため、
-                # Labelとの縦の中央を揃えるには生成後の実際のHeightを見て個別にY位置を計算する必要がある
                 foreach ($inputDef in $bd.Inputs) {
                     if ($inputDef.NewRow) {
                         $currentInputRow++
@@ -285,13 +237,9 @@ function New-CategoryTabControl {
                     $inputX += $labelWidth + 4
 
                     if ($inputDef.ExistingControl) {
-                        # 動的に選択肢を再読み込みするComboBoxなど、呼び出し側が既に持っているコントロールを
-                        # そのまま使う（新規作成しない）。呼び出し側が引き続き参照を保持できる
                         $inputCtrl = $inputDef.ExistingControl
                         $inputCtrl.Width = $inputWidth
                     } elseif ($inputDef.Options) {
-                        # DataSource経由のバインドはコントロールがフォームに追加されBindingContextが
-                        # 確定するまで反映されない（初期選択が効かない）ため、Itemsへ直接追加する方式にしている
                         $inputCtrl = New-Object System.Windows.Forms.ComboBox
                         $inputCtrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
                         $inputCtrl.Width = $inputWidth
@@ -333,10 +281,6 @@ function New-CategoryTabControl {
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
                 $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
                 $lnkOpen.Tag = $bd
-                # OpenTargetは固定のフォルダパス文字列の他に、{ param($groupName) ... } という
-                # スクリプトブロックも受け付ける（投稿ボタンのkintoneスレッドURLのように、選択中の
-                # 対象グループによって開き先が変わる場合に使う）。後者の場合はここで対象グループの
-                # 選択値を渡して実際に開くパス/URLへ解決する
                 $lnkOpen.Add_LinkClicked({
                     $target = $this.Tag.OpenTarget
                     if ($target -is [scriptblock]) {
@@ -364,8 +308,6 @@ function New-CategoryTabControl {
         }
     }
 
-    # タブごとにボタン数が異なるため、選択中のタブの実際の内容量に合わせてtabControl自体の高さを変え、
-    # 下の（Dock=Fillな）ログ欄の開始位置がタブごとに動的に変わるようにする
     $updateTabHeight = {
         if ($tabControl.SelectedTab -and $tabControl.SelectedTab.Controls.Count -gt 0) {
             $tabControl.Height = $TabHeaderAllowance + $tabControl.SelectedTab.Controls[0].Height
@@ -373,12 +315,8 @@ function New-CategoryTabControl {
         }
     }.GetNewClosure()
     $tabControl.Add_SelectedIndexChanged($updateTabHeight)
-    # 生成直後はまだ親に追加されておらずSelectedTabが解決できないことがあるため、
-    # 初期表示分だけは先頭タブの高さを直接計算して設定する
     $tabControl.Height = $TabHeaderAllowance + (Get-CategoryPanelHeight -ButtonDefs $CategoryDefs[0].ButtonDefs)
 
-    # StepStatusLabel/InputControlsは各ButtonDef自身のプロパティとして既に持たせているため、
-    # ここでは返さない（呼び出し側は$ButtonDef.StepStatusLabel/$ButtonDef.InputControlsを直接使う）
     return [PSCustomObject]@{
         TabControl = $tabControl
         RunButtons = $runButtons

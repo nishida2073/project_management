@@ -1,7 +1,4 @@
-﻿# =========================================
-# GUI（kintoneデータ集計ツール）
-# =========================================
-
+﻿
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -14,7 +11,6 @@ if ($MyInvocation.MyCommand.Path) {
 } else {
     $rootPath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
-# build-gui.ps1でps2exeビルドした実行ファイルはプロジェクトルートに置かれるため、batsフォルダを別途辿る
 $basePath = Join-Path $rootPath "bats"
 
 $libraryDir = Join-Path $basePath "library"
@@ -22,43 +18,28 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-# 子プロセス（Invoke-BatProcess経由で起動するbat/ps1）のWrite-Messageに、
-# GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
-# ログファイルはbats\*.bat経由で起動される各.ps1本体が自分で書き出す
-# （New-WorkerLogPath/Tee-Objectを使う方式。bats\library\common.ps1参照）ため、
-# GUI側では何もしない（以前はここでGUI独自にログファイルを書き出していたが、
-# .ps1側に統一したため不要になった）
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
 $script:suppressComboSync = $false
 
 $clientsDir = Join-Path $rootPath "clients"
 
-# 対象グループの選択肢はclients\直下の*.xlsx（clients\template\は対象外）のファイル名から作る。
-# 実行対象の判定（%TargetGroupNameFilter%.xlsx）と同じ考え方
 function Get-GroupNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
     return @(Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) })
 }
 
-# 空欄（すべて）を選ぶと各batが内部でTargetGroupNameFilter=*（全グループ）として扱う
 $groupOptions = @([PSCustomObject]@{ Text = "すべて"; Value = "" })
 foreach ($groupName in (Get-GroupNames)) {
     $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
 }
 
-# 日付入力の既定値は当日（対象グループが空欄の場合のみ各batが内部で全グループとして扱う）
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
 $dateAndGroupInputs = @(
     [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 55; InputWidth = 90 }
     [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 120; Options = $groupOptions }
 )
-$dateOnlyInputs = @(
-    [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 55; InputWidth = 90 }
-)
-
-# GUIのタブ（カテゴリ）とその中に並べるボタンの定義。並べ方や見た目はNew-CategoryTabControl側の責務
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "アプリデータ作成"
@@ -95,11 +76,6 @@ $form.Add_FormClosing({
     }
 })
 
-# =========================================
-# 外側タブ（実行／ログ／設定。package-generator/kintone-resourse-generatorと同じ構成）。
-# ps2exeでビルドした実行ファイルではTabPageCollection.Insert()がNotSupportedExceptionになるため、
-# 後から並び替えるのではなく、最初から最終的な順序でAddしていく必要がある
-# =========================================
 
 $tabControl = New-Object System.Windows.Forms.TabControl
 $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -110,18 +86,9 @@ $tabControl.Controls.Add($tabRun)
 
 $form.Controls.Add($tabControl)
 
-# =========================================
-# 一括実行タブ（package-generatorの実行タブUIを参考にしたレイアウト：
-# チェックボックスで対象ステップを選び、共通入力欄を使って1つの実行ボタンで一括実行する）
-#
-# 「実行」タブの中を一括実行タブ＋カテゴリごとのタブに分けるため、TabControlをここで作って
-# このタブを最初にAddし、後段の「実行タブ（カテゴリごと）」ではこのTabControlに追記してもらう形にする。
-# 同じくps2exeのInsert()制限のため、最初から最終的な順序でAddしていく必要がある
-# =========================================
 
 $execTabControl = New-Object System.Windows.Forms.TabControl
 
-# IncludeInBatchを$falseにしたButtonDefだけ、一括実行タブの対象から外せる（実行タブ側には影響しない）
 $allButtonDefs = @()
 foreach ($cd in $categoryDefs) {
     foreach ($bd in $cd.ButtonDefs) {
@@ -176,9 +143,6 @@ function Start-BatchRunAll {
 
 $btnRunAll.Add_Click({ Start-BatchRunAll })
 
-# =========================================
-# 実行タブ（カテゴリごとに分割）
-# =========================================
 
 $tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
@@ -199,14 +163,8 @@ $tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $c
 }
 $script:runButtons = $tabResult.RunButtons
 
-# 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった
-# 初期の$execTabControl.Height（アプリデータ作成タブ基準）をこのタブの内容量に合わせて上書きする。
-# 45はNew-CategoryTabControlの$TabHeaderAllowance既定値
 $execTabControl.Height = 45 + $batchPanel.Height
 
-# =========================================
-# ログ（「実行」タブの中で常に表示。ログ／設定タブへ切り替えると見えなくなる）
-# =========================================
 
 $logSpacer = New-Object System.Windows.Forms.Panel
 $logSpacer.Height = 10
@@ -214,7 +172,6 @@ $logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
 
 $txtLog = New-LogTextBox
 
-# 視覚的な上→下の並び: execTabControl → logSpacer → txtLog（Dock=Fillで残り全域を埋める）
 Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $logSpacer, $txtLog)
 
 function Set-RunButtonsEnabled {
@@ -223,18 +180,11 @@ function Set-RunButtonsEnabled {
     Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
 }
 
-# =========================================
-# ログタブ（package-generator/kintone-resourse-generatorの「ログ」タブを参考にしたレイアウト：
-# 対象グループ・工程で絞り込んで過去ログを閲覧する）。
-# 実行中ログ（txtLog）は「実行」タブの中にしかないため、このタブに来ると自動的に見えなくなる。
-# このタブ自身はDock=Top/Fillの組み合わせを直下に置くだけでよい
-# =========================================
 
 $tabLogs = New-Object System.Windows.Forms.TabPage
 $tabLogs.Text = "ログ"
 $tabControl.Controls.Add($tabLogs)
 
-# ログの閲覧対象は一括実行の対象外（IncludeInBatch=$false）も含めた全ButtonDef
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -247,9 +197,6 @@ $cmbLogGroup.DisplayMember = "Text"
 foreach ($opt in $groupOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
 if ($cmbLogGroup.Items.Count -gt 0) { $cmbLogGroup.SelectedIndex = 0 }
 
-# 各.ps1はNew-WorkerLogPathで「<バッチ名>-<対象グループ>-<対象日等>_<timestamp>.log」という
-# ファイル名で書き出す（bats\library\common.ps1参照）。<バッチ名>はButtonDef.BatchPathの
-# ファイル名（拡張子無し）と一致するため、それをそのままフィルタの接頭辞に使う
 foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
@@ -257,17 +204,6 @@ $cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView })
 
 Update-LogView
 
-# =========================================
-# 設定タブ（package-generatorの設定タブUIを参考にしたレイアウト：
-# 「共通」「グループ別」のサブタブに分けて編集する）
-#
-# 「共通」タブはcommon-env.bat（対象日・対象グループに関わらず共通のパス設定に加え、
-# 全グループ共通の業務日誌/パルスサーベイのフィールドコード）を直接編集する。
-# 「グループ別」タブはグループを選ぶと、そのグループのclients\<グループ名>.bat（認証情報＋
-# 業務日誌/パルスサーベイの対象アプリID。種別ごとにcommon-env.bat側のSourceType_<接尾辞>
-# から検出した接尾辞を付けた変数名で1ファイルにまとめて持つ）を編集する。
-# 新規グループはclients\template\の内容を初期値として使う（保存するまでファイルは作成しない）
-# =========================================
 
 $tabSettings = New-Object System.Windows.Forms.TabPage
 $tabSettings.Text = "設定"
@@ -277,10 +213,6 @@ $clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
-# 設定タブの各フィールドの生の値には、common-env.bat内の%BASE_PATH%や%OutputRootDir%のような
-# %VAR%トークンがそのまま残っている（%~dp0のようなバッチ専用トークンは.NET側では解決できないため、
-# common-env.bat側は%BASE_PATH%を使う方式に統一済み）。$script:commonEnvVars（起動時に
-# common-env.batを実際に実行して解決済みの値）を使って再帰的に展開する
 $script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
 
 $commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir", "OutputAlertBackupDir")
@@ -290,11 +222,6 @@ $postVars = @("SpaceId", "ThreadId", "MentionUserCodes", "CommentTextTemplate")
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
 
-# 業務日誌/パルスサーベイのような「種別」の一覧をcommon-env.batから動的に検出する。
-# common-env.batに"SourceType_<接尾辞>"（例: SourceType_Daily=業務日誌）を追加するだけで、
-# 設定タブに新しい種別のセクションが増えるようにするための仕組み。変数名の"_<接尾辞>"部分が
-# そのままTargetAppIds_<接尾辞>等の変数名サフィックスになる（別にSuffix変数を持つ必要はない）。
-# 新しいcreate-xxx.batを作る場合も、設定タブ側のコード変更は不要
 function Get-ReportTypeDefs {
     $types = @()
     foreach ($key in $script:commonEnvVars.Keys) {
@@ -333,18 +260,12 @@ $settingsVarLabels = @{
 }
 $settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir", "OutputAlertBackupDir")
 $settingsMaskedVars = @("KintonePassword")
-# client.batは1変数1行(set "Var=Value")の形式で改行を持てないため、複数行入力欄は
-# 保存時に実際の改行を"\n"リテラルへ変換して1行に収め、画面表示時・check-alert.ps1側の利用時に戻す
 $settingsMultilineVars = @("CommentTextTemplate")
-# このフィールドの次の行にテスト用ボタンを置く。グループ別タブにのみ出現するフィールドを指定すること
 $settingsTrailingButtonVars = @{
     "TargetAppIds"        = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group }.GetNewClosure() }
     "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick { Test-KintonePostSettings } }
 }
 
-# TargetAppIds等は種別（業務日誌/パルスサーベイ等）ごとに同じ変数名を別の値で使うため、変数名に
-# 各種別のSuffix（Get-ReportTypeDefs参照）を付けて区別して持つ。この関数はそのサフィックス付きの
-# 生値を、サフィックスを外した変数名（$VarNamesと同じキー）のハッシュテーブルへ変換する
 function Get-SuffixedRawValues {
     param([hashtable]$RawValues, [string]$Suffix, [array]$VarNames)
     $result = @{}
@@ -355,9 +276,6 @@ function Get-SuffixedRawValues {
     return $result
 }
 
-# clients\template\の内容（新規作成の初期値）。一度だけ読み込みキャッシュする。
-# グループ別設定（$groupReportVars=TargetAppIds）のみが対象。$commonReportVarsはcommon-env.bat側の
-# 共通設定なのでここには含めない。ByTypeは種別のPrefix（例: Daily）をキーにした辞書
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
@@ -388,7 +306,6 @@ $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
-# --- 共通タブ ---
 $settingsCommonTopPanel = New-Object System.Windows.Forms.Panel
 $settingsCommonTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $settingsCommonTopPanel.Height = 40
@@ -418,7 +335,6 @@ $settingsCommonFieldPanel.AutoScroll = $true
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-# --- グループ別タブ ---
 $settingsGroupTopPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 $settingsGroupTopPanel.Height = 70
@@ -457,13 +373,8 @@ $lblSettingsGroupSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsGr
 
 $settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx, $btnSettingsGroupSave, $btnSettingsGroupReload, $lblSettingsGroupSaveStatus))
 
-# Label/LinkLabelはAutoSizeによる実際のHeightが親へのAddより前だと仮の値（23）のままで、
-# 親に追加された後でないと正しい値（例: 17）に確定しない。TextBox/ComboBoxも指定したHeightを
-# 無視してフォントに応じた高さに強制されるため、いずれもControls.Addの後で実際のHeightを見て
-# Y位置を計算しないと縦の中央が揃わない（New-CategoryTabControlの入力欄と同じ理由）
 $settingsRow1CenterY = 26
 $lblSettingsGroupTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsGroupTarget.Height / 2)))
-# ラベル幅（AutoSize）に応じて後続コントロールを詰めて配置し、ラベルの文言を変えても重ならないようにする
 $cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(($lblSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
 $btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(($cmbSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
 $lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(($btnSettingsGroupNewGroup.Right + 10), ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
@@ -480,8 +391,6 @@ function Get-CommonSettingsFieldRows {
     foreach ($varName in $commonSettingsVars) {
         [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "BASE"; Value = $raw[$varName] }
     }
-    # TargetDateCodeField/TargetUserCodeFieldは全グループ共通のためcommon-env.bat側で持つ。
-    # 種別（Get-ReportTypeDefsで検出）ごとにセクションを作る
     foreach ($rt in (Get-ReportTypeDefs)) {
         $rawForType = Get-SuffixedRawValues -RawValues $raw -Suffix $rt.Suffix -VarNames $commonReportVars
         foreach ($varName in $commonReportVars) {
@@ -518,23 +427,12 @@ function Get-GroupSettingsFieldRows {
 $script:settingsCommonFieldTextBoxes = @{}
 $script:settingsGroupFieldTextBoxes = @{}
 
-# メンション設定（MentionUserCodes）は"ユーザコード:権限"のペアをカンマ区切りで1行に保持する
-# （client.batは1変数1行のため）。GUI側は行単位で追加・削除できるUIにするため、
-# 選択中のグループの行データだけをメモリ上に保持し（$script:mentionRowsGroupNameで検知）、
-# グループを切り替えたときだけファイルの値から読み直す
 $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 $script:mentionRows = @()
 $script:mentionRowsGroupName = $null
 $script:mentionRowControls = @()
 
-# collect-data-defs.txt（アプリデータ集計の列定義。[セクション見出し]＋「元の列名[,新しい列名]」の
-# 表形式）を、行の追加・削除ができる表形式のUIで編集する。全グループ共通の内容なので共通タブの末尾に置く。
-# セクション見出しはcommon-env.bat側のSourceType_<接尾辞>変数名（例: SourceType_Daily）をそのまま使う。
-# 実際の出力ファイル名はその変数の値（業務日誌/パルスサーベイ等）が決めるため、画面の
-# 「ファイル名」欄は値の参照表示のみ（編集不可）にする
 $collectDataDefsPath = Join-Path $basePath "collect-data-defs.txt"
-# $null=未読込（初回描画時にファイルから読み込む）。以降は編集中の内容をここに保持し、
-# 行追加・削除のたびの再描画でも未保存の入力内容が消えないようにする
 $script:collectDataDefsSections = $null
 $script:collectDataDefsRowControls = @()
 
@@ -577,8 +475,6 @@ function ConvertTo-CollectDataDefsText {
     return ($lines -join "`r`n")
 }
 
-# 描画済みのテキストボックスの現在値を$script:collectDataDefsSectionsへ書き戻す。
-# 再描画（行追加・削除）の直前に必ず呼び、それまでの入力内容を失わないようにする
 function Sync-CollectDataDefsFromControls {
     foreach ($entry in $script:collectDataDefsRowControls) {
         $entry.Row.OrgName = $entry.OrgBox.Text
@@ -718,10 +614,6 @@ function Update-GroupSettingsFields {
     $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
-# 業務日誌/パルスサーベイの各セクションの「テスト接続」ボタン用。画面上の（未保存の）入力値を使って
-# kintoneのフィールド取得APIを呼び、認証情報・対象アプリIDの組み合わせが有効かその場で確認する。
-# TargetAppIdsはcreate-app-data.ps1のGet-FieldCodeListと同じくカンマ・空白区切りで複数指定できるため、
-# 1つずつ個別に呼び分けて成功/失敗をID単位で表示する
 function Test-KintoneConnection {
     param([string]$ReportGroup)
 
@@ -739,7 +631,6 @@ function Test-KintoneConnection {
     $baseUrl = "https://$kintoneSubdomain.cybozu.com"
     $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
 
-    # IDが複数になっても横に長くならないよう、1件1行の縦並びで表示する
     $resultLines = @()
     $hasFailure = $false
     foreach ($targetAppId in $targetAppIds) {
@@ -758,8 +649,6 @@ function Test-KintoneConnection {
     [System.Windows.Forms.MessageBox]::Show(($resultLines -join "`r`n"), "テスト接続", [System.Windows.Forms.MessageBoxButtons]::OK, $icon) | Out-Null
 }
 
-# スペースID・スレッドID・メンション設定（投稿先）の妥当性は、スレッド単体を取得するAPIが無く
-# メンション対象の存在確認にも別APIが必要になるため、実際にダミーコメントを投稿してみて確認する
 function Test-KintonePostSettings {
     $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
     $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
@@ -789,7 +678,6 @@ function Test-KintonePostSettings {
 function Save-CommonSettings {
     $path = Join-Path $basePath "common-env.bat"
 
-    # TargetDateCodeField_Daily等サフィックス付きの実際の行名→画面の入力欄キー（<Prefix>_xxx）の対応表
     $reportVarKeyMap = @{}
     foreach ($rt in (Get-ReportTypeDefs)) {
         foreach ($varName in $commonReportVars) {
@@ -818,8 +706,6 @@ function Save-CommonSettings {
 function Save-GroupSettings {
     param([string]$GroupName)
 
-    # Authorizationは画面上の編集項目からは外したが、実行スクリプト側は今も参照するため、
-    # 上書き前の既存の値をそのまま引き継ぐ（新規グループはclients\template\の既定値＝空欄になる）
     $existingAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
     $authorizationValue = if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
 
@@ -829,7 +715,6 @@ function Save-GroupSettings {
         $groupLines += "set `"$varName=$val`""
     }
     $groupLines += "set `"Authorization=$authorizationValue`""
-    # BaseUrlは画面では編集させず、KintoneSubdomainから常に導出する
     $groupLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
     $groupLines += ""
     Sync-MentionRowsFromControls
@@ -852,7 +737,6 @@ function Save-GroupSettings {
     $groupLines += ""
     [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($groupLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
 
-    # 受講生データ（xlsx）は既存グループでは上書きしない。新規グループのときだけclients\template\からコピーする
     $xlsxPath = Get-GroupXlsxPath $GroupName
     if (!(Test-Path -LiteralPath $xlsxPath)) {
         $templateXlsxPath = Join-Path $clientsTemplateDir "client.xlsx"
@@ -862,9 +746,6 @@ function Save-GroupSettings {
     }
 }
 
-# 一括実行タブ・各カテゴリタブの「対象グループ」ドロップダウンは起動時に作った$groupOptionsを
-# 元にしているため、設定タブでグループを新規作成・保存しても自動では反映されない。
-# 選択中の値はできるだけ保つ（見つからなければ「すべて」に戻す）
 function Update-GroupComboBoxItems {
     param([System.Windows.Forms.ComboBox]$ComboBox, [array]$Options)
     if (-not $ComboBox) { return }
@@ -904,7 +785,6 @@ $btnSettingsCommonSave.Add_Click({
 })
 
 $btnSettingsCommonReload.Add_Click({
-    # 未保存の編集内容を破棄してcollect-data-defs.txtをディスクから読み直す
     $script:collectDataDefsSections = $null
     Update-CommonSettingsFields
     $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::Black
@@ -956,8 +836,6 @@ $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
     if (!$script:suppressComboSync) { Update-GroupSettingsFields }
 })
 
-# 外側タブ（実行/ログ/設定）はDock=Fillで常にフォーム全高を使うため、ここでは表示切り替えは不要で、
-# タブ選択のたびに内容を最新化するだけでよい
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsGroupList
@@ -970,7 +848,6 @@ Update-SettingsGroupList
 Update-CommonSettingsFields
 Update-GroupSettingsFields
 
-# ps2exeビルド環境ではタブの既定選択がずれることがあるため明示的に指定する
 $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
