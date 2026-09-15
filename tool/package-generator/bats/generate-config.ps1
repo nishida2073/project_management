@@ -5,7 +5,10 @@
 # 先頭シートの「取得元（フルパス）」列に DOWNLOAD_LOCAL_PATH 配下のファイルを再帰的に一覧化する。
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "library\common.ps1")
+$libraryDir = Join-Path $scriptDir "library"
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
+}
 $basePath = Split-Path $scriptDir -Parent
 
 $clientName = $env:CLIENT_NAME

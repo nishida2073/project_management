@@ -10,8 +10,10 @@ param(
     [string]$ConfigName
 )
 
-$scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "library\common.ps1")
+$libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
+}
 
 $baseUrl = $env:KINTONE_BASE_URL
 $downloadRoot = $env:COMMON_DOWNLOAD_PATH
@@ -50,6 +52,7 @@ $script:exitCode = 0
         Write-Message "　CONFIG_NAME=$ConfigName" -Type "Info" -NoHeader -Hidden
     }
     $downloadPath = Join-Path $downloadRoot "${ConfigName}_download.xlsx"
+    New-Item -ItemType Directory -Path (Split-Path $downloadPath -Parent) -Force | Out-Null
 
     Write-Message "" -Type "Info" -NoHeader
     Write-Message "# スペースID: $($space.spaceId) ($($space.spaceName))" -Type "Info" -NoHeader
@@ -64,7 +67,6 @@ $script:exitCode = 0
         "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する" = $space.fixedMember
         "アプリ作成できるユーザーをスペースの管理者に限定する"           = ($space.createApp -eq "ADMIN")
     })
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-settings" -Rows $spaceListRows -Headers @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する")
 
     $spaceRightLines = @('参加メンバーだけにこのスペースを公開する', 'スペースのポータルと複数のスレッドを使用する', 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する', 'アプリ作成できるユーザーをスペースの管理者に限定する') | ForEach-Object {
         "　${_}: $($spaceListRows[0].$_)"
@@ -80,7 +82,6 @@ $script:exitCode = 0
             "下位組織も含める"       = $_.includeSubs
         }
     })
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-member-list" -Rows $memberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
 
     $memberLines = @($memberRows | ForEach-Object {
         $row = $_
@@ -95,7 +96,6 @@ $script:exitCode = 0
             "アプリ名" = $_.name
         }
     })
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-list" -Rows $appListRows -Headers @("アプリID", "アプリ名")
 
     $appAclRows = @()
     foreach ($app in $space.apps) {
@@ -116,7 +116,6 @@ $script:exitCode = 0
             }
         }
     }
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-acl" -Rows $appAclRows -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
 
     $recordAclRows = @()
     foreach ($app in $space.apps) {
@@ -138,9 +137,46 @@ $script:exitCode = 0
             }
         }
     }
-    Write-KintoneExcelRows -Path $downloadPath -WorksheetName "space-app-record-acl" -Rows $recordAclRows -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除")
 
-    Set-KintoneHeaderRowColor -Path $downloadPath -WorksheetNames @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl") -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+    $excel.ScreenUpdating = $false
+    $excel.EnableEvents = $false
+    try {
+        $workbook = $excel.Workbooks.Add()
+        while ($workbook.Sheets.Count -gt 1) {
+            $workbook.Sheets.Item($workbook.Sheets.Count).Delete()
+        }
+        $downloadSheetData = [ordered]@{
+            "space-settings"       = @{ Rows = $spaceListRows; Headers = @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する") }
+            "space-member-list"    = @{ Rows = $memberRows; Headers = @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める") }
+            "space-app-list"       = @{ Rows = $appListRows; Headers = @("アプリID", "アプリ名") }
+            "space-app-acl"        = @{ Rows = $appAclRows; Headers = @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し") }
+            "space-app-record-acl" = @{ Rows = $recordAclRows; Headers = @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除") }
+        }
+        $usedDefaultSheet = $false
+        foreach ($sheetName in $downloadSheetData.Keys) {
+            if (-not $usedDefaultSheet) {
+                $ws = $workbook.Sheets.Item(1)
+                $usedDefaultSheet = $true
+            } else {
+                $ws = $workbook.Sheets.Add([Type]::Missing, $workbook.Sheets.Item($workbook.Sheets.Count))
+            }
+            $ws.Name = $sheetName
+            Write-RowObjects -Sheet $ws -Rows $downloadSheetData[$sheetName].Rows -Headers $downloadSheetData[$sheetName].Headers
+        }
+        foreach ($sheetName in $downloadSheetData.Keys) {
+            Set-HeaderRowColor -Sheet $workbook.Sheets.Item($sheetName) -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
+        }
+        $workbook.SaveAs($downloadPath, 51)
+    }
+    finally {
+        if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+        if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
+    }
 
     foreach ($app in $space.apps) {
         Write-Message "" -Type "Info" -NoHeader

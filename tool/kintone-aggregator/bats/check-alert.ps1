@@ -495,7 +495,7 @@ function Export-DailyResult {
     $resultRange = $sheet.Range(
         $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 2 -1 ), 
         $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 3 -1))
-    Set-ResultCellColor $resultRange
+    Set-CellColorByBoolean -Range $resultRange -TrueLabel "提出済" -FalseLabel "未提出"
 }
 
 
@@ -818,7 +818,7 @@ function Export-TotalResult {
     $resultRange = $sheet.Range(
         $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 3 -1 ), 
         $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 4 -1))
-    Set-ResultCellColor $resultRange
+    Set-CellColorByBoolean -Range $resultRange -TrueLabel "提出済" -FalseLabel "未提出"
 }
 
 

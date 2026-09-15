@@ -11,8 +11,10 @@ param(
     [string]$Sheets
 )
 
-$scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "library\common.ps1")
+$libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
+}
 
 $baseUrl = $env:KINTONE_BASE_URL
 $configRoot = $env:COMMON_CONFIG_PATH
@@ -32,11 +34,31 @@ $logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "apply_$ConfigName"
 $script:exitCode = 0
 
 & {
-    $spaceRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-settings"
-    $memberRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-member-list"
-    $appRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-app-list"
-    $appAclRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-app-acl"
-    $recordAclRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-app-record-acl"
+    if (-not (Test-Path -LiteralPath $configPath)) {
+        Write-Message "設定ファイルが見つかりません: $configPath" -ForegroundColor Red -Type "Info" -NoHeader
+        $script:exitCode = 1
+        return
+    }
+
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+    $excel.ScreenUpdating = $false
+    $excel.EnableEvents = $false
+    try {
+        $workbook = $excel.Workbooks.Open($configPath)
+        $spaceRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-settings")
+        $memberRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-member-list")
+        $appRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-list")
+        $appAclRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-acl")
+        $recordAclRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-record-acl")
+    }
+    finally {
+        if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+        if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
+    }
 
     $authorization = Get-KintoneAuthorizationHeader -BaseUrl $baseUrl
 

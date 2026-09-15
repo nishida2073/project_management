@@ -3,7 +3,10 @@
 # =========================================
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "library\common.ps1")
+$libraryDir = Join-Path $scriptDir "library"
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
+}
 $startTime = Get-Date
 
 $configPath = $env:GENERATE_CONFIG_PATH

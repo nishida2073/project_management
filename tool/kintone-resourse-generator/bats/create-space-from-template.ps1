@@ -10,8 +10,10 @@ param(
     [string]$SpaceName
 )
 
-$scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "library\common.ps1")
+$libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
+}
 
 $baseUrl = $env:KINTONE_BASE_URL
 $logRoot = $env:COMMON_LOG_PATH

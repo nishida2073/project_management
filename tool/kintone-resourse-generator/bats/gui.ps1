@@ -380,19 +380,19 @@ function Test-StepPrereq {
     param([int]$Id)
     $ic = $script:stepInputControls[$Id]
     if ($Id -ne 1 -and !$ic['ConfigName'].Text.Trim()) {
-        [System.Windows.Forms.MessageBox]::Show("スペース識別名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("スペース識別名を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     if ($Id -eq 0 -and !$ic['SpaceTemplateId'].Text.Trim()) {
-        [System.Windows.Forms.MessageBox]::Show("スペース作成にはスペーステンプレートIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("スペーステンプレートIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     if ($Id -eq 1 -and !$ic['SpaceId'].Text.Trim()) {
-        [System.Windows.Forms.MessageBox]::Show("ダウンロードにはスペースIDが必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("スペースIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     if ($Id -eq 2 -and (!$ic['BaseTemplateName'].Text.Trim() -or $ic['BaseTemplateName'].Text.Trim() -eq $script:baseTemplateNamePlaceholder)) {
-        [System.Windows.Forms.MessageBox]::Show("設定ファイルの生成には設定テンプレート名（基本）が必要です。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return $false
     }
     return $true
@@ -527,7 +527,12 @@ function Invoke-SeededAllSteps {
 $btnRunAll.Add_Click({
     $seedConfigName = $txtRunAllConfigName.Text.Trim()
     if (!$seedConfigName) {
-        [System.Windows.Forms.MessageBox]::Show("スペース識別名を入力してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        [System.Windows.Forms.MessageBox]::Show("スペース識別名を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    $seedBaseTemplateName = "$($cmbRunAllBaseTemplateName.SelectedItem)".Trim()
+    if (!$seedBaseTemplateName -or $seedBaseTemplateName -eq $script:baseTemplateNamePlaceholder) {
+        [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
 
@@ -562,7 +567,21 @@ $btnBatchRunAll.Add_Click({
 
     $rows = $null
     try {
-        $rows = @(Import-Excel -Path $excelPath)
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+        $excel.ScreenUpdating = $false
+        $excel.EnableEvents = $false
+        try {
+            $workbook = $excel.Workbooks.Open($excelPath)
+            $rows = @(Get-RowObjects -Sheet $workbook.Sheets.Item(1))
+        }
+        finally {
+            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+            if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+            [System.GC]::Collect()
+            [System.GC]::WaitForPendingFinalizers()
+        }
     } catch {
         [System.Windows.Forms.MessageBox]::Show("Excelの読み込みに失敗しました: $($_.Exception.Message)", "複数実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
         return

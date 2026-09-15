@@ -12,8 +12,10 @@ param(
     [string]$Sheets
 )
 
-$scriptDir = Split-Path $MyInvocation.MyCommand.Path
-. (Join-Path $scriptDir "library\common.ps1")
+$libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
+Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
+    . $_.FullName
+}
 
 $baseUrl = $env:KINTONE_BASE_URL
 $configRoot = $env:COMMON_CONFIG_PATH
@@ -35,11 +37,31 @@ $logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "check_$ConfigName"
 $script:exitCode = 0
 
 & {
-    $spaceRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-settings"
-    $memberRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-member-list"
-    $appRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-app-list"
-    $appAclRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-app-acl"
-    $recordAclRows = Read-KintoneExcelRows -Path $configPath -WorksheetName "space-app-record-acl"
+    if (-not (Test-Path -LiteralPath $configPath)) {
+        Write-Message "設定ファイルが見つかりません: $configPath" -ForegroundColor Red -Type "Info" -NoHeader
+        $script:exitCode = 1
+        return
+    }
+
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+    $excel.ScreenUpdating = $false
+    $excel.EnableEvents = $false
+    try {
+        $workbook = $excel.Workbooks.Open($configPath)
+        $spaceRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-settings")
+        $memberRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-member-list")
+        $appRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-list")
+        $appAclRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-acl")
+        $recordAclRows = Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-record-acl")
+    }
+    finally {
+        if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+        if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
+    }
 
     $authorization = Get-KintoneAuthorizationHeader -BaseUrl $baseUrl
 
@@ -345,12 +367,6 @@ $script:exitCode = 0
         "space-app-acl"        = $appAclDiff
         "space-app-record-acl" = $appRecordAclDiff
     }
-    foreach ($sheetName in $sheetData.Keys) {
-        $rows = @($sheetData[$sheetName])
-        if ($rows.Count -eq 0) { continue }
-        $rows | Export-Excel -Path $outputPath -WorksheetName $sheetName -AutoSize
-    }
-
     # 各シートの「結果」列（ヘッダー名で検索、シートごとに位置が異なる）に色を付ける。
     $colorMap = @{
         "一致"                 = [System.Drawing.Color]::FromArgb(0, 128, 0)
@@ -364,61 +380,93 @@ $script:exitCode = 0
     $kitaichiColor = [System.Drawing.Color]::FromArgb(198, 224, 241)
     $resultHeaderColor = [System.Drawing.Color]::FromArgb(255, 230, 153)
     $otherColor = [System.Drawing.Color]::FromArgb(217, 217, 217)
-    $pkg = Open-ExcelPackage -Path $outputPath
-    foreach ($sheetName in $sheetData.Keys) {
-        $ws = $pkg.Workbook.Worksheets[$sheetName]
-        if (-not $ws) { continue }
-        $lastRow = $ws.Dimension.End.Row
-        $lastCol = $ws.Dimension.End.Column
-        $resultCol = 0
-        # "<項目名>_現状"/"<項目名>_期待値" の列ペアを項目名ごとに集める（行ごとの値比較に使う）。
-        $fieldPairCols = @{}
-        for ($c = 1; $c -le $lastCol; $c++) {
-            $header = $ws.Cells[1, $c].Text
-            if ($header -eq "結果") { $resultCol = $c }
-            $headerCell = $ws.Cells[1, $c]
-            $headerCell.Style.Fill.PatternType = [OfficeOpenXml.Style.ExcelFillStyle]::Solid
-            if ($header.EndsWith("_現状")) {
-                $headerCell.Style.Fill.BackgroundColor.SetColor($genjoColor)
-                $label = $header.Substring(0, $header.Length - "_現状".Length)
-                if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
-                $fieldPairCols[$label]["現状"] = $c
-            } elseif ($header.EndsWith("_期待値")) {
-                $headerCell.Style.Fill.BackgroundColor.SetColor($kitaichiColor)
-                $label = $header.Substring(0, $header.Length - "_期待値".Length)
-                if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
-                $fieldPairCols[$label]["期待値"] = $c
-            } elseif ($header -eq "結果") {
-                $headerCell.Style.Fill.BackgroundColor.SetColor($resultHeaderColor)
-            } else {
-                $headerCell.Style.Fill.BackgroundColor.SetColor($otherColor)
-            }
+
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+    $excel.ScreenUpdating = $false
+    $excel.EnableEvents = $false
+    try {
+        $workbook = $excel.Workbooks.Add()
+        while ($workbook.Sheets.Count -gt 1) {
+            $workbook.Sheets.Item($workbook.Sheets.Count).Delete()
         }
-        $diffColor = $colorMap["不一致"]
-        for ($row = 2; $row -le $lastRow; $row++) {
-            # 項目ごとに現状/期待値を比較し、値が違う項目だけそのセルを赤字にする（どの項目が違うか一目でわかるように）。
-            foreach ($label in $fieldPairCols.Keys) {
-                $pair = $fieldPairCols[$label]
-                if (-not ($pair.ContainsKey("現状") -and $pair.ContainsKey("期待値"))) { continue }
-                $curCell = $ws.Cells[$row, $pair["現状"]]
-                $expCell = $ws.Cells[$row, $pair["期待値"]]
-                if ($curCell.Text -ne $expCell.Text) {
-                    $curCell.Style.Font.Color.SetColor($diffColor)
-                    $expCell.Style.Font.Color.SetColor($diffColor)
-                    $curCell.Style.Font.Bold = $true
-                    $expCell.Style.Font.Bold = $true
+        $usedDefaultSheet = $false
+        foreach ($sheetName in $sheetData.Keys) {
+            $rows = @($sheetData[$sheetName])
+            if ($rows.Count -eq 0) { continue }
+            if (-not $usedDefaultSheet) {
+                $ws = $workbook.Sheets.Item(1)
+                $usedDefaultSheet = $true
+            } else {
+                $ws = $workbook.Sheets.Add([Type]::Missing, $workbook.Sheets.Item($workbook.Sheets.Count))
+            }
+            $ws.Name = $sheetName
+            Write-RowObjects -Sheet $ws -Rows $rows
+        }
+
+        foreach ($sheetName in $sheetData.Keys) {
+            $ws = $null
+            try { $ws = $workbook.Sheets.Item($sheetName) } catch { $ws = $null }
+            if (-not $ws) { continue }
+            $used = $ws.UsedRange
+            $lastRow = $used.Row + $used.Rows.Count - 1
+            $lastCol = $used.Column + $used.Columns.Count - 1
+            $resultCol = 0
+            # "<項目名>_現状"/"<項目名>_期待値" の列ペアを項目名ごとに集める（行ごとの値比較に使う）。
+            $fieldPairCols = @{}
+            for ($c = 1; $c -le $lastCol; $c++) {
+                $header = "$($ws.Cells.Item(1, $c).Text)"
+                if ($header -eq "結果") { $resultCol = $c }
+                $headerCell = $ws.Cells.Item(1, $c)
+                if ($header.EndsWith("_現状")) {
+                    $headerCell.Interior.Color = ConvertTo-OleColor $genjoColor
+                    $label = $header.Substring(0, $header.Length - "_現状".Length)
+                    if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
+                    $fieldPairCols[$label]["現状"] = $c
+                } elseif ($header.EndsWith("_期待値")) {
+                    $headerCell.Interior.Color = ConvertTo-OleColor $kitaichiColor
+                    $label = $header.Substring(0, $header.Length - "_期待値".Length)
+                    if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
+                    $fieldPairCols[$label]["期待値"] = $c
+                } elseif ($header -eq "結果") {
+                    $headerCell.Interior.Color = ConvertTo-OleColor $resultHeaderColor
+                } else {
+                    $headerCell.Interior.Color = ConvertTo-OleColor $otherColor
                 }
             }
-            if ($resultCol -eq 0) { continue }
-            $value = $ws.Cells[$row, $resultCol].Text
-            if ($colorMap.ContainsKey($value)) {
-                $ws.Cells[$row, $resultCol].Style.Font.Color.SetColor($colorMap[$value])
-                $ws.Cells[$row, $resultCol].Style.Font.Bold = $true
+            $diffColorOle = ConvertTo-OleColor $colorMap["不一致"]
+            for ($row = 2; $row -le $lastRow; $row++) {
+                # 項目ごとに現状/期待値を比較し、値が違う項目だけそのセルを赤字にする（どの項目が違うか一目でわかるように）。
+                foreach ($label in $fieldPairCols.Keys) {
+                    $pair = $fieldPairCols[$label]
+                    if (-not ($pair.ContainsKey("現状") -and $pair.ContainsKey("期待値"))) { continue }
+                    $curCell = $ws.Cells.Item($row, $pair["現状"])
+                    $expCell = $ws.Cells.Item($row, $pair["期待値"])
+                    if ("$($curCell.Text)" -ne "$($expCell.Text)") {
+                        $curCell.Font.Color = $diffColorOle
+                        $expCell.Font.Color = $diffColorOle
+                        $curCell.Font.Bold = $true
+                        $expCell.Font.Bold = $true
+                    }
+                }
+                if ($resultCol -eq 0) { continue }
+                $value = "$($ws.Cells.Item($row, $resultCol).Text)"
+                if ($colorMap.ContainsKey($value)) {
+                    $ws.Cells.Item($row, $resultCol).Font.Color = ConvertTo-OleColor $colorMap[$value]
+                    $ws.Cells.Item($row, $resultCol).Font.Bold = $true
+                }
             }
+            Set-ColumnWidth -Worksheet $ws
         }
-        Set-KintoneColumnWidth -Worksheet $ws
+        $workbook.SaveAs($outputPath, 51)
     }
-    Close-ExcelPackage $pkg
+    finally {
+        if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+        if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
+    }
 
     $allDiffRows = @($spaceSettingsDiff) + @($memberDiff) + @($appListDiff) + @($appAclDiff) + @($appRecordAclDiff)
     $errorCount = @($allDiffRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count

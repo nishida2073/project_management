@@ -208,7 +208,7 @@ function Export-UserSummaryData {
     $resultRange = $sheet.Range(
         $Sheet.Cells.Item($rowStartIndex + $totalViewItems.Count, $columsStartIndex + 6 -1 ), 
         $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1,  $columsStartIndex + $rowDatas[0].Count -1 ))
-    Set-ResultCellColorByThreshold $resultRange $PassScore
+    Set-CellColorByValue $resultRange $PassScore
 
 }
 
@@ -248,7 +248,7 @@ function Export-GroupSummaryData {
         $sheet.Cells($rowStartIndex + 1, $columsStartIndex + 1),
         $sheet.Cells($lastRowIndex, $columsStartIndex + $rowDatas[0].Count - 1)
     )
-    Set-CompareTotalCellColor -ResultRange $resultRange -TotalRowIndex $rowStartIndex -BlockSize 9 -SkipInBlock 4
+    Set-CellColorByRowComparison -Range $resultRange -TotalRowIndex $rowStartIndex -BlockSize 9 -SkipInBlock 4
 }
 
 
@@ -360,7 +360,7 @@ function Export-UserPlainData {
             $resultRange = $newSheet.Range(
                 $newSheet.Cells.Item($rowStartIndex + 1, $columsStartIndex + $rowDatas[0].Count - $questionCount), 
                 $newSheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1,  $columsStartIndex + $rowDatas[0].Count -1 ))
-            Set-ResultCellColorByWord $resultRange "〇"
+            Set-CellColorByWord $resultRange "〇"
             
             # オートフィット
             Set-AutoFit $newSheet
