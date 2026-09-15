@@ -22,7 +22,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-# 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、
+# 子プロセス（Invoke-BatProcess経由で起動するbat/ps1）のWrite-Messageに、
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
@@ -154,202 +154,80 @@ foreach ($cd in $categoryDefs) {
     }
 }
 
-# 一括実行タブでの表示名。BatchLabelがあればそれを、無ければ実行タブ側のLabelを使う。
-# チェックボックスの表示名とログの文言が食い違わないよう、一括実行タブ関連のログは
-# 必ずこの関数を通す（$ButtonDef.Labelを直接使わない）
-function Get-BatchDisplayLabel {
-    param($ButtonDef)
-    if ($ButtonDef.BatchLabel) { $ButtonDef.BatchLabel } else { $ButtonDef.Label }
-}
-
 $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
-$batchPanel = New-Object System.Windows.Forms.Panel
-$batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$tabBatchAll.Controls.Add($batchPanel)
-
-# 対象グループ（共通入力）。各ボタン固有の入力欄（経年比較集計のTargetCompanyNames等）は
-# ボタンごとに異なるため一括実行タブには置かないが、対象グループの絞り込みだけは全ボタン共通の
-# 概念のため、ここに1つだけ置いて全ステップに適用する（Invoke-BatchStep参照）
-$lblBatchGroup = New-Object System.Windows.Forms.Label
-$lblBatchGroup.Text = "対象グループ"
-$lblBatchGroup.AutoSize = $true
-
-$cmbBatchGroup = New-Object System.Windows.Forms.ComboBox
-$cmbBatchGroup.Size = New-Object System.Drawing.Size(150, 24)
-$cmbBatchGroup.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$cmbBatchGroup.DisplayMember = "Text"
-foreach ($opt in $groupOptions) { $cmbBatchGroup.Items.Add($opt) | Out-Null }
-if ($cmbBatchGroup.Items.Count -gt 0) { $cmbBatchGroup.SelectedIndex = 0 }
-
-$batchTopControls = @()
-
-# ステップごとのチェックボックス＋開くリンク（チェックを外したステップは「一括実行」の対象外になる）。
-# このツールはボタンごとに入力欄の内容が異なり（経年比較集計だけが専用の入力欄を持つ）、
-# 全ボタン共通の入力欄は対象グループのみのため、一括実行タブにはそれ以外の入力欄を置かない。
-# チェックボックスはLabelではなく$allButtonDefsと同じ並び順のインデックスで対応付ける
-# （Labelはカテゴリをまたいで重複し得るため、Labelをキーにするとハッシュテーブルで
-# 上書きが起きてチェック状態を取り違える）
-$script:batchStepCheckboxes = @()
-$y = 56
-foreach ($bd in $allButtonDefs) {
-    # BatchLabelの長さはボタンごとに異なるため、AutoSizeで実測幅に合わせると「開く」の位置が
-    # ずれて見切れたり画面外に出たりする。チェックボックスを固定幅＋省略表示にして「開く」の位置を固定する
-    $chk = New-Object System.Windows.Forms.CheckBox
-    $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
-    # 一括実行タブで値を確認・変更できない入力欄を持つステップや、kintoneへの投稿のように
-    # 副作用のあるステップは、ButtonDef側でDefaultChecked=$falseを指定して既定チェックを外す
-    $chk.Checked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
-    $chk.AutoSize = $false
-    $chk.AutoEllipsis = $true
-    $chk.Size = New-Object System.Drawing.Size(500, 22)
-    $chk.Location = New-Object System.Drawing.Point(20, $y)
-    $script:batchStepCheckboxes += $chk
-    $batchTopControls += $chk
-
-    if ($bd.OpenTarget) {
-        $lnkOpen = New-Object System.Windows.Forms.LinkLabel
-        $lnkOpen.Text = "開く"
-        $lnkOpen.AutoSize = $false
-        $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-        $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
-        $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
-        $lnkOpen.Tag = $bd
-        # OpenTargetがスクリプトブロックの場合（投稿ボタンのkintoneスレッドURLなど）は、
-        # 一括実行タブ共通の対象グループ選択（$cmbBatchGroup）を渡して解決する
-        $lnkOpen.Add_LinkClicked({
-            $target = $this.Tag.OpenTarget
-            if ($target -is [scriptblock]) {
-                $groupValue = Get-InputValue -Control $cmbBatchGroup
-                $target = & $target $groupValue
-            }
-            Open-TargetOrWarn -Path $target
-        })
-        $batchTopControls += $lnkOpen
+$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
+    -Inputs @(
+        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 90; InputWidth = 150 }
+    ) `
+    -OnOpenClick {
+        param($bd, $inputControls)
+        $target = $bd.OpenTarget
+        if ($target -is [scriptblock]) {
+            $groupValue = Get-InputValue -Control $inputControls["TargetGroupNameFilter"]
+            $target = & $target $groupValue
+        }
+        Open-TargetOrWarn -Path $target
     }
 
-    $y += 26
-}
-
-$btnRunAll = New-Object System.Windows.Forms.Button
-$btnRunAll.Text = "一括実行"
-$btnRunAll.Location = New-Object System.Drawing.Point(20, ($y + 10))
-$btnRunAll.Size = New-Object System.Drawing.Size(120, 28)
-$batchTopControls += $btnRunAll
+$batchPanel = $batchTab.Panel
+$cmbBatchGroup = $batchTab.InputControls["TargetGroupNameFilter"]
+$script:batchStepCheckboxes = $batchTab.CheckBoxes
+$btnRunAll = $batchTab.RunButton
+$lblBatchStatus = $batchTab.StatusLabel
 $script:batchRunButtons = @($btnRunAll)
 
-$lblBatchStatus = New-Object System.Windows.Forms.Label
-$lblBatchStatus.Text = ""
-$lblBatchStatus.AutoSize = $true
-$lblBatchStatus.Location = New-Object System.Drawing.Point(154, ($y + 16))
-$lblBatchStatus.Font = New-Object System.Drawing.Font($lblBatchStatus.Font, [System.Drawing.FontStyle]::Bold)
-$batchTopControls += $lblBatchStatus
-
-$batchTopControls += @($lblBatchGroup, $cmbBatchGroup)
-$batchPanel.Controls.AddRange($batchTopControls)
-$batchPanel.Height = $y + 10 + 28 + 16
-
-# Label/ComboBoxは親に追加された後でないと実際のHeightが確定しないため、
-# Controls.AddRangeの後で縦中央揃えのY位置を計算する（設定タブの対象行と同じ理由）
-$batchGroupRowCenterY = 26
-$lblBatchGroup.Location = New-Object System.Drawing.Point(20, ($batchGroupRowCenterY - [int]($lblBatchGroup.Height / 2)))
-$cmbBatchGroup.Location = New-Object System.Drawing.Point(100, ($batchGroupRowCenterY - [int]($cmbBatchGroup.Height / 2)))
-
-$btnRunAll.Add_Click({ Invoke-BatchRunAll })
-
-# 一括実行タブでの1ステップ分の実行本体（「一括実行」から順番に呼ばれる）
-function Invoke-BatchStep {
-    param($ButtonDef)
-
-    Write-Log ""
-    Write-Log "--------------- $(Get-BatchDisplayLabel -ButtonDef $ButtonDef) 開始 ---------------"
-
-    # 一括実行タブには対象グループ以外の個別タブのような専用入力欄が無いため、
-    # 対象グループ以外のInputs（経年比較集計のTargetCompanyNames等）はcommon-env.bat由来の
-    # 既定値（Default）をそのまま使う。対象グループだけは一括実行タブの共通入力欄の値を使う
-    $batArgs = @()
-    foreach ($inputDef in $ButtonDef.Inputs) {
-        $value = if ($inputDef.Name -eq "TargetGroupNameFilter") { Get-InputValue -Control $cmbBatchGroup } else { $inputDef.Default }
-        $batArgs += "$($inputDef.Name):$value"
-    }
-
-    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line } `
-        -CurrentProcessRef ([ref]$script:currentProc)
-
-    Show-FormInForeground -Form $form
-
-    if ($exitCode -ne 0) {
-        Write-Log "--------------- $(Get-BatchDisplayLabel -ButtonDef $ButtonDef) 失敗（終了コード: $exitCode） ---------------"
-    } else {
-        Write-Log "--------------- $(Get-BatchDisplayLabel -ButtonDef $ButtonDef) 完了 ---------------"
-    }
-
-    return $exitCode
-}
-
-function Invoke-BatchRunAll {
-    Set-RunButtonsEnabled $false
-    foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $false }
-    $lblBatchStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblBatchStatus.Text = "実行中..."
-
-    Write-Log ""
-    Write-Log "==================== 一括実行 開始 ===================="
-
-    # チェックを外したステップはスキップする。いずれかのステップが失敗しても、
-    # 以降のステップは独立した処理のため続行する
-    $anyFailed = $false
-    for ($i = 0; $i -lt $allButtonDefs.Count; $i++) {
-        $bd = $allButtonDefs[$i]
-        if (-not $script:batchStepCheckboxes[$i].Checked) {
-            Write-Log "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
-            continue
+function Start-BatchRunAll {
+    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
+        -StatusLabel $lblBatchStatus `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -InvokeStep {
+            param($bd)
+            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+                -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
+                -GetBatArgs {
+                    param($bd)
+                    $batArgs = @()
+                    foreach ($inputDef in $bd.Inputs) {
+                        $value = if ($inputDef.Name -eq "TargetGroupNameFilter") { Get-InputValue -Control $cmbBatchGroup } else { $inputDef.Default }
+                        $batArgs += "$($inputDef.Name):$value"
+                    }
+                    return $batArgs
+                }
         }
-        $exitCode = Invoke-BatchStep -ButtonDef $bd
-        if ($exitCode -ne 0) { $anyFailed = $true }
-    }
-
-    Write-Log "==================== 一括実行 完了 ===================="
-
-    if ($anyFailed) {
-        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblBatchStatus.Text = "失敗のステップあり"
-    } else {
-        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-        $lblBatchStatus.Text = "成功"
-    }
-
-    foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $true }
-    Set-RunButtonsEnabled $true
 }
+
+$btnRunAll.Add_Click({ Start-BatchRunAll })
 
 # =========================================
 # 実行タブ（カテゴリごとに分割）
 # =========================================
 
-$tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-BatButton -ButtonDef $bd }
+$tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
+    param($bd)
+    Invoke-BatButton -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -CurrentProcessRef ([ref]$script:currentProc) `
+        -GetBatArgs {
+            param($bd)
+            $batArgs = @()
+            $inputMap = $bd.InputControls
+            if ($inputMap) {
+                foreach ($inputName in $inputMap.Keys) {
+                    $batArgs += "$($inputName):$(Get-InputValue -Control $inputMap[$inputName])"
+                }
+            }
+            return $batArgs
+        }
+}
 $script:runButtons = $tabResult.RunButtons
 
 # 一括実行タブが既定の選択タブになるため、New-CategoryTabControl側で計算済みだった
 # 初期の$execTabControl.Height（実施データ取得タブ基準）をこのタブの内容量に合わせて上書きする。
 # 45はNew-CategoryTabControlの$TabHeaderAllowance既定値
 $execTabControl.Height = 45 + $batchPanel.Height
-
-# Labelはカテゴリをまたいで重複し得るため、Labelをキーにした辞書からではなく
-# ButtonDef自身が持つStepStatusLabelプロパティ（New-CategoryTabControlが設定）を直接使う
-function Set-StepStatus {
-    param($ButtonDef, [string]$Text)
-    $color = switch ($Text) {
-        "実行中..." { [System.Drawing.Color]::Black }
-        "成功"      { [System.Drawing.Color]::DarkGreen }
-        "失敗"      { [System.Drawing.Color]::DarkRed }
-        default     { [System.Drawing.Color]::Gray }
-    }
-    Set-StatusLabelText -Label $ButtonDef.StepStatusLabel -Text $Text -ForeColor $color
-}
 
 # =========================================
 # ログ（「実行」タブの中で常に表示。ログ／設定タブへ切り替えると見えなくなる）
@@ -364,49 +242,10 @@ $txtLog = New-LogTextBox
 # 視覚的な上→下の並び: execTabControl → logSpacer → txtLog（Dock=Fillで残り全域を埋める）
 Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $logSpacer, $txtLog)
 
-function Write-Log {
-    param([string]$Text)
-    Write-ColoredLine -TextBox $txtLog -Text $Text
-}
-
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
     Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
     Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
-}
-
-function Invoke-BatButton {
-    param($ButtonDef)
-
-    Set-RunButtonsEnabled $false
-    Set-StepStatus -ButtonDef $ButtonDef -Text "実行中..."
-
-    Write-Log ""
-    Write-Log "--------------- $($ButtonDef.Label) 開始 ---------------"
-
-    $batArgs = @()
-    $inputMap = $ButtonDef.InputControls
-    if ($inputMap) {
-        foreach ($inputName in $inputMap.Keys) {
-            $batArgs += "$($inputName):$(Get-InputValue -Control $inputMap[$inputName])"
-        }
-    }
-
-    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line } `
-        -CurrentProcessRef ([ref]$script:currentProc)
-
-    Show-FormInForeground -Form $form
-
-    if ($exitCode -ne 0) {
-        Write-Log "--------------- $($ButtonDef.Label) 失敗（終了コード: $exitCode） ---------------"
-        Set-StepStatus -ButtonDef $ButtonDef -Text "失敗"
-    } else {
-        Write-Log "--------------- $($ButtonDef.Label) 完了 ---------------"
-        Set-StepStatus -ButtonDef $ButtonDef -Text "成功"
-    }
-
-    Set-RunButtonsEnabled $true
 }
 
 # =========================================
@@ -423,95 +262,23 @@ $tabControl.Controls.Add($tabLogs)
 # ログの閲覧対象は一括実行の対象外（IncludeInBatch=$false）も含めた全ButtonDef
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
-$logContentBox = New-LogTextBox
-$tabLogs.Controls.Add($logContentBox)
-
-$logStagePanel = New-Object System.Windows.Forms.Panel
-$logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$logStagePanel.Height = 40 + 24 * $allButtonDefsForLog.Count
-$tabLogs.Controls.Add($logStagePanel)
-
-$lblLogGroup = New-Object System.Windows.Forms.Label
-$lblLogGroup.Text = "対象グループ"
-$lblLogGroup.AutoSize = $true
-$lblLogGroup.Location = New-Object System.Drawing.Point(20, 17)
-$logStagePanel.Controls.Add($lblLogGroup)
-
-$cmbLogGroup = New-Object System.Windows.Forms.ComboBox
-$cmbLogGroup.Location = New-Object System.Drawing.Point(100, 14)
-$cmbLogGroup.Size = New-Object System.Drawing.Size(150, 24)
-$cmbLogGroup.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
+    -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
+    -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
+    -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] } `
+    -OnUpdateLogView { Update-LogView }
+$cmbLogGroup = $script:logTab.ExtraCombo
 $cmbLogGroup.DisplayMember = "Text"
 foreach ($opt in $groupOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
 if ($cmbLogGroup.Items.Count -gt 0) { $cmbLogGroup.SelectedIndex = 0 }
-$logStagePanel.Controls.Add($cmbLogGroup)
-
-$btnClearLogs = New-Object System.Windows.Forms.Button
-$btnClearLogs.Text = "ログをすべて削除"
-$btnClearLogs.Location = New-Object System.Drawing.Point(260, 13)
-$btnClearLogs.Size = New-Object System.Drawing.Size(140, 26)
-$logStagePanel.Controls.Add($btnClearLogs)
-
-# ラベルはカテゴリをまたいで重複し得るため、一括実行タブと同じGet-BatchDisplayLabelを通し、
-# Tagに保持したButtonDef自身からログファイル名の接頭辞を導く
-$script:logStageRadios = @()
-for ($i = 0; $i -lt $allButtonDefsForLog.Count; $i++) {
-    $bd = $allButtonDefsForLog[$i]
-    $radio = New-Object System.Windows.Forms.RadioButton
-    $radio.Text = Get-BatchDisplayLabel -ButtonDef $bd
-    $radio.AutoSize = $true
-    $radio.Tag = $bd
-    $radio.Checked = ($i -eq 0)
-    $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
-    $logStagePanel.Controls.Add($radio)
-    $script:logStageRadios += $radio
-}
 
 # 各.ps1はNew-WorkerLogPathで「<バッチ名>-<対象グループ>[-<対象年>]_<timestamp>.log」という
 # ファイル名で書き出す（bats\library\common.ps1参照）。<バッチ名>はButtonDef.BatchPathの
 # ファイル名（拡張子無し）と一致するため、それをそのままフィルタの接頭辞に使う
-function Update-LogView {
-    $selectedRadio = $script:logStageRadios | Where-Object { $_.Checked } | Select-Object -First 1
-    if (-not $selectedRadio) { return }
-    $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
-    $logPath = $script:commonEnvVars["LOG_DIR"]
-
-    $logContentBox.Text = ""
-    if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
-
-    $groupValue = if ($cmbLogGroup.SelectedItem) { "$($cmbLogGroup.SelectedItem.Value)" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$groupValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
-    $sections = foreach ($file in $files) { [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding) }
-    $logContentBox.Text = $sections -join "`r`n`r`n"
-}
-
-foreach ($radio in $script:logStageRadios) {
+foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
 $cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView })
-
-$btnClearLogs.Add_Click({
-    $logPath = $script:commonEnvVars["LOG_DIR"]
-    if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
-
-    $logFiles = @(Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue)
-    if ($logFiles.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("削除対象のログファイルがありません。", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-        return
-    }
-
-    $confirm = [System.Windows.Forms.MessageBox]::Show("ログファイルを$($logFiles.Count)件すべて削除します。よろしいですか？", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
-    if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
-
-    foreach ($file in $logFiles) {
-        try {
-            Remove-Item -LiteralPath $file.FullName -Force
-        } catch {
-            [System.Windows.Forms.MessageBox]::Show("削除に失敗したファイルがあります: $($file.Name)`r`n$($_.Exception.Message)", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        }
-    }
-    Update-LogView
-})
 
 Update-LogView
 
@@ -535,9 +302,7 @@ $tabControl.Controls.Add($tabSettings)
 
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
-$settingsLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
 
-function Get-GroupBatPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.bat" }
 function Get-GroupXlsxPath { param([string]$GroupName, [string]$Year) Join-Path $clientsDir "$GroupName-$Year.xlsx" }
 
 # グループ名に一致する受講生データ（xlsx）を探す。<グループ名>.xlsxと<グループ名>-<年度>.xlsxの
@@ -558,53 +323,14 @@ function Get-TemplateXlsxPath {
     return $null
 }
 
-# set "VAR=value" 形式の行だけを拾ってVAR→valueのハッシュテーブルにする（common-env.bat・グループ別ファイル共通）
-function Get-SetLineRawValues {
-    param([string]$Path)
-    $result = @{}
-    if (!(Test-Path -LiteralPath $Path)) { return $result }
-    foreach ($line in [System.IO.File]::ReadAllLines($Path, $script:cp932Encoding)) {
-        $m = $settingsLineRegex.Match($line.Trim())
-        if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
-    }
-    return $result
-}
-
-# 実行タブ・一括実行タブの「開く」リンク用。指定グループのclient.batからKintoneSubdomain/SpaceId/ThreadIdを読み、
-# kintoneのスレッドを直接開くURLを組み立てる（いずれか未設定、または対象グループが「すべて」（空欄）なら$null）
-function Get-GroupKintoneThreadUrl {
-    param([string]$GroupName)
-    if (!$GroupName) { return $null }
-    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
-    $subdomain = $raw["KintoneSubdomain"]
-    $spaceId = $raw["SpaceId"]
-    $threadId = $raw["ThreadId"]
-    if (!$subdomain -or !$spaceId -or !$threadId) { return $null }
-    return "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId"
-}
-
 # 設定タブの各フィールドの生の値には、common-env.bat内の%BASE_PATH%や%OutputRootDir%のような
 # %VAR%トークンがそのまま残っている（%~dp0のようなバッチ専用トークンは.NET側では解決できないため、
 # common-env.bat側は%BASE_PATH%を使う方式に統一済み）。$script:commonEnvVars（起動時に
 # common-env.batを実際に実行して解決済みの値）を使って再帰的に展開する
-function Expand-VarTokens {
-    param([string]$Value)
-    if (!$Value) { return $Value }
-    return [regex]::Replace($Value, '%(\w+)%', {
-        param($match)
-        $refVal = $script:commonEnvVars[$match.Groups[1].Value]
-        if ($refVal) { $refVal } else { $match.Value }
-    })
-}
-
-function Resolve-BrowseStart {
-    param([string]$RawValue)
-    if (!$RawValue) { return $rootPath }
-    return Expand-VarTokens $RawValue
-}
+$script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
 
 # TargetYearはcommon-env.bat内でpowershellコマンドから動的に計算される特殊な行（set "VAR=value"形式
-# ではない）ため、このリストにも$settingsLineRegexにも掛からず編集対象にならない（既存の行はそのまま保持される）
+# ではない）ため、このリストにも$script:groupBatLineRegexにも掛からず編集対象にならない（既存の行はそのまま保持される）
 $commonSettingsVars = @(
     "ClientDataRootDir", "TemplateRootDir", "LOG_DIR",
     "ResultRootDir", "TestResultRootDir", "SurveyResultRootDir",
@@ -800,21 +526,6 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-function Update-SettingsGroupList {
-    $selected = $cmbSettingsGroupTarget.SelectedItem
-    $script:suppressComboSync = $true
-    $cmbSettingsGroupTarget.Items.Clear()
-    foreach ($groupName in (Get-GroupNames)) {
-        $cmbSettingsGroupTarget.Items.Add($groupName) | Out-Null
-    }
-    if ($selected -and $cmbSettingsGroupTarget.Items.Contains($selected)) {
-        $cmbSettingsGroupTarget.SelectedItem = $selected
-    } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-        $cmbSettingsGroupTarget.SelectedIndex = 0
-    }
-    $script:suppressComboSync = $false
-}
-
 function Get-CommonSettingsFieldRows {
     $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
     foreach ($varName in $commonSettingsVars) {
@@ -847,140 +558,6 @@ function Get-GroupSettingsFieldRows {
 $script:settingsCommonFieldTextBoxes = @{}
 $script:settingsGroupFieldTextBoxes = @{}
 
-# 共通タブ・グループ別タブ共通の描画処理。$TextBoxesへ描画結果（Key→TextBox）を書き戻す
-function Render-SettingsFields {
-    param(
-        [System.Windows.Forms.Panel]$Panel,
-        [array]$Rows,
-        [hashtable]$TextBoxes
-    )
-    $Panel.Controls.Clear()
-    $TextBoxes.Clear()
-
-    $y = 10
-    $lastGroup = ""
-    foreach ($field in $Rows) {
-        if ($field.Group -ne $lastGroup) {
-            if ($lastGroup -ne "") {
-                $y += 10
-                $separator = New-Object System.Windows.Forms.Panel
-                $separator.BackColor = [System.Drawing.Color]::LightGray
-                $separator.Location = New-Object System.Drawing.Point(10, $y)
-                $separator.Size = New-Object System.Drawing.Size(690, 2)
-                $Panel.Controls.Add($separator)
-                $y += 14
-            }
-            $lblGroup = New-Object System.Windows.Forms.Label
-            $lblGroup.Text = $settingsGroupLabels[$field.Group]
-            $lblGroup.AutoSize = $true
-            $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
-            $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
-            $Panel.Controls.Add($lblGroup)
-            $y += 28
-            $lastGroup = $field.Group
-        }
-
-        if ($field.VarName -eq "MentionUserCodes") {
-            $y = Add-MentionsEditor -Panel $Panel -StartY $y -RawValue "$($field.Value)"
-            continue
-        }
-
-        $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = if ($settingsVarLabels.ContainsKey($field.VarName)) { $settingsVarLabels[$field.VarName] } else { $field.VarName }
-        $lbl.AutoSize = $false
-        $lbl.Size = New-Object System.Drawing.Size(220, 20)
-        $lbl.Location = New-Object System.Drawing.Point(20, $y)
-        $settingsToolTip.SetToolTip($lbl, $field.VarName)
-        $Panel.Controls.Add($lbl)
-
-        $isMultiline = $settingsMultilineVars -contains $field.VarName
-
-        if ($radioVars.ContainsKey($field.VarName)) {
-            # テキスト入力ではなくラジオボタンで選ばせる項目（個別設定では未上書きを表す空欄も選べる）。
-            # 実際の値は非表示のTextBoxで保持し、Get-CommonSettingsFieldValue等の既存の
-            # ".Text"読み取り契約をそのまま使えるようにする
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = "$($field.Value)"
-            $txt.Visible = $false
-            $Panel.Controls.Add($txt)
-
-            $radioPanel = New-Object System.Windows.Forms.Panel
-            $radioPanel.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            $radioPanel.Size = New-Object System.Drawing.Size(300, 22)
-            $radioPanel.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-
-            $radioX = 0
-            foreach ($opt in $radioVars[$field.VarName]) {
-                $rb = New-Object System.Windows.Forms.RadioButton
-                $rb.Text = $opt.Label
-                $rb.AutoSize = $true
-                $rb.Location = New-Object System.Drawing.Point($radioX, 2)
-                $rb.Tag = [PSCustomObject]@{ TextBox = $txt; Value = $opt.Value }
-                $rb.Checked = ($field.Value -eq $opt.Value)
-                $rb.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.TextBox.Text = $this.Tag.Value } })
-                $radioPanel.Controls.Add($rb)
-                $radioX += 80
-            }
-
-            if ($field.Group -eq "OVERRIDE") {
-                # グループ見出し（"個別設定（空欄の場合は共通設定の値を使用）"）側で説明済みのため、
-                # ラベルは短く「未設定」にしてパネル幅に収まらず切れるのを防ぐ
-                $rbUnset = New-Object System.Windows.Forms.RadioButton
-                $rbUnset.Text = "未設定"
-                $rbUnset.AutoSize = $true
-                $rbUnset.Location = New-Object System.Drawing.Point($radioX, 2)
-                $rbUnset.Tag = $txt
-                $rbUnset.Checked = [string]::IsNullOrEmpty($field.Value)
-                $rbUnset.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.Text = "" } })
-                $settingsToolTip.SetToolTip($rbUnset, "空欄にすると共通設定の値を使用します")
-                $radioPanel.Controls.Add($rbUnset)
-            }
-
-            $Panel.Controls.Add($radioPanel)
-        } else {
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
-            $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            if ($isMultiline) {
-                $txt.Multiline = $true
-                $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
-                $txt.Size = New-Object System.Drawing.Size(300, 60)
-            } else {
-                $txt.Size = New-Object System.Drawing.Size(300, 22)
-            }
-            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            if ($settingsMaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
-            $Panel.Controls.Add($txt)
-        }
-
-        if ($settingsFolderBrowseVars -contains $field.VarName) {
-            $btnBrowse = New-Object System.Windows.Forms.Button
-            $btnBrowse.Text = "参照..."
-            $btnBrowse.Location = New-Object System.Drawing.Point(560, ($y - 3))
-            $btnBrowse.Size = New-Object System.Drawing.Size(70, 24)
-            $btnBrowse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            $btnBrowse.Tag = $txt
-            $btnBrowse.Add_Click({
-                $targetTxt = $this.Tag
-                $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                $startPath = Resolve-BrowseStart $targetTxt.Text
-                if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
-                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
-            })
-            $Panel.Controls.Add($btnBrowse)
-        }
-
-        $TextBoxes[$field.Key] = $txt
-        $y += if ($isMultiline) { 66 } else { 28 }
-
-        if ($field.VarName -eq "CommentTextTemplate") {
-            Add-TestPostButton -Panel $Panel -Y $y
-            $y += 34
-        }
-    }
-    return $y
-}
-
 # メンション設定（MentionUserCodes）は"ユーザコード:権限"のペアをカンマ区切りで1行に保持する
 # （client.batは1変数1行のため）。GUI側は行単位で追加・削除できるUIにするため、
 # 選択中のグループの行データだけをメモリ上に保持し（$script:mentionRowsGroupNameで検知）、
@@ -990,152 +567,9 @@ $script:mentionRows = @()
 $script:mentionRowsGroupName = $null
 $script:mentionRowControls = @()
 
-function ConvertFrom-MentionUserCodesText {
-    param([string]$Text)
-    $rows = [System.Collections.Generic.List[object]]::new()
-    foreach ($part in ($Text -split ',')) {
-        $trimmed = $part.Trim()
-        if (!$trimmed) { continue }
-        $pair = $trimmed -split ':', 2
-        $code = $pair[0].Trim()
-        if (!$code) { continue }
-        $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
-        if ($mentionTypeOptions -notcontains $type) { $type = "USER" }
-        $rows.Add([PSCustomObject]@{ Code = $code; Type = $type })
-    }
-    return $rows
-}
-
-function ConvertTo-MentionUserCodesText {
-    param($Rows)
-    return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
-}
-
-# 描画済みの行コントロールの現在値を$script:mentionRowsへ書き戻す。
-# 再描画（行追加・削除）の直前に必ず呼び、それまでの入力内容を失わないようにする
-function Sync-MentionRowsFromControls {
-    foreach ($entry in $script:mentionRowControls) {
-        $entry.Row.Code = $entry.CodeBox.Text
-        $entry.Row.Type = $entry.TypeCombo.SelectedItem
-    }
-}
-
-function Add-MentionsEditor {
-    param(
-        [System.Windows.Forms.Panel]$Panel,
-        [int]$StartY,
-        [string]$RawValue
-    )
-    $groupName = $cmbSettingsGroupTarget.SelectedItem
-    if ($script:mentionRowsGroupName -ne $groupName) {
-        # ConvertFrom-MentionUserCodesTextはList[object]を返すため、@()で配列化しないと
-        # 後段の "$script:mentionRows += ..." が配列結合ではなくop_Addition呼び出しになって失敗する
-        $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue)
-        $script:mentionRowsGroupName = $groupName
-    }
-    $script:mentionRowControls = @()
-
-    $y = $StartY
-    $lbl = New-Object System.Windows.Forms.Label
-    $lbl.Text = "メンション対象"
-    $lbl.AutoSize = $false
-    $lbl.Size = New-Object System.Drawing.Size(220, 20)
-    $lbl.Location = New-Object System.Drawing.Point(20, $y)
-    $settingsToolTip.SetToolTip($lbl, "MentionUserCodes")
-    $Panel.Controls.Add($lbl)
-    $y += 24
-
-    foreach ($row in @($script:mentionRows)) {
-        $txtCode = New-Object System.Windows.Forms.TextBox
-        $txtCode.Text = "$($row.Code)"
-        $txtCode.Location = New-Object System.Drawing.Point(40, $y)
-        $txtCode.Size = New-Object System.Drawing.Size(190, 22)
-        $Panel.Controls.Add($txtCode)
-
-        $cmbType = New-Object System.Windows.Forms.ComboBox
-        $cmbType.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-        foreach ($opt in $mentionTypeOptions) { $cmbType.Items.Add($opt) | Out-Null }
-        $cmbType.SelectedItem = if ($mentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
-        $cmbType.Location = New-Object System.Drawing.Point(240, $y)
-        $cmbType.Size = New-Object System.Drawing.Size(120, 22)
-        $Panel.Controls.Add($cmbType)
-
-        $btnDeleteRow = New-Object System.Windows.Forms.Button
-        $btnDeleteRow.Text = "削除"
-        $btnDeleteRow.Location = New-Object System.Drawing.Point(370, ($y - 1))
-        $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
-        $btnDeleteRow.Tag = $row
-        $btnDeleteRow.Add_Click({
-            Sync-MentionRowsFromControls
-            $target = $this.Tag
-            $script:mentionRows = @($script:mentionRows | Where-Object { $_ -ne $target })
-            Update-GroupSettingsFields
-        })
-        $Panel.Controls.Add($btnDeleteRow)
-
-        $script:mentionRowControls += [PSCustomObject]@{ Row = $row; CodeBox = $txtCode; TypeCombo = $cmbType }
-        $y += 28
-    }
-
-    $btnAddRow = New-Object System.Windows.Forms.Button
-    $btnAddRow.Text = "＋ 追加"
-    $btnAddRow.Location = New-Object System.Drawing.Point(40, $y)
-    $btnAddRow.Size = New-Object System.Drawing.Size(80, 24)
-    $btnAddRow.Add_Click({
-        Sync-MentionRowsFromControls
-        $script:mentionRows += [PSCustomObject]@{ Code = ""; Type = "USER" }
-        Update-GroupSettingsFields
-    })
-    $Panel.Controls.Add($btnAddRow)
-    $y += 34
-
-    return $y
-}
-
-function Add-TestPostButton {
-    param(
-        [System.Windows.Forms.Panel]$Panel,
-        [int]$Y
-    )
-    $btnTestPost = New-Object System.Windows.Forms.Button
-    $btnTestPost.Text = "テスト投稿"
-    $btnTestPost.Location = New-Object System.Drawing.Point(40, $Y)
-    $btnTestPost.Size = New-Object System.Drawing.Size(90, 24)
-    $btnTestPost.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-    $btnTestPost.Add_Click({ Test-KintonePostSettings })
-    $Panel.Controls.Add($btnTestPost)
-}
-
-# スペースID・スレッドID・メンション設定（投稿先）の妥当性は、スレッド単体を取得するAPIが無く
-# メンション対象の存在確認にも別APIが必要になるため、実際にダミーコメントを投稿してみて確認する
-function Test-KintonePostSettings {
-    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
-    $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
-    $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
-
-    if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) {
-        [System.Windows.Forms.MessageBox]::Show("スペースIDとスレッドIDを入力してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    Sync-MentionRowsFromControls
-    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
-
-    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-
-    try {
-        $response = Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
-        [System.Windows.Forms.MessageBox]::Show("投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-    } catch {
-        [System.Windows.Forms.MessageBox]::Show("投稿に失敗しました。`r`n$($_.Exception.Message)", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-    }
-}
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes | Out-Null
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars | Out-Null
 }
 
 function Update-GroupSettingsFields {
@@ -1144,25 +578,15 @@ function Update-GroupSettingsFields {
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes | Out-Null
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestPostButton -Panel $Panel -Y $Y -ToolName "track-aggregator" } } | Out-Null
 
     $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
-}
-
-function Get-CommonSettingsFieldValue {
-    param([string]$Key)
-    return $script:settingsCommonFieldTextBoxes[$Key].Text
-}
-
-function Get-GroupSettingsFieldValue {
-    param([string]$Key)
-    return $script:settingsGroupFieldTextBoxes[$Key].Text
 }
 
 function Save-CommonSettings {
     $path = Join-Path $basePath "common-env.bat"
     $newLines = foreach ($line in [System.IO.File]::ReadAllLines($path, $script:cp932Encoding)) {
-        $m = $settingsLineRegex.Match($line.Trim())
+        $m = $script:groupBatLineRegex.Match($line.Trim())
         if ($m.Success -and ($commonSettingsVars -contains $m.Groups["var"].Value)) {
             $varName = $m.Groups["var"].Value
             $val = Get-CommonSettingsFieldValue $varName

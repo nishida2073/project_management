@@ -27,7 +27,6 @@ $clientsDir = Join-Path $basePath "clients"
 $setEnvBat = Join-Path $clientsDir "set-env.bat"
 $setKintoneBat = Join-Path $clientsDir "set-kintone.bat"
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
-$lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 
 $libraryDir = Join-Path $basePath "bats\library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -45,6 +44,7 @@ $form.MinimumSize = New-Object System.Drawing.Size(600, 500)
 $script:currentProc = $null
 $script:stepOutputPaths = @{}
 $script:runHadWarning = $false
+$script:createdSpaceUrl = $null
 $form.Add_FormClosing({
     if ($script:currentProc -and !$script:currentProc.HasExited) {
         & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
@@ -121,13 +121,17 @@ $stepMeta = @(
         Inputs = @($configNameInputDef, $spaceTemplateIdInputDef)
         ArgsFn = { param($ic) @("-TemplateId", $ic['SpaceTemplateId'].Text.Trim(), "-SpaceName", $ic['ConfigName'].Text.Trim()) }
         OutputPathFn = $null
-        # 成功時に出力されるSPACE_IDを次工程（ダウンロード）のスペースID欄へ引き継ぐ
+        OpenTargetFn = { $script:createdSpaceUrl }
+        # 成功時に出力されるSPACE_IDを次工程（ダウンロード）のスペースID欄へ引き継ぎ、
+        # 「開く」リンク（このスペース自身と「kintoneへ反映」タブの両方が使う）のURLも組み立てる
         OnSuccessFn = {
             param($ic, $lastOutputLines)
             $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
             if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
                 $nextIc = $script:stepInputControls[1]
                 if ($nextIc -and $nextIc.ContainsKey('SpaceId')) { $nextIc['SpaceId'].Text = $Matches.id }
+                $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path $setKintoneBat).TrimEnd('/')
+                if ($baseUrl) { $script:createdSpaceUrl = "$baseUrl/k/#/space/$($Matches.id)" }
             }
         }
     }
@@ -165,6 +169,7 @@ $stepMeta = @(
         Inputs = @($configNameInputDef)
         ArgsFn = { param($ic) @("-ConfigName", $ic['ConfigName'].Text.Trim()) }
         OutputPathFn = $null
+        OpenTargetFn = { $script:createdSpaceUrl }
     }
     [PSCustomObject]@{
         Id = 4; Label = "データチェック"; StageKey = "check"; Bat = $checkBat
@@ -185,7 +190,7 @@ $categoryDefs = @($stepMeta | ForEach-Object {
                 Label      = $_.Label
                 Id         = $stepId
                 Inputs     = $_.Inputs
-                OpenTarget = if ($_.OutputPathFn) { { $script:stepOutputPaths[$stepId] }.GetNewClosure() } else { $null }
+                OpenTarget = if ($_.OpenTargetFn) { $_.OpenTargetFn } elseif ($_.OutputPathFn) { { $script:stepOutputPaths[$stepId] }.GetNewClosure() } else { $null }
             }
         )
     }
@@ -197,78 +202,25 @@ $tabRunAll = New-Object System.Windows.Forms.TabPage
 $tabRunAll.Text = "一括実行"
 $stepTabControl.Controls.Add($tabRunAll)
 
-$runAllPanel = New-Object System.Windows.Forms.Panel
-$runAllPanel.Location = New-Object System.Drawing.Point(0, 0)
-$tabRunAll.Controls.Add($runAllPanel)
-
-$grpRunAll = New-Object System.Windows.Forms.GroupBox
-$grpRunAll.Text = "一括実行"
-$grpRunAll.Location = New-Object System.Drawing.Point(10, 10)
-$grpRunAll.Size = New-Object System.Drawing.Size(730, 60)
-$grpRunAll.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
-$runAllPanel.Controls.Add($grpRunAll)
-
-$lblRunAllConfigName = New-Object System.Windows.Forms.Label
-$lblRunAllConfigName.Text = "スペース識別名"
-$lblRunAllConfigName.AutoSize = $true
-$lblRunAllConfigName.Location = New-Object System.Drawing.Point(15, 18)
-$grpRunAll.Controls.Add($lblRunAllConfigName)
-
-$txtRunAllConfigName = New-Object System.Windows.Forms.TextBox
-$txtRunAllConfigName.Size = New-Object System.Drawing.Size(200, 22)
-$txtRunAllConfigName.Location = New-Object System.Drawing.Point(170, 15)
-$grpRunAll.Controls.Add($txtRunAllConfigName)
-
-$lblRunAllSpaceTemplateId = New-Object System.Windows.Forms.Label
-$lblRunAllSpaceTemplateId.Text = "スペーステンプレートID"
-$lblRunAllSpaceTemplateId.AutoSize = $true
-$lblRunAllSpaceTemplateId.Location = New-Object System.Drawing.Point(15, 53)
-$grpRunAll.Controls.Add($lblRunAllSpaceTemplateId)
-
-$txtRunAllSpaceTemplateId = New-Object System.Windows.Forms.TextBox
-$txtRunAllSpaceTemplateId.Size = New-Object System.Drawing.Size(200, 22)
-$txtRunAllSpaceTemplateId.Location = New-Object System.Drawing.Point(170, 50)
-$grpRunAll.Controls.Add($txtRunAllSpaceTemplateId)
-
-$lblRunAllBaseTemplateName = New-Object System.Windows.Forms.Label
-$lblRunAllBaseTemplateName.Text = "設定テンプレート名（基本）"
-$lblRunAllBaseTemplateName.AutoSize = $true
-$lblRunAllBaseTemplateName.Location = New-Object System.Drawing.Point(15, 88)
-$grpRunAll.Controls.Add($lblRunAllBaseTemplateName)
-
 $cmbRunAllBaseTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbRunAllBaseTemplateName.Size = New-Object System.Drawing.Size(220, 22)
-$cmbRunAllBaseTemplateName.Location = New-Object System.Drawing.Point(170, 85)
 $cmbRunAllBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$grpRunAll.Controls.Add($cmbRunAllBaseTemplateName)
-
-$lblRunAllCustomTemplateName = New-Object System.Windows.Forms.Label
-$lblRunAllCustomTemplateName.Text = "設定テンプレート名（カスタム）"
-$lblRunAllCustomTemplateName.AutoSize = $true
-$lblRunAllCustomTemplateName.Location = New-Object System.Drawing.Point(15, 123)
-$grpRunAll.Controls.Add($lblRunAllCustomTemplateName)
 
 $cmbRunAllCustomTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbRunAllCustomTemplateName.Size = New-Object System.Drawing.Size(180, 22)
-$cmbRunAllCustomTemplateName.Location = New-Object System.Drawing.Point(170, 120)
 $cmbRunAllCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$grpRunAll.Controls.Add($cmbRunAllCustomTemplateName)
 
-$btnRunAll = New-Object System.Windows.Forms.Button
-$btnRunAll.Text = "実行"
-$btnRunAll.Size = New-Object System.Drawing.Size(100, 28)
-$btnRunAll.Location = New-Object System.Drawing.Point(15, 158)
-$grpRunAll.Controls.Add($btnRunAll)
+$batchTab = New-BatchRunTab -TabPage $tabRunAll -ButtonDefs @() -RunButtonText "実行" `
+    -Inputs @(
+        [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200 }
+        [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true }
+        [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true }
+        [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 180; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true }
+    )
 
-$lblOverallStatus = New-Object System.Windows.Forms.Label
-$lblOverallStatus.Text = ""
-$lblOverallStatus.AutoSize = $true
-$lblOverallStatus.Location = New-Object System.Drawing.Point(130, 164)
-$lblOverallStatus.Font = New-Object System.Drawing.Font($lblOverallStatus.Font, [System.Drawing.FontStyle]::Bold)
-$grpRunAll.Controls.Add($lblOverallStatus)
-
-$grpRunAll.Size = New-Object System.Drawing.Size(730, ($btnRunAll.Bottom + 10))
-$runAllPanel.Size = New-Object System.Drawing.Size(750, ($grpRunAll.Bottom + 10))
+$runAllPanel = $batchTab.Panel
+$txtRunAllConfigName = $batchTab.InputControls["ConfigName"]
+$txtRunAllSpaceTemplateId = $batchTab.InputControls["SpaceTemplateId"]
+$btnRunAll = $batchTab.RunButton
+$lblOverallStatus = $batchTab.StatusLabel
 
 $stepTabResult = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $stepTabControl `
     -OnRunClick { param($bd) Invoke-SingleStep -Id $bd.Id }
@@ -354,11 +306,6 @@ $tabBatchRun.Controls.Add($batchPanel)
 $tabRun.Controls.Add($txtLog)
 $tabRun.Controls.Add($innerRunTabControl)
 
-function Write-Log {
-    param([string]$Text)
-    Write-ColoredLine -TextBox $txtLog -Text $Text
-}
-
 function Get-StepBat {
     param([int]$Id)
     return $script:stepMetaById[$Id].Bat
@@ -398,19 +345,6 @@ function Test-StepPrereq {
     return $true
 }
 
-function Set-StepStatus {
-    param([int]$Id, [string]$Text)
-    $lbl = $script:stepStatusLabels[$Id]
-    $lbl.Text = $Text
-    $lbl.ForeColor = switch ($Text) {
-        "実行中..." { [System.Drawing.Color]::Black }
-        "成功"      { [System.Drawing.Color]::DarkGreen }
-        "警告"      { [System.Drawing.Color]::DarkOrange }
-        "失敗"      { [System.Drawing.Color]::DarkRed }
-        default     { [System.Drawing.Color]::Gray }
-    }
-}
-
 function Set-RunControlsEnabled {
     param([bool]$Enabled)
     foreach ($ic in $script:stepInputControls.Values) {
@@ -440,14 +374,16 @@ function Invoke-Step {
     param([int]$Id)
 
     $sm = $script:stepMetaById[$Id]
-    Set-StepStatus -Id $Id -Text "実行中..."
-    Write-Log ""
-    Write-Log "--------------- $($sm.Label) 開始 ---------------"
-
     $script:lastStepOutputLines = New-Object System.Collections.Generic.List[string]
-    $exitCode = Invoke-BatStep -BatPath $sm.Bat -WorkingDirectory $basePath -BatArgs (Get-StepArgs -Id $Id) `
+
+    $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $sm.Bat }) `
+        -GetBatArgs { param($bd) Get-StepArgs -Id $Id } `
+        -WorkingDirectory $basePath -Form $form `
+        -WriteLog { param($msg) Write-Log $msg } `
         -OnOutputLine { param($line) Write-Log $line; $script:lastStepOutputLines.Add($line) } `
-        -CurrentProcessRef ([ref]$script:currentProc)
+        -CurrentProcessRef ([ref]$script:currentProc) `
+        -DisplayLabel $sm.Label -StatusLabel $script:stepStatusLabels[$Id] `
+        -IsWarningExitCode { param($ExitCode) $ExitCode -eq 2 }
 
     $outputPath = Get-StepOutputPath -Id $Id
     if ($outputPath -and (Test-Path -LiteralPath $outputPath)) {
@@ -455,22 +391,11 @@ function Invoke-Step {
     }
 
     if ($exitCode -ne 0 -and $exitCode -ne 2) {
-        Write-Log "--------------- $($sm.Label) 失敗（終了コード: $exitCode） ---------------"
-        Set-StepStatus -Id $Id -Text "失敗"
         return $false
     }
 
-    if ($exitCode -eq 2) {
-        $script:runHadWarning = $true
-        Write-Log "--------------- $($sm.Label) 完了（警告あり） ---------------"
-    } else {
-        Write-Log "--------------- $($sm.Label) 完了 ---------------"
-    }
-    Set-StepStatus -Id $Id -Text $(if ($exitCode -eq 2) { "警告" } else { "成功" })
+    if ($exitCode -eq 2) { $script:runHadWarning = $true }
 
-    # 工程ごとの後処理（出力からの値の取り込みなど）はOnSuccessFnに任せ、Invoke-Step自体は
-    # 工程の中身を知らない汎用ランナーのままにする。ConfigNameの次工程への引き継ぎは全工程共通のため、
-    # OnSuccessFnより後に無条件で行う（工程自身がConfigNameを更新した場合はその後の値が伝播する）
     if ($sm.OnSuccessFn) { & $sm.OnSuccessFn $script:stepInputControls[$Id] $script:lastStepOutputLines }
     Sync-NextStepConfigName -CompletedId $Id
     return $true
@@ -538,20 +463,16 @@ $btnRunAll.Add_Click({
 
     $script:isRunning = $true
     Set-RunControlsEnabled $false
-    $lblOverallStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblOverallStatus.Text = "実行中..."
+    Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
 
     $failedLabel = Invoke-SeededAllSteps
 
     if ($failedLabel) {
-        $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblOverallStatus.Text = "エラーが発生しました（$failedLabel）"
+        Set-StepStatus -Label $lblOverallStatus -Text "エラーが発生しました（$failedLabel）" -State "失敗"
     } elseif ($script:runHadWarning) {
-        $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkOrange
-        $lblOverallStatus.Text = "完了しました（警告あり、要確認）"
+        Set-StepStatus -Label $lblOverallStatus -Text "完了しました（警告あり、要確認）" -State "警告"
     } else {
-        $lblOverallStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-        $lblOverallStatus.Text = "完了しました"
+        Set-StepStatus -Label $lblOverallStatus -Text "完了しました" -State "成功"
     }
 
     Set-RunControlsEnabled $true
@@ -611,8 +532,7 @@ $btnBatchRunAll.Add_Click({
         $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')".Trim()
         $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')".Trim()
 
-        $lblBatchStatus.ForeColor = [System.Drawing.Color]::Black
-        $lblBatchStatus.Text = "実行中... ($($i + 1)/$($rows.Count): $rowConfigName)"
+        Set-StepStatus -Label $lblBatchStatus -Text "実行中... ($($i + 1)/$($rows.Count): $rowConfigName)" -State "実行中..."
         [System.Windows.Forms.Application]::DoEvents()
 
         Write-Log ""
@@ -657,14 +577,11 @@ $btnBatchRunAll.Add_Click({
     $failedCount = @($resultLines | Where-Object { $_ -match ": 失敗|: スキップ" }).Count
     $warningCount = @($resultLines | Where-Object { $_ -match "警告あり" }).Count
     if ($failedCount -gt 0) {
-        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblBatchStatus.Text = "完了（$($rows.Count)件中$failedCount件が失敗/スキップ）"
+        Set-StepStatus -Label $lblBatchStatus -Text "完了（$($rows.Count)件中$failedCount件が失敗/スキップ）" -State "失敗"
     } elseif ($warningCount -gt 0) {
-        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkOrange
-        $lblBatchStatus.Text = "完了しました（$($rows.Count)件中$warningCount件で警告あり、要確認）"
+        Set-StepStatus -Label $lblBatchStatus -Text "完了しました（$($rows.Count)件中$warningCount件で警告あり、要確認）" -State "警告"
     } else {
-        $lblBatchStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-        $lblBatchStatus.Text = "完了しました（全$($rows.Count)件成功）"
+        Set-StepStatus -Label $lblBatchStatus -Text "完了しました（全$($rows.Count)件成功）" -State "成功"
     }
 
     foreach ($sm in $stepMeta) { $script:stepInputControls[$sm.Id]['ConfigName'].Text = $origConfigNames[$sm.Id] }
@@ -684,55 +601,6 @@ $btnBatchRunAll.Add_Click({
     Set-RunControlsEnabled $true
     $script:isRunning = $false
 })
-
-function Read-EnvBatLines {
-    param([string]$Path = $setEnvBat)
-    if (!(Test-Path -LiteralPath $Path)) { return @() }
-    return [System.IO.File]::ReadAllLines($Path, $cp932)
-}
-
-function Get-EnvBatDefaults {
-    param([string]$Path = $setEnvBat)
-    $result = @{}
-    foreach ($line in (Read-EnvBatLines -Path $Path)) {
-        $m = $lineRegex.Match($line.Trim())
-        if ($m.Success) {
-            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
-        }
-    }
-    return $result
-}
-
-function Expand-VarTokens {
-    param([string]$Value)
-    if (!$Value) { return $Value }
-    $expanded = $Value.Replace("%BASE_PATH%", "$basePath\")
-    $expanded = [regex]::Replace($expanded, '%(\w+)%', {
-        param($match)
-        $refVal = Get-ResolvedVar $match.Groups[1].Value
-        if ($refVal) { $refVal } else { $match.Value }
-    })
-    return $expanded
-}
-
-function Get-ResolvedVar {
-    param([string]$VarName)
-    $val = [Environment]::GetEnvironmentVariable($VarName)
-    if (!$val) {
-        $defaults = Get-EnvBatDefaults
-        if ($defaults.ContainsKey($VarName)) {
-            $val = $defaults[$VarName]
-        }
-    }
-    if (!$val) { return $val }
-    return Expand-VarTokens $val
-}
-
-function Resolve-BrowseStart {
-    param([string]$RawValue)
-    if (!$RawValue) { return $basePath }
-    return Expand-VarTokens $RawValue
-}
 
 function Get-TemplateFileNames {
     param([string]$EnvVarName)
@@ -858,8 +726,8 @@ function Update-SettingsFields {
     $fieldPanel.Controls.Clear()
     $script:fieldTextBoxes = @{}
 
-    $defaults = Get-EnvBatDefaults -Path $setEnvBat
-    $kintoneDefaults = Get-EnvBatDefaults -Path $setKintoneBat
+    $defaults = Get-SetEnvDefaults -Path $setEnvBat
+    $kintoneDefaults = Get-SetEnvDefaults -Path $setKintoneBat
     $y = 10
 
     foreach ($varName in $varLabels.Keys) {
@@ -905,7 +773,7 @@ function Update-SettingsFields {
             $btnBrowse.Add_Click({
                 $targetTxt = $this.Tag
                 $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                $startPath = Resolve-BrowseStart $targetTxt.Text
+                $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
                 if (Test-Path -LiteralPath $startPath) {
                     $dlg.SelectedPath = $startPath
                 }
@@ -959,42 +827,12 @@ $btnReload.Add_Click({
     $lblSaveStatus.Text = "再読込しました"
 })
 
-function Save-EnvBatFile {
-    param(
-        [Parameter(Mandatory)][string]$Path,
-        [Parameter(Mandatory)][string[]]$VarNames
-    )
-    $existingLines = Read-EnvBatLines -Path $Path
-    $writtenVars = @{}
-
-    $newLines = @(foreach ($line in $existingLines) {
-        $m = $lineRegex.Match($line.Trim())
-        $varName = if ($m.Success) { $m.Groups["var"].Value } else { $null }
-        if ($varName -and $VarNames -contains $varName -and $script:fieldTextBoxes.ContainsKey($varName)) {
-            $writtenVars[$varName] = $true
-            $newVal = $script:fieldTextBoxes[$varName].Text
-            "if not defined $varName set `"$varName=$newVal`""
-        } else {
-            $line
-        }
-    })
-
-    foreach ($varName in $VarNames) {
-        if (!$writtenVars.ContainsKey($varName) -and $script:fieldTextBoxes.ContainsKey($varName)) {
-            $newLines += "if not defined $varName set `"$varName=$($script:fieldTextBoxes[$varName].Text)`""
-        }
-    }
-    if ($existingLines.Count -eq 0) {
-        $newLines = @("@echo off", "") + $newLines
-    }
-
-    $content = ($newLines -join "`r`n") + "`r`n"
-    [System.IO.File]::WriteAllText($Path, $content, $cp932)
-}
+$script:saveEnvBatGetValueFn = { param($name) $script:fieldTextBoxes[$name].Text }
+$script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 
 $btnSave.Add_Click({
-    Save-EnvBatFile -Path $setEnvBat -VarNames @($varLabels.Keys | Where-Object { $kintoneVars -notcontains $_ })
-    Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars
+    Save-EnvBatFile -Path $setEnvBat -VarNames @($varLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+    Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
 
     $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
     $lblSaveStatus.Text = "保存しました"
@@ -1002,68 +840,15 @@ $btnSave.Add_Click({
 
 Update-SettingsFields
 
-$logStagePanel = New-Object System.Windows.Forms.Panel
-$logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$logStagePanel.Height = 40 + 24 * $stepMeta.Count
-
-$lblLogConfigName = New-Object System.Windows.Forms.Label
-$lblLogConfigName.Text = "スペース識別名"
-$lblLogConfigName.AutoSize = $true
-$lblLogConfigName.Location = New-Object System.Drawing.Point(20, 17)
-
-$cmbLogConfigName = New-Object System.Windows.Forms.ComboBox
-$cmbLogConfigName.Location = New-Object System.Drawing.Point(160, 14)
-$cmbLogConfigName.Size = New-Object System.Drawing.Size(220, 24)
-$cmbLogConfigName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-
-$btnClearLogs = New-Object System.Windows.Forms.Button
-$btnClearLogs.Text = "ログをすべて削除"
-$btnClearLogs.Location = New-Object System.Drawing.Point(420, 13)
-$btnClearLogs.Size = New-Object System.Drawing.Size(140, 26)
-$btnClearLogs.Add_Click({
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-    if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
-
-    $logFiles = @(Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue)
-    if ($logFiles.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("削除対象のログファイルがありません。", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-        return
-    }
-
-    $confirm = [System.Windows.Forms.MessageBox]::Show("ログファイルを$($logFiles.Count)件すべて削除します。よろしいですか？", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
-    if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
-
-    foreach ($file in $logFiles) {
-        try {
-            Remove-Item -LiteralPath $file.FullName -Force
-        } catch {
-            [System.Windows.Forms.MessageBox]::Show("削除に失敗したファイルがあります: $($file.Name)`r`n$($_.Exception.Message)", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        }
-    }
-    Update-LogConfigNameList
-    Update-LogView
-})
-
-$script:logStageRadios = @{}
-for ($i = 0; $i -lt $stepMeta.Count; $i++) {
-    $sm = $stepMeta[$i]
-    $radio = New-Object System.Windows.Forms.RadioButton
-    $radio.Text = $sm.Label
-    $radio.AutoSize = $true
-    $radio.Tag = $sm.StageKey
-    $radio.Checked = ($sm.Id -eq 0)
-    $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
+$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $stepMeta `
+    -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
+    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
+    -OnAfterClear { Update-LogConfigNameList } `
+    -OnUpdateLogView { Update-LogView }
+foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-    $logStagePanel.Controls.Add($radio)
-    $script:logStageRadios[$sm.StageKey] = $radio
 }
-
-$logStagePanel.Controls.AddRange(@($lblLogConfigName, $cmbLogConfigName, $btnClearLogs))
-
-$logContentBox = New-LogTextBox
-
-$tabLogs.Controls.Add($logContentBox)
-$tabLogs.Controls.Add($logStagePanel)
+$cmbLogConfigName = $script:logTab.ExtraCombo
 
 function Update-LogConfigNameList {
     $selected = $cmbLogConfigName.SelectedItem
@@ -1088,10 +873,12 @@ function Update-LogConfigNameList {
 }
 
 function Update-LogView {
-    $stage = ($script:logStageRadios.GetEnumerator() | Where-Object { $_.Value.Checked }).Key
+    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
+    if (-not $selectedRadio) { return }
+    $stage = $selectedRadio.Tag.StageKey
     $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
 
-    $logContentBox.Text = ""
+    $script:logTab.ContentBox.Text = ""
 
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) {
         return
@@ -1101,8 +888,14 @@ function Update-LogView {
     $configFilter = if ($logConfigName -and $logConfigName -ne "すべて") { "$logConfigName" + "_" } else { "" }
     $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}_$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
 
-    $sections = foreach ($file in $files) { [System.IO.File]::ReadAllText($file.FullName, $cp932) }
-    $logContentBox.Text = $sections -join "`r`n`r`n"
+    $sections = foreach ($file in $files) {
+        try {
+            [System.IO.File]::ReadAllText($file.FullName, $cp932)
+        } catch {
+            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
+        }
+    }
+    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
 }
 
 $cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })

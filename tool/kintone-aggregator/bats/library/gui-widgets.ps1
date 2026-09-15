@@ -83,6 +83,11 @@ function Write-ColoredLine {
     $TextBox.ScrollToCaret()
 }
 
+function Write-Log {
+    param([string]$Text)
+    Write-ColoredLine -TextBox $txtLog -Text $Text
+}
+
 # ログ表示用に設定済みのRichTextBoxを作る（Dock=Fill、等幅フォント、URLクリックで既定ブラウザを開く）
 function New-LogTextBox {
     param(
@@ -271,9 +276,9 @@ function New-CategoryTabControl {
                     $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
                     $lblInput = New-Object System.Windows.Forms.Label
-                    $lblInput.Text = "$($inputDef.Label):"
+                    $lblInput.Text = "$($inputDef.Label)"
                     $lblInput.AutoSize = $false
-                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleRight
+                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
                     $lblInput.Size = New-Object System.Drawing.Size($labelWidth, 22)
                     $lblInput.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($lblInput.Height / 2)))
                     $grp.Controls.Add($lblInput)
@@ -378,4 +383,650 @@ function New-CategoryTabControl {
         TabControl = $tabControl
         RunButtons = $runButtons
     }
+}
+
+function New-LogTab {
+    param(
+        [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
+        [Parameter(Mandatory)][array]$ButtonDefs,
+        [scriptblock]$LabelFn = { param($bd) $bd.Label },
+        [Parameter(Mandatory)][string]$ExtraLabelText,
+        [int]$ExtraComboWidth = 200,
+        [Parameter(Mandatory)][scriptblock]$GetLogPathFn,
+        [scriptblock]$OnAfterClear = {},
+        [Parameter(Mandatory)][scriptblock]$OnUpdateLogView
+    )
+
+    $logContentBox = New-LogTextBox
+
+    $logStagePanel = New-Object System.Windows.Forms.Panel
+    $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
+    $logStagePanel.Height = 40 + 24 * $ButtonDefs.Count
+
+    $lblLogExtra = New-Object System.Windows.Forms.Label
+    $lblLogExtra.Text = $ExtraLabelText
+    $lblLogExtra.AutoSize = $true
+    $lblLogExtra.Location = New-Object System.Drawing.Point(20, 17)
+    $logStagePanel.Controls.Add($lblLogExtra)
+
+    $cmbLogExtra = New-Object System.Windows.Forms.ComboBox
+    $cmbLogExtra.Location = New-Object System.Drawing.Point(100, 14)
+    $cmbLogExtra.Size = New-Object System.Drawing.Size($ExtraComboWidth, 24)
+    $cmbLogExtra.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+    $logStagePanel.Controls.Add($cmbLogExtra)
+
+    $btnClearLogs = New-Object System.Windows.Forms.Button
+    $btnClearLogs.Text = "ログをすべて削除"
+    $btnClearLogs.Location = New-Object System.Drawing.Point((120 + $ExtraComboWidth), 13)
+    $btnClearLogs.Size = New-Object System.Drawing.Size(140, 26)
+    $btnClearLogs.Add_Click({
+        $logPath = & $GetLogPathFn
+        if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
+
+        $logFiles = @(Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue)
+        if ($logFiles.Count -eq 0) {
+            [System.Windows.Forms.MessageBox]::Show("削除対象のログファイルがありません。", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            return
+        }
+
+        $confirm = [System.Windows.Forms.MessageBox]::Show("ログファイルを削除します。よろしいですか？", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+
+        foreach ($file in $logFiles) {
+            try {
+                Remove-Item -LiteralPath $file.FullName -Force
+            } catch {
+                [System.Windows.Forms.MessageBox]::Show("削除に失敗したファイルがあります: $($file.Name)`r`n$($_.Exception.Message)", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+            }
+        }
+        & $OnAfterClear
+        & $OnUpdateLogView
+    }.GetNewClosure())
+    $logStagePanel.Controls.Add($btnClearLogs)
+
+    $radios = @()
+    for ($i = 0; $i -lt $ButtonDefs.Count; $i++) {
+        $bd = $ButtonDefs[$i]
+        $radio = New-Object System.Windows.Forms.RadioButton
+        $radio.Text = & $LabelFn $bd
+        $radio.AutoSize = $true
+        $radio.Tag = $bd
+        $radio.Checked = ($i -eq 0)
+        $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
+        $logStagePanel.Controls.Add($radio)
+        $radios += $radio
+    }
+
+    $TabPage.Controls.Add($logContentBox)
+    $TabPage.Controls.Add($logStagePanel)
+
+    return [PSCustomObject]@{
+        ContentBox  = $logContentBox
+        StagePanel  = $logStagePanel
+        Radios      = $radios
+        ExtraLabel  = $lblLogExtra
+        ExtraCombo  = $cmbLogExtra
+        ClearButton = $btnClearLogs
+    }
+}
+
+function Get-BatchDisplayLabel {
+    param($ButtonDef)
+    if ($ButtonDef.BatchLabel) { $ButtonDef.BatchLabel } else { $ButtonDef.Label }
+}
+
+function New-BatchRunTab {
+    param(
+        [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
+        [array]$ButtonDefs = @(),
+        [array]$Inputs = @(),
+        [string]$RunButtonText = "一括実行",
+        [scriptblock]$ShowOpenLink = { param($bd) [bool]$bd.OpenTarget },
+        [scriptblock]$OnOpenClick = {}
+    )
+
+    $batchPanel = New-Object System.Windows.Forms.Panel
+    $batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+    $TabPage.Controls.Add($batchPanel)
+
+    $grpBatchAll = New-Object System.Windows.Forms.GroupBox
+    $grpBatchAll.Text = "一括実行"
+    $grpBatchAll.Location = New-Object System.Drawing.Point(10, 10)
+    $grpBatchAll.Size = New-Object System.Drawing.Size(730, 60)
+    $grpBatchAll.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+    $batchPanel.Controls.Add($grpBatchAll)
+
+    $inputRowHeight = 35
+    $topControls = @()
+    $inputControls = @{}
+    $inputX = 20
+    $currentInputRow = 0
+    foreach ($inputDef in $Inputs) {
+        if ($inputDef.NewRow) {
+            $currentInputRow++
+            $inputX = 20
+        }
+        $inputRowCenterY = 26 + ($inputRowHeight * $currentInputRow)
+
+        $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
+        $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 120 }
+
+        $lblInput = New-Object System.Windows.Forms.Label
+        $lblInput.Text = $inputDef.Label
+        $lblInput.AutoSize = $false
+        $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        $lblInput.Size = New-Object System.Drawing.Size($labelWidth, 22)
+        $lblInput.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($lblInput.Height / 2)))
+        $topControls += $lblInput
+        $inputX += $labelWidth + 4
+
+        if ($inputDef.ExistingControl) {
+            $inputCtrl = $inputDef.ExistingControl
+            $inputCtrl.Width = $inputWidth
+        } elseif ($inputDef.Options) {
+            $inputCtrl = New-Object System.Windows.Forms.ComboBox
+            $inputCtrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+            $inputCtrl.DisplayMember = "Text"
+            $inputCtrl.Width = $inputWidth
+            foreach ($opt in $inputDef.Options) { $inputCtrl.Items.Add($opt) | Out-Null }
+            $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
+            if ($selectedOption) {
+                $inputCtrl.SelectedItem = $selectedOption
+            } elseif ($inputCtrl.Items.Count -gt 0) {
+                $inputCtrl.SelectedIndex = 0
+            }
+        } else {
+            $inputCtrl = New-Object System.Windows.Forms.TextBox
+            $inputCtrl.Width = $inputWidth
+            $inputCtrl.Text = "$($inputDef.Default)"
+        }
+        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
+        $topControls += $inputCtrl
+        $inputControls[$inputDef.Name] = $inputCtrl
+        $inputX += $inputWidth + 15
+    }
+
+    $checkBoxes = @()
+    $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 20 } else { 20 }
+    foreach ($bd in $ButtonDefs) {
+        $chk = New-Object System.Windows.Forms.CheckBox
+        $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
+        $chk.Checked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
+        $chk.AutoSize = $false
+        $chk.AutoEllipsis = $true
+        $chk.Size = New-Object System.Drawing.Size(500, 22)
+        $chk.Location = New-Object System.Drawing.Point(20, $y)
+        $chk.Tag = $bd
+        $checkBoxes += $chk
+        $topControls += $chk
+
+        if (& $ShowOpenLink $bd) {
+            $lnkOpen = New-Object System.Windows.Forms.LinkLabel
+            $lnkOpen.Text = "開く"
+            $lnkOpen.AutoSize = $false
+            $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+            $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
+            $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
+            $lnkOpen.Tag = $bd
+            $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag $inputControls }.GetNewClosure())
+            $topControls += $lnkOpen
+        }
+
+        $y += 26
+    }
+
+    $btnRunAll = New-Object System.Windows.Forms.Button
+    $btnRunAll.Text = $RunButtonText
+    $btnRunAll.Location = New-Object System.Drawing.Point(20, ($y + 10))
+    $btnRunAll.Size = New-Object System.Drawing.Size(120, 28)
+    $topControls += $btnRunAll
+
+    $lblStatus = New-Object System.Windows.Forms.Label
+    $lblStatus.Text = ""
+    $lblStatus.AutoSize = $true
+    $lblStatus.Location = New-Object System.Drawing.Point(154, ($y + 16))
+    $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
+    $topControls += $lblStatus
+
+    $grpBatchAll.Controls.AddRange($topControls)
+    $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28 + 16))
+    $batchPanel.Height = $grpBatchAll.Bottom + 10
+
+    return [PSCustomObject]@{
+        Panel         = $batchPanel
+        GroupBox      = $grpBatchAll
+        InputControls = $inputControls
+        CheckBoxes    = $checkBoxes
+        RunButton     = $btnRunAll
+        StatusLabel   = $lblStatus
+    }
+}
+
+function Set-StepStatus {
+    param([System.Windows.Forms.Label]$Label, [string]$Text, [string]$State)
+    if (-not $State) { $State = $Text }
+    $color = switch ($State) {
+        "実行中..." { [System.Drawing.Color]::Black }
+        "成功"      { [System.Drawing.Color]::DarkGreen }
+        "警告"      { [System.Drawing.Color]::DarkOrange }
+        "失敗"      { [System.Drawing.Color]::DarkRed }
+        default     { [System.Drawing.Color]::Gray }
+    }
+    Set-StatusLabelText -Label $Label -Text $Text -ForeColor $color
+}
+
+function Invoke-BatchStep {
+    param(
+        $ButtonDef,
+        [Parameter(Mandatory)][scriptblock]$GetBatArgs,
+        [Parameter(Mandatory)][string]$WorkingDirectory,
+        [Parameter(Mandatory)][System.Windows.Forms.Form]$Form,
+        [Parameter(Mandatory)][scriptblock]$WriteLog,
+        [ref]$CurrentProcessRef,
+        [string]$DisplayLabel,
+        [System.Windows.Forms.Label]$StatusLabel,
+        [scriptblock]$OnOutputLine,
+        [scriptblock]$IsWarningExitCode = { param($ExitCode) $false },
+        [scriptblock]$OnAfterRun = {}
+    )
+
+    if (-not $DisplayLabel) { $DisplayLabel = Get-BatchDisplayLabel -ButtonDef $ButtonDef }
+    if (-not $OnOutputLine) { $OnOutputLine = { param($line) & $WriteLog $line } }
+
+    if ($StatusLabel) { Set-StepStatus -Label $StatusLabel -Text "実行中..." }
+
+    & $WriteLog ""
+    & $WriteLog "--------------- $DisplayLabel 開始 ---------------"
+
+    $batArgs = & $GetBatArgs $ButtonDef
+    $exitCode = Invoke-BatProcess -BatPath $ButtonDef.BatchPath -WorkingDirectory $WorkingDirectory -BatArgs $batArgs `
+        -OnOutputLine $OnOutputLine `
+        -CurrentProcessRef $CurrentProcessRef
+
+    Show-FormInForeground -Form $Form
+
+    $isWarning = ($exitCode -ne 0) -and (& $IsWarningExitCode $exitCode)
+
+    if ($exitCode -ne 0 -and -not $isWarning) {
+        & $WriteLog "--------------- $DisplayLabel 失敗（終了コード: $exitCode） ---------------"
+        if ($StatusLabel) { Set-StepStatus -Label $StatusLabel -Text "失敗" }
+    } elseif ($isWarning) {
+        & $WriteLog "--------------- $DisplayLabel 完了（警告あり） ---------------"
+        if ($StatusLabel) { Set-StepStatus -Label $StatusLabel -Text "警告" }
+    } else {
+        & $WriteLog "--------------- $DisplayLabel 完了 ---------------"
+        if ($StatusLabel) { Set-StepStatus -Label $StatusLabel -Text "成功" }
+    }
+
+    & $OnAfterRun $ButtonDef $exitCode $isWarning
+
+    return $exitCode
+}
+
+function Invoke-BatButton {
+    param(
+        $ButtonDef,
+        [Parameter(Mandatory)][scriptblock]$GetBatArgs,
+        [Parameter(Mandatory)][string]$WorkingDirectory,
+        [Parameter(Mandatory)][System.Windows.Forms.Form]$Form,
+        [Parameter(Mandatory)][scriptblock]$WriteLog,
+        [Parameter(Mandatory)][scriptblock]$SetRunButtonsEnabled,
+        [ref]$CurrentProcessRef
+    )
+
+    & $SetRunButtonsEnabled $false
+    $exitCode = Invoke-BatchStep -ButtonDef $ButtonDef -GetBatArgs $GetBatArgs -WorkingDirectory $WorkingDirectory `
+        -Form $Form -WriteLog $WriteLog -CurrentProcessRef $CurrentProcessRef `
+        -DisplayLabel $ButtonDef.Label -StatusLabel $ButtonDef.StepStatusLabel
+    & $SetRunButtonsEnabled $true
+    return $exitCode
+}
+
+function Invoke-BatchRunAll {
+    param(
+        [Parameter(Mandatory)][array]$ButtonDefs,
+        [Parameter(Mandatory)][array]$CheckBoxes,
+        [Parameter(Mandatory)][System.Windows.Forms.Label]$StatusLabel,
+        [Parameter(Mandatory)][scriptblock]$InvokeStep,
+        [Parameter(Mandatory)][scriptblock]$WriteLog,
+        [Parameter(Mandatory)][scriptblock]$SetRunButtonsEnabled,
+        [array]$ExtraControls = @(),
+        [switch]$StopOnFailure,
+        [string]$HeaderSuffix = "",
+        [scriptblock]$OnComplete
+    )
+
+    & $SetRunButtonsEnabled $false
+    foreach ($chk in $CheckBoxes) { $chk.Enabled = $false }
+    foreach ($ctrl in $ExtraControls) { $ctrl.Enabled = $false }
+    Set-StepStatus -Label $StatusLabel -Text "実行中..."
+
+    & $WriteLog ""
+    & $WriteLog "==================== 一括実行 開始$HeaderSuffix ===================="
+
+    $anyFailed = $false
+    $failedExitCode = 0
+    for ($i = 0; $i -lt $ButtonDefs.Count; $i++) {
+        $bd = $ButtonDefs[$i]
+        if (-not $CheckBoxes[$i].Checked) {
+            & $WriteLog "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
+            continue
+        }
+        $exitCode = & $InvokeStep $bd
+        if ($exitCode -ne 0) {
+            $anyFailed = $true
+            $failedExitCode = $exitCode
+            if ($StopOnFailure) { break }
+        }
+    }
+
+    if ($OnComplete) {
+        & $OnComplete $anyFailed $failedExitCode
+    } else {
+        & $WriteLog "==================== 一括実行 完了$HeaderSuffix ===================="
+        if ($anyFailed) {
+            Set-StepStatus -Label $StatusLabel -Text "失敗のステップあり" -State "失敗"
+        } else {
+            Set-StepStatus -Label $StatusLabel -Text "成功"
+        }
+    }
+
+    foreach ($chk in $CheckBoxes) { $chk.Enabled = $true }
+    foreach ($ctrl in $ExtraControls) { $ctrl.Enabled = $true }
+    & $SetRunButtonsEnabled $true
+}
+
+function Update-LogView {
+    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
+    if (-not $selectedRadio) { return }
+    $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
+    $logPath = $script:commonEnvVars["LOG_DIR"]
+
+    $script:logTab.ContentBox.Text = ""
+    if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
+
+    $groupValue = if ($cmbLogGroup.SelectedItem) { "$($cmbLogGroup.SelectedItem.Value)" } else { "" }
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$groupValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    $sections = foreach ($file in $files) {
+        try {
+            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
+        } catch {
+            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
+        }
+    }
+    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
+}
+
+function Get-CommonSettingsFieldValue {
+    param([string]$Key)
+    return $script:settingsCommonFieldTextBoxes[$Key].Text
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    return $script:settingsGroupFieldTextBoxes[$Key].Text
+}
+
+function Update-SettingsGroupList {
+    $selected = $cmbSettingsGroupTarget.SelectedItem
+    $script:suppressComboSync = $true
+    $cmbSettingsGroupTarget.Items.Clear()
+    foreach ($groupName in (Get-GroupNames)) {
+        $cmbSettingsGroupTarget.Items.Add($groupName) | Out-Null
+    }
+    if ($selected -and $cmbSettingsGroupTarget.Items.Contains($selected)) {
+        $cmbSettingsGroupTarget.SelectedItem = $selected
+    } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+        $cmbSettingsGroupTarget.SelectedIndex = 0
+    }
+    $script:suppressComboSync = $false
+}
+
+function Sync-MentionRowsFromControls {
+    foreach ($entry in $script:mentionRowControls) {
+        $entry.Row.Code = $entry.CodeBox.Text
+        $entry.Row.Type = $entry.TypeCombo.SelectedItem
+    }
+}
+
+function Add-MentionsEditor {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [int]$StartY,
+        [string]$RawValue
+    )
+    $groupName = $cmbSettingsGroupTarget.SelectedItem
+    if ($script:mentionRowsGroupName -ne $groupName) {
+        $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue)
+        $script:mentionRowsGroupName = $groupName
+    }
+    $script:mentionRowControls = @()
+
+    $y = $StartY
+    $lbl = New-Object System.Windows.Forms.Label
+    $lbl.Text = "メンション対象"
+    $lbl.AutoSize = $false
+    $lbl.Size = New-Object System.Drawing.Size(220, 20)
+    $lbl.Location = New-Object System.Drawing.Point(20, $y)
+    $settingsToolTip.SetToolTip($lbl, "MentionUserCodes")
+    $Panel.Controls.Add($lbl)
+    $y += 24
+
+    foreach ($row in @($script:mentionRows)) {
+        $txtCode = New-Object System.Windows.Forms.TextBox
+        $txtCode.Text = "$($row.Code)"
+        $txtCode.Location = New-Object System.Drawing.Point(40, $y)
+        $txtCode.Size = New-Object System.Drawing.Size(190, 22)
+        $Panel.Controls.Add($txtCode)
+
+        $cmbType = New-Object System.Windows.Forms.ComboBox
+        $cmbType.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+        foreach ($opt in $mentionTypeOptions) { $cmbType.Items.Add($opt) | Out-Null }
+        $cmbType.SelectedItem = if ($mentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
+        $cmbType.Location = New-Object System.Drawing.Point(240, $y)
+        $cmbType.Size = New-Object System.Drawing.Size(120, 22)
+        $Panel.Controls.Add($cmbType)
+
+        $btnDeleteRow = New-Object System.Windows.Forms.Button
+        $btnDeleteRow.Text = "削除"
+        $btnDeleteRow.Location = New-Object System.Drawing.Point(370, ($y - 1))
+        $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
+        $btnDeleteRow.Tag = $row
+        $btnDeleteRow.Add_Click({
+            Sync-MentionRowsFromControls
+            $target = $this.Tag
+            $script:mentionRows = @($script:mentionRows | Where-Object { $_ -ne $target })
+            Update-GroupSettingsFields
+        })
+        $Panel.Controls.Add($btnDeleteRow)
+
+        $script:mentionRowControls += [PSCustomObject]@{ Row = $row; CodeBox = $txtCode; TypeCombo = $cmbType }
+        $y += 28
+    }
+
+    $btnAddRow = New-Object System.Windows.Forms.Button
+    $btnAddRow.Text = "＋ 追加"
+    $btnAddRow.Location = New-Object System.Drawing.Point(40, $y)
+    $btnAddRow.Size = New-Object System.Drawing.Size(80, 24)
+    $btnAddRow.Add_Click({
+        Sync-MentionRowsFromControls
+        $script:mentionRows += [PSCustomObject]@{ Code = ""; Type = "USER" }
+        Update-GroupSettingsFields
+    })
+    $Panel.Controls.Add($btnAddRow)
+    $y += 34
+
+    return $y
+}
+
+function Add-TestPostButton {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [int]$Y,
+        [Parameter(Mandatory)][string]$ToolName
+    )
+    $btnTestPost = New-Object System.Windows.Forms.Button
+    $btnTestPost.Text = "テスト投稿"
+    $btnTestPost.Location = New-Object System.Drawing.Point(40, $Y)
+    $btnTestPost.Size = New-Object System.Drawing.Size(90, 24)
+    $btnTestPost.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+    $btnTestPost.Add_Click({ Test-KintonePostSettings -ToolName $ToolName }.GetNewClosure())
+    $Panel.Controls.Add($btnTestPost)
+}
+
+function Test-KintonePostSettings {
+    param([Parameter(Mandatory)][string]$ToolName)
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+    $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+    $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+
+    if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) {
+        [System.Windows.Forms.MessageBox]::Show("スペースIDとスレッドIDを入力してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    Sync-MentionRowsFromControls
+    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+
+    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+
+    try {
+        $response = Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】${ToolName}の設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+        [System.Windows.Forms.MessageBox]::Show("投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("投稿に失敗しました。`r`n$($_.Exception.Message)", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+    }
+}
+
+function Render-SettingsFields {
+    param(
+        [System.Windows.Forms.Panel]$Panel,
+        [array]$Rows,
+        [hashtable]$TextBoxes,
+        [hashtable]$RadioVars = @{},
+        [hashtable]$TrailingButtonVars = @{}
+    )
+    $Panel.Controls.Clear()
+    $TextBoxes.Clear()
+
+    $y = 10
+    $lastGroup = ""
+    foreach ($field in $Rows) {
+        if ($field.Group -ne $lastGroup) {
+            if ($lastGroup -ne "") {
+                $y += 10
+                $separator = New-Object System.Windows.Forms.Panel
+                $separator.BackColor = [System.Drawing.Color]::LightGray
+                $separator.Location = New-Object System.Drawing.Point(10, $y)
+                $separator.Size = New-Object System.Drawing.Size(690, 2)
+                $Panel.Controls.Add($separator)
+                $y += 14
+            }
+            $lblGroup = New-Object System.Windows.Forms.Label
+            $lblGroup.Text = $settingsGroupLabels[$field.Group]
+            $lblGroup.AutoSize = $true
+            $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
+            $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
+            $Panel.Controls.Add($lblGroup)
+            $y += 28
+            $lastGroup = $field.Group
+        }
+
+        if ($field.VarName -eq "MentionUserCodes") {
+            $y = Add-MentionsEditor -Panel $Panel -StartY $y -RawValue "$($field.Value)"
+            continue
+        }
+
+        $lbl = New-Object System.Windows.Forms.Label
+        $lbl.Text = if ($settingsVarLabels.ContainsKey($field.VarName)) { $settingsVarLabels[$field.VarName] } else { $field.VarName }
+        $lbl.AutoSize = $false
+        $lbl.Size = New-Object System.Drawing.Size(220, 20)
+        $lbl.Location = New-Object System.Drawing.Point(20, $y)
+        $settingsToolTip.SetToolTip($lbl, $field.VarName)
+        $Panel.Controls.Add($lbl)
+
+        $isMultiline = $settingsMultilineVars -contains $field.VarName
+
+        if ($RadioVars.ContainsKey($field.VarName)) {
+            $txt = New-Object System.Windows.Forms.TextBox
+            $txt.Text = "$($field.Value)"
+            $txt.Visible = $false
+            $Panel.Controls.Add($txt)
+
+            $radioPanel = New-Object System.Windows.Forms.Panel
+            $radioPanel.Location = New-Object System.Drawing.Point(250, ($y - 2))
+            $radioPanel.Size = New-Object System.Drawing.Size(300, 22)
+            $radioPanel.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+
+            $radioX = 0
+            foreach ($opt in $RadioVars[$field.VarName]) {
+                $rb = New-Object System.Windows.Forms.RadioButton
+                $rb.Text = $opt.Label
+                $rb.AutoSize = $true
+                $rb.Location = New-Object System.Drawing.Point($radioX, 2)
+                $rb.Tag = [PSCustomObject]@{ TextBox = $txt; Value = $opt.Value }
+                $rb.Checked = ($field.Value -eq $opt.Value)
+                $rb.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.TextBox.Text = $this.Tag.Value } })
+                $radioPanel.Controls.Add($rb)
+                $radioX += 80
+            }
+
+            if ($field.Group -eq "OVERRIDE") {
+                $rbUnset = New-Object System.Windows.Forms.RadioButton
+                $rbUnset.Text = "未設定"
+                $rbUnset.AutoSize = $true
+                $rbUnset.Location = New-Object System.Drawing.Point($radioX, 2)
+                $rbUnset.Tag = $txt
+                $rbUnset.Checked = [string]::IsNullOrEmpty($field.Value)
+                $rbUnset.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.Text = "" } })
+                $settingsToolTip.SetToolTip($rbUnset, "空欄にすると共通設定の値を使用します")
+                $radioPanel.Controls.Add($rbUnset)
+            }
+
+            $Panel.Controls.Add($radioPanel)
+        } else {
+            $txt = New-Object System.Windows.Forms.TextBox
+            $txt.Text = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
+            $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
+            if ($isMultiline) {
+                $txt.Multiline = $true
+                $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
+                $txt.Size = New-Object System.Drawing.Size(300, 60)
+            } else {
+                $txt.Size = New-Object System.Drawing.Size(300, 22)
+            }
+            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            if ($settingsMaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
+            $Panel.Controls.Add($txt)
+        }
+
+        if ($settingsFolderBrowseVars -contains $field.VarName) {
+            $btnBrowse = New-Object System.Windows.Forms.Button
+            $btnBrowse.Text = "参照..."
+            $btnBrowse.Location = New-Object System.Drawing.Point(560, ($y - 3))
+            $btnBrowse.Size = New-Object System.Drawing.Size(70, 24)
+            $btnBrowse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            $btnBrowse.Tag = $txt
+            $btnBrowse.Add_Click({
+                $targetTxt = $this.Tag
+                $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+                $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
+                if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
+                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
+            })
+            $Panel.Controls.Add($btnBrowse)
+        }
+
+        $TextBoxes[$field.Key] = $txt
+        $y += if ($isMultiline) { 66 } else { 28 }
+
+        if ($TrailingButtonVars.ContainsKey($field.VarName)) {
+            & $TrailingButtonVars[$field.VarName] $Panel $y $field
+            $y += 34
+        }
+    }
+    return $y
 }

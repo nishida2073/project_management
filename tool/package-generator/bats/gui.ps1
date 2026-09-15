@@ -26,7 +26,6 @@ $setEnvBat = Join-Path $clientsDir "set-env.bat"
 $clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
 $cp932 = [System.Text.Encoding]::GetEncoding(932)
 $clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
-$lineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
 $defaultClientLabel = "デフォルト"
 $script:suppressComboSync = $false
 
@@ -35,7 +34,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-# 子プロセス（Invoke-BatStep経由で起動するbat/ps1）のWrite-Messageに、
+# 子プロセス（Invoke-BatProcess経由で起動するbat/ps1）のWrite-Messageに、
 # GUIログ向けの色タグ付き出力へ切り替えさせる合図
 $env:GUI_LOG_MODE = "1"
 
@@ -92,19 +91,7 @@ $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
 $runTabControl.Controls.Add($tabBatchAll)
 
-$runTopPanel = New-Object System.Windows.Forms.Panel
-$runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$runTopPanel.Height = 176
-$tabBatchAll.Controls.Add($runTopPanel)
-
-$lblClient = New-Object System.Windows.Forms.Label
-$lblClient.Text = "クライアント"
-$lblClient.AutoSize = $true
-$lblClient.Location = New-Object System.Drawing.Point(20, 17)
-
 $cmbClient = New-Object System.Windows.Forms.ComboBox
-$cmbClient.Location = New-Object System.Drawing.Point(100, 14)
-$cmbClient.Size = New-Object System.Drawing.Size(260, 24)
 $cmbClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 # ファイルダウンロード／個別パッケージの作成／ファイルアップロードの各個別実行タブは、
@@ -151,7 +138,7 @@ $categoryDefs = @(
                 LogPrefixVarName = "DOWNLOAD_LOG_PREFIX"
                 LocalPathVarName = "DOWNLOAD_LOCAL_PATH"
                 Inputs           = New-ClientInputDef -Combo $cmbDownloadClient
-                OpenTarget       = { Get-ValueForClient -ClientName $cmbDownloadClient.Text -VarName "DOWNLOAD_LOCAL_PATH" }.GetNewClosure()
+                OpenTarget       = { Get-ValueForClient -ClientName $cmbDownloadClient.Text -VarName "DOWNLOAD_LOCAL_PATH" }
             }
         )
     }
@@ -166,7 +153,7 @@ $categoryDefs = @(
                 LogPrefixVarName = "GENERATE_LOG_PREFIX"
                 LocalPathVarName = "GENERATE_OUTPUT_PATH"
                 Inputs           = New-ClientInputDef -Combo $cmbGenerateClient
-                OpenTarget       = { Get-ValueForClient -ClientName $cmbGenerateClient.Text -VarName "GENERATE_OUTPUT_PATH" }.GetNewClosure()
+                OpenTarget       = { Get-ValueForClient -ClientName $cmbGenerateClient.Text -VarName "GENERATE_OUTPUT_PATH" }
             }
         )
     }
@@ -186,18 +173,12 @@ $categoryDefs = @(
                     Get-SharePointFolderUrl `
                         -SiteUrl (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_URL") `
                         -SitePath (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_PATH")
-                }.GetNewClosure()
+                }
             }
         )
     }
 )
 $allButtonDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
-
-# 一括実行タブでの表示名。BatchLabelがあればそれを、無ければLabelを使う
-function Get-BatchDisplayLabel {
-    param($ButtonDef)
-    if ($ButtonDef.BatchLabel) { $ButtonDef.BatchLabel } else { $ButtonDef.Label }
-}
 
 # 一括実行タブの「開く」リンク用。個別実行タブと違い対象クライアントは$cmbClient（共通の1つ）なので、
 # ButtonDefが持つ変数名（LocalPathVarName、またはSiteUrlVarName+SitePathVarName）から解決する
@@ -211,30 +192,6 @@ function Get-BatchOpenTarget {
     return Get-ValueForClient -ClientName $ClientName -VarName $ButtonDef.LocalPathVarName
 }
 
-$script:batchStepCheckboxes = @()
-$script:batchLinkControls = @()
-for ($i = 0; $i -lt $allButtonDefs.Count; $i++) {
-    $bd = $allButtonDefs[$i]
-    $y = 40 + 26 * $i
-
-    $chk = New-Object System.Windows.Forms.CheckBox
-    $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
-    $chk.AutoSize = $true
-    $chk.Tag = $bd
-    $chk.Location = New-Object System.Drawing.Point(20, $y)
-    $script:batchStepCheckboxes += $chk
-
-    $lnk = New-Object System.Windows.Forms.LinkLabel
-    $lnk.Text = "開く"
-    $lnk.AutoSize = $false
-    $lnk.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-    $lnk.Size = New-Object System.Drawing.Size(40, $chk.PreferredSize.Height)
-    $lnk.Location = New-Object System.Drawing.Point(220, $y)
-    $lnk.Tag = $bd
-    $lnk.Add_LinkClicked({ Open-TargetOrWarn -Path (Get-BatchOpenTarget -ButtonDef $this.Tag -ClientName $cmbClient.SelectedItem) })
-    $script:batchLinkControls += $lnk
-}
-
 function Get-SharePointFolderUrl {
     param([string]$SiteUrl, [string]$SitePath)
     if (!$SiteUrl -or !$SitePath) { return $null }
@@ -244,16 +201,20 @@ function Get-SharePointFolderUrl {
     return "$($siteUri.Scheme)://$($siteUri.Authority)$($siteUri.AbsolutePath.TrimEnd('/'))/$([Uri]::EscapeDataString($library))/Forms/AllItems.aspx?id=$([Uri]::EscapeDataString($serverRelativePath))"
 }
 
-$btnRun = New-Object System.Windows.Forms.Button
-$btnRun.Text = "実行"
-$btnRun.Location = New-Object System.Drawing.Point(20, 126)
-$btnRun.Size = New-Object System.Drawing.Size(100, 24)
+$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs -RunButtonText "実行" `
+    -Inputs @(
+        [PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $cmbClient; LabelWidth = 80; InputWidth = 260 }
+    ) `
+    -ShowOpenLink { param($bd) $true } `
+    -OnOpenClick {
+        param($bd, $inputControls)
+        Open-TargetOrWarn -Path (Get-BatchOpenTarget -ButtonDef $bd -ClientName $inputControls["Client"].SelectedItem)
+    }
 
-$lblStatus = New-Object System.Windows.Forms.Label
-$lblStatus.Text = ""
-$lblStatus.AutoSize = $true
-$lblStatus.Location = New-Object System.Drawing.Point(134, 136)
-$lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
+$runTopPanel = $batchTab.Panel
+$script:batchStepCheckboxes = $batchTab.CheckBoxes
+$btnRun = $batchTab.RunButton
+$lblStatus = $batchTab.StatusLabel
 
 function Update-ClientComboItems {
     param(
@@ -293,7 +254,7 @@ function Get-ClientProfileRawValues {
         $trimmed = $line.Trim()
         $m = $clientLineRegex.Match($trimmed)
         if (!$m.Success) {
-            $m = $lineRegex.Match($trimmed)
+            $m = $script:setEnvLineRegex.Match($trimmed)
         }
         if ($m.Success) {
             $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
@@ -307,32 +268,19 @@ function Get-ClientProfileValues {
     $raw = Get-ClientProfileRawValues $ClientName
     $result = @{}
     foreach ($varName in $raw.Keys) {
-        $result[$varName] = Expand-VarTokens $raw[$varName]
+        $result[$varName] = Expand-VarTokens -Value $raw[$varName] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
     }
     return $result
 }
-
-$runTopPanel.Controls.AddRange(@($script:batchStepCheckboxes + $script:batchLinkControls + @($btnRun, $lblStatus, $lblClient, $cmbClient)))
 
 $txtLog = New-LogTextBox
 
 $tabRun.Controls.Add($txtLog)
 $tabRun.Controls.Add($runTabControl)
 
-function Write-Log {
-    param([string]$Text)
-    Write-ColoredLine -TextBox $txtLog -Text $Text
-}
-
-$btnRun.Add_Click({
-    $script:isRunning = $true
-    Set-RunButtonsEnabled $false
-    $lblStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblStatus.Text = "実行中..."
+function Start-BatchRunAll {
     $selectedClient = $cmbClient.SelectedItem
     $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
-    Write-Log ""
-    Write-Log "==================== 一括実行 開始（$clientDisplayName） ===================="
 
     foreach ($chk in $script:batchStepCheckboxes) {
         Set-Item -Path "env:$($chk.Tag.EnabledVarName)" -Value $(if ($chk.Checked) { "1" } else { "0" })
@@ -359,52 +307,25 @@ $btnRun.Add_Click({
         [Environment]::SetEnvironmentVariable("CLIENT_NAME", $null)
     }
 
-    # all.bat自体は呼ばず、GUI側からステージごとに個別に実行する。
-    # チェックを外したステージはkintone-aggregator/track-aggregatorの一括実行タブと同じ
-    # 「スキップします」表示にする（黙って$stagesから外すのではなく、全ステージを列挙する）。
     # download→generate→uploadは前段の出力を後段が使う依存関係があるため、
-    # kintone-aggregator側と違い最初の失敗で処理を打ち切る（breakのまま維持）
-    $stages = @($script:batchStepCheckboxes | ForEach-Object { [PSCustomObject]@{ Label = $_.Text; Bat = $_.Tag.BatchPath; Checked = $_.Checked } })
-
-    $hasError = $false
-    $failedExitCode = 0
-    foreach ($stage in $stages) {
-        if (-not $stage.Checked) {
-            Write-Log "$($stage.Label) はチェックが外れているためスキップします。"
-            continue
+    # kintone-aggregator/track-aggregator側と違い最初の失敗で処理を打ち切る（-StopOnFailure）
+    $script:isRunning = $true
+    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
+        -StatusLabel $lblStatus -StopOnFailure -HeaderSuffix "（$clientDisplayName）" `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -InvokeStep {
+            param($bd)
+            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+                -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
+                -GetBatArgs { param($bd) @() }
         }
-        Write-Log "--------------- $($stage.Label) 開始 ---------------"
-        $exitCode = Invoke-BatStep -BatPath $stage.Bat -WorkingDirectory $basePath `
-            -OnOutputLine { param($line) Write-Log $line } `
-            -CurrentProcessRef ([ref]$script:currentProc)
-        if ($exitCode -ne 0) {
-            Write-Log "--------------- $($stage.Label) 失敗（終了コード: $exitCode） ---------------"
-            $hasError = $true
-            $failedExitCode = $exitCode
-            break
-        }
-        Write-Log "--------------- $($stage.Label) 完了 ---------------"
-    }
 
-    if (-not $hasError) {
-        Write-Log "==================== 一括実行 完了（$clientDisplayName） ===================="
-        $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-        $lblStatus.Text = "完了しました"
-    } else {
-        Write-Log "==================== 一括実行 失敗（終了コード: $failedExitCode、$clientDisplayName） ===================="
-        $lblStatus.ForeColor = [System.Drawing.Color]::DarkRed
-        $lblStatus.Text = "エラーが発生しました（終了コード: $failedExitCode）"
-    }
-
-    Set-RunButtonsEnabled $true
     $script:isRunning = $false
     $script:currentProc = $null
-})
-
-function Read-SetEnvLines {
-    $rawLines = [System.IO.File]::ReadAllLines($setEnvBat, $cp932)
-    return $rawLines
 }
+
+$btnRun.Add_Click({ Start-BatchRunAll })
+
 
 $topPanel = New-Object System.Windows.Forms.Panel
 $topPanel.Dock = [System.Windows.Forms.DockStyle]::Top
@@ -501,25 +422,6 @@ $clientOverridableVars = @(
 )
 $clientRuntimeExcludeVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
 
-function Expand-VarTokens {
-    param([string]$Value)
-    $expanded = $Value.Replace("%BASE_PATH%", "$basePath\")
-    $expanded = [regex]::Replace($expanded, '%(\w+)%', {
-        param($match)
-        $refVal = Get-ResolvedVar $match.Groups[1].Value
-        if ($refVal) { $refVal } else { $match.Value }
-    })
-    return $expanded
-}
-
-function Resolve-BrowseStart {
-    param([string]$RawValue)
-    if (!$RawValue) {
-        return $basePath
-    }
-    return Expand-VarTokens $RawValue
-}
-
 function Get-NewClientInitialValues {
     param([string]$ClientName, [hashtable]$Defaults)
     return @{
@@ -533,7 +435,7 @@ function Get-SettingsFieldSource {
     $client = $cmbSettingsClient.SelectedItem
     if ($client -and $client -ne $defaultClientLabel) {
         $clientRaw = Get-ClientProfileRawValues $client
-        $defaults = Get-SetEnvDefaults
+        $defaults = Get-SetEnvDefaults -Path $setEnvBat
         $isPendingNewClient = !(Test-Path -LiteralPath (Get-ClientBatPath $client))
         $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $client $defaults } else { @{} }
         foreach ($varName in $clientOverridableVars) {
@@ -541,8 +443,8 @@ function Get-SettingsFieldSource {
             [PSCustomObject]@{ VarName = $varName; VarValue = $varValue }
         }
     } else {
-        foreach ($line in (Read-SetEnvLines)) {
-            $m = $lineRegex.Match($line.Trim())
+        foreach ($line in (Read-SetEnvLines -Path $setEnvBat)) {
+            $m = $script:setEnvLineRegex.Match($line.Trim())
             if ($m.Success) {
                 [PSCustomObject]@{ VarName = $m.Groups["var"].Value; VarValue = $m.Groups["val"].Value }
             }
@@ -632,7 +534,7 @@ function Update-SettingsFields {
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                    $startPath = Resolve-BrowseStart $targetTxt.Text
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
                     if (Test-Path -LiteralPath $startPath) {
                         $dlg.SelectedPath = $startPath
                     }
@@ -645,7 +547,7 @@ function Update-SettingsFields {
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.OpenFileDialog
                     $dlg.Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*"
-                    $startPath = Resolve-BrowseStart $targetTxt.Text
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
                     if (Test-Path -LiteralPath $startPath) {
                         $dlg.InitialDirectory = Split-Path $startPath -Parent
                         $dlg.FileName = Split-Path $startPath -Leaf
@@ -667,7 +569,7 @@ function Update-SettingsFields {
                 $btnOpen.Tag = $txt
                 $btnOpen.Add_LinkClicked({
                     $targetTxt = $this.Tag
-                    $openPath = Resolve-BrowseStart $targetTxt.Text
+                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $basePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
                     if (Test-Path -LiteralPath $openPath) {
                         Start-Process -FilePath $openPath
                     } else {
@@ -726,9 +628,9 @@ function Save-ClientProfile {
     [System.IO.File]::WriteAllText($clientBat, $content, $cp932)
 
     if ($isNewClient) {
-        $defaults = Get-SetEnvDefaults
-        $defaultConfigPath = Expand-VarTokens $defaults["GENERATE_CONFIG_PATH"]
-        $newConfigPath = Expand-VarTokens (Get-FieldValue "GENERATE_CONFIG_PATH")
+        $defaults = Get-SetEnvDefaults -Path $setEnvBat
+        $defaultConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+        $newConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
         if ($newConfigPath -ne $defaultConfigPath -and (Test-Path -LiteralPath $defaultConfigPath) -and !(Test-Path -LiteralPath $newConfigPath)) {
             New-Item (Split-Path $newConfigPath -Parent) -ItemType Directory -Force | Out-Null
             Copy-Item -LiteralPath $defaultConfigPath -Destination $newConfigPath
@@ -737,19 +639,9 @@ function Save-ClientProfile {
 }
 
 function Save-DefaultSettings {
-    $newLines = foreach ($line in (Read-SetEnvLines)) {
-        $m = $lineRegex.Match($line.Trim())
-        $varName = if ($m.Success) { $m.Groups["var"].Value } else { $null }
-        if ($varName -and ($script:fieldRadios.ContainsKey($varName) -or $script:fieldTextBoxes.ContainsKey($varName))) {
-            $newVal = Get-FieldValue $varName
-            "if not defined $varName set `"$varName=$newVal`""
-        } else {
-            $line
-        }
-    }
-
-    $content = ($newLines -join "`r`n") + "`r`n"
-    [System.IO.File]::WriteAllText($setEnvBat, $content, $cp932)
+    Save-EnvBatFile -Path $setEnvBat `
+        -GetValueFn { param($name) Get-FieldValue $name } `
+        -HasValueFn { param($name) $script:fieldRadios.ContainsKey($name) -or $script:fieldTextBoxes.ContainsKey($name) }
 }
 
 $btnSave.Add_Click({
@@ -791,111 +683,26 @@ $btnNewClient.Add_Click({
     $cmbSettingsClient.SelectedItem = $newName
 })
 
-function Get-SetEnvDefaults {
-    $result = @{}
-    foreach ($line in (Read-SetEnvLines)) {
-        $m = $lineRegex.Match($line.Trim())
-        if ($m.Success) {
-            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
-        }
-    }
-    return $result
-}
-
-function Get-ResolvedVar {
-    param([string]$VarName)
-
-    $val = [Environment]::GetEnvironmentVariable($VarName)
-    if (!$val) {
-        $defaults = Get-SetEnvDefaults
-        if ($defaults.ContainsKey($VarName)) {
-            $val = $defaults[$VarName]
-        }
-    }
-    if (!$val) {
-        return $val
-    }
-
-    return Expand-VarTokens $val
-}
-
-$logStagePanel = New-Object System.Windows.Forms.Panel
-$logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$logStagePanel.Height = 40 + 24 * $allButtonDefs.Count
-
-$lblLogClient = New-Object System.Windows.Forms.Label
-$lblLogClient.Text = "クライアント"
-$lblLogClient.AutoSize = $true
-$lblLogClient.Location = New-Object System.Drawing.Point(20, 17)
-
-$cmbLogClient = New-Object System.Windows.Forms.ComboBox
-$cmbLogClient.Location = New-Object System.Drawing.Point(100, 14)
-$cmbLogClient.Size = New-Object System.Drawing.Size(260, 24)
-$cmbLogClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 function Update-LogClientList {
-    Update-ClientComboItems -ComboBox $cmbLogClient -FixedItems @("すべて", $defaultClientLabel)
+    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo -FixedItems @("すべて", $defaultClientLabel)
 }
 
-$btnClearLogs = New-Object System.Windows.Forms.Button
-$btnClearLogs.Text = "ログをすべて削除"
-$btnClearLogs.Location = New-Object System.Drawing.Point(380, 13)
-$btnClearLogs.Size = New-Object System.Drawing.Size(140, 26)
-$btnClearLogs.Add_Click({
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-    if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
-
-    $logFiles = @(Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue)
-    if ($logFiles.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("削除対象のログファイルがありません。", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-        return
-    }
-
-    $confirm = [System.Windows.Forms.MessageBox]::Show("ログファイルを$($logFiles.Count)件すべて削除します。よろしいですか？", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::YesNo, [System.Windows.Forms.MessageBoxIcon]::Warning)
-    if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
-
-    foreach ($file in $logFiles) {
-        try {
-            Remove-Item -LiteralPath $file.FullName -Force
-        } catch {
-            [System.Windows.Forms.MessageBox]::Show("削除に失敗したファイルがあります: $($file.Name)`r`n$($_.Exception.Message)", "ログの削除", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        }
-    }
-    Update-LogClientList
-    Update-LogView
-})
-
-# $categoryDefs（一括実行タブと共通）から動的に生成する（他3ツールと同じ、単一の定義元からの生成方式）
-$script:logStageRadios = @()
-for ($i = 0; $i -lt $allButtonDefs.Count; $i++) {
-    $bd = $allButtonDefs[$i]
-    $radio = New-Object System.Windows.Forms.RadioButton
-    $radio.Text = Get-BatchDisplayLabel -ButtonDef $bd
-    $radio.AutoSize = $true
-    $radio.Tag = $bd
-    $radio.Checked = ($i -eq 0)
-    $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-    $logStagePanel.Controls.Add($radio)
-    $script:logStageRadios += $radio
-}
-
-$logStagePanel.Controls.AddRange(@($lblLogClient, $cmbLogClient, $btnClearLogs))
-
-# 過去ログの静的な表示のみで色分けは使わないが、New-LogTextBoxを流用してReadOnly時の
-# 背景色などのスタイルをtxtLog（実行中ログ）と一本化する
-$logContentBox = New-LogTextBox
-
-$tabLogs.Controls.Add($logContentBox)
-$tabLogs.Controls.Add($logStagePanel)
+$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
+    -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
+    -ExtraLabelText "クライアント" -ExtraComboWidth 260 `
+    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
+    -OnAfterClear { Update-LogClientList } `
+    -OnUpdateLogView { Update-LogView }
+$cmbLogClient = $script:logTab.ExtraCombo
 
 function Update-LogView {
-    $selectedRadio = $script:logStageRadios | Where-Object { $_.Checked } | Select-Object -First 1
+    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
     if (-not $selectedRadio) { return }
     $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
     $prefix = Get-ResolvedVar $selectedRadio.Tag.LogPrefixVarName
 
-    $logContentBox.Text = ""
+    $script:logTab.ContentBox.Text = ""
 
     if (!($logPath -and $prefix -and (Test-Path -LiteralPath $logPath))) {
         return
@@ -905,10 +712,19 @@ function Update-LogView {
     $clientFilter = if ($logClient -and $logClient -ne "すべて") { "$logClient" + "_" } else { "" }
     $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix$clientFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
 
-    $sections = foreach ($file in $files) { [System.IO.File]::ReadAllText($file.FullName, $cp932) }
-    $logContentBox.Text = $sections -join "`r`n`r`n"
+    $sections = foreach ($file in $files) {
+        try {
+            [System.IO.File]::ReadAllText($file.FullName, $cp932)
+        } catch {
+            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
+        }
+    }
+    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
 }
 
+foreach ($radio in $script:logTab.Radios) {
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+}
 $cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
 
 function Get-ValueForClient {
@@ -949,17 +765,6 @@ function Get-ClientArgValue {
     return ""
 }
 
-function Set-StepStatus {
-    param($ButtonDef, [string]$Text)
-    $color = switch ($Text) {
-        "実行中..." { [System.Drawing.Color]::Black }
-        "成功"      { [System.Drawing.Color]::DarkGreen }
-        "失敗"      { [System.Drawing.Color]::DarkRed }
-        default     { [System.Drawing.Color]::Gray }
-    }
-    Set-StatusLabelText -Label $ButtonDef.StepStatusLabel -Text $Text -ForeColor $color
-}
-
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
     foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $Enabled }
@@ -977,30 +782,14 @@ function Invoke-IndividualStep {
     # download/upload側のAzureサインイン待ちでURL・コードが表示されている間に実行タブを
     # 離れられてしまわないよう、一括実行と同じ$script:isRunningで外側タブの切り替えをブロックする
     $script:isRunning = $true
-    Set-RunButtonsEnabled $false
-    Set-StepStatus -ButtonDef $ButtonDef -Text "実行中..."
-
-    $clientArg = Get-ClientArgValue -ComboBox $ButtonDef.InputControls['Client']
-    $batArgs = if ($clientArg) { @("client=$clientArg") } else { @() }
-
-    Write-Log ""
-    Write-Log "--------------- $($ButtonDef.Label) 開始 ---------------"
-
-    $exitCode = Invoke-BatStep -BatPath $ButtonDef.BatchPath -WorkingDirectory $basePath -BatArgs $batArgs `
-        -OnOutputLine { param($line) Write-Log $line } `
-        -CurrentProcessRef ([ref]$script:currentProc)
-
-    Show-FormInForeground -Form $form
-
-    if ($exitCode -ne 0) {
-        Write-Log "--------------- $($ButtonDef.Label) 失敗（終了コード: $exitCode） ---------------"
-        Set-StepStatus -ButtonDef $ButtonDef -Text "失敗"
-    } else {
-        Write-Log "--------------- $($ButtonDef.Label) 完了 ---------------"
-        Set-StepStatus -ButtonDef $ButtonDef -Text "成功"
-    }
-
-    Set-RunButtonsEnabled $true
+    Invoke-BatButton -ButtonDef $ButtonDef -WorkingDirectory $basePath -Form $form `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -CurrentProcessRef ([ref]$script:currentProc) `
+        -GetBatArgs {
+            param($bd)
+            $clientArg = Get-ClientArgValue -ComboBox $bd.InputControls['Client']
+            if ($clientArg) { @("client=$clientArg") } else { @() }
+        }
     $script:isRunning = $false
 }
 

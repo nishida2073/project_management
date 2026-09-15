@@ -1,4 +1,147 @@
 ﻿$script:cp932Encoding = [System.Text.Encoding]::GetEncoding(932)
+$script:setEnvLineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
+
+function Read-SetEnvLines {
+    param([Parameter(Mandatory)][string]$Path)
+    if (!(Test-Path -LiteralPath $Path)) { return @() }
+    return [System.IO.File]::ReadAllLines($Path, $script:cp932Encoding)
+}
+
+function Expand-VarTokens {
+    param(
+        [string]$Value,
+        [Parameter(Mandatory)][scriptblock]$Resolver,
+        [string]$BasePath
+    )
+    if (!$Value) { return $Value }
+    $expanded = if ($BasePath) { $Value.Replace("%BASE_PATH%", "$BasePath\") } else { $Value }
+    return [regex]::Replace($expanded, '%(\w+)%', {
+        param($match)
+        $refVal = & $Resolver $match.Groups[1].Value
+        if ($refVal) { $refVal } else { $match.Value }
+    })
+}
+
+function Resolve-BrowseStart {
+    param(
+        [string]$RawValue,
+        [Parameter(Mandatory)][string]$DefaultPath,
+        [Parameter(Mandatory)][scriptblock]$Resolver,
+        [string]$BasePath
+    )
+    if (!$RawValue) { return $DefaultPath }
+    return Expand-VarTokens -Value $RawValue -Resolver $Resolver -BasePath $BasePath
+}
+
+function Get-SetEnvDefaults {
+    param([Parameter(Mandatory)][string]$Path)
+    $result = @{}
+    foreach ($line in (Read-SetEnvLines -Path $Path)) {
+        $m = $script:setEnvLineRegex.Match($line.Trim())
+        if ($m.Success) {
+            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
+        }
+    }
+    return $result
+}
+
+function Get-ResolvedVar {
+    param([string]$VarName, [string]$Path = $setEnvBat)
+    $val = [Environment]::GetEnvironmentVariable($VarName)
+    if (!$val) {
+        $defaults = Get-SetEnvDefaults -Path $Path
+        if ($defaults.ContainsKey($VarName)) {
+            $val = $defaults[$VarName]
+        }
+    }
+    if (!$val) { return $val }
+    return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name } -BasePath $basePath
+}
+
+function Save-EnvBatFile {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [string[]]$VarNames,
+        [Parameter(Mandatory)][scriptblock]$GetValueFn,
+        [Parameter(Mandatory)][scriptblock]$HasValueFn
+    )
+    $existingLines = Read-SetEnvLines -Path $Path
+    $writtenVars = @{}
+
+    $newLines = @(foreach ($line in $existingLines) {
+        $m = $script:setEnvLineRegex.Match($line.Trim())
+        $varName = if ($m.Success) { $m.Groups["var"].Value } else { $null }
+        $matchesVarNames = (-not $VarNames) -or ($VarNames -contains $varName)
+        if ($varName -and $matchesVarNames -and (& $HasValueFn $varName)) {
+            $writtenVars[$varName] = $true
+            $newVal = & $GetValueFn $varName
+            "if not defined $varName set `"$varName=$newVal`""
+        } else {
+            $line
+        }
+    })
+
+    if ($VarNames) {
+        foreach ($varName in $VarNames) {
+            if (!$writtenVars.ContainsKey($varName) -and (& $HasValueFn $varName)) {
+                $newLines += "if not defined $varName set `"$varName=$(& $GetValueFn $varName)`""
+            }
+        }
+    }
+    if ($existingLines.Count -eq 0) {
+        $newLines = @("@echo off", "") + $newLines
+    }
+
+    $content = ($newLines -join "`r`n") + "`r`n"
+    [System.IO.File]::WriteAllText($Path, $content, $script:cp932Encoding)
+}
+
+$script:groupBatLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
+
+function Get-GroupBatPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.bat" }
+
+function Get-SetLineRawValues {
+    param([string]$Path)
+    $result = @{}
+    if (!(Test-Path -LiteralPath $Path)) { return $result }
+    foreach ($line in [System.IO.File]::ReadAllLines($Path, $script:cp932Encoding)) {
+        $m = $script:groupBatLineRegex.Match($line.Trim())
+        if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
+    }
+    return $result
+}
+
+function Get-GroupKintoneThreadUrl {
+    param([string]$GroupName)
+    if (!$GroupName) { return $null }
+    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $subdomain = $raw["KintoneSubdomain"]
+    $spaceId = $raw["SpaceId"]
+    $threadId = $raw["ThreadId"]
+    if (!$subdomain -or !$spaceId -or !$threadId) { return $null }
+    return "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId"
+}
+
+function ConvertFrom-MentionUserCodesText {
+    param([string]$Text)
+    $rows = [System.Collections.Generic.List[object]]::new()
+    foreach ($part in ($Text -split ',')) {
+        $trimmed = $part.Trim()
+        if (!$trimmed) { continue }
+        $pair = $trimmed -split ':', 2
+        $code = $pair[0].Trim()
+        if (!$code) { continue }
+        $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
+        if ($mentionTypeOptions -notcontains $type) { $type = "USER" }
+        $rows.Add([PSCustomObject]@{ Code = $code; Type = $type })
+    }
+    return $rows
+}
+
+function ConvertTo-MentionUserCodesText {
+    param($Rows)
+    return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
+}
 
 # バッチ実行中に外部プロセス（ブラウザ等）へフォーカスが移ると、SetForegroundWindowを
 # 単純に呼ぶだけではWindowsのセキュリティ制限で拒否され、タスクバーの点滅になるだけのため、
@@ -22,9 +165,6 @@ public class Win32Focus {
     [DllImport("user32.dll")]
     public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 
-    [DllImport("user32.dll")]
-    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
     public static void ForceForeground(IntPtr hWnd) {
         uint currentThreadId = GetCurrentThreadId();
         uint dummyProcessId;
@@ -35,7 +175,6 @@ public class Win32Focus {
             attached = AttachThreadInput(currentThreadId, foregroundThreadId, true);
         }
         try {
-            ShowWindow(hWnd, 9); // SW_RESTORE
             SetForegroundWindow(hWnd);
         } finally {
             if (attached) {
@@ -84,7 +223,7 @@ function Get-BatEnvVars {
 # カンマやスペースを含んでいても1つの引数として渡るよう、それぞれ個別にクォートする。
 # $CurrentProcessRefを渡すと、呼び出し側でウィンドウを閉じる際にプロセスを強制終了できるよう
 # 実行中のProcessオブジェクトを書き戻す
-function Invoke-BatStep {
+function Invoke-BatProcess {
     param(
         [Parameter(Mandatory)][string]$BatPath,
         [Parameter(Mandatory)][string]$WorkingDirectory,
