@@ -27,64 +27,6 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "kintoneリソース生成ツール"
-$form.Size = New-Object System.Drawing.Size(780, 560)
-$form.StartPosition = "CenterScreen"
-$form.MinimumSize = New-Object System.Drawing.Size(600, 500)
-
-$script:currentProc = $null
-$script:stepOutputPaths = @{}
-$script:runHadWarning = $false
-$script:createdSpaceUrl = $null
-$form.Add_FormClosing({
-    if ($script:currentProc -and !$script:currentProc.HasExited) {
-        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
-    }
-})
-
-$tabControl = New-Object System.Windows.Forms.TabControl
-$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
-
-$tabRun = New-Object System.Windows.Forms.TabPage
-$tabRun.Text = "実行"
-
-$innerRunTabControl = New-Object System.Windows.Forms.TabControl
-$innerRunTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
-$innerRunTabControl.Height = 404
-
-$tabSingleRun = New-Object System.Windows.Forms.TabPage
-$tabSingleRun.Text = "単体実行"
-
-$tabBatchRun = New-Object System.Windows.Forms.TabPage
-$tabBatchRun.Text = "複数実行"
-
-$innerRunTabControl.Controls.AddRange(@($tabBatchRun, $tabSingleRun))
-$innerRunTabControl.Add_Selecting({
-    if ($script:isRunning) { $_.Cancel = $true }
-})
-
-$innerRunTabControl.Add_SelectedIndexChanged({ Update-InnerRunTabHeight })
-
-$tabLogs = New-Object System.Windows.Forms.TabPage
-$tabLogs.Text = "ログ"
-
-$tabSettings = New-Object System.Windows.Forms.TabPage
-$tabSettings.Text = "設定"
-
-$tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
-$form.Controls.Add($tabControl)
-
-$script:isRunning = $false
-$tabControl.Add_Selecting({
-    if ($script:isRunning -and $_.TabPage -ne $tabRun) {
-        $_.Cancel = $true
-    }
-})
-
-$runTopPanel = New-Object System.Windows.Forms.Panel
-$runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-
 $script:baseTemplateNamePlaceholder = "未選択"
 
 $script:customTemplateNamePlaceholder = "指定なし"
@@ -179,6 +121,64 @@ $categoryDefs = @($stepMeta | ForEach-Object {
         )
     }
 })
+
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "kintoneリソース生成ツール"
+$form.Size = New-Object System.Drawing.Size(780, 560)
+$form.StartPosition = "CenterScreen"
+$form.MinimumSize = New-Object System.Drawing.Size(600, 500)
+
+$script:currentProc = $null
+$script:stepOutputPaths = @{}
+$script:runHadWarning = $false
+$script:createdSpaceUrl = $null
+$form.Add_FormClosing({
+    if ($script:currentProc -and !$script:currentProc.HasExited) {
+        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
+    }
+})
+
+$tabControl = New-Object System.Windows.Forms.TabControl
+$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+
+$tabRun = New-Object System.Windows.Forms.TabPage
+$tabRun.Text = "実行"
+
+$innerRunTabControl = New-Object System.Windows.Forms.TabControl
+$innerRunTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
+$innerRunTabControl.Height = 404
+
+$tabSingleRun = New-Object System.Windows.Forms.TabPage
+$tabSingleRun.Text = "単体実行"
+
+$tabBatchRun = New-Object System.Windows.Forms.TabPage
+$tabBatchRun.Text = "複数実行"
+
+$innerRunTabControl.Controls.AddRange(@($tabBatchRun, $tabSingleRun))
+$innerRunTabControl.Add_Selecting({
+    if ($script:isRunning) { $_.Cancel = $true }
+})
+
+$innerRunTabControl.Add_SelectedIndexChanged({ Update-InnerRunTabHeight })
+
+$tabLogs = New-Object System.Windows.Forms.TabPage
+$tabLogs.Text = "ログ"
+
+$tabSettings = New-Object System.Windows.Forms.TabPage
+$tabSettings.Text = "設定"
+
+$tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
+$form.Controls.Add($tabControl)
+
+$script:isRunning = $false
+$tabControl.Add_Selecting({
+    if ($script:isRunning -and $_.TabPage -ne $tabRun) {
+        $_.Cancel = $true
+    }
+})
+
+$runTopPanel = New-Object System.Windows.Forms.Panel
+$runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
 
 $execTabControl = New-Object System.Windows.Forms.TabControl
 
@@ -282,13 +282,79 @@ $btnBatchBrowse.Add_Click({
     }
 })
 
-$txtLog = New-LogTextBox
-
 $tabSingleRun.Controls.Add($runTopPanel)
 $tabBatchRun.Controls.Add($batchExcelPanel)
 
-$tabRun.Controls.Add($txtLog)
-$tabRun.Controls.Add($innerRunTabControl)
+$logSpacer = New-Object System.Windows.Forms.Panel
+$logSpacer.Height = 10
+$logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
+
+$txtLog = New-LogTextBox
+
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($innerRunTabControl, $logSpacer, $txtLog)
+
+$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $stepMeta `
+    -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
+    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
+    -OnAfterClear { Update-LogConfigNameList } `
+    -OnUpdateLogView { Update-LogView }
+foreach ($radio in $script:logTab.Radios) {
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+}
+$cmbLogConfigName = $script:logTab.ExtraCombo
+
+function Update-LogConfigNameList {
+    $selected = $cmbLogConfigName.SelectedItem
+    $cmbLogConfigName.Items.Clear()
+    $cmbLogConfigName.Items.Add("すべて") | Out-Null
+
+    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
+    if ($logPath -and (Test-Path -LiteralPath $logPath)) {
+        $stageKeyPattern = ($stepMeta.StageKey -join '|')
+        $stagePrefixPattern = "^(?:$stageKeyPattern)_(?<config>.+)_\d{8}_\d{6}$"
+        $configNames = Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                $m = [regex]::Match([System.IO.Path]::GetFileNameWithoutExtension($_.Name), $stagePrefixPattern)
+                if ($m.Success) { $m.Groups["config"].Value }
+            } | Sort-Object -Unique
+        foreach ($name in $configNames) {
+            $cmbLogConfigName.Items.Add($name) | Out-Null
+        }
+    }
+
+    $cmbLogConfigName.SelectedIndex = if ($selected -and $cmbLogConfigName.Items.Contains($selected)) { $cmbLogConfigName.Items.IndexOf($selected) } else { 0 }
+}
+
+function Update-LogView {
+    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
+    if (-not $selectedRadio) { return }
+    $stage = $selectedRadio.Tag.StageKey
+    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
+
+    $script:logTab.ContentBox.Text = ""
+
+    if (!($logPath -and (Test-Path -LiteralPath $logPath))) {
+        return
+    }
+
+    $logConfigName = $cmbLogConfigName.SelectedItem
+    $configFilter = if ($logConfigName -and $logConfigName -ne "すべて") { "$logConfigName" + "_" } else { "" }
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}_$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
+
+    $sections = foreach ($file in $files) {
+        try {
+            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
+        } catch {
+            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
+        }
+    }
+    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
+}
+
+$cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
+
+Update-LogConfigNameList
+Update-LogView
 
 function Get-StepArgs {
     param([int]$Id)
@@ -324,7 +390,7 @@ function Test-StepPrereq {
     return $true
 }
 
-function Set-RunControlsEnabled {
+function Set-RunButtonsEnabled {
     param([bool]$Enabled)
     foreach ($ic in $script:stepInputControls.Values) {
         foreach ($ctrl in $ic.Values) { $ctrl.Enabled = $Enabled }
@@ -386,12 +452,12 @@ function Invoke-SingleStep {
     if (!(Test-StepPrereq -Id $Id)) { return }
 
     $script:isRunning = $true
-    Set-RunControlsEnabled $false
+    Set-RunButtonsEnabled $false
     $lblOverallStatus.Text = ""
 
     Invoke-Step -Id $Id | Out-Null
 
-    Set-RunControlsEnabled $true
+    Set-RunButtonsEnabled $true
     $script:isRunning = $false
 }
 
@@ -441,7 +507,7 @@ $btnRunAll.Add_Click({
     }
 
     $script:isRunning = $true
-    Set-RunControlsEnabled $false
+    Set-RunButtonsEnabled $false
     Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
 
     $failedLabel = Invoke-SeededAllSteps
@@ -454,7 +520,7 @@ $btnRunAll.Add_Click({
         Set-StepStatus -Label $lblOverallStatus -Text "完了しました" -State "成功"
     }
 
-    Set-RunControlsEnabled $true
+    Set-RunButtonsEnabled $true
     $script:isRunning = $false
 })
 
@@ -492,7 +558,7 @@ $btnBatchRunAll.Add_Click({
     }
 
     $script:isRunning = $true
-    Set-RunControlsEnabled $false
+    Set-RunButtonsEnabled $false
 
     $origConfigNames = @{}
     foreach ($sm in $stepMeta) { $origConfigNames[$sm.Id] = $script:stepInputControls[$sm.Id]['ConfigName'].Text }
@@ -577,7 +643,7 @@ $btnBatchRunAll.Add_Click({
         $cmbCustomTemplateName.Text = $origCustomTemplateText
     }
 
-    Set-RunControlsEnabled $true
+    Set-RunButtonsEnabled $true
     $script:isRunning = $false
 })
 
@@ -638,40 +704,6 @@ $lblSaveStatus.Font = New-Object System.Drawing.Font($lblSaveStatus.Font, [Syste
 
 $topPanel.Controls.AddRange(@($btnSave, $btnReload, $lblSaveStatus))
 
-function Test-KintoneConnectionFromFields {
-    param(
-        [System.Windows.Forms.Button]$Button,
-        [System.Windows.Forms.Label]$StatusLabel
-    )
-
-    $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
-    $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
-    $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
-
-    if (!$baseUrlVal -or !$loginVal -or !$passwordVal) {
-        $StatusLabel.ForeColor = [System.Drawing.Color]::DarkRed
-        $StatusLabel.Text = "kintoneのサイトURL・ログイン名・パスワードをすべて入力してください"
-        return
-    }
-
-    $Button.Enabled = $false
-    $StatusLabel.ForeColor = [System.Drawing.Color]::Black
-    $StatusLabel.Text = "接続テスト中..."
-    [System.Windows.Forms.Application]::DoEvents()
-
-    try {
-        $pair = "${loginVal}:${passwordVal}"
-        $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
-        Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
-        $StatusLabel.ForeColor = [System.Drawing.Color]::DarkGreen
-        $StatusLabel.Text = "成功しました"
-    } catch {
-        $StatusLabel.ForeColor = [System.Drawing.Color]::DarkRed
-        $StatusLabel.Text = "失敗しました（$($_.Exception.Message)）"
-    }
-
-    $Button.Enabled = $true
-}
 
 $fieldPanel = New-Object System.Windows.Forms.Panel
 $fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -786,16 +818,18 @@ function Update-SettingsFields {
     $fieldPanel.Controls.Add($btnTestConnection)
     $y += 32
 
-    $lblTestStatus = New-Object System.Windows.Forms.Label
-    $lblTestStatus.Text = ""
-    $lblTestStatus.AutoSize = $true
-    $lblTestStatus.MaximumSize = New-Object System.Drawing.Size(420, 0)
-    $lblTestStatus.Location = New-Object System.Drawing.Point(310, $y)
-    $lblTestStatus.Font = New-Object System.Drawing.Font($lblTestStatus.Font, [System.Drawing.FontStyle]::Bold)
-    $fieldPanel.Controls.Add($lblTestStatus)
-
-    $btnTestConnection.Tag = $lblTestStatus
-    $btnTestConnection.Add_Click({ Test-KintoneConnectionFromFields -Button $this -StatusLabel $this.Tag })
+    $btnTestConnection.Add_Click({
+        $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
+        $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
+        $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
+        $validationError = if (!$baseUrlVal -or !$loginVal -or !$passwordVal) { "kintoneのサイトURL・ログイン名・パスワードをすべて入力してください" } else { $null }
+        Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError `
+            -Action {
+                $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
+                Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
+            }.GetNewClosure() `
+            -FormatSuccessMessage { param($response) "成功しました" }
+    })
 }
 
 $btnReload.Add_Click({
@@ -817,66 +851,6 @@ $btnSave.Add_Click({
 
 Update-SettingsFields
 
-$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $stepMeta `
-    -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
-    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
-    -OnAfterClear { Update-LogConfigNameList } `
-    -OnUpdateLogView { Update-LogView }
-foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-}
-$cmbLogConfigName = $script:logTab.ExtraCombo
-
-function Update-LogConfigNameList {
-    $selected = $cmbLogConfigName.SelectedItem
-    $cmbLogConfigName.Items.Clear()
-    $cmbLogConfigName.Items.Add("すべて") | Out-Null
-
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-    if ($logPath -and (Test-Path -LiteralPath $logPath)) {
-        $stageKeyPattern = ($stepMeta.StageKey -join '|')
-        $stagePrefixPattern = "^(?:$stageKeyPattern)_(?<config>.+)_\d{8}_\d{6}$"
-        $configNames = Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue |
-            ForEach-Object {
-                $m = [regex]::Match([System.IO.Path]::GetFileNameWithoutExtension($_.Name), $stagePrefixPattern)
-                if ($m.Success) { $m.Groups["config"].Value }
-            } | Sort-Object -Unique
-        foreach ($name in $configNames) {
-            $cmbLogConfigName.Items.Add($name) | Out-Null
-        }
-    }
-
-    $cmbLogConfigName.SelectedIndex = if ($selected -and $cmbLogConfigName.Items.Contains($selected)) { $cmbLogConfigName.Items.IndexOf($selected) } else { 0 }
-}
-
-function Update-LogView {
-    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
-    if (-not $selectedRadio) { return }
-    $stage = $selectedRadio.Tag.StageKey
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-
-    $script:logTab.ContentBox.Text = ""
-
-    if (!($logPath -and (Test-Path -LiteralPath $logPath))) {
-        return
-    }
-
-    $logConfigName = $cmbLogConfigName.SelectedItem
-    $configFilter = if ($logConfigName -and $logConfigName -ne "すべて") { "$logConfigName" + "_" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}_$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
-
-    $sections = foreach ($file in $files) {
-        try {
-            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
-        } catch {
-            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
-        }
-    }
-    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
-}
-
-$cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
-
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
         Update-BaseTemplateNameList
@@ -891,8 +865,6 @@ $tabControl.Add_SelectedIndexChanged({
 
 Update-BaseTemplateNameList
 Update-CustomTemplateNameList
-Update-LogConfigNameList
-Update-LogView
 
 $form.Add_Shown({ Update-InnerRunTabHeight })
 $tabControl.SelectedTab = $tabRun

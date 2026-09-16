@@ -13,7 +13,6 @@
 
     $Url = "$BaseUrl/k/v1/app/form/fields.json?app=$TargetAppId"
     try {
-        $allRecords = @()
         $response = Invoke-RestMethod -Uri $Url -Headers $headers -Method GET
         Write-Message $response -VarName "response"
         return $response.properties
@@ -60,7 +59,7 @@ function Get-CurrentAppData {
     $Url = "$BaseUrl/k/v1/records.json?app=$TargetAppId&query=$TargetDateCodeField=`"$TargetDate`""
 
     try {
-        $allRecords = @()
+        $allRecords = New-Object System.Collections.Generic.List[object]
         $offset = 0
         $limit = 100
         while ($true) {
@@ -82,7 +81,7 @@ function Get-CurrentAppData {
                 Write-Message "データなし" -VarName "message" -Type "Info"
                 break
             }
-            $allRecords += $records
+            $allRecords.AddRange($records)
 
             if ($records.Count -lt $limit) {
                 break

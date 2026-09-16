@@ -111,8 +111,14 @@ $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 
 $tabRun = New-Object System.Windows.Forms.TabPage
 $tabRun.Text = "実行"
-$tabControl.Controls.Add($tabRun)
 
+$tabLogs = New-Object System.Windows.Forms.TabPage
+$tabLogs.Text = "ログ"
+
+$tabSettings = New-Object System.Windows.Forms.TabPage
+$tabSettings.Text = "設定"
+
+$tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
 
@@ -210,10 +216,6 @@ function Set-RunButtonsEnabled {
 }
 
 
-$tabLogs = New-Object System.Windows.Forms.TabPage
-$tabLogs.Text = "ログ"
-$tabControl.Controls.Add($tabLogs)
-
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -233,10 +235,6 @@ $cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView })
 
 Update-LogView
 
-
-$tabSettings = New-Object System.Windows.Forms.TabPage
-$tabSettings.Text = "設定"
-$tabControl.Controls.Add($tabSettings)
 
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
@@ -479,35 +477,25 @@ function Update-GroupSettingsFields {
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick { Test-KintonePostSettings } } } | Out-Null
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
+        Sync-MentionRowsFromControls
+        $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+        $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+        $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
+        Invoke-TestAction -DialogTitle "テスト投稿" -ValidationError $validationError `
+            -Action {
+                $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+                $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+                $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+                $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+                $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+                $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+                Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+            }.GetNewClosure() `
+            -FormatSuccessMessage { param($response) "投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。" }
+    } } } | Out-Null
 
     $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
-}
-
-function Test-KintonePostSettings {
-    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
-    $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
-    $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
-
-    if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) {
-        [System.Windows.Forms.MessageBox]::Show("スペースIDとスレッドIDを入力してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    Sync-MentionRowsFromControls
-    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
-
-    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-
-    try {
-        $response = Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
-        [System.Windows.Forms.MessageBox]::Show("投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-    } catch {
-        [System.Windows.Forms.MessageBox]::Show("投稿に失敗しました。`r`n$($_.Exception.Message)", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-    }
 }
 
 function Save-CommonSettings {

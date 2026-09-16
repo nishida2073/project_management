@@ -33,49 +33,6 @@ function Get-ClientBatPath {
     return Join-Path $clientsDir "$clientFilePrefix-$ClientName.bat"
 }
 
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "コース別パッケージ生成ツール"
-$form.Size = New-Object System.Drawing.Size(760, 560)
-$form.StartPosition = "CenterScreen"
-$form.MinimumSize = New-Object System.Drawing.Size(520, 360)
-
-$script:currentProc = $null
-$form.Add_FormClosing({
-    if ($script:currentProc -and !$script:currentProc.HasExited) {
-        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
-    }
-})
-
-$tabControl = New-Object System.Windows.Forms.TabControl
-$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
-
-$tabRun = New-Object System.Windows.Forms.TabPage
-$tabRun.Text = "実行"
-
-$tabLogs = New-Object System.Windows.Forms.TabPage
-$tabLogs.Text = "ログ"
-
-$tabSettings = New-Object System.Windows.Forms.TabPage
-$tabSettings.Text = "設定"
-
-$tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
-$form.Controls.Add($tabControl)
-
-$script:isRunning = $false
-$script:lastClientVars = @()
-$tabControl.Add_Selecting({
-    if ($script:isRunning -and $_.TabPage -ne $tabRun) {
-        $_.Cancel = $true
-    }
-})
-
-$execTabControl = New-Object System.Windows.Forms.TabControl
-$execTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
-
-$tabBatchAll = New-Object System.Windows.Forms.TabPage
-$tabBatchAll.Text = "一括実行"
-$execTabControl.Controls.Add($tabBatchAll)
-
 $cmbClient = New-Object System.Windows.Forms.ComboBox
 $cmbClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
@@ -146,6 +103,49 @@ $categoryDefs = @(
     }
 )
 $allButtonDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "コース別パッケージ生成ツール"
+$form.Size = New-Object System.Drawing.Size(760, 560)
+$form.StartPosition = "CenterScreen"
+$form.MinimumSize = New-Object System.Drawing.Size(520, 360)
+
+$script:currentProc = $null
+$form.Add_FormClosing({
+    if ($script:currentProc -and !$script:currentProc.HasExited) {
+        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
+    }
+})
+
+$tabControl = New-Object System.Windows.Forms.TabControl
+$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+
+$tabRun = New-Object System.Windows.Forms.TabPage
+$tabRun.Text = "実行"
+
+$tabLogs = New-Object System.Windows.Forms.TabPage
+$tabLogs.Text = "ログ"
+
+$tabSettings = New-Object System.Windows.Forms.TabPage
+$tabSettings.Text = "設定"
+
+$tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
+$form.Controls.Add($tabControl)
+
+$script:isRunning = $false
+$script:lastClientVars = @()
+$tabControl.Add_Selecting({
+    if ($script:isRunning -and $_.TabPage -ne $tabRun) {
+        $_.Cancel = $true
+    }
+})
+
+$execTabControl = New-Object System.Windows.Forms.TabControl
+$execTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
+
+$tabBatchAll = New-Object System.Windows.Forms.TabPage
+$tabBatchAll.Text = "一括実行"
+$execTabControl.Controls.Add($tabBatchAll)
 
 function Get-BatchOpenTarget {
     param($ButtonDef, [string]$ClientName)
@@ -238,10 +238,13 @@ function Get-ClientProfileValues {
     return $result
 }
 
+$logSpacer = New-Object System.Windows.Forms.Panel
+$logSpacer.Height = 10
+$logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
+
 $txtLog = New-LogTextBox
 
-$tabRun.Controls.Add($txtLog)
-$tabRun.Controls.Add($execTabControl)
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $logSpacer, $txtLog)
 
 function Start-BatchRunAll {
     $selectedClient = $cmbClient.SelectedItem
@@ -288,6 +291,49 @@ function Start-BatchRunAll {
 }
 
 $btnRunAll.Add_Click({ Start-BatchRunAll })
+
+function Update-LogClientList {
+    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo -FixedItems @("すべて", $defaultClientLabel)
+}
+
+$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
+    -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
+    -ExtraLabelText "クライアント" -ExtraComboWidth 260 `
+    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
+    -OnAfterClear { Update-LogClientList } `
+    -OnUpdateLogView { Update-LogView }
+$cmbLogClient = $script:logTab.ExtraCombo
+
+function Update-LogView {
+    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
+    if (-not $selectedRadio) { return }
+    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
+    $prefix = Get-ResolvedVar $selectedRadio.Tag.LogPrefixVarName
+
+    $script:logTab.ContentBox.Text = ""
+
+    if (!($logPath -and $prefix -and (Test-Path -LiteralPath $logPath))) {
+        return
+    }
+
+    $logClient = $cmbLogClient.SelectedItem
+    $clientFilter = if ($logClient -and $logClient -ne "すべて") { "$logClient" + "_" } else { "" }
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix$clientFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+
+    $sections = foreach ($file in $files) {
+        try {
+            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
+        } catch {
+            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
+        }
+    }
+    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
+}
+
+foreach ($radio in $script:logTab.Radios) {
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+}
+$cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
 
 
 $topPanel = New-Object System.Windows.Forms.Panel
@@ -646,49 +692,6 @@ $btnNewClient.Add_Click({
     $cmbSettingsClient.SelectedItem = $newName
 })
 
-
-function Update-LogClientList {
-    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo -FixedItems @("すべて", $defaultClientLabel)
-}
-
-$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
-    -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
-    -ExtraLabelText "クライアント" -ExtraComboWidth 260 `
-    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
-    -OnAfterClear { Update-LogClientList } `
-    -OnUpdateLogView { Update-LogView }
-$cmbLogClient = $script:logTab.ExtraCombo
-
-function Update-LogView {
-    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
-    if (-not $selectedRadio) { return }
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-    $prefix = Get-ResolvedVar $selectedRadio.Tag.LogPrefixVarName
-
-    $script:logTab.ContentBox.Text = ""
-
-    if (!($logPath -and $prefix -and (Test-Path -LiteralPath $logPath))) {
-        return
-    }
-
-    $logClient = $cmbLogClient.SelectedItem
-    $clientFilter = if ($logClient -and $logClient -ne "すべて") { "$logClient" + "_" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix$clientFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
-
-    $sections = foreach ($file in $files) {
-        try {
-            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
-        } catch {
-            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
-        }
-    }
-    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
-}
-
-foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-}
-$cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
 
 function Get-ValueForClient {
     param([string]$ClientName, [string]$VarName)

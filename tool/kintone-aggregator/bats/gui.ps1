@@ -82,8 +82,14 @@ $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 
 $tabRun = New-Object System.Windows.Forms.TabPage
 $tabRun.Text = "実行"
-$tabControl.Controls.Add($tabRun)
 
+$tabLogs = New-Object System.Windows.Forms.TabPage
+$tabLogs.Text = "ログ"
+
+$tabSettings = New-Object System.Windows.Forms.TabPage
+$tabSettings.Text = "設定"
+
+$tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
 
@@ -181,10 +187,6 @@ function Set-RunButtonsEnabled {
 }
 
 
-$tabLogs = New-Object System.Windows.Forms.TabPage
-$tabLogs.Text = "ログ"
-$tabControl.Controls.Add($tabLogs)
-
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -204,10 +206,6 @@ $cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView })
 
 Update-LogView
 
-
-$tabSettings = New-Object System.Windows.Forms.TabPage
-$tabSettings.Text = "設定"
-$tabControl.Controls.Add($tabSettings)
 
 $clientsTemplateDir = Join-Path $clientsDir "template"
 
@@ -263,7 +261,23 @@ $settingsMaskedVars = @("KintonePassword")
 $settingsMultilineVars = @("CommentTextTemplate")
 $settingsTrailingButtonVars = @{
     "TargetAppIds"        = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group }.GetNewClosure() }
-    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick { Test-KintonePostSettings } }
+    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
+        Sync-MentionRowsFromControls
+        $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+        $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+        $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
+        Invoke-TestAction -DialogTitle "テスト投稿" -ValidationError $validationError `
+            -Action {
+                $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+                $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+                $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+                $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+                $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+                $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+                Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+            }.GetNewClosure() `
+            -FormatSuccessMessage { param($response) "投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。" }
+    } }
 }
 
 function Get-SuffixedRawValues {
@@ -623,56 +637,33 @@ function Test-KintoneConnection {
     $targetAppIdsValue = Get-GroupSettingsFieldValue "${ReportGroup}_TargetAppIds"
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
 
-    if ($targetAppIds.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("対象アプリIDが未入力です。", "テスト接続", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
+    $validationError = if ($targetAppIds.Count -eq 0) { "対象アプリIDが未入力です。" } else { $null }
 
-    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+    Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError `
+        -Action {
+            $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+            $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
 
-    $resultLines = @()
-    $hasFailure = $false
-    foreach ($targetAppId in $targetAppIds) {
-        try {
-            $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
-            $fieldCodes = @($fieldData.PSObject.Properties.Name)
-            $resultLines += "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
-            $resultLines += "  $($fieldCodes -join ', ')"
-        } catch {
-            $hasFailure = $true
-            $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
-        }
-    }
+            $resultLines = @()
+            $hasFailure = $false
+            foreach ($targetAppId in $targetAppIds) {
+                try {
+                    $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
+                    $fieldCodes = @($fieldData.PSObject.Properties.Name)
+                    $resultLines += "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
+                    $resultLines += "  $($fieldCodes -join ', ')"
+                } catch {
+                    $hasFailure = $true
+                    $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
+                }
+            }
 
-    $icon = if ($hasFailure) { [System.Windows.Forms.MessageBoxIcon]::Error } else { [System.Windows.Forms.MessageBoxIcon]::Information }
-    [System.Windows.Forms.MessageBox]::Show(($resultLines -join "`r`n"), "テスト接続", [System.Windows.Forms.MessageBoxButtons]::OK, $icon) | Out-Null
-}
-
-function Test-KintonePostSettings {
-    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
-    $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
-    $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
-
-    if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) {
-        [System.Windows.Forms.MessageBox]::Show("スペースIDとスレッドIDを入力してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    Sync-MentionRowsFromControls
-    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
-
-    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-
-    try {
-        $response = Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
-        [System.Windows.Forms.MessageBox]::Show("投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-    } catch {
-        [System.Windows.Forms.MessageBox]::Show("投稿に失敗しました。`r`n$($_.Exception.Message)", "テスト投稿", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-    }
+            $resultText = $resultLines -join "`r`n"
+            if ($hasFailure) { throw $resultText }
+            return $resultText
+        }.GetNewClosure() `
+        -FormatSuccessMessage { param($response) $response } `
+        -FormatFailureMessage { param($ErrorRecord) $ErrorRecord.Exception.Message }
 }
 
 function Save-CommonSettings {

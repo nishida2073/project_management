@@ -942,3 +942,25 @@ function Render-SettingsFields {
     }
     return $y
 }
+
+function Invoke-TestAction {
+    param(
+        [string]$ValidationError,
+        [Parameter(Mandatory)][scriptblock]$Action,
+        [Parameter(Mandatory)][scriptblock]$FormatSuccessMessage,
+        [scriptblock]$FormatFailureMessage = { param($ErrorRecord) "失敗しました。`r`n$($ErrorRecord.Exception.Message)" },
+        [string]$DialogTitle = "テスト"
+    )
+
+    if ($ValidationError) {
+        [System.Windows.Forms.MessageBox]::Show($ValidationError, $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    try {
+        $response = & $Action
+        [System.Windows.Forms.MessageBox]::Show((& $FormatSuccessMessage $response), $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show((& $FormatFailureMessage $_), $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+    }
+}
