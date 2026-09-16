@@ -257,6 +257,7 @@ $settingsVarLabels = @{
     "TargetUserCodeField"      = "受講生IDフィールドコード"
 }
 $settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir", "OutputAlertBackupDir")
+$settingsFileBrowseVars = @()
 $settingsMaskedVars = @("KintonePassword")
 $settingsMultilineVars = @("CommentTextTemplate")
 $settingsTrailingButtonVars = @{
@@ -320,27 +321,11 @@ $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
-$settingsCommonTopPanel = New-Object System.Windows.Forms.Panel
-$settingsCommonTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$settingsCommonTopPanel.Height = 40
-
-$btnSettingsCommonSave = New-Object System.Windows.Forms.Button
-$btnSettingsCommonSave.Text = "保存"
-$btnSettingsCommonSave.Location = New-Object System.Drawing.Point(20, 8)
-$btnSettingsCommonSave.Size = New-Object System.Drawing.Size(100, 24)
-
-$btnSettingsCommonReload = New-Object System.Windows.Forms.Button
-$btnSettingsCommonReload.Text = "再読込"
-$btnSettingsCommonReload.Location = New-Object System.Drawing.Point(130, 8)
-$btnSettingsCommonReload.Size = New-Object System.Drawing.Size(100, 24)
-
-$lblSettingsCommonSaveStatus = New-Object System.Windows.Forms.Label
-$lblSettingsCommonSaveStatus.Text = ""
-$lblSettingsCommonSaveStatus.AutoSize = $true
-$lblSettingsCommonSaveStatus.Location = New-Object System.Drawing.Point(244, 14)
-$lblSettingsCommonSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsCommonSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
-
-$settingsCommonTopPanel.Controls.AddRange(@($btnSettingsCommonSave, $btnSettingsCommonReload, $lblSettingsCommonSaveStatus))
+$settingsCommonTopPanelResult = New-SettingsTopPanel `
+    -OnSave { Save-CommonSettings; Save-CollectDataDefs; Update-CommonSettingsFields } `
+    -OnReload { $script:collectDataDefsSections = $null; Update-CommonSettingsFields }
+$settingsCommonTopPanel = $settingsCommonTopPanelResult.Panel
+$lblSettingsCommonSaveStatus = $settingsCommonTopPanelResult.StatusLabel
 
 $settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -349,13 +334,8 @@ $settingsCommonFieldPanel.AutoScroll = $true
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$settingsGroupTopPanel = New-Object System.Windows.Forms.Panel
-$settingsGroupTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$settingsGroupTopPanel.Height = 70
-
 $lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
 $lblSettingsGroupTarget.Text = "対象グループ"
-$lblSettingsGroupTarget.AutoSize = $true
 
 $cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
 $cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
@@ -367,31 +347,20 @@ $btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
 
 $lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsGroupOpenXlsx.Text = "開く"
-$lnkSettingsGroupOpenXlsx.AutoSize = $true
 
-$btnSettingsGroupSave = New-Object System.Windows.Forms.Button
-$btnSettingsGroupSave.Text = "保存"
-$btnSettingsGroupSave.Location = New-Object System.Drawing.Point(20, 44)
-$btnSettingsGroupSave.Size = New-Object System.Drawing.Size(100, 24)
-
-$btnSettingsGroupReload = New-Object System.Windows.Forms.Button
-$btnSettingsGroupReload.Text = "再読込"
-$btnSettingsGroupReload.Location = New-Object System.Drawing.Point(130, 44)
-$btnSettingsGroupReload.Size = New-Object System.Drawing.Size(100, 24)
-
-$lblSettingsGroupSaveStatus = New-Object System.Windows.Forms.Label
-$lblSettingsGroupSaveStatus.Text = ""
-$lblSettingsGroupSaveStatus.AutoSize = $true
-$lblSettingsGroupSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
-$lblSettingsGroupSaveStatus.Font = New-Object System.Drawing.Font($lblSettingsGroupSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
-
-$settingsGroupTopPanel.Controls.AddRange(@($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx, $btnSettingsGroupSave, $btnSettingsGroupReload, $lblSettingsGroupSaveStatus))
-
-$settingsRow1CenterY = 26
-$lblSettingsGroupTarget.Location = New-Object System.Drawing.Point(20, ($settingsRow1CenterY - [int]($lblSettingsGroupTarget.Height / 2)))
-$cmbSettingsGroupTarget.Location = New-Object System.Drawing.Point(($lblSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($cmbSettingsGroupTarget.Height / 2)))
-$btnSettingsGroupNewGroup.Location = New-Object System.Drawing.Point(($cmbSettingsGroupTarget.Right + 10), ($settingsRow1CenterY - [int]($btnSettingsGroupNewGroup.Height / 2)))
-$lnkSettingsGroupOpenXlsx.Location = New-Object System.Drawing.Point(($btnSettingsGroupNewGroup.Right + 10), ($settingsRow1CenterY - [int]($lnkSettingsGroupOpenXlsx.Height / 2)))
+$settingsGroupTopPanelResult = New-SettingsTopPanel `
+    -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
+    -OnSave {
+        $target = $cmbSettingsGroupTarget.SelectedItem
+        if (!$target) { return }
+        Save-GroupSettings -GroupName $target
+        Update-SettingsGroupList
+        Update-GroupSettingsFields
+        Update-GroupDropdowns
+    } `
+    -OnReload { Update-GroupSettingsFields }
+$settingsGroupTopPanel = $settingsGroupTopPanelResult.Panel
+$lblSettingsGroupSaveStatus = $settingsGroupTopPanelResult.StatusLabel
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -766,38 +735,6 @@ function Update-GroupDropdowns {
         }
     }
 }
-
-$btnSettingsCommonSave.Add_Click({
-    Save-CommonSettings
-    Save-CollectDataDefs
-    Update-CommonSettingsFields
-    $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-    $lblSettingsCommonSaveStatus.Text = "保存しました"
-})
-
-$btnSettingsCommonReload.Add_Click({
-    $script:collectDataDefsSections = $null
-    Update-CommonSettingsFields
-    $lblSettingsCommonSaveStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblSettingsCommonSaveStatus.Text = "再読込しました"
-})
-
-$btnSettingsGroupSave.Add_Click({
-    $target = $cmbSettingsGroupTarget.SelectedItem
-    if (!$target) { return }
-    Save-GroupSettings -GroupName $target
-    Update-SettingsGroupList
-    Update-GroupSettingsFields
-    Update-GroupDropdowns
-    $lblSettingsGroupSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-    $lblSettingsGroupSaveStatus.Text = "保存しました"
-})
-
-$btnSettingsGroupReload.Add_Click({
-    Update-GroupSettingsFields
-    $lblSettingsGroupSaveStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblSettingsGroupSaveStatus.Text = "再読込しました"
-})
 
 $btnSettingsGroupNewGroup.Add_Click({
     Add-Type -AssemblyName Microsoft.VisualBasic

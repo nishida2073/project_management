@@ -336,49 +336,16 @@ foreach ($radio in $script:logTab.Radios) {
 $cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
 
 
-$topPanel = New-Object System.Windows.Forms.Panel
-$topPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$topPanel.Height = 70
-
 $lblSettingsClient = New-Object System.Windows.Forms.Label
 $lblSettingsClient.Text = "クライアント"
-$lblSettingsClient.AutoSize = $true
-$lblSettingsClient.Location = New-Object System.Drawing.Point(20, 17)
 
 $cmbSettingsClient = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsClient.Location = New-Object System.Drawing.Point(100, 14)
 $cmbSettingsClient.Size = New-Object System.Drawing.Size(260, 24)
 $cmbSettingsClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
 $btnNewClient = New-Object System.Windows.Forms.Button
 $btnNewClient.Text = "新規作成..."
-$btnNewClient.Location = New-Object System.Drawing.Point(370, 14)
 $btnNewClient.Size = New-Object System.Drawing.Size(100, 24)
-
-$btnSave = New-Object System.Windows.Forms.Button
-$btnSave.Text = "保存"
-$btnSave.Location = New-Object System.Drawing.Point(20, 44)
-$btnSave.Size = New-Object System.Drawing.Size(100, 24)
-
-$btnReload = New-Object System.Windows.Forms.Button
-$btnReload.Text = "再読込"
-$btnReload.Location = New-Object System.Drawing.Point(130, 44)
-$btnReload.Size = New-Object System.Drawing.Size(100, 24)
-
-$lblSaveStatus = New-Object System.Windows.Forms.Label
-$lblSaveStatus.Text = ""
-$lblSaveStatus.AutoSize = $true
-$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 50)
-$lblSaveStatus.Font = New-Object System.Drawing.Font($lblSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
-
-$topPanel.Controls.AddRange(@($lblSettingsClient, $cmbSettingsClient, $btnNewClient, $btnSave, $btnReload, $lblSaveStatus))
-
-$fieldPanel = New-Object System.Windows.Forms.Panel
-$fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$fieldPanel.AutoScroll = $true
-
-$tabSettings.Controls.Add($fieldPanel)
-$tabSettings.Controls.Add($topPanel)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
@@ -416,11 +383,12 @@ $settingsVarLabels = @{
 }
 
 $script:fieldTextBoxes = @{}
-$script:fieldRadios = @{}
 
 $enabledVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
 $settingsFolderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_PATH", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_PATH")
-$fileBrowseVars = @("GENERATE_CONFIG_PATH")
+$settingsFileBrowseVars = @("GENERATE_CONFIG_PATH")
+$settingsMultilineVars = @()
+$settingsMaskedVars = @()
 
 $clientOverridableVars = @(
     "DOWNLOAD_ENABLED", "DOWNLOAD_SITE_URL", "DOWNLOAD_SITE_PATH", "DOWNLOAD_SITE_TENANT_ID", "DOWNLOAD_LOCAL_PATH",
@@ -431,6 +399,18 @@ $clientOverridableVars = @(
 )
 $clientRuntimeExcludeVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
 
+$script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
+
+$enabledRadioOptions = @(
+    [PSCustomObject]@{ Label = "有効"; Value = "1" }
+    [PSCustomObject]@{ Label = "無効"; Value = "0" }
+)
+$settingsRadioVars = @{
+    "DOWNLOAD_ENABLED" = $enabledRadioOptions
+    "GENERATE_ENABLED" = $enabledRadioOptions
+    "UPLOAD_ENABLED"   = $enabledRadioOptions
+}
+
 function Get-NewClientInitialValues {
     param([string]$ClientName, [hashtable]$Defaults)
     return @{
@@ -440,7 +420,7 @@ function Get-NewClientInitialValues {
     }
 }
 
-function Get-SettingsFieldSource {
+function Get-SettingsFieldRows {
     $client = $cmbSettingsClient.SelectedItem
     if ($client -and $client -ne $defaultClientLabel) {
         $clientRaw = Get-ClientProfileRawValues $client
@@ -449,174 +429,24 @@ function Get-SettingsFieldSource {
         $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $client $defaults } else { @{} }
         foreach ($varName in $clientOverridableVars) {
             $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { $defaults[$varName] }
-            [PSCustomObject]@{ VarName = $varName; VarValue = $varValue }
+            [PSCustomObject]@{ Group = $varName.Split("_")[0]; VarName = $varName; Value = $varValue; Key = $varName }
         }
     } else {
         foreach ($line in (Read-SetEnvLines -Path $setEnvBat)) {
             $m = $script:setEnvLineRegex.Match($line.Trim())
             if ($m.Success) {
-                [PSCustomObject]@{ VarName = $m.Groups["var"].Value; VarValue = $m.Groups["val"].Value }
+                [PSCustomObject]@{ Group = $m.Groups["var"].Value.Split("_")[0]; VarName = $m.Groups["var"].Value; Value = $m.Groups["val"].Value; Key = $m.Groups["var"].Value }
             }
         }
     }
 }
 
 function Update-SettingsFields {
-    $fieldPanel.Controls.Clear()
-    $script:fieldTextBoxes = @{}
-    $script:fieldRadios = @{}
-
-    $y = 10
-    $lastGroup = ""
-
-    foreach ($field in (Get-SettingsFieldSource)) {
-        $varName = $field.VarName
-        $varValue = $field.VarValue
-
-        $group = $varName.Split("_")[0]
-        if ($group -ne $lastGroup) {
-            if ($lastGroup -ne "") {
-                $y += 10
-                $separator = New-Object System.Windows.Forms.Panel
-                $separator.BackColor = [System.Drawing.Color]::LightGray
-                $separator.Location = New-Object System.Drawing.Point(10, $y)
-                $separator.Size = New-Object System.Drawing.Size(690, 2)
-                $fieldPanel.Controls.Add($separator)
-                $y += 14
-            }
-
-            $lblGroup = New-Object System.Windows.Forms.Label
-            $lblGroup.Text = if ($settingsGroupLabels.ContainsKey($group)) { $settingsGroupLabels[$group] } else { $group }
-            $lblGroup.AutoSize = $true
-            $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
-            $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
-            $fieldPanel.Controls.Add($lblGroup)
-            $y += 28
-            $lastGroup = $group
-        }
-
-        $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = if ($settingsVarLabels.ContainsKey($varName)) { $settingsVarLabels[$varName] } else { $varName }
-        $lbl.AutoSize = $false
-        $lbl.Size = New-Object System.Drawing.Size(220, 20)
-        $lbl.Location = New-Object System.Drawing.Point(20, $y)
-        $settingsToolTip.SetToolTip($lbl, $varName)
-        $fieldPanel.Controls.Add($lbl)
-
-        if ($enabledVars -contains $varName) {
-            $radioGroupPanel = New-Object System.Windows.Forms.Panel
-            $radioGroupPanel.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            $radioGroupPanel.Size = New-Object System.Drawing.Size(200, 22)
-
-            $radioEnabled = New-Object System.Windows.Forms.RadioButton
-            $radioEnabled.Text = "有効"
-            $radioEnabled.AutoSize = $true
-            $radioEnabled.Location = New-Object System.Drawing.Point(0, 0)
-            $radioEnabled.Checked = ($varValue -eq "1")
-
-            $radioDisabled = New-Object System.Windows.Forms.RadioButton
-            $radioDisabled.Text = "無効"
-            $radioDisabled.AutoSize = $true
-            $radioDisabled.Location = New-Object System.Drawing.Point(70, 0)
-            $radioDisabled.Checked = ($varValue -ne "1")
-
-            $radioGroupPanel.Controls.AddRange(@($radioEnabled, $radioDisabled))
-            $fieldPanel.Controls.Add($radioGroupPanel)
-            $script:fieldRadios[$varName] = $radioEnabled
-        } elseif ($settingsFolderBrowseVars -contains $varName -or $fileBrowseVars -contains $varName) {
-            $isFileBrowse = $fileBrowseVars -contains $varName
-
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = $varValue
-            $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            $txt.Size = New-Object System.Drawing.Size(300, 22)
-            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-
-            $btnBrowse = New-Object System.Windows.Forms.Button
-            $btnBrowse.Text = "参照..."
-            $btnBrowse.Location = New-Object System.Drawing.Point(560, ($y - 3))
-            $btnBrowse.Size = New-Object System.Drawing.Size(70, 24)
-            $btnBrowse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            $btnBrowse.Tag = $txt
-
-            if ($settingsFolderBrowseVars -contains $varName) {
-                $btnBrowse.Add_Click({
-                    $targetTxt = $this.Tag
-                    $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-                    if (Test-Path -LiteralPath $startPath) {
-                        $dlg.SelectedPath = $startPath
-                    }
-                    if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-                        $targetTxt.Text = $dlg.SelectedPath
-                    }
-                })
-            } else {
-                $btnBrowse.Add_Click({
-                    $targetTxt = $this.Tag
-                    $dlg = New-Object System.Windows.Forms.OpenFileDialog
-                    $dlg.Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*"
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-                    if (Test-Path -LiteralPath $startPath) {
-                        $dlg.InitialDirectory = Split-Path $startPath -Parent
-                        $dlg.FileName = Split-Path $startPath -Leaf
-                    }
-                    if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-                        $targetTxt.Text = $dlg.FileName
-                    }
-                })
-            }
-
-            if ($isFileBrowse) {
-                $btnOpen = New-Object System.Windows.Forms.LinkLabel
-                $btnOpen.Text = "開く"
-                $btnOpen.AutoSize = $false
-                $btnOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-                $btnOpen.Size = New-Object System.Drawing.Size(50, 22)
-                $btnOpen.Location = New-Object System.Drawing.Point(640, ($y - 2))
-                $btnOpen.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-                $btnOpen.Tag = $txt
-                $btnOpen.Add_LinkClicked({
-                    $targetTxt = $this.Tag
-                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-                    if (Test-Path -LiteralPath $openPath) {
-                        Start-Process -FilePath $openPath
-                    } else {
-                        [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません: $openPath", "エラー") | Out-Null
-                    }
-                })
-                $fieldPanel.Controls.AddRange(@($txt, $btnBrowse, $btnOpen))
-            } else {
-                $fieldPanel.Controls.AddRange(@($txt, $btnBrowse))
-            }
-            $script:fieldTextBoxes[$varName] = $txt
-        } else {
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = $varValue
-            $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            $txt.Size = New-Object System.Drawing.Size(440, 22)
-            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-
-            $fieldPanel.Controls.Add($txt)
-            $script:fieldTextBoxes[$varName] = $txt
-        }
-
-        $y += 28
-    }
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars | Out-Null
 }
-
-$btnReload.Add_Click({
-    Update-SettingsFields
-    $lblSaveStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblSaveStatus.Text = "再読込しました"
-})
 
 function Get-FieldValue {
     param([string]$VarName)
-    if ($script:fieldRadios.ContainsKey($VarName)) {
-        if ($script:fieldRadios[$VarName].Checked) { return "1" }
-        return "0"
-    }
     return $script:fieldTextBoxes[$VarName].Text
 }
 
@@ -627,7 +457,7 @@ function Save-ClientProfile {
 
     $newLines = foreach ($varName in $clientOverridableVars) {
         $newVal = Get-FieldValue $varName
-        if ($script:fieldRadios.ContainsKey($varName)) {
+        if ($enabledVars -contains $varName) {
             "if not defined $varName set `"$varName=$newVal`""
         } else {
             "set `"$varName=$newVal`""
@@ -638,8 +468,8 @@ function Save-ClientProfile {
 
     if ($isNewClient) {
         $defaults = Get-SetEnvDefaults -Path $setEnvBat
-        $defaultConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-        $newConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+        $defaultConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver $script:commonEnvResolver -BasePath $rootPath
+        $newConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver $script:commonEnvResolver -BasePath $rootPath
         if ($newConfigPath -ne $defaultConfigPath -and (Test-Path -LiteralPath $defaultConfigPath) -and !(Test-Path -LiteralPath $newConfigPath)) {
             New-Item (Split-Path $newConfigPath -Parent) -ItemType Directory -Force | Out-Null
             Copy-Item -LiteralPath $defaultConfigPath -Destination $newConfigPath
@@ -650,21 +480,30 @@ function Save-ClientProfile {
 function Save-DefaultSettings {
     Save-EnvBatFile -Path $setEnvBat `
         -GetValueFn { param($name) Get-FieldValue $name } `
-        -HasValueFn { param($name) $script:fieldRadios.ContainsKey($name) -or $script:fieldTextBoxes.ContainsKey($name) }
+        -HasValueFn { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 }
 
-$btnSave.Add_Click({
-    $client = $cmbSettingsClient.SelectedItem
-    if ($client -and $client -ne $defaultClientLabel) {
-        Save-ClientProfile $client
-    } else {
-        Save-DefaultSettings
-    }
+$settingsTopPanel = New-SettingsTopPanel `
+    -ExtraControls @($lblSettingsClient, $cmbSettingsClient, $btnNewClient) `
+    -OnSave {
+        $client = $cmbSettingsClient.SelectedItem
+        if ($client -and $client -ne $defaultClientLabel) {
+            Save-ClientProfile $client
+        } else {
+            Save-DefaultSettings
+        }
+        Update-RunCheckboxesFromClient
+    } `
+    -OnReload { Update-SettingsFields }
+$topPanel = $settingsTopPanel.Panel
+$lblSaveStatus = $settingsTopPanel.StatusLabel
 
-    $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-    $lblSaveStatus.Text = "保存しました"
-    Update-RunCheckboxesFromClient
-})
+$fieldPanel = New-Object System.Windows.Forms.Panel
+$fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$fieldPanel.AutoScroll = $true
+
+$tabSettings.Controls.Add($fieldPanel)
+$tabSettings.Controls.Add($topPanel)
 
 function Update-SettingsClientList {
     Update-ClientComboItems -ComboBox $cmbSettingsClient -FixedItems @($defaultClientLabel)

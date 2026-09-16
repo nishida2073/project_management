@@ -682,35 +682,11 @@ function Update-CustomTemplateNameList {
     Set-ComboItems -ComboBox $cmbRunAllCustomTemplateName -Names $names -Placeholder $script:customTemplateNamePlaceholder
 }
 
-$topPanel = New-Object System.Windows.Forms.Panel
-$topPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$topPanel.Height = 46
-
-$btnSave = New-Object System.Windows.Forms.Button
-$btnSave.Text = "保存"
-$btnSave.Location = New-Object System.Drawing.Point(20, 11)
-$btnSave.Size = New-Object System.Drawing.Size(100, 24)
-
-$btnReload = New-Object System.Windows.Forms.Button
-$btnReload.Text = "再読込"
-$btnReload.Location = New-Object System.Drawing.Point(130, 11)
-$btnReload.Size = New-Object System.Drawing.Size(100, 24)
-
-$lblSaveStatus = New-Object System.Windows.Forms.Label
-$lblSaveStatus.Text = ""
-$lblSaveStatus.AutoSize = $true
-$lblSaveStatus.Location = New-Object System.Drawing.Point(244, 17)
-$lblSaveStatus.Font = New-Object System.Drawing.Font($lblSaveStatus.Font, [System.Drawing.FontStyle]::Bold)
-
-$topPanel.Controls.AddRange(@($btnSave, $btnReload, $lblSaveStatus))
-
-
 $fieldPanel = New-Object System.Windows.Forms.Panel
 $fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
 $fieldPanel.AutoScroll = $true
 
 $tabSettings.Controls.Add($fieldPanel)
-$tabSettings.Controls.Add($topPanel)
 
 $settingsVarLabels = [ordered]@{
     "COMMON_DOWNLOAD_PATH"     = "ダウンロード先のフォルダ"
@@ -724,101 +700,36 @@ $settingsVarLabels = [ordered]@{
     "KINTONE_PASSWORD"         = "パスワード"
 }
 
+$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+$settingsGroupLabels = @{ "COMMON" = "基本設定"; "KINTONE" = "kintoneの接続情報" }
 $settingsFolderBrowseVars = @("COMMON_DOWNLOAD_PATH", "COMMON_BASE_TEMPLATE_PATH", "COMMON_CUSTOM_TEMPLATE_PATH", "COMMON_CONFIG_PATH", "COMMON_CHECK_OUTPUT_PATH", "COMMON_LOG_PATH")
+$settingsFileBrowseVars = @()
+$settingsMultilineVars = @()
 
 $kintoneVars = @("KINTONE_BASE_URL", "KINTONE_LOGIN", "KINTONE_PASSWORD")
 $settingsMaskedVars = @("KINTONE_PASSWORD")
 
+$script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
 $script:fieldTextBoxes = @{}
 
-function Update-SettingsFields {
-    $fieldPanel.Controls.Clear()
-    $script:fieldTextBoxes = @{}
-
+function Get-SettingsFieldRows {
     $defaults = Get-SetEnvDefaults -Path $setEnvBat
     $kintoneDefaults = Get-SetEnvDefaults -Path $setKintoneBat
-    $y = 10
-
     foreach ($varName in $settingsVarLabels.Keys) {
-        $isKintoneVar = $kintoneVars -contains $varName
-        if ($isKintoneVar) {
+        if ($kintoneVars -contains $varName) {
             $varValue = if ($kintoneDefaults.ContainsKey($varName)) { $kintoneDefaults[$varName] } else { "" }
+            $group = "KINTONE"
         } else {
             if (!$defaults.ContainsKey($varName)) { continue }
             $varValue = $defaults[$varName]
+            $group = "COMMON"
         }
-
-        if ($varName -eq "KINTONE_BASE_URL") {
-            $y += 8
-            $lblKintoneHeader = New-Object System.Windows.Forms.Label
-            $lblKintoneHeader.Text = "kintoneの接続情報"
-            $lblKintoneHeader.AutoSize = $true
-            $lblKintoneHeader.Location = New-Object System.Drawing.Point(20, $y)
-            $lblKintoneHeader.Font = New-Object System.Drawing.Font($lblKintoneHeader.Font, [System.Drawing.FontStyle]::Bold)
-            $fieldPanel.Controls.Add($lblKintoneHeader)
-            $y += 28
-        }
-
-        $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = $settingsVarLabels[$varName]
-        $lbl.AutoSize = $false
-        $lbl.Size = New-Object System.Drawing.Size(280, 20)
-        $lbl.Location = New-Object System.Drawing.Point(20, $y)
-        $fieldPanel.Controls.Add($lbl)
-
-        if ($settingsFolderBrowseVars -contains $varName) {
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = $varValue
-            $txt.Location = New-Object System.Drawing.Point(310, ($y - 2))
-            $txt.Size = New-Object System.Drawing.Size(300, 22)
-            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-
-            $btnBrowse = New-Object System.Windows.Forms.Button
-            $btnBrowse.Text = "参照..."
-            $btnBrowse.Location = New-Object System.Drawing.Point(620, ($y - 3))
-            $btnBrowse.Size = New-Object System.Drawing.Size(70, 24)
-            $btnBrowse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            $btnBrowse.Tag = $txt
-            $btnBrowse.Add_Click({
-                $targetTxt = $this.Tag
-                $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-                if (Test-Path -LiteralPath $startPath) {
-                    $dlg.SelectedPath = $startPath
-                }
-                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-                    $targetTxt.Text = $dlg.SelectedPath
-                }
-            })
-
-            $fieldPanel.Controls.AddRange(@($txt, $btnBrowse))
-            $script:fieldTextBoxes[$varName] = $txt
-        } else {
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = $varValue
-            $txt.Location = New-Object System.Drawing.Point(310, ($y - 2))
-            $txt.Size = New-Object System.Drawing.Size(380, 22)
-            $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            if ($settingsMaskedVars -contains $varName) {
-                $txt.UseSystemPasswordChar = $true
-            }
-
-            $fieldPanel.Controls.Add($txt)
-            $script:fieldTextBoxes[$varName] = $txt
-        }
-
-        $y += 32
+        [PSCustomObject]@{ Group = $group; VarName = $varName; Value = $varValue; Key = $varName }
     }
+}
 
-    $y += 4
-    $btnTestConnection = New-Object System.Windows.Forms.Button
-    $btnTestConnection.Text = "接続テスト"
-    $btnTestConnection.Location = New-Object System.Drawing.Point(310, $y)
-    $btnTestConnection.Size = New-Object System.Drawing.Size(100, 26)
-    $fieldPanel.Controls.Add($btnTestConnection)
-    $y += 32
-
-    $btnTestConnection.Add_Click({
+$settingsTrailingButtonVars = @{
+    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "接続テスト" -OnClick {
         $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
         $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
         $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
@@ -829,25 +740,24 @@ function Update-SettingsFields {
                 Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
             }.GetNewClosure() `
             -FormatSuccessMessage { param($response) "成功しました" }
-    })
+    } }
 }
 
-$btnReload.Add_Click({
-    Update-SettingsFields
-    $lblSaveStatus.ForeColor = [System.Drawing.Color]::Black
-    $lblSaveStatus.Text = "再読込しました"
-})
+function Update-SettingsFields {
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars | Out-Null
+}
 
 $script:saveEnvBatGetValueFn = { param($name) $script:fieldTextBoxes[$name].Text }
 $script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 
-$btnSave.Add_Click({
-    Save-EnvBatFile -Path $setEnvBat -VarNames @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
-    Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
-
-    $lblSaveStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-    $lblSaveStatus.Text = "保存しました"
-})
+$settingsTopPanel = New-SettingsTopPanel `
+    -OnSave {
+        Save-EnvBatFile -Path $setEnvBat -VarNames @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+        Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+    } `
+    -OnReload { Update-SettingsFields }
+$topPanel = $settingsTopPanel.Panel
+$tabSettings.Controls.Add($topPanel)
 
 Update-SettingsFields
 

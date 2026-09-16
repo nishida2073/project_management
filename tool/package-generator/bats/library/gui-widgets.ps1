@@ -413,6 +413,87 @@ function Get-BatchDisplayLabel {
     if ($ButtonDef.BatchLabel) { $ButtonDef.BatchLabel } else { $ButtonDef.Label }
 }
 
+function New-SettingsTopPanel {
+    param(
+        [Parameter(Mandatory)][scriptblock]$OnSave,
+        [Parameter(Mandatory)][scriptblock]$OnReload,
+        [System.Windows.Forms.Control[]]$ExtraControls = @(),
+        [int]$ExtraControlsHeight = 24,
+        [int]$ExtraControlsX = 20,
+        [int]$ExtraControlsSpacing = 10,
+        [int]$ExtraControlsY = -1,
+        [int]$ButtonRowY = -1,
+        [int]$Height = -1
+    )
+
+    $rowHeight = 35
+    if ($ExtraControls.Count -gt 0) {
+        if ($Height -eq -1) { $Height = 2 * $rowHeight }
+        if ($ButtonRowY -eq -1) { $ButtonRowY = $rowHeight + [int](($rowHeight - 24) / 2) }
+        if ($ExtraControlsY -eq -1) { $ExtraControlsY = [int](($rowHeight - $ExtraControlsHeight) / 2) }
+    } else {
+        if ($Height -eq -1) { $Height = 46 }
+        if ($ButtonRowY -eq -1) { $ButtonRowY = 11 }
+    }
+
+    $panel = New-Object System.Windows.Forms.Panel
+    $panel.Dock = [System.Windows.Forms.DockStyle]::Top
+    $panel.Height = $Height
+
+    $btnSave = New-Object System.Windows.Forms.Button
+    $btnSave.Text = "保存"
+    $btnSave.Location = New-Object System.Drawing.Point(20, $ButtonRowY)
+    $btnSave.Size = New-Object System.Drawing.Size(100, 24)
+
+    $btnReload = New-Object System.Windows.Forms.Button
+    $btnReload.Text = "再読込"
+    $btnReload.Location = New-Object System.Drawing.Point(130, $ButtonRowY)
+    $btnReload.Size = New-Object System.Drawing.Size(100, 24)
+
+    $lblStatus = New-Object System.Windows.Forms.Label
+    $lblStatus.Text = ""
+    $lblStatus.AutoSize = $true
+    $lblStatus.Location = New-Object System.Drawing.Point(244, ($ButtonRowY + 6))
+    $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
+
+    $panel.Controls.AddRange(@($btnSave, $btnReload, $lblStatus))
+
+    if ($ExtraControls.Count -gt 0) {
+        $extraX = $ExtraControlsX
+        foreach ($ctrl in $ExtraControls) {
+            if ($ctrl -is [System.Windows.Forms.Label] -or $ctrl -is [System.Windows.Forms.LinkLabel]) {
+                $ctrl.AutoSize = $true
+                $autoWidth = $ctrl.Width
+                $ctrl.AutoSize = $false
+                $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+                $ctrl.Size = New-Object System.Drawing.Size($autoWidth, $ExtraControlsHeight)
+            }
+            $ctrl.Location = New-Object System.Drawing.Point($extraX, $ExtraControlsY)
+            $extraX = $ctrl.Right + $ExtraControlsSpacing
+        }
+        $panel.Controls.AddRange($ExtraControls)
+    }
+
+    $btnSave.Add_Click({
+        & $OnSave
+        $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
+        $lblStatus.Text = "保存しました"
+    }.GetNewClosure())
+
+    $btnReload.Add_Click({
+        & $OnReload
+        $lblStatus.ForeColor = [System.Drawing.Color]::Black
+        $lblStatus.Text = "再読込しました"
+    }.GetNewClosure())
+
+    return [PSCustomObject]@{
+        Panel        = $panel
+        SaveButton   = $btnSave
+        ReloadButton = $btnReload
+        StatusLabel  = $lblStatus
+    }
+}
+
 function New-BatchRunTab {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
@@ -853,7 +934,7 @@ function Render-SettingsFields {
         }
 
         $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = if ($settingsVarLabels.ContainsKey($field.VarName)) { $settingsVarLabels[$field.VarName] } else { $field.VarName }
+        $lbl.Text = if ($settingsVarLabels.Contains($field.VarName)) { $settingsVarLabels[$field.VarName] } else { $field.VarName }
         $lbl.AutoSize = $false
         $lbl.Size = New-Object System.Drawing.Size(220, 20)
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
@@ -915,21 +996,56 @@ function Render-SettingsFields {
             $Panel.Controls.Add($txt)
         }
 
-        if ($settingsFolderBrowseVars -contains $field.VarName) {
+        $isFileBrowse = $settingsFileBrowseVars -contains $field.VarName
+        if (($settingsFolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
             $btnBrowse = New-Object System.Windows.Forms.Button
             $btnBrowse.Text = "参照..."
             $btnBrowse.Location = New-Object System.Drawing.Point(560, ($y - 3))
             $btnBrowse.Size = New-Object System.Drawing.Size(70, 24)
             $btnBrowse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
             $btnBrowse.Tag = $txt
-            $btnBrowse.Add_Click({
-                $targetTxt = $this.Tag
-                $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
-                if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
-                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
-            })
-            $Panel.Controls.Add($btnBrowse)
+
+            if ($isFileBrowse) {
+                $btnBrowse.Add_Click({
+                    $targetTxt = $this.Tag
+                    $dlg = New-Object System.Windows.Forms.OpenFileDialog
+                    $dlg.Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*"
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
+                    if ($startPath -and (Test-Path -LiteralPath $startPath)) {
+                        $dlg.InitialDirectory = Split-Path $startPath -Parent
+                        $dlg.FileName = Split-Path $startPath -Leaf
+                    }
+                    if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.FileName }
+                })
+
+                $btnOpen = New-Object System.Windows.Forms.LinkLabel
+                $btnOpen.Text = "開く"
+                $btnOpen.AutoSize = $false
+                $btnOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+                $btnOpen.Size = New-Object System.Drawing.Size(50, 22)
+                $btnOpen.Location = New-Object System.Drawing.Point(640, ($y - 2))
+                $btnOpen.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+                $btnOpen.Tag = $txt
+                $btnOpen.Add_LinkClicked({
+                    $targetTxt = $this.Tag
+                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
+                    if (Test-Path -LiteralPath $openPath) {
+                        Start-Process -FilePath $openPath
+                    } else {
+                        [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません: $openPath", "エラー") | Out-Null
+                    }
+                })
+                $Panel.Controls.AddRange(@($btnBrowse, $btnOpen))
+            } else {
+                $btnBrowse.Add_Click({
+                    $targetTxt = $this.Tag
+                    $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
+                    if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
+                    if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
+                })
+                $Panel.Controls.Add($btnBrowse)
+            }
         }
 
         $TextBoxes[$field.Key] = $txt
