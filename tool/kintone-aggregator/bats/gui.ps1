@@ -172,13 +172,9 @@ $script:runButtons = $tabResult.RunButtons
 $execTabControl.Height = 45 + $batchPanel.Height
 
 
-$logSpacer = New-Object System.Windows.Forms.Panel
-$logSpacer.Height = 10
-$logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
-
 $txtLog = New-LogTextBox
 
-Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $logSpacer, $txtLog)
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -321,11 +317,17 @@ $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
+function Get-CommonSettingsFiles {
+    return @(
+        [PSCustomObject]@{ Path = (Join-Path $basePath "common-env.bat"); Save = { Save-CommonSettings }; Reload = {} }
+        [PSCustomObject]@{ Path = $collectDataDefsPath; Save = { Save-CollectDataDefs }; Reload = { $script:collectDataDefsSections = $null } }
+    )
+}
+
 $settingsCommonTopPanelResult = New-SettingsTopPanel `
-    -OnSave { Save-CommonSettings; Save-CollectDataDefs; Update-CommonSettingsFields } `
-    -OnReload { $script:collectDataDefsSections = $null; Update-CommonSettingsFields }
+    -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
+    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }
 $settingsCommonTopPanel = $settingsCommonTopPanelResult.Panel
-$lblSettingsCommonSaveStatus = $settingsCommonTopPanelResult.StatusLabel
 
 $settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -348,19 +350,29 @@ $btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
 $lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsGroupOpenXlsx.Text = "開く"
 
+function Get-GroupSettingsFiles {
+    param([string]$GroupName)
+    return @(
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+    )
+}
+
 $settingsGroupTopPanelResult = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
     -OnSave {
         $target = $cmbSettingsGroupTarget.SelectedItem
         if (!$target) { return }
-        Save-GroupSettings -GroupName $target
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
         Update-SettingsGroupList
         Update-GroupSettingsFields
         Update-GroupDropdowns
     } `
-    -OnReload { Update-GroupSettingsFields }
+    -OnReload {
+        $target = $cmbSettingsGroupTarget.SelectedItem
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
+        Update-GroupSettingsFields
+    }
 $settingsGroupTopPanel = $settingsGroupTopPanelResult.Panel
-$lblSettingsGroupSaveStatus = $settingsGroupTopPanelResult.StatusLabel
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -466,8 +478,6 @@ function Sync-CollectDataDefsFromControls {
 }
 
 function Add-CollectDataDefsEditor {
-    param([int]$StartY)
-
     if ($null -eq $script:collectDataDefsSections) {
         $text = if (Test-Path -LiteralPath $collectDataDefsPath) {
             [System.IO.File]::ReadAllText($collectDataDefsPath, (New-Object System.Text.UTF8Encoding($false)))
@@ -478,22 +488,13 @@ function Add-CollectDataDefsEditor {
     }
     $script:collectDataDefsRowControls = @()
 
-    $y = $StartY + 10
-    $separator = New-Object System.Windows.Forms.Panel
-    $separator.BackColor = [System.Drawing.Color]::LightGray
-    $separator.Location = New-Object System.Drawing.Point(10, $y)
-    $separator.Size = New-Object System.Drawing.Size(690, 2)
-    $settingsCommonFieldPanel.Controls.Add($separator)
-    $y += 14
+    $grp = New-Object System.Windows.Forms.GroupBox
+    $grp.Text = "アプリデータ集計の列定義"
+    $grp.Dock = [System.Windows.Forms.DockStyle]::Top
+    $grp.AutoSize = $true
+    $grp.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
 
-    $lblDefs = New-Object System.Windows.Forms.Label
-    $lblDefs.Text = "アプリデータ集計の列定義"
-    $lblDefs.AutoSize = $true
-    $lblDefs.Location = New-Object System.Drawing.Point(10, $y)
-    $lblDefs.Font = New-Object System.Drawing.Font($lblDefs.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
-    $settingsCommonFieldPanel.Controls.Add($lblDefs)
-    $y += 30
-
+    $y = 25
     foreach ($section in $script:collectDataDefsSections) {
         $lblFileNameCaption = New-Object System.Windows.Forms.Label
         $lblFileNameCaption.Text = "ファイル名"
@@ -501,14 +502,14 @@ function Add-CollectDataDefsEditor {
         $lblFileNameCaption.Size = New-Object System.Drawing.Size(220, 20)
         $lblFileNameCaption.Location = New-Object System.Drawing.Point(20, $y)
         $lblFileNameCaption.Font = New-Object System.Drawing.Font($lblFileNameCaption.Font.FontFamily, 9, [System.Drawing.FontStyle]::Bold)
-        $settingsCommonFieldPanel.Controls.Add($lblFileNameCaption)
+        $grp.Controls.Add($lblFileNameCaption)
 
         $lblFileNameValue = New-Object System.Windows.Forms.Label
         $lblFileNameValue.Text = if ($script:commonEnvVars.ContainsKey($section.Key)) { $script:commonEnvVars[$section.Key] } else { $section.Key }
         $lblFileNameValue.AutoSize = $false
         $lblFileNameValue.Size = New-Object System.Drawing.Size(300, 20)
         $lblFileNameValue.Location = New-Object System.Drawing.Point(250, $y)
-        $settingsCommonFieldPanel.Controls.Add($lblFileNameValue)
+        $grp.Controls.Add($lblFileNameValue)
         $y += 26
 
         $lblOrgHeader = New-Object System.Windows.Forms.Label
@@ -516,14 +517,14 @@ function Add-CollectDataDefsEditor {
         $lblOrgHeader.AutoSize = $false
         $lblOrgHeader.Size = New-Object System.Drawing.Size(210, 18)
         $lblOrgHeader.Location = New-Object System.Drawing.Point(20, $y)
-        $settingsCommonFieldPanel.Controls.Add($lblOrgHeader)
+        $grp.Controls.Add($lblOrgHeader)
 
         $lblNewHeader = New-Object System.Windows.Forms.Label
         $lblNewHeader.Text = "変更後"
         $lblNewHeader.AutoSize = $false
         $lblNewHeader.Size = New-Object System.Drawing.Size(210, 18)
         $lblNewHeader.Location = New-Object System.Drawing.Point(250, $y)
-        $settingsCommonFieldPanel.Controls.Add($lblNewHeader)
+        $grp.Controls.Add($lblNewHeader)
         $y += 20
 
         foreach ($row in @($section.Rows)) {
@@ -531,13 +532,13 @@ function Add-CollectDataDefsEditor {
             $txtOrg.Text = "$($row.OrgName)"
             $txtOrg.Location = New-Object System.Drawing.Point(20, $y)
             $txtOrg.Size = New-Object System.Drawing.Size(210, 22)
-            $settingsCommonFieldPanel.Controls.Add($txtOrg)
+            $grp.Controls.Add($txtOrg)
 
             $txtNew = New-Object System.Windows.Forms.TextBox
             $txtNew.Text = "$($row.NewName)"
             $txtNew.Location = New-Object System.Drawing.Point(250, $y)
             $txtNew.Size = New-Object System.Drawing.Size(210, 22)
-            $settingsCommonFieldPanel.Controls.Add($txtNew)
+            $grp.Controls.Add($txtNew)
 
             $btnDeleteRow = New-Object System.Windows.Forms.Button
             $btnDeleteRow.Text = "削除"
@@ -550,7 +551,7 @@ function Add-CollectDataDefsEditor {
                 $ctx.Section.Rows.Remove($ctx.Row) | Out-Null
                 Update-CommonSettingsFields
             })
-            $settingsCommonFieldPanel.Controls.Add($btnDeleteRow)
+            $grp.Controls.Add($btnDeleteRow)
 
             $script:collectDataDefsRowControls += [PSCustomObject]@{ Section = $section; Row = $row; OrgBox = $txtOrg; NewBox = $txtNew }
             $y += 26
@@ -566,9 +567,17 @@ function Add-CollectDataDefsEditor {
             $this.Tag.Rows.Add([PSCustomObject]@{ OrgName = ""; NewName = "" })
             Update-CommonSettingsFields
         })
-        $settingsCommonFieldPanel.Controls.Add($btnAddRow)
+        $grp.Controls.Add($btnAddRow)
         $y += 36
     }
+
+    $spacer = New-Object System.Windows.Forms.Panel
+    $spacer.Dock = [System.Windows.Forms.DockStyle]::Top
+    $spacer.Height = 10
+    $settingsCommonFieldPanel.Controls.Add($grp)
+    $settingsCommonFieldPanel.Controls.SetChildIndex($grp, 0)
+    $settingsCommonFieldPanel.Controls.Add($spacer)
+    $settingsCommonFieldPanel.Controls.SetChildIndex($spacer, 1)
 }
 
 function Save-CollectDataDefs {
@@ -581,8 +590,10 @@ function Update-CommonSettingsFields {
     $scrollX = -$settingsCommonFieldPanel.AutoScrollPosition.X
     $scrollY = -$settingsCommonFieldPanel.AutoScrollPosition.Y
 
-    $endY = Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes
-    Add-CollectDataDefsEditor -StartY $endY
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
+    Add-CollectDataDefsEditor
 
     $settingsCommonFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
@@ -592,7 +603,10 @@ function Update-GroupSettingsFields {
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars | Out-Null
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
+        -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions | Out-Null
 
     $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }

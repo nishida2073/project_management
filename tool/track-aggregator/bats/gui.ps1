@@ -201,13 +201,9 @@ $script:runButtons = $tabResult.RunButtons
 $execTabControl.Height = 45 + $batchPanel.Height
 
 
-$logSpacer = New-Object System.Windows.Forms.Panel
-$logSpacer.Height = 10
-$logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
-
 $txtLog = New-LogTextBox
 
-Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $logSpacer, $txtLog)
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -281,37 +277,68 @@ $radioVars = @{
     )
 }
 
-$settingsGroupLabels = @{ "COMMON" = "共通設定"; "AUTH" = "認証情報"; "POST" = "投稿先"; "OVERRIDE" = "個別設定（空欄の場合は共通設定の値を使用）" }
-$settingsVarLabels = @{
-    "KintoneLoginName"                = "ログイン名"
-    "KintonePassword"                 = "パスワード"
-    "SpaceId"                         = "投稿先スペースID"
-    "ThreadId"                        = "投稿先スレッドID"
-    "MentionUserCodes"                = "メンション対象"
-    "CommentTextTemplate"             = "投稿コメント文言"
-    "ClientDataRootDir"               = "受講生データのフォルダ"
-    "TemplateRootDir"                 = "テンプレートのフォルダ"
-    "LOG_DIR"                         = "ログの出力先"
-    "ResultRootDir"                   = "実施結果の取得先（共通）"
-    "TestResultRootDir"               = "テスト結果の取得先"
-    "SurveyResultRootDir"             = "アンケート結果の取得先"
-    "OutputRootDir"                   = "集計結果の出力先（共通）"
-    "OutputTestCollectDir"            = "テスト集計結果の出力先"
-    "OutputTestResultFileSuffix"      = "テスト結果ファイル名の接尾辞"
-    "OutputSurveyCollectDir"          = "アンケート集計結果の出力先"
-    "OutputSurveyResultFileSuffix"    = "アンケート結果ファイル名の接尾辞"
-    "OutputCombineCollectDir"         = "統合結果の出力先"
-    "OutputCombineResultFileSuffix"   = "統合結果ファイル名の接尾辞"
-    "OutputYearComparisonCollectDir"  = "経年比較結果の出力先"
-    "OutputYearComparisonResultFileSuffix" = "経年比較結果ファイル名の接尾辞"
-    "PassScore"                       = "合格点"
-    "AutoHotkeyExePath"               = "AutoHotkey実行ファイルのパス"
-    "AutoHotkeyScriptPath"            = "ダウンロード用スクリプトのパス"
-    "TrackLoginUrl"                   = "trackログインURL"
-    "ComparePeriod"                   = "経年比較の比較年数"
-    "CourseGroupDefs"                 = "コースグループ定義"
-    "YearOrder"                       = "経年比較の年度表示順（0:昇順 1:降順）"
-    "KintoneSubdomain"                = "kintoneサブドメイン"
+$settingsGroups = [ordered]@{
+    "COMMON" = @{
+        Label = "共通設定"
+        VarLabels = @{
+            "ClientDataRootDir"                    = "受講生データのフォルダ"
+            "TemplateRootDir"                       = "テンプレートのフォルダ"
+            "LOG_DIR"                                = "ログの出力先"
+            "ResultRootDir"                          = "実施結果の取得先（共通）"
+            "TestResultRootDir"                      = "テスト結果の取得先"
+            "SurveyResultRootDir"                    = "アンケート結果の取得先"
+            "OutputRootDir"                          = "集計結果の出力先（共通）"
+            "OutputTestCollectDir"                   = "テスト集計結果の出力先"
+            "OutputTestResultFileSuffix"              = "テスト結果ファイル名の接尾辞"
+            "OutputSurveyCollectDir"                  = "アンケート集計結果の出力先"
+            "OutputSurveyResultFileSuffix"             = "アンケート結果ファイル名の接尾辞"
+            "OutputCombineCollectDir"                 = "統合結果の出力先"
+            "OutputCombineResultFileSuffix"            = "統合結果ファイル名の接尾辞"
+            "OutputYearComparisonCollectDir"          = "経年比較結果の出力先"
+            "OutputYearComparisonResultFileSuffix"    = "経年比較結果ファイル名の接尾辞"
+            "AutoHotkeyExePath"                       = "AutoHotkey実行ファイルのパス"
+            "AutoHotkeyScriptPath"                    = "ダウンロード用スクリプトのパス"
+            "TrackLoginUrl"                           = "trackログインURL"
+            "CourseGroupDefs"                         = "コースグループ定義"
+            "ComparePeriod"                           = "経年比較の比較年数"
+            "YearOrder"                               = "経年比較の年度表示順（0:昇順 1:降順）"
+            "PassScore"                               = "合格点"
+        }
+    }
+    "AUTH" = @{
+        Label = "認証情報"
+        VarLabels = @{
+            "KintoneLoginName" = "ログイン名"
+            "KintonePassword"  = "パスワード"
+            "KintoneSubdomain" = "kintoneサブドメイン"
+        }
+    }
+    "POST" = @{
+        Label = "投稿先"
+        VarLabels = @{
+            "SpaceId"             = "投稿先スペースID"
+            "ThreadId"            = "投稿先スレッドID"
+            "MentionUserCodes"    = "メンション対象"
+            "CommentTextTemplate" = "投稿コメント文言"
+        }
+    }
+    "OVERRIDE" = @{
+        Label = "個別設定（空欄の場合は共通設定の値を使用）"
+        VarLabels = @{
+            "ComparePeriod" = "経年比較の比較年数"
+            "YearOrder"     = "経年比較の年度表示順（0:昇順 1:降順）"
+            "PassScore"     = "合格点"
+        }
+    }
+}
+
+$settingsGroupLabels = @{}
+$settingsVarLabels = @{}
+foreach ($groupKey in $settingsGroups.Keys) {
+    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
+    foreach ($varKey in $settingsGroups[$groupKey].VarLabels.Keys) {
+        $settingsVarLabels[$varKey] = $settingsGroups[$groupKey].VarLabels[$varKey]
+    }
 }
 $settingsFolderBrowseVars = @(
     "ClientDataRootDir", "TemplateRootDir", "LOG_DIR",
@@ -344,11 +371,16 @@ $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
+function Get-CommonSettingsFiles {
+    return @(
+        [PSCustomObject]@{ Path = (Join-Path $basePath "common-env.bat"); Save = { Save-CommonSettings }; Reload = {} }
+    )
+}
+
 $settingsCommonTopPanelResult = New-SettingsTopPanel `
-    -OnSave { Save-CommonSettings; Update-CommonSettingsFields } `
-    -OnReload { Update-CommonSettingsFields }
+    -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
+    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }
 $settingsCommonTopPanel = $settingsCommonTopPanelResult.Panel
-$lblSettingsCommonSaveStatus = $settingsCommonTopPanelResult.StatusLabel
 
 $settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -371,18 +403,28 @@ $btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
 $lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsGroupOpenXlsx.Text = "開く"
 
+function Get-GroupSettingsFiles {
+    param([string]$GroupName)
+    return @(
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+    )
+}
+
 $settingsGroupTopPanelResult = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
     -OnSave {
         $target = $cmbSettingsGroupTarget.SelectedItem
         if (!$target) { return }
-        Save-GroupSettings -GroupName $target
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
         Update-SettingsGroupList
         Update-GroupSettingsFields
     } `
-    -OnReload { Update-GroupSettingsFields }
+    -OnReload {
+        $target = $cmbSettingsGroupTarget.SelectedItem
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
+        Update-GroupSettingsFields
+    }
 $settingsGroupTopPanel = $settingsGroupTopPanelResult.Panel
-$lblSettingsGroupSaveStatus = $settingsGroupTopPanelResult.StatusLabel
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -437,7 +479,9 @@ $script:mentionRowControls = @()
 
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars | Out-Null
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
 
 function Update-GroupSettingsFields {
@@ -445,7 +489,11 @@ function Update-GroupSettingsFields {
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
+        -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions `
+        -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
         Sync-MentionRowsFromControls
         $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
         $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"

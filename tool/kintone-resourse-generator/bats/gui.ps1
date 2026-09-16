@@ -285,13 +285,9 @@ $btnBatchBrowse.Add_Click({
 $tabSingleRun.Controls.Add($runTopPanel)
 $tabBatchRun.Controls.Add($batchExcelPanel)
 
-$logSpacer = New-Object System.Windows.Forms.Panel
-$logSpacer.Height = 10
-$logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
-
 $txtLog = New-LogTextBox
 
-Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($innerRunTabControl, $logSpacer, $txtLog)
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($innerRunTabControl, $txtLog)
 
 $script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $stepMeta `
     -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
@@ -744,18 +740,24 @@ $settingsTrailingButtonVars = @{
 }
 
 function Update-SettingsFields {
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars | Out-Null
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
 
 $script:saveEnvBatGetValueFn = { param($name) $script:fieldTextBoxes[$name].Text }
 $script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 
+function Get-SettingsFiles {
+    return @(
+        [PSCustomObject]@{ Path = $setEnvBat; Save = { Save-EnvBatFile -Path $setEnvBat -VarNames @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn }; Reload = {} }
+        [PSCustomObject]@{ Path = $setKintoneBat; Save = { Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn }; Reload = {} }
+    )
+}
+
 $settingsTopPanel = New-SettingsTopPanel `
-    -OnSave {
-        Save-EnvBatFile -Path $setEnvBat -VarNames @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
-        Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
-    } `
-    -OnReload { Update-SettingsFields }
+    -OnSave { foreach ($f in (Get-SettingsFiles)) { & $f.Save } } `
+    -OnReload { foreach ($f in (Get-SettingsFiles)) { & $f.Reload }; Update-SettingsFields }
 $topPanel = $settingsTopPanel.Panel
 $tabSettings.Controls.Add($topPanel)
 

@@ -122,12 +122,20 @@ function Get-InputValue {
 function Add-StackedDockedControls {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.Control]$Container,
-        [Parameter(Mandatory)][System.Windows.Forms.Control[]]$ControlsTopToBottom
+        [Parameter(Mandatory)][System.Windows.Forms.Control[]]$ControlsTopToBottom,
+        [int]$Spacing = 10
     )
     $Container.SuspendLayout()
 
     $fillControls = @($ControlsTopToBottom | Where-Object { $_.Dock -eq [System.Windows.Forms.DockStyle]::Fill })
     $topControls = @($ControlsTopToBottom | Where-Object { $_.Dock -ne [System.Windows.Forms.DockStyle]::Fill })
+
+    if ($Spacing -gt 0 -and $topControls.Count -gt 0 -and $fillControls.Count -gt 0) {
+        $spacer = New-Object System.Windows.Forms.Panel
+        $spacer.Height = $Spacing
+        $spacer.Dock = [System.Windows.Forms.DockStyle]::Top
+        $topControls += $spacer
+    }
 
     foreach ($fillControl in $fillControls) { $Container.Controls.Add($fillControl) }
     for ($i = $topControls.Count - 1; $i -ge 0; $i--) {
@@ -337,26 +345,34 @@ function New-LogTab {
 
     $logContentBox = New-LogTextBox
 
-    $logStagePanel = New-Object System.Windows.Forms.Panel
+    $logStagePanel = New-Object System.Windows.Forms.GroupBox
+    $logStagePanel.Text = "ログ"
     $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-    $logStagePanel.Height = 40 + 24 * $ButtonDefs.Count
+    $logStagePanel.AutoSize = $true
+    $logStagePanel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+
+    $rowCenterY = 30
 
     $lblLogExtra = New-Object System.Windows.Forms.Label
     $lblLogExtra.Text = $ExtraLabelText
     $lblLogExtra.AutoSize = $true
-    $lblLogExtra.Location = New-Object System.Drawing.Point(20, 17)
+    $lblLogExtraWidth = $lblLogExtra.Width
+    $lblLogExtra.AutoSize = $false
+    $lblLogExtra.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $lblLogExtra.Size = New-Object System.Drawing.Size($lblLogExtraWidth, 24)
+    $lblLogExtra.Location = New-Object System.Drawing.Point(20, ($rowCenterY - [int]($lblLogExtra.Height / 2)))
     $logStagePanel.Controls.Add($lblLogExtra)
 
     $cmbLogExtra = New-Object System.Windows.Forms.ComboBox
-    $cmbLogExtra.Location = New-Object System.Drawing.Point(100, 14)
     $cmbLogExtra.Size = New-Object System.Drawing.Size($ExtraComboWidth, 24)
     $cmbLogExtra.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+    $cmbLogExtra.Location = New-Object System.Drawing.Point(($lblLogExtra.Right + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
     $logStagePanel.Controls.Add($cmbLogExtra)
 
     $btnClearLogs = New-Object System.Windows.Forms.Button
     $btnClearLogs.Text = "ログをすべて削除"
-    $btnClearLogs.Location = New-Object System.Drawing.Point((120 + $ExtraComboWidth), 13)
-    $btnClearLogs.Size = New-Object System.Drawing.Size(140, 26)
+    $btnClearLogs.Size = New-Object System.Drawing.Size(140, 24)
+    $btnClearLogs.Location = New-Object System.Drawing.Point(($cmbLogExtra.Right + 20), ($rowCenterY - [int]($btnClearLogs.Height / 2)))
     $btnClearLogs.Add_Click({
         $logPath = & $GetLogPathFn
         if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
@@ -390,13 +406,12 @@ function New-LogTab {
         $radio.AutoSize = $true
         $radio.Tag = $bd
         $radio.Checked = ($i -eq 0)
-        $radio.Location = New-Object System.Drawing.Point(20, (40 + 24 * $i))
+        $radio.Location = New-Object System.Drawing.Point(20, (50 + 24 * $i))
         $logStagePanel.Controls.Add($radio)
         $radios += $radio
     }
 
-    $TabPage.Controls.Add($logContentBox)
-    $TabPage.Controls.Add($logStagePanel)
+    Add-StackedDockedControls -Container $TabPage -ControlsTopToBottom @($logStagePanel, $logContentBox)
 
     return [PSCustomObject]@{
         ContentBox  = $logContentBox
@@ -418,27 +433,27 @@ function New-SettingsTopPanel {
         [Parameter(Mandatory)][scriptblock]$OnSave,
         [Parameter(Mandatory)][scriptblock]$OnReload,
         [System.Windows.Forms.Control[]]$ExtraControls = @(),
+        [string]$Title = "",
         [int]$ExtraControlsHeight = 24,
         [int]$ExtraControlsX = 20,
         [int]$ExtraControlsSpacing = 10,
         [int]$ExtraControlsY = -1,
-        [int]$ButtonRowY = -1,
-        [int]$Height = -1
+        [int]$ButtonRowY = -1
     )
 
-    $rowHeight = 35
+    $rowCenterSpacing = 30
     if ($ExtraControls.Count -gt 0) {
-        if ($Height -eq -1) { $Height = 2 * $rowHeight }
-        if ($ButtonRowY -eq -1) { $ButtonRowY = $rowHeight + [int](($rowHeight - 24) / 2) }
-        if ($ExtraControlsY -eq -1) { $ExtraControlsY = [int](($rowHeight - $ExtraControlsHeight) / 2) }
+        $extraCenterY = if ($ExtraControlsY -eq -1) { $rowCenterSpacing } else { $ExtraControlsY + [int]($ExtraControlsHeight / 2) }
+        if ($ButtonRowY -eq -1) { $ButtonRowY = (2 * $rowCenterSpacing) - 12 }
     } else {
-        if ($Height -eq -1) { $Height = 46 }
-        if ($ButtonRowY -eq -1) { $ButtonRowY = 11 }
+        if ($ButtonRowY -eq -1) { $ButtonRowY = $rowCenterSpacing - 12 }
     }
 
-    $panel = New-Object System.Windows.Forms.Panel
+    $panel = New-Object System.Windows.Forms.GroupBox
+    $panel.Text = $Title
     $panel.Dock = [System.Windows.Forms.DockStyle]::Top
-    $panel.Height = $Height
+    $panel.AutoSize = $true
+    $panel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
 
     $btnSave = New-Object System.Windows.Forms.Button
     $btnSave.Text = "保存"
@@ -468,7 +483,7 @@ function New-SettingsTopPanel {
                 $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
                 $ctrl.Size = New-Object System.Drawing.Size($autoWidth, $ExtraControlsHeight)
             }
-            $ctrl.Location = New-Object System.Drawing.Point($extraX, $ExtraControlsY)
+            $ctrl.Location = New-Object System.Drawing.Point($extraX, ($extraCenterY - [int]($ctrl.Height / 2)))
             $extraX = $ctrl.Right + $ExtraControlsSpacing
         }
         $panel.Controls.AddRange($ExtraControls)
@@ -810,11 +825,14 @@ function Sync-MentionRowsFromControls {
 
 function Add-MentionsEditor {
     param(
-        [System.Windows.Forms.Panel]$Panel,
+        [System.Windows.Forms.Control]$Panel,
         [int]$StartY,
-        [string]$RawValue
+        [string]$RawValue,
+        [Parameter(Mandatory)][System.Windows.Forms.ComboBox]$GroupCombo,
+        [Parameter(Mandatory)][System.Windows.Forms.ToolTip]$ToolTip,
+        [Parameter(Mandatory)][string[]]$MentionTypeOptions
     )
-    $groupName = $cmbSettingsGroupTarget.SelectedItem
+    $groupName = $GroupCombo.SelectedItem
     if ($script:mentionRowsGroupName -ne $groupName) {
         $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue)
         $script:mentionRowsGroupName = $groupName
@@ -827,7 +845,7 @@ function Add-MentionsEditor {
     $lbl.AutoSize = $false
     $lbl.Size = New-Object System.Drawing.Size(220, 20)
     $lbl.Location = New-Object System.Drawing.Point(20, $y)
-    $settingsToolTip.SetToolTip($lbl, "MentionUserCodes")
+    $ToolTip.SetToolTip($lbl, "MentionUserCodes")
     $Panel.Controls.Add($lbl)
     $y += 24
 
@@ -840,8 +858,8 @@ function Add-MentionsEditor {
 
         $cmbType = New-Object System.Windows.Forms.ComboBox
         $cmbType.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-        foreach ($opt in $mentionTypeOptions) { $cmbType.Items.Add($opt) | Out-Null }
-        $cmbType.SelectedItem = if ($mentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
+        foreach ($opt in $MentionTypeOptions) { $cmbType.Items.Add($opt) | Out-Null }
+        $cmbType.SelectedItem = if ($MentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
         $cmbType.Location = New-Object System.Drawing.Point(240, $y)
         $cmbType.Size = New-Object System.Drawing.Size(120, 22)
         $Panel.Controls.Add($cmbType)
@@ -880,7 +898,7 @@ function Add-MentionsEditor {
 
 function Add-TestActionButton {
     param(
-        [System.Windows.Forms.Panel]$Panel,
+        [System.Windows.Forms.Control]$Panel,
         [int]$Y,
         [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick
@@ -899,55 +917,60 @@ function Render-SettingsFields {
         [System.Windows.Forms.Panel]$Panel,
         [array]$Rows,
         [hashtable]$TextBoxes,
+        [Parameter(Mandatory)][hashtable]$GroupLabels,
+        [Parameter(Mandatory)][hashtable]$VarLabels,
+        [Parameter(Mandatory)][System.Windows.Forms.ToolTip]$ToolTip,
+        [Parameter(Mandatory)][string]$RootPath,
+        [Parameter(Mandatory)][scriptblock]$EnvResolver,
+        [string[]]$MultilineVars = @(),
+        [string[]]$MaskedVars = @(),
+        [string[]]$FolderBrowseVars = @(),
+        [string[]]$FileBrowseVars = @(),
         [hashtable]$RadioVars = @{},
-        [hashtable]$TrailingButtonVars = @{}
+        [hashtable]$TrailingButtonVars = @{},
+        [System.Windows.Forms.ComboBox]$MentionGroupCombo,
+        [string[]]$MentionTypeOptions = @()
     )
     $Panel.Controls.Clear()
     $TextBoxes.Clear()
 
-    $y = 10
-    $lastGroup = ""
+    $groupBoxes = [System.Collections.Generic.List[System.Windows.Forms.GroupBox]]::new()
+    $grp = $null
+    $lastGroup = $null
+    $y = 25
+
     foreach ($field in $Rows) {
         if ($field.Group -ne $lastGroup) {
-            if ($lastGroup -ne "") {
-                $y += 10
-                $separator = New-Object System.Windows.Forms.Panel
-                $separator.BackColor = [System.Drawing.Color]::LightGray
-                $separator.Location = New-Object System.Drawing.Point(10, $y)
-                $separator.Size = New-Object System.Drawing.Size(690, 2)
-                $Panel.Controls.Add($separator)
-                $y += 14
-            }
-            $lblGroup = New-Object System.Windows.Forms.Label
-            $lblGroup.Text = $settingsGroupLabels[$field.Group]
-            $lblGroup.AutoSize = $true
-            $lblGroup.Location = New-Object System.Drawing.Point(10, $y)
-            $lblGroup.Font = New-Object System.Drawing.Font($lblGroup.Font.FontFamily, 10, [System.Drawing.FontStyle]::Bold)
-            $Panel.Controls.Add($lblGroup)
-            $y += 28
+            $grp = New-Object System.Windows.Forms.GroupBox
+            $grp.Text = $GroupLabels[$field.Group]
+            $grp.Dock = [System.Windows.Forms.DockStyle]::Top
+            $grp.AutoSize = $true
+            $grp.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+            $groupBoxes.Add($grp)
+            $y = 25
             $lastGroup = $field.Group
         }
 
         if ($field.VarName -eq "MentionUserCodes") {
-            $y = Add-MentionsEditor -Panel $Panel -StartY $y -RawValue "$($field.Value)"
+            $y = Add-MentionsEditor -Panel $grp -StartY $y -RawValue "$($field.Value)" -GroupCombo $MentionGroupCombo -ToolTip $ToolTip -MentionTypeOptions $MentionTypeOptions
             continue
         }
 
         $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = if ($settingsVarLabels.Contains($field.VarName)) { $settingsVarLabels[$field.VarName] } else { $field.VarName }
+        $lbl.Text = if ($VarLabels.Contains($field.VarName)) { $VarLabels[$field.VarName] } else { $field.VarName }
         $lbl.AutoSize = $false
         $lbl.Size = New-Object System.Drawing.Size(220, 20)
         $lbl.Location = New-Object System.Drawing.Point(20, $y)
-        $settingsToolTip.SetToolTip($lbl, $field.VarName)
-        $Panel.Controls.Add($lbl)
+        $ToolTip.SetToolTip($lbl, $field.VarName)
+        $grp.Controls.Add($lbl)
 
-        $isMultiline = $settingsMultilineVars -contains $field.VarName
+        $isMultiline = $MultilineVars -contains $field.VarName
 
         if ($RadioVars.ContainsKey($field.VarName)) {
             $txt = New-Object System.Windows.Forms.TextBox
             $txt.Text = "$($field.Value)"
             $txt.Visible = $false
-            $Panel.Controls.Add($txt)
+            $grp.Controls.Add($txt)
 
             $radioPanel = New-Object System.Windows.Forms.Panel
             $radioPanel.Location = New-Object System.Drawing.Point(250, ($y - 2))
@@ -975,11 +998,11 @@ function Render-SettingsFields {
                 $rbUnset.Tag = $txt
                 $rbUnset.Checked = [string]::IsNullOrEmpty($field.Value)
                 $rbUnset.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.Text = "" } })
-                $settingsToolTip.SetToolTip($rbUnset, "空欄にすると共通設定の値を使用します")
+                $ToolTip.SetToolTip($rbUnset, "空欄にすると共通設定の値を使用します")
                 $radioPanel.Controls.Add($rbUnset)
             }
 
-            $Panel.Controls.Add($radioPanel)
+            $grp.Controls.Add($radioPanel)
         } else {
             $txt = New-Object System.Windows.Forms.TextBox
             $txt.Text = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
@@ -992,12 +1015,12 @@ function Render-SettingsFields {
                 $txt.Size = New-Object System.Drawing.Size(300, 22)
             }
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-            if ($settingsMaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
-            $Panel.Controls.Add($txt)
+            if ($MaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
+            $grp.Controls.Add($txt)
         }
 
-        $isFileBrowse = $settingsFileBrowseVars -contains $field.VarName
-        if (($settingsFolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
+        $isFileBrowse = $FileBrowseVars -contains $field.VarName
+        if (($FolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
             $btnBrowse = New-Object System.Windows.Forms.Button
             $btnBrowse.Text = "参照..."
             $btnBrowse.Location = New-Object System.Drawing.Point(560, ($y - 3))
@@ -1010,13 +1033,13 @@ function Render-SettingsFields {
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.OpenFileDialog
                     $dlg.Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*"
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver
                     if ($startPath -and (Test-Path -LiteralPath $startPath)) {
                         $dlg.InitialDirectory = Split-Path $startPath -Parent
                         $dlg.FileName = Split-Path $startPath -Leaf
                     }
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.FileName }
-                })
+                }.GetNewClosure())
 
                 $btnOpen = New-Object System.Windows.Forms.LinkLabel
                 $btnOpen.Text = "開く"
@@ -1028,23 +1051,23 @@ function Render-SettingsFields {
                 $btnOpen.Tag = $txt
                 $btnOpen.Add_LinkClicked({
                     $targetTxt = $this.Tag
-                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
+                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver
                     if (Test-Path -LiteralPath $openPath) {
                         Start-Process -FilePath $openPath
                     } else {
                         [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません: $openPath", "エラー") | Out-Null
                     }
-                })
-                $Panel.Controls.AddRange(@($btnBrowse, $btnOpen))
+                }.GetNewClosure())
+                $grp.Controls.AddRange(@($btnBrowse, $btnOpen))
             } else {
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $rootPath -Resolver $script:commonEnvResolver
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver
                     if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
-                })
-                $Panel.Controls.Add($btnBrowse)
+                }.GetNewClosure())
+                $grp.Controls.Add($btnBrowse)
             }
         }
 
@@ -1052,11 +1075,26 @@ function Render-SettingsFields {
         $y += if ($isMultiline) { 66 } else { 28 }
 
         if ($TrailingButtonVars.ContainsKey($field.VarName)) {
-            & $TrailingButtonVars[$field.VarName] $Panel $y $field
+            & $TrailingButtonVars[$field.VarName] $grp $y $field
             $y += 34
         }
     }
-    return $y
+
+    $controlsToStack = [System.Collections.Generic.List[System.Windows.Forms.Control]]::new()
+    for ($i = 0; $i -lt $groupBoxes.Count; $i++) {
+        if ($i -gt 0) {
+            $spacer = New-Object System.Windows.Forms.Panel
+            $spacer.Dock = [System.Windows.Forms.DockStyle]::Top
+            $spacer.Height = 10
+            $controlsToStack.Add($spacer)
+        }
+        $controlsToStack.Add($groupBoxes[$i])
+    }
+    Add-StackedDockedControls -Container $Panel -ControlsTopToBottom @($controlsToStack) -Spacing 0
+
+    $totalHeight = 10
+    foreach ($ctrl in $controlsToStack) { $totalHeight += $ctrl.Height }
+    return $totalHeight
 }
 
 function Invoke-TestAction {

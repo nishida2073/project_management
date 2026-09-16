@@ -238,13 +238,9 @@ function Get-ClientProfileValues {
     return $result
 }
 
-$logSpacer = New-Object System.Windows.Forms.Panel
-$logSpacer.Height = 10
-$logSpacer.Dock = [System.Windows.Forms.DockStyle]::Top
-
 $txtLog = New-LogTextBox
 
-Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $logSpacer, $txtLog)
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
 
 function Start-BatchRunAll {
     $selectedClient = $cmbClient.SelectedItem
@@ -442,7 +438,9 @@ function Get-SettingsFieldRows {
 }
 
 function Update-SettingsFields {
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars | Out-Null
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
 
 function Get-FieldValue {
@@ -483,20 +481,23 @@ function Save-DefaultSettings {
         -HasValueFn { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 }
 
+function Get-SettingsFiles {
+    $client = $cmbSettingsClient.SelectedItem
+    if ($client -and $client -ne $defaultClientLabel) {
+        return @([PSCustomObject]@{ Path = (Get-ClientBatPath $client); Save = { Save-ClientProfile $client }.GetNewClosure(); Reload = {} })
+    } else {
+        return @([PSCustomObject]@{ Path = $setEnvBat; Save = { Save-DefaultSettings }; Reload = {} })
+    }
+}
+
 $settingsTopPanel = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsClient, $cmbSettingsClient, $btnNewClient) `
     -OnSave {
-        $client = $cmbSettingsClient.SelectedItem
-        if ($client -and $client -ne $defaultClientLabel) {
-            Save-ClientProfile $client
-        } else {
-            Save-DefaultSettings
-        }
+        foreach ($f in (Get-SettingsFiles)) { & $f.Save }
         Update-RunCheckboxesFromClient
     } `
-    -OnReload { Update-SettingsFields }
+    -OnReload { foreach ($f in (Get-SettingsFiles)) { & $f.Reload }; Update-SettingsFields }
 $topPanel = $settingsTopPanel.Panel
-$lblSaveStatus = $settingsTopPanel.StatusLabel
 
 $fieldPanel = New-Object System.Windows.Forms.Panel
 $fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
