@@ -345,67 +345,89 @@ $btnNewClient.Size = New-Object System.Drawing.Size(100, 24)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
-$settingsGroupLabels = @{
-    "COMMON" = "共通"
-    "DOWNLOAD" = "ダウンロード"
-    "GENERATE" = "パッケージ作成"
-    "UPLOAD" = "アップロード"
-}
-
-$settingsVarLabels = @{
-    "COMMON_LOG_PATH" = "ログの出力先"
-    "DOWNLOAD_ENABLED" = "機能の有効化"
-    "DOWNLOAD_SITE_URL" = "ダウンロード元のサイトURL"
-    "DOWNLOAD_SITE_PATH" = "ダウンロード元のフォルダ"
-    "DOWNLOAD_SITE_TENANT_ID" = "テナントID"
-    "DOWNLOAD_LOCAL_PATH" = "ダウンロード先のフォルダ"
-    "DOWNLOAD_LOG_PREFIX" = "ログファイル名の接頭辞"
-    "GENERATE_ENABLED" = "機能の有効化"
-    "GENERATE_SOURCE_PATH" = "圧縮元のフォルダ"
-    "GENERATE_CONFIG_PATH" = "パッケージ定義ファイル"
-    "GENERATE_WORK_PATH" = "作業用のフォルダ"
-    "GENERATE_OUTPUT_PATH" = "パッケージの出力先"
-    "GENERATE_SHEETS_INCLUDE" = "対象のシート"
-    "GENERATE_SHEETS_EXCLUDE" = "除外のシート"
-    "GENERATE_LOG_PREFIX" = "ログファイル名の接頭辞"
-    "UPLOAD_ENABLED" = "機能の有効化"
-    "UPLOAD_SITE_URL" = "アップロード先のサイトURL"
-    "UPLOAD_SITE_PATH" = "アップロード先のフォルダ"
-    "UPLOAD_SITE_TENANT_ID" = "テナントID"
-    "UPLOAD_LOCAL_PATH" = "アップロード元のフォルダ"
-    "UPLOAD_ITEMS_INCLUDE" = "対象の項目形式"
-    "UPLOAD_ITEMS_EXCLUDE" = "除外の項目形式"
-    "UPLOAD_LOG_PREFIX" = "ログファイル名の接頭辞"
-}
-
-$script:fieldTextBoxes = @{}
-
-$enabledVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
-$settingsFolderBrowseVars = @("COMMON_LOG_PATH","DOWNLOAD_LOCAL_PATH", "GENERATE_OUTPUT_PATH", "UPLOAD_LOCAL_PATH")
-$settingsFileBrowseVars = @("GENERATE_CONFIG_PATH")
-$settingsMultilineVars = @()
-$settingsMaskedVars = @()
-
-$clientOverridableVars = @(
-    "DOWNLOAD_ENABLED", "DOWNLOAD_SITE_URL", "DOWNLOAD_SITE_PATH", "DOWNLOAD_SITE_TENANT_ID", "DOWNLOAD_LOCAL_PATH",
-    "GENERATE_ENABLED", "GENERATE_SOURCE_PATH", "GENERATE_CONFIG_PATH", "GENERATE_WORK_PATH", "GENERATE_OUTPUT_PATH",
-    "GENERATE_SHEETS_INCLUDE", "GENERATE_SHEETS_EXCLUDE",
-    "UPLOAD_ENABLED", "UPLOAD_SITE_URL", "UPLOAD_SITE_PATH", "UPLOAD_SITE_TENANT_ID", "UPLOAD_LOCAL_PATH",
-    "UPLOAD_ITEMS_INCLUDE", "UPLOAD_ITEMS_EXCLUDE"
-)
-$clientRuntimeExcludeVars = @("DOWNLOAD_ENABLED", "GENERATE_ENABLED", "UPLOAD_ENABLED")
-
-$script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
-
 $enabledRadioOptions = @(
     [PSCustomObject]@{ Label = "有効"; Value = "1" }
     [PSCustomObject]@{ Label = "無効"; Value = "0" }
 )
-$settingsRadioVars = @{
-    "DOWNLOAD_ENABLED" = $enabledRadioOptions
-    "GENERATE_ENABLED" = $enabledRadioOptions
-    "UPLOAD_ENABLED"   = $enabledRadioOptions
+
+$settingsGroups = [ordered]@{
+    "COMMON" = @{
+        Label = "共通"
+        Overridable = $false
+        Vars = [ordered]@{
+            "COMMON_LOG_PATH" = @{ Label = "ログの出力先"; Browse = "Folder" }
+        }
+    }
+    "DOWNLOAD" = @{
+        Label = "ダウンロード"
+        Vars = [ordered]@{
+            "DOWNLOAD_ENABLED"        = @{ Label = "機能の有効化"; Radio = $enabledRadioOptions; IsEnabledFlag = $true }
+            "DOWNLOAD_SITE_URL"       = @{ Label = "ダウンロード元のサイトURL" }
+            "DOWNLOAD_SITE_PATH"      = @{ Label = "ダウンロード元のフォルダ" }
+            "DOWNLOAD_SITE_TENANT_ID" = @{ Label = "テナントID" }
+            "DOWNLOAD_LOCAL_PATH"     = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
+            "DOWNLOAD_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞"; Overridable = $false }
+        }
+    }
+    "GENERATE" = @{
+        Label = "パッケージ作成"
+        Vars = [ordered]@{
+            "GENERATE_ENABLED"        = @{ Label = "機能の有効化"; Radio = $enabledRadioOptions; IsEnabledFlag = $true }
+            "GENERATE_SOURCE_PATH"    = @{ Label = "圧縮元のフォルダ" }
+            "GENERATE_CONFIG_PATH"    = @{ Label = "パッケージ定義ファイル"; Browse = "File" }
+            "GENERATE_WORK_PATH"      = @{ Label = "作業用のフォルダ" }
+            "GENERATE_OUTPUT_PATH"    = @{ Label = "パッケージの出力先"; Browse = "Folder" }
+            "GENERATE_SHEETS_INCLUDE" = @{ Label = "対象のシート" }
+            "GENERATE_SHEETS_EXCLUDE" = @{ Label = "除外のシート" }
+            "GENERATE_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞"; Overridable = $false }
+        }
+    }
+    "UPLOAD" = @{
+        Label = "アップロード"
+        Vars = [ordered]@{
+            "UPLOAD_ENABLED"        = @{ Label = "機能の有効化"; Radio = $enabledRadioOptions; IsEnabledFlag = $true }
+            "UPLOAD_SITE_URL"       = @{ Label = "アップロード先のサイトURL" }
+            "UPLOAD_SITE_PATH"      = @{ Label = "アップロード先のフォルダ" }
+            "UPLOAD_SITE_TENANT_ID" = @{ Label = "テナントID" }
+            "UPLOAD_LOCAL_PATH"     = @{ Label = "アップロード元のフォルダ"; Browse = "Folder" }
+            "UPLOAD_ITEMS_INCLUDE"  = @{ Label = "対象の項目形式" }
+            "UPLOAD_ITEMS_EXCLUDE"  = @{ Label = "除外の項目形式" }
+            "UPLOAD_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞"; Overridable = $false }
+        }
+    }
 }
+
+$settingsGroupLabels = @{}
+$settingsVarLabels = @{}
+$settingsFolderBrowseVars = @()
+$settingsFileBrowseVars = @()
+$settingsMaskedVars = @()
+$settingsMultilineVars = @()
+$settingsRadioVars = @{}
+$enabledVars = @()
+$clientOverridableVars = @()
+foreach ($groupKey in $settingsGroups.Keys) {
+    $group = $settingsGroups[$groupKey]
+    $settingsGroupLabels[$groupKey] = $group.Label
+    $isOverridableGroup = if ($group.ContainsKey("Overridable")) { $group.Overridable } else { $true }
+    foreach ($varKey in $group.Vars.Keys) {
+        $varDef = $group.Vars[$varKey]
+        $settingsVarLabels[$varKey] = $varDef.Label
+        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
+        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
+        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
+        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
+        if ($varDef.Radio) { $settingsRadioVars[$varKey] = $varDef.Radio }
+        if ($varDef.IsEnabledFlag) { $enabledVars += $varKey }
+        $isOverridableVar = if ($varDef.ContainsKey("Overridable")) { $varDef.Overridable } else { $isOverridableGroup }
+        if ($isOverridableVar) { $clientOverridableVars += $varKey }
+    }
+}
+$clientRuntimeExcludeVars = $enabledVars
+
+$script:fieldTextBoxes = @{}
+
+$script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
 
 function Get-NewClientInitialValues {
     param([string]$ClientName, [hashtable]$Defaults)

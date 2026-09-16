@@ -254,98 +254,93 @@ function Get-TemplateXlsxPath {
 
 $script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
 
-$commonSettingsVars = @(
-    "ClientDataRootDir", "TemplateRootDir", "LOG_DIR",
-    "ResultRootDir", "TestResultRootDir", "SurveyResultRootDir",
-    "OutputRootDir", "OutputTestCollectDir", "OutputTestResultFileSuffix", "OutputSurveyCollectDir", "OutputSurveyResultFileSuffix", "OutputCombineCollectDir", "OutputCombineResultFileSuffix", "OutputYearComparisonCollectDir", "OutputYearComparisonResultFileSuffix",
-    "PassScore",
-    "AutoHotkeyExePath", "AutoHotkeyScriptPath", "TrackLoginUrl",
-    "ComparePeriod",
-    "CourseGroupDefs",
-    "YearOrder"
-)
-$authVars = @("KintoneLoginName", "KintonePassword", "KintoneSubdomain")
-$postVars = @("SpaceId", "ThreadId", "MentionUserCodes", "CommentTextTemplate")
-$settingsMaskedVars = @("KintonePassword")
-$settingsMultilineVars = @("CommentTextTemplate")
-$groupOverrideVars = @("ComparePeriod", "YearOrder", "PassScore")
-
-$radioVars = @{
-    "YearOrder" = @(
-        [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
-        [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
-    )
+$overridableVarDefs = [ordered]@{
+    "ComparePeriod" = @{ Label = "経年比較の比較年数" }
+    "YearOrder"     = @{
+        Label = "経年比較の年度表示順（0:昇順 1:降順）"
+        Radio = @(
+            [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
+            [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
+        )
+    }
+    "PassScore"     = @{ Label = "合格点" }
 }
 
 $settingsGroups = [ordered]@{
     "COMMON" = @{
         Label = "共通設定"
-        VarLabels = @{
-            "ClientDataRootDir"                    = "受講生データのフォルダ"
-            "TemplateRootDir"                       = "テンプレートのフォルダ"
-            "LOG_DIR"                                = "ログの出力先"
-            "ResultRootDir"                          = "実施結果の取得先（共通）"
-            "TestResultRootDir"                      = "テスト結果の取得先"
-            "SurveyResultRootDir"                    = "アンケート結果の取得先"
-            "OutputRootDir"                          = "集計結果の出力先（共通）"
-            "OutputTestCollectDir"                   = "テスト集計結果の出力先"
-            "OutputTestResultFileSuffix"              = "テスト結果ファイル名の接尾辞"
-            "OutputSurveyCollectDir"                  = "アンケート集計結果の出力先"
-            "OutputSurveyResultFileSuffix"             = "アンケート結果ファイル名の接尾辞"
-            "OutputCombineCollectDir"                 = "統合結果の出力先"
-            "OutputCombineResultFileSuffix"            = "統合結果ファイル名の接尾辞"
-            "OutputYearComparisonCollectDir"          = "経年比較結果の出力先"
-            "OutputYearComparisonResultFileSuffix"    = "経年比較結果ファイル名の接尾辞"
-            "AutoHotkeyExePath"                       = "AutoHotkey実行ファイルのパス"
-            "AutoHotkeyScriptPath"                    = "ダウンロード用スクリプトのパス"
-            "TrackLoginUrl"                           = "trackログインURL"
-            "CourseGroupDefs"                         = "コースグループ定義"
-            "ComparePeriod"                           = "経年比較の比較年数"
-            "YearOrder"                               = "経年比較の年度表示順（0:昇順 1:降順）"
-            "PassScore"                               = "合格点"
+        Vars = [ordered]@{
+            "ClientDataRootDir"                    = @{ Label = "受講生データのフォルダ"; Browse = "Folder" }
+            "TemplateRootDir"                      = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
+            "LOG_DIR"                               = @{ Label = "ログの出力先"; Browse = "Folder" }
+            "ResultRootDir"                         = @{ Label = "実施結果の取得先（共通）"; Browse = "Folder" }
+            "TestResultRootDir"                     = @{ Label = "テスト結果の取得先"; Browse = "Folder" }
+            "SurveyResultRootDir"                   = @{ Label = "アンケート結果の取得先"; Browse = "Folder" }
+            "OutputRootDir"                         = @{ Label = "集計結果の出力先（共通）"; Browse = "Folder" }
+            "OutputTestCollectDir"                  = @{ Label = "テスト集計結果の出力先"; Browse = "Folder" }
+            "OutputTestResultFileSuffix"            = @{ Label = "テスト結果ファイル名の接尾辞" }
+            "OutputSurveyCollectDir"                = @{ Label = "アンケート集計結果の出力先"; Browse = "Folder" }
+            "OutputSurveyResultFileSuffix"          = @{ Label = "アンケート結果ファイル名の接尾辞" }
+            "OutputCombineCollectDir"               = @{ Label = "統合結果の出力先"; Browse = "Folder" }
+            "OutputCombineResultFileSuffix"         = @{ Label = "統合結果ファイル名の接尾辞" }
+            "OutputYearComparisonCollectDir"        = @{ Label = "経年比較結果の出力先"; Browse = "Folder" }
+            "OutputYearComparisonResultFileSuffix"  = @{ Label = "経年比較結果ファイル名の接尾辞" }
+            "PassScore"                             = $overridableVarDefs["PassScore"]
+            "AutoHotkeyExePath"                     = @{ Label = "AutoHotkey実行ファイルのパス" }
+            "AutoHotkeyScriptPath"                  = @{ Label = "ダウンロード用スクリプトのパス" }
+            "TrackLoginUrl"                         = @{ Label = "trackログインURL" }
+            "ComparePeriod"                         = $overridableVarDefs["ComparePeriod"]
+            "CourseGroupDefs"                       = @{ Label = "コースグループ定義" }
+            "YearOrder"                             = $overridableVarDefs["YearOrder"]
         }
     }
     "AUTH" = @{
         Label = "認証情報"
-        VarLabels = @{
-            "KintoneLoginName" = "ログイン名"
-            "KintonePassword"  = "パスワード"
-            "KintoneSubdomain" = "kintoneサブドメイン"
+        Vars = [ordered]@{
+            "KintoneLoginName" = @{ Label = "ログイン名" }
+            "KintonePassword"  = @{ Label = "パスワード"; Masked = $true }
+            "KintoneSubdomain" = @{ Label = "kintoneサブドメイン" }
         }
     }
     "POST" = @{
         Label = "投稿先"
-        VarLabels = @{
-            "SpaceId"             = "投稿先スペースID"
-            "ThreadId"            = "投稿先スレッドID"
-            "MentionUserCodes"    = "メンション対象"
-            "CommentTextTemplate" = "投稿コメント文言"
+        Vars = [ordered]@{
+            "SpaceId"             = @{ Label = "投稿先スペースID" }
+            "ThreadId"            = @{ Label = "投稿先スレッドID" }
+            "MentionUserCodes"    = @{ Label = "メンション対象" }
+            "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Multiline = $true }
         }
     }
     "OVERRIDE" = @{
         Label = "個別設定（空欄の場合は共通設定の値を使用）"
-        VarLabels = @{
-            "ComparePeriod" = "経年比較の比較年数"
-            "YearOrder"     = "経年比較の年度表示順（0:昇順 1:降順）"
-            "PassScore"     = "合格点"
-        }
+        Vars = $overridableVarDefs
     }
 }
 
+$commonSettingsVars = @($settingsGroups["COMMON"].Vars.Keys)
+$authVars = @($settingsGroups["AUTH"].Vars.Keys)
+$postVars = @($settingsGroups["POST"].Vars.Keys)
+$groupOverrideVars = @($settingsGroups["OVERRIDE"].Vars.Keys)
+
 $settingsGroupLabels = @{}
 $settingsVarLabels = @{}
+$settingsFolderBrowseVars = @()
+$settingsFileBrowseVars = @()
+$settingsMaskedVars = @()
+$settingsMultilineVars = @()
+$radioVars = @{}
 foreach ($groupKey in $settingsGroups.Keys) {
     $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
-    foreach ($varKey in $settingsGroups[$groupKey].VarLabels.Keys) {
-        $settingsVarLabels[$varKey] = $settingsGroups[$groupKey].VarLabels[$varKey]
+    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
+        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
+        $settingsVarLabels[$varKey] = $varDef.Label
+        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
+        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
+        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
+        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
+        if ($varDef.Radio) { $radioVars[$varKey] = $varDef.Radio }
     }
 }
-$settingsFolderBrowseVars = @(
-    "ClientDataRootDir", "TemplateRootDir", "LOG_DIR",
-    "ResultRootDir", "TestResultRootDir", "SurveyResultRootDir",
-    "OutputRootDir", "OutputTestCollectDir", "OutputSurveyCollectDir", "OutputCombineCollectDir", "OutputYearComparisonCollectDir"
-)
-$settingsFileBrowseVars = @()
 
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {

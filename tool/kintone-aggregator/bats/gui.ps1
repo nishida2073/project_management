@@ -209,10 +209,6 @@ function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$G
 
 $script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
 
-$commonSettingsVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir", "OutputAlertBackupDir")
-$authVars = @("KintoneSubdomain", "KintoneLoginName", "KintonePassword")
-$postVars = @("SpaceId", "ThreadId", "MentionUserCodes", "CommentTextTemplate")
-
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
 
@@ -230,32 +226,69 @@ function Get-ReportTypeDefs {
     return @($types | Sort-Object Prefix)
 }
 
-$settingsGroupLabels = @{ "BASE" = "基本設定"; "AUTH" = "認証情報"; "POST" = "投稿先" }
-foreach ($rt in (Get-ReportTypeDefs)) { $settingsGroupLabels[$rt.Prefix] = $rt.Label }
-$settingsVarLabels = @{
-    "ClientDataRootDir"        = "グループデータのフォルダ"
-    "OutputRootDir"            = "出力のルートフォルダ"
-    "TemplateRootDir"          = "テンプレートのフォルダ"
-    "LOG_DIR"                  = "ログの出力先"
-    "OutputReportDir"          = "業務日誌・パルスサーベイの出力先"
-    "OutputCollectDataRootDir" = "アプリデータ集計の出力先"
-    "OutputAlertRootDir"       = "アラート検知結果の出力先"
-    "OutputAlertBackupDir"     = "アラート検知結果のバックアップ先"
-    "KintoneLoginName"         = "ログイン名"
-    "KintonePassword"          = "パスワード"
-    "KintoneSubdomain"         = "サブドメイン"
-    "SpaceId"                  = "投稿先スペースID"
-    "ThreadId"                 = "投稿先スレッドID"
-    "MentionUserCodes"         = "メンション対象"
-    "CommentTextTemplate"      = "投稿コメント文言"
-    "TargetAppIds"             = "対象アプリID"
-    "TargetDateCodeField"      = "日付フィールドコード"
-    "TargetUserCodeField"      = "受講生IDフィールドコード"
+$settingsGroups = [ordered]@{
+    "BASE" = @{
+        Label = "基本設定"
+        Vars = [ordered]@{
+            "ClientDataRootDir"        = @{ Label = "グループデータのフォルダ"; Browse = "Folder" }
+            "OutputRootDir"            = @{ Label = "出力のルートフォルダ"; Browse = "Folder" }
+            "TemplateRootDir"          = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
+            "LOG_DIR"                  = @{ Label = "ログの出力先"; Browse = "Folder" }
+            "OutputReportDir"          = @{ Label = "業務日誌・パルスサーベイの出力先"; Browse = "Folder" }
+            "OutputCollectDataRootDir" = @{ Label = "アプリデータ集計の出力先"; Browse = "Folder" }
+            "OutputAlertRootDir"       = @{ Label = "アラート検知結果の出力先"; Browse = "Folder" }
+            "OutputAlertBackupDir"     = @{ Label = "アラート検知結果のバックアップ先"; Browse = "Folder" }
+        }
+    }
+    "AUTH" = @{
+        Label = "認証情報"
+        Vars = [ordered]@{
+            "KintoneSubdomain" = @{ Label = "サブドメイン" }
+            "KintoneLoginName" = @{ Label = "ログイン名" }
+            "KintonePassword"  = @{ Label = "パスワード"; Masked = $true }
+        }
+    }
+    "POST" = @{
+        Label = "投稿先"
+        Vars = [ordered]@{
+            "SpaceId"             = @{ Label = "投稿先スペースID" }
+            "ThreadId"            = @{ Label = "投稿先スレッドID" }
+            "MentionUserCodes"    = @{ Label = "メンション対象" }
+            "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Multiline = $true }
+        }
+    }
 }
-$settingsFolderBrowseVars = @("ClientDataRootDir", "OutputRootDir", "TemplateRootDir", "LOG_DIR", "OutputReportDir", "OutputCollectDataRootDir", "OutputAlertRootDir", "OutputAlertBackupDir")
+
+$reportTypeVarDefs = [ordered]@{
+    "TargetAppIds"        = @{ Label = "対象アプリID" }
+    "TargetDateCodeField" = @{ Label = "日付フィールドコード" }
+    "TargetUserCodeField" = @{ Label = "受講生IDフィールドコード" }
+}
+foreach ($rt in (Get-ReportTypeDefs)) {
+    $settingsGroups[$rt.Prefix] = @{ Label = $rt.Label; Vars = $reportTypeVarDefs }
+}
+
+$commonSettingsVars = @($settingsGroups["BASE"].Vars.Keys)
+$authVars = @($settingsGroups["AUTH"].Vars.Keys)
+$postVars = @($settingsGroups["POST"].Vars.Keys)
+
+$settingsGroupLabels = @{}
+$settingsVarLabels = @{}
+$settingsFolderBrowseVars = @()
 $settingsFileBrowseVars = @()
-$settingsMaskedVars = @("KintonePassword")
-$settingsMultilineVars = @("CommentTextTemplate")
+$settingsMaskedVars = @()
+$settingsMultilineVars = @()
+foreach ($groupKey in $settingsGroups.Keys) {
+    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
+    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
+        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
+        $settingsVarLabels[$varKey] = $varDef.Label
+        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
+        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
+        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
+        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
+    }
+}
 $settingsTrailingButtonVars = @{
     "TargetAppIds"        = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group }.GetNewClosure() }
     "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {

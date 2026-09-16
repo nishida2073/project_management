@@ -684,26 +684,48 @@ $fieldPanel.AutoScroll = $true
 
 $tabSettings.Controls.Add($fieldPanel)
 
-$settingsVarLabels = [ordered]@{
-    "COMMON_DOWNLOAD_PATH"     = "ダウンロード先のフォルダ"
-    "COMMON_BASE_TEMPLATE_PATH"     = "設定テンプレート（基本）ファイルのフォルダ"
-    "COMMON_CUSTOM_TEMPLATE_PATH"   = "設定テンプレート（カスタム）ファイルのフォルダ"
-    "COMMON_CONFIG_PATH"       = "設定ファイルのフォルダ"
-    "COMMON_CHECK_OUTPUT_PATH" = "チェック結果の出力先フォルダ"
-    "COMMON_LOG_PATH"          = "ログの出力先フォルダ"
-    "KINTONE_BASE_URL"         = "kintoneのサイトURL"
-    "KINTONE_LOGIN"            = "ログイン名"
-    "KINTONE_PASSWORD"         = "パスワード"
+$settingsGroups = [ordered]@{
+    "COMMON" = @{
+        Label = "基本設定"
+        Vars = [ordered]@{
+            "COMMON_DOWNLOAD_PATH"        = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
+            "COMMON_BASE_TEMPLATE_PATH"   = @{ Label = "設定テンプレート（基本）ファイルのフォルダ"; Browse = "Folder" }
+            "COMMON_CUSTOM_TEMPLATE_PATH" = @{ Label = "設定テンプレート（カスタム）ファイルのフォルダ"; Browse = "Folder" }
+            "COMMON_CONFIG_PATH"          = @{ Label = "設定ファイルのフォルダ"; Browse = "Folder" }
+            "COMMON_CHECK_OUTPUT_PATH"    = @{ Label = "チェック結果の出力先フォルダ"; Browse = "Folder" }
+            "COMMON_LOG_PATH"             = @{ Label = "ログの出力先フォルダ"; Browse = "Folder" }
+        }
+    }
+    "KINTONE" = @{
+        Label = "kintoneの接続情報"
+        Vars = [ordered]@{
+            "KINTONE_BASE_URL" = @{ Label = "kintoneのサイトURL" }
+            "KINTONE_LOGIN"    = @{ Label = "ログイン名" }
+            "KINTONE_PASSWORD" = @{ Label = "パスワード"; Masked = $true }
+        }
+    }
+}
+
+$settingsGroupLabels = @{}
+$settingsVarLabels = [ordered]@{}
+$settingsFolderBrowseVars = @()
+$settingsFileBrowseVars = @()
+$settingsMaskedVars = @()
+$settingsMultilineVars = @()
+foreach ($groupKey in $settingsGroups.Keys) {
+    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
+    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
+        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
+        $settingsVarLabels[$varKey] = $varDef.Label
+        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
+        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
+        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
+        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
+    }
 }
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
-$settingsGroupLabels = @{ "COMMON" = "基本設定"; "KINTONE" = "kintoneの接続情報" }
-$settingsFolderBrowseVars = @("COMMON_DOWNLOAD_PATH", "COMMON_BASE_TEMPLATE_PATH", "COMMON_CUSTOM_TEMPLATE_PATH", "COMMON_CONFIG_PATH", "COMMON_CHECK_OUTPUT_PATH", "COMMON_LOG_PATH")
-$settingsFileBrowseVars = @()
-$settingsMultilineVars = @()
-
-$kintoneVars = @("KINTONE_BASE_URL", "KINTONE_LOGIN", "KINTONE_PASSWORD")
-$settingsMaskedVars = @("KINTONE_PASSWORD")
+$kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
 $script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
 $script:fieldTextBoxes = @{}
@@ -725,7 +747,7 @@ function Get-SettingsFieldRows {
 }
 
 $settingsTrailingButtonVars = @{
-    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "接続テスト" -OnClick {
+    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick {
         $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
         $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
         $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
