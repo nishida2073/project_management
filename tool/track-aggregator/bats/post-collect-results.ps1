@@ -43,12 +43,12 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
     if (Test-Path -LiteralPath $testFilePath) {
         $filePaths += $testFilePath
     } else {
-        Write-Message "テスト結果ファイルが見つかりません: $testFilePath" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        Write-MessageWarn "テスト結果ファイルが見つかりません: $testFilePath"
     }
     if (Test-Path -LiteralPath $surveyFilePath) {
         $filePaths += $surveyFilePath
     } else {
-        Write-Message "アンケート結果ファイルが見つかりません: $surveyFilePath" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        Write-MessageWarn "アンケート結果ファイルが見つかりません: $surveyFilePath"
     }
 
     if ($filePaths.Count -eq 0) {
@@ -68,5 +68,9 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
 
     $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths $filePaths -Mentions $mentions -BaseUrl $BaseUrl -Authorization $Authorization
     Write-Message $commentResponse -VarName "commentResponse" -Type "Info"
+
+    Write-MessageComplete "集計結果を投稿しました"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

@@ -290,8 +290,8 @@ foreach ($groupKey in $settingsGroups.Keys) {
     }
 }
 $settingsTrailingButtonVars = @{
-    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group }.GetNewClosure() }
-    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
+    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group }.GetNewClosure() }
+    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
         Sync-MentionRowsFromControls
         $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
         $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
@@ -825,5 +825,10 @@ Update-GroupSettingsFields
 
 $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
+
+$form.Add_Shown({
+    Update-CommonSettingsFields
+    Update-GroupSettingsFields
+})
 
 [System.Windows.Forms.Application]::Run($form)

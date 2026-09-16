@@ -1,8 +1,6 @@
 ﻿# =========================================
 # 共通処理（Azure CLI / Microsoft Graph 関連）
 # =========================================
-# 各ワーカースクリプトが使うAzure CLI認証・Microsoft Graph API呼び出し・
-# SharePointサイト/パス解決の共通処理。
 
 function Get-AzureCliPath {
     $az = (Get-Command az.cmd -ErrorAction SilentlyContinue).Source
@@ -10,8 +8,8 @@ function Get-AzureCliPath {
         $az = "C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.cmd"
     }
     if (!(Test-Path $az)) {
-        Write-Message "Azure CLIが見つかりません。以下でインストールしてください：" -ForegroundColor Red -Type "Info" -NoHeader
-        Write-Message "  winget install --id Microsoft.AzureCLI" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "Azure CLIが見つかりません。以下でインストールしてください："
+        Write-MessageError "  winget install --id Microsoft.AzureCLI"
         exit 1
     }
     return $az
@@ -54,7 +52,7 @@ function Get-GraphToken {
         $out = & $Az account get-access-token --resource "https://graph.microsoft.com" --tenant $TenantId 2>$null
     }
     if (!$out) {
-        Write-Message "トークンの取得に失敗しました" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "トークンの取得に失敗しました"
         exit 1
     }
     return ($out | Out-String | ConvertFrom-Json).accessToken

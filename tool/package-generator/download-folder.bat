@@ -20,7 +20,6 @@ set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"
 
-timeout /t 5 >nul
 
 
 exit /b %EXITCODE%

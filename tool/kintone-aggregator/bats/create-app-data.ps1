@@ -20,8 +20,6 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-# create-daily-report.bat/create-pulse-survey.batの両方がこのps1を共有しているため、
-# ログファイル名で呼び出し元を区別できるよう呼び出し元の.bat名をLogNamePrefixとして受け取る
 $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'create-app-data' })-$TargetGroupName-$TargetDate"
 
 $appDefinedCodeFields = [PSCustomObject]@{
@@ -29,7 +27,6 @@ $appDefinedCodeFields = [PSCustomObject]@{
     UserCodeField                = $TargetUserCodeField
 }
 
-# TargetAppIds用のパース処理。カンマ・空白区切りの文字列を空要素を除いた配列にする
 function Get-FieldCodeList {
     param(
         [string]$Value
@@ -48,10 +45,6 @@ function Get-AppDatas {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
-    # アプリの構造（フィールドコード・ラベル）はレコードの有無に関わらず取得できる、
-    # レコード取得（Get-CurrentAppData）とは別のAPIのため、ループの外で独立して取得する。
-    # 対象日のレコードが1件も無いと、以前はレコードのループが回らず$fieldDatasが
-    # 一度も取得されない（＝集計対象フィールドが展開できない）不具合があった
     $fieldDatas = if ($TargetAppIds.Count -gt 0) {
         Get-CurrentAppFieldData -TargetAppId $TargetAppIds[0] -BaseUrl $BaseUrl -Authorization $Authorization
     } else {
@@ -60,11 +53,9 @@ function Get-AppDatas {
 
     $resultAllDatas = @()
     foreach ($targetAppId in $TargetAppIds) {
-        # 結果取得
         $resultDatas = Get-CurrentAppData -TargetAppId $targetAppId -BaseUrl $BaseUrl -Authorization $Authorization -TargetDateCodeField $appDefinedCodeFields.DateCodeField -TargetDate $TargetDate
         $labelDatas = @()
         foreach ($resultData in $resultDatas) {
-            # フィールドをラベルに変換
             $labelData = [PSCustomObject]@{}
             foreach ($fieldCode in $resultData.PSObject.Properties.Name) {
                 if ($null -ne $fieldDatas.PSObject.Properties[$fieldCode]) {
@@ -81,17 +72,12 @@ function Get-AppDatas {
     }
     Write-Message $resultAllDatas -VarName "resultAllDatas"
 
-    # 最新版を取得
     $resultAllDatas = @($resultAllDatas | Group-Object userCode |
                           ForEach-Object {
                               $_.Group | Sort-Object { $_.更新日時 } -Descending |
                               Select-Object -First 1
                           })
 
-    # 集計対象フィールド（AllFieldLabels）の算出用。アプリの全フィールドのラベル名から、
-    # 日付・受講生ID特定に既に使っているフィールド（DateCodeField/UserCodeField）を除いたもの。
-    # UserCodeFieldは"作成者.code"のようなネストパス（kintoneのCREATOR等サブテーブル系フィールド）
-    # を指定できるため、比較は最初の"."より前のベースのフィールドコードで行う
     $excludeFieldCodes = @(
         $appDefinedCodeFields.DateCodeField
         ($appDefinedCodeFields.UserCodeField -split '\.')[0]
@@ -181,7 +167,6 @@ function Export-File {
         $rowData = @($_.existStatus)
 
         foreach ($field in $FixedCodeFields) {
-            # Write-Message "field = $field"
             $rowData += $_.userData.$field
         }
         foreach ($field in $AppCodeFields) {
@@ -212,11 +197,11 @@ function Export-File {
     Write-Message $courseScheduleData -VarName "courseScheduleData"
 
     if(-not $courseScheduleData){
-        Write-Message "対象の科目がありません。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        Write-MessageWarn "対象の科目がありません。日付=$($TargetDate)"
         return
     }
     if($courseScheduleData.isHoliday){
-        Write-Message "休日です。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        Write-MessageWarn "休日です。日付=$($TargetDate)"
         return
     }
 
@@ -227,19 +212,12 @@ function Export-File {
     $appDatas = $appDatasResult.Datas
     Write-Message $appDatas -VarName "appDatas"
 
-    # kintoneアプリの全フィールド（ラベル名）のうち、日付・受講生ID特定に使用済みの
-    # フィールドを除いた残り全部を集計対象にする
     $appCodeFields = $appDatasResult.AllFieldLabels
     Write-Message $appCodeFields -VarName "appCodeFields"
 
     $checkResults = Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData
     Write-Message $checkResults -VarName "checkResults"
 
-    # userData（受講生データにCheck-Resultが科目名・日付等を付与した後の最終形）の全プロパティのうち、
-    # Create-UserDatas/Check-Resultが別名として付与した英語エイリアス（userNo/userCode/userName/
-    # companyName/className/scheduledDate/isHoliday/scheduledCourseName）を除いた残り全部を
-    # 固定列にする。userDataのプロパティ一覧はCheck-Result実行後でないと日付・科目名を含んだ
-    # 最終形にならないため、ここで算出する
     $userDataAliasFieldCodes = @(
         "userNo", "userCode", "userName", "companyName", "className",
         "scheduledDate", "isHoliday", "scheduledCourseName"
@@ -255,5 +233,9 @@ function Export-File {
     $outputFileName = "$TargetGroupName-$($OutputFileNameSuffix.TrimStart('_')).txt"
     $outputFilePath = Join-Path $OutputRootDir $outputFileName
     Export-File -CheckResults $checkResults -OutputFilePath $outputFilePath -FixedCodeFields $fixedCodeFields -AppCodeFields $appCodeFields
+
+    Write-MessageComplete "アプリデータを出力しました: $outputFilePath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

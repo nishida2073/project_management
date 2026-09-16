@@ -11,4 +11,5 @@ set "ThreadId=25"
 set "MentionUserCodes="
 set "CommentTextTemplate=集計結果を更新しました。（{TargetGroupName}）"
 
+set "PassScore=100"
 

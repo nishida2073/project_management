@@ -133,5 +133,9 @@ function Download-TrackResults {
     Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
 
     Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
+
+    Write-MessageComplete "実施結果をダウンロードしました: $(Join-Path $TestResultRootDir $TargetGroupName), $(Join-Path $SurveyResultRootDir $TargetGroupName)"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

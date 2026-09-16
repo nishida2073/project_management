@@ -56,7 +56,6 @@ function Create-SurveyResultDatas {
             }
         }
     }
-    # Write-Message $allResultDatas -VarName "allResultDatas" -Type "Info"
     return $allResultDatas
 }
 
@@ -84,7 +83,6 @@ function Create-SurveySummaryDataByGroup {
             $actualCount = $filtered.Count
             $isExecute = ($filtered.Count -ne 0)
             $obj = [ordered]@{}
-            # total 以外のみグループキー追加
             if ($GroupKey) {
                 $obj[$GroupKey] = $group.GroupValue
             }
@@ -95,7 +93,6 @@ function Create-SurveySummaryDataByGroup {
                 actualCount  = $actualCount
             }
 
-            # 平均
             if ($isExecute) {
                 $surveyCount = [int]$filtered[0].surveyCount
                 $obj["surveyCount"] = $surveyCount
@@ -111,6 +108,5 @@ function Create-SurveySummaryDataByGroup {
             [pscustomobject]$obj
         }
     }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
     return $results
 }

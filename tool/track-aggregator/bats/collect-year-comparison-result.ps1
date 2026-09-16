@@ -8,11 +8,11 @@
     [string]$SurveyResultRootDir,
     [string]$TestResultRootDir,
     [int]$PassScore,
-    [string]$CourseGroupDefs = "",     # コースグループ定義。"グループ名:コース1,コース2;グループ名2:コース3,コース4" の形式
-    [string]$TargetCompanyNames = "",  # カンマ区切り。空の場合は全社を対象とする
-    [string]$TargetRankNames = "",     # カンマ区切り。空の場合は全ランクを対象とする
-    [string]$TargetClassNames = "",    # カンマ区切り。空の場合は全クラスを対象とする
-    [int]$YearOrder = 1,                # 年度行の表示順。0:昇順（古い→新しい） 1:降順（新しい→古い、既定）
+    [string]$CourseGroupDefs = "",
+    [string]$TargetCompanyNames = "",
+    [string]$TargetRankNames = "",
+    [string]$TargetClassNames = "",
+    [int]$YearOrder = 1,
     [string]$OutputFileSuffix = "経年比較結果",
     [string]$LogNamePrefix
 )
@@ -31,7 +31,7 @@ function Get-YearSummaryDatas {
         $TestDatas,
         $SurveyDatas,
         [string]$GroupName,
-        [array]$Dimensions  # 各要素: @{ Key = <集計軸のプロパティ名>; Names = <値の一覧> }
+        [array]$Dimensions
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -88,8 +88,8 @@ function Get-CourseGroupDatas {
 function Create-YearComparisonDatas {
     param(
         $CourseGroupDatas,
-        [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順。各要素は @{ year = <int>; summaryDatas = <Get-YearSummaryDatasの戻り値> }
-        [int]$YearOrder = 1  # 年度行の表示順（差分計算には影響しない）。0:昇順（古い→新しい） 1:降順（新しい→古い）
+        [array]$YearSummaryDatasList,
+        [int]$YearOrder = 1
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -114,7 +114,6 @@ function Create-YearComparisonDatas {
     }
 
     $results = foreach ($courseGroup in $CourseGroupDatas) {
-        # コースが1件も無いグループでも、グループ名の行だけは出力する
         $courseNamesInGroup = if ($courseGroup.courseNames.Count -eq 0) { @($null) } else { $courseGroup.courseNames }
         foreach ($courseName in $courseNamesInGroup) {
             $yearRows = foreach ($yearSummaryDatas in $YearSummaryDatasList) {
@@ -123,7 +122,6 @@ function Create-YearComparisonDatas {
                 New-YearRow -GroupName $courseGroup.groupName -CourseName $courseName -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
             }
 
-            # 差分は現在年度と、その1年前（ComparePeriodの範囲に関わらず直前の年度）との比較
             $newestRow = $yearRows[0]
             $previousRow = $yearRows[1]
             $diffRow = [ordered]@{
@@ -141,7 +139,6 @@ function Create-YearComparisonDatas {
                 }
             }
 
-            # 表示順の並び替えは差分計算（直前の年度との比較）の後に行う。差分は常に新しい年度→直前の年度で計算する
             $displayYearRows = if ($YearOrder -eq 0) { $yearRows[($yearRows.Count - 1)..0] } else { $yearRows }
             foreach ($yearRow in $displayYearRows) { [pscustomobject]$yearRow }
             [pscustomobject]$diffRow
@@ -154,11 +151,11 @@ function Create-YearComparisonDatas {
 function Create-DimensionYearComparisonDatas {
     param(
         $CourseGroupDatas,
-        [array]$YearSummaryDatasList,  # 新しい年度→古い年度の順
-        [string]$DimensionKey,         # 行オブジェクト・集計結果上の集計軸プロパティ名（例: "companyName"）
-        [string]$AllLabel,             # 集計軸を問わない合計スコープの表示名（例: "全社"）
+        [array]$YearSummaryDatasList,
+        [string]$DimensionKey,
+        [string]$AllLabel,
         [array]$DimensionNames,
-        [int]$YearOrder = 1  # 年度行の表示順（差分計算には影響しない）。0:昇順（古い→新しい） 1:降順（新しい→古い）
+        [int]$YearOrder = 1
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -184,10 +181,8 @@ function Create-DimensionYearComparisonDatas {
     }
 
     $results = foreach ($courseGroup in $CourseGroupDatas) {
-        # コースが1件も無いグループでも、グループ名の行だけは出力する
         $courseNamesInGroup = if ($courseGroup.courseNames.Count -eq 0) { @($null) } else { $courseGroup.courseNames }
         foreach ($courseName in $courseNamesInGroup) {
-            # 各コースの先頭に集計軸を問わない合計のセットを追加し、その後に集計軸の値ごとのセットを続ける
             $dimensionScopes = @($AllLabel) + $DimensionNames
             foreach ($dimensionValue in $dimensionScopes) {
                 $yearRows = foreach ($yearSummaryDatas in $YearSummaryDatasList) {
@@ -195,8 +190,6 @@ function Create-DimensionYearComparisonDatas {
                         $testResult   = $yearSummaryDatas.summaryDatas.totalTestSummaryResults   | Where-Object { $_.testName -eq $courseName } | Select-Object -First 1
                         $surveyResult = $yearSummaryDatas.summaryDatas.totalSurveySummaryResults | Where-Object { $_.surveyName -eq $courseName } | Select-Object -First 1
                     } else {
-                        # summaryDatasがnull（対象年度のマスタファイルが無い）の場合、プロパティアクセスは
-                        # 安全にnullを返すが、null配列への添字アクセスは例外になるためガードする
                         $dimensionSummaryResults = if ($yearSummaryDatas.summaryDatas) { $yearSummaryDatas.summaryDatas.dimensionSummaryResults[$DimensionKey] } else { $null }
                         $testResult   = $dimensionSummaryResults.testSummaryResults   | Where-Object { $_.testName -eq $courseName -and $_.$DimensionKey -eq $dimensionValue } | Select-Object -First 1
                         $surveyResult = $dimensionSummaryResults.surveySummaryResults | Where-Object { $_.surveyName -eq $courseName -and $_.$DimensionKey -eq $dimensionValue } | Select-Object -First 1
@@ -204,7 +197,6 @@ function Create-DimensionYearComparisonDatas {
                     New-DimensionYearRow -GroupName $courseGroup.groupName -CourseName $courseName -DimensionKey $DimensionKey -DimensionValue $dimensionValue -YearLabel "FY$($yearSummaryDatas.year)" -TestResult $testResult -SurveyResult $surveyResult
                 }
 
-                # 差分は現在年度と、その1年前（ComparePeriodの範囲に関わらず直前の年度）との比較
                 $newestRow = $yearRows[0]
                 $previousRow = $yearRows[1]
                 $diffRow = [ordered]@{
@@ -223,7 +215,6 @@ function Create-DimensionYearComparisonDatas {
                     }
                 }
 
-                # 表示順の並び替えは差分計算（直前の年度との比較）の後に行う。差分は常に新しい年度→直前の年度で計算する
                 $displayYearRows = if ($YearOrder -eq 0) { $yearRows[($yearRows.Count - 1)..0] } else { $yearRows }
                 foreach ($yearRow in $displayYearRows) { [pscustomobject]$yearRow }
                 [pscustomobject]$diffRow
@@ -237,7 +228,6 @@ function Create-DimensionYearComparisonDatas {
 function Export-GroupedComparisonSheets {
     param($Workbook, [array]$Rows, $TemplateSheetName, [scriptblock]$WriteRows)
 
-    # コースグループごとに行をまとめる（出現順を保持）
     $groupNames = @()
     $rowsByGroup = [ordered]@{}
     foreach ($row in $Rows) {
@@ -248,7 +238,6 @@ function Export-GroupedComparisonSheets {
         $rowsByGroup[$row.groupName] += $row
     }
 
-    # グループ別シートを、テンプレートのマーカーが残っているうちに先に作成する
     foreach ($groupName in $groupNames) {
         $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
         $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
@@ -257,7 +246,6 @@ function Export-GroupedComparisonSheets {
         & $WriteRows $newSheet $rowsByGroup[$groupName]
     }
 
-    # 元のテンプレートシートには全コースをまとめて書き込み、先頭の「まとめ」シートとして残す
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
     & $WriteRows $sheet $Rows
 }
@@ -270,14 +258,13 @@ function Export-DimensionYearComparisonData {
         [int]$RowsPerCourse,
         [int]$DimensionCount,
         [string]$DimensionKey,
-        [string]$DimensionHeaderName,      # このシートで使う集計軸の列見出し（例: "会社名"）
-        [string]$SourceTemplateSheetName,  # 会社別・ランク別・クラス別で共通のテンプレートシート名
+        [string]$DimensionHeaderName,
+        [string]$SourceTemplateSheetName,
         $TemplateSheetName
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    # 共通テンプレートシートを複製し、この集計軸専用のシート名にリネームした上で列見出しを設定する
     $sourceSheet = $Workbook.Worksheets.Item($SourceTemplateSheetName)
     $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
     $templateSheet = $Workbook.ActiveSheet
@@ -295,15 +282,12 @@ function Export-DimensionYearComparisonData {
         $dataStartCell = Get-CellByKey $Sheet "{コースグループデータ}" -ErrorOnMissing
         $rowStartIndex = $dataStartCell.Row
 
-        # まず年度行をComparePeriodに応じた行数まで増やす
         $yearRowCount = $RowsPerCourse - 1
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet 1 -TotalSets $yearRowCount -InsertBeforeCopy
 
-        # 年度行＋差分行（集計軸の値1つ分）を、集計軸の値の数だけ増やす
         $rowsPerDimension = $RowsPerCourse
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerDimension -TotalSets $DimensionCount
 
-        # 1コース分（集計軸の値の数分の年度行＋差分行）を、コース数分だけ複製する
         $rowsPerCourseBlock = $rowsPerDimension * $DimensionCount
         $courseCount = [int]($Rows.Count / $rowsPerCourseBlock)
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $rowsPerCourseBlock -TotalSets $courseCount
@@ -314,7 +298,6 @@ function Export-DimensionYearComparisonData {
             $isFirstRowOfCourse = ($i % $rowsPerCourseBlock -eq 0)
             $isFirstRowOfDimension = ($i % $rowsPerDimension -eq 0)
 
-            # グループ名・コース名列は、コース内の先頭行にのみ書き込む。集計軸列は、その値のブロックの先頭行にのみ書き込む
             $groupCellValue = if ($isFirstRowOfCourse) { $row.groupName } else { "" }
             $courseCellValue = if ($isFirstRowOfCourse) { $row.courseName } else { "" }
             $dimensionCellValue = if ($isFirstRowOfDimension) { $row.$DimensionKey } else { "" }
@@ -332,7 +315,6 @@ function Export-DimensionYearComparisonData {
 
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-        # コースグループ列・研修コース名列・集計軸列を、それぞれ連続する範囲で縦に結合する
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 2) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)|$($r.$DimensionKey)" }
@@ -364,11 +346,9 @@ function Export-YearComparisonData {
         $dataStartCell = Get-CellByKey $Sheet "{コースグループデータ}" -ErrorOnMissing
         $rowStartIndex = $dataStartCell.Row
 
-        # テンプレートは年度行1行＋差分行1行の状態なので、まず年度行をComparePeriodに応じた行数まで増やす
         $yearRowCount = $RowsPerCourse - 1
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet 1 -TotalSets $yearRowCount -InsertBeforeCopy
 
-        # 年度行＋差分行を1セットとして、コース数分だけ複製する
         $courseCount = [int]($Rows.Count / $RowsPerCourse)
         Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -RowsPerSet $RowsPerCourse -TotalSets $courseCount
 
@@ -377,7 +357,6 @@ function Export-YearComparisonData {
             $row = $Rows[$i]
             $isFirstRowOfCourse = ($i % $RowsPerCourse -eq 0)
 
-            # グループ名・コース名列は、コースの現在年度行（先頭行）にのみ書き込む
             $groupCellValue = if ($isFirstRowOfCourse) { $row.groupName } else { "" }
             $courseCellValue = if ($isFirstRowOfCourse) { $row.courseName } else { "" }
 
@@ -394,7 +373,6 @@ function Export-YearComparisonData {
 
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-        # コースグループ列・研修コース名列を、それぞれ連続する範囲で縦に結合する
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex $dataStartCell.Column       -KeySelector { param($r) $r.groupName }
         Merge-ConsecutiveColumn -Sheet $Sheet -RowStartIndex $rowStartIndex -Rows $Rows -ColumnIndex ($dataStartCell.Column + 1) -KeySelector { param($r) "$($r.groupName)|$($r.courseName)" }
 
@@ -409,7 +387,7 @@ function Export-YearComparisonData {
 function Export-Excel {
     param(
         [array]$YearComparisonDatas,
-        [array]$DimensionResults,  # 各要素: @{ Key; Datas; Count; SheetName; HeaderName }
+        [array]$DimensionResults,
         [int]$RowsPerCourse,
         [string]$OutputFilePath
     )
@@ -429,7 +407,6 @@ function Export-Excel {
 
         Export-YearComparisonData -Workbook $workbook -YearComparisonDatas $YearComparisonDatas -RowsPerCourse $RowsPerCourse -TemplateSheetName "経年比較"
 
-        # 会社別・ランク別・クラス別は共通のテンプレートシートから複製して作るため、複製元は最後に削除する
         $sourceTemplateSheetName = "経年比較-属性別"
         foreach ($dimensionResult in $DimensionResults) {
             Export-DimensionYearComparisonData -Workbook $workbook -DimensionYearComparisonDatas $dimensionResult.Datas -RowsPerCourse $RowsPerCourse -DimensionCount $dimensionResult.Count -DimensionKey $dimensionResult.Key -SourceTemplateSheetName $sourceTemplateSheetName -DimensionHeaderName $dimensionResult.HeaderName -TemplateSheetName $dimensionResult.SheetName
@@ -451,16 +428,12 @@ function Export-Excel {
 & {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    # ComparePeriod年前から現在年度までの各年度分＋差分行で1コースあたりの行数を決める
     $rowsPerCourse = $ComparePeriod + 2
 
     New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
     $courseGroupDatas = Get-CourseGroupDatas -CourseGroupDefs $CourseGroupDefs
 
-    # 年度ごとに、その年度自身のマスタファイル（受講生・テスト/アンケート定義）を読み込む。
-    # 受講生は年度が変わると別人になり得るため、他年度のuserCodeと混同しないよう年度ごとに分けている。
-    # 該当年度のマスタファイルが無ければ、その年度は未実施（データなし）として扱う。
     $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
         $year = $TargetYear - $offset
         $yearMasterFilePath = Join-Path $ClientDataRootDir "$TargetGroupName-$year.xlsx"
@@ -490,16 +463,10 @@ function Export-Excel {
         }
     }
 
-    # 会社名・ランク・クラスの絞り込み（カンマ区切り）。
-    # 注意: 変数名をパラメーター名（$TargetCompanyNames等）と大文字小文字違いだけにすると、
-    # PowerShellは同一変数とみなし、自己参照パイプライン特有の不具合でWhere-Objectのフィルタが効かなくなる。
-    # そのため意図的に別名（CompanyNameFilter等）にしている。
     $companyNameFilter = @($TargetCompanyNames -split "," | Where-Object { $_ -ne "" })
     $rankNameFilter = @($TargetRankNames -split "," | Where-Object { $_ -ne "" })
     $classNameFilter = @($TargetClassNames -split "," | Where-Object { $_ -ne "" })
 
-    # 会社名・ランク・クラスの一覧は全年度分のロースターを合体してから作る。
-    # 現在年度のロースターだけを基準にすると、過去にしか存在しない値の行が作られず実績が漏れる。
     $allYearsUserDatas = @($yearDataCache.userDatas | Where-Object { $_ })
     $rankOrder = @("S","A","B","C","D","E")
     $companyNames = if ($companyNameFilter.Count -gt 0) { @($companyNameFilter | Select-Object -Unique) } else { @($allYearsUserDatas.companyName | Select-Object -Unique) }
@@ -507,14 +474,12 @@ function Export-Excel {
     $rankNames = @($rankNames | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
     $classNames = if ($classNameFilter.Count -gt 0) { @($classNameFilter | Sort-Object -Unique) } else { @($allYearsUserDatas.className | Select-Object -Unique | Sort-Object) }
 
-    # 集計軸の定義。会社別・ランク別・クラス別のシートはすべてこの定義に沿って生成される
     $dimensionDefs = @(
         [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別";   HeaderName = "会社名" }
         [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別"; HeaderName = "クラス" }
         [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別"; HeaderName = "ランク" }
     )
 
-    # 新しい年度→古い年度の順で、現在年度からComparePeriod年前までを集計する
     $yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
         $groupName = "$TargetGroupName-$($yearData.year)"
         $summaryDatas = if ($yearData.isExecuted) {
@@ -546,5 +511,9 @@ function Export-Excel {
     Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
     Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
+
+    Write-MessageComplete "集計結果を出力しました: $outputFilePath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

@@ -53,5 +53,9 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
 
     $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths @($backupFilePath) -Mentions $mentions -BaseUrl $BaseUrl -Authorization $Authorization
     Write-Message $commentResponse -VarName "スレッド投稿" -Type "Info"
+
+    Write-MessageComplete "集計結果を投稿しました"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

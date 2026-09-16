@@ -52,47 +52,41 @@ function Create-CollectResultsDatas {
     $rankOrder = @("S","A","B","C","D","E")
     $RankNames = $UserDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) }
     
-    # totalSummary
     $totalSummarySurveyResults = Create-SurveySummaryDataByGroup `
         -UserDatas $UserDatas `
         -SurveyDatas $SurveyDatas `
         -ValidResultDatas $validSurveyResultDatas
-    
-    # companySummary
+
     $companySummarySurveyResults = Create-SurveySummaryDataByGroup `
         -GroupValues $CompanyNames `
         -GroupKey "companyName" `
         -UserDatas $UserDatas `
         -SurveyDatas $SurveyDatas `
         -ValidResultDatas $validSurveyResultDatas
-    
-    # classSummary
+
     $classSummaryResults = Create-SurveySummaryDataByGroup `
         -GroupValues $ClassNames `
         -GroupKey "className" `
         -UserDatas $UserDatas `
         -SurveyDatas $SurveyDatas `
         -ValidResultDatas $validSurveyResultDatas
-    
-    # rankSummary
+
     $rankSummaryResults = Create-SurveySummaryDataByGroup `
         -GroupValues $RankNames `
         -GroupKey "rankName" `
         -UserDatas $UserDatas `
         -SurveyDatas $SurveyDatas `
         -ValidResultDatas $validSurveyResultDatas
-    
-    # 全体
+
     $results = [PSCustomObject]@{
         plainSurveyResults = $plainSurveyResults
-        
+
         totalSummarySurveyResults = $totalSummarySurveyResults
         companySummarySurveyResults = $companySummarySurveyResults
         classSummarySurveyResults = $classSummaryResults
         rankSummarySurveyResults = $rankSummaryResults
     }
-    
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
+
     return $results
 }
 
@@ -122,7 +116,6 @@ function Export-UserPlainData {
 
         $targetPlainSurveyResultDatas = @($PlainSurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
 
-        # 全体
         $targetTotalSummarySurveyResultData = @($TotalSummarySurveyResultDatas | Where-Object { $_.surveyName -eq $surveyData.surveyName })
         $surveyCount = if ($targetTotalSummarySurveyResultData) { [int]$targetTotalSummarySurveyResultData[0].surveyCount } else { 0 }
 
@@ -145,7 +138,6 @@ function Export-UserPlainData {
         }
         $rowDatas += ,$rowData
 
-        # ユーザ別
         foreach ($targetPlainSurveyResultData in $targetPlainSurveyResultDatas) {
             $targetUserData = $targetPlainSurveyResultData.userData
             $rowData = @()
@@ -177,23 +169,18 @@ function Export-UserPlainData {
         $rowStartIndex = $dataStartCell.Row
         $columsStartIndex = $dataStartCell.Column
 
-        # 行のコピー
         Expand-RowsFromTemplate -Sheet $newSheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
 
-        # データの書き込み
         Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-        # 初期セル設定
         Set-SheetFirstCell -Sheet $newSheet
 
-        # オートフィルター
         $headerRange = $newSheet.Range(
             $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
             $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
         )
         Set-AutoFilter $headerRange
 
-        # オートフィット
         Set-AutoFit $newSheet
     }
     Remove-Sheet $Workbook $TemplateSheetName
@@ -257,7 +244,6 @@ function Export-UserSummaryData {
 
     $rowDatas = @()
 
-    # 全体
     $rowData = @()
     $rowData += "全体-平均"
     $rowData += ""
@@ -277,7 +263,6 @@ function Export-UserSummaryData {
     }
     $rowDatas += ,$rowData
 
-    # ユーザ別
     $uniqueUsers = @($PlainSurveyResultDatas |
         Group-Object -Property { $_.userData.userCode } |
         ForEach-Object {
@@ -319,23 +304,18 @@ function Export-UserSummaryData {
     $rowStartIndex = $dataStartCell.Row
     $columsStartIndex = $dataStartCell.Column
 
-    # 行のコピー
     Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
 
-    # データの書き込み
     Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-    # 初期セル設定
     Set-SheetFirstCell -Sheet $sheet
 
-    # オートフィルター
     $headerRange = $sheet.Range(
         $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
         $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
     )
     Set-AutoFilter $headerRange
 
-    # オートフィット
     Set-AutoFit $sheet
 }
 
@@ -360,7 +340,6 @@ function Export-Excel {
         $excel.EnableEvents = $false
         
         $workbook = $excel.Workbooks.Open($OutputFilePath)
-        # サマリ(テスト結果との組み合わせ)は collect-combine-result.ps1 側で出力する
 
         Export-UserPlainData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -PlainSurveyResultDatas $CollectResultDatas.plainSurveyResults -TemplateSheetName "詳細-ユーザ別"
 
@@ -371,11 +350,9 @@ function Export-Excel {
         Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.classSummarySurveyResults -TemplateSheetName "サマリ-クラス別" -TargetUniquePropName "className"
         
         Export-GroupSummaryData -Workbook $workbook -SurveyDatas $SurveyDatas -TotalSummarySurveyResultDatas $CollectResultDatas.totalSummarySurveyResults -UseSummaryResults $CollectResultDatas.rankSummarySurveyResults -TemplateSheetName "サマリ-ランク別" -TargetUniquePropName "rankName"
-        
-        # 最初のシートをアクティブに
+
         Set-FirstVisibleSheet -Workbook $workbook
-        
-        # 保存
+
         $workbook.SaveAs($OutputFilePath, 51)
     }
     finally {
@@ -391,24 +368,23 @@ function Export-Excel {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
     $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
-    # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
     New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
     $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
     $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-    # Write-Message $surveyDatas -VarName "surveyDatas" -Type "Info"
-
     $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
-    # Write-Message $surveyResultDatas -VarName "surveyResultDatas" -Type "Info"
 
     $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
-    # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
 
     $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
     Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
     Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
+
+    Write-MessageComplete "集計結果を出力しました: $outputFilePath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

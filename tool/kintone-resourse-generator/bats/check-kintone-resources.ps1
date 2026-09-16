@@ -1,11 +1,6 @@
 ﻿# =========================================
 # kintoneの現在の状態と編集済みExcelを比較する（読み取り専用）
 # =========================================
-# config\<CONFIG_NAME>.xlsx（期待値）とkintoneの現在の状態を比較し、差分をExcelに出力する。
-# 出力はダウンロードファイルと同じ5シート構成（space-settings / space-member-list /
-# space-app-list / space-app-acl / space-app-record-acl）。各シートは同じキー列に加えて
-# 項目ごとの「_現状」「_期待値」列と、行全体の「結果」列（一致/不一致/kintoneに未定義/設定ファイルに未定義/Everyoneの影響）を持つ。
-# kintoneへの書き込みは行わない。
 
 param(
     [string]$ConfigName,
@@ -38,7 +33,7 @@ $script:exitCode = 0
 
 & {
     if (-not (Test-Path -LiteralPath $configPath)) {
-        Write-Message "設定ファイルが見つかりません: $configPath" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "設定ファイルが見つかりません: $configPath"
         $script:exitCode = 1
         return
     }
@@ -75,8 +70,6 @@ $script:exitCode = 0
     $checkAppAcl        = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-acl"
     $checkAppRecordAcl  = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-record-acl"
 
-    # $Pairs: @({Label; Current; Expected}, ...) を "<Label>_現状"/"<Label>_期待値" 列に展開する。
-    # 全項目が一致すれば"一致"、1つでも違えば"不一致"を返す（存在有無はこの関数の外で判定する）。
     function Add-FieldColumns {
         param([System.Collections.Specialized.OrderedDictionary]$Row, [array]$Pairs)
         $allMatch = $true
@@ -88,8 +81,6 @@ $script:exitCode = 0
         return $allMatch
     }
 
-    # Everyoneが持つ権限がそのまま個別ユーザーの現状としてkintone側に残ることがあるため、
-    # 「設定ファイルに未定義」の現状値がEveryoneの期待値と完全一致する場合だけ"Everyoneの影響"として区別する。
     function Test-PairsMatch {
         param([array]$Pairs)
         foreach ($p in $Pairs) {
@@ -98,8 +89,6 @@ $script:exitCode = 0
         return $true
     }
 
-    # List[object]（型引数がobject）を@()で囲むとWindows PowerShell 5.1で
-    # "Argument types do not match" エラーになり中身が消える。List[psobject]なら問題ない。
     $spaceSettingsDiff = New-Object System.Collections.Generic.List[psobject]
     $memberDiff = New-Object System.Collections.Generic.List[psobject]
     $appListDiff = New-Object System.Collections.Generic.List[psobject]
@@ -151,8 +140,6 @@ $script:exitCode = 0
                 foreach ($code in $allOrgCodes) {
                     $cur = $currentMembersByCode[$code]
                     $exp = $expectedMembersByCode[$code]
-                    # 種別は比較対象ではなく表示用の参考情報。現状があればそれを正とし、
-                    # 現状が無い（存在しない）場合はシートの種別、無ければ自動判定を試す。
                     $typeLabel = if ($cur) {
                         Get-KintoneMemberTypeLabel $cur.entity.type
                     } elseif ($exp.'種別') {
@@ -224,7 +211,6 @@ $script:exitCode = 0
                 }
             }
 
-            # 組織名で突き合わせ
             if ($checkAppAcl) {
                 $expectedAclRowsForApp = @($appAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
                 $expectedAclByOrg = @{}
@@ -294,7 +280,6 @@ $script:exitCode = 0
                 }
             }
 
-            # 条件＋組織名で突き合わせ
             if ($checkAppRecordAcl) {
                 $expectedRecordAclRowsForApp = @($recordAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
                 $expectedRecordAclByKey = @{}
@@ -367,7 +352,6 @@ $script:exitCode = 0
         "space-app-acl"        = $appAclDiff
         "space-app-record-acl" = $appRecordAclDiff
     }
-    # 各シートの「結果」列（ヘッダー名で検索、シートごとに位置が異なる）に色を付ける。
     $colorMap = @{
         "一致"                 = [System.Drawing.Color]::FromArgb(0, 128, 0)
         "不一致"               = [System.Drawing.Color]::FromArgb(255, 0, 0)
@@ -375,7 +359,6 @@ $script:exitCode = 0
         "設定ファイルに未定義"   = [System.Drawing.Color]::FromArgb(128, 128, 0)
         "Everyoneの影響" = [System.Drawing.Color]::FromArgb(128, 128, 128)
     }
-    # 「_現状」列は緑系、「_期待値」列は青系、「結果」列は黄系、それ以外（キー列）は灰色系にする。
     $genjoColor = [System.Drawing.Color]::FromArgb(226, 239, 218)
     $kitaichiColor = [System.Drawing.Color]::FromArgb(198, 224, 241)
     $resultHeaderColor = [System.Drawing.Color]::FromArgb(255, 230, 153)
@@ -413,7 +396,6 @@ $script:exitCode = 0
             $lastRow = $used.Row + $used.Rows.Count - 1
             $lastCol = $used.Column + $used.Columns.Count - 1
             $resultCol = 0
-            # "<項目名>_現状"/"<項目名>_期待値" の列ペアを項目名ごとに集める（行ごとの値比較に使う）。
             $fieldPairCols = @{}
             for ($c = 1; $c -le $lastCol; $c++) {
                 $header = "$($ws.Cells.Item(1, $c).Text)"
@@ -437,7 +419,6 @@ $script:exitCode = 0
             }
             $diffColorOle = ConvertTo-OleColor $colorMap["不一致"]
             for ($row = 2; $row -le $lastRow; $row++) {
-                # 項目ごとに現状/期待値を比較し、値が違う項目だけそのセルを赤字にする（どの項目が違うか一目でわかるように）。
                 foreach ($label in $fieldPairCols.Keys) {
                     $pair = $fieldPairCols[$label]
                     if (-not ($pair.ContainsKey("現状") -and $pair.ContainsKey("期待値"))) { continue }
@@ -472,7 +453,6 @@ $script:exitCode = 0
     $errorCount = @($allDiffRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count
     Write-Message "" -Type "Info" -NoHeader
     Write-Message "差分件数: $errorCount / $($allDiffRows.Count)" -Type "Info" -NoHeader
-    # シートごとの内訳（結果が「一致」以外の件数と、その種類ごとの件数）を表示する
     foreach ($sheetName in $sheetData.Keys) {
         $sheetRows = @($sheetData[$sheetName])
         if ($sheetRows.Count -eq 0) { continue }
@@ -484,12 +464,10 @@ $script:exitCode = 0
             Write-Message "  ${sheetName}: $sheetErrorCount / $($sheetRows.Count)" -Type "Info" -NoHeader
         }
     }
-    Write-Message "チェック結果を出力しました: $outputPath" -ForegroundColor Green -Type "Info" -NoHeader
-    # 差分ありは確認が必要な警告であり、チェック結果自体は正常に出力済みのため致命的エラー(exit 1)とは区別する
+    Write-MessageComplete "チェック結果を出力しました: $outputPath"
     if ($errorCount -gt 0) { $script:exitCode = 2 }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message "" -Type "Info" -NoHeader
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
+Write-MessageComplete "ログを出力しました: $logFilePath"
 exit $script:exitCode

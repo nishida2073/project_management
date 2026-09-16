@@ -15,7 +15,7 @@ $outputPath = $env:GENERATE_OUTPUT_PATH
 $logPath = $env:COMMON_LOG_PATH
 
 if (!$configPath -or !$workPath -or !$outputPath -or !$logPath) {
-    Write-Message "GENERATE_CONFIG_PATH と GENERATE_WORK_PATH と GENERATE_OUTPUT_PATH と COMMON_LOG_PATH を set-env.bat で設定してください" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "GENERATE_CONFIG_PATH と GENERATE_WORK_PATH と GENERATE_OUTPUT_PATH と COMMON_LOG_PATH を set-env.bat で設定してください"
     exit 1
 }
 
@@ -184,8 +184,6 @@ foreach ($sheetName in $sheetNames) {
         ResultSectionTitle = "パッケージ結果"
         ResultLines        = $packageLog
     }
-    # パッケージが作成されなかった場合（対象ファイル無し／圧縮エラー）はpackagePathが存在しないため、
-    # -TreeRootPathを渡さず「# 構成」セクション自体を出さない（理由は上のパッケージ結果に既に出ている）
     if (Test-Path -LiteralPath $packagePath) {
         $runLogArgs["TreeRootPath"] = $packagePath
     }

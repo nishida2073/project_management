@@ -23,7 +23,6 @@ function Combine-ArrayHorizontal {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
-    # 最大行数
     $maxRows = ($Arrays | ForEach-Object {
         if ($_ -is [array] -and $_.Count -gt 0 -and $_[0] -is [array]) {
             $_.Count
@@ -39,13 +38,11 @@ function Combine-ArrayHorizontal {
                 $row += $arr
                 continue
             }
-            # 2次元
             if ($arr.Count -gt 0 -and $arr[0] -is [array]) {
                 if ($r -lt $arr.Count) {
                     $row += $arr[$r]
                 }
             }
-            # 1次元
             else {
                 if ($r -eq 0) {
                     $row += $arr
@@ -71,11 +68,6 @@ function Read-SourseDataDefsFile {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    # [ファイル識別子] セクションの下に、1行1列で「元の列名[,新しい列名]」を書く書式。
-    # ファイル識別子はcommon-env.bat側のSourceType_<接尾辞>変数名（SourceType_Daily等）をそのまま書き、
-    # 実際の出力ファイル名（create-app-data.ps1がその変数の値から組み立てる"<グループ名>-業務日誌.txt"等）
-    # へは$FileKeyMap経由で変換する。値をハードコードすると、common-env.bat側の値を変えたときに
-    # ファイル名がずれて気づかずに集計漏れる
     $lines = Get-Content -Path $FilePath -Encoding UTF8
 
     $sourseDataProps = @()
@@ -137,18 +129,14 @@ function Export-Datas {
         $range = Read-FileToArray $sourceFilePath
         $headerRow = $range[0]
 
-        # 元の列名から列位置を引くためのインデックス。同じ列を複数回引くので事前に1回だけ計算する。
-        # 見つからない列はアプリ側のフィールド変更等でずれている可能性があるため、処理は止めずに
-        # 警告を出したうえで該当列を空欄扱いにする（-1のままにしておき、後段の値取得側で判定する）
         $columnIndexes = @($columnDefs | ForEach-Object {
             $index = [array]::IndexOf($headerRow, $_.OrgName)
             if ($index -lt 0) {
-                Write-Message "列が見つかりません: $($_.OrgName) (ファイル: $sourceFilePath)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+                Write-MessageWarn "列が見つかりません: $($_.OrgName) (ファイル: $sourceFilePath)"
             }
             $index
         })
 
-        # ヘッダー
         $headerDatas = @()
         foreach ($def in $columnDefs) {
             $headerName = if (-not [string]::IsNullOrWhiteSpace($def.NewName)) {
@@ -159,7 +147,6 @@ function Export-Datas {
             $headerDatas += ,$headerName
         }
         $allHeaderDatas += ,$headerDatas
-        # ボディ
         $bodyDatas = [System.Collections.Generic.List[object]]::new($range.Count)
         for ($r = 1; $r -lt $range.Count; $r++) {
             $rowData = @()
@@ -171,19 +158,14 @@ function Export-Datas {
         }
         $allBodyDatas += ,$bodyDatas.ToArray()
     }
-    # Write-Message $allHeaderDatas -VarName "allHeaderDatas" -Type "Info" -ForegroundColor Green
-    # Write-Message $allBodyDatas -VarName "allBodyDatas" -Type "Info" -ForegroundColor Green
     
-    # フラット化
     $allHeaderDatas = Combine-ArrayHorizontal $allHeaderDatas
     $allBodyDatas = Combine-ArrayHorizontal $allBodyDatas
     
-    # ファイルに出力
     $allDatas = @()
     $allDatas += $allHeaderDatas
     $allDatas += $allBodyDatas
     
-    # 集計用ファイルを作成
     $collectFilePath = Join-Path -Path $CollectDirPath -ChildPath $CollectFileName
     Export-ArrayToFile $allDatas $collectFilePath
 }
@@ -193,7 +175,7 @@ function Export-Datas {
 
     $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
     if (-not $hasFiles) {
-        Write-Message "集計対象がありません。日付=$($TargetDate)" -VarName "message" -Type "Warn" -ForegroundColor Yellow
+        Write-MessageWarn "集計対象がありません。日付=$($TargetDate)"
         return
     }
 
@@ -209,5 +191,9 @@ function Export-Datas {
     $collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
 
     Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName
+
+    Write-MessageComplete "集計結果を出力しました: $(Join-Path $CollectRootDir $collectFileName)"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

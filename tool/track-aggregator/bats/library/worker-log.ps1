@@ -46,6 +46,24 @@
     }
 }
 
+function Write-MessageComplete {
+    param([Parameter(Mandatory)][string]$Message)
+    Write-Message "" -Type "Info" -NoHeader
+    Write-Message $Message -ForegroundColor Green -Type "Info" -NoHeader
+}
+
+function Write-MessageError {
+    param([Parameter(Mandatory)][string]$Message)
+    Write-Message "" -Type "Info" -NoHeader
+    Write-Message $Message -ForegroundColor Red -Type "Info" -NoHeader
+}
+
+function Write-MessageWarn {
+    param([Parameter(Mandatory)][string]$Message)
+    Write-Message "" -Type "Info" -NoHeader
+    Write-Message $Message -VarName "message" -Type "Warn" -ForegroundColor Yellow -NoHeader
+}
+
 function New-WorkerLogPath {
     param(
         [Parameter(Mandatory)][string]$LogRoot,

@@ -896,7 +896,7 @@ function Add-MentionsEditor {
     return $y
 }
 
-function Add-TestActionButton {
+function Add-FieldActionButton {
     param(
         [System.Windows.Forms.Control]$Panel,
         [int]$Y,
@@ -905,7 +905,7 @@ function Add-TestActionButton {
     )
     $btn = New-Object System.Windows.Forms.Button
     $btn.Text = $Text
-    $btn.Location = New-Object System.Drawing.Point(40, $Y)
+    $btn.Location = New-Object System.Drawing.Point(20, $Y)
     $btn.Size = New-Object System.Drawing.Size(90, 24)
     $btn.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
     $btn.Add_Click({ & $OnClick }.GetNewClosure())
@@ -1033,7 +1033,7 @@ function Render-SettingsFields {
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.OpenFileDialog
                     $dlg.Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*"
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver -BasePath $RootPath
                     if ($startPath -and (Test-Path -LiteralPath $startPath)) {
                         $dlg.InitialDirectory = Split-Path $startPath -Parent
                         $dlg.FileName = Split-Path $startPath -Leaf
@@ -1051,7 +1051,7 @@ function Render-SettingsFields {
                 $btnOpen.Tag = $txt
                 $btnOpen.Add_LinkClicked({
                     $targetTxt = $this.Tag
-                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver
+                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver -BasePath $RootPath
                     if (Test-Path -LiteralPath $openPath) {
                         Start-Process -FilePath $openPath
                     } else {
@@ -1063,7 +1063,7 @@ function Render-SettingsFields {
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver
+                    $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver -BasePath $RootPath
                     if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
                 }.GetNewClosure())

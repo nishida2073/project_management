@@ -16,12 +16,12 @@ $tenantId = $env:UPLOAD_SITE_TENANT_ID
 $localPath = $env:UPLOAD_LOCAL_PATH
 
 if (!$siteUrl -or !$sitePath -or !$tenantId -or !$localPath) {
-    Write-Message "UPLOAD_SITE_URL と UPLOAD_SITE_PATH と UPLOAD_SITE_TENANT_ID と UPLOAD_LOCAL_PATH を set-env.bat で設定してください" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "UPLOAD_SITE_URL と UPLOAD_SITE_PATH と UPLOAD_SITE_TENANT_ID と UPLOAD_LOCAL_PATH を set-env.bat で設定してください"
     exit 1
 }
 
 if (!(Test-Path -LiteralPath $localPath)) {
-    Write-Message "アップロード元が存在しません：$localPath" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "アップロード元が存在しません：$localPath"
     exit 1
 }
 

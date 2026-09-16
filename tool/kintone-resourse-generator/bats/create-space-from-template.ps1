@@ -1,9 +1,6 @@
 ﻿# =========================================
 # スペーステンプレートから新しいスペースを作成する
 # =========================================
-# kintoneの「スペーステンプレート」機能を使い、指定したテンプレートIDから新しいスペースを作成する。
-# 元スペースを「テンプレートとして保存」する操作自体はAPIには無いため、kintoneの管理画面で
-# 事前に済ませておく必要がある（テンプレートIDはその管理画面のURLから確認できる）。
 
 param(
     [string]$TemplateId,
@@ -41,7 +38,7 @@ $script:newSpaceId = $null
     try {
         $newSpaceId = New-KintoneSpaceFromTemplate -BaseUrl $baseUrl -Authorization $authorization -TemplateId $TemplateId -Name $SpaceName -AdminLogin $script:kintoneLogin
     } catch {
-        Write-Message "スペース作成に失敗しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "スペース作成に失敗しました: $($_.Exception.Message)"
         $script:exitCode = 1
         return
     }
@@ -52,11 +49,9 @@ $script:newSpaceId = $null
         "　スペースID: $newSpaceId"
         "　スペース名：$SpaceName"
     )
-    # GUI（gui.ps1）が作成されたスペースIDを取得するための機械可読な行。人間向けログの文言とは独立させておく。
     Write-Message "　SPACE_ID=$newSpaceId" -Type "Info" -NoHeader -Hidden
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message "" -Type "Info" -NoHeader
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
+Write-MessageComplete "ログを出力しました: $logFilePath"
 exit $script:exitCode

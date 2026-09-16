@@ -1,8 +1,6 @@
 ﻿# =========================================
 # 集計結果・マスタデータの整形
 # =========================================
-# 各ワーカースクリプトが使う、受講生マスタ/テスト結果集計データを
-# シート書き込み用の形式に組み立てる処理。
 
 function Create-MasterDatas {
     param(
@@ -101,7 +99,6 @@ function Export-GroupSummaryDataCore {
 
     $rowDatas = @()
 
-    # 全体
     $rowData = @()
     $rowData += "全体"
     foreach ($dataItem in $DataItems) {
@@ -118,7 +115,6 @@ function Export-GroupSummaryDataCore {
     }
     $rowDatas += ,$rowData
 
-    # X別
     $uniqueUseSummaryResults = $UseSummaryResults | Select-Object -Property $TargetUniquePropName -Unique
     foreach ($uniqueUseSummaryResult in $uniqueUseSummaryResults) {
         $rowData = @()
@@ -143,16 +139,12 @@ function Export-GroupSummaryDataCore {
     $rowStartIndex = $dataStartCell.Row
     $columsStartIndex = $dataStartCell.Column
 
-    # 行のコピー
     Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
 
-    # データの書き込み
     Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
-    # 初期セル設定
     Set-SheetFirstCell -Sheet $Sheet
 
-    # オートフィット
     Set-AutoFit $Sheet
 
     return [PSCustomObject]@{

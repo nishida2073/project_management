@@ -460,7 +460,7 @@ function Get-SettingsFieldRows {
 }
 
 function Update-SettingsFields {
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars `
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
@@ -510,6 +510,59 @@ function Get-SettingsFiles {
     } else {
         return @([PSCustomObject]@{ Path = $setEnvBat; Save = { Save-DefaultSettings }; Reload = {} })
     }
+}
+
+function Invoke-GenerateConfigForClient {
+    param([string]$ClientName)
+
+    $clientRaw = Get-ClientProfileRawValues $ClientName
+    $defaults = Get-SetEnvDefaults -Path $setEnvBat
+    $rawSourcePath = if ($clientRaw.ContainsKey("GENERATE_SOURCE_PATH")) { $clientRaw["GENERATE_SOURCE_PATH"] } else { $defaults["GENERATE_SOURCE_PATH"] }
+    $sourcePath = Expand-VarTokens -Value $rawSourcePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+
+    if ([string]::IsNullOrWhiteSpace($sourcePath) -or !(Test-Path -LiteralPath $sourcePath)) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "圧縮元のフォルダが未設定か、存在しません。`r`n先に「圧縮元のフォルダ」を設定して保存してください。",
+            "パッケージ定義ファイルの作成",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    $destPath = Join-Path $rootPath "config\package_definition_$ClientName.xlsx"
+    $batArgs = @("client:$ClientName")
+
+    if (Test-Path -LiteralPath $destPath) {
+        $confirm = [System.Windows.Forms.MessageBox]::Show(
+            "既に存在します。上書きしますか？`r`n$destPath",
+            "パッケージ定義ファイルの作成",
+            [System.Windows.Forms.MessageBoxButtons]::YesNo,
+            [System.Windows.Forms.MessageBoxIcon]::Warning)
+        if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+        $batArgs += "force:1"
+    }
+
+    $exitCode = Invoke-BatProcess -BatPath (Join-Path $rootPath "generate-config.bat") -WorkingDirectory $rootPath -BatArgs $batArgs `
+        -OnOutputLine {}
+
+    if ($exitCode -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("作成しました：$destPath", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    } else {
+        [System.Windows.Forms.MessageBox]::Show("作成に失敗しました。", "パッケージ定義ファイルの作成に失敗しました", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+    }
+}
+
+$settingsTrailingButtonVars = @{
+    "GENERATE_CONFIG_PATH" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "更新" -OnClick {
+        $client = $cmbSettingsClient.SelectedItem
+        if (!$client -or $client -eq $defaultClientLabel) {
+            [System.Windows.Forms.MessageBox]::Show("クライアントを選択してください。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+            return
+        }
+        foreach ($f in (Get-SettingsFiles)) { & $f.Save }
+        Update-RunCheckboxesFromClient
+        Invoke-GenerateConfigForClient -ClientName $client
+    } }
 }
 
 $settingsTopPanel = New-SettingsTopPanel `
@@ -635,5 +688,7 @@ Update-LogClientList
 Update-LogView
 $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
+
+$form.Add_Shown({ Update-SettingsFields })
 
 [System.Windows.Forms.Application]::Run($form)

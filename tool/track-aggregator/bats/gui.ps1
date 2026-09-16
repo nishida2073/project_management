@@ -488,7 +488,7 @@ function Update-GroupSettingsFields {
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
         -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions `
-        -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
+        -TrailingButtonVars @{ "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
         Sync-MentionRowsFromControls
         $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
         $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
@@ -621,5 +621,10 @@ Update-GroupSettingsFields
 
 $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
+
+$form.Add_Shown({
+    Update-CommonSettingsFields
+    Update-GroupSettingsFields
+})
 
 [System.Windows.Forms.Application]::Run($form)

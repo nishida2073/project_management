@@ -1,9 +1,6 @@
 ﻿# =========================================
 # Teams/SharePointファイル取得ツール（Azure CLI + Microsoft Graph版）
 # =========================================
-# PnP.PowerShellの既定アプリがテナントで許可されていない環境向けに、
-# 既にテナントで許可されているAzure CLIでトークンを取得し、
-# Microsoft Graph APIで直接ファイルを取得する。
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $scriptDir "library"
@@ -17,7 +14,7 @@ $sitePath = $env:DOWNLOAD_SITE_PATH
 $tenantId = $env:DOWNLOAD_SITE_TENANT_ID
 
 if (!$siteUrl -or !$sitePath -or !$tenantId) {
-    Write-Message "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_PATH と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_PATH と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください"
     exit 1
 }
 

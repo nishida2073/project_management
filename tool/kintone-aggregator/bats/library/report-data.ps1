@@ -1,8 +1,6 @@
 ﻿# =========================================
 # 業務日誌・コースデータの整形
 # =========================================
-# 各ワーカースクリプトが使う、受講生データ・コーススケジュールをkintoneアプリ登録用の
-# レコード形式に組み立てる処理。
 
 function ConvertTo-MappedRecords {
     param(
@@ -87,17 +85,14 @@ function Create-CourseScheduleDatas {
 
     $results = @()
 
-    # 開始日
     $firstStart = ($courseDatas | Sort-Object {[datetime]$_.startDate})[0].startDate
     $startDate = [datetime]$firstStart
 
-    # 終了日
     $lastEnd = ($courseDatas | Sort-Object {[datetime]$_.endDate} -Descending)[0].endDate
     $endDate = [datetime]$lastEnd
 
     $previousWasHoliday = $false
 
-    # 日付ごとの対象科目を事前計算（総登場日数の計算と連番付与の両方で使うため、フィルタ処理は1回だけ行う）
     $courseForDateByDate = @{}
     for ($date = $startDate; $date -le $endDate; $date = $date.AddDays(1)) {
         $courseForDateByDate[$date.Ticks] = @($courseDatas | Where-Object {
@@ -107,7 +102,6 @@ function Create-CourseScheduleDatas {
         })
     }
 
-    # 科目ごとの総登場日数を事前計算
     $courseTotalDays = @{}
     for ($date = $startDate; $date -le $endDate; $date = $date.AddDays(1)) {
         $courseForDate = $courseForDateByDate[$date.Ticks]
@@ -118,7 +112,6 @@ function Create-CourseScheduleDatas {
             $courseTotalDays[$name]++
         }
     }
-    # 連番管理
     $courseCounters = @{}
     for ($date = $startDate; $date -le $endDate; $date = $date.AddDays(1)) {
         $courseForDate = $courseForDateByDate[$date.Ticks]
@@ -130,7 +123,6 @@ function Create-CourseScheduleDatas {
                     $courseCounters[$courseName] = 0
                 }
                 $courseCounters[$courseName]++
-                # 総登場日数が1日なら連番なし
                 if ($courseTotalDays[$courseName] -eq 1) {
                     $displayNames += $courseName
                 }
@@ -149,7 +141,6 @@ function Create-CourseScheduleDatas {
             $previousWasHoliday = $false
         }
         else {
-            # 休日
             $results += [PSCustomObject]@{
                 科目名            = "研修無し"
                 courseName        = "研修無し"
@@ -167,6 +158,5 @@ function Create-CourseScheduleDatas {
             [datetime]$_.date -le $cutoff
         }
     }
-    # Write-Message $results -VarName "results" -Type "Info" -ForegroundColor Green
     return $results
 }

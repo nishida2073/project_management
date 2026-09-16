@@ -5,16 +5,8 @@
     [string]$TargetGroupNameFilter = ""
 )
 
-# どの年度のマスタファイルを実際に読むか（年度ごとの存在確認・フォールバック含む）は
-# collect-year-comparison-result.ps1自身がTargetYear/ComparePeriodを使って解決するため、
-# ここでは「年度を除いたベース名」を重複無く列挙するだけでよい。
-# ただし、TargetYear-ComparePeriod ～ TargetYear の範囲に1件もファイルが無いベース名は、
-# 対象外（今は動いていない過去のプログラム扱い）として除外する。
 $files = Get-ChildItem -Path $ClientDataRootDir -Filter *.xlsx
 
-# TargetGroupNameFilterは接頭語として扱う（例: "地域共催"を指定すると"地域共催.xlsx"と
-# "地域共催-2026.xlsx"の両方が対象になる）。他のbatが%TargetGroupNameFilter%*.xlsxという
-# ワイルドカードグロブで絞り込むのと同じ考え方
 if ($TargetGroupNameFilter -and $TargetGroupNameFilter -ne "*") {
     $files = $files | Where-Object { $_.BaseName -like "$TargetGroupNameFilter*" }
 }

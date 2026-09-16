@@ -1,10 +1,6 @@
 ﻿# =========================================
 # 編集済みExcelの内容をkintoneに反映する
 # =========================================
-# config\<CONFIG_NAME>.xlsx の内容をkintoneに反映する。
-# スペース単位で、スペース設定（space-settings）・スペースのメンバー（space-member-list）を更新。
-# アプリ単位で、アプリ名（space-app-list）・アプリのACL（space-app-acl）・レコードACL
-# （space-app-record-acl）を更新。
 
 param(
     [string]$ConfigName,
@@ -35,7 +31,7 @@ $script:exitCode = 0
 
 & {
     if (-not (Test-Path -LiteralPath $configPath)) {
-        Write-Message "設定ファイルが見つかりません: $configPath" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "設定ファイルが見つかりません: $configPath"
         $script:exitCode = 1
         return
     }
@@ -89,7 +85,7 @@ $script:exitCode = 0
                 Write-ApplyStepResult -ActionLabel "スペース名を設定しました" -DetailLines @("　$($spaceRow.'スペース名')")
                 Write-ApplyStepResult -ActionLabel "スペース権限を設定しました" -DetailLines $spaceRightLines
             } catch {
-                Write-Message "スペースID $spaceId のスペース設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+                Write-MessageError "スペースID $spaceId のスペース設定でエラーが発生しました: $($_.Exception.Message)"
                 $hasError = $true
             }
         }
@@ -119,13 +115,12 @@ $script:exitCode = 0
                 }
                 Write-ApplyStepResult -ActionLabel "スペースメンバーを設定しました" -CountPhrase "$($memberResult.TotalCount)件" -DetailLines $memberDetailLines
             } catch {
-                Write-Message "スペースID $spaceId のメンバー設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+                Write-MessageError "スペースID $spaceId のメンバー設定でエラーが発生しました: $($_.Exception.Message)"
                 $hasError = $true
             }
         }
     }
 
-    # アプリ単位の処理（スペースとは無関係にアプリIDだけで処理する）
     $applyAppList = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-list"
     $applyAppAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-acl"
     $applyAppRecordAcl = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-record-acl"
@@ -159,7 +154,7 @@ $script:exitCode = 0
                     $appChanged = $true
                     Write-ApplyStepResult -ActionLabel "アプリ名を設定しました" -DetailLines @("　$finalName")
                 } catch {
-                    Write-Message "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+                    Write-MessageError "アプリID[$appId]の名前設定でエラーが発生しました: $($_.Exception.Message)"
                     $hasError = $true
                     $appHasError = $true
                 }
@@ -174,8 +169,6 @@ $script:exitCode = 0
                         $grantedRights = @('レコード閲覧', 'レコード追加', 'レコード編集', 'レコード削除', 'アプリ管理', 'ファイル読み込み', 'ファイル書き出し') | Where-Object { ToBool $row.$_ }
                         "　$($row.'種別'):$($row.'ユーザー／組織／グループ') - $($grantedRights -join ',')"
                     })
-                    # kintoneはrightsにCREATOR(appEditable:true)相当が無いとエラーになるため、Set-AppAclが自動的に補う。
-                    # ログ上の件数・対象一覧にもその自動追加分を反映しておく。
                     $hasCreatorManage = [bool]($rights | Where-Object { $_.entity.type -eq "CREATOR" -and $_.appEditable })
                     $aclTotalCount = $rights.Count + $(if ($hasCreatorManage) { 0 } else { 1 })
                     if (-not $hasCreatorManage) {
@@ -186,7 +179,7 @@ $script:exitCode = 0
                     $appChanged = $true
                     Write-ApplyStepResult -ActionLabel "アプリの権限を設定しました" -CountPhrase "$($aclTotalCount)件" -DetailLines $aclTargetLines
                 } catch {
-                    Write-Message "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+                    Write-MessageError "アプリ[$label](appId=$appId)のACL設定でエラーが発生しました: $($_.Exception.Message)"
                     $hasError = $true
                     $appHasError = $true
                 }
@@ -212,13 +205,12 @@ $script:exitCode = 0
                     $appChanged = $true
                     Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定しました" -CountPhrase "条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
                 } catch {
-                    Write-Message "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+                    Write-MessageError "アプリ[$label](appId=$appId)のレコードACL設定でエラーが発生しました: $($_.Exception.Message)"
                     $hasError = $true
                     $appHasError = $true
                 }
             }
 
-            # 成功した項目だけが中途半端に反映されるのを避けるため、1つでも設定に失敗していればデプロイをスキップする
             if ($appChanged) {
                 if ($appHasError) {
                     Write-Message "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow -Type "Info" -NoHeader
@@ -226,7 +218,7 @@ $script:exitCode = 0
                     try {
                         Update-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds @($appId)
                     } catch {
-                        Write-Message "アプリ[$label](appId=$appId)の更新でエラーが発生しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+                        Write-MessageError "アプリ[$label](appId=$appId)の更新でエラーが発生しました: $($_.Exception.Message)"
                         $hasError = $true
                     }
                 }
@@ -240,16 +232,14 @@ $script:exitCode = 0
         }
     }
 
-    Write-Message "" -Type "Info" -NoHeader
     if ($hasError) {
-        Write-Message "一部の処理でエラーが発生しました。" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "一部の処理でエラーが発生しました。"
         $script:exitCode = 1
     } else {
-        Write-Message "すべての反映が完了しました。" -ForegroundColor Green -Type "Info" -NoHeader
+        Write-MessageComplete "すべての反映が完了しました。"
     }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message "" -Type "Info" -NoHeader
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
+Write-MessageComplete "ログを出力しました: $logFilePath"
 exit $script:exitCode

@@ -583,7 +583,7 @@ function Write-RowObjects {
     try {
         $range.Value2 = $excelDatas
     } catch {
-        Write-Message "Write-RowObjects: Value2代入に失敗 rowCount=$rowCount colCount=$colCount rangeAddress=$($range.Address())" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "Write-RowObjects: Value2代入に失敗 rowCount=$rowCount colCount=$colCount rangeAddress=$($range.Address())"
         throw
     }
     $Sheet.UsedRange.Columns.AutoFit() | Out-Null

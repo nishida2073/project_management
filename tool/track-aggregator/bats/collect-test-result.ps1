@@ -41,7 +41,6 @@ function Create-CollectResultsDatas {
         } |
         Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
     
-    # plain
     $plainResults = foreach ($userData in $UserDatas) {
         $userResults = @($validResultDatas | Where-Object { $_.userCode -eq $userData.userCode })
         foreach ($testData in $TestDatas) {
@@ -56,36 +55,32 @@ function Create-CollectResultsDatas {
         }
     }
     
-    # totalSummary
     $totalSummaryResults = Create-TestSummaryDataByGroup `
         -UserDatas $UserDatas `
         -TestDatas $TestDatas `
         -ValidResultDatas $validResultDatas
-    
-    # companySummary
+
     $companySummaryResults = Create-TestSummaryDataByGroup `
         -GroupValues $CompanyNames `
         -GroupKey "companyName" `
         -UserDatas $UserDatas `
         -TestDatas $TestDatas `
         -ValidResultDatas $validResultDatas
-    
-    # classSummary
+
     $classSummaryResults = Create-TestSummaryDataByGroup `
         -GroupValues $ClassNames `
         -GroupKey "className" `
         -UserDatas $UserDatas `
         -TestDatas $TestDatas `
         -ValidResultDatas $validResultDatas
-    
-    # rankSummary
+
     $rankSummaryResults = Create-TestSummaryDataByGroup `
         -GroupValues $RankNames `
         -GroupKey "rankName" `
         -UserDatas $UserDatas `
         -TestDatas $TestDatas `
         -ValidResultDatas $validResultDatas
-    
+
     $results = [PSCustomObject]@{
         plainResults          = $plainResults
         totalSummaryResults   = $totalSummaryResults
@@ -93,8 +88,6 @@ function Create-CollectResultsDatas {
         classSummaryResults   = $classSummaryResults
         rankSummaryResults    = $rankSummaryResults
     }
-    # Write-Message $results.totalSummaryResults -VarName "totalSummaryResults" -Type "Info"
-    # Write-Message $results.companySummaryResults -VarName "results" -Type "Info"
     return $results
 }
 
@@ -126,8 +119,7 @@ function Export-UserSummaryData {
     Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
     
     $rowDatas = @()
-    
-    # 全体
+
     $totalViewItems = @("平均点")
     foreach ($totalViewItem in $totalViewItems) {
         $rowData = @()
@@ -143,8 +135,7 @@ function Export-UserSummaryData {
         }
         $rowDatas += ,$rowData
     }
-    
-    # ユーザー別
+
     $uniqueUsers = @($PlainResults |
         Group-Object -Property { $_.userData.userCode } |
         ForEach-Object { 
@@ -179,32 +170,24 @@ function Export-UserSummaryData {
         }
         $rowDatas += ,$rowData
     }
-    
-    # Write-Message $rowDatas -VarName "rowDatas" -Type "Info" -ForegroundColor Green
-    
+
     $dataStartCell = Get-CellByKey $sheet "{ユーザーデータ}" -ErrorOnMissing
     $rowStartIndex = $dataStartCell.Row
     $columsStartIndex = $dataStartCell.Column
-    # 行のコピー
     Expand-RowsFromTemplate -Sheet $sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
-    
-    # データの書き込み
+
     Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-    
-    # 初期セル設定
+
     Set-SheetFirstCell -Sheet $sheet
-    
-    # オートフィット
+
     Set-AutoFit $sheet
-    
-    # オートフィルター
+
     $headerRange = $sheet.Range(
         $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
         $sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
     )
     Set-AutoFilter $headerRange
-    
-    # セルの色
+
     $resultRange = $sheet.Range(
         $Sheet.Cells.Item($rowStartIndex + $totalViewItems.Count, $columsStartIndex + 6 -1 ), 
         $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1,  $columsStartIndex + $rowDatas[0].Count -1 ))
@@ -239,7 +222,6 @@ function Export-GroupSummaryData {
         -DataMarkerKey "{テストデータ}" `
         -FormatAsText
 
-    # セルの色
     $rowStartIndex = $result.RowStartIndex
     $columsStartIndex = $result.ColumnStartIndex
     $rowDatas = $result.RowDatas
@@ -290,13 +272,10 @@ function Export-UserPlainData {
             $dataStartCell = Get-CellByKey $newSheet "{問題データ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
             $columsStartIndex = $dataStartCell.Column
-            # 列のコピー
             Expand-ColumnsFromTemplate -Sheet $newSheet -TemplateStartColumn $columsStartIndex -TotalSets $rowDatas[0].Count
-            # データの書き込み
             Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
             $rowDatas = @()
-            # 合計
             $rowData = @()
             $rowData += "正答率"
             $rowData += ""
@@ -310,8 +289,7 @@ function Export-UserPlainData {
                 $rowData += "$propValues%"
             }
             $rowDatas += ,$rowData
-            
-            # ユーザ別
+
             foreach ($targetPlainResult in $targetPlainResults) {
                 $targetUserData = $targetPlainResult.userData
                 $rowData = @()
@@ -339,30 +317,24 @@ function Export-UserPlainData {
             $dataStartCell = Get-CellByKey $newSheet "{ユーザーデータ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
             $columsStartIndex = $dataStartCell.Column
-            
-            # 行のコピー
+
             Expand-RowsFromTemplate -Sheet $newSheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
-            
-            # データの書き込み
+
             Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-            
-            # 初期セル設定
+
             Set-SheetFirstCell -Sheet $newSheet
-            
-            # オートフィルター
+
             $headerRange = $newSheet.Range(
                 $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
                 $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
             )
             Set-AutoFilter $headerRange
-            
-            # セルの色
+
             $resultRange = $newSheet.Range(
-                $newSheet.Cells.Item($rowStartIndex + 1, $columsStartIndex + $rowDatas[0].Count - $questionCount), 
+                $newSheet.Cells.Item($rowStartIndex + 1, $columsStartIndex + $rowDatas[0].Count - $questionCount),
                 $newSheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1,  $columsStartIndex + $rowDatas[0].Count -1 ))
             Set-CellColorByWord $resultRange "〇"
-            
-            # オートフィット
+
             Set-AutoFit $newSheet
         }
     }
@@ -410,13 +382,10 @@ function Export-GroupPlainData {
             $dataStartCell = Get-CellByKey $newSheet "{問題データ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
             $columsStartIndex = $dataStartCell.Column
-            # 列のコピー
             Expand-ColumnsFromTemplate -Sheet $newSheet -TemplateStartColumn $columsStartIndex -TotalSets $rowDatas[0].Count
-            # データの書き込み
             Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
 
             $rowDatas = @()
-            # 全体
             $rowData = @()
             $rowData += "全体"
 
@@ -426,8 +395,7 @@ function Export-GroupPlainData {
                 $rowData += "$propValue%"
             }
             $rowDatas += ,$rowData
-            
-            # X別
+
             foreach ($targetUseSummaryResult in $targetUseSummaryResults) {
                 $rowData = @()
                 $rowData += "$($targetUseSummaryResult.$TargetUniquePropName)"
@@ -445,24 +413,19 @@ function Export-GroupPlainData {
             $dataStartCell = Get-CellByKey $newSheet "{結果データ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
             $columsStartIndex = $dataStartCell.Column
-            
-            # 行のコピー
+
             Expand-RowsFromTemplate -Sheet $newSheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
-            
-            # データの書き込み
+
             Write-BodyDatas -StartCell $dataStartCell -Datas $rowDatas
-            
-            # 初期セル設定
+
             Set-SheetFirstCell -Sheet $newSheet
-            
-            # オートフィルター
+
             $headerRange = $newSheet.Range(
                 $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
                 $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
             )
             Set-AutoFilter $headerRange
-            
-            # オートフィット
+
             Set-AutoFit $newSheet
         }
     }
@@ -491,8 +454,7 @@ function Export-Excel {
         $excel.EnableEvents = $false
         
         $workbook = $excel.Workbooks.Open($OutputFilePath)
-        
-        # データ作成
+
         Export-UserSummaryData -Workbook $workbook -TestDatas $TestDatas -TotalSummaryResults $CollectResultDatas.totalSummaryResults -PlainResults $CollectResultDatas.plainResults -TemplateSheetName "サマリ-ユーザー別"
         
         Export-GroupSummaryData -Workbook $workbook -TestDatas $TestDatas -TotalSummaryResults $CollectResultDatas.totalSummaryResults -UseSummaryResults $CollectResultDatas.classSummaryResults -TemplateSheetName "サマリ-クラス別" -TargetUniquePropName "className"
@@ -508,11 +470,9 @@ function Export-Excel {
         Export-GroupPlainData -Workbook $workbook -TestDatas $TestDatas -TotalSummaryResults $CollectResultDatas.totalSummaryResults -UseSummaryResults $CollectResultDatas.companySummaryResults -TemplateSheetName "詳細-会社別" -TargetUniquePropName "companyName" -ShowDetail $ShowDetail
         
         Export-GroupPlainData -Workbook $workbook -TestDatas $TestDatas -TotalSummaryResults $CollectResultDatas.totalSummaryResults -UseSummaryResults $CollectResultDatas.rankSummaryResults -TemplateSheetName "詳細-ランク別" -TargetUniquePropName "rankName" -ShowDetail $ShowDetail
-        
-        # 最初のシートをアクティブに
+
         Set-FirstVisibleSheet -Workbook $workbook
-        
-        # 保存
+
         $workbook.SaveAs($OutputFilePath, 51)
     }
     finally {
@@ -533,20 +493,20 @@ function Export-Excel {
 
     $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
     $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
-    # Write-Message $testDatas -VarName "testDatas" -Type "Info"
 
     $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
-    # Write-Message $userDatas -VarName "userDatas" -Type "Info"
 
     $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
-    # Write-Message $resultDatas -VarName "resultDatas" -Type "Info"
 
     $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
-    # Write-Message $collectResultDatas -VarName "collectResultDatas" -Type "Info"
 
     $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
     Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
     Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
+
+    Write-MessageComplete "集計結果を出力しました: $outputFilePath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"
 

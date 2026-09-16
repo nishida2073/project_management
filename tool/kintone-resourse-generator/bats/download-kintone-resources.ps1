@@ -1,9 +1,6 @@
 ﻿# =========================================
 # 現在のスペースの状態をExcelへ書き出す
 # =========================================
-# 指定したスペースIDの現在の状態を download\<CONFIG_NAME>.xlsx のシート
-# （space-settings / space-member-list / space-app-list / space-app-acl / space-app-record-acl）に書き出す。
-# 対象の5シートは毎回完全に上書きする。
 
 param(
     [string]$SpaceId,
@@ -26,9 +23,6 @@ if (-not $baseUrl -or -not $downloadRoot -or -not $logRoot) {
 if (-not $SpaceId) {
     $SpaceId = Read-Host "ダウンロード対象のスペースID"
 }
-# 設定ファイル名（ConfigName）は省略可能。未指定の場合はダウンロード対象スペースの現在の名前から
-# 自動で設定するため、ダウンロード先パスの確定はスペース取得後に行う（ログファイル名だけは
-# その時点でConfigNameが未確定のため、代わりにスペースIDを使って先に決めておく）。
 $logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "download_$(if ($ConfigName) { $ConfigName } else { "space$SpaceId" })"
 
 $script:exitCode = 0
@@ -40,7 +34,7 @@ $script:exitCode = 0
     try {
         $space = Get-CurrentSpace -SpaceId $SpaceId -BaseUrl $baseUrl -Authorization $authorization
     } catch {
-        Write-Message "スペース取得に失敗しました: $($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "スペース取得に失敗しました: $($_.Exception.Message)"
         $script:exitCode = 1
         return
     }
@@ -48,7 +42,6 @@ $script:exitCode = 0
     if (-not $ConfigName) {
         $invalidChars = [System.IO.Path]::GetInvalidFileNameChars()
         $ConfigName = -join ($space.spaceName.ToCharArray() | ForEach-Object { if ($invalidChars -contains $_) { "_" } else { $_ } })
-        # GUI（gui.ps1）が自動設定された設定ファイル名を取得するための機械可読な行。人間向けログの文言とは独立させておく。
         Write-Message "　CONFIG_NAME=$ConfigName" -Type "Info" -NoHeader -Hidden
     }
     $downloadPath = Join-Path $downloadRoot "${ConfigName}_download.xlsx"
@@ -208,11 +201,9 @@ $script:exitCode = 0
         Write-ApplyStepResult -ActionLabel "アプリのレコード権限を取得しました" -CountPhrase "条件$($recordAclCondGroups.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
     }
 
-    Write-Message "" -Type "Info" -NoHeader
-    Write-Message "現在の状態を出力しました: $downloadPath" -ForegroundColor Green -Type "Info" -NoHeader
+    Write-MessageComplete "現在の状態を出力しました: $downloadPath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message "" -Type "Info" -NoHeader
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
+Write-MessageComplete "ログを出力しました: $logFilePath"
 exit $script:exitCode

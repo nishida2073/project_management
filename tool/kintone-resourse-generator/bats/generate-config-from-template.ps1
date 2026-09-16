@@ -1,23 +1,6 @@
 ﻿# =========================================
 # テンプレートと新スペースのダウンロード結果からconfigを自動生成する
 # =========================================
-# テンプレート（スペースID・アプリIDを持たず、アプリ名だけで紐づく共通ACL・メンバー設定）と
-# ダウンロード結果（新スペースの実ID入り）をアプリ名の一致で対応付けてconfigを生成する。
-# 対応付けられなかったアプリはコンソールに一覧表示するので、必要なら手動でconfigに追記する。
-# スペース名・アプリ名の"{PH}"は、kintone側で最終名が決まる前の仮名という運用を想定し、
-# 設定ファイル名に置き換える。kintoneへの書き込みは行わない。
-#
-# CustomTemplateConfigName（省略可）を指定すると、設定テンプレート（基本）に加えて設定テンプレート（カスタム）の
-# 内容を組み合わせてconfigを生成する。組み合わせ方はシートによって異なる:
-#   space-settings         : 項目ごとにcustomの値があれば優先し、無ければbaseの値を使う
-#   space-member-list      : base・custom両方の行を残す（追加）。種別+ユーザー/組織/グループが
-#                             重複する場合はcustomの行で上書きする
-#   space-app-list         : base・custom双方をダウンロード結果と個別にマッチングする。同じ
-#                             ダウンロード先アプリに両方が対応した場合、ACLはbase・custom両方の
-#                             テンプレートから取得し、警告表示等の代表テンプレートアプリ名はcustomを優先する
-#   space-app-acl          : マッチしたアプリごとに、base・custom両方のACL行を残す（追加）。
-#   space-app-record-acl     種別+ユーザー／組織／グループ（レコードACLはレコードの条件も含む）が
-#                             重複する場合はcustomの行で上書きする
 
 param(
     [string]$BaseTemplateConfigName,
@@ -59,15 +42,12 @@ $logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "generate_$DownloadCo
 
 $script:exitCode = 0
 
-# customの値が空でなければcustomを、空ならbaseを返す（space-settingsのフィールド単位のマージに使う）
 function Get-PreferredValue {
     param($CustomValue, $BaseValue)
     if ("$CustomValue" -ne "") { return $CustomValue }
     return $BaseValue
 }
 
-# 複数行シート（メンバー・ACL・レコードACL）のbaseTemplateとcustomTemplateの結合に使う。
-# [KeyProperties]が一致する行はcustomTemplate側で上書きし、一致しない行は両方とも残す（追加）
 function Merge-KintoneRowsByKey {
     param(
         [array]$BaseRows,
@@ -76,9 +56,6 @@ function Merge-KintoneRowsByKey {
     )
     $result = New-Object System.Collections.Generic.List[psobject]
     $indexByKey = @{}
-    # BaseRows/CustomRowsが0件のとき、呼び出し元の「if式の結果を代入」という書き方によって
-    # $null（空配列ではなく）になることがあり、@($null)は要素数1の配列（中身はnull）になってしまうため、
-    # ここでnull行を明示的に除外する
     foreach ($row in @($BaseRows)) {
         if ($null -eq $row) { continue }
         $key = ($KeyProperties | ForEach-Object { "$($row.$_)" }) -join "`u{0}"
@@ -100,17 +77,17 @@ function Merge-KintoneRowsByKey {
 
 & {
     if (-not (Test-Path -LiteralPath $baseTemplatePath)) {
-        Write-Message "設定テンプレート（基本）が見つかりません: $baseTemplatePath" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "設定テンプレート（基本）が見つかりません: $baseTemplatePath"
         $script:exitCode = 1
         return
     }
     if ($customTemplatePath -and -not (Test-Path -LiteralPath $customTemplatePath)) {
-        Write-Message "設定テンプレート（カスタム）が見つかりません: $customTemplatePath" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "設定テンプレート（カスタム）が見つかりません: $customTemplatePath"
         $script:exitCode = 1
         return
     }
     if (-not (Test-Path -LiteralPath $downloadPath)) {
-        Write-Message "ダウンロード結果が見つかりません: $downloadPath" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "ダウンロード結果が見つかりません: $downloadPath"
         $script:exitCode = 1
         return
     }
@@ -184,13 +161,12 @@ function Merge-KintoneRowsByKey {
     }
 
     if (-not $baseSpaceRow -or -not $downloadSpaceRow) {
-        Write-Message "テンプレートまたはダウンロード結果のspace-settingsが空です" -ForegroundColor Red -Type "Info" -NoHeader
+        Write-MessageError "テンプレートまたはダウンロード結果のspace-settingsが空です"
         $script:exitCode = 1
         return
     }
     $newSpaceId = $downloadSpaceRow.'スペースID'
 
-    # space-settings: 項目ごとにcustomの値があれば優先し、無ければbaseの値を使う
     $templateSpaceRow = [PSCustomObject]@{
         'スペース名'                                                      = Get-PreferredValue $customSpaceRow.'スペース名' $baseSpaceRow.'スペース名'
         '参加メンバーだけにこのスペースを公開する'                       = Get-PreferredValue $customSpaceRow.'参加メンバーだけにこのスペースを公開する' $baseSpaceRow.'参加メンバーだけにこのスペースを公開する'
@@ -199,15 +175,11 @@ function Merge-KintoneRowsByKey {
         'アプリ作成できるユーザーをスペースの管理者に限定する'           = Get-PreferredValue $customSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する' $baseSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
     }
 
-    # スペース名はテンプレート（base/custom）のspace-settingsに列があればそれを優先し、無ければダウンロード結果（新スペースの現在の名前）を使う
     $spaceNameSource = if ("$($templateSpaceRow.'スペース名')" -ne "") { $templateSpaceRow.'スペース名' } else { $downloadSpaceRow.'スペース名' }
     $finalSpaceName = Expand-KintonePlaceholder -Value $spaceNameSource -ConfigName $DownloadConfigName
 
-    # space-member-list: base・custom両方の行を残し、種別+ユーザー/組織/グループが重複する場合はcustomで上書きする
     $templateMemberRows = @(Merge-KintoneRowsByKey -BaseRows $baseMemberRows -CustomRows $customMemberRows -KeyProperties @("種別", "ユーザー/組織/グループ"))
 
-    # space-app-list: base・custom双方を個別にダウンロード結果とマッチングし、ダウンロード先アプリIDを軸に統合する。
-    # ACLはbase・custom両方のテンプレートアプリ名から取得するため、統合後も両方のテンプレートアプリ名を保持しておく
     $baseAppMapping = Get-AppNameMapping -TemplateApps $baseAppRows -DownloadApps $downloadAppRows
     $customAppMapping = if ($customAppRows.Count -gt 0) { Get-AppNameMapping -TemplateApps $customAppRows -DownloadApps $downloadAppRows } else { @() }
 
@@ -233,8 +205,6 @@ function Merge-KintoneRowsByKey {
         }
     }
 
-    # TemplateAppNameは対応付けの表示・ACL検索の代表名（customを優先）。DownloadAppNameは対応付けに使った
-    # 元の名前として残すため、{PH}置き換え後の名前は別プロパティ（FinalAppName）に持たせる
     $matchedApps = @($matchedByDownloadId.Values | ForEach-Object {
         $finalTemplateAppName = if ($_.CustomTemplateAppName) { $_.CustomTemplateAppName } else { $_.BaseTemplateAppName }
         $finalAppName = Expand-KintonePlaceholder -Value $finalTemplateAppName -ConfigName $DownloadConfigName
@@ -261,7 +231,6 @@ function Merge-KintoneRowsByKey {
         }
     }
 
-    # space-settings: スペース名はテンプレート側に列があればそれを、無ければ新スペース側の値を使う。それ以外はテンプレート側の値を使う
     $outSpaceRow = [PSCustomObject]@{
         "スペースID"                                                     = $newSpaceId
         "スペース名"                                                     = $finalSpaceName
@@ -302,9 +271,6 @@ function Merge-KintoneRowsByKey {
     }
     Write-ApplyStepResult -ActionLabel "スペース権限を設定しました" -DetailLines $spaceRightLines
 
-    # テンプレートに無い既存メンバー（スペース作成時にkintoneが自動追加する個人ユーザーなど）は
-    # ダウンロード結果から引き継ぐ。apply側のSet-SpaceMembersはシートに無いコードのメンバーを
-    # 消さずに残す設計のため、ここで引き継いでおかないとcheckで「想定外」と誤検知される
     $templateMemberCodes = @($templateMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' })
     $keptMemberRows = @($downloadMemberRows | Where-Object { $templateMemberCodes -notcontains $_.'ユーザー/組織/グループ' })
 
@@ -426,16 +392,8 @@ function Merge-KintoneRowsByKey {
         Set-HeaderRowColor -Sheet $workbook.Sheets.Item($sheetName) -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
     }
 
-    $applyDiffColoring = $true # 赤字処理を一旦無効化
+    $applyDiffColoring = $true
 
-    # スペース名・アプリ名は{PH}置き換え部分だけを赤字にする。
-    # それ以外は、ユニークキーでダウンロード結果に対応する行がある場合は値が異なるセルだけを赤字にし、
-    # 対応する行が無い（新規追加）場合は行全体を赤字にする。ユニークキーは以下:
-    #   space-settings: なし（1行のみ）
-    #   space-member-list: 種別, ユーザー/組織/グループ
-    #   space-app-list: アプリ名（マッチング済みのアプリのみ出力するため常に対応行あり）
-    #   space-app-acl: アプリ名, 種別, ユーザー／組織／グループ
-    #   space-app-record-acl: アプリ名, レコードの条件, 種別, ユーザー／組織／グループ
     $diffColor = [System.Drawing.Color]::FromArgb(255, 0, 0)
     $diffColorOle = ConvertTo-OleColor $diffColor
 
@@ -469,7 +427,6 @@ function Merge-KintoneRowsByKey {
                 $templateRowEnd = [Math]::Min(1 + $templateMemberRows.Count, $memberLastRow)
                 for ($row = 2; $row -le $templateRowEnd; $row++) {
                     $tmplRow = $templateMemberRows[$row - 2]
-                    # ユニークキー: 種別 + ユーザー/組織/グループ
                     $dlRow = $downloadMemberRows | Where-Object {
                         "$($_.'種別')" -eq "$($tmplRow.'種別')" -and
                         "$($_.'ユーザー/組織/グループ')" -eq "$($tmplRow.'ユーザー/組織/グループ')"
@@ -497,7 +454,6 @@ function Merge-KintoneRowsByKey {
                     if ($row -gt $aclLastRow) { break }
                     $src = $aclRowSources[$i]
                     $tmplRow = $src.TemplateRow
-                    # ユニークキー: アプリ名 + 種別 + ユーザー／組織／グループ
                     $dlRow = $downloadAclRows | Where-Object {
                         "$($_.'アプリ名')" -eq "$($src.DownloadAppName)" -and
                         "$($_.'種別')" -eq "$($tmplRow.'種別')" -and
@@ -530,7 +486,6 @@ function Merge-KintoneRowsByKey {
                     if ($row -gt $recordAclLastRow) { break }
                     $src = $recordAclRowSources[$i]
                     $tmplRow = $src.TemplateRow
-                    # ユニークキー: アプリ名 + レコードの条件 + 種別 + ユーザー／組織／グループ
                     $dlRow = $downloadRecordAclRows | Where-Object {
                         "$($_.'アプリ名')" -eq "$($src.DownloadAppName)" -and
                         "$($_.'レコードの条件')" -eq "$($tmplRow.'レコードの条件')" -and
@@ -567,15 +522,12 @@ function Merge-KintoneRowsByKey {
         [System.GC]::WaitForPendingFinalizers()
     }
 
-    Write-Message "" -Type "Info" -NoHeader
-    Write-Message "設定内容を出力しました: $outputPath" -ForegroundColor Green -Type "Info" -NoHeader
+    Write-MessageComplete "設定内容を出力しました: $outputPath"
     if ($hasUnmatched) {
-        # 対応付け未了の警告のみで設定ファイル自体は生成済みのため、致命的エラー(exit 1)とは区別する
         $script:exitCode = 2
     }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
 
-Write-Message "" -Type "Info" -NoHeader
-Write-Message "ログを出力しました: $logFilePath" -ForegroundColor Green -Type "Info" -NoHeader
+Write-MessageComplete "ログを出力しました: $logFilePath"
 exit $script:exitCode

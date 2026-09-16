@@ -1,8 +1,6 @@
 ﻿# =========================================
 # クライアント用パッケージ定義ファイル生成
 # =========================================
-# config\package_definition.xlsx をコピーして config\package_definition_<クライアント名>.xlsx を作成し、
-# 先頭シートの「取得元（フルパス）」列に DOWNLOAD_LOCAL_PATH 配下のファイルを再帰的に一覧化する。
 
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $scriptDir "library"
@@ -12,101 +10,95 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 $basePath = Split-Path $scriptDir -Parent
 
 $clientName = $env:CLIENT_NAME
-$downloadLocalPath = $env:DOWNLOAD_LOCAL_PATH
+$sourcePath = $env:GENERATE_SOURCE_PATH
 
 if (!$clientName) {
-    Write-Message "CLIENT_NAME が指定されていません（generate-config.bat client:<クライアント名> のように指定してください）" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "CLIENT_NAME が指定されていません（generate-config.bat client:<クライアント名> のように指定してください）"
     exit 1
 }
 
-if (!$downloadLocalPath) {
-    Write-Message "DOWNLOAD_LOCAL_PATH を set-env.bat で設定してください" -ForegroundColor Red -Type "Info" -NoHeader
+if (!$sourcePath) {
+    Write-MessageError "GENERATE_SOURCE_PATH を set-env.bat で設定してください"
     exit 1
 }
 
-if (!(Test-Path -LiteralPath $downloadLocalPath)) {
-    Write-Message "存在しません：$downloadLocalPath" -ForegroundColor Red -Type "Info" -NoHeader
+if (!(Test-Path -LiteralPath $sourcePath)) {
+    Write-MessageError "存在しません：$sourcePath"
     exit 1
 }
 
 $templatePath = Join-Path $basePath "config\package_definition.xlsx"
 if (!(Test-Path -LiteralPath $templatePath)) {
-    Write-Message "テンプレートが見つかりません：$templatePath" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "テンプレートが見つかりません：$templatePath"
     exit 1
 }
 
 $destPath = Join-Path (Split-Path $templatePath -Parent) "package_definition_$clientName.xlsx"
 
 if ((Test-Path -LiteralPath $destPath) -and $env:FORCE -ne "1") {
-    Write-Message "すでに存在します：$destPath" -ForegroundColor Red -Type "Info" -NoHeader
-    Write-Message "上書きする場合は force:1 を指定してください" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "すでに存在します：$destPath"
+    Write-MessageError "上書きする場合は force:1 を指定してください"
     exit 1
-}
-
-if (!(Get-Module -ListAvailable ImportExcel)) {
-    Write-Message "ImportExcelをインストールします" -Type "Info" -NoHeader
-    Install-Module ImportExcel -Scope CurrentUser -Force
 }
 
 Copy-Item -LiteralPath $templatePath -Destination $destPath -Force
 
 $prevEap = $ErrorActionPreference
+$excel = $null
+$workbook = $null
 try {
     $ErrorActionPreference = "Stop"
 
-    $pkg = Open-ExcelPackage -Path $destPath
-    try {
-        $ws = $pkg.Workbook.Worksheets[1]
+    $excel = New-Object -ComObject Excel.Application
+    $excel.Visible = $false
+    $excel.DisplayAlerts = $false
+    $excel.ScreenUpdating = $false
+    $excel.EnableEvents = $false
 
-        if (!$ws.Dimension) {
-            throw "先頭シート（$($ws.Name)）にヘッダー行がありません"
-        }
+    $workbook = $excel.Workbooks.Open($destPath)
+    $ws = $workbook.Worksheets.Item(1)
 
-        $headerRow = $ws.Dimension.Start.Row
-        $lastCol = $ws.Dimension.End.Column
+    $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
+    $headerRow = $sourceCell.Row
+    $sourceCol = $sourceCell.Column
 
-        $colMap = @{}
-        for ($c = 1; $c -le $lastCol; $c++) {
-            $header = $ws.Cells[$headerRow, $c].Text
-            if ($header) {
-                $colMap[$header] = $c
-            }
-        }
+    $noCell = Get-CellByKey -Sheet $ws -Key "No" -WholeMatch
+    $noCol = if ($noCell) { $noCell.Column } else { $null }
 
-        if (!$colMap.ContainsKey("取得元（フルパス）")) {
-            throw "先頭シート（$($ws.Name)）に「取得元（フルパス）」列が見つかりません"
-        }
-        $sourceCol = $colMap["取得元（フルパス）"]
-        $noCol = $colMap["No"]
+    $usedRange = $ws.UsedRange
+    $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
+    $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
 
-        if ($ws.Dimension.End.Row -gt $headerRow) {
-            for ($r = $headerRow + 1; $r -le $ws.Dimension.End.Row; $r++) {
-                for ($c = 1; $c -le $lastCol; $c++) {
-                    $ws.Cells[$r, $c].Value = $null
-                }
-            }
-        }
-
-        $downloadLocalPathTrimmed = $downloadLocalPath.TrimEnd('\')
-        $files = @(Get-ChildItem -LiteralPath $downloadLocalPath -Recurse -File)
-
-        $row = $headerRow + 1
-        foreach ($file in $files) {
-            $relativePath = ".\" + $file.FullName.Substring($downloadLocalPathTrimmed.Length).TrimStart('\')
-            $ws.Cells[$row, $sourceCol].Value = $relativePath
-            if ($noCol) {
-                $ws.Cells[$row, $noCol].Value = ($row - $headerRow)
-            }
-            $row++
-        }
-
-        Write-Message "作成しました：$destPath（$($files.Count)件）" -ForegroundColor Green -Type "Info" -NoHeader
-    } finally {
-        Close-ExcelPackage $pkg
+    if ($lastRow -gt $headerRow) {
+        $clearLastCol = [Math]::Max($lastCol, $sourceCol)
+        $ws.Range($ws.Cells.Item($headerRow + 1, 1), $ws.Cells.Item($lastRow, $clearLastCol)).ClearContents()
     }
+
+    $sourcePathTrimmed = $sourcePath.TrimEnd('\')
+    $files = @(Get-ChildItem -LiteralPath $sourcePath -Recurse -File)
+
+    $row = $headerRow + 1
+    foreach ($file in $files) {
+        $relativePath = ".\" + $file.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+        $ws.Cells.Item($row, $sourceCol).Value2 = $relativePath
+        if ($noCol) {
+            $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
+        }
+        $row++
+    }
+
+    $workbook.Save()
+
+    Write-MessageComplete "作成しました：$destPath（$($files.Count)件）"
 } catch {
-    Write-Message "処理に失敗しました：$($_.Exception.Message)" -ForegroundColor Red -Type "Info" -NoHeader
+    Write-MessageError "処理に失敗しました：$($_.Exception.Message)"
     exit 1
 } finally {
+    if ($workbook) { $workbook.Close($true) }
+    if ($excel) { $excel.Quit() }
+    if ($workbook) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+    if ($excel) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
     $ErrorActionPreference = $prevEap
 }

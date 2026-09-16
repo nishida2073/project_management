@@ -747,7 +747,7 @@ function Get-SettingsFieldRows {
 }
 
 $settingsTrailingButtonVars = @{
-    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-TestActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick {
+    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick {
         $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
         $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
         $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
@@ -800,7 +800,10 @@ $tabControl.Add_SelectedIndexChanged({
 Update-BaseTemplateNameList
 Update-CustomTemplateNameList
 
-$form.Add_Shown({ Update-InnerRunTabHeight })
+$form.Add_Shown({
+    Update-InnerRunTabHeight
+    Update-SettingsFields
+})
 $tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)
