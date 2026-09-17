@@ -5,3 +5,8 @@
 /work
 /test
 *.exe
+/clients/*
+!/clients/set-env-サンプル.bat
+!/clients/template/
+!/clients/package_definition_サンプル.xlsx
+!/clients/README.md
