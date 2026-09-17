@@ -12,14 +12,20 @@ shift
 goto parse_args
 :args_done
 
-call "%~dp0clients\set-env.bat"
+if not defined CLIENT_NAME (
+    echo client:^<クライアント名^> を指定してください（例: generate-config.bat client:サンプル）
+    set "EXITCODE=1"
+    goto end
+)
+
+call "%~dp0clients\template\set-env.bat"
 if exist "%~dp0clients\set-env-%CLIENT_NAME%.bat" call "%~dp0clients\set-env-%CLIENT_NAME%.bat"
 
 call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0bats\generate-config.ps1" -SourcePath "%GENERATE_SOURCE_PATH%" -TemplateConfigFilePath "%~dp0config\package_definition.xlsx" -TargetConfigFilePath "%GENERATE_CONFIG_PATH%" -Force "%FORCE%" -LogPath "%COMMON_LOG_PATH%" -LogPrefix "%GENERATE_CONFIG_LOG_PREFIX%" -ClientName "%CLIENT_NAME%"
+ -File "%~dp0bats\generate-config.ps1" -SourcePath "%GENERATE_SOURCE_PATH%" -TemplateConfigFilePath "%~dp0clients\template\package_definition.xlsx" -TargetConfigFilePath "%GENERATE_CONFIG_PATH%" -Force "%FORCE%" -LogPath "%COMMON_LOG_PATH%" -LogPrefix "%GENERATE_CONFIG_LOG_PREFIX%" -ClientName "%CLIENT_NAME%"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"

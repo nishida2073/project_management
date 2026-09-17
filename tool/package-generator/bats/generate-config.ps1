@@ -55,78 +55,83 @@ if ((Test-Path -LiteralPath $TargetConfigFilePath) -and $Force -ne "1") {
     exit 1
 }
 
-if ([System.IO.Path]::GetFullPath($TargetConfigFilePath) -ne [System.IO.Path]::GetFullPath($TemplateConfigFilePath)) {
-    Copy-Item -LiteralPath $TemplateConfigFilePath -Destination $TargetConfigFilePath -Force
+if ([System.IO.Path]::GetFullPath($TargetConfigFilePath) -eq [System.IO.Path]::GetFullPath($TemplateConfigFilePath)) {
+    Write-MessageError "TargetConfigFilePath にテンプレート自身のパスは指定できません：$TargetConfigFilePath"
+    exit 1
 }
+
+Copy-Item -LiteralPath $TemplateConfigFilePath -Destination $TargetConfigFilePath -Force
 
 New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
 
-$prevEap = $ErrorActionPreference
-$excel = $null
-$workbook = $null
-try {
-    $ErrorActionPreference = "Stop"
+$logNamePrefix = "$($LogPrefix)$(if ($ClientName) { "${ClientName}_" } else { "${defaultClientLabel}_" })$(Split-Path $TargetConfigFilePath -Leaf)"
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Timestamp $startTime
 
-    $excel = New-Object -ComObject Excel.Application
-    $excel.Visible = $false
-    $excel.DisplayAlerts = $false
-    $excel.ScreenUpdating = $false
-    $excel.EnableEvents = $false
+$script:exitCode = 0
+& {
+    $prevEap = $ErrorActionPreference
+    $excel = $null
+    $workbook = $null
+    try {
+        $ErrorActionPreference = "Stop"
 
-    $workbook = $excel.Workbooks.Open($TargetConfigFilePath)
-    $ws = $workbook.Worksheets.Item(1)
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+        $excel.ScreenUpdating = $false
+        $excel.EnableEvents = $false
 
-    $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
-    $headerRow = $sourceCell.Row
-    $sourceCol = $sourceCell.Column
+        $workbook = $excel.Workbooks.Open($TargetConfigFilePath)
+        $ws = $workbook.Worksheets.Item(1)
 
-    $noCell = Get-CellByKey -Sheet $ws -Key "No" -WholeMatch
-    $noCol = if ($noCell) { $noCell.Column } else { $null }
+        $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
+        $headerRow = $sourceCell.Row
+        $sourceCol = $sourceCell.Column
 
-    $usedRange = $ws.UsedRange
-    $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
-    $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
+        $noCell = Get-CellByKey -Sheet $ws -Key "No" -WholeMatch
+        $noCol = if ($noCell) { $noCell.Column } else { $null }
 
-    if ($lastRow -gt $headerRow) {
-        $clearLastCol = [Math]::Max($lastCol, $sourceCol)
-        $ws.Range($ws.Cells.Item($headerRow + 1, 1), $ws.Cells.Item($lastRow, $clearLastCol)).ClearContents()
-    }
+        $usedRange = $ws.UsedRange
+        $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
+        $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
 
-    $sourcePathTrimmed = $SourcePath.TrimEnd('\')
-    $files = @(Get-ChildItem -LiteralPath $SourcePath -Recurse -File)
-
-    $resultLines = @()
-    $row = $headerRow + 1
-    foreach ($file in $files) {
-        $relativePath = ".\" + $file.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
-        $ws.Cells.Item($row, $sourceCol).Value2 = $relativePath
-        if ($noCol) {
-            $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
+        if ($lastRow -gt $headerRow) {
+            $clearLastCol = [Math]::Max($lastCol, $sourceCol)
+            $ws.Range($ws.Cells.Item($headerRow + 1, 1), $ws.Cells.Item($lastRow, $clearLastCol)).ClearContents()
         }
-        $resultLines += $relativePath
-        $row++
+
+        $sourcePathTrimmed = $SourcePath.TrimEnd('\')
+        $files = @(Get-ChildItem -LiteralPath $SourcePath -Recurse -File)
+
+        $resultLines = @()
+        $row = $headerRow + 1
+        foreach ($file in $files) {
+            $relativePath = ".\" + $file.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+            $ws.Cells.Item($row, $sourceCol).Value2 = $relativePath
+            if ($noCol) {
+                $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
+            }
+            $resultLines += $relativePath
+            $row++
+        }
+
+        $workbook.Save()
+
+        Write-Message (Get-RunLogMessage -ResultSectionTitle "登録内容" -ResultLines $resultLines) -Type "Info" -NoHeader
+    } catch {
+        Write-Message (Get-RunLogMessage -ResultSectionTitle "エラー" -ResultLines @("処理に失敗しました：$TargetConfigFilePath", "$($_.Exception.Message)")) -Type "Info" -NoHeader
+        $script:exitCode = 1
+    } finally {
+        if ($workbook) { $workbook.Close($true) }
+        if ($excel) { $excel.Quit() }
+        if ($workbook) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+        if ($excel) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        [System.GC]::Collect()
+        [System.GC]::WaitForPendingFinalizers()
+        $ErrorActionPreference = $prevEap
     }
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath
 
-    $workbook.Save()
-
-    $logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $TargetConfigFilePath -Leaf).log" `
-        -StartTime $startTime -EndTime (Get-Date) `
-        -ResultSectionTitle "登録内容" -ResultLines $resultLines `
-        -ClientName $ClientName
-    Show-LogFileContent -Path $logFilePath
-} catch {
-    $logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $TargetConfigFilePath -Leaf).log" `
-        -StartTime $startTime -EndTime (Get-Date) `
-        -ResultSectionTitle "エラー" -ResultLines @("処理に失敗しました：$TargetConfigFilePath", "$($_.Exception.Message)") `
-        -ClientName $ClientName
-    Show-LogFileContent -Path $logFilePath
-    exit 1
-} finally {
-    if ($workbook) { $workbook.Close($true) }
-    if ($excel) { $excel.Quit() }
-    if ($workbook) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-    if ($excel) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
-    [System.GC]::Collect()
-    [System.GC]::WaitForPendingFinalizers()
-    $ErrorActionPreference = $prevEap
-}
+Write-MessageComplete "ログを出力しました: $logFilePath"
+exit $script:exitCode

@@ -15,7 +15,7 @@ $downloadBat = Join-Path $rootPath "download-folder.bat"
 $generateBat = Join-Path $rootPath "generate-package.bat"
 $uploadBat = Join-Path $rootPath "upload-folder.bat"
 $clientsDir = Join-Path $rootPath "clients"
-$setEnvBat = Join-Path $clientsDir "set-env.bat"
+$setEnvBat = Join-Path $clientsDir "template\set-env.bat"
 $clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
 $clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
 $defaultClientLabel = "デフォルト"
@@ -206,10 +206,10 @@ function Update-ClientComboItems {
 }
 
 function Update-ClientList {
-    Update-ClientComboItems -ComboBox $cmbClient -FixedItems @($defaultClientLabel)
-    Update-ClientComboItems -ComboBox $cmbDownloadClient -FixedItems @($defaultClientLabel)
-    Update-ClientComboItems -ComboBox $cmbGenerateClient -FixedItems @($defaultClientLabel)
-    Update-ClientComboItems -ComboBox $cmbUploadClient -FixedItems @($defaultClientLabel)
+    Update-ClientComboItems -ComboBox $cmbClient -FixedItems @()
+    Update-ClientComboItems -ComboBox $cmbDownloadClient -FixedItems @()
+    Update-ClientComboItems -ComboBox $cmbGenerateClient -FixedItems @()
+    Update-ClientComboItems -ComboBox $cmbUploadClient -FixedItems @()
 }
 Update-ClientList
 
@@ -249,7 +249,7 @@ Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabCont
 
 function Start-BatchRunAll {
     $selectedClient = $cmbClient.SelectedItem
-    $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
+    $clientDisplayName = $selectedClient
 
     foreach ($chk in $script:batchStepCheckboxes) {
         if ($chk.Tag.EnabledVarName) {
@@ -262,7 +262,7 @@ function Start-BatchRunAll {
     }
     $script:lastClientVars = @()
 
-    if ($selectedClient -and $selectedClient -ne $defaultClientLabel) {
+    if ($selectedClient) {
         $clientValues = Get-ClientProfileValues $selectedClient
         $appliedVars = @()
         foreach ($varName in $clientValues.Keys) {
@@ -296,7 +296,7 @@ function Start-BatchRunAll {
 $btnRunAll.Add_Click({ Start-BatchRunAll })
 
 function Update-LogClientList {
-    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo -FixedItems @("すべて", $defaultClientLabel)
+    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo -FixedItems @("すべて")
 }
 
 $script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allLogButtonDefs `
@@ -567,10 +567,13 @@ function Invoke-GenerateConfigForClient {
 $settingsTrailingButtonVars = @{
     "GENERATE_CONFIG_PATH" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テンプレートの更新" -Width 120 -OnClick {
         $client = $cmbSettingsClient.SelectedItem
-        $clientName = if ($client -and $client -ne $defaultClientLabel) { $client } else { "" }
+        if (!$client -or $client -eq $defaultClientLabel) {
+            [System.Windows.Forms.MessageBox]::Show("クライアントを選択してください。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+            return
+        }
         foreach ($f in (Get-SettingsFiles)) { & $f.Save }
         Update-RunCheckboxesFromClient
-        Invoke-GenerateConfigForClient -ClientName $clientName
+        Invoke-GenerateConfigForClient -ClientName $client
     } }
 }
 
@@ -619,7 +622,7 @@ $btnNewClient.Add_Click({
 
 function Get-ValueForClient {
     param([string]$ClientName, [string]$VarName)
-    if ($ClientName -and $ClientName -ne $defaultClientLabel) {
+    if ($ClientName) {
         $clientValues = Get-ClientProfileValues $ClientName
         if ($clientValues.ContainsKey($VarName)) {
             return $clientValues[$VarName]
@@ -645,7 +648,7 @@ $cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-R
 function Get-ClientArgValue {
     param([System.Windows.Forms.ComboBox]$ComboBox)
     $value = $ComboBox.Text.Trim()
-    if ($value -and $value -ne $defaultClientLabel) { return $value }
+    if ($value) { return $value }
     return ""
 }
 

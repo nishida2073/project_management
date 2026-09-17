@@ -3,32 +3,6 @@
 # =========================================
 # 各ワーカースクリプトが実行結果をログファイルへ書き出し、GUIログ欄にも表示するための共通処理。
 
-function Write-LogFile {
-    param(
-        [string]$Path,
-        [string[]]$Lines
-    )
-    [System.IO.File]::WriteAllLines($Path, $Lines, $cp932)
-}
-
-function Get-ClientLogSegment {
-    param([string]$ClientName)
-
-    if ($ClientName) {
-        return "${ClientName}_"
-    }
-    return "${defaultClientLabel}_"
-}
-
-function Get-ClientLogHeaderLines {
-    param([string]$ClientName)
-
-    if ($ClientName) {
-        return @("クライアント: $ClientName")
-    }
-    return @("クライアント: $defaultClientLabel")
-}
-
 function Write-TreeNode {
     param(
         [System.Collections.Specialized.OrderedDictionary]$Node,
@@ -126,68 +100,28 @@ function Get-ItemListLines {
     Write-TreeNode -Node $tree -Prefix $Prefix
 }
 
-function Write-RunLogFile {
+function Get-RunLogMessage {
     param(
-        [string]$LogPath,
-        [string]$LogFileName,
         [string[]]$ExtraHeaderLines = @(),
-        [datetime]$StartTime,
-        [datetime]$EndTime,
         [string]$ResultSectionTitle,
         [string[]]$ResultLines,
         [string]$TreeRootPath = "",
         [string]$ItemListRootPath = "",
-        [string[]]$ItemListPaths = @(),
-        [string]$ClientName = ""
+        [string[]]$ItemListPaths = @()
     )
 
     if ($TreeRootPath -and $ItemListPaths.Count -gt 0) {
         throw "TreeRootPath と ItemListPaths は同時に指定できません"
     }
 
-    $timestamp = $StartTime.ToString('yyyyMMdd_HHmmss')
-    $logFileExt = [System.IO.Path]::GetExtension($LogFileName)
-    $logFileBase = [System.IO.Path]::GetFileNameWithoutExtension($LogFileName)
-    $logFilePath = Join-Path $LogPath "${logFileBase}_${timestamp}${logFileExt}"
-    $logLines = @()
-    $logLines += "# 実行情報"
-    $logLines += (Get-ClientLogHeaderLines -ClientName $ClientName)
-    $logLines += $ExtraHeaderLines
-    $logLines += "開始時刻: $($StartTime.ToString('yyyy-MM-dd HH:mm:ss'))"
-    $logLines += "終了時刻: $($EndTime.ToString('yyyy-MM-dd HH:mm:ss'))"
-    $logLines += ""
-    $logLines += "# $ResultSectionTitle"
-    $logLines += $ResultLines
+    $lines = @("# 実行情報") + $ExtraHeaderLines + @("", "# $ResultSectionTitle") + $ResultLines
     if ($TreeRootPath) {
-        $logLines += ""
-        $logLines += "# 構成"
-        $logLines += $TreeRootPath
-        $logLines += (Get-TreeLines -Path $TreeRootPath)
+        $lines += @("", "# 構成", $TreeRootPath) + @(Get-TreeLines -Path $TreeRootPath)
     } elseif ($ItemListPaths.Count -gt 0) {
-        $logLines += ""
-        $logLines += "# 構成"
-        if ($ItemListRootPath) {
-            $logLines += $ItemListRootPath
-        }
-        $logLines += (Get-ItemListLines -Paths $ItemListPaths)
+        $lines += @("", "# 構成")
+        if ($ItemListRootPath) { $lines += $ItemListRootPath }
+        $lines += @(Get-ItemListLines -Paths $ItemListPaths)
     }
-    Write-LogFile -Path $logFilePath -Lines $logLines
 
-    return $logFilePath
-}
-
-function Show-LogFileContent {
-    param([string]$Path)
-
-    Write-Message "" -Type "Info" -NoHeader
-    foreach ($line in [System.IO.File]::ReadAllLines($Path, $cp932)) {
-        if ($line -match '^#') {
-            Write-Message $line -Type "Info" -NoHeader
-        } elseif ($line -match 'エラー|失敗|存在しません') {
-            Write-Message $line -ForegroundColor Red -Type "Info" -NoHeader
-        } else {
-            Write-Message $line -Type "Info" -NoHeader
-        }
-    }
-    Write-Message "" -Type "Info" -NoHeader
+    return $lines -join "`r`n"
 }

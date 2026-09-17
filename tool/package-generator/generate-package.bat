@@ -1,7 +1,7 @@
 @echo off
 
 set "BATCH_NAME=%~nx0"
-call "%~dp0clients\set-env.bat"
+call "%~dp0clients\template\set-env.bat"
 
 :parse_args
 if "%~1"=="" goto args_done

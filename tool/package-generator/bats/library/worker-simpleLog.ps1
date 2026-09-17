@@ -63,3 +63,24 @@ function Write-MessageWarn {
     Write-Message "" -Type "Info" -NoHeader
     Write-Message $Message -VarName "message" -Type "Warn" -ForegroundColor Yellow -NoHeader
 }
+
+function New-WorkerLogPath {
+    param(
+        [Parameter(Mandatory)][string]$LogRoot,
+        [Parameter(Mandatory)][string]$Prefix,
+        [datetime]$Timestamp = (Get-Date)
+    )
+    New-Item -ItemType Directory -Path $LogRoot -Force | Out-Null
+    $timestampText = $Timestamp.ToString("yyyyMMdd_HHmmss")
+    return Join-Path $LogRoot "${Prefix}_${timestampText}.log"
+}
+
+function ConvertTo-Utf8LogFile {
+    param([Parameter(Mandatory)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { return }
+    $content = Get-Content -LiteralPath $Path -Raw
+    if ($null -eq $content) { $content = "" }
+    $content = $content -replace '\[\[COLOR:\w+\]\]', ''
+    $content = $content -replace '\[\[HIDE\]\]', ''
+    [System.IO.File]::WriteAllText($Path, $content, (New-Object System.Text.UTF8Encoding($true)))
+}

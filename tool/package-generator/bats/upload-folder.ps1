@@ -179,13 +179,17 @@ if ($ItemsExclude) {
     $topLevelItems = $topLevelItems | Where-Object { !(Test-NameMatchesPatterns -Name $_.Name -Patterns $excludePatterns) }
 }
 
-$topLevelItems | ForEach-Object {
-    Send-Item -Item $_ -SubPath $_.Name
-}
+$logNamePrefix = "$($LogPrefix)$(if ($ClientName) { "${ClientName}_" } else { "${defaultClientLabel}_" })$(Split-Path $relativeFolder -Leaf)"
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Timestamp $startTime
 
-$endTime = Get-Date
-$logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $relativeFolder -Leaf).log" `
-    -StartTime $startTime -EndTime $endTime `
-    -ResultSectionTitle "アップロード結果" -ResultLines $uploadLog `
-    -ItemListRootPath $LocalPath -ItemListPaths @($topLevelItems | ForEach-Object { $_.FullName }) -ClientName $ClientName
-Show-LogFileContent -Path $logFilePath
+& {
+    $topLevelItems | ForEach-Object {
+        Send-Item -Item $_ -SubPath $_.Name
+    }
+    $message = Get-RunLogMessage -ResultSectionTitle "アップロード結果" -ResultLines $uploadLog `
+        -ItemListRootPath $LocalPath -ItemListPaths @($topLevelItems | ForEach-Object { $_.FullName })
+    Write-Message $message -Type "Info" -NoHeader
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

@@ -91,11 +91,13 @@ function Get-GraphChildrenRecursive {
     }
 }
 
-Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $LocalPath -RelativePath $SitePath
+$logNamePrefix = "$($LogPrefix)$(if ($ClientName) { "${ClientName}_" } else { "${defaultClientLabel}_" })$(Split-Path $SitePath -Leaf)"
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Timestamp $startTime
 
-$endTime = Get-Date
-$logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $SitePath -Leaf).log" `
-    -StartTime $startTime -EndTime $endTime `
-    -ResultSectionTitle "ダウンロード結果" -ResultLines $downloadLog `
-    -TreeRootPath $LocalPath -ClientName $ClientName
-Show-LogFileContent -Path $logFilePath
+& {
+    Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $LocalPath -RelativePath $SitePath
+    Write-Message (Get-RunLogMessage -ResultSectionTitle "ダウンロード結果" -ResultLines $downloadLog -TreeRootPath $LocalPath) -Type "Info" -NoHeader
+} *>&1 | Tee-Object -FilePath $logFilePath
+ConvertTo-Utf8LogFile -Path $logFilePath
+
+Write-MessageComplete "ログを出力しました: $logFilePath"

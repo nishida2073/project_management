@@ -82,7 +82,8 @@ function New-LogTextBox {
     )
     $textBox = New-Object System.Windows.Forms.RichTextBox
     $textBox.Multiline = $true
-    $textBox.ScrollBars = [System.Windows.Forms.RichTextBoxScrollBars]::Vertical
+    $textBox.ScrollBars = [System.Windows.Forms.RichTextBoxScrollBars]::Both
+    $textBox.WordWrap = $false
     $textBox.ReadOnly = $true
     $textBox.BackColor = [System.Drawing.Color]::White
     $textBox.Font = New-Object System.Drawing.Font($FontFamily, $FontSize)
@@ -669,7 +670,6 @@ function Invoke-BatchStep {
 
     if ($StatusLabel) { Set-StepStatus -Label $StatusLabel -Text "実行中..." }
 
-    & $WriteLog ""
     & $WriteLog "--------------- $DisplayLabel 開始 ---------------"
 
     $batArgs = & $GetBatArgs $ButtonDef

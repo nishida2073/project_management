@@ -9,7 +9,7 @@ if /i "%arg:~0,7%"=="client=" set "CLIENT_NAME=%arg:~7%"
 shift
 goto parse_args
 :args_done
-call "%~dp0clients\set-env.bat"
+call "%~dp0clients\template\set-env.bat"
 if defined CLIENT_NAME if exist "%~dp0clients\set-env-%CLIENT_NAME%.bat" call "%~dp0clients\set-env-%CLIENT_NAME%.bat"
 
 call "%~dp0bats\message.bat" "Start %BATCH_NAME%"

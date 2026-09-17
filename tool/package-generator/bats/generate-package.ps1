@@ -41,11 +41,11 @@ try {
     $ErrorActionPreference = "Stop"
     $excel = Get-ExcelSheetInfo $ConfigPath
 } catch {
-    $logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $ConfigPath -Leaf).log" `
-        -StartTime $startTime -EndTime (Get-Date) `
-        -ResultSectionTitle "エラー" -ResultLines @("パッケージ定義ファイルの読み込みに失敗しました：$ConfigPath", "$($_.Exception.Message)") `
-        -ClientName $ClientName
-    Show-LogFileContent -Path $logFilePath
+    $logNamePrefix = "$($LogPrefix)$(if ($ClientName) { "${ClientName}_" } else { "${defaultClientLabel}_" })$(Split-Path $ConfigPath -Leaf)"
+    $logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Timestamp $startTime
+    Write-Message (Get-RunLogMessage -ResultSectionTitle "エラー" -ResultLines @("パッケージ定義ファイルの読み込みに失敗しました：$ConfigPath", "$($_.Exception.Message)")) -Type "Info" -NoHeader *>&1 | Tee-Object -FilePath $logFilePath
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
     exit 1
 } finally {
     $ErrorActionPreference = $prevEap
@@ -66,139 +66,139 @@ if ($SheetsExclude) {
 
 foreach ($sheetName in $sheetNames) {
     $sheetStartTime = Get-Date
-    $packageWorkPath = Join-Path $WorkPath $sheetName
-    New-Item $packageWorkPath -ItemType Directory -Force | Out-Null
+    $logNamePrefix = "$($LogPrefix)$(if ($ClientName) { "${ClientName}_" } else { "${defaultClientLabel}_" })$sheetName"
+    $logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Timestamp $sheetStartTime
 
-    $packageLog = @()
+    & {
+        $packageWorkPath = Join-Path $WorkPath $sheetName
+        New-Item $packageWorkPath -ItemType Directory -Force | Out-Null
 
-    $rows = Import-Excel -Path $ConfigPath -WorksheetName $sheetName
-    $baseSourcePath = $SourcePath
+        $packageLog = @()
 
-    foreach ($row in $rows) {
+        $rows = Import-Excel -Path $ConfigPath -WorksheetName $sheetName
+        $baseSourcePath = $SourcePath
 
-        $sourcePath = $row.'取得元（フルパス）'
+        foreach ($row in $rows) {
 
-        if (!$sourcePath) {
-            continue
-        }
+            $sourcePath = $row.'取得元（フルパス）'
 
-        if ($baseSourcePath -and !([System.IO.Path]::IsPathRooted($sourcePath))) {
-            $sourcePath = Join-Path $baseSourcePath $sourcePath
-        }
-
-        $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
-
-        if (!(Test-Path $sourcePath)) {
-            Write-Message "存在しません：$sourcePath" -ForegroundColor Yellow -Type "Info" -NoHeader
-            $packageLog += "$sourcePath -> 存在しません"
-            continue
-        }
-
-        $sourceIsFolder = Test-Path -LiteralPath $sourcePath -PathType Container
-
-        $storeRootPath = $packageWorkPath
-        $renameFileName = $null
-        if ($row.格納先) {
-            if (!$sourceIsFolder -and [System.IO.Path]::HasExtension($row.格納先)) {
-                $storeSubDir = Split-Path $row.格納先 -Parent
-                $renameFileName = Split-Path $row.格納先 -Leaf
-                if ($storeSubDir) {
-                    $storeRootPath = Join-Path $packageWorkPath $storeSubDir
-                }
-            } else {
-                $storeRootPath = Join-Path $packageWorkPath $row.格納先
+            if (!$sourcePath) {
+                continue
             }
-        }
-        New-Item $storeRootPath -ItemType Directory -Force | Out-Null
 
-        if ($sourceIsFolder) {
+            if ($baseSourcePath -and !([System.IO.Path]::IsPathRooted($sourcePath))) {
+                $sourcePath = Join-Path $baseSourcePath $sourcePath
+            }
 
-            $sourcePathTrimmed = $sourcePath.TrimEnd('\')
+            $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
 
-            Get-ChildItem $sourcePath -Recurse | ForEach-Object {
+            if (!(Test-Path $sourcePath)) {
+                Write-Message "存在しません：$sourcePath" -ForegroundColor Yellow -Type "Info" -NoHeader
+                $packageLog += "$sourcePath -> 存在しません"
+                continue
+            }
 
-                $relativePath = $_.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+            $sourceIsFolder = Test-Path -LiteralPath $sourcePath -PathType Container
 
-                if ($row.含める形式) {
-                    $includePatterns = $row.含める形式.Split(",") | ForEach-Object { $_.Trim() }
-                    $included = $false
-                    foreach ($pattern in $includePatterns) {
-                        if ($relativePath -like $pattern) {
-                            $included = $true
-                            break
-                        }
+            $storeRootPath = $packageWorkPath
+            $renameFileName = $null
+            if ($row.格納先) {
+                if (!$sourceIsFolder -and [System.IO.Path]::HasExtension($row.格納先)) {
+                    $storeSubDir = Split-Path $row.格納先 -Parent
+                    $renameFileName = Split-Path $row.格納先 -Leaf
+                    if ($storeSubDir) {
+                        $storeRootPath = Join-Path $packageWorkPath $storeSubDir
                     }
-                    if (!$included) {
-                        return
-                    }
+                } else {
+                    $storeRootPath = Join-Path $packageWorkPath $row.格納先
                 }
+            }
+            New-Item $storeRootPath -ItemType Directory -Force | Out-Null
 
-                if ($row.除外する形式) {
-                    foreach ($exclude in $row.除外する形式.Split(",")) {
-                        if ($relativePath -like $exclude.Trim()) {
+            if ($sourceIsFolder) {
+
+                $sourcePathTrimmed = $sourcePath.TrimEnd('\')
+
+                Get-ChildItem $sourcePath -Recurse | ForEach-Object {
+
+                    $relativePath = $_.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+
+                    if ($row.含める形式) {
+                        $includePatterns = $row.含める形式.Split(",") | ForEach-Object { $_.Trim() }
+                        $included = $false
+                        foreach ($pattern in $includePatterns) {
+                            if ($relativePath -like $pattern) {
+                                $included = $true
+                                break
+                            }
+                        }
+                        if (!$included) {
                             return
                         }
                     }
-                }
 
-                if (!$_.PSIsContainer) {
-                    $currentFile = $_.FullName
-                    $destinationPath = Join-Path $storeRootPath $relativePath
-                    New-Item (Split-Path $destinationPath -Parent) -ItemType Directory -Force | Out-Null
-                    try {
-                        Copy-Item $currentFile $destinationPath -Force
-                        $packageLog += "$currentFile -> $destinationPath"
-                    } catch {
-                        $packageLog += "$currentFile -> エラー: $($_.Exception.Message)"
+                    if ($row.除外する形式) {
+                        foreach ($exclude in $row.除外する形式.Split(",")) {
+                            if ($relativePath -like $exclude.Trim()) {
+                                return
+                            }
+                        }
+                    }
+
+                    if (!$_.PSIsContainer) {
+                        $currentFile = $_.FullName
+                        $destinationPath = Join-Path $storeRootPath $relativePath
+                        New-Item (Split-Path $destinationPath -Parent) -ItemType Directory -Force | Out-Null
+                        try {
+                            Copy-Item $currentFile $destinationPath -Force
+                            $packageLog += "$currentFile -> $destinationPath"
+                        } catch {
+                            $packageLog += "$currentFile -> エラー: $($_.Exception.Message)"
+                        }
                     }
                 }
+
+            } else {
+
+                $fileName = if ($renameFileName) { $renameFileName } else { Split-Path $sourcePath -Leaf }
+                $destinationPath = Join-Path $storeRootPath $fileName
+                try {
+                    Copy-Item $sourcePath $destinationPath -Force
+                    $packageLog += "$sourcePath -> $destinationPath"
+                } catch {
+                    $packageLog += "$sourcePath -> エラー: $($_.Exception.Message)"
+                }
             }
+        }
 
-        } else {
+        $packagePath = Join-Path $OutputPath "$sheetName.zip"
+        Remove-Item $packagePath -Force -ErrorAction SilentlyContinue
 
-            $fileName = if ($renameFileName) { $renameFileName } else { Split-Path $sourcePath -Leaf }
-            $destinationPath = Join-Path $storeRootPath $fileName
+        $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
+        if ($packageItems) {
+            Write-Message "操作中：$sheetName.zip" -Type "Info" -NoHeader
             try {
-                Copy-Item $sourcePath $destinationPath -Force
-                $packageLog += "$sourcePath -> $destinationPath"
+                Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
             } catch {
-                $packageLog += "$sourcePath -> エラー: $($_.Exception.Message)"
+                $packageLog += "パッケージ作成エラー: $($_.Exception.Message)"
             }
+        } else {
+            Write-Message "$sheetName：対象ファイルが無いためパッケージを作成しませんでした" -ForegroundColor Yellow -Type "Info" -NoHeader
+            $packageLog += "対象ファイルが無いためパッケージを作成しませんでした"
         }
-    }
 
-    $packagePath = Join-Path $OutputPath "$sheetName.zip"
-    Remove-Item $packagePath -Force -ErrorAction SilentlyContinue
-
-    $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
-    if ($packageItems) {
-        Write-Message "操作中：$sheetName.zip" -Type "Info" -NoHeader
-        try {
-            Compress-Archive -LiteralPath $packageItems.FullName -DestinationPath $packagePath
-        } catch {
-            $packageLog += "パッケージ作成エラー: $($_.Exception.Message)"
+        $runLogArgs = @{
+            ExtraHeaderLines   = @("シート名: $sheetName")
+            ResultSectionTitle = "パッケージ結果"
+            ResultLines        = $packageLog
         }
-    } else {
-        Write-Message "$sheetName：対象ファイルが無いためパッケージを作成しませんでした" -ForegroundColor Yellow -Type "Info" -NoHeader
-        $packageLog += "対象ファイルが無いためパッケージを作成しませんでした"
-    }
-
-    $sheetEndTime = Get-Date
-    $runLogArgs = @{
-        LogPath            = $LogPath
-        LogFileName        = "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$sheetName.log"
-        ExtraHeaderLines   = @("シート名: $sheetName")
-        StartTime          = $sheetStartTime
-        EndTime            = $sheetEndTime
-        ResultSectionTitle = "パッケージ結果"
-        ResultLines        = $packageLog
-        ClientName         = $ClientName
-    }
-    if (Test-Path -LiteralPath $packagePath) {
-        $runLogArgs["TreeRootPath"] = $packagePath
-    }
-    $logFilePath = Write-RunLogFile @runLogArgs
-    Show-LogFileContent -Path $logFilePath
+        if (Test-Path -LiteralPath $packagePath) {
+            $runLogArgs["TreeRootPath"] = $packagePath
+        }
+        Write-Message (Get-RunLogMessage @runLogArgs) -Type "Info" -NoHeader
+    } *>&1 | Tee-Object -FilePath $logFilePath
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
 }
 
 Remove-Item $WorkPath -Recurse -Force -ErrorAction SilentlyContinue
