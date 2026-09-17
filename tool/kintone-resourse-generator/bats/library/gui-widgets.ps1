@@ -780,7 +780,7 @@ function Update-LogView {
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
 
     $groupValue = if ($cmbLogGroup.SelectedItem) { "$($cmbLogGroup.SelectedItem.Value)" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$groupValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$groupValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
     $sections = foreach ($file in $files) {
         try {
             [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)

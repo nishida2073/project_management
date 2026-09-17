@@ -321,7 +321,7 @@ function Update-LogView {
 
     $logClient = $cmbLogClient.SelectedItem
     $clientFilter = if ($logClient -and $logClient -ne "すべて") { "$logClient" + "_" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix$clientFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix$clientFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
 
     $sections = foreach ($file in $files) {
         try {
@@ -678,6 +678,8 @@ function Invoke-IndividualStep {
 $tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd }
 $script:runButtons = $tabResult.RunButtons
 
+$execTabControl.Controls.Remove($tabBatchAll)
+
 $execTabControl.Height = 45 + $batchPanel.Height
 
 $tabControl.Add_SelectedIndexChanged({
@@ -695,7 +697,7 @@ Update-ClientList
 Update-RunCheckboxesFromClient
 Update-LogClientList
 Update-LogView
-$execTabControl.SelectedTab = $tabBatchAll
+$execTabControl.SelectedTab = $execTabControl.TabPages[0]
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({ Update-SettingsFields })
