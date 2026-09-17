@@ -25,7 +25,7 @@ call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0bats\generate-config.ps1" -SourcePath "%GENERATE_SOURCE_PATH%" -TemplateConfigFilePath "%~dp0clients\template\package_definition.xlsx" -TargetConfigFilePath "%GENERATE_CONFIG_PATH%" -Force "%FORCE%" -LogPath "%COMMON_LOG_PATH%" -LogPrefix "%GENERATE_CONFIG_LOG_PREFIX%" -ClientName "%CLIENT_NAME%"
+ -File "%~dp0bats\generate-config.ps1" -SourcePath "%GENERATE_SOURCE_PATH%" -TargetConfigFilePath "%GENERATE_CONFIG_PATH%" -Force "%FORCE%" -LogPath "%COMMON_LOG_PATH%" -LogPrefix "%GENERATE_CONFIG_LOG_PREFIX%" -ClientName "%CLIENT_NAME%"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"

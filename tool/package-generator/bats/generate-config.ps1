@@ -4,14 +4,13 @@
 
 param(
     [string]$SourcePath,
-    [string]$TemplateConfigFilePath,
     [string]$TargetConfigFilePath,
     [string]$Force = "",
     [string]$LogPath,
     [string]$LogPrefix,
     [string]$ClientName = ""
 )
-
+$newLine = [Environment]::NewLine
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -26,16 +25,6 @@ if (!$SourcePath) {
 
 if (!(Test-Path -LiteralPath $SourcePath)) {
     Write-MessageError "存在しません：$SourcePath"
-    exit 1
-}
-
-if (!$TemplateConfigFilePath) {
-    Write-MessageError "TemplateConfigFilePath を指定してください"
-    exit 1
-}
-
-if (!(Test-Path -LiteralPath $TemplateConfigFilePath)) {
-    Write-MessageError "テンプレートが見つかりません：$TemplateConfigFilePath"
     exit 1
 }
 
@@ -54,13 +43,6 @@ if ((Test-Path -LiteralPath $TargetConfigFilePath) -and $Force -ne "1") {
     Write-MessageError "上書きする場合は force:1 を指定してください"
     exit 1
 }
-
-if ([System.IO.Path]::GetFullPath($TargetConfigFilePath) -eq [System.IO.Path]::GetFullPath($TemplateConfigFilePath)) {
-    Write-MessageError "TargetConfigFilePath にテンプレート自身のパスは指定できません：$TargetConfigFilePath"
-    exit 1
-}
-
-Copy-Item -LiteralPath $TemplateConfigFilePath -Destination $TargetConfigFilePath -Force
 
 New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
 
@@ -82,7 +64,7 @@ $script:exitCode = 0
         $excel.EnableEvents = $false
 
         $workbook = $excel.Workbooks.Open($TargetConfigFilePath)
-        $ws = $workbook.Worksheets.Item(1)
+        $ws = $workbook.Worksheets.Item("テンプレート")
 
         $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
         $headerRow = $sourceCell.Row
@@ -116,10 +98,10 @@ $script:exitCode = 0
         }
 
         $workbook.Save()
-
-        Write-Message (Get-RunLogMessage -ResultSectionTitle "登録内容" -ResultLines $resultLines) -Type "Info" -NoHeader
+        $resultText = $resultLines -join "$newLine"
+        Write-MessageComplete "テンプレートを更新しました：$TargetConfigFilePath$newLine$resultText"
     } catch {
-        Write-Message (Get-RunLogMessage -ResultSectionTitle "エラー" -ResultLines @("処理に失敗しました：$TargetConfigFilePath", "$($_.Exception.Message)")) -Type "Info" -NoHeader
+        Write-MessageError "テンプレートの更新に失敗しました：$TargetConfigFilePath$newLine$($_.Exception.Message)"
         $script:exitCode = 1
     } finally {
         if ($workbook) { $workbook.Close($true) }
