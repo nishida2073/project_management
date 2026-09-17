@@ -67,11 +67,12 @@ function Write-MessageWarn {
 function New-WorkerLogPath {
     param(
         [Parameter(Mandatory)][string]$LogRoot,
-        [Parameter(Mandatory)][string]$Prefix
+        [Parameter(Mandatory)][string]$Prefix,
+        [datetime]$Timestamp = (Get-Date)
     )
     New-Item -ItemType Directory -Path $LogRoot -Force | Out-Null
-    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-    return Join-Path $LogRoot "${Prefix}_${timestamp}.log"
+    $timestampText = $Timestamp.ToString("yyyyMMdd_HHmmss")
+    return Join-Path $LogRoot "${Prefix}_${timestampText}.log"
 }
 
 function ConvertTo-Utf8LogFile {
