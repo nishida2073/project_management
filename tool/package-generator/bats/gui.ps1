@@ -14,7 +14,8 @@ if ($MyInvocation.MyCommand.Path) {
 $downloadBat = Join-Path $rootPath "download-folder.bat"
 $generateBat = Join-Path $rootPath "generate-package.bat"
 $uploadBat = Join-Path $rootPath "upload-folder.bat"
-$clientsDir = Join-Path $rootPath "clients"
+$clientsDirName = "clients"
+$clientsDir = Join-Path $rootPath $clientsDirName
 $setEnvBat = Join-Path $clientsDir "template\set-env.bat"
 $clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
 $clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
@@ -433,10 +434,13 @@ $script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
 
 function Get-NewClientInitialValues {
     param([string]$ClientName, [hashtable]$Defaults)
+    $newConfigPath = Split-Path -Parent (Split-Path -Parent $Defaults["GENERATE_CONFIG_PATH"])
+    $defaultFilename = Split-Path -Path $Defaults["GENERATE_CONFIG_PATH"] -Leaf
+    $newConfigFilename = $($defaultFilename -replace '\.xlsx$', "_$ClientName.xlsx")
     return @{
-        "GENERATE_CONFIG_PATH" = $Defaults["GENERATE_CONFIG_PATH"] -replace '\.xlsx$', "_$ClientName.xlsx"
-        "GENERATE_OUTPUT_PATH" = "$($Defaults["GENERATE_OUTPUT_PATH"])/$ClientName"
-        "UPLOAD_SITE_PATH" = "$($Defaults["UPLOAD_SITE_PATH"])/$ClientName"
+        "GENERATE_CONFIG_PATH" =  "$newConfigPath\$newConfigFilename"
+        "GENERATE_OUTPUT_PATH" = "$($Defaults["GENERATE_OUTPUT_PATH"])\$ClientName"
+        "UPLOAD_SITE_PATH" = "$($Defaults["UPLOAD_SITE_PATH"])\$ClientName"
     }
 }
 
