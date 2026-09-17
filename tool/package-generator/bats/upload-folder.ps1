@@ -3,6 +3,18 @@
 # =========================================
 # download-folder.ps1と同じ仕組み（Azure CLIで取得したトークンでMicrosoft Graph APIを直接呼ぶ）の逆方向版。
 
+param(
+    [string]$SiteUrl,
+    [string]$SitePath,
+    [string]$TenantId,
+    [string]$LocalPath,
+    [string]$LogPath,
+    [string]$LogPrefix,
+    [string]$ItemsInclude,
+    [string]$ItemsExclude,
+    [string]$ClientName = ""
+)
+
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -10,33 +22,27 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 }
 $startTime = Get-Date
 
-$siteUrl = $env:UPLOAD_SITE_URL
-$sitePath = $env:UPLOAD_SITE_PATH
-$tenantId = $env:UPLOAD_SITE_TENANT_ID
-$localPath = $env:UPLOAD_LOCAL_PATH
-
-if (!$siteUrl -or !$sitePath -or !$tenantId -or !$localPath) {
-    Write-MessageError "UPLOAD_SITE_URL と UPLOAD_SITE_PATH と UPLOAD_SITE_TENANT_ID と UPLOAD_LOCAL_PATH を set-env.bat で設定してください"
+if (!$SiteUrl -or !$SitePath -or !$TenantId -or !$LocalPath) {
+    Write-MessageError "SiteUrl と SitePath と TenantId と LocalPath を指定してください"
     exit 1
 }
 
-if (!(Test-Path -LiteralPath $localPath)) {
-    Write-MessageError "アップロード元が存在しません：$localPath"
+if (!(Test-Path -LiteralPath $LocalPath)) {
+    Write-MessageError "アップロード元が存在しません：$LocalPath"
     exit 1
 }
 
-$logPath = $env:COMMON_LOG_PATH
-New-Item -ItemType Directory -Path $logPath -Force | Out-Null
+New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
 
 $uploadLog = @()
 
 $az = Get-AzureCliPath
-$token = Get-GraphToken -Az $az -TenantId $tenantId
+$token = Get-GraphToken -Az $az -TenantId $TenantId
 $headers = @{ Authorization = "Bearer $token" }
 
-$siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $siteUrl
+$siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $SiteUrl
 
-$folderParts = $sitePath -split '/'
+$folderParts = $SitePath -split '/'
 $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
 
 function Send-EmptyFileToSharePoint {
@@ -142,7 +148,7 @@ function Send-Item {
         Write-Message "操作中：$currentName" -Type "Info" -NoHeader
         try {
             Send-FileToSharePoint -LocalFile $currentFile -SiteRelativePath $fileSitePath
-            $script:uploadLog += "$currentFile -> $sitePath/$SubPath"
+            $script:uploadLog += "$currentFile -> $SitePath/$SubPath"
         } catch {
             $script:uploadLog += "$currentFile -> エラー: $($_.Exception.Message)"
         }
@@ -161,15 +167,15 @@ function Send-FolderRecursive {
     }
 }
 
-$topLevelItems = Get-ChildItem -LiteralPath $localPath
+$topLevelItems = Get-ChildItem -LiteralPath $LocalPath
 
-if ($env:UPLOAD_ITEMS_INCLUDE) {
-    $includePatterns = $env:UPLOAD_ITEMS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+if ($ItemsInclude) {
+    $includePatterns = $ItemsInclude.Split(",") | ForEach-Object { $_.Trim() }
     $topLevelItems = $topLevelItems | Where-Object { Test-NameMatchesPatterns -Name $_.Name -Patterns $includePatterns }
 }
 
-if ($env:UPLOAD_ITEMS_EXCLUDE) {
-    $excludePatterns = $env:UPLOAD_ITEMS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+if ($ItemsExclude) {
+    $excludePatterns = $ItemsExclude.Split(",") | ForEach-Object { $_.Trim() }
     $topLevelItems = $topLevelItems | Where-Object { !(Test-NameMatchesPatterns -Name $_.Name -Patterns $excludePatterns) }
 }
 
@@ -178,8 +184,8 @@ $topLevelItems | ForEach-Object {
 }
 
 $endTime = Get-Date
-$logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:UPLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $relativeFolder -Leaf).log" `
+$logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $relativeFolder -Leaf).log" `
     -StartTime $startTime -EndTime $endTime `
     -ResultSectionTitle "アップロード結果" -ResultLines $uploadLog `
-    -ItemListRootPath $localPath -ItemListPaths @($topLevelItems | ForEach-Object { $_.FullName })
+    -ItemListRootPath $LocalPath -ItemListPaths @($topLevelItems | ForEach-Object { $_.FullName }) -ClientName $ClientName
 Show-LogFileContent -Path $logFilePath

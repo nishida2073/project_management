@@ -2,46 +2,64 @@
 # クライアント用パッケージ定義ファイル生成
 # =========================================
 
+param(
+    [string]$SourcePath,
+    [string]$TemplateConfigFilePath,
+    [string]$TargetConfigFilePath,
+    [string]$Force = "",
+    [string]$LogPath,
+    [string]$LogPrefix,
+    [string]$ClientName = ""
+)
+
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
-$basePath = Split-Path $scriptDir -Parent
+$startTime = Get-Date
 
-$clientName = $env:CLIENT_NAME
-$sourcePath = $env:GENERATE_SOURCE_PATH
-
-if (!$clientName) {
-    Write-MessageError "CLIENT_NAME が指定されていません（generate-config.bat client:<クライアント名> のように指定してください）"
+if (!$SourcePath) {
+    Write-MessageError "SourcePath を指定してください"
     exit 1
 }
 
-if (!$sourcePath) {
-    Write-MessageError "GENERATE_SOURCE_PATH を set-env.bat で設定してください"
+if (!(Test-Path -LiteralPath $SourcePath)) {
+    Write-MessageError "存在しません：$SourcePath"
     exit 1
 }
 
-if (!(Test-Path -LiteralPath $sourcePath)) {
-    Write-MessageError "存在しません：$sourcePath"
+if (!$TemplateConfigFilePath) {
+    Write-MessageError "TemplateConfigFilePath を指定してください"
     exit 1
 }
 
-$templatePath = Join-Path $basePath "config\package_definition.xlsx"
-if (!(Test-Path -LiteralPath $templatePath)) {
-    Write-MessageError "テンプレートが見つかりません：$templatePath"
+if (!(Test-Path -LiteralPath $TemplateConfigFilePath)) {
+    Write-MessageError "テンプレートが見つかりません：$TemplateConfigFilePath"
     exit 1
 }
 
-$destPath = Join-Path (Split-Path $templatePath -Parent) "package_definition_$clientName.xlsx"
+if (!$TargetConfigFilePath) {
+    Write-MessageError "TargetConfigFilePath を指定してください"
+    exit 1
+}
 
-if ((Test-Path -LiteralPath $destPath) -and $env:FORCE -ne "1") {
-    Write-MessageError "すでに存在します：$destPath"
+if (!$LogPath) {
+    Write-MessageError "LogPath を指定してください"
+    exit 1
+}
+
+if ((Test-Path -LiteralPath $TargetConfigFilePath) -and $Force -ne "1") {
+    Write-MessageError "すでに存在します：$TargetConfigFilePath"
     Write-MessageError "上書きする場合は force:1 を指定してください"
     exit 1
 }
 
-Copy-Item -LiteralPath $templatePath -Destination $destPath -Force
+if ([System.IO.Path]::GetFullPath($TargetConfigFilePath) -ne [System.IO.Path]::GetFullPath($TemplateConfigFilePath)) {
+    Copy-Item -LiteralPath $TemplateConfigFilePath -Destination $TargetConfigFilePath -Force
+}
+
+New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
 
 $prevEap = $ErrorActionPreference
 $excel = $null
@@ -55,7 +73,7 @@ try {
     $excel.ScreenUpdating = $false
     $excel.EnableEvents = $false
 
-    $workbook = $excel.Workbooks.Open($destPath)
+    $workbook = $excel.Workbooks.Open($TargetConfigFilePath)
     $ws = $workbook.Worksheets.Item(1)
 
     $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
@@ -74,9 +92,10 @@ try {
         $ws.Range($ws.Cells.Item($headerRow + 1, 1), $ws.Cells.Item($lastRow, $clearLastCol)).ClearContents()
     }
 
-    $sourcePathTrimmed = $sourcePath.TrimEnd('\')
-    $files = @(Get-ChildItem -LiteralPath $sourcePath -Recurse -File)
+    $sourcePathTrimmed = $SourcePath.TrimEnd('\')
+    $files = @(Get-ChildItem -LiteralPath $SourcePath -Recurse -File)
 
+    $resultLines = @()
     $row = $headerRow + 1
     foreach ($file in $files) {
         $relativePath = ".\" + $file.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
@@ -84,14 +103,23 @@ try {
         if ($noCol) {
             $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
         }
+        $resultLines += $relativePath
         $row++
     }
 
     $workbook.Save()
 
-    Write-MessageComplete "作成しました：$destPath（$($files.Count)件）"
+    $logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $TargetConfigFilePath -Leaf).log" `
+        -StartTime $startTime -EndTime (Get-Date) `
+        -ResultSectionTitle "登録内容" -ResultLines $resultLines `
+        -ClientName $ClientName
+    Show-LogFileContent -Path $logFilePath
 } catch {
-    Write-MessageError "処理に失敗しました：$($_.Exception.Message)"
+    $logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $TargetConfigFilePath -Leaf).log" `
+        -StartTime $startTime -EndTime (Get-Date) `
+        -ResultSectionTitle "エラー" -ResultLines @("処理に失敗しました：$TargetConfigFilePath", "$($_.Exception.Message)") `
+        -ClientName $ClientName
+    Show-LogFileContent -Path $logFilePath
     exit 1
 } finally {
     if ($workbook) { $workbook.Close($true) }

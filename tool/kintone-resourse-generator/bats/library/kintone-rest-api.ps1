@@ -1,39 +1,4 @@
-﻿function Write-ApplyStepResult {
-    param(
-        [Parameter(Mandatory)][string]$ActionLabel,
-        [string]$CountPhrase = "",
-        [string[]]$DetailLines = @(),
-        [ConsoleColor]$ForegroundColor = "White"
-    )
-    $headerText = "■$ActionLabel"
-    if ($CountPhrase) { $headerText += " ($CountPhrase)" }
-    Write-Message $headerText -ForegroundColor $ForegroundColor -Type "Info" -NoHeader
-    foreach ($line in $DetailLines) { Write-Message $line -ForegroundColor $ForegroundColor -Type "Info" -NoHeader }
-}
-
-function Get-KintoneAuthorizationHeader {
-    param([string]$BaseUrl)
-
-    if ($env:KINTONE_LOGIN -and $env:KINTONE_PASSWORD) {
-        $login = $env:KINTONE_LOGIN
-        $password = $env:KINTONE_PASSWORD
-    } else {
-        Write-Message "kintoneへログインします: $BaseUrl" -ForegroundColor Cyan -Type "Info" -NoHeader
-        $login = Read-Host "ログイン名"
-        $securePassword = Read-Host "パスワード" -AsSecureString
-        $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
-        try {
-            $password = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($bstr)
-        } finally {
-            [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
-        }
-    }
-    $script:kintoneLogin = $login
-    $pair = "${login}:${password}"
-    return [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
-}
-
-function Invoke-KintoneRequest {
+﻿function Invoke-KintoneRequest {
     param(
         [Parameter(Mandatory)][string]$BaseUrl,
         [Parameter(Mandatory)][string]$Authorization,

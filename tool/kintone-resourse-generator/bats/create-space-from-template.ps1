@@ -4,7 +4,11 @@
 
 param(
     [string]$TemplateId,
-    [string]$SpaceName
+    [string]$SpaceName,
+    [string]$BaseUrl,
+    [string]$LogRoot,
+    [string]$KintoneLogin,
+    [string]$KintonePassword
 )
 
 $libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
@@ -12,31 +16,26 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$baseUrl = $env:KINTONE_BASE_URL
-$logRoot = $env:COMMON_LOG_PATH
-
-if (-not $baseUrl -or -not $logRoot) {
-    Write-Message "KINTONE_BASE_URL / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）" -Type "Info" -NoHeader
+if (-not $TemplateId) {
+    Write-MessageError "TemplateId を指定してください"
     exit 1
 }
-if (-not $TemplateId) {
-    $TemplateId = Read-Host "スペーステンプレートID"
-}
 if (-not $SpaceName) {
-    $SpaceName = Read-Host "作成するスペースの名前"
+    Write-MessageError "SpaceName を指定してください"
+    exit 1
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "createspace_$SpaceName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "createspace_$SpaceName"
 
 $script:exitCode = 0
 $script:newSpaceId = $null
 
 & {
-    $authorization = Get-KintoneAuthorizationHeader -BaseUrl $baseUrl
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${KintoneLogin}:${KintonePassword}"))
 
     $newSpaceId = $null
     try {
-        $newSpaceId = New-KintoneSpaceFromTemplate -BaseUrl $baseUrl -Authorization $authorization -TemplateId $TemplateId -Name $SpaceName -AdminLogin $script:kintoneLogin
+        $newSpaceId = New-KintoneSpaceFromTemplate -BaseUrl $BaseUrl -Authorization $authorization -TemplateId $TemplateId -Name $SpaceName -AdminLogin $KintoneLogin
     } catch {
         Write-MessageError "スペース作成に失敗しました: $($_.Exception.Message)"
         $script:exitCode = 1

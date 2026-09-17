@@ -4,7 +4,13 @@
 
 param(
     [string]$ConfigName,
-    [string]$Sheets
+    [string]$Sheets,
+    [string]$BaseUrl,
+    [string]$ConfigRoot,
+    [string]$OutputRoot,
+    [string]$LogRoot,
+    [string]$KintoneLogin,
+    [string]$KintonePassword
 )
 
 $libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
@@ -12,22 +18,14 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$baseUrl = $env:KINTONE_BASE_URL
-$configRoot = $env:COMMON_CONFIG_PATH
-$outputRoot = $env:COMMON_CHECK_OUTPUT_PATH
-$logRoot = $env:COMMON_LOG_PATH
-
-if (-not $baseUrl -or -not $configRoot -or -not $outputRoot -or -not $logRoot) {
-    Write-Message "KINTONE_BASE_URL / COMMON_CONFIG_PATH / COMMON_CHECK_OUTPUT_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）" -Type "Info" -NoHeader
+if (-not $ConfigName) {
+    Write-MessageError "ConfigName を指定してください（config\<CONFIG_NAME>_config.xlsx の<CONFIG_NAME>）"
     exit 1
 }
-if (-not $ConfigName) {
-    $ConfigName = Read-Host "設定ファイル名（config\<CONFIG_NAME>_config.xlsx の<CONFIG_NAME>）"
-}
 
-$configPath = Join-Path $configRoot "${ConfigName}_config.xlsx"
-$outputPath = Join-Path $outputRoot "${ConfigName}_check.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "check_$ConfigName"
+$configPath = Join-Path $ConfigRoot "${ConfigName}_config.xlsx"
+$outputPath = Join-Path $OutputRoot "${ConfigName}_check.xlsx"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "check_$ConfigName"
 
 $script:exitCode = 0
 
@@ -58,7 +56,7 @@ $script:exitCode = 0
         [System.GC]::WaitForPendingFinalizers()
     }
 
-    $authorization = Get-KintoneAuthorizationHeader -BaseUrl $baseUrl
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${KintoneLogin}:${KintonePassword}"))
 
     $selectedSheets = ConvertTo-SheetNameArray -Sheets $Sheets
     if ($selectedSheets.Count -gt 0) {
@@ -104,7 +102,7 @@ $script:exitCode = 0
 
             $current = $null
             try {
-                $current = Get-CurrentSpace -SpaceId $spaceId -BaseUrl $baseUrl -Authorization $authorization -HasAppAcl:$false -HasRecordAcl:$false
+                $current = Get-CurrentSpace -SpaceId $spaceId -BaseUrl $BaseUrl -Authorization $authorization -HasAppAcl:$false -HasRecordAcl:$false
             } catch {
                 if ($checkSpaceSettings) {
                     $row = [ordered]@{ "スペースID" = $spaceId }
@@ -145,7 +143,7 @@ $script:exitCode = 0
                     } elseif ($exp.'種別') {
                         $exp.'種別'
                     } else {
-                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $baseUrl -Authorization $authorization -Code $code) } catch { "不明" }
+                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $code) } catch { "不明" }
                     }
                     $row = [ordered]@{ "スペースID" = $spaceId; "種別" = $typeLabel; "ユーザー/組織/グループ" = $code; "結果" = $null }
                     if ($cur -and -not $exp) {
@@ -191,7 +189,7 @@ $script:exitCode = 0
 
         foreach ($appId in $allAppIds) {
             Write-Message "アプリID: $appId を確認中..." -Type "Info" -NoHeader
-            $current = Get-AppCurrentInfo -BaseUrl $baseUrl -Authorization $authorization -AppId $appId
+            $current = Get-AppCurrentInfo -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId
             $appLabel = $current.name
 
             if ($checkAppList) {
@@ -233,7 +231,7 @@ $script:exitCode = 0
                     } elseif ($exp.'種別') {
                         $exp.'種別'
                     } else {
-                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $baseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
+                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
                     }
                     $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
                     if ($cur -and -not $exp) {
@@ -309,7 +307,7 @@ $script:exitCode = 0
                     } elseif ($orgName -eq "作成者") {
                         "作成者"
                     } else {
-                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $baseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
+                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
                     }
                     $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "レコードの条件" = $cond; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
                     if ($cur -and -not $exp) {

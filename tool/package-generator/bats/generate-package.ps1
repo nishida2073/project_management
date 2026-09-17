@@ -2,6 +2,18 @@
 # コース別パッケージ生成ツール
 # =========================================
 
+param(
+    [string]$ConfigPath,
+    [string]$WorkPath,
+    [string]$OutputPath,
+    [string]$LogPath,
+    [string]$LogPrefix,
+    [string]$SheetsInclude,
+    [string]$SheetsExclude,
+    [string]$SourcePath,
+    [string]$ClientName = ""
+)
+
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -9,20 +21,15 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 }
 $startTime = Get-Date
 
-$configPath = $env:GENERATE_CONFIG_PATH
-$workPath = $env:GENERATE_WORK_PATH
-$outputPath = $env:GENERATE_OUTPUT_PATH
-$logPath = $env:COMMON_LOG_PATH
-
-if (!$configPath -or !$workPath -or !$outputPath -or !$logPath) {
-    Write-MessageError "GENERATE_CONFIG_PATH と GENERATE_WORK_PATH と GENERATE_OUTPUT_PATH と COMMON_LOG_PATH を set-env.bat で設定してください"
+if (!$ConfigPath -or !$WorkPath -or !$OutputPath -or !$LogPath) {
+    Write-MessageError "ConfigPath と WorkPath と OutputPath と LogPath を指定してください"
     exit 1
 }
 
-Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
-New-Item $workPath -ItemType Directory | Out-Null
-New-Item $outputPath -ItemType Directory -Force | Out-Null
-New-Item $logPath -ItemType Directory -Force | Out-Null
+Remove-Item $WorkPath -Recurse -Force -ErrorAction SilentlyContinue
+New-Item $WorkPath -ItemType Directory | Out-Null
+New-Item $OutputPath -ItemType Directory -Force | Out-Null
+New-Item $LogPath -ItemType Directory -Force | Out-Null
 
 if (!(Get-Module -ListAvailable ImportExcel)) {
     Write-Message "ImportExcelをインストールします" -Type "Info" -NoHeader
@@ -32,11 +39,12 @@ if (!(Get-Module -ListAvailable ImportExcel)) {
 $prevEap = $ErrorActionPreference
 try {
     $ErrorActionPreference = "Stop"
-    $excel = Get-ExcelSheetInfo $configPath
+    $excel = Get-ExcelSheetInfo $ConfigPath
 } catch {
-    $logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $configPath -Leaf).log" `
+    $logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $ConfigPath -Leaf).log" `
         -StartTime $startTime -EndTime (Get-Date) `
-        -ResultSectionTitle "エラー" -ResultLines @("パッケージ定義ファイルの読み込みに失敗しました：$configPath", "$($_.Exception.Message)")
+        -ResultSectionTitle "エラー" -ResultLines @("パッケージ定義ファイルの読み込みに失敗しました：$ConfigPath", "$($_.Exception.Message)") `
+        -ClientName $ClientName
     Show-LogFileContent -Path $logFilePath
     exit 1
 } finally {
@@ -46,24 +54,25 @@ try {
 
 $sheetNames = $excel.Name
 
-if ($env:GENERATE_SHEETS_INCLUDE) {
-    $includePatterns = $env:GENERATE_SHEETS_INCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+if ($SheetsInclude) {
+    $includePatterns = $SheetsInclude.Split(",") | ForEach-Object { $_.Trim() }
     $sheetNames = $sheetNames | Where-Object { Test-NameMatchesPatterns -Name $_ -Patterns $includePatterns }
 }
 
-if ($env:GENERATE_SHEETS_EXCLUDE) {
-    $excludePatterns = $env:GENERATE_SHEETS_EXCLUDE.Split(",") | ForEach-Object { $_.Trim() }
+if ($SheetsExclude) {
+    $excludePatterns = $SheetsExclude.Split(",") | ForEach-Object { $_.Trim() }
     $sheetNames = $sheetNames | Where-Object { !(Test-NameMatchesPatterns -Name $_ -Patterns $excludePatterns) }
 }
 
 foreach ($sheetName in $sheetNames) {
     $sheetStartTime = Get-Date
-    $packageWorkPath = Join-Path $workPath $sheetName
+    $packageWorkPath = Join-Path $WorkPath $sheetName
     New-Item $packageWorkPath -ItemType Directory -Force | Out-Null
 
     $packageLog = @()
 
-    $rows = Import-Excel -Path $configPath -WorksheetName $sheetName
+    $rows = Import-Excel -Path $ConfigPath -WorksheetName $sheetName
+    $baseSourcePath = $SourcePath
 
     foreach ($row in $rows) {
 
@@ -73,8 +82,8 @@ foreach ($sheetName in $sheetNames) {
             continue
         }
 
-        if ($env:GENERATE_SOURCE_PATH -and !([System.IO.Path]::IsPathRooted($sourcePath))) {
-            $sourcePath = Join-Path $env:GENERATE_SOURCE_PATH $sourcePath
+        if ($baseSourcePath -and !([System.IO.Path]::IsPathRooted($sourcePath))) {
+            $sourcePath = Join-Path $baseSourcePath $sourcePath
         }
 
         $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
@@ -158,7 +167,7 @@ foreach ($sheetName in $sheetNames) {
         }
     }
 
-    $packagePath = Join-Path $outputPath "$sheetName.zip"
+    $packagePath = Join-Path $OutputPath "$sheetName.zip"
     Remove-Item $packagePath -Force -ErrorAction SilentlyContinue
 
     $packageItems = Get-ChildItem -LiteralPath $packageWorkPath
@@ -176,13 +185,14 @@ foreach ($sheetName in $sheetNames) {
 
     $sheetEndTime = Get-Date
     $runLogArgs = @{
-        LogPath            = $logPath
-        LogFileName        = "$($env:GENERATE_LOG_PREFIX)$(Get-ClientLogSegment)$sheetName.log"
+        LogPath            = $LogPath
+        LogFileName        = "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$sheetName.log"
         ExtraHeaderLines   = @("シート名: $sheetName")
         StartTime          = $sheetStartTime
         EndTime            = $sheetEndTime
         ResultSectionTitle = "パッケージ結果"
         ResultLines        = $packageLog
+        ClientName         = $ClientName
     }
     if (Test-Path -LiteralPath $packagePath) {
         $runLogArgs["TreeRootPath"] = $packagePath
@@ -191,7 +201,7 @@ foreach ($sheetName in $sheetNames) {
     Show-LogFileContent -Path $logFilePath
 }
 
-Remove-Item $workPath -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $WorkPath -Recurse -Force -ErrorAction SilentlyContinue
 
-Copy-Item $configPath (Join-Path $outputPath (Split-Path $configPath -Leaf)) -Force
+Copy-Item $ConfigPath (Join-Path $OutputPath (Split-Path $ConfigPath -Leaf)) -Force
 

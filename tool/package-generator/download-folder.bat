@@ -15,7 +15,7 @@ call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0bats\download-folder.ps1"
+ -File "%~dp0bats\download-folder.ps1" -SiteUrl "%DOWNLOAD_SITE_URL%" -SitePath "%DOWNLOAD_SITE_PATH%" -TenantId "%DOWNLOAD_SITE_TENANT_ID%" -LocalPath "%DOWNLOAD_LOCAL_PATH%" -LogPath "%COMMON_LOG_PATH%" -LogPrefix "%DOWNLOAD_LOG_PREFIX%" -ClientName "%CLIENT_NAME%"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"

@@ -5,7 +5,12 @@
 param(
     [string]$BaseTemplateConfigName,
     [string]$CustomTemplateConfigName,
-    [string]$DownloadConfigName
+    [string]$DownloadConfigName,
+    [string]$BaseTemplateRoot,
+    [string]$CustomTemplateRoot,
+    [string]$ConfigRoot,
+    [string]$DownloadRoot,
+    [string]$LogRoot
 )
 
 $libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
@@ -13,32 +18,20 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$baseTemplateRoot = $env:COMMON_BASE_TEMPLATE_PATH
-$customTemplateRoot = $env:COMMON_CUSTOM_TEMPLATE_PATH
-$configRoot = $env:COMMON_CONFIG_PATH
-$downloadRoot = $env:COMMON_DOWNLOAD_PATH
-$logRoot = $env:COMMON_LOG_PATH
-
-if (-not $baseTemplateRoot -or -not $configRoot -or -not $downloadRoot -or -not $logRoot) {
-    Write-Message "COMMON_BASE_TEMPLATE_PATH / COMMON_CONFIG_PATH / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を set-env.bat で設定してください" -Type "Info" -NoHeader
-    exit 1
-}
 if (-not $BaseTemplateConfigName) {
-    $BaseTemplateConfigName = Read-Host "設定テンプレート（基本）名"
+    Write-MessageError "BaseTemplateConfigName を指定してください"
+    exit 1
 }
 if (-not $DownloadConfigName) {
-    $DownloadConfigName = Read-Host "設定ファイル名"
-}
-if ($CustomTemplateConfigName -and -not $customTemplateRoot) {
-    Write-Message "COMMON_CUSTOM_TEMPLATE_PATH を set-env.bat で設定してください" -Type "Info" -NoHeader
+    Write-MessageError "DownloadConfigName を指定してください"
     exit 1
 }
 
-$baseTemplatePath = Join-Path $baseTemplateRoot "$BaseTemplateConfigName.xlsx"
-$customTemplatePath = if ($CustomTemplateConfigName) { Join-Path $customTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
-$downloadPath = Join-Path $downloadRoot "${DownloadConfigName}_download.xlsx"
-$outputPath = Join-Path $configRoot "${DownloadConfigName}_config.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "generate_$DownloadConfigName"
+$baseTemplatePath = Join-Path $BaseTemplateRoot "$BaseTemplateConfigName.xlsx"
+$customTemplatePath = if ($CustomTemplateConfigName) { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
+$downloadPath = Join-Path $DownloadRoot "${DownloadConfigName}_download.xlsx"
+$outputPath = Join-Path $ConfigRoot "${DownloadConfigName}_config.xlsx"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "generate_$DownloadConfigName"
 
 $script:exitCode = 0
 

@@ -4,7 +4,12 @@
 
 param(
     [string]$ConfigName,
-    [string]$Sheets
+    [string]$Sheets,
+    [string]$BaseUrl,
+    [string]$ConfigRoot,
+    [string]$LogRoot,
+    [string]$KintoneLogin,
+    [string]$KintonePassword
 )
 
 $libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
@@ -12,20 +17,13 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$baseUrl = $env:KINTONE_BASE_URL
-$configRoot = $env:COMMON_CONFIG_PATH
-$logRoot = $env:COMMON_LOG_PATH
-
-if (-not $baseUrl -or -not $configRoot -or -not $logRoot) {
-    Write-Message "KINTONE_BASE_URL / COMMON_CONFIG_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）" -Type "Info" -NoHeader
+if (-not $ConfigName) {
+    Write-MessageError "ConfigName を指定してください（config\<CONFIG_NAME>_config.xlsx の<CONFIG_NAME>）"
     exit 1
 }
-if (-not $ConfigName) {
-    $ConfigName = Read-Host "設定ファイル名（config\<CONFIG_NAME>_config.xlsx の<CONFIG_NAME>）"
-}
 
-$configPath = Join-Path $configRoot "${ConfigName}_config.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "apply_$ConfigName"
+$configPath = Join-Path $ConfigRoot "${ConfigName}_config.xlsx"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "apply_$ConfigName"
 
 $script:exitCode = 0
 
@@ -56,7 +54,7 @@ $script:exitCode = 0
         [System.GC]::WaitForPendingFinalizers()
     }
 
-    $authorization = Get-KintoneAuthorizationHeader -BaseUrl $baseUrl
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${KintoneLogin}:${KintonePassword}"))
 
     $selectedSheets = ConvertTo-SheetNameArray -Sheets $Sheets
     if ($selectedSheets.Count -gt 0) {
@@ -77,7 +75,7 @@ $script:exitCode = 0
                 $spaceRightLines = @('参加メンバーだけにこのスペースを公開する', 'スペースのポータルと複数のスレッドを使用する', 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する', 'アプリ作成できるユーザーをスペースの管理者に限定する') | ForEach-Object {
                     "　${_}: $($spaceRow.$_)"
                 }
-                Set-Space -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId `
+                Set-Space -BaseUrl $BaseUrl -Authorization $authorization -SpaceId $spaceId `
                     -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
                     -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
                     -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
@@ -98,7 +96,7 @@ $script:exitCode = 0
                     $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
                     "　　$($row.'種別'):$($row.'ユーザー/組織/グループ') - $($flags -join ',')"
                 })
-                $memberResult = Set-SpaceMembers -BaseUrl $baseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
+                $memberResult = Set-SpaceMembers -BaseUrl $BaseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
                 $memberDetailLines = @()
                 if ($targetMemberRows.Count -gt 0) {
                     $memberDetailLines += "　テンプレート内のメンバー ($($targetMemberRows.Count)件)"
@@ -150,7 +148,7 @@ $script:exitCode = 0
             if ($applyAppList -and $appNameRow) {
                 $finalName = $appNameRow.'アプリ名'
                 try {
-                    Set-AppName -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Name $finalName
+                    Set-AppName -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId -Name $finalName
                     $appChanged = $true
                     Write-ApplyStepResult -ActionLabel "アプリ名を設定しました" -DetailLines @("　$finalName")
                 } catch {
@@ -162,7 +160,7 @@ $script:exitCode = 0
 
             if ($applyAppAcl -and $aclRowsForApp.Count -gt 0) {
                 try {
-                    $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $baseUrl -Authorization $authorization -Row $_ })
+                    $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $BaseUrl -Authorization $authorization -Row $_ })
 
                     $aclTargetLines = @($aclRowsForApp | ForEach-Object {
                         $row = $_
@@ -175,7 +173,7 @@ $script:exitCode = 0
                         $aclTargetLines += "　アプリ作成者(自動追加) - レコード閲覧,レコード追加,レコード編集,レコード削除,アプリ管理,ファイル読み込み,ファイル書き出し"
                     }
 
-                    Set-AppAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $rights
+                    Set-AppAcl -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId -Rights $rights
                     $appChanged = $true
                     Write-ApplyStepResult -ActionLabel "アプリの権限を設定しました" -CountPhrase "$($aclTotalCount)件" -DetailLines $aclTargetLines
                 } catch {
@@ -187,7 +185,7 @@ $script:exitCode = 0
 
             if ($applyAppRecordAcl -and $recordAclRowsForApp.Count -gt 0) {
                 try {
-                    $recordRights = New-RecordAclRightsFromRows -BaseUrl $baseUrl -Authorization $authorization -Rows $recordAclRowsForApp
+                    $recordRights = New-RecordAclRightsFromRows -BaseUrl $BaseUrl -Authorization $authorization -Rows $recordAclRowsForApp
 
                     $recordAclTargetLines = @($recordAclRowsForApp | Group-Object -Property 'レコードの条件' | ForEach-Object {
                         $condGroup = $_
@@ -201,7 +199,7 @@ $script:exitCode = 0
                         }
                     })
 
-                    Set-AppRecordAcl -BaseUrl $baseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
+                    Set-AppRecordAcl -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
                     $appChanged = $true
                     Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定しました" -CountPhrase "条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
                 } catch {
@@ -216,7 +214,7 @@ $script:exitCode = 0
                     Write-Message "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow -Type "Info" -NoHeader
                 } else {
                     try {
-                        Update-KintoneApps -BaseUrl $baseUrl -Authorization $authorization -AppIds @($appId)
+                        Update-KintoneApps -BaseUrl $BaseUrl -Authorization $authorization -AppIds @($appId)
                     } catch {
                         Write-MessageError "アプリ[$label](appId=$appId)の更新でエラーが発生しました: $($_.Exception.Message)"
                         $hasError = $true

@@ -2,6 +2,16 @@
 # Teams/SharePointファイル取得ツール（Azure CLI + Microsoft Graph版）
 # =========================================
 
+param(
+    [string]$SiteUrl,
+    [string]$SitePath,
+    [string]$TenantId,
+    [string]$LocalPath,
+    [string]$LogPath,
+    [string]$LogPrefix,
+    [string]$ClientName = ""
+)
+
 $scriptDir = Split-Path $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -9,28 +19,22 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 }
 $startTime = Get-Date
 
-$siteUrl = $env:DOWNLOAD_SITE_URL
-$sitePath = $env:DOWNLOAD_SITE_PATH
-$tenantId = $env:DOWNLOAD_SITE_TENANT_ID
-
-if (!$siteUrl -or !$sitePath -or !$tenantId) {
-    Write-MessageError "DOWNLOAD_SITE_URL と DOWNLOAD_SITE_PATH と DOWNLOAD_SITE_TENANT_ID を set-env.bat で設定してください"
+if (!$SiteUrl -or !$SitePath -or !$TenantId) {
+    Write-MessageError "SiteUrl と SitePath と TenantId を指定してください"
     exit 1
 }
 
-$localPath = $env:DOWNLOAD_LOCAL_PATH
-$logPath = $env:COMMON_LOG_PATH
-New-Item -ItemType Directory -Path $logPath -Force | Out-Null
+New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
 
 $downloadLog = @()
 
 $az = Get-AzureCliPath
-$token = Get-GraphToken -Az $az -TenantId $tenantId
+$token = Get-GraphToken -Az $az -TenantId $TenantId
 $headers = @{ Authorization = "Bearer $token" }
 
-$siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $siteUrl
+$siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $SiteUrl
 
-$folderParts = $sitePath -split '/'
+$folderParts = $SitePath -split '/'
 $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
 $encodedRelativeFolder = Get-EncodedSitePath $relativeFolder
 
@@ -57,11 +61,27 @@ function Get-GraphChildrenRecursive {
             if ($item.file) {
                 $dest = Join-Path $LocalFolder $item.Name
                 Write-Message "操作中：$($item.Name)" -Type "Info" -NoHeader
-                try {
-                    Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
+
+                $maxRetry = 8
+                $succeeded = $false
+                $lastErrorDetail = $null
+                for ($retry = 1; $retry -le $maxRetry; $retry++) {
+                    try {
+                        Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
+                        $succeeded = $true
+                        break
+                    } catch {
+                        $lastErrorDetail = $_.Exception.Message
+                        if ($retry -lt $maxRetry) {
+                            Start-Sleep -Milliseconds (1000 * $retry)
+                        }
+                    }
+                }
+
+                if ($succeeded) {
                     $script:downloadLog += "$RelativePath/$($item.Name) -> $dest"
-                } catch {
-                    $script:downloadLog += "$RelativePath/$($item.Name) -> エラー: $($_.Exception.Message)"
+                } else {
+                    $script:downloadLog += "$RelativePath/$($item.Name) -> エラー: $lastErrorDetail"
                 }
             } elseif ($item.folder) {
                 Get-GraphChildrenRecursive -ItemId $item.id -LocalFolder (Join-Path $LocalFolder $item.Name) -RelativePath "$RelativePath/$($item.Name)"
@@ -71,11 +91,11 @@ function Get-GraphChildrenRecursive {
     }
 }
 
-Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $localPath -RelativePath $sitePath
+Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $LocalPath -RelativePath $SitePath
 
 $endTime = Get-Date
-$logFilePath = Write-RunLogFile -LogPath $logPath -LogFileName "$($env:DOWNLOAD_LOG_PREFIX)$(Get-ClientLogSegment)$(Split-Path $sitePath -Leaf).log" `
+$logFilePath = Write-RunLogFile -LogPath $LogPath -LogFileName "$($LogPrefix)$(Get-ClientLogSegment -ClientName $ClientName)$(Split-Path $SitePath -Leaf).log" `
     -StartTime $startTime -EndTime $endTime `
     -ResultSectionTitle "ダウンロード結果" -ResultLines $downloadLog `
-    -TreeRootPath $localPath
+    -TreeRootPath $LocalPath -ClientName $ClientName
 Show-LogFileContent -Path $logFilePath

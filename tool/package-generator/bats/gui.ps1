@@ -58,7 +58,6 @@ $categoryDefs = @(
                 Label            = "ファイルダウンロード"
                 BatchLabel       = "ファイルダウンロード"
                 BatchPath        = $downloadBat
-                EnabledVarName   = "DOWNLOAD_ENABLED"
                 LogPrefixVarName = "DOWNLOAD_LOG_PREFIX"
                 LocalPathVarName = "DOWNLOAD_LOCAL_PATH"
                 Inputs           = New-ClientInputDef -Combo $cmbDownloadClient
@@ -73,7 +72,6 @@ $categoryDefs = @(
                 Label            = "個別パッケージの作成"
                 BatchLabel       = "個別パッケージの作成"
                 BatchPath        = $generateBat
-                EnabledVarName   = "GENERATE_ENABLED"
                 LogPrefixVarName = "GENERATE_LOG_PREFIX"
                 LocalPathVarName = "GENERATE_OUTPUT_PATH"
                 Inputs           = New-ClientInputDef -Combo $cmbGenerateClient
@@ -88,7 +86,6 @@ $categoryDefs = @(
                 Label            = "ファイルアップロード"
                 BatchLabel       = "ファイルアップロード"
                 BatchPath        = $uploadBat
-                EnabledVarName   = "UPLOAD_ENABLED"
                 LogPrefixVarName = "UPLOAD_LOG_PREFIX"
                 SiteUrlVarName   = "UPLOAD_SITE_URL"
                 SitePathVarName  = "UPLOAD_SITE_PATH"
@@ -102,7 +99,15 @@ $categoryDefs = @(
         )
     }
 )
+$categoryDefs = @($categoryDefs | Where-Object { $_.Label -eq "個別パッケージの作成" })
 $allButtonDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+
+$generateConfigLogButtonDef = [PSCustomObject]@{
+    Label            = "パッケージ定義ファイル生成"
+    BatchLabel       = "パッケージ定義ファイル生成"
+    LogPrefixVarName = "GENERATE_CONFIG_LOG_PREFIX"
+}
+$allLogButtonDefs = @($allButtonDefs) + @($generateConfigLogButtonDef)
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "コース別パッケージ生成ツール"
@@ -247,7 +252,9 @@ function Start-BatchRunAll {
     $clientDisplayName = if ($selectedClient -and $selectedClient -ne $defaultClientLabel) { $selectedClient } else { $defaultClientLabel }
 
     foreach ($chk in $script:batchStepCheckboxes) {
-        Set-Item -Path "env:$($chk.Tag.EnabledVarName)" -Value $(if ($chk.Checked) { "1" } else { "0" })
+        if ($chk.Tag.EnabledVarName) {
+            Set-Item -Path "env:$($chk.Tag.EnabledVarName)" -Value $(if ($chk.Checked) { "1" } else { "0" })
+        }
     }
 
     foreach ($varName in $script:lastClientVars) {
@@ -292,7 +299,7 @@ function Update-LogClientList {
     Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo -FixedItems @("すべて", $defaultClientLabel)
 }
 
-$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
+$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allLogButtonDefs `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "クライアント" -ExtraComboWidth 260 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
@@ -345,11 +352,6 @@ $btnNewClient.Size = New-Object System.Drawing.Size(100, 24)
 
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
-$enabledRadioOptions = @(
-    [PSCustomObject]@{ Label = "有効"; Value = "1" }
-    [PSCustomObject]@{ Label = "無効"; Value = "0" }
-)
-
 $settingsGroups = [ordered]@{
     "COMMON" = @{
         Label = "共通"
@@ -361,7 +363,6 @@ $settingsGroups = [ordered]@{
     "DOWNLOAD" = @{
         Label = "ダウンロード"
         Vars = [ordered]@{
-            "DOWNLOAD_ENABLED"        = @{ Label = "機能の有効化"; Radio = $enabledRadioOptions; IsEnabledFlag = $true }
             "DOWNLOAD_SITE_URL"       = @{ Label = "ダウンロード元のサイトURL" }
             "DOWNLOAD_SITE_PATH"      = @{ Label = "ダウンロード元のフォルダ" }
             "DOWNLOAD_SITE_TENANT_ID" = @{ Label = "テナントID" }
@@ -372,20 +373,19 @@ $settingsGroups = [ordered]@{
     "GENERATE" = @{
         Label = "パッケージ作成"
         Vars = [ordered]@{
-            "GENERATE_ENABLED"        = @{ Label = "機能の有効化"; Radio = $enabledRadioOptions; IsEnabledFlag = $true }
-            "GENERATE_SOURCE_PATH"    = @{ Label = "圧縮元のフォルダ" }
+            "GENERATE_SOURCE_PATH"    = @{ Label = "圧縮元のフォルダ"; Browse = "Folder"  }
             "GENERATE_CONFIG_PATH"    = @{ Label = "パッケージ定義ファイル"; Browse = "File" }
-            "GENERATE_WORK_PATH"      = @{ Label = "作業用のフォルダ" }
+            "GENERATE_CONFIG_LOG_PREFIX" = @{ Label = "ログファイル名の接頭辞（定義ファイル作成）"; Overridable = $false }
+            "GENERATE_WORK_PATH"      = @{ Label = "作業用のフォルダ"; Browse = "Folder"  }
             "GENERATE_OUTPUT_PATH"    = @{ Label = "パッケージの出力先"; Browse = "Folder" }
             "GENERATE_SHEETS_INCLUDE" = @{ Label = "対象のシート" }
             "GENERATE_SHEETS_EXCLUDE" = @{ Label = "除外のシート" }
-            "GENERATE_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞"; Overridable = $false }
+            "GENERATE_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞（パッケージ作成）"; Overridable = $false }
         }
     }
     "UPLOAD" = @{
         Label = "アップロード"
         Vars = [ordered]@{
-            "UPLOAD_ENABLED"        = @{ Label = "機能の有効化"; Radio = $enabledRadioOptions; IsEnabledFlag = $true }
             "UPLOAD_SITE_URL"       = @{ Label = "アップロード先のサイトURL" }
             "UPLOAD_SITE_PATH"      = @{ Label = "アップロード先のフォルダ" }
             "UPLOAD_SITE_TENANT_ID" = @{ Label = "テナントID" }
@@ -406,6 +406,7 @@ $settingsMultilineVars = @()
 $settingsRadioVars = @{}
 $enabledVars = @()
 $clientOverridableVars = @()
+$allKnownSettingsVars = @()
 foreach ($groupKey in $settingsGroups.Keys) {
     $group = $settingsGroups[$groupKey]
     $settingsGroupLabels[$groupKey] = $group.Label
@@ -413,6 +414,7 @@ foreach ($groupKey in $settingsGroups.Keys) {
     foreach ($varKey in $group.Vars.Keys) {
         $varDef = $group.Vars[$varKey]
         $settingsVarLabels[$varKey] = $varDef.Label
+        $allKnownSettingsVars += $varKey
         if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
         if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
         if ($varDef.Masked) { $settingsMaskedVars += $varKey }
@@ -450,17 +452,26 @@ function Get-SettingsFieldRows {
             [PSCustomObject]@{ Group = $varName.Split("_")[0]; VarName = $varName; Value = $varValue; Key = $varName }
         }
     } else {
+        $rowsByVarName = @{}
+        $fileVarNames = @()
         foreach ($line in (Read-SetEnvLines -Path $setEnvBat)) {
             $m = $script:setEnvLineRegex.Match($line.Trim())
             if ($m.Success) {
-                [PSCustomObject]@{ Group = $m.Groups["var"].Value.Split("_")[0]; VarName = $m.Groups["var"].Value; Value = $m.Groups["val"].Value; Key = $m.Groups["var"].Value }
+                $varName = $m.Groups["var"].Value
+                $rowsByVarName[$varName] = [PSCustomObject]@{ Group = $varName.Split("_")[0]; VarName = $varName; Value = $m.Groups["val"].Value; Key = $varName }
+                $fileVarNames += $varName
             }
+        }
+        $orderedVarNames = @($allKnownSettingsVars | Where-Object { $rowsByVarName.ContainsKey($_) })
+        $orderedVarNames += @($fileVarNames | Where-Object { $allKnownSettingsVars -notcontains $_ })
+        foreach ($varName in $orderedVarNames) {
+            $rowsByVarName[$varName]
         }
     }
 }
 
 function Update-SettingsFields {
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -notin @("DOWNLOAD", "UPLOAD") }) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
@@ -529,7 +540,8 @@ function Invoke-GenerateConfigForClient {
         return
     }
 
-    $destPath = Join-Path $rootPath "config\package_definition_$ClientName.xlsx"
+    $rawDestPath = if ($clientRaw.ContainsKey("GENERATE_CONFIG_PATH")) { $clientRaw["GENERATE_CONFIG_PATH"] } else { $defaults["GENERATE_CONFIG_PATH"] }
+    $destPath = Expand-VarTokens -Value $rawDestPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
     $batArgs = @("client:$ClientName")
 
     if (Test-Path -LiteralPath $destPath) {
@@ -553,15 +565,12 @@ function Invoke-GenerateConfigForClient {
 }
 
 $settingsTrailingButtonVars = @{
-    "GENERATE_CONFIG_PATH" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "更新" -OnClick {
+    "GENERATE_CONFIG_PATH" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テンプレートの更新" -Width 120 -OnClick {
         $client = $cmbSettingsClient.SelectedItem
-        if (!$client -or $client -eq $defaultClientLabel) {
-            [System.Windows.Forms.MessageBox]::Show("クライアントを選択してください。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
+        $clientName = if ($client -and $client -ne $defaultClientLabel) { $client } else { "" }
         foreach ($f in (Get-SettingsFiles)) { & $f.Save }
         Update-RunCheckboxesFromClient
-        Invoke-GenerateConfigForClient -ClientName $client
+        Invoke-GenerateConfigForClient -ClientName $clientName
     } }
 }
 

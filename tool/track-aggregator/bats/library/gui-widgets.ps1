@@ -901,12 +901,13 @@ function Add-FieldActionButton {
         [System.Windows.Forms.Control]$Panel,
         [int]$Y,
         [Parameter(Mandatory)][string]$Text,
-        [Parameter(Mandatory)][scriptblock]$OnClick
+        [Parameter(Mandatory)][scriptblock]$OnClick,
+        [int]$Width = 90
     )
     $btn = New-Object System.Windows.Forms.Button
     $btn.Text = $Text
     $btn.Location = New-Object System.Drawing.Point(20, $Y)
-    $btn.Size = New-Object System.Drawing.Size(90, 24)
+    $btn.Size = New-Object System.Drawing.Size($Width, 24)
     $btn.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
     $btn.Add_Click({ & $OnClick }.GetNewClosure())
     $Panel.Controls.Add($btn)

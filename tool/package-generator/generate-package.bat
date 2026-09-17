@@ -18,7 +18,7 @@ call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0bats\generate-package.ps1"
+ -File "%~dp0bats\generate-package.ps1" -ConfigPath "%GENERATE_CONFIG_PATH%" -WorkPath "%GENERATE_WORK_PATH%" -OutputPath "%GENERATE_OUTPUT_PATH%" -LogPath "%COMMON_LOG_PATH%" -LogPrefix "%GENERATE_LOG_PREFIX%" -SheetsInclude "%GENERATE_SHEETS_INCLUDE%" -SheetsExclude "%GENERATE_SHEETS_EXCLUDE%" -SourcePath "%GENERATE_SOURCE_PATH%" -ClientName "%CLIENT_NAME%"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"

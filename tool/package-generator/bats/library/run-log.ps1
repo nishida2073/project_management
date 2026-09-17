@@ -12,15 +12,19 @@ function Write-LogFile {
 }
 
 function Get-ClientLogSegment {
-    if ($env:CLIENT_NAME) {
-        return "$($env:CLIENT_NAME)_"
+    param([string]$ClientName)
+
+    if ($ClientName) {
+        return "${ClientName}_"
     }
     return "${defaultClientLabel}_"
 }
 
 function Get-ClientLogHeaderLines {
-    if ($env:CLIENT_NAME) {
-        return @("クライアント: $($env:CLIENT_NAME)")
+    param([string]$ClientName)
+
+    if ($ClientName) {
+        return @("クライアント: $ClientName")
     }
     return @("クライアント: $defaultClientLabel")
 }
@@ -133,7 +137,8 @@ function Write-RunLogFile {
         [string[]]$ResultLines,
         [string]$TreeRootPath = "",
         [string]$ItemListRootPath = "",
-        [string[]]$ItemListPaths = @()
+        [string[]]$ItemListPaths = @(),
+        [string]$ClientName = ""
     )
 
     if ($TreeRootPath -and $ItemListPaths.Count -gt 0) {
@@ -146,8 +151,7 @@ function Write-RunLogFile {
     $logFilePath = Join-Path $LogPath "${logFileBase}_${timestamp}${logFileExt}"
     $logLines = @()
     $logLines += "# 実行情報"
-    $logLines += (Get-ClientLogHeaderLines)
-    $logLines += "バッチ名: $($env:BATCH_NAME)"
+    $logLines += (Get-ClientLogHeaderLines -ClientName $ClientName)
     $logLines += $ExtraHeaderLines
     $logLines += "開始時刻: $($StartTime.ToString('yyyy-MM-dd HH:mm:ss'))"
     $logLines += "終了時刻: $($EndTime.ToString('yyyy-MM-dd HH:mm:ss'))"

@@ -4,7 +4,12 @@
 
 param(
     [string]$SpaceId,
-    [string]$ConfigName
+    [string]$ConfigName,
+    [string]$BaseUrl,
+    [string]$DownloadRoot,
+    [string]$LogRoot,
+    [string]$KintoneLogin,
+    [string]$KintonePassword
 )
 
 $libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
@@ -12,27 +17,20 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$baseUrl = $env:KINTONE_BASE_URL
-$downloadRoot = $env:COMMON_DOWNLOAD_PATH
-$logRoot = $env:COMMON_LOG_PATH
-
-if (-not $baseUrl -or -not $downloadRoot -or -not $logRoot) {
-    Write-Message "KINTONE_BASE_URL / COMMON_DOWNLOAD_PATH / COMMON_LOG_PATH を設定してください（clients\set-kintone.bat・set-env.bat）" -Type "Info" -NoHeader
+if (-not $SpaceId) {
+    Write-MessageError "SpaceId を指定してください"
     exit 1
 }
-if (-not $SpaceId) {
-    $SpaceId = Read-Host "ダウンロード対象のスペースID"
-}
-$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "download_$(if ($ConfigName) { $ConfigName } else { "space$SpaceId" })"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "download_$(if ($ConfigName) { $ConfigName } else { "space$SpaceId" })"
 
 $script:exitCode = 0
 
 & {
-    $authorization = Get-KintoneAuthorizationHeader -BaseUrl $baseUrl
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${KintoneLogin}:${KintonePassword}"))
 
     $space = $null
     try {
-        $space = Get-CurrentSpace -SpaceId $SpaceId -BaseUrl $baseUrl -Authorization $authorization
+        $space = Get-CurrentSpace -SpaceId $SpaceId -BaseUrl $BaseUrl -Authorization $authorization
     } catch {
         Write-MessageError "スペース取得に失敗しました: $($_.Exception.Message)"
         $script:exitCode = 1
@@ -44,7 +42,7 @@ $script:exitCode = 0
         $ConfigName = -join ($space.spaceName.ToCharArray() | ForEach-Object { if ($invalidChars -contains $_) { "_" } else { $_ } })
         Write-Message "　CONFIG_NAME=$ConfigName" -Type "Info" -NoHeader -Hidden
     }
-    $downloadPath = Join-Path $downloadRoot "${ConfigName}_download.xlsx"
+    $downloadPath = Join-Path $DownloadRoot "${ConfigName}_download.xlsx"
     New-Item -ItemType Directory -Path (Split-Path $downloadPath -Parent) -Force | Out-Null
 
     Write-Message "" -Type "Info" -NoHeader

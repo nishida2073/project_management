@@ -14,20 +14,14 @@ if defined CLIENT_NAME if exist "%~dp0clients\set-env-%CLIENT_NAME%.bat" call "%
 
 call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
-if "%DOWNLOAD_ENABLED%"=="1" (
-    call "%~dp0download-folder.bat"
-    if errorlevel 1 goto :error
-)
+call "%~dp0download-folder.bat"
+if errorlevel 1 goto :error
 
-if "%GENERATE_ENABLED%"=="1" (
-    call "%~dp0generate-package.bat"
-    if errorlevel 1 goto :error
-)
+call "%~dp0generate-package.bat"
+if errorlevel 1 goto :error
 
-if "%UPLOAD_ENABLED%"=="1" (
-    call "%~dp0upload-folder.bat"
-    if errorlevel 1 goto :error
-)
+call "%~dp0upload-folder.bat"
+if errorlevel 1 goto :error
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"
 goto :eof
