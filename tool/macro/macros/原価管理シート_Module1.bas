@@ -21,11 +21,11 @@ Private gLastSavedSnapshot As Object
 Private gLastKnownMainLastRow As Long
 Private gLastKnownMainLastRowValid As Boolean
 
-' システム用シート「項目マッピング」表のキャッシュ（項目名 → Array(実績シート値, 計算算定シート値)）。
+' ツール設定用シート「項目マッピング」表のキャッシュ（項目名 → Array(実績シート値, 計算算定シート値)）。
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
 Private gItemMap As Object
 
-' システム用シート「変換マッピング-区分1」「変換マッピング-区分2」表のキャッシュ（区分名 → Dictionary(実績シート値 → 計算算定シート値)）。
+' ツール設定用シート「変換マッピング-区分1」「変換マッピング-区分2」表のキャッシュ（区分名 → Dictionary(実績シート値 → 計算算定シート値)）。
 ' 呼ぶたびにシートを走査し直さないよう、初回だけ読み込んで使い回す
 Private gConversionMaps As Object
 
@@ -1339,7 +1339,7 @@ Function GetItemValue(ByVal itemName As String, isMain As Boolean) As String
     If Not gItemMap.Exists(itemName) Then
         Err.Raise vbObjectError + 1000, _
                   "GetItemValue", _
-                  "システム用シートに項目「" & itemName & "」が見つかりません。"
+                  "ツール設定用シートに項目「" & itemName & "」が見つかりません。"
     End If
 
     Dim arr As Variant
@@ -1362,7 +1362,7 @@ Function GetConversionMap(itemName As String) As Object
     If Not gConversionMaps.Exists(itemName) Then
         Err.Raise vbObjectError + 1000, _
                   "GetConversionMap", _
-                  "システム用シートに項目「" & itemName & "」の変換マッピングが見つかりません。"
+                  "ツール設定用シートに項目「" & itemName & "」の変換マッピングが見つかりません。"
     End If
 
     Set GetConversionMap = gConversionMaps(itemName)
@@ -1470,14 +1470,14 @@ End Function
 
 
 ' ============================
-' システム用シートの「範囲マッピング」表・「項目マッピング」表（両方ともgItemMapへマージ）と、
+' ツール設定用シートの「範囲マッピング」表・「項目マッピング」表（両方ともgItemMapへマージ）と、
 ' 「変換マッピング-XXX」というタイトルの表をすべて、それぞれ1回だけ読み込み、
 ' gItemMap・gConversionMapsにキャッシュする。
 ' 「変換マッピング-XXX」は数がいくつあっても（区分3以降を追加しても）自動的に拾われる
 ' ============================
 Sub LoadSystemMappings()
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.Sheets("システム用")
+    Set ws = ThisWorkbook.Sheets("ツール設定用")
 
     Set gItemMap = LoadNamedPairMapTable(ws, "範囲マッピング")
 
@@ -1499,7 +1499,7 @@ End Sub
 
 
 ' ============================
-' システム用シート全体から「変換マッピング-XXX」というタイトルのセルをすべて探し、
+' ツール設定用シート全体から「変換マッピング-XXX」というタイトルのセルをすべて探し、
 ' XXXの部分を項目名として、それぞれの表をLoadPairMapTableで読み込む
 ' ============================
 Function LoadAllConversionMaps(ws As Worksheet) As Object
@@ -1539,7 +1539,7 @@ Function LoadNamedPairMapTable(ws As Worksheet, titleText As String) As Object
     If titleCell Is Nothing Then
         Err.Raise vbObjectError + 1000, _
                   "LoadNamedPairMapTable", _
-                  "システム用シートに見出し「" & titleText & "」が見つかりません。"
+                  "ツール設定用シートに見出し「" & titleText & "」が見つかりません。"
     End If
 
     Dim headerRow As Long
@@ -1586,7 +1586,7 @@ Function LoadPairMapTable(ws As Worksheet, titleText As String) As Object
     If titleCell Is Nothing Then
         Err.Raise vbObjectError + 1000, _
                   "LoadPairMapTable", _
-                  "システム用シートに見出し「" & titleText & "」が見つかりません。"
+                  "ツール設定用シートに見出し「" & titleText & "」が見つかりません。"
     End If
 
     Dim headerRow As Long
