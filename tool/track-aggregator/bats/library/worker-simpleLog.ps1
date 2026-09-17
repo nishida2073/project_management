@@ -61,7 +61,7 @@ function Write-MessageError {
 function Write-MessageWarn {
     param([Parameter(Mandatory)][string]$Message)
     Write-Message "" -Type "Info" -NoHeader
-    Write-Message $Message -VarName "message" -Type "Warn" -ForegroundColor Yellow -NoHeader
+    Write-Message $Message -ForegroundColor Yellow -Type "Warn" -NoHeader
 }
 
 function New-WorkerLogPath {

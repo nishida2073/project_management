@@ -31,11 +31,6 @@ New-Item $WorkPath -ItemType Directory | Out-Null
 New-Item $OutputPath -ItemType Directory -Force | Out-Null
 New-Item $LogPath -ItemType Directory -Force | Out-Null
 
-if (!(Get-Module -ListAvailable ImportExcel)) {
-    Write-Message "ImportExcelをインストールします" -Type "Info" -NoHeader
-    Install-Module ImportExcel -Scope CurrentUser -Force
-}
-
 $prevEap = $ErrorActionPreference
 try {
     $ErrorActionPreference = "Stop"
@@ -93,7 +88,7 @@ foreach ($sheetName in $sheetNames) {
             $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
 
             if (!(Test-Path $sourcePath)) {
-                Write-Message "存在しません：$sourcePath" -ForegroundColor Yellow -Type "Info" -NoHeader
+                Write-MessageWarn "存在しません：$sourcePath"
                 $packageLog += "$sourcePath -> 存在しません"
                 continue
             }
@@ -183,7 +178,7 @@ foreach ($sheetName in $sheetNames) {
                 $packageLog += "パッケージ作成エラー: $($_.Exception.Message)"
             }
         } else {
-            Write-Message "$sheetName：対象ファイルが無いためパッケージを作成しませんでした" -ForegroundColor Yellow -Type "Info" -NoHeader
+            Write-MessageWarn "$sheetName：対象ファイルが無いためパッケージを作成しませんでした"
             $packageLog += "対象ファイルが無いためパッケージを作成しませんでした"
         }
 
