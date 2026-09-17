@@ -191,6 +191,7 @@ foreach ($sheetName in $sheetNames) {
             $runLogArgs["TreeRootPath"] = $packagePath
         }
         Write-Message (Get-RunLogMessage @runLogArgs) -Type "Info" -NoHeader
+        Write-MessageComplete "パッケージを作成しました: $packagePath"
     } *>&1 | Tee-Object -FilePath $logFilePath
     ConvertTo-Utf8LogFile -Path $logFilePath
     Write-MessageComplete "ログを出力しました: $logFilePath"
