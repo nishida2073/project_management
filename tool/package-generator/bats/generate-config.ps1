@@ -87,12 +87,31 @@ $script:exitCode = 0
 
         $resultLines = @()
         $row = $headerRow + 1
+        $addedFolders = @{}
+
         foreach ($file in $files) {
+            $relativeFolderPath = ".\" + $file.DirectoryName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+
+            if ($relativeFolderPath -ne ".\" -and !$addedFolders.ContainsKey($relativeFolderPath)) {
+                $ws.Cells.Item($row, $sourceCol).Value2 = $relativeFolderPath
+
+                if ($noCol) {
+                    $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
+                }
+
+                $resultLines += $relativeFolderPath
+                $addedFolders[$relativeFolderPath] = $true
+                $row++
+            }
+
             $relativePath = ".\" + $file.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+
             $ws.Cells.Item($row, $sourceCol).Value2 = $relativePath
+
             if ($noCol) {
                 $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
             }
+
             $resultLines += $relativePath
             $row++
         }
