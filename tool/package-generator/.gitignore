@@ -1,5 +1,7 @@
-log
-generated
-work
-test
+/logs
+/generated
+/download/*
+!/download/サンプル/
+/work
+/test
 *.exe
