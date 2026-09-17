@@ -297,7 +297,7 @@ function Start-BatchRunAll {
 $btnRunAll.Add_Click({ Start-BatchRunAll })
 
 function Update-LogClientList {
-    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo -FixedItems @("すべて")
+    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo
 }
 
 $script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allLogButtonDefs `
@@ -575,7 +575,11 @@ $settingsTrailingButtonVars = @{
             [System.Windows.Forms.MessageBox]::Show("クライアントを選択してください。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
             return
         }
-        foreach ($f in (Get-SettingsFiles)) { & $f.Save }
+        $newClientConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver $script:commonEnvResolver -BasePath $rootPath
+        if (-not (Test-Path -LiteralPath $newClientConfigPath)){
+            [System.Windows.Forms.MessageBox]::Show("ファイルが存在しません:$newClientConfigPath", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+            return
+        }
         Update-RunCheckboxesFromClient
         Invoke-GenerateConfigForClient -ClientName $client
     } }
@@ -598,7 +602,7 @@ $tabSettings.Controls.Add($fieldPanel)
 $tabSettings.Controls.Add($topPanel)
 
 function Update-SettingsClientList {
-    Update-ClientComboItems -ComboBox $cmbSettingsClient -FixedItems @($defaultClientLabel)
+    Update-ClientComboItems -ComboBox $cmbSettingsClient
 }
 Update-SettingsClientList
 Update-SettingsFields
