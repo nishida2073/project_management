@@ -337,7 +337,7 @@ class SmsSearchActivity : AppCompatActivity() {
     /** [resolvedPartsCache]を経由してSettingsStore.resolveSendTargetsを呼ぶ。同一recordへの重複呼び出し（AI解析）を避ける */
     private suspend fun resolveSendTargetCached(record: SmsRecord, config: SettingsStore.Config): Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>> =
         resolvedPartsCache.getOrPut(record.id) {
-            SettingsStore.resolveSendTargets(this, record.address, record.body, record.dateMillis, config.aiExtractionEnabled, config.continuationEnabled, config.continuationScope)
+            SettingsStore.resolveSendTargets(this, record.address, record.body, record.dateMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
         }
 
     /** 成功したKintone送信ログのみを対象にする（失敗ログは「未送信」として扱われるべきなので除外） */

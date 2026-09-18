@@ -16,6 +16,20 @@
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurface" />
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilSenderInfoSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="@string/hint_sender_info_search">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSenderInfoSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDeleteAllSenderInfo"
         style="@style/AppButton.OutlinedButton"
@@ -43,6 +57,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/message_sender_info_empty"
+                android:textColor="?android:attr/textColorSecondary"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvSenderInfoNoMatch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/message_sender_info_no_match"
                 android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone" />
 

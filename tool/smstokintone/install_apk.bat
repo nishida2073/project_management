@@ -23,10 +23,39 @@ if not exist "%APK_SRC%" (
     exit /b 1
 )
 
-adb install -r "%APK_SRC%"
+rem 引数が指定されていれば、その端末を使用
+if not "%~1"=="" (
+    set "DEVICE_ID=%~1"
+) else (
+    rem 引数がなければ、接続されている最初の端末を使用
+    for /f "skip=1 tokens=1,2" %%A in ('adb devices') do (
+        if "%%B"=="device" (
+            set "DEVICE_ID=%%A"
+            goto :FOUND_DEVICE
+        )
+    )
+)
+
+:FOUND_DEVICE
+
+if not defined DEVICE_ID (
+    echo [エラー] 接続されている端末が見つかりません。
+    echo.
+    adb devices
+    echo.
+    pause
+    exit /b 1
+)
+
+echo.
+echo 端末ID: %DEVICE_ID%
+echo.
+
+adb -s "%DEVICE_ID%" install -r "%APK_SRC%"
 if errorlevel 1 (
     echo.
-    echo [エラー] インストールに失敗しました（端末が未接続の可能性があります）。
+    echo [エラー] インストールに失敗しました。
+    echo 端末ID: %DEVICE_ID%
     pause
     exit /b 1
 )

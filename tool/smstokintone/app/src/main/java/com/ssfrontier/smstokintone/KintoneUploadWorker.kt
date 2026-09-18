@@ -26,7 +26,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる（SmsMatching参照）
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.aiExtractionEnabled, config.continuationEnabled, config.continuationScope)
+        val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
         val smsParts = resolution.smsParts
         val validSendTargets = sendTargets.filter { it.isValid }
         // smsParts.companyNameはSettingsStore.resolveSendTargetsで既に会社名変換が適用済みのため、

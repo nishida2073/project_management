@@ -1,6 +1,8 @@
 package com.ssfrontier.smstokintone
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -48,15 +50,55 @@ class SenderInfoActivity : AppCompatActivity() {
 
         entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
 
+        binding.etSenderInfoSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable?) {
+                applySearchFilter(s?.toString().orEmpty())
+            }
+        })
+
         binding.btnDeleteAllSenderInfo.setOnClickListener {
             // 個別の削除ボタンと同様、ここではUI上から一覧をまとめて外すだけでストアはまだ変更しない。
             // 実際にストアから削除されるのは「設定を保存」を押した時点（onSaveClicked）
             binding.llSenderInfoContainer.removeAllViews()
             cards.clear()
             binding.tvSenderInfoEmpty.visibility = View.VISIBLE
+            binding.tvSenderInfoNoMatch.visibility = View.GONE
         }
 
         binding.btnSaveSenderInfo.setOnClickListener { onSaveClicked() }
+    }
+
+    /**
+     * [query]でカードを絞り込む。会社名・氏名・電話番号（[ContinuationStore.Entry.senderAddress]、無ければ
+     * 正規化済みの[senderKey]）のいずれかに部分一致したカードのみ表示する。検索は表示の絞り込みのみで
+     * [cards]やストアは変更しないため、非表示のカードは保存時に通常どおり保持される
+     */
+    private fun applySearchFilter(query: String) {
+        val q = query.trim()
+        if (q.isEmpty()) {
+            cards.forEach { it.itemBinding.root.visibility = View.VISIBLE }
+            binding.tvSenderInfoNoMatch.visibility = View.GONE
+            binding.tvSenderInfoEmpty.visibility = if (cards.isEmpty()) View.VISIBLE else View.GONE
+            return
+        }
+        val lowered = q.lowercase()
+        var matchCount = 0
+        cards.forEach { card ->
+            val entry = loadedSnapshot[card.senderKey]
+            val matched = listOf(
+                entry?.companyName.orEmpty(),
+                entry?.userName.orEmpty(),
+                entry?.senderAddress.orEmpty().ifBlank { card.senderKey }
+            ).any { it.lowercase().contains(lowered) }
+            card.itemBinding.root.visibility = if (matched) View.VISIBLE else View.GONE
+            if (matched) matchCount++
+        }
+        binding.tvSenderInfoNoMatch.visibility = if (matchCount == 0) View.VISIBLE else View.GONE
+        binding.tvSenderInfoEmpty.visibility = View.GONE
     }
 
     /** 1件分のカードをUIとcardsの両方へ追加する */

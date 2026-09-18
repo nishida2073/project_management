@@ -74,13 +74,13 @@ object SmsPartsGenerator {
      * [aiExtractionEnabled]が有効なら端末上のAI（ML Kit GenAI）に解析させ、Android 12未満・非対応端末・
      * AI呼び出し失敗時は[generateSmsParts]（ルールベース）にフォールバックする
      */
-    suspend fun resolveSmsParts(body: String, aiExtractionEnabled: Boolean): SmsParts {
+    suspend fun resolveSmsParts(body: String, aiExtractionEnabled: Boolean, companyNameExtractionEnabled: Boolean = true): SmsParts {
         if (!aiExtractionEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return generateSmsParts(body)
+            return generateSmsParts(body, companyNameExtractionEnabled)
         }
 
         val deferred = aiResultCache.computeIfAbsent(body) {
-            aiScope.async { requestAiSmsParts(body) ?: generateSmsParts(body) }
+            aiScope.async { requestAiSmsParts(body) ?: generateSmsParts(body, companyNameExtractionEnabled) }
         }
         return deferred.await()
     }
@@ -132,21 +132,31 @@ object SmsPartsGenerator {
         }
     }
 
-    /** 1行目を会社名、2行目を氏名として固定位置で切り出す（ラベル文字列は見ない）。本文は常に全体をそのまま保持する */
-    fun generateSmsParts(body: String?): SmsParts {
+    /**
+     * 本文の先頭行を固定位置で切り出す。[companyNameExtractionEnabled]が有効なら
+     * 1行目を会社名・2行目を氏名、無効なら1行目を氏名として扱う
+     */
+    fun generateSmsParts(body: String?, companyNameExtractionEnabled: Boolean = true): SmsParts {
         if (body.isNullOrBlank()) return SmsParts()
 
         val normalized = body.replace("\r\n", "\n").replace("\r", "\n").trim()
         val contentLines = normalized.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
-        // 氏名・会社名を1行にまとめて書く人がいるため、3行未満では会社名・氏名は抽出せず空のまま返す
-        if (contentLines.size < 3) {
-            return SmsParts(body = normalized)
+        if (companyNameExtractionEnabled) {
+            // 氏名・会社名を1行にまとめて書く人がいるため、3行未満では会社名・氏名は抽出せず空のまま返す
+            if (contentLines.size < 3) {
+                return SmsParts(body = normalized)
+            }
+            return SmsParts(companyName = contentLines[0], userName = contentLines[1], body = normalized)
         }
 
-        val companyName = contentLines[0]
-        val userName = contentLines[1]
-
-        return SmsParts(companyName = companyName, userName = userName, body = normalized)
+        if (contentLines.size < 2) {
+            return SmsParts(body = normalized)
+        }
+        return SmsParts(
+            companyName = "",
+            userName = contentLines[0],
+            body = contentLines.drop(1).joinToString("\n")
+        )
     }
 }

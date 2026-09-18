@@ -127,6 +127,10 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         val bodyExtractionConfig = SettingsStore.load(this)
+        binding.swCompanyNameExtractionEnabled.isChecked = bodyExtractionConfig.companyNameExtractionEnabled
+        binding.swCompanyNameExtractionEnabled.setOnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+        }
         binding.swCompanyNameAutoConversionEnabled.isChecked = bodyExtractionConfig.companyNameAutoConversionEnabled
         binding.swCompanyNameAutoConversionEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(companyNameAutoConversionEnabled = isChecked) }

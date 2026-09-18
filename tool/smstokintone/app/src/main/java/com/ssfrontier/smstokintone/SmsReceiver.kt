@@ -60,7 +60,7 @@ class SmsReceiver : BroadcastReceiver() {
                 // KintoneUploadWorkerの登録処理と同じresolveSendTargetsを使い、抽出方法のずれによる
                 // 登録内容と送信先名の食い違いを防ぐ。1件のSMSが複数の送信先に一致することがあるため、
                 // 受信ログ・自動返信ログでは名前を連結して表示する（実際の登録はWorker側で送信先ごとに行う）
-                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiExtractionEnabled, config.continuationEnabled, config.continuationScope)
+                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
                 val smsParts = resolution.smsParts
                 // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは
                 // 空になり、送信先名は「なし」扱いになる（実際の登録も行われない）

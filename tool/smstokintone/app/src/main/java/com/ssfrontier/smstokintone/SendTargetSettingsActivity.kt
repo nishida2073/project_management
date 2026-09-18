@@ -64,6 +64,12 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         val card = SendTargetCard(sendTarget.id, itemBinding)
 
         itemBinding.etSendTargetName.setText(sendTarget.name)
+        itemBinding.etCompanyName.setText(sendTarget.companyName)
+        val companyNameExtractionEnabled = SettingsStore.load(applicationContext).companyNameExtractionEnabled
+        itemBinding.llCompanyNameSection.visibility =
+            if (companyNameExtractionEnabled) View.GONE else View.VISIBLE
+        itemBinding.llKeywordsSection.visibility =
+            if (companyNameExtractionEnabled) View.VISIBLE else View.GONE
         sendTarget.keywords.forEach { addKeywordRow(itemBinding.llKeywordsContainer, it) }
         itemBinding.btnAddKeyword.setOnClickListener { addKeywordRow(itemBinding.llKeywordsContainer, "") }
         itemBinding.etSubdomain.setText(sendTarget.subdomain)
@@ -147,6 +153,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return SettingsStore.SendTarget(
             id = id,
             name = itemBinding.etSendTargetName.text.toString().trim(),
+            companyName = itemBinding.etCompanyName.text.toString().trim(),
             keywords = (0 until itemBinding.llKeywordsContainer.childCount).map { index ->
                 itemBinding.llKeywordsContainer.getChildAt(index).findViewById<EditText>(R.id.etKeyword).text.toString().trim()
             }.filter { it.isNotEmpty() },
@@ -189,7 +196,9 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             return
         }
 
-        val testSendBody = if (sendTarget.keywords.isNotEmpty()) {
+        val testSendBody = if (!SettingsStore.load(this).companyNameExtractionEnabled) {
+            getString(R.string.test_send_body_template_company_name_extraction_disabled)
+        } else if (sendTarget.keywords.isNotEmpty()) {
             getString(R.string.test_send_body_template_exists_keywords, sendTarget.keywords.joinToString("、"))
         } else {
             getString(R.string.test_send_body_template_no_keywords)
@@ -225,16 +234,15 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.btnTestSend.isEnabled = false
         lifecycleScope.launch {
             val config = SettingsStore.load(applicationContext)
-            val extracted = SmsPartsGenerator.resolveSmsParts(testBody, config.aiExtractionEnabled)
-            // SettingsStore.resolveSendTargetsと同じく、抽出直後（送信先の判定より前）に
-            // アプリ全体の会社名変換を適用する
-            val smsParts = extracted.copy(companyName = SettingsStore.applyCompanyNameConversion(extracted.companyName, config))
+            val extracted = SmsPartsGenerator.resolveSmsParts(testBody, config.aiExtractionEnabled, config.companyNameExtractionEnabled)
+            val smsParts = extracted.copy(
+                companyName = SettingsStore.applyCompanyNameConversion(
+                    if (config.companyNameExtractionEnabled) extracted.companyName else sendTarget.companyName,
+                    config
+                )
+            )
 
-            // 抽出した会社名が[sendTarget]自身の振り分け条件（キーワード、またはデフォルト送信先）に
-            // 一致しない場合は警告して送信を中断する。実際の登録処理（KintoneUploadWorker、
-            // SettingsStore.resolveSendTargets）と判定基準がずれないよう、routesToを使う
-            // （デフォルト送信先はここでは常にfalseになるので個別に許可する）
-            if (!sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
+            if (config.companyNameExtractionEnabled && !sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
                 AlertDialog.Builder(this@SendTargetSettingsActivity)
                     .setTitle(R.string.dialog_title_test_send_result)

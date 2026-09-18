@@ -54,6 +54,8 @@ object SettingsStore {
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
     /** [Config.aiExtractionEnabled]のキー */
     private const val KEY_AI_EXTRACTION_ENABLED = "ai_extraction_enabled"
+    /** [Config.companyNameExtractionEnabled]のキー */
+    private const val KEY_COMPANY_NAME_EXTRACTION_ENABLED = "company_name_extraction_enabled"
     /** [Config.companyNameAutoConversionEnabled]のキー */
     private const val KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED = "company_name_auto_conversion_enabled"
     /** [Config.companyNameFixedConversions]のキー。JSON配列文字列として保存する */
@@ -197,6 +199,7 @@ object SettingsStore {
         /** 本文からの会社名・氏名の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
          * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
         val aiExtractionEnabled: Boolean,
+        val companyNameExtractionEnabled: Boolean,
         /** 本文からの抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するかどうか。
          * [resolveSendTargets]で抽出直後に適用され、送信先の判定・送信元情報の登録・kintoneへの送信すべてに反映される */
         val companyNameAutoConversionEnabled: Boolean = false,
@@ -227,6 +230,7 @@ object SettingsStore {
         val id: String,
         /** 表示名。空の場合は[displayName]がフォールバック文字列を返す */
         val name: String,
+        val companyName: String = "",
         /** 振り分け条件のキーワード。行ごとに1件、UI上で追加・削除できる */
         val keywords: List<String>,
         /** kintoneのサブドメイン（https://{subdomain}.cybozu.com のホスト名部分） */
@@ -348,6 +352,7 @@ object SettingsStore {
             .putString(KEY_DEFAULT_REPLY_BODY, config.defaultReplyBody)
             .putString(KEY_EXTRACTION_FAILED_REPLY_ADDITION, config.extractionFailedReplyAddition)
             .putBoolean(KEY_AI_EXTRACTION_ENABLED, config.aiExtractionEnabled)
+            .putBoolean(KEY_COMPANY_NAME_EXTRACTION_ENABLED, config.companyNameExtractionEnabled)
             .putBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, config.companyNameAutoConversionEnabled)
             .putString(
                 KEY_COMPANY_NAME_FIXED_CONVERSIONS,
@@ -397,6 +402,7 @@ object SettingsStore {
         extractionFailedReplyAddition = AppDefaults.SMS_EXTRACTION_FAILED_REPLY_BODY,
         defaultSendTargetFilterId = null,
         aiExtractionEnabled = false,
+        companyNameExtractionEnabled = true,
         companyNameAutoConversionEnabled = false,
         companyNameFixedConversions = emptyList(),
         defaultSendNoneOnlyEnabled = false,
@@ -433,6 +439,7 @@ object SettingsStore {
                 ?: DEFAULT_CONFIG.extractionFailedReplyAddition,
             defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, DEFAULT_CONFIG.defaultSendTargetFilterId),
             aiExtractionEnabled = p.getBoolean(KEY_AI_EXTRACTION_ENABLED, DEFAULT_CONFIG.aiExtractionEnabled),
+            companyNameExtractionEnabled = p.getBoolean(KEY_COMPANY_NAME_EXTRACTION_ENABLED, DEFAULT_CONFIG.companyNameExtractionEnabled),
             companyNameAutoConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, DEFAULT_CONFIG.companyNameAutoConversionEnabled),
             companyNameFixedConversions = p.getString(KEY_COMPANY_NAME_FIXED_CONVERSIONS, null)?.let { json ->
                 val arr = JSONArray(json)
@@ -480,6 +487,7 @@ object SettingsStore {
                 JSONObject()
                     .put("id", sendTarget.id)
                     .put("name", sendTarget.name)
+                    .put("companyName", sendTarget.companyName)
                     .put("keywords", JSONArray(sendTarget.keywords))
                     .put("subdomain", sendTarget.subdomain)
                     .put("appId", sendTarget.appId)
@@ -512,6 +520,7 @@ object SettingsStore {
             SendTarget(
                 id = obj.optString("id", UUID.randomUUID().toString()),
                 name = obj.optString("name", ""),
+                companyName = obj.optString("companyName", ""),
                 keywords = obj.optJSONArray("keywords")?.let { array ->
                     (0 until array.length()).map { array.getString(it) }
                 } ?: emptyList(),
@@ -602,6 +611,9 @@ object SettingsStore {
      * 解析して振り分ける。本文単体で解析する場合、抽出直後（送信先の判定より前）に[applyCompanyNameConversion]
      * で会社名変換を一度だけ適用するため、戻り値の[SmsResolution.smsParts]の会社名は既に変換済みで、
      * 送信先の判定・[ContinuationStore]への登録・ログ表示・kintoneへの送信のいずれもこの値をそのまま使えばよい。
+     * 会社名の抽出が無効な場合（[companyNameExtractionEnabled]がfalse）は本文から会社名・氏名を
+     * 抽出せず、振り分けも行わずにすべての送信先へ送る。会社名には先頭の送信先の「会社名」
+     * （[SendTarget.companyName]）を使う。
      * この関数自体は[ContinuationStore]を更新しない（SMS検索画面のプレビュー表示
      * など、実際の受信・送信を伴わない呼び出しからも使われるため）。実際に受信・送信を処理する側
      * （[SmsReceiver]・[KintoneUploadWorker]）が、抽出状況が正常だった場合にのみ更新すること
@@ -612,6 +624,7 @@ object SettingsStore {
         body: String,
         timestampMillis: Long,
         aiExtractionEnabled: Boolean,
+        companyNameExtractionEnabled: Boolean,
         continuationEnabled: Boolean,
         continuationScope: ContinuationScope
     ): Pair<SmsResolution, List<SendTarget>> {
@@ -628,12 +641,26 @@ object SettingsStore {
             )
             val resolution = SmsResolution(smsParts = smsParts, isContinuation = true)
             // 送信先は保持せず、引き継いだ会社名を現在の送信先ルールに通して都度判定する
-            val sendTargets = findSendTargets(context, previousEntry.companyName)
+            val sendTargets = if (companyNameExtractionEnabled) {
+                findSendTargets(context, previousEntry.companyName)
+            } else {
+                loadSendTargets(context)
+            }
             return resolution to sendTargets
         }
-        val extracted = SmsPartsGenerator.resolveSmsParts(body, aiExtractionEnabled)
-        val convertedCompanyName = applyCompanyNameConversion(extracted.companyName, load(context))
-        val finalParts = extracted.copy(companyName = convertedCompanyName)
-        return SmsResolution(smsParts = finalParts) to findSendTargets(context, convertedCompanyName)
+        val extracted = SmsPartsGenerator.resolveSmsParts(body, aiExtractionEnabled, companyNameExtractionEnabled)
+        val config = load(context)
+        val sendTargets = if (companyNameExtractionEnabled) {
+            findSendTargets(context, extracted.companyName)
+        } else {
+            loadSendTargets(context)
+        }
+        val companyNameSource = if (companyNameExtractionEnabled) {
+            extracted.companyName
+        } else {
+            sendTargets.firstOrNull()?.companyName.orEmpty()
+        }
+        val finalParts = extracted.copy(companyName = applyCompanyNameConversion(companyNameSource, config))
+        return SmsResolution(smsParts = finalParts) to sendTargets
     }
 }
