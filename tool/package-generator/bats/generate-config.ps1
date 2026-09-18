@@ -73,6 +73,9 @@ $script:exitCode = 0
         $noCell = Get-CellByKey -Sheet $ws -Key "No" -WholeMatch
         $noCol = if ($noCell) { $noCell.Column } else { $null }
 
+        $extensionCell = Get-CellByKey -Sheet $ws -Key "拡張子" -WholeMatch
+        $extensionCol = if ($extensionCell) { $extensionCell.Column } else { $null }
+
         $usedRange = $ws.UsedRange
         $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
         $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
@@ -99,6 +102,10 @@ $script:exitCode = 0
                     $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
                 }
 
+                if ($extensionCol) {
+                    $ws.Cells.Item($row, $extensionCol).Value2 = ""
+                }
+
                 $resultLines += $relativeFolderPath
                 $addedFolders[$relativeFolderPath] = $true
                 $row++
@@ -110,6 +117,10 @@ $script:exitCode = 0
 
             if ($noCol) {
                 $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
+            }
+
+            if ($extensionCol) {
+                $ws.Cells.Item($row, $extensionCol).Value2 = [System.IO.Path]::GetExtension($relativePath).TrimStart('.')
             }
 
             $resultLines += $relativePath
