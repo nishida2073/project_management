@@ -841,7 +841,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_sms_standard_reply_body"
+                            android:text="@string/section_sms_extraction_success_reply_body"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -854,10 +854,10 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_standard_reply_body">
+                                android:hint="@string/hint_sms_extraction_success_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etDefaultReplyBody"
+                                    android:id="@+id/etExtractionSuccessReplyBody"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="textMultiLine" />
@@ -874,7 +874,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_standard_reply_body"
+                                android:text="@string/helper_sms_extraction_success_reply_body"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -907,7 +907,7 @@
                                 android:hint="@string/hint_sms_extraction_failed_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etExtractionFailedReplyAddition"
+                                    android:id="@+id/etExtractionFailedReplyBody"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="textMultiLine" />

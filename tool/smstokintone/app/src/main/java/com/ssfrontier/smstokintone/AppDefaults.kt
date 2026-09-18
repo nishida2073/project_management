@@ -36,10 +36,10 @@ object AppDefaults {
     const val SMS_SEARCH_DATE_RANGE_DAYS = 1
 
     /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言の初期値 */
-    const val SMS_STANDARD_REPLY_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"
+    const val SMS_EXTRACTION_SUCCESS_REPLY_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"
 
     /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言の初期値。（抽出失敗のSMS） */
-    const val SMS_EXTRACTION_FAILED_REPLY_BODY = SMS_STANDARD_REPLY_BODY +
+    const val SMS_EXTRACTION_FAILED_REPLY_BODY = SMS_EXTRACTION_SUCCESS_REPLY_BODY +
         "\n下記の形式でご記入のうえ、\n再度SMSのご送信をお願いします。\n\n" +
         "（記入例）\nNTTデータ〇〇〇\nユニバ太郎\n\nここに内容を入力"
 

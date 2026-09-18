@@ -159,9 +159,9 @@
     <string name="helper_auto_reply_cooldown_seconds">同じ送信元には、ここで指定した時間が経過するまで自動返信を再送信しません</string>
     <string name="hint_auto_reply_cooldown_seconds">秒</string>
     <string name="section_reply">返信メッセージ（自動入力）</string>
-    <string name="section_sms_standard_reply_body">正しく抽出できた場合</string>
-    <string name="hint_sms_standard_reply_body">文言</string>
-    <string name="helper_sms_standard_reply_body">抽出状況が正常なSMSへの返信に使用します</string>
+    <string name="section_sms_extraction_success_reply_body">正しく抽出できた場合</string>
+    <string name="hint_sms_extraction_success_reply_body">文言</string>
+    <string name="helper_sms_extraction_success_reply_body">抽出状況が正常なSMSへの返信に使用します</string>
     <string name="section_sms_extraction_failed_reply_body">正しく抽出できなかった場合</string>
     <string name="hint_sms_extraction_failed_reply_body">文言</string>
     <string name="helper_sms_extraction_failed_reply_body">抽出状況が異常なSMSへの返信に使用します。\n※会社名が不要な場合は、（記入例）から会社名を削除してください。</string>
@@ -188,7 +188,7 @@
     <string name="section_body_extraction">本文の抽出</string>
     <string name="label_company_name_extraction">会社名の抽出</string>
     <string name="switch_company_name_extraction_enabled">有効にする</string>
-    <string name="helper_company_name_extraction_enabled">本文の1行目を会社名として扱います。無効にすると、1行目を氏名・2行目以降を内容として扱い、会社名には送信先の設定の「会社名」を使用します</string>
+    <string name="helper_company_name_extraction_enabled">有効：本文の1行目を「会社名」として扱います。\n無効：1行目を「氏名」として扱います。</string>
     <string name="label_ai_extraction">AIによる抽出</string>
     <string name="switch_ai_extraction_enabled">有効にする</string>
     <string name="helper_ai_extraction_enabled">端末上のAIを使用して会社名・氏名を抽出します。\nAIの呼び出しに失敗した場合は、ルールベースの抽出を実行します。</string>

@@ -368,12 +368,12 @@ class SmsSearchActivity : AppCompatActivity() {
 
     /**
      * SMSアプリの返信画面を開く。抽出失敗のメッセージには通常の定型文ではなく
-     * extractionFailedReplyAddition（抽出失敗時専用の文面）を差し込む
+     * extractionFailedReplyBody（抽出失敗時専用の文面）を差し込む
      */
     private fun openSmsReply(address: String, extractionFailed: Boolean) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$address"))
         val config = SettingsStore.load(this)
-        val body = if (extractionFailed) config.extractionFailedReplyAddition else config.defaultReplyBody
+        val body = if (extractionFailed) config.extractionFailedReplyBody else config.extractionSuccessReplyBody
         if (body.isNotEmpty()) {
             intent.putExtra("sms_body", body)
         }
