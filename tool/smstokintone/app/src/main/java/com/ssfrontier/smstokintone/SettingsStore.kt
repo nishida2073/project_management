@@ -46,9 +46,9 @@ object SettingsStore {
     private const val KEY_SMS_SEARCH_DATE_RANGE_DAYS = "sms_search_date_range_days"
     /** [Config.searchFiltersVisibleByDefault]のキー */
     private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
-    /** [Config.extractionSuccessReplyBody]のキー */
+    /** [Config.smsExtractionSuccessReplyBody]のキー */
     private const val KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY = "sms_extraction_success_reply_body"
-    /** [Config.extractionFailedReplyBody]のキー */
+    /** [Config.smsExtractionFailedReplyBody]のキー */
     private const val KEY_SMS_EXTRACTION_FAILED_REPLY_BODY = "sms_extraction_failed_reply_body"
     /** [Config.defaultSendTargetFilterId]のキー */
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
@@ -160,7 +160,7 @@ object SettingsStore {
         val searchExtractionFailedEnabled: Boolean,
         /** SMS検索画面で、抽出状況が未実施（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか */
         val searchExtractionNotPerformedEnabled: Boolean,
-        /** 自動受信時、本文の抽出状況が異常なSMSに対して[extractionFailedReplyBody]の文言でSMSへ自動返信するかどうか */
+        /** 自動受信時、本文の抽出状況が異常なSMSに対して[smsExtractionFailedReplyBody]の文言でSMSへ自動返信するかどうか */
         val autoReplyExtractionFailedEnabled: Boolean,
         /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
         val autoReplyCooldownSeconds: Int,
@@ -188,9 +188,9 @@ object SettingsStore {
         /** SMS検索画面を開いた際に検索条件エリアを表示した状態にするかどうか */
         val searchFiltersVisibleByDefault: Boolean,
         /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言 */
-        val extractionSuccessReplyBody: String,
-        /** 抽出失敗のSMSへの返信時、[extractionSuccessReplyBody]の代わりに使う文言 */
-        val extractionFailedReplyBody: String,
+        val smsExtractionSuccessReplyBody: String,
+        /** 抽出失敗のSMSへの返信時、[smsExtractionSuccessReplyBody]の代わりに使う文言 */
+        val smsExtractionFailedReplyBody: String,
         /**
          * SMS検索画面を開いた際に「送信先」フィルタへ初期設定する送信先ID。
          * nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す
@@ -349,8 +349,8 @@ object SettingsStore {
             .putString(KEY_THEME_MODE, config.themeMode.name)
             .putInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, config.smsSearchDateRangeDays)
             .putBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, config.searchFiltersVisibleByDefault)
-            .putString(KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY, config.extractionSuccessReplyBody)
-            .putString(KEY_SMS_EXTRACTION_FAILED_REPLY_BODY, config.extractionFailedReplyBody)
+            .putString(KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY, config.smsExtractionSuccessReplyBody)
+            .putString(KEY_SMS_EXTRACTION_FAILED_REPLY_BODY, config.smsExtractionFailedReplyBody)
             .putBoolean(KEY_AI_EXTRACTION_ENABLED, config.aiExtractionEnabled)
             .putBoolean(KEY_COMPANY_NAME_EXTRACTION_ENABLED, config.companyNameExtractionEnabled)
             .putBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, config.companyNameAutoConversionEnabled)
@@ -398,8 +398,8 @@ object SettingsStore {
         themeMode = ThemeMode.LIGHT,
         smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
         searchFiltersVisibleByDefault = true,
-        extractionSuccessReplyBody = AppDefaults.SMS_EXTRACTION_SUCCESS_REPLY_BODY,
-        extractionFailedReplyBody = AppDefaults.SMS_EXTRACTION_FAILED_REPLY_BODY,
+        smsExtractionSuccessReplyBody = AppDefaults.SMS_EXTRACTION_SUCCESS_REPLY_BODY,
+        smsExtractionFailedReplyBody = AppDefaults.SMS_EXTRACTION_FAILED_REPLY_BODY,
         defaultSendTargetFilterId = null,
         aiExtractionEnabled = false,
         companyNameExtractionEnabled = true,
@@ -434,9 +434,9 @@ object SettingsStore {
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
             smsSearchDateRangeDays = p.getInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, DEFAULT_CONFIG.smsSearchDateRangeDays),
             searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, DEFAULT_CONFIG.searchFiltersVisibleByDefault),
-            extractionSuccessReplyBody = p.getString(KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY, DEFAULT_CONFIG.extractionSuccessReplyBody) ?: DEFAULT_CONFIG.extractionSuccessReplyBody,
-            extractionFailedReplyBody = p.getString(KEY_SMS_EXTRACTION_FAILED_REPLY_BODY, DEFAULT_CONFIG.extractionFailedReplyBody)
-                ?: DEFAULT_CONFIG.extractionFailedReplyBody,
+            smsExtractionSuccessReplyBody = p.getString(KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY, DEFAULT_CONFIG.smsExtractionSuccessReplyBody) ?: DEFAULT_CONFIG.smsExtractionSuccessReplyBody,
+            smsExtractionFailedReplyBody = p.getString(KEY_SMS_EXTRACTION_FAILED_REPLY_BODY, DEFAULT_CONFIG.smsExtractionFailedReplyBody)
+                ?: DEFAULT_CONFIG.smsExtractionFailedReplyBody,
             defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, DEFAULT_CONFIG.defaultSendTargetFilterId),
             aiExtractionEnabled = p.getBoolean(KEY_AI_EXTRACTION_ENABLED, DEFAULT_CONFIG.aiExtractionEnabled),
             companyNameExtractionEnabled = p.getBoolean(KEY_COMPANY_NAME_EXTRACTION_ENABLED, DEFAULT_CONFIG.companyNameExtractionEnabled),

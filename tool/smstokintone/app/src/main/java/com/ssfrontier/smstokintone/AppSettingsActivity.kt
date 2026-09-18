@@ -294,14 +294,14 @@ class AppSettingsActivity : AppCompatActivity() {
             requestReadSmsPermissionLauncher.launch(Manifest.permission.READ_SMS)
         }
 
-        binding.etExtractionSuccessReplyBody.setText(config.extractionSuccessReplyBody)
-        binding.etExtractionSuccessReplyBody.addTextChangedListener { text ->
-            SettingsStore.update(this) { it.copy(extractionSuccessReplyBody = text.toString()) }
+        binding.etSmsExtractionSuccessReplyBody.setText(config.smsExtractionSuccessReplyBody)
+        binding.etSmsExtractionSuccessReplyBody.addTextChangedListener { text ->
+            SettingsStore.update(this) { it.copy(smsExtractionSuccessReplyBody = text.toString()) }
         }
 
-        binding.etExtractionFailedReplyBody.setText(config.extractionFailedReplyBody)
-        binding.etExtractionFailedReplyBody.addTextChangedListener { text ->
-            SettingsStore.update(this) { it.copy(extractionFailedReplyBody = text.toString()) }
+        binding.etSmsExtractionFailedReplyBody.setText(config.smsExtractionFailedReplyBody)
+        binding.etSmsExtractionFailedReplyBody.addTextChangedListener { text ->
+            SettingsStore.update(this) { it.copy(smsExtractionFailedReplyBody = text.toString()) }
         }
 
         binding.btnResetSettings.setOnClickListener {

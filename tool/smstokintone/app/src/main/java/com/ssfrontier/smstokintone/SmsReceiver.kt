@@ -102,7 +102,7 @@ class SmsReceiver : BroadcastReceiver() {
                 if (config.autoReplyExtractionFailedEnabled && sender.isNotBlank() && smsParts.isExtractionFailed()) {
                     val now = System.currentTimeMillis()
                     if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
-                        if (sendAutoReply(context, sender, config.extractionFailedReplyBody)) {
+                        if (sendAutoReply(context, sender, config.smsExtractionFailedReplyBody)) {
                             SmsLogStore.add(
                                 context,
                                 type = SmsLogStore.EntryType.AUTO_REPLY,
@@ -114,7 +114,7 @@ class SmsReceiver : BroadcastReceiver() {
                                 sendTargetName = sendTargetName,
                                 smsParts = smsParts,
                                 companyNameConverted = companyNameConverted,
-                                replyBody = config.extractionFailedReplyBody,
+                                replyBody = config.smsExtractionFailedReplyBody,
                                 isContinuation = resolution.isContinuation
                             )
                         }
