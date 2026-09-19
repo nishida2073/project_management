@@ -281,7 +281,7 @@
     <string name="btn_open_settings_import_export">設定のインポート・エクスポート</string>
     <string name="title_settings_import_export">設定のインポート・エクスポート</string>
     <string name="label_settings_import">インポート</string>
-    <string name="settings_import_description">JSONファイルからアプリの設定・送信先の設定・送信元情報をまとめて反映できます。ファイルに含まれる項目だけが上書きされます。</string>
+    <string name="settings_import_description">JSONファイルからアプリの設定・送信先の設定・送信元情報をまとめて反映できます。</string>
     <string name="btn_select_import_file">ファイルを選択</string>
     <string name="btn_import_settings">インポート</string>
     <string name="label_import_file">ファイル: %1$s</string>
@@ -301,7 +301,7 @@
     <string name="message_import_no_section">アプリの設定・送信先の設定・送信元情報のいずれも含まれていないため、反映する内容がありません</string>
     <string name="message_import_sender_address_required">送信元情報の%1$d件目にsenderAddressがありません</string>
     <string name="label_settings_export">エクスポート</string>
-    <string name="settings_export_description">現在のアプリ設定・送信先の設定・送信元情報を、インポートできる形式のJSONファイルとしてまとめて書き出します。</string>
+    <string name="settings_export_description">現在のアプリ設定・送信先の設定・送信元情報をJSONファイルとしてまとめて書き出します。</string>
     <string name="btn_export_settings">エクスポート</string>
     <string name="toast_settings_exported">設定をエクスポートしました</string>
     <string name="dialog_title_export_error">エクスポートエラー</string>
