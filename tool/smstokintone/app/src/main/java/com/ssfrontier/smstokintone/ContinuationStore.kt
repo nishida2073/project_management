@@ -10,7 +10,7 @@ import java.util.Calendar
  * 抽出状況が正常なSMSの抽出結果を保持する専用のストア。SmsLogStore（全履歴のログ）とは別ファイルで
  * 管理し、ログをクリアしても送信元情報は失われない。送信元ごとに最新1件のみ保持する
  * （継続SMS自体の結果は保存しない。引き継ぎ元と同じ内容の再保存になり意味が無いため）。
- * [SenderInfoActivity]から個別の閲覧・編集・削除もできる。編集画面のように読み込みから保存
+ * [SenderInfoSettingsActivity]から個別の閲覧・編集・削除もできる。編集画面のように読み込みから保存
  * までに時間が空く操作は[applyIfUnchanged]で楽観的排他制御を行うこと（[lock]は保存時の一致確認と
  * 書き込みのみを保護し、編集中はロックしない）
  */
@@ -22,7 +22,7 @@ object ContinuationStore {
     private const val KEY_ENTRIES = "entries"
     /**
      * [getAll]・[set]・[delete]・[applyIfUnchanged]の排他制御に使うロック。SmsReceiver・
-     * KintoneUploadWorker（SMS受信・送信時）とSenderInfoActivity（編集画面）が同一プロセス内から
+     * KintoneUploadWorker（SMS受信・送信時）とSenderInfoSettingsActivity（編集画面）が同一プロセス内から
      * 並行してアクセスし得るため、読み込み→変更→書き込みの間に割り込まれてどちらかの変更が
      * 失われることを防ぐ
      */
@@ -42,7 +42,7 @@ object ContinuationStore {
         val timestampMillis: Long,
         /**
          * 正規化前の元の送信元アドレス（電話番号など）。マップのキー（[SmsMatching.normalizeSenderKey]で
-         * 正規化済み）は表記ゆれ吸収のため末尾8桁などに削られてしまうため、[SenderInfoActivity]での
+         * 正規化済み）は表記ゆれ吸収のため末尾8桁などに削られてしまうため、[SenderInfoSettingsActivity]での
          * 表示専用にこちらを別途保持する。マッチング処理自体はこの値を使わずキー側で行う
          */
         val senderAddress: String = ""
@@ -108,6 +108,11 @@ object ContinuationStore {
         val entry = getAll(context)[SmsMatching.normalizeSenderKey(sender)] ?: return null
         if (sameDayOnly && !isSameDay(entry.timestampMillis, timestampMillis)) return null
         return entry
+    }
+
+    /** [entries]（正規化済みの送信元キーをキーとするマップ）で送信元情報を一括置き換えする。設定のインポート画面専用 */
+    fun importAll(context: Context, entries: Map<String, Entry>) = synchronized(lock) {
+        save(context, entries)
     }
 
     /** 正規化した送信元キーをキーとする全データのマップを返す */

@@ -40,7 +40,11 @@
             android:exported="false" />
 
         <activity
-            android:name=".SenderInfoActivity"
+            android:name=".SettingsImportExportActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SenderInfoSettingsActivity"
             android:exported="false" />
 
         <activity

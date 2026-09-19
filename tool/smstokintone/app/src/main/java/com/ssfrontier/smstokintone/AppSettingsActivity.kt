@@ -215,7 +215,7 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         binding.btnEditSenderInfo.setOnClickListener {
-            startActivity(Intent(this, SenderInfoActivity::class.java))
+            startActivity(Intent(this, SenderInfoSettingsActivity::class.java))
         }
 
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())

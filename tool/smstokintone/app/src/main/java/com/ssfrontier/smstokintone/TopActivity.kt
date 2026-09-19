@@ -27,6 +27,9 @@ class TopActivity : AppCompatActivity() {
         binding.btnOpenAppSettings.setOnClickListener {
             startActivity(Intent(this, AppSettingsActivity::class.java))
         }
+        binding.btnOpenSettingsImportExport.setOnClickListener {
+            startActivity(Intent(this, SettingsImportExportActivity::class.java))
+        }
         binding.btnOpenLog.setOnClickListener {
             startActivity(Intent(this, LogActivity::class.java))
         }
