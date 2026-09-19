@@ -31,7 +31,7 @@
 > **注意**
 > - `appConfig` 内のキーはすべて省略可能です。ファイルに含まれないキーはアプリの既定値で補われるため、変更したいキーだけを指定できます（部分指定可）。
 > - `appConfig` が空（`{}`）の場合はブロック未指定として扱われ、何も反映されません。
-> - SMS検索画面の「送信先」フィルタの初期値には、既存の送信先IDを指定してください。存在しないIDを指定した場合、フィルタは「すべて」に戻ります。
+> - SMS検索画面の「送信先」フィルタの初期値には、既存の送信先名を指定してください。存在しない送信先名を指定した場合、フィルタは「すべて」に戻ります。
 
 #### 設定内容
 
@@ -56,7 +56,7 @@
 | `searchFiltersVisibleByDefault` | SMS検索画面を開いた際に検索条件エリアを表示した状態にするか | `true` / `false`<br><br>例）`true` |
 | `smsExtractionSuccessReplyBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列<br><br>例）`"NTTデータユニバーシティ\n運営事務局です。\n"` |
 | `smsExtractionFailedReplyBody` | 抽出失敗のSMSへの返信時に使う文言 | 文字列<br><br>例）`"…（記入例）…\nここに内容を入力"` |
-| `defaultSendTargetFilterId` | SMS検索画面の「送信先」フィルタの初期値 | 送信先ID／ `null`（すべて）／ `"__filter_key_unset__"`（なし）<br><br>例）`null` |
+| `defaultSendTargetFilterName` | SMS検索画面の「送信先」フィルタの初期値 | 送信先名／ `null`（すべて）／ `"__filter_key_unset__"`（なし）<br><br>例）`null` |
 | `aiExtractionEnabled` | 本文の会社名・氏名の抽出に、ルールベースの代わりに端末上のAIを使うか。非対応端末では自動的にルールベースへ | `true` / `false`<br><br>例）`false` |
 | `companyNameExtractionEnabled` | 本文から会社名・氏名を抽出するか。`false` の場合は抽出せず全送信先へ送る | `true` / `false`<br><br>例）`true` |
 | `companyNameAutoConversionEnabled` | 抽出した会社名に、英数字を半角大文字・それ以外を全角へ統一する変換を適用するか | `true` / `false`<br><br>例）`false` |
@@ -78,6 +78,7 @@
 > - インポート時は送信先名をキーに既存の送信先へマージされます。
 > - 既存と同じ送信先名の送信先があればその内容が上書きされ、なければ新規追加されます。
 > - ファイルに含まれない既存の送信先は変更されません。
+> - 1つのファイル内で送信先名が重複している場合はインポートエラーになります。
 > - `id` は省略可能です。省略した場合はアプリが自動で割り当てます。
 
 #### 設定内容
@@ -146,7 +147,7 @@
     "searchFiltersVisibleByDefault": true,
     "smsExtractionSuccessReplyBody": "NTTデータユニバーシティ\n運営事務局です。\n",
     "smsExtractionFailedReplyBody": "…（記入例）…\nここに内容を入力",
-    "defaultSendTargetFilterId": null,
+    "defaultSendTargetFilterName": null,
     "aiExtractionEnabled": false,
     "companyNameExtractionEnabled": true,
     "companyNameAutoConversionEnabled": false,

@@ -153,9 +153,23 @@ class SettingsImportExportActivity : AppCompatActivity() {
         importedConfig = root.optJSONObject("appConfig")
             ?.takeIf { it.length() > 0 }
             ?.let { SettingsStore.configFromJson(it) }
-        importedSendTargets = root.optJSONArray("sendTargetConfig")?.let { array ->
+        val sendTargets = root.optJSONArray("sendTargetConfig")?.let { array ->
             (0 until array.length()).map { i -> SettingsStore.sendTargetFromJson(array.getJSONObject(i)) }
         }
+        if (sendTargets != null) {
+            // 同名が増えた既存はマージ時に最後の内容で上書きされ続けるため、黙って通すと
+            // ファイル内の重複がそのまま採用されることになる。不正なファイルはここで止める
+            val duplicateNames = sendTargets.groupBy { it.name }
+                .filter { it.value.size > 1 }
+                .map { it.key }
+                .sorted()
+            if (duplicateNames.isNotEmpty()) {
+                throw JSONException(
+                    getString(R.string.message_import_send_target_duplicate_name, duplicateNames.joinToString("／"))
+                )
+            }
+        }
+        importedSendTargets = sendTargets
         importedSenderInfo = root.optJSONArray("senderInfoConfig")?.let { parseSenderInfo(it) }
 
         if (importedConfig == null && importedSendTargets == null && importedSenderInfo == null) {

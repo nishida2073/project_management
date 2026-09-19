@@ -48,12 +48,12 @@ class SmsSearchActivity : AppCompatActivity() {
     private val records = mutableListOf<SmsRecord>()
 
     /**
-     * スピナーの表示位置に対応する送信先ID（sendTargetFilterOptionsと同じ並び）。null=すべて、
-     * AppConstants.SEND_TARGET_FILTER_KEY_UNSET=未設定、それ以外は送信先ID
+     * スピナーの表示位置に対応する送信先名（sendTargetFilterOptionsと同じ並び）。null=すべて、
+     * AppConstants.SEND_TARGET_FILTER_KEY_UNSET=未設定、それ以外は送信先名（[SendTarget.name]）
      */
-    private var sendTargetFilterKeys: List<String?> = emptyList()
-    /** 現在選択中の送信先フィルタのID。[sendTargetFilterKeys]の要素の一つ */
-    private var selectedSendTargetId: String? = null
+    private var sendTargetFilterNames: List<String?> = emptyList()
+    /** 現在選択中の送信先フィルタの送信先名。[sendTargetFilterNames]の要素の一つ */
+    private var selectedSendTargetName: String? = null
 
     /**
      * 直近のsearchSms呼び出し内でのSettingsStore.resolveSendTargets結果をrecord.idごとにキャッシュしたもの。
@@ -84,14 +84,14 @@ class SmsSearchActivity : AppCompatActivity() {
         }
         binding.spSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedSendTargetId = sendTargetFilterKeys.getOrNull(position)
+                selectedSendTargetName = sendTargetFilterNames.getOrNull(position)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         val config = SettingsStore.load(this)
-        selectedSendTargetId = config.defaultSendTargetFilterId
+        selectedSendTargetName = config.defaultSendTargetFilterName
         val today = Calendar.getInstance()
         val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -(config.smsSearchDateRangeDays - 1)) }
         applyDateFilter(isFrom = true, calendar = rangeStart)
@@ -131,21 +131,21 @@ class SmsSearchActivity : AppCompatActivity() {
         if (SettingsStore.loadSendTargets(this).size == 1) {
             binding.tvSendTargetFilterLabel.visibility = View.GONE
             binding.llSendTargetFilter.visibility = View.GONE
-            selectedSendTargetId = null
+            selectedSendTargetName = null
             return
         }
         binding.tvSendTargetFilterLabel.visibility = View.VISIBLE
         binding.llSendTargetFilter.visibility = View.VISIBLE
 
         val options = SettingsStore.sendTargetFilterOptions(this)
-        sendTargetFilterKeys = options.map { it.first }
+        sendTargetFilterNames = options.map { it.first }
         val labels = options.map { it.second }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spSendTargetFilter.adapter = adapter
 
-        val restoreIndex = sendTargetFilterKeys.indexOf(selectedSendTargetId)
+        val restoreIndex = sendTargetFilterNames.indexOf(selectedSendTargetName)
         binding.spSendTargetFilter.setSelection(if (restoreIndex >= 0) restoreIndex else 0)
     }
 
@@ -290,7 +290,7 @@ class SmsSearchActivity : AppCompatActivity() {
             val config = SettingsStore.load(this@SmsSearchActivity)
             resolvedPartsCache = mutableMapOf()
 
-            when (val sendTargetId = selectedSendTargetId) {
+            when (val sendTargetName = selectedSendTargetName) {
                 null -> Unit
                 AppConstants.SEND_TARGET_FILTER_KEY_UNSET -> {
                     val matched = mutableListOf<SmsRecord>()
@@ -305,7 +305,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     val matched = mutableListOf<SmsRecord>()
                     for (record in records) {
                         val (_, sendTargets) = resolveSendTargetCached(record, config)
-                        if (sendTargets.any { it.id == sendTargetId }) matched.add(record)
+                        if (sendTargets.any { it.name == sendTargetName }) matched.add(record)
                     }
                     records.clear()
                     records.addAll(matched)

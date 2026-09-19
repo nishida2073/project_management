@@ -19,7 +19,7 @@
     "searchFiltersVisibleByDefault": true,
     "smsExtractionSuccessReplyBody": "NTTデータユニバーシティ\n運営事務局です。\n",
     "smsExtractionFailedReplyBody": "NTTデータユニバーシティ\n運営事務局です。\n\n下記の形式でご記入のうえ、\n再度SMSのご送信をお願いします。\n\n（記入例）\nNTTデータ〇〇〇\nユニバ太郎\n\nここに内容を入力",
-    "defaultSendTargetFilterId": null,
+    "defaultSendTargetFilterName": null,
     "aiExtractionEnabled": false,
     "companyNameExtractionEnabled": true,
     "companyNameAutoConversionEnabled": false,

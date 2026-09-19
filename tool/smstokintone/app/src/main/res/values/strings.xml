@@ -85,6 +85,7 @@
     <string name="helper_update_tolerance_hours">指定した時間以内に同じ送信元から再度受信した場合は、既存のデータを更新します</string>
     <string name="dialog_title_validation_error">入力エラー</string>
     <string name="dialog_message_validation_error">%1$s\n\n送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です</string>
+    <string name="dialog_message_validation_error_duplicate_name">送信先名が重複しています\n%1$s</string>
     <string name="btn_send_test">テスト送信</string>
     <string name="dialog_title_test_send_body">テスト本文</string>
     <string name="dialog_title_test_send_result">テスト結果</string>
@@ -300,6 +301,7 @@
     <string name="dialog_message_import_invalid_json">ファイルの形式が正しくありません（JSONとして読み込めません）。\n\n%1$s</string>
     <string name="message_import_no_section">アプリの設定・送信先の設定・送信元情報のいずれも含まれていないため、反映する内容がありません</string>
     <string name="message_import_sender_address_required">送信元情報の%1$d件目にsenderAddressがありません</string>
+    <string name="message_import_send_target_duplicate_name">送信先名がファイル内で重複しています。\n%1$s\n\n送信先名は他の送信先と重複しないようにしてください</string>
     <string name="label_settings_export">エクスポート</string>
     <string name="settings_export_description">現在のアプリ設定・送信先の設定・送信元情報をJSONファイルとしてまとめて書き出します。</string>
     <string name="btn_export_settings">エクスポート</string>

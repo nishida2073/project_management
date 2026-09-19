@@ -50,8 +50,8 @@ object SettingsStore {
     private const val KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY = "sms_extraction_success_reply_body"
     /** [Config.smsExtractionFailedReplyBody]のキー */
     private const val KEY_SMS_EXTRACTION_FAILED_REPLY_BODY = "sms_extraction_failed_reply_body"
-    /** [Config.defaultSendTargetFilterId]のキー */
-    private const val KEY_DEFAULT_SEND_TARGET_FILTER_ID = "default_send_target_filter_id"
+    /** [Config.defaultSendTargetFilterName]のキー */
+    private const val KEY_DEFAULT_SEND_TARGET_FILTER_NAME = "default_send_target_filter_name"
     /** [Config.aiExtractionEnabled]のキー */
     private const val KEY_AI_EXTRACTION_ENABLED = "ai_extraction_enabled"
     /** [Config.companyNameExtractionEnabled]のキー */
@@ -178,11 +178,10 @@ object SettingsStore {
         val smsExtractionSuccessReplyBody: String,
         /** 抽出失敗のSMSへの返信時、[smsExtractionSuccessReplyBody]の代わりに使う文言 */
         val smsExtractionFailedReplyBody: String,
-        /**
-         * SMS検索画面を開いた際に「送信先」フィルタへ初期設定する送信先ID。
+        /** SMS検索画面を開いた際に「送信先」フィルタへ初期設定する送信先名。
          * nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す
-         */
-        val defaultSendTargetFilterId: String?,
+         * （送信先はnameで一意に管理するため名前で参照する） */
+        val defaultSendTargetFilterName: String?,
         /** 本文からの会社名・氏名の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
          * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
         val aiExtractionEnabled: Boolean,
@@ -346,10 +345,10 @@ object SettingsStore {
             .putBoolean(KEY_DEFAULT_EXTRACTION_NOT_PERFORMED_ONLY_ENABLED, config.defaultExtractionNotPerformedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
-        if (config.defaultSendTargetFilterId != null) {
-            editor.putString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, config.defaultSendTargetFilterId)
+        if (config.defaultSendTargetFilterName != null) {
+            editor.putString(KEY_DEFAULT_SEND_TARGET_FILTER_NAME, config.defaultSendTargetFilterName)
         } else {
-            editor.remove(KEY_DEFAULT_SEND_TARGET_FILTER_ID)
+            editor.remove(KEY_DEFAULT_SEND_TARGET_FILTER_NAME)
         }
         editor.apply()
     }
@@ -378,7 +377,7 @@ object SettingsStore {
         searchFiltersVisibleByDefault = true,
         smsExtractionSuccessReplyBody = AppDefaults.SMS_EXTRACTION_SUCCESS_REPLY_BODY,
         smsExtractionFailedReplyBody = AppDefaults.SMS_EXTRACTION_FAILED_REPLY_BODY,
-        defaultSendTargetFilterId = null,
+        defaultSendTargetFilterName = null,
         aiExtractionEnabled = false,
         companyNameExtractionEnabled = true,
         companyNameAutoConversionEnabled = false,
@@ -415,7 +414,7 @@ object SettingsStore {
             smsExtractionSuccessReplyBody = p.getString(KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY, DEFAULT_CONFIG.smsExtractionSuccessReplyBody) ?: DEFAULT_CONFIG.smsExtractionSuccessReplyBody,
             smsExtractionFailedReplyBody = p.getString(KEY_SMS_EXTRACTION_FAILED_REPLY_BODY, DEFAULT_CONFIG.smsExtractionFailedReplyBody)
                 ?: DEFAULT_CONFIG.smsExtractionFailedReplyBody,
-            defaultSendTargetFilterId = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_ID, DEFAULT_CONFIG.defaultSendTargetFilterId),
+            defaultSendTargetFilterName = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_NAME, DEFAULT_CONFIG.defaultSendTargetFilterName),
             aiExtractionEnabled = p.getBoolean(KEY_AI_EXTRACTION_ENABLED, DEFAULT_CONFIG.aiExtractionEnabled),
             companyNameExtractionEnabled = p.getBoolean(KEY_COMPANY_NAME_EXTRACTION_ENABLED, DEFAULT_CONFIG.companyNameExtractionEnabled),
             companyNameAutoConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, DEFAULT_CONFIG.companyNameAutoConversionEnabled),
@@ -458,7 +457,7 @@ object SettingsStore {
         .put("searchFiltersVisibleByDefault", config.searchFiltersVisibleByDefault)
         .put("smsExtractionSuccessReplyBody", config.smsExtractionSuccessReplyBody)
         .put("smsExtractionFailedReplyBody", config.smsExtractionFailedReplyBody)
-        .put("defaultSendTargetFilterId", config.defaultSendTargetFilterId ?: JSONObject.NULL)
+        .put("defaultSendTargetFilterName", config.defaultSendTargetFilterName ?: JSONObject.NULL)
         .put("aiExtractionEnabled", config.aiExtractionEnabled)
         .put("companyNameExtractionEnabled", config.companyNameExtractionEnabled)
         .put("companyNameAutoConversionEnabled", config.companyNameAutoConversionEnabled)
@@ -498,10 +497,10 @@ object SettingsStore {
         searchFiltersVisibleByDefault = json.optBoolean("searchFiltersVisibleByDefault", DEFAULT_CONFIG.searchFiltersVisibleByDefault),
         smsExtractionSuccessReplyBody = json.optString("smsExtractionSuccessReplyBody", DEFAULT_CONFIG.smsExtractionSuccessReplyBody),
         smsExtractionFailedReplyBody = json.optString("smsExtractionFailedReplyBody", DEFAULT_CONFIG.smsExtractionFailedReplyBody),
-        defaultSendTargetFilterId = if (json.has("defaultSendTargetFilterId") && !json.isNull("defaultSendTargetFilterId")) {
-            json.optString("defaultSendTargetFilterId")
+        defaultSendTargetFilterName = if (json.has("defaultSendTargetFilterName") && !json.isNull("defaultSendTargetFilterName")) {
+            json.optString("defaultSendTargetFilterName")
         } else {
-            DEFAULT_CONFIG.defaultSendTargetFilterId
+            DEFAULT_CONFIG.defaultSendTargetFilterName
         },
         aiExtractionEnabled = json.optBoolean("aiExtractionEnabled", DEFAULT_CONFIG.aiExtractionEnabled),
         companyNameExtractionEnabled = json.optBoolean("companyNameExtractionEnabled", DEFAULT_CONFIG.companyNameExtractionEnabled),
@@ -520,9 +519,12 @@ object SettingsStore {
         defaultSentManualOnlyEnabled = json.optBoolean("defaultSentManualOnlyEnabled", DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
     )
 
-    /** インポートファイル用に[SendTarget]をJSONオブジェクトへ変換する */
+    /**
+     * インポートファイル用に[SendTarget]をJSONオブジェクトへ変換する。送信先ID（[SendTarget.id]）は
+     * セッション内のカード追跡専用のため、エクスポート対象に含めない（送信先名[SendTarget.name]を
+     * 一意キーとして扱う）。復元は[sendTargetFromJson]を参照
+     */
     fun sendTargetToJson(sendTarget: SendTarget): JSONObject = JSONObject()
-        .put("id", sendTarget.id)
         .put("name", sendTarget.name)
         .put("companyName", sendTarget.companyName)
         .put("keywords", JSONArray(sendTarget.keywords))
@@ -540,9 +542,12 @@ object SettingsStore {
         .put("fieldUserName", sendTarget.fieldUserName)
         .put("fieldBody", sendTarget.fieldBody)
 
-    /** インポートファイルのJSONオブジェクトから[SendTarget]を復元する。欠落したキーは既定値で補う */
+    /** インポートファイルのJSONオブジェクトから[SendTarget]を復元する。欠落したキーは既定値で補う。
+     * idはインポート/エクスポートファイルに含めない（[sendTargetToJson]参照）ため、常に新規UUIDを採番する。
+     * つまり同じ送信先名[SendTarget.name]でもインポートのたびに別のIDになる（送信先名が一意キーで、
+     * IDはセッション内のカード追跡専用） */
     fun sendTargetFromJson(obj: JSONObject): SendTarget = SendTarget(
-        id = obj.optString("id", UUID.randomUUID().toString()),
+        id = UUID.randomUUID().toString(),
         name = obj.optString("name", ""),
         companyName = obj.optString("companyName", ""),
         keywords = obj.optJSONArray("keywords")?.let { array ->
@@ -576,12 +581,13 @@ object SettingsStore {
     /**
      * SMS検索画面・アプリ設定画面の「送信先」選択肢（すべて／各送信先／未設定）を
      * キーと表示ラベルの組で返す。キーがnullの選択肢は「すべて」、
-     * [AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す
+     * [AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す。
+     * キーは送信先名[SendTarget.name]（送信先ID[SendTarget.id]はファイル外のセッション追跡専用なので使わない）
      */
     fun sendTargetFilterOptions(context: Context): List<Pair<String?, String>> {
         val sendTargets = loadSendTargets(context)
         return listOf(null to context.getString(R.string.filter_send_target_all)) +
-            sendTargets.map { it.id to it.displayName(context) } +
+            sendTargets.map { it.name to it.displayName(context) } +
             listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_none))
     }
 
@@ -596,7 +602,7 @@ object SettingsStore {
      * 設定のインポート用に、既存の送信先一覧へ[imported]（ファイルから読み込んだ送信先）を
      * 送信先名（[SendTarget.name]）をキーにマージする。既存に同じ送信先名があればその内容を
      * インポート内容で上書きし、ID（[SendTarget.id]）は既存のまま保持する
-     * （[Config.defaultSendTargetFilterId]などからの参照を維持するため）。同じ送信先名が無ければ
+     * （[Config.defaultSendTargetFilterName]などからの参照を維持するため）。同じ送信先名が無ければ
      * インポート内容を新規追加し、ファイルに含まれない既存の送信先は変更しない
      */
     fun mergeImportSendTargets(context: Context, imported: List<SendTarget>): List<SendTarget> {

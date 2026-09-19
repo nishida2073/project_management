@@ -3,6 +3,8 @@ chcp 932 >nul
 setlocal
 
 cd /d "%~dp0"
+rem AGP 8.5.2 fails with JDK 25 (compileDebugJavaWithJavac), so use JDK 21 for the build.
+set "JAVA_HOME=C:\Program Files\Java\jdk-21"
 
 rem 出力先ディレクトリの決定 (優先順位: 第1引数 > 環境変数 OUTPUT_DIR > 既定のバッチルートのフォルダ)
 set "OUT_DIR=%~1"

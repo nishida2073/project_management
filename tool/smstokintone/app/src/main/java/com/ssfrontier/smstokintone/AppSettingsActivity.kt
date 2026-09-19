@@ -26,8 +26,8 @@ class AppSettingsActivity : AppCompatActivity() {
     /** この画面のビューバインディング */
     private lateinit var binding: ActivityAppSettingsBinding
 
-    /** 「送信先」スピナーの選択位置と対応する送信先ID（[SettingsStore.sendTargetFilterOptions]の並び順）の一覧 */
-    private var defaultSendTargetFilterKeys: List<String?> = emptyList()
+    /** 「送信先」スピナーの選択位置と対応する送信先名（[SettingsStore.sendTargetFilterOptions]の並び順）の一覧 */
+    private var defaultSendTargetFilterNames: List<String?> = emptyList()
 
     /** SMS受信権限（RECEIVE_SMS）のリクエスト結果を受け取り、表示更新と拒否時のトースト表示を行う */
     private val requestPermissionLauncher =
@@ -260,11 +260,11 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(defaultExtractionNotPerformedOnlyEnabled = isChecked) }
         }
 
-        binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val sendTargetId = defaultSendTargetFilterKeys.getOrNull(position)
-                SettingsStore.update(this@AppSettingsActivity) { it.copy(defaultSendTargetFilterId = sendTargetId) }
-            }
+            binding.spDefaultSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val sendTargetName = defaultSendTargetFilterNames.getOrNull(position)
+                    SettingsStore.update(this@AppSettingsActivity) { it.copy(defaultSendTargetFilterName = sendTargetName) }
+                }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -351,22 +351,22 @@ class AppSettingsActivity : AppCompatActivity() {
         // ここで初期値を設定しても意味を持たない。項目ごと隠して値も「すべて」に揃える
         if (SettingsStore.loadSendTargets(this).size == 1) {
             binding.llDefaultSendTargetFilter.visibility = View.GONE
-            if (SettingsStore.load(this).defaultSendTargetFilterId != null) {
-                SettingsStore.update(this) { it.copy(defaultSendTargetFilterId = null) }
+            if (SettingsStore.load(this).defaultSendTargetFilterName != null) {
+                SettingsStore.update(this) { it.copy(defaultSendTargetFilterName = null) }
             }
             return
         }
         binding.llDefaultSendTargetFilter.visibility = View.VISIBLE
 
         val options = SettingsStore.sendTargetFilterOptions(this)
-        defaultSendTargetFilterKeys = options.map { it.first }
+        defaultSendTargetFilterNames = options.map { it.first }
         val labels = options.map { it.second }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spDefaultSendTargetFilter.adapter = adapter
 
-        val selectedIndex = defaultSendTargetFilterKeys.indexOf(SettingsStore.load(this).defaultSendTargetFilterId)
+        val selectedIndex = defaultSendTargetFilterNames.indexOf(SettingsStore.load(this).defaultSendTargetFilterName)
         binding.spDefaultSendTargetFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
     }
 

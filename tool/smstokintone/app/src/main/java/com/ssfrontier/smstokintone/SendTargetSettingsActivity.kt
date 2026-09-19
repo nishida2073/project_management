@@ -187,6 +187,15 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         return true
     }
 
+    /** [duplicateNames]を「入力エラー」ダイアログで報告する（保存を中断するため呼び出し元でreturnする） */
+    private fun showDuplicateNameErrorDialog(duplicateNames: List<String>) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_title_validation_error)
+            .setMessage(getString(R.string.dialog_message_validation_error_duplicate_name, duplicateNames.joinToString("／")))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
     /** カードの現在の入力内容で検証し、問題なければテスト本文を入力するダイアログを出す */
     private fun onTestSendClicked(itemBinding: ItemSendTargetBinding, card: SendTargetCard) {
         val sendTarget = readSendTargetFromBinding(itemBinding, id = card.id)
@@ -321,6 +330,15 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             }
 
             newSendTargets.add(sendTarget)
+        }
+
+        val duplicateNames = newSendTargets.groupBy { it.name }
+            .filter { it.value.size > 1 }
+            .map { it.key }
+            .sorted()
+        if (duplicateNames.isNotEmpty()) {
+            showDuplicateNameErrorDialog(duplicateNames)
+            return
         }
 
         SettingsStore.saveSendTargets(this, newSendTargets)
