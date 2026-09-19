@@ -1,0 +1,69 @@
+{
+  "appConfig": {
+    "sendEnabled": true,
+    "sendExtractionFailedEnabled": false,
+    "sendExtractionNotPerformedEnabled": true,
+    "searchExtractionFailedEnabled": false,
+    "searchExtractionNotPerformedEnabled": true,
+    "autoReplyExtractionFailedEnabled": false,
+    "autoReplyCooldownSeconds": 10,
+    "autoRefreshEnabled": true,
+    "autoRefreshIntervalSeconds": 5,
+    "smsMatchToleranceSeconds": 15,
+    "bodyExcerptLength": 100,
+    "continuationEnabled": true,
+    "continuationScope": "UNLIMITED",
+    "continuationShowUserNameEnabled": true,
+    "themeMode": "LIGHT",
+    "smsSearchDateRangeDays": 1,
+    "searchFiltersVisibleByDefault": true,
+    "smsExtractionSuccessReplyBody": "NTTデータユニバーシティ\n運営事務局です。\n",
+    "smsExtractionFailedReplyBody": "NTTデータユニバーシティ\n運営事務局です。\n\n下記の形式でご記入のうえ、\n再度SMSのご送信をお願いします。\n\n（記入例）\nNTTデータ〇〇〇\nユニバ太郎\n\nここに内容を入力",
+    "defaultSendTargetFilterId": null,
+    "aiExtractionEnabled": false,
+    "companyNameExtractionEnabled": true,
+    "companyNameAutoConversionEnabled": false,
+    "companyNameFixedConversions": [],
+    "defaultSendNoneOnlyEnabled": false,
+    "defaultExtractionFailedOnlyEnabled": false,
+    "defaultExtractionSucceededOnlyEnabled": false,
+    "defaultExtractionNotPerformedOnlyEnabled": false,
+    "defaultSentAutoOnlyEnabled": false,
+    "defaultSentManualOnlyEnabled": false
+  },
+  "sendTargetConfig": [
+    {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "name": "（例）本社",
+      "companyName": "NTTデータユニバーシティ",
+      "keywords": [
+        "NTTデータ",
+        "ユニバーシティ"
+      ],
+      "subdomain": "univ-kyousai-{X}",
+      "appId": "1",
+      "authMethod": "PASSWORD",
+      "apiToken": "",
+      "loginName": "kintoneのログイン名",
+      "loginPassword": "kintoneのパスワード",
+      "fieldSender": "sender",
+      "fieldHistory": "history",
+      "fieldDatetime": "receive_datetime",
+      "fieldType": "registration_type",
+      "updateToleranceHours": 5,
+      "updateToleranceMode": "SAME_DATE",
+      "fieldCompanyName": "company_name",
+      "fieldUserName": "user_name",
+      "fieldBody": "body"
+    }
+  ],
+  "senderInfoConfig": [
+    {
+      "senderKey": "012345678",
+      "companyName": "（例）NTTデータユニバーシティ",
+      "userName": "（例）ユニバ太郎",
+      "timestampMillis": 0,
+      "senderAddress": "09012345678"
+    }
+  ]
+}
