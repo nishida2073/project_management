@@ -56,8 +56,8 @@
 | `searchFiltersVisibleByDefault` | SMS検索画面を開いた際に検索条件エリアを表示した状態にするか | `true` / `false`<br><br>例）`true` |
 | `smsExtractionSuccessReplyBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列<br><br>例）`"NTTデータユニバーシティ\n運営事務局です。\n"` |
 | `smsExtractionFailedReplyBody` | 抽出失敗のSMSへの返信時に使う文言 | 文字列<br><br>例）`"…（記入例）…\nここに内容を入力"` |
-| `defaultSendTargetFilterId` | SMS検索画面の「送信先」フィルタの初期値 | 送信先ID／ `null`（すべて）／ `"__filter_key_unset__"`（未設定）<br><br>例）`null` |
-| `aiExtractionEnabled` | 本文の会社名・氏名の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を使うか。非対応端末では自動的にルールベースへ | `true` / `false`<br><br>例）`false` |
+| `defaultSendTargetFilterId` | SMS検索画面の「送信先」フィルタの初期値 | 送信先ID／ `null`（すべて）／ `"__filter_key_unset__"`（なし）<br><br>例）`null` |
+| `aiExtractionEnabled` | 本文の会社名・氏名の抽出に、ルールベースの代わりに端末上のAIを使うか。非対応端末では自動的にルールベースへ | `true` / `false`<br><br>例）`false` |
 | `companyNameExtractionEnabled` | 本文から会社名・氏名を抽出するか。`false` の場合は抽出せず全送信先へ送る | `true` / `false`<br><br>例）`true` |
 | `companyNameAutoConversionEnabled` | 抽出した会社名に、英数字を半角大文字・それ以外を全角へ統一する変換を適用するか | `true` / `false`<br><br>例）`false` |
 | `companyNameFixedConversions` | 会社名の固定変換ルールの配列。先頭から順に `from` を `to` へ置換 | 変換ルールの配列／ `[]`<br><br>例）`[{"from": "ユニバ", "to": "ユニバーシティ"}]` |

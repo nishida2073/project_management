@@ -690,27 +690,20 @@ object SettingsStore {
     )
 
     /**
-     * SMS本文から[SmsParts]を抽出し、対応する送信先（複数一致し得る）を判定する。抽出結果と
-     * 送信先判定の両方が必要な箇所（kintone登録・受信ログ記録・SMS検索画面・テスト送信など）は、
-     * 抽出方法（ルールベース／AI）のずれで登録内容と振り分け結果が食い違わないよう必ずこれを使うこと。
+     * SMS本文から[SmsParts]を抽出し、対応する送信先（複数一致し得る）を判定する。抽出結果と振り分けの
+     * 両方が必要な箇所は、ずれないよう必ずこれを使うこと。
      *
-     * [continuationEnabled]がtrueの場合、[sender]と同じ送信元から過去に一度でも抽出状況が正常なSMS
-     * （[ContinuationStore]、[continuationScope]が[ContinuationScope.UNLIMITED]なら日付は問わない）
-     * が届いていれば、今回のSMS自体の抽出結果（本文単体で解析できるかどうか）に関わらず、常にその直近1件
-     * から会社名・氏名を引き継ぐ（内容は今回の本文そのもの）。送信先はその会社名を現在の送信先
-     * ルールに通して都度判定する（[findSendTargets]）ため、送信先の設定を変更・削除
-     * すれば継続SMSの振り分け先にも即座に反映される。一度識別できた送信元は[continuationScope]の
-     * 範囲内でずっと同じ会社名・氏名として扱う。
-     * [continuationEnabled]がfalse、または該当する過去のSMSが無い送信元は、今回の本文を実際に
-     * 解析して振り分ける。本文単体で解析する場合、抽出直後（送信先の判定より前）に[applyCompanyNameConversion]
-     * で会社名変換を一度だけ適用するため、戻り値の[SmsResolution.smsParts]の会社名は既に変換済みで、
-     * 送信先の判定・[ContinuationStore]への登録・ログ表示・kintoneへの送信のいずれもこの値をそのまま使えばよい。
-     * 会社名の抽出が無効な場合（[companyNameExtractionEnabled]がfalse）は本文から会社名・氏名を
-     * 抽出せず、振り分けも行わずにすべての送信先へ送る。会社名には先頭の送信先の「会社名」
-     * （[SendTarget.companyName]）を使う。
-     * この関数自体は[ContinuationStore]を更新しない（SMS検索画面のプレビュー表示
-     * など、実際の受信・送信を伴わない呼び出しからも使われるため）。実際に受信・送信を処理する側
-     * （[SmsReceiver]・[KintoneUploadWorker]）が、抽出状況が正常だった場合にのみ更新すること
+     * - 引き継ぎ：[continuationEnabled]で同一送信元の直近の抽出成功結果があれば、その会社名・氏名を
+     *   引き継いで[isContinuation]をtrueにする（本文は今回分）。送信先は引き継いだ会社名を現在の送信先
+     *   ルールに通して都度判定するため、設定の変更・削除が即時反映される。
+     * - 通常解析：本文を解析し、抽出直後に会社名変換（[applyCompanyNameConversion]）を一度適用する。
+     *   以降は戻り値の会社名をそのまま使えばよい。
+     * - 会社名抽出が無効：[companyNameExtractionEnabled]がfalse。本文から抽出せず振り分けもせず、
+     *   全送信先へ送る。共有[SmsParts]の会社名は先頭の送信先の設定値（変換済み）をプレースホルダとし、
+     *   kintone登録・送信ログでは[KintoneUploadWorker]が送信先ごとの設定値を使う。
+     *
+     * この関数自体は[ContinuationStore]を更新しない（プレビューなど送信を伴わない呼び出しからも使われる）。
+     * 更新は受信・送信を処理する[SmsReceiver]・[KintoneUploadWorker]が、抽出成功時にのみ行うこと。
      */
     suspend fun resolveSendTargets(
         context: Context,
@@ -749,6 +742,9 @@ object SettingsStore {
         } else {
             loadSendTargets(context)
         }
+        // 会社名抽出が無効な場合は本文から会社名を抽出しないため、共有SmsPartsには先頭の送信先の会社名を
+        // 変換適用した値をプレースホルダとして入れる（検索画面・受信ログなど送信先ごとに分かれない表示用）。
+        // 実際のkintone登録・送信ログではKintoneUploadWorkerが送信先ごとの「会社名」を使う
         val companyNameSource = if (companyNameExtractionEnabled) {
             extracted.companyName
         } else {
