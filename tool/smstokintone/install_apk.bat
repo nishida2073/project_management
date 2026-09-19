@@ -65,5 +65,5 @@ echo ============================================
 echo  インストールが完了しました。
 echo ============================================
 
-timeout /t 5 /nobreak >nul
+rem timeout /t 5 /nobreak >nul
 endlocal

@@ -87,5 +87,5 @@ echo [警告] 7-Zipが見つからないため、配布用ZIPの作成をスキップしました。
 
 :after_zip
 
-timeout /t 5 /nobreak >nul
+rem timeout /t 5 /nobreak >nul
 endlocal
