@@ -33,7 +33,6 @@
   },
   "sendTargetConfig": [
     {
-      "id": "00000000-0000-0000-0000-000000000000",
       "name": "（例）本社",
       "companyName": "NTTデータユニバーシティ",
       "keywords": [
