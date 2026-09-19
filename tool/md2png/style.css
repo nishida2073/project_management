@@ -35,10 +35,10 @@ th { background: #f3f5f7; }
    この注意書き形式は原稿間で共通のため、ここで共通定義する */
 blockquote {
   margin: 1rem 0;
-  padding: 0.5rem 1rem 0.6rem;
-  background: #fff8e1;
-  border: 1px solid #e8d27a;
-  border-left: 6px solid #e6b800;
+  padding: 0.6rem 1rem 0.7rem;
+  background: #fff3cd;
+  border: 1px solid #ffe08a;
+  border-left: 6px solid #ffbf00;
   border-radius: 4px;
   break-inside: avoid;
 }
@@ -46,7 +46,7 @@ blockquote > p:first-child {
   margin: 0;
 }
 blockquote > p:first-child strong {
-  color: #7a5a00;
+  color: #664d03;
   font-size: 1.05em;
 }
 blockquote > p:not(:first-child) {
@@ -55,6 +55,12 @@ blockquote > p:not(:first-child) {
 blockquote > ul {
   margin: 0.2rem 0 0;
   padding-left: 1.5rem;
+}
+/* 注意欄の内側のコード（appConfig 等）は共通のcodeスタイル（グレー #f5f5f5）だと
+   黄色い欄の中でグレーの箱に見えてしまうため、欄の色に合わせた金色に変える */
+blockquote code {
+  background-color: #f0cf6a;
+  color: #3a2c00;
 }
 
 /* ==================== 目次の設定 ==================== */
