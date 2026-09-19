@@ -59,11 +59,10 @@
   ],
   "senderInfoConfig": [
     {
-      "senderKey": "012345678",
+      "senderAddress": "09012345678",
       "companyName": "（例）NTTデータユニバーシティ",
       "userName": "（例）ユニバ太郎",
-      "timestampMillis": 0,
-      "senderAddress": "09012345678"
+      "timestampMillis": 0
     }
   ]
 }

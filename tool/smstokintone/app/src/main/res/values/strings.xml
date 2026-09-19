@@ -299,7 +299,7 @@
     <string name="dialog_message_import_file_read_failed">ファイルを読み込めませんでした</string>
     <string name="dialog_message_import_invalid_json">ファイルの形式が正しくありません（JSONとして読み込めません）。\n\n%1$s</string>
     <string name="message_import_no_section">アプリの設定・送信先の設定・送信元情報のいずれも含まれていないため、反映する内容がありません</string>
-    <string name="message_import_sender_key_required">送信元情報の%1$d件目にsenderKey（またはsenderAddress）がありません</string>
+    <string name="message_import_sender_address_required">送信元情報の%1$d件目にsenderAddressがありません</string>
     <string name="label_settings_export">エクスポート</string>
     <string name="settings_export_description">現在のアプリ設定・送信先の設定・送信元情報を、インポートできる形式のJSONファイルとしてまとめて書き出します。</string>
     <string name="btn_export_settings">エクスポート</string>

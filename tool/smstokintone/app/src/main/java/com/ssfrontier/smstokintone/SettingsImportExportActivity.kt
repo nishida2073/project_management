@@ -82,14 +82,13 @@ class SettingsImportExportActivity : AppCompatActivity() {
             }
         }
         val senderInfo = JSONArray().apply {
-            ContinuationStore.getAll(this@SettingsImportExportActivity).forEach { (senderKey, entry) ->
+            ContinuationStore.getAll(this@SettingsImportExportActivity).forEach { (_, entry) ->
                 put(
                     JSONObject()
-                        .put("senderKey", senderKey)
+                        .put("senderAddress", entry.senderAddress)
                         .put("companyName", entry.companyName)
                         .put("userName", entry.userName)
                         .put("timestampMillis", entry.timestampMillis)
-                        .put("senderAddress", entry.senderAddress)
                 )
             }
         }
@@ -172,11 +171,9 @@ class SettingsImportExportActivity : AppCompatActivity() {
         for (i in 0 until array.length()) {
             val obj = array.getJSONObject(i)
             val senderAddress = obj.optString("senderAddress", "")
-            val senderKey = obj.optString("senderKey").ifBlank {
-                SmsMatching.normalizeSenderKey(senderAddress)
-            }
+            val senderKey = SmsMatching.normalizeSenderKey(senderAddress)
             if (senderKey.isBlank()) {
-                throw JSONException(getString(R.string.message_import_sender_key_required, i + 1))
+                throw JSONException(getString(R.string.message_import_sender_address_required, i + 1))
             }
             entries[senderKey] = ContinuationStore.Entry(
                 companyName = obj.optString("companyName", ""),

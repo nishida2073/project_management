@@ -30,6 +30,33 @@ table { border-collapse: collapse; margin: 1rem 0 1rem 1rem; }
 th, td { border: 1px solid #d3d9df; padding: 0.4rem 0.8rem; }
 th { background: #f3f5f7; }
 
+/* ==================== 「注意」ブロックの設定 ==================== */
+/* Markdownの「> **注意**」ブロック（blockquote）を、目立つ注意書きの欄として表示する。
+   この注意書き形式は原稿間で共通のため、ここで共通定義する */
+blockquote {
+  margin: 1rem 0;
+  padding: 0.5rem 1rem 0.6rem;
+  background: #fff8e1;
+  border: 1px solid #e8d27a;
+  border-left: 6px solid #e6b800;
+  border-radius: 4px;
+  break-inside: avoid;
+}
+blockquote > p:first-child {
+  margin: 0;
+}
+blockquote > p:first-child strong {
+  color: #7a5a00;
+  font-size: 1.05em;
+}
+blockquote > p:not(:first-child) {
+  margin: 0.2rem 0 0;
+}
+blockquote > ul {
+  margin: 0.2rem 0 0;
+  padding-left: 1.5rem;
+}
+
 /* ==================== 目次の設定 ==================== */
 /* build_pdf.js --toc: 表紙の直後に挿入する目次ページ */
 .toc-page { height: 267mm; break-after: page; overflow: hidden; }
