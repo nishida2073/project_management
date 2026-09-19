@@ -1,4 +1,4 @@
-# インポート・エクスポート用の設定ファイル
+﻿# インポート・エクスポート用の設定ファイル
 
 ## 設定ファイルについて
 
@@ -35,38 +35,38 @@
 
 #### 設定内容
 
-| キー | 意味 | 利用できる値 | 例 |
-| --- | --- | --- | --- |
-| `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false` | `true` |
-| `sendExtractionFailedEnabled` | 自動送信時、会社名・氏名を抽出できなかったSMSも送信するか | `true` / `false` | `false` |
-| `sendExtractionNotPerformedEnabled` | 自動送信時、抽出状況が未実施（継続SMS）のSMSも送信するか | `true` / `false` | `true` |
-| `searchExtractionFailedEnabled` | SMS検索画面で抽出異常のSMSを選択可能にするか | `true` / `false` | `false` |
-| `searchExtractionNotPerformedEnabled` | SMS検索画面で抽出未実施（継続SMS）のSMSを選択可能にするか | `true` / `false` | `true` |
-| `autoReplyExtractionFailedEnabled` | 自動受信時、抽出異常のSMSへ自動返信するか | `true` / `false` | `false` |
-| `autoReplyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒） | `10` |
-| `autoRefreshEnabled` | ログ画面（送信履歴）を自動再読み込みするか | `true` / `false` | `true` |
-| `autoRefreshIntervalSeconds` | 自動再読み込みの間隔 | 整数（秒） | `5` |
-| `smsMatchToleranceSeconds` | 自動受信SMSのログと端末上のSMSを突き合わせる許容範囲 | 整数（秒） | `15` |
-| `bodyExcerptLength` | ログ一覧に表示する本文抜粋の文字数 | 整数 | `100` |
-| `continuationEnabled` | 継続SMSの引き継ぎ機能を有効にするか | `true` / `false` | `true` |
-| `continuationScope` | 引き継ぎをどこまで遡るか | `UNLIMITED`（過去に一度でも抽出正常なら常に引き継ぎ）／ `SAME_DAY`（同暦日のみ） | `UNLIMITED` |
-| `continuationShowUserNameEnabled` | 継続SMSについて送信元電話番号の代わりに引き継いだ氏名を表示するか | `true` / `false` | `true` |
-| `themeMode` | アプリの配色モード | `LIGHT` / `DARK` | `LIGHT` |
-| `smsSearchDateRangeDays` | SMS検索画面を開いた際の受信日の範囲 | 整数（日） | `1` |
-| `searchFiltersVisibleByDefault` | SMS検索画面を開いた際に検索条件エリアを表示した状態にするか | `true` / `false` | `true` |
-| `smsExtractionSuccessReplyBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列 | `"NTTデータユニバーシティ\n運営事務局です。\n"` |
-| `smsExtractionFailedReplyBody` | 抽出失敗のSMSへの返信時に使う文言 | 文字列 | `"…（記入例）…\nここに内容を入力"` |
-| `defaultSendTargetFilterId` | SMS検索画面の「送信先」フィルタの初期値 | 送信先ID／ `null`（すべて）／ `"__filter_key_unset__"`（未設定） | `null` |
-| `aiExtractionEnabled` | 本文の会社名・氏名の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を使うか。非対応端末では自動的にルールベースへ | `true` / `false` | `false` |
-| `companyNameExtractionEnabled` | 本文から会社名・氏名を抽出するか。`false` の場合は抽出せず全送信先へ送る | `true` / `false` | `true` |
-| `companyNameAutoConversionEnabled` | 抽出した会社名に、英数字を半角大文字・それ以外を全角へ統一する変換を適用するか | `true` / `false` | `false` |
-| `companyNameFixedConversions` | 会社名の固定変換ルールの配列。先頭から順に `from` を `to` へ置換 | 変換ルールの配列／ `[]` | `[{"from": "ユニバ", "to": "ユニバーシティ"}]` |
-| `defaultSendNoneOnlyEnabled` | SMS検索画面を開いた際の「送信」の「未」チェックを初期ONにするか | `true` / `false` | `false` |
-| `defaultExtractionFailedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「異常」チェックを初期ONにするか | `true` / `false` | `false` |
-| `defaultExtractionSucceededOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「正常」チェックを初期ONにするか | `true` / `false` | `false` |
-| `defaultExtractionNotPerformedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「未実施」チェックを初期ONにするか | `true` / `false` | `false` |
-| `defaultSentAutoOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（自動）」チェックを初期ONにするか | `true` / `false` | `false` |
-| `defaultSentManualOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（手動）」チェックを初期ONにするか | `true` / `false` | `false` |
+| キー | 意味 | 利用できる値 |
+| --- | --- | --- |
+| `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false`<br><br>例）`true` |
+| `sendExtractionFailedEnabled` | 自動送信時、会社名・氏名を抽出できなかったSMSも送信するか | `true` / `false`<br><br>例）`false` |
+| `sendExtractionNotPerformedEnabled` | 自動送信時、抽出状況が未実施（継続SMS）のSMSも送信するか | `true` / `false`<br><br>例）`true` |
+| `searchExtractionFailedEnabled` | SMS検索画面で抽出異常のSMSを選択可能にするか | `true` / `false`<br><br>例）`false` |
+| `searchExtractionNotPerformedEnabled` | SMS検索画面で抽出未実施（継続SMS）のSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
+| `autoReplyExtractionFailedEnabled` | 自動受信時、抽出異常のSMSへ自動返信するか | `true` / `false`<br><br>例）`false` |
+| `autoReplyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
+| `autoRefreshEnabled` | ログ画面（送信履歴）を自動再読み込みするか | `true` / `false`<br><br>例）`true` |
+| `autoRefreshIntervalSeconds` | 自動再読み込みの間隔 | 整数（秒）<br><br>例）`5` |
+| `smsMatchToleranceSeconds` | 自動受信SMSのログと端末上のSMSを突き合わせる許容範囲 | 整数（秒）<br><br>例）`15` |
+| `bodyExcerptLength` | ログ一覧に表示する本文抜粋の文字数 | 整数<br><br>例）`100` |
+| `continuationEnabled` | 継続SMSの引き継ぎ機能を有効にするか | `true` / `false`<br><br>例）`true` |
+| `continuationScope` | 引き継ぎをどこまで遡るか | `UNLIMITED`（過去に一度でも抽出正常なら常に引き継ぎ）／ `SAME_DAY`（同暦日のみ）<br><br>例）`UNLIMITED` |
+| `continuationShowUserNameEnabled` | 継続SMSについて送信元電話番号の代わりに引き継いだ氏名を表示するか | `true` / `false`<br><br>例）`true` |
+| `themeMode` | アプリの配色モード | `LIGHT` / `DARK`<br><br>例）`LIGHT` |
+| `smsSearchDateRangeDays` | SMS検索画面を開いた際の受信日の範囲 | 整数（日）<br><br>例）`1` |
+| `searchFiltersVisibleByDefault` | SMS検索画面を開いた際に検索条件エリアを表示した状態にするか | `true` / `false`<br><br>例）`true` |
+| `smsExtractionSuccessReplyBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列<br><br>例）`"NTTデータユニバーシティ\n運営事務局です。\n"` |
+| `smsExtractionFailedReplyBody` | 抽出失敗のSMSへの返信時に使う文言 | 文字列<br><br>例）`"…（記入例）…\nここに内容を入力"` |
+| `defaultSendTargetFilterId` | SMS検索画面の「送信先」フィルタの初期値 | 送信先ID／ `null`（すべて）／ `"__filter_key_unset__"`（未設定）<br><br>例）`null` |
+| `aiExtractionEnabled` | 本文の会社名・氏名の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を使うか。非対応端末では自動的にルールベースへ | `true` / `false`<br><br>例）`false` |
+| `companyNameExtractionEnabled` | 本文から会社名・氏名を抽出するか。`false` の場合は抽出せず全送信先へ送る | `true` / `false`<br><br>例）`true` |
+| `companyNameAutoConversionEnabled` | 抽出した会社名に、英数字を半角大文字・それ以外を全角へ統一する変換を適用するか | `true` / `false`<br><br>例）`false` |
+| `companyNameFixedConversions` | 会社名の固定変換ルールの配列。先頭から順に `from` を `to` へ置換 | 変換ルールの配列／ `[]`<br><br>例）`[{"from": "ユニバ", "to": "ユニバーシティ"}]` |
+| `defaultSendNoneOnlyEnabled` | SMS検索画面を開いた際の「送信」の「未」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `defaultExtractionFailedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「異常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `defaultExtractionSucceededOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「正常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `defaultExtractionNotPerformedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「未実施」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `defaultSentAutoOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（自動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `defaultSentManualOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（手動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 
 ---
 
@@ -78,30 +78,29 @@
 > - インポート時は送信先名をキーに既存の送信先へマージされます。
 > - 既存と同じ送信先名の送信先があればその内容が上書きされ、なければ新規追加されます。
 > - ファイルに含まれない既存の送信先は変更されません。
+> - `id` は省略可能です。省略した場合はアプリが自動で割り当てます。
 
 #### 設定内容
 
-| キー | 意味 | 利用できる値 | 例 |
-| --- | --- | --- | --- |
-| `id` | 送信先を一意に識別するID（UUID）。省略可 | UUID文字列 | `"00000000-0000-0000-0000-000000000000"` |
-| `name` | 送信先の表示名 | 文字列 | `"本社"` |
-| `companyName` | この送信先の会社名（本文抽出が無効な送信先判定で使われる） | 文字列 | `"NTTデータユニバーシティ"` |
-| `keywords` | 振り分け条件のキーワード配列。いずれかが会社名に含まれればこの送信先へ。**空配列＝フォールバック送信先** | 文字列の配列 | `["NTTデータ", "ユニバーシティ"]` |
-| `subdomain` | kintoneのサブドメイン（`https://{subdomain}.cybozu.com` のホスト名部分） | 文字列 | `"univ-kyousai-{X}"` |
-| `appId` | kintoneアプリのID | 文字列 | `"1"` |
-| `authMethod` | kintoneへの接続認証方式 | `PASSWORD` / `API_TOKEN` | `PASSWORD` |
-| `apiToken` | APIトークン認証（`API_TOKEN`）時の値。パスワード認証時は未使用 | 文字列 | `""` |
-| `loginName` | パスワード認証（`PASSWORD`）時のログイン名。APIトークン認証時は未使用 | 文字列 | `"kintoneのログイン名"` |
-| `loginPassword` | パスワード認証（`PASSWORD`）時のパスワード。APIトークン認証時は未使用 | 文字列 | `"kintoneのパスワード"` |
-| `fieldSender` | 送信元電話番号を書き込むkintoneフィールドのフィールドコード | 文字列 | `"sender"` |
-| `fieldHistory` | 本文（複数SMSを連結する場合は履歴として蓄積）を書き込むフィールドコード | 文字列 | `"history"` |
-| `fieldDatetime` | 最終受信日時を書き込む・既存レコード検索にも使うフィールドコード | 文字列 | `"receive_datetime"` |
-| `fieldType` | 登録種別を書き込む・既存レコード検索の絞り込みにも使うフィールドコード | 文字列 | `"registration_type"` |
-| `updateToleranceHours` | 同一送信元の既存レコードへ追記するか判定する許容時間。`updateToleranceMode` が `HOURS` のときのみ使う | 整数（時間） | `5` |
-| `updateToleranceMode` | 既存レコードへ追記するか新規登録するかの判定条件 | `SAME_DATE`（端末の暦日が同じ）／ `HOURS`（許容時間以内） | `SAME_DATE` |
-| `fieldCompanyName` | 抽出した会社名を書き込むフィールドコード。空なら書き込まない | 文字列 | `"company_name"` |
-| `fieldUserName` | 抽出した氏名を書き込むフィールドコード。空なら書き込まない | 文字列 | `"user_name"` |
-| `fieldBody` | SMS本文全体（原文）を書き込むフィールドコード。空なら書き込まない | 文字列 | `"body"` |
+| キー | 意味 | 利用できる値 |
+| --- | --- | --- |
+| `id` | 送信先を一意に識別するID（UUID） | UUID文字列<br><br>例）`"00000000-0000-0000-0000-000000000000"` |
+| `name` | 送信先の表示名 | 文字列<br><br>例）`"本社"` |
+| `companyName` | この送信先の会社名 | 文字列<br><br>例）`"NTTデータユニバーシティ"` |
+| `keywords` | 振り分け条件のキーワード配列。<br>**空配列の場合:デフォルトの送信先** | 文字列の配列<br><br>例）`["NTTデータ", "ユニバーシティ"]` |
+| `subdomain` | kintoneのサブドメイン | 文字列<br><br>例）`"univ-kyousai-{X}"` |
+| `appId` | kintoneアプリのID | 文字列<br><br>例）`"1"` |
+| `loginName` | パスワード認証（kintoneのログイン名とパスワード）でkintoneへ接続する際のログイン名 | 文字列<br><br>例）`"kintoneのログイン名"` |
+| `loginPassword` | パスワード認証で使うkintoneのパスワード | 文字列<br><br>例）`"kintoneのパスワード"` |
+| `fieldSender` | 送信元電話番号を書き込むkintoneフィールドのフィールドコード | 文字列<br><br>例）`"sender"` |
+| `fieldHistory` | 本文（複数SMSを連結する場合は履歴として蓄積）を書き込むフィールドコード | 文字列<br><br>例）`"history"` |
+| `fieldDatetime` | 最終受信日時を書き込む・既存レコード検索にも使うフィールドコード | 文字列<br><br>例）`"receive_datetime"` |
+| `fieldType` | 登録種別を書き込む・既存レコード検索の絞り込みにも使うフィールドコード | 文字列<br><br>例）`"registration_type"` |
+| `updateToleranceHours` | 同一送信元の既存レコードへ追記するか判定する許容時間。`updateToleranceMode` が `HOURS` のときのみ使う | 整数（時間）<br><br>例）`5` |
+| `updateToleranceMode` | 既存レコードへ追記するか新規登録するかの判定条件 | `SAME_DATE`（端末の暦日が同じ）／ `HOURS`（許容時間以内）<br><br>例）`SAME_DATE` |
+| `fieldCompanyName` | 抽出した会社名を書き込むフィールドコード。空なら書き込まない | 文字列<br><br>例）`"company_name"` |
+| `fieldUserName` | 抽出した氏名を書き込むフィールドコード。空なら書き込まない | 文字列<br><br>例）`"user_name"` |
+| `fieldBody` | SMS本文全体（原文）を書き込むフィールドコード。空なら書き込まない | 文字列<br><br>例）`"body"` |
 
 
 ---
@@ -115,12 +114,12 @@
 
 #### 設定内容
 
-| キー | 意味 | 例・利用できる値 |
+| キー | 意味 | 利用できる値 |
 | --- | --- | --- |
-| `senderAddress` | 元の送信元アドレス（電話番号など）。送信元キーの自動生成と編集画面での表示に使う | `"09012345678"` |
-| `companyName` | 引き継ぐ会社名 | `"NTTデータユニバーシティ"` |
-| `userName` | 引き継ぐ氏名 | `"ユニバ太郎"` |
-| `timestampMillis` | そのSMSの受信日時（Unixエポックミリ秒）。省略時は取り込み時点の日時を使う | `0`（初期例）／ `"1726704000000"` など |
+| `senderAddress` | 元の送信元アドレス（電話番号など）。送信元キーの自動生成と編集画面での表示に使う | 文字列<br><br>例）`"09012345678"` |
+| `companyName` | 引き継ぐ会社名 | 文字列<br><br>例）`"NTTデータユニバーシティ"` |
+| `userName` | 引き継ぐ氏名 | 文字列<br><br>例）`"ユニバ太郎"` |
+| `timestampMillis` | そのSMSの受信日時（Unixエポックミリ秒）。省略時は取り込み時点の日時を使う | 整数（Unixエポックミリ秒）<br><br>例）`0`（初期例）／ `1726704000000` |
 
 ---
 
@@ -170,8 +169,6 @@
       ],
       "subdomain": "univ-kyousai-{X}",
       "appId": "1",
-      "authMethod": "PASSWORD",
-      "apiToken": "",
       "loginName": "kintoneのログイン名",
       "loginPassword": "kintoneのパスワード",
       "fieldSender": "sender",

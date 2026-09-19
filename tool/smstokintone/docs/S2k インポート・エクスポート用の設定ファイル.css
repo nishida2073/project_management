@@ -1,0 +1,13 @@
+/* この原稿固有の追加CSS（build_pdf.js の --extra-css で読み込まれる） */
+
+/* テーブルの文字を一段小さくする（共有style.cssのth,tdより優先） */
+th, td {
+  font-size: 0.875em;
+}
+
+/* テーブルの先頭列（キー）は改行しない */
+th:first-child, td:first-child {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}

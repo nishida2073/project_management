@@ -42,8 +42,6 @@
       ],
       "subdomain": "univ-kyousai-{X}",
       "appId": "1",
-      "authMethod": "PASSWORD",
-      "apiToken": "",
       "loginName": "kintoneのログイン名",
       "loginPassword": "kintoneのパスワード",
       "fieldSender": "sender",

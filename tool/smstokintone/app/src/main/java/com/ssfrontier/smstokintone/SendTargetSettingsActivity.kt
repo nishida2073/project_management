@@ -159,8 +159,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             }.filter { it.isNotEmpty() },
             subdomain = itemBinding.etSubdomain.text.toString().trim(),
             appId = itemBinding.etAppId.text.toString().trim(),
-            authMethod = SettingsStore.AuthMethod.PASSWORD,
-            apiToken = "",
             loginName = itemBinding.etLoginName.text.toString().trim(),
             loginPassword = itemBinding.etLoginPassword.text.toString(),
             fieldSender = itemBinding.etFieldSender.text.toString().trim(),

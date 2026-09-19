@@ -76,19 +76,6 @@ object SettingsStore {
     /** [SendTarget]のリスト全体をJSON配列として保存するキー。[Config]とは別枠で[saveSendTargets]/[loadSendTargets]が読み書きする */
     private const val KEY_SEND_TARGETS = "send_targets"
 
-    /** kintoneへの接続認証方式 */
-    enum class AuthMethod {
-        API_TOKEN,
-        PASSWORD;
-
-        /** [fromName]を提供するコンパニオンオブジェクト */
-        companion object {
-            /** 保存値からの復元用。未知の値やnullは[SendTarget.newEmpty]と同じPASSWORDにフォールバックする */
-            fun fromName(name: String?): AuthMethod =
-                entries.firstOrNull { it.name == name } ?: PASSWORD
-        }
-    }
-
     /**
      * 既存レコードに追記するか新規登録するかを判定する条件（[SendTarget.updateToleranceHours]、
      * [KintoneApi.findExistingRecord]参照）。[SAME_DATE]は最終受信日時が端末の暦日で同じ既存レコードを
@@ -237,13 +224,9 @@ object SettingsStore {
         val subdomain: String,
         /** kintoneアプリのID */
         val appId: String,
-        /** kintoneへの接続認証方式 */
-        val authMethod: AuthMethod,
-        /** APIトークン認証（[AuthMethod.API_TOKEN]）時に使う値。パスワード認証時は未使用 */
-        val apiToken: String,
-        /** パスワード認証（[AuthMethod.PASSWORD]）時に使うログイン名。APIトークン認証時は未使用 */
+        /** パスワード認証（kintoneのログイン名とパスワード）でkintoneへ接続する */
         val loginName: String,
-        /** パスワード認証（[AuthMethod.PASSWORD]）時に使うパスワード。APIトークン認証時は未使用 */
+        /** パスワード認証で使うkintoneのパスワード */
         val loginPassword: String,
         /** 送信元電話番号を書き込むkintoneフィールドのフィールドコード */
         val fieldSender: String,
@@ -280,10 +263,7 @@ object SettingsStore {
             get() {
                 if (name.isBlank() || subdomain.isBlank() || appId.isBlank()) return false
                 if (fieldSender.isBlank() || fieldHistory.isBlank() || fieldDatetime.isBlank() || fieldType.isBlank()) return false
-                return when (authMethod) {
-                    AuthMethod.API_TOKEN -> apiToken.isNotBlank()
-                    AuthMethod.PASSWORD -> loginName.isNotBlank() && loginPassword.isNotBlank()
-                }
+                return loginName.isNotBlank() && loginPassword.isNotBlank()
             }
 
         /**
@@ -309,8 +289,6 @@ object SettingsStore {
                 keywords = emptyList(),
                 subdomain = AppDefaults.NEW_PROFILE_SUBDOMAIN,
                 appId = "",
-                authMethod = AuthMethod.PASSWORD,
-                apiToken = "",
                 loginName = "",
                 loginPassword = "",
                 fieldSender = AppDefaults.NEW_PROFILE_FIELD_SENDER,
@@ -550,8 +528,6 @@ object SettingsStore {
         .put("keywords", JSONArray(sendTarget.keywords))
         .put("subdomain", sendTarget.subdomain)
         .put("appId", sendTarget.appId)
-        .put("authMethod", sendTarget.authMethod.name)
-        .put("apiToken", sendTarget.apiToken)
         .put("loginName", sendTarget.loginName)
         .put("loginPassword", sendTarget.loginPassword)
         .put("fieldSender", sendTarget.fieldSender)
@@ -574,8 +550,6 @@ object SettingsStore {
         } ?: emptyList(),
         subdomain = obj.optString("subdomain", ""),
         appId = obj.optString("appId", ""),
-        authMethod = AuthMethod.fromName(obj.optString("authMethod", "")),
-        apiToken = obj.optString("apiToken", ""),
         loginName = obj.optString("loginName", ""),
         loginPassword = obj.optString("loginPassword", ""),
         fieldSender = obj.optString("fieldSender", ""),
@@ -635,8 +609,6 @@ object SettingsStore {
                     keywords = from.keywords,
                     subdomain = from.subdomain,
                     appId = from.appId,
-                    authMethod = from.authMethod,
-                    apiToken = from.apiToken,
                     loginName = from.loginName,
                     loginPassword = from.loginPassword,
                     fieldSender = from.fieldSender,

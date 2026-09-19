@@ -353,22 +353,16 @@ object KintoneApi {
     }
 
     /**
-     * kintoneの認証ヘッダーを付与する。APIトークン認証は`X-Cybozu-API-Token`、パスワード認証は
-     * `ログイン名:パスワード`をBase64化した`X-Cybozu-Authorization`と、kintone独自のヘッダー名・形式を使う
+     * kintoneの認証ヘッダーを付与する。「ログイン名:パスワード」をBase64化した`X-Cybozu-Authorization`を
+     * kintone固有のヘッダー名・形式で設定する
      */
     private fun addAuthHeader(requestBuilder: Request.Builder, sendTarget: SettingsStore.SendTarget) {
-        when (sendTarget.authMethod) {
-            SettingsStore.AuthMethod.API_TOKEN ->
-                requestBuilder.addHeader("X-Cybozu-API-Token", sendTarget.apiToken)
-            SettingsStore.AuthMethod.PASSWORD -> {
-                val credentials = "${sendTarget.loginName}:${sendTarget.loginPassword}"
-                val encoded = Base64.encodeToString(
-                    credentials.toByteArray(Charsets.UTF_8),
-                    Base64.NO_WRAP
-                )
-                requestBuilder.addHeader("X-Cybozu-Authorization", encoded)
-            }
-        }
+        val credentials = "${sendTarget.loginName}:${sendTarget.loginPassword}"
+        val encoded = Base64.encodeToString(
+            credentials.toByteArray(Charsets.UTF_8),
+            Base64.NO_WRAP
+        )
+        requestBuilder.addHeader("X-Cybozu-Authorization", encoded)
     }
 
     /** [requestBuilder]のリクエストを実行し、成否とレスポンス/例外を[PostResult]に変換する */
