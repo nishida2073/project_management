@@ -143,9 +143,14 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
             }
         }
         if (invalidCard != null) {
+            val messageResId = if (config.companyNameExtractionEnabled) {
+                R.string.dialog_message_continuation_validation_error_extraction_enabled
+            } else {
+                R.string.dialog_message_continuation_validation_error_extraction_disabled
+            }
             AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_validation_error)
-                .setMessage(getString(R.string.dialog_message_continuation_validation_error, invalidCard.senderKey))
+                .setMessage(getString(messageResId, invalidCard.senderKey))
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
             return

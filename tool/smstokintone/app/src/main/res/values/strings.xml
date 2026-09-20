@@ -272,9 +272,10 @@
     <string name="title_continuation_info_settings">引き継ぎ内容の設定</string>
     <string name="hint_continuation_search">キーワードで検索</string>
     <string name="message_continuation_empty">引き継ぎ内容がありません</string>
-    <string name="message_continuation_no_match">一致する引き継ぎ元がありません</string>
+    <string name="message_continuation_no_match">一致する引き継ぎ内容がありません</string>
     <string name="label_continuation_sender">送信元</string>
-    <string name="dialog_message_continuation_validation_error">引き継ぎ元: %1$s\n\n会社名・氏名は必須です</string>
+    <string name="dialog_message_continuation_validation_error_extraction_enabled">引き継ぎ内容: %1$s\n\n会社名・氏名は必須です</string>
+    <string name="dialog_message_continuation_validation_error_extraction_disabled">引き継ぎ内容: %1$s\n\n氏名は必須です</string>
     <string name="dialog_title_continuation_info_save_conflict">保存に失敗しました</string>
     <string name="dialog_message_continuation_info_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
 
