@@ -448,48 +448,53 @@ object SettingsStore {
         .put("defaultSentAutoOnlyEnabled", config.defaultSentAutoOnlyEnabled)
         .put("defaultSentManualOnlyEnabled", config.defaultSentManualOnlyEnabled)
 
-    /** JSONオブジェクトから[Config]を復元 */
-    fun configFromJson(json: JSONObject): Config = Config(
-        sendEnabled = json.optBoolean("sendEnabled", DEFAULT_CONFIG.sendEnabled),
-        sendExtractionFailedEnabled = json.optBoolean("sendExtractionFailedEnabled", DEFAULT_CONFIG.sendExtractionFailedEnabled),
-        sendExtractionNotPerformedEnabled = json.optBoolean("sendExtractionNotPerformedEnabled", DEFAULT_CONFIG.sendExtractionNotPerformedEnabled),
-        searchExtractionFailedEnabled = json.optBoolean("searchExtractionFailedEnabled", DEFAULT_CONFIG.searchExtractionFailedEnabled),
-        searchExtractionNotPerformedEnabled = json.optBoolean("searchExtractionNotPerformedEnabled", DEFAULT_CONFIG.searchExtractionNotPerformedEnabled),
-        autoReplyExtractionFailedEnabled = json.optBoolean("autoReplyExtractionFailedEnabled", DEFAULT_CONFIG.autoReplyExtractionFailedEnabled),
-        autoReplyCooldownSeconds = json.optInt("autoReplyCooldownSeconds", DEFAULT_CONFIG.autoReplyCooldownSeconds),
-        autoRefreshEnabled = json.optBoolean("autoRefreshEnabled", DEFAULT_CONFIG.autoRefreshEnabled),
-        autoRefreshIntervalSeconds = json.optInt("autoRefreshIntervalSeconds", DEFAULT_CONFIG.autoRefreshIntervalSeconds),
-        smsMatchToleranceSeconds = json.optInt("smsMatchToleranceSeconds", DEFAULT_CONFIG.smsMatchToleranceSeconds),
-        bodyExcerptLength = json.optInt("bodyExcerptLength", DEFAULT_CONFIG.bodyExcerptLength),
-        continuationEnabled = json.optBoolean("continuationEnabled", DEFAULT_CONFIG.continuationEnabled),
-        continuationScope = ContinuationScope.fromName(json.optString("continuationScope", "")),
-        continuationShowUserNameEnabled = json.optBoolean("continuationShowUserNameEnabled", DEFAULT_CONFIG.continuationShowUserNameEnabled),
-        themeMode = ThemeMode.fromName(json.optString("themeMode", "")),
-        smsSearchDateRangeDays = json.optInt("smsSearchDateRangeDays", DEFAULT_CONFIG.smsSearchDateRangeDays),
-        searchFiltersVisibleByDefault = json.optBoolean("searchFiltersVisibleByDefault", DEFAULT_CONFIG.searchFiltersVisibleByDefault),
-        smsExtractionSuccessReplyBody = json.optString("smsExtractionSuccessReplyBody", DEFAULT_CONFIG.smsExtractionSuccessReplyBody),
-        smsExtractionFailedReplyBody = json.optString("smsExtractionFailedReplyBody", DEFAULT_CONFIG.smsExtractionFailedReplyBody),
-        defaultSendTargetFilterName = if (json.has("defaultSendTargetFilterName") && !json.isNull("defaultSendTargetFilterName")) {
-            json.optString("defaultSendTargetFilterName")
-        } else {
-            DEFAULT_CONFIG.defaultSendTargetFilterName
-        },
-        aiExtractionEnabled = json.optBoolean("aiExtractionEnabled", DEFAULT_CONFIG.aiExtractionEnabled),
-        companyNameExtractionEnabled = json.optBoolean("companyNameExtractionEnabled", DEFAULT_CONFIG.companyNameExtractionEnabled),
-        companyNameAutoConversionEnabled = json.optBoolean("companyNameAutoConversionEnabled", DEFAULT_CONFIG.companyNameAutoConversionEnabled),
-        companyNameFixedConversions = json.optJSONArray("companyNameFixedConversions")?.let { arr ->
-            (0 until arr.length()).map { i ->
-                val obj = arr.getJSONObject(i)
-                FixedConversion(from = obj.optString("from", ""), to = obj.optString("to", ""))
-            }
-        } ?: DEFAULT_CONFIG.companyNameFixedConversions,
-        defaultSendNoneOnlyEnabled = json.optBoolean("defaultSendNoneOnlyEnabled", DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
-        defaultExtractionFailedOnlyEnabled = json.optBoolean("defaultExtractionFailedOnlyEnabled", DEFAULT_CONFIG.defaultExtractionFailedOnlyEnabled),
-        defaultExtractionSucceededOnlyEnabled = json.optBoolean("defaultExtractionSucceededOnlyEnabled", DEFAULT_CONFIG.defaultExtractionSucceededOnlyEnabled),
-        defaultExtractionNotPerformedOnlyEnabled = json.optBoolean("defaultExtractionNotPerformedOnlyEnabled", DEFAULT_CONFIG.defaultExtractionNotPerformedOnlyEnabled),
-        defaultSentAutoOnlyEnabled = json.optBoolean("defaultSentAutoOnlyEnabled", DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
-        defaultSentManualOnlyEnabled = json.optBoolean("defaultSentManualOnlyEnabled", DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
-    )
+    /** JSONオブジェクトから[Config]を復元。未定義の属性は[existingConfig]の値を保持 */
+    fun configFromJson(json: JSONObject, existingConfig: Config? = null): Config {
+        val fallback = existingConfig ?: DEFAULT_CONFIG
+        return Config(
+            sendEnabled = json.optBoolean("sendEnabled", fallback.sendEnabled),
+            sendExtractionFailedEnabled = json.optBoolean("sendExtractionFailedEnabled", fallback.sendExtractionFailedEnabled),
+            sendExtractionNotPerformedEnabled = json.optBoolean("sendExtractionNotPerformedEnabled", fallback.sendExtractionNotPerformedEnabled),
+            searchExtractionFailedEnabled = json.optBoolean("searchExtractionFailedEnabled", fallback.searchExtractionFailedEnabled),
+            searchExtractionNotPerformedEnabled = json.optBoolean("searchExtractionNotPerformedEnabled", fallback.searchExtractionNotPerformedEnabled),
+            autoReplyExtractionFailedEnabled = json.optBoolean("autoReplyExtractionFailedEnabled", fallback.autoReplyExtractionFailedEnabled),
+            autoReplyCooldownSeconds = json.optInt("autoReplyCooldownSeconds", fallback.autoReplyCooldownSeconds),
+            autoRefreshEnabled = json.optBoolean("autoRefreshEnabled", fallback.autoRefreshEnabled),
+            autoRefreshIntervalSeconds = json.optInt("autoRefreshIntervalSeconds", fallback.autoRefreshIntervalSeconds),
+            smsMatchToleranceSeconds = json.optInt("smsMatchToleranceSeconds", fallback.smsMatchToleranceSeconds),
+            bodyExcerptLength = json.optInt("bodyExcerptLength", fallback.bodyExcerptLength),
+            continuationEnabled = json.optBoolean("continuationEnabled", fallback.continuationEnabled),
+            continuationScope = if (json.has("continuationScope")) ContinuationScope.fromName(json.optString("continuationScope", "")) else fallback.continuationScope,
+            continuationShowUserNameEnabled = json.optBoolean("continuationShowUserNameEnabled", fallback.continuationShowUserNameEnabled),
+            themeMode = if (json.has("themeMode")) ThemeMode.fromName(json.optString("themeMode", "")) else fallback.themeMode,
+            smsSearchDateRangeDays = json.optInt("smsSearchDateRangeDays", fallback.smsSearchDateRangeDays),
+            searchFiltersVisibleByDefault = json.optBoolean("searchFiltersVisibleByDefault", fallback.searchFiltersVisibleByDefault),
+            smsExtractionSuccessReplyBody = json.optString("smsExtractionSuccessReplyBody", fallback.smsExtractionSuccessReplyBody),
+            smsExtractionFailedReplyBody = json.optString("smsExtractionFailedReplyBody", fallback.smsExtractionFailedReplyBody),
+            defaultSendTargetFilterName = if (json.has("defaultSendTargetFilterName") && !json.isNull("defaultSendTargetFilterName")) {
+                json.optString("defaultSendTargetFilterName")
+            } else if (json.has("defaultSendTargetFilterName")) {
+                null
+            } else {
+                fallback.defaultSendTargetFilterName
+            },
+            aiExtractionEnabled = json.optBoolean("aiExtractionEnabled", fallback.aiExtractionEnabled),
+            companyNameExtractionEnabled = json.optBoolean("companyNameExtractionEnabled", fallback.companyNameExtractionEnabled),
+            companyNameAutoConversionEnabled = json.optBoolean("companyNameAutoConversionEnabled", fallback.companyNameAutoConversionEnabled),
+            companyNameFixedConversions = json.optJSONArray("companyNameFixedConversions")?.let { arr ->
+                (0 until arr.length()).map { i ->
+                    val obj = arr.getJSONObject(i)
+                    FixedConversion(from = obj.optString("from", ""), to = obj.optString("to", ""))
+                }
+            } ?: fallback.companyNameFixedConversions,
+            defaultSendNoneOnlyEnabled = json.optBoolean("defaultSendNoneOnlyEnabled", fallback.defaultSendNoneOnlyEnabled),
+            defaultExtractionFailedOnlyEnabled = json.optBoolean("defaultExtractionFailedOnlyEnabled", fallback.defaultExtractionFailedOnlyEnabled),
+            defaultExtractionSucceededOnlyEnabled = json.optBoolean("defaultExtractionSucceededOnlyEnabled", fallback.defaultExtractionSucceededOnlyEnabled),
+            defaultExtractionNotPerformedOnlyEnabled = json.optBoolean("defaultExtractionNotPerformedOnlyEnabled", fallback.defaultExtractionNotPerformedOnlyEnabled),
+            defaultSentAutoOnlyEnabled = json.optBoolean("defaultSentAutoOnlyEnabled", fallback.defaultSentAutoOnlyEnabled),
+            defaultSentManualOnlyEnabled = json.optBoolean("defaultSentManualOnlyEnabled", fallback.defaultSentManualOnlyEnabled)
+        )
+    }
 
     /** [SendTarget]のデフォルト値を持つインスタンスを返す（UUIDは新規採番） */
     private fun createDefaultSendTarget(): SendTarget = SendTarget(
@@ -531,29 +536,33 @@ object SettingsStore {
         .put("fieldUserName", sendTarget.fieldUserName)
         .put("fieldBody", sendTarget.fieldBody)
 
-    /** JSONオブジェクトから[SendTarget]を復元（新規UUIDを採番） */
-    fun sendTargetFromJson(obj: JSONObject): SendTarget {
-        val default = createDefaultSendTarget()
+    /** JSONオブジェクトから[SendTarget]を復元。未定義の属性は[existingSendTarget]の値を保持 */
+    fun sendTargetFromJson(obj: JSONObject, existingSendTarget: SendTarget? = null): SendTarget {
+        val default = existingSendTarget ?: createDefaultSendTarget()
         return default.copy(
-            id = UUID.randomUUID().toString(),
-            name = obj.optString("name", default.name),
-            companyName = obj.optString("companyName", default.companyName),
-            keywords = obj.optJSONArray("keywords")?.let { array ->
-                (0 until array.length()).map { array.getString(it) }
-            } ?: default.keywords,
-            subdomain = obj.optString("subdomain", default.subdomain),
-            appId = obj.optString("appId", default.appId),
-            loginName = obj.optString("loginName", default.loginName),
-            loginPassword = obj.optString("loginPassword", default.loginPassword),
-            fieldSender = obj.optString("fieldSender", default.fieldSender),
-            fieldHistory = obj.optString("fieldHistory", default.fieldHistory),
-            fieldDatetime = obj.optString("fieldDatetime", default.fieldDatetime),
-            fieldType = obj.optString("fieldType", default.fieldType),
-            updateToleranceHours = obj.optInt("updateToleranceHours", default.updateToleranceHours),
-            updateToleranceMode = UpdateToleranceMode.fromName(obj.optString("updateToleranceMode", "")) ?: default.updateToleranceMode,
-            fieldCompanyName = obj.optString("fieldCompanyName", default.fieldCompanyName),
-            fieldUserName = obj.optString("fieldUserName", default.fieldUserName),
-            fieldBody = obj.optString("fieldBody", default.fieldBody)
+            id = existingSendTarget?.id ?: UUID.randomUUID().toString(),
+            name = if (obj.has("name")) obj.optString("name", default.name) else default.name,
+            companyName = if (obj.has("companyName")) obj.optString("companyName", default.companyName) else default.companyName,
+            keywords = if (obj.has("keywords")) {
+                obj.optJSONArray("keywords")?.let { array ->
+                    (0 until array.length()).map { array.getString(it) }
+                } ?: default.keywords
+            } else {
+                default.keywords
+            },
+            subdomain = if (obj.has("subdomain")) obj.optString("subdomain", default.subdomain) else default.subdomain,
+            appId = if (obj.has("appId")) obj.optString("appId", default.appId) else default.appId,
+            loginName = if (obj.has("loginName")) obj.optString("loginName", default.loginName) else default.loginName,
+            loginPassword = if (obj.has("loginPassword")) obj.optString("loginPassword", default.loginPassword) else default.loginPassword,
+            fieldSender = if (obj.has("fieldSender")) obj.optString("fieldSender", default.fieldSender) else default.fieldSender,
+            fieldHistory = if (obj.has("fieldHistory")) obj.optString("fieldHistory", default.fieldHistory) else default.fieldHistory,
+            fieldDatetime = if (obj.has("fieldDatetime")) obj.optString("fieldDatetime", default.fieldDatetime) else default.fieldDatetime,
+            fieldType = if (obj.has("fieldType")) obj.optString("fieldType", default.fieldType) else default.fieldType,
+            updateToleranceHours = if (obj.has("updateToleranceHours")) obj.optInt("updateToleranceHours", default.updateToleranceHours) else default.updateToleranceHours,
+            updateToleranceMode = if (obj.has("updateToleranceMode")) UpdateToleranceMode.fromName(obj.optString("updateToleranceMode", "")) else default.updateToleranceMode,
+            fieldCompanyName = if (obj.has("fieldCompanyName")) obj.optString("fieldCompanyName", default.fieldCompanyName) else default.fieldCompanyName,
+            fieldUserName = if (obj.has("fieldUserName")) obj.optString("fieldUserName", default.fieldUserName) else default.fieldUserName,
+            fieldBody = if (obj.has("fieldBody")) obj.optString("fieldBody", default.fieldBody) else default.fieldBody
         )
     }
 
@@ -603,37 +612,28 @@ object SettingsStore {
     }
 
     /**
-     * インポート送信先を既存リストにマージする。送信先名をキーに既存送信先を上書き更新し、
-     * 新規送信先は追加する。
+     * インポート送信先を既存リストにマージする。送信先名をキーに既存送信先とマージし、
+     * JSON に含まれない属性は既存値を保持。新規送信先は追加する。
      *
      * @param context アプリケーションコンテキスト
-     * @param imported マージ対象のインポート送信先リスト
+     * @param importedJsonArray インポート元のJSON配列（属性の有無を確認するため）
      * @return マージされた送信先リスト
      */
-    fun mergeImportSendTargets(context: Context, imported: List<SendTarget>): List<SendTarget> {
+    fun mergeImportSendTargets(context: Context, importedJsonArray: JSONArray): List<SendTarget> {
         val merged = loadSendTargets(context).toMutableList()
-        imported.forEach { from ->
-            val index = merged.indexOfFirst { it.name == from.name }
-            if (index >= 0) {
-                merged[index] = merged[index].copy(
-                    companyName = from.companyName,
-                    keywords = from.keywords,
-                    subdomain = from.subdomain,
-                    appId = from.appId,
-                    loginName = from.loginName,
-                    loginPassword = from.loginPassword,
-                    fieldSender = from.fieldSender,
-                    fieldHistory = from.fieldHistory,
-                    fieldDatetime = from.fieldDatetime,
-                    fieldType = from.fieldType,
-                    updateToleranceHours = from.updateToleranceHours,
-                    updateToleranceMode = from.updateToleranceMode,
-                    fieldCompanyName = from.fieldCompanyName,
-                    fieldUserName = from.fieldUserName,
-                    fieldBody = from.fieldBody
-                )
+        for (i in 0 until importedJsonArray.length()) {
+            val obj = importedJsonArray.getJSONObject(i)
+            val importedName = obj.optString("name", "")
+            val index = merged.indexOfFirst { it.name == importedName }
+            val mergedTarget = if (index >= 0) {
+                sendTargetFromJson(obj, merged[index])
             } else {
-                merged.add(from)
+                sendTargetFromJson(obj, null)
+            }
+            if (index >= 0) {
+                merged[index] = mergedTarget
+            } else {
+                merged.add(mergedTarget)
             }
         }
         return merged

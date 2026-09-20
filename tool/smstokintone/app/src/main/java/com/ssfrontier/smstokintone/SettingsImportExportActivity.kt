@@ -22,8 +22,8 @@ import java.util.Locale
  * 現在の設定を同じ形式のJSONファイルへまとめて書き出す画面。
  * インポートはファイルを選択して内容をプレビューで確認し、「この内容で設定する」で反映する。
  * ファイルに含まれるセクションだけが反映され、含まれないセクションは変更されない。
- * 送信先（[SettingsStore.SendTarget]）は送信先名をキーに既存へマージされ（[SettingsStore.mergeImportSendTargets]）、
- * アプリ設定・引き継ぎ内容はセクション単位で上書きされる。
+ * アプリ設定（[SettingsStore.Config]）、送信先（[SettingsStore.SendTarget]）、引き継ぎ内容（[ContinuationStore.Entry]）は
+ * すべてマージされ、ファイルに含まれない属性・エントリは既存値が保持される。
  * エクスポートはインポートと互換のJSON（[buildExportJson]）を保存先に書き出す
  */
 class SettingsImportExportActivity : AppCompatActivity() {
@@ -42,7 +42,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
      * ファイルから読み込んだ反映対象。ファイルに含まれないセクションはnull。
      */
     private var importedConfig: SettingsStore.Config? = null
-    private var importedSendTargets: List<SettingsStore.SendTarget>? = null
+    private var importedSendTargets: List<JSONObject>? = null
     private var importedContinuationInfo: Map<String, ContinuationStore.Entry>? = null
 
     /**
@@ -160,14 +160,14 @@ class SettingsImportExportActivity : AppCompatActivity() {
         val root = JSONObject(text)
         importedConfig = root.optJSONObject("appConfig")
             ?.takeIf { it.length() > 0 }
-            ?.let { SettingsStore.configFromJson(it) }
-        val sendTargets = root.optJSONArray("sendTargetConfig")?.let { array ->
-            (0 until array.length()).map { i -> SettingsStore.sendTargetFromJson(array.getJSONObject(i)) }
-        }
-        if (sendTargets != null) {
-            // 同名が増えた既存はマージ時に最後の内容で上書きされ続けるため、黙って通すと
-            // ファイル内の重複がそのまま採用されることになる。不正なファイルはここで止める
-            val duplicateNames = sendTargets.groupBy { it.name }
+            ?.let { SettingsStore.configFromJson(it, SettingsStore.load(this)) }
+        val sendTargetArray = root.optJSONArray("sendTargetConfig")
+        if (sendTargetArray != null) {
+            // ファイル内の重複チェック
+            val allNames = (0 until sendTargetArray.length()).map { i ->
+                sendTargetArray.getJSONObject(i).optString("name", "")
+            }
+            val duplicateNames = allNames.groupBy { it }
                 .filter { it.value.size > 1 }
                 .map { it.key }
                 .sorted()
@@ -176,9 +176,13 @@ class SettingsImportExportActivity : AppCompatActivity() {
                     getString(R.string.message_import_send_target_duplicate_name, duplicateNames.joinToString("／"))
                 )
             }
+            importedSendTargets = (0 until sendTargetArray.length()).map { i ->
+                sendTargetArray.getJSONObject(i)
+            }
+        } else {
+            importedSendTargets = null
         }
-        importedSendTargets = sendTargets
-        importedContinuationInfo = root.optJSONArray("continuationInfoConfig")?.let { parseContinuationInfo(it) }
+        importedContinuationInfo = root.optJSONArray("continuationInfoConfig")?.let { parseContinuationInfo(it, ContinuationStore.getAll(this)) }
 
         if (importedConfig == null && importedSendTargets == null && importedContinuationInfo == null) {
             showError(getString(R.string.message_import_no_section))
@@ -187,8 +191,9 @@ class SettingsImportExportActivity : AppCompatActivity() {
         updatePreview()
     }
 
-    /** 引き継ぎ内容のJSON配列を正規化済みキー→[ContinuationStore.Entry]のマップへ変換する */
-    private fun parseContinuationInfo(array: JSONArray): Map<String, ContinuationStore.Entry> {
+    /** 引き継ぎ内容のJSON配列を正規化済みキー→[ContinuationStore.Entry]のマップへ変換する。未定義の属性は[existingEntries]から保持 */
+    private fun parseContinuationInfo(array: JSONArray, existingEntries: Map<String, ContinuationStore.Entry>): Map<String, ContinuationStore.Entry> {
+        val senderKeys = mutableListOf<String>()
         val entries = mutableMapOf<String, ContinuationStore.Entry>()
         for (i in 0 until array.length()) {
             val obj = array.getJSONObject(i)
@@ -197,11 +202,22 @@ class SettingsImportExportActivity : AppCompatActivity() {
             if (senderKey.isBlank()) {
                 throw JSONException(getString(R.string.message_import_sender_address_required, i + 1))
             }
+            senderKeys.add(senderKey)
+            val existingEntry = existingEntries[senderKey]
             entries[senderKey] = ContinuationStore.Entry(
-                companyName = obj.optString("companyName", ""),
-                userName = obj.optString("userName", ""),
-                timestampMillis = obj.optLong("timestampMillis", System.currentTimeMillis()),
+                companyName = if (obj.has("companyName")) obj.optString("companyName", "") else (existingEntry?.companyName ?: ""),
+                userName = if (obj.has("userName")) obj.optString("userName", "") else (existingEntry?.userName ?: ""),
+                timestampMillis = if (obj.has("timestampMillis")) obj.optLong("timestampMillis", System.currentTimeMillis()) else (existingEntry?.timestampMillis ?: System.currentTimeMillis()),
                 senderAddress = senderAddress
+            )
+        }
+        val duplicateKeys = senderKeys.groupBy { it }
+            .filter { it.value.size > 1 }
+            .map { it.key }
+            .sorted()
+        if (duplicateKeys.isNotEmpty()) {
+            throw JSONException(
+                getString(R.string.message_import_continuation_duplicate_sender, duplicateKeys.joinToString("／"))
             )
         }
         return entries
@@ -253,7 +269,10 @@ class SettingsImportExportActivity : AppCompatActivity() {
     /** 反映対象を各ストアへ書き込み、完了トーストを表示して画面を閉じる */
     private fun applyImport() {
         importedSendTargets?.let { imported ->
-            SettingsStore.saveSendTargets(this, SettingsStore.mergeImportSendTargets(this, imported))
+            val jsonArray = JSONArray().apply {
+                imported.forEach { put(it) }
+            }
+            SettingsStore.saveSendTargets(this, SettingsStore.mergeImportSendTargets(this, jsonArray))
         }
         importedContinuationInfo?.let { ContinuationStore.importAll(this, it) }
         importedConfig?.let { SettingsStore.save(this, it) }

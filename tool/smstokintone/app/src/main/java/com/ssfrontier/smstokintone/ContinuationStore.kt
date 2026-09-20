@@ -144,14 +144,17 @@ object ContinuationStore {
     }
 
     /**
-     * [entries]（正規化済みの送信元キーをキーとするマップ）で引き継ぎ内容を一括置き換えする。
+     * [entries]（正規化済みの送信元キーをキーとするマップ）で引き継ぎ内容をマージする。
+     * ファイルに含まれる送信元のエントリだけが更新され、含まれない既存の送信元は保持される。
      * 設定のインポート画面（[SettingsImportExportActivity]）専用。
      *
      * @param context アプリケーションコンテキスト
      * @param entries インポート対象の引き継ぎ内容マップ
      */
     fun importAll(context: Context, entries: Map<String, Entry>) = synchronized(lock) {
-        save(context, entries)
+        val merged = getAll(context).toMutableMap()
+        merged.putAll(entries)
+        save(context, merged)
     }
 
     /**
