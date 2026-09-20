@@ -3,6 +3,7 @@ package com.ssfrontier.smstokintone
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.UUID
 
@@ -625,11 +626,8 @@ object SettingsStore {
             val obj = importedJsonArray.getJSONObject(i)
             val importedName = obj.optString("name", "")
             val index = merged.indexOfFirst { it.name == importedName }
-            val mergedTarget = if (index >= 0) {
-                sendTargetFromJson(obj, merged[index])
-            } else {
-                sendTargetFromJson(obj, null)
-            }
+            val existingTarget = if (index >= 0) merged[index] else null
+            val mergedTarget = sendTargetFromJson(obj, existingTarget)
             if (index >= 0) {
                 merged[index] = mergedTarget
             } else {
@@ -783,5 +781,60 @@ object SettingsStore {
         }
         val finalParts = extracted.copy(companyName = companyNameSource)
         return SmsResolution(smsParts = finalParts) to sendTargets
+    }
+
+    /**
+     * インポート JSON から設定をマージして反映する。
+     * JSON に含まれないセクション・属性・エントリは変更されない。
+     *
+     * @param context アプリケーションコンテキスト
+     * @param json インポート JSON
+     */
+    fun mergeFromJson(context: Context, json: JSONObject) {
+        json.optJSONObject("appConfig")?.takeIf { it.length() > 0 }?.let {
+            val config = configFromJson(it, load(context))
+            save(context, config)
+        }
+        json.optJSONArray("sendTargetConfig")?.let {
+            saveSendTargets(context, mergeImportSendTargets(context, it))
+        }
+        json.optJSONArray("continuationInfoConfig")?.let {
+            val existing = ContinuationStore.getAll(context)
+            ContinuationStore.importAll(context, parseContinuationInfoFromJson(it, existing))
+        }
+    }
+
+    /**
+     * 引き継ぎ内容の JSON 配列をパースする（インポート用）。
+     * 属性が未定義の場合は既存エントリの値を保持、存在しなければデフォルト値で埋める。
+     *
+     * @param array continuationInfoConfig の JSON 配列
+     * @param existingEntries 既存の引き継ぎ内容（マージ用）
+     * @return 正規化済みキー→Entry のマップ
+     */
+    fun parseContinuationInfoFromJson(array: JSONArray, existingEntries: Map<String, ContinuationStore.Entry>): Map<String, ContinuationStore.Entry> {
+        val duplicateKeys = mutableSetOf<String>()
+        val seenKeys = mutableSetOf<String>()
+        val entries = mutableMapOf<String, ContinuationStore.Entry>()
+        for (i in 0 until array.length()) {
+            val obj = array.getJSONObject(i)
+            val senderAddress = obj.optString("senderAddress", "")
+            val senderKey = SmsMatching.normalizeSenderKey(senderAddress)
+            if (senderKey.isBlank()) {
+                throw JSONException("senderAddress is required at index ${i + 1}")
+            }
+            if (!seenKeys.add(senderKey)) duplicateKeys.add(senderKey)
+            val existingEntry = existingEntries[senderKey]
+            entries[senderKey] = ContinuationStore.Entry(
+                companyName = if (obj.has("companyName")) obj.optString("companyName", "") else (existingEntry?.companyName ?: ""),
+                userName = if (obj.has("userName")) obj.optString("userName", "") else (existingEntry?.userName ?: ""),
+                timestampMillis = if (obj.has("timestampMillis")) obj.optLong("timestampMillis", System.currentTimeMillis()) else (existingEntry?.timestampMillis ?: System.currentTimeMillis()),
+                senderAddress = senderAddress
+            )
+        }
+        if (duplicateKeys.isNotEmpty()) {
+            throw JSONException("Duplicate sender addresses: ${duplicateKeys.sorted().joinToString(", ")}")
+        }
+        return entries
     }
 }

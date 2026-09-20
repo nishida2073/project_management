@@ -39,11 +39,9 @@ class SettingsImportExportActivity : AppCompatActivity() {
     private var selectedFileName: String? = null
 
     /**
-     * ファイルから読み込んだ反映対象。ファイルに含まれないセクションはnull。
+     * ファイルから読み込んだインポート JSON。
      */
-    private var importedConfig: SettingsStore.Config? = null
-    private var importedSendTargets: List<JSONObject>? = null
-    private var importedContinuationInfo: Map<String, ContinuationStore.Entry>? = null
+    private var importedJson: JSONObject? = null
 
     /**
      * ファイル選択ダイアログの結果ハンドラ。選択されたURIのファイル内容を読み込んでプレビューへ反映する。
@@ -155,73 +153,43 @@ class SettingsImportExportActivity : AppCompatActivity() {
             if (index >= 0 && cursor.moveToFirst()) cursor.getString(index) else null
         } ?: uri.lastPathSegment
 
-    /** インポートファイル（JSON）を解析して反映対象へ格納し、プレビューを更新する */
+    /** インポートファイル（JSON）を検証して保持し、プレビューを更新する */
     private fun parseImportFile(text: String) {
         val root = JSONObject(text)
-        importedConfig = root.optJSONObject("appConfig")
-            ?.takeIf { it.length() > 0 }
-            ?.let { SettingsStore.configFromJson(it, SettingsStore.load(this)) }
-        val sendTargetArray = root.optJSONArray("sendTargetConfig")
-        if (sendTargetArray != null) {
-            // ファイル内の重複チェック
-            val allNames = (0 until sendTargetArray.length()).map { i ->
-                sendTargetArray.getJSONObject(i).optString("name", "")
-            }
-            val duplicateNames = allNames.groupBy { it }
-                .filter { it.value.size > 1 }
-                .map { it.key }
-                .sorted()
-            if (duplicateNames.isNotEmpty()) {
-                throw JSONException(
-                    getString(R.string.message_import_send_target_duplicate_name, duplicateNames.joinToString("／"))
-                )
-            }
-            importedSendTargets = (0 until sendTargetArray.length()).map { i ->
-                sendTargetArray.getJSONObject(i)
-            }
-        } else {
-            importedSendTargets = null
+        root.optJSONArray("sendTargetConfig")?.let { checkSendTargetDuplicates(it) }
+        root.optJSONArray("continuationInfoConfig")?.let {
+            SettingsStore.parseContinuationInfoFromJson(it, ContinuationStore.getAll(this))
         }
-        importedContinuationInfo = root.optJSONArray("continuationInfoConfig")?.let { parseContinuationInfo(it, ContinuationStore.getAll(this)) }
 
-        if (importedConfig == null && importedSendTargets == null && importedContinuationInfo == null) {
+        if (!hasAnySection(root)) {
             showError(getString(R.string.message_import_no_section))
             return
         }
+        importedJson = root
         updatePreview()
     }
 
-    /** 引き継ぎ内容のJSON配列を正規化済みキー→[ContinuationStore.Entry]のマップへ変換する。未定義の属性は[existingEntries]から保持 */
-    private fun parseContinuationInfo(array: JSONArray, existingEntries: Map<String, ContinuationStore.Entry>): Map<String, ContinuationStore.Entry> {
-        val senderKeys = mutableListOf<String>()
-        val entries = mutableMapOf<String, ContinuationStore.Entry>()
+    /** JSON に1つ以上のセクションが含まれているか */
+    private fun hasAnySection(json: JSONObject): Boolean =
+        (json.optJSONObject("appConfig")?.length() ?: 0) > 0 ||
+        (json.optJSONArray("sendTargetConfig")?.length() ?: 0) > 0 ||
+        (json.optJSONArray("continuationInfoConfig")?.length() ?: 0) > 0
+
+    /** 送信先の重複をチェック */
+    private fun checkSendTargetDuplicates(array: JSONArray) {
+        val duplicateNames = mutableSetOf<String>()
+        val seenNames = mutableSetOf<String>()
         for (i in 0 until array.length()) {
-            val obj = array.getJSONObject(i)
-            val senderAddress = obj.optString("senderAddress", "")
-            val senderKey = SmsMatching.normalizeSenderKey(senderAddress)
-            if (senderKey.isBlank()) {
-                throw JSONException(getString(R.string.message_import_sender_address_required, i + 1))
-            }
-            senderKeys.add(senderKey)
-            val existingEntry = existingEntries[senderKey]
-            entries[senderKey] = ContinuationStore.Entry(
-                companyName = if (obj.has("companyName")) obj.optString("companyName", "") else (existingEntry?.companyName ?: ""),
-                userName = if (obj.has("userName")) obj.optString("userName", "") else (existingEntry?.userName ?: ""),
-                timestampMillis = if (obj.has("timestampMillis")) obj.optLong("timestampMillis", System.currentTimeMillis()) else (existingEntry?.timestampMillis ?: System.currentTimeMillis()),
-                senderAddress = senderAddress
-            )
+            val name = array.getJSONObject(i).optString("name", "")
+            if (!seenNames.add(name)) duplicateNames.add(name)
         }
-        val duplicateKeys = senderKeys.groupBy { it }
-            .filter { it.value.size > 1 }
-            .map { it.key }
-            .sorted()
-        if (duplicateKeys.isNotEmpty()) {
+        if (duplicateNames.isNotEmpty()) {
             throw JSONException(
-                getString(R.string.message_import_continuation_duplicate_sender, duplicateKeys.joinToString("／"))
+                getString(R.string.message_import_send_target_duplicate_name, duplicateNames.sorted().joinToString("／"))
             )
         }
-        return entries
     }
+
 
     // ---- プレビュー表示と反映（インポート） ----
 
@@ -233,61 +201,51 @@ class SettingsImportExportActivity : AppCompatActivity() {
 
     /** プレビュー表示と確認ダイアログで使う反映内容の一覧を組み立てる */
     private fun buildPreviewText(includeFileName: Boolean): String {
+        val json = importedJson ?: return ""
         val lines = mutableListOf<String>()
         if (includeFileName) {
             selectedFileName?.let { lines += getString(R.string.label_import_file, it) }
         }
-        lines += getString(R.string.preview_app_settings, sectionState(importedConfig != null))
-        lines += getString(R.string.preview_send_targets, countOrSkip(importedSendTargets?.size))
-        lines += getString(R.string.preview_continuation_info, countOrSkip(importedContinuationInfo?.size))
+        lines += getString(R.string.preview_app_settings, getStateLabel(json.optJSONObject("appConfig")?.length() ?: 0 > 0))
+        lines += getString(R.string.preview_send_targets, getCountLabel(json.optJSONArray("sendTargetConfig")?.length()))
+        lines += getString(R.string.preview_continuation_info, getCountLabel(json.optJSONArray("continuationInfoConfig")?.length()))
         return lines.joinToString("\n")
     }
 
-    /** アプリ設定のような単一セクションの反映状態の文言を返す */
-    private fun sectionState(included: Boolean): String =
+    /** セクションの状態文言を返す */
+    private fun getStateLabel(included: Boolean): String =
         if (included) getString(R.string.value_import_applied) else getString(R.string.value_import_skip)
 
-    /** リストのセクション（送信先・引き継ぎ内容）の反映状態の文言を返す。含まれない場合は「変更しません」 */
-    private fun countOrSkip(count: Int?): String =
-        if (count == null) getString(R.string.value_import_skip)
+    /** セクションの件数文言を返す */
+    private fun getCountLabel(count: Int?): String =
+        if (count == null || count == 0) getString(R.string.value_import_skip)
         else getString(R.string.value_import_applied_count, count)
 
     /** 「この内容で設定する」ボタン。反映内容の確認ダイアログを表示し、確定時に適用する */
     private fun onImportClicked() {
-        if (importedConfig == null && importedSendTargets == null && importedContinuationInfo == null) {
-            Toast.makeText(this, getString(R.string.message_import_no_section), Toast.LENGTH_SHORT).show()
-            return
-        }
+        val json = importedJson ?: return
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_confirm_import)
             .setMessage(getString(R.string.dialog_message_confirm_import, buildPreviewText(includeFileName = true)))
             .setNegativeButton(R.string.btn_cancel, null)
-            .setPositiveButton(R.string.btn_import_settings) { _, _ -> applyImport() }
+            .setPositiveButton(R.string.btn_import_settings) { _, _ -> applyImport(json) }
             .show()
     }
 
-    /** 反映対象を各ストアへ書き込み、完了トーストを表示して画面を閉じる */
-    private fun applyImport() {
-        importedSendTargets?.let { imported ->
-            val jsonArray = JSONArray().apply {
-                imported.forEach { put(it) }
-            }
-            SettingsStore.saveSendTargets(this, SettingsStore.mergeImportSendTargets(this, jsonArray))
-        }
-        importedContinuationInfo?.let { ContinuationStore.importAll(this, it) }
-        importedConfig?.let { SettingsStore.save(this, it) }
+    /** JSON から設定をマージして反映し、完了トーストを表示して画面を閉じる */
+    private fun applyImport(json: JSONObject) {
+        SettingsStore.mergeFromJson(this, json)
         Toast.makeText(this, getString(R.string.toast_settings_imported), Toast.LENGTH_SHORT).show()
-        // テーマは保存だけでは反映されないため（SmsToKintoneApp.onCreate参照）、設定画面側と同じく
-        // 明示的に反映する。この画面は再生成されるが、設定は反映済みのため問題ない
-        importedConfig?.let { AppCompatDelegate.setDefaultNightMode(it.themeMode.toNightMode()) }
+        json.optJSONObject("appConfig")?.takeIf { it.length() > 0 }?.let {
+            val config = SettingsStore.configFromJson(it, SettingsStore.load(this))
+            AppCompatDelegate.setDefaultNightMode(config.themeMode.toNightMode())
+        }
         finish()
     }
 
     /** エラーダイアログを表示し、プレビューを未選択状態へ戻す */
     private fun showError(message: String) {
-        importedConfig = null
-        importedSendTargets = null
-        importedContinuationInfo = null
+        importedJson = null
         binding.tvImportPreview.text = getString(R.string.message_import_no_file)
         binding.btnImportSettings.isEnabled = false
         AlertDialog.Builder(this)
