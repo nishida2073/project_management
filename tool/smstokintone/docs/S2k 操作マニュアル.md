@@ -29,11 +29,8 @@
 ### 画面の遷移
 
 <p float="left">
-  <img src="screenshots/screen_transition.png" alt="画面遷移図">
+  <img src="screenshots/screen_transition.png" alt="画面遷移図" width="600">
 </p>
-
-　送信先の設定画面は「設定を保存」を押すとトップ画面に戻ります。<br>
-　それ以外の画面は、戻るボタン（または端末の戻るボタン）を押すと遷移元の画面に戻ります。
 
 ### 画面の一覧
 
