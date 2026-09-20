@@ -11,27 +11,27 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/title_sender_info"
+        android:text="@string/title_continuation_info_settings"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurface" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilSenderInfoSearch"
+        android:id="@+id/tilContinuationSearch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:hint="@string/hint_sender_info_search">
+        android:hint="@string/hint_continuation_search">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etSenderInfoSearch"
+            android:id="@+id/etContinuationSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnDeleteAllSenderInfo"
+        android:id="@+id/btnDeleteAllContinuationInfo"
         style="@style/AppButton.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,25 +53,25 @@
             android:paddingBottom="24dp">
 
             <TextView
-                android:id="@+id/tvSenderInfoEmpty"
+                android:id="@+id/tvContinuationEmpty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/message_sender_info_empty"
+                android:text="@string/message_continuation_empty"
                 android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/tvSenderInfoNoMatch"
+                android:id="@+id/tvContinuationNoMatch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/message_sender_info_no_match"
+                android:text="@string/message_continuation_no_match"
                 android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone" />
 
             <LinearLayout
-                android:id="@+id/llSenderInfoContainer"
+                android:id="@+id/llContinuationContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
@@ -80,7 +80,7 @@
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSaveSenderInfo"
+        android:id="@+id/btnSaveContinuationInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

@@ -177,7 +177,7 @@
     <string name="label_continuation_show_name">送信元の表示</string>
     <string name="switch_continuation_show_user_name_enabled">氏名を表示する</string>
     <string name="helper_continuation_show_user_name_enabled">電話番号の代わりに引き継いだ氏名を表示します</string>
-    <string name="btn_edit_sender_info">送信元情報の編集</string>
+    <string name="btn_edit_continuation_info">引き継ぎ内容の設定</string>
     <string name="section_company_name_conversion">会社名の変換</string>
     <string name="label_company_name_auto_conversion">自動変換</string>
     <string name="switch_company_name_auto_conversion_enabled">有効にする</string>
@@ -268,27 +268,27 @@
     <string name="toast_sms_send_finished">SMSの送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
     <string name="toast_sms_send_finished_no_log">SMSの送信が完了しました</string>
 
-    <!-- 送信元情報の編集画面 -->
-    <string name="title_sender_info">送信元情報の編集</string>
-    <string name="hint_sender_info_search">会社名・氏名・電話番号で検索</string>
-    <string name="message_sender_info_empty">送信元情報がありません</string>
-    <string name="message_sender_info_no_match">一致する送信元がありません</string>
+    <!-- 引き継ぎ内容の設定画面 -->
+    <string name="title_continuation_info_settings">引き継ぎ内容の設定</string>
+    <string name="hint_continuation_search">会社名・氏名・電話番号で検索</string>
+    <string name="message_continuation_empty">引き継ぎ内容がありません</string>
+    <string name="message_continuation_no_match">一致する引き継ぎ元がありません</string>
     <string name="label_continuation_sender">送信元</string>
-    <string name="dialog_message_continuation_validation_error">送信元: %1$s\n\n会社名・氏名は必須です</string>
-    <string name="dialog_title_sender_info_save_conflict">保存に失敗しました</string>
-    <string name="dialog_message_sender_info_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
+    <string name="dialog_message_continuation_validation_error">引き継ぎ元: %1$s\n\n会社名・氏名は必須です</string>
+    <string name="dialog_title_continuation_info_save_conflict">保存に失敗しました</string>
+    <string name="dialog_message_continuation_info_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
 
     <!-- 設定のインポート・エクスポート画面 -->
     <string name="btn_open_settings_import_export">設定のインポート・エクスポート</string>
     <string name="title_settings_import_export">設定のインポート・エクスポート</string>
     <string name="label_settings_import">インポート</string>
-    <string name="settings_import_description">JSONファイルからアプリの設定・送信先の設定・送信元情報をまとめて反映できます。</string>
+    <string name="settings_import_description">JSONファイルからアプリの設定・送信先の設定・引き継ぎ内容をまとめて反映できます。</string>
     <string name="btn_select_import_file">ファイルを選択</string>
     <string name="btn_import_settings">インポート</string>
     <string name="label_import_file">"ファイル名\n　%1$s\n"</string>
     <string name="preview_app_settings">"アプリの設定: %1$s"</string>
     <string name="preview_send_targets">"送信先の設定: %1$s"</string>
-    <string name="preview_sender_info">"送信元情報: %1$s"</string>
+    <string name="preview_continuation_info">"引き継ぎ内容: %1$s"</string>
     <string name="value_import_applied">反映</string>
     <string name="value_import_applied_count">反映（%1$d件）</string>
     <string name="value_import_skip">変更しません。</string>
@@ -299,11 +299,11 @@
     <string name="dialog_title_import_error">インポートエラー</string>
     <string name="dialog_message_import_file_read_failed">ファイルを読み込めませんでした</string>
     <string name="dialog_message_import_invalid_json">ファイルの形式が正しくありません（JSONとして読み込めません）。\n\n%1$s</string>
-    <string name="message_import_no_section">アプリの設定・送信先の設定・送信元情報のいずれも含まれていないため、反映する内容がありません</string>
-    <string name="message_import_sender_address_required">送信元情報の%1$d件目にsenderAddressがありません</string>
+    <string name="message_import_no_section">アプリの設定・送信先の設定・引き継ぎ内容のいずれも含まれていないため、反映する内容がありません</string>
+    <string name="message_import_sender_address_required">引き継ぎ内容の%1$d件目にsenderAddressがありません</string>
     <string name="message_import_send_target_duplicate_name">送信先名がファイル内で重複しています。\n%1$s\n\n送信先名は他の送信先と重複しないようにしてください</string>
     <string name="label_settings_export">エクスポート</string>
-    <string name="settings_export_description">現在のアプリ設定・送信先の設定・送信元情報をJSONファイルとしてまとめて書き出します。</string>
+    <string name="settings_export_description">現在のアプリ設定・送信先の設定・引き継ぎ内容をJSONファイルとしてまとめて書き出します。</string>
     <string name="btn_export_settings">エクスポート</string>
     <string name="toast_settings_exported">設定をエクスポートしました</string>
     <string name="dialog_title_export_error">エクスポートエラー</string>

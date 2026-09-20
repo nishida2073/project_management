@@ -54,7 +54,7 @@
       "fieldBody": "body"
     }
   ],
-  "senderInfoConfig": [
+  "continuationInfoConfig": [
     {
       "senderAddress": "09012345678",
       "companyName": "（例）NTTデータユニバーシティ",
