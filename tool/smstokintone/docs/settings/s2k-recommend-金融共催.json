@@ -1,0 +1,21 @@
+{
+  "appConfig": {
+    "companyNameExtractionEnabled": true,
+    "sendExtractionFailedEnabled": true,
+    "searchExtractionFailedEnabled": true,
+    "companyNameFixedConversions":[
+      {"from": "data", "to": "データ"},
+      {"from": "NFT", "to": "NTTデータフィナンシャルテクノロジー"}
+    ]
+  },
+  "sendTargetConfig": [
+    {
+      "name": "金融共催",
+      "keywords": [
+        "NTTデータフィナンシャルテクノロジー",
+        "NTTデータソフィア",
+        "NTTデータフォース"
+      ]
+    }
+  ]
+}
