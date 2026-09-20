@@ -69,6 +69,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
         binding.btnSelectImportFile.setOnClickListener {
             openDocumentLauncher.launch(arrayOf("*/*"))
         }
+        binding.btnImportSettings.isEnabled = false
         binding.btnImportSettings.setOnClickListener { onImportClicked() }
         binding.btnExportSettings.setOnClickListener {
             createDocumentLauncher.launch(suggestedExportFileName())
