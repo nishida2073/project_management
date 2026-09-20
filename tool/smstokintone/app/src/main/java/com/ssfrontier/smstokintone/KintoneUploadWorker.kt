@@ -65,11 +65,11 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 送信先ごとに登録。リトライ時の重複は KintoneApi 側で検出
         var shouldRetryAny = false
         for (sendTarget in validSendTargets) {
-            // 抽出が無効な場合は送信先の会社名を使用
+            // 抽出が無効な場合は送信先の会社名を使用（変換しない）
             val targetSmsParts = if (config.companyNameExtractionEnabled) {
                 smsParts
             } else {
-                smsParts.copy(companyName = SettingsStore.applyCompanyNameConversion(sendTarget.companyName, config))
+                smsParts.copy(companyName = sendTarget.companyName)
             }
 
             if (!manual && smsParts.isExtractionFailed() && !config.sendExtractionFailedEnabled) {
