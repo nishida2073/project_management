@@ -350,13 +350,17 @@ class AppSettingsActivity : AppCompatActivity() {
         }
     }
 
-    /** [themeMode]をライト／ダークのラジオボタンの選択状態に反映する */
+    /**
+     * [themeMode]をライト/ダークのラジオボタン選択状態に反映する。
+     */
     private fun applyThemeSelection(themeMode: SettingsStore.ThemeMode) {
         binding.rbThemeDark.isChecked = themeMode == SettingsStore.ThemeMode.DARK
         binding.rbThemeLight.isChecked = themeMode != SettingsStore.ThemeMode.DARK
     }
 
-    /** 他画面（権限リクエストや送信先の設定画面）から戻ってきた際に、権限状態と送信先の選択肢を最新化する */
+    /**
+     * 他画面（権限リクエストや送信先設定）から戻ってきた際に、権限状態と送信先選択肢を最新化する。
+     */
     override fun onResume() {
         super.onResume()
         updatePermissionStatus()
@@ -365,7 +369,9 @@ class AppSettingsActivity : AppCompatActivity() {
         refreshDefaultSendTargetFilterOptions()
     }
 
-    /** 「送信先」スピナーの選択肢を最新の送信先一覧で更新する */
+    /**
+     * 「送信先」スピナーの選択肢を最新の送信先一覧で更新する。
+     */
     private fun refreshDefaultSendTargetFilterOptions() {
         val config = SettingsStore.load(this)
         // 送信先が1件の場合は「すべて」に固定されるため、項目を隠す
@@ -390,7 +396,9 @@ class AppSettingsActivity : AppCompatActivity() {
         binding.spDefaultSendTargetFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
     }
 
-    /** 権限の許可状態を確認し、ステータス表示・許可ボタン・案内文を更新する */
+    /**
+     * 権限の許可状態を確認し、ステータス表示・許可ボタン・案内文を更新する。
+     */
     private fun updatePermissionUi(
         permission: String,
         statusText: TextView,
@@ -406,7 +414,9 @@ class AppSettingsActivity : AppCompatActivity() {
         helperText.visibility = if (granted) View.GONE else View.VISIBLE
     }
 
-    /** SMS受信権限（RECEIVE_SMS）の許可状態を画面に反映する */
+    /**
+     * SMS受信権限（[Manifest.permission.RECEIVE_SMS]）の許可状態を画面に反映する。
+     */
     private fun updatePermissionStatus() = updatePermissionUi(
         Manifest.permission.RECEIVE_SMS,
         binding.tvPermissionStatus,
@@ -415,7 +425,9 @@ class AppSettingsActivity : AppCompatActivity() {
         R.string.label_permission_sms_receive_granted
     )
 
-    /** SMS送信権限（SEND_SMS）の許可状態を画面に反映する */
+    /**
+     * SMS送信権限（[Manifest.permission.SEND_SMS]）の許可状態を画面に反映する。
+     */
     private fun updateSendPermissionStatus() = updatePermissionUi(
         Manifest.permission.SEND_SMS,
         binding.tvSendPermissionStatus,
@@ -424,7 +436,9 @@ class AppSettingsActivity : AppCompatActivity() {
         R.string.label_permission_sms_send_granted
     )
 
-    /** SMS読み取り権限（READ_SMS）の許可状態を画面に反映する */
+    /**
+     * SMS読み取り権限（[Manifest.permission.READ_SMS]）の許可状態を画面に反映する。
+     */
     private fun updateReadPermissionStatus() = updatePermissionUi(
         Manifest.permission.READ_SMS,
         binding.tvReadPermissionStatus,

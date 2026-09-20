@@ -70,9 +70,8 @@ object SmsLogStore {
         val manual: Boolean,
         /**
          * 本文から抽出した会社名・氏名、および本文全体。全エントリ種別で記録時点の抽出結果が設定される。
-         * 会社名（[SmsParts.companyName]）は記録時点でアプリ全体の会社名変換
-         * （[SettingsStore.Config.companyNameAutoConversionEnabled]・[SettingsStore.Config.companyNameFixedConversions]）
-         * が適用済みの値（[SettingsStore.resolveSendTargets]参照）
+         * 会社名（[SmsParts.companyName]）は[SettingsStore.resolveSendTargets]で変換済みの値
+         * （アプリの会社名変換設定が反映済み）
          */
         val smsParts: SmsParts? = null,
         /** 記録時点でアプリ全体の会社名変換が有効だったかどうか。[LogActivity]で変換済みアイコンの表示に使う */
@@ -153,6 +152,7 @@ object SmsLogStore {
                         .put("userName", it.userName)
                         .put("body", it.body)
                         .put("extractedByAi", it.extractedByAi)
+                        .put("extractionPerformed", it.extractionPerformed)
                 )
             }
             array.put(obj)
@@ -187,7 +187,8 @@ object SmsLogStore {
                         companyName = it.optString("companyName", ""),
                         userName = it.optString("userName", ""),
                         body = it.optString("body", ""),
-                        extractedByAi = it.optBoolean("extractedByAi", false)
+                        extractedByAi = it.optBoolean("extractedByAi", false),
+                        extractionPerformed = it.optBoolean("extractionPerformed", true)
                     )
                 },
                 isContinuation = obj.optBoolean("isContinuation", false)

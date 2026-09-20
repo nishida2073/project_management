@@ -19,8 +19,15 @@ import kotlin.math.abs
 object SmsMatching {
 
     /**
-     * [senderA]/[timestampA]と[senderB]/[timestampB]が同一SMSを指しているとみなせるかを判定する。
-     * 送信元が正規化後に一致し、かつタイムスタンプの差が[toleranceMillis]以内であればtrue。
+     * [senderA]/[timestampA]と[senderB]/[timestampB]が同一SMSを指しているかを判定する。
+     * 送信元が正規化後に一致し、かつタイムスタンプの差が[toleranceMillis]以内ならtrue。
+     *
+     * @param senderA 送信者A
+     * @param timestampA 送信者Aのタイムスタンプ（ミリ秒）
+     * @param senderB 送信者B
+     * @param timestampB 送信者Bのタイムスタンプ（ミリ秒）
+     * @param toleranceMillis タイムスタンプの許容差（ミリ秒）
+     * @return 同一SMSとみなせる場合true
      */
     fun isLikelySameSms(
         senderA: String,
@@ -32,11 +39,19 @@ object SmsMatching {
         isSameSender(senderA, senderB) && abs(timestampA - timestampB) <= toleranceMillis
 
     /**
-     * [records]と[completedEntries]（[SmsLogStore.Entry]）を1対1対応させ、record.idからEntryへの
-     * マップを返す。手動送信ログは[SmsLogStore.Entry.smsId]一致で対応付け、IDを持たない自動送信ログは
-     * [isLikelySameSms]（送信元・タイムスタンプの近さ）で対応付ける。1件のログが複数レコードに同時
-     * マッチしないよう、時刻が近いレコードから順に貪欲に割り当てる。[id]/[sender]/[timestampMillis]は
-     * [records]の要素からそれぞれの値を取り出すセレクタ（[records]の型を特定のクラスに固定しないため）。
+     * [records]と[completedEntries]を1対1対応させ、record IDからログEntryへのマップを返す。
+     * 手動送信ログは[SmsLogStore.Entry.smsId]の一致で対応付け、自動送信ログは[isLikelySameSms]
+     * （送信元・タイムスタンプの近さ）で対応付ける。1件のログが複数レコードに同時マッチしないよう、
+     * 時刻が近いレコードから順に貪欲に割り当てる。
+     *
+     * @param T レコード型（型の特定を呼び出し側に委ねるため、セレクタ関数で値を取り出す）
+     * @param records 対応付け対象のレコードリスト
+     * @param completedEntries 対応付け対象のログエントリリスト
+     * @param toleranceMillis タイムスタンプ許容差（ミリ秒）
+     * @param id レコード型からIDを取り出すセレクタ関数
+     * @param sender レコード型から送信元を取り出すセレクタ関数
+     * @param timestampMillis レコード型からタイムスタンプを取り出すセレクタ関数
+     * @return record ID→ログEntryのマップ
      */
     fun <T> matchEntries(
         records: List<T>,
@@ -72,10 +87,23 @@ object SmsMatching {
         return result
     }
 
-    /** [a]と[b]を正規化した上で同一の送信元とみなせるかどうか（電話番号表記のゆれを吸収する） */
+    /**
+     * [a]と[b]を正規化した上で同一の送信元とみなせるかを判定する。電話番号の表記ゆれを吸収する。
+     *
+     * @param a 送信元A
+     * @param b 送信元B
+     * @return 正規化後に一致する場合true
+     */
     fun isSameSender(a: String, b: String): Boolean = normalizeSenderKey(a) == normalizeSenderKey(b)
 
-    /** 電話番号は数字のみに絞り末尾8桁を比較キーにする。数字がほぼ無い送信者ID等はそのまま比較する */
+    /**
+     * 送信元アドレスを正規化キーに変換する。
+     * 電話番号の場合は数字のみに絞り末尾8桁を比較キーにする（6桁以上）。
+     * 6桁未満の送信者ID等はそのまま空白を削除して返す。
+     *
+     * @param address 送信元アドレス（電話番号など）
+     * @return 正規化済みのキー文字列
+     */
     fun normalizeSenderKey(address: String): String {
         val digits = address.filter { it.isDigit() }
         return if (digits.length >= 6) digits.takeLast(8) else address.trim()

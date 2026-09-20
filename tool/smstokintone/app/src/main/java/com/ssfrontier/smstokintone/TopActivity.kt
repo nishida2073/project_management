@@ -12,10 +12,14 @@ import com.ssfrontier.smstokintone.databinding.ActivityTopBinding
  */
 class TopActivity : AppCompatActivity() {
 
-    /** この画面のViewBinding */
+    /**
+     * この画面のViewBinding。
+     */
     private lateinit var binding: ActivityTopBinding
 
-    /** 各設定・ログ・SMS検索画面への遷移ボタンを配線する */
+    /**
+     * 各種設定・ログ・SMS検索画面への遷移ボタンを配線する。
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTopBinding.inflate(layoutInflater)
@@ -38,14 +42,18 @@ class TopActivity : AppCompatActivity() {
         }
     }
 
-    /** 他画面での設定変更を反映するため、表示に戻るたびにステータス表示を再読込する */
+    /**
+     * 他画面での設定変更を反映するため、表示に戻るたびにステータス表示を再読込する。
+     */
     override fun onResume() {
         super.onResume()
         // 設定画面から戻ってきた場合など、他画面での変更を毎回反映するために再読込する
         updateModeStatus()
     }
 
-    /** SettingsStoreの現在値を送信/返信ステータス表示（文言・色）へ反映する */
+    /**
+     * [SettingsStore]の現在値を送信/返信ステータス表示（文言・色）へ反映する。
+     */
     private fun updateModeStatus() {
         val config = SettingsStore.load(this)
 

@@ -15,27 +15,27 @@ import kotlinx.coroutines.withContext
 class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
 
-    /** 入力データから送信先を解決し、送信可否判定・kintoneへの登録・ログ記録までを行う */
+    /**
+     * 入力データから送信先を解決し、送信可否判定・kintoneへの登録・ログ記録までを行う。
+     *
+     * @return 処理結果（成功時は[Result.success]、リトライ可能な失敗は[Result.retry]）
+     */
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val config = SettingsStore.load(applicationContext)
         val sender = inputData.getString(KEY_SENDER) ?: ""
         val body = inputData.getString(KEY_BODY) ?: ""
         val timestampMillis = inputData.getLong(KEY_TIMESTAMP, System.currentTimeMillis())
         val manual = inputData.getBoolean(KEY_MANUAL, false)
-        // -1LはKEY_SMS_ID未指定（自動受信）を表す。自動受信時はここで解決せず、
-        // 「受信済みSMS送信」画面側で送信元・タイムスタンプの近さによって突き合わせる（SmsMatching参照）
+        // -1Lは[KEY_SMS_ID]未指定（自動受信）を表す
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
         val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
         val smsParts = resolution.smsParts
         val validSendTargets = sendTargets.filter { it.isValid }
-        // smsParts.companyNameはSettingsStore.resolveSendTargetsで既に会社名変換が適用済みのため、
-        // ここでは記録時点で変換が有効だったかどうかのフラグ（ログのアイコン表示用）だけを求める
+        // 会社名変換が有効かどうかを判定（ログ記録用）
         val companyNameConverted = config.companyNameAutoConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
 
-        // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で抽出状況が正常に解析できた
-        // 場合のみ更新する。SmsReceiver側でも同じ条件で更新しており、手動送信のみで運用している場合
-        // （SmsReceiverが動かない場合）でもここで送信元情報を残せるようにする
+        // 本文が正常に解析できた場合のみ引き継ぎ内容を更新
         if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
             ContinuationStore.update(
                 applicationContext,
@@ -47,33 +47,25 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         }
 
         if (validSendTargets.isEmpty()) {
-            // 一致した送信先自体が無い場合は送信先名なしの1件、一致したが設定不備で無効な場合は
-            // その送信先ごとに1件ずつ「送信先未設定」ログを記録する
+            // 送信先が無い場合または無効な場合にログ記録
             val unconfiguredTargets: List<SettingsStore.SendTarget?> = if (sendTargets.isEmpty()) listOf(null) else sendTargets
             unconfiguredTargets.forEach { sendTarget ->
                 val sendTargetName = sendTarget?.displayName(applicationContext)
                 logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_send_target_unconfigured), sendTargetName = sendTargetName, manual = manual, smsParts = smsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
             }
-            // Result.failure()にすると、複数件をまとめて送信した際に後続のチェーンされた
-            // ワーカーが実行されずキャンセルされてしまうため、成否はログのみで管理する
+            // ワーカーチェーン中断を避けるため成否はログのみで管理
             return@withContext Result.success()
         }
 
         if (!manual && !config.sendEnabled) {
-            // 自動送信が無効な場合、自動受信時はkintoneへの送信を何も試みないため、
-            // 受信完了のログのみとし送信開始・送信完了は記録しない
+            // 自動送信が無効な場合は受信完了のログのみ
             return@withContext Result.success()
         }
 
-        // 一致した送信先ごとに個別にkintoneへ登録し、ログも送信先ごとに分けて記録する。
-        // いずれかの送信先で一時的な失敗（リトライ可能）が発生した場合、ワーカー全体をリトライする
-        // ため、既に成功した送信先へ再度送信されることがあるが、KintoneApi側の重複判定で実害は防げる
+        // 送信先ごとに登録。リトライ時の重複は KintoneApi 側で検出
         var shouldRetryAny = false
         for (sendTarget in validSendTargets) {
-            // 会社名抽出が無効な場合は本文から会社名を抽出しないため、ログとkintone登録では
-            // 送信先ごとの「会社名」（SendTarget.companyName）を使う（変換は通常の抽出時と同様に
-            // アプリ全体の会社名変換を適用する）。抽出失敗・引き継ぎスキップの判定は本文の抽出結果
-            // smsPartsをそのまま使い、targetSmsPartsの値には依存させない
+            // 抽出が無効な場合は送信先の会社名を使用
             val targetSmsParts = if (config.companyNameExtractionEnabled) {
                 smsParts
             } else {

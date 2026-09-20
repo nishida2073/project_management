@@ -37,28 +37,43 @@ import java.util.concurrent.TimeUnit
 /** 受信箱のSMSを日付・本文・送信状況・送信先で絞り込んで一覧表示し、選択した分をKintoneへ手動送信キューに載せる画面 */
 class SmsSearchActivity : AppCompatActivity() {
 
-    /** この画面のViewBinding */
+    /**
+     * この画面のViewBinding。
+     */
     private lateinit var binding: ActivitySmsSearchBinding
 
-    /** 日付絞り込みの範囲（inclusive）。applyDateFilterで開始日は00:00:00.000、終了日は23:59:59.999に正規化される */
+    /**
+     * 日付絞り込みの範囲（inclusive）の開始日時。[applyDateFilter]で00:00:00.000に正規化される。
+     */
     private var fromMillis: Long? = null
-    /** [fromMillis]と対をなす終了日時 */
+
+    /**
+     * 日付絞り込み範囲の終了日時。[applyDateFilter]で23:59:59.999に正規化される。
+     */
     private var toMillis: Long? = null
-    /** 直近のsearchSmsの結果。一覧描画・全選択/解除・送信対象の特定に共用するため、検索のたびにクリアして詰め直す */
+
+    /**
+     * 直近の[searchSms]結果。一覧描画・全選択/解除・送信対象の特定に共用するため、
+     * 検索のたびにクリアして詰め直す。
+     */
     private val records = mutableListOf<SmsRecord>()
 
     /**
-     * スピナーの表示位置に対応する送信先名（sendTargetFilterOptionsと同じ並び）。null=すべて、
-     * AppConstants.SEND_TARGET_FILTER_KEY_UNSET=未設定、それ以外は送信先名（[SendTarget.name]）
+     * スピナーの表示位置に対応する送信先名。[SettingsStore.sendTargetFilterOptions]と同じ並び。
+     * nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」、
+     * それ以外は送信先名（[SendTarget.name]）。
      */
     private var sendTargetFilterNames: List<String?> = emptyList()
-    /** 現在選択中の送信先フィルタの送信先名。[sendTargetFilterNames]の要素の一つ */
+
+    /**
+     * 現在選択中の送信先フィルタの送信先名。[sendTargetFilterNames]の要素の一つ。
+     */
     private var selectedSendTargetName: String? = null
 
     /**
-     * 直近のsearchSms呼び出し内でのSettingsStore.resolveSendTargets結果をrecord.idごとにキャッシュしたもの。
+     * 直近の[searchSms]呼び出し内での[SettingsStore.resolveSendTargets]結果をrecord.idごとにキャッシュしたもの。
      * 送信先フィルタ・抽出失敗フィルタ・一覧描画がいずれも同じrecordに対して抽出結果を必要とするため、
-     * AI呼び出しを伴い得る抽出処理を1件のSMSにつき1回で済ませるためのもの。searchSmsのたびに作り直す
+     * AI呼び出しを伴い得る抽出処理を1件のSMSにつき1回で済ませるためのキャッシュ。[searchSms]のたびに作り直す。
      */
     private var resolvedPartsCache = mutableMapOf<Long, Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>>>()
 

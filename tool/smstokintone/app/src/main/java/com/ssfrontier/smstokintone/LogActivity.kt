@@ -21,17 +21,27 @@ import java.util.Date
  */
 class LogActivity : AppCompatActivity() {
 
-    /** この画面のViewBinding */
+    /**
+     * この画面のViewBinding。
+     */
     private lateinit var binding: ActivityLogBinding
-    /** [autoRefreshRunnable]のスケジュールに使うHandler */
+
+    /**
+     * [autoRefreshRunnable]のスケジュール管理に使う[Handler]。メインスレッドで実行するため[Looper.getMainLooper]を使用。
+     */
     private val autoRefreshHandler = Handler(Looper.getMainLooper())
-    /** 再描画のたびに次回分を再スケジュールすることで自動更新を継続させる */
+
+    /**
+     * 自動更新用Runnable。再描画のたびに次回実行を再スケジュールすることで、自動更新を継続させる。
+     */
     private val autoRefreshRunnable = Runnable {
         renderLog()
         scheduleAutoRefresh()
     }
 
-    /** ログ一覧の初期表示と、更新/クリアボタン・スワイプ更新の配線を行う */
+    /**
+     * ログ一覧の初期表示と、更新/クリアボタン・スワイプ更新の配線を行う。
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLogBinding.inflate(layoutInflater)
@@ -45,22 +55,28 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    /** 他画面での変更を反映するため表示に戻るたびに再描画し、自動更新のスケジュールを再開する */
+    /**
+     * 他画面での変更を反映するため、表示に戻るたびに再描画し、自動更新のスケジュールを再開する。
+     */
     override fun onResume() {
         super.onResume()
         renderLog()
         scheduleAutoRefresh()
     }
 
-    /** 画面が表示されていない間は自動更新を止める */
+    /**
+     * 画面が表示されていない間は自動更新を停止する。
+     */
     override fun onPause() {
         super.onPause()
         autoRefreshHandler.removeCallbacks(autoRefreshRunnable)
     }
 
-    /** 設定で自動更新が有効な場合、次回の[autoRefreshRunnable]実行を予約する */
+    /**
+     * 設定で自動更新が有効な場合、次回の[autoRefreshRunnable]実行を予約する。
+     * 既存予約をキャンセルしてから積み直すことで、[onResume]と[autoRefreshRunnable]の両方から呼ばれる際の多重登録を防ぐ。
+     */
     private fun scheduleAutoRefresh() {
-        // 既存の予約をキャンセルしてから積み直す（onResumeとrunnable自身の両方から呼ばれるため多重登録を防ぐ）
         autoRefreshHandler.removeCallbacks(autoRefreshRunnable)
         val config = SettingsStore.load(this)
         if (config.autoRefreshEnabled) {
@@ -71,7 +87,9 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    /** 確認ダイアログを出し、OKならログを全削除して再描画する */
+    /**
+     * 確認ダイアログを表示し、ユーザーが了承したらログを全削除して再描画する。
+     */
     private fun onClearClicked() {
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_confirm_clear_log)
@@ -84,7 +102,9 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
-    /** SmsLogStoreの全エントリを読み込み、一覧のViewを組み立て直して表示する */
+    /**
+     * [SmsLogStore]の全エントリを読み込み、一覧のViewを組み立て直して表示する。
+     */
     private fun renderLog() {
         val entries = SmsLogStore.getAll(this)
         binding.llLogContainer.removeAllViews()

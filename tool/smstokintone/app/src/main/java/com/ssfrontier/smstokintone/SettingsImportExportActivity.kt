@@ -18,34 +18,44 @@ import java.util.Locale
 
 /**
  * 外部のJSONファイルからアプリの設定（[SettingsStore.Config]）、送信先の設定
- * （[SettingsStore.SendTarget]）、送信元情報（[ContinuationStore.Entry]）をまとめて反映し、
+ * （[SettingsStore.SendTarget]）、引き継ぎ内容（[ContinuationStore.Entry]）をまとめて反映し、
  * 現在の設定を同じ形式のJSONファイルへまとめて書き出す画面。
  * インポートはファイルを選択して内容をプレビューで確認し、「この内容で設定する」で反映する。
  * ファイルに含まれるセクションだけが反映され、含まれないセクションは変更されない。
  * 送信先（[SettingsStore.SendTarget]）は送信先名をキーに既存へマージされ（[SettingsStore.mergeImportSendTargets]）、
- * アプリ設定・送信元情報はセクション単位で上書きされる。
+ * アプリ設定・引き継ぎ内容はセクション単位で上書きされる。
  * エクスポートはインポートと互換のJSON（[buildExportJson]）を保存先に書き出す
  */
 class SettingsImportExportActivity : AppCompatActivity() {
 
-    /** この画面のViewBinding */
+    /**
+     * この画面のViewBinding。
+     */
     private lateinit var binding: ActivitySettingsImportExportBinding
 
-    /** 選択中ファイルの表示名 */
+    /**
+     * 選択中のインポートファイルの表示名。
+     */
     private var selectedFileName: String? = null
 
-    /** ファイルから読み込んだ反映対象。ファイルに含まれないセクションはnull */
+    /**
+     * ファイルから読み込んだ反映対象。ファイルに含まれないセクションはnull。
+     */
     private var importedConfig: SettingsStore.Config? = null
     private var importedSendTargets: List<SettingsStore.SendTarget>? = null
-    private var importedSenderInfo: Map<String, ContinuationStore.Entry>? = null
+    private var importedContinuationInfo: Map<String, ContinuationStore.Entry>? = null
 
-    /** ファイル選択ダイアログの結果を受け取り、内容を読み込んでプレビューへ反映する */
+    /**
+     * ファイル選択ダイアログの結果ハンドラ。選択されたURIのファイル内容を読み込んでプレビューへ反映する。
+     */
     private val openDocumentLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) loadImportFile(uri)
         }
 
-    /** エクスポート先の保存ダイアログの結果を受け取り、JSONファイルを書き出す */
+    /**
+     * エクスポート先の保存ダイアログの結果ハンドラ。選択された保存先へJSONファイルを書き出す。
+     */
     private val createDocumentLauncher =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
             if (uri != null) writeExportFile(uri)
@@ -65,23 +75,20 @@ class SettingsImportExportActivity : AppCompatActivity() {
         }
     }
 
-    // ---- 保存先の選択（エクスポート） ----
-
-    /** エクスポート先の候補ファイル名（s2k_settings_時刻.json）を返す */
+    /** エクスポート先のファイル名を生成（s2k_settings_時刻.json） */
     private fun suggestedExportFileName(): String {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         return "s2k_settings_$timestamp.json"
     }
 
-    /** 現在の設定（[SettingsStore.Config]・[SettingsStore.SendTarget]・[ContinuationStore.Entry]）を
-     * インポートと互換のJSONオブジェクトへまとめる。エクスポート専用 */
+    /** 現在の設定をエクスポート用JSONにまとめる */
     private fun buildExportJson(): JSONObject {
         val sendTargets = JSONArray().apply {
             SettingsStore.loadSendTargets(this@SettingsImportExportActivity).forEach { sendTarget ->
                 put(SettingsStore.sendTargetToJson(sendTarget))
             }
         }
-        val senderInfo = JSONArray().apply {
+        val continuationInfo = JSONArray().apply {
             ContinuationStore.getAll(this@SettingsImportExportActivity).forEach { (_, entry) ->
                 put(
                     JSONObject()
@@ -95,7 +102,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
         return JSONObject()
             .put("appConfig", SettingsStore.configToJson(SettingsStore.load(this)))
             .put("sendTargetConfig", sendTargets)
-            .put("senderInfoConfig", senderInfo)
+            .put("continuationInfoConfig", continuationInfo)
     }
 
     /** [uri]の保存先へエクスポートJSONを書き出し、成功トーストまたは失敗ダイアログを表示する */
@@ -170,17 +177,17 @@ class SettingsImportExportActivity : AppCompatActivity() {
             }
         }
         importedSendTargets = sendTargets
-        importedSenderInfo = root.optJSONArray("senderInfoConfig")?.let { parseSenderInfo(it) }
+        importedContinuationInfo = root.optJSONArray("continuationInfoConfig")?.let { parseContinuationInfo(it) }
 
-        if (importedConfig == null && importedSendTargets == null && importedSenderInfo == null) {
+        if (importedConfig == null && importedSendTargets == null && importedContinuationInfo == null) {
             showError(getString(R.string.message_import_no_section))
             return
         }
         updatePreview()
     }
 
-    /** 送信元情報のJSON配列を正規化済みキー→[ContinuationStore.Entry]のマップへ変換する */
-    private fun parseSenderInfo(array: JSONArray): Map<String, ContinuationStore.Entry> {
+    /** 引き継ぎ内容のJSON配列を正規化済みキー→[ContinuationStore.Entry]のマップへ変換する */
+    private fun parseContinuationInfo(array: JSONArray): Map<String, ContinuationStore.Entry> {
         val entries = mutableMapOf<String, ContinuationStore.Entry>()
         for (i in 0 until array.length()) {
             val obj = array.getJSONObject(i)
@@ -215,7 +222,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
         }
         lines += getString(R.string.preview_app_settings, sectionState(importedConfig != null))
         lines += getString(R.string.preview_send_targets, countOrSkip(importedSendTargets?.size))
-        lines += getString(R.string.preview_sender_info, countOrSkip(importedSenderInfo?.size))
+        lines += getString(R.string.preview_continuation_info, countOrSkip(importedContinuationInfo?.size))
         return lines.joinToString("\n")
     }
 
@@ -223,14 +230,14 @@ class SettingsImportExportActivity : AppCompatActivity() {
     private fun sectionState(included: Boolean): String =
         if (included) getString(R.string.value_import_applied) else getString(R.string.value_import_skip)
 
-    /** リストのセクション（送信先・送信元情報）の反映状態の文言を返す。含まれない場合は「変更しません」 */
+    /** リストのセクション（送信先・引き継ぎ内容）の反映状態の文言を返す。含まれない場合は「変更しません」 */
     private fun countOrSkip(count: Int?): String =
         if (count == null) getString(R.string.value_import_skip)
         else getString(R.string.value_import_applied_count, count)
 
     /** 「この内容で設定する」ボタン。反映内容の確認ダイアログを表示し、確定時に適用する */
     private fun onImportClicked() {
-        if (importedConfig == null && importedSendTargets == null && importedSenderInfo == null) {
+        if (importedConfig == null && importedSendTargets == null && importedContinuationInfo == null) {
             Toast.makeText(this, getString(R.string.message_import_no_section), Toast.LENGTH_SHORT).show()
             return
         }
@@ -247,7 +254,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
         importedSendTargets?.let { imported ->
             SettingsStore.saveSendTargets(this, SettingsStore.mergeImportSendTargets(this, imported))
         }
-        importedSenderInfo?.let { ContinuationStore.importAll(this, it) }
+        importedContinuationInfo?.let { ContinuationStore.importAll(this, it) }
         importedConfig?.let { SettingsStore.save(this, it) }
         Toast.makeText(this, getString(R.string.toast_settings_imported), Toast.LENGTH_SHORT).show()
         // テーマは保存だけでは反映されないため（SmsToKintoneApp.onCreate参照）、設定画面側と同じく
@@ -260,7 +267,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
     private fun showError(message: String) {
         importedConfig = null
         importedSendTargets = null
-        importedSenderInfo = null
+        importedContinuationInfo = null
         binding.tvImportPreview.text = getString(R.string.message_import_no_file)
         binding.btnImportSettings.isEnabled = false
         AlertDialog.Builder(this)

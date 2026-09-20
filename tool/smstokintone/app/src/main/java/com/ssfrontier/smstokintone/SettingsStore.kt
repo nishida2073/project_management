@@ -119,74 +119,70 @@ object SettingsStore {
         }
     }
 
-    /** アプリ全体の設定（kintoneへの接続設定は含まない。接続設定は[SendTarget]を参照） */
+    /**
+     * アプリ全体の設定。kintoneへの接続設定は含まない（接続設定は[SendTarget]を参照）。
+     *
+     * @property sendEnabled trueなら自動送信モード、falseなら手動送信モード。[KintoneUploadWorker]が参照
+     * @property sendExtractionFailedEnabled 自動送信時、抽出失敗のSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか
+     * @property sendExtractionNotPerformedEnabled 自動送信時、抽出未実施（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか
+     * @property searchExtractionFailedEnabled SMS検索画面で、抽出失敗のSMSを選択可能にするかどうか
+     * @property searchExtractionNotPerformedEnabled SMS検索画面で、抽出未実施（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか
+     * @property autoReplyExtractionFailedEnabled 自動受信時、抽出失敗のSMSに対して[smsExtractionFailedReplyBody]の文言で自動返信するかどうか
+     * @property autoReplyCooldownSeconds 同一送信元への自動返信再送信までの間隔（秒）。連投防止用クールダウン
+     * @property autoRefreshEnabled SMS送信履歴画面（[LogActivity]）を[autoRefreshIntervalSeconds]間隔で自動再読み込みするかどうか
+     * @property autoRefreshIntervalSeconds 自動再読み込み間隔（秒）。[autoRefreshEnabled]が有効な場合に使用
+     * @property smsMatchToleranceSeconds 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒）
+     * @property bodyExcerptLength ログ一覧（[LogActivity]）に表示する本文抜粋（[SmsLogStore.Entry.bodyExcerpt]）の文字数
+     * @property continuationEnabled 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）機能全体の有効/無効
+     * @property continuationScope 継続SMSの引き継ぎを送信元ごとにどこまで遡って有効とするか
+     * @property continuationShowUserNameEnabled SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引き継いだ氏名を表示するかどうか
+     * @property themeMode アプリの配色モード（ライト/ダーク）
+     * @property smsSearchDateRangeDays SMS検索画面を開いた際に検索条件へ初期設定する日付範囲（日）
+     * @property searchFiltersVisibleByDefault SMS検索画面を開いた際に検索条件エリアを表示した状態にするかどうか
+     * @property smsExtractionSuccessReplyBody SMS検索画面で長押しした際に開く返信画面に自動入力する文言
+     * @property smsExtractionFailedReplyBody 抽出失敗のSMSへの返信時に使う文言。[smsExtractionSuccessReplyBody]の代わり
+     * @property defaultSendTargetFilterName SMS検索画面の「送信先」フィルタの初期値。nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」
+     * @property aiExtractionEnabled 本文からの会社名・氏名の抽出に端末上のAI（ML Kit GenAI / Gemini Nano）を使うかどうか。非対応端末は自動フォールバック
+     * @property companyNameExtractionEnabled 本文からの会社名・氏名の抽出機能全体の有効/無効
+     * @property companyNameAutoConversionEnabled 抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するかどうか。[resolveSendTargets]で抽出直後に適用
+     * @property companyNameFixedConversions 抽出結果の会社名に適用する固定変換ルール。[FixedConversion.from]に一致する部分を[FixedConversion.to]に置換。[companyNameAutoConversionEnabled]の後に適用
+     * @property defaultSendNoneOnlyEnabled SMS検索画面で「送信」の「未」チェックボックスの初期状態
+     * @property defaultExtractionFailedOnlyEnabled SMS検索画面で「抽出状況」の「異常」チェックボックスの初期状態
+     * @property defaultExtractionSucceededOnlyEnabled SMS検索画面で「抽出状況」の「正常」チェックボックスの初期状態
+     * @property defaultExtractionNotPerformedOnlyEnabled SMS検索画面で「抽出状況」の「未実施」チェックボックスの初期状態
+     * @property defaultSentAutoOnlyEnabled SMS検索画面で「送信」の「済（自動）」チェックボックスの初期状態
+     * @property defaultSentManualOnlyEnabled SMS検索画面で「送信」の「済（手動）」チェックボックスの初期状態
+     */
     data class Config(
-        /** trueなら自動送信モード、falseなら手動送信モード（[KintoneUploadWorker]が参照） */
         val sendEnabled: Boolean,
-        /** 自動送信時、本文の抽出状況が異常なSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか */
         val sendExtractionFailedEnabled: Boolean,
-        /** 自動送信時、抽出状況が未実施（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか */
         val sendExtractionNotPerformedEnabled: Boolean,
-        /** SMS検索画面で、本文の抽出状況が異常なSMSを選択可能にするかどうか */
         val searchExtractionFailedEnabled: Boolean,
-        /** SMS検索画面で、抽出状況が未実施（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか */
         val searchExtractionNotPerformedEnabled: Boolean,
-        /** 自動受信時、本文の抽出状況が異常なSMSに対して[smsExtractionFailedReplyBody]の文言でSMSへ自動返信するかどうか */
         val autoReplyExtractionFailedEnabled: Boolean,
-        /** 同一の送信元への自動返信を再送信するまでの間隔（秒）。連投を防ぐためのクールダウン */
         val autoReplyCooldownSeconds: Int,
-        /** SMS送信履歴画面（[LogActivity]）を[autoRefreshIntervalSeconds]間隔で自動再読み込みするかどうか */
         val autoRefreshEnabled: Boolean,
-        /** [autoRefreshEnabled]が有効な場合の自動再読み込み間隔（秒） */
         val autoRefreshIntervalSeconds: Int,
-        /** 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒） */
         val smsMatchToleranceSeconds: Int,
-        /** ログ一覧（[LogActivity]）に表示する本文抜粋（[SmsLogStore.Entry.bodyExcerpt]）の文字数 */
         val bodyExcerptLength: Int,
-        /** 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）機能自体を有効にするかどうか */
         val continuationEnabled: Boolean,
-        /** 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）を送信元ごとにどこまで遡って有効とするか */
         val continuationScope: ContinuationScope,
-        /**
-         * SMS検索画面・ログ画面の一覧で、継続SMS（[SmsResolution.isContinuation]）については
-         * 送信元電話番号の代わりに引き継いだ氏名を表示するかどうか
-         */
         val continuationShowUserNameEnabled: Boolean,
-        /** アプリの配色モード */
         val themeMode: ThemeMode,
-        /** SMS検索画面を開いた際に検索条件へ初期設定する、開始日〜終了日の範囲（日） */
         val smsSearchDateRangeDays: Int,
-        /** SMS検索画面を開いた際に検索条件エリアを表示した状態にするかどうか */
         val searchFiltersVisibleByDefault: Boolean,
-        /** SMS検索画面で長押しした際に開く返信画面に自動入力する文言 */
         val smsExtractionSuccessReplyBody: String,
-        /** 抽出失敗のSMSへの返信時、[smsExtractionSuccessReplyBody]の代わりに使う文言 */
         val smsExtractionFailedReplyBody: String,
-        /** SMS検索画面を開いた際に「送信先」フィルタへ初期設定する送信先名。
-         * nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す
-         * （送信先はnameで一意に管理するため名前で参照する） */
         val defaultSendTargetFilterName: String?,
-        /** 本文からの会社名・氏名の抽出に、ルールベースの代わりに端末上のAI（ML Kit GenAI / Gemini Nano）を
-         * 使うかどうか。非対応端末では自動的にルールベースにフォールバックする */
         val aiExtractionEnabled: Boolean,
         val companyNameExtractionEnabled: Boolean,
-        /** 本文からの抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するかどうか。
-         * [resolveSendTargets]で抽出直後に適用され、送信先の判定・引き継ぎ内容の登録・kintoneへの送信すべてに反映される */
         val companyNameAutoConversionEnabled: Boolean = false,
-        /** 本文からの抽出結果の会社名に適用する固定変換。[FixedConversion.from]に一致する部分文字列を
-         * [FixedConversion.to]に置換する。複数件は先頭から順番に、[companyNameAutoConversionEnabled]の後に適用される */
         val companyNameFixedConversions: List<FixedConversion> = emptyList(),
-        /** SMS検索画面を開いた際に「送信」の「未」チェックボックスを初期状態でONにするかどうか */
         val defaultSendNoneOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「抽出状況」の「異常」チェックボックスを初期状態でONにするかどうか */
         val defaultExtractionFailedOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「抽出状況」の「正常」チェックボックスを初期状態でONにするかどうか */
         val defaultExtractionSucceededOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「抽出状況」の「未実施」チェックボックスを初期状態でONにするかどうか */
         val defaultExtractionNotPerformedOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「送信」の「済（自動）」チェックボックスを初期状態でONにするかどうか */
         val defaultSentAutoOnlyEnabled: Boolean,
-        /** SMS検索画面を開いた際に「送信」の「済（手動）」チェックボックスを初期状態でONにするかどうか */
         val defaultSentManualOnlyEnabled: Boolean
     )
 
@@ -537,17 +533,32 @@ object SettingsStore {
         fieldBody = obj.optString("fieldBody", "")
     )
 
-    /** 設定を読み込み、変更して保存 */
+    /**
+     * 現在の設定を読み込み、[change]で変更してから保存する。
+     *
+     * @param context アプリケーションコンテキスト
+     * @param change 現在の[Config]を受け取って、変更版を返す変換関数
+     */
     fun update(context: Context, change: (Config) -> Config) {
         save(context, change(load(context)))
     }
 
-    /** アプリ設定をデフォルトに戻す */
+    /**
+     * アプリ設定をデフォルト値に戻す。
+     *
+     * @param context アプリケーションコンテキスト
+     */
     fun resetToDefaults(context: Context) {
         save(context, DEFAULT_CONFIG)
     }
 
-    /** 「送信先」選択肢をキーと表示ラベルの組で返す */
+    /**
+     * 「送信先」フィルタの選択肢を返す。
+     * 「すべて」（null）、各送信先の名前、「未設定」の順
+     *
+     * @param context アプリケーションコンテキスト
+     * @return キー→表示ラベルの[Pair]リスト
+     */
     fun sendTargetFilterOptions(context: Context): List<Pair<String?, String>> {
         val sendTargets = loadSendTargets(context)
         return listOf(null to context.getString(R.string.filter_send_target_all)) +
@@ -555,14 +566,26 @@ object SettingsStore {
             listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_none))
     }
 
-    /** [SendTarget]のリストを保存 */
+    /**
+     * [SendTarget]のリストを保存する。
+     *
+     * @param context アプリケーションコンテキスト
+     * @param sendTargets 保存する送信先リスト
+     */
     fun saveSendTargets(context: Context, sendTargets: List<SendTarget>) {
         val array = JSONArray()
         sendTargets.forEach { array.put(sendTargetToJson(it)) }
         prefs(context).edit().putString(KEY_SEND_TARGETS, array.toString()).apply()
     }
 
-    /** インポート送信先を既存リストにマージ（送信先名をキーに） */
+    /**
+     * インポート送信先を既存リストにマージする。送信先名をキーに既存送信先を上書き更新し、
+     * 新規送信先は追加する。
+     *
+     * @param context アプリケーションコンテキスト
+     * @param imported マージ対象のインポート送信先リスト
+     * @return マージされた送信先リスト
+     */
     fun mergeImportSendTargets(context: Context, imported: List<SendTarget>): List<SendTarget> {
         val merged = loadSendTargets(context).toMutableList()
         imported.forEach { from ->
@@ -592,7 +615,12 @@ object SettingsStore {
         return merged
     }
 
-    /** 保存済みの送信先設定を読み込む */
+    /**
+     * 保存済みの送信先設定を読み込む。初回起動で保存済みデータがない場合はデフォルト送信先を作成。
+     *
+     * @param context アプリケーションコンテキスト
+     * @return 送信先リスト
+     */
     fun loadSendTargets(context: Context): List<SendTarget> {
         val json = prefs(context).getString(KEY_SEND_TARGETS, null)
             ?: return createDefaultSendTarget(context)
@@ -601,14 +629,25 @@ object SettingsStore {
         return (0 until array.length()).map { i -> sendTargetFromJson(array.getJSONObject(i)) }
     }
 
-    /** 初回起動時にデフォルト送信先を作成 */
+    /**
+     * 初回起動時にデフォルト送信先を作成して保存し、戻す。
+     *
+     * @param context アプリケーションコンテキスト
+     * @return デフォルト送信先を含むリスト
+     */
     private fun createDefaultSendTarget(context: Context): List<SendTarget> {
         val sendTargets = listOf(SendTarget.newEmpty())
         saveSendTargets(context, sendTargets)
         return sendTargets
     }
 
-    /** 会社名に変換ルールを適用（幅変換→固定変換） */
+    /**
+     * 会社名に対して、アプリ全体の会社名変換（幅統一→固定変換）を適用する。
+     *
+     * @param companyName 変換対象の会社名
+     * @param config 変換設定
+     * @return 変換済みの会社名
+     */
     fun applyCompanyNameConversion(companyName: String, config: Config): String {
         val autoConverted = if (config.companyNameAutoConversionEnabled) {
             TextNormalization.normalizeWidth(companyName)
@@ -620,7 +659,13 @@ object SettingsStore {
         }
     }
 
-    /** 会社名に一致する送信先を返す（デフォルト送信先にフォールバック） */
+    /**
+     * 会社名に一致する送信先を返す。一致する送信先がない場合はデフォルト送信先にフォールバック。
+     *
+     * @param context アプリケーションコンテキスト
+     * @param companyName 照合対象の会社名
+     * @return 一致した送信先リスト（一致なしの場合はデフォルト送信先）
+     */
     fun findSendTargets(context: Context, companyName: String): List<SendTarget> {
         val sendTargets = loadSendTargets(context)
         val matched = sendTargets.filter { it.routesTo(companyName) }

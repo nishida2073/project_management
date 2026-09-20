@@ -21,19 +21,24 @@ import kotlinx.coroutines.withContext
 /** 送信先（Kintoneアプリ接続先）の一覧を追加・複製・削除・並べ替えしながら編集し、保存する画面 */
 class SendTargetSettingsActivity : AppCompatActivity() {
 
-    /** この画面のViewBinding */
+    /**
+     * この画面のViewBinding。
+     */
     private lateinit var binding: ActivitySendTargetSettingsBinding
 
     /**
-     * idはカードの表示順が変わっても（複製・削除・並べ替え）当該送信先を追跡できるよう、
-     * 画面上の並び位置とは別に保持しておく安定な識別子
+     * 送信先設定1件分のUIカード。[id]はカードの表示順が変わっても（複製・削除・並べ替え）
+     * 当該送信先を安定に追跡できるよう、画面上の並び位置とは別に保持する一意な識別子。
+     *
+     * @property id UUID形式の一意な識別子
+     * @property binding カード要素のViewBinding
      */
     private class SendTargetCard(val id: String, val binding: ItemSendTargetBinding)
 
     /**
-     * 画面上のカードの並び順（=llSendTargetsContainerの子View順）を保持するリスト。この並び順のまま
-     * 保存される（SettingsStore.resolveSendTargetsは一致した送信先をすべて返すため、複数の送信先が
-     * 同じ本文にマッチした場合もこの並び順による優先順位は無く、一致した全件が振り分け対象になる）
+     * 画面上のカードの並び順（=llSendTargetsContainerの子View順）を保持するリスト。
+     * この並び順のまま保存される。[SettingsStore.resolveSendTargets]は一致した送信先をすべて返すため、
+     * 複数の送信先が同じ本文にマッチした場合も、この並び順による優先順位は無く、一致した全件が振り分け対象になる。
      */
     private val sendTargetCards = mutableListOf<SendTargetCard>()
 
