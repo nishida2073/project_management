@@ -320,10 +320,10 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
     /** 全カードを検証してからまとめて保存する。1件でも不正な入力があれば、その時点で中断しどこも保存しない */
     private fun onSaveClicked() {
-        if (sendTargetCards.isEmpty()) {
-            Toast.makeText(this, getString(R.string.toast_no_send_targets), Toast.LENGTH_SHORT).show()
-            return
-        }
+        // if (sendTargetCards.isEmpty()) {
+        //     Toast.makeText(this, getString(R.string.toast_no_send_targets), Toast.LENGTH_SHORT).show()
+        //     return
+        // }
 
         val newSendTargets = mutableListOf<SettingsStore.SendTarget>()
 
