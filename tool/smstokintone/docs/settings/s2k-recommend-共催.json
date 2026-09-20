@@ -1,5 +1,14 @@
 {
   "appConfig": {
     "searchExtractionFailedEnabled": true
-  }
+  },
+  "sendTargetConfig": [
+    {
+      "name": "地域",
+      "keywords": [
+        "北海道",
+        "東北"
+      ]
+    }
+  ]
 }

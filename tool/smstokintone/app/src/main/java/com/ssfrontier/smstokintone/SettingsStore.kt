@@ -491,6 +491,27 @@ object SettingsStore {
         defaultSentManualOnlyEnabled = json.optBoolean("defaultSentManualOnlyEnabled", DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
     )
 
+    /** [SendTarget]のデフォルト値を持つインスタンスを返す（UUIDは新規採番） */
+    private fun createDefaultSendTarget(): SendTarget = SendTarget(
+        id = UUID.randomUUID().toString(),
+        name = "",
+        companyName = "",
+        keywords = emptyList(),
+        subdomain = AppDefaults.NEW_PROFILE_SUBDOMAIN,
+        appId = "",
+        loginName = "",
+        loginPassword = "",
+        fieldSender = AppDefaults.NEW_PROFILE_FIELD_SENDER,
+        fieldHistory = AppDefaults.NEW_PROFILE_FIELD_HISTORY,
+        fieldDatetime = AppDefaults.NEW_PROFILE_FIELD_DATETIME,
+        fieldType = AppDefaults.NEW_PROFILE_FIELD_TYPE,
+        updateToleranceHours = AppDefaults.UPDATE_TOLERANCE_HOURS,
+        updateToleranceMode = UpdateToleranceMode.SAME_DATE,
+        fieldCompanyName = AppDefaults.NEW_PROFILE_FIELD_COMPANY_NAME,
+        fieldUserName = AppDefaults.NEW_PROFILE_FIELD_USER_NAME,
+        fieldBody = AppDefaults.NEW_PROFILE_FIELD_BODY
+    )
+
     /** [SendTarget]をJSONオブジェクトへ変換（IDは含めない） */
     fun sendTargetToJson(sendTarget: SendTarget): JSONObject = JSONObject()
         .put("name", sendTarget.name)
@@ -511,27 +532,30 @@ object SettingsStore {
         .put("fieldBody", sendTarget.fieldBody)
 
     /** JSONオブジェクトから[SendTarget]を復元（新規UUIDを採番） */
-    fun sendTargetFromJson(obj: JSONObject): SendTarget = SendTarget(
-        id = UUID.randomUUID().toString(),
-        name = obj.optString("name", ""),
-        companyName = obj.optString("companyName", ""),
-        keywords = obj.optJSONArray("keywords")?.let { array ->
-            (0 until array.length()).map { array.getString(it) }
-        } ?: emptyList(),
-        subdomain = obj.optString("subdomain", ""),
-        appId = obj.optString("appId", ""),
-        loginName = obj.optString("loginName", ""),
-        loginPassword = obj.optString("loginPassword", ""),
-        fieldSender = obj.optString("fieldSender", ""),
-        fieldHistory = obj.optString("fieldHistory", ""),
-        fieldDatetime = obj.optString("fieldDatetime", ""),
-        fieldType = obj.optString("fieldType", ""),
-        updateToleranceHours = obj.optInt("updateToleranceHours", AppDefaults.UPDATE_TOLERANCE_HOURS),
-        updateToleranceMode = UpdateToleranceMode.fromName(obj.optString("updateToleranceMode", "")),
-        fieldCompanyName = obj.optString("fieldCompanyName", ""),
-        fieldUserName = obj.optString("fieldUserName", ""),
-        fieldBody = obj.optString("fieldBody", "")
-    )
+    fun sendTargetFromJson(obj: JSONObject): SendTarget {
+        val default = createDefaultSendTarget()
+        return default.copy(
+            id = UUID.randomUUID().toString(),
+            name = obj.optString("name", default.name),
+            companyName = obj.optString("companyName", default.companyName),
+            keywords = obj.optJSONArray("keywords")?.let { array ->
+                (0 until array.length()).map { array.getString(it) }
+            } ?: default.keywords,
+            subdomain = obj.optString("subdomain", default.subdomain),
+            appId = obj.optString("appId", default.appId),
+            loginName = obj.optString("loginName", default.loginName),
+            loginPassword = obj.optString("loginPassword", default.loginPassword),
+            fieldSender = obj.optString("fieldSender", default.fieldSender),
+            fieldHistory = obj.optString("fieldHistory", default.fieldHistory),
+            fieldDatetime = obj.optString("fieldDatetime", default.fieldDatetime),
+            fieldType = obj.optString("fieldType", default.fieldType),
+            updateToleranceHours = obj.optInt("updateToleranceHours", default.updateToleranceHours),
+            updateToleranceMode = UpdateToleranceMode.fromName(obj.optString("updateToleranceMode", "")) ?: default.updateToleranceMode,
+            fieldCompanyName = obj.optString("fieldCompanyName", default.fieldCompanyName),
+            fieldUserName = obj.optString("fieldUserName", default.fieldUserName),
+            fieldBody = obj.optString("fieldBody", default.fieldBody)
+        )
+    }
 
     /**
      * 現在の設定を読み込み、[change]で変更してから保存する。
