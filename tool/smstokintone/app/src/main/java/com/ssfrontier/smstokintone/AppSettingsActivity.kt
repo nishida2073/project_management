@@ -83,10 +83,13 @@ class AppSettingsActivity : AppCompatActivity() {
      * @param from 変換前の文字列
      * @param to 変換後の文字列
      */
-    private fun addFixedConversionRow(container: LinearLayout, from: String, to: String) {
+    private fun addFixedConversionRow(container: LinearLayout, from: String, to: String, enabled: Boolean = true) {
         val rowBinding = ItemFixedConversionBinding.inflate(layoutInflater, container, false)
         rowBinding.etFixConversionBefore.setText(from)
         rowBinding.etFixConversionAfter.setText(to)
+        rowBinding.etFixConversionBefore.isEnabled = enabled
+        rowBinding.etFixConversionAfter.isEnabled = enabled
+        rowBinding.btnDeleteFixedConversion.isEnabled = enabled
         rowBinding.etFixConversionBefore.addTextChangedListener { saveFixedConversions() }
         rowBinding.etFixConversionAfter.addTextChangedListener { saveFixedConversions() }
         rowBinding.btnDeleteFixedConversion.setOnClickListener {
@@ -109,6 +112,18 @@ class AppSettingsActivity : AppCompatActivity() {
             )
         }
         SettingsStore.update(this) { it.copy(companyNameFixedConversions = rules) }
+    }
+
+    /**
+     * llFixedConversionsContainer 内の全行の EditText と Button の Enable/Disable 状態を更新。
+     */
+    private fun updateFixedConversionsRowState(enabled: Boolean) {
+        for (i in 0 until binding.llFixedConversionsContainer.childCount) {
+            val row = binding.llFixedConversionsContainer.getChildAt(i)
+            row.findViewById<EditText>(R.id.etFixConversionBefore).isEnabled = enabled
+            row.findViewById<EditText>(R.id.etFixConversionAfter).isEnabled = enabled
+            row.findViewById<android.widget.Button>(R.id.btnDeleteFixedConversion).isEnabled = enabled
+        }
     }
 
     /**
@@ -161,6 +176,9 @@ class AppSettingsActivity : AppCompatActivity() {
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
                             previousCompanyNameExtractionEnabled = isChecked
+                            binding.swCompanyNameAutoConversionEnabled.isEnabled = isChecked
+                            binding.btnAddFixedConversion.isEnabled = isChecked
+                            updateFixedConversionsRowState(isChecked)
                         }
                         .setNegativeButton(android.R.string.cancel) { _, _ ->
                             binding.swCompanyNameExtractionEnabled.isChecked = previousCompanyNameExtractionEnabled
@@ -169,18 +187,26 @@ class AppSettingsActivity : AppCompatActivity() {
                 } else {
                     SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
                     previousCompanyNameExtractionEnabled = isChecked
+                    binding.swCompanyNameAutoConversionEnabled.isEnabled = isChecked
+                    binding.btnAddFixedConversion.isEnabled = isChecked
+                    updateFixedConversionsRowState(isChecked)
                 }
             } else {
                 SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
                 previousCompanyNameExtractionEnabled = isChecked
+                binding.swCompanyNameAutoConversionEnabled.isEnabled = isChecked
+                binding.btnAddFixedConversion.isEnabled = isChecked
+                updateFixedConversionsRowState(isChecked)
             }
         }
         binding.swCompanyNameAutoConversionEnabled.isChecked = bodyExtractionConfig.companyNameAutoConversionEnabled
+        binding.swCompanyNameAutoConversionEnabled.isEnabled = bodyExtractionConfig.companyNameExtractionEnabled
         binding.swCompanyNameAutoConversionEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(companyNameAutoConversionEnabled = isChecked) }
         }
-        bodyExtractionConfig.companyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to) }
-        binding.btnAddFixedConversion.setOnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "") }
+        bodyExtractionConfig.companyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to, enabled = bodyExtractionConfig.companyNameExtractionEnabled) }
+        binding.btnAddFixedConversion.isEnabled = bodyExtractionConfig.companyNameExtractionEnabled
+        binding.btnAddFixedConversion.setOnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "", enabled = bodyExtractionConfig.companyNameExtractionEnabled) }
 
         binding.swSearchExtractionFailedEnabled.isChecked = config.searchExtractionFailedEnabled
         binding.swSearchExtractionFailedEnabled.setOnCheckedChangeListener { _, isChecked ->

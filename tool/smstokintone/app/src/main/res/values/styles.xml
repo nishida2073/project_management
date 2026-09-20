@@ -3,7 +3,8 @@
          ダークモードでは背景（colorSurface）との明度差が小さく視認しづらいため、枠線をボタン文字と
          同じcolorPrimaryに変更する -->
     <style name="AppButton.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="strokeColor">?attr/colorPrimary</item>
+        <item name="strokeColor">@color/button_stroke_color</item>
+        <item name="android:disabledAlpha">0.5</item>
     </style>
 
     <!-- キーワード行の追加／削除など、1文字程度の短いラベルを行内にコンパクトに収めるためのボタン。
