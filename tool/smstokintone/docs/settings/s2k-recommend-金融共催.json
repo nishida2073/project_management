@@ -3,7 +3,7 @@
     "companyNameExtractionEnabled": true,
     "sendExtractionFailedEnabled": true,
     "searchExtractionFailedEnabled": true,
-    "companyNameFixedConversions":[
+    "companyNameFixedConversions": [
       {"from": "data", "to": "データ"},
       {"from": "NFT", "to": "NTTデータフィナンシャルテクノロジー"}
     ]
@@ -13,8 +13,11 @@
       "name": "金融共催",
       "keywords": [
         "NTTデータフィナンシャルテクノロジー",
+        "フィナンシャルテクノロジー",
         "NTTデータソフィア",
-        "NTTデータフォース"
+        "ソフィア",
+        "NTTデータフォース",
+        "フォース"
       ]
     }
   ]
