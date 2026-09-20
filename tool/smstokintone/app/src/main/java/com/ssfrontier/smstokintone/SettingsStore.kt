@@ -6,130 +6,114 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
-/** アプリの設定（[Config]）と送信先設定（[SendTarget]）をSharedPreferencesで永続化する */
+/**
+ * アプリ全体の設定と送信先設定を SharedPreferences で永続化・管理。
+ * [Config] でアプリ全体の動作制御、[SendTarget] で個別の Kintone 連携設定を保持。
+ */
 object SettingsStore {
 
-    /** SharedPreferencesのファイル名 */
     private const val PREFS_NAME = "smstokintone_prefs"
-    /** SharedPreferencesのキー名。各キーが対応する設定の意味は[Config]の同名フィールドのKDocを参照 */
-    /** [Config.sendEnabled]のキー */
+
     private const val KEY_SEND_ENABLED = "send_enabled"
-    /** [Config.sendExtractionFailedEnabled]のキー */
     private const val KEY_SEND_EXTRACTION_FAILED_ENABLED = "send_extraction_failed_enabled"
-    /** [Config.sendExtractionNotPerformedEnabled]のキー */
     private const val KEY_SEND_EXTRACTION_NOT_PERFORMED_ENABLED = "send_extraction_not_performed_enabled"
-    /** [Config.searchExtractionFailedEnabled]のキー */
     private const val KEY_SEARCH_EXTRACTION_FAILED_ENABLED = "search_extraction_failed_enabled"
-    /** [Config.searchExtractionNotPerformedEnabled]のキー */
     private const val KEY_SEARCH_EXTRACTION_NOT_PERFORMED_ENABLED = "search_extraction_not_performed_enabled"
-    /** [Config.autoReplyExtractionFailedEnabled]のキー */
     private const val KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED = "auto_reply_extraction_failed_enabled"
-    /** [Config.autoReplyCooldownSeconds]のキー */
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
-    /** [Config.autoRefreshEnabled]のキー */
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
-    /** [Config.autoRefreshIntervalSeconds]のキー */
     private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
-    /** [Config.smsMatchToleranceSeconds]のキー */
     private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
-    /** [Config.bodyExcerptLength]のキー */
     private const val KEY_BODY_EXCERPT_LENGTH = "body_excerpt_length"
-    /** [Config.continuationEnabled]のキー */
     private const val KEY_CONTINUATION_ENABLED = "continuation_enabled"
-    /** [Config.continuationScope]のキー */
     private const val KEY_CONTINUATION_SCOPE = "continuation_scope"
-    /** [Config.continuationShowUserNameEnabled]のキー */
     private const val KEY_CONTINUATION_SHOW_USER_NAME_ENABLED = "continuation_show_user_name_enabled"
-    /** [Config.themeMode]のキー */
     private const val KEY_THEME_MODE = "theme_mode"
-    /** [Config.smsSearchDateRangeDays]のキー */
     private const val KEY_SMS_SEARCH_DATE_RANGE_DAYS = "sms_search_date_range_days"
-    /** [Config.searchFiltersVisibleByDefault]のキー */
     private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
-    /** [Config.smsExtractionSuccessReplyBody]のキー */
     private const val KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY = "sms_extraction_success_reply_body"
-    /** [Config.smsExtractionFailedReplyBody]のキー */
     private const val KEY_SMS_EXTRACTION_FAILED_REPLY_BODY = "sms_extraction_failed_reply_body"
-    /** [Config.defaultSendTargetFilterName]のキー */
     private const val KEY_DEFAULT_SEND_TARGET_FILTER_NAME = "default_send_target_filter_name"
-    /** [Config.aiExtractionEnabled]のキー */
     private const val KEY_AI_EXTRACTION_ENABLED = "ai_extraction_enabled"
-    /** [Config.companyNameExtractionEnabled]のキー */
     private const val KEY_COMPANY_NAME_EXTRACTION_ENABLED = "company_name_extraction_enabled"
-    /** [Config.companyNameAutoConversionEnabled]のキー */
     private const val KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED = "company_name_auto_conversion_enabled"
-    /** [Config.companyNameFixedConversions]のキー。JSON配列文字列として保存する */
     private const val KEY_COMPANY_NAME_FIXED_CONVERSIONS = "company_name_fixed_conversions"
-    /** [Config.defaultSendNoneOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SEND_NONE_ONLY_ENABLED = "default_send_none_only_enabled"
-    /** [Config.defaultExtractionFailedOnlyEnabled]のキー */
     private const val KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED = "default_extraction_failed_only_enabled"
-    /** [Config.defaultExtractionSucceededOnlyEnabled]のキー */
     private const val KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED = "default_extraction_succeeded_only_enabled"
-    /** [Config.defaultExtractionNotPerformedOnlyEnabled]のキー */
     private const val KEY_DEFAULT_EXTRACTION_NOT_PERFORMED_ONLY_ENABLED = "default_extraction_not_performed_only_enabled"
-    /** [Config.defaultSentAutoOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
-    /** [Config.defaultSentManualOnlyEnabled]のキー */
     private const val KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED = "default_sent_manual_only_enabled"
 
-    /** [SendTarget]のリスト全体をJSON配列として保存するキー。[Config]とは別枠で[saveSendTargets]/[loadSendTargets]が読み書きする */
     private const val KEY_SEND_TARGETS = "send_targets"
 
     /**
-     * 既存レコードに追記するか新規登録するかを判定する条件（[SendTarget.updateToleranceHours]、
-     * [KintoneApi.findExistingRecord]参照）。[SAME_DATE]は最終受信日時が端末の暦日で同じ既存レコードを
-     * 対象にする。[HOURS]は[SendTarget.updateToleranceHours]で指定した時間以内の既存レコードを対象にする
+     * 既存レコード判定時の日時許容範囲の定義方法。[KintoneApi.findExistingRecord] で使用。
+     *
+     * [SAME_DATE]: 最終受信日時が端末の暦日で同じ既存レコードを対象。
+     * [HOURS]: [SendTarget.updateToleranceHours] で指定した時間以内の既存レコードを対象。
      */
     enum class UpdateToleranceMode {
+        /** 暦日で判定（最終受信日が同じ日）。 */
         SAME_DATE,
+        /** 時間差で判定（[SendTarget.updateToleranceHours] 以内）。 */
         HOURS;
 
-        /** [fromName]を提供するコンパニオンオブジェクト */
+        /** 保存値からの復元用ファクトリ。 */
         companion object {
-            /** 保存値からの復元用。未知の値やnullは[SendTarget.updateToleranceMode]の既定値と同じSAME_DATEにフォールバックする */
+            /** 保存値から復元。未知の値は [SAME_DATE] にデフォルト。 */
             fun fromName(name: String?): UpdateToleranceMode =
                 entries.firstOrNull { it.name == name } ?: SAME_DATE
         }
     }
 
-    /** 固定変換の1行（[Config.companyNameFixedConversions]）。[from]に一致する部分文字列を[to]に置換する */
+    /**
+     * 固定変換ルール1行（[Config.companyNameFixedConversions] の要素）。
+     * [from] に一致する部分文字列を [to] に置換。
+     */
     data class FixedConversion(
+        /** 変換前の文字列（パターン）。 */
         val from: String = "",
+        /** 変換後の文字列。 */
         val to: String = ""
     )
 
-    /** アプリの配色モード */
+    /** アプリの配色モード。 */
     enum class ThemeMode {
+        /** ライトテーマ（昼間）。 */
         LIGHT,
+        /** ダークテーマ（夜間）。 */
         DARK;
 
-        /** [AppCompatDelegate.setDefaultNightMode]に渡すモード値に変換する */
+        /** [AppCompatDelegate.setDefaultNightMode] に渡すモード値に変換。 */
         fun toNightMode(): Int = when (this) {
             LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
             DARK -> AppCompatDelegate.MODE_NIGHT_YES
         }
 
-        /** [fromName]を提供するコンパニオンオブジェクト */
+        /** 保存値からの復元用ファクトリ。 */
         companion object {
-            /** 保存値からの復元用。未知の値やnullは[DEFAULT_CONFIG]と同じLIGHTにフォールバックする */
+            /** 保存値から復元。未知の値は [LIGHT] にデフォルト。 */
             fun fromName(name: String?): ThemeMode =
                 entries.firstOrNull { it.name == name } ?: LIGHT
         }
     }
 
     /**
-     * 継続SMS（[SmsResolution.isContinuation]）の引き継ぎを、送信元ごとにどこまで遡って有効とするか。
-     * [UNLIMITED]は日付を問わず過去に一度でも抽出状況が正常なSMSがあれば常に引き継ぐ。[SAME_DAY]は
-     * 引き継ぎ元のSMSと暦日が同じ場合のみ有効とし、日付が変わると引き継ぎがリセットされる
+     * 継続SMS の引き継ぎ有効範囲。送信元ごとにどこまで遡って継続を認めるか。
+     *
+     * [UNLIMITED]: 日付を問わず、過去に一度でも正常に抽出されたら常に引き継ぐ。
+     * [SAME_DAY]: 引き継ぎ元と暦日が同じ場合のみ引き継ぎ有効。日付が変わるとリセット。
      */
     enum class ContinuationScope {
+        /** 期限なし（無制限に過去へ遡る）。 */
         UNLIMITED,
+        /** 同日のみ有効（日付が変わるとリセット）。 */
         SAME_DAY;
 
-        /** [fromName]を提供するコンパニオンオブジェクト */
+        /** 保存値からの復元用ファクトリ。 */
         companion object {
-            /** 保存値からの復元用。未知の値やnullは[DEFAULT_CONFIG]と同じUNLIMITEDにフォールバックする */
+            /** 保存値から復元。未知の値は [UNLIMITED] にデフォルト。 */
             fun fromName(name: String?): ContinuationScope =
                 entries.firstOrNull { it.name == name } ?: UNLIMITED
         }
@@ -187,7 +171,7 @@ object SettingsStore {
         val aiExtractionEnabled: Boolean,
         val companyNameExtractionEnabled: Boolean,
         /** 本文からの抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するかどうか。
-         * [resolveSendTargets]で抽出直後に適用され、送信先の判定・送信元情報の登録・kintoneへの送信すべてに反映される */
+         * [resolveSendTargets]で抽出直後に適用され、送信先の判定・引き継ぎ内容の登録・kintoneへの送信すべてに反映される */
         val companyNameAutoConversionEnabled: Boolean = false,
         /** 本文からの抽出結果の会社名に適用する固定変換。[FixedConversion.from]に一致する部分文字列を
          * [FixedConversion.to]に置換する。複数件は先頭から順番に、[companyNameAutoConversionEnabled]の後に適用される */
@@ -306,7 +290,7 @@ object SettingsStore {
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    /** [Config]をSharedPreferencesに保存する。送信先設定（[SendTarget]）は対象外で[saveSendTargets]を使うこと */
+    /** [Config]をSharedPreferencesに保存 */
     fun save(context: Context, config: Config) {
         val editor = prefs(context).edit()
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
@@ -353,10 +337,7 @@ object SettingsStore {
         editor.apply()
     }
 
-    /**
-     * [Config]の既定値。[load]のフォールバックと[resetToDefaults]の両方が参照する。
-     * 別々に書くと「初回起動時のデフォルト」と「初期化後の値」が食い違う恐れがあるため1箇所にまとめる
-     */
+    /** [Config]の既定値（[load]と[resetToDefaults]で共用） */
     private val DEFAULT_CONFIG = Config(
         sendEnabled = true,
         sendExtractionFailedEnabled = false,
@@ -390,7 +371,7 @@ object SettingsStore {
         defaultSentManualOnlyEnabled = false
     )
 
-    /** [save]で保存した設定を読み込む。未保存のキーは[DEFAULT_CONFIG]の値で補う */
+    /** 保存済みの設定を読み込む */
     fun load(context: Context): Config {
         val p = prefs(context)
         return Config(
@@ -434,9 +415,7 @@ object SettingsStore {
         )
     }
 
-    /**
-     * [Config]をインポートファイル用のJSONオブジェクトへ変換する。復元は[configFromJson]を参照
-     */
+    /** [Config]をJSONオブジェクトへ変換 */
     fun configToJson(config: Config): JSONObject = JSONObject()
         .put("sendEnabled", config.sendEnabled)
         .put("sendExtractionFailedEnabled", config.sendExtractionFailedEnabled)
@@ -473,10 +452,7 @@ object SettingsStore {
         .put("defaultSentAutoOnlyEnabled", config.defaultSentAutoOnlyEnabled)
         .put("defaultSentManualOnlyEnabled", config.defaultSentManualOnlyEnabled)
 
-    /**
-     * インポートファイルのJSONオブジェクトから[Config]を復元する。欠落したキーは[load]と同じ
-     * 既定値（[DEFAULT_CONFIG]）で補うため、部分的な指定にも対応する
-     */
+    /** JSONオブジェクトから[Config]を復元 */
     fun configFromJson(json: JSONObject): Config = Config(
         sendEnabled = json.optBoolean("sendEnabled", DEFAULT_CONFIG.sendEnabled),
         sendExtractionFailedEnabled = json.optBoolean("sendExtractionFailedEnabled", DEFAULT_CONFIG.sendExtractionFailedEnabled),
@@ -519,11 +495,7 @@ object SettingsStore {
         defaultSentManualOnlyEnabled = json.optBoolean("defaultSentManualOnlyEnabled", DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
     )
 
-    /**
-     * インポートファイル用に[SendTarget]をJSONオブジェクトへ変換する。送信先ID（[SendTarget.id]）は
-     * セッション内のカード追跡専用のため、エクスポート対象に含めない（送信先名[SendTarget.name]を
-     * 一意キーとして扱う）。復元は[sendTargetFromJson]を参照
-     */
+    /** [SendTarget]をJSONオブジェクトへ変換（IDは含めない） */
     fun sendTargetToJson(sendTarget: SendTarget): JSONObject = JSONObject()
         .put("name", sendTarget.name)
         .put("companyName", sendTarget.companyName)
@@ -542,10 +514,7 @@ object SettingsStore {
         .put("fieldUserName", sendTarget.fieldUserName)
         .put("fieldBody", sendTarget.fieldBody)
 
-    /** インポートファイルのJSONオブジェクトから[SendTarget]を復元する。欠落したキーは既定値で補う。
-     * idはインポート/エクスポートファイルに含めない（[sendTargetToJson]参照）ため、常に新規UUIDを採番する。
-     * つまり同じ送信先名[SendTarget.name]でもインポートのたびに別のIDになる（送信先名が一意キーで、
-     * IDはセッション内のカード追跡専用） */
+    /** JSONオブジェクトから[SendTarget]を復元（新規UUIDを採番） */
     fun sendTargetFromJson(obj: JSONObject): SendTarget = SendTarget(
         id = UUID.randomUUID().toString(),
         name = obj.optString("name", ""),
@@ -568,22 +537,17 @@ object SettingsStore {
         fieldBody = obj.optString("fieldBody", "")
     )
 
-    /** 設定画面の変更リスナーで繰り返す「読み込み→copyで1項目だけ変更→保存」をまとめたもの */
+    /** 設定を読み込み、変更して保存 */
     fun update(context: Context, change: (Config) -> Config) {
         save(context, change(load(context)))
     }
 
-    /** アプリの設定（[Config]）をすべて既定値に戻す。送信先の設定（[SendTarget]）は対象外で変更されない */
+    /** アプリ設定をデフォルトに戻す */
     fun resetToDefaults(context: Context) {
         save(context, DEFAULT_CONFIG)
     }
 
-    /**
-     * SMS検索画面・アプリ設定画面の「送信先」選択肢（すべて／各送信先／未設定）を
-     * キーと表示ラベルの組で返す。キーがnullの選択肢は「すべて」、
-     * [AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」を表す。
-     * キーは送信先名[SendTarget.name]（送信先ID[SendTarget.id]はファイル外のセッション追跡専用なので使わない）
-     */
+    /** 「送信先」選択肢をキーと表示ラベルの組で返す */
     fun sendTargetFilterOptions(context: Context): List<Pair<String?, String>> {
         val sendTargets = loadSendTargets(context)
         return listOf(null to context.getString(R.string.filter_send_target_all)) +
@@ -591,20 +555,14 @@ object SettingsStore {
             listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_none))
     }
 
-    /** [SendTarget]のリストをJSON配列にシリアライズして保存する。読み込みは[loadSendTargets]を使うこと */
+    /** [SendTarget]のリストを保存 */
     fun saveSendTargets(context: Context, sendTargets: List<SendTarget>) {
         val array = JSONArray()
         sendTargets.forEach { array.put(sendTargetToJson(it)) }
         prefs(context).edit().putString(KEY_SEND_TARGETS, array.toString()).apply()
     }
 
-    /**
-     * 設定のインポート用に、既存の送信先一覧へ[imported]（ファイルから読み込んだ送信先）を
-     * 送信先名（[SendTarget.name]）をキーにマージする。既存に同じ送信先名があればその内容を
-     * インポート内容で上書きし、ID（[SendTarget.id]）は既存のまま保持する
-     * （[Config.defaultSendTargetFilterName]などからの参照を維持するため）。同じ送信先名が無ければ
-     * インポート内容を新規追加し、ファイルに含まれない既存の送信先は変更しない
-     */
+    /** インポート送信先を既存リストにマージ（送信先名をキーに） */
     fun mergeImportSendTargets(context: Context, imported: List<SendTarget>): List<SendTarget> {
         val merged = loadSendTargets(context).toMutableList()
         imported.forEach { from ->
@@ -634,7 +592,7 @@ object SettingsStore {
         return merged
     }
 
-    /** [saveSendTargets]で保存した送信先設定を読み込む。未保存（初回起動など）の場合は[createDefaultSendTarget]で1件生成する */
+    /** 保存済みの送信先設定を読み込む */
     fun loadSendTargets(context: Context): List<SendTarget> {
         val json = prefs(context).getString(KEY_SEND_TARGETS, null)
             ?: return createDefaultSendTarget(context)
@@ -643,19 +601,14 @@ object SettingsStore {
         return (0 until array.length()).map { i -> sendTargetFromJson(array.getJSONObject(i)) }
     }
 
-    /** 送信先が1件も保存されていない場合に、空の送信先を1件作成して保存する（[loadSendTargets]専用） */
+    /** 初回起動時にデフォルト送信先を作成 */
     private fun createDefaultSendTarget(context: Context): List<SendTarget> {
         val sendTargets = listOf(SendTarget.newEmpty())
         saveSendTargets(context, sendTargets)
         return sendTargets
     }
 
-    /**
-     * 抽出結果の会社名に、アプリ全体の会社名変換（[Config.companyNameAutoConversionEnabled]の
-     * 幅変換、続いて[Config.companyNameFixedConversions]の固定変換の順）を適用する。[resolveSendTargets]で
-     * 抽出直後に一度だけ呼び、以降（送信先の判定・送信元情報の登録・kintoneへの送信・ログ表示）は
-     * すべてこの変換済みの値をそのまま使う
-     */
+    /** 会社名に変換ルールを適用（幅変換→固定変換） */
     fun applyCompanyNameConversion(companyName: String, config: Config): String {
         val autoConverted = if (config.companyNameAutoConversionEnabled) {
             TextNormalization.normalizeWidth(companyName)
@@ -667,10 +620,7 @@ object SettingsStore {
         }
     }
 
-    /**
-     * 会社名にキーワードが一致する送信先を（複数あれば）すべて返す。1件も一致しなければ、キーワード
-     * 未設定（デフォルト）の送信先1件にフォールバックする。該当が無ければ空リスト
-     */
+    /** 会社名に一致する送信先を返す（デフォルト送信先にフォールバック） */
     fun findSendTargets(context: Context, companyName: String): List<SendTarget> {
         val sendTargets = loadSendTargets(context)
         val matched = sendTargets.filter { it.routesTo(companyName) }
@@ -727,15 +677,18 @@ object SettingsStore {
             null
         }
         if (previousEntry != null) {
+            val config = load(context)
+            val convertedCompanyName = applyCompanyNameConversion(previousEntry.companyName, config)
             val smsParts = SmsParts(
-                companyName = previousEntry.companyName,
+                companyName = convertedCompanyName,
                 userName = previousEntry.userName,
-                body = body.trim()
+                body = body.trim(),
+                extractionPerformed = false
             )
             val resolution = SmsResolution(smsParts = smsParts, isContinuation = true)
-            // 送信先は保持せず、引き継いだ会社名を現在の送信先ルールに通して都度判定する
+            // 引き継いだ会社名（変換済み）で送信先を都度判定
             val sendTargets = if (companyNameExtractionEnabled) {
-                findSendTargets(context, previousEntry.companyName)
+                findSendTargets(context, convertedCompanyName)
             } else {
                 loadSendTargets(context)
             }
@@ -743,20 +696,23 @@ object SettingsStore {
         }
         val extracted = SmsPartsGenerator.resolveSmsParts(body, aiExtractionEnabled, companyNameExtractionEnabled)
         val config = load(context)
+        val convertedCompanyName = if (companyNameExtractionEnabled) {
+            applyCompanyNameConversion(extracted.companyName, config)
+        } else {
+            extracted.companyName
+        }
         val sendTargets = if (companyNameExtractionEnabled) {
-            findSendTargets(context, extracted.companyName)
+            findSendTargets(context, convertedCompanyName)
         } else {
             loadSendTargets(context)
         }
-        // 会社名抽出が無効な場合は本文から会社名を抽出しないため、共有SmsPartsには先頭の送信先の会社名を
-        // 変換適用した値をプレースホルダとして入れる（検索画面・受信ログなど送信先ごとに分かれない表示用）。
-        // 実際のkintone登録・送信ログではKintoneUploadWorkerが送信先ごとの「会社名」を使う
+        // 抽出が無効な場合は会社名を空のまま（各送信先ごとに KintoneUploadWorker で設定）
         val companyNameSource = if (companyNameExtractionEnabled) {
-            extracted.companyName
+            convertedCompanyName
         } else {
-            sendTargets.firstOrNull()?.companyName.orEmpty()
+            ""
         }
-        val finalParts = extracted.copy(companyName = applyCompanyNameConversion(companyNameSource, config))
+        val finalParts = extracted.copy(companyName = companyNameSource)
         return SmsResolution(smsParts = finalParts) to sendTargets
     }
 }

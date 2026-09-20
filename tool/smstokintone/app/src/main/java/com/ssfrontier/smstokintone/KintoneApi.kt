@@ -17,40 +17,60 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-/** kintoneのレコードAPI（登録・更新・検索）を呼び出し、SMSの内容をレコードとして登録・追記する */
+/**
+ * Kintone レコード API（登録・更新・検索）を呼び出す。
+ * SMS内容をレコードとして登録、または既存レコードの履歴に追記。
+ */
 object KintoneApi {
 
-    /** [Log]出力に使うタグ */
+    /** [Log] 出力用のタグ。 */
     private const val TAG = "KintoneApi"
-    /** [mergeBody]で複数エントリを連結する際の本文中の区切り文字列 */
+    /** [mergeBody] で複数エントリを区切る文字列。 */
     private const val ENTRY_SEPARATOR = "------------------------------"
 
-    /** [postRecord]の結果。呼び出し側は成功/スキップ/失敗を区別してログ・通知文言を出し分ける */
+    /**
+     * [postRecord] の結果。呼び出し側は 成功/スキップ/失敗を区別して
+     * ログ・通知文言を出し分ける。
+     */
     sealed class PostResult {
-        /** 新規登録または更新が成功した */
+        /** 新規登録または更新が成功。 */
         data class Success(val message: String) : PostResult()
-        /** 重複と判定され何も送信しなかった */
+        /** 重複判定されスキップ。 */
         data class Skipped(val message: String) : PostResult()
-        /** kintoneがエラーレスポンスを返した。[code]はHTTPステータスコード、[detail]はレスポンスボディ */
+        /** Kintone サーバー側エラー。[code] は HTTP ステータス、[detail] はエラー詳細。 */
         data class HttpFailure(val code: Int, val detail: String) : PostResult() {
-            /** サーバーエラー（5xx）またはレートリミット（429）は一時的な失敗とみなし、リトライの余地があるとする */
+            /** 5xx またはレート制限（429）はリトライ可能な一時的エラーとみなす。 */
             val isRetryable: Boolean
                 get() = code in 500..599 || code == 429
         }
-        /** 通信自体が例外で失敗した */
+        /** 通信例外で失敗（ネットワークエラー）。 */
         data class NetworkError(val message: String) : PostResult()
     }
 
-    /** [findExistingRecord]でヒットした既存レコードの$id・履歴・最終受信日時 */
-    private data class ExistingRecord(val id: String, val historyValue: String, val datetimeValue: String)
+    /**
+     * [findExistingRecord] でヒットした既存レコード。
+     * Kintone 上の $id、履歴フィールド、最終受信日時を保持。
+     */
+    private data class ExistingRecord(
+        /** Kintone レコード ID（$id フィールド）。 */
+        val id: String,
+        /** 履歴フィールド（複数エントリを区切り文字で保持）。 */
+        val historyValue: String,
+        /** 最終受信日時（ISO 8601 形式）。 */
+        val datetimeValue: String
+    )
 
-    /** [findExistingRecord]の結果。検索失敗（[SearchFailed]）を未検出（[NotFound]）と区別し、誤って新規登録扱いにしないためのもの */
+    /**
+     * [findExistingRecord] の結果バリアント。
+     * 検索失敗 [SearchFailed] を未検出 [NotFound] と区別することで、
+     * エラーを新規登録扱いにして重複登録を防止。
+     */
     private sealed class ExistingRecordResult {
-        /** 既存レコードが見つかった */
+        /** 既存レコード見つかった。 */
         data class Found(val record: ExistingRecord) : ExistingRecordResult()
-        /** 条件に一致する既存レコードが無かった */
+        /** 条件に一致するレコードなし。 */
         object NotFound : ExistingRecordResult()
-        /** 検索自体がエラーで失敗した */
+        /** 検索時エラー（リトライする）。 */
         data class SearchFailed(val result: PostResult) : ExistingRecordResult()
     }
 
@@ -87,7 +107,7 @@ object KintoneApi {
         val existing = when (existingResult) {
             is ExistingRecordResult.Found -> existingResult.record
             ExistingRecordResult.NotFound -> null
-            // 検索失敗をNotFound扱いにすると、更新すべきレコードを見落として重複登録する恐れがあるため打ち切る
+            // 検索失敗をNotFound扱いにすると、更新対象レコードを見落として重複登録する恐れがあるため打ち切る。
             is ExistingRecordResult.SearchFailed -> return existingResult.result
         }
 
@@ -106,9 +126,9 @@ object KintoneApi {
             } else {
                 datetimeIsoValue
             }
-            // newEntryMillisはここに到達した時点で既にfindExistingRecord内でパース済み（失敗していればNotFoundとなり
-            // existing != nullに来ない）のため、nullになり得るのは既存レコード側の日時が空/未解析の場合のみ。
-            // その場合は新旧を比較できないため、従来通り上書きする
+            // newEntryMillis は [findExistingRecord] でパース済み。失敗していれば
+            // [NotFound] となるため、ここで null になるのは既存レコード側の日時が空/未解析の場合のみ。
+            // その場合は比較不可なため、従来通り上書きする。
             val isNewEntryNewer = existingMillis == null || newEntryMillis == null || newEntryMillis > existingMillis
             val record = buildRecord(
                 sendTarget,
@@ -127,8 +147,13 @@ object KintoneApi {
     }
 
     /**
-     * 履歴を[ENTRY_SEPARATOR]区切りのエントリに分解し、受信日時が古い順になる位置に新エントリを挿入する。
-     * 挿入位置が判定できない場合は末尾に追加する
+     * 既存の履歴に新しいエントリを受信日時の古い順で挿入。
+     * 日時解析に失敗した場合は末尾に追加。
+     *
+     * @param existingHistory 既存の履歴テキスト（[ENTRY_SEPARATOR] で区切られた複数エントリ）
+     * @param newEntryText 新しいエントリテキスト
+     * @param newEntryMillis 新エントリの受信日時（ミリ秒）。null の場合は末尾追加
+     * @return マージされた履歴テキスト
      */
     private fun mergeBody(existingHistory: String, newEntryText: String, newEntryMillis: Long?): String {
         if (existingHistory.isBlank()) return newEntryText
@@ -150,27 +175,49 @@ object KintoneApi {
         return entries.joinToString(separator)
     }
 
-    /** 受信日時（表示形式）と本文を連結した、kintoneの履歴フィールドに書き込む1エントリ分のテキストを組み立てる */
+    /**
+     * Kintone 履歴フィールド用の 1 エントリテキストを組み立て。
+     * 表示形式の受信日時と本文を改行で区切って連結。
+     *
+     * @param datetimeIsoValue ISO 8601 形式の受信日時（null 時は日時なしで返す）
+     * @param historyEntryBody エントリ本文
+     * @return 日時 + "\n\n" + 本文（または本文のみ）
+     */
     private fun buildEntryText(datetimeIsoValue: String?, historyEntryBody: String): String {
         val displayDatetime = datetimeIsoValue?.let { formatDisplayDateTime(it) }
         return if (displayDatetime != null) "$displayDatetime\n\n$historyEntryBody" else historyEntryBody
     }
 
-    /** ISO8601（UTC）の[datetimeIsoValue]を、kintoneの本文に書き込む表示用日時文字列に変換する */
+    /**
+     * ISO 8601 形式（UTC）の日時を表示用文字列に変換。
+     * パース失敗時は null を返す。
+     *
+     * @param datetimeIsoValue ISO 8601 形式の日時文字列
+     * @return 表示形式の日時（失敗時は null）
+     */
     private fun formatDisplayDateTime(datetimeIsoValue: String): String? {
         val baseMillis = parseIsoDateTime(datetimeIsoValue) ?: return null
         return DateFormats.display().format(Date(baseMillis))
     }
 
-    /** kintoneの日時フィールド用ISO8601形式（UTC）のフォーマッタ。書き込み側（[formatIsoDateTime]）と
-     * 読み取り側（[parseIsoDateTime]、[findExistingRecord]の検索範囲組み立て）で必ずこれを共有し、
-     * 書式がずれて既存レコードの重複判定が壊れることを防ぐ */
+    /**
+     * Kintone 日時フィールド用 ISO 8601（UTC）フォーマッタ。
+     * 書き込み・読み取り・検索範囲組み立てで必ずこれを使用。
+     * フォーマットズレは既存レコード判定を破壊するため共有必須。
+     *
+     * @return ISO 8601（UTC）フォーマッタ
+     */
     private fun isoDateTimeFormat(): SimpleDateFormat =
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
 
-    /** [millis]をkintoneの日時フィールドに書き込めるISO8601（UTC）文字列に変換する */
+    /**
+     * ミリ秒を Kintone 日時フィールド用 ISO 8601（UTC）文字列に変換。
+     *
+     * @param millis ミリ秒タイムスタンプ
+     * @return ISO 8601 形式の日時文字列
+     */
     fun formatIsoDateTime(millis: Long): String = isoDateTimeFormat().format(Date(millis))
 
     /** ISO8601（UTC）の[datetimeIsoValue]をエポックミリ秒に変換する。パースできなければnull */
@@ -296,6 +343,9 @@ object KintoneApi {
         } catch (e: IOException) {
             Log.w(TAG, "既存レコードの検索で通信エラーが発生しました: ${e.message}")
             ExistingRecordResult.SearchFailed(PostResult.NetworkError(e.message ?: ""))
+        } catch (e: Exception) {
+            Log.w(TAG, "既存レコードの検索でJSON解析エラーが発生しました: ${e.message}")
+            ExistingRecordResult.SearchFailed(PostResult.HttpFailure(500, "JSON解析エラー: ${e.message}"))
         }
     }
 

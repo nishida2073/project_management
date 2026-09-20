@@ -20,44 +20,52 @@ import androidx.core.widget.addTextChangedListener
 import com.ssfrontier.smstokintone.databinding.ActivityAppSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemFixedConversionBinding
 
-/** アプリの設定画面。各項目は変更すると即座に[SettingsStore]へ保存され、保存ボタンは無い */
+/**
+ * アプリの設定画面。すべての設定項目の変更はリアルタイムで [SettingsStore] へ保存される
+ * （確定ボタンはない）。他画面での設定変更を反映するため [onResume] ごとに表示を更新。
+ */
 class AppSettingsActivity : AppCompatActivity() {
 
-    /** この画面のビューバインディング */
+    /** ビューバインディング（レイアウト要素へのアクセス）。 */
     private lateinit var binding: ActivityAppSettingsBinding
 
-    /** 「送信先」スピナーの選択位置と対応する送信先名（[SettingsStore.sendTargetFilterOptions]の並び順）の一覧 */
+    /**
+     * 「送信先」スピナー選択位置と対応する送信先リスト。
+     * [SettingsStore.sendTargetFilterOptions] の並び順に対応。
+     */
     private var defaultSendTargetFilterNames: List<String?> = emptyList()
 
-    /** SMS受信権限（RECEIVE_SMS）のリクエスト結果を受け取り、表示更新と拒否時のトースト表示を行う */
+    /** SMS受信権限リクエスト結果ハンドラ。許可時は表示更新、拒否時はトースト表示。 */
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updatePermissionStatus()
             if (!granted) showPermissionDeniedToast(R.string.toast_sms_receive_permission_denied)
         }
 
-    /** SMS送信権限（SEND_SMS）のリクエスト結果を受け取り、表示更新と拒否時のトースト表示を行う */
+    /** SMS送信権限リクエスト結果ハンドラ。許可時は表示更新、拒否時はトースト表示。 */
     private val requestSendSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateSendPermissionStatus()
             if (!granted) showPermissionDeniedToast(R.string.toast_sms_send_permission_denied)
         }
 
-    /** SMS読み取り権限（READ_SMS）のリクエスト結果を受け取り、表示更新と拒否時のトースト表示を行う */
+    /** SMS読み取り権限リクエスト結果ハンドラ。許可時は表示更新、拒否時はトースト表示。 */
     private val requestReadSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateReadPermissionStatus()
             if (!granted) showPermissionDeniedToast(R.string.toast_sms_read_permission_denied)
         }
 
-    /** 権限が拒否されたことを示すトーストを表示する */
+    /** 権限拒否時のトースト表示。 */
     private fun showPermissionDeniedToast(messageResId: Int) {
         Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
     }
 
     /**
-     * このEditTextの入力が1以上の整数として読み取れたときだけ[onChanged]を呼ぶ。クールダウン秒・
-     * 自動更新間隔・統合範囲・検索日数など、数値設定の入力欄で同じ検証を繰り返さないためのもの
+     * EditText の入力値が 1 以上の正整数のときだけ [onChanged] を実行。
+     * クールダウン秒・自動更新間隔・統合範囲など、数値設定の重複検証を避けるためのヘルパー。
+     *
+     * @param onChanged 有効な正整数入力時に実行するコールバック
      */
     private fun EditText.onPositiveIntChanged(onChanged: (Int) -> Unit) {
         addTextChangedListener { text ->
@@ -67,7 +75,14 @@ class AppSettingsActivity : AppCompatActivity() {
         }
     }
 
-    /** 固定変換行を1件containerへ追加する。行の内容が変わるたびに[saveFixedConversions]で保存し直す */
+    /**
+     * 固定変換ルール（名前変換）の行をコンテナに追加。
+     * 行内容の変更時に [saveFixedConversions] で自動保存。
+     *
+     * @param container 行を追加する親レイアウト
+     * @param from 変換前の文字列
+     * @param to 変換後の文字列
+     */
     private fun addFixedConversionRow(container: LinearLayout, from: String, to: String) {
         val rowBinding = ItemFixedConversionBinding.inflate(layoutInflater, container, false)
         rowBinding.etFixConversionBefore.setText(from)
@@ -81,7 +96,10 @@ class AppSettingsActivity : AppCompatActivity() {
         container.addView(rowBinding.root)
     }
 
-    /** llFixedConversionsContainer内の全行の現在の内容で[SettingsStore.Config.companyNameFixedConversions]を保存し直す */
+    /**
+     * llFixedConversionsContainer 内の全行の現在内容で [SettingsStore.Config.companyNameFixedConversions] を保存。
+     * 各行の EditText 内容を読み取り、[SettingsStore.FixedConversion] リストに変換して永続化。
+     */
     private fun saveFixedConversions() {
         val rules = (0 until binding.llFixedConversionsContainer.childCount).map { index ->
             val row = binding.llFixedConversionsContainer.getChildAt(index)
@@ -93,13 +111,17 @@ class AppSettingsActivity : AppCompatActivity() {
         SettingsStore.update(this) { it.copy(companyNameFixedConversions = rules) }
     }
 
-    /** 各設定項目に現在の値を反映し、変更時に[SettingsStore]へ保存するリスナーを登録する */
+    /**
+     * UI 初期化と設定値の反映。
+     * すべての設定項目に現在値を反映し、変更時に [SettingsStore] へ自動保存するリスナーを登録。
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAppSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val sendEnabled = SettingsStore.load(this).sendEnabled
+        val config = SettingsStore.load(this)
+        val sendEnabled = config.sendEnabled
         binding.rbSendAuto.isChecked = sendEnabled
         binding.rbSendManual.isChecked = !sendEnabled
         binding.swSendExtractionFailedEnabled.isEnabled = sendEnabled
@@ -111,22 +133,22 @@ class AppSettingsActivity : AppCompatActivity() {
             binding.swSendExtractionNotPerformedEnabled.isEnabled = enabled
         }
 
-        binding.swSendExtractionFailedEnabled.isChecked = SettingsStore.load(this).sendExtractionFailedEnabled
+        binding.swSendExtractionFailedEnabled.isChecked = config.sendExtractionFailedEnabled
         binding.swSendExtractionFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(sendExtractionFailedEnabled = isChecked) }
         }
 
-        binding.swSendExtractionNotPerformedEnabled.isChecked = SettingsStore.load(this).sendExtractionNotPerformedEnabled
+        binding.swSendExtractionNotPerformedEnabled.isChecked = config.sendExtractionNotPerformedEnabled
         binding.swSendExtractionNotPerformedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(sendExtractionNotPerformedEnabled = isChecked) }
         }
 
-        binding.swAiExtractionEnabled.isChecked = SettingsStore.load(this).aiExtractionEnabled
+        binding.swAiExtractionEnabled.isChecked = config.aiExtractionEnabled
         binding.swAiExtractionEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(aiExtractionEnabled = isChecked) }
         }
 
-        val bodyExtractionConfig = SettingsStore.load(this)
+        val bodyExtractionConfig = config
         binding.swCompanyNameExtractionEnabled.isChecked = bodyExtractionConfig.companyNameExtractionEnabled
         binding.swCompanyNameExtractionEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
@@ -138,18 +160,18 @@ class AppSettingsActivity : AppCompatActivity() {
         bodyExtractionConfig.companyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to) }
         binding.btnAddFixedConversion.setOnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "") }
 
-        binding.swSearchExtractionFailedEnabled.isChecked = SettingsStore.load(this).searchExtractionFailedEnabled
+        binding.swSearchExtractionFailedEnabled.isChecked = config.searchExtractionFailedEnabled
         binding.swSearchExtractionFailedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(searchExtractionFailedEnabled = isChecked) }
         }
 
-        binding.swSearchExtractionNotPerformedEnabled.isChecked = SettingsStore.load(this).searchExtractionNotPerformedEnabled
+        binding.swSearchExtractionNotPerformedEnabled.isChecked = config.searchExtractionNotPerformedEnabled
         binding.swSearchExtractionNotPerformedEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(searchExtractionNotPerformedEnabled = isChecked) }
         }
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
-        val autoReplyExtractionFailedEnabled = SettingsStore.load(this).autoReplyExtractionFailedEnabled
+        val autoReplyExtractionFailedEnabled = config.autoReplyExtractionFailedEnabled
         binding.rbSmsReplyModeAuto.isChecked = autoReplyExtractionFailedEnabled
         binding.rbSmsReplyModeManual.isChecked = !autoReplyExtractionFailedEnabled
         binding.tilAutoReplyCooldownSeconds.isEnabled = autoReplyExtractionFailedEnabled
@@ -159,12 +181,11 @@ class AppSettingsActivity : AppCompatActivity() {
             binding.tilAutoReplyCooldownSeconds.isEnabled = enabled
         }
 
-        binding.etAutoReplyCooldownSeconds.setText(SettingsStore.load(this).autoReplyCooldownSeconds.toString())
+        binding.etAutoReplyCooldownSeconds.setText(config.autoReplyCooldownSeconds.toString())
         binding.etAutoReplyCooldownSeconds.onPositiveIntChanged { seconds ->
             SettingsStore.update(this) { it.copy(autoReplyCooldownSeconds = seconds) }
         }
 
-        val config = SettingsStore.load(this)
         binding.swAutoRefreshEnabled.isChecked = config.autoRefreshEnabled
         binding.etAutoRefreshInterval.setText(config.autoRefreshIntervalSeconds.toString())
         binding.tilAutoRefreshInterval.isEnabled = config.autoRefreshEnabled
@@ -214,8 +235,8 @@ class AppSettingsActivity : AppCompatActivity() {
             SettingsStore.update(this) { it.copy(continuationShowUserNameEnabled = isChecked) }
         }
 
-        binding.btnEditSenderInfo.setOnClickListener {
-            startActivity(Intent(this, SenderInfoSettingsActivity::class.java))
+        binding.btnEditContinuationInfo.setOnClickListener {
+            startActivity(Intent(this, ContinuationInfoSettingsActivity::class.java))
         }
 
         binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())
@@ -322,8 +343,7 @@ class AppSettingsActivity : AppCompatActivity() {
                 .show()
         }
 
-        // ライト/ダーク切り替え時、AppCompatDelegateがActivityを再生成するためスクロール位置が失われる。
-        // 切り替え直前の位置を復元し、画面が先頭へ飛んで見えないようにする
+        // テーマ切り替え時にスクロール位置を復元
         pendingScrollY?.let { y ->
             pendingScrollY = null
             binding.svAppSettings.post { binding.svAppSettings.scrollTo(0, y) }
@@ -347,11 +367,11 @@ class AppSettingsActivity : AppCompatActivity() {
 
     /** 「送信先」スピナーの選択肢を最新の送信先一覧で更新する */
     private fun refreshDefaultSendTargetFilterOptions() {
-        // 送信先が1件しかない場合はSMS検索画面側で常に「すべて」に固定されるため、
-        // ここで初期値を設定しても意味を持たない。項目ごと隠して値も「すべて」に揃える
+        val config = SettingsStore.load(this)
+        // 送信先が1件の場合は「すべて」に固定されるため、項目を隠す
         if (SettingsStore.loadSendTargets(this).size == 1) {
             binding.llDefaultSendTargetFilter.visibility = View.GONE
-            if (SettingsStore.load(this).defaultSendTargetFilterName != null) {
+            if (config.defaultSendTargetFilterName != null) {
                 SettingsStore.update(this) { it.copy(defaultSendTargetFilterName = null) }
             }
             return
@@ -366,15 +386,11 @@ class AppSettingsActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spDefaultSendTargetFilter.adapter = adapter
 
-        val selectedIndex = defaultSendTargetFilterNames.indexOf(SettingsStore.load(this).defaultSendTargetFilterName)
+        val selectedIndex = defaultSendTargetFilterNames.indexOf(config.defaultSendTargetFilterName)
         binding.spDefaultSendTargetFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
     }
 
-    /**
-     * 権限の許可状態を確認し、ステータス表示・許可ボタン・案内文の表示/非表示を切り替える。
-     * SMSの受信・送信・読み取りの3権限で同じロジックを繰り返さないよう、対象のビュー一式を
-     * 引数で受け取る形にまとめている
-     */
+    /** 権限の許可状態を確認し、ステータス表示・許可ボタン・案内文を更新する */
     private fun updatePermissionUi(
         permission: String,
         statusText: TextView,
@@ -417,10 +433,7 @@ class AppSettingsActivity : AppCompatActivity() {
         R.string.label_permission_sms_read_granted
     )
 
-    /** [pendingScrollY]を保持するコンパニオンオブジェクト */
     companion object {
-        /** ライト/ダーク切替でActivityが再生成される直前のスクロール位置。破棄・再生成をまたいで
-         * 参照するためcompanion objectに保持する */
         private var pendingScrollY: Int? = null
     }
 }

@@ -17,19 +17,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-/** SMS受信をトリガーにKintoneUploadWorkerを起動し、必要に応じて抽出失敗時の自動返信も行うBroadcastReceiver */
+/**
+ * SMS 受信ブロードキャスト受信者。
+ * SMS受信を契機に [KintoneUploadWorker] を起動し、受信ログ記録と抽出失敗時の自動返信を実行。
+ */
 class SmsReceiver : BroadcastReceiver() {
 
-    /** SMS受信ブロードキャストを受けてKintoneUploadWorkerを起動し、受信ログの記録と抽出失敗時の自動返信を行う */
+    /**
+     * SMS受信ブロードキャストハンドラ。
+     * [KintoneUploadWorker] を非同期実行、受信ログ記録、抽出失敗時の自動返信判定を実施。
+     */
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
-        // 送信可否やkintone設定の完否はKintoneUploadWorker側で判定しログに残すため、
-        // ここで早期returnすると判定結果が送信ログ画面に表示されなくなる
+        // 送信可否・Kintone設定の判定は [KintoneUploadWorker] で行うため、
+        // ここで早期 return すると判定結果が受信ログに表示されない。
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
         if (messages.isNullOrEmpty()) return
 
-        // 分割送信された長文SMSは複数メッセージに分かれて届くため本文を連結する
+        // 長文 SMS（分割送信）は複数メッセージに分かれて届くため、本文を連結。
         val sender = messages[0].originatingAddress ?: ""
         val body = messages.joinToString(separator = "") { it.messageBody ?: "" }
         val timestampMillis = messages[0].timestampMillis
@@ -51,26 +57,26 @@ class SmsReceiver : BroadcastReceiver() {
 
         WorkManager.getInstance(context).enqueue(request)
 
-        // 送信先名の解決は端末上のAI呼び出しを伴う場合があり、onReceiveの同期処理内では
-        // 待てないため、goAsync()で実行時間を延長しコルーチンで判定・記録・返信を行う
+        // 送信先名の解決は端末上のAI呼び出しを伴うため、onReceive の同期処理内では
+        // 完了を待てない。[goAsync] で実行時間を延長し、コルーチンで判定・記録・返信を実施。
         val config = SettingsStore.load(context)
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.Default).launch {
             try {
-                // KintoneUploadWorkerの登録処理と同じresolveSendTargetsを使い、抽出方法のずれによる
-                // 登録内容と送信先名の食い違いを防ぐ。1件のSMSが複数の送信先に一致することがあるため、
-                // 受信ログ・自動返信ログでは名前を連結して表示する（実際の登録はWorker側で送信先ごとに行う）
+                // [KintoneUploadWorker] と同じ [resolveSendTargets] を使用し、
+                // 抽出方法のズレによる登録内容と送信先名の食い違いを防止。
+                // 1 つの SMS が複数の送信先に一致する場合は、受信ログ内で名前を連結表示。
                 val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
                 val smsParts = resolution.smsParts
-                // 引き継ぎ元の送信先がその後削除・変更されて現在は解決できない場合、sendTargetsは
-                // 空になり、送信先名は「なし」扱いになる（実際の登録も行われない）
+                // 引き継ぎ元の送信先が削除・変更された場合、sendTargets は空、
+                // 送信先名は「なし」扱い（登録も行われない）。
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
-                // smsParts.companyNameは既に会社名変換が適用済みのため、ここでは記録時点で
-                // 変換が有効だったかどうかのフラグ（ログのアイコン表示用）だけを求める
+                // smsParts.companyName は既に会社名変換適用済み。
+                // ここでは記録時に変換が有効だったかのフラグ（アイコン表示用）のみ求める。
                 val companyNameConverted = config.companyNameAutoConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
 
-                // 継続SMS自体（引き継ぎ結果）は再保存しても意味が無いため、本文単体で抽出状況が正常に解析
-                // できた場合のみ更新する。KintoneUploadWorker側でも同じ条件で更新している
+                // 継続 SMS（引き継ぎ結果）は再保存しても無意味なため、本文単体で正常に抽出できた
+                // 場合のみ更新。[KintoneUploadWorker] 側でも同じ条件で更新。
                 if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
                     ContinuationStore.update(
                         context,
@@ -81,10 +87,10 @@ class SmsReceiver : BroadcastReceiver() {
                     )
                 }
 
-                // kintoneへの送信結果を待たず受信時点でログ記録することで、送信ログ画面でSMS受信の
-                // 有無を確認できる。smsIdはこの時点では確実に特定できない（電話番号の表記ゆれや
-                // 標準SMSアプリの書き込みタイミング次第で一致しないことがある）ため解決を試みず、
-                // 「受信済みSMS送信」画面側でタイムスタンプ近似により突き合わせる（SmsMatching参照）
+                // Kintone への送信完了を待たず、受信時点でログ記録。
+                // これにより受信ログ画面で SMS 受信の有無を即座に確認可能。
+                // smsId は電話番号表記ゆれや標準 SMS アプリの書き込みタイミングで一致しないため、
+                // 特定を試みず、「受信済み SMS 送信」画面で [SmsMatching] により突き合わせ。
                 SmsLogStore.add(
                     context,
                     type = SmsLogStore.EntryType.RECEIVE,
