@@ -149,9 +149,31 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         val bodyExtractionConfig = config
-        binding.swCompanyNameExtractionEnabled.isChecked = bodyExtractionConfig.companyNameExtractionEnabled
+        var previousCompanyNameExtractionEnabled = bodyExtractionConfig.companyNameExtractionEnabled
+        binding.swCompanyNameExtractionEnabled.isChecked = previousCompanyNameExtractionEnabled
         binding.swCompanyNameExtractionEnabled.setOnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+            if (isChecked && !previousCompanyNameExtractionEnabled) {
+                val noCompanyNameCount = ContinuationStore.getAll(this).values.count { it.companyName.isBlank() }
+                if (noCompanyNameCount > 0) {
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.dialog_title_company_name_extraction_warning)
+                        .setMessage(getString(R.string.dialog_message_company_name_extraction_warning, noCompanyNameCount))
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+                            previousCompanyNameExtractionEnabled = isChecked
+                        }
+                        .setNegativeButton(android.R.string.cancel) { _, _ ->
+                            binding.swCompanyNameExtractionEnabled.isChecked = previousCompanyNameExtractionEnabled
+                        }
+                        .show()
+                } else {
+                    SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+                    previousCompanyNameExtractionEnabled = isChecked
+                }
+            } else {
+                SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+                previousCompanyNameExtractionEnabled = isChecked
+            }
         }
         binding.swCompanyNameAutoConversionEnabled.isChecked = bodyExtractionConfig.companyNameAutoConversionEnabled
         binding.swCompanyNameAutoConversionEnabled.setOnCheckedChangeListener { _, isChecked ->
