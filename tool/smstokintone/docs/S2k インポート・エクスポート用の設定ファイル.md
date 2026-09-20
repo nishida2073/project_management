@@ -148,7 +148,7 @@
     "defaultSendTargetFilterName": null,
     "aiExtractionEnabled": false,
     "companyNameExtractionEnabled": true,
-    "companyNameAutoConversionEnabled": false,
+    "companyNameAutoConversionEnabled": true,
     "companyNameFixedConversions": [],
     "defaultSendNoneOnlyEnabled": false,
     "defaultExtractionFailedOnlyEnabled": false,
@@ -193,3 +193,16 @@
 
 - キー名は上の各ブロックの表（`appConfig`・`sendTargetConfig`・`continuationInfoConfig`）を参照してください。
 - `appConfig` は部分指定ができるため、変更したいキーだけを書いても構いません。このサンプルは記入例（プレースホルダー）です。
+
+---
+
+## 推奨設定ファイル
+
+　異なるイベント開催形態向けの推奨設定ファイルを用意しています。運用方法に応じてアプリへインポートしてご活用ください。
+
+| 形態 | ファイル名 | 概要 |
+| --- | --- | --- |
+| 単一企業のイベント | `s2k-recommend-個社.json` | 会社名の自動抽出を有効化し、継続SMSは过去に一度でも成功したら引き継ぐ設定です |
+| 複数企業の合同開催 | `s2k-recommend-共催.json` | 会社名の自動抽出を無効化し、各送信先に設定した会社名を使う設定です。継続SMSは過去に一度でも成功したら引き継ぎます |
+| 複数企業のイベント（同一アプリ） | `s2k-recommend-複数開催-単一app.json` | 会社名の自動抽出を無効化し、継続SMSは同じ暦日のSMSのみ引き継ぐ設定です |
+| 複数企業のイベント（別々のアプリ） | `s2k-recommend-複数開催-複数app.json` | 会社名の自動抽出を無効化し、継続SMSは同じ暦日のSMSのみ引き継ぐ設定です |

@@ -1,0 +1,6 @@
+{
+  "appConfig": {
+    "searchExtractionFailedEnabled": true,
+    "continuationScope": "SAME_DAY"
+  }
+}

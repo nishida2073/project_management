@@ -22,7 +22,7 @@
     "defaultSendTargetFilterName": null,
     "aiExtractionEnabled": false,
     "companyNameExtractionEnabled": true,
-    "companyNameAutoConversionEnabled": false,
+    "companyNameAutoConversionEnabled": true,
     "companyNameFixedConversions": [],
     "defaultSendNoneOnlyEnabled": false,
     "defaultExtractionFailedOnlyEnabled": false,
