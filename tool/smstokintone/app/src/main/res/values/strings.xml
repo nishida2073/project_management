@@ -270,7 +270,7 @@
 
     <!-- 引き継ぎ内容の設定画面 -->
     <string name="title_continuation_info_settings">引き継ぎ内容の設定</string>
-    <string name="hint_continuation_search">会社名・氏名・電話番号で検索</string>
+    <string name="hint_continuation_search">キーワードで検索</string>
     <string name="message_continuation_empty">引き継ぎ内容がありません</string>
     <string name="message_continuation_no_match">一致する引き継ぎ元がありません</string>
     <string name="label_continuation_sender">送信元</string>

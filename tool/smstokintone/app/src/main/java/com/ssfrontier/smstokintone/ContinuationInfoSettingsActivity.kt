@@ -108,7 +108,11 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
     private fun addCard(senderKey: String, entry: ContinuationStore.Entry) {
         val itemBinding = ItemContinuationInfoBinding.inflate(layoutInflater, binding.llContinuationContainer, false)
         itemBinding.tvSenderAddress.text = entry.senderAddress.ifBlank { senderKey }
+
+        val config = SettingsStore.load(this)
         itemBinding.etContinuationCompanyName.setText(entry.companyName)
+        itemBinding.llCompanyNameSection.visibility = if (config.companyNameExtractionEnabled) View.VISIBLE else View.GONE
+
         itemBinding.etContinuationUserName.setText(entry.userName)
 
         val sendTargets = SettingsStore.findSendTargets(this, entry.companyName)
@@ -128,9 +132,15 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
 
     /** 変更内容をストアへ適用。楽観的排他制御で競合を検出する */
     private fun onSaveClicked() {
-        val invalidCard = cards.firstOrNull {
-            it.itemBinding.etContinuationCompanyName.text.toString().isBlank() ||
-                it.itemBinding.etContinuationUserName.text.toString().isBlank()
+        val config = SettingsStore.load(this)
+        val invalidCard = cards.firstOrNull { card ->
+            val companyNameBlank = card.itemBinding.etContinuationCompanyName.text.toString().isBlank()
+            val userNameBlank = card.itemBinding.etContinuationUserName.text.toString().isBlank()
+            if (config.companyNameExtractionEnabled) {
+                companyNameBlank || userNameBlank
+            } else {
+                userNameBlank
+            }
         }
         if (invalidCard != null) {
             AlertDialog.Builder(this)

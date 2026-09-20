@@ -10,9 +10,9 @@
 
 ```json
 {
-  "appConfig":          { ... },   // アプリの設定
-  "sendTargetConfig":   [ ... ],   // 送信先（kintone接続設定）の一覧
-  "senderInfoConfig":   [ ... ]    // 送信元情報（会社名・氏名）の一覧
+  "appConfig":             { ... },   // アプリの設定
+  "sendTargetConfig":      [ ... ],   // 送信先（kintone接続設定）の一覧
+  "continuationInfoConfig": [ ... ]    // 引き継ぎ内容（会社名・氏名）の一覧
 }
 ```
 
@@ -104,8 +104,8 @@
 
 ---
 
-### `senderInfoConfig`（送信元情報）
-　`senderInfoConfig` は送信元情報の設定をまとめたものです。
+### `continuationInfoConfig`（引き継ぎ内容）
+　`continuationInfoConfig` は引き継ぎ内容（過去の SMS から引き継いだ会社名・氏名情報）の設定をまとめたものです。
 
 > **注意**
 > - インポート時はこの一覧で送信元情報が置き換わります。
@@ -126,7 +126,7 @@
 　以下は、設定ファイルの全体像を示す1つのサンプル（記入例）です。<br>
 　インポート時は、このサンプルのように「変更したい内容だけ」をファイルへ書いて使用します。<br>
 
-　以下は `appConfig` の一部キーだけを指定し、`sendTargetConfig`・`senderInfoConfig` には記入例を入れています。
+　以下は `appConfig` の一部キーだけを指定し、`sendTargetConfig`・`continuationInfoConfig` には記入例を入れています。
 
 ```json
 {
@@ -180,7 +180,7 @@
       "fieldBody": "body"
     }
   ],
-  "senderInfoConfig": [
+  "continuationInfoConfig": [
     {
       "senderAddress": "09012345678",
       "companyName": "（例）NTTデータユニバーシティ",
@@ -191,5 +191,5 @@
 }
 ```
 
-- キー名は上の各ブロックの表（`appConfig`・`sendTargetConfig`・`senderInfoConfig`）を参照してください。
+- キー名は上の各ブロックの表（`appConfig`・`sendTargetConfig`・`continuationInfoConfig`）を参照してください。
 - `appConfig` は部分指定ができるため、変更したいキーだけを書いても構いません。このサンプルは記入例（プレースホルダー）です。
