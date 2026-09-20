@@ -186,7 +186,7 @@
     <string name="hint_company_name_fix_conversion_before">変換前</string>
     <string name="hint_company_name_fix_conversion_after">変換後</string>
     <string name="helper_company_name_fix_conversion">抽出された会社名に適用する変換ルールです</string>
-    <string name="section_body_extraction">本文の抽出</string>
+    <string name="section_information_extraction">SMSの情報抽出</string>
     <string name="label_company_name_extraction">会社名の抽出</string>
     <string name="switch_company_name_extraction_enabled">有効にする</string>
     <string name="helper_company_name_extraction_enabled">有効：本文の1行目を「会社名」として扱います。\n無効：1行目を「氏名」として扱います。</string>
