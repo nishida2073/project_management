@@ -285,7 +285,7 @@
     <string name="btn_open_settings_import_export">設定のインポート・エクスポート</string>
     <string name="title_settings_import_export">設定のインポート・エクスポート</string>
     <string name="label_settings_import">インポート</string>
-    <string name="settings_import_description">JSONファイルからアプリの設定・送信先の設定・引き継ぎ内容をまとめて反映できます。</string>
+    <string name="settings_import_description">JSONファイルからアプリ設定・送信先の設定・引き継ぎ内容を反映します</string>
     <string name="btn_select_import_file">ファイルを選択</string>
     <string name="btn_import_settings">インポート</string>
     <string name="label_import_file">"ファイル名\n　%1$s\n"</string>
@@ -306,7 +306,7 @@
     <string name="message_import_sender_address_required">引き継ぎ内容の%1$d件目にsenderAddressがありません</string>
     <string name="message_import_send_target_duplicate_name">送信先名がファイル内で重複しています。\n%1$s\n\n送信先名は他の送信先と重複しないようにしてください</string>
     <string name="label_settings_export">エクスポート</string>
-    <string name="settings_export_description">現在のアプリ設定・送信先の設定・引き継ぎ内容をJSONファイルとしてまとめて書き出します。</string>
+    <string name="settings_export_description">現在のアプリ設定・送信先の設定・引き継ぎ内容をJSONファイルに書き出します</string>
     <string name="btn_export_settings">エクスポート</string>
     <string name="toast_settings_exported">設定をエクスポートしました</string>
     <string name="dialog_title_export_error">エクスポートエラー</string>
