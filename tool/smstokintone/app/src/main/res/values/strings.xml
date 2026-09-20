@@ -280,6 +280,8 @@
     <string name="dialog_message_company_name_extraction_warning">引き継ぎ内容に会社名がない件が %1$d 件あります。必要に応じて会社名を追加してください。</string>
     <string name="dialog_title_continuation_info_save_conflict">保存に失敗しました</string>
     <string name="dialog_message_continuation_info_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
+    <string name="dialog_title_confirm_delete_all_continuation_info">削除確認</string>
+    <string name="dialog_message_delete_all_continuation_info">すべての引き継ぎ内容を削除しますか？</string>
 
     <!-- 設定のインポート・エクスポート画面 -->
     <string name="btn_open_settings_import_export">設定のインポート・エクスポート</string>

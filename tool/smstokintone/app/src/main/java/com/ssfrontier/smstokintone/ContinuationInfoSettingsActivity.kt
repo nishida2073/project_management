@@ -69,11 +69,17 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
         })
 
         binding.btnDeleteAllContinuationInfo.setOnClickListener {
-            // UI上から削除するだけで、ストアの削除は保存時に実行
-            binding.llContinuationContainer.removeAllViews()
-            cards.clear()
-            binding.tvContinuationEmpty.visibility = View.VISIBLE
-            binding.tvContinuationNoMatch.visibility = View.GONE
+            AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_title_confirm_delete_all_continuation_info)
+                .setMessage(R.string.dialog_message_delete_all_continuation_info)
+                .setNegativeButton(R.string.btn_cancel, null)
+                .setPositiveButton(R.string.btn_delete) { _, _ ->
+                    binding.llContinuationContainer.removeAllViews()
+                    cards.clear()
+                    binding.tvContinuationEmpty.visibility = View.VISIBLE
+                    binding.tvContinuationNoMatch.visibility = View.GONE
+                }
+                .show()
         }
 
         binding.btnSaveContinuationInfo.setOnClickListener { onSaveClicked() }
