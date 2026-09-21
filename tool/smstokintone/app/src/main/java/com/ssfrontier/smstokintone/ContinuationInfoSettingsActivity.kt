@@ -58,7 +58,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
         entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
 
         val searchTextWatcher = simpleTextWatcher { applySearchFilter(it) }
-        binding.etContinuationSearch.setupManaged(searchTextWatcher, lifecycleResources)
+        binding.etContinuationSearch.setupManaged(searchTextWatcher)
 
         val deleteAllListener = View.OnClickListener {
             AlertDialog.Builder(this)
@@ -71,19 +71,19 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
                     binding.tvContinuationEmpty.visibility = View.VISIBLE
                     binding.tvContinuationNoMatch.visibility = View.GONE
                 }
-                .show().setupManaged(lifecycleResources)
+                .show().setupManaged()
         }
-        binding.btnDeleteAllContinuationInfo.setupManaged(deleteAllListener, lifecycleResources)
+        binding.btnDeleteAllContinuationInfo.setupManaged(deleteAllListener)
 
         val sortListener = android.widget.RadioGroup.OnCheckedChangeListener { _, checkedId ->
             val isAscending = checkedId == binding.rbContinuationSortAscending.id
             reloadCards(isAscending)
             applySearchFilter(binding.etContinuationSearch.text.toString())
         }
-        binding.rgContinuationSort.setupManaged(sortListener, lifecycleResources)
+        binding.rgContinuationSort.setupManaged(sortListener)
 
         val saveListener = View.OnClickListener { onSaveClicked() }
-        binding.btnSaveContinuationInfo.setupManaged(saveListener, lifecycleResources)
+        binding.btnSaveContinuationInfo.setupManaged(saveListener)
     }
 
     /** ソート順序に応じてカードを再読み込みする */
@@ -144,7 +144,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
             binding.llContinuationContainer.removeView(itemBinding.root)
             cards.remove(card)
         }
-        itemBinding.btnDeleteContinuationInfo.setupManaged(deleteCardListener, lifecycleResources)
+        itemBinding.btnDeleteContinuationInfo.setupManaged(deleteCardListener)
 
         binding.llContinuationContainer.addView(itemBinding.root)
         cards.add(card)
@@ -173,7 +173,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
                 .setTitle(R.string.dialog_title_validation_error)
                 .setMessage(getString(messageResId, invalidCard.senderKey))
                 .setPositiveButton(android.R.string.ok, null)
-                .show().setupManaged(lifecycleResources)
+                .show().setupManaged()
             return
         }
 
@@ -200,7 +200,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
                 .setTitle(R.string.dialog_title_continuation_info_save_conflict)
                 .setMessage(R.string.dialog_message_continuation_info_save_conflict)
                 .setPositiveButton(android.R.string.ok, null)
-                .show().setupManaged(lifecycleResources)
+                .show().setupManaged()
         }
     }
 }

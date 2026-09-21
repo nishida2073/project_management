@@ -67,17 +67,17 @@ class SettingsImportExportActivity : BaseActivity() {
         val selectImportFileListener = View.OnClickListener {
             openDocumentLauncher.launch(arrayOf("*/*"))
         }
-        binding.btnSelectImportFile.setupManaged(selectImportFileListener, lifecycleResources)
+        binding.btnSelectImportFile.setupManaged(selectImportFileListener)
 
         binding.btnImportSettings.isEnabled = false
         binding.btnImportSettings.setButtonStyleByEnabled(false)
         val importListener = View.OnClickListener { onImportClicked() }
-        binding.btnImportSettings.setupManaged(importListener, lifecycleResources)
+        binding.btnImportSettings.setupManaged(importListener)
 
         val exportListener = View.OnClickListener {
             createDocumentLauncher.launch(suggestedExportFileName())
         }
-        binding.btnExportSettings.setupManaged(exportListener, lifecycleResources)
+        binding.btnExportSettings.setupManaged(exportListener)
     }
 
     /** エクスポート先のファイル名を生成（s2k_settings_時刻.json） */
@@ -127,7 +127,7 @@ class SettingsImportExportActivity : BaseActivity() {
                 .setTitle(R.string.dialog_title_export_error)
                 .setMessage(R.string.dialog_message_export_failed)
                 .setPositiveButton(android.R.string.ok, null)
-                .show().setupManaged(lifecycleResources)
+                .show().setupManaged()
         }
     }
 
@@ -236,7 +236,7 @@ class SettingsImportExportActivity : BaseActivity() {
             .setMessage(getString(R.string.dialog_message_confirm_import, buildPreviewText(includeFileName = true)))
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_import_settings) { _, _ -> applyImport(json) }
-            .show().setupManaged(lifecycleResources)
+            .show().setupManaged()
     }
 
     /** JSON から設定をマージして反映し、完了トーストを表示して画面を閉じる */
@@ -260,7 +260,7 @@ class SettingsImportExportActivity : BaseActivity() {
             .setTitle(R.string.dialog_title_import_error)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
-            .show().setupManaged(lifecycleResources)
+            .show().setupManaged()
     }
 
 }
