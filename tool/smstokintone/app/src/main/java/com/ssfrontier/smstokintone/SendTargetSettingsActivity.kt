@@ -7,11 +7,8 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.ssfrontier.smstokintone.databinding.ActivitySendTargetSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemSendTargetBinding
@@ -21,7 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** 送信先（Kintoneアプリ接続先）の一覧を追加・複製・削除・並べ替えしながら編集し、保存する画面 */
-class SendTargetSettingsActivity : AppCompatActivity() {
+class SendTargetSettingsActivity : BaseActivity() {
 
     /**
      * この画面のViewBinding。
@@ -44,19 +41,6 @@ class SendTargetSettingsActivity : AppCompatActivity() {
      */
     private val sendTargetCards = mutableListOf<SendTargetCard>()
 
-    /**
-     * 表示中のダイアログリスト。cleanup()で一括削除。
-     */
-    private val dialogs = mutableListOf<AlertDialog>()
-
-    init {
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                cleanup()
-            }
-        })
-    }
-
     /** 保存済みの送信先ごとにカードを1枚ずつ復元し、追加/保存ボタンの動作を配線する */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,22 +52,16 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
         SettingsStore.loadSendTargets(this).forEach { addSendTargetCard(it) }
 
-        binding.btnAddSendTarget.setOnClickListener {
+        val addSendTargetListener = View.OnClickListener {
             val newCardView = addSendTargetCard(SettingsStore.SendTarget.newEmpty())
             newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
-        binding.btnSave.setOnClickListener { onSaveClicked() }
+        lifecycleResources.addClickListener(binding.btnAddSendTarget, addSendTargetListener)
+
+        val saveListener = View.OnClickListener { onSaveClicked() }
+        lifecycleResources.addClickListener(binding.btnSave, saveListener)
     }
 
-    private fun AlertDialog.addWithTracking(): AlertDialog {
-        dialogs.add(this)
-        return this
-    }
-
-    private fun cleanup() {
-        dialogs.forEach { it.dismiss() }
-        dialogs.clear()
-    }
 
     /**
      * sendTargetの内容でカードを1枚生成し、insertAtの位置（省略時は末尾）にUIとsendTargetCardsの両方へ挿入する。
@@ -101,7 +79,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         itemBinding.llKeywordsSection.visibility =
             if (companyNameExtractionEnabled) View.VISIBLE else View.GONE
         sendTarget.keywords.forEach { addKeywordRow(itemBinding.llKeywordsContainer, it) }
-        itemBinding.btnAddKeyword.setOnClickListener { addKeywordRow(itemBinding.llKeywordsContainer, "") }
+        val addKeywordListener = View.OnClickListener { addKeywordRow(itemBinding.llKeywordsContainer, "") }
+        lifecycleResources.addClickListener(itemBinding.btnAddKeyword, addKeywordListener)
         itemBinding.etSubdomain.setText(sendTarget.subdomain)
         itemBinding.etAppId.setText(sendTarget.appId)
         itemBinding.etLoginName.setText(sendTarget.loginName)
@@ -120,24 +99,28 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             SettingsStore.UpdateToleranceMode.HOURS -> itemBinding.rbUpdateToleranceModeHours.isChecked = true
         }
         itemBinding.tilUpdateToleranceHours.isEnabled = sendTarget.updateToleranceMode == SettingsStore.UpdateToleranceMode.HOURS
-        itemBinding.rgUpdateToleranceMode.setOnCheckedChangeListener { _, checkedId ->
+        val toleranceModeListener = android.widget.RadioGroup.OnCheckedChangeListener { _, checkedId ->
             itemBinding.tilUpdateToleranceHours.isEnabled = checkedId == itemBinding.rbUpdateToleranceModeHours.id
         }
+        lifecycleResources.addRadioGroupListener(itemBinding.rgUpdateToleranceMode, toleranceModeListener)
 
-        itemBinding.btnCopySendTarget.setOnClickListener {
+        val copyListener = View.OnClickListener {
             val source = readSendTargetFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
             val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_send_target_copy)
             val newCardView = addSendTargetCard(source.copy(name = copyName), insertAt = sendTargetCards.indexOf(card) + 1)
             newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
+        lifecycleResources.addClickListener(itemBinding.btnCopySendTarget, copyListener)
 
-        itemBinding.btnDeleteSendTarget.setOnClickListener {
+        val deleteListener = View.OnClickListener {
             binding.llSendTargetsContainer.removeView(itemBinding.root)
             sendTargetCards.remove(card)
             renumberCards()
         }
+        lifecycleResources.addClickListener(itemBinding.btnDeleteSendTarget, deleteListener)
 
-        itemBinding.btnTestSend.setOnClickListener { onTestSendClicked(itemBinding, card) }
+        val testSendListener = View.OnClickListener { onTestSendClicked(itemBinding, card) }
+        lifecycleResources.addClickListener(itemBinding.btnTestSend, testSendListener)
 
         if (insertAt < 0 || insertAt >= sendTargetCards.size) {
             binding.llSendTargetsContainer.addView(itemBinding.root)
@@ -154,7 +137,8 @@ class SendTargetSettingsActivity : AppCompatActivity() {
     private fun addKeywordRow(container: LinearLayout, keyword: String) {
         val rowBinding = ItemSendTargetKeywordBinding.inflate(layoutInflater, container, false)
         rowBinding.etKeyword.setText(keyword)
-        rowBinding.btnDeleteKeyword.setOnClickListener { container.removeView(rowBinding.root) }
+        val deleteListener = View.OnClickListener { container.removeView(rowBinding.root) }
+        lifecycleResources.addClickListener(rowBinding.btnDeleteKeyword, deleteListener)
         container.addView(rowBinding.root)
     }
 
@@ -213,7 +197,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error, label))
             .setPositiveButton(android.R.string.ok, null)
-            .show().addWithTracking()
+            .show().let { lifecycleResources.addDialog(it); it }
         return true
     }
 
@@ -223,7 +207,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error_duplicate_name, duplicateNames.joinToString("／")))
             .setPositiveButton(android.R.string.ok, null)
-            .show().addWithTracking()
+            .show().let { lifecycleResources.addDialog(it); it }
     }
 
     /** カードの現在の入力内容で検証し、問題なければテスト本文を入力するダイアログを出す */
@@ -257,7 +241,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             .setPositiveButton(R.string.btn_send) { _, _ ->
                 performTestSend(itemBinding, sendTarget, editText.text.toString())
             }
-            .show().addWithTracking()
+            .show().let { lifecycleResources.addDialog(it); it }
     }
 
     /** [testBody]の振り分け条件を確認したうえでkintoneへテスト送信し、抽出結果と送信結果をダイアログで表示する */
@@ -285,7 +269,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                     .setTitle(R.string.dialog_title_test_send_result)
                     .setMessage(getString(R.string.dialog_message_test_send_routing_unmatched, sendTarget.keywords.joinToString("、")))
                     .setPositiveButton(android.R.string.ok, null)
-                    .show().addWithTracking()
+                    .show().let { lifecycleResources.addDialog(it); it }
                 return@launch
             }
 
@@ -332,7 +316,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
-                .show().addWithTracking()
+                .show().let { lifecycleResources.addDialog(it); it }
         }
     }
 

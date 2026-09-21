@@ -15,13 +15,10 @@ import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
@@ -37,7 +34,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /** 受信箱のSMSを日付・本文・送信状況・送信先で絞り込んで一覧表示し、選択した分をKintoneへ手動送信キューに載せる画面 */
-class SmsSearchActivity : AppCompatActivity() {
+class SmsSearchActivity : BaseActivity() {
 
     /**
      * この画面のViewBinding。
@@ -79,18 +76,6 @@ class SmsSearchActivity : AppCompatActivity() {
      */
     private var resolvedPartsCache = mutableMapOf<Long, Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>>>()
 
-    /**
-     * 登録済みの LiveData observer のリスト。cleanup() でクリアするために保持。
-     */
-    private val liveDataObservers = mutableListOf<Pair<androidx.lifecycle.LiveData<*>, androidx.lifecycle.Observer<*>>>()
-
-    init {
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                cleanup()
-            }
-        })
-    }
 
     /**
      * リスナー登録と、SettingsStoreに保存済みの初期条件（既定の日付範囲・送信先フィルタ・各チェックボックス）の反映のみ行う。
@@ -101,24 +86,43 @@ class SmsSearchActivity : AppCompatActivity() {
         binding = ActivitySmsSearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.etDateFrom.setOnClickListener { pickDate(isFrom = true) }
-        binding.etDateTo.setOnClickListener { pickDate(isFrom = false) }
-        binding.btnSearchSms.setOnClickListener { searchSms() }
-        binding.btnSelectAll.setOnClickListener { setAllChecked(true) }
-        binding.btnDeselectAll.setOnClickListener { setAllChecked(false) }
-        binding.btnSendSelected.setOnClickListener { sendSelected() }
-        binding.btnToggleSearchFilters.setOnClickListener { toggleSearchFilters() }
-        binding.swipeRefreshSmsList.setOnRefreshListener {
-            searchSms(showFoundToast = false)
-            binding.swipeRefreshSmsList.isRefreshing = false
+        val dateFromListener = View.OnClickListener { pickDate(isFrom = true) }
+        lifecycleResources.addClickListener(binding.etDateFrom, dateFromListener)
+
+        val dateToListener = View.OnClickListener { pickDate(isFrom = false) }
+        lifecycleResources.addClickListener(binding.etDateTo, dateToListener)
+
+        val searchListener = View.OnClickListener { searchSms() }
+        lifecycleResources.addClickListener(binding.btnSearchSms, searchListener)
+
+        val selectAllListener = View.OnClickListener { setAllChecked(true) }
+        lifecycleResources.addClickListener(binding.btnSelectAll, selectAllListener)
+
+        val deselectAllListener = View.OnClickListener { setAllChecked(false) }
+        lifecycleResources.addClickListener(binding.btnDeselectAll, deselectAllListener)
+
+        val sendSelectedListener = View.OnClickListener { sendSelected() }
+        lifecycleResources.addClickListener(binding.btnSendSelected, sendSelectedListener)
+
+        val toggleFiltersListener = View.OnClickListener { toggleSearchFilters() }
+        lifecycleResources.addClickListener(binding.btnToggleSearchFilters, toggleFiltersListener)
+
+        val refreshListener = object : androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
+            override fun onRefresh() {
+                searchSms(showFoundToast = false)
+                binding.swipeRefreshSmsList.isRefreshing = false
+            }
         }
-        binding.spSendTargetFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        lifecycleResources.addRefreshListener(binding.swipeRefreshSmsList, refreshListener)
+
+        val spinnerListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedSendTargetName = sendTargetFilterNames.getOrNull(position)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+        lifecycleResources.addSpinnerListener(binding.spSendTargetFilter, spinnerListener)
 
         val config = SettingsStore.load(this)
         selectedSendTargetName = config.defaultSendTargetFilterName
@@ -151,13 +155,6 @@ class SmsSearchActivity : AppCompatActivity() {
         searchSms(showFoundToast = false)
     }
 
-    private fun cleanup() {
-        @Suppress("UNCHECKED_CAST")
-        liveDataObservers.forEach { (liveData, observer) ->
-            (liveData as androidx.lifecycle.LiveData<Any?>).removeObserver(observer as androidx.lifecycle.Observer<Any?>)
-        }
-        liveDataObservers.clear()
-    }
 
     /**
      * 送信先設定は他画面で変更され得るため、スピナーの選択肢を毎回作り直す。作り直した後も
@@ -223,7 +220,10 @@ class SmsSearchActivity : AppCompatActivity() {
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        ).let {
+            lifecycleResources.addDialog(it)
+            it.show()
+        }
     }
 
     /** 選んだ日の00:00:00.000〜23:59:59.999に丸めることで、時刻を問わずその日一日分をDATE列の範囲条件として使えるようにする */
@@ -608,8 +608,7 @@ class SmsSearchActivity : AppCompatActivity() {
                     onSendBatchFinished(selectedIds)
                 }
             }
-            liveData.observe(this, observer)
-            liveDataObservers.add(liveData to observer)
+            lifecycleResources.addLiveDataObserver(liveData, observer)
         }
 
         Toast.makeText(

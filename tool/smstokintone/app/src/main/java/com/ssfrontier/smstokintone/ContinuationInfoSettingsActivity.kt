@@ -6,9 +6,6 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.ssfrontier.smstokintone.databinding.ActivityContinuationInfoSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemContinuationInfoBinding
 
@@ -18,7 +15,7 @@ import com.ssfrontier.smstokintone.databinding.ItemContinuationInfoBinding
  * [SettingsStore.findSendTargets]で都度再判定した結果を読み取り専用のラベルとして
  * 表示するのみで、この画面での編集対象にはしない
  */
-class ContinuationInfoSettingsActivity : AppCompatActivity() {
+class ContinuationInfoSettingsActivity : BaseActivity() {
 
     /**
      * この画面のViewBinding。
@@ -48,34 +45,6 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
      */
     private val cards = mutableListOf<Card>()
 
-    /**
-     * 登録中のTextWatcher。cleanup()で一括削除。
-     */
-    private val textWatchers = mutableListOf<Pair<android.widget.EditText, TextWatcher>>()
-
-    /**
-     * 登録中のRadioGroupリスナー。cleanup()で一括削除。
-     */
-    private val radioGroupListeners = mutableListOf<Pair<android.widget.RadioGroup, android.widget.RadioGroup.OnCheckedChangeListener>>()
-
-    init {
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                cleanup()
-            }
-        })
-    }
-
-    private fun android.widget.EditText.addWithTracking(listener: TextWatcher) {
-        addTextChangedListener(listener)
-        textWatchers.add(this to listener)
-    }
-
-    private fun android.widget.RadioGroup.addWithTracking(listener: android.widget.RadioGroup.OnCheckedChangeListener) {
-        setOnCheckedChangeListener(listener)
-        radioGroupListeners.add(this to listener)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityContinuationInfoSettingsBinding.inflate(layoutInflater)
@@ -89,9 +58,9 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
         entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
 
         val searchTextWatcher = simpleTextWatcher { applySearchFilter(it) }
-        binding.etContinuationSearch.addWithTracking(searchTextWatcher)
+        lifecycleResources.addTextWatcher(binding.etContinuationSearch, searchTextWatcher)
 
-        binding.btnDeleteAllContinuationInfo.setOnClickListener {
+        val deleteAllListener = View.OnClickListener {
             AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_confirm_delete_all_continuation_info)
                 .setMessage(R.string.dialog_message_delete_all_continuation_info)
@@ -102,17 +71,19 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
                     binding.tvContinuationEmpty.visibility = View.VISIBLE
                     binding.tvContinuationNoMatch.visibility = View.GONE
                 }
-                .show()
+                .show().let { lifecycleResources.addDialog(it); it }
         }
+        lifecycleResources.addClickListener(binding.btnDeleteAllContinuationInfo, deleteAllListener)
 
         val sortListener = android.widget.RadioGroup.OnCheckedChangeListener { _, checkedId ->
             val isAscending = checkedId == binding.rbContinuationSortAscending.id
             reloadCards(isAscending)
             applySearchFilter(binding.etContinuationSearch.text.toString())
         }
-        binding.rgContinuationSort.addWithTracking(sortListener)
+        lifecycleResources.addRadioGroupListener(binding.rgContinuationSort, sortListener)
 
-        binding.btnSaveContinuationInfo.setOnClickListener { onSaveClicked() }
+        val saveListener = View.OnClickListener { onSaveClicked() }
+        lifecycleResources.addClickListener(binding.btnSaveContinuationInfo, saveListener)
     }
 
     /** ソート順序に応じてカードを再読み込みする */
@@ -169,25 +140,16 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
 
         val card = Card(senderKey, itemBinding)
 
-        itemBinding.btnDeleteContinuationInfo.setOnClickListener {
+        val deleteCardListener = View.OnClickListener {
             binding.llContinuationContainer.removeView(itemBinding.root)
             cards.remove(card)
         }
+        lifecycleResources.addClickListener(itemBinding.btnDeleteContinuationInfo, deleteCardListener)
 
         binding.llContinuationContainer.addView(itemBinding.root)
         cards.add(card)
     }
 
-    private fun cleanup() {
-        textWatchers.forEach { (editText, watcher) ->
-            editText.removeTextChangedListener(watcher)
-        }
-        textWatchers.clear()
-        radioGroupListeners.forEach { (radioGroup, listener) ->
-            radioGroup.setOnCheckedChangeListener(null)
-        }
-        radioGroupListeners.clear()
-    }
 
     /** 変更内容をストアへ適用。楽観的排他制御で競合を検出する */
     private fun onSaveClicked() {
@@ -211,7 +173,7 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
                 .setTitle(R.string.dialog_title_validation_error)
                 .setMessage(getString(messageResId, invalidCard.senderKey))
                 .setPositiveButton(android.R.string.ok, null)
-                .show()
+                .show().let { lifecycleResources.addDialog(it); it }
             return
         }
 
@@ -238,7 +200,7 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
                 .setTitle(R.string.dialog_title_continuation_info_save_conflict)
                 .setMessage(R.string.dialog_message_continuation_info_save_conflict)
                 .setPositiveButton(android.R.string.ok, null)
-                .show()
+                .show().let { lifecycleResources.addDialog(it); it }
         }
     }
 }

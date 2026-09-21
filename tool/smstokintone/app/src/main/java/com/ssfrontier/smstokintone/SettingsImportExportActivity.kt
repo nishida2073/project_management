@@ -3,13 +3,11 @@ package com.ssfrontier.smstokintone
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import com.ssfrontier.smstokintone.databinding.ActivitySettingsImportExportBinding
 import org.json.JSONArray
 import org.json.JSONException
@@ -28,7 +26,7 @@ import java.util.Locale
  * すべてマージされ、ファイルに含まれない属性・エントリは既存値が保持される。
  * エクスポートはインポートと互換のJSON（[buildExportJson]）を保存先に書き出す
  */
-class SettingsImportExportActivity : AppCompatActivity() {
+class SettingsImportExportActivity : BaseActivity() {
 
     /**
      * この画面のViewBinding。
@@ -44,19 +42,6 @@ class SettingsImportExportActivity : AppCompatActivity() {
      * ファイルから読み込んだインポート JSON。
      */
     private var importedJson: JSONObject? = null
-
-    /**
-     * 表示中のダイアログリスト。cleanup()で一括削除。
-     */
-    private val dialogs = mutableListOf<AlertDialog>()
-
-    init {
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                cleanup()
-            }
-        })
-    }
 
     /**
      * ファイル選択ダイアログの結果ハンドラ。選択されたURIのファイル内容を読み込んでプレビューへ反映する。
@@ -79,15 +64,20 @@ class SettingsImportExportActivity : AppCompatActivity() {
         binding = ActivitySettingsImportExportBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnSelectImportFile.setOnClickListener {
+        val selectImportFileListener = View.OnClickListener {
             openDocumentLauncher.launch(arrayOf("*/*"))
         }
+        lifecycleResources.addClickListener(binding.btnSelectImportFile, selectImportFileListener)
+
         binding.btnImportSettings.isEnabled = false
         binding.btnImportSettings.setButtonStyleByEnabled(false)
-        binding.btnImportSettings.setOnClickListener { onImportClicked() }
-        binding.btnExportSettings.setOnClickListener {
+        val importListener = View.OnClickListener { onImportClicked() }
+        lifecycleResources.addClickListener(binding.btnImportSettings, importListener)
+
+        val exportListener = View.OnClickListener {
             createDocumentLauncher.launch(suggestedExportFileName())
         }
+        lifecycleResources.addClickListener(binding.btnExportSettings, exportListener)
     }
 
     /** エクスポート先のファイル名を生成（s2k_settings_時刻.json） */
@@ -137,7 +127,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
                 .setTitle(R.string.dialog_title_export_error)
                 .setMessage(R.string.dialog_message_export_failed)
                 .setPositiveButton(android.R.string.ok, null)
-                .show().addWithTracking()
+                .show().let { lifecycleResources.addDialog(it); it }
         }
     }
 
@@ -246,7 +236,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
             .setMessage(getString(R.string.dialog_message_confirm_import, buildPreviewText(includeFileName = true)))
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_import_settings) { _, _ -> applyImport(json) }
-            .show().addWithTracking()
+            .show().let { lifecycleResources.addDialog(it); it }
     }
 
     /** JSON から設定をマージして反映し、完了トーストを表示して画面を閉じる */
@@ -270,16 +260,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
             .setTitle(R.string.dialog_title_import_error)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
-            .show().addWithTracking()
+            .show().let { lifecycleResources.addDialog(it); it }
     }
 
-    private fun AlertDialog.addWithTracking(): AlertDialog {
-        dialogs.add(this)
-        return this
-    }
-
-    private fun cleanup() {
-        dialogs.forEach { it.dismiss() }
-        dialogs.clear()
-    }
 }
