@@ -282,6 +282,9 @@
     <string name="dialog_message_continuation_info_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
     <string name="dialog_title_confirm_delete_all_continuation_info">削除確認</string>
     <string name="dialog_message_delete_all_continuation_info">すべての引き継ぎ内容を削除しますか？</string>
+    <string name="label_continuation_sort">表示順序</string>
+    <string name="rb_continuation_sort_ascending">古い順</string>
+    <string name="rb_continuation_sort_descending">新しい順</string>
 
     <!-- 設定のインポート・エクスポート画面 -->
     <string name="btn_open_settings_import_export">設定のインポート・エクスポート</string>

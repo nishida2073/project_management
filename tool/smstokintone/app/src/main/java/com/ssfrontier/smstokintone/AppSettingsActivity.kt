@@ -257,11 +257,13 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         binding.swContinuationEnabled.isChecked = config.continuationEnabled
+        binding.btnEditContinuationInfo.isEnabled = config.continuationEnabled
         binding.rbContinuationScopeUnlimited.isEnabled = config.continuationEnabled
         binding.rbContinuationScopeSameDay.isEnabled = config.continuationEnabled
         binding.swContinuationShowUserNameEnabled.isEnabled = config.continuationEnabled
         binding.swContinuationEnabled.setOnCheckedChangeListener { _, isChecked ->
             SettingsStore.update(this) { it.copy(continuationEnabled = isChecked) }
+            binding.btnEditContinuationInfo.isEnabled = isChecked
             binding.rbContinuationScopeUnlimited.isEnabled = isChecked
             binding.rbContinuationScopeSameDay.isEnabled = isChecked
             binding.swContinuationShowUserNameEnabled.isEnabled = isChecked

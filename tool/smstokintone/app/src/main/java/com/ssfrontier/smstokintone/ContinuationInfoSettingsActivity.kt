@@ -52,7 +52,7 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         loadedSnapshot = ContinuationStore.getAll(this)
-        val entries = loadedSnapshot.entries.sortedByDescending { it.value.timestampMillis }
+        val entries = loadedSnapshot.entries.sortedBy { it.value.timestampMillis }
 
         binding.tvContinuationEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
 
@@ -82,7 +82,28 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
                 .show()
         }
 
+        binding.rgContinuationSort.setOnCheckedChangeListener { _, checkedId ->
+            val isAscending = checkedId == binding.rbContinuationSortAscending.id
+            reloadCards(isAscending)
+            applySearchFilter(binding.etContinuationSearch.text.toString())
+        }
+
         binding.btnSaveContinuationInfo.setOnClickListener { onSaveClicked() }
+    }
+
+    /** ソート順序に応じてカードを再読み込みする */
+    private fun reloadCards(isAscending: Boolean) {
+        binding.llContinuationContainer.removeAllViews()
+        cards.clear()
+
+        val entries = if (isAscending) {
+            loadedSnapshot.entries.sortedBy { it.value.timestampMillis }
+        } else {
+            loadedSnapshot.entries.sortedByDescending { it.value.timestampMillis }
+        }
+
+        binding.tvContinuationEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
+        entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
     }
 
     /** [query]でカードを絞り込む（表示のみ、ストアは変更しない） */
@@ -94,7 +115,6 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
             binding.tvContinuationEmpty.visibility = if (cards.isEmpty()) View.VISIBLE else View.GONE
             return
         }
-        val lowered = q.lowercase()
         var matchCount = 0
         cards.forEach { card ->
             val entry = loadedSnapshot[card.senderKey]
@@ -102,7 +122,7 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
                 entry?.companyName.orEmpty(),
                 entry?.userName.orEmpty(),
                 entry?.senderAddress.orEmpty().ifBlank { card.senderKey }
-            ).any { it.lowercase().contains(lowered) }
+            ).any { TextNormalization.matches(it, q) }
             card.itemBinding.root.visibility = if (matched) View.VISIBLE else View.GONE
             if (matched) matchCount++
         }

@@ -30,6 +30,41 @@
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/label_continuation_sort"
+            android:textSize="14sp"
+            android:textColor="?attr/colorOnSurface" />
+
+        <RadioGroup
+            android:id="@+id/rgContinuationSort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbContinuationSortAscending"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:checked="true"
+                android:text="@string/rb_continuation_sort_ascending" />
+            <RadioButton
+                android:id="@+id/rbContinuationSortDescending"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rb_continuation_sort_descending" />
+        </RadioGroup>
+    </LinearLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDeleteAllContinuationInfo"
         style="@style/AppButton.OutlinedButton"

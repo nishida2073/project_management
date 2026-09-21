@@ -1205,6 +1205,14 @@
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEditContinuationInfo"
+                            style="@style/AppButton.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/btn_edit_continuation_info" />
                     </LinearLayout>
 
                     <TextView
@@ -1296,14 +1304,6 @@
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
                     </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnEditContinuationInfo"
-                        style="@style/AppButton.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/btn_edit_continuation_info" />
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
