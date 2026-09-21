@@ -57,7 +57,6 @@
     </style>
 
     <style name="AppSpinner">
-        <item name="android:minHeight">48dp</item>
         <item name="android:padding">0dp</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
