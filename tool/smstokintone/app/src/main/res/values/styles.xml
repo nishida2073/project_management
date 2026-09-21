@@ -1,4 +1,8 @@
 <resources>
+    <style name="AppButton.FilledButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:disabledAlpha">0.5</item>
+    </style>
+
     <!-- Widget.MaterialComponents.Button.OutlinedButtonの既定の枠線色は低透過のcolorOnSurfaceで、
          ダークモードでは背景（colorSurface）との明度差が小さく視認しづらいため、枠線をボタン文字と
          同じcolorPrimaryに変更する -->

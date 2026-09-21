@@ -1,5 +1,6 @@
 package com.ssfrontier.smstokintone
 
+import android.content.res.ColorStateList
 import android.util.TypedValue
 import com.google.android.material.button.MaterialButton
 
@@ -12,6 +13,7 @@ fun MaterialButton.setButtonStyleByEnabled(enabled: Boolean) {
         setStrokeWidth(1)
         setBackgroundColor(context.getColor(android.R.color.transparent))
         setTextColor(context.getColor(android.R.color.darker_gray))
+        setStrokeColor(ColorStateList.valueOf(context.getColor(android.R.color.darker_gray)))
     }
 }
 
