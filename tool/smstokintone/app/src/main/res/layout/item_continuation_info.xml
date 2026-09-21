@@ -25,7 +25,15 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-<TextView
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/label_continuation_sender"
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <TextView
                     android:id="@+id/tvSenderAddress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -44,48 +52,61 @@
                 android:text="@string/btn_delete" />
         </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/llCompanyNameSection"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:hint="@string/hint_field_company">
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etContinuationCompanyName"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/llCompanyNameSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:hint="@string/hint_field_company">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/hint_field_user_name">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etContinuationCompanyName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etContinuationUserName"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginTop="8dp"
+                android:hint="@string/hint_field_user_name">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etContinuationUserName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/label_send_target_filter"
             android:textColor="?attr/colorOnSurface" />
 
-        <TextView
-            android:id="@+id/tvContinuationSendTargetName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"
-            android:textStyle="bold"
-            android:textColor="@color/send_target_name"
-            tools:text="地域" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvContinuationSendTargetName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="@color/send_target_name"
+                tools:text="地域" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

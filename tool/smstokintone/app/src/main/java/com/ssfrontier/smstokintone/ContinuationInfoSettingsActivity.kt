@@ -94,16 +94,14 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
     /** ソート順序に応じてカードを再読み込みする */
     private fun reloadCards(isAscending: Boolean) {
         binding.llContinuationContainer.removeAllViews()
-        cards.clear()
 
-        val entries = if (isAscending) {
-            loadedSnapshot.entries.sortedBy { it.value.timestampMillis }
+        val sortedCards = if (isAscending) {
+            cards.sortedBy { loadedSnapshot[it.senderKey]?.timestampMillis ?: 0 }
         } else {
-            loadedSnapshot.entries.sortedByDescending { it.value.timestampMillis }
+            cards.sortedByDescending { loadedSnapshot[it.senderKey]?.timestampMillis ?: 0 }
         }
 
-        binding.tvContinuationEmpty.visibility = if (entries.isEmpty()) View.VISIBLE else View.GONE
-        entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
+        sortedCards.forEach { card -> binding.llContinuationContainer.addView(card.itemBinding.root) }
     }
 
     /** [query]でカードを絞り込む（表示のみ、ストアは変更しない） */
