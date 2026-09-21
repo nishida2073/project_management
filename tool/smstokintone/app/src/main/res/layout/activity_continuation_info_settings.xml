@@ -45,6 +45,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etContinuationSearch"
+                    style="@style/AppTextInputEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text" />
@@ -74,6 +75,7 @@
 
                 <RadioButton
                     android:id="@+id/rbContinuationSortAscending"
+                    style="@style/AppRadioButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
@@ -81,6 +83,7 @@
                     android:text="@string/rb_continuation_sort_ascending" />
                 <RadioButton
                     android:id="@+id/rbContinuationSortDescending"
+                    style="@style/AppRadioButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/rb_continuation_sort_descending" />

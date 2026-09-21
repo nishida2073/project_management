@@ -14,6 +14,7 @@
         android:hint="@string/hint_keyword">
 
         <com.google.android.material.textfield.TextInputEditText
+            style="@style/AppTextInputEditText"
             android:id="@+id/etKeyword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

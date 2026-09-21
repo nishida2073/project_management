@@ -19,6 +19,7 @@
             android:hint="@string/hint_company_name_fix_conversion_before">
 
             <com.google.android.material.textfield.TextInputEditText
+                style="@style/AppTextInputEditText"
                 android:id="@+id/etFixConversionBefore"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -32,6 +33,7 @@
             android:hint="@string/hint_company_name_fix_conversion_after">
 
             <com.google.android.material.textfield.TextInputEditText
+                style="@style/AppTextInputEditText"
                 android:id="@+id/etFixConversionAfter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

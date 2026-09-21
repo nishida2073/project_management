@@ -92,6 +92,7 @@
                             android:hint="@string/hint_send_target_name">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                style="@style/AppTextInputEditText"
                                 android:id="@+id/etSendTargetName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -128,6 +129,7 @@
                             android:hint="@string/hint_company_name">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                style="@style/AppTextInputEditText"
                                 android:id="@+id/etCompanyName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -238,6 +240,7 @@
                             android:hint="@string/hint_subdomain">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                style="@style/AppTextInputEditText"
                                 android:id="@+id/etSubdomain"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -273,6 +276,7 @@
                             android:hint="@string/hint_login_name">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                style="@style/AppTextInputEditText"
                                 android:id="@+id/etLoginName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -287,6 +291,7 @@
                             app:endIconMode="password_toggle">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                style="@style/AppTextInputPasswordEditText"
                                 android:id="@+id/etLoginPassword"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -322,6 +327,7 @@
                             android:hint="@string/hint_app_id">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                style="@style/AppTextInputEditText"
                                 android:id="@+id/etAppId"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -356,6 +362,7 @@
                                 android:hint="@string/hint_field_type">
 
                                 <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldType"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -369,6 +376,7 @@
                                 android:hint="@string/hint_field_datetime">
 
                                 <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldDatetime"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -382,6 +390,7 @@
                                 android:hint="@string/hint_field_sender">
 
                                 <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldSender"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -395,6 +404,7 @@
                                 android:hint="@string/hint_field_history">
 
                                 <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldHistory"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -408,6 +418,7 @@
                                 android:hint="@string/hint_field_company">
 
                                 <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldCompanyName"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -421,6 +432,7 @@
                                 android:hint="@string/hint_field_user_name">
 
                                 <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldUserName"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -434,6 +446,7 @@
                                 android:hint="@string/hint_field_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldBody"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -472,6 +485,7 @@
                             android:orientation="horizontal">
 
                             <RadioButton
+                                style="@style/AppRadioButton"
                                 android:id="@+id/rbUpdateToleranceModeSameDate"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -479,6 +493,7 @@
                                 android:checked="true"
                                 android:text="@string/rb_update_tolerance_mode_same_date" />
                             <RadioButton
+                                style="@style/AppRadioButton"
                                 android:id="@+id/rbUpdateToleranceModeHours"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -493,6 +508,7 @@
                             android:hint="@string/hint_update_tolerance_hours">
 
                             <com.google.android.material.textfield.TextInputEditText
+                                style="@style/AppTextInputEditText"
                                 android:id="@+id/etUpdateToleranceHours"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"

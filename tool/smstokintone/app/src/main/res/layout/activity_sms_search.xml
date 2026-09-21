@@ -91,6 +91,7 @@
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDateFrom"
+                        style="@style/AppTextInputEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:focusable="false"
@@ -105,6 +106,7 @@
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDateTo"
+                        style="@style/AppTextInputEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:focusable="false"
@@ -121,6 +123,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etBodyFilter"
+                    style="@style/AppTextInputEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text" />
@@ -144,6 +147,7 @@
 
                 <Spinner
                     android:id="@+id/spSendTargetFilter"
+                    style="@style/AppSpinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -165,6 +169,7 @@
 
                 <CheckBox
                     android:id="@+id/cbExtractionSucceededOnly"
+                    style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
@@ -174,6 +179,7 @@
 
                 <CheckBox
                     android:id="@+id/cbExtractionFailedOnly"
+                    style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
@@ -183,6 +189,7 @@
 
                 <CheckBox
                     android:id="@+id/cbExtractionNotPerformedOnly"
+                    style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minHeight="0dp"
@@ -206,6 +213,7 @@
 
                 <CheckBox
                     android:id="@+id/cbSendNoneOnly"
+                    style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
@@ -220,6 +228,7 @@
 
                     <CheckBox
                         android:id="@+id/cbSentAutoOnly"
+                        style="@style/AppCheckBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:minHeight="0dp"
@@ -228,6 +237,7 @@
 
                     <CheckBox
                         android:id="@+id/cbSentManualOnly"
+                        style="@style/AppCheckBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:minHeight="0dp"
