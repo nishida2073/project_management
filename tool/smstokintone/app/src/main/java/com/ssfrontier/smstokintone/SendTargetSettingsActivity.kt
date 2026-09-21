@@ -42,6 +42,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
      */
     private val sendTargetCards = mutableListOf<SendTargetCard>()
 
+    /**
+     * 表示中のダイアログへの参照。onDestroy でクリアするために保持。
+     */
+    private var shownDialog: AlertDialog? = null
+
     /** 保存済みの送信先ごとにカードを1枚ずつ復元し、追加/保存ボタンの動作を配線する */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +63,12 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
         binding.btnSave.setOnClickListener { onSaveClicked() }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        shownDialog?.dismiss()
+        shownDialog = null
     }
 
     /**
@@ -184,7 +195,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         if (sendTarget.isValid) return false
 
         val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
-        AlertDialog.Builder(this)
+        shownDialog = AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error, label))
             .setPositiveButton(android.R.string.ok, null)
@@ -194,7 +205,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
     /** [duplicateNames]を「入力エラー」ダイアログで報告する（保存を中断するため呼び出し元でreturnする） */
     private fun showDuplicateNameErrorDialog(duplicateNames: List<String>) {
-        AlertDialog.Builder(this)
+        shownDialog = AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error_duplicate_name, duplicateNames.joinToString("／")))
             .setPositiveButton(android.R.string.ok, null)
@@ -225,7 +236,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             setPadding(padding, padding, padding, padding)
         }
 
-        AlertDialog.Builder(this)
+        shownDialog = AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_test_send_body)
             .setView(editText)
             .setNegativeButton(R.string.btn_cancel, null)
@@ -256,7 +267,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
             if (config.companyNameExtractionEnabled && !sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
-                AlertDialog.Builder(this@SendTargetSettingsActivity)
+                shownDialog = AlertDialog.Builder(this@SendTargetSettingsActivity)
                     .setTitle(R.string.dialog_title_test_send_result)
                     .setMessage(getString(R.string.dialog_message_test_send_routing_unmatched, sendTarget.keywords.joinToString("、")))
                     .setPositiveButton(android.R.string.ok, null)
@@ -303,7 +314,7 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                 getString(R.string.icon_extraction_rule)
             }
             val title = "${getString(R.string.dialog_title_test_send_result)} $icon"
-            AlertDialog.Builder(this@SendTargetSettingsActivity)
+            shownDialog = AlertDialog.Builder(this@SendTargetSettingsActivity)
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)

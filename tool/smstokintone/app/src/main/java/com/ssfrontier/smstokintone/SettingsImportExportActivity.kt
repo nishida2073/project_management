@@ -44,6 +44,11 @@ class SettingsImportExportActivity : AppCompatActivity() {
     private var importedJson: JSONObject? = null
 
     /**
+     * 表示中のダイアログへの参照。onDestroy でクリアするために保持。
+     */
+    private var shownDialog: AlertDialog? = null
+
+    /**
      * ファイル選択ダイアログの結果ハンドラ。選択されたURIのファイル内容を読み込んでプレビューへ反映する。
      */
     private val openDocumentLauncher =
@@ -118,7 +123,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
         if (written) {
             Toast.makeText(this, getString(R.string.toast_settings_exported), Toast.LENGTH_SHORT).show()
         } else {
-            AlertDialog.Builder(this)
+            shownDialog = AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_export_error)
                 .setMessage(R.string.dialog_message_export_failed)
                 .setPositiveButton(android.R.string.ok, null)
@@ -226,7 +231,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
     /** 「この内容で設定する」ボタン。反映内容の確認ダイアログを表示し、確定時に適用する */
     private fun onImportClicked() {
         val json = importedJson ?: return
-        AlertDialog.Builder(this)
+        shownDialog = AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_confirm_import)
             .setMessage(getString(R.string.dialog_message_confirm_import, buildPreviewText(includeFileName = true)))
             .setNegativeButton(R.string.btn_cancel, null)
@@ -251,10 +256,16 @@ class SettingsImportExportActivity : AppCompatActivity() {
         binding.tvImportPreview.text = getString(R.string.message_import_no_file)
         binding.btnImportSettings.isEnabled = false
         binding.btnImportSettings.setButtonStyleByEnabled(false)
-        AlertDialog.Builder(this)
+        shownDialog = AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_import_error)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
             .show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        shownDialog?.dismiss()
+        shownDialog = null
     }
 }

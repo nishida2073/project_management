@@ -46,6 +46,11 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
      */
     private val cards = mutableListOf<Card>()
 
+    /**
+     * 検索フィールドのTextWatcher。onDestroyでリスナー削除に使用。
+     */
+    private lateinit var searchTextWatcher: TextWatcher
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityContinuationInfoSettingsBinding.inflate(layoutInflater)
@@ -58,7 +63,7 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
 
         entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
 
-        binding.etContinuationSearch.addTextChangedListener(object : TextWatcher {
+        searchTextWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
@@ -66,7 +71,8 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 applySearchFilter(s?.toString().orEmpty())
             }
-        })
+        }
+        binding.etContinuationSearch.addTextChangedListener(searchTextWatcher)
 
         binding.btnDeleteAllContinuationInfo.setOnClickListener {
             AlertDialog.Builder(this)
@@ -152,6 +158,12 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
 
         binding.llContinuationContainer.addView(itemBinding.root)
         cards.add(card)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.etContinuationSearch.removeTextChangedListener(searchTextWatcher)
+        binding.rgContinuationSort.setOnCheckedChangeListener(null)
     }
 
     /** 変更内容をストアへ適用。楽観的排他制御で競合を検出する */

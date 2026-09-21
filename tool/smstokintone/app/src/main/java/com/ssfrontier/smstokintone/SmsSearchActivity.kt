@@ -78,6 +78,11 @@ class SmsSearchActivity : AppCompatActivity() {
     private var resolvedPartsCache = mutableMapOf<Long, Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>>>()
 
     /**
+     * 登録済みの LiveData observer のリスト。onDestroy でクリアするために保持。
+     */
+    private val liveDataObservers = mutableListOf<Pair<androidx.lifecycle.LiveData<*>, androidx.lifecycle.Observer<*>>>()
+
+    /**
      * リスナー登録と、SettingsStoreに保存済みの初期条件（既定の日付範囲・送信先フィルタ・各チェックボックス）の反映のみ行う。
      * 実際の検索はonResumeで行われる
      */
@@ -134,6 +139,15 @@ class SmsSearchActivity : AppCompatActivity() {
         updatePermissionUi()
         refreshSendTargetFilterOptions()
         searchSms(showFoundToast = false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        @Suppress("UNCHECKED_CAST")
+        liveDataObservers.forEach { (liveData, observer) ->
+            (liveData as androidx.lifecycle.LiveData<Any?>).removeObserver(observer as androidx.lifecycle.Observer<Any?>)
+        }
+        liveDataObservers.clear()
     }
 
     /**
@@ -579,11 +593,14 @@ class SmsSearchActivity : AppCompatActivity() {
 
         val selectedIds = selectedRecords.map { it.id }.toSet()
         lastRequest?.let { request ->
-            workManager.getWorkInfoByIdLiveData(request.id).observe(this, Observer { workInfo ->
+            val liveData = workManager.getWorkInfoByIdLiveData(request.id)
+            val observer = Observer<androidx.work.WorkInfo> { workInfo ->
                 if (workInfo != null && workInfo.state.isFinished) {
                     onSendBatchFinished(selectedIds)
                 }
-            })
+            }
+            liveData.observe(this, observer)
+            liveDataObservers.add(liveData to observer)
         }
 
         Toast.makeText(
