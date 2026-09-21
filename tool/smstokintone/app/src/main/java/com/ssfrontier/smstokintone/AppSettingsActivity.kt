@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.ssfrontier.smstokintone.databinding.ActivityAppSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemFixedConversionBinding
 
@@ -36,14 +38,22 @@ class AppSettingsActivity : AppCompatActivity() {
     private var defaultSendTargetFilterNames: List<String?> = emptyList()
 
     /**
-     * 登録済みの TextWatcher のリスト。onDestroy でクリアするために保持。
+     * 登録済みの TextWatcher のリスト。cleanup() でクリアするために保持。
      */
     private val textWatchers = mutableListOf<Pair<EditText, android.text.TextWatcher>>()
 
     /**
-     * 表示中のダイアログへの参照。onDestroy でクリアするために保持。
+     * 表示中のダイアログリスト。cleanup() で一括削除。
      */
-    private var shownDialog: AlertDialog? = null
+    private val dialogs = mutableListOf<AlertDialog>()
+
+    init {
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                cleanup()
+            }
+        })
+    }
 
     /** SMS受信権限リクエスト結果ハンドラ。許可時は表示更新、拒否時はトースト表示。 */
     private val requestPermissionLauncher =
@@ -71,6 +81,18 @@ class AppSettingsActivity : AppCompatActivity() {
         Toast.makeText(this, getString(messageResId), Toast.LENGTH_LONG).show()
     }
 
+    /** TextWatcher を追加して textWatchers に自動的に登録 */
+    private fun EditText.addWithTracking(listener: android.text.TextWatcher) {
+        addTextChangedListener(listener)
+        textWatchers.add(this to listener)
+    }
+
+    /** AlertDialog をリストに追加 */
+    private fun AlertDialog.addWithTracking(): AlertDialog {
+        dialogs.add(this)
+        return this
+    }
+
     /**
      * EditText の入力値が 1 以上の正整数のときだけ [onChanged] を実行。
      * クールダウン秒・自動更新間隔・統合範囲など、数値設定の重複検証を避けるためのヘルパー。
@@ -78,17 +100,12 @@ class AppSettingsActivity : AppCompatActivity() {
      * @param onChanged 有効な正整数入力時に実行するコールバック
      */
     private fun EditText.onPositiveIntChanged(onChanged: (Int) -> Unit) {
-        val watcher = object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-            override fun afterTextChanged(s: android.text.Editable?) {
-                val value = s.toString().toIntOrNull() ?: return
-                if (value < 1) return
-                onChanged(value)
-            }
+        val watcher = simpleTextWatcher { text ->
+            val value = text.toIntOrNull() ?: return@simpleTextWatcher
+            if (value < 1) return@simpleTextWatcher
+            onChanged(value)
         }
-        addTextChangedListener(watcher)
-        textWatchers.add(this to watcher)
+        addWithTracking(watcher)
     }
 
     /**
@@ -107,21 +124,11 @@ class AppSettingsActivity : AppCompatActivity() {
         rowBinding.etFixConversionAfter.isEnabled = enabled
         rowBinding.btnDeleteFixedConversion.isEnabled = enabled
 
-        val beforeWatcher = object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-            override fun afterTextChanged(s: android.text.Editable?) { saveFixedConversions() }
-        }
-        val afterWatcher = object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-            override fun afterTextChanged(s: android.text.Editable?) { saveFixedConversions() }
-        }
+        val beforeWatcher = simpleTextWatcher { saveFixedConversions() }
+        val afterWatcher = simpleTextWatcher { saveFixedConversions() }
 
-        rowBinding.etFixConversionBefore.addTextChangedListener(beforeWatcher)
-        rowBinding.etFixConversionAfter.addTextChangedListener(afterWatcher)
-        textWatchers.add(rowBinding.etFixConversionBefore to beforeWatcher)
-        textWatchers.add(rowBinding.etFixConversionAfter to afterWatcher)
+        rowBinding.etFixConversionBefore.addWithTracking(beforeWatcher)
+        rowBinding.etFixConversionAfter.addWithTracking(afterWatcher)
 
         rowBinding.btnDeleteFixedConversion.setOnClickListener {
             container.removeView(rowBinding.root)
@@ -145,12 +152,11 @@ class AppSettingsActivity : AppCompatActivity() {
         SettingsStore.update(this) { it.copy(companyNameFixedConversions = rules) }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun cleanup() {
         textWatchers.forEach { (editText, watcher) -> editText.removeTextChangedListener(watcher) }
         textWatchers.clear()
-        shownDialog?.dismiss()
-        shownDialog = null
+        dialogs.forEach { it.dismiss() }
+        dialogs.clear()
     }
 
     /**
@@ -209,7 +215,7 @@ class AppSettingsActivity : AppCompatActivity() {
             if (isChecked && !previousCompanyNameExtractionEnabled) {
                 val noCompanyNameCount = ContinuationStore.getAll(this).values.count { it.companyName.isBlank() }
                 if (noCompanyNameCount > 0) {
-                    shownDialog = AlertDialog.Builder(this)
+                    AlertDialog.Builder(this)
                         .setTitle(R.string.dialog_title_company_name_extraction_warning)
                         .setMessage(getString(R.string.dialog_message_company_name_extraction_warning, noCompanyNameCount))
                         .setPositiveButton(android.R.string.ok) { _, _ ->
@@ -222,7 +228,7 @@ class AppSettingsActivity : AppCompatActivity() {
                         .setNegativeButton(android.R.string.cancel) { _, _ ->
                             binding.swCompanyNameExtractionEnabled.isChecked = previousCompanyNameExtractionEnabled
                         }
-                        .show()
+                        .show().addWithTracking()
                 } else {
                     SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
                     previousCompanyNameExtractionEnabled = isChecked
@@ -405,29 +411,19 @@ class AppSettingsActivity : AppCompatActivity() {
         }
 
         binding.etSmsExtractionSuccessReplyBody.setText(config.smsExtractionSuccessReplyBody)
-        val successReplyWatcher = object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-            override fun afterTextChanged(s: android.text.Editable?) {
-                SettingsStore.update(this@AppSettingsActivity) { it.copy(smsExtractionSuccessReplyBody = s.toString()) }
-            }
+        val successReplyWatcher = simpleTextWatcher { text ->
+            SettingsStore.update(this) { it.copy(smsExtractionSuccessReplyBody = text) }
         }
-        binding.etSmsExtractionSuccessReplyBody.addTextChangedListener(successReplyWatcher)
-        textWatchers.add(binding.etSmsExtractionSuccessReplyBody to successReplyWatcher)
+        binding.etSmsExtractionSuccessReplyBody.addWithTracking(successReplyWatcher)
 
         binding.etSmsExtractionFailedReplyBody.setText(config.smsExtractionFailedReplyBody)
-        val failedReplyWatcher = object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-            override fun afterTextChanged(s: android.text.Editable?) {
-                SettingsStore.update(this@AppSettingsActivity) { it.copy(smsExtractionFailedReplyBody = s.toString()) }
-            }
+        val failedReplyWatcher = simpleTextWatcher { text ->
+            SettingsStore.update(this) { it.copy(smsExtractionFailedReplyBody = text) }
         }
-        binding.etSmsExtractionFailedReplyBody.addTextChangedListener(failedReplyWatcher)
-        textWatchers.add(binding.etSmsExtractionFailedReplyBody to failedReplyWatcher)
+        binding.etSmsExtractionFailedReplyBody.addWithTracking(failedReplyWatcher)
 
         binding.btnResetSettings.setOnClickListener {
-            shownDialog = AlertDialog.Builder(this)
+            AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_confirm_reset_settings)
                 .setMessage(R.string.dialog_message_confirm_reset_settings)
                 .setNegativeButton(R.string.btn_cancel, null)
@@ -441,7 +437,7 @@ class AppSettingsActivity : AppCompatActivity() {
                     finish()
                     startActivity(Intent(this, AppSettingsActivity::class.java))
                 }
-                .show()
+                .show().addWithTracking()
         }
 
         // テーマ切り替え時にスクロール位置を復元

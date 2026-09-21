@@ -10,6 +10,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.ssfrontier.smstokintone.databinding.ActivitySendTargetSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemSendTargetBinding
@@ -43,9 +45,17 @@ class SendTargetSettingsActivity : AppCompatActivity() {
     private val sendTargetCards = mutableListOf<SendTargetCard>()
 
     /**
-     * 表示中のダイアログへの参照。onDestroy でクリアするために保持。
+     * 表示中のダイアログリスト。cleanup()で一括削除。
      */
-    private var shownDialog: AlertDialog? = null
+    private val dialogs = mutableListOf<AlertDialog>()
+
+    init {
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                cleanup()
+            }
+        })
+    }
 
     /** 保存済みの送信先ごとにカードを1枚ずつ復元し、追加/保存ボタンの動作を配線する */
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,10 +75,14 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener { onSaveClicked() }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        shownDialog?.dismiss()
-        shownDialog = null
+    private fun AlertDialog.addWithTracking(): AlertDialog {
+        dialogs.add(this)
+        return this
+    }
+
+    private fun cleanup() {
+        dialogs.forEach { it.dismiss() }
+        dialogs.clear()
     }
 
     /**
@@ -195,21 +209,21 @@ class SendTargetSettingsActivity : AppCompatActivity() {
         if (sendTarget.isValid) return false
 
         val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
-        shownDialog = AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error, label))
             .setPositiveButton(android.R.string.ok, null)
-            .show()
+            .show().addWithTracking()
         return true
     }
 
     /** [duplicateNames]を「入力エラー」ダイアログで報告する（保存を中断するため呼び出し元でreturnする） */
     private fun showDuplicateNameErrorDialog(duplicateNames: List<String>) {
-        shownDialog = AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error_duplicate_name, duplicateNames.joinToString("／")))
             .setPositiveButton(android.R.string.ok, null)
-            .show()
+            .show().addWithTracking()
     }
 
     /** カードの現在の入力内容で検証し、問題なければテスト本文を入力するダイアログを出す */
@@ -236,14 +250,14 @@ class SendTargetSettingsActivity : AppCompatActivity() {
             setPadding(padding, padding, padding, padding)
         }
 
-        shownDialog = AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_test_send_body)
             .setView(editText)
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_send) { _, _ ->
                 performTestSend(itemBinding, sendTarget, editText.text.toString())
             }
-            .show()
+            .show().addWithTracking()
     }
 
     /** [testBody]の振り分け条件を確認したうえでkintoneへテスト送信し、抽出結果と送信結果をダイアログで表示する */
@@ -267,11 +281,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
 
             if (config.companyNameExtractionEnabled && !sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
-                shownDialog = AlertDialog.Builder(this@SendTargetSettingsActivity)
+                AlertDialog.Builder(this@SendTargetSettingsActivity)
                     .setTitle(R.string.dialog_title_test_send_result)
                     .setMessage(getString(R.string.dialog_message_test_send_routing_unmatched, sendTarget.keywords.joinToString("、")))
                     .setPositiveButton(android.R.string.ok, null)
-                    .show()
+                    .show().addWithTracking()
                 return@launch
             }
 
@@ -314,11 +328,11 @@ class SendTargetSettingsActivity : AppCompatActivity() {
                 getString(R.string.icon_extraction_rule)
             }
             val title = "${getString(R.string.dialog_title_test_send_result)} $icon"
-            shownDialog = AlertDialog.Builder(this@SendTargetSettingsActivity)
+            AlertDialog.Builder(this@SendTargetSettingsActivity)
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
-                .show()
+                .show().addWithTracking()
         }
     }
 

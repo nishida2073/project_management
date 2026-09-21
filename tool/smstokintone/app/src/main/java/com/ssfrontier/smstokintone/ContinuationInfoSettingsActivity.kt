@@ -7,6 +7,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.ssfrontier.smstokintone.databinding.ActivityContinuationInfoSettingsBinding
 import com.ssfrontier.smstokintone.databinding.ItemContinuationInfoBinding
 
@@ -47,9 +49,32 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
     private val cards = mutableListOf<Card>()
 
     /**
-     * 検索フィールドのTextWatcher。onDestroyでリスナー削除に使用。
+     * 登録中のTextWatcher。cleanup()で一括削除。
      */
-    private lateinit var searchTextWatcher: TextWatcher
+    private val textWatchers = mutableListOf<Pair<android.widget.EditText, TextWatcher>>()
+
+    /**
+     * 登録中のRadioGroupリスナー。cleanup()で一括削除。
+     */
+    private val radioGroupListeners = mutableListOf<Pair<android.widget.RadioGroup, android.widget.RadioGroup.OnCheckedChangeListener>>()
+
+    init {
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                cleanup()
+            }
+        })
+    }
+
+    private fun android.widget.EditText.addWithTracking(listener: TextWatcher) {
+        addTextChangedListener(listener)
+        textWatchers.add(this to listener)
+    }
+
+    private fun android.widget.RadioGroup.addWithTracking(listener: android.widget.RadioGroup.OnCheckedChangeListener) {
+        setOnCheckedChangeListener(listener)
+        radioGroupListeners.add(this to listener)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,16 +88,8 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
 
         entries.forEach { (senderKey, entry) -> addCard(senderKey, entry) }
 
-        searchTextWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-
-            override fun afterTextChanged(s: Editable?) {
-                applySearchFilter(s?.toString().orEmpty())
-            }
-        }
-        binding.etContinuationSearch.addTextChangedListener(searchTextWatcher)
+        val searchTextWatcher = simpleTextWatcher { applySearchFilter(it) }
+        binding.etContinuationSearch.addWithTracking(searchTextWatcher)
 
         binding.btnDeleteAllContinuationInfo.setOnClickListener {
             AlertDialog.Builder(this)
@@ -88,11 +105,12 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
                 .show()
         }
 
-        binding.rgContinuationSort.setOnCheckedChangeListener { _, checkedId ->
+        val sortListener = android.widget.RadioGroup.OnCheckedChangeListener { _, checkedId ->
             val isAscending = checkedId == binding.rbContinuationSortAscending.id
             reloadCards(isAscending)
             applySearchFilter(binding.etContinuationSearch.text.toString())
         }
+        binding.rgContinuationSort.addWithTracking(sortListener)
 
         binding.btnSaveContinuationInfo.setOnClickListener { onSaveClicked() }
     }
@@ -160,10 +178,15 @@ class ContinuationInfoSettingsActivity : AppCompatActivity() {
         cards.add(card)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.etContinuationSearch.removeTextChangedListener(searchTextWatcher)
-        binding.rgContinuationSort.setOnCheckedChangeListener(null)
+    private fun cleanup() {
+        textWatchers.forEach { (editText, watcher) ->
+            editText.removeTextChangedListener(watcher)
+        }
+        textWatchers.clear()
+        radioGroupListeners.forEach { (radioGroup, listener) ->
+            radioGroup.setOnCheckedChangeListener(null)
+        }
+        radioGroupListeners.clear()
     }
 
     /** 変更内容をストアへ適用。楽観的排他制御で競合を検出する */

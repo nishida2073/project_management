@@ -8,6 +8,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.ssfrontier.smstokintone.databinding.ActivitySettingsImportExportBinding
 import org.json.JSONArray
 import org.json.JSONException
@@ -44,9 +46,17 @@ class SettingsImportExportActivity : AppCompatActivity() {
     private var importedJson: JSONObject? = null
 
     /**
-     * 表示中のダイアログへの参照。onDestroy でクリアするために保持。
+     * 表示中のダイアログリスト。cleanup()で一括削除。
      */
-    private var shownDialog: AlertDialog? = null
+    private val dialogs = mutableListOf<AlertDialog>()
+
+    init {
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                cleanup()
+            }
+        })
+    }
 
     /**
      * ファイル選択ダイアログの結果ハンドラ。選択されたURIのファイル内容を読み込んでプレビューへ反映する。
@@ -123,11 +133,11 @@ class SettingsImportExportActivity : AppCompatActivity() {
         if (written) {
             Toast.makeText(this, getString(R.string.toast_settings_exported), Toast.LENGTH_SHORT).show()
         } else {
-            shownDialog = AlertDialog.Builder(this)
+            AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_title_export_error)
                 .setMessage(R.string.dialog_message_export_failed)
                 .setPositiveButton(android.R.string.ok, null)
-                .show()
+                .show().addWithTracking()
         }
     }
 
@@ -231,12 +241,12 @@ class SettingsImportExportActivity : AppCompatActivity() {
     /** 「この内容で設定する」ボタン。反映内容の確認ダイアログを表示し、確定時に適用する */
     private fun onImportClicked() {
         val json = importedJson ?: return
-        shownDialog = AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_confirm_import)
             .setMessage(getString(R.string.dialog_message_confirm_import, buildPreviewText(includeFileName = true)))
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_import_settings) { _, _ -> applyImport(json) }
-            .show()
+            .show().addWithTracking()
     }
 
     /** JSON から設定をマージして反映し、完了トーストを表示して画面を閉じる */
@@ -256,16 +266,20 @@ class SettingsImportExportActivity : AppCompatActivity() {
         binding.tvImportPreview.text = getString(R.string.message_import_no_file)
         binding.btnImportSettings.isEnabled = false
         binding.btnImportSettings.setButtonStyleByEnabled(false)
-        shownDialog = AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_import_error)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
-            .show()
+            .show().addWithTracking()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        shownDialog?.dismiss()
-        shownDialog = null
+    private fun AlertDialog.addWithTracking(): AlertDialog {
+        dialogs.add(this)
+        return this
+    }
+
+    private fun cleanup() {
+        dialogs.forEach { it.dismiss() }
+        dialogs.clear()
     }
 }

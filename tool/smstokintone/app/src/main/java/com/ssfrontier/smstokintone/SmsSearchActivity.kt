@@ -20,6 +20,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.color
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
@@ -78,9 +80,17 @@ class SmsSearchActivity : AppCompatActivity() {
     private var resolvedPartsCache = mutableMapOf<Long, Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>>>()
 
     /**
-     * 登録済みの LiveData observer のリスト。onDestroy でクリアするために保持。
+     * 登録済みの LiveData observer のリスト。cleanup() でクリアするために保持。
      */
     private val liveDataObservers = mutableListOf<Pair<androidx.lifecycle.LiveData<*>, androidx.lifecycle.Observer<*>>>()
+
+    init {
+        lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                cleanup()
+            }
+        })
+    }
 
     /**
      * リスナー登録と、SettingsStoreに保存済みの初期条件（既定の日付範囲・送信先フィルタ・各チェックボックス）の反映のみ行う。
@@ -141,8 +151,7 @@ class SmsSearchActivity : AppCompatActivity() {
         searchSms(showFoundToast = false)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun cleanup() {
         @Suppress("UNCHECKED_CAST")
         liveDataObservers.forEach { (liveData, observer) ->
             (liveData as androidx.lifecycle.LiveData<Any?>).removeObserver(observer as androidx.lifecycle.Observer<Any?>)
