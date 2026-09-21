@@ -56,10 +56,10 @@ class SendTargetSettingsActivity : BaseActivity() {
             val newCardView = addSendTargetCard(SettingsStore.SendTarget.newEmpty())
             newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
-        lifecycleResources.addClickListener(binding.btnAddSendTarget, addSendTargetListener)
+        binding.btnAddSendTarget.setupManaged(addSendTargetListener, lifecycleResources)
 
         val saveListener = View.OnClickListener { onSaveClicked() }
-        lifecycleResources.addClickListener(binding.btnSave, saveListener)
+        binding.btnSave.setupManaged(saveListener, lifecycleResources)
     }
 
 
@@ -80,7 +80,7 @@ class SendTargetSettingsActivity : BaseActivity() {
             if (companyNameExtractionEnabled) View.VISIBLE else View.GONE
         sendTarget.keywords.forEach { addKeywordRow(itemBinding.llKeywordsContainer, it) }
         val addKeywordListener = View.OnClickListener { addKeywordRow(itemBinding.llKeywordsContainer, "") }
-        lifecycleResources.addClickListener(itemBinding.btnAddKeyword, addKeywordListener)
+        itemBinding.btnAddKeyword.setupManaged(addKeywordListener, lifecycleResources)
         itemBinding.etSubdomain.setText(sendTarget.subdomain)
         itemBinding.etAppId.setText(sendTarget.appId)
         itemBinding.etLoginName.setText(sendTarget.loginName)
@@ -102,7 +102,7 @@ class SendTargetSettingsActivity : BaseActivity() {
         val toleranceModeListener = android.widget.RadioGroup.OnCheckedChangeListener { _, checkedId ->
             itemBinding.tilUpdateToleranceHours.isEnabled = checkedId == itemBinding.rbUpdateToleranceModeHours.id
         }
-        lifecycleResources.addRadioGroupListener(itemBinding.rgUpdateToleranceMode, toleranceModeListener)
+        itemBinding.rgUpdateToleranceMode.setupManaged(toleranceModeListener, lifecycleResources)
 
         val copyListener = View.OnClickListener {
             val source = readSendTargetFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
@@ -110,17 +110,17 @@ class SendTargetSettingsActivity : BaseActivity() {
             val newCardView = addSendTargetCard(source.copy(name = copyName), insertAt = sendTargetCards.indexOf(card) + 1)
             newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
-        lifecycleResources.addClickListener(itemBinding.btnCopySendTarget, copyListener)
+        itemBinding.btnCopySendTarget.setupManaged(copyListener, lifecycleResources)
 
         val deleteListener = View.OnClickListener {
             binding.llSendTargetsContainer.removeView(itemBinding.root)
             sendTargetCards.remove(card)
             renumberCards()
         }
-        lifecycleResources.addClickListener(itemBinding.btnDeleteSendTarget, deleteListener)
+        itemBinding.btnDeleteSendTarget.setupManaged(deleteListener, lifecycleResources)
 
         val testSendListener = View.OnClickListener { onTestSendClicked(itemBinding, card) }
-        lifecycleResources.addClickListener(itemBinding.btnTestSend, testSendListener)
+        itemBinding.btnTestSend.setupManaged(testSendListener, lifecycleResources)
 
         if (insertAt < 0 || insertAt >= sendTargetCards.size) {
             binding.llSendTargetsContainer.addView(itemBinding.root)
@@ -138,7 +138,7 @@ class SendTargetSettingsActivity : BaseActivity() {
         val rowBinding = ItemSendTargetKeywordBinding.inflate(layoutInflater, container, false)
         rowBinding.etKeyword.setText(keyword)
         val deleteListener = View.OnClickListener { container.removeView(rowBinding.root) }
-        lifecycleResources.addClickListener(rowBinding.btnDeleteKeyword, deleteListener)
+        rowBinding.btnDeleteKeyword.setupManaged(deleteListener, lifecycleResources)
         container.addView(rowBinding.root)
     }
 
@@ -197,7 +197,7 @@ class SendTargetSettingsActivity : BaseActivity() {
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error, label))
             .setPositiveButton(android.R.string.ok, null)
-            .show().let { lifecycleResources.addDialog(it); it }
+            .show().setupManaged(lifecycleResources)
         return true
     }
 
@@ -207,7 +207,7 @@ class SendTargetSettingsActivity : BaseActivity() {
             .setTitle(R.string.dialog_title_validation_error)
             .setMessage(getString(R.string.dialog_message_validation_error_duplicate_name, duplicateNames.joinToString("／")))
             .setPositiveButton(android.R.string.ok, null)
-            .show().let { lifecycleResources.addDialog(it); it }
+            .show().setupManaged(lifecycleResources)
     }
 
     /** カードの現在の入力内容で検証し、問題なければテスト本文を入力するダイアログを出す */
@@ -241,7 +241,7 @@ class SendTargetSettingsActivity : BaseActivity() {
             .setPositiveButton(R.string.btn_send) { _, _ ->
                 performTestSend(itemBinding, sendTarget, editText.text.toString())
             }
-            .show().let { lifecycleResources.addDialog(it); it }
+            .show().setupManaged(lifecycleResources)
     }
 
     /** [testBody]の振り分け条件を確認したうえでkintoneへテスト送信し、抽出結果と送信結果をダイアログで表示する */
@@ -269,7 +269,7 @@ class SendTargetSettingsActivity : BaseActivity() {
                     .setTitle(R.string.dialog_title_test_send_result)
                     .setMessage(getString(R.string.dialog_message_test_send_routing_unmatched, sendTarget.keywords.joinToString("、")))
                     .setPositiveButton(android.R.string.ok, null)
-                    .show().let { lifecycleResources.addDialog(it); it }
+                    .show().setupManaged(lifecycleResources)
                 return@launch
             }
 
@@ -316,7 +316,7 @@ class SendTargetSettingsActivity : BaseActivity() {
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, null)
-                .show().let { lifecycleResources.addDialog(it); it }
+                .show().setupManaged(lifecycleResources)
         }
     }
 

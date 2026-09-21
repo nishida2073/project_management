@@ -42,153 +42,151 @@ fun simpleTextWatcher(onAfter: (String) -> Unit): TextWatcher = object : TextWat
 }
 
 class ActivityLifecycleResourceManager {
-    private val textWatchers = mutableListOf<Pair<EditText, TextWatcher>>()
-    private val dialogs = mutableListOf<Dialog>()
-    private val radioGroupListeners = mutableListOf<Pair<RadioGroup, RadioGroup.OnCheckedChangeListener>>()
-    private val compoundButtonListeners = mutableListOf<Pair<CompoundButton, CompoundButton.OnCheckedChangeListener>>()
-    private val clickListeners = mutableListOf<Pair<View, View.OnClickListener>>()
-    private val spinnerListeners = mutableListOf<Pair<AdapterView<*>, AdapterView.OnItemSelectedListener>>()
-    private val refreshListeners = mutableListOf<Pair<SwipeRefreshLayout, SwipeRefreshLayout.OnRefreshListener>>()
-    private val liveDataObservers = mutableListOf<Triple<LiveData<*>, Observer<*>, Any?>>()
-
-    @Synchronized
-    fun addTextWatcher(editText: EditText, listener: TextWatcher) {
-        editText.addTextChangedListener(listener)
-        textWatchers.add(editText to listener)
-    }
-
-    @Synchronized
-    fun addRadioGroupListener(radioGroup: RadioGroup, listener: RadioGroup.OnCheckedChangeListener) {
-        radioGroup.setOnCheckedChangeListener(listener)
-        radioGroupListeners.add(radioGroup to listener)
-    }
-
-    @Synchronized
-    fun addCompoundButtonListener(compoundButton: CompoundButton, listener: CompoundButton.OnCheckedChangeListener) {
-        compoundButton.setOnCheckedChangeListener(listener)
-        compoundButtonListeners.add(compoundButton to listener)
-    }
-
-    @Synchronized
-    fun addClickListener(view: View, listener: View.OnClickListener) {
-        view.setOnClickListener(listener)
-        clickListeners.add(view to listener)
-    }
-
-    @Synchronized
-    fun addSpinnerListener(spinner: AdapterView<*>, listener: AdapterView.OnItemSelectedListener) {
-        spinner.onItemSelectedListener = listener
-        spinnerListeners.add(spinner to listener)
-    }
-
-    @Synchronized
-    fun addRefreshListener(refreshLayout: SwipeRefreshLayout, listener: SwipeRefreshLayout.OnRefreshListener) {
-        refreshLayout.setOnRefreshListener(listener)
-        refreshListeners.add(refreshLayout to listener)
-    }
-
-    @Synchronized
-    fun addDialog(dialog: Dialog) {
-        dialogs.add(dialog)
-    }
-
-    @Synchronized
-    fun <T> addLiveDataObserver(liveData: LiveData<T>, observer: Observer<T>) {
-        liveData.observeForever(observer)
-        @Suppress("UNCHECKED_CAST")
-        liveDataObservers.add(Triple(liveData, observer as Observer<*>, null))
-    }
+    internal val textWatchers = mutableListOf<Pair<EditText, TextWatcher>>()
+    internal val dialogs = mutableListOf<Dialog>()
+    internal val radioGroupListeners = mutableListOf<Pair<RadioGroup, RadioGroup.OnCheckedChangeListener>>()
+    internal val compoundButtonListeners = mutableListOf<Pair<CompoundButton, CompoundButton.OnCheckedChangeListener>>()
+    internal val clickListeners = mutableListOf<Pair<View, View.OnClickListener>>()
+    internal val spinnerListeners = mutableListOf<Pair<AdapterView<*>, AdapterView.OnItemSelectedListener>>()
+    internal val refreshListeners = mutableListOf<Pair<SwipeRefreshLayout, SwipeRefreshLayout.OnRefreshListener>>()
+    internal val liveDataObservers = mutableListOf<Triple<LiveData<*>, Observer<*>, Any?>>()
 
     @Synchronized
     fun cleanup() {
+        cleanupTextWatchers()
+        cleanupRadioGroupListeners()
+        cleanupCompoundButtonListeners()
+        cleanupClickListeners()
+        cleanupSpinnerListeners()
+        cleanupRefreshListeners()
+        cleanupDialogs()
+        cleanupLiveDataObservers()
+    }
+
+    private fun cleanupTextWatchers() {
         try {
             textWatchers.forEach { (editText, watcher) ->
-                try {
-                    editText.removeTextChangedListener(watcher)
-                } catch (e: Exception) {
-                }
+                try { editText.removeTextChangedListener(watcher) } catch (e: Exception) {}
             }
         } finally {
             textWatchers.clear()
         }
+    }
 
+    private fun cleanupRadioGroupListeners() {
         try {
-            radioGroupListeners.forEach { (radioGroup, listener) ->
-                try {
-                    radioGroup.setOnCheckedChangeListener(null)
-                } catch (e: Exception) {
-                }
+            radioGroupListeners.forEach { (radioGroup, _) ->
+                try { radioGroup.setOnCheckedChangeListener(null) } catch (e: Exception) {}
             }
         } finally {
             radioGroupListeners.clear()
         }
+    }
 
+    private fun cleanupCompoundButtonListeners() {
         try {
-            compoundButtonListeners.forEach { (compoundButton, listener) ->
-                try {
-                    compoundButton.setOnCheckedChangeListener(null)
-                } catch (e: Exception) {
-                }
+            compoundButtonListeners.forEach { (compoundButton, _) ->
+                try { compoundButton.setOnCheckedChangeListener(null) } catch (e: Exception) {}
             }
         } finally {
             compoundButtonListeners.clear()
         }
+    }
 
+    private fun cleanupClickListeners() {
         try {
             clickListeners.forEach { (view, _) ->
-                try {
-                    view.setOnClickListener(null)
-                } catch (e: Exception) {
-                }
+                try { view.setOnClickListener(null) } catch (e: Exception) {}
             }
         } finally {
             clickListeners.clear()
         }
+    }
 
+    private fun cleanupSpinnerListeners() {
         try {
             spinnerListeners.forEach { (spinner, _) ->
-                try {
-                    spinner.onItemSelectedListener = null
-                } catch (e: Exception) {
-                }
+                try { spinner.onItemSelectedListener = null } catch (e: Exception) {}
             }
         } finally {
             spinnerListeners.clear()
         }
+    }
 
+    private fun cleanupRefreshListeners() {
         try {
             refreshListeners.forEach { (refreshLayout, _) ->
-                try {
-                    refreshLayout.setOnRefreshListener(null)
-                } catch (e: Exception) {
-                }
+                try { refreshLayout.setOnRefreshListener(null) } catch (e: Exception) {}
             }
         } finally {
             refreshListeners.clear()
         }
+    }
 
+    private fun cleanupDialogs() {
         try {
             dialogs.forEach { dialog ->
                 try {
                     dialog.cancel()
                     dialog.dismiss()
-                } catch (e: Exception) {
-                }
+                } catch (e: Exception) {}
             }
         } finally {
             dialogs.clear()
         }
+    }
 
+    private fun cleanupLiveDataObservers() {
         try {
             liveDataObservers.forEach { (liveData, observer, _) ->
                 try {
                     @Suppress("UNCHECKED_CAST")
                     (liveData as LiveData<Any?>).removeObserver(observer as Observer<Any?>)
-                } catch (e: Exception) {
-                }
+                } catch (e: Exception) {}
             }
         } finally {
             liveDataObservers.clear()
         }
     }
+}
+
+fun EditText.setupManaged(listener: TextWatcher, manager: ActivityLifecycleResourceManager) {
+    addTextChangedListener(listener)
+    manager.textWatchers.add(this to listener)
+}
+
+fun RadioGroup.setupManaged(listener: RadioGroup.OnCheckedChangeListener, manager: ActivityLifecycleResourceManager) {
+    setOnCheckedChangeListener(listener)
+    manager.radioGroupListeners.add(this to listener)
+}
+
+fun CompoundButton.setupManaged(listener: CompoundButton.OnCheckedChangeListener, manager: ActivityLifecycleResourceManager) {
+    setOnCheckedChangeListener(listener)
+    manager.compoundButtonListeners.add(this to listener)
+}
+
+fun View.setupManaged(listener: View.OnClickListener, manager: ActivityLifecycleResourceManager) {
+    setOnClickListener(listener)
+    manager.clickListeners.add(this to listener)
+}
+
+fun AdapterView<*>.setupManaged(listener: AdapterView.OnItemSelectedListener, manager: ActivityLifecycleResourceManager) {
+    onItemSelectedListener = listener
+    manager.spinnerListeners.add(this to listener)
+}
+
+fun SwipeRefreshLayout.setupManaged(listener: SwipeRefreshLayout.OnRefreshListener, manager: ActivityLifecycleResourceManager) {
+    setOnRefreshListener(listener)
+    manager.refreshListeners.add(this to listener)
+}
+
+fun Dialog.setupManaged(manager: ActivityLifecycleResourceManager): Dialog {
+    manager.dialogs.add(this)
+    return this
+}
+
+fun <T> LiveData<T>.setupManaged(observer: Observer<T>, manager: ActivityLifecycleResourceManager) {
+    observeForever(observer)
+    @Suppress("UNCHECKED_CAST")
+    manager.liveDataObservers.add(Triple(this, observer as Observer<*>, null))
 }

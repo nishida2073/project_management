@@ -67,17 +67,17 @@ class SettingsImportExportActivity : BaseActivity() {
         val selectImportFileListener = View.OnClickListener {
             openDocumentLauncher.launch(arrayOf("*/*"))
         }
-        lifecycleResources.addClickListener(binding.btnSelectImportFile, selectImportFileListener)
+        binding.btnSelectImportFile.setupManaged(selectImportFileListener, lifecycleResources)
 
         binding.btnImportSettings.isEnabled = false
         binding.btnImportSettings.setButtonStyleByEnabled(false)
         val importListener = View.OnClickListener { onImportClicked() }
-        lifecycleResources.addClickListener(binding.btnImportSettings, importListener)
+        binding.btnImportSettings.setupManaged(importListener, lifecycleResources)
 
         val exportListener = View.OnClickListener {
             createDocumentLauncher.launch(suggestedExportFileName())
         }
-        lifecycleResources.addClickListener(binding.btnExportSettings, exportListener)
+        binding.btnExportSettings.setupManaged(exportListener, lifecycleResources)
     }
 
     /** エクスポート先のファイル名を生成（s2k_settings_時刻.json） */
@@ -127,7 +127,7 @@ class SettingsImportExportActivity : BaseActivity() {
                 .setTitle(R.string.dialog_title_export_error)
                 .setMessage(R.string.dialog_message_export_failed)
                 .setPositiveButton(android.R.string.ok, null)
-                .show().let { lifecycleResources.addDialog(it); it }
+                .show().setupManaged(lifecycleResources)
         }
     }
 
@@ -236,7 +236,7 @@ class SettingsImportExportActivity : BaseActivity() {
             .setMessage(getString(R.string.dialog_message_confirm_import, buildPreviewText(includeFileName = true)))
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_import_settings) { _, _ -> applyImport(json) }
-            .show().let { lifecycleResources.addDialog(it); it }
+            .show().setupManaged(lifecycleResources)
     }
 
     /** JSON から設定をマージして反映し、完了トーストを表示して画面を閉じる */
@@ -260,7 +260,7 @@ class SettingsImportExportActivity : BaseActivity() {
             .setTitle(R.string.dialog_title_import_error)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
-            .show().let { lifecycleResources.addDialog(it); it }
+            .show().setupManaged(lifecycleResources)
     }
 
 }

@@ -87,25 +87,25 @@ class SmsSearchActivity : BaseActivity() {
         setContentView(binding.root)
 
         val dateFromListener = View.OnClickListener { pickDate(isFrom = true) }
-        lifecycleResources.addClickListener(binding.etDateFrom, dateFromListener)
+        binding.etDateFrom.setupManaged(dateFromListener, lifecycleResources)
 
         val dateToListener = View.OnClickListener { pickDate(isFrom = false) }
-        lifecycleResources.addClickListener(binding.etDateTo, dateToListener)
+        binding.etDateTo.setupManaged(dateToListener, lifecycleResources)
 
         val searchListener = View.OnClickListener { searchSms() }
-        lifecycleResources.addClickListener(binding.btnSearchSms, searchListener)
+        binding.btnSearchSms.setupManaged(searchListener, lifecycleResources)
 
         val selectAllListener = View.OnClickListener { setAllChecked(true) }
-        lifecycleResources.addClickListener(binding.btnSelectAll, selectAllListener)
+        binding.btnSelectAll.setupManaged(selectAllListener, lifecycleResources)
 
         val deselectAllListener = View.OnClickListener { setAllChecked(false) }
-        lifecycleResources.addClickListener(binding.btnDeselectAll, deselectAllListener)
+        binding.btnDeselectAll.setupManaged(deselectAllListener, lifecycleResources)
 
         val sendSelectedListener = View.OnClickListener { sendSelected() }
-        lifecycleResources.addClickListener(binding.btnSendSelected, sendSelectedListener)
+        binding.btnSendSelected.setupManaged(sendSelectedListener, lifecycleResources)
 
         val toggleFiltersListener = View.OnClickListener { toggleSearchFilters() }
-        lifecycleResources.addClickListener(binding.btnToggleSearchFilters, toggleFiltersListener)
+        binding.btnToggleSearchFilters.setupManaged(toggleFiltersListener, lifecycleResources)
 
         val refreshListener = object : androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener {
             override fun onRefresh() {
@@ -113,7 +113,7 @@ class SmsSearchActivity : BaseActivity() {
                 binding.swipeRefreshSmsList.isRefreshing = false
             }
         }
-        lifecycleResources.addRefreshListener(binding.swipeRefreshSmsList, refreshListener)
+        binding.swipeRefreshSmsList.setupManaged(refreshListener, lifecycleResources)
 
         val spinnerListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -122,7 +122,7 @@ class SmsSearchActivity : BaseActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        lifecycleResources.addSpinnerListener(binding.spSendTargetFilter, spinnerListener)
+        binding.spSendTargetFilter.setupManaged(spinnerListener, lifecycleResources)
 
         val config = SettingsStore.load(this)
         selectedSendTargetName = config.defaultSendTargetFilterName
@@ -221,7 +221,7 @@ class SmsSearchActivity : BaseActivity() {
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         ).let {
-            lifecycleResources.addDialog(it)
+            it.setupManaged(lifecycleResources)
             it.show()
         }
     }
@@ -608,7 +608,7 @@ class SmsSearchActivity : BaseActivity() {
                     onSendBatchFinished(selectedIds)
                 }
             }
-            lifecycleResources.addLiveDataObserver(liveData, observer)
+            liveData.setupManaged(observer, lifecycleResources)
         }
 
         Toast.makeText(
