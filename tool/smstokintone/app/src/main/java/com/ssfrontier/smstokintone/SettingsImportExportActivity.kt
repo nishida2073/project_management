@@ -68,6 +68,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
             openDocumentLauncher.launch(arrayOf("*/*"))
         }
         binding.btnImportSettings.isEnabled = false
+        binding.btnImportSettings.setButtonStyleByEnabled(false)
         binding.btnImportSettings.setOnClickListener { onImportClicked() }
         binding.btnExportSettings.setOnClickListener {
             createDocumentLauncher.launch(suggestedExportFileName())
@@ -197,6 +198,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
     private fun updatePreview() {
         binding.tvImportPreview.text = buildPreviewText(includeFileName = true)
         binding.btnImportSettings.isEnabled = true
+        binding.btnImportSettings.setButtonStyleByEnabled(true)
     }
 
     /** プレビュー表示と確認ダイアログで使う反映内容の一覧を組み立てる */
@@ -248,6 +250,7 @@ class SettingsImportExportActivity : AppCompatActivity() {
         importedJson = null
         binding.tvImportPreview.text = getString(R.string.message_import_no_file)
         binding.btnImportSettings.isEnabled = false
+        binding.btnImportSettings.setButtonStyleByEnabled(false)
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_import_error)
             .setMessage(message)
