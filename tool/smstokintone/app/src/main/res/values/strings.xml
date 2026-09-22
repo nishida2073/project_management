@@ -82,6 +82,7 @@
     <string name="section_send_target_settings_update_tolerance_condition">統合範囲</string>
     <string name="rb_send_target_settings_update_tolerance_mode_same_date">同一日付</string>
     <string name="rb_send_target_settings_update_tolerance_mode_hours">時間</string>
+    <string name="helper_send_target_settings_update_tolerance_condition">同一日付は日付が同じ場合、時間は指定した時間以内の場合に既存データを更新します</string>
     <string name="hint_send_target_settings_update_tolerance_hours">±時間</string>
     <string name="helper_send_target_settings_update_tolerance_hours">指定した時間以内に同じ送信元から再度受信した場合は、既存のデータを更新します</string>
     <string name="dialog_title_send_target_settings_validation_error">入力エラー</string>
@@ -192,6 +193,7 @@
     <string name="section_app_settings_log">ログ</string>
     <string name="section_app_settings_auto_refresh">自動更新</string>
     <string name="switch_app_settings_auto_refresh_enabled">有効にする</string>
+    <string name="helper_app_settings_auto_refresh_enabled">ログ画面を指定した間隔で自動的に再読み込みします</string>
     <string name="label_app_settings_auto_refresh_interval">更新間隔</string>
     <string name="hint_app_settings_auto_refresh_interval">秒</string>
     <string name="helper_app_settings_auto_refresh_interval">ログ画面を自動的に再読み込みする間隔です</string>

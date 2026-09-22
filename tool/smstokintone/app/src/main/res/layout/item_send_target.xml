@@ -481,7 +481,6 @@
                             android:id="@+id/rgUpdateToleranceMode"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
                             android:orientation="horizontal">
 
                             <RadioButton
@@ -500,6 +499,22 @@
                                 android:checked="false"
                                 android:text="@string/rb_send_target_settings_update_tolerance_mode_hours" />
                         </RadioGroup>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:layout_marginBottom="8dp"
+                                android:text="@string/helper_send_target_settings_update_tolerance_condition"
+                                android:textSize="12sp"
+                                android:textColor="?android:attr/textColorSecondary" />
+                        </LinearLayout>
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/tilUpdateToleranceHours"
