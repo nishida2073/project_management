@@ -18,11 +18,11 @@ import java.util.Locale
 
 /**
  * 外部のJSONファイルからアプリの設定（[SettingsStore.Config]）、送信先の設定
- * （[SettingsStore.SendTarget]）、引き継ぎ内容（[ContinuationStore.Entry]）をまとめて反映し、
+ * （[SettingsStore.SendTarget]）、引継ぎ内容（[ContinuationStore.Entry]）をまとめて反映し、
  * 現在の設定を同じ形式のJSONファイルへまとめて書き出す画面。
  * インポートはファイルを選択して内容をプレビューで確認し、「この内容で設定する」で反映する。
  * ファイルに含まれるセクションだけが反映され、含まれないセクションは変更されない。
- * アプリ設定（[SettingsStore.Config]）、送信先（[SettingsStore.SendTarget]）、引き継ぎ内容（[ContinuationStore.Entry]）は
+ * アプリ設定（[SettingsStore.Config]）、送信先（[SettingsStore.SendTarget]）、引継ぎ内容（[ContinuationStore.Entry]）は
  * すべてマージされ、ファイルに含まれない属性・エントリは既存値が保持される。
  * エクスポートはインポートと互換のJSON（[buildExportJson]）を保存先に書き出す
  */

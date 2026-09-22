@@ -4,7 +4,7 @@
     <!-- アイコン -->
     <string name="icon_extraction_succeeded">🆗</string>
     <string name="icon_extraction_failed">🆖</string>
-    <string name="icon_extraction_not_performed">♻️</string>
+    <string name="icon_extraction_continuation">♻️</string>
     <string name="icon_replied">📨</string>
     <string name="icon_send_none">⬜</string>
     <string name="icon_send_auto">✅</string>
@@ -131,15 +131,15 @@
     <string name="label_default_extraction_status_filter">抽出状況</string>
     <string name="switch_default_extraction_succeeded_only_enabled">正常</string>
     <string name="switch_default_extraction_failed_only_enabled">異常</string>
-    <string name="switch_default_extraction_not_performed_only_enabled">引き継ぎ</string>
+    <string name="switch_default_extraction_continuation_only_enabled">引継ぎ</string>
     <string name="section_search_filters_visibility">検索条件の表示</string>
     <string name="rb_search_filters_visible">表示</string>
     <string name="rb_search_filters_hidden">隠す</string>
     <string name="label_search_selection_target">SMS選択の対象</string>
     <string name="switch_search_extraction_failed_enabled">抽出状況が異常</string>
     <string name="helper_search_extraction_failed_enabled">抽出状況が異常なSMSを検索結果で選択できるようにします</string>
-    <string name="switch_search_extraction_not_performed_enabled">抽出状況が引き継ぎ</string>
-    <string name="helper_search_extraction_not_performed_enabled">抽出状況が引き継ぎのSMSを検索結果で選択できるようにします</string>
+    <string name="switch_search_extraction_continuation_enabled">抽出状況が引継ぎ</string>
+    <string name="helper_search_extraction_continuation_enabled">抽出状況が引継ぎのSMSを検索結果で選択できるようにします</string>
     <string name="section_sms_send">SMSの送信</string>
     <string name="label_sms_send_mode">送信モード</string>
     <string name="rb_sms_send_mode_manual">手動</string>
@@ -148,8 +148,8 @@
     <string name="section_send_target">自動送信の対象</string>
     <string name="switch_send_extraction_failed_enabled">抽出状況が異常</string>
     <string name="helper_send_extraction_failed_enabled">抽出状況が異常なSMSを自動送信の対象として含めることができます</string>
-    <string name="switch_send_extraction_not_performed_enabled">抽出状況が引き継ぎ</string>
-    <string name="helper_send_extraction_not_performed_enabled">抽出状況が引き継ぎのSMSを自動送信の対象として含めることができます</string>
+    <string name="switch_send_extraction_continuation_enabled">抽出状況が引継ぎ</string>
+    <string name="helper_send_extraction_continuation_enabled">抽出状況が引継ぎのSMSを自動送信の対象として含めることができます</string>
     <string name="section_sms_reply">SMSの返信</string>
     <string name="label_sms_reply_mode">返信モード</string>
     <string name="rb_sms_reply_mode_manual">手動</string>
@@ -165,18 +165,18 @@
     <string name="section_sms_extraction_failed_reply_body">正しく抽出できなかった場合</string>
     <string name="hint_sms_extraction_failed_reply_body">文言</string>
     <string name="helper_sms_extraction_failed_reply_body">抽出状況が異常なSMSへの返信に使用します。\n※会社名が不要な場合は、（記入例）から会社名を削除してください。</string>
-    <string name="section_continuation">SMSの引き継ぎ</string>
-    <string name="label_continuation">引き継ぎ</string>
+    <string name="section_continuation">SMSの引継ぎ</string>
+    <string name="label_continuation">引継ぎ</string>
     <string name="switch_continuation_enabled">有効にする</string>
-    <string name="helper_continuation_enabled">同一送信元の過去の正常なSMSから会社名・氏名・送信先を引き継ぎます。無効時は今回の本文だけで判定します。</string>
-    <string name="label_continuation_scope">引き継ぎの範囲</string>
+    <string name="helper_continuation_enabled">同一送信元の過去の正常なSMSから会社名・氏名・送信先を引継ぎます。無効時は今回の本文だけで判定します。</string>
+    <string name="label_continuation_scope">引継ぎの範囲</string>
     <string name="rb_continuation_scope_unlimited">制限なし</string>
     <string name="rb_continuation_scope_same_day">同一日のみ</string>
-    <string name="helper_continuation_scope">会社名・氏名・送信先を引き継ぐ範囲です。「同一日のみ」にすると、日付が変わると引き継ぎがリセットされます</string>
+    <string name="helper_continuation_scope">会社名・氏名・送信先を引き継ぐ範囲です。「同一日のみ」にすると、日付が変わると引継ぎがリセットされます</string>
     <string name="label_continuation_show_name">送信元の表示</string>
     <string name="switch_continuation_show_user_name_enabled">氏名を表示する</string>
     <string name="helper_continuation_show_user_name_enabled">電話番号の代わりに引き継いだ氏名を表示します</string>
-    <string name="btn_edit_continuation_info">引き継ぎ内容の設定</string>
+    <string name="btn_edit_continuation_info">引継ぎ内容の設定</string>
     <string name="section_company_name_conversion">会社名の変換</string>
     <string name="label_company_name_auto_conversion">自動変換</string>
     <string name="switch_company_name_auto_conversion_enabled">有効にする</string>
@@ -222,7 +222,7 @@
     <string name="message_log_send_complete_create_success">SMSの登録に成功しました</string>
     <string name="message_log_send_complete_update_success">SMSの更新に成功しました</string>
     <string name="message_log_send_start_extraction_failed_skipped">SMSの送信をスキップしました\n（本文の抽出状況が異常）</string>
-    <string name="message_log_send_start_extraction_not_performed_skipped">SMSの送信をスキップしました\n（抽出状況が引き継ぎ）</string>
+    <string name="message_log_send_start_extraction_continuation_skipped">SMSの送信をスキップしました\n（抽出状況が引継ぎ）</string>
     <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
     <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
     <string name="message_log_send_complete_skipped_duplicate">SMSの更新をスキップしました\n（最終受信日時（秒は除く）と本文が一致）</string>
@@ -232,7 +232,7 @@
     <string name="dialog_title_extraction_result">抽出結果</string>
     <string name="dialog_message_extraction_failure">会社名・氏名の抽出に失敗しています</string>
     <string name="dialog_title_auto_reply_body">返信内容</string>
-    <string name="helper_log_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ ♻️ 引き継ぎ\n送信状況：✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
+    <string name="helper_log_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ ♻️ 引継ぎ\n送信状況：✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
     
     <!-- SMSの検索画面 -->
     <string name="title_sms_search">SMSの検索</string>
@@ -248,12 +248,12 @@
     <string name="label_search_extraction_status_filter">抽出状況</string>
     <string name="cb_extraction_succeeded_only">🆗 正常</string>
     <string name="cb_extraction_failed_only">🆖 異常</string>
-    <string name="cb_extraction_not_performed_only">♻️ 引き継ぎ</string>
+    <string name="cb_extraction_continuation_only">♻️ 引継ぎ</string>
     <string name="label_search_send_status_filter">送信状況</string>
     <string name="cb_send_none_only">⬜ 未</string>
     <string name="cb_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ ♻️ 引き継ぎ\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
+    <string name="helper_sms_status_legend">"抽出状況：🆗 正常 ・ 🆖 異常 ・ ♻️ 引継ぎ\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
     <string name="btn_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>
@@ -267,21 +267,21 @@
     <string name="toast_sms_send_finished">SMSの送信が完了しました\n（成功%1$d件 / 失敗%2$d件）</string>
     <string name="toast_sms_send_finished_no_log">SMSの送信が完了しました</string>
 
-    <!-- 引き継ぎ内容の設定画面 -->
-    <string name="title_continuation_info_settings">引き継ぎ内容の設定</string>
+    <!-- 引継ぎ内容の設定画面 -->
+    <string name="title_continuation_info_settings">引継ぎ内容の設定</string>
     <string name="label_continuation_search">キーワード</string>
     <string name="hint_continuation_search">検索キーワード</string>
-    <string name="message_continuation_empty">引き継ぎ内容がありません</string>
-    <string name="message_continuation_no_match">一致する引き継ぎ内容がありません</string>
+    <string name="message_continuation_empty">引継ぎ内容がありません</string>
+    <string name="message_continuation_no_match">一致する引継ぎ内容がありません</string>
     <string name="label_continuation_sender">送信元</string>
-    <string name="dialog_message_continuation_validation_error_extraction_enabled">引き継ぎ内容: %1$s\n\n会社名・氏名は必須です</string>
-    <string name="dialog_message_continuation_validation_error_extraction_disabled">引き継ぎ内容: %1$s\n\n氏名は必須です</string>
+    <string name="dialog_message_continuation_validation_error_extraction_enabled">引継ぎ内容: %1$s\n\n会社名・氏名は必須です</string>
+    <string name="dialog_message_continuation_validation_error_extraction_disabled">引継ぎ内容: %1$s\n\n氏名は必須です</string>
     <string name="dialog_title_company_name_extraction_warning">注意</string>
-    <string name="dialog_message_company_name_extraction_warning">引き継ぎ内容に会社名がない件が %1$d 件あります。必要に応じて会社名を追加してください。</string>
+    <string name="dialog_message_company_name_extraction_warning">引継ぎ内容に会社名がない件が %1$d 件あります。必要に応じて会社名を追加してください。</string>
     <string name="dialog_title_continuation_info_save_conflict">保存に失敗しました</string>
     <string name="dialog_message_continuation_info_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
     <string name="dialog_title_confirm_delete_all_continuation_info">削除確認</string>
-    <string name="dialog_message_delete_all_continuation_info">すべての引き継ぎ内容を削除しますか？</string>
+    <string name="dialog_message_delete_all_continuation_info">すべての引継ぎ内容を削除しますか？</string>
     <string name="label_continuation_sort">表示順序</string>
     <string name="rb_continuation_sort_ascending">古い順</string>
     <string name="rb_continuation_sort_descending">新しい順</string>
@@ -290,13 +290,13 @@
     <string name="btn_open_settings_import_export">設定のインポート・エクスポート</string>
     <string name="title_settings_import_export">設定のインポート・エクスポート</string>
     <string name="label_settings_import">インポート</string>
-    <string name="settings_import_description">JSONファイルからアプリ設定・送信先の設定・引き継ぎ内容を反映します</string>
+    <string name="settings_import_description">JSONファイルからアプリ設定・送信先の設定・引継ぎ内容を反映します</string>
     <string name="btn_select_import_file">ファイルを選択</string>
     <string name="btn_import_settings">インポート</string>
     <string name="label_import_file">"ファイル名\n%1$s\n"</string>
     <string name="preview_app_settings">"アプリの設定: %1$s"</string>
     <string name="preview_send_targets">"送信先の設定: %1$s"</string>
-    <string name="preview_continuation_info">"引き継ぎ内容: %1$s"</string>
+    <string name="preview_continuation_info">"引継ぎ内容: %1$s"</string>
     <string name="value_import_applied">統合</string>
     <string name="value_import_applied_count">統合（%1$d件）</string>
     <string name="value_import_skip">変更なし</string>
@@ -307,12 +307,12 @@
     <string name="dialog_title_import_error">インポートエラー</string>
     <string name="dialog_message_import_file_read_failed">ファイルを読み込めませんでした</string>
     <string name="dialog_message_import_invalid_json">ファイルの形式が正しくありません（JSONとして読み込めません）。\n\n%1$s</string>
-    <string name="message_import_no_section">アプリの設定・送信先の設定・引き継ぎ内容のいずれも含まれていないため、反映する内容がありません</string>
-    <string name="message_import_sender_address_required">引き継ぎ内容の%1$d件目にsenderAddressがありません</string>
+    <string name="message_import_no_section">アプリの設定・送信先の設定・引継ぎ内容のいずれも含まれていないため、反映する内容がありません</string>
+    <string name="message_import_sender_address_required">引継ぎ内容の%1$d件目にsenderAddressがありません</string>
     <string name="message_import_send_target_duplicate_name">送信先名がファイル内で重複しています。\n%1$s\n\n送信先名は他の送信先と重複しないようにしてください</string>
     <string name="message_import_continuation_duplicate_sender">送信元アドレスがファイル内で重複しています。\n%1$s\n\n送信元アドレスは重複しないようにしてください</string>
     <string name="label_settings_export">エクスポート</string>
-    <string name="settings_export_description">現在のアプリ設定・送信先の設定・引き継ぎ内容をJSONファイルに書き出します</string>
+    <string name="settings_export_description">現在のアプリ設定・送信先の設定・引継ぎ内容をJSONファイルに書き出します</string>
     <string name="btn_export_settings">エクスポート</string>
     <string name="toast_settings_exported">設定をエクスポートしました</string>
     <string name="dialog_title_export_error">エクスポートエラー</string>

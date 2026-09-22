@@ -79,7 +79,7 @@ object SmsLogStore {
         /** [EntryType.AUTO_REPLY]で実際に送信した返信本文。それ以外のエントリはnull */
         val replyBody: String? = null,
         /**
-         * このエントリが継続SMS（同一送信元の過去の正常なSMSからの引き継ぎ、
+         * このエントリが継続SMS（同一送信元の過去の正常なSMSからの引継ぎ、
          * [SettingsStore.SmsResolution.isContinuation]参照）によるものかどうか。[smsParts]は
          * 抽出結果のみを表すためこことは別に持つ
          */

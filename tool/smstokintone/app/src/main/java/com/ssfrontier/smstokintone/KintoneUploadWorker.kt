@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 /**
  * SmsReceiverや手動再送UIから渡されたSMS情報をkintoneへ登録するCoroutineWorker。
  * 送信可否・抽出失敗判定・登録結果はいずれもSmsLogStoreへログとして記録する。抽出状況が正常だった場合は
- * ContinuationStoreも更新し、以降の継続SMSの引き継ぎに使えるようにする。
+ * ContinuationStoreも更新し、以降の継続SMSの引継ぎに使えるようにする。
  */
 class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
@@ -35,7 +35,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // 会社名変換が有効かどうかを判定（ログ記録用）
         val companyNameConverted = config.companyNameAutoConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
 
-        // 本文が正常に解析できた場合のみ引き継ぎ内容を更新
+        // 本文が正常に解析できた場合のみ引継ぎ内容を更新
         if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
             ContinuationStore.update(
                 applicationContext,
@@ -77,8 +77,8 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 continue
             }
 
-            if (!manual && resolution.isContinuation && !config.sendExtractionNotPerformedEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_not_performed_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = targetSmsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
+            if (!manual && resolution.isContinuation && !config.sendExtractionContinuationEnabled) {
+                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_continuation_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = targetSmsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
                 continue
             }
 

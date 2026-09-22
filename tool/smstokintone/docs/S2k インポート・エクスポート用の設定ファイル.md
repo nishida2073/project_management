@@ -12,7 +12,7 @@
 {
   "appConfig":             { ... },   // アプリの設定
   "sendTargetConfig":      [ ... ],   // 送信先（kintone接続設定）の一覧
-  "continuationInfoConfig": [ ... ]    // 引き継ぎ内容（会社名・氏名）の一覧
+  "continuationInfoConfig": [ ... ]    // 引継ぎ内容（会社名・氏名）の一覧
 }
 ```
 
@@ -26,7 +26,7 @@
 
 ### `appConfig`（アプリの設定）
 　`appConfig` は、アプリの動作設定をまとめたものです。<br>
-　SMS受信時の送信モード（自動／手動）と送信対象、抽出異常・引き継ぎSMSの扱い、自動返信、ログ画面の自動再読み込み、継続SMSの引き継ぎ、テーマ（配色）、SMS検索画面の初期表示、本文からの会社名・氏名の抽出ルールなどをまとめて指定します。
+　SMS受信時の送信モード（自動／手動）と送信対象、抽出異常・引継ぎSMSの扱い、自動返信、ログ画面の自動再読み込み、継続SMSの引継ぎ、テーマ（配色）、SMS検索画面の初期表示、本文からの会社名・氏名の抽出ルールなどをまとめて指定します。
 
 > **注意**
 > - `appConfig` 内のキーはすべて省略可能です。ファイルに含まれないキーはアプリの既定値で補われるため、変更したいキーだけを指定できます（部分指定可）。
@@ -39,17 +39,17 @@
 | --- | --- | --- |
 | `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false`<br><br>例）`true` |
 | `sendExtractionFailedEnabled` | 自動送信時、会社名・氏名を抽出できなかったSMSも送信するか | `true` / `false`<br><br>例）`false` |
-| `sendExtractionNotPerformedEnabled` | 自動送信時、抽出状況が引き継ぎのSMSも送信するか | `true` / `false`<br><br>例）`true` |
+| `sendExtractionContinuationEnabled` | 自動送信時、抽出状況が引継ぎのSMSも送信するか | `true` / `false`<br><br>例）`true` |
 | `searchExtractionFailedEnabled` | SMS検索画面で抽出状況が異常のSMSを選択可能にするか | `true` / `false`<br><br>例）`false` |
-| `searchExtractionNotPerformedEnabled` | SMS検索画面で抽出状況が引き継ぎのSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
+| `searchExtractionContinuationEnabled` | SMS検索画面で抽出状況が引継ぎのSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
 | `autoReplyExtractionFailedEnabled` | 自動受信時、抽出異常のSMSへ自動返信するか | `true` / `false`<br><br>例）`false` |
 | `autoReplyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
 | `autoRefreshEnabled` | ログ画面（送信履歴）を自動再読み込みするか | `true` / `false`<br><br>例）`true` |
 | `autoRefreshIntervalSeconds` | 自動再読み込みの間隔 | 整数（秒）<br><br>例）`5` |
 | `smsMatchToleranceSeconds` | 自動受信SMSのログと端末上のSMSを突き合わせる許容範囲 | 整数（秒）<br><br>例）`15` |
 | `bodyExcerptLength` | ログ一覧に表示する本文抜粋の文字数 | 整数<br><br>例）`100` |
-| `continuationEnabled` | 継続SMSの引き継ぎ機能を有効にするか | `true` / `false`<br><br>例）`true` |
-| `continuationScope` | 引き継ぎをどこまで遡るか | `UNLIMITED`（過去に一度でも抽出正常なら常に引き継ぎ）／ `SAME_DAY`（同暦日のみ）<br><br>例）`UNLIMITED` |
+| `continuationEnabled` | 継続SMSの引継ぎ機能を有効にするか | `true` / `false`<br><br>例）`true` |
+| `continuationScope` | 引継ぎをどこまで遡るか | `UNLIMITED`（過去に一度でも抽出正常なら常に引継ぎ）／ `SAME_DAY`（同暦日のみ）<br><br>例）`UNLIMITED` |
 | `continuationShowUserNameEnabled` | 継続SMSについて送信元電話番号の代わりに引き継いだ氏名を表示するか | `true` / `false`<br><br>例）`true` |
 | `themeMode` | アプリの配色モード | `LIGHT` / `DARK`<br><br>例）`LIGHT` |
 | `smsSearchDateRangeDays` | SMS検索画面を開いた際の受信日の範囲 | 整数（日）<br><br>例）`1` |
@@ -64,7 +64,7 @@
 | `defaultSendNoneOnlyEnabled` | SMS検索画面を開いた際の「送信」の「未」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultExtractionFailedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「異常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultExtractionSucceededOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「正常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `defaultExtractionNotPerformedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「引き継ぎ」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `defaultExtractionContinuationOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「引継ぎ」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultSentAutoOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（自動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultSentManualOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（手動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 
@@ -104,8 +104,8 @@
 
 ---
 
-### `continuationInfoConfig`（引き継ぎ内容）
-　`continuationInfoConfig` は引き継ぎ内容（過去の SMS から引き継いだ会社名・氏名情報）の設定をまとめたものです。
+### `continuationInfoConfig`（引継ぎ内容）
+　`continuationInfoConfig` は引継ぎ内容（過去の SMS から引き継いだ会社名・氏名情報）の設定をまとめたものです。
 
 > **注意**
 > - インポート時はこの一覧で送信元情報が置き換わります。
@@ -133,7 +133,7 @@
   "appConfig": {
     "sendEnabled": true,
     "sendExtractionFailedEnabled": false,
-    "sendExtractionNotPerformedEnabled": true,
+    "sendExtractionContinuationEnabled": true,
     "autoReplyExtractionFailedEnabled": false,
     "autoReplyCooldownSeconds": 10,
     "autoRefreshEnabled": true,
@@ -153,7 +153,7 @@
     "defaultSendNoneOnlyEnabled": false,
     "defaultExtractionFailedOnlyEnabled": false,
     "defaultExtractionSucceededOnlyEnabled": false,
-    "defaultExtractionNotPerformedOnlyEnabled": false,
+    "defaultExtractionContinuationOnlyEnabled": false,
     "defaultSentAutoOnlyEnabled": false,
     "defaultSentManualOnlyEnabled": false
   },
@@ -203,6 +203,6 @@
 | 形態 | ファイル名 | 概要 |
 | --- | --- | --- |
 | 単一企業のイベント | `s2k-recommend-個社.json` | 会社名の自動抽出を有効化し、継続SMSは过去に一度でも成功したら引き継ぐ設定です |
-| 複数企業の合同開催 | `s2k-recommend-共催.json` | 会社名の自動抽出を無効化し、各送信先に設定した会社名を使う設定です。継続SMSは過去に一度でも成功したら引き継ぎます |
+| 複数企業の合同開催 | `s2k-recommend-共催.json` | 会社名の自動抽出を無効化し、各送信先に設定した会社名を使う設定です。継続SMSは過去に一度でも成功したら引継ぎます |
 | 複数企業のイベント（同一アプリ） | `s2k-recommend-複数開催-単一app.json` | 会社名の自動抽出を無効化し、継続SMSは同じ暦日のSMSのみ引き継ぐ設定です |
 | 複数企業のイベント（別々のアプリ） | `s2k-recommend-複数開催-複数app.json` | 会社名の自動抽出を無効化し、継続SMSは同じ暦日のSMSのみ引き継ぐ設定です |

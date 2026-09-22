@@ -2,9 +2,9 @@
   "appConfig": {
     "sendEnabled": true,
     "sendExtractionFailedEnabled": false,
-    "sendExtractionNotPerformedEnabled": true,
+    "sendExtractionContinuationEnabled": true,
     "searchExtractionFailedEnabled": false,
-    "searchExtractionNotPerformedEnabled": true,
+    "searchExtractionContinuationEnabled": true,
     "autoReplyExtractionFailedEnabled": false,
     "autoReplyCooldownSeconds": 10,
     "autoRefreshEnabled": true,
@@ -27,7 +27,7 @@
     "defaultSendNoneOnlyEnabled": false,
     "defaultExtractionFailedOnlyEnabled": false,
     "defaultExtractionSucceededOnlyEnabled": false,
-    "defaultExtractionNotPerformedOnlyEnabled": false,
+    "defaultExtractionContinuationOnlyEnabled": false,
     "defaultSentAutoOnlyEnabled": false,
     "defaultSentManualOnlyEnabled": false
   },

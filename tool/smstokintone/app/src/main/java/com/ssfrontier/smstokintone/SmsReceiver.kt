@@ -68,14 +68,14 @@ class SmsReceiver : BroadcastReceiver() {
                 // 1 つの SMS が複数の送信先に一致する場合は、受信ログ内で名前を連結表示。
                 val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
                 val smsParts = resolution.smsParts
-                // 引き継ぎ元の送信先が削除・変更された場合、sendTargets は空、
+                // 引継ぎ元の送信先が削除・変更された場合、sendTargets は空、
                 // 送信先名は「なし」扱い（登録も行われない）。
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
                 // smsParts.companyName は既に会社名変換適用済み。
                 // ここでは記録時に変換が有効だったかのフラグ（アイコン表示用）のみ求める。
                 val companyNameConverted = config.companyNameAutoConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
 
-                // 継続 SMS（引き継ぎ結果）は再保存しても無意味なため、本文単体で正常に抽出できた
+                // 継続 SMS（引継ぎ結果）は再保存しても無意味なため、本文単体で正常に抽出できた
                 // 場合のみ更新。[KintoneUploadWorker] 側でも同じ条件で更新。
                 if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
                     ContinuationStore.update(

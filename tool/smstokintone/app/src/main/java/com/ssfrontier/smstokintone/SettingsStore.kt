@@ -17,9 +17,9 @@ object SettingsStore {
 
     private const val KEY_SEND_ENABLED = "send_enabled"
     private const val KEY_SEND_EXTRACTION_FAILED_ENABLED = "send_extraction_failed_enabled"
-    private const val KEY_SEND_EXTRACTION_NOT_PERFORMED_ENABLED = "send_extraction_not_performed_enabled"
+    private const val KEY_SEND_EXTRACTION_CONTINUATION_ENABLED = "send_extraction_continuation_enabled"
     private const val KEY_SEARCH_EXTRACTION_FAILED_ENABLED = "search_extraction_failed_enabled"
-    private const val KEY_SEARCH_EXTRACTION_NOT_PERFORMED_ENABLED = "search_extraction_not_performed_enabled"
+    private const val KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED = "search_extraction_continuation_enabled"
     private const val KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED = "auto_reply_extraction_failed_enabled"
     private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
     private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
@@ -42,7 +42,7 @@ object SettingsStore {
     private const val KEY_DEFAULT_SEND_NONE_ONLY_ENABLED = "default_send_none_only_enabled"
     private const val KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED = "default_extraction_failed_only_enabled"
     private const val KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED = "default_extraction_succeeded_only_enabled"
-    private const val KEY_DEFAULT_EXTRACTION_NOT_PERFORMED_ONLY_ENABLED = "default_extraction_not_performed_only_enabled"
+    private const val KEY_DEFAULT_EXTRACTION_CONTINUATION_ONLY_ENABLED = "default_extraction_continuation_only_enabled"
     private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
     private const val KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED = "default_sent_manual_only_enabled"
 
@@ -101,10 +101,10 @@ object SettingsStore {
     }
 
     /**
-     * 継続SMS の引き継ぎ有効範囲。送信元ごとにどこまで遡って継続を認めるか。
+     * 継続SMS の引継ぎ有効範囲。送信元ごとにどこまで遡って継続を認めるか。
      *
      * [UNLIMITED]: 日付を問わず、過去に一度でも正常に抽出されたら常に引き継ぐ。
-     * [SAME_DAY]: 引き継ぎ元と暦日が同じ場合のみ引き継ぎ有効。日付が変わるとリセット。
+     * [SAME_DAY]: 引継ぎ元と暦日が同じ場合のみ引継ぎ有効。日付が変わるとリセット。
      */
     enum class ContinuationScope {
         /** 期限なし（無制限に過去へ遡る）。 */
@@ -125,17 +125,17 @@ object SettingsStore {
      *
      * @property sendEnabled trueなら自動送信モード、falseなら手動送信モード。[KintoneUploadWorker]が参照
      * @property sendExtractionFailedEnabled 自動送信時、抽出失敗のSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか
-     * @property sendExtractionNotPerformedEnabled 自動送信時、抽出引き継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか
+     * @property sendExtractionContinuationEnabled 自動送信時、抽出引継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか
      * @property searchExtractionFailedEnabled SMS検索画面で、抽出失敗のSMSを選択可能にするかどうか
-     * @property searchExtractionNotPerformedEnabled SMS検索画面で、抽出引き継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか
+     * @property searchExtractionContinuationEnabled SMS検索画面で、抽出引継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか
      * @property autoReplyExtractionFailedEnabled 自動受信時、抽出失敗のSMSに対して[smsExtractionFailedReplyBody]の文言で自動返信するかどうか
      * @property autoReplyCooldownSeconds 同一送信元への自動返信再送信までの間隔（秒）。連投防止用クールダウン
      * @property autoRefreshEnabled SMS送信履歴画面（[LogActivity]）を[autoRefreshIntervalSeconds]間隔で自動再読み込みするかどうか
      * @property autoRefreshIntervalSeconds 自動再読み込み間隔（秒）。[autoRefreshEnabled]が有効な場合に使用
      * @property smsMatchToleranceSeconds 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒）
      * @property bodyExcerptLength ログ一覧（[LogActivity]）に表示する本文抜粋（[SmsLogStore.Entry.bodyExcerpt]）の文字数
-     * @property continuationEnabled 継続SMSの引き継ぎ（[SmsResolution.isContinuation]）機能全体の有効/無効
-     * @property continuationScope 継続SMSの引き継ぎを送信元ごとにどこまで遡って有効とするか
+     * @property continuationEnabled 継続SMSの引継ぎ（[SmsResolution.isContinuation]）機能全体の有効/無効
+     * @property continuationScope 継続SMSの引継ぎを送信元ごとにどこまで遡って有効とするか
      * @property continuationShowUserNameEnabled SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引き継いだ氏名を表示するかどうか
      * @property themeMode アプリの配色モード（ライト/ダーク）
      * @property smsSearchDateRangeDays SMS検索画面を開いた際に検索条件へ初期設定する日付範囲（日）
@@ -150,16 +150,16 @@ object SettingsStore {
      * @property defaultSendNoneOnlyEnabled SMS検索画面で「送信」の「未」チェックボックスの初期状態
      * @property defaultExtractionFailedOnlyEnabled SMS検索画面で「抽出状況」の「異常」チェックボックスの初期状態
      * @property defaultExtractionSucceededOnlyEnabled SMS検索画面で「抽出状況」の「正常」チェックボックスの初期状態
-     * @property defaultExtractionNotPerformedOnlyEnabled SMS検索画面で「抽出状況」の「引き継ぎ」チェックボックスの初期状態
+     * @property defaultExtractionContinuationOnlyEnabled SMS検索画面で「抽出状況」の「引継ぎ」チェックボックスの初期状態
      * @property defaultSentAutoOnlyEnabled SMS検索画面で「送信」の「済（自動）」チェックボックスの初期状態
      * @property defaultSentManualOnlyEnabled SMS検索画面で「送信」の「済（手動）」チェックボックスの初期状態
      */
     data class Config(
         val sendEnabled: Boolean,
         val sendExtractionFailedEnabled: Boolean,
-        val sendExtractionNotPerformedEnabled: Boolean,
+        val sendExtractionContinuationEnabled: Boolean,
         val searchExtractionFailedEnabled: Boolean,
-        val searchExtractionNotPerformedEnabled: Boolean,
+        val searchExtractionContinuationEnabled: Boolean,
         val autoReplyExtractionFailedEnabled: Boolean,
         val autoReplyCooldownSeconds: Int,
         val autoRefreshEnabled: Boolean,
@@ -182,7 +182,7 @@ object SettingsStore {
         val defaultSendNoneOnlyEnabled: Boolean,
         val defaultExtractionFailedOnlyEnabled: Boolean,
         val defaultExtractionSucceededOnlyEnabled: Boolean,
-        val defaultExtractionNotPerformedOnlyEnabled: Boolean,
+        val defaultExtractionContinuationOnlyEnabled: Boolean,
         val defaultSentAutoOnlyEnabled: Boolean,
         val defaultSentManualOnlyEnabled: Boolean
     )
@@ -292,9 +292,9 @@ object SettingsStore {
         val editor = prefs(context).edit()
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
             .putBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, config.sendExtractionFailedEnabled)
-            .putBoolean(KEY_SEND_EXTRACTION_NOT_PERFORMED_ENABLED, config.sendExtractionNotPerformedEnabled)
+            .putBoolean(KEY_SEND_EXTRACTION_CONTINUATION_ENABLED, config.sendExtractionContinuationEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, config.searchExtractionFailedEnabled)
-            .putBoolean(KEY_SEARCH_EXTRACTION_NOT_PERFORMED_ENABLED, config.searchExtractionNotPerformedEnabled)
+            .putBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED, config.searchExtractionContinuationEnabled)
             .putBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, config.autoReplyExtractionFailedEnabled)
             .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
             .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
@@ -323,7 +323,7 @@ object SettingsStore {
             .putBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, config.defaultSendNoneOnlyEnabled)
             .putBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, config.defaultExtractionFailedOnlyEnabled)
             .putBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, config.defaultExtractionSucceededOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_EXTRACTION_NOT_PERFORMED_ONLY_ENABLED, config.defaultExtractionNotPerformedOnlyEnabled)
+            .putBoolean(KEY_DEFAULT_EXTRACTION_CONTINUATION_ONLY_ENABLED, config.defaultExtractionContinuationOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
             .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
         if (config.defaultSendTargetFilterName != null) {
@@ -338,9 +338,9 @@ object SettingsStore {
     private val DEFAULT_CONFIG = Config(
         sendEnabled = true,
         sendExtractionFailedEnabled = false,
-        sendExtractionNotPerformedEnabled = true,
+        sendExtractionContinuationEnabled = true,
         searchExtractionFailedEnabled = false,
-        searchExtractionNotPerformedEnabled = true,
+        searchExtractionContinuationEnabled = true,
         autoReplyExtractionFailedEnabled = false,
         autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
         autoRefreshEnabled = true,
@@ -363,7 +363,7 @@ object SettingsStore {
         defaultSendNoneOnlyEnabled = false,
         defaultExtractionFailedOnlyEnabled = false,
         defaultExtractionSucceededOnlyEnabled = false,
-        defaultExtractionNotPerformedOnlyEnabled = false,
+        defaultExtractionContinuationOnlyEnabled = false,
         defaultSentAutoOnlyEnabled = false,
         defaultSentManualOnlyEnabled = false
     )
@@ -374,9 +374,9 @@ object SettingsStore {
         return Config(
             sendEnabled = p.getBoolean(KEY_SEND_ENABLED, DEFAULT_CONFIG.sendEnabled),
             sendExtractionFailedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.sendExtractionFailedEnabled),
-            sendExtractionNotPerformedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_NOT_PERFORMED_ENABLED, DEFAULT_CONFIG.sendExtractionNotPerformedEnabled),
+            sendExtractionContinuationEnabled = p.getBoolean(KEY_SEND_EXTRACTION_CONTINUATION_ENABLED, DEFAULT_CONFIG.sendExtractionContinuationEnabled),
             searchExtractionFailedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.searchExtractionFailedEnabled),
-            searchExtractionNotPerformedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_NOT_PERFORMED_ENABLED, DEFAULT_CONFIG.searchExtractionNotPerformedEnabled),
+            searchExtractionContinuationEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED, DEFAULT_CONFIG.searchExtractionContinuationEnabled),
             autoReplyExtractionFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.autoReplyExtractionFailedEnabled),
             autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, DEFAULT_CONFIG.autoReplyCooldownSeconds),
             autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, DEFAULT_CONFIG.autoRefreshEnabled),
@@ -406,7 +406,7 @@ object SettingsStore {
             defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
             defaultExtractionFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionFailedOnlyEnabled),
             defaultExtractionSucceededOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionSucceededOnlyEnabled),
-            defaultExtractionNotPerformedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_NOT_PERFORMED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionNotPerformedOnlyEnabled),
+            defaultExtractionContinuationOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_CONTINUATION_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionContinuationOnlyEnabled),
             defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
             defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
         )
@@ -416,9 +416,9 @@ object SettingsStore {
     fun configToJson(config: Config): JSONObject = JSONObject()
         .put("sendEnabled", config.sendEnabled)
         .put("sendExtractionFailedEnabled", config.sendExtractionFailedEnabled)
-        .put("sendExtractionNotPerformedEnabled", config.sendExtractionNotPerformedEnabled)
+        .put("sendExtractionContinuationEnabled", config.sendExtractionContinuationEnabled)
         .put("searchExtractionFailedEnabled", config.searchExtractionFailedEnabled)
-        .put("searchExtractionNotPerformedEnabled", config.searchExtractionNotPerformedEnabled)
+        .put("searchExtractionContinuationEnabled", config.searchExtractionContinuationEnabled)
         .put("autoReplyExtractionFailedEnabled", config.autoReplyExtractionFailedEnabled)
         .put("autoReplyCooldownSeconds", config.autoReplyCooldownSeconds)
         .put("autoRefreshEnabled", config.autoRefreshEnabled)
@@ -445,7 +445,7 @@ object SettingsStore {
         .put("defaultSendNoneOnlyEnabled", config.defaultSendNoneOnlyEnabled)
         .put("defaultExtractionFailedOnlyEnabled", config.defaultExtractionFailedOnlyEnabled)
         .put("defaultExtractionSucceededOnlyEnabled", config.defaultExtractionSucceededOnlyEnabled)
-        .put("defaultExtractionNotPerformedOnlyEnabled", config.defaultExtractionNotPerformedOnlyEnabled)
+        .put("defaultExtractionContinuationOnlyEnabled", config.defaultExtractionContinuationOnlyEnabled)
         .put("defaultSentAutoOnlyEnabled", config.defaultSentAutoOnlyEnabled)
         .put("defaultSentManualOnlyEnabled", config.defaultSentManualOnlyEnabled)
 
@@ -455,9 +455,9 @@ object SettingsStore {
         return Config(
             sendEnabled = json.optBoolean("sendEnabled", fallback.sendEnabled),
             sendExtractionFailedEnabled = json.optBoolean("sendExtractionFailedEnabled", fallback.sendExtractionFailedEnabled),
-            sendExtractionNotPerformedEnabled = json.optBoolean("sendExtractionNotPerformedEnabled", fallback.sendExtractionNotPerformedEnabled),
+            sendExtractionContinuationEnabled = json.optBoolean("sendExtractionContinuationEnabled", fallback.sendExtractionContinuationEnabled),
             searchExtractionFailedEnabled = json.optBoolean("searchExtractionFailedEnabled", fallback.searchExtractionFailedEnabled),
-            searchExtractionNotPerformedEnabled = json.optBoolean("searchExtractionNotPerformedEnabled", fallback.searchExtractionNotPerformedEnabled),
+            searchExtractionContinuationEnabled = json.optBoolean("searchExtractionContinuationEnabled", fallback.searchExtractionContinuationEnabled),
             autoReplyExtractionFailedEnabled = json.optBoolean("autoReplyExtractionFailedEnabled", fallback.autoReplyExtractionFailedEnabled),
             autoReplyCooldownSeconds = json.optInt("autoReplyCooldownSeconds", fallback.autoReplyCooldownSeconds),
             autoRefreshEnabled = json.optBoolean("autoRefreshEnabled", fallback.autoRefreshEnabled),
@@ -491,7 +491,7 @@ object SettingsStore {
             defaultSendNoneOnlyEnabled = json.optBoolean("defaultSendNoneOnlyEnabled", fallback.defaultSendNoneOnlyEnabled),
             defaultExtractionFailedOnlyEnabled = json.optBoolean("defaultExtractionFailedOnlyEnabled", fallback.defaultExtractionFailedOnlyEnabled),
             defaultExtractionSucceededOnlyEnabled = json.optBoolean("defaultExtractionSucceededOnlyEnabled", fallback.defaultExtractionSucceededOnlyEnabled),
-            defaultExtractionNotPerformedOnlyEnabled = json.optBoolean("defaultExtractionNotPerformedOnlyEnabled", fallback.defaultExtractionNotPerformedOnlyEnabled),
+            defaultExtractionContinuationOnlyEnabled = json.optBoolean("defaultExtractionContinuationOnlyEnabled", fallback.defaultExtractionContinuationOnlyEnabled),
             defaultSentAutoOnlyEnabled = json.optBoolean("defaultSentAutoOnlyEnabled", fallback.defaultSentAutoOnlyEnabled),
             defaultSentManualOnlyEnabled = json.optBoolean("defaultSentManualOnlyEnabled", fallback.defaultSentManualOnlyEnabled)
         )
@@ -697,7 +697,7 @@ object SettingsStore {
 
     /**
      * [resolveSendTargets]の結果。[SmsParts]は本文からの抽出結果のみを表すため、それが継続SMS
-     * （同一送信元の過去の正常なSMSからの引き継ぎ）によるものかどうかという振り分け固有のメタ情報は
+     * （同一送信元の過去の正常なSMSからの引継ぎ）によるものかどうかという振り分け固有のメタ情報は
      * ここで別に持つ。[SmsSearchActivity]など[SmsLogStore.Entry]を経由せず端末上のSMSをその場で
      * 解決する画面でも必要なため、[SmsLogStore.Entry]側だけに寄せることはできない
      */
@@ -716,7 +716,7 @@ object SettingsStore {
      * SMS本文から[SmsParts]を抽出し、対応する送信先（複数一致し得る）を判定する。抽出結果と振り分けの
      * 両方が必要な箇所は、ずれないよう必ずこれを使うこと。
      *
-     * - 引き継ぎ：[continuationEnabled]で同一送信元の直近の抽出成功結果があれば、その会社名・氏名を
+     * - 引継ぎ：[continuationEnabled]で同一送信元の直近の抽出成功結果があれば、その会社名・氏名を
      *   引き継いで[isContinuation]をtrueにする（本文は今回分）。送信先は引き継いだ会社名を現在の送信先
      *   ルールに通して都度判定するため、設定の変更・削除が即時反映される。
      * - 通常解析：本文を解析し、抽出直後に会社名変換（[applyCompanyNameConversion]）を一度適用する。
@@ -805,11 +805,11 @@ object SettingsStore {
     }
 
     /**
-     * 引き継ぎ内容の JSON 配列をパースする（インポート用）。
+     * 引継ぎ内容の JSON 配列をパースする（インポート用）。
      * 属性が未定義の場合は既存エントリの値を保持、存在しなければデフォルト値で埋める。
      *
      * @param array continuationInfoConfig の JSON 配列
-     * @param existingEntries 既存の引き継ぎ内容（マージ用）
+     * @param existingEntries 既存の引継ぎ内容（マージ用）
      * @return 正規化済みキー→Entry のマップ
      */
     fun parseContinuationInfoFromJson(array: JSONArray, existingEntries: Map<String, ContinuationStore.Entry>): Map<String, ContinuationStore.Entry> {

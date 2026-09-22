@@ -188,13 +188,13 @@
                     android:text="@string/cb_extraction_failed_only" />
 
                 <CheckBox
-                    android:id="@+id/cbExtractionNotPerformedOnly"
+                    android:id="@+id/cbExtractionContinuationOnly"
                     style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minHeight="0dp"
                     android:checked="false"
-                    android:text="@string/cb_extraction_not_performed_only" />
+                    android:text="@string/cb_extraction_continuation_only" />
             </LinearLayout>
 
             <TextView

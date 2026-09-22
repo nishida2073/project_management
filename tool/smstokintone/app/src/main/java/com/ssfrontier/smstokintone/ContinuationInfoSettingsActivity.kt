@@ -10,7 +10,7 @@ import com.ssfrontier.smstokintone.databinding.ActivityContinuationInfoSettingsB
 import com.ssfrontier.smstokintone.databinding.ItemContinuationInfoBinding
 
 /**
- * 送信元ごとの引き継ぎ内容（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
+ * 送信元ごとの引継ぎ内容（[ContinuationStore]）を一覧表示し、会社名・氏名を個別に編集、
  * または送信元単位で削除できる画面。送信先は保持せず、会社名から
  * [SettingsStore.findSendTargets]で都度再判定した結果を読み取り専用のラベルとして
  * 表示するのみで、この画面での編集対象にはしない
@@ -29,7 +29,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
     private lateinit var loadedSnapshot: Map<String, ContinuationStore.Entry>
 
     /**
-     * 継続SMS引き継ぎ内容1件分のUIカード。[senderKey]は正規化済みの送信元キー（[ContinuationStore]のマップのキー）。
+     * 継続SMS引継ぎ内容1件分のUIカード。[senderKey]は正規化済みの送信元キー（[ContinuationStore]のマップのキー）。
      * この画面では元の電話番号は保持していないため編集対象にしない。
      *
      * @property senderKey 正規化済みの送信元キー

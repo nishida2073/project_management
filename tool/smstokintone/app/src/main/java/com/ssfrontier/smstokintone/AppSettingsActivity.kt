@@ -151,12 +151,12 @@ class AppSettingsActivity : BaseActivity() {
         binding.rbSendAuto.isChecked = sendEnabled
         binding.rbSendManual.isChecked = !sendEnabled
         binding.swSendExtractionFailedEnabled.isEnabled = sendEnabled
-        binding.swSendExtractionNotPerformedEnabled.isEnabled = sendEnabled
+        binding.swSendExtractionContinuationEnabled.isEnabled = sendEnabled
         val sendModeListener = RadioGroup.OnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSendAuto.id
             SettingsStore.update(this) { it.copy(sendEnabled = enabled) }
             binding.swSendExtractionFailedEnabled.isEnabled = enabled
-            binding.swSendExtractionNotPerformedEnabled.isEnabled = enabled
+            binding.swSendExtractionContinuationEnabled.isEnabled = enabled
         }
         binding.rgSendMode.setupManaged(sendModeListener)
 
@@ -166,11 +166,11 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.swSendExtractionFailedEnabled.setupManaged(sendFailedListener)
 
-        binding.swSendExtractionNotPerformedEnabled.isChecked = config.sendExtractionNotPerformedEnabled
-        val sendNotPerformedListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(sendExtractionNotPerformedEnabled = isChecked) }
+        binding.swSendExtractionContinuationEnabled.isChecked = config.sendExtractionContinuationEnabled
+        val sendContinuationListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(sendExtractionContinuationEnabled = isChecked) }
         }
-        binding.swSendExtractionNotPerformedEnabled.setupManaged(sendNotPerformedListener)
+        binding.swSendExtractionContinuationEnabled.setupManaged(sendContinuationListener)
 
         binding.swAiExtractionEnabled.isChecked = config.aiExtractionEnabled
         val aiExtractionListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
@@ -233,11 +233,11 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.swSearchExtractionFailedEnabled.setupManaged(searchFailedListener)
 
-        binding.swSearchExtractionNotPerformedEnabled.isChecked = config.searchExtractionNotPerformedEnabled
-        val searchNotPerformedListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(searchExtractionNotPerformedEnabled = isChecked) }
+        binding.swSearchExtractionContinuationEnabled.isChecked = config.searchExtractionContinuationEnabled
+        val searchContinuationListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchExtractionContinuationEnabled = isChecked) }
         }
-        binding.swSearchExtractionNotPerformedEnabled.setupManaged(searchNotPerformedListener)
+        binding.swSearchExtractionContinuationEnabled.setupManaged(searchContinuationListener)
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
         val autoReplyExtractionFailedEnabled = config.autoReplyExtractionFailedEnabled
@@ -359,11 +359,11 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.cbDefaultExtractionSucceededOnlyEnabled.setupManaged(extractionSucceededOnlyListener)
 
-        binding.cbDefaultExtractionNotPerformedOnlyEnabled.isChecked = config.defaultExtractionNotPerformedOnlyEnabled
-        val extractionNotPerformedOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultExtractionNotPerformedOnlyEnabled = isChecked) }
+        binding.cbDefaultExtractionContinuationOnlyEnabled.isChecked = config.defaultExtractionContinuationOnlyEnabled
+        val extractionContinuationOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(defaultExtractionContinuationOnlyEnabled = isChecked) }
         }
-        binding.cbDefaultExtractionNotPerformedOnlyEnabled.setupManaged(extractionNotPerformedOnlyListener)
+        binding.cbDefaultExtractionContinuationOnlyEnabled.setupManaged(extractionContinuationOnlyListener)
 
         val spinnerListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
