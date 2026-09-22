@@ -79,10 +79,11 @@
     <string name="hint_send_target_settings_field_company">会社名</string>
     <string name="hint_send_target_settings_field_user_name">氏名</string>
     <string name="hint_send_target_settings_field_body">本文</string>
-    <string name="section_send_target_settings_update_tolerance_condition">統合範囲</string>
+    <string name="section_send_target_settings_update_tolerance_condition">統合条件</string>
     <string name="rb_send_target_settings_update_tolerance_mode_same_date">同一日付</string>
     <string name="rb_send_target_settings_update_tolerance_mode_hours">時間</string>
     <string name="helper_send_target_settings_update_tolerance_condition">同一日付は日付が同じ場合、時間は指定した時間以内の場合に既存データを更新します</string>
+    <string name="section_send_target_settings_update_tolerance_hours">統合範囲</string>
     <string name="hint_send_target_settings_update_tolerance_hours">±時間</string>
     <string name="helper_send_target_settings_update_tolerance_hours">指定した時間以内に同じ送信元から再度受信した場合は、既存のデータを更新します</string>
     <string name="dialog_title_send_target_settings_validation_error">入力エラー</string>
