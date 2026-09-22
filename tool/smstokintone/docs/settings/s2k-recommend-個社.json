@@ -1,6 +1,5 @@
 {
   "appConfig": {
-    "extractionCompanyNameEnabled": false,
-    "searchExtractionContinuationEnabled": true
+    "extractionCompanyNameEnabled": false
   }
 }

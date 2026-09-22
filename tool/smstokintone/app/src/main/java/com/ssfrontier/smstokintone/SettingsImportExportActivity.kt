@@ -164,7 +164,8 @@ class SettingsImportExportActivity : BaseActivity() {
         val root = JSONObject(text)
         root.optJSONArray("sendTargetConfig")?.let { checkSendTargetDuplicates(it) }
         root.optJSONArray("continuationInfoConfig")?.let {
-            checkContinuationInfoValidation(it)
+            val extractionCompanyNameEnabled = root.optJSONObject("appConfig")?.optBoolean("extractionCompanyNameEnabled", SettingsStore.load(this).extractionCompanyNameEnabled) ?: SettingsStore.load(this).extractionCompanyNameEnabled
+            checkContinuationInfoValidation(it, extractionCompanyNameEnabled)
             SettingsStore.parseContinuationInfoFromJson(it, ContinuationStore.getAll(this))
         }
 
@@ -198,7 +199,7 @@ class SettingsImportExportActivity : BaseActivity() {
     }
 
     /** 引継ぎ内容の検証 */
-    private fun checkContinuationInfoValidation(array: JSONArray) {
+    private fun checkContinuationInfoValidation(array: JSONArray, extractionCompanyNameEnabled: Boolean) {
         val duplicateSenders = mutableSetOf<String>()
         val seenSenders = mutableSetOf<String>()
         for (i in 0 until array.length()) {
@@ -210,6 +211,22 @@ class SettingsImportExportActivity : BaseActivity() {
                 )
             }
             if (!seenSenders.add(senderAddress)) duplicateSenders.add(senderAddress)
+
+            val userName = obj.optString("userName", "").trim()
+            if (userName.isEmpty()) {
+                throw JSONException(
+                    getString(R.string.message_settings_import_export_import_continuation_user_name_required, i + 1)
+                )
+            }
+
+            if (extractionCompanyNameEnabled) {
+                val companyName = obj.optString("companyName", "").trim()
+                if (companyName.isEmpty()) {
+                    throw JSONException(
+                        getString(R.string.message_settings_import_export_import_continuation_company_name_required, i + 1)
+                    )
+                }
+            }
         }
         if (duplicateSenders.isNotEmpty()) {
             throw JSONException(

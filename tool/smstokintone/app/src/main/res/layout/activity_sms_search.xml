@@ -186,15 +186,6 @@
                     android:minHeight="0dp"
                     android:checked="false"
                     android:text="@string/cb_sms_search_extraction_failed_only" />
-
-                <CheckBox
-                    android:id="@+id/cbSmsSearchExtractionContinuationOnly"
-                    style="@style/AppCheckBox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minHeight="0dp"
-                    android:checked="false"
-                    android:text="@string/cb_sms_search_extraction_continuation_only" />
             </LinearLayout>
 
             <TextView
@@ -258,7 +249,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton

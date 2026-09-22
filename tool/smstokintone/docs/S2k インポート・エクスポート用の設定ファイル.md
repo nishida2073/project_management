@@ -40,7 +40,6 @@
 | `themeMode` | アプリの配色モード | `LIGHT` / `DARK`<br><br>例）`LIGHT` |
 | `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false`<br><br>例）`true` |
 | `sendExtractionFailedEnabled` | 自動送信時、抽出失敗のSMS（会社名・氏名を抽出できなかったSMS）も送信するか | `true` / `false`<br><br>例）`true` |
-| `sendExtractionContinuationEnabled` | 自動送信時、抽出引継ぎ（継続SMS）のSMSも送信するか | `true` / `false`<br><br>例）`true` |
 | `replyEnabled` | 自動受信時、抽出失敗のSMSに対して自動返信するか | `true` / `false`<br><br>例）`false` |
 | `replyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
 | `replySuccessBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列<br><br>例）`"NTTデータユニバーシティ\n運営事務局です。\n"` |
@@ -49,11 +48,9 @@
 | `searchFiltersVisibleByDefault` | SMS検索画面を開いた際に検索条件エリアを表示した状態にするか | `true` / `false`<br><br>例）`true` |
 | `searchSendTargetFilterName` | SMS検索画面の「送信先」フィルタの初期値 | 送信先名（例）`"本社"`）：その送信先を初期選択<br>`null`：すべて<br>`"__filter_key_unset__"`：なし（どの送信先にも一致しないSMSのみ）<br><br>例）`null` |
 | `searchExtractionFailedEnabled` | SMS検索画面で、抽出失敗のSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
-| `searchExtractionContinuationEnabled` | SMS検索画面で、抽出引継ぎ（継続SMS）のSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
 | `searchSendNoneOnlyEnabled` | SMS検索画面を開いた際の「送信」の「未」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `searchExtractionFailedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「異常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `searchExtractionSucceededOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「正常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `searchExtractionContinuationOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「引継ぎ」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `searchSentAutoOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（自動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `searchSentManualOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（手動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `extractionAiEnabled` | 本文からの会社名・氏名の抽出に端末上のAI（ML Kit GenAI / Gemini Nano）を使うか。非対応端末は自動フォールバック | `true` / `false`<br><br>例）`false` |
@@ -134,7 +131,6 @@
     "themeMode": "LIGHT",
     "sendEnabled": true,
     "sendExtractionFailedEnabled": true,
-    "sendExtractionContinuationEnabled": true,
     "replyEnabled": false,
     "replyCooldownSeconds": 10,
     "replySuccessBody": "NTTデータユニバーシティ\n運営事務局です。\n",
@@ -143,11 +139,9 @@
     "searchFiltersVisibleByDefault": true,
     "searchSendTargetFilterName": null,
     "searchExtractionFailedEnabled": true,
-    "searchExtractionContinuationEnabled": true,
     "searchSendNoneOnlyEnabled": false,
     "searchExtractionFailedOnlyEnabled": false,
     "searchExtractionSucceededOnlyEnabled": false,
-    "searchExtractionContinuationOnlyEnabled": false,
     "searchSentAutoOnlyEnabled": false,
     "searchSentManualOnlyEnabled": false,
     "extractionAiEnabled": false,

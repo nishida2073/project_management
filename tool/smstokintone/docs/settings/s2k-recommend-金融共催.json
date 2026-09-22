@@ -4,8 +4,7 @@
     "extractionCompanyNameFixedConversions": [
       {"from": "data", "to": "データ"},
       {"from": "NFT", "to": "NTTデータフィナンシャルテクノロジー"}
-    ],
-    "searchExtractionContinuationEnabled": true
+    ]
   },
   "sendTargetConfig": [
     {

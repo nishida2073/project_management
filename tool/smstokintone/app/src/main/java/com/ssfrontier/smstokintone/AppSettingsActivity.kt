@@ -151,12 +151,10 @@ class AppSettingsActivity : BaseActivity() {
         binding.rbSendAuto.isChecked = sendEnabled
         binding.rbSendManual.isChecked = !sendEnabled
         binding.swSendExtractionFailedEnabled.isEnabled = sendEnabled
-        binding.swSendExtractionContinuationEnabled.isEnabled = sendEnabled
         val sendModeListener = RadioGroup.OnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSendAuto.id
             SettingsStore.update(this) { it.copy(sendEnabled = enabled) }
             binding.swSendExtractionFailedEnabled.isEnabled = enabled
-            binding.swSendExtractionContinuationEnabled.isEnabled = enabled
         }
         binding.rgSendMode.setupManaged(sendModeListener)
 
@@ -165,12 +163,6 @@ class AppSettingsActivity : BaseActivity() {
             SettingsStore.update(this) { it.copy(sendExtractionFailedEnabled = isChecked) }
         }
         binding.swSendExtractionFailedEnabled.setupManaged(sendFailedListener)
-
-        binding.swSendExtractionContinuationEnabled.isChecked = config.sendExtractionContinuationEnabled
-        val sendContinuationListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(sendExtractionContinuationEnabled = isChecked) }
-        }
-        binding.swSendExtractionContinuationEnabled.setupManaged(sendContinuationListener)
 
         binding.swAiExtractionEnabled.isChecked = config.extractionAiEnabled
         val aiExtractionListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
@@ -232,12 +224,6 @@ class AppSettingsActivity : BaseActivity() {
             SettingsStore.update(this) { it.copy(searchExtractionFailedEnabled = isChecked) }
         }
         binding.swSearchExtractionFailedEnabled.setupManaged(searchFailedListener)
-
-        binding.swSearchExtractionContinuationEnabled.isChecked = config.searchExtractionContinuationEnabled
-        val searchContinuationListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(searchExtractionContinuationEnabled = isChecked) }
-        }
-        binding.swSearchExtractionContinuationEnabled.setupManaged(searchContinuationListener)
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
         val replyEnabled = config.replyEnabled
@@ -358,12 +344,6 @@ class AppSettingsActivity : BaseActivity() {
             SettingsStore.update(this) { it.copy(searchExtractionSucceededOnlyEnabled = isChecked) }
         }
         binding.cbSearchExtractionSucceededOnlyEnabled.setupManaged(searchExtractionSucceededOnlyEnabledListener)
-
-        binding.cbSearchExtractionContinuationOnlyEnabled.isChecked = config.searchExtractionContinuationOnlyEnabled
-        val searchExtractionContinuationOnlyEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(searchExtractionContinuationOnlyEnabled = isChecked) }
-        }
-        binding.cbSearchExtractionContinuationOnlyEnabled.setupManaged(searchExtractionContinuationOnlyEnabledListener)
 
         val spinnerListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {

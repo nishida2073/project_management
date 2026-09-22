@@ -77,11 +77,6 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
                 continue
             }
 
-            if (!manual && resolution.isContinuation && !config.sendExtractionContinuationEnabled) {
-                logStart(sender, body, timestampMillis, smsId, success = false, message = applicationContext.getString(R.string.message_log_send_start_extraction_continuation_skipped), sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = targetSmsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
-                continue
-            }
-
             logStart(sender, body, timestampMillis, smsId, sendTargetName = sendTarget.displayName(applicationContext), manual = manual, smsParts = targetSmsParts, companyNameConverted = companyNameConverted, isContinuation = resolution.isContinuation)
 
             val targetDatetimeIso = if (sendTarget.fieldDatetime.isNotBlank()) {

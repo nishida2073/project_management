@@ -138,8 +138,10 @@ class LogActivity : AppCompatActivity() {
             val statusIconsView: View? = if (!hasStatusIcon) null else TextView(this).apply {
                 text = buildSpannedString {
                     entry.smsParts?.let { smsParts ->
+                        val extractionTargetIcon = if (entry.isContinuation) R.string.icon_extraction_target_continuation else R.string.icon_extraction_target_sms
+                        append(getString(extractionTargetIcon))
+                        append(" ")
                         val extractionIcon = when {
-                            entry.isContinuation -> R.string.icon_extraction_continuation
                             smsParts.isExtractionFailed() -> R.string.icon_extraction_failed
                             else -> R.string.icon_extraction_succeeded
                         }
@@ -159,6 +161,12 @@ class LogActivity : AppCompatActivity() {
                         if (isNotEmpty()) append(" ")
                         append(getString(R.string.icon_replied))
                     }
+                    if (isNotEmpty()) append(" ")
+                    val sendTargetIcon = when {
+                        entry.sendTargetName == null -> R.string.icon_send_target_unconfigured
+                        else -> R.string.icon_send_target_exists
+                    }
+                    append(getString(sendTargetIcon))
                 }
                 setTextColor(itemTextColor)
                 textSize = 16f
@@ -167,12 +175,6 @@ class LogActivity : AppCompatActivity() {
 
             val sendTargetNameView = TextView(this).apply {
                 text = buildSpannedString {
-                    val sendTargetIcon = when {
-                        entry.sendTargetName == null -> R.string.icon_send_target_unconfigured
-                        else -> R.string.icon_send_target_exists
-                    }
-                    append(getString(sendTargetIcon))
-                    append(" ")
                     color(ContextCompat.getColor(this@LogActivity, R.color.send_target_name)) {
                         bold { append(entry.sendTargetName ?: getString(R.string.label_send_target_settings_none)) }
                     }

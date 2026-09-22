@@ -141,7 +141,6 @@ class SmsSearchActivity : BaseActivity() {
         binding.cbSmsSearchSentManualOnly.isChecked = config.searchSentManualOnlyEnabled
         binding.cbSmsSearchExtractionFailedOnly.isChecked = config.searchExtractionFailedOnlyEnabled
         binding.cbSmsSearchExtractionSucceededOnly.isChecked = config.searchExtractionSucceededOnlyEnabled
-        binding.cbSmsSearchExtractionContinuationOnly.isChecked = config.searchExtractionContinuationOnlyEnabled
     }
 
     /**
@@ -350,12 +349,11 @@ class SmsSearchActivity : BaseActivity() {
                 }
             }
 
-            if (binding.cbSmsSearchExtractionFailedOnly.isChecked || binding.cbSmsSearchExtractionSucceededOnly.isChecked || binding.cbSmsSearchExtractionContinuationOnly.isChecked) {
+            if (binding.cbSmsSearchExtractionFailedOnly.isChecked || binding.cbSmsSearchExtractionSucceededOnly.isChecked) {
                 val matchedExtractionStatusRecords = mutableListOf<SmsRecord>()
                 for (record in records) {
                     val (resolution, _) = resolveSendTargetCached(record, config)
                     val matchesFilter = when {
-                        resolution.isContinuation -> binding.cbSmsSearchExtractionContinuationOnly.isChecked
                         resolution.smsParts.isExtractionFailed() -> binding.cbSmsSearchExtractionFailedOnly.isChecked
                         else -> binding.cbSmsSearchExtractionSucceededOnly.isChecked
                     }
@@ -444,8 +442,7 @@ class SmsSearchActivity : BaseActivity() {
             val sentEntry = sentEntries[record.id]
             val isExtractionFailedBody = resolution.smsParts.isExtractionFailed()
             val isSelectable = !isSendTargetUnconfigured &&
-                (!isExtractionFailedBody || config.searchExtractionFailedEnabled) &&
-                (!resolution.isContinuation || config.searchExtractionContinuationEnabled)
+                (!isExtractionFailedBody || config.searchExtractionFailedEnabled)
             val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
             val sendTargetIcon = getString(
                 when {
@@ -466,8 +463,10 @@ class SmsSearchActivity : BaseActivity() {
 
             val textView = TextView(this).apply {
                 text = buildSpannedString {
+                    val extractionTargetIcon = if (resolution.isContinuation) getString(R.string.icon_extraction_target_continuation) else getString(R.string.icon_extraction_target_sms)
+                    append(extractionTargetIcon)
+                    append(" ")
                     val extractionIcon = when {
-                        resolution.isContinuation -> R.string.icon_extraction_continuation
                         isExtractionFailedBody -> R.string.icon_extraction_failed
                         else -> R.string.icon_extraction_succeeded
                     }
@@ -486,11 +485,13 @@ class SmsSearchActivity : BaseActivity() {
                         append(" ")
                         append(getString(R.string.icon_replied))
                     }
+                    append(" ")
+                    append(sendTargetIcon)
                     append("\n")
                     if (isSelectable) {
-                        color(sendTargetColor) { bold { append(sendTargetIcon); append(" "); append(sendTargetName) } }
+                        color(sendTargetColor) { bold { append(sendTargetName) } }
                     } else {
-                        bold { append(sendTargetIcon); append(" "); append(sendTargetName) }
+                        bold { append(sendTargetName) }
                     }
                     val senderDisplay = if (resolution.isContinuation && config.continuationShowUserNameEnabled && resolution.smsParts.userName.isNotBlank()) {
                         resolution.smsParts.userName

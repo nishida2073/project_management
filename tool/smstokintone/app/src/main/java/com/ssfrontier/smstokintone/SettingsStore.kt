@@ -19,7 +19,6 @@ object SettingsStore {
 
     private const val KEY_SEND_ENABLED = "send_enabled"
     private const val KEY_SEND_EXTRACTION_FAILED_ENABLED = "send_extraction_failed_enabled"
-    private const val KEY_SEND_EXTRACTION_CONTINUATION_ENABLED = "send_extraction_continuation_enabled"
 
     private const val KEY_REPLY_ENABLED = "reply_enabled"
     private const val KEY_REPLY_COOLDOWN_SECONDS = "reply_cooldown_seconds"
@@ -30,11 +29,9 @@ object SettingsStore {
     private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
     private const val KEY_SEARCH_SEND_TARGET_FILTER_NAME = "search_send_target_filter_name"
     private const val KEY_SEARCH_EXTRACTION_FAILED_ENABLED = "search_extraction_failed_enabled"
-    private const val KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED = "search_extraction_continuation_enabled"
     private const val KEY_SEARCH_SEND_NONE_ONLY_ENABLED = "search_send_none_only_enabled"
     private const val KEY_SEARCH_EXTRACTION_FAILED_ONLY_ENABLED = "search_extraction_failed_only_enabled"
     private const val KEY_SEARCH_EXTRACTION_SUCCEEDED_ONLY_ENABLED = "search_extraction_succeeded_only_enabled"
-    private const val KEY_SEARCH_EXTRACTION_CONTINUATION_ONLY_ENABLED = "search_extraction_continuation_only_enabled"
     private const val KEY_SEARCH_SENT_AUTO_ONLY_ENABLED = "search_sent_auto_only_enabled"
     private const val KEY_SEARCH_SENT_MANUAL_ONLY_ENABLED = "search_sent_manual_only_enabled"
 
@@ -132,7 +129,6 @@ object SettingsStore {
      * @property themeMode アプリの配色モード（ライト/ダーク）
      * @property sendEnabled trueなら自動送信モード、falseなら手動送信モード。[KintoneUploadWorker]が参照
      * @property sendExtractionFailedEnabled 自動送信時、抽出失敗のSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか
-     * @property sendExtractionContinuationEnabled 自動送信時、抽出引継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか
      * @property replyEnabled 自動受信時、抽出失敗のSMSに対して[replyFailedBody]の文言で自動返信するかどうか
      * @property replyCooldownSeconds 同一送信元への自動返信再送信までの間隔（秒）。連投防止用クールダウン
      * @property replySuccessBody SMS検索画面で長押しした際に開く返信画面に自動入力する文言
@@ -141,11 +137,9 @@ object SettingsStore {
      * @property searchFiltersVisibleByDefault SMS検索画面を開いた際に検索条件エリアを表示した状態にするかどうか
      * @property searchSendTargetFilterName SMS検索画面の「送信先」フィルタの初期値。nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」
      * @property searchExtractionFailedEnabled SMS検索画面で、抽出失敗のSMSを選択可能にするかどうか
-     * @property searchExtractionContinuationEnabled SMS検索画面で、抽出引継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか
      * @property searchSendNoneOnlyEnabled SMS検索画面で「送信」の「未」チェックボックスの初期状態
      * @property searchExtractionFailedOnlyEnabled SMS検索画面で「抽出状況」の「異常」チェックボックスの初期状態
      * @property searchExtractionSucceededOnlyEnabled SMS検索画面で「抽出状況」の「正常」チェックボックスの初期状態
-     * @property searchExtractionContinuationOnlyEnabled SMS検索画面で「抽出状況」の「引継ぎ」チェックボックスの初期状態
      * @property searchSentAutoOnlyEnabled SMS検索画面で「送信」の「済（自動）」チェックボックスの初期状態
      * @property searchSentManualOnlyEnabled SMS検索画面で「送信」の「済（手動）」チェックボックスの初期状態
      * @property extractionAiEnabled 本文からの会社名・氏名の抽出に端末上のAI（ML Kit GenAI / Gemini Nano）を使うかどうか。非対応端末は自動フォールバック
@@ -164,7 +158,6 @@ object SettingsStore {
         val themeMode: ThemeMode,
         val sendEnabled: Boolean,
         val sendExtractionFailedEnabled: Boolean,
-        val sendExtractionContinuationEnabled: Boolean,
         val replyEnabled: Boolean,
         val replyCooldownSeconds: Int,
         val replySuccessBody: String,
@@ -173,11 +166,9 @@ object SettingsStore {
         val searchFiltersVisibleByDefault: Boolean,
         val searchSendTargetFilterName: String?,
         val searchExtractionFailedEnabled: Boolean,
-        val searchExtractionContinuationEnabled: Boolean,
         val searchSendNoneOnlyEnabled: Boolean,
         val searchExtractionFailedOnlyEnabled: Boolean,
         val searchExtractionSucceededOnlyEnabled: Boolean,
-        val searchExtractionContinuationOnlyEnabled: Boolean,
         val searchSentAutoOnlyEnabled: Boolean,
         val searchSentManualOnlyEnabled: Boolean,
         val extractionAiEnabled: Boolean,
@@ -299,7 +290,6 @@ object SettingsStore {
             .putString(KEY_THEME_MODE, config.themeMode.name)
             .putBoolean(KEY_SEND_ENABLED, config.sendEnabled)
             .putBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, config.sendExtractionFailedEnabled)
-            .putBoolean(KEY_SEND_EXTRACTION_CONTINUATION_ENABLED, config.sendExtractionContinuationEnabled)
             .putBoolean(KEY_REPLY_ENABLED, config.replyEnabled)
             .putInt(KEY_REPLY_COOLDOWN_SECONDS, config.replyCooldownSeconds)
             .putString(KEY_REPLY_SUCCESS_BODY, config.replySuccessBody)
@@ -313,11 +303,9 @@ object SettingsStore {
         }
         editorWithFilter
             .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, config.searchExtractionFailedEnabled)
-            .putBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED, config.searchExtractionContinuationEnabled)
             .putBoolean(KEY_SEARCH_SEND_NONE_ONLY_ENABLED, config.searchSendNoneOnlyEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ONLY_ENABLED, config.searchExtractionFailedOnlyEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_SUCCEEDED_ONLY_ENABLED, config.searchExtractionSucceededOnlyEnabled)
-            .putBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ONLY_ENABLED, config.searchExtractionContinuationOnlyEnabled)
             .putBoolean(KEY_SEARCH_SENT_AUTO_ONLY_ENABLED, config.searchSentAutoOnlyEnabled)
             .putBoolean(KEY_SEARCH_SENT_MANUAL_ONLY_ENABLED, config.searchSentManualOnlyEnabled)
             .putBoolean(KEY_EXTRACTION_AI_ENABLED, config.extractionAiEnabled)
@@ -346,7 +334,6 @@ object SettingsStore {
         themeMode = ThemeMode.LIGHT,
         sendEnabled = true,
         sendExtractionFailedEnabled = false,
-        sendExtractionContinuationEnabled = true,
         replyEnabled = false,
         replyCooldownSeconds = AppDefaults.REPLY_COOLDOWN_SECONDS,
         replySuccessBody = AppDefaults.REPLY_SUCCESS_BODY,
@@ -355,11 +342,9 @@ object SettingsStore {
         searchFiltersVisibleByDefault = true,
         searchSendTargetFilterName = null,
         searchExtractionFailedEnabled = false,
-        searchExtractionContinuationEnabled = true,
         searchSendNoneOnlyEnabled = false,
         searchExtractionFailedOnlyEnabled = false,
         searchExtractionSucceededOnlyEnabled = false,
-        searchExtractionContinuationOnlyEnabled = false,
         searchSentAutoOnlyEnabled = false,
         searchSentManualOnlyEnabled = false,
         extractionAiEnabled = false,
@@ -382,7 +367,6 @@ object SettingsStore {
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
             sendEnabled = p.getBoolean(KEY_SEND_ENABLED, DEFAULT_CONFIG.sendEnabled),
             sendExtractionFailedEnabled = p.getBoolean(KEY_SEND_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.sendExtractionFailedEnabled),
-            sendExtractionContinuationEnabled = p.getBoolean(KEY_SEND_EXTRACTION_CONTINUATION_ENABLED, DEFAULT_CONFIG.sendExtractionContinuationEnabled),
             replyEnabled = p.getBoolean(KEY_REPLY_ENABLED, DEFAULT_CONFIG.replyEnabled),
             replyCooldownSeconds = p.getInt(KEY_REPLY_COOLDOWN_SECONDS, DEFAULT_CONFIG.replyCooldownSeconds),
             replySuccessBody = p.getString(KEY_REPLY_SUCCESS_BODY, DEFAULT_CONFIG.replySuccessBody) ?: DEFAULT_CONFIG.replySuccessBody,
@@ -392,11 +376,9 @@ object SettingsStore {
             searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, DEFAULT_CONFIG.searchFiltersVisibleByDefault),
             searchSendTargetFilterName = p.getString(KEY_SEARCH_SEND_TARGET_FILTER_NAME, DEFAULT_CONFIG.searchSendTargetFilterName),
             searchExtractionFailedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.searchExtractionFailedEnabled),
-            searchExtractionContinuationEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED, DEFAULT_CONFIG.searchExtractionContinuationEnabled),
             searchSendNoneOnlyEnabled = p.getBoolean(KEY_SEARCH_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.searchSendNoneOnlyEnabled),
             searchExtractionFailedOnlyEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.searchExtractionFailedOnlyEnabled),
             searchExtractionSucceededOnlyEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.searchExtractionSucceededOnlyEnabled),
-            searchExtractionContinuationOnlyEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ONLY_ENABLED, DEFAULT_CONFIG.searchExtractionContinuationOnlyEnabled),
             searchSentAutoOnlyEnabled = p.getBoolean(KEY_SEARCH_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.searchSentAutoOnlyEnabled),
             searchSentManualOnlyEnabled = p.getBoolean(KEY_SEARCH_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.searchSentManualOnlyEnabled),
             extractionAiEnabled = p.getBoolean(KEY_EXTRACTION_AI_ENABLED, DEFAULT_CONFIG.extractionAiEnabled),
@@ -424,7 +406,6 @@ object SettingsStore {
         .put("themeMode", config.themeMode.name)
         .put("sendEnabled", config.sendEnabled)
         .put("sendExtractionFailedEnabled", config.sendExtractionFailedEnabled)
-        .put("sendExtractionContinuationEnabled", config.sendExtractionContinuationEnabled)
         .put("replyEnabled", config.replyEnabled)
         .put("replyCooldownSeconds", config.replyCooldownSeconds)
         .put("replySuccessBody", config.replySuccessBody)
@@ -433,11 +414,9 @@ object SettingsStore {
         .put("searchFiltersVisibleByDefault", config.searchFiltersVisibleByDefault)
         .put("searchSendTargetFilterName", config.searchSendTargetFilterName ?: JSONObject.NULL)
         .put("searchExtractionFailedEnabled", config.searchExtractionFailedEnabled)
-        .put("searchExtractionContinuationEnabled", config.searchExtractionContinuationEnabled)
         .put("searchSendNoneOnlyEnabled", config.searchSendNoneOnlyEnabled)
         .put("searchExtractionFailedOnlyEnabled", config.searchExtractionFailedOnlyEnabled)
         .put("searchExtractionSucceededOnlyEnabled", config.searchExtractionSucceededOnlyEnabled)
-        .put("searchExtractionContinuationOnlyEnabled", config.searchExtractionContinuationOnlyEnabled)
         .put("searchSentAutoOnlyEnabled", config.searchSentAutoOnlyEnabled)
         .put("searchSentManualOnlyEnabled", config.searchSentManualOnlyEnabled)
         .put("extractionAiEnabled", config.extractionAiEnabled)
@@ -463,7 +442,6 @@ object SettingsStore {
             themeMode = if (json.has("themeMode")) ThemeMode.fromName(json.optString("themeMode", "")) else fallback.themeMode,
             sendEnabled = json.optBoolean("sendEnabled", fallback.sendEnabled),
             sendExtractionFailedEnabled = json.optBoolean("sendExtractionFailedEnabled", fallback.sendExtractionFailedEnabled),
-            sendExtractionContinuationEnabled = json.optBoolean("sendExtractionContinuationEnabled", fallback.sendExtractionContinuationEnabled),
             replyEnabled = json.optBoolean("replyEnabled", fallback.replyEnabled),
             replyCooldownSeconds = json.optInt("replyCooldownSeconds", fallback.replyCooldownSeconds),
             replySuccessBody = json.optString("replySuccessBody", fallback.replySuccessBody),
@@ -478,11 +456,9 @@ object SettingsStore {
                 fallback.searchSendTargetFilterName
             },
             searchExtractionFailedEnabled = json.optBoolean("searchExtractionFailedEnabled", fallback.searchExtractionFailedEnabled),
-            searchExtractionContinuationEnabled = json.optBoolean("searchExtractionContinuationEnabled", fallback.searchExtractionContinuationEnabled),
             searchSendNoneOnlyEnabled = json.optBoolean("searchSendNoneOnlyEnabled", fallback.searchSendNoneOnlyEnabled),
             searchExtractionFailedOnlyEnabled = json.optBoolean("searchExtractionFailedOnlyEnabled", fallback.searchExtractionFailedOnlyEnabled),
             searchExtractionSucceededOnlyEnabled = json.optBoolean("searchExtractionSucceededOnlyEnabled", fallback.searchExtractionSucceededOnlyEnabled),
-            searchExtractionContinuationOnlyEnabled = json.optBoolean("searchExtractionContinuationOnlyEnabled", fallback.searchExtractionContinuationOnlyEnabled),
             searchSentAutoOnlyEnabled = json.optBoolean("searchSentAutoOnlyEnabled", fallback.searchSentAutoOnlyEnabled),
             searchSentManualOnlyEnabled = json.optBoolean("searchSentManualOnlyEnabled", fallback.searchSentManualOnlyEnabled),
             extractionAiEnabled = json.optBoolean("extractionAiEnabled", fallback.extractionAiEnabled),
