@@ -146,6 +146,15 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
         }
         itemBinding.btnDeleteContinuationInfo.setupManaged(deleteCardListener)
 
+        if (config.extractionCompanyNameEnabled) {
+            val companyNameWatcher = simpleTextWatcher { companyName ->
+                val sendTargets = SettingsStore.findSendTargets(this, companyName)
+                val name = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this) }
+                itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_settings_none)
+            }
+            itemBinding.etContinuationCompanyName.setupManaged(companyNameWatcher)
+        }
+
         binding.llContinuationContainer.addView(itemBinding.root)
         cards.add(card)
     }
