@@ -4,7 +4,7 @@
   },
   "sendTargetConfig": [
     {
-      "name": "地域",
+      "sendTargetName": "地域",
       "keywords": [
         "NTTデータ北海道",
         "NTTデータ東北",

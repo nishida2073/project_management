@@ -503,7 +503,7 @@ object SettingsStore {
 
     /** [SendTarget]をJSONオブジェクトへ変換（IDは含めない） */
     fun sendTargetToJson(sendTarget: SendTarget): JSONObject = JSONObject()
-        .put("name", sendTarget.sendTargetName)
+        .put("sendTargetName", sendTarget.sendTargetName)
         .put("companyName", sendTarget.companyName)
         .put("keywords", JSONArray(sendTarget.keywords))
         .put("subdomain", sendTarget.subdomain)
@@ -525,7 +525,7 @@ object SettingsStore {
         val default = existingSendTarget ?: createDefaultSendTarget()
         return default.copy(
             id = existingSendTarget?.id ?: UUID.randomUUID().toString(),
-            sendTargetName = if (obj.has("name")) obj.optString("name", default.sendTargetName) else default.sendTargetName,
+            sendTargetName = if (obj.has("sendTargetName")) obj.optString("sendTargetName", default.sendTargetName) else default.sendTargetName,
             companyName = if (obj.has("companyName")) obj.optString("companyName", default.companyName) else default.companyName,
             keywords = if (obj.has("keywords")) {
                 obj.optJSONArray("keywords")?.let { array ->
@@ -607,7 +607,7 @@ object SettingsStore {
         val merged = loadSendTargets(context).toMutableList()
         for (i in 0 until importedJsonArray.length()) {
             val obj = importedJsonArray.getJSONObject(i)
-            val importedName = obj.optString("name", "")
+            val importedName = obj.optString("sendTargetName", "")
             val index = merged.indexOfFirst { it.sendTargetName == importedName }
             val existingTarget = if (index >= 0) merged[index] else null
             val mergedTarget = sendTargetFromJson(obj, existingTarget)

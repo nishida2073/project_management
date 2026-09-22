@@ -8,7 +8,7 @@
   },
   "sendTargetConfig": [
     {
-      "name": "金融共催",
+      "sendTargetName": "金融共催",
       "keywords": [
         "NTTデータフィナンシャルテクノロジー",
         "フィナンシャルテクノロジー",
