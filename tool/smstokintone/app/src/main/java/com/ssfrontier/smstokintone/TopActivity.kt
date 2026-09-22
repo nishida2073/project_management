@@ -25,19 +25,19 @@ class TopActivity : AppCompatActivity() {
         binding = ActivityTopBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.btnOpenSendTargetSettings.setOnClickListener {
+        binding.btnTopOpenSendTargetSettings.setOnClickListener {
             startActivity(Intent(this, SendTargetSettingsActivity::class.java))
         }
-        binding.btnOpenAppSettings.setOnClickListener {
+        binding.btnTopOpenAppSettings.setOnClickListener {
             startActivity(Intent(this, AppSettingsActivity::class.java))
         }
-        binding.btnOpenSettingsImportExport.setOnClickListener {
+        binding.btnTopOpenSettingsImportExport.setOnClickListener {
             startActivity(Intent(this, SettingsImportExportActivity::class.java))
         }
-        binding.btnOpenLog.setOnClickListener {
+        binding.btnTopOpenLog.setOnClickListener {
             startActivity(Intent(this, LogActivity::class.java))
         }
-        binding.btnOpenSmsSearch.setOnClickListener {
+        binding.btnTopOpenSmsSearch.setOnClickListener {
             startActivity(Intent(this, SmsSearchActivity::class.java))
         }
     }

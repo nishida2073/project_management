@@ -61,7 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_basic_info"
+                    android:text="@string/section_send_target_settings_basic_info"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -76,7 +76,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_name"
+                        android:text="@string/section_send_target_settings_send_target_name"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -89,7 +89,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_send_target_name">
+                            android:hint="@string/hint_send_target_settings_send_target_name">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -113,7 +113,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_company_name"
+                        android:text="@string/section_send_target_settings_company_name"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -126,7 +126,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_company_name">
+                            android:hint="@string/hint_send_target_settings_company_name">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -150,7 +150,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_sms_target"
+                        android:text="@string/section_send_target_settings_sms_target"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -172,7 +172,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="@string/btn_add_keyword" />
+                            android:text="@string/btn_send_target_settings_add_keyword" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -184,7 +184,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_keywords"
+                                android:text="@string/helper_send_target_settings_keywords"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -209,7 +209,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_kintone_info"
+                    android:text="@string/section_send_target_settings_kintone_info"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -224,7 +224,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_connection"
+                        android:text="@string/section_send_target_settings_connection"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -237,7 +237,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_subdomain">
+                            android:hint="@string/hint_send_target_settings_subdomain">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -260,7 +260,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_auth_info"
+                        android:text="@string/section_send_target_settings_auth_info"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -273,7 +273,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_login_name">
+                            android:hint="@string/hint_send_target_settings_login_name">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -287,7 +287,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:hint="@string/hint_login_password"
+                            android:hint="@string/hint_send_target_settings_login_password"
                             app:endIconMode="password_toggle">
 
                             <com.google.android.material.textfield.TextInputEditText
@@ -311,7 +311,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_app"
+                        android:text="@string/section_send_target_settings_app"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -324,7 +324,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_app_id">
+                            android:hint="@string/hint_send_target_settings_app_id">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -346,7 +346,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_field_mapping"
+                            android:text="@string/section_send_target_settings_field_mapping"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -359,7 +359,7 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_field_type">
+                                android:hint="@string/hint_send_target_settings_field_type">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -373,7 +373,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_datetime">
+                                android:hint="@string/hint_send_target_settings_field_datetime">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -387,7 +387,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_sender">
+                                android:hint="@string/hint_send_target_settings_field_sender">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -401,7 +401,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_history">
+                                android:hint="@string/hint_send_target_settings_field_history">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -415,7 +415,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_company">
+                                android:hint="@string/hint_send_target_settings_field_company">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -429,7 +429,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_user_name">
+                                android:hint="@string/hint_send_target_settings_field_user_name">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -443,7 +443,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_field_body">
+                                android:hint="@string/hint_send_target_settings_field_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -467,7 +467,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_update_tolerance_condition"
+                        android:text="@string/section_send_target_settings_update_tolerance_condition"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -491,21 +491,21 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="16dp"
                                 android:checked="true"
-                                android:text="@string/rb_update_tolerance_mode_same_date" />
+                                android:text="@string/rb_send_target_settings_update_tolerance_mode_same_date" />
                             <RadioButton
                                 style="@style/AppRadioButton"
                                 android:id="@+id/rbUpdateToleranceModeHours"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:checked="false"
-                                android:text="@string/rb_update_tolerance_mode_hours" />
+                                android:text="@string/rb_send_target_settings_update_tolerance_mode_hours" />
                         </RadioGroup>
 
                         <com.google.android.material.textfield.TextInputLayout
                             android:id="@+id/tilUpdateToleranceHours"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_update_tolerance_hours">
+                            android:hint="@string/hint_send_target_settings_update_tolerance_hours">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -525,7 +525,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_update_tolerance_hours"
+                                android:text="@string/helper_send_target_settings_update_tolerance_hours"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -541,7 +541,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_send_test" />
+            android:text="@string/btn_send_target_settings_send_test" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

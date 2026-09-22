@@ -133,15 +133,15 @@ class SmsSearchActivity : BaseActivity() {
 
         binding.llSearchFilters.visibility = if (config.searchFiltersVisibleByDefault) View.VISIBLE else View.GONE
         binding.btnToggleSearchFilters.text = getString(
-            if (config.searchFiltersVisibleByDefault) R.string.btn_hide_search_filters else R.string.btn_show_search_filters
+            if (config.searchFiltersVisibleByDefault) R.string.btn_sms_search_hide_search_filters else R.string.btn_sms_search_show_search_filters
         )
 
-        binding.cbSendNoneOnly.isChecked = config.searchSendNoneOnlyEnabled
-        binding.cbSentAutoOnly.isChecked = config.searchSentAutoOnlyEnabled
-        binding.cbSentManualOnly.isChecked = config.searchSentManualOnlyEnabled
-        binding.cbExtractionFailedOnly.isChecked = config.searchExtractionFailedOnlyEnabled
-        binding.cbExtractionSucceededOnly.isChecked = config.searchExtractionSucceededOnlyEnabled
-        binding.cbExtractionContinuationOnly.isChecked = config.searchExtractionContinuationOnlyEnabled
+        binding.cbSmsSearchSendNoneOnly.isChecked = config.searchSendNoneOnlyEnabled
+        binding.cbSmsSearchSentAutoOnly.isChecked = config.searchSentAutoOnlyEnabled
+        binding.cbSmsSearchSentManualOnly.isChecked = config.searchSentManualOnlyEnabled
+        binding.cbSmsSearchExtractionFailedOnly.isChecked = config.searchExtractionFailedOnlyEnabled
+        binding.cbSmsSearchExtractionSucceededOnly.isChecked = config.searchExtractionSucceededOnlyEnabled
+        binding.cbSmsSearchExtractionContinuationOnly.isChecked = config.searchExtractionContinuationOnlyEnabled
     }
 
     /**
@@ -201,7 +201,7 @@ class SmsSearchActivity : BaseActivity() {
         val show = binding.llSearchFilters.visibility != View.VISIBLE
         binding.llSearchFilters.visibility = if (show) View.VISIBLE else View.GONE
         binding.btnToggleSearchFilters.text = getString(
-            if (show) R.string.btn_hide_search_filters else R.string.btn_show_search_filters
+            if (show) R.string.btn_sms_search_hide_search_filters else R.string.btn_sms_search_show_search_filters
         )
     }
 
@@ -310,14 +310,14 @@ class SmsSearchActivity : BaseActivity() {
             Toast.makeText(this, getString(R.string.toast_sms_search_error, e.message ?: ""), Toast.LENGTH_LONG).show()
         }
 
-        if (binding.cbSendNoneOnly.isChecked || binding.cbSentAutoOnly.isChecked || binding.cbSentManualOnly.isChecked) {
+        if (binding.cbSmsSearchSendNoneOnly.isChecked || binding.cbSmsSearchSentAutoOnly.isChecked || binding.cbSmsSearchSentManualOnly.isChecked) {
             val sentEntries = matchSentEntries(records, loadCompletedEntries())
             records.removeAll { record ->
                 val sentEntry = sentEntries[record.id]
                 val matchesFilter = when {
-                    sentEntry == null -> binding.cbSendNoneOnly.isChecked
-                    sentEntry.manual -> binding.cbSentManualOnly.isChecked
-                    else -> binding.cbSentAutoOnly.isChecked
+                    sentEntry == null -> binding.cbSmsSearchSendNoneOnly.isChecked
+                    sentEntry.manual -> binding.cbSmsSearchSentManualOnly.isChecked
+                    else -> binding.cbSmsSearchSentAutoOnly.isChecked
                 }
                 !matchesFilter
             }
@@ -350,14 +350,14 @@ class SmsSearchActivity : BaseActivity() {
                 }
             }
 
-            if (binding.cbExtractionFailedOnly.isChecked || binding.cbExtractionSucceededOnly.isChecked || binding.cbExtractionContinuationOnly.isChecked) {
+            if (binding.cbSmsSearchExtractionFailedOnly.isChecked || binding.cbSmsSearchExtractionSucceededOnly.isChecked || binding.cbSmsSearchExtractionContinuationOnly.isChecked) {
                 val matchedExtractionStatusRecords = mutableListOf<SmsRecord>()
                 for (record in records) {
                     val (resolution, _) = resolveSendTargetCached(record, config)
                     val matchesFilter = when {
-                        resolution.isContinuation -> binding.cbExtractionContinuationOnly.isChecked
-                        resolution.smsParts.isExtractionFailed() -> binding.cbExtractionFailedOnly.isChecked
-                        else -> binding.cbExtractionSucceededOnly.isChecked
+                        resolution.isContinuation -> binding.cbSmsSearchExtractionContinuationOnly.isChecked
+                        resolution.smsParts.isExtractionFailed() -> binding.cbSmsSearchExtractionFailedOnly.isChecked
+                        else -> binding.cbSmsSearchExtractionSucceededOnly.isChecked
                     }
                     if (matchesFilter) matchedExtractionStatusRecords.add(record)
                 }
@@ -418,7 +418,7 @@ class SmsSearchActivity : BaseActivity() {
         try {
             startActivity(intent)
         } catch (e: android.content.ActivityNotFoundException) {
-            Toast.makeText(this, getString(R.string.toast_sms_app_not_found), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_sms_search_app_not_found), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -438,7 +438,7 @@ class SmsSearchActivity : BaseActivity() {
         records.forEach { record ->
             val (resolution, sendTargets) = resolveSendTargetCached(record, config)
             val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@SmsSearchActivity) }
-                ?: getString(R.string.label_send_target_none)
+                ?: getString(R.string.label_send_target_settings_none)
             val isSendTargetUnconfigured = sendTargets.none { it.isValid }
             val isAutoReplied = record.id in autoRepliedEntries
             val sentEntry = sentEntries[record.id]
@@ -570,7 +570,7 @@ class SmsSearchActivity : BaseActivity() {
         // 一覧の表示順（新しい順）とは関係なく、送信自体は受信日時の古い順に行う
         val selectedRecords = records.filter { it.id in checkedIds }.sortedBy { it.dateMillis }
         if (selectedRecords.isEmpty()) {
-            Toast.makeText(this, getString(R.string.toast_sms_send_not_selection), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_sms_search_send_not_selection), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -612,7 +612,7 @@ class SmsSearchActivity : BaseActivity() {
 
         Toast.makeText(
             this,
-            getString(R.string.toast_sms_send_queued, selectedRecords.size),
+            getString(R.string.toast_sms_search_send_queued, selectedRecords.size),
             Toast.LENGTH_LONG
         ).show()
 
@@ -634,13 +634,13 @@ class SmsSearchActivity : BaseActivity() {
             .mapValues { it.value.first() }
 
         if (latestCompleteEntryPerSms.isEmpty()) {
-            Toast.makeText(this, getString(R.string.toast_sms_send_finished_no_log), Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.toast_sms_search_send_finished_no_log), Toast.LENGTH_LONG).show()
         } else {
             val successCount = latestCompleteEntryPerSms.values.count { it.success }
             val failureCount = latestCompleteEntryPerSms.size - successCount
             Toast.makeText(
                 this,
-                getString(R.string.toast_sms_send_finished, successCount, failureCount),
+                getString(R.string.toast_sms_search_send_finished, successCount, failureCount),
                 Toast.LENGTH_LONG
             ).show()
         }

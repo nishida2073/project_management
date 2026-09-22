@@ -63,45 +63,45 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenSmsSearch"
+            android:id="@+id/btnTopOpenSmsSearch"
             style="@style/AppButton.FilledButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="48dp"
-            android:text="@string/btn_open_sms_search" />
+            android:text="@string/btn_top_open_sms_search" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenLog"
+            android:id="@+id/btnTopOpenLog"
             style="@style/AppButton.FilledButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_open_log" />
+            android:text="@string/btn_top_open_log" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenSendTargetSettings"
+            android:id="@+id/btnTopOpenSendTargetSettings"
             style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="64dp"
-            android:text="@string/btn_open_send_target_settings"
+            android:text="@string/btn_top_open_send_target_settings"
             android:textAllCaps="false" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenAppSettings"
+            android:id="@+id/btnTopOpenAppSettings"
             style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_open_app_settings" />
+            android:text="@string/btn_top_open_app_settings" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenSettingsImportExport"
+            android:id="@+id/btnTopOpenSettingsImportExport"
             style="@style/AppButton.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_open_settings_import_export" />
+            android:text="@string/btn_top_open_settings_import_export" />
 
     </LinearLayout>
 </ScrollView>

@@ -62,8 +62,8 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
 
         val deleteAllListener = View.OnClickListener {
             AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_confirm_delete_all_continuation_info)
-                .setMessage(R.string.dialog_message_delete_all_continuation_info)
+                .setTitle(R.string.dialog_title_continuation_info_settings_confirm_delete_all)
+                .setMessage(R.string.dialog_message_continuation_info_settings_delete_all)
                 .setNegativeButton(R.string.btn_cancel, null)
                 .setPositiveButton(R.string.btn_delete) { _, _ ->
                     binding.llContinuationContainer.removeAllViews()
@@ -136,7 +136,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
 
         val sendTargets = SettingsStore.findSendTargets(this, entry.companyName)
         val name = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this) }
-        itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_none)
+        itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_settings_none)
 
         val card = Card(senderKey, itemBinding)
 
@@ -165,12 +165,12 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
         }
         if (invalidCard != null) {
             val messageResId = if (config.extractionCompanyNameEnabled) {
-                R.string.dialog_message_continuation_validation_error_extraction_enabled
+                R.string.dialog_message_continuation_info_settings_validation_error_extraction_enabled
             } else {
-                R.string.dialog_message_continuation_validation_error_extraction_disabled
+                R.string.dialog_message_continuation_info_settings_validation_error_extraction_disabled
             }
             AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_validation_error)
+                .setTitle(R.string.dialog_title_send_target_settings_validation_error)
                 .setMessage(getString(messageResId, invalidCard.senderKey))
                 .setPositiveButton(android.R.string.ok, null)
                 .show().setupManaged()
@@ -197,8 +197,8 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
             finish()
         } else {
             AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_continuation_info_save_conflict)
-                .setMessage(R.string.dialog_message_continuation_info_save_conflict)
+                .setTitle(R.string.dialog_title_continuation_info_settings_save_conflict)
+                .setMessage(R.string.dialog_message_continuation_info_settings_save_conflict)
                 .setPositiveButton(android.R.string.ok, null)
                 .show().setupManaged()
         }

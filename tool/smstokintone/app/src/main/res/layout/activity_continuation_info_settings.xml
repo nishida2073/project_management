@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="@string/label_continuation_search"
+            android:text="@string/label_continuation_info_settings_search"
             android:textSize="14sp"
             android:textColor="?attr/colorOnSurface" />
 
@@ -41,7 +41,7 @@
                 android:id="@+id/tilContinuationSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_continuation_search">
+                android:hint="@string/hint_continuation_info_settings_search">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etContinuationSearch"
@@ -57,7 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="8dp"
-            android:text="@string/label_continuation_sort"
+            android:text="@string/label_continuation_info_settings_sort"
             android:textSize="14sp"
             android:textColor="?attr/colorOnSurface" />
 
@@ -80,13 +80,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="16dp"
                     android:checked="true"
-                    android:text="@string/rb_continuation_sort_ascending" />
+                    android:text="@string/rb_continuation_info_settings_sort_ascending" />
                 <RadioButton
                     android:id="@+id/rbContinuationSortDescending"
                     style="@style/AppRadioButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/rb_continuation_sort_descending" />
+                    android:text="@string/rb_continuation_info_settings_sort_descending" />
             </RadioGroup>
         </LinearLayout>
     </LinearLayout>
@@ -118,7 +118,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/message_continuation_empty"
+                android:text="@string/message_continuation_info_settings_empty"
                 android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone" />
 
@@ -127,7 +127,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/message_continuation_no_match"
+                android:text="@string/message_continuation_info_settings_no_match"
                 android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone" />
 

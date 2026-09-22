@@ -48,7 +48,7 @@ class SendTargetSettingsActivity : BaseActivity() {
         setContentView(binding.root)
 
         binding.tvSendTargetSettingsDescription.visibility =
-            if (getString(R.string.send_target_settings_description).isBlank()) View.GONE else View.VISIBLE
+            if (getString(R.string.title_send_target_settings_description).isBlank()) View.GONE else View.VISIBLE
 
         SettingsStore.loadSendTargets(this).forEach { addSendTargetCard(it) }
 
@@ -106,7 +106,7 @@ class SendTargetSettingsActivity : BaseActivity() {
 
         val copyListener = View.OnClickListener {
             val source = readSendTargetFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
-            val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_send_target_copy)
+            val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_send_target_settings_copy)
             val newCardView = addSendTargetCard(source.copy(name = copyName), insertAt = sendTargetCards.indexOf(card) + 1)
             newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
@@ -192,10 +192,10 @@ class SendTargetSettingsActivity : BaseActivity() {
     private fun showValidationErrorDialogIfInvalid(index: Int, sendTarget: SettingsStore.SendTarget): Boolean {
         if (sendTarget.isValid) return false
 
-        val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_index, index + 1) }
+        val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_settings_index, index + 1) }
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_validation_error)
-            .setMessage(getString(R.string.dialog_message_validation_error, label))
+            .setTitle(R.string.dialog_title_send_target_settings_validation_error)
+            .setMessage(getString(R.string.dialog_message_send_target_settings_validation_error, label))
             .setPositiveButton(android.R.string.ok, null)
             .show().setupManaged()
         return true
@@ -204,8 +204,8 @@ class SendTargetSettingsActivity : BaseActivity() {
     /** [duplicateNames]を「入力エラー」ダイアログで報告する（保存を中断するため呼び出し元でreturnする） */
     private fun showDuplicateNameErrorDialog(duplicateNames: List<String>) {
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_validation_error)
-            .setMessage(getString(R.string.dialog_message_validation_error_duplicate_name, duplicateNames.joinToString("／")))
+            .setTitle(R.string.dialog_title_send_target_settings_validation_error)
+            .setMessage(getString(R.string.dialog_message_send_target_settings_validation_error_duplicate_name, duplicateNames.joinToString("／")))
             .setPositiveButton(android.R.string.ok, null)
             .show().setupManaged()
     }
@@ -218,11 +218,11 @@ class SendTargetSettingsActivity : BaseActivity() {
         }
 
         val testSendBody = if (!SettingsStore.load(this).extractionCompanyNameEnabled) {
-            getString(R.string.test_send_body_template_company_name_extraction_disabled)
+            getString(R.string.label_send_target_settings_test_send_body_template_company_name_extraction_disabled)
         } else if (sendTarget.keywords.isNotEmpty()) {
-            getString(R.string.test_send_body_template_exists_keywords, sendTarget.keywords.joinToString("、"))
+            getString(R.string.label_send_target_settings_test_send_body_template_exists_keywords, sendTarget.keywords.joinToString("、"))
         } else {
-            getString(R.string.test_send_body_template_no_keywords)
+            getString(R.string.label_send_target_settings_test_send_body_template_no_keywords)
         }
 
         val editText = EditText(this).apply {
@@ -235,7 +235,7 @@ class SendTargetSettingsActivity : BaseActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_test_send_body)
+            .setTitle(R.string.dialog_title_send_target_settings_test_send_body)
             .setView(editText)
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_send) { _, _ ->
@@ -266,8 +266,8 @@ class SendTargetSettingsActivity : BaseActivity() {
             if (config.extractionCompanyNameEnabled && !sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
                 AlertDialog.Builder(this@SendTargetSettingsActivity)
-                    .setTitle(R.string.dialog_title_test_send_result)
-                    .setMessage(getString(R.string.dialog_message_test_send_routing_unmatched, sendTarget.keywords.joinToString("、")))
+                    .setTitle(R.string.dialog_title_send_target_settings_test_send_result)
+                    .setMessage(getString(R.string.dialog_message_send_target_settings_test_send_routing_unmatched, sendTarget.keywords.joinToString("、")))
                     .setPositiveButton(android.R.string.ok, null)
                     .show().setupManaged()
                 return@launch
@@ -290,18 +290,18 @@ class SendTargetSettingsActivity : BaseActivity() {
             val sendResultMessage = when (result) {
                 is KintoneApi.PostResult.Success -> result.message
                 is KintoneApi.PostResult.Skipped -> result.message
-                is KintoneApi.PostResult.HttpFailure -> getString(R.string.dialog_message_test_send_result_failure, "${result.code} ${result.detail}")
-                is KintoneApi.PostResult.NetworkError -> getString(R.string.dialog_message_test_send_result_network_error, result.message)
+                is KintoneApi.PostResult.HttpFailure -> getString(R.string.dialog_message_send_target_settings_test_send_result_failure, "${result.code} ${result.detail}")
+                is KintoneApi.PostResult.NetworkError -> getString(R.string.dialog_message_send_target_settings_test_send_result_network_error, result.message)
             }
             val message = buildSpannedString {
                 append(sendResultMessage)
                 append("\n\n")
                 if (smsParts.isExtractionFailed()) {
-                    append(getString(R.string.dialog_message_extraction_failure))
+                    append(getString(R.string.dialog_message_log_extraction_failure))
                 } else {
-                    bold { append(getString(R.string.hint_field_company)) }
+                    bold { append(getString(R.string.hint_send_target_settings_field_company)) }
                     append("：${smsParts.companyName}\n")
-                    bold { append(getString(R.string.hint_field_user_name)) }
+                    bold { append(getString(R.string.hint_send_target_settings_field_user_name)) }
                     append("：${smsParts.userName}\n\n")
                     append(smsParts.body)
                 }
@@ -311,7 +311,7 @@ class SendTargetSettingsActivity : BaseActivity() {
             } else {
                 getString(R.string.icon_extraction_rule)
             }
-            val title = "${getString(R.string.dialog_title_test_send_result)} $icon"
+            val title = "${getString(R.string.dialog_title_send_target_settings_test_send_result)} $icon"
             AlertDialog.Builder(this@SendTargetSettingsActivity)
                 .setTitle(title)
                 .setMessage(message)
@@ -323,14 +323,14 @@ class SendTargetSettingsActivity : BaseActivity() {
     /** カード追加/削除/並べ替えのたびに呼び、各カードの表示上の番号ラベルを現在の並び順に合わせて振り直す */
     private fun renumberCards() {
         sendTargetCards.forEachIndexed { index, card ->
-            card.binding.tvSendTargetIndex.text = getString(R.string.label_send_target_index, index + 1)
+            card.binding.tvSendTargetIndex.text = getString(R.string.label_send_target_settings_index, index + 1)
         }
     }
 
     /** 全カードを検証してからまとめて保存する。1件でも不正な入力があれば、その時点で中断しどこも保存しない */
     private fun onSaveClicked() {
         // if (sendTargetCards.isEmpty()) {
-        //     Toast.makeText(this, getString(R.string.toast_no_send_targets), Toast.LENGTH_SHORT).show()
+        //     Toast.makeText(this, getString(R.string.toast_send_target_settings_no_send_targets), Toast.LENGTH_SHORT).show()
         //     return
         // }
 

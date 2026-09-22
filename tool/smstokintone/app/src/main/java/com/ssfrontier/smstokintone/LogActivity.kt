@@ -92,8 +92,8 @@ class LogActivity : AppCompatActivity() {
      */
     private fun onClearClicked() {
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_confirm_clear_log)
-            .setMessage(R.string.dialog_message_confirm_clear_log)
+            .setTitle(R.string.dialog_title_log_confirm_clear_log)
+            .setMessage(R.string.dialog_message_log_confirm_clear_log)
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_clear) { _, _ ->
                 SmsLogStore.clear(this)
@@ -174,7 +174,7 @@ class LogActivity : AppCompatActivity() {
                     append(getString(sendTargetIcon))
                     append(" ")
                     color(ContextCompat.getColor(this@LogActivity, R.color.send_target_name)) {
-                        bold { append(entry.sendTargetName ?: getString(R.string.label_send_target_none)) }
+                        bold { append(entry.sendTargetName ?: getString(R.string.label_send_target_settings_none)) }
                     }
                 }
                 setPadding(0, 16, 0, 16)
@@ -248,12 +248,12 @@ class LogActivity : AppCompatActivity() {
     /** 会社名は[SmsParts.companyName]（[SettingsStore.resolveSendTargets]で会社名変換が適用済み）をそのまま表示する */
     private fun showExtractionResultDialog(smsParts: SmsParts, companyNameConverted: Boolean) {
         val message = if (smsParts.isExtractionFailed()) {
-            getString(R.string.dialog_message_extraction_failure)
+            getString(R.string.dialog_message_log_extraction_failure)
         } else {
             buildSpannedString {
-                bold { append(getString(R.string.hint_field_company)) }
+                bold { append(getString(R.string.hint_send_target_settings_field_company)) }
                 append("：${smsParts.companyName}\n")
-                bold { append(getString(R.string.hint_field_user_name)) }
+                bold { append(getString(R.string.hint_send_target_settings_field_user_name)) }
                 append("：${smsParts.userName}\n\n")
                 append(smsParts.body)
             }
@@ -264,7 +264,7 @@ class LogActivity : AppCompatActivity() {
             getString(R.string.icon_extraction_rule)
         }
         val title = buildString {
-            append(getString(R.string.dialog_title_extraction_result))
+            append(getString(R.string.dialog_title_log_extraction_result))
             append(" ")
             append(extractionMethodIcon)
             if (!smsParts.isExtractionFailed() && companyNameConverted) {
@@ -282,7 +282,7 @@ class LogActivity : AppCompatActivity() {
     /** 自動返信ログの行を長押しした際に、実際に送信した返信本文をダイアログで表示する */
     private fun showAutoReplyBodyDialog(replyBody: String) {
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_auto_reply_body)
+            .setTitle(R.string.dialog_title_log_auto_reply_body)
             .setMessage(replyBody)
             .setPositiveButton(android.R.string.ok, null)
             .show()

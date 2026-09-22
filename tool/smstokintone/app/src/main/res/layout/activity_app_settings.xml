@@ -54,7 +54,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_permission"
+                    android:text="@string/section_app_settings_permission"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -69,7 +69,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_read_permission"
+                        android:text="@string/label_app_settings_sms_read_permission"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -83,7 +83,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_permission_sms_read_granted"
+                            android:text="@string/label_app_settings_permission_sms_read_granted"
                             android:textColor="?attr/colorOnSurface"
                             android:visibility="gone" />
 
@@ -92,7 +92,7 @@
                             style="@style/AppButton.OutlinedButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/btn_sms_read_permission" />
+                            android:text="@string/btn_app_settings_sms_read_permission" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -105,7 +105,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_read_permission"
+                                android:text="@string/helper_app_settings_sms_read_permission"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -116,7 +116,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_receive_permission"
+                        android:text="@string/label_app_settings_sms_receive_permission"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -130,7 +130,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_permission_sms_receive_granted"
+                            android:text="@string/label_app_settings_permission_sms_receive_granted"
                             android:textColor="?attr/colorOnSurface"
                             android:visibility="gone" />
 
@@ -139,7 +139,7 @@
                             style="@style/AppButton.OutlinedButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/btn_sms_receive_permission" />
+                            android:text="@string/btn_app_settings_sms_receive_permission" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -152,7 +152,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_receive_permission"
+                                android:text="@string/helper_app_settings_sms_receive_permission"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -163,7 +163,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_send_permission"
+                        android:text="@string/label_app_settings_sms_send_permission"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -177,7 +177,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_permission_sms_send_granted"
+                            android:text="@string/label_app_settings_permission_sms_send_granted"
                             android:textColor="?attr/colorOnSurface"
                             android:visibility="gone" />
 
@@ -186,7 +186,7 @@
                             style="@style/AppButton.OutlinedButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/btn_sms_send_permission" />
+                            android:text="@string/btn_app_settings_sms_send_permission" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -199,7 +199,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_send_permission"
+                                android:text="@string/helper_app_settings_sms_send_permission"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -224,7 +224,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_layout"
+                    android:text="@string/section_app_settings_layout"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -239,7 +239,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_theme_mode"
+                        android:text="@string/section_app_settings_theme_mode"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -261,7 +261,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:checked="true"
-                                android:text="@string/rb_theme_light" />
+                                android:text="@string/rb_app_settings_theme_light" />
 
                             <RadioButton
                                 android:id="@+id/rbThemeDark"
@@ -269,7 +269,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
-                                android:text="@string/rb_theme_dark" />
+                                android:text="@string/rb_app_settings_theme_dark" />
                         </RadioGroup>
                     </LinearLayout>
                 </LinearLayout>
@@ -292,7 +292,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_sms_search"
+                    android:text="@string/section_app_settings_sms_search"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -307,7 +307,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_search_filter"
+                        android:text="@string/label_app_settings_search_filter"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -321,7 +321,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_sms_search_date_range"
+                            android:text="@string/label_app_settings_sms_search_date_range"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -333,7 +333,7 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_search_date_range_days">
+                                android:hint="@string/hint_app_settings_sms_search_date_range_days">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/etSmsSearchDateRangeDays"
@@ -357,7 +357,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_send_target_filter"
+                            android:text="@string/label_app_settings_default_send_target_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -385,7 +385,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_send_status_filter"
+                            android:text="@string/label_app_settings_default_send_status_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -401,7 +401,7 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_send_none_only_enabled" />
+                                android:text="@string/switch_app_settings_default_send_none_only_enabled" />
 
                             <CheckBox
                                 android:id="@+id/cbSearchSentAutoOnlyEnabled"
@@ -410,7 +410,7 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_sent_auto_only_enabled" />
+                                android:text="@string/switch_app_settings_default_sent_auto_only_enabled" />
 
                             <CheckBox
                                 android:id="@+id/cbSearchSentManualOnlyEnabled"
@@ -419,7 +419,7 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_sent_manual_only_enabled" />
+                                android:text="@string/switch_app_settings_default_sent_manual_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -434,7 +434,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_default_extraction_status_filter"
+                            android:text="@string/label_app_settings_default_extraction_status_filter"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -450,7 +450,7 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_extraction_succeeded_only_enabled" />
+                                android:text="@string/switch_app_settings_default_extraction_succeeded_only_enabled" />
 
                             <CheckBox
                                 android:id="@+id/cbSearchExtractionFailedOnlyEnabled"
@@ -459,7 +459,7 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_extraction_failed_only_enabled" />
+                                android:text="@string/switch_app_settings_default_extraction_failed_only_enabled" />
 
                             <CheckBox
                                 android:id="@+id/cbSearchExtractionContinuationOnlyEnabled"
@@ -468,7 +468,7 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="0dp"
                                 android:checked="false"
-                                android:text="@string/switch_default_extraction_continuation_only_enabled" />
+                                android:text="@string/switch_app_settings_default_extraction_continuation_only_enabled" />
                         </LinearLayout>
                     </LinearLayout>
 
@@ -477,7 +477,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_search_filters_visibility"
+                        android:text="@string/section_app_settings_search_filters_visibility"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -499,7 +499,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:checked="true"
-                                android:text="@string/rb_search_filters_visible" />
+                                android:text="@string/rb_app_settings_search_filters_visible" />
 
                             <RadioButton
                                 android:id="@+id/rbSearchFiltersHidden"
@@ -507,7 +507,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
-                                android:text="@string/rb_search_filters_hidden" />
+                                android:text="@string/rb_app_settings_search_filters_hidden" />
                         </RadioGroup>
                     </LinearLayout>
 
@@ -516,7 +516,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_search_selection_target"
+                        android:text="@string/label_app_settings_search_selection_target"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -533,7 +533,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="false"
-                            android:text="@string/switch_search_extraction_failed_enabled" />
+                            android:text="@string/switch_app_settings_search_extraction_failed_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -545,7 +545,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_extraction_failed_enabled"
+                                android:text="@string/helper_app_settings_search_extraction_failed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -557,7 +557,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_search_extraction_continuation_enabled" />
+                            android:text="@string/switch_app_settings_search_extraction_continuation_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -569,7 +569,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_search_extraction_continuation_enabled"
+                                android:text="@string/helper_app_settings_search_extraction_continuation_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -594,7 +594,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_sms_send"
+                    android:text="@string/section_app_settings_sms_send"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -609,7 +609,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_send_mode"
+                        android:text="@string/label_app_settings_sms_send_mode"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -629,7 +629,7 @@
                                 style="@style/AppRadioButton"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/rb_sms_send_mode_manual" />
+                                android:text="@string/rb_app_settings_sms_send_mode_manual" />
 
                             <RadioButton
                                 android:id="@+id/rbSendAuto"
@@ -638,7 +638,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
                                 android:checked="true"
-                                android:text="@string/rb_sms_send_mode_auto" />
+                                android:text="@string/rb_app_settings_sms_send_mode_auto" />
                         </RadioGroup>
 
                         <LinearLayout
@@ -651,7 +651,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_send_mode"
+                                android:text="@string/helper_app_settings_sms_send_mode"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -662,7 +662,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target"
+                        android:text="@string/section_app_settings_send_target"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -677,7 +677,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_send_extraction_failed_enabled" />
+                            android:text="@string/switch_app_settings_send_extraction_failed_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -689,7 +689,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_send_extraction_failed_enabled"
+                                android:text="@string/helper_app_settings_send_extraction_failed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -701,7 +701,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:checked="true"
-                            android:text="@string/switch_send_extraction_continuation_enabled" />
+                            android:text="@string/switch_app_settings_send_extraction_continuation_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -713,7 +713,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_send_extraction_continuation_enabled"
+                                android:text="@string/helper_app_settings_send_extraction_continuation_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -738,7 +738,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_sms_reply"
+                    android:text="@string/section_app_settings_sms_reply"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -753,7 +753,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_reply_mode"
+                        android:text="@string/label_app_settings_sms_reply_mode"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -774,7 +774,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:checked="true"
-                                android:text="@string/rb_sms_reply_mode_manual" />
+                                android:text="@string/rb_app_settings_sms_reply_mode_manual" />
 
                             <RadioButton
                                 android:id="@+id/rbSmsReplyModeAuto"
@@ -782,7 +782,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
-                                android:text="@string/rb_sms_reply_mode_auto" />
+                                android:text="@string/rb_app_settings_sms_reply_mode_auto" />
                         </RadioGroup>
 
                         <LinearLayout
@@ -795,7 +795,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_auto_reply_extraction_failed_enabled"
+                                android:text="@string/helper_app_settings_auto_reply_extraction_failed_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -806,7 +806,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_auto_reply_cooldown_seconds"
+                        android:text="@string/label_app_settings_auto_reply_cooldown_seconds"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -819,7 +819,7 @@
                             android:id="@+id/tilReplyCooldownSeconds"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_auto_reply_cooldown_seconds">
+                            android:hint="@string/hint_app_settings_auto_reply_cooldown_seconds">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etReplyCooldownSeconds"
@@ -839,7 +839,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_auto_reply_cooldown_seconds"
+                                android:text="@string/helper_app_settings_auto_reply_cooldown_seconds"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -850,7 +850,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_reply"
+                        android:text="@string/section_app_settings_reply"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -863,7 +863,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_sms_extraction_success_reply_body"
+                            android:text="@string/section_app_settings_sms_extraction_success_reply_body"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -876,7 +876,7 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_extraction_success_reply_body">
+                                android:hint="@string/hint_app_settings_sms_extraction_success_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/etReplySuccessBody"
@@ -897,7 +897,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_extraction_success_reply_body"
+                                android:text="@string/helper_app_settings_sms_extraction_success_reply_body"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -914,7 +914,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_sms_extraction_failed_reply_body"
+                            android:text="@string/section_app_settings_sms_extraction_failed_reply_body"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -927,7 +927,7 @@
                             <com.google.android.material.textfield.TextInputLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_sms_extraction_failed_reply_body">
+                                android:hint="@string/hint_app_settings_sms_extraction_failed_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/etReplyFailedBody"
@@ -948,7 +948,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_extraction_failed_reply_body"
+                                android:text="@string/helper_app_settings_sms_extraction_failed_reply_body"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -973,7 +973,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_information_extraction"
+                    android:text="@string/section_app_settings_information_extraction"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -988,7 +988,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_company_name_extraction"
+                        android:text="@string/label_app_settings_company_name_extraction"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1004,7 +1004,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:text="@string/switch_company_name_extraction_enabled" />
+                            android:text="@string/switch_app_settings_company_name_extraction_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -1016,7 +1016,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_company_name_extraction_enabled"
+                                android:text="@string/helper_app_settings_company_name_extraction_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1034,7 +1034,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_company_name_conversion"
+                        android:text="@string/section_app_settings_company_name_conversion"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1048,7 +1048,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_company_name_auto_conversion"
+                            android:text="@string/label_app_settings_company_name_auto_conversion"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -1064,7 +1064,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:checked="false"
-                                android:text="@string/switch_company_name_auto_conversion_enabled" />
+                                android:text="@string/switch_app_settings_company_name_auto_conversion_enabled" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -1076,7 +1076,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="@string/helper_company_name_auto_conversion_enabled"
+                                    android:text="@string/helper_app_settings_company_name_auto_conversion_enabled"
                                     android:textSize="12sp"
                                     android:textColor="?android:attr/textColorSecondary" />
                             </LinearLayout>
@@ -1087,7 +1087,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_company_name_fix_conversion"
+                            android:text="@string/label_app_settings_company_name_fix_conversion"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -1109,7 +1109,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="@string/btn_add_keyword" />
+                                android:text="@string/btn_send_target_settings_add_keyword" />
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -1121,7 +1121,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="@string/helper_company_name_fix_conversion"
+                                    android:text="@string/helper_app_settings_company_name_fix_conversion"
                                     android:textSize="12sp"
                                     android:textColor="?android:attr/textColorSecondary" />
                             </LinearLayout>
@@ -1133,7 +1133,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_ai_extraction"
+                        android:text="@string/label_app_settings_ai_extraction"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1149,7 +1149,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="false"
-                            android:text="@string/switch_ai_extraction_enabled" />
+                            android:text="@string/switch_app_settings_ai_extraction_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -1161,7 +1161,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_ai_extraction_enabled"
+                                android:text="@string/helper_app_settings_ai_extraction_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1185,7 +1185,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_continuation"
+                    android:text="@string/section_app_settings_continuation"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -1200,7 +1200,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_continuation"
+                        android:text="@string/label_app_settings_continuation"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1216,7 +1216,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:text="@string/switch_continuation_enabled" />
+                            android:text="@string/switch_app_settings_continuation_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -1228,7 +1228,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_continuation_enabled"
+                                android:text="@string/helper_app_settings_continuation_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1239,7 +1239,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:text="@string/btn_edit_continuation_info" />
+                            android:text="@string/btn_app_settings_edit_continuation_info" />
                     </LinearLayout>
 
                     <TextView
@@ -1247,7 +1247,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_continuation_scope"
+                        android:text="@string/label_app_settings_continuation_scope"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1270,14 +1270,14 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="16dp"
                                 android:checked="false"
-                                android:text="@string/rb_continuation_scope_unlimited" />
+                                android:text="@string/rb_app_settings_continuation_scope_unlimited" />
                             <RadioButton
                                 android:id="@+id/rbContinuationScopeSameDay"
                                 style="@style/AppRadioButton"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:checked="true"
-                                android:text="@string/rb_continuation_scope_same_day" />
+                                android:text="@string/rb_app_settings_continuation_scope_same_day" />
                         </RadioGroup>
 
                         <LinearLayout
@@ -1290,7 +1290,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_continuation_scope"
+                                android:text="@string/helper_app_settings_continuation_scope"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1301,7 +1301,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_continuation_show_name"
+                        android:text="@string/label_app_settings_continuation_show_name"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1317,7 +1317,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:text="@string/switch_continuation_show_user_name_enabled" />
+                            android:text="@string/switch_app_settings_continuation_show_user_name_enabled" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -1329,7 +1329,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_continuation_show_user_name_enabled"
+                                android:text="@string/helper_app_settings_continuation_show_user_name_enabled"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1354,7 +1354,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/section_log"
+                    android:text="@string/section_app_settings_log"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface" />
@@ -1369,7 +1369,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_auto_refresh"
+                        android:text="@string/section_app_settings_auto_refresh"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1385,7 +1385,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:text="@string/switch_auto_refresh_enabled" />
+                            android:text="@string/switch_app_settings_auto_refresh_enabled" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -1399,7 +1399,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/label_auto_refresh_interval"
+                            android:text="@string/label_app_settings_auto_refresh_interval"
                             android:textColor="?attr/colorOnSurface" />
 
                         <LinearLayout
@@ -1412,7 +1412,7 @@
                                 android:id="@+id/tilLogRefreshInterval"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="@string/hint_auto_refresh_interval">
+                                android:hint="@string/hint_app_settings_auto_refresh_interval">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
@@ -1432,7 +1432,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="4dp"
-                                    android:text="@string/helper_auto_refresh_interval"
+                                    android:text="@string/helper_app_settings_auto_refresh_interval"
                                     android:textSize="12sp"
                                     android:textColor="?android:attr/textColorSecondary" />
                             </LinearLayout>
@@ -1444,7 +1444,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_sms_match_tolerance_seconds"
+                        android:text="@string/label_app_settings_sms_match_tolerance_seconds"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1457,7 +1457,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_sms_match_tolerance_seconds">
+                            android:hint="@string/hint_app_settings_sms_match_tolerance_seconds">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -1477,7 +1477,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_sms_match_tolerance_seconds"
+                                android:text="@string/helper_app_settings_sms_match_tolerance_seconds"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1488,7 +1488,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/label_body_excerpt_length"
+                        android:text="@string/label_app_settings_body_excerpt_length"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -1501,7 +1501,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_body_excerpt_length">
+                            android:hint="@string/hint_app_settings_body_excerpt_length">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
@@ -1521,7 +1521,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="@string/helper_body_excerpt_length"
+                                android:text="@string/helper_app_settings_body_excerpt_length"
                                 android:textSize="12sp"
                                 android:textColor="?android:attr/textColorSecondary" />
                         </LinearLayout>
@@ -1534,3 +1534,4 @@
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
+

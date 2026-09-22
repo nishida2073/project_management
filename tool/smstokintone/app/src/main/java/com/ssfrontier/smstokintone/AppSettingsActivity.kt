@@ -41,21 +41,21 @@ class AppSettingsActivity : BaseActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updatePermissionStatus()
-            if (!granted) showPermissionDeniedToast(R.string.toast_sms_receive_permission_denied)
+            if (!granted) showPermissionDeniedToast(R.string.toast_app_settings_sms_receive_permission_denied)
         }
 
     /** SMS送信権限リクエスト結果ハンドラ。許可時は表示更新、拒否時はトースト表示。 */
     private val requestSendSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateSendPermissionStatus()
-            if (!granted) showPermissionDeniedToast(R.string.toast_sms_send_permission_denied)
+            if (!granted) showPermissionDeniedToast(R.string.toast_app_settings_sms_send_permission_denied)
         }
 
     /** SMS読み取り権限リクエスト結果ハンドラ。許可時は表示更新、拒否時はトースト表示。 */
     private val requestReadSmsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             updateReadPermissionStatus()
-            if (!granted) showPermissionDeniedToast(R.string.toast_sms_read_permission_denied)
+            if (!granted) showPermissionDeniedToast(R.string.toast_app_settings_sms_read_permission_denied)
         }
 
     /** 権限拒否時のトースト表示。 */
@@ -186,8 +186,8 @@ class AppSettingsActivity : BaseActivity() {
                 val noCompanyNameCount = ContinuationStore.getAll(this).values.count { it.companyName.isBlank() }
                 if (noCompanyNameCount > 0) {
                     AlertDialog.Builder(this)
-                        .setTitle(R.string.dialog_title_company_name_extraction_warning)
-                        .setMessage(getString(R.string.dialog_message_company_name_extraction_warning, noCompanyNameCount))
+                        .setTitle(R.string.dialog_title_continuation_info_settings_company_name_extraction_warning)
+                        .setMessage(getString(R.string.dialog_message_continuation_info_settings_company_name_extraction_warning, noCompanyNameCount))
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             SettingsStore.update(this) { it.copy(extractionCompanyNameEnabled = isChecked) }
                             previousCompanyNameExtractionEnabled = isChecked
@@ -418,8 +418,8 @@ class AppSettingsActivity : BaseActivity() {
 
         val resetSettingsListener = View.OnClickListener {
             AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_confirm_reset_settings)
-                .setMessage(R.string.dialog_message_confirm_reset_settings)
+                .setTitle(R.string.dialog_title_app_settings_confirm_reset_settings)
+                .setMessage(R.string.dialog_message_app_settings_confirm_reset_settings)
                 .setNegativeButton(R.string.btn_cancel, null)
                 .setPositiveButton(R.string.btn_reset) { _, _ ->
                     SettingsStore.resetToDefaults(this)
@@ -514,7 +514,7 @@ class AppSettingsActivity : BaseActivity() {
         binding.tvPermissionStatus,
         binding.btnRequestPermission,
         binding.tvReceivePermissionHelper,
-        R.string.label_permission_sms_receive_granted
+        R.string.label_app_settings_permission_sms_receive_granted
     )
 
     /**
@@ -525,7 +525,7 @@ class AppSettingsActivity : BaseActivity() {
         binding.tvSendPermissionStatus,
         binding.btnRequestSendPermission,
         binding.tvSendPermissionHelper,
-        R.string.label_permission_sms_send_granted
+        R.string.label_app_settings_permission_sms_send_granted
     )
 
     /**
@@ -536,7 +536,7 @@ class AppSettingsActivity : BaseActivity() {
         binding.tvReadPermissionStatus,
         binding.btnRequestReadPermission,
         binding.tvReadPermissionHelper,
-        R.string.label_permission_sms_read_granted
+        R.string.label_app_settings_permission_sms_read_granted
     )
 
     companion object {

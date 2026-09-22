@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="@string/label_sms_read_permission_required"
+            android:text="@string/label_sms_search_read_permission_required"
             android:textColor="?attr/colorOnSurface" />
     </LinearLayout>
 
@@ -49,7 +49,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/section_search_conditions"
+                android:text="@string/section_sms_search_conditions"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface" />
@@ -59,7 +59,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/btn_hide_search_filters" />
+                android:text="@string/btn_sms_search_hide_search_filters" />
         </LinearLayout>
 
         <LinearLayout
@@ -73,7 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_date_range"
+                android:text="@string/label_sms_search_date_range"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                    android:hint="@string/hint_date_from">
+                    android:hint="@string/hint_sms_search_date_from">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDateFrom"
@@ -102,7 +102,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="@string/hint_date_to">
+                    android:hint="@string/hint_sms_search_date_to">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etDateTo"
@@ -118,7 +118,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/hint_body_filter"
+                android:hint="@string/hint_sms_search_body_filter"
                 android:visibility="gone">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -135,7 +135,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_send_target_filter"
+                android:text="@string/label_sms_search_send_target_filter"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
@@ -157,7 +157,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_extraction_status_filter"
+                android:text="@string/label_sms_search_extraction_status_filter"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
@@ -168,33 +168,33 @@
                 android:gravity="center_vertical">
 
                 <CheckBox
-                    android:id="@+id/cbExtractionSucceededOnly"
+                    android:id="@+id/cbSmsSearchExtractionSucceededOnly"
                     style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:minHeight="0dp"
                     android:checked="false"
-                    android:text="@string/cb_extraction_succeeded_only" />
+                    android:text="@string/cb_sms_search_extraction_succeeded_only" />
 
                 <CheckBox
-                    android:id="@+id/cbExtractionFailedOnly"
+                    android:id="@+id/cbSmsSearchExtractionFailedOnly"
                     style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:minHeight="0dp"
                     android:checked="false"
-                    android:text="@string/cb_extraction_failed_only" />
+                    android:text="@string/cb_sms_search_extraction_failed_only" />
 
                 <CheckBox
-                    android:id="@+id/cbExtractionContinuationOnly"
+                    android:id="@+id/cbSmsSearchExtractionContinuationOnly"
                     style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minHeight="0dp"
                     android:checked="false"
-                    android:text="@string/cb_extraction_continuation_only" />
+                    android:text="@string/cb_sms_search_extraction_continuation_only" />
             </LinearLayout>
 
             <TextView
@@ -202,7 +202,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="@string/label_search_send_status_filter"
+                android:text="@string/label_sms_search_send_status_filter"
                 android:textColor="?attr/colorOnSurface" />
 
             <LinearLayout
@@ -212,14 +212,14 @@
                 android:orientation="horizontal">
 
                 <CheckBox
-                    android:id="@+id/cbSendNoneOnly"
+                    android:id="@+id/cbSmsSearchSendNoneOnly"
                     style="@style/AppCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:minHeight="0dp"
                     android:checked="true"
-                    android:text="@string/cb_send_none_only" />
+                    android:text="@string/cb_sms_search_send_none_only" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -227,22 +227,22 @@
                     android:orientation="vertical">
 
                     <CheckBox
-                        android:id="@+id/cbSentAutoOnly"
+                        android:id="@+id/cbSmsSearchSentAutoOnly"
                         style="@style/AppCheckBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:minHeight="0dp"
                         android:checked="false"
-                        android:text="@string/cb_sent_auto_only" />
+                        android:text="@string/cb_sms_search_sent_auto_only" />
 
                     <CheckBox
-                        android:id="@+id/cbSentManualOnly"
+                        android:id="@+id/cbSmsSearchSentManualOnly"
                         style="@style/AppCheckBox"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:minHeight="0dp"
                         android:checked="false"
-                        android:text="@string/cb_sent_manual_only" />
+                        android:text="@string/cb_sms_search_sent_manual_only" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -283,7 +283,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/helper_sms_status_legend"
+            android:text="@string/helper_sms_search_status_legend"
             android:textSize="12sp"
             android:textColor="?android:attr/textColorSecondary" />
 
@@ -324,6 +324,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/btn_send_selected" />
+        android:text="@string/btn_sms_search_send_selected" />
 
 </LinearLayout>

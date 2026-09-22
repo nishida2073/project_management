@@ -242,7 +242,7 @@ object SettingsStore {
 
         /** 表示名が未設定の場合のフォールバック文字列を返す */
         fun displayName(context: Context): String =
-            name.ifBlank { context.getString(R.string.label_send_target_name_unset) }
+            name.ifBlank { context.getString(R.string.label_send_target_settings_name_unset) }
 
         /** kintoneへの送信に必要な項目（認証情報含む）が揃っているかどうか。[keywords]の有無や[fieldCompanyName]等の任意項目は問わない */
         val isValid: Boolean
@@ -602,9 +602,9 @@ object SettingsStore {
      */
     fun sendTargetFilterOptions(context: Context): List<Pair<String?, String>> {
         val sendTargets = loadSendTargets(context)
-        return listOf(null to context.getString(R.string.filter_send_target_all)) +
+        return listOf(null to context.getString(R.string.filter_sms_search_send_target_all)) +
             sendTargets.map { it.name to it.displayName(context) } +
-            listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_none))
+            listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_settings_none))
     }
 
     /**

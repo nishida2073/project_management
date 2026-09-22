@@ -121,11 +121,11 @@ class SettingsImportExportActivity : BaseActivity() {
             false
         }
         if (written) {
-            Toast.makeText(this, getString(R.string.toast_settings_exported), Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.toast_settings_import_export_settings_exported), Toast.LENGTH_SHORT).show()
         } else {
             AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_export_error)
-                .setMessage(R.string.dialog_message_export_failed)
+                .setTitle(R.string.dialog_title_settings_import_export_export_error)
+                .setMessage(R.string.dialog_message_settings_import_export_export_failed)
                 .setPositiveButton(android.R.string.ok, null)
                 .show().setupManaged()
         }
@@ -142,13 +142,13 @@ class SettingsImportExportActivity : BaseActivity() {
             null
         }
         if (text.isNullOrBlank()) {
-            showError(getString(R.string.dialog_message_import_file_read_failed))
+            showError(getString(R.string.dialog_message_settings_import_export_import_file_read_failed))
             return
         }
         try {
             parseImportFile(text)
         } catch (e: JSONException) {
-            showError(getString(R.string.dialog_message_import_invalid_json, e.message.orEmpty()))
+            showError(getString(R.string.dialog_message_settings_import_export_import_invalid_json, e.message.orEmpty()))
         }
     }
 
@@ -168,7 +168,7 @@ class SettingsImportExportActivity : BaseActivity() {
         }
 
         if (!hasAnySection(root)) {
-            showError(getString(R.string.message_import_no_section))
+            showError(getString(R.string.message_settings_import_export_import_no_section))
             return
         }
         importedJson = root
@@ -191,7 +191,7 @@ class SettingsImportExportActivity : BaseActivity() {
         }
         if (duplicateNames.isNotEmpty()) {
             throw JSONException(
-                getString(R.string.message_import_send_target_duplicate_name, duplicateNames.sorted().joinToString("／"))
+                getString(R.string.message_settings_import_export_import_send_target_duplicate_name, duplicateNames.sorted().joinToString("／"))
             )
         }
     }
@@ -211,38 +211,38 @@ class SettingsImportExportActivity : BaseActivity() {
         val json = importedJson ?: return ""
         val lines = mutableListOf<String>()
         if (includeFileName) {
-            selectedFileName?.let { lines += getString(R.string.label_import_file, it) }
+            selectedFileName?.let { lines += getString(R.string.label_settings_import_export_import_file, it) }
         }
-        lines += getString(R.string.preview_app_settings, getStateLabel(json.optJSONObject("appConfig")?.length() ?: 0 > 0))
-        lines += getString(R.string.preview_send_targets, getCountLabel(json.optJSONArray("sendTargetConfig")?.length()))
-        lines += getString(R.string.preview_continuation_info, getCountLabel(json.optJSONArray("continuationInfoConfig")?.length()))
+        lines += getString(R.string.label_settings_import_export_preview_app_settings, getStateLabel(json.optJSONObject("appConfig")?.length() ?: 0 > 0))
+        lines += getString(R.string.label_settings_import_export_preview_send_targets, getCountLabel(json.optJSONArray("sendTargetConfig")?.length()))
+        lines += getString(R.string.label_settings_import_export_preview_continuation_info, getCountLabel(json.optJSONArray("continuationInfoConfig")?.length()))
         return lines.joinToString("\n")
     }
 
     /** セクションの状態文言を返す */
     private fun getStateLabel(included: Boolean): String =
-        if (included) getString(R.string.value_import_applied) else getString(R.string.value_import_skip)
+        if (included) getString(R.string.label_settings_import_export_result_import_applied) else getString(R.string.label_settings_import_export_result_import_skip)
 
     /** セクションの件数文言を返す */
     private fun getCountLabel(count: Int?): String =
-        if (count == null || count == 0) getString(R.string.value_import_skip)
-        else getString(R.string.value_import_applied_count, count)
+        if (count == null || count == 0) getString(R.string.label_settings_import_export_result_import_skip)
+        else getString(R.string.label_settings_import_export_result_import_applied_count, count)
 
     /** 「この内容で設定する」ボタン。反映内容の確認ダイアログを表示し、確定時に適用する */
     private fun onImportClicked() {
         val json = importedJson ?: return
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_confirm_import)
-            .setMessage(getString(R.string.dialog_message_confirm_import, buildPreviewText(includeFileName = true)))
+            .setTitle(R.string.dialog_title_settings_import_export_confirm_import)
+            .setMessage(getString(R.string.dialog_message_settings_import_export_confirm_import, buildPreviewText(includeFileName = true)))
             .setNegativeButton(R.string.btn_cancel, null)
-            .setPositiveButton(R.string.btn_import_settings) { _, _ -> applyImport(json) }
+            .setPositiveButton(R.string.btn_settings_import_export_import_settings) { _, _ -> applyImport(json) }
             .show().setupManaged()
     }
 
     /** JSON から設定をマージして反映し、完了トーストを表示して画面を閉じる */
     private fun applyImport(json: JSONObject) {
         SettingsStore.mergeFromJson(this, json)
-        Toast.makeText(this, getString(R.string.toast_settings_imported), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.toast_settings_import_export_settings_imported), Toast.LENGTH_SHORT).show()
         json.optJSONObject("appConfig")?.takeIf { it.length() > 0 }?.let {
             val config = SettingsStore.configFromJson(it, SettingsStore.load(this))
             AppCompatDelegate.setDefaultNightMode(config.themeMode.toNightMode())
@@ -253,11 +253,11 @@ class SettingsImportExportActivity : BaseActivity() {
     /** エラーダイアログを表示し、プレビューを未選択状態へ戻す */
     private fun showError(message: String) {
         importedJson = null
-        binding.tvImportPreview.text = getString(R.string.message_import_no_file)
+        binding.tvImportPreview.text = getString(R.string.message_settings_import_export_import_no_file)
         binding.btnImportSettings.isEnabled = false
         binding.btnImportSettings.setButtonStyleByEnabled(false)
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_import_error)
+            .setTitle(R.string.dialog_title_settings_import_export_import_error)
             .setMessage(message)
             .setPositiveButton(android.R.string.ok, null)
             .show().setupManaged()
