@@ -30,32 +30,32 @@
   },
   "sendTargetConfig": [
     {
-      "sendTargetName": "（例）本社",
+      "sendTargetName": "本社",
       "companyName": "NTTデータユニバーシティ",
       "keywords": [
         "NTTデータ",
         "ユニバーシティ"
       ],
       "subdomain": "univ-kyousai-{X}",
-      "appId": "1",
       "loginName": "kintoneのログイン名",
       "loginPassword": "kintoneのパスワード",
-      "fieldSender": "sender",
-      "fieldHistory": "history",
-      "fieldDatetime": "receive_datetime",
+      "appId": "1",
       "fieldType": "registration_type",
-      "updateToleranceHours": 5,
-      "updateToleranceMode": "SAME_DATE",
+      "fieldDatetime": "receive_datetime",
+      "fieldSender": "sender",
       "fieldCompanyName": "company_name",
       "fieldUserName": "user_name",
-      "fieldBody": "body"
+      "fieldBody": "body",
+      "fieldHistory": "history",
+      "updateToleranceMode": "SAME_DATE",
+      "updateToleranceHours": 5
     }
   ],
   "continuationInfoConfig": [
     {
       "senderAddress": "09012345678",
-      "companyName": "（例）NTTデータユニバーシティ",
-      "userName": "（例）ユニバ太郎",
+      "companyName": "NTTデータユニバーシティ",
+      "userName": "ユニバ太郎",
       "timestampMillis": 0
     }
   ]

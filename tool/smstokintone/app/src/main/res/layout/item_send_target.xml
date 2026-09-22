@@ -401,20 +401,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:hint="@string/hint_send_target_settings_field_history">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    style="@style/AppTextInputEditText"
-                                    android:id="@+id/etFieldHistory"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="text" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
                                 android:hint="@string/hint_send_target_settings_field_company">
 
                                 <com.google.android.material.textfield.TextInputEditText
@@ -448,6 +434,20 @@
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
                                     android:id="@+id/etFieldBody"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="text" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:hint="@string/hint_send_target_settings_field_history">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    style="@style/AppTextInputEditText"
+                                    android:id="@+id/etFieldHistory"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="text" />

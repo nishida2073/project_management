@@ -81,22 +81,22 @@
 
 | キー | 意味 | 利用できる値 |
 | --- | --- | --- |
-| `name` | 送信先の表示名 | 文字列<br><br>例）`"本社"` |
+| `sendTargetName` | 送信先の表示名 | 文字列<br><br>例）`"本社"` |
 | `companyName` | この送信先の会社名 | 文字列<br><br>例）`"NTTデータユニバーシティ"` |
 | `keywords` | 振り分け条件のキーワード配列。<br>**空配列の場合:デフォルトの送信先** | 文字列の配列<br><br>例）`["NTTデータ", "ユニバーシティ"]` |
 | `subdomain` | kintoneのサブドメイン | 文字列<br><br>例）`"univ-kyousai-{X}"` |
-| `appId` | kintoneアプリのID | 文字列<br><br>例）`"1"` |
 | `loginName` | パスワード認証（kintoneのログイン名とパスワード）でkintoneへ接続する際のログイン名 | 文字列<br><br>例）`"kintoneのログイン名"` |
 | `loginPassword` | パスワード認証で使うkintoneのパスワード | 文字列<br><br>例）`"kintoneのパスワード"` |
-| `fieldSender` | 送信元電話番号を書き込むkintoneフィールドのフィールドコード | 文字列<br><br>例）`"sender"` |
-| `fieldHistory` | 本文（複数SMSを連結する場合は履歴として蓄積）を書き込むフィールドコード | 文字列<br><br>例）`"history"` |
-| `fieldDatetime` | 最終受信日時を書き込む・既存レコード検索にも使うフィールドコード | 文字列<br><br>例）`"receive_datetime"` |
+| `appId` | kintoneアプリのID | 文字列<br><br>例）`"1"` |
 | `fieldType` | 登録種別を書き込む・既存レコード検索の絞り込みにも使うフィールドコード | 文字列<br><br>例）`"registration_type"` |
-| `updateToleranceHours` | 同一送信元の既存レコードへ追記するか判定する許容時間。`updateToleranceMode` が `HOURS` のときのみ使う | 整数（時間）<br><br>例）`5` |
-| `updateToleranceMode` | 既存レコードへ追記するか新規登録するかの判定条件 | `SAME_DATE`（端末の暦日が同じ）／ `HOURS`（許容時間以内）<br><br>例）`SAME_DATE` |
+| `fieldDatetime` | 最終受信日時を書き込む・既存レコード検索にも使うフィールドコード | 文字列<br><br>例）`"receive_datetime"` |
+| `fieldSender` | 送信元電話番号を書き込むkintoneフィールドのフィールドコード | 文字列<br><br>例）`"sender"` |
 | `fieldCompanyName` | 抽出した会社名を書き込むフィールドコード。空なら書き込まない | 文字列<br><br>例）`"company_name"` |
 | `fieldUserName` | 抽出した氏名を書き込むフィールドコード。空なら書き込まない | 文字列<br><br>例）`"user_name"` |
 | `fieldBody` | SMS本文全体（原文）を書き込むフィールドコード。空なら書き込まない | 文字列<br><br>例）`"body"` |
+| `fieldHistory` | 本文（複数SMSを連結する場合は履歴として蓄積）を書き込むフィールドコード | 文字列<br><br>例）`"history"` |
+| `updateToleranceMode` | 既存レコードへ追記するか新規登録するかの判定条件 | `SAME_DATE`（端末の暦日が同じ）／ `HOURS`（許容時間以内）<br><br>例）`SAME_DATE` |
+| `updateToleranceHours` | 同一送信元の既存レコードへ追記するか判定する許容時間。`updateToleranceMode` が `HOURS` のときのみ使う | 整数（時間）<br><br>例）`5` |
 
 
 ---
@@ -158,32 +158,32 @@
   },
   "sendTargetConfig": [
     {
-      "name": "（例）本社",
+      "sendTargetName": "本社",
       "companyName": "NTTデータユニバーシティ",
       "keywords": [
         "NTTデータ",
         "ユニバーシティ"
       ],
       "subdomain": "univ-kyousai-{X}",
-      "appId": "1",
       "loginName": "kintoneのログイン名",
       "loginPassword": "kintoneのパスワード",
-      "fieldSender": "sender",
-      "fieldHistory": "history",
-      "fieldDatetime": "receive_datetime",
+      "appId": "1",
       "fieldType": "registration_type",
-      "updateToleranceHours": 5,
-      "updateToleranceMode": "SAME_DATE",
+      "fieldDatetime": "receive_datetime",
+      "fieldSender": "sender",
       "fieldCompanyName": "company_name",
       "fieldUserName": "user_name",
-      "fieldBody": "body"
+      "fieldBody": "body",
+      "fieldHistory": "history",
+      "updateToleranceMode": "SAME_DATE",
+      "updateToleranceHours": 5
     }
   ],
   "continuationInfoConfig": [
     {
       "senderAddress": "09012345678",
-      "companyName": "（例）NTTデータユニバーシティ",
-      "userName": "（例）ユニバ太郎",
+      "companyName": "NTTデータユニバーシティ",
+      "userName": "ユニバ太郎",
       "timestampMillis": 0
     }
   ]
