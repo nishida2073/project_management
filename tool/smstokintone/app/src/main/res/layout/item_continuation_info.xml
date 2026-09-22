@@ -63,7 +63,7 @@
                 android:id="@+id/llCompanyNameSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_send_target_settings_field_company">
+                android:hint="@string/hint_continuation_info_field_company">
 
                 <com.google.android.material.textfield.TextInputEditText
                     style="@style/AppTextInputEditText"
@@ -77,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:hint="@string/hint_send_target_settings_field_user_name">
+                android:hint="@string/hint_continuation_info_field_user_name">
 
                 <com.google.android.material.textfield.TextInputEditText
                     style="@style/AppTextInputEditText"
@@ -92,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/section_send_target_settings_send_target_name"
+            android:text="@string/label_continuation_info_send_target_name"
             android:textColor="?attr/colorOnSurface" />
 
         <LinearLayout

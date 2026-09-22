@@ -76,7 +76,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_send_target_name"
+                        android:text="@string/label_send_target_settings_send_target_name"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -113,7 +113,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_company_name"
+                        android:text="@string/label_send_target_settings_company_name"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -150,7 +150,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_sms_target"
+                        android:text="@string/label_send_target_settings_sms_target"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -224,7 +224,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_connection"
+                        android:text="@string/label_send_target_settings_connection"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -260,7 +260,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_auth_info"
+                        android:text="@string/label_send_target_settings_auth_info"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -311,7 +311,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="24dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_app"
+                        android:text="@string/label_send_target_settings_app"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -346,7 +346,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_send_target_settings_field_mapping"
+                            android:text="@string/label_send_target_settings_field_mapping"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -467,7 +467,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_update_tolerance_condition"
+                        android:text="@string/label_send_target_settings_update_tolerance_condition"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -521,7 +521,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_send_target_settings_update_tolerance_hours"
+                        android:text="@string/label_send_target_settings_update_tolerance_hours"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 

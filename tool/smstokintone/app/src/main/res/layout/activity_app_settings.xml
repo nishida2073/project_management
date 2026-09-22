@@ -239,7 +239,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_app_settings_theme_mode"
+                        android:text="@string/label_app_settings_theme_mode"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -468,7 +468,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_app_settings_search_filters_visibility"
+                        android:text="@string/label_app_settings_search_filters_visibility"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
@@ -628,7 +628,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_app_settings_send_target"
+                        android:text="@string/label_app_settings_send_target"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -792,7 +792,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_app_settings_reply"
+                        android:text="@string/label_app_settings_reply"
                         android:textColor="?attr/colorOnSurface" />
 
                     <LinearLayout
@@ -805,7 +805,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_app_settings_sms_extraction_success_reply_body"
+                            android:text="@string/label_app_settings_sms_extraction_success_reply_body"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -856,7 +856,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/section_app_settings_sms_extraction_failed_reply_body"
+                            android:text="@string/label_app_settings_sms_extraction_failed_reply_body"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurface" />
 
@@ -976,7 +976,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="@string/section_app_settings_company_name_conversion"
+                        android:text="@string/label_app_settings_company_name_conversion"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurface" />
 
