@@ -60,7 +60,7 @@ class SmsSearchActivity : BaseActivity() {
     /**
      * スピナーの表示位置に対応する送信先名。[SettingsStore.sendTargetFilterOptions]と同じ並び。
      * nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」、
-     * それ以外は送信先名（[SendTarget.name]）。
+     * それ以外は送信先名（[SendTarget.sendTargetName]）。
      */
     private var sendTargetFilterNames: List<String?> = emptyList()
 
@@ -342,7 +342,7 @@ class SmsSearchActivity : BaseActivity() {
                     val matched = mutableListOf<SmsRecord>()
                     for (record in records) {
                         val (_, sendTargets) = resolveSendTargetCached(record, config)
-                        if (sendTargets.any { it.name == sendTargetName }) matched.add(record)
+                        if (sendTargets.any { it.sendTargetName == sendTargetName }) matched.add(record)
                     }
                     records.clear()
                     records.addAll(matched)

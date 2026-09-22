@@ -193,7 +193,7 @@ object SettingsStore {
         /** 送信先を一意に識別するID（UUID文字列） */
         val id: String,
         /** 表示名。空の場合は[displayName]がフォールバック文字列を返す */
-        val name: String,
+        val sendTargetName: String,
         val companyName: String = "",
         /** 振り分け条件のキーワード。行ごとに1件、UI上で追加・削除できる */
         val keywords: List<String>,
@@ -233,12 +233,12 @@ object SettingsStore {
 
         /** 表示名が未設定の場合のフォールバック文字列を返す */
         fun displayName(context: Context): String =
-            name.ifBlank { context.getString(R.string.label_send_target_settings_name_unset) }
+            sendTargetName.ifBlank { context.getString(R.string.label_send_target_settings_name_unset) }
 
         /** kintoneへの送信に必要な項目（認証情報含む）が揃っているかどうか。[keywords]の有無や[fieldCompanyName]等の任意項目は問わない */
         val isValid: Boolean
             get() {
-                if (name.isBlank() || subdomain.isBlank() || appId.isBlank()) return false
+                if (sendTargetName.isBlank() || subdomain.isBlank() || appId.isBlank()) return false
                 if (fieldSender.isBlank() || fieldHistory.isBlank() || fieldDatetime.isBlank() || fieldType.isBlank()) return false
                 return loginName.isNotBlank() && loginPassword.isNotBlank()
             }
@@ -262,7 +262,7 @@ object SettingsStore {
             /** 送信先を新規追加する際の初期値。フィールドコード等の既定値は[AppDefaults]を参照 */
             fun newEmpty(): SendTarget = SendTarget(
                 id = UUID.randomUUID().toString(),
-                name = "",
+                sendTargetName = "",
                 keywords = emptyList(),
                 subdomain = AppDefaults.NEW_PROFILE_SUBDOMAIN,
                 appId = "",
@@ -483,7 +483,7 @@ object SettingsStore {
     /** [SendTarget]のデフォルト値を持つインスタンスを返す（UUIDは新規採番） */
     private fun createDefaultSendTarget(): SendTarget = SendTarget(
         id = UUID.randomUUID().toString(),
-        name = "",
+        sendTargetName = "",
         companyName = "",
         keywords = emptyList(),
         subdomain = AppDefaults.NEW_PROFILE_SUBDOMAIN,
@@ -503,7 +503,7 @@ object SettingsStore {
 
     /** [SendTarget]をJSONオブジェクトへ変換（IDは含めない） */
     fun sendTargetToJson(sendTarget: SendTarget): JSONObject = JSONObject()
-        .put("name", sendTarget.name)
+        .put("name", sendTarget.sendTargetName)
         .put("companyName", sendTarget.companyName)
         .put("keywords", JSONArray(sendTarget.keywords))
         .put("subdomain", sendTarget.subdomain)
@@ -525,7 +525,7 @@ object SettingsStore {
         val default = existingSendTarget ?: createDefaultSendTarget()
         return default.copy(
             id = existingSendTarget?.id ?: UUID.randomUUID().toString(),
-            name = if (obj.has("name")) obj.optString("name", default.name) else default.name,
+            sendTargetName = if (obj.has("name")) obj.optString("name", default.sendTargetName) else default.sendTargetName,
             companyName = if (obj.has("companyName")) obj.optString("companyName", default.companyName) else default.companyName,
             keywords = if (obj.has("keywords")) {
                 obj.optJSONArray("keywords")?.let { array ->
@@ -579,7 +579,7 @@ object SettingsStore {
     fun sendTargetFilterOptions(context: Context): List<Pair<String?, String>> {
         val sendTargets = loadSendTargets(context)
         return listOf(null to context.getString(R.string.filter_sms_search_send_target_all)) +
-            sendTargets.map { it.name to it.displayName(context) } +
+            sendTargets.map { it.sendTargetName to it.displayName(context) } +
             listOf(AppConstants.SEND_TARGET_FILTER_KEY_UNSET to context.getString(R.string.label_send_target_settings_none))
     }
 
@@ -608,7 +608,7 @@ object SettingsStore {
         for (i in 0 until importedJsonArray.length()) {
             val obj = importedJsonArray.getJSONObject(i)
             val importedName = obj.optString("name", "")
-            val index = merged.indexOfFirst { it.name == importedName }
+            val index = merged.indexOfFirst { it.sendTargetName == importedName }
             val existingTarget = if (index >= 0) merged[index] else null
             val mergedTarget = sendTargetFromJson(obj, existingTarget)
             if (index >= 0) {

@@ -71,7 +71,7 @@ class SendTargetSettingsActivity : BaseActivity() {
         val itemBinding = ItemSendTargetBinding.inflate(layoutInflater, binding.llSendTargetsContainer, false)
         val card = SendTargetCard(sendTarget.id, itemBinding)
 
-        itemBinding.etSendTargetName.setText(sendTarget.name)
+        itemBinding.etSendTargetName.setText(sendTarget.sendTargetName)
         itemBinding.etCompanyName.setText(sendTarget.companyName)
         val extractionCompanyNameEnabled = SettingsStore.load(applicationContext).extractionCompanyNameEnabled
         itemBinding.llCompanyNameSection.visibility =
@@ -106,8 +106,8 @@ class SendTargetSettingsActivity : BaseActivity() {
 
         val copyListener = View.OnClickListener {
             val source = readSendTargetFromBinding(itemBinding, id = java.util.UUID.randomUUID().toString())
-            val copyName = if (source.name.isBlank()) source.name else source.name + getString(R.string.suffix_send_target_settings_copy)
-            val newCardView = addSendTargetCard(source.copy(name = copyName), insertAt = sendTargetCards.indexOf(card) + 1)
+            val copyName = if (source.sendTargetName.isBlank()) source.sendTargetName else source.sendTargetName + getString(R.string.suffix_send_target_settings_copy)
+            val newCardView = addSendTargetCard(source.copy(sendTargetName = copyName), insertAt = sendTargetCards.indexOf(card) + 1)
             newCardView.post { binding.svSendTargetSettings.smoothScrollTo(0, topRelativeTo(newCardView, binding.svSendTargetSettings)) }
         }
         itemBinding.btnCopySendTarget.setupManaged(copyListener)
@@ -166,7 +166,7 @@ class SendTargetSettingsActivity : BaseActivity() {
 
         return SettingsStore.SendTarget(
             id = id,
-            name = itemBinding.etSendTargetName.text.toString().trim(),
+            sendTargetName = itemBinding.etSendTargetName.text.toString().trim(),
             companyName = itemBinding.etCompanyName.text.toString().trim(),
             keywords = (0 until itemBinding.llKeywordsContainer.childCount).map { index ->
                 itemBinding.llKeywordsContainer.getChildAt(index).findViewById<EditText>(R.id.etKeyword).text.toString().trim()
@@ -192,7 +192,7 @@ class SendTargetSettingsActivity : BaseActivity() {
     private fun showValidationErrorDialogIfInvalid(index: Int, sendTarget: SettingsStore.SendTarget): Boolean {
         if (sendTarget.isValid) return false
 
-        val label = sendTarget.name.ifBlank { getString(R.string.label_send_target_settings_index, index + 1) }
+        val label = sendTarget.sendTargetName.ifBlank { getString(R.string.label_send_target_settings_index, index + 1) }
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_title_send_target_settings_validation_error)
             .setMessage(getString(R.string.dialog_message_send_target_settings_validation_error, label))
@@ -346,7 +346,7 @@ class SendTargetSettingsActivity : BaseActivity() {
             newSendTargets.add(sendTarget)
         }
 
-        val duplicateNames = newSendTargets.groupBy { it.name }
+        val duplicateNames = newSendTargets.groupBy { it.sendTargetName }
             .filter { it.value.size > 1 }
             .map { it.key }
             .sorted()
