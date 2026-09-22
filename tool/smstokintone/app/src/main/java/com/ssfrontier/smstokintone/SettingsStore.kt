@@ -125,9 +125,9 @@ object SettingsStore {
      *
      * @property sendEnabled trueなら自動送信モード、falseなら手動送信モード。[KintoneUploadWorker]が参照
      * @property sendExtractionFailedEnabled 自動送信時、抽出失敗のSMS（会社名・氏名を抽出できなかったSMS）も送信するかどうか
-     * @property sendExtractionNotPerformedEnabled 自動送信時、抽出未実施（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか
+     * @property sendExtractionNotPerformedEnabled 自動送信時、抽出引き継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか
      * @property searchExtractionFailedEnabled SMS検索画面で、抽出失敗のSMSを選択可能にするかどうか
-     * @property searchExtractionNotPerformedEnabled SMS検索画面で、抽出未実施（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか
+     * @property searchExtractionNotPerformedEnabled SMS検索画面で、抽出引き継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか
      * @property autoReplyExtractionFailedEnabled 自動受信時、抽出失敗のSMSに対して[smsExtractionFailedReplyBody]の文言で自動返信するかどうか
      * @property autoReplyCooldownSeconds 同一送信元への自動返信再送信までの間隔（秒）。連投防止用クールダウン
      * @property autoRefreshEnabled SMS送信履歴画面（[LogActivity]）を[autoRefreshIntervalSeconds]間隔で自動再読み込みするかどうか
@@ -150,7 +150,7 @@ object SettingsStore {
      * @property defaultSendNoneOnlyEnabled SMS検索画面で「送信」の「未」チェックボックスの初期状態
      * @property defaultExtractionFailedOnlyEnabled SMS検索画面で「抽出状況」の「異常」チェックボックスの初期状態
      * @property defaultExtractionSucceededOnlyEnabled SMS検索画面で「抽出状況」の「正常」チェックボックスの初期状態
-     * @property defaultExtractionNotPerformedOnlyEnabled SMS検索画面で「抽出状況」の「未実施」チェックボックスの初期状態
+     * @property defaultExtractionNotPerformedOnlyEnabled SMS検索画面で「抽出状況」の「引き継ぎ」チェックボックスの初期状態
      * @property defaultSentAutoOnlyEnabled SMS検索画面で「送信」の「済（自動）」チェックボックスの初期状態
      * @property defaultSentManualOnlyEnabled SMS検索画面で「送信」の「済（手動）」チェックボックスの初期状態
      */

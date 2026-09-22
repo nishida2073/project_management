@@ -449,7 +449,6 @@ class SmsSearchActivity : BaseActivity() {
             val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
             val sendTargetIcon = getString(
                 when {
-                    resolution.isContinuation -> R.string.icon_send_target_inherited
                     isSendTargetUnconfigured -> R.string.icon_send_target_unconfigured
                     else -> R.string.icon_send_target_exists
                 }

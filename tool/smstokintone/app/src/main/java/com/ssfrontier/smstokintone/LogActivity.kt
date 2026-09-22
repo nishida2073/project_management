@@ -168,7 +168,6 @@ class LogActivity : AppCompatActivity() {
             val sendTargetNameView = TextView(this).apply {
                 text = buildSpannedString {
                     val sendTargetIcon = when {
-                        entry.isContinuation -> R.string.icon_send_target_inherited
                         entry.sendTargetName == null -> R.string.icon_send_target_unconfigured
                         else -> R.string.icon_send_target_exists
                     }

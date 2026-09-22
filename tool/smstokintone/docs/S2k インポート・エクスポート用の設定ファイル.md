@@ -26,7 +26,7 @@
 
 ### `appConfig`（アプリの設定）
 　`appConfig` は、アプリの動作設定をまとめたものです。<br>
-　SMS受信時の送信モード（自動／手動）と送信対象、抽出異常・未実施SMSの扱い、自動返信、ログ画面の自動再読み込み、継続SMSの引き継ぎ、テーマ（配色）、SMS検索画面の初期表示、本文からの会社名・氏名の抽出ルールなどをまとめて指定します。
+　SMS受信時の送信モード（自動／手動）と送信対象、抽出異常・引き継ぎSMSの扱い、自動返信、ログ画面の自動再読み込み、継続SMSの引き継ぎ、テーマ（配色）、SMS検索画面の初期表示、本文からの会社名・氏名の抽出ルールなどをまとめて指定します。
 
 > **注意**
 > - `appConfig` 内のキーはすべて省略可能です。ファイルに含まれないキーはアプリの既定値で補われるため、変更したいキーだけを指定できます（部分指定可）。
@@ -39,9 +39,9 @@
 | --- | --- | --- |
 | `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false`<br><br>例）`true` |
 | `sendExtractionFailedEnabled` | 自動送信時、会社名・氏名を抽出できなかったSMSも送信するか | `true` / `false`<br><br>例）`false` |
-| `sendExtractionNotPerformedEnabled` | 自動送信時、抽出状況が未実施（継続SMS）のSMSも送信するか | `true` / `false`<br><br>例）`true` |
-| `searchExtractionFailedEnabled` | SMS検索画面で抽出異常のSMSを選択可能にするか | `true` / `false`<br><br>例）`false` |
-| `searchExtractionNotPerformedEnabled` | SMS検索画面で抽出未実施（継続SMS）のSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
+| `sendExtractionNotPerformedEnabled` | 自動送信時、抽出状況が引き継ぎのSMSも送信するか | `true` / `false`<br><br>例）`true` |
+| `searchExtractionFailedEnabled` | SMS検索画面で抽出状況が異常のSMSを選択可能にするか | `true` / `false`<br><br>例）`false` |
+| `searchExtractionNotPerformedEnabled` | SMS検索画面で抽出状況が引き継ぎのSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
 | `autoReplyExtractionFailedEnabled` | 自動受信時、抽出異常のSMSへ自動返信するか | `true` / `false`<br><br>例）`false` |
 | `autoReplyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
 | `autoRefreshEnabled` | ログ画面（送信履歴）を自動再読み込みするか | `true` / `false`<br><br>例）`true` |
@@ -64,7 +64,7 @@
 | `defaultSendNoneOnlyEnabled` | SMS検索画面を開いた際の「送信」の「未」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultExtractionFailedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「異常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultExtractionSucceededOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「正常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `defaultExtractionNotPerformedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「未実施」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `defaultExtractionNotPerformedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「引き継ぎ」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultSentAutoOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（自動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 | `defaultSentManualOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（手動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
 
