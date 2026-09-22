@@ -34,6 +34,10 @@ android {
         viewBinding = true
     }
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     applicationVariants.all {
         outputs.all {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl

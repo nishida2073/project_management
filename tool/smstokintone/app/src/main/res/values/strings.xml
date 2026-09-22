@@ -30,9 +30,6 @@
     <string name="btn_save_settings">設定を保存</string>
     <string name="toast_settings_saved">設定を保存しました</string>
 
-    <!-- 汎用ラベル -->
-    <string name="label_send_target_filter">送信先</string>
-
     <!-- トップ画面 -->
     <string name="label_top_sms_send">SMSの送信モード</string>
     <string name="label_top_sms_send_auto">自動</string>
@@ -311,9 +308,9 @@
     <string name="dialog_message_settings_import_export_import_file_read_failed">ファイルを読み込めませんでした</string>
     <string name="dialog_message_settings_import_export_import_invalid_json">ファイルの形式が正しくありません（JSONとして読み込めません）。\n\n%1$s</string>
     <string name="message_settings_import_export_import_no_section">アプリの設定・送信先の設定・引継ぎ内容のいずれも含まれていないため、反映する内容がありません</string>
-    <string name="message_settings_import_export_import_sender_address_required">引継ぎ内容の%1$d件目にsenderAddressがありません</string>
     <string name="message_settings_import_export_import_send_target_duplicate_name">送信先名がファイル内で重複しています。\n%1$s\n\n送信先名は他の送信先と重複しないようにしてください</string>
-    <string name="message_settings_import_export_import_continuation_duplicate_sender">送信元アドレスがファイル内で重複しています。\n%1$s\n\n送信元アドレスは重複しないようにしてください</string>
+    <string name="message_settings_import_export_import_continuation_sender_address_required">引継ぎ内容の%1$d件目に送信元がありません</string>
+    <string name="message_settings_import_export_import_continuation_duplicate_sender">送信元がファイル内で重複しています。\n%1$s\n\n送信元は他の送信元と重複しないようにしてください</string>
     <string name="label_settings_import_export_export">エクスポート</string>
     <string name="label_settings_import_export_export_description">現在のアプリ設定・送信先の設定・引継ぎ内容をJSONファイルに書き出します</string>
     <string name="btn_settings_import_export_export_settings">エクスポート</string>

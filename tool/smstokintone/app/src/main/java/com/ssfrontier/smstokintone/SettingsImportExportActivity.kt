@@ -164,6 +164,7 @@ class SettingsImportExportActivity : BaseActivity() {
         val root = JSONObject(text)
         root.optJSONArray("sendTargetConfig")?.let { checkSendTargetDuplicates(it) }
         root.optJSONArray("continuationInfoConfig")?.let {
+            checkContinuationInfoValidation(it)
             SettingsStore.parseContinuationInfoFromJson(it, ContinuationStore.getAll(this))
         }
 
@@ -192,6 +193,27 @@ class SettingsImportExportActivity : BaseActivity() {
         if (duplicateNames.isNotEmpty()) {
             throw JSONException(
                 getString(R.string.message_settings_import_export_import_send_target_duplicate_name, duplicateNames.sorted().joinToString("／"))
+            )
+        }
+    }
+
+    /** 引継ぎ内容の検証 */
+    private fun checkContinuationInfoValidation(array: JSONArray) {
+        val duplicateSenders = mutableSetOf<String>()
+        val seenSenders = mutableSetOf<String>()
+        for (i in 0 until array.length()) {
+            val obj = array.getJSONObject(i)
+            val senderAddress = obj.optString("senderAddress", "").trim()
+            if (senderAddress.isEmpty()) {
+                throw JSONException(
+                    getString(R.string.message_settings_import_export_import_continuation_sender_address_required, i + 1)
+                )
+            }
+            if (!seenSenders.add(senderAddress)) duplicateSenders.add(senderAddress)
+        }
+        if (duplicateSenders.isNotEmpty()) {
+            throw JSONException(
+                getString(R.string.message_settings_import_export_import_continuation_duplicate_sender, duplicateSenders.sorted().joinToString("／"))
             )
         }
     }
