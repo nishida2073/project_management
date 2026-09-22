@@ -1,7 +1,6 @@
 {
   "appConfig": {
-    "companyNameExtractionEnabled": false,
-    "sendExtractionFailedEnabled": true,
-    "searchExtractionFailedEnabled": true
+    "extractionCompanyNameEnabled": false,
+    "searchExtractionContinuationEnabled": true
   }
 }

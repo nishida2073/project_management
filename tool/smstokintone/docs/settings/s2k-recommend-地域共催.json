@@ -1,8 +1,7 @@
 {
   "appConfig": {
-    "companyNameExtractionEnabled": true,
-    "sendExtractionFailedEnabled": true,
-    "searchExtractionFailedEnabled": true
+    "extractionCompanyNameEnabled": true,
+    "searchExtractionContinuationEnabled": true
   },
   "sendTargetConfig": [
     {

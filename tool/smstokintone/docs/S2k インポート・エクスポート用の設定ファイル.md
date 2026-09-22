@@ -11,8 +11,8 @@
 ```json
 {
   "appConfig":             { ... },   // アプリの設定
-  "sendTargetConfig":      [ ... ],   // 送信先（kintone接続設定）の一覧
-  "continuationInfoConfig": [ ... ]    // 引継ぎ内容（会社名・氏名）の一覧
+  "sendTargetConfig":      [ ... ],   // 送信先の一覧
+  "continuationInfoConfig": [ ... ]    // 引継ぎ内容の一覧
 }
 ```
 
@@ -37,36 +37,36 @@
 
 | キー | 意味 | 利用できる値 |
 | --- | --- | --- |
-| `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false`<br><br>例）`true` |
-| `sendExtractionFailedEnabled` | 自動送信時、会社名・氏名を抽出できなかったSMSも送信するか | `true` / `false`<br><br>例）`false` |
-| `sendExtractionContinuationEnabled` | 自動送信時、抽出状況が引継ぎのSMSも送信するか | `true` / `false`<br><br>例）`true` |
-| `searchExtractionFailedEnabled` | SMS検索画面で抽出状況が異常のSMSを選択可能にするか | `true` / `false`<br><br>例）`false` |
-| `searchExtractionContinuationEnabled` | SMS検索画面で抽出状況が引継ぎのSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
-| `autoReplyEnabled` | 自動受信時、抽出異常のSMSへ自動返信するか | `true` / `false`<br><br>例）`false` |
-| `autoReplyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
-| `autoRefreshEnabled` | ログ画面（送信履歴）を自動再読み込みするか | `true` / `false`<br><br>例）`true` |
-| `autoRefreshIntervalSeconds` | 自動再読み込みの間隔 | 整数（秒）<br><br>例）`5` |
-| `smsMatchToleranceSeconds` | 自動受信SMSのログと端末上のSMSを突き合わせる許容範囲 | 整数（秒）<br><br>例）`15` |
-| `bodyExcerptLength` | ログ一覧に表示する本文抜粋の文字数 | 整数<br><br>例）`100` |
-| `continuationEnabled` | 継続SMSの引継ぎ機能を有効にするか | `true` / `false`<br><br>例）`true` |
-| `continuationScope` | 引継ぎをどこまで遡るか | `UNLIMITED`（過去に一度でも抽出正常なら常に引継ぎ）／ `SAME_DAY`（同暦日のみ）<br><br>例）`UNLIMITED` |
-| `continuationShowUserNameEnabled` | 継続SMSについて送信元電話番号の代わりに引き継いだ氏名を表示するか | `true` / `false`<br><br>例）`true` |
 | `themeMode` | アプリの配色モード | `LIGHT` / `DARK`<br><br>例）`LIGHT` |
-| `smsSearchDateRangeDays` | SMS検索画面を開いた際の受信日の範囲 | 整数（日）<br><br>例）`1` |
+| `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false`<br><br>例）`true` |
+| `sendExtractionFailedEnabled` | 自動送信時、抽出失敗のSMS（会社名・氏名を抽出できなかったSMS）も送信するか | `true` / `false`<br><br>例）`true` |
+| `sendExtractionContinuationEnabled` | 自動送信時、抽出引継ぎ（継続SMS）のSMSも送信するか | `true` / `false`<br><br>例）`true` |
+| `replyEnabled` | 自動受信時、抽出失敗のSMSに対して自動返信するか | `true` / `false`<br><br>例）`false` |
+| `replyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
+| `replySuccessBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列<br><br>例）`"NTTデータユニバーシティ\n運営事務局です。\n"` |
+| `replyFailedBody` | 抽出失敗のSMSへの返信時に使う文言 | 文字列<br><br>例）`"…（記入例）…\nここに内容を入力"` |
+| `searchDateRangeDays` | SMS検索画面を開いた際の受信日の範囲 | 整数（日）<br><br>例）`1` |
 | `searchFiltersVisibleByDefault` | SMS検索画面を開いた際に検索条件エリアを表示した状態にするか | `true` / `false`<br><br>例）`true` |
-| `smsExtractionSuccessReplyBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列<br><br>例）`"NTTデータユニバーシティ\n運営事務局です。\n"` |
-| `smsExtractionFailedReplyBody` | 抽出失敗のSMSへの返信時に使う文言 | 文字列<br><br>例）`"…（記入例）…\nここに内容を入力"` |
-| `defaultSendTargetFilterName` | SMS検索画面の「送信先」フィルタの初期値 | 送信先名（例）`"本社"`）：その送信先を初期選択<br>`null`：すべて<br>`"__filter_key_unset__"`：なし（どの送信先にも一致しないSMSのみ）<br><br>例）`null` |
-| `aiExtractionEnabled` | 本文の会社名・氏名の抽出に、ルールベースの代わりに端末上のAIを使うか。非対応端末では自動的にルールベースへ | `true` / `false`<br><br>例）`false` |
-| `companyNameExtractionEnabled` | 本文から会社名・氏名を抽出するか。`false` の場合は抽出せず全送信先へ送る | `true` / `false`<br><br>例）`true` |
-| `companyNameAutoConversionEnabled` | 抽出した会社名に、英数字を半角大文字・それ以外を全角へ統一する変換を適用するか | `true` / `false`<br><br>例）`false` |
-| `companyNameFixedConversions` | 会社名の固定変換ルールの配列。先頭から順に `from` を `to` へ置換 | 変換ルールの配列／ `[]`<br><br>例）`[{"from": "ユニバ", "to": "ユニバーシティ"}]` |
-| `defaultSendNoneOnlyEnabled` | SMS検索画面を開いた際の「送信」の「未」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `defaultExtractionFailedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「異常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `defaultExtractionSucceededOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「正常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `defaultExtractionContinuationOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「引継ぎ」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `defaultSentAutoOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（自動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
-| `defaultSentManualOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（手動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `searchSendTargetFilterName` | SMS検索画面の「送信先」フィルタの初期値 | 送信先名（例）`"本社"`）：その送信先を初期選択<br>`null`：すべて<br>`"__filter_key_unset__"`：なし（どの送信先にも一致しないSMSのみ）<br><br>例）`null` |
+| `searchExtractionFailedEnabled` | SMS検索画面で、抽出失敗のSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
+| `searchExtractionContinuationEnabled` | SMS検索画面で、抽出引継ぎ（継続SMS）のSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
+| `searchSendNoneOnlyEnabled` | SMS検索画面を開いた際の「送信」の「未」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `searchExtractionFailedOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「異常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `searchExtractionSucceededOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「正常」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `searchExtractionContinuationOnlyEnabled` | SMS検索画面を開いた際の「抽出状況」の「引継ぎ」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `searchSentAutoOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（自動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `searchSentManualOnlyEnabled` | SMS検索画面を開いた際の「送信」の「済（手動）」チェックを初期ONにするか | `true` / `false`<br><br>例）`false` |
+| `extractionAiEnabled` | 本文からの会社名・氏名の抽出に端末上のAI（ML Kit GenAI / Gemini Nano）を使うか。非対応端末は自動フォールバック | `true` / `false`<br><br>例）`false` |
+| `extractionCompanyNameEnabled` | 本文からの会社名・氏名の抽出機能全体の有効/無効 | `true` / `false`<br><br>例）`true` |
+| `extractionCompanyNameAutoConversionEnabled` | 抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するか | `true` / `false`<br><br>例）`false` |
+| `extractionCompanyNameFixedConversions` | 抽出結果の会社名に適用する固定変換ルール。先頭から順に `from` を `to` へ置換 | 変換ルールの配列／ `[]`<br><br>例）`[{"from": "ユニバ", "to": "ユニバーシティ"}]` |
+| `continuationEnabled` | 継続SMSの引継ぎ機能全体の有効/無効 | `true` / `false`<br><br>例）`true` |
+| `continuationScope` | 継続SMSの引継ぎを送信元ごとにどこまで遡るか | `UNLIMITED`（過去に一度でも抽出正常なら常に引継ぎ）／ `SAME_DAY`（同暦日のみ）<br><br>例）`UNLIMITED` |
+| `continuationShowUserNameEnabled` | SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引き継いだ氏名を表示するか | `true` / `false`<br><br>例）`true` |
+| `logRefreshEnabled` | SMS送信履歴画面を自動再読み込みするか | `true` / `false`<br><br>例）`true` |
+| `logRefreshIntervalSeconds` | 自動再読み込み間隔 | 整数（秒）<br><br>例）`5` |
+| `logMatchToleranceSeconds` | 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲 | 整数（秒）<br><br>例）`15` |
+| `logBodyExcerptLength` | ログ一覧に表示する本文抜粋の文字数 | 整数<br><br>例）`100` |
 
 ---
 
@@ -131,31 +131,36 @@
 ```json
 {
   "appConfig": {
+    "themeMode": "LIGHT",
     "sendEnabled": true,
-    "sendExtractionFailedEnabled": false,
+    "sendExtractionFailedEnabled": true,
     "sendExtractionContinuationEnabled": true,
-    "autoReplyEnabled": false,
-    "autoReplyCooldownSeconds": 10,
-    "autoRefreshEnabled": true,
-    "autoRefreshIntervalSeconds": 5,
+    "replyEnabled": false,
+    "replyCooldownSeconds": 10,
+    "replySuccessBody": "NTTデータユニバーシティ\n運営事務局です。\n",
+    "replyFailedBody": "…（記入例）…\nここに内容を入力",
+    "searchDateRangeDays": 1,
+    "searchFiltersVisibleByDefault": true,
+    "searchSendTargetFilterName": null,
+    "searchExtractionFailedEnabled": true,
+    "searchExtractionContinuationEnabled": true,
+    "searchSendNoneOnlyEnabled": false,
+    "searchExtractionFailedOnlyEnabled": false,
+    "searchExtractionSucceededOnlyEnabled": false,
+    "searchExtractionContinuationOnlyEnabled": false,
+    "searchSentAutoOnlyEnabled": false,
+    "searchSentManualOnlyEnabled": false,
+    "extractionAiEnabled": false,
+    "extractionCompanyNameEnabled": true,
+    "extractionCompanyNameAutoConversionEnabled": true,
+    "extractionCompanyNameFixedConversions": [],
     "continuationEnabled": true,
     "continuationScope": "UNLIMITED",
-    "themeMode": "LIGHT",
-    "smsSearchDateRangeDays": 1,
-    "searchFiltersVisibleByDefault": true,
-    "smsExtractionSuccessReplyBody": "NTTデータユニバーシティ\n運営事務局です。\n",
-    "smsExtractionFailedReplyBody": "…（記入例）…\nここに内容を入力",
-    "defaultSendTargetFilterName": null,
-    "aiExtractionEnabled": false,
-    "companyNameExtractionEnabled": true,
-    "companyNameAutoConversionEnabled": true,
-    "companyNameFixedConversions": [],
-    "defaultSendNoneOnlyEnabled": false,
-    "defaultExtractionFailedOnlyEnabled": false,
-    "defaultExtractionSucceededOnlyEnabled": false,
-    "defaultExtractionContinuationOnlyEnabled": false,
-    "defaultSentAutoOnlyEnabled": false,
-    "defaultSentManualOnlyEnabled": false
+    "continuationShowUserNameEnabled": true,
+    "logRefreshEnabled": true,
+    "logRefreshIntervalSeconds": 5,
+    "logMatchToleranceSeconds": 15,
+    "logBodyExcerptLength": 100
   },
   "sendTargetConfig": [
     {
@@ -192,7 +197,7 @@
 ```
 
 - キー名は上の各ブロックの表（`appConfig`・`sendTargetConfig`・`continuationInfoConfig`）を参照してください。
-- `appConfig` は部分指定ができるため、変更したいキーだけを書いても構いません。このサンプルは記入例（プレースホルダー）です。
+- `appConfig` は部分指定ができるため、変更したいキーだけを書いても構いません。このサンプルは記入例です。
 
 ---
 
@@ -202,7 +207,7 @@
 
 | 形態 | ファイル名 | 概要 |
 | --- | --- | --- |
-| 単一企業のイベント | `s2k-recommend-個社.json` | 会社名の自動抽出を有効化し、継続SMSは过去に一度でも成功したら引き継ぐ設定です |
-| 複数企業の合同開催 | `s2k-recommend-共催.json` | 会社名の自動抽出を無効化し、各送信先に設定した会社名を使う設定です。継続SMSは過去に一度でも成功したら引継ぎます |
-| 複数企業のイベント（同一アプリ） | `s2k-recommend-複数開催-単一app.json` | 会社名の自動抽出を無効化し、継続SMSは同じ暦日のSMSのみ引き継ぐ設定です |
-| 複数企業のイベント（別々のアプリ） | `s2k-recommend-複数開催-複数app.json` | 会社名の自動抽出を無効化し、継続SMSは同じ暦日のSMSのみ引き継ぐ設定です |
+| 単一企業のイベント | `s2k-recommend-個社.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |
+| グループ企業の合同開催 | `s2k-recommend-グループ共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |
+| 地域企業の合同開催 | `s2k-recommend-地域共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |
+| 金融企業の合同開催 | `s2k-recommend-金融共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |

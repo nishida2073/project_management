@@ -1,12 +1,11 @@
 {
   "appConfig": {
-    "companyNameExtractionEnabled": true,
-    "sendExtractionFailedEnabled": true,
-    "searchExtractionFailedEnabled": true,
-    "companyNameFixedConversions": [
+    "extractionCompanyNameEnabled": true,
+    "extractionCompanyNameFixedConversions": [
       {"from": "data", "to": "データ"},
       {"from": "NFT", "to": "NTTデータフィナンシャルテクノロジー"}
-    ]
+    ],
+    "searchExtractionContinuationEnabled": true
   },
   "sendTargetConfig": [
     {
