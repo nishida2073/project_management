@@ -52,7 +52,7 @@ object SmsLogStore {
         val timestampMillis: Long,
         /** 送信元電話番号 */
         val sender: String,
-        /** SMS本文の先頭[SettingsStore.Config.bodyExcerptLength]文字の抜粋（記録時点の設定値で切り出し済み） */
+        /** SMS本文の先頭[SettingsStore.Config.logBodyExcerptLength]文字の抜粋（記録時点の設定値で切り出し済み） */
         val bodyExcerpt: String,
         /** このエントリが表す処理が成功したかどうか */
         val success: Boolean,
@@ -115,7 +115,7 @@ object SmsLogStore {
                 loggedAtMillis = System.currentTimeMillis(),
                 timestampMillis = timestampMillis,
                 sender = sender,
-                bodyExcerpt = body.take(SettingsStore.load(context).bodyExcerptLength),
+                bodyExcerpt = body.take(SettingsStore.load(context).logBodyExcerptLength),
                 success = success,
                 message = message,
                 smsId = smsId,

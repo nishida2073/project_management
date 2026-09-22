@@ -125,9 +125,9 @@ class SmsSearchActivity : BaseActivity() {
         binding.spSendTargetFilter.setupManaged(spinnerListener)
 
         val config = SettingsStore.load(this)
-        selectedSendTargetName = config.defaultSendTargetFilterName
+        selectedSendTargetName = config.searchSendTargetFilterName
         val today = Calendar.getInstance()
-        val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -(config.smsSearchDateRangeDays - 1)) }
+        val rangeStart = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, -(config.searchDateRangeDays - 1)) }
         applyDateFilter(isFrom = true, calendar = rangeStart)
         applyDateFilter(isFrom = false, calendar = today)
 
@@ -136,12 +136,12 @@ class SmsSearchActivity : BaseActivity() {
             if (config.searchFiltersVisibleByDefault) R.string.btn_hide_search_filters else R.string.btn_show_search_filters
         )
 
-        binding.cbSendNoneOnly.isChecked = config.defaultSendNoneOnlyEnabled
-        binding.cbSentAutoOnly.isChecked = config.defaultSentAutoOnlyEnabled
-        binding.cbSentManualOnly.isChecked = config.defaultSentManualOnlyEnabled
-        binding.cbExtractionFailedOnly.isChecked = config.defaultExtractionFailedOnlyEnabled
-        binding.cbExtractionSucceededOnly.isChecked = config.defaultExtractionSucceededOnlyEnabled
-        binding.cbExtractionContinuationOnly.isChecked = config.defaultExtractionContinuationOnlyEnabled
+        binding.cbSendNoneOnly.isChecked = config.searchSendNoneOnlyEnabled
+        binding.cbSentAutoOnly.isChecked = config.searchSentAutoOnlyEnabled
+        binding.cbSentManualOnly.isChecked = config.searchSentManualOnlyEnabled
+        binding.cbExtractionFailedOnly.isChecked = config.searchExtractionFailedOnlyEnabled
+        binding.cbExtractionSucceededOnly.isChecked = config.searchExtractionSucceededOnlyEnabled
+        binding.cbExtractionContinuationOnly.isChecked = config.searchExtractionContinuationOnlyEnabled
     }
 
     /**
@@ -375,7 +375,7 @@ class SmsSearchActivity : BaseActivity() {
     /** [resolvedPartsCache]を経由してSettingsStore.resolveSendTargetsを呼ぶ。同一recordへの重複呼び出し（AI解析）を避ける */
     private suspend fun resolveSendTargetCached(record: SmsRecord, config: SettingsStore.Config): Pair<SettingsStore.SmsResolution, List<SettingsStore.SendTarget>> =
         resolvedPartsCache.getOrPut(record.id) {
-            SettingsStore.resolveSendTargets(this, record.address, record.body, record.dateMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
+            SettingsStore.resolveSendTargets(this, record.address, record.body, record.dateMillis, config.extractionAiEnabled, config.extractionCompanyNameEnabled, config.continuationEnabled, config.continuationScope)
         }
 
     /** 成功したKintone送信ログのみを対象にする（失敗ログは「未送信」として扱われるべきなので除外） */
@@ -393,7 +393,7 @@ class SmsSearchActivity : BaseActivity() {
         records: List<SmsRecord>,
         completedEntries: List<SmsLogStore.Entry>
     ): Map<Long, SmsLogStore.Entry> {
-        val toleranceMillis = SettingsStore.load(this).smsMatchToleranceSeconds * 1_000L
+        val toleranceMillis = SettingsStore.load(this).logMatchToleranceSeconds * 1_000L
         return SmsMatching.matchEntries(
             records = records,
             completedEntries = completedEntries,
@@ -406,12 +406,12 @@ class SmsSearchActivity : BaseActivity() {
 
     /**
      * SMSアプリの返信画面を開く。抽出失敗のメッセージには通常の定型文ではなく
-     * smsExtractionFailedReplyBody（抽出失敗時専用の文面）を差し込む
+     * replyFailedBody（抽出失敗時専用の文面）を差し込む
      */
     private fun openSmsReply(address: String, extractionFailed: Boolean) {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$address"))
         val config = SettingsStore.load(this)
-        val body = if (extractionFailed) config.smsExtractionFailedReplyBody else config.smsExtractionSuccessReplyBody
+        val body = if (extractionFailed) config.replyFailedBody else config.replySuccessBody
         if (body.isNotEmpty()) {
             intent.putExtra("sms_body", body)
         }

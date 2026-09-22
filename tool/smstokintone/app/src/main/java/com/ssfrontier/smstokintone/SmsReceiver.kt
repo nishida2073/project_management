@@ -66,14 +66,14 @@ class SmsReceiver : BroadcastReceiver() {
                 // [KintoneUploadWorker] と同じ [resolveSendTargets] を使用し、
                 // 抽出方法のズレによる登録内容と送信先名の食い違いを防止。
                 // 1 つの SMS が複数の送信先に一致する場合は、受信ログ内で名前を連結表示。
-                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
+                val (resolution, sendTargets) = SettingsStore.resolveSendTargets(context, sender, body, timestampMillis, config.extractionAiEnabled, config.extractionCompanyNameEnabled, config.continuationEnabled, config.continuationScope)
                 val smsParts = resolution.smsParts
                 // 引継ぎ元の送信先が削除・変更された場合、sendTargets は空、
                 // 送信先名は「なし」扱い（登録も行われない）。
                 val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(context) }
                 // smsParts.companyName は既に会社名変換適用済み。
                 // ここでは記録時に変換が有効だったかのフラグ（アイコン表示用）のみ求める。
-                val companyNameConverted = config.companyNameAutoConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
+                val companyNameConverted = config.extractionCompanyNameAutoConversionEnabled || config.extractionCompanyNameFixedConversions.isNotEmpty()
 
                 // 継続 SMS（引継ぎ結果）は再保存しても無意味なため、本文単体で正常に抽出できた
                 // 場合のみ更新。[KintoneUploadWorker] 側でも同じ条件で更新。
@@ -105,10 +105,10 @@ class SmsReceiver : BroadcastReceiver() {
                     isContinuation = resolution.isContinuation
                 )
 
-                if (config.autoReplyExtractionFailedEnabled && sender.isNotBlank() && smsParts.isExtractionFailed()) {
+                if (config.replyEnabled && sender.isNotBlank() && smsParts.isExtractionFailed()) {
                     val now = System.currentTimeMillis()
-                    if (AutoReplyThrottle.shouldSend(context, sender, config.autoReplyCooldownSeconds, now)) {
-                        if (sendAutoReply(context, sender, config.smsExtractionFailedReplyBody)) {
+                    if (AutoReplyThrottle.shouldSend(context, sender, config.replyCooldownSeconds, now)) {
+                        if (sendAutoReply(context, sender, config.replyFailedBody)) {
                             SmsLogStore.add(
                                 context,
                                 type = SmsLogStore.EntryType.AUTO_REPLY,
@@ -120,7 +120,7 @@ class SmsReceiver : BroadcastReceiver() {
                                 sendTargetName = sendTargetName,
                                 smsParts = smsParts,
                                 companyNameConverted = companyNameConverted,
-                                replyBody = config.smsExtractionFailedReplyBody,
+                                replyBody = config.replyFailedBody,
                                 isContinuation = resolution.isContinuation
                             )
                         }

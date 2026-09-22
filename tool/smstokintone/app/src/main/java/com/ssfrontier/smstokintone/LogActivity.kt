@@ -79,10 +79,10 @@ class LogActivity : AppCompatActivity() {
     private fun scheduleAutoRefresh() {
         autoRefreshHandler.removeCallbacks(autoRefreshRunnable)
         val config = SettingsStore.load(this)
-        if (config.autoRefreshEnabled) {
+        if (config.logRefreshEnabled) {
             autoRefreshHandler.postDelayed(
                 autoRefreshRunnable,
-                config.autoRefreshIntervalSeconds * 1000L
+                config.logRefreshIntervalSeconds * 1000L
             )
         }
     }

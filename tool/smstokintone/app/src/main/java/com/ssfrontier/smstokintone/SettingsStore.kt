@@ -20,31 +20,31 @@ object SettingsStore {
     private const val KEY_SEND_EXTRACTION_CONTINUATION_ENABLED = "send_extraction_continuation_enabled"
     private const val KEY_SEARCH_EXTRACTION_FAILED_ENABLED = "search_extraction_failed_enabled"
     private const val KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED = "search_extraction_continuation_enabled"
-    private const val KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED = "auto_reply_extraction_failed_enabled"
-    private const val KEY_AUTO_REPLY_COOLDOWN_SECONDS = "auto_reply_cooldown_seconds"
-    private const val KEY_AUTO_REFRESH_ENABLED = "auto_refresh_enabled"
-    private const val KEY_AUTO_REFRESH_INTERVAL_SECONDS = "auto_refresh_interval_seconds"
-    private const val KEY_SMS_MATCH_TOLERANCE_SECONDS = "sms_match_tolerance_seconds"
-    private const val KEY_BODY_EXCERPT_LENGTH = "body_excerpt_length"
+    private const val KEY_REPLY_ENABLED = "reply_enabled"
+    private const val KEY_REPLY_COOLDOWN_SECONDS = "reply_cooldown_seconds"
+    private const val KEY_LOG_REFRESH_ENABLED = "log_refresh_enabled"
+    private const val KEY_LOG_REFRESH_INTERVAL_SECONDS = "log_refresh_interval_seconds"
+    private const val KEY_LOG_MATCH_TOLERANCE_SECONDS = "log_match_tolerance_seconds"
+    private const val KEY_LOG_BODY_EXCERPT_LENGTH = "log_body_excerpt_length"
     private const val KEY_CONTINUATION_ENABLED = "continuation_enabled"
     private const val KEY_CONTINUATION_SCOPE = "continuation_scope"
     private const val KEY_CONTINUATION_SHOW_USER_NAME_ENABLED = "continuation_show_user_name_enabled"
     private const val KEY_THEME_MODE = "theme_mode"
-    private const val KEY_SMS_SEARCH_DATE_RANGE_DAYS = "sms_search_date_range_days"
+    private const val KEY_SEARCH_DATE_RANGE_DAYS = "search_date_range_days"
     private const val KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT = "search_filters_visible_by_default"
-    private const val KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY = "sms_extraction_success_reply_body"
-    private const val KEY_SMS_EXTRACTION_FAILED_REPLY_BODY = "sms_extraction_failed_reply_body"
-    private const val KEY_DEFAULT_SEND_TARGET_FILTER_NAME = "default_send_target_filter_name"
-    private const val KEY_AI_EXTRACTION_ENABLED = "ai_extraction_enabled"
-    private const val KEY_COMPANY_NAME_EXTRACTION_ENABLED = "company_name_extraction_enabled"
-    private const val KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED = "company_name_auto_conversion_enabled"
-    private const val KEY_COMPANY_NAME_FIXED_CONVERSIONS = "company_name_fixed_conversions"
-    private const val KEY_DEFAULT_SEND_NONE_ONLY_ENABLED = "default_send_none_only_enabled"
-    private const val KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED = "default_extraction_failed_only_enabled"
-    private const val KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED = "default_extraction_succeeded_only_enabled"
-    private const val KEY_DEFAULT_EXTRACTION_CONTINUATION_ONLY_ENABLED = "default_extraction_continuation_only_enabled"
-    private const val KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED = "default_sent_auto_only_enabled"
-    private const val KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED = "default_sent_manual_only_enabled"
+    private const val KEY_REPLY_SUCCESS_BODY = "reply_success_body"
+    private const val KEY_REPLY_FAILED_BODY = "reply_failed_body"
+    private const val KEY_SEARCH_SEND_TARGET_FILTER_NAME = "search_send_target_filter_name"
+    private const val KEY_EXTRACTION_AI_ENABLED = "extraction_ai_enabled"
+    private const val KEY_EXTRACTION_COMPANY_NAME_ENABLED = "extraction_company_name_enabled"
+    private const val KEY_EXTRACTION_COMPANY_NAME_AUTO_CONVERSION_ENABLED = "extraction_company_name_auto_conversion_enabled"
+    private const val KEY_EXTRACTION_COMPANY_NAME_FIXED_CONVERSIONS = "extraction_company_name_fixed_conversions"
+    private const val KEY_SEARCH_SEND_NONE_ONLY_ENABLED = "search_send_none_only_enabled"
+    private const val KEY_SEARCH_EXTRACTION_FAILED_ONLY_ENABLED = "search_extraction_failed_only_enabled"
+    private const val KEY_SEARCH_EXTRACTION_SUCCEEDED_ONLY_ENABLED = "search_extraction_succeeded_only_enabled"
+    private const val KEY_SEARCH_EXTRACTION_CONTINUATION_ONLY_ENABLED = "search_extraction_continuation_only_enabled"
+    private const val KEY_SEARCH_SENT_AUTO_ONLY_ENABLED = "search_sent_auto_only_enabled"
+    private const val KEY_SEARCH_SENT_MANUAL_ONLY_ENABLED = "search_sent_manual_only_enabled"
 
     private const val KEY_SEND_TARGETS = "send_targets"
 
@@ -69,7 +69,7 @@ object SettingsStore {
     }
 
     /**
-     * 固定変換ルール1行（[Config.companyNameFixedConversions] の要素）。
+     * 固定変換ルール1行（[Config.extractionCompanyNameFixedConversions] の要素）。
      * [from] に一致する部分文字列を [to] に置換。
      */
     data class FixedConversion(
@@ -128,31 +128,31 @@ object SettingsStore {
      * @property sendExtractionContinuationEnabled 自動送信時、抽出引継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSも送信するかどうか
      * @property searchExtractionFailedEnabled SMS検索画面で、抽出失敗のSMSを選択可能にするかどうか
      * @property searchExtractionContinuationEnabled SMS検索画面で、抽出引継ぎ（継続SMS、[SmsResolution.isContinuation]）のSMSを選択可能にするかどうか
-     * @property autoReplyExtractionFailedEnabled 自動受信時、抽出失敗のSMSに対して[smsExtractionFailedReplyBody]の文言で自動返信するかどうか
-     * @property autoReplyCooldownSeconds 同一送信元への自動返信再送信までの間隔（秒）。連投防止用クールダウン
-     * @property autoRefreshEnabled SMS送信履歴画面（[LogActivity]）を[autoRefreshIntervalSeconds]間隔で自動再読み込みするかどうか
-     * @property autoRefreshIntervalSeconds 自動再読み込み間隔（秒）。[autoRefreshEnabled]が有効な場合に使用
-     * @property smsMatchToleranceSeconds 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒）
-     * @property bodyExcerptLength ログ一覧（[LogActivity]）に表示する本文抜粋（[SmsLogStore.Entry.bodyExcerpt]）の文字数
+     * @property replyEnabled 自動受信時、抽出失敗のSMSに対して[replyFailedBody]の文言で自動返信するかどうか
+     * @property replyCooldownSeconds 同一送信元への自動返信再送信までの間隔（秒）。連投防止用クールダウン
+     * @property logRefreshEnabled SMS送信履歴画面（[LogActivity]）を[logRefreshIntervalSeconds]間隔で自動再読み込みするかどうか
+     * @property logRefreshIntervalSeconds 自動再読み込み間隔（秒）。[logRefreshEnabled]が有効な場合に使用
+     * @property logMatchToleranceSeconds 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒）
+     * @property logBodyExcerptLength ログ一覧（[LogActivity]）に表示する本文抜粋（[SmsLogStore.Entry.bodyExcerpt]）の文字数
      * @property continuationEnabled 継続SMSの引継ぎ（[SmsResolution.isContinuation]）機能全体の有効/無効
      * @property continuationScope 継続SMSの引継ぎを送信元ごとにどこまで遡って有効とするか
      * @property continuationShowUserNameEnabled SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引き継いだ氏名を表示するかどうか
      * @property themeMode アプリの配色モード（ライト/ダーク）
-     * @property smsSearchDateRangeDays SMS検索画面を開いた際に検索条件へ初期設定する日付範囲（日）
+     * @property searchDateRangeDays SMS検索画面を開いた際に検索条件へ初期設定する日付範囲（日）
      * @property searchFiltersVisibleByDefault SMS検索画面を開いた際に検索条件エリアを表示した状態にするかどうか
-     * @property smsExtractionSuccessReplyBody SMS検索画面で長押しした際に開く返信画面に自動入力する文言
-     * @property smsExtractionFailedReplyBody 抽出失敗のSMSへの返信時に使う文言。[smsExtractionSuccessReplyBody]の代わり
-     * @property defaultSendTargetFilterName SMS検索画面の「送信先」フィルタの初期値。nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」
-     * @property aiExtractionEnabled 本文からの会社名・氏名の抽出に端末上のAI（ML Kit GenAI / Gemini Nano）を使うかどうか。非対応端末は自動フォールバック
-     * @property companyNameExtractionEnabled 本文からの会社名・氏名の抽出機能全体の有効/無効
-     * @property companyNameAutoConversionEnabled 抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するかどうか。[resolveSendTargets]で抽出直後に適用
-     * @property companyNameFixedConversions 抽出結果の会社名に適用する固定変換ルール。[FixedConversion.from]に一致する部分を[FixedConversion.to]に置換。[companyNameAutoConversionEnabled]の後に適用
-     * @property defaultSendNoneOnlyEnabled SMS検索画面で「送信」の「未」チェックボックスの初期状態
-     * @property defaultExtractionFailedOnlyEnabled SMS検索画面で「抽出状況」の「異常」チェックボックスの初期状態
-     * @property defaultExtractionSucceededOnlyEnabled SMS検索画面で「抽出状況」の「正常」チェックボックスの初期状態
-     * @property defaultExtractionContinuationOnlyEnabled SMS検索画面で「抽出状況」の「引継ぎ」チェックボックスの初期状態
-     * @property defaultSentAutoOnlyEnabled SMS検索画面で「送信」の「済（自動）」チェックボックスの初期状態
-     * @property defaultSentManualOnlyEnabled SMS検索画面で「送信」の「済（手動）」チェックボックスの初期状態
+     * @property replySuccessBody SMS検索画面で長押しした際に開く返信画面に自動入力する文言
+     * @property replyFailedBody 抽出失敗のSMSへの返信時に使う文言。[replySuccessBody]の代わり
+     * @property searchSendTargetFilterName SMS検索画面の「送信先」フィルタの初期値。nullは「すべて」、[AppConstants.SEND_TARGET_FILTER_KEY_UNSET]は「未設定」
+     * @property extractionAiEnabled 本文からの会社名・氏名の抽出に端末上のAI（ML Kit GenAI / Gemini Nano）を使うかどうか。非対応端末は自動フォールバック
+     * @property extractionCompanyNameEnabled 本文からの会社名・氏名の抽出機能全体の有効/無効
+     * @property extractionCompanyNameAutoConversionEnabled 抽出結果の会社名に、英数字は半角大文字・それ以外は全角に統一する変換を適用するかどうか。[resolveSendTargets]で抽出直後に適用
+     * @property extractionCompanyNameFixedConversions 抽出結果の会社名に適用する固定変換ルール。[FixedConversion.from]に一致する部分を[FixedConversion.to]に置換。[extractionCompanyNameAutoConversionEnabled]の後に適用
+     * @property searchSendNoneOnlyEnabled SMS検索画面で「送信」の「未」チェックボックスの初期状態
+     * @property searchExtractionFailedOnlyEnabled SMS検索画面で「抽出状況」の「異常」チェックボックスの初期状態
+     * @property searchExtractionSucceededOnlyEnabled SMS検索画面で「抽出状況」の「正常」チェックボックスの初期状態
+     * @property searchExtractionContinuationOnlyEnabled SMS検索画面で「抽出状況」の「引継ぎ」チェックボックスの初期状態
+     * @property searchSentAutoOnlyEnabled SMS検索画面で「送信」の「済（自動）」チェックボックスの初期状態
+     * @property searchSentManualOnlyEnabled SMS検索画面で「送信」の「済（手動）」チェックボックスの初期状態
      */
     data class Config(
         val sendEnabled: Boolean,
@@ -160,31 +160,31 @@ object SettingsStore {
         val sendExtractionContinuationEnabled: Boolean,
         val searchExtractionFailedEnabled: Boolean,
         val searchExtractionContinuationEnabled: Boolean,
-        val autoReplyExtractionFailedEnabled: Boolean,
-        val autoReplyCooldownSeconds: Int,
-        val autoRefreshEnabled: Boolean,
-        val autoRefreshIntervalSeconds: Int,
-        val smsMatchToleranceSeconds: Int,
-        val bodyExcerptLength: Int,
+        val replyEnabled: Boolean,
+        val replyCooldownSeconds: Int,
+        val logRefreshEnabled: Boolean,
+        val logRefreshIntervalSeconds: Int,
+        val logMatchToleranceSeconds: Int,
+        val logBodyExcerptLength: Int,
         val continuationEnabled: Boolean,
         val continuationScope: ContinuationScope,
         val continuationShowUserNameEnabled: Boolean,
         val themeMode: ThemeMode,
-        val smsSearchDateRangeDays: Int,
+        val searchDateRangeDays: Int,
         val searchFiltersVisibleByDefault: Boolean,
-        val smsExtractionSuccessReplyBody: String,
-        val smsExtractionFailedReplyBody: String,
-        val defaultSendTargetFilterName: String?,
-        val aiExtractionEnabled: Boolean,
-        val companyNameExtractionEnabled: Boolean,
-        val companyNameAutoConversionEnabled: Boolean = true,
-        val companyNameFixedConversions: List<FixedConversion> = emptyList(),
-        val defaultSendNoneOnlyEnabled: Boolean,
-        val defaultExtractionFailedOnlyEnabled: Boolean,
-        val defaultExtractionSucceededOnlyEnabled: Boolean,
-        val defaultExtractionContinuationOnlyEnabled: Boolean,
-        val defaultSentAutoOnlyEnabled: Boolean,
-        val defaultSentManualOnlyEnabled: Boolean
+        val replySuccessBody: String,
+        val replyFailedBody: String,
+        val searchSendTargetFilterName: String?,
+        val extractionAiEnabled: Boolean,
+        val extractionCompanyNameEnabled: Boolean,
+        val extractionCompanyNameAutoConversionEnabled: Boolean = true,
+        val extractionCompanyNameFixedConversions: List<FixedConversion> = emptyList(),
+        val searchSendNoneOnlyEnabled: Boolean,
+        val searchExtractionFailedOnlyEnabled: Boolean,
+        val searchExtractionSucceededOnlyEnabled: Boolean,
+        val searchExtractionContinuationOnlyEnabled: Boolean,
+        val searchSentAutoOnlyEnabled: Boolean,
+        val searchSentManualOnlyEnabled: Boolean
     )
 
     /**
@@ -248,7 +248,7 @@ object SettingsStore {
 
         /**
          * 会社名を[keywords]と照合する。呼び出し元（[resolveSendTargets]）が渡す時点で、既にアプリ全体の
-         * 会社名変換（[Config.companyNameAutoConversionEnabled]・[Config.companyNameFixedConversions]）が
+         * 会社名変換（[Config.extractionCompanyNameAutoConversionEnabled]・[Config.extractionCompanyNameFixedConversions]）が
          * 適用済みであることを前提とする
          */
         fun matches(companyName: String): Boolean = keywords.any { TextNormalization.matches(companyName, it) }
@@ -295,41 +295,41 @@ object SettingsStore {
             .putBoolean(KEY_SEND_EXTRACTION_CONTINUATION_ENABLED, config.sendExtractionContinuationEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, config.searchExtractionFailedEnabled)
             .putBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED, config.searchExtractionContinuationEnabled)
-            .putBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, config.autoReplyExtractionFailedEnabled)
-            .putInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, config.autoReplyCooldownSeconds)
-            .putBoolean(KEY_AUTO_REFRESH_ENABLED, config.autoRefreshEnabled)
-            .putInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, config.autoRefreshIntervalSeconds)
-            .putInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, config.smsMatchToleranceSeconds)
-            .putInt(KEY_BODY_EXCERPT_LENGTH, config.bodyExcerptLength)
+            .putBoolean(KEY_REPLY_ENABLED, config.replyEnabled)
+            .putInt(KEY_REPLY_COOLDOWN_SECONDS, config.replyCooldownSeconds)
+            .putBoolean(KEY_LOG_REFRESH_ENABLED, config.logRefreshEnabled)
+            .putInt(KEY_LOG_REFRESH_INTERVAL_SECONDS, config.logRefreshIntervalSeconds)
+            .putInt(KEY_LOG_MATCH_TOLERANCE_SECONDS, config.logMatchToleranceSeconds)
+            .putInt(KEY_LOG_BODY_EXCERPT_LENGTH, config.logBodyExcerptLength)
             .putBoolean(KEY_CONTINUATION_ENABLED, config.continuationEnabled)
             .putString(KEY_CONTINUATION_SCOPE, config.continuationScope.name)
             .putBoolean(KEY_CONTINUATION_SHOW_USER_NAME_ENABLED, config.continuationShowUserNameEnabled)
             .putString(KEY_THEME_MODE, config.themeMode.name)
-            .putInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, config.smsSearchDateRangeDays)
+            .putInt(KEY_SEARCH_DATE_RANGE_DAYS, config.searchDateRangeDays)
             .putBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, config.searchFiltersVisibleByDefault)
-            .putString(KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY, config.smsExtractionSuccessReplyBody)
-            .putString(KEY_SMS_EXTRACTION_FAILED_REPLY_BODY, config.smsExtractionFailedReplyBody)
-            .putBoolean(KEY_AI_EXTRACTION_ENABLED, config.aiExtractionEnabled)
-            .putBoolean(KEY_COMPANY_NAME_EXTRACTION_ENABLED, config.companyNameExtractionEnabled)
-            .putBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, config.companyNameAutoConversionEnabled)
+            .putString(KEY_REPLY_SUCCESS_BODY, config.replySuccessBody)
+            .putString(KEY_REPLY_FAILED_BODY, config.replyFailedBody)
+            .putBoolean(KEY_EXTRACTION_AI_ENABLED, config.extractionAiEnabled)
+            .putBoolean(KEY_EXTRACTION_COMPANY_NAME_ENABLED, config.extractionCompanyNameEnabled)
+            .putBoolean(KEY_EXTRACTION_COMPANY_NAME_AUTO_CONVERSION_ENABLED, config.extractionCompanyNameAutoConversionEnabled)
             .putString(
-                KEY_COMPANY_NAME_FIXED_CONVERSIONS,
+                KEY_EXTRACTION_COMPANY_NAME_FIXED_CONVERSIONS,
                 JSONArray().apply {
-                    config.companyNameFixedConversions.forEach { rule ->
+                    config.extractionCompanyNameFixedConversions.forEach { rule ->
                         put(JSONObject().put("from", rule.from).put("to", rule.to))
                     }
                 }.toString()
             )
-            .putBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, config.defaultSendNoneOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, config.defaultExtractionFailedOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, config.defaultExtractionSucceededOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_EXTRACTION_CONTINUATION_ONLY_ENABLED, config.defaultExtractionContinuationOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, config.defaultSentAutoOnlyEnabled)
-            .putBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, config.defaultSentManualOnlyEnabled)
-        if (config.defaultSendTargetFilterName != null) {
-            editor.putString(KEY_DEFAULT_SEND_TARGET_FILTER_NAME, config.defaultSendTargetFilterName)
+            .putBoolean(KEY_SEARCH_SEND_NONE_ONLY_ENABLED, config.searchSendNoneOnlyEnabled)
+            .putBoolean(KEY_SEARCH_EXTRACTION_FAILED_ONLY_ENABLED, config.searchExtractionFailedOnlyEnabled)
+            .putBoolean(KEY_SEARCH_EXTRACTION_SUCCEEDED_ONLY_ENABLED, config.searchExtractionSucceededOnlyEnabled)
+            .putBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ONLY_ENABLED, config.searchExtractionContinuationOnlyEnabled)
+            .putBoolean(KEY_SEARCH_SENT_AUTO_ONLY_ENABLED, config.searchSentAutoOnlyEnabled)
+            .putBoolean(KEY_SEARCH_SENT_MANUAL_ONLY_ENABLED, config.searchSentManualOnlyEnabled)
+        if (config.searchSendTargetFilterName != null) {
+            editor.putString(KEY_SEARCH_SEND_TARGET_FILTER_NAME, config.searchSendTargetFilterName)
         } else {
-            editor.remove(KEY_DEFAULT_SEND_TARGET_FILTER_NAME)
+            editor.remove(KEY_SEARCH_SEND_TARGET_FILTER_NAME)
         }
         editor.apply()
     }
@@ -341,31 +341,31 @@ object SettingsStore {
         sendExtractionContinuationEnabled = true,
         searchExtractionFailedEnabled = false,
         searchExtractionContinuationEnabled = true,
-        autoReplyExtractionFailedEnabled = false,
-        autoReplyCooldownSeconds = AppDefaults.AUTO_REPLY_COOLDOWN_SECONDS,
-        autoRefreshEnabled = true,
-        autoRefreshIntervalSeconds = AppDefaults.AUTO_REFRESH_INTERVAL_SECONDS,
-        smsMatchToleranceSeconds = AppDefaults.SMS_MATCH_TOLERANCE_SECONDS,
-        bodyExcerptLength = AppDefaults.BODY_EXCERPT_LENGTH,
+        replyEnabled = false,
+        replyCooldownSeconds = AppDefaults.REPLY_COOLDOWN_SECONDS,
+        logRefreshEnabled = true,
+        logRefreshIntervalSeconds = AppDefaults.LOG_REFRESH_INTERVAL_SECONDS,
+        logMatchToleranceSeconds = AppDefaults.LOG_MATCH_TOLERANCE_SECONDS,
+        logBodyExcerptLength = AppDefaults.LOG_BODY_EXCERPT_LENGTH,
         continuationEnabled = true,
         continuationScope = ContinuationScope.UNLIMITED,
         continuationShowUserNameEnabled = true,
         themeMode = ThemeMode.LIGHT,
-        smsSearchDateRangeDays = AppDefaults.SMS_SEARCH_DATE_RANGE_DAYS,
+        searchDateRangeDays = AppDefaults.SEARCH_DATE_RANGE_DAYS,
         searchFiltersVisibleByDefault = true,
-        smsExtractionSuccessReplyBody = AppDefaults.SMS_EXTRACTION_SUCCESS_REPLY_BODY,
-        smsExtractionFailedReplyBody = AppDefaults.SMS_EXTRACTION_FAILED_REPLY_BODY,
-        defaultSendTargetFilterName = null,
-        aiExtractionEnabled = false,
-        companyNameExtractionEnabled = true,
-        companyNameAutoConversionEnabled = true,
-        companyNameFixedConversions = emptyList(),
-        defaultSendNoneOnlyEnabled = false,
-        defaultExtractionFailedOnlyEnabled = false,
-        defaultExtractionSucceededOnlyEnabled = false,
-        defaultExtractionContinuationOnlyEnabled = false,
-        defaultSentAutoOnlyEnabled = false,
-        defaultSentManualOnlyEnabled = false
+        replySuccessBody = AppDefaults.REPLY_SUCCESS_BODY,
+        replyFailedBody = AppDefaults.REPLY_FAILED_BODY,
+        searchSendTargetFilterName = null,
+        extractionAiEnabled = false,
+        extractionCompanyNameEnabled = true,
+        extractionCompanyNameAutoConversionEnabled = true,
+        extractionCompanyNameFixedConversions = emptyList(),
+        searchSendNoneOnlyEnabled = false,
+        searchExtractionFailedOnlyEnabled = false,
+        searchExtractionSucceededOnlyEnabled = false,
+        searchExtractionContinuationOnlyEnabled = false,
+        searchSentAutoOnlyEnabled = false,
+        searchSentManualOnlyEnabled = false
     )
 
     /** 保存済みの設定を読み込む */
@@ -377,38 +377,38 @@ object SettingsStore {
             sendExtractionContinuationEnabled = p.getBoolean(KEY_SEND_EXTRACTION_CONTINUATION_ENABLED, DEFAULT_CONFIG.sendExtractionContinuationEnabled),
             searchExtractionFailedEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.searchExtractionFailedEnabled),
             searchExtractionContinuationEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ENABLED, DEFAULT_CONFIG.searchExtractionContinuationEnabled),
-            autoReplyExtractionFailedEnabled = p.getBoolean(KEY_AUTO_REPLY_EXTRACTION_FAILED_ENABLED, DEFAULT_CONFIG.autoReplyExtractionFailedEnabled),
-            autoReplyCooldownSeconds = p.getInt(KEY_AUTO_REPLY_COOLDOWN_SECONDS, DEFAULT_CONFIG.autoReplyCooldownSeconds),
-            autoRefreshEnabled = p.getBoolean(KEY_AUTO_REFRESH_ENABLED, DEFAULT_CONFIG.autoRefreshEnabled),
-            autoRefreshIntervalSeconds = p.getInt(KEY_AUTO_REFRESH_INTERVAL_SECONDS, DEFAULT_CONFIG.autoRefreshIntervalSeconds),
-            smsMatchToleranceSeconds = p.getInt(KEY_SMS_MATCH_TOLERANCE_SECONDS, DEFAULT_CONFIG.smsMatchToleranceSeconds),
-            bodyExcerptLength = p.getInt(KEY_BODY_EXCERPT_LENGTH, DEFAULT_CONFIG.bodyExcerptLength),
+            replyEnabled = p.getBoolean(KEY_REPLY_ENABLED, DEFAULT_CONFIG.replyEnabled),
+            replyCooldownSeconds = p.getInt(KEY_REPLY_COOLDOWN_SECONDS, DEFAULT_CONFIG.replyCooldownSeconds),
+            logRefreshEnabled = p.getBoolean(KEY_LOG_REFRESH_ENABLED, DEFAULT_CONFIG.logRefreshEnabled),
+            logRefreshIntervalSeconds = p.getInt(KEY_LOG_REFRESH_INTERVAL_SECONDS, DEFAULT_CONFIG.logRefreshIntervalSeconds),
+            logMatchToleranceSeconds = p.getInt(KEY_LOG_MATCH_TOLERANCE_SECONDS, DEFAULT_CONFIG.logMatchToleranceSeconds),
+            logBodyExcerptLength = p.getInt(KEY_LOG_BODY_EXCERPT_LENGTH, DEFAULT_CONFIG.logBodyExcerptLength),
             continuationEnabled = p.getBoolean(KEY_CONTINUATION_ENABLED, DEFAULT_CONFIG.continuationEnabled),
             continuationScope = ContinuationScope.fromName(p.getString(KEY_CONTINUATION_SCOPE, null)),
             continuationShowUserNameEnabled = p.getBoolean(KEY_CONTINUATION_SHOW_USER_NAME_ENABLED, DEFAULT_CONFIG.continuationShowUserNameEnabled),
             themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
-            smsSearchDateRangeDays = p.getInt(KEY_SMS_SEARCH_DATE_RANGE_DAYS, DEFAULT_CONFIG.smsSearchDateRangeDays),
+            searchDateRangeDays = p.getInt(KEY_SEARCH_DATE_RANGE_DAYS, DEFAULT_CONFIG.searchDateRangeDays),
             searchFiltersVisibleByDefault = p.getBoolean(KEY_SEARCH_FILTERS_VISIBLE_BY_DEFAULT, DEFAULT_CONFIG.searchFiltersVisibleByDefault),
-            smsExtractionSuccessReplyBody = p.getString(KEY_SMS_EXTRACTION_SUCCESS_REPLY_BODY, DEFAULT_CONFIG.smsExtractionSuccessReplyBody) ?: DEFAULT_CONFIG.smsExtractionSuccessReplyBody,
-            smsExtractionFailedReplyBody = p.getString(KEY_SMS_EXTRACTION_FAILED_REPLY_BODY, DEFAULT_CONFIG.smsExtractionFailedReplyBody)
-                ?: DEFAULT_CONFIG.smsExtractionFailedReplyBody,
-            defaultSendTargetFilterName = p.getString(KEY_DEFAULT_SEND_TARGET_FILTER_NAME, DEFAULT_CONFIG.defaultSendTargetFilterName),
-            aiExtractionEnabled = p.getBoolean(KEY_AI_EXTRACTION_ENABLED, DEFAULT_CONFIG.aiExtractionEnabled),
-            companyNameExtractionEnabled = p.getBoolean(KEY_COMPANY_NAME_EXTRACTION_ENABLED, DEFAULT_CONFIG.companyNameExtractionEnabled),
-            companyNameAutoConversionEnabled = p.getBoolean(KEY_COMPANY_NAME_AUTO_CONVERSION_ENABLED, DEFAULT_CONFIG.companyNameAutoConversionEnabled),
-            companyNameFixedConversions = p.getString(KEY_COMPANY_NAME_FIXED_CONVERSIONS, null)?.let { json ->
+            replySuccessBody = p.getString(KEY_REPLY_SUCCESS_BODY, DEFAULT_CONFIG.replySuccessBody) ?: DEFAULT_CONFIG.replySuccessBody,
+            replyFailedBody = p.getString(KEY_REPLY_FAILED_BODY, DEFAULT_CONFIG.replyFailedBody)
+                ?: DEFAULT_CONFIG.replyFailedBody,
+            searchSendTargetFilterName = p.getString(KEY_SEARCH_SEND_TARGET_FILTER_NAME, DEFAULT_CONFIG.searchSendTargetFilterName),
+            extractionAiEnabled = p.getBoolean(KEY_EXTRACTION_AI_ENABLED, DEFAULT_CONFIG.extractionAiEnabled),
+            extractionCompanyNameEnabled = p.getBoolean(KEY_EXTRACTION_COMPANY_NAME_ENABLED, DEFAULT_CONFIG.extractionCompanyNameEnabled),
+            extractionCompanyNameAutoConversionEnabled = p.getBoolean(KEY_EXTRACTION_COMPANY_NAME_AUTO_CONVERSION_ENABLED, DEFAULT_CONFIG.extractionCompanyNameAutoConversionEnabled),
+            extractionCompanyNameFixedConversions = p.getString(KEY_EXTRACTION_COMPANY_NAME_FIXED_CONVERSIONS, null)?.let { json ->
                 val arr = JSONArray(json)
                 (0 until arr.length()).map { i ->
                     val obj = arr.getJSONObject(i)
                     FixedConversion(from = obj.optString("from", ""), to = obj.optString("to", ""))
                 }
-            } ?: DEFAULT_CONFIG.companyNameFixedConversions,
-            defaultSendNoneOnlyEnabled = p.getBoolean(KEY_DEFAULT_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.defaultSendNoneOnlyEnabled),
-            defaultExtractionFailedOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionFailedOnlyEnabled),
-            defaultExtractionSucceededOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionSucceededOnlyEnabled),
-            defaultExtractionContinuationOnlyEnabled = p.getBoolean(KEY_DEFAULT_EXTRACTION_CONTINUATION_ONLY_ENABLED, DEFAULT_CONFIG.defaultExtractionContinuationOnlyEnabled),
-            defaultSentAutoOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentAutoOnlyEnabled),
-            defaultSentManualOnlyEnabled = p.getBoolean(KEY_DEFAULT_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.defaultSentManualOnlyEnabled)
+            } ?: DEFAULT_CONFIG.extractionCompanyNameFixedConversions,
+            searchSendNoneOnlyEnabled = p.getBoolean(KEY_SEARCH_SEND_NONE_ONLY_ENABLED, DEFAULT_CONFIG.searchSendNoneOnlyEnabled),
+            searchExtractionFailedOnlyEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_FAILED_ONLY_ENABLED, DEFAULT_CONFIG.searchExtractionFailedOnlyEnabled),
+            searchExtractionSucceededOnlyEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_SUCCEEDED_ONLY_ENABLED, DEFAULT_CONFIG.searchExtractionSucceededOnlyEnabled),
+            searchExtractionContinuationOnlyEnabled = p.getBoolean(KEY_SEARCH_EXTRACTION_CONTINUATION_ONLY_ENABLED, DEFAULT_CONFIG.searchExtractionContinuationOnlyEnabled),
+            searchSentAutoOnlyEnabled = p.getBoolean(KEY_SEARCH_SENT_AUTO_ONLY_ENABLED, DEFAULT_CONFIG.searchSentAutoOnlyEnabled),
+            searchSentManualOnlyEnabled = p.getBoolean(KEY_SEARCH_SENT_MANUAL_ONLY_ENABLED, DEFAULT_CONFIG.searchSentManualOnlyEnabled)
         )
     }
 
@@ -419,35 +419,35 @@ object SettingsStore {
         .put("sendExtractionContinuationEnabled", config.sendExtractionContinuationEnabled)
         .put("searchExtractionFailedEnabled", config.searchExtractionFailedEnabled)
         .put("searchExtractionContinuationEnabled", config.searchExtractionContinuationEnabled)
-        .put("autoReplyExtractionFailedEnabled", config.autoReplyExtractionFailedEnabled)
-        .put("autoReplyCooldownSeconds", config.autoReplyCooldownSeconds)
-        .put("autoRefreshEnabled", config.autoRefreshEnabled)
-        .put("autoRefreshIntervalSeconds", config.autoRefreshIntervalSeconds)
-        .put("smsMatchToleranceSeconds", config.smsMatchToleranceSeconds)
-        .put("bodyExcerptLength", config.bodyExcerptLength)
+        .put("replyEnabled", config.replyEnabled)
+        .put("replyCooldownSeconds", config.replyCooldownSeconds)
+        .put("logRefreshEnabled", config.logRefreshEnabled)
+        .put("logRefreshIntervalSeconds", config.logRefreshIntervalSeconds)
+        .put("logMatchToleranceSeconds", config.logMatchToleranceSeconds)
+        .put("logBodyExcerptLength", config.logBodyExcerptLength)
         .put("continuationEnabled", config.continuationEnabled)
         .put("continuationScope", config.continuationScope.name)
         .put("continuationShowUserNameEnabled", config.continuationShowUserNameEnabled)
         .put("themeMode", config.themeMode.name)
-        .put("smsSearchDateRangeDays", config.smsSearchDateRangeDays)
+        .put("searchDateRangeDays", config.searchDateRangeDays)
         .put("searchFiltersVisibleByDefault", config.searchFiltersVisibleByDefault)
-        .put("smsExtractionSuccessReplyBody", config.smsExtractionSuccessReplyBody)
-        .put("smsExtractionFailedReplyBody", config.smsExtractionFailedReplyBody)
-        .put("defaultSendTargetFilterName", config.defaultSendTargetFilterName ?: JSONObject.NULL)
-        .put("aiExtractionEnabled", config.aiExtractionEnabled)
-        .put("companyNameExtractionEnabled", config.companyNameExtractionEnabled)
-        .put("companyNameAutoConversionEnabled", config.companyNameAutoConversionEnabled)
-        .put("companyNameFixedConversions", JSONArray().apply {
-            config.companyNameFixedConversions.forEach { rule ->
+        .put("replySuccessBody", config.replySuccessBody)
+        .put("replyFailedBody", config.replyFailedBody)
+        .put("searchSendTargetFilterName", config.searchSendTargetFilterName ?: JSONObject.NULL)
+        .put("extractionAiEnabled", config.extractionAiEnabled)
+        .put("extractionCompanyNameEnabled", config.extractionCompanyNameEnabled)
+        .put("extractionCompanyNameAutoConversionEnabled", config.extractionCompanyNameAutoConversionEnabled)
+        .put("extractionCompanyNameFixedConversions", JSONArray().apply {
+            config.extractionCompanyNameFixedConversions.forEach { rule ->
                 put(JSONObject().put("from", rule.from).put("to", rule.to))
             }
         })
-        .put("defaultSendNoneOnlyEnabled", config.defaultSendNoneOnlyEnabled)
-        .put("defaultExtractionFailedOnlyEnabled", config.defaultExtractionFailedOnlyEnabled)
-        .put("defaultExtractionSucceededOnlyEnabled", config.defaultExtractionSucceededOnlyEnabled)
-        .put("defaultExtractionContinuationOnlyEnabled", config.defaultExtractionContinuationOnlyEnabled)
-        .put("defaultSentAutoOnlyEnabled", config.defaultSentAutoOnlyEnabled)
-        .put("defaultSentManualOnlyEnabled", config.defaultSentManualOnlyEnabled)
+        .put("searchSendNoneOnlyEnabled", config.searchSendNoneOnlyEnabled)
+        .put("searchExtractionFailedOnlyEnabled", config.searchExtractionFailedOnlyEnabled)
+        .put("searchExtractionSucceededOnlyEnabled", config.searchExtractionSucceededOnlyEnabled)
+        .put("searchExtractionContinuationOnlyEnabled", config.searchExtractionContinuationOnlyEnabled)
+        .put("searchSentAutoOnlyEnabled", config.searchSentAutoOnlyEnabled)
+        .put("searchSentManualOnlyEnabled", config.searchSentManualOnlyEnabled)
 
     /** JSONオブジェクトから[Config]を復元。未定義の属性は[existingConfig]の値を保持 */
     fun configFromJson(json: JSONObject, existingConfig: Config? = null): Config {
@@ -458,42 +458,42 @@ object SettingsStore {
             sendExtractionContinuationEnabled = json.optBoolean("sendExtractionContinuationEnabled", fallback.sendExtractionContinuationEnabled),
             searchExtractionFailedEnabled = json.optBoolean("searchExtractionFailedEnabled", fallback.searchExtractionFailedEnabled),
             searchExtractionContinuationEnabled = json.optBoolean("searchExtractionContinuationEnabled", fallback.searchExtractionContinuationEnabled),
-            autoReplyExtractionFailedEnabled = json.optBoolean("autoReplyExtractionFailedEnabled", fallback.autoReplyExtractionFailedEnabled),
-            autoReplyCooldownSeconds = json.optInt("autoReplyCooldownSeconds", fallback.autoReplyCooldownSeconds),
-            autoRefreshEnabled = json.optBoolean("autoRefreshEnabled", fallback.autoRefreshEnabled),
-            autoRefreshIntervalSeconds = json.optInt("autoRefreshIntervalSeconds", fallback.autoRefreshIntervalSeconds),
-            smsMatchToleranceSeconds = json.optInt("smsMatchToleranceSeconds", fallback.smsMatchToleranceSeconds),
-            bodyExcerptLength = json.optInt("bodyExcerptLength", fallback.bodyExcerptLength),
+            replyEnabled = json.optBoolean("replyEnabled", fallback.replyEnabled),
+            replyCooldownSeconds = json.optInt("replyCooldownSeconds", fallback.replyCooldownSeconds),
+            logRefreshEnabled = json.optBoolean("logRefreshEnabled", fallback.logRefreshEnabled),
+            logRefreshIntervalSeconds = json.optInt("logRefreshIntervalSeconds", fallback.logRefreshIntervalSeconds),
+            logMatchToleranceSeconds = json.optInt("logMatchToleranceSeconds", fallback.logMatchToleranceSeconds),
+            logBodyExcerptLength = json.optInt("logBodyExcerptLength", fallback.logBodyExcerptLength),
             continuationEnabled = json.optBoolean("continuationEnabled", fallback.continuationEnabled),
             continuationScope = if (json.has("continuationScope")) ContinuationScope.fromName(json.optString("continuationScope", "")) else fallback.continuationScope,
             continuationShowUserNameEnabled = json.optBoolean("continuationShowUserNameEnabled", fallback.continuationShowUserNameEnabled),
             themeMode = if (json.has("themeMode")) ThemeMode.fromName(json.optString("themeMode", "")) else fallback.themeMode,
-            smsSearchDateRangeDays = json.optInt("smsSearchDateRangeDays", fallback.smsSearchDateRangeDays),
+            searchDateRangeDays = json.optInt("searchDateRangeDays", fallback.searchDateRangeDays),
             searchFiltersVisibleByDefault = json.optBoolean("searchFiltersVisibleByDefault", fallback.searchFiltersVisibleByDefault),
-            smsExtractionSuccessReplyBody = json.optString("smsExtractionSuccessReplyBody", fallback.smsExtractionSuccessReplyBody),
-            smsExtractionFailedReplyBody = json.optString("smsExtractionFailedReplyBody", fallback.smsExtractionFailedReplyBody),
-            defaultSendTargetFilterName = if (json.has("defaultSendTargetFilterName") && !json.isNull("defaultSendTargetFilterName")) {
-                json.optString("defaultSendTargetFilterName")
-            } else if (json.has("defaultSendTargetFilterName")) {
+            replySuccessBody = json.optString("replySuccessBody", fallback.replySuccessBody),
+            replyFailedBody = json.optString("replyFailedBody", fallback.replyFailedBody),
+            searchSendTargetFilterName = if (json.has("searchSendTargetFilterName") && !json.isNull("searchSendTargetFilterName")) {
+                json.optString("searchSendTargetFilterName")
+            } else if (json.has("searchSendTargetFilterName")) {
                 null
             } else {
-                fallback.defaultSendTargetFilterName
+                fallback.searchSendTargetFilterName
             },
-            aiExtractionEnabled = json.optBoolean("aiExtractionEnabled", fallback.aiExtractionEnabled),
-            companyNameExtractionEnabled = json.optBoolean("companyNameExtractionEnabled", fallback.companyNameExtractionEnabled),
-            companyNameAutoConversionEnabled = json.optBoolean("companyNameAutoConversionEnabled", fallback.companyNameAutoConversionEnabled),
-            companyNameFixedConversions = json.optJSONArray("companyNameFixedConversions")?.let { arr ->
+            extractionAiEnabled = json.optBoolean("extractionAiEnabled", fallback.extractionAiEnabled),
+            extractionCompanyNameEnabled = json.optBoolean("extractionCompanyNameEnabled", fallback.extractionCompanyNameEnabled),
+            extractionCompanyNameAutoConversionEnabled = json.optBoolean("extractionCompanyNameAutoConversionEnabled", fallback.extractionCompanyNameAutoConversionEnabled),
+            extractionCompanyNameFixedConversions = json.optJSONArray("extractionCompanyNameFixedConversions")?.let { arr ->
                 (0 until arr.length()).map { i ->
                     val obj = arr.getJSONObject(i)
                     FixedConversion(from = obj.optString("from", ""), to = obj.optString("to", ""))
                 }
-            } ?: fallback.companyNameFixedConversions,
-            defaultSendNoneOnlyEnabled = json.optBoolean("defaultSendNoneOnlyEnabled", fallback.defaultSendNoneOnlyEnabled),
-            defaultExtractionFailedOnlyEnabled = json.optBoolean("defaultExtractionFailedOnlyEnabled", fallback.defaultExtractionFailedOnlyEnabled),
-            defaultExtractionSucceededOnlyEnabled = json.optBoolean("defaultExtractionSucceededOnlyEnabled", fallback.defaultExtractionSucceededOnlyEnabled),
-            defaultExtractionContinuationOnlyEnabled = json.optBoolean("defaultExtractionContinuationOnlyEnabled", fallback.defaultExtractionContinuationOnlyEnabled),
-            defaultSentAutoOnlyEnabled = json.optBoolean("defaultSentAutoOnlyEnabled", fallback.defaultSentAutoOnlyEnabled),
-            defaultSentManualOnlyEnabled = json.optBoolean("defaultSentManualOnlyEnabled", fallback.defaultSentManualOnlyEnabled)
+            } ?: fallback.extractionCompanyNameFixedConversions,
+            searchSendNoneOnlyEnabled = json.optBoolean("searchSendNoneOnlyEnabled", fallback.searchSendNoneOnlyEnabled),
+            searchExtractionFailedOnlyEnabled = json.optBoolean("searchExtractionFailedOnlyEnabled", fallback.searchExtractionFailedOnlyEnabled),
+            searchExtractionSucceededOnlyEnabled = json.optBoolean("searchExtractionSucceededOnlyEnabled", fallback.searchExtractionSucceededOnlyEnabled),
+            searchExtractionContinuationOnlyEnabled = json.optBoolean("searchExtractionContinuationOnlyEnabled", fallback.searchExtractionContinuationOnlyEnabled),
+            searchSentAutoOnlyEnabled = json.optBoolean("searchSentAutoOnlyEnabled", fallback.searchSentAutoOnlyEnabled),
+            searchSentManualOnlyEnabled = json.optBoolean("searchSentManualOnlyEnabled", fallback.searchSentManualOnlyEnabled)
         )
     }
 
@@ -671,12 +671,12 @@ object SettingsStore {
      * @return 変換済みの会社名
      */
     fun applyCompanyNameConversion(companyName: String, config: Config): String {
-        val autoConverted = if (config.companyNameAutoConversionEnabled) {
+        val autoConverted = if (config.extractionCompanyNameAutoConversionEnabled) {
             TextNormalization.normalizeWidth(companyName)
         } else {
             companyName
         }
-        return config.companyNameFixedConversions.fold(autoConverted) { acc, rule ->
+        return config.extractionCompanyNameFixedConversions.fold(autoConverted) { acc, rule ->
             if (rule.from.isNotEmpty()) acc.replace(rule.from, rule.to) else acc
         }
     }
@@ -721,7 +721,7 @@ object SettingsStore {
      *   ルールに通して都度判定するため、設定の変更・削除が即時反映される。
      * - 通常解析：本文を解析し、抽出直後に会社名変換（[applyCompanyNameConversion]）を一度適用する。
      *   以降は戻り値の会社名をそのまま使えばよい。
-     * - 会社名抽出が無効：[companyNameExtractionEnabled]がfalse。本文から抽出せず振り分けもせず、
+     * - 会社名抽出が無効：[extractionCompanyNameEnabled]がfalse。本文から抽出せず振り分けもせず、
      *   全送信先へ送る。共有[SmsParts]の会社名は先頭の送信先の設定値（変換済み）をプレースホルダとし、
      *   kintone登録・送信ログでは[KintoneUploadWorker]が送信先ごとの設定値を使う。
      *
@@ -733,8 +733,8 @@ object SettingsStore {
         sender: String,
         body: String,
         timestampMillis: Long,
-        aiExtractionEnabled: Boolean,
-        companyNameExtractionEnabled: Boolean,
+        extractionAiEnabled: Boolean,
+        extractionCompanyNameEnabled: Boolean,
         continuationEnabled: Boolean,
         continuationScope: ContinuationScope
     ): Pair<SmsResolution, List<SendTarget>> {
@@ -754,27 +754,27 @@ object SettingsStore {
             )
             val resolution = SmsResolution(smsParts = smsParts, isContinuation = true)
             // 引き継いだ会社名（変換済み）で送信先を都度判定
-            val sendTargets = if (companyNameExtractionEnabled) {
+            val sendTargets = if (extractionCompanyNameEnabled) {
                 findSendTargets(context, convertedCompanyName)
             } else {
                 loadSendTargets(context)
             }
             return resolution to sendTargets
         }
-        val extracted = SmsPartsGenerator.resolveSmsParts(body, aiExtractionEnabled, companyNameExtractionEnabled)
+        val extracted = SmsPartsGenerator.resolveSmsParts(body, extractionAiEnabled, extractionCompanyNameEnabled)
         val config = load(context)
-        val convertedCompanyName = if (companyNameExtractionEnabled) {
+        val convertedCompanyName = if (extractionCompanyNameEnabled) {
             applyCompanyNameConversion(extracted.companyName, config)
         } else {
             extracted.companyName
         }
-        val sendTargets = if (companyNameExtractionEnabled) {
+        val sendTargets = if (extractionCompanyNameEnabled) {
             findSendTargets(context, convertedCompanyName)
         } else {
             loadSendTargets(context)
         }
         // 抽出が無効な場合は会社名を空のまま（各送信先ごとに KintoneUploadWorker で設定）
-        val companyNameSource = if (companyNameExtractionEnabled) {
+        val companyNameSource = if (extractionCompanyNameEnabled) {
             convertedCompanyName
         } else {
             ""

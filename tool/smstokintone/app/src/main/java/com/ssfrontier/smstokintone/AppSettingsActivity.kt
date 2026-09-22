@@ -35,7 +35,7 @@ class AppSettingsActivity : BaseActivity() {
      * 「送信先」スピナー選択位置と対応する送信先リスト。
      * [SettingsStore.sendTargetFilterOptions] の並び順に対応。
      */
-    private var defaultSendTargetFilterNames: List<String?> = emptyList()
+    private var searchSendTargetFilterNames: List<String?> = emptyList()
 
     /** SMS受信権限リクエスト結果ハンドラ。許可時は表示更新、拒否時はトースト表示。 */
     private val requestPermissionLauncher =
@@ -110,7 +110,7 @@ class AppSettingsActivity : BaseActivity() {
     }
 
     /**
-     * llFixedConversionsContainer 内の全行の現在内容で [SettingsStore.Config.companyNameFixedConversions] を保存。
+     * llFixedConversionsContainer 内の全行の現在内容で [SettingsStore.Config.extractionCompanyNameFixedConversions] を保存。
      * 各行の EditText 内容を読み取り、[SettingsStore.FixedConversion] リストに変換して永続化。
      */
     private fun saveFixedConversions() {
@@ -121,7 +121,7 @@ class AppSettingsActivity : BaseActivity() {
                 to = row.findViewById<EditText>(R.id.etFixConversionAfter).text.toString().trim()
             )
         }
-        SettingsStore.update(this) { it.copy(companyNameFixedConversions = rules) }
+        SettingsStore.update(this) { it.copy(extractionCompanyNameFixedConversions = rules) }
     }
 
 
@@ -172,14 +172,14 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.swSendExtractionContinuationEnabled.setupManaged(sendContinuationListener)
 
-        binding.swAiExtractionEnabled.isChecked = config.aiExtractionEnabled
+        binding.swAiExtractionEnabled.isChecked = config.extractionAiEnabled
         val aiExtractionListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(aiExtractionEnabled = isChecked) }
+            SettingsStore.update(this) { it.copy(extractionAiEnabled = isChecked) }
         }
         binding.swAiExtractionEnabled.setupManaged(aiExtractionListener)
 
         val bodyExtractionConfig = config
-        var previousCompanyNameExtractionEnabled = bodyExtractionConfig.companyNameExtractionEnabled
+        var previousCompanyNameExtractionEnabled = bodyExtractionConfig.extractionCompanyNameEnabled
         binding.swCompanyNameExtractionEnabled.isChecked = previousCompanyNameExtractionEnabled
         val companyNameExtractionListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
             if (isChecked && !previousCompanyNameExtractionEnabled) {
@@ -189,7 +189,7 @@ class AppSettingsActivity : BaseActivity() {
                         .setTitle(R.string.dialog_title_company_name_extraction_warning)
                         .setMessage(getString(R.string.dialog_message_company_name_extraction_warning, noCompanyNameCount))
                         .setPositiveButton(android.R.string.ok) { _, _ ->
-                            SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+                            SettingsStore.update(this) { it.copy(extractionCompanyNameEnabled = isChecked) }
                             previousCompanyNameExtractionEnabled = isChecked
                             binding.swCompanyNameAutoConversionEnabled.isEnabled = isChecked
                             binding.btnAddFixedConversion.isEnabled = isChecked
@@ -200,14 +200,14 @@ class AppSettingsActivity : BaseActivity() {
                         }
                         .show().setupManaged()
                 } else {
-                    SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+                    SettingsStore.update(this) { it.copy(extractionCompanyNameEnabled = isChecked) }
                     previousCompanyNameExtractionEnabled = isChecked
                     binding.swCompanyNameAutoConversionEnabled.isEnabled = isChecked
                     binding.btnAddFixedConversion.isEnabled = isChecked
                     updateFixedConversionsRowState(isChecked)
                 }
             } else {
-                SettingsStore.update(this) { it.copy(companyNameExtractionEnabled = isChecked) }
+                SettingsStore.update(this) { it.copy(extractionCompanyNameEnabled = isChecked) }
                 previousCompanyNameExtractionEnabled = isChecked
                 binding.swCompanyNameAutoConversionEnabled.isEnabled = isChecked
                 binding.btnAddFixedConversion.isEnabled = isChecked
@@ -216,15 +216,15 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.swCompanyNameExtractionEnabled.setupManaged(companyNameExtractionListener)
 
-        binding.swCompanyNameAutoConversionEnabled.isChecked = bodyExtractionConfig.companyNameAutoConversionEnabled
-        binding.swCompanyNameAutoConversionEnabled.isEnabled = bodyExtractionConfig.companyNameExtractionEnabled
+        binding.swCompanyNameAutoConversionEnabled.isChecked = bodyExtractionConfig.extractionCompanyNameAutoConversionEnabled
+        binding.swCompanyNameAutoConversionEnabled.isEnabled = bodyExtractionConfig.extractionCompanyNameEnabled
         val companyNameAutoConversionListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(companyNameAutoConversionEnabled = isChecked) }
+            SettingsStore.update(this) { it.copy(extractionCompanyNameAutoConversionEnabled = isChecked) }
         }
         binding.swCompanyNameAutoConversionEnabled.setupManaged(companyNameAutoConversionListener)
-        bodyExtractionConfig.companyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to, enabled = bodyExtractionConfig.companyNameExtractionEnabled) }
-        binding.btnAddFixedConversion.isEnabled = bodyExtractionConfig.companyNameExtractionEnabled
-        val addFixedConversionListener = View.OnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "", enabled = bodyExtractionConfig.companyNameExtractionEnabled) }
+        bodyExtractionConfig.extractionCompanyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to, enabled = bodyExtractionConfig.extractionCompanyNameEnabled) }
+        binding.btnAddFixedConversion.isEnabled = bodyExtractionConfig.extractionCompanyNameEnabled
+        val addFixedConversionListener = View.OnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "", enabled = bodyExtractionConfig.extractionCompanyNameEnabled) }
         binding.btnAddFixedConversion.setupManaged(addFixedConversionListener)
 
         binding.swSearchExtractionFailedEnabled.isChecked = config.searchExtractionFailedEnabled
@@ -240,43 +240,43 @@ class AppSettingsActivity : BaseActivity() {
         binding.swSearchExtractionContinuationEnabled.setupManaged(searchContinuationListener)
 
         // SMS返信の手動/自動は、SMS送信の送信モードとは独立して管理する
-        val autoReplyExtractionFailedEnabled = config.autoReplyExtractionFailedEnabled
-        binding.rbSmsReplyModeAuto.isChecked = autoReplyExtractionFailedEnabled
-        binding.rbSmsReplyModeManual.isChecked = !autoReplyExtractionFailedEnabled
-        binding.tilAutoReplyCooldownSeconds.isEnabled = autoReplyExtractionFailedEnabled
+        val replyEnabled = config.replyEnabled
+        binding.rbSmsReplyModeAuto.isChecked = replyEnabled
+        binding.rbSmsReplyModeManual.isChecked = !replyEnabled
+        binding.tilReplyCooldownSeconds.isEnabled = replyEnabled
         val smsReplyModeListener = RadioGroup.OnCheckedChangeListener { _, checkedId ->
             val enabled = checkedId == binding.rbSmsReplyModeAuto.id
-            SettingsStore.update(this) { it.copy(autoReplyExtractionFailedEnabled = enabled) }
-            binding.tilAutoReplyCooldownSeconds.isEnabled = enabled
+            SettingsStore.update(this) { it.copy(replyEnabled = enabled) }
+            binding.tilReplyCooldownSeconds.isEnabled = enabled
         }
         binding.rgSmsReplyMode.setupManaged(smsReplyModeListener)
 
-        binding.etAutoReplyCooldownSeconds.setText(config.autoReplyCooldownSeconds.toString())
-        binding.etAutoReplyCooldownSeconds.onPositiveIntChanged { seconds ->
-            SettingsStore.update(this) { it.copy(autoReplyCooldownSeconds = seconds) }
+        binding.etReplyCooldownSeconds.setText(config.replyCooldownSeconds.toString())
+        binding.etReplyCooldownSeconds.onPositiveIntChanged { seconds ->
+            SettingsStore.update(this) { it.copy(replyCooldownSeconds = seconds) }
         }
 
-        binding.swAutoRefreshEnabled.isChecked = config.autoRefreshEnabled
-        binding.etAutoRefreshInterval.setText(config.autoRefreshIntervalSeconds.toString())
-        binding.tilAutoRefreshInterval.isEnabled = config.autoRefreshEnabled
+        binding.swLogRefreshEnabled.isChecked = config.logRefreshEnabled
+        binding.etLogRefreshInterval.setText(config.logRefreshIntervalSeconds.toString())
+        binding.tilLogRefreshInterval.isEnabled = config.logRefreshEnabled
 
-        val autoRefreshListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(autoRefreshEnabled = isChecked) }
-            binding.tilAutoRefreshInterval.isEnabled = isChecked
+        val logRefreshEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(logRefreshEnabled = isChecked) }
+            binding.tilLogRefreshInterval.isEnabled = isChecked
         }
-        binding.swAutoRefreshEnabled.setupManaged(autoRefreshListener)
-        binding.etAutoRefreshInterval.onPositiveIntChanged { seconds ->
-            SettingsStore.update(this) { it.copy(autoRefreshIntervalSeconds = seconds) }
-        }
-
-        binding.etSmsMatchToleranceSeconds.setText(config.smsMatchToleranceSeconds.toString())
-        binding.etSmsMatchToleranceSeconds.onPositiveIntChanged { seconds ->
-            SettingsStore.update(this) { it.copy(smsMatchToleranceSeconds = seconds) }
+        binding.swLogRefreshEnabled.setupManaged(logRefreshEnabledListener)
+        binding.etLogRefreshInterval.onPositiveIntChanged { seconds ->
+            SettingsStore.update(this) { it.copy(logRefreshIntervalSeconds = seconds) }
         }
 
-        binding.etBodyExcerptLength.setText(config.bodyExcerptLength.toString())
-        binding.etBodyExcerptLength.onPositiveIntChanged { length ->
-            SettingsStore.update(this) { it.copy(bodyExcerptLength = length) }
+        binding.etLogMatchToleranceSeconds.setText(config.logMatchToleranceSeconds.toString())
+        binding.etLogMatchToleranceSeconds.onPositiveIntChanged { seconds ->
+            SettingsStore.update(this) { it.copy(logMatchToleranceSeconds = seconds) }
+        }
+
+        binding.etLogBodyExcerptLength.setText(config.logBodyExcerptLength.toString())
+        binding.etLogBodyExcerptLength.onPositiveIntChanged { length ->
+            SettingsStore.update(this) { it.copy(logBodyExcerptLength = length) }
         }
 
         binding.swContinuationEnabled.isChecked = config.continuationEnabled
@@ -316,9 +316,9 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.btnEditContinuationInfo.setupManaged(editContinuationInfoListener)
 
-        binding.etSmsSearchDateRangeDays.setText(config.smsSearchDateRangeDays.toString())
+        binding.etSmsSearchDateRangeDays.setText(config.searchDateRangeDays.toString())
         binding.etSmsSearchDateRangeDays.onPositiveIntChanged { days ->
-            SettingsStore.update(this) { it.copy(smsSearchDateRangeDays = days) }
+            SettingsStore.update(this) { it.copy(searchDateRangeDays = days) }
         }
 
         binding.rbSearchFiltersVisible.isChecked = config.searchFiltersVisibleByDefault
@@ -329,46 +329,46 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.rgSearchFiltersVisibility.setupManaged(searchFiltersVisibilityListener)
 
-        binding.cbDefaultSendNoneOnlyEnabled.isChecked = config.defaultSendNoneOnlyEnabled
-        val sendNoneOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultSendNoneOnlyEnabled = isChecked) }
+        binding.cbSearchSendNoneOnlyEnabled.isChecked = config.searchSendNoneOnlyEnabled
+        val searchSendNoneOnlyEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchSendNoneOnlyEnabled = isChecked) }
         }
-        binding.cbDefaultSendNoneOnlyEnabled.setupManaged(sendNoneOnlyListener)
+        binding.cbSearchSendNoneOnlyEnabled.setupManaged(searchSendNoneOnlyEnabledListener)
 
-        binding.cbDefaultSentAutoOnlyEnabled.isChecked = config.defaultSentAutoOnlyEnabled
-        val sentAutoOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultSentAutoOnlyEnabled = isChecked) }
+        binding.cbSearchSentAutoOnlyEnabled.isChecked = config.searchSentAutoOnlyEnabled
+        val searchSentAutoOnlyEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchSentAutoOnlyEnabled = isChecked) }
         }
-        binding.cbDefaultSentAutoOnlyEnabled.setupManaged(sentAutoOnlyListener)
+        binding.cbSearchSentAutoOnlyEnabled.setupManaged(searchSentAutoOnlyEnabledListener)
 
-        binding.cbDefaultSentManualOnlyEnabled.isChecked = config.defaultSentManualOnlyEnabled
-        val sentManualOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultSentManualOnlyEnabled = isChecked) }
+        binding.cbSearchSentManualOnlyEnabled.isChecked = config.searchSentManualOnlyEnabled
+        val searchSentManualOnlyEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchSentManualOnlyEnabled = isChecked) }
         }
-        binding.cbDefaultSentManualOnlyEnabled.setupManaged(sentManualOnlyListener)
+        binding.cbSearchSentManualOnlyEnabled.setupManaged(searchSentManualOnlyEnabledListener)
 
-        binding.cbDefaultExtractionFailedOnlyEnabled.isChecked = config.defaultExtractionFailedOnlyEnabled
-        val extractionFailedOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultExtractionFailedOnlyEnabled = isChecked) }
+        binding.cbSearchExtractionFailedOnlyEnabled.isChecked = config.searchExtractionFailedOnlyEnabled
+        val searchExtractionFailedOnlyEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchExtractionFailedOnlyEnabled = isChecked) }
         }
-        binding.cbDefaultExtractionFailedOnlyEnabled.setupManaged(extractionFailedOnlyListener)
+        binding.cbSearchExtractionFailedOnlyEnabled.setupManaged(searchExtractionFailedOnlyEnabledListener)
 
-        binding.cbDefaultExtractionSucceededOnlyEnabled.isChecked = config.defaultExtractionSucceededOnlyEnabled
-        val extractionSucceededOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultExtractionSucceededOnlyEnabled = isChecked) }
+        binding.cbSearchExtractionSucceededOnlyEnabled.isChecked = config.searchExtractionSucceededOnlyEnabled
+        val searchExtractionSucceededOnlyEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchExtractionSucceededOnlyEnabled = isChecked) }
         }
-        binding.cbDefaultExtractionSucceededOnlyEnabled.setupManaged(extractionSucceededOnlyListener)
+        binding.cbSearchExtractionSucceededOnlyEnabled.setupManaged(searchExtractionSucceededOnlyEnabledListener)
 
-        binding.cbDefaultExtractionContinuationOnlyEnabled.isChecked = config.defaultExtractionContinuationOnlyEnabled
-        val extractionContinuationOnlyListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
-            SettingsStore.update(this) { it.copy(defaultExtractionContinuationOnlyEnabled = isChecked) }
+        binding.cbSearchExtractionContinuationOnlyEnabled.isChecked = config.searchExtractionContinuationOnlyEnabled
+        val searchExtractionContinuationOnlyEnabledListener = CompoundButton.OnCheckedChangeListener { _, isChecked ->
+            SettingsStore.update(this) { it.copy(searchExtractionContinuationOnlyEnabled = isChecked) }
         }
-        binding.cbDefaultExtractionContinuationOnlyEnabled.setupManaged(extractionContinuationOnlyListener)
+        binding.cbSearchExtractionContinuationOnlyEnabled.setupManaged(searchExtractionContinuationOnlyEnabledListener)
 
         val spinnerListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val sendTargetName = defaultSendTargetFilterNames.getOrNull(position)
-                SettingsStore.update(this@AppSettingsActivity) { it.copy(defaultSendTargetFilterName = sendTargetName) }
+                val sendTargetName = searchSendTargetFilterNames.getOrNull(position)
+                SettingsStore.update(this@AppSettingsActivity) { it.copy(searchSendTargetFilterName = sendTargetName) }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -404,17 +404,17 @@ class AppSettingsActivity : BaseActivity() {
         }
         binding.btnRequestReadPermission.setupManaged(requestReadPermissionListener)
 
-        binding.etSmsExtractionSuccessReplyBody.setText(config.smsExtractionSuccessReplyBody)
-        val successReplyWatcher = simpleTextWatcher { text ->
-            SettingsStore.update(this) { it.copy(smsExtractionSuccessReplyBody = text) }
+        binding.etReplySuccessBody.setText(config.replySuccessBody)
+        val replySuccessBodyWatcher = simpleTextWatcher { text ->
+            SettingsStore.update(this) { it.copy(replySuccessBody = text) }
         }
-        binding.etSmsExtractionSuccessReplyBody.setupManaged(successReplyWatcher)
+        binding.etReplySuccessBody.setupManaged(replySuccessBodyWatcher)
 
-        binding.etSmsExtractionFailedReplyBody.setText(config.smsExtractionFailedReplyBody)
-        val failedReplyWatcher = simpleTextWatcher { text ->
-            SettingsStore.update(this) { it.copy(smsExtractionFailedReplyBody = text) }
+        binding.etReplyFailedBody.setText(config.replyFailedBody)
+        val replyFailedBodyWatcher = simpleTextWatcher { text ->
+            SettingsStore.update(this) { it.copy(replyFailedBody = text) }
         }
-        binding.etSmsExtractionFailedReplyBody.setupManaged(failedReplyWatcher)
+        binding.etReplyFailedBody.setupManaged(replyFailedBodyWatcher)
 
         val resetSettingsListener = View.OnClickListener {
             AlertDialog.Builder(this)
@@ -469,22 +469,22 @@ class AppSettingsActivity : BaseActivity() {
         // 送信先が1件の場合は「すべて」に固定されるため、項目を隠す
         if (SettingsStore.loadSendTargets(this).size == 1) {
             binding.llDefaultSendTargetFilter.visibility = View.GONE
-            if (config.defaultSendTargetFilterName != null) {
-                SettingsStore.update(this) { it.copy(defaultSendTargetFilterName = null) }
+            if (config.searchSendTargetFilterName != null) {
+                SettingsStore.update(this) { it.copy(searchSendTargetFilterName = null) }
             }
             return
         }
         binding.llDefaultSendTargetFilter.visibility = View.VISIBLE
 
         val options = SettingsStore.sendTargetFilterOptions(this)
-        defaultSendTargetFilterNames = options.map { it.first }
+        searchSendTargetFilterNames = options.map { it.first }
         val labels = options.map { it.second }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, labels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spDefaultSendTargetFilter.adapter = adapter
 
-        val selectedIndex = defaultSendTargetFilterNames.indexOf(config.defaultSendTargetFilterName)
+        val selectedIndex = searchSendTargetFilterNames.indexOf(config.searchSendTargetFilterName)
         binding.spDefaultSendTargetFilter.setSelection(if (selectedIndex >= 0) selectedIndex else 0)
     }
 

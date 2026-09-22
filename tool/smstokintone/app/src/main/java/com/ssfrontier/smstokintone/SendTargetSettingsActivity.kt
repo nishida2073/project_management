@@ -73,11 +73,11 @@ class SendTargetSettingsActivity : BaseActivity() {
 
         itemBinding.etSendTargetName.setText(sendTarget.name)
         itemBinding.etCompanyName.setText(sendTarget.companyName)
-        val companyNameExtractionEnabled = SettingsStore.load(applicationContext).companyNameExtractionEnabled
+        val extractionCompanyNameEnabled = SettingsStore.load(applicationContext).extractionCompanyNameEnabled
         itemBinding.llCompanyNameSection.visibility =
-            if (companyNameExtractionEnabled) View.GONE else View.VISIBLE
+            if (extractionCompanyNameEnabled) View.GONE else View.VISIBLE
         itemBinding.llKeywordsSection.visibility =
-            if (companyNameExtractionEnabled) View.VISIBLE else View.GONE
+            if (extractionCompanyNameEnabled) View.VISIBLE else View.GONE
         sendTarget.keywords.forEach { addKeywordRow(itemBinding.llKeywordsContainer, it) }
         val addKeywordListener = View.OnClickListener { addKeywordRow(itemBinding.llKeywordsContainer, "") }
         itemBinding.btnAddKeyword.setupManaged(addKeywordListener)
@@ -217,7 +217,7 @@ class SendTargetSettingsActivity : BaseActivity() {
             return
         }
 
-        val testSendBody = if (!SettingsStore.load(this).companyNameExtractionEnabled) {
+        val testSendBody = if (!SettingsStore.load(this).extractionCompanyNameEnabled) {
             getString(R.string.test_send_body_template_company_name_extraction_disabled)
         } else if (sendTarget.keywords.isNotEmpty()) {
             getString(R.string.test_send_body_template_exists_keywords, sendTarget.keywords.joinToString("、"))
@@ -255,15 +255,15 @@ class SendTargetSettingsActivity : BaseActivity() {
         itemBinding.btnTestSend.isEnabled = false
         lifecycleScope.launch {
             val config = SettingsStore.load(applicationContext)
-            val extracted = SmsPartsGenerator.resolveSmsParts(testBody, config.aiExtractionEnabled, config.companyNameExtractionEnabled)
+            val extracted = SmsPartsGenerator.resolveSmsParts(testBody, config.extractionAiEnabled, config.extractionCompanyNameEnabled)
             val smsParts = extracted.copy(
                 companyName = SettingsStore.applyCompanyNameConversion(
-                    if (config.companyNameExtractionEnabled) extracted.companyName else sendTarget.companyName,
+                    if (config.extractionCompanyNameEnabled) extracted.companyName else sendTarget.companyName,
                     config
                 )
             )
 
-            if (config.companyNameExtractionEnabled && !sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
+            if (config.extractionCompanyNameEnabled && !sendTarget.isDefault && !sendTarget.routesTo(smsParts.companyName)) {
                 itemBinding.btnTestSend.isEnabled = true
                 AlertDialog.Builder(this@SendTargetSettingsActivity)
                     .setTitle(R.string.dialog_title_test_send_result)

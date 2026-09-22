@@ -29,11 +29,11 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         // -1Lは[KEY_SMS_ID]未指定（自動受信）を表す
         val smsId = inputData.getLong(KEY_SMS_ID, -1L).let { if (it == -1L) null else it }
 
-        val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.aiExtractionEnabled, config.companyNameExtractionEnabled, config.continuationEnabled, config.continuationScope)
+        val (resolution, sendTargets) = SettingsStore.resolveSendTargets(applicationContext, sender, body, timestampMillis, config.extractionAiEnabled, config.extractionCompanyNameEnabled, config.continuationEnabled, config.continuationScope)
         val smsParts = resolution.smsParts
         val validSendTargets = sendTargets.filter { it.isValid }
         // 会社名変換が有効かどうかを判定（ログ記録用）
-        val companyNameConverted = config.companyNameAutoConversionEnabled || config.companyNameFixedConversions.isNotEmpty()
+        val companyNameConverted = config.extractionCompanyNameAutoConversionEnabled || config.extractionCompanyNameFixedConversions.isNotEmpty()
 
         // 本文が正常に解析できた場合のみ引継ぎ内容を更新
         if (!resolution.isContinuation && !smsParts.isExtractionFailed()) {
@@ -66,7 +66,7 @@ class KintoneUploadWorker(appContext: Context, params: WorkerParameters) :
         var shouldRetryAny = false
         for (sendTarget in validSendTargets) {
             // 抽出が無効な場合は送信先の会社名を使用（変換しない）
-            val targetSmsParts = if (config.companyNameExtractionEnabled) {
+            val targetSmsParts = if (config.extractionCompanyNameEnabled) {
                 smsParts
             } else {
                 smsParts.copy(companyName = sendTarget.companyName)

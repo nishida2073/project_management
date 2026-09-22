@@ -85,17 +85,17 @@ object SmsPartsGenerator {
      * 同一本文への重複呼び出しはキャッシュから即座に返される。
      *
      * @param body SMS本文（改行はいずれの形式にも対応）
-     * @param aiExtractionEnabled AI抽出機能の有効フラグ
-     * @param companyNameExtractionEnabled 会社名抽出の有効フラグ（無効時は空文字返却）
+     * @param extractionAiEnabled AI抽出機能の有効フラグ
+     * @param extractionCompanyNameEnabled 会社名抽出の有効フラグ（無効時は空文字返却）
      * @return 抽出結果を含む [SmsParts]。失敗時も本文は常に返される
      */
-    suspend fun resolveSmsParts(body: String, aiExtractionEnabled: Boolean, companyNameExtractionEnabled: Boolean = true): SmsParts {
-        if (!aiExtractionEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return generateSmsParts(body, companyNameExtractionEnabled)
+    suspend fun resolveSmsParts(body: String, extractionAiEnabled: Boolean, extractionCompanyNameEnabled: Boolean = true): SmsParts {
+        if (!extractionAiEnabled || body.isBlank() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            return generateSmsParts(body, extractionCompanyNameEnabled)
         }
 
         val deferred = aiResultCache.computeIfAbsent(body) {
-            aiScope.async { requestAiSmsParts(body) ?: generateSmsParts(body, companyNameExtractionEnabled) }
+            aiScope.async { requestAiSmsParts(body) ?: generateSmsParts(body, extractionCompanyNameEnabled) }
         }
         return deferred.await()
     }
@@ -158,21 +158,21 @@ object SmsPartsGenerator {
     /**
      * SMS本文から会社名・氏名をルールベースで抽出。
      *
-     * [companyNameExtractionEnabled] が有効: 1行目=会社名、2行目=氏名（3行以上必須）。
-     * [companyNameExtractionEnabled] が無効: 1行目=氏名、会社名=空（2行以上必須）。
+     * [extractionCompanyNameEnabled] が有効: 1行目=会社名、2行目=氏名（3行以上必須）。
+     * [extractionCompanyNameEnabled] が無効: 1行目=氏名、会社名=空（2行以上必須）。
      * 行数不足時は抽出フラグを立てた上で、本文と空文字を返す。
      *
      * @param body SMS本文（null/空白時は空の [SmsParts] を返す）
-     * @param companyNameExtractionEnabled 会社名抽出の有効フラグ
+     * @param extractionCompanyNameEnabled 会社名抽出の有効フラグ
      * @return 本文と抽出結果（または空文字）を含む [SmsParts]
      */
-    fun generateSmsParts(body: String?, companyNameExtractionEnabled: Boolean = true): SmsParts {
+    fun generateSmsParts(body: String?, extractionCompanyNameEnabled: Boolean = true): SmsParts {
         if (body.isNullOrBlank()) return SmsParts()
 
         val normalized = body.replace("\r\n", "\n").replace("\r", "\n").trim()
         val contentLines = normalized.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
 
-        if (companyNameExtractionEnabled) {
+        if (extractionCompanyNameEnabled) {
             // 氏名・会社名を1行にまとめて書く人がいるため、3行未満では抽出せず空で返す。
             if (contentLines.size < 3) {
                 return SmsParts(body = normalized, extractionPerformed = true)

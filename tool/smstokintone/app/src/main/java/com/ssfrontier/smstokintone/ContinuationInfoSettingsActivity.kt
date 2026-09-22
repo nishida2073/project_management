@@ -130,7 +130,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
 
         val config = SettingsStore.load(this)
         itemBinding.etContinuationCompanyName.setText(entry.companyName)
-        itemBinding.llCompanyNameSection.visibility = if (config.companyNameExtractionEnabled) View.VISIBLE else View.GONE
+        itemBinding.llCompanyNameSection.visibility = if (config.extractionCompanyNameEnabled) View.VISIBLE else View.GONE
 
         itemBinding.etContinuationUserName.setText(entry.userName)
 
@@ -157,14 +157,14 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
         val invalidCard = cards.firstOrNull { card ->
             val companyNameBlank = card.itemBinding.etContinuationCompanyName.text.toString().isBlank()
             val userNameBlank = card.itemBinding.etContinuationUserName.text.toString().isBlank()
-            if (config.companyNameExtractionEnabled) {
+            if (config.extractionCompanyNameEnabled) {
                 companyNameBlank || userNameBlank
             } else {
                 userNameBlank
             }
         }
         if (invalidCard != null) {
-            val messageResId = if (config.companyNameExtractionEnabled) {
+            val messageResId = if (config.extractionCompanyNameEnabled) {
                 R.string.dialog_message_continuation_validation_error_extraction_enabled
             } else {
                 R.string.dialog_message_continuation_validation_error_extraction_disabled

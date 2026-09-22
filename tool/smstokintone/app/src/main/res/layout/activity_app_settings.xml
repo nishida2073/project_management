@@ -395,7 +395,7 @@
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:id="@+id/cbDefaultSendNoneOnlyEnabled"
+                                android:id="@+id/cbSearchSendNoneOnlyEnabled"
                                 style="@style/AppCheckBox"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -404,7 +404,7 @@
                                 android:text="@string/switch_default_send_none_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultSentAutoOnlyEnabled"
+                                android:id="@+id/cbSearchSentAutoOnlyEnabled"
                                 style="@style/AppCheckBox"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -413,7 +413,7 @@
                                 android:text="@string/switch_default_sent_auto_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultSentManualOnlyEnabled"
+                                android:id="@+id/cbSearchSentManualOnlyEnabled"
                                 style="@style/AppCheckBox"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -444,7 +444,7 @@
                             android:orientation="vertical">
 
                             <CheckBox
-                                android:id="@+id/cbDefaultExtractionSucceededOnlyEnabled"
+                                android:id="@+id/cbSearchExtractionSucceededOnlyEnabled"
                                 style="@style/AppCheckBox"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -453,7 +453,7 @@
                                 android:text="@string/switch_default_extraction_succeeded_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultExtractionFailedOnlyEnabled"
+                                android:id="@+id/cbSearchExtractionFailedOnlyEnabled"
                                 style="@style/AppCheckBox"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -462,7 +462,7 @@
                                 android:text="@string/switch_default_extraction_failed_only_enabled" />
 
                             <CheckBox
-                                android:id="@+id/cbDefaultExtractionContinuationOnlyEnabled"
+                                android:id="@+id/cbSearchExtractionContinuationOnlyEnabled"
                                 style="@style/AppCheckBox"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -816,13 +816,13 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilAutoReplyCooldownSeconds"
+                            android:id="@+id/tilReplyCooldownSeconds"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/hint_auto_reply_cooldown_seconds">
 
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etAutoReplyCooldownSeconds"
+                                android:id="@+id/etReplyCooldownSeconds"
                                 style="@style/AppTextInputEditText"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -879,7 +879,7 @@
                                 android:hint="@string/hint_sms_extraction_success_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etSmsExtractionSuccessReplyBody"
+                                    android:id="@+id/etReplySuccessBody"
                                     style="@style/AppTextInputEditTextMultiLine"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -930,7 +930,7 @@
                                 android:hint="@string/hint_sms_extraction_failed_reply_body">
 
                                 <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etSmsExtractionFailedReplyBody"
+                                    android:id="@+id/etReplyFailedBody"
                                     style="@style/AppTextInputEditTextMultiLine"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -1380,7 +1380,7 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/swAutoRefreshEnabled"
+                            android:id="@+id/swLogRefreshEnabled"
                             style="@style/AppSwitch"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -1409,14 +1409,14 @@
                             android:orientation="vertical">
 
                             <com.google.android.material.textfield.TextInputLayout
-                                android:id="@+id/tilAutoRefreshInterval"
+                                android:id="@+id/tilLogRefreshInterval"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:hint="@string/hint_auto_refresh_interval">
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     style="@style/AppTextInputEditText"
-                                    android:id="@+id/etAutoRefreshInterval"
+                                    android:id="@+id/etLogRefreshInterval"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="number" />
@@ -1455,14 +1455,14 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilSmsMatchToleranceSeconds"
+                            android:id="@+id/tilLogMatchToleranceSeconds"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/hint_sms_match_tolerance_seconds">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
-                                android:id="@+id/etSmsMatchToleranceSeconds"
+                                android:id="@+id/etLogMatchToleranceSeconds"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number" />
@@ -1500,14 +1500,14 @@
                         android:orientation="vertical">
 
                         <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilBodyExcerptLength"
+                            android:id="@+id/tilLogBodyExcerptLength"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/hint_body_excerpt_length">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 style="@style/AppTextInputEditText"
-                                android:id="@+id/etBodyExcerptLength"
+                                android:id="@+id/etLogBodyExcerptLength"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number" />

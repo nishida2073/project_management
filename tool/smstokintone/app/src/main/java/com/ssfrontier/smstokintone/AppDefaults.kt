@@ -8,21 +8,21 @@ object AppDefaults {
 
     /**
      * ログ画面の自動更新間隔（秒）の初期値。
-     * [SettingsStore.Config.autoRefreshIntervalSeconds]の既定値。
+     * [SettingsStore.Config.logRefreshIntervalSeconds]の既定値。
      */
-    const val AUTO_REFRESH_INTERVAL_SECONDS = 5
+    const val LOG_REFRESH_INTERVAL_SECONDS = 5
 
     /**
      * ログエントリとSMSレコードを突き合わせる際の許容範囲（秒）の初期値。
-     * [SettingsStore.Config.smsMatchToleranceSeconds]の既定値。[SmsMatching.matchEntries]で使用。
+     * [SettingsStore.Config.logMatchToleranceSeconds]の既定値。[SmsMatching.matchEntries]で使用。
      */
-    const val SMS_MATCH_TOLERANCE_SECONDS = 15
+    const val LOG_MATCH_TOLERANCE_SECONDS = 15
 
     /**
      * ログ一覧に表示する本文抜粋の文字数の初期値。
-     * [SettingsStore.Config.bodyExcerptLength]の既定値。
+     * [SettingsStore.Config.logBodyExcerptLength]の既定値。
      */
-    const val BODY_EXCERPT_LENGTH = 100
+    const val LOG_BODY_EXCERPT_LENGTH = 100
 
     /**
      * 送信先を新規追加した際のkintoneサブドメイン欄の初期値。
@@ -80,27 +80,27 @@ object AppDefaults {
 
     /**
      * SMS検索画面を開いた際の、受信日の検索範囲（日数）の初期値。
-     * [SettingsStore.Config.smsSearchDateRangeDays]の既定値。
+     * [SettingsStore.Config.searchDateRangeDays]の既定値。
      */
-    const val SMS_SEARCH_DATE_RANGE_DAYS = 1
+    const val SEARCH_DATE_RANGE_DAYS = 1
 
     /**
      * SMS検索画面で長押しした際に開く返信画面に自動入力する文言の初期値。
-     * 正常な抽出結果の場合に使用。[SettingsStore.Config.smsExtractionSuccessReplyBody]の既定値。
+     * 正常な抽出結果の場合に使用。[SettingsStore.Config.replySuccessBody]の既定値。
      */
-    const val SMS_EXTRACTION_SUCCESS_REPLY_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"
+    const val REPLY_SUCCESS_BODY = "NTTデータユニバーシティ\n運営事務局です。\n"
 
     /**
      * SMS検索画面で長押しした際に開く返信画面に自動入力する文言の初期値。
-     * 抽出失敗のSMSに対する返信時に使用。[SettingsStore.Config.smsExtractionFailedReplyBody]の既定値。
+     * 抽出失敗のSMSに対する返信時に使用。[SettingsStore.Config.replyFailedBody]の既定値。
      */
-    const val SMS_EXTRACTION_FAILED_REPLY_BODY = SMS_EXTRACTION_SUCCESS_REPLY_BODY +
+    const val REPLY_FAILED_BODY = REPLY_SUCCESS_BODY +
         "\n下記の形式でご記入のうえ、\n再度SMSのご送信をお願いします。\n\n" +
         "（記入例）\nNTTデータ〇〇〇\nユニバ太郎\n\nここに内容を入力"
 
     /**
      * 同一送信元への自動返信を再送信するまでの間隔（秒）の初期値。
-     * [SettingsStore.Config.autoReplyCooldownSeconds]の既定値。[AutoReplyThrottle]で使用。
+     * [SettingsStore.Config.replyCooldownSeconds]の既定値。[AutoReplyThrottle]で使用。
      */
-    const val AUTO_REPLY_COOLDOWN_SECONDS = 10
+    const val REPLY_COOLDOWN_SECONDS = 10
 }

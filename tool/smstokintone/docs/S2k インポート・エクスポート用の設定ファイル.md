@@ -42,7 +42,7 @@
 | `sendExtractionContinuationEnabled` | 自動送信時、抽出状況が引継ぎのSMSも送信するか | `true` / `false`<br><br>例）`true` |
 | `searchExtractionFailedEnabled` | SMS検索画面で抽出状況が異常のSMSを選択可能にするか | `true` / `false`<br><br>例）`false` |
 | `searchExtractionContinuationEnabled` | SMS検索画面で抽出状況が引継ぎのSMSを選択可能にするか | `true` / `false`<br><br>例）`true` |
-| `autoReplyExtractionFailedEnabled` | 自動受信時、抽出異常のSMSへ自動返信するか | `true` / `false`<br><br>例）`false` |
+| `autoReplyEnabled` | 自動受信時、抽出異常のSMSへ自動返信するか | `true` / `false`<br><br>例）`false` |
 | `autoReplyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
 | `autoRefreshEnabled` | ログ画面（送信履歴）を自動再読み込みするか | `true` / `false`<br><br>例）`true` |
 | `autoRefreshIntervalSeconds` | 自動再読み込みの間隔 | 整数（秒）<br><br>例）`5` |
@@ -134,7 +134,7 @@
     "sendEnabled": true,
     "sendExtractionFailedEnabled": false,
     "sendExtractionContinuationEnabled": true,
-    "autoReplyExtractionFailedEnabled": false,
+    "autoReplyEnabled": false,
     "autoReplyCooldownSeconds": 10,
     "autoRefreshEnabled": true,
     "autoRefreshIntervalSeconds": 5,

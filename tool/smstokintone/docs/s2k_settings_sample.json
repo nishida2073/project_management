@@ -5,7 +5,7 @@
     "sendExtractionContinuationEnabled": true,
     "searchExtractionFailedEnabled": false,
     "searchExtractionContinuationEnabled": true,
-    "autoReplyExtractionFailedEnabled": false,
+    "autoReplyEnabled": false,
     "autoReplyCooldownSeconds": 10,
     "autoRefreshEnabled": true,
     "autoRefreshIntervalSeconds": 5,

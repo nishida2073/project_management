@@ -67,14 +67,14 @@ class TopActivity : AppCompatActivity() {
             )
         )
 
-        // autoReplyExtractionFailedEnabled: 会社名・氏名の抽出に失敗したSMSにのみ自動返信する設定
+        // replyEnabled: 会社名・氏名の抽出に失敗したSMSにのみ自動返信する設定
         binding.tvTopReplyStatus.text = getString(
-            if (config.autoReplyExtractionFailedEnabled) R.string.label_top_sms_reply_auto else R.string.label_top_sms_reply_manual
+            if (config.replyEnabled) R.string.label_top_sms_reply_auto else R.string.label_top_sms_reply_manual
         )
         binding.tvTopReplyStatus.setTextColor(
             ContextCompat.getColor(
                 this,
-                if (config.autoReplyExtractionFailedEnabled) R.color.status_running else R.color.status_manual
+                if (config.replyEnabled) R.color.status_running else R.color.status_manual
             )
         )
     }
