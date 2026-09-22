@@ -134,9 +134,13 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
 
         itemBinding.etContinuationUserName.setText(entry.userName)
 
-        val sendTargets = SettingsStore.findSendTargets(this, entry.companyName)
-        val name = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this) }
-        itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_settings_none)
+        fun updateSendTargetDisplay(companyName: String) {
+            val sendTargets = SettingsStore.findSendTargetsForCompanyName(this@ContinuationInfoSettingsActivity, companyName)
+            val name = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@ContinuationInfoSettingsActivity) }
+            itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_settings_none)
+        }
+
+        updateSendTargetDisplay(entry.companyName)
 
         val card = Card(senderKey, itemBinding)
 
@@ -148,9 +152,7 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
 
         if (config.extractionCompanyNameEnabled) {
             val companyNameWatcher = simpleTextWatcher { companyName ->
-                val sendTargets = SettingsStore.findSendTargets(this, companyName)
-                val name = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this) }
-                itemBinding.tvContinuationSendTargetName.text = name ?: getString(R.string.label_send_target_settings_none)
+                updateSendTargetDisplay(companyName)
             }
             itemBinding.etContinuationCompanyName.setupManaged(companyNameWatcher)
         }

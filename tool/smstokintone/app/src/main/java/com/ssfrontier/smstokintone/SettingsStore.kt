@@ -653,7 +653,7 @@ object SettingsStore {
      * @param config 変換設定
      * @return 変換済みの会社名
      */
-    fun applyCompanyNameConversion(companyName: String, config: Config): String {
+    fun getConvertedCompanyName(config: Config, companyName: String): String {
         val autoConverted = if (config.extractionCompanyNameAutoConversionEnabled) {
             TextNormalization.normalizeWidth(companyName)
         } else {
@@ -679,6 +679,18 @@ object SettingsStore {
     }
 
     /**
+     * 会社名を変換してから送信先を取得する。[getConvertedCompanyName]と[findSendTargets]をまとめたヘルパー。
+     *
+     * @param context アプリケーションコンテキスト
+     * @param companyName 変換対象の会社名
+     * @return 一致した送信先リスト
+     */
+    fun findSendTargetsForCompanyName(context: Context, companyName: String): List<SendTarget> {
+        val converted = getConvertedCompanyName(context, companyName)
+        return findSendTargets(context, converted)
+    }
+
+    /**
      * [resolveSendTargets]の結果。[SmsParts]は本文からの抽出結果のみを表すため、それが継続SMS
      * （同一送信元の過去の正常なSMSからの引継ぎ）によるものかどうかという振り分け固有のメタ情報は
      * ここで別に持つ。[SmsSearchActivity]など[SmsLogStore.Entry]を経由せず端末上のSMSをその場で
@@ -694,13 +706,23 @@ object SettingsStore {
     )
 
     /**
+     * 会社名に変換を適用して取得する。
+     *
+     * @param context アプリケーションコンテキスト
+     * @param companyName 変換対象の会社名
+     * @return 変換済みの会社名
+     */
+    fun getConvertedCompanyName(context: Context, companyName: String): String =
+        getConvertedCompanyName(load(context), companyName)
+
+    /**
      * SMS本文から[SmsParts]を抽出し、対応する送信先（複数一致し得る）を判定する。抽出結果と振り分けの
      * 両方が必要な箇所は、ずれないよう必ずこれを使うこと。
      *
      * - 引継ぎ：[continuationEnabled]で同一送信元の直近の抽出成功結果があれば、その会社名・氏名を
      *   引継いで[isContinuation]をtrueにする（本文は今回分）。送信先は引継いだ会社名を現在の送信先
      *   ルールに通して都度判定するため、設定の変更・削除が即時反映される。
-     * - 通常解析：本文を解析し、抽出直後に会社名変換（[applyCompanyNameConversion]）を一度適用する。
+     * - 通常解析：本文を解析し、抽出直後に会社名変換（[getConvertedCompanyName]）を一度適用する。
      *   以降は戻り値の会社名をそのまま使えばよい。
      * - 会社名抽出が無効：[extractionCompanyNameEnabled]がfalse。本文から抽出せず振り分けもせず、
      *   全送信先へ送る。共有[SmsParts]の会社名は先頭の送信先の設定値（変換済み）をプレースホルダとし、
@@ -726,7 +748,7 @@ object SettingsStore {
         }
         if (previousEntry != null) {
             val config = load(context)
-            val convertedCompanyName = applyCompanyNameConversion(previousEntry.companyName, config)
+            val convertedCompanyName = getConvertedCompanyName(config, previousEntry.companyName)
             val smsParts = SmsParts(
                 companyName = convertedCompanyName,
                 userName = previousEntry.userName,
@@ -745,7 +767,7 @@ object SettingsStore {
         val extracted = SmsPartsGenerator.resolveSmsParts(body, extractionAiEnabled, extractionCompanyNameEnabled)
         val config = load(context)
         val convertedCompanyName = if (extractionCompanyNameEnabled) {
-            applyCompanyNameConversion(extracted.companyName, config)
+            getConvertedCompanyName(config, extracted.companyName)
         } else {
             extracted.companyName
         }

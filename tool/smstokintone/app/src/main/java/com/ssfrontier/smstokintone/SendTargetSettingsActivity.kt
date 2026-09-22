@@ -257,9 +257,9 @@ class SendTargetSettingsActivity : BaseActivity() {
             val config = SettingsStore.load(applicationContext)
             val extracted = SmsPartsGenerator.resolveSmsParts(testBody, config.extractionAiEnabled, config.extractionCompanyNameEnabled)
             val smsParts = extracted.copy(
-                companyName = SettingsStore.applyCompanyNameConversion(
-                    if (config.extractionCompanyNameEnabled) extracted.companyName else sendTarget.companyName,
-                    config
+                companyName = SettingsStore.getConvertedCompanyName(
+                    config,
+                    if (config.extractionCompanyNameEnabled) extracted.companyName else sendTarget.companyName
                 )
             )
 
