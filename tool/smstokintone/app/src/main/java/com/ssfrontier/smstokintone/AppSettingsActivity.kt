@@ -216,7 +216,10 @@ class AppSettingsActivity : BaseActivity() {
         binding.swCompanyNameAutoConversionEnabled.setupManaged(companyNameAutoConversionListener)
         bodyExtractionConfig.extractionCompanyNameFixedConversions.forEach { addFixedConversionRow(binding.llFixedConversionsContainer, it.from, it.to, enabled = bodyExtractionConfig.extractionCompanyNameEnabled) }
         binding.btnAddFixedConversion.isEnabled = bodyExtractionConfig.extractionCompanyNameEnabled
-        val addFixedConversionListener = View.OnClickListener { addFixedConversionRow(binding.llFixedConversionsContainer, "", "", enabled = bodyExtractionConfig.extractionCompanyNameEnabled) }
+        val addFixedConversionListener = View.OnClickListener {
+            val config = SettingsStore.load(this)
+            addFixedConversionRow(binding.llFixedConversionsContainer, "", "", enabled = config.extractionCompanyNameEnabled)
+        }
         binding.btnAddFixedConversion.setupManaged(addFixedConversionListener)
 
         binding.swSearchExtractionFailedEnabled.isChecked = config.searchExtractionFailedEnabled
