@@ -1310,6 +1310,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
                         android:text="@string/section_app_settings_auto_refresh"
                         android:textSize="14sp"
@@ -1339,7 +1340,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginTop="16dp"
                             android:layout_marginBottom="8dp"
                             android:text="@string/label_app_settings_auto_refresh_interval"
                             android:textColor="?attr/colorOnSurface" />
