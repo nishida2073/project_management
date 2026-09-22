@@ -59,7 +59,7 @@
 | `extractionCompanyNameFixedConversions` | 抽出結果の会社名に適用する固定変換ルール。先頭から順に `from` を `to` へ置換 | 変換ルールの配列／ `[]`<br><br>例）`[{"from": "ユニバ", "to": "ユニバーシティ"}]` |
 | `continuationEnabled` | 継続SMSの引継ぎ機能全体の有効/無効 | `true` / `false`<br><br>例）`true` |
 | `continuationScope` | 継続SMSの引継ぎを送信元ごとにどこまで遡るか | `UNLIMITED`（過去に一度でも抽出正常なら常に引継ぎ）／ `SAME_DAY`（同暦日のみ）<br><br>例）`UNLIMITED` |
-| `continuationShowUserNameEnabled` | SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引き継いだ氏名を表示するか | `true` / `false`<br><br>例）`true` |
+| `continuationShowUserNameEnabled` | SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引継いだ氏名を表示するか | `true` / `false`<br><br>例）`true` |
 | `logRefreshEnabled` | SMS送信履歴画面を自動再読み込みするか | `true` / `false`<br><br>例）`true` |
 | `logRefreshIntervalSeconds` | 自動再読み込み間隔 | 整数（秒）<br><br>例）`5` |
 | `logMatchToleranceSeconds` | 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲 | 整数（秒）<br><br>例）`15` |
@@ -102,7 +102,7 @@
 ---
 
 ### `continuationInfoConfig`（引継ぎ内容）
-　`continuationInfoConfig` は引継ぎ内容（過去の SMS から引き継いだ会社名・氏名情報）の設定をまとめたものです。
+　`continuationInfoConfig` は引継ぎ内容（過去の SMS から引継いだ会社名・氏名情報）の設定をまとめたものです。
 
 > **注意**
 > - インポート時はこの一覧で送信元情報が置き換わります。
@@ -113,8 +113,8 @@
 | キー | 意味 | 利用できる値 |
 | --- | --- | --- |
 | `senderAddress` | 元の送信元アドレス（電話番号など）。送信元キーの自動生成と編集画面での表示に使う | 文字列<br><br>例）`"09012345678"` |
-| `companyName` | 引き継ぐ会社名 | 文字列<br><br>例）`"NTTデータユニバーシティ"` |
-| `userName` | 引き継ぐ氏名 | 文字列<br><br>例）`"ユニバ太郎"` |
+| `companyName` | 引継ぐ会社名 | 文字列<br><br>例）`"NTTデータユニバーシティ"` |
+| `userName` | 引継ぐ氏名 | 文字列<br><br>例）`"ユニバ太郎"` |
 | `timestampMillis` | そのSMSの受信日時（Unixエポックミリ秒）。省略時は取り込み時点の日時を使う | 整数（Unixエポックミリ秒）<br><br>例）`0`（初期例）／ `1726704000000` |
 
 ---
@@ -201,7 +201,7 @@
 
 | 形態 | ファイル名 | 概要 |
 | --- | --- | --- |
-| 単一企業のイベント | `s2k-recommend-個社.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |
-| グループ企業の合同開催 | `s2k-recommend-グループ共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |
-| 地域企業の合同開催 | `s2k-recommend-地域共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |
-| 金融企業の合同開催 | `s2k-recommend-金融共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引き継ぐ設定です |
+| 単一企業のイベント | `s2k-recommend-個社.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引継ぐ設定です |
+| グループ企業の合同開催 | `s2k-recommend-グループ共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引継ぐ設定です |
+| 地域企業の合同開催 | `s2k-recommend-地域共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引継ぐ設定です |
+| 金融企業の合同開催 | `s2k-recommend-金融共催.json` | 会社名の自動抽出を有効化し、継続SMSは過去に一度でも成功したら引継ぐ設定です |

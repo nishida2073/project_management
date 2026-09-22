@@ -106,7 +106,7 @@ object SettingsStore {
     /**
      * 継続SMS の引継ぎ有効範囲。送信元ごとにどこまで遡って継続を認めるか。
      *
-     * [UNLIMITED]: 日付を問わず、過去に一度でも正常に抽出されたら常に引き継ぐ。
+     * [UNLIMITED]: 日付を問わず、過去に一度でも正常に抽出されたら常に引継ぐ。
      * [SAME_DAY]: 引継ぎ元と暦日が同じ場合のみ引継ぎ有効。日付が変わるとリセット。
      */
     enum class ContinuationScope {
@@ -148,7 +148,7 @@ object SettingsStore {
      * @property extractionCompanyNameFixedConversions 抽出結果の会社名に適用する固定変換ルール。[FixedConversion.from]に一致する部分を[FixedConversion.to]に置換。[extractionCompanyNameAutoConversionEnabled]の後に適用
      * @property continuationEnabled 継続SMSの引継ぎ（[SmsResolution.isContinuation]）機能全体の有効/無効
      * @property continuationScope 継続SMSの引継ぎを送信元ごとにどこまで遡って有効とするか
-     * @property continuationShowUserNameEnabled SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引き継いだ氏名を表示するかどうか
+     * @property continuationShowUserNameEnabled SMS検索画面・ログ画面で、継続SMSの場合は送信元電話番号の代わりに引継いだ氏名を表示するかどうか
      * @property logRefreshEnabled SMS送信履歴画面（[LogActivity]）を[logRefreshIntervalSeconds]間隔で自動再読み込みするかどうか
      * @property logRefreshIntervalSeconds 自動再読み込み間隔（秒）。[logRefreshEnabled]が有効な場合に使用
      * @property logMatchToleranceSeconds 自動受信SMSのログと端末上のSMSを突き合わせる際の許容範囲（秒）
@@ -688,9 +688,7 @@ object SettingsStore {
         /** 本文から抽出した会社名・氏名、および本文全体 */
         val smsParts: SmsParts,
         /**
-         * 同一送信元が過去に一度でも抽出状況が正常なSMSを送っていたため、その直近1件から会社名・氏名と
-         * 送信先を引き継いだ結果かどうか。今回の本文自体が単独で解析できるかどうかは問わない。
-         * trueの場合、抽出・送信先のアイコン表示は通常の⭕/❌・📍/🚫ではなく専用のアイコンに切り替える
+         * 引継ぎかどうか
          */
         val isContinuation: Boolean = false
     )
@@ -700,7 +698,7 @@ object SettingsStore {
      * 両方が必要な箇所は、ずれないよう必ずこれを使うこと。
      *
      * - 引継ぎ：[continuationEnabled]で同一送信元の直近の抽出成功結果があれば、その会社名・氏名を
-     *   引き継いで[isContinuation]をtrueにする（本文は今回分）。送信先は引き継いだ会社名を現在の送信先
+     *   引継いで[isContinuation]をtrueにする（本文は今回分）。送信先は引継いだ会社名を現在の送信先
      *   ルールに通して都度判定するため、設定の変更・削除が即時反映される。
      * - 通常解析：本文を解析し、抽出直後に会社名変換（[applyCompanyNameConversion]）を一度適用する。
      *   以降は戻り値の会社名をそのまま使えばよい。
@@ -736,7 +734,7 @@ object SettingsStore {
                 extractionPerformed = false
             )
             val resolution = SmsResolution(smsParts = smsParts, isContinuation = true)
-            // 引き継いだ会社名（変換済み）で送信先を都度判定
+            // 引継いだ会社名（変換済み）で送信先を都度判定
             val sendTargets = if (extractionCompanyNameEnabled) {
                 findSendTargets(context, convertedCompanyName)
             } else {

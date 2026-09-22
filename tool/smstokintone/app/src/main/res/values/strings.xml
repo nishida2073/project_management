@@ -166,14 +166,14 @@
     <string name="section_app_settings_continuation">SMSの引継ぎ</string>
     <string name="label_app_settings_continuation">引継ぎ</string>
     <string name="switch_app_settings_continuation_enabled">有効にする</string>
-    <string name="helper_app_settings_continuation_enabled">同一送信元の過去の正常なSMSから会社名・氏名・送信先を引継ぎます。無効時は今回の本文だけで判定します。</string>
+    <string name="helper_app_settings_continuation_enabled">過去の正常なSMSから抽出結果を引継ぎます</string>
     <string name="label_app_settings_continuation_scope">引継ぎの範囲</string>
     <string name="rb_app_settings_continuation_scope_unlimited">制限なし</string>
     <string name="rb_app_settings_continuation_scope_same_day">同一日のみ</string>
-    <string name="helper_app_settings_continuation_scope">会社名・氏名・送信先を引き継ぐ範囲です。「同一日のみ」にすると、日付が変わると引継ぎがリセットされます</string>
+    <string name="helper_app_settings_continuation_scope">抽出結果を引継ぐ範囲です。「同一日のみ」にすると、日付が変わると引継ぎがリセットされます</string>
     <string name="label_app_settings_continuation_show_name">送信元の表示</string>
     <string name="switch_app_settings_continuation_show_user_name_enabled">氏名を表示する</string>
-    <string name="helper_app_settings_continuation_show_user_name_enabled">電話番号の代わりに引き継いだ氏名を表示します</string>
+    <string name="helper_app_settings_continuation_show_user_name_enabled">電話番号の代わりに引継いだ氏名を表示します</string>
     <string name="btn_app_settings_edit_continuation_info">引継ぎ内容の設定</string>
     <string name="section_app_settings_company_name_conversion">会社名の変換</string>
     <string name="label_app_settings_company_name_auto_conversion">自動変換</string>
