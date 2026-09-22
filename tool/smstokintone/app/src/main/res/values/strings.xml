@@ -192,7 +192,7 @@
     <string name="switch_app_settings_ai_extraction_enabled">有効にする</string>
     <string name="helper_app_settings_ai_extraction_enabled">端末上のAIを使用して会社名・氏名を抽出します。\nAIの呼び出しに失敗した場合は、ルールベースの抽出を実行します。</string>
     <string name="section_app_settings_log">ログ</string>
-    <string name="section_app_settings_auto_refresh">自動更新</string>
+    <string name="label_app_settings_auto_refresh">自動更新</string>
     <string name="switch_app_settings_auto_refresh_enabled">有効にする</string>
     <string name="helper_app_settings_auto_refresh_enabled">ログ画面を指定した間隔で自動的に再読み込みします</string>
     <string name="label_app_settings_auto_refresh_interval">更新間隔</string>
