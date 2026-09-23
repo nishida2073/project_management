@@ -23,6 +23,16 @@ if errorlevel 1 (
     exit /b 1
 )
 
+
+echo キャッシュをクリアしています...
+call gradle clean
+if errorlevel 1 (
+    echo.
+    echo [エラー] キャッシュのクリアに失敗しました。
+    pause
+    exit /b 1
+)
+
 call gradle assembleDebug
 if errorlevel 1 (
     echo.
