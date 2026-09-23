@@ -26,7 +26,7 @@
 
 ### `appConfig`（アプリの設定）
 　`appConfig` は、アプリの動作設定をまとめたものです。<br>
-　SMS受信時の送信モード（自動／手動）と送信対象、抽出異常・引継ぎSMSの扱い、自動返信、ログ画面の自動再読み込み、継続SMSの引継ぎ、テーマ（配色）、SMS検索画面の初期表示、本文からの会社名・氏名の抽出ルールなどをまとめて指定します。
+　SMSの自動送信や画面のデフォルト値などをまとめて指定します。
 
 > **注意**
 > - `appConfig` 内のキーはすべて省略可能です。ファイルに含まれないキーはアプリの既定値で補われるため、変更したいキーだけを指定できます（部分指定可）。
@@ -38,9 +38,9 @@
 | キー | 意味 | 利用できる値 |
 | --- | --- | --- |
 | `themeMode` | アプリの配色モード | `LIGHT` / `DARK`<br><br>例）`LIGHT` |
-| `sendEnabled` | 自動送信モードか手動送信モードか | `true` / `false`<br><br>例）`true` |
+| `sendEnabled` | 自動送信が有効か無効か | `true` / `false`<br><br>例）`true` |
 | `sendExtractionFailedEnabled` | 自動送信時、抽出失敗のSMS（会社名・氏名を抽出できなかったSMS）も送信するか | `true` / `false`<br><br>例）`true` |
-| `replyEnabled` | 自動受信時、抽出失敗のSMSに対して自動返信するか | `true` / `false`<br><br>例）`false` |
+| `replyEnabled` | 自動返信が有効か無効か | `true` / `false`<br><br>例）`false` |
 | `replyCooldownSeconds` | 同一送信元への自動返信を再送信するまでの間隔 | 整数（秒）<br><br>例）`10` |
 | `replySuccessBody` | SMS検索画面で長押しした際に開く返信画面へ自動入力する文言 | 文字列<br><br>例）`"NTTデータユニバーシティ\n運営事務局です。\n"` |
 | `replyFailedBody` | 抽出失敗のSMSへの返信時に使う文言 | 文字列<br><br>例）`"…（記入例）…\nここに内容を入力"` |
