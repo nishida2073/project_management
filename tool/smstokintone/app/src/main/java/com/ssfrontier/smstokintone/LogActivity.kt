@@ -27,7 +27,6 @@ class LogActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLogBinding
 
     companion object {
-        private const val PADDING_SEND_TARGET_BOTTOM = 32
         private const val PADDING_RESULT_BOTTOM = 32
         private const val DIVIDER_HEIGHT = 2
     }
@@ -134,10 +133,7 @@ class LogActivity : AppCompatActivity() {
             orientation = android.widget.LinearLayout.VERTICAL
             addView(buildTypeAndTimestampView(entry, dateFormat, itemTextColor))
             addView(buildResultView(entry, itemTextColor))
-            buildStatusIconsView(entry, itemTextColor)?.let { addView(it) }
-            addView(buildSendTargetNameView(entry, itemTextColor))
-            addView(buildSenderAndTimestampView(entry, config, dateFormat, itemTextColor))
-            addView(buildBodyView(entry, itemTextColor))
+            addView(buildStatusIconsView(entry, config, dateFormat, itemTextColor))
             setupLongClickListener(entry)
         }
     }
@@ -150,50 +146,39 @@ class LogActivity : AppCompatActivity() {
             SmsLogStore.EntryType.AUTO_REPLY -> getString(R.string.label_log_type_auto_reply)
         }
         return TextView(this).apply {
-            text = "${getString(R.string.label_log_type_bracketed, typeLabel)} ${dateFormat.format(Date(entry.loggedAtMillis))}"
+            text = buildSpannedString {
+                append(getString(R.string.label_log_type_bracketed, typeLabel))
+                append(dateFormat.format(Date(entry.loggedAtMillis)))
+            }
             setTextColor(itemTextColor)
         }
     }
 
-    private fun buildStatusIconsView(entry: SmsLogStore.Entry, itemTextColor: Int): TextView? {
-        val hasStatusIcon = entry.smsParts != null ||
-            entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE ||
-            entry.type == SmsLogStore.EntryType.AUTO_REPLY
-        if (!hasStatusIcon) return null
+    private fun buildStatusIconsView(entry: SmsLogStore.Entry, config: SettingsStore.Config, dateFormat: java.text.SimpleDateFormat, itemTextColor: Int): TextView {
+        val extractionTargetIcon = entry.smsParts?.let { if (entry.isContinuation) getString(R.string.icon_extraction_target_storage) else getString(R.string.icon_extraction_target_sms) } ?: ""
+        val isExtractionFailed = entry.smsParts?.isExtractionFailed() ?: false
+        val sendStatus = when {
+            entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE -> getString(if (entry.manual) R.string.icon_send_manual else R.string.icon_send_auto)
+            else -> null
+        }
+        val isAutoReplied = entry.type == SmsLogStore.EntryType.AUTO_REPLY
+        val sendTargetIcon = getString(
+            when {
+                entry.sendTargetName == null -> R.string.icon_send_target_unconfigured
+                else -> R.string.icon_send_target_exists
+            }
+        )
+        val sendTargetName = entry.sendTargetName ?: getString(R.string.label_send_target_settings_none)
+        val sendTargetColor = ContextCompat.getColor(this, R.color.send_target_name)
+        val senderDisplay = if (entry.isContinuation && config.continuationShowUserNameEnabled && entry.smsParts?.userName?.isNotBlank() == true) {
+            entry.smsParts.userName
+        } else {
+            entry.sender
+        }
+        val dateString = dateFormat.format(Date(entry.timestampMillis))
 
         return TextView(this).apply {
-            text = buildSpannedString {
-                entry.smsParts?.let { smsParts ->
-                    val extractionTargetIcon = if (entry.isContinuation) R.string.icon_extraction_target_storage else R.string.icon_extraction_target_sms
-                    append(getString(extractionTargetIcon))
-                    append(" ")
-                    val extractionIcon = when {
-                        smsParts.isExtractionFailed() -> R.string.icon_extraction_failed
-                        else -> R.string.icon_extraction_succeeded
-                    }
-                    append(getString(extractionIcon))
-                }
-                if (entry.type == SmsLogStore.EntryType.SEND_START || entry.type == SmsLogStore.EntryType.SEND_COMPLETE) {
-                    if (isNotEmpty()) append(" ")
-                    val modeColor = ContextCompat.getColor(
-                        this@LogActivity,
-                        if (entry.manual) R.color.status_manual else R.color.status_running
-                    )
-                    color(modeColor) {
-                        append(getString(if (entry.manual) R.string.icon_send_manual else R.string.icon_send_auto))
-                    }
-                }
-                if (entry.type == SmsLogStore.EntryType.AUTO_REPLY) {
-                    if (isNotEmpty()) append(" ")
-                    append(getString(R.string.icon_replied))
-                }
-                if (isNotEmpty()) append(" ")
-                val sendTargetIcon = when {
-                    entry.sendTargetName == null -> R.string.icon_send_target_unconfigured
-                    else -> R.string.icon_send_target_exists
-                }
-                append(getString(sendTargetIcon))
-            }
+            text = buildSmsInfoString(extractionTargetIcon, isExtractionFailed, sendStatus, isAutoReplied, sendTargetIcon, sendTargetName, sendTargetColor, senderDisplay, dateString, entry.bodyExcerpt)
             setTextColor(itemTextColor)
         }
     }
@@ -209,36 +194,6 @@ class LogActivity : AppCompatActivity() {
             if (entry.success) R.color.log_success else R.color.log_failure
         )
         return buildLabeledMessageRow(resultLabel, entry.message, resultColor)
-    }
-
-    private fun buildSendTargetNameView(entry: SmsLogStore.Entry, itemTextColor: Int): TextView {
-        return TextView(this).apply {
-            text = buildSpannedString {
-                color(ContextCompat.getColor(this@LogActivity, R.color.send_target_name)) {
-                    bold { append(entry.sendTargetName ?: getString(R.string.label_send_target_settings_none)) }
-                }
-            }
-            setPadding(0, 0, 0, PADDING_SEND_TARGET_BOTTOM)
-        }
-    }
-
-    private fun buildSenderAndTimestampView(entry: SmsLogStore.Entry, config: SettingsStore.Config, dateFormat: java.text.SimpleDateFormat, itemTextColor: Int): TextView {
-        val senderDisplay = if (entry.isContinuation && config.continuationShowUserNameEnabled && entry.smsParts?.userName?.isNotBlank() == true) {
-            entry.smsParts.userName
-        } else {
-            entry.sender
-        }
-        return TextView(this).apply {
-            text = "${dateFormat.format(Date(entry.timestampMillis))}　$senderDisplay"
-            setTextColor(itemTextColor)
-        }
-    }
-
-    private fun buildBodyView(entry: SmsLogStore.Entry, itemTextColor: Int): TextView {
-        return TextView(this).apply {
-            text = entry.bodyExcerpt
-            setTextColor(itemTextColor)
-        }
     }
 
     private fun buildDivider(): View {
@@ -310,26 +265,14 @@ class LogActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun buildLabeledMessageRow(label: String, message: String, color: Int): View {
-        return android.widget.LinearLayout(this).apply {
-            orientation = android.widget.LinearLayout.HORIZONTAL
+    private fun buildLabeledMessageRow(label: String, message: String, color: Int): TextView {
+        return TextView(this).apply {
+            text = buildSpannedString {
+                append(getString(R.string.label_log_result_bracketed, label))
+                append(message)
+            }
+            setTextColor(color)
             setPadding(0, 0, 0, PADDING_RESULT_BOTTOM)
-            addView(buildLabelView(label, color))
-            addView(buildMessageView(message, color))
-        }
-    }
-
-    private fun buildLabelView(label: String, color: Int): TextView {
-        return TextView(this).apply {
-            text = getString(R.string.label_log_result_bracketed, label)
-            setTextColor(color)
-        }
-    }
-
-    private fun buildMessageView(message: String, color: Int): TextView {
-        return TextView(this).apply {
-            text = message
-            setTextColor(color)
         }
     }
 }

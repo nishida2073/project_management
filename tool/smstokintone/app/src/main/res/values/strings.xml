@@ -221,7 +221,6 @@
     <string name="message_log_send_start_send_target_unconfigured">SMSの送信先が存在しません</string>
     <string name="message_log_send_complete_create_success">SMSの登録に成功しました</string>
     <string name="message_log_send_complete_update_success">SMSの更新に成功しました</string>
-    <string name="message_log_send_start_extraction_failed_skipped">SMSの送信をスキップしました\n（本文の抽出状況が異常）</string>
     <string name="message_log_send_complete_failure">SMSの送信に失敗しました\n%1$s</string>
     <string name="message_log_send_complete_network_error">SMSの送信に失敗しました\n%1$s</string>
     <string name="message_log_send_complete_skipped_duplicate">SMSの更新をスキップしました\n（最終受信日時と本文が一致）</string>

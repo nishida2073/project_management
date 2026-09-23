@@ -63,21 +63,21 @@ object SmsMatching {
     ): Map<Long, SmsLogStore.Entry> {
         val result = mutableMapOf<Long, SmsLogStore.Entry>()
 
-        val idMatchedEntries = completedEntries.filter { it.smsId != null }.associateBy { it.smsId }
+        val idMatchedEntries = completedEntries.filter { it.smsId != null }.groupBy { it.smsId }
         records.forEach { record ->
-            idMatchedEntries[id(record)]?.let { result[id(record)] = it }
+            idMatchedEntries[id(record)]?.maxByOrNull { it.loggedAtMillis }?.let { result[id(record)] = it }
         }
 
         val unclaimedEntries = completedEntries.filter { it.smsId == null }.toMutableList()
         records.filter { id(it) !in result }
             .sortedBy { timestampMillis(it) }
             .forEach { record ->
-                val bestIndex = unclaimedEntries.indices
+                val matchingIndices = unclaimedEntries.indices
                     .filter { i ->
                         val entry = unclaimedEntries[i]
                         isLikelySameSms(entry.sender, entry.timestampMillis, sender(record), timestampMillis(record), toleranceMillis)
                     }
-                    .minByOrNull { i -> abs(unclaimedEntries[i].timestampMillis - timestampMillis(record)) }
+                val bestIndex = matchingIndices.minByOrNull { i -> abs(unclaimedEntries[i].timestampMillis - timestampMillis(record)) }
                 if (bestIndex != null) {
                     result[id(record)] = unclaimedEntries[bestIndex]
                     unclaimedEntries.removeAt(bestIndex)

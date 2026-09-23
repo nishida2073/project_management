@@ -310,7 +310,7 @@ class SmsSearchActivity : BaseActivity() {
         }
 
         if (binding.cbSmsSearchSendNoneOnly.isChecked || binding.cbSmsSearchSentAutoOnly.isChecked || binding.cbSmsSearchSentManualOnly.isChecked) {
-            val sentEntries = matchSentEntries(records, loadCompletedEntries())
+            val sentEntries = matchSentEntries(records, loadSentLogEntries())
             records.removeAll { record ->
                 val sentEntry = sentEntries[record.id]
                 val matchesFilter = when {
@@ -376,10 +376,15 @@ class SmsSearchActivity : BaseActivity() {
             SettingsStore.resolveSendTargets(this, record.address, record.body, record.dateMillis, config.extractionAiEnabled, config.extractionCompanyNameEnabled, config.continuationEnabled, config.continuationScope)
         }
 
-    /** 成功したKintone送信ログのみを対象にする（失敗ログは「未送信」として扱われるべきなので除外） */
-    private fun loadCompletedEntries(): List<SmsLogStore.Entry> =
+    /** 成功：SEND_COMPLETEのみ、失敗：SEND_START・SEND_COMPLETEの両方を対象にする */
+    private fun loadSentLogEntries(): List<SmsLogStore.Entry> =
         SmsLogStore.getAll(this)
-            .filter { it.type == SmsLogStore.EntryType.SEND_COMPLETE && it.success }
+            .filter {
+                when {
+                    it.success -> it.type == SmsLogStore.EntryType.SEND_COMPLETE
+                    else -> it.type in listOf(SmsLogStore.EntryType.SEND_START, SmsLogStore.EntryType.SEND_COMPLETE)
+                }
+            }
 
     /** 成功した自動返信ログのみを対象にする */
     private fun loadAutoReplyEntries(): List<SmsLogStore.Entry> =
@@ -429,7 +434,7 @@ class SmsSearchActivity : BaseActivity() {
         binding.svSmsList.scrollTo(0, 0)
         binding.tvSmsListEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
 
-        val sentEntries = matchSentEntries(records, loadCompletedEntries())
+        val sentEntries = matchSentEntries(records, loadSentLogEntries())
         val autoRepliedEntries = matchSentEntries(records, loadAutoReplyEntries())
         val config = SettingsStore.load(this)
         val dateFormat = DateFormats.display()
@@ -452,9 +457,9 @@ class SmsSearchActivity : BaseActivity() {
     ): View {
         val isSendTargetUnconfigured = sendTargets.none { it.isValid }
         val isAutoReplied = record.id in autoRepliedEntries
-        val isExtractionFailedBody = resolution.smsParts.isExtractionFailed()
+        val isExtractionFailed = resolution.smsParts.isExtractionFailed()
         val isSelectable = !isSendTargetUnconfigured &&
-            (!isExtractionFailedBody || config.searchExtractionFailedEnabled)
+            (!isExtractionFailed || config.searchExtractionFailedEnabled)
         val sentEntry = sentEntries[record.id]
 
         return android.widget.LinearLayout(this).apply {
@@ -466,8 +471,9 @@ class SmsSearchActivity : BaseActivity() {
             )
             setPadding(0, 16, 0, 16)
             addView(buildCheckbox(record, isSelectable))
-            addView(buildSmsRowText(record, resolution, sendTargets, isSelectable, isAutoReplied, isExtractionFailedBody, sentEntry, config, dateFormat))
+            addView(buildSmsRowText(record, resolution, sendTargets, isSelectable, isAutoReplied, isExtractionFailed, sentEntry, config, dateFormat))
             val backgroundColor = when {
+                sentEntry != null && !sentEntry.success -> R.color.sms_sent_failed_background
                 sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
                 sentEntry != null -> R.color.sms_sent_auto_background
                 else -> null
@@ -482,7 +488,7 @@ class SmsSearchActivity : BaseActivity() {
                 }
             }
             setOnLongClickListener {
-                openSmsReply(record.address, isExtractionFailedBody)
+                openSmsReply(record.address, isExtractionFailed)
                 true
             }
         }
@@ -506,61 +512,45 @@ class SmsSearchActivity : BaseActivity() {
         sendTargets: List<SettingsStore.SendTarget>,
         isSelectable: Boolean,
         isAutoReplied: Boolean,
-        isExtractionFailedBody: Boolean,
+        isExtractionFailed: Boolean,
         sentEntry: SmsLogStore.Entry?,
         config: SettingsStore.Config,
         dateFormat: SimpleDateFormat
     ): TextView {
         val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@SmsSearchActivity) }
             ?: getString(R.string.label_send_target_settings_none)
-        val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
+        val sendTargetColor = if (isSelectable) ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name) else null
+        val extractionTargetIcon = if (resolution.isContinuation) getString(R.string.icon_extraction_target_storage) else getString(R.string.icon_extraction_target_sms)
+        val sendStatus = when {
+            sentEntry == null -> getString(R.string.icon_send_none)
+            else -> getString(if (sentEntry.manual) R.string.icon_send_manual else R.string.icon_send_auto)
+        }
         val sendTargetIcon = getString(
             when {
                 sendTargets.none { it.isValid } -> R.string.icon_send_target_unconfigured
                 else -> R.string.icon_send_target_exists
             }
         )
+        val senderDisplay = if (resolution.isContinuation && config.continuationShowUserNameEnabled && resolution.smsParts.userName.isNotBlank()) {
+            resolution.smsParts.userName
+        } else {
+            record.address
+        }
+        val dateString = dateFormat.format(Date(record.dateMillis))
 
         return TextView(this).apply {
-            text = buildSpannedString {
-                val extractionTargetIcon = if (resolution.isContinuation) getString(R.string.icon_extraction_target_storage) else getString(R.string.icon_extraction_target_sms)
-                append(extractionTargetIcon)
-                append(" ")
-                val extractionIcon = when {
-                    isExtractionFailedBody -> R.string.icon_extraction_failed
-                    else -> R.string.icon_extraction_succeeded
-                }
-                append(getString(extractionIcon))
-                append(" ")
-                if (sentEntry == null) {
-                    append(getString(R.string.icon_send_none))
-                } else {
-                    append(
-                        getString(
-                            if (sentEntry.manual) R.string.icon_send_manual else R.string.icon_send_auto
-                        )
-                    )
-                }
-                if (isAutoReplied) {
-                    append(" ")
-                    append(getString(R.string.icon_replied))
-                }
-                append(" ")
-                append(sendTargetIcon)
-                append("\n")
-                if (isSelectable) {
-                    color(sendTargetColor) { bold { append(sendTargetName) } }
-                } else {
-                    bold { append(sendTargetName) }
-                }
-                val senderDisplay = if (resolution.isContinuation && config.continuationShowUserNameEnabled && resolution.smsParts.userName.isNotBlank()) {
-                    resolution.smsParts.userName
-                } else {
-                    record.address
-                }
-                append("\n\n${dateFormat.format(Date(record.dateMillis))}　$senderDisplay\n")
-                append(record.body)
-            }
+            text = buildSmsInfoString(
+                extractionTargetIcon,
+                isExtractionFailed,
+                sendStatus,
+                isAutoReplied,
+                sendTargetIcon,
+                sendTargetName,
+                sendTargetColor,
+                senderDisplay,
+                dateString,
+                record.body
+            )
             layoutParams = android.widget.LinearLayout.LayoutParams(
                 0,
                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
