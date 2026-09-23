@@ -127,8 +127,6 @@ class LogActivity : AppCompatActivity() {
             val typeAndTimestampView = TextView(this).apply {
                 text = "${getString(R.string.label_log_type_bracketed, typeLabel)} ${dateFormat.format(Date(entry.loggedAtMillis))}"
                 setTextColor(itemTextColor)
-                textSize = 16f
-                setPadding(0, 24, 0, 4)
             }
 
             // SMSの検索画面と同じ並び（抽出→送信→返信）で表示する
@@ -138,7 +136,7 @@ class LogActivity : AppCompatActivity() {
             val statusIconsView: View? = if (!hasStatusIcon) null else TextView(this).apply {
                 text = buildSpannedString {
                     entry.smsParts?.let { smsParts ->
-                        val extractionTargetIcon = if (entry.isContinuation) R.string.icon_extraction_target_continuation else R.string.icon_extraction_target_sms
+                        val extractionTargetIcon = if (entry.isContinuation) R.string.icon_extraction_target_storage else R.string.icon_extraction_target_sms
                         append(getString(extractionTargetIcon))
                         append(" ")
                         val extractionIcon = when {
@@ -169,8 +167,6 @@ class LogActivity : AppCompatActivity() {
                     append(getString(sendTargetIcon))
                 }
                 setTextColor(itemTextColor)
-                textSize = 16f
-                setPadding(0, 8, 0, 0)
             }
 
             val sendTargetNameView = TextView(this).apply {
@@ -179,7 +175,7 @@ class LogActivity : AppCompatActivity() {
                         bold { append(entry.sendTargetName ?: getString(R.string.label_send_target_settings_none)) }
                     }
                 }
-                setPadding(0, 16, 0, 16)
+                setPadding(0, 0, 0, 32)
             }
             val senderDisplay = if (entry.isContinuation && config.continuationShowUserNameEnabled && entry.smsParts?.userName?.isNotBlank() == true) {
                 entry.smsParts.userName
@@ -189,12 +185,10 @@ class LogActivity : AppCompatActivity() {
             val senderAndTimestampView = TextView(this).apply {
                 text = "${dateFormat.format(Date(entry.timestampMillis))}　$senderDisplay"
                 setTextColor(itemTextColor)
-                setPadding(0, 0, 0, 4)
             }
             val bodyView = TextView(this).apply {
                 text = entry.bodyExcerpt
                 setTextColor(itemTextColor)
-                setPadding(0, 0, 0, 4)
             }
 
             // 全エントリ共通: 成功=緑(log_success)・失敗=赤(log_failure)
@@ -207,7 +201,7 @@ class LogActivity : AppCompatActivity() {
                 this@LogActivity,
                 if (entry.success) R.color.log_success else R.color.log_failure
             )
-            val resultView: View = buildLabeledMessageRow(resultLabel, entry.message, resultColor, topPadding = 16)
+            val resultView: View = buildLabeledMessageRow(resultLabel, entry.message, resultColor)
 
             val divider = View(this).apply {
                 setBackgroundColor(ContextCompat.getColor(this@LogActivity, R.color.log_divider))
@@ -291,10 +285,10 @@ class LogActivity : AppCompatActivity() {
     }
 
     /** 結果行・抽出結果行の両方で使う「[ラベル] メッセージ」形式の横並び行を組み立てる */
-    private fun buildLabeledMessageRow(label: String, message: String, color: Int, topPadding: Int): View {
+    private fun buildLabeledMessageRow(label: String, message: String, color: Int): View {
         return android.widget.LinearLayout(this).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL
-            setPadding(0, topPadding, 0, 4)
+            setPadding(0, 0, 0, 32)
             addView(TextView(this@LogActivity).apply {
                 text = getString(R.string.label_log_result_bracketed, label)
                 setTextColor(color)

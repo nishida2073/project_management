@@ -463,7 +463,7 @@ class SmsSearchActivity : BaseActivity() {
 
             val textView = TextView(this).apply {
                 text = buildSpannedString {
-                    val extractionTargetIcon = if (resolution.isContinuation) getString(R.string.icon_extraction_target_continuation) else getString(R.string.icon_extraction_target_sms)
+                    val extractionTargetIcon = if (resolution.isContinuation) getString(R.string.icon_extraction_target_storage) else getString(R.string.icon_extraction_target_sms)
                     append(extractionTargetIcon)
                     append(" ")
                     val extractionIcon = when {

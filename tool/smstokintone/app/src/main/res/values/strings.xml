@@ -4,7 +4,7 @@
     <!-- アイコン -->
     <string name="icon_extraction_succeeded">🆗</string>
     <string name="icon_extraction_failed">🆖</string>
-    <string name="icon_extraction_target_continuation">♻️</string>
+    <string name="icon_extraction_target_storage">💾</string>
     <string name="icon_extraction_target_sms">💬</string>
     <string name="icon_replied">📨</string>
     <string name="icon_send_none">⬜</string>
@@ -222,16 +222,16 @@
     <string name="message_log_send_complete_create_success">SMSの登録に成功しました</string>
     <string name="message_log_send_complete_update_success">SMSの更新に成功しました</string>
     <string name="message_log_send_start_extraction_failed_skipped">SMSの送信をスキップしました\n（本文の抽出状況が異常）</string>
-    <string name="message_log_send_complete_failure">送信失敗: %1$s</string>
-    <string name="message_log_send_complete_network_error">通信エラー: %1$s</string>
-    <string name="message_log_send_complete_skipped_duplicate">SMSの更新をスキップしました\n（最終受信日時（秒は除く）と本文が一致）</string>
+    <string name="message_log_send_complete_failure">SMSの送信に失敗しました\n%1$s</string>
+    <string name="message_log_send_complete_network_error">SMSの送信に失敗しました\n%1$s</string>
+    <string name="message_log_send_complete_skipped_duplicate">SMSの更新をスキップしました\n（最終受信日時と本文が一致）</string>
     <string name="message_log_auto_reply">抽出状況が異常なため、SMSを返信しました</string>
     <string name="dialog_title_log_confirm_clear_log">ログをクリアしますか？</string>
     <string name="dialog_message_log_confirm_clear_log">この操作は取り消せません</string>
     <string name="dialog_title_log_extraction_result">抽出結果</string>
     <string name="dialog_message_log_extraction_failure">会社名・氏名の抽出に失敗しています</string>
     <string name="dialog_title_log_auto_reply_body">返信内容</string>
-    <string name="helper_log_status_legend">"抽出対象：💬SMS・♻️ 引継ぎ\n抽出状況：🆗 正常 ・ 🆖 異常\n送信状況：✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
+    <string name="helper_log_status_legend">"抽出対象：💬SMS・💾 ストレージ\n抽出状況：🆗 正常 ・ 🆖 異常\n送信状況：✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
     
     <!-- SMSの検索画面 -->
     <string name="title_sms_search">SMSの検索</string>
@@ -251,7 +251,7 @@
     <string name="cb_sms_search_send_none_only">⬜ 未</string>
     <string name="cb_sms_search_sent_auto_only">✅ 済（自動）</string>
     <string name="cb_sms_search_sent_manual_only">☑️ 済（手動）</string>
-    <string name="helper_sms_search_status_legend">"抽出対象：💬SMS・♻️ 引継ぎ\n抽出状況：🆗 正常 ・ 🆖 異常\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
+    <string name="helper_sms_search_status_legend">"抽出対象：💬SMS・💾 ストレージ\n抽出状況：🆗 正常 ・ 🆖 異常\n送信状況：⬜ 未 ・ ✅ 済（自動） ・ ☑️ 済（手動）\n返信状況：📨 済（自動）\n送信先：🈶 あり ・ 🈚 なし"</string>
     <string name="btn_sms_search_send_selected">選択したSMSを送信</string>
     <string name="message_sms_search_empty">該当するSMSがありません</string>
     <string name="label_sms_search_read_permission_required">アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください</string>
