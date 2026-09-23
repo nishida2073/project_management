@@ -64,12 +64,17 @@
                 android:text="@string/btn_sms_search_hide_search_filters" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/llSearchFilters"
+        <com.google.android.material.card.MaterialCardView
+            style="@style/AppCard"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/llSearchFilters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -135,7 +140,7 @@
                 android:id="@+id/tvSendTargetFilterLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/label_sms_search_send_target_filter"
                 android:textColor="?attr/colorOnSurface" />
@@ -157,7 +162,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/label_sms_search_extraction_status_filter"
                 android:textColor="?attr/colorOnSurface" />
@@ -193,7 +198,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/label_sms_search_send_status_filter"
                 android:textColor="?attr/colorOnSurface" />
@@ -239,6 +244,8 @@
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSearchSms"
