@@ -435,118 +435,147 @@ class SmsSearchActivity : BaseActivity() {
         val dateFormat = DateFormats.display()
         records.forEach { record ->
             val (resolution, sendTargets) = resolveSendTargetCached(record, config)
-            val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@SmsSearchActivity) }
-                ?: getString(R.string.label_send_target_settings_none)
-            val isSendTargetUnconfigured = sendTargets.none { it.isValid }
-            val isAutoReplied = record.id in autoRepliedEntries
-            val sentEntry = sentEntries[record.id]
-            val isExtractionFailedBody = resolution.smsParts.isExtractionFailed()
-            val isSelectable = !isSendTargetUnconfigured &&
-                (!isExtractionFailedBody || config.searchExtractionFailedEnabled)
-            val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
-            val sendTargetIcon = getString(
-                when {
-                    isSendTargetUnconfigured -> R.string.icon_send_target_unconfigured
-                    else -> R.string.icon_send_target_exists
-                }
+            val rowView = buildSmsRow(record, resolution, sendTargets, sentEntries, autoRepliedEntries, config, dateFormat)
+            binding.llSmsListContainer.addView(rowView)
+            binding.llSmsListContainer.addView(buildDivider())
+        }
+    }
+
+    private fun buildSmsRow(
+        record: SmsRecord,
+        resolution: SettingsStore.SmsResolution,
+        sendTargets: List<SettingsStore.SendTarget>,
+        sentEntries: Map<Long, SmsLogStore.Entry>,
+        autoRepliedEntries: Map<Long, SmsLogStore.Entry>,
+        config: SettingsStore.Config,
+        dateFormat: SimpleDateFormat
+    ): View {
+        val isSendTargetUnconfigured = sendTargets.none { it.isValid }
+        val isAutoReplied = record.id in autoRepliedEntries
+        val isExtractionFailedBody = resolution.smsParts.isExtractionFailed()
+        val isSelectable = !isSendTargetUnconfigured &&
+            (!isExtractionFailedBody || config.searchExtractionFailedEnabled)
+        val sentEntry = sentEntries[record.id]
+
+        return android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
             )
-
-            val checkBox = CheckBox(this).apply {
-                tag = record.id
-                isEnabled = isSelectable
-                isClickable = false
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-                )
+            setPadding(0, 16, 0, 16)
+            addView(buildCheckbox(record, isSelectable))
+            addView(buildSmsRowText(record, resolution, sendTargets, isSelectable, isAutoReplied, isExtractionFailedBody, sentEntry, config, dateFormat))
+            val backgroundColor = when {
+                sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
+                sentEntry != null -> R.color.sms_sent_auto_background
+                else -> null
             }
+            backgroundColor?.let {
+                setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, it))
+            }
+            setOnClickListener {
+                if (isSelectable) {
+                    val checkBox = getChildAt(0) as CheckBox
+                    checkBox.isChecked = !checkBox.isChecked
+                }
+            }
+            setOnLongClickListener {
+                openSmsReply(record.address, isExtractionFailedBody)
+                true
+            }
+        }
+    }
 
-            val textView = TextView(this).apply {
-                text = buildSpannedString {
-                    val extractionTargetIcon = if (resolution.isContinuation) getString(R.string.icon_extraction_target_storage) else getString(R.string.icon_extraction_target_sms)
-                    append(extractionTargetIcon)
-                    append(" ")
-                    val extractionIcon = when {
-                        isExtractionFailedBody -> R.string.icon_extraction_failed
-                        else -> R.string.icon_extraction_succeeded
-                    }
-                    append(getString(extractionIcon))
-                    append(" ")
-                    if (sentEntry == null) {
-                        append(getString(R.string.icon_send_none))
-                    } else {
-                        append(
-                            getString(
-                                if (sentEntry.manual) R.string.icon_send_manual else R.string.icon_send_auto
-                            )
+    private fun buildCheckbox(record: SmsRecord, isSelectable: Boolean): CheckBox {
+        return CheckBox(this).apply {
+            tag = record.id
+            isEnabled = isSelectable
+            isClickable = false
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+    }
+
+    private fun buildSmsRowText(
+        record: SmsRecord,
+        resolution: SettingsStore.SmsResolution,
+        sendTargets: List<SettingsStore.SendTarget>,
+        isSelectable: Boolean,
+        isAutoReplied: Boolean,
+        isExtractionFailedBody: Boolean,
+        sentEntry: SmsLogStore.Entry?,
+        config: SettingsStore.Config,
+        dateFormat: SimpleDateFormat
+    ): TextView {
+        val sendTargetName = sendTargets.takeIf { it.isNotEmpty() }?.joinToString("、") { it.displayName(this@SmsSearchActivity) }
+            ?: getString(R.string.label_send_target_settings_none)
+        val sendTargetColor = ContextCompat.getColor(this@SmsSearchActivity, R.color.send_target_name)
+        val sendTargetIcon = getString(
+            when {
+                sendTargets.none { it.isValid } -> R.string.icon_send_target_unconfigured
+                else -> R.string.icon_send_target_exists
+            }
+        )
+
+        return TextView(this).apply {
+            text = buildSpannedString {
+                val extractionTargetIcon = if (resolution.isContinuation) getString(R.string.icon_extraction_target_storage) else getString(R.string.icon_extraction_target_sms)
+                append(extractionTargetIcon)
+                append(" ")
+                val extractionIcon = when {
+                    isExtractionFailedBody -> R.string.icon_extraction_failed
+                    else -> R.string.icon_extraction_succeeded
+                }
+                append(getString(extractionIcon))
+                append(" ")
+                if (sentEntry == null) {
+                    append(getString(R.string.icon_send_none))
+                } else {
+                    append(
+                        getString(
+                            if (sentEntry.manual) R.string.icon_send_manual else R.string.icon_send_auto
                         )
-                    }
-                    if (isAutoReplied) {
-                        append(" ")
-                        append(getString(R.string.icon_replied))
-                    }
+                    )
+                }
+                if (isAutoReplied) {
                     append(" ")
-                    append(sendTargetIcon)
-                    append("\n")
-                    if (isSelectable) {
-                        color(sendTargetColor) { bold { append(sendTargetName) } }
-                    } else {
-                        bold { append(sendTargetName) }
-                    }
-                    val senderDisplay = if (resolution.isContinuation && config.continuationShowUserNameEnabled && resolution.smsParts.userName.isNotBlank()) {
-                        resolution.smsParts.userName
-                    } else {
-                        record.address
-                    }
-                    append("\n\n${dateFormat.format(Date(record.dateMillis))}　$senderDisplay\n")
-                    append(record.body)
+                    append(getString(R.string.icon_replied))
                 }
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    0,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f
-                )
+                append(" ")
+                append(sendTargetIcon)
+                append("\n")
+                if (isSelectable) {
+                    color(sendTargetColor) { bold { append(sendTargetName) } }
+                } else {
+                    bold { append(sendTargetName) }
+                }
+                val senderDisplay = if (resolution.isContinuation && config.continuationShowUserNameEnabled && resolution.smsParts.userName.isNotBlank()) {
+                    resolution.smsParts.userName
+                } else {
+                    record.address
+                }
+                append("\n\n${dateFormat.format(Date(record.dateMillis))}　$senderDisplay\n")
+                append(record.body)
             }
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                0,
+                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+            )
+        }
+    }
 
-            val row = android.widget.LinearLayout(this).apply {
-                orientation = android.widget.LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                setPadding(0, 16, 0, 16)
-                addView(checkBox)
-                addView(textView)
-                val backgroundColor = when {
-                    sentEntry != null && sentEntry.manual -> R.color.sms_sent_manual_background
-                    sentEntry != null -> R.color.sms_sent_auto_background
-                    else -> null
-                }
-                backgroundColor?.let {
-                    setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, it))
-                }
-                setOnClickListener {
-                    if (isSelectable) {
-                        checkBox.isChecked = !checkBox.isChecked
-                    }
-                }
-                setOnLongClickListener {
-                    openSmsReply(record.address, isExtractionFailedBody)
-                    true
-                }
-            }
-
-            val divider = View(this).apply {
-                setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, R.color.log_divider))
-                layoutParams = android.widget.LinearLayout.LayoutParams(
-                    android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                    2
-                )
-            }
-
-            binding.llSmsListContainer.addView(row)
-            binding.llSmsListContainer.addView(divider)
+    private fun buildDivider(): View {
+        return View(this).apply {
+            setBackgroundColor(ContextCompat.getColor(this@SmsSearchActivity, R.color.log_divider))
+            layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                2
+            )
         }
     }
 
