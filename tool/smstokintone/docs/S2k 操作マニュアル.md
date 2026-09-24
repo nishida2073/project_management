@@ -62,29 +62,31 @@
 
 #### 機能の詳細 {#feature-details}
 ##### 現在のモードの表示
-　画面上部に「SMSの送信モード」、その下に「SMSの返信モード」の見出しとともに、それぞれ「自動」または「手動」が表示されます。
+　現在の「SMSの送信モード」、「SMSの返信モード」の状態（自動・手動）が表示されます。
+
+<p float="left">
+  <img src="screenshots/top_send_status.png" alt="現在のモードの表示">
+</p>
 
 - 送信モード 自動：受信したSMSを自動で送信する設定になっている状態
 - 送信モード 手動：SMSの検索画面から手動で選んで送信する設定になっている状態
 - 返信モード 自動：本文の抽出状況が異常なSMSを受信した際に、自動でSMSを返信する設定になっている状態
 - 返信モード 手動：自動返信を行わない状態（返信はSMSの検索画面から手動で行います）
 
-<p float="left">
-  <img src="screenshots/top_send_status.png" alt="現在のモードの表示">
-</p>
-
 <div class="pagebreak"></div>
 
 ##### 各画面への移動
+　各画面の遷移ボタンが表示されます。
+
+<p float="left">
+  <img src="screenshots/top_nav_buttons.png" alt="各画面への移動ボタン">
+</p>
+
 - 「SMSの検索」：[SMSの検索画面](#SMSの検索画面)を開きます。
 - 「ログの確認」：[ログの一覧画面](#ログの一覧画面)を開きます。
 - 「送信先の設定」：[送信先の設定画面](#送信先の設定画面)を開きます。
 - 「アプリの設定」：[アプリの設定画面](#アプリの設定画面)を開きます。
 - 「設定のインポート・エクスポート」：[設定のインポート・エクスポート画面](#設定のインポート・エクスポート画面)を開きます。
-
-<p float="left">
-  <img src="screenshots/top_nav_buttons.png" alt="各画面への移動ボタン">
-</p>
 
 <div class="pagebreak"></div>
 
@@ -115,6 +117,12 @@
 
 #### 機能の詳細 {#sms-search-feature-details}
 ##### 検索条件の設定
+　SMSの検索条件を設定することができます。
+
+<p float="left">
+  <img src="screenshots/sms_search_conditions.png" alt="検索条件の設定">
+</p>
+
 - 開始日／終了日
   - それぞれタップするとカレンダーが開き、日付を選べます。
 - 送信先
@@ -129,9 +137,6 @@
   - 済（自動）：自動で送信されたSMS
   - 済（手動）：手動で送信されたSMS
 
-<p float="left">
-  <img src="screenshots/sms_search_conditions.png" alt="検索条件の設定">
-</p>
 
 <div class="pagebreak"></div>
 
@@ -148,6 +153,11 @@
 ##### SMSの検索 {#search}
 　受信ボックスから検索条件に該当するSMSを取得し、一覧で表示します。
 
+<p float="left">
+  <img src="screenshots/sms_search_search.png" alt="SMSの検索">
+  <img src="screenshots/sms_search_list.png" alt="SMSの一覧表示">
+</p>
+
 - アイコン
   - 抽出対象：SMS・ストレージ
   - 抽出状況：正常・異常
@@ -163,10 +173,6 @@
   - 手動送信済み：アンバー系
   - 送信失敗：赤系
 
-<p float="left">
-  <img src="screenshots/sms_search_search.png" alt="SMSの検索">
-  <img src="screenshots/sms_search_list.png" alt="SMSの一覧表示">
-</p>
 
 <div class="pagebreak"></div>
 
@@ -231,6 +237,11 @@
 #### 機能の詳細 {#log-feature-details}
 ##### ログの一覧表示
 　ログ（受信・送信・返信）を、一覧で表示します。
+
+<p float="left">
+  <img src="screenshots/log_list.png" alt="ログの一覧表示">
+</p>
+
 - ログの種別（受信完了／送信開始／送信完了／返信完了）と記録日時
 - 結果（成功／失敗）とメッセージ（緑＝成功、赤＝失敗）
 - アイコン
@@ -242,10 +253,6 @@
 - 送信先名
 - 受信日時と送信元
 - 本文全体
-
-<p float="left">
-  <img src="screenshots/log_list.png" alt="ログの一覧表示">
-</p>
 
 <div class="pagebreak"></div>
 
@@ -272,16 +279,16 @@
 ##### 抽出結果の表示
 　ログを長押しすると、SMSの抽出結果をダイアログで確認できます。<br>
 
+<p float="left">
+  <img src="screenshots/log_extraction_result.png" alt="抽出結果の表示">
+</p>
+
 - アイコン
   - 抽出方法:ルールベース／AI
   - 会社名の変換:ある／なし
 - 会社名
 - 氏名
 - 本文
-
-<p float="left">
-  <img src="screenshots/log_extraction_result.png" alt="抽出結果の表示">
-</p>
 
 <div class="pagebreak"></div>
 
@@ -337,6 +344,11 @@
 
 ##### 送信先の設定（基本の設定）
 　送信先の名前や振り分けの際のルールを変更できます。
+
+<p float="left">
+  <img src="screenshots/send_target_basic.png" alt="送信先の設定（基本の設定）">
+</p>
+
 ###### 設定項目 {#send-target-basic-config-items}
 - 送信先
   - 送信先名
@@ -346,10 +358,6 @@
   - 送信先の振り分け
     - この送信先を使う条件となる、会社名に含まれる文字列
     - 「+」で行を追加、「×」で行を削除し、複数指定できます。
-
-<p float="left">
-  <img src="screenshots/send_target_basic.png" alt="送信先の設定（基本の設定）">
-</p>
 
 > **注意**
 > - 設定内容は、「設定を保存」を押した時点で反映されます。
@@ -364,6 +372,11 @@
 
 ##### 送信先の設定（kintoneの設定）
 　送信先のkintoneのサブドメインや認証情報を変更できます。
+
+<p float="left">
+  <img src="screenshots/send_target_kintone1.png" alt="送信先の設定（kintoneの設定）">
+  <img src="screenshots/send_target_kintone2.png" alt="送信先の設定（kintoneの設定）">
+</p>
 
 ###### 設定項目 {#send-target-kintone-config-items}
 - 接続先
@@ -386,11 +399,6 @@
     - 時間：指定した時間以内の場合に更新します。
 - 統合範囲
   - 「統合条件」を時間にした場合の許容時間（±時間）
-
-<p float="left">
-  <img src="screenshots/send_target_kintone1.png" alt="送信先の設定（kintoneの設定）">
-  <img src="screenshots/send_target_kintone2.png" alt="送信先の設定（kintoneの設定）">
-</p>
 
 > **注意**
 > - 設定内容は、「設定を保存」を押した時点で反映されます。
@@ -499,18 +507,22 @@
 ##### レイアウト
 　アプリのレイアウトを変更できます。
 
-###### 設定項目 {#layout-config-items}
-- 表示テーマ
-  - アプリのテーマを変更できます。
-
 <p float="left">
   <img src="screenshots/app_settings_layout_settings.png" alt="レイアウト">
 </p>
+
+###### 設定項目 {#layout-config-items}
+- 表示テーマ
+  - アプリのテーマを変更できます。
 
 <div class="pagebreak"></div>
 
 ##### SMSの検索
 　[SMSの検索画面](#SMSの検索画面)を開いたときの、デフォルトの検索条件や選択の対象を変更できます。
+
+<p float="left">
+  <img src="screenshots/app_settings_search_settings.png" alt="SMSの検索（SMS選択の対象）">
+</p>
 
 ###### 設定項目 {#sms-search-config-items}
 - 検索条件の初期値
@@ -529,14 +541,14 @@
   - 抽出状況が異常
     - 選択対象のSMSとして有効にするかどうか
 
-<p float="left">
-  <img src="screenshots/app_settings_search_settings.png" alt="SMSの検索（SMS選択の対象）">
-</p>
-
 <div class="pagebreak"></div>
 
 ##### SMSの送信 {#app-settings-sms-send}
 　SMS送信の自動送信の切り替えや自動送信の対象のSMSなどを変更できます。
+
+<p float="left">
+  <img src="screenshots/app_settings_send_settings.png" alt="SMSの送信">
+</p>
 
 ###### 設定項目 {#sms-send-config-items}
 - 送信モード
@@ -545,14 +557,15 @@
   - 抽出状況が異常
     - 自動送信対象のSMSとして有効にするかどうか
 
-<p float="left">
-  <img src="screenshots/app_settings_send_settings.png" alt="SMSの送信">
-</p>
-
 <div class="pagebreak"></div>
 
 ##### SMSの返信 {#app-settings-sms-reply}
 　SMS送信の自動返信の切り替えや返信メッセージなどを変更できます。
+
+<p float="left">
+  <img src="screenshots/app_settings_reply_settings1.png" alt="SMSの送信1">
+  <img src="screenshots/app_settings_reply_settings2.png" alt="SMSの送信1">
+</p>
 
 ###### 設定項目 {#sms-reply-config-items}
 - 返信モード
@@ -566,15 +579,14 @@
     - 正しく抽出でなかった場合
       - 抽出状況が異常なSMSに返信する場合の文言
 
-<p float="left">
-  <img src="screenshots/app_settings_reply_settings1.png" alt="SMSの送信1">
-  <img src="screenshots/app_settings_reply_settings2.png" alt="SMSの送信1">
-</p>
-
 <div class="pagebreak"></div>
 
 ##### SMSの情報抽出
 　抽出の対象や抽出後の変換などを変更できます。
+
+<p float="left">
+  <img src="screenshots/app_settings_extraction_settings.png" alt="SMSの情報抽出">
+</p>
 
 ###### 設定項目 {#sms-extraction-config-items}
 - 会社名の抽出
@@ -590,10 +602,6 @@
 - AIによる抽出
   - 端末上のAIを使用して抽出をするかどうか　
 
-<p float="left">
-  <img src="screenshots/app_settings_extraction_settings.png" alt="SMSの情報抽出">
-</p>
-
 > **注意**
 > - 自動変換と固定変換を併用している場合、固定変換は自動変換後の値に適用されます。
 > - 「会社名の抽出」を有効にした場合
@@ -607,6 +615,10 @@
 ##### SMSの引継ぎ
 　SMSの引継ぎの有効・無効や引継ぎ内容を変更できます。
 
+<p float="left">
+  <img src="screenshots/app_settings_app_continuation_settings.png" alt="SMSの引継ぎ">
+</p>
+
 ###### 設定項目 {#sms-continuation-config-items}
 - 引継ぎ
   - 引継ぎの有効・無効
@@ -619,17 +631,16 @@
 - 引継ぎ内容の表示
   - 電話番号を氏名として表示するかどうか
 
-
 　「引継ぎ内容の設定」ボタンについては、後述の[引継ぎ内容の設定画面](#引継ぎ内容の設定画面)を確認してください。
-
-<p float="left">
-  <img src="screenshots/app_settings_app_continuation_settings.png" alt="SMSの引継ぎ">
-</p>
 
 <div class="pagebreak"></div>
 
 ##### ログ
 　ログの自動更新や統合範囲などを変更できます。
+
+<p float="left">
+  <img src="screenshots/app_settings_log_settings.png" alt="ログ">
+</p>
 
 ###### 設定項目 {#log-config-items}
 - 自動更新
@@ -640,10 +651,6 @@
   - 送信元と受信日時の近さでSMSと突き合わせをする際の許容誤差（秒）
 - 本文の最大表示文字数
   - 一覧に表示する本文の最大表示文字数
-
-<p float="left">
-  <img src="screenshots/app_settings_log_settings.png" alt="ログ">
-</p>
 
 <div class="pagebreak"></div>
 
@@ -680,27 +687,28 @@
 ##### 引継ぎ内容の並び替え
 　引継ぎ内容を並び替えることができます。
 
-- 「古い順」：登録日時が古い順に表示します（デフォルト）
-- 「新しい順」：登録日時が新しい順に表示します
-
 <p float="left">
   <img src="screenshots/app_continuation_info_setting_sort.png" alt="引継ぎ内容の並び替え">
 </p>
+
+- 「古い順」：登録日時が古い順に表示します（デフォルト）
+- 「新しい順」：登録日時が新しい順に表示します
+
 
 <div class="pagebreak"></div>
 
 ##### 引継ぎ内容の一覧表示
 　引継ぎ内容を、一覧で表示します。
 
-- 送信元
-- 会社名
-- 氏名
-- 送信先名
-
 <p float="left">
   <img src="screenshots/app_continuation_info_setting_view1.png" alt="引継ぎ内容の表示">
   <img src="screenshots/app_continuation_info_setting_view2.png" alt="引継ぎ内容の表示">
 </p>
+
+- 送信元
+- 会社名
+- 氏名
+- 送信先名
 
 > **注意**
 > - 会社名の表示
