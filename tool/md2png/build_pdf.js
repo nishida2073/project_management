@@ -81,7 +81,7 @@ const pdfMargin = narrowMargins
   ? { top: '15mm', bottom: '15mm', left: '8mm', right: '8mm' }
   : { top: '15mm', bottom: '15mm', left: '15mm', right: '15mm' };
 
-const frontMatterPageCount = (titlePage ? 1 : 0) + (toc ? 1 : 0);
+let frontMatterPageCount = (titlePage ? 1 : 0) + (toc ? 1 : 0);
 const backMatterPageCount = issueDate && issueDatePosition === 'back' ? 1 : 0;
 
 function tocRow(h, depth, displayPage) {
@@ -218,12 +218,24 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
 
     const pageByToken = new Map(headingsWithPages.map((h) => [h.token, h.pageIndex]));
     const tree = buildTree(headingsWithPages, tocDepth);
-    const tocDisplayOffset = pageNumbers ? frontMatterPageCount : 0;
-    const tocHtml = buildTocHtml(tree, pageByToken, tocDisplayOffset);
+    let tocHtml = buildTocHtml(tree, pageByToken, pageNumbers ? frontMatterPageCount : 0);
 
     finalPage = titlePage
       ? finalPage.replace(/(<div class="title-page">[\s\S]*?<\/div>)/, `$1\n${tocHtml}`)
       : finalPage.replace('<body>\n', `<body>\n${tocHtml}\n`);
+
+    if (pageNumbers && toc) {
+      const frontMatterPdfPath = await renderPdf(browser, finalPage, null);
+      const pdfBytes = fs.readFileSync(frontMatterPdfPath);
+
+      const headingsWithPages = await findHeadingPages(pdfBytes, headings);
+      if (headingsWithPages.length > 0) {
+        frontMatterPageCount = headingsWithPages[0].pageIndex;
+      } else {
+        frontMatterPageCount = titlePage ? 1 : 0;
+      }
+      fs.unlinkSync(frontMatterPdfPath);
+    }
   }
 
   if (backMatterPageCount) {
@@ -248,6 +260,7 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
   fs.unlinkSync(tmpPdfPath);
 
   if (pageNumbers) {
+    console.log(`DEBUG: frontMatterPageCount=${frontMatterPageCount}, backMatterPageCount=${backMatterPageCount}`);
     await addPageNumbers(outPath, frontMatterPageCount, backMatterPageCount);
   }
 

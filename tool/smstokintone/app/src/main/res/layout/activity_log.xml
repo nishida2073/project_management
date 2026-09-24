@@ -32,12 +32,12 @@
             android:text="@string/btn_refresh" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnClearLog"
+            android:id="@+id/btnDeleteLog"
             style="@style/AppButton.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/btn_clear" />
+            android:text="@string/btn_delete" />
     </LinearLayout>
 
     <TextView

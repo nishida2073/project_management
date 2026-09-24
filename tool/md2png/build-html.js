@@ -8,6 +8,12 @@ function buildHtml(mdPath, anchorLevels = [2, 3, 5], styleCss = defaultStyle) {
   const title = path.basename(mdPath, path.extname(mdPath));
   let md = fs.readFileSync(mdPath, 'utf8');
 
+  const anchorMap = {};
+  md = md.replace(/^(#+)\s+(.+?)\s+\{#([^}]+)\}\s*$/gm, (match, hashes, text, id) => {
+    anchorMap[text.trim()] = id;
+    return `${hashes} ${text}`;
+  });
+
   const mermaidBlocks = [];
   md = md.replace(/```mermaid\n([\s\S]*?)```/g, (m, code) => {
     const token = `@@MERMAID_${mermaidBlocks.length}@@`;
@@ -21,15 +27,13 @@ function buildHtml(mdPath, anchorLevels = [2, 3, 5], styleCss = defaultStyle) {
   const headingRe = new RegExp(`<h([${anchorLevels.join('')}])([^>]*)>(.*?)</h\\1>`, 'g');
   html = html.replace(headingRe, (m, level, attrs, inner) => {
     const rawText = inner.replace(/<[^>]+>/g, '').trim();
-    const idMatch = rawText.match(/^(.*?)\s*\{#([^}]+)\}$/);
-    const text = idMatch ? idMatch[1] : rawText;
-    const id = idMatch ? idMatch[2] : rawText;
-    const displayInner = idMatch ? inner.replace(/\s*\{#[^}]+\}\s*$/, '') : inner;
+    const text = rawText;
+    const id = anchorMap[rawText] || rawText;
     const token = `ANCHOR-${headings.length}-${Math.random().toString(36).slice(2, 8)}`;
     headings.push({ level: Number(level), text, id, token });
     const marker = `<span style="font-size:1px;color:#ffffff;position:absolute;">${token}</span>`;
     const idAttr = ` id="${id.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"`;
-    return `<h${level}${attrs}${idAttr}>${marker}${displayInner}</h${level}>`;
+    return `<h${level}${attrs}${idAttr}>${marker}${inner}</h${level}>`;
   });
 
   mermaidBlocks.forEach((code, i) => {
@@ -66,7 +70,7 @@ ${html}
 </body>
 </html>`;
 
-  return { page, headings, title };
+  return { page, headings, title, anchorMap };
 }
 
 module.exports = { buildHtml };

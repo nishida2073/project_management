@@ -53,7 +53,7 @@ class LogActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnRefreshLog.setOnClickListener { renderLog() }
-        binding.btnClearLog.setOnClickListener { onClearClicked() }
+        binding.btnDeleteLog.setOnClickListener { onClearClicked() }
         binding.swipeRefreshLog.setOnRefreshListener {
             renderLog()
             binding.swipeRefreshLog.isRefreshing = false
@@ -97,10 +97,10 @@ class LogActivity : AppCompatActivity() {
      */
     private fun onClearClicked() {
         AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_title_log_confirm_clear_log)
-            .setMessage(R.string.dialog_message_log_confirm_clear_log)
+            .setTitle(R.string.dialog_title_log_confirm_delete_log)
+            .setMessage(R.string.dialog_message_log_confirm_delete_log)
             .setNegativeButton(R.string.btn_cancel, null)
-            .setPositiveButton(R.string.btn_clear) { _, _ ->
+            .setPositiveButton(R.string.btn_delete) { _, _ ->
                 SmsLogStore.clear(this)
                 renderLog()
             }

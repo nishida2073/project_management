@@ -19,7 +19,6 @@
     <!-- 汎用ボタン -->
     <string name="btn_refresh">更新</string>
     <string name="btn_cancel">キャンセル</string>
-    <string name="btn_clear">クリア</string>
     <string name="btn_copy">コピー</string>
     <string name="btn_delete">削除</string>
     <string name="btn_delete_all">すべて削除</string>
@@ -172,7 +171,7 @@
     <string name="rb_app_settings_continuation_scope_unlimited">制限なし</string>
     <string name="rb_app_settings_continuation_scope_same_day">同一日のみ</string>
     <string name="helper_app_settings_continuation_scope">抽出結果を引継ぐ範囲です。「同一日のみ」にすると、日付が変わると引継ぎがリセットされます</string>
-    <string name="label_app_settings_continuation_show_name">送信元の表示</string>
+    <string name="label_app_settings_continuation_show">引継ぎ内容の表示</string>
     <string name="switch_app_settings_continuation_show_user_name_enabled">氏名を表示する</string>
     <string name="helper_app_settings_continuation_show_user_name_enabled">電話番号の代わりに引継いだ氏名を表示します</string>
     <string name="btn_app_settings_edit_continuation_info">引継ぎ内容の設定</string>
@@ -225,8 +224,8 @@
     <string name="message_log_send_complete_network_error">SMSの送信に失敗しました\n%1$s</string>
     <string name="message_log_send_complete_skipped_duplicate">SMSの更新をスキップしました\n（最終受信日時と本文が一致）</string>
     <string name="message_log_auto_reply">抽出状況が異常なため、SMSを返信しました</string>
-    <string name="dialog_title_log_confirm_clear_log">ログをクリアしますか？</string>
-    <string name="dialog_message_log_confirm_clear_log">この操作は取り消せません</string>
+    <string name="dialog_title_log_confirm_delete_log">ログを削除しますか？</string>
+    <string name="dialog_message_log_confirm_delete_log">この操作は取り消せません</string>
     <string name="dialog_title_log_extraction_result">抽出結果</string>
     <string name="dialog_message_log_extraction_failure">会社名・氏名の抽出に失敗しています</string>
     <string name="dialog_title_log_auto_reply_body">返信内容</string>

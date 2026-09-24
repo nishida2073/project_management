@@ -4,20 +4,19 @@ body {
   max-width: 900px;
   margin: 0 auto;
   padding: 40px;
-  color: #1c232c;
   background: #ffffff;
-  line-height: 1.8;
 }
-h1 { font-size: 2.2rem; }
-h2 { font-size: 1.8rem; margin-top: 2.5rem; border-bottom: 1px solid #d3d9df; padding-bottom: 0.3rem; break-before: page; }
-h3 { font-size: 1.45rem; margin-top: 1.8rem; }
-h4 { font-size: 1.2rem; margin-top: 1.4rem; }
-h5 { font-size: 1rem; margin-top: 1.2rem; color: #2b5f73; }
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; margin-top: 2.5rem; border-bottom: 1px solid #d3d9df; padding-bottom: 0.3rem; break-before: page; }
+h3 { font-size: 1.8rem; margin-top: 1rem; }
+h4 { font-size: 1.6rem; margin-top: 1rem; }
+h5 { font-size: 1.4rem; margin-top: 1rem; }
+h6 { font-size: 1.2rem; font-weight: bold; padding-left: 1rem; }
 hr { border: none; border-top: 1px solid #d3d9df; margin: 2rem 0; }
 li { margin-bottom: 0.3rem; }
 strong { color: #2b5f73; }
 .mermaid { text-align: center; margin: 1rem 0; break-inside: avoid; }
-h2, h3, h4, h5 { break-after: avoid; }
+h2, h3, h4, h5, h6 { break-after: avoid; }
 img { vertical-align: top; margin-left: 1rem; margin-bottom: 1rem; border: 1px solid #d3d9df; max-width: 100%; height: auto; }
 .img-center { text-align: center; }
 .img-center img { margin-left: 0; }
@@ -65,7 +64,7 @@ blockquote code {
 
 /* ==================== 目次の設定 ==================== */
 /* build_pdf.js --toc: 表紙の直後に挿入する目次ページ */
-.toc-page { height: 267mm; break-after: page; overflow: hidden; }
+.toc-page { break-after: page; }
 /* 通常の見出し用CSS（h2 { break-before: page; ... }）を目次自身の見出しには適用させない */
 .toc-title { margin-top: 0; break-before: avoid; border-bottom: none; }
 .toc-item { display: flex; align-items: baseline; margin: 0.5rem 0; color: inherit; text-decoration: none; }
