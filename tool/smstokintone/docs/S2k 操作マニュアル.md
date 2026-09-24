@@ -133,7 +133,7 @@
 
 ##### 検索条件の表示・非表示の切り替え
 
-　見出し「検索条件」の右にあるボタンで、検索条件の入力欄をまとめて隠す／表示できます。
+　検索条件の入力欄をまとめて隠す／表示を切り替えることができます。
 
 <p float="left">
   <img src="screenshots/sms_search_filter_toggle-show.png" alt="検索条件の表示・非表示の切り替え">
@@ -166,7 +166,7 @@
 
 ##### 検索 {#search}
 
-　「検索」ボタンを押すと、受信ボックスから上記の条件に該当するSMSを検索し、一覧に表示します。
+　受信ボックスから上記の条件に該当するSMSを検索し、一覧に表示します。
 
 <p float="left">
   <img src="screenshots/sms_search_search.png" alt="検索">
@@ -193,12 +193,12 @@
   - 手動送信済み：アンバー系
   - 送信失敗：赤系
 
-> **注意**
-> - 送信先名が「なし」のSMSはチェックボックスで選択できません。
-
 <p float="left">
   <img src="screenshots/sms_search_list.png" alt="SMSの一覧表示">
 </p>
+
+> **注意**
+> - 送信先名が「なし」のSMSはチェックボックスで選択できません。
 
 <div class="pagebreak"></div>
 
@@ -224,7 +224,7 @@
 
 ##### SMSの送信 {#sms-send}
 
-　チェックを付けたSMSを「選択したSMSを送信」ボタンで送信します。<br>
+　チェックを付けたSMSをkintoneに送信します。<br>
 　一覧の表示順（受信日時が新しい順）に関わらず、送信自体は受信日時が古いものから順に1件ずつ処理されます。<br>
 　完了すると成功・失敗件数がメッセージで表示され、一覧が自動的に更新されます。
 
@@ -389,28 +389,28 @@
     - 一覧や履歴で表示される名前を設定します。
   - 会社名
     - 送信先の「会社名」を設定します。
-      - [アプリの設定画面](#アプリの設定画面)の「SMSの情報抽出（会社名の抽出）」が無効な場合に表示されます。
-- 送信先の振り分け
-  - この送信先を使う条件となる、会社名に含まれる文字列を設定します。
-  - 本文から抽出した会社名にこの文字列が含まれるかどうかで判定します。
-  - この入力欄は「会社名の抽出」が有効な場合のみ表示されます（「会社名の抽出」が無効な場合は振り分けに使われません）。
-    - 「+」で行を追加、「×」で行を削除でき、複数指定できます。
-    - 空欄の場合は、どの文字列にも一致しなかったときのデフォルトの送信先として扱われます。
-    - 複数の送信先の条件に同時に一致した場合は、その全ての送信先へ登録されます。
+  - 送信先の振り分け
+    - この送信先を使う条件となる、会社名に含まれる文字列を設定します。
+    - 「+」で行を追加、「×」で行を削除し、複数指定できます。
 
 <p float="left">
-  <img src="screenshots/send_target_basic1.png" alt="送信先の設定（基本の設定-送信先）">
-  <img src="screenshots/send_target_basic2.png" alt="送信先の設定（基本の設定-送信先の振り分け）">
+  <img src="screenshots/send_target_basic.png" alt="送信先の設定（基本の設定）">
 </p>
+
+> **注意**
+> - 設定内容は、「設定を保存」を押した時点で反映されます。
+> - 会社名の表示
+>   - 「会社名の抽出」が有効な場合のみ表示されます。
+> - 送信先の振り分けの表示
+>   - 「会社名の抽出」が有効な場合のみ表示されます。
+> - 送信先の振り分けがない場合の扱い
+>   - デフォルトの送信先として扱われます。
 
 <div class="pagebreak"></div>
 
 ##### 送信先の設定（kintoneの設定）
 
 　送信先のkintoneのサブドメインや認証情報を設定します。
-
-> **注意**
-> - 設定内容は、「設定を保存」を押した時点で反映されます。
 
 ###### 設定項目 {#send-target-kintone-config-items}
 - 接続先
@@ -439,23 +439,23 @@
   <img src="screenshots/send_target_kintone2.png" alt="送信先の設定（kintoneの設定）">
 </p>
 
+> **注意**
+> - 設定内容は、「設定を保存」を押した時点で反映されます。
+
 <div class="pagebreak"></div>
 
 ##### テスト送信
 
-　「テスト送信」ボタンを押すと、その場でkintoneへ実際に送信を試せます。
+　現在の設定を利用し、kintoneへの送信をテストできます。
 
 <p float="left">
-  <img src="screenshots/send_target_test_send1.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send.png" alt="テスト送信">
 </p>
 
 <div class="pagebreak"></div>
 
-テストの実施:
-
-- テストデータの送信
-
-　テスト送信を押すと本文の入力欄が表示されます。初期値は設定に応じて変わります。
+###### テストデータ
+　初期値は設定に応じて変わります。
 
 - 抽出が有効な場合
   - 1行目（会社名）：テスト用の会社名（振り分けのキーワードが設定されていればそのキーワード、複数ある場合は「、」で連結したもの、未設定なら「NTTデータ○○○」）
@@ -465,40 +465,39 @@
   - 1行目（氏名）：「テスト太郎」
   - 2行目以降（内容）：「これはアプリからのテスト送信です」
 
-編集してそのまま送信内容を確認できます。
-
 <p float="left">
-  <img src="screenshots/send_target_test_send3.png" alt="テスト送信">
-</p>
-
-- テストの成功
-
-<p float="left">
-  <img src="screenshots/send_target_test_send5.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send_data1.png" alt="テストデータ1">
+  <img src="screenshots/send_target_test_send_data2.png" alt="テストデータ2">
 </p>
 
 <div class="pagebreak"></div>
 
-- テストの失敗
+###### テスト結果の表示
+
+**成功の場合**
 
 <p float="left">
-  <img src="screenshots/send_target_test_send4.png" alt="テスト送信">
+  <img src="screenshots/send_target_test_send_result_ok.png" alt="テスト送信">
+</p>
+
+**失敗の場合**
+
+<p float="left">
+  <img src="screenshots/send_target_test_send_result_fail.png" alt="テスト送信">
 </p>
 
 <div class="pagebreak"></div>
 
 ##### 送信先の保存 {#send-target-settings-save}
 
-　「設定を保存」ボタンは画面下部に固定表示されており、押すと、すべての送信先の入力内容を検証します。<br>
-
-> **注意**
-> - 送信先名・サブドメイン・認証情報（ログイン名・パスワード）・アプリID・フィールドコード（送信元・履歴・受信日時・登録種別）のいずれかが未入力の場合、保存は行われません。
+　すべての送信先の設定を保存します。
 
 <p float="left">
   <img src="screenshots/send_target_save.png" alt="送信先の保存">
 </p>
 
-
+> **注意**
+> - 送信先名・サブドメイン・認証情報（ログイン名・パスワード）・アプリID・フィールドコード（送信元・履歴・受信日時・登録種別）のいずれかが未入力の場合、保存は行われません。
 
 <div class="pagebreak"></div>
 
@@ -516,7 +515,7 @@
 
 - [設定の初期化](#設定の初期化)
 - [端末の許可](#device-permissions)
-- [レイアウトの変更](#レイアウトの変更)
+- [レイアウト](#レイアウト)
 - [SMSの検索](#SMSの検索)
 - [SMSの送信](#SMSの送信)
 - [SMSの返信](#SMSの返信)
@@ -543,12 +542,13 @@
 　すでに許可されている場合は「許可済み」と表示され、ボタンと説明文は隠れます。
 
 <p float="left">
-  <img src="screenshots/app_settings_permission_settings.png" alt="端末の許可">
+  <img src="screenshots/app_settings_permission_settings1.png" alt="端末の許可1">
+  <img src="screenshots/app_settings_permission_settings2.png" alt="端末の許可2">
 </p>
 
 <div class="pagebreak"></div>
 
-##### レイアウトの変更
+##### レイアウト
 　アプリのレイアウトを設定します。
 
 ###### 設定項目 {#layout-config-items}
@@ -556,7 +556,7 @@
   - アプリのテーマを設定します。
 
 <p float="left">
-  <img src="screenshots/app_settings_layout_settings.png" alt="レイアウトの変更">
+  <img src="screenshots/app_settings_layout_settings.png" alt="レイアウト">
 </p>
 
 <div class="pagebreak"></div>
@@ -645,15 +645,16 @@
 - AIによる抽出
   - 端末上のAIを使用して抽出をするかどうかを設定します。　
 
+<p float="left">
+  <img src="screenshots/app_settings_extraction_settings.png" alt="SMSの情報抽出">
+</p>
+
 > **注意**
 > - 「会社名の抽出」を有効にした場合
 >   - 会社名がない引継ぎ内容がある場合は警告ダイアログが表示され、会社名がない件数が表示されます。<br>
 >   - ダイアログが表示された場合は、[SMSの引継ぎ](#SMSの引継ぎ)画面で会社名を追加してください。
 > - 「AIによる抽出」を有効にした場合
 >   - 対応端末（Pixel 8以降など、対応チップを搭載した一部の機種のみ）が無い場合や、AIの呼び出しに失敗した場合は、自動的にルールベースの解析にフォールバックします。
-<p float="left">
-  <img src="screenshots/app_settings_extraction_settings.png" alt="SMSの情報抽出">
-</p>
 
 <div class="pagebreak"></div>
 
@@ -673,7 +674,7 @@
   - 電話番号を氏名として表示するかどうかを設定します。
 
 
-　引継ぎ内容の設定については、後述の[引継ぎ内容の設定画面](#引継ぎ内容の設定画面)を確認してください。
+　「引継ぎ内容の設定」ボタンについては、後述の[引継ぎ内容の設定画面](#引継ぎ内容の設定画面)を確認してください。
 
 <p float="left">
   <img src="screenshots/app_settings_app_continuation_settings.png" alt="SMSの引継ぎ">
@@ -736,7 +737,7 @@
 
 ##### 引継ぎ内容の並び替え
 
-　画面上部の「表示順序」のラジオボタンで、引継ぎ内容を並び替えることができます。
+　引継ぎ内容を並び替えることができます。
 
 - 「古い順」：登録日時が古い順に表示します（デフォルト）
 - 「新しい順」：登録日時が新しい順に表示します
@@ -761,8 +762,13 @@
 - 送信先名
 
 <p float="left">
-  <img src="screenshots/app_continuation_info_setting_view.png" alt="引継ぎ内容の表示">
+  <img src="screenshots/app_continuation_info_setting_view1.png" alt="引継ぎ内容の表示">
+  <img src="screenshots/app_continuation_info_setting_view2.png" alt="引継ぎ内容の表示">
 </p>
+
+> **注意**
+> - 会社名の表示
+>   - 「会社名の抽出」が有効な場合のみ表示されます。
 
 <div class="pagebreak"></div>
 
@@ -770,37 +776,42 @@
 
 　会社名・氏名を変更できます。
 
-> **注意**
-> - 編集内容は、「設定を保存」を押した時点で反映されます。
-
 <p float="left">
-  <img src="screenshots/app_continuation_info_setting_edit.png" alt="引継ぎ内容の編集">
+  <img src="screenshots/app_continuation_info_setting_edit1.png" alt="引継ぎ内容の編集1">
+  <img src="screenshots/app_continuation_info_setting_edit2.png" alt="引継ぎ内容の編集2">
 </p>
+
+> **注意**
+> - 会社名の表示
+>   - 「会社名の抽出」が有効な場合のみ表示されます。
+> - 編集内容は、「設定を保存」を押した時点で反映されます。
 
 <div class="pagebreak"></div>
 
 ##### 引継ぎ内容の削除
-　「削除」ボタンを押すと、その引継ぎ内容が一覧から外れます。
-
-> **注意**
-> - 削除内容は、「設定を保存」を押した時点で反映されます。
+　引継ぎ内容の一覧から削除することができます。
 
 <p float="left">
   <img src="screenshots/app_continuation_info_setting_delete.png" alt="引継ぎ内容の削除">
 </p>
 
+> **注意**
+> - 削除内容は、「設定を保存」を押した時点で反映されます。
+
+
 <div class="pagebreak"></div>
 
 ##### 引継ぎ内容の保存 {#continuation-save}
 
-　「設定を保存」ボタンを押すと、編集内容を反映します。<br>
-
-> **注意**
-> - 必須項目(会社名・氏名)が空欄の場合、保存は行われません。
+　編集内容を保存します。
 
 <p float="left">
   <img src="screenshots/app_continuation_info_setting_save.png" alt="引継ぎ内容の保存">
 </p>
+
+> **注意**
+> - 会社名・氏名が空欄の場合、保存は行われません。
+>   - 会社名は、「会社名の抽出」が有効な場合のみ必須になります。
 
 <div class="pagebreak"></div>
 
@@ -839,21 +850,21 @@
 <div class="pagebreak"></div>
 
 ##### 設定のインポート（インポート）
-　ファイルの内容から、反映します。
-
-> **注意**
-> - 反映されるのはファイルに含まれる内容だけです。
->   - 含まれていない内容は変更されません。
+　ファイルの内容を設定として反映します。
 
 <p float="left">
   <img src="screenshots/settings_import_export_import.png" alt="設定のインポート（ファイル選択）">
 </p>
 
+> **注意**
+> - 反映されるのはファイルに含まれる内容だけです。
+>   - 含まれていない内容は変更されません。
+
 <div class="pagebreak"></div>
 
 ##### 設定のエクスポート
 
-　現在のアプリの設定・送信先の設定・引継ぎ内容を、インポートできるJSONファイルとしてまとめて書き出します。
+　現在の設定（「アプリの設定」・「送信先の設定」・「引継ぎ内容の設定」）を、インポートできるJSONファイルとしてまとめて書き出します。
 - ファイル名の初期値：s2k_settings_日時.json
 
 <p float="left">

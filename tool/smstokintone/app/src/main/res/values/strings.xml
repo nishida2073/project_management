@@ -118,7 +118,7 @@
     <string name="label_app_settings_permission_sms_read_granted">許可済み</string>
     <string name="toast_app_settings_sms_read_permission_denied">SMSの読み取りの許可がない場合、SMSの検索はできません</string>
     <string name="helper_app_settings_sms_read_permission">SMSの検索に使用します</string>
-    <string name="section_app_settings_layout">レイアウトの変更</string>
+    <string name="section_app_settings_layout">レイアウト</string>
     <string name="label_app_settings_theme_mode">表示テーマ</string>
     <string name="rb_app_settings_theme_light">ライト</string>
     <string name="rb_app_settings_theme_dark">ダーク</string>
