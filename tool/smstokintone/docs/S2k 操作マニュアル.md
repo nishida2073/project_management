@@ -62,16 +62,19 @@
 
 #### 機能の詳細 {#feature-details}
 ##### 現在のモードの表示
-　現在の「SMSの送信モード」、「SMSの返信モード」の状態（自動・手動）が表示されます。
+　現在の「SMSの送信モード」、「SMSの返信モード」の状態（自動／手動）が表示されます。
 
 <p float="left">
   <img src="screenshots/top_send_status.png" alt="現在のモードの表示">
 </p>
 
-- 送信モード 自動：受信したSMSを自動で送信する設定になっている状態
-- 送信モード 手動：SMSの検索画面から手動で選んで送信する設定になっている状態
-- 返信モード 自動：本文の抽出状況が異常なSMSを受信した際に、自動でSMSを返信する設定になっている状態
-- 返信モード 手動：自動返信を行わない状態（返信はSMSの検索画面から手動で行います）
+###### 画面の項目 {#top_send_status-items}
+- 送信モード
+  - 自動：受信したSMSを自動で送信する設定になっている状態
+  - 手動：SMSの検索画面から手動で選んで送信する設定になっている状態
+- 返信モード
+  - 自動：本文の抽出状況が異常なSMSを受信した際に、自動でSMSを返信する設定になっている状態
+-   手動：自動返信を行わない状態（返信はSMSの検索画面から手動で行います）
 
 <div class="pagebreak"></div>
 
@@ -82,11 +85,17 @@
   <img src="screenshots/top_nav_buttons.png" alt="各画面への移動ボタン">
 </p>
 
-- 「SMSの検索」：[SMSの検索画面](#SMSの検索画面)を開きます。
-- 「ログの確認」：[ログの一覧画面](#ログの一覧画面)を開きます。
-- 「送信先の設定」：[送信先の設定画面](#送信先の設定画面)を開きます。
-- 「アプリの設定」：[アプリの設定画面](#アプリの設定画面)を開きます。
-- 「設定のインポート・エクスポート」：[設定のインポート・エクスポート画面](#設定のインポート・エクスポート画面)を開きます。
+###### 画面の項目 {#top_nav_buttons-items}
+- SMSの検索
+  - [SMSの検索画面](#SMSの検索画面)を開きます。
+- ログの確認
+  -[ログの一覧画面](#ログの一覧画面)を開きます。
+- 送信先の設定
+  - [送信先の設定画面](#送信先の設定画面)を開きます。
+- アプリの設定
+  - [アプリの設定画面](#アプリの設定画面)を開きます。
+- 設定のインポート・エクスポート
+  - [設定のインポート・エクスポート画面](#設定のインポート・エクスポート画面)を開きます。
 
 <div class="pagebreak"></div>
 
@@ -106,7 +115,7 @@
 
 #### 機能一覧 {#sms-search-feature-list}
 - [検索条件の設定](#検索条件の設定)
-- [検索条件の表示・非表示の切り替え](#検索条件の表示・非表示の切り替え)
+- [検索条件の表示／非表示の切り替え](#検索条件の表示／非表示の切り替え)
 - [SMSの検索](#SMSの検索)
 - [SMS一覧の更新](#SMS一覧の更新)
 - [SMSの返信](#SMSの返信)
@@ -123,15 +132,18 @@
   <img src="screenshots/sms_search_conditions.png" alt="検索条件の設定">
 </p>
 
-- 開始日／終了日
-  - それぞれタップするとカレンダーが開き、日付を選べます。
+###### 画面の項目 {#sms_search_conditions-items}
+- 開始日
+  - SMSを検索する期間の開始日
+- 終了日
+  - SMSを検索する期間の開始日
 - 送信先
-  - 特定の送信先に一致するSMSだけに絞り込めます。
-  - 「すべて」の他、設定済みの送信先名、「なし」（どの送信先にも一致しないSMS）を選べます。
-  - 送信先が1件しか設定されていない場合は、絞り込んでも結果が変わらないためこの項目自体が表示されません。
+  - 特定の送信先のSMS
+    - 「すべて」の他、設定済みの送信先名、「なし」（どの送信先にも一致しないSMS）を選べます。
+    - 送信先が1件しか設定されていない場合は、絞り込んでも結果が変わらないためこの項目自体が表示されません。
 - 抽出状況
-  - 正常：本文から会社名・氏名を抽出できた
-  - 異常：本文から会社名・氏名を抽出できなかった
+  - 正常：本文から会社名・氏名を抽出できたSMS
+  - 異常：本文から会社名・氏名を抽出できなかったSMS
 - 送信状況
   - 未：送信前のSMS
   - 済（自動）：自動で送信されたSMS
@@ -140,12 +152,12 @@
 
 <div class="pagebreak"></div>
 
-##### 検索条件の表示・非表示の切り替え
-　検索条件の入力欄をまとめて隠す／表示を切り替えることができます。
+##### 検索条件の表示／非表示の切り替え
+　検索条件の入力欄の表示／非表示を切り替えることができます。
 
 <p float="left">
-  <img src="screenshots/sms_search_filter_toggle-show.png" alt="検索条件の表示・非表示の切り替え">
-  <img src="screenshots/sms_search_filter_toggle-hide.png" alt="検索条件の表示・非表示の切り替え">
+  <img src="screenshots/sms_search_filter_toggle-show.png" alt="検索条件の表示／非表示の切り替え">
+  <img src="screenshots/sms_search_filter_toggle-hide.png" alt="検索条件の表示／非表示の切り替え">
 </p>
 
 <div class="pagebreak"></div>
@@ -158,12 +170,13 @@
   <img src="screenshots/sms_search_list.png" alt="SMSの一覧表示">
 </p>
 
+###### 画面の項目 {#sms_search_search-items}
 - アイコン
-  - 抽出対象：SMS・ストレージ
-  - 抽出状況：正常・異常
-  - 送信状況：未送信・自動送信済み・手動送信済み
+  - 抽出対象：SMS／ストレージ
+  - 抽出状況：正常／異常
+  - 送信状況：未送信／自動送信済み／手動送信済み
   - 返信状況：自動返信済み
-  - 送信先の存在：あり・なし
+  - 送信先の存在：あり／なし
 - 送信先名
 - 受信日時と送信元
 - 本文全体
@@ -196,7 +209,7 @@
 
 ##### SMSの送信 {#sms-send}
 　選択したSMSをkintoneに送信します。<br>
-　完了すると成功・失敗件数がメッセージで表示され、一覧が自動的に更新されます。
+　完了すると成功／失敗件数がメッセージで表示され、一覧が自動的に更新されます。
 
 <p float="left">
   <img src="screenshots/sms_search_send.png" alt="SMSの送信">
@@ -242,14 +255,15 @@
   <img src="screenshots/log_list.png" alt="ログの一覧表示">
 </p>
 
+###### 画面の項目 {#log_list-items}
 - ログの種別（受信完了／送信開始／送信完了／返信完了）と記録日時
 - 結果（成功／失敗）とメッセージ（緑＝成功、赤＝失敗）
 - アイコン
-  - 抽出対象：SMS・ストレージ
-  - 抽出状況：正常・異常
-  - 送信状況：未送信・自動送信済み・手動送信済み
+  - 抽出対象：SMS／ストレージ
+  - 抽出状況：正常／異常
+  - 送信状況：未送信／自動送信済み／手動送信済み
   - 返信状況：自動返信済み
-  - 送信先の存在：あり・なし
+  - 送信先の存在：あり／なし
 - 送信先名
 - 受信日時と送信元
 - 本文全体
@@ -283,6 +297,7 @@
   <img src="screenshots/log_extraction_result.png" alt="抽出結果の表示">
 </p>
 
+###### 画面の項目 {#log_extraction_result-items}
 - アイコン
   - 抽出方法:ルールベース／AI
   - 会社名の変換:ある／なし
@@ -349,7 +364,7 @@
   <img src="screenshots/send_target_basic.png" alt="送信先の設定（基本の設定）">
 </p>
 
-###### 設定項目 {#send-target-basic-config-items}
+###### 画面の項目 {#send_target_basic-items}
 - 送信先
   - 送信先名
     - 一覧や履歴で表示される名前
@@ -378,7 +393,7 @@
   <img src="screenshots/send_target_kintone2.png" alt="送信先の設定（kintoneの設定）">
 </p>
 
-###### 設定項目 {#send-target-kintone-config-items}
+###### 画面の項目 {#send_target_kintone-items}
 - 接続先
   - サブドメイン
     - kintoneのサブドメイン（URLの一部）
@@ -511,7 +526,7 @@
   <img src="screenshots/app_settings_layout_settings.png" alt="レイアウト">
 </p>
 
-###### 設定項目 {#layout-config-items}
+###### 画面の項目 {#app_settings_layout_settings-items}
 - 表示テーマ
   - アプリのテーマを変更できます。
 
@@ -524,7 +539,7 @@
   <img src="screenshots/app_settings_search_settings.png" alt="SMSの検索（SMS選択の対象）">
 </p>
 
-###### 設定項目 {#sms-search-config-items}
+###### 画面の項目 {#app_settings_search_settings-items}
 - 検索条件の初期値
   - 受信日の範囲
     - 開始日を「今日から何日前」にするかを指定します（1を指定すると開始日・終了日ともに今日になります）
@@ -550,9 +565,9 @@
   <img src="screenshots/app_settings_send_settings.png" alt="SMSの送信">
 </p>
 
-###### 設定項目 {#sms-send-config-items}
+###### 画面の項目 {#app_settings_send_settings-items}
 - 送信モード
-  - 自動送信の有効・無効
+  - 自動送信の有効／無効
 - 自動送信の対象
   - 抽出状況が異常
     - 自動送信対象のSMSとして有効にするかどうか
@@ -567,9 +582,9 @@
   <img src="screenshots/app_settings_reply_settings2.png" alt="SMSの送信1">
 </p>
 
-###### 設定項目 {#sms-reply-config-items}
+###### 画面の項目 {#app_settings_reply_settings-items}
 - 返信モード
-  - 自動返信の有効・無効
+  - 自動返信の有効／無効
 - 自動送信の間隔
   - 同じ送信元へ再度返信するまでの間隔
 - 返信メッセージ
@@ -588,7 +603,7 @@
   <img src="screenshots/app_settings_extraction_settings.png" alt="SMSの情報抽出">
 </p>
 
-###### 設定項目 {#sms-extraction-config-items}
+###### 画面の項目 {#app_settings_extraction_settings-items}
 - 会社名の抽出
   - 本文の1行目を「会社名」または「氏名」として扱うかどうか
 - 会社名の変換
@@ -613,15 +628,15 @@
 <div class="pagebreak"></div>
 
 ##### SMSの引継ぎ
-　SMSの引継ぎの有効・無効や引継ぎ内容を変更できます。
+　SMSの引継ぎの有効／無効や引継ぎ内容を変更できます。
 
 <p float="left">
   <img src="screenshots/app_settings_app_continuation_settings.png" alt="SMSの引継ぎ">
 </p>
 
-###### 設定項目 {#sms-continuation-config-items}
+###### 画面の項目 {#app_settings_app_continuation_settings-items}
 - 引継ぎ
-  - 引継ぎの有効・無効
+  - 引継ぎの有効／無効
 - 引継ぎの範囲
   - 引継ぎの範囲
     - 制限なし
@@ -642,9 +657,9 @@
   <img src="screenshots/app_settings_log_settings.png" alt="ログ">
 </p>
 
-###### 設定項目 {#log-config-items}
+###### 画面の項目 {#app_settings_log_settings-items}
 - 自動更新
-  - 自動更新の有効・無効
+  - 自動更新の有効／無効
   - 更新間隔
     - 自動更新の間隔（秒）
 - 統合範囲
@@ -691,6 +706,7 @@
   <img src="screenshots/app_continuation_info_setting_sort.png" alt="引継ぎ内容の並び替え">
 </p>
 
+###### 画面の項目 {#app_continuation_info_setting_sort-items}
 - 「古い順」：登録日時が古い順に表示します（デフォルト）
 - 「新しい順」：登録日時が新しい順に表示します
 
@@ -705,6 +721,7 @@
   <img src="screenshots/app_continuation_info_setting_view2.png" alt="引継ぎ内容の表示">
 </p>
 
+###### 画面の項目 {#app_continuation_info_setting_view-items}
 - 送信元
 - 会社名
 - 氏名
@@ -740,7 +757,6 @@
 
 > **注意**
 > - 削除内容は、「設定を保存」を押した時点で反映されます。
-
 
 <div class="pagebreak"></div>
 
