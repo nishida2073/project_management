@@ -14,3 +14,6 @@ set "CommentTextTemplate=アラート結果を更新しました。（{TargetGroupName} / {Targ
 set "TargetAppIds_Daily="
 
 set "TargetAppIds_Pulse="
+
+set "SyncUserMasterAppId="
+set "SyncUserMasterSheetName=受講生一覧"

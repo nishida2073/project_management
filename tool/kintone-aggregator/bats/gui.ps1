@@ -61,6 +61,14 @@ $categoryDefs = @(
             [PSCustomObject]@{ Label = "投稿"; BatchLabel = "アラート集計-投稿"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "post-alert-result.bat"); OpenTarget = { param($groupName) Get-GroupKintoneThreadUrl -GroupName $groupName }; Inputs = $dateAndGroupInputs }
         )
     }
+    [PSCustomObject]@{
+        Label = "ユーザーマスター同期"
+        ButtonDefs = @(
+            [PSCustomObject]@{ Label = "kintoneからExcelに同期"; BatchLabel = "ユーザーマスター同期-kintoneからExcelに同期"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "sync-kintone-to-sheet.bat"); OpenTarget = $clientsDir; Inputs = @(
+                [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 120; Options = $groupOptions }
+            ) }
+        )
+    }
 )
 
 $form = New-Object System.Windows.Forms.Form
@@ -211,6 +219,7 @@ $script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
 
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
+$syncUserMasterVars = @("SyncUserMasterAppId", "SyncUserMasterSheetName")
 
 function Get-ReportTypeDefs {
     $types = @()
@@ -257,6 +266,13 @@ $settingsGroups = [ordered]@{
             "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Multiline = $true }
         }
     }
+    "SYNC" = @{
+        Label = "ユーザーマスター同期"
+        Vars = [ordered]@{
+            "SyncUserMasterAppId"   = @{ Label = "対象アプリID" }
+            "SyncUserMasterSheetName" = @{ Label = "対象シート名" }
+        }
+    }
 }
 
 $reportTypeVarDefs = [ordered]@{
@@ -290,7 +306,8 @@ foreach ($groupKey in $settingsGroups.Keys) {
     }
 }
 $settingsTrailingButtonVars = @{
-    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group }.GetNewClosure() }
+    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup $Field.Group -FieldName "$($Field.Group)_TargetAppIds" }.GetNewClosure() }
+    "SyncUserMasterAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" }.GetNewClosure() }
     "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -OnClick {
         Sync-MentionRowsFromControls
         $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
@@ -328,9 +345,16 @@ function Get-GroupTemplateDefaults {
         foreach ($rt in (Get-ReportTypeDefs)) {
             $byType[$rt.Prefix] = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $rt.Suffix -VarNames $groupReportVars
         }
+        $syncValues = @{}
+        foreach ($varName in $syncUserMasterVars) {
+            if ($rawTemplate.ContainsKey($varName)) {
+                $syncValues[$varName] = $rawTemplate[$varName]
+            }
+        }
         $script:groupTemplateDefaults = [PSCustomObject]@{
             Auth   = $rawTemplate
             ByType = $byType
+            Sync   = $syncValues
         }
     }
     return $script:groupTemplateDefaults
@@ -441,6 +465,10 @@ function Get-GroupSettingsFieldRows {
     foreach ($varName in $postVars) {
         $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Auth[$varName] }
         [PSCustomObject]@{ Key = "POST_$varName"; VarName = $varName; Group = "POST"; Value = $value }
+    }
+    foreach ($varName in $syncUserMasterVars) {
+        $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Sync[$varName] }
+        [PSCustomObject]@{ Key = "SYNC_$varName"; VarName = $varName; Group = "SYNC"; Value = $value }
     }
     foreach ($rt in (Get-ReportTypeDefs)) {
         $rawForType = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $rt.Suffix -VarNames $groupReportVars
@@ -645,15 +673,15 @@ function Update-GroupSettingsFields {
 }
 
 function Test-KintoneConnection {
-    param([string]$ReportGroup)
+    param([string]$ReportGroup, [string]$FieldName)
 
     $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
     $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
     $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
-    $targetAppIdsValue = Get-GroupSettingsFieldValue "${ReportGroup}_TargetAppIds"
+    $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
 
-    $validationError = if ($targetAppIds.Count -eq 0) { "対象アプリIDが未入力です。" } else { $null }
+    $validationError = if ($targetAppIds.Count -eq 0) { "同期対象のアプリIDが未入力です。" } else { $null }
 
     Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError `
         -Action {
@@ -732,6 +760,11 @@ function Save-GroupSettings {
             Get-GroupSettingsFieldValue "POST_$varName"
         }
         if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+        $groupLines += "set `"$varName=$val`""
+    }
+    $groupLines += ""
+    foreach ($varName in $syncUserMasterVars) {
+        $val = Get-GroupSettingsFieldValue "SYNC_$varName"
         $groupLines += "set `"$varName=$val`""
     }
     foreach ($rt in (Get-ReportTypeDefs)) {

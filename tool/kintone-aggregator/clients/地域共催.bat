@@ -1,8 +1,8 @@
 @echo off
 
+set "KintoneSubdomain=7iw5x87e2mne"
 set "KintoneLoginName=user01"
 set "KintonePassword=abcd1234"
-set "KintoneSubdomain=7iw5x87e2mne"
 set "Authorization="
 set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
 
@@ -10,6 +10,9 @@ set "SpaceId=3"
 set "ThreadId=24"
 set "MentionUserCodes=user02:USER"
 set "CommentTextTemplate=アラート結果を更新しました。（{TargetGroupName} / {TargetDate}）"
+
+set "SyncUserMasterAppId=122"
+set "SyncUserMasterSheetName=受講生一覧"
 
 set "TargetAppIds_Daily=39"
 

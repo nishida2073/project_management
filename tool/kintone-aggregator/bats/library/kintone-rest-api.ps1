@@ -41,6 +41,59 @@ function Get-NestedPropertyValue {
 }
 
 
+function Get-AllKintoneRecords {
+    param(
+        [string]$TargetAppId,
+        [string]$BaseUrl,
+        [string]$Authorization
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+
+    $headers = @{
+        "X-Cybozu-Authorization" = $Authorization
+    }
+
+    $Url = "$BaseUrl/k/v1/records.json?app=$TargetAppId"
+
+    try {
+        $allRecords = New-Object System.Collections.Generic.List[object]
+        $offset = 0
+        $limit = 100
+        while ($true) {
+            $urlWithOffset = "$Url&limit=$limit&offset=$offset"
+            Write-Message $urlWithOffset -VarName "urlWithOffset" -Type "Info"
+
+            $response = Invoke-RestMethod -Uri $urlWithOffset -Headers $headers -Method GET
+            if ($response.PSObject.Properties.Name -contains "records") {
+                $records = $response.records
+            } else {
+                $records = ($response.PSObject.Properties |
+                                Where-Object {
+                                    $_.Value -is [System.Collections.IEnumerable] -and
+                                    -not ($_.Value -is [string])
+                                } |
+                                Select-Object -First 1).Value
+            }
+            if (-not $records -or $records.Count -eq 0) {
+                Write-Message "データなし" -VarName "message" -Type "Info"
+                break
+            }
+            $allRecords.AddRange($records)
+
+            if ($records.Count -lt $limit) {
+                break
+            }
+            $offset += $limit
+        }
+        Write-Message $allRecords -VarName "allRecords" -Type "Info"
+        return $allRecords
+    } catch {
+        throw
+    }
+}
+
+
 function Get-CurrentAppData {
     param(
         [string]$TargetAppId,
