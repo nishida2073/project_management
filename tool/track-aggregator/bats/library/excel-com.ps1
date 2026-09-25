@@ -642,3 +642,24 @@ function Set-ColumnWidth {
         $Worksheet.Columns.Item($c).ColumnWidth += 4
     }
 }
+
+function Remove-DataRows {
+    param(
+        [Parameter(Mandatory)]
+        $Sheet,
+        [int]$StartRow = 2,
+        [int]$StartCol = 1
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+
+    $usedRange = $Sheet.UsedRange
+    if ($usedRange.Rows.Count -le 1) {
+        return
+    }
+
+    $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
+    $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
+
+    $dataRange = $Sheet.Range($Sheet.Cells.Item($StartRow, $StartCol), $Sheet.Cells.Item($lastRow, $lastCol))
+    $dataRange.Delete([Microsoft.Office.Interop.Excel.XlDeleteShiftDirection]::xlShiftUp) | Out-Null
+}

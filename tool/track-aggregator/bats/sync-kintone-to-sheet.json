@@ -1,0 +1,27 @@
+{
+  "columnMappings": [
+    {
+      "sheetColumn": "通番",
+      "defaultValue": "increment"
+    },
+    {
+      "sheetColumn": "会社名",
+      "kintoneField": "company_name",
+      "defaultValue": ""
+    },
+    {
+      "sheetColumn": "受講生ID",
+      "kintoneField": "student_id",
+      "defaultValue": ""
+    },
+    {
+      "sheetColumn": "氏名",
+      "kintoneField": "student_name",
+      "defaultValue": ""
+    },
+    {
+      "sheetColumn": "停止中",
+      "defaultValue": false
+    }
+  ]
+}

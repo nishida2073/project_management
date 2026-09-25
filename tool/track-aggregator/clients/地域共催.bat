@@ -13,3 +13,6 @@ set "CommentTextTemplate=集計結果を更新しました。（{TargetGroupName}）"
 
 set "PassScore=100"
 
+set "SyncUserMasterAppId=122"
+set "SyncUserMasterSheetName=受講生一覧"
+

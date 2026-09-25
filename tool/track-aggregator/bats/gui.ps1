@@ -90,6 +90,14 @@ $categoryDefs = @(
             }
         )
     }
+    [PSCustomObject]@{
+        Label = "ユーザーマスター同期"
+        ButtonDefs = @(
+            [PSCustomObject]@{ Label = "kintoneからExcelに同期"; BatchLabel = "ユーザーマスター同期-kintoneからExcelに同期"; IncludeInBatch = $true; BatchPath = (Join-Path $basePath "sync-kintone-to-sheet.bat"); OpenTarget = $clientsDir; Inputs = @(
+                [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 120; Options = $groupOptions }
+            ) }
+        )
+    }
 )
 
 $form = New-Object System.Windows.Forms.Form
@@ -315,12 +323,20 @@ $settingsGroups = [ordered]@{
         Label = "個別設定（空欄の場合は共通設定の値を使用）"
         Vars = $overridableVarDefs
     }
+    "SYNC" = @{
+        Label = "ユーザーマスター同期"
+        Vars = [ordered]@{
+            "SyncUserMasterAppId"   = @{ Label = "対象アプリID" }
+            "SyncUserMasterSheetName" = @{ Label = "対象シート名" }
+        }
+    }
 }
 
 $commonSettingsVars = @($settingsGroups["COMMON"].Vars.Keys)
 $authVars = @($settingsGroups["AUTH"].Vars.Keys)
 $postVars = @($settingsGroups["POST"].Vars.Keys)
 $groupOverrideVars = @($settingsGroups["OVERRIDE"].Vars.Keys)
+$syncUserMasterVars = @($settingsGroups["SYNC"].Vars.Keys)
 
 $settingsGroupLabels = @{}
 $settingsVarLabels = @{}
@@ -462,6 +478,10 @@ function Get-GroupSettingsFieldRows {
         $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } else { "" }
         [PSCustomObject]@{ Key = "OVERRIDE_$varName"; VarName = $varName; Group = "OVERRIDE"; Value = $value }
     }
+    foreach ($varName in $syncUserMasterVars) {
+        $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } else { $templateDefaults.Sync[$varName] }
+        [PSCustomObject]@{ Key = "SYNC_$varName"; VarName = $varName; Group = "SYNC"; Value = $value }
+    }
 }
 
 $script:settingsCommonFieldTextBoxes = @{}
@@ -477,6 +497,36 @@ function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
+}
+
+function Test-KintoneConnection {
+    param([string]$ReportGroup, [string]$FieldName)
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+    $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
+    $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
+    $validationError = if ($targetAppIds.Count -eq 0) { "同期対象のアプリIDが未入力です。" } else { $null }
+    Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError -Action {
+        $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+        $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+        $resultLines = @()
+        $hasFailure = $false
+        foreach ($targetAppId in $targetAppIds) {
+            try {
+                $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
+                $fieldCodes = @($fieldData.PSObject.Properties.Name)
+                $resultLines += "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
+                $resultLines += "  $($fieldCodes -join ', ')"
+            } catch {
+                $hasFailure = $true
+                $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
+            }
+        }
+        $resultText = $resultLines -join "`r`n"
+        if ($hasFailure) { throw $resultText }
+        return $resultText
+    }.GetNewClosure() -FormatSuccessMessage { param($response) $response } -FormatFailureMessage { param($ErrorRecord) $ErrorRecord.Exception.Message }
 }
 
 function Update-GroupSettingsFields {
@@ -504,7 +554,10 @@ function Update-GroupSettingsFields {
                 Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
             }.GetNewClosure() `
             -FormatSuccessMessage { param($response) "投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。" }
-    } } } | Out-Null
+        }
+    }
+    "SyncUserMasterAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick { Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" }.GetNewClosure() }
+    } | Out-Null
 
     $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
@@ -555,6 +608,11 @@ function Save-GroupSettings {
     foreach ($varName in $groupOverrideVars) {
         $val = Get-GroupSettingsFieldValue "OVERRIDE_$varName"
         if ($val -ne "") { $authLines += "set `"$varName=$val`"" }
+    }
+    $authLines += ""
+    foreach ($varName in $syncUserMasterVars) {
+        $val = Get-GroupSettingsFieldValue "SYNC_$varName"
+        $authLines += "set `"$varName=$val`""
     }
     $authLines += ""
     [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($authLines -join "`r`n") + "`r`n"), $script:cp932Encoding)

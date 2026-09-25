@@ -9,4 +9,7 @@ set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
 set "SpaceId="
 set "ThreadId="
 set "MentionUserCodes="
-set "CommentTextTemplate=集計結果を更新しました。（{TargetGroupName}）"
+set "CommentTextTemplate=アラートの内容が更新されました。({TargetGroupName})"
+
+set "SyncUserMasterAppId="
+set "SyncUserMasterSheetName=受講生一覧"
