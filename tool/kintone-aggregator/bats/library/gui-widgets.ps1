@@ -902,15 +902,26 @@ function Add-FieldActionButton {
         [int]$Y,
         [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick,
-        [int]$Width = 90
+        [int]$Width = 90,
+        [switch]$AddStatusLabel
     )
     $btn = New-Object System.Windows.Forms.Button
     $btn.Text = $Text
     $btn.Location = New-Object System.Drawing.Point(20, $Y)
     $btn.Size = New-Object System.Drawing.Size($Width, 24)
     $btn.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-    $btn.Add_Click({ & $OnClick }.GetNewClosure())
-    $Panel.Controls.Add($btn)
+    $btn.Add_Click({ & $OnClick }.GetNewClosure()) | Out-Null
+    $Panel.Controls.Add($btn) | Out-Null
+
+    if ($AddStatusLabel) {
+        $lbl = New-Object System.Windows.Forms.Label
+        $lbl.Text = "未実行"
+        $lbl.AutoSize = $true
+        $lbl.Location = New-Object System.Drawing.Point(($btn.Right + 10), ($btn.Top + 6))
+        $lbl.Font = New-Object System.Drawing.Font($lbl.Font, [System.Drawing.FontStyle]::Bold)
+        $Panel.Controls.Add($lbl) | Out-Null
+        return $lbl
+    }
 }
 
 function Render-SettingsFields {
@@ -1076,7 +1087,10 @@ function Render-SettingsFields {
         $y += if ($isMultiline) { 66 } else { 28 }
 
         if ($TrailingButtonVars.ContainsKey($field.VarName)) {
-            & $TrailingButtonVars[$field.VarName] $grp $y $field
+            $result = & $TrailingButtonVars[$field.VarName] $grp $y $field
+            if ($result) {
+                $field | Add-Member -NotePropertyName StatusLabel -NotePropertyValue $result -Force
+            }
             $y += 34
         }
     }
@@ -1104,11 +1118,13 @@ function Invoke-TestAction {
         [Parameter(Mandatory)][scriptblock]$Action,
         [Parameter(Mandatory)][scriptblock]$FormatSuccessMessage,
         [scriptblock]$FormatFailureMessage = { param($ErrorRecord) "失敗しました。`r`n$($ErrorRecord.Exception.Message)" },
-        [string]$DialogTitle = "テスト"
+        [string]$DialogTitle = "テスト",
+        [switch]$ThrowOnError
     )
 
     if ($ValidationError) {
         [System.Windows.Forms.MessageBox]::Show($ValidationError, $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        if ($ThrowOnError) { throw $ValidationError }
         return
     }
 
@@ -1116,6 +1132,8 @@ function Invoke-TestAction {
         $response = & $Action
         [System.Windows.Forms.MessageBox]::Show((& $FormatSuccessMessage $response), $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     } catch {
-        [System.Windows.Forms.MessageBox]::Show((& $FormatFailureMessage $_), $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        $errorMessage = & $FormatFailureMessage $_
+        [System.Windows.Forms.MessageBox]::Show($errorMessage, $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        if ($ThrowOnError) { throw $errorMessage }
     }
 }

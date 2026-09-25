@@ -25,11 +25,20 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
     if exist "!envFile!" (
         call "!envFile!"
 
+        for %%A in (%*) do (
+            set "arg=%%~A"
+            if "!arg:~0,1!"=="-" set "arg=!arg:~1!"
+            for /f "tokens=1,* delims=:" %%K in ("!arg!") do (
+                set "%%K=%%~L"
+            )
+        )
+
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF.running"
         set "ERROR_FLAG=%TEMP%\%MyName%%%~nF.failed"
         if exist "!ERROR_FLAG!" del /f /q "!ERROR_FLAG!"
 
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+          "$env:ERROR_FLAG = '!ERROR_FLAG!'; " ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
@@ -44,10 +53,10 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "     -ConfigPath '%ConfigFile%'" ^
           "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
-          "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
+          "  if (Test-Path $env:ERROR_FLAG -ErrorAction SilentlyContinue) {} else { New-Item -Path $env:ERROR_FLAG -ItemType File -Force | Out-Null }" ^
           "  throw" ^
           "} finally {" ^
-          "  Remove-Item -Path '!JOB_FLAG!' -Force" ^
+          "  Remove-Item -Path '!JOB_FLAG!' -Force -ErrorAction SilentlyContinue" ^
           "}"
     )
     call "%~dp0message.bat" "Finished %MyName% [%%~nF]"

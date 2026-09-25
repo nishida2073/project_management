@@ -11,6 +11,8 @@
     [string]$LogNamePrefix
 )
 
+$script:hasError = $false
+
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $libraryDir = Join-Path $libraryDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -25,18 +27,22 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
 & {
     if (-not $ConfigPath) {
         Write-MessageError "ConfigPathが指定されていません"
+        $script:hasError = $true
         return
     }
     if (-not (Test-Path $ConfigPath)) {
         Write-MessageError "設定ファイルが見つかりません: $ConfigPath"
+        $script:hasError = $true
         return
     }
     if (-not $ExcelFilePath) {
         Write-MessageError "ExcelFilePathが指定されていません"
+        $script:hasError = $true
         return
     }
     if (-not (Test-Path $ExcelFilePath)) {
         Write-MessageError "Excelファイルが見つかりません: $ExcelFilePath"
+        $script:hasError = $true
         return
     }
 
@@ -49,7 +55,13 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
     }
 
     Write-Message "kintoneからデータ取得中..." -Type "Info"
-    $records = Get-AllKintoneRecords -TargetAppId $AppId -BaseUrl $BaseUrl -Authorization $Authorization
+    try {
+        $records = Get-AllKintoneRecords -TargetAppId $AppId -BaseUrl $BaseUrl -Authorization $Authorization
+    } catch {
+        Write-MessageError "kintoneデータ取得エラー: $($_.Exception.Message)"
+        $script:hasError = $true
+        return
+    }
 
     $recordCount = @($records).Count
     Write-Message "取得レコード数: $recordCount" -Type "Info"
@@ -67,6 +79,7 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
 
     if (-not $records -or $records.Count -eq 0) {
         Write-MessageError "取得するデータがありません。AppId=$AppId, ExcelFilePath=$ExcelFilePath"
+        $script:hasError = $true
         return
     }
 
@@ -170,3 +183,8 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
 
 ConvertTo-Utf8LogFile -Path $logFilePath
 Write-MessageComplete "ログを出力しました: $logFilePath"
+
+if ($script:hasError) {
+    if ($env:ERROR_FLAG) { New-Item -Path $env:ERROR_FLAG -ItemType File -Force | Out-Null }
+    exit 1
+}
