@@ -90,4 +90,11 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%*.xlsx") do (
         del /f /q "!ERROR_FLAG!"
     )
 )
-if !HAS_ERROR! EQU 1 exit /b 1
+if !HAS_ERROR! EQU 1 exit /b 1
+
+
+
+
+
+
+

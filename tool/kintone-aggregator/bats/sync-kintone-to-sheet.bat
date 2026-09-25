@@ -6,7 +6,7 @@ set "MyName=%~nx0"
 
 call "%~dp0common-env.bat"
 
-set "TargetGroupNameFilter="
+set "TargetGroupNameFilter=*"
 
 for %%A in (%*) do (
     set "arg=%%~A"
