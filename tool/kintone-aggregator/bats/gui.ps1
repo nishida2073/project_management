@@ -337,7 +337,12 @@ $settingsTrailingButtonVars = @{
                 }
                 $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
                 $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
-                $batArgs = @("$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
+                if ([string]::IsNullOrWhiteSpace($syncAppId)) {
+                    [System.Windows.Forms.MessageBox]::Show("対象アプリIDを入力してください。", "同期実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+                    Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
+                    return
+                }
+                $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
                 $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
                 if ($exitCode -eq 0) {
                     Set-StepStatus -Label $Field.StatusLabel -Text "成功" -State "成功"
@@ -735,7 +740,7 @@ function Test-KintoneConnection {
     $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
 
-    $validationError = if ($targetAppIds.Count -eq 0) { "同期対象のアプリIDが未入力です。" } else { $null }
+    $validationError = if ($targetAppIds.Count -eq 0) { "対象アプリIDが未入力です。" } else { $null }
 
     Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError `
         -Action {

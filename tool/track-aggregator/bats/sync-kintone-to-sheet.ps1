@@ -184,7 +184,4 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
 ConvertTo-Utf8LogFile -Path $logFilePath
 Write-MessageComplete "ログを出力しました: $logFilePath"
 
-if ($script:hasError) {
-    if ($env:ERROR_FLAG) { New-Item -Path $env:ERROR_FLAG -ItemType File -Force | Out-Null }
-    exit 1
-}
+if ($script:hasError) { throw "同期処理に失敗しました" }

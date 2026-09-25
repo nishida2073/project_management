@@ -349,6 +349,11 @@ $settingsTrailingButtonVars = @{
             try {
                 $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
                 $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
+                if ([string]::IsNullOrWhiteSpace($syncAppId)) {
+                    [System.Windows.Forms.MessageBox]::Show("対象アプリIDを入力してください。", "同期実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
+                    Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
+                    return
+                }
                 $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
                 $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
                 if ($exitCode -eq 0) {
@@ -534,7 +539,7 @@ function Test-KintoneConnection {
     $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
     $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
-    $validationError = if ($targetAppIds.Count -eq 0) { "同期対象のアプリIDが未入力です。" } else { $null }
+    $validationError = if ($targetAppIds.Count -eq 0) { "対象アプリIDが未入力です。" } else { $null }
     Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError -Action {
         $baseUrl = "https://$kintoneSubdomain.cybozu.com"
         $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))

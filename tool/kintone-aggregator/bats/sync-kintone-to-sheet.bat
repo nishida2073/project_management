@@ -6,15 +6,19 @@ set "MyName=%~nx0"
 
 call "%~dp0common-env.bat"
 
+set "TargetGroupNameFilter="
+
+for %%A in (%*) do (
+    set "arg=%%~A"
+    if "!arg:~0,1!"=="-" set "arg=!arg:~1!"
+    for /f "tokens=1,* delims=:" %%K in ("!arg!") do (
+        set "%%K=%%~L"
+    )
+)
+
 set "SCRIPT_PATH=%~dp0sync-kintone-to-sheet.ps1"
 set "ConfigFile=%~dp0sync-kintone-to-sheet.json"
 set "ClientDataRootDir=%ClientDataRootDir%"
-
-if "%~1"=="" (
-    set "TargetGroupNameFilter=*"
-) else (
-    set "TargetGroupNameFilter=%~1"
-)
 
 call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 
@@ -32,13 +36,12 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
                 set "%%K=%%~L"
             )
         )
-
+        
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF.running"
         set "ERROR_FLAG=%TEMP%\%MyName%%%~nF.failed"
         if exist "!ERROR_FLAG!" del /f /q "!ERROR_FLAG!"
 
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-          "$env:ERROR_FLAG = '!ERROR_FLAG!'; " ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
@@ -53,10 +56,10 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
           "     -ConfigPath '%ConfigFile%'" ^
           "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
-          "  if (Test-Path $env:ERROR_FLAG -ErrorAction SilentlyContinue) {} else { New-Item -Path $env:ERROR_FLAG -ItemType File -Force | Out-Null }" ^
+          "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
           "  throw" ^
           "} finally {" ^
-          "  Remove-Item -Path '!JOB_FLAG!' -Force -ErrorAction SilentlyContinue" ^
+          "  Remove-Item -Path '!JOB_FLAG!' -Force" ^
           "}"
     )
     call "%~dp0message.bat" "Finished %MyName% [%%~nF]"
@@ -86,4 +89,11 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
         del /f /q "!ERROR_FLAG!"
     )
 )
-if !HAS_ERROR! EQU 1 exit /b 1
+if !HAS_ERROR! EQU 1 exit /b 1
+
+
+
+
+
+
+
