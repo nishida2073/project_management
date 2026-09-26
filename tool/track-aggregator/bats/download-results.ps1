@@ -118,9 +118,10 @@ function Download-TrackResults {
     }
 }
 
+$psParams = $PSBoundParameters
 
 & {
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
     $downloadDetail = if($DownloadDetail -eq 1){ $true } else { $false }
 

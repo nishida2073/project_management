@@ -892,8 +892,11 @@ function Export-CourseScheduleData {
     
 }
 
+$psParams = $PSBoundParameters
 
 & {
+    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+
     $allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
         Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath
     } else {

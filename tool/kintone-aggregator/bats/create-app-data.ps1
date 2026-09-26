@@ -177,9 +177,11 @@ function Export-File {
     Export-ArrayToFile $allDatas $OutputFilePath
 }
 
-
+$psParams = $PSBoundParameters
 
 & {
+    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+
     $newTargetAppIds = Get-FieldCodeList -Value $TargetAppIds
 
     New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null

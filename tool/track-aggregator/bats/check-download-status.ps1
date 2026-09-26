@@ -51,9 +51,9 @@ function Write-DownloadStatusRows {
     }
 }
 
-& {
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+$PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "ssss" -ForegroundColor Blue }
 
+& {
     Use-Mutex "Test-File" {
         $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
         $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath

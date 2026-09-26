@@ -363,9 +363,10 @@ function Export-Excel {
     }
 }
 
+$psParams = $PSBoundParameters
 
 & {
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
     $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
 

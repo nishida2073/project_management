@@ -24,7 +24,11 @@ if (-not $TargetGroupName) {
 }
 $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'sync-kintone-to-sheet' })-$TargetGroupName"
 
+$psParams = $PSBoundParameters
+
 & {
+    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+
     if (-not $ConfigPath) {
         Write-MessageError "ConfigPathが指定されていません"
         $script:hasError = $true

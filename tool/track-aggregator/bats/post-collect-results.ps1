@@ -23,8 +23,10 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'post-collect-results' })-$TargetGroupName"
 
+$psParams = $PSBoundParameters
+
 & {
-    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
     if ([string]::IsNullOrWhiteSpace($SpaceId) -or [string]::IsNullOrWhiteSpace($ThreadId)) {
         Write-Message "SpaceIdまたはThreadIdが未設定のため、スレッド投稿をスキップします。" -VarName "message" -Type "Info"

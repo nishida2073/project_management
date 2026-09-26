@@ -170,7 +170,11 @@ function Export-Datas {
     Export-ArrayToFile $allDatas $collectFilePath
 }
 
+$psParams = $PSBoundParameters
+
 & {
+    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+
     New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
     $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
