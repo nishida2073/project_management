@@ -5,15 +5,24 @@ set "MyName=%~nx0"
 
 call "%~dp0common-env.bat"
 
-if "%~1"=="" (
-    for /f %%i in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "(Get-Date).AddDays(-1).ToString(\"yyyy-MM-dd\")"') do set "TargetDate=%%i"
-) else (
-    set "TargetDate=%~1"
+set "TargetDate="
+set "TargetGroupNameFilter="
+
+for %%A in (%*) do (
+    set "arg=%%~A"
+    if "!arg:~0,1!"=="-" (
+        set "arg=!arg:~1!"
+        for /f "tokens=1* delims=:" %%K in ("!arg!") do (
+            call set "%%K=%%L"
+        )
+    )
 )
-if "%~2"=="" (
+
+if "!TargetDate!"=="" (
+    for /f %%i in ('powershell -NoProfile -ExecutionPolicy Bypass -Command "(Get-Date).AddDays(-1).ToString(\"yyyy-MM-dd\")"') do set "TargetDate=%%i"
+)
+if "!TargetGroupNameFilter!"=="" (
     set "TargetGroupNameFilter=*"
-) else (
-    set "TargetGroupNameFilter=%~2"
 )
 
 set "SCRIPT_PATH=%~dp0collect-app-data.ps1"
@@ -24,15 +33,15 @@ set "CollectDataDefsPath=%~dp0collect-data-defs.txt"
 set "CollectRootDir=%OutputCollectDataRootDir%"
 set "SourceTypeFileNameMap=SourceType_Daily=%SourceType_Daily%,SourceType_Pulse=%SourceType_Pulse%"
 
-set "CheckedFileRootDir=%OutputReportDir%\%TargetDate%"
+set "CheckedFileRootDir=%OutputReportDir%\!TargetDate!"
 
-call "%~dp0message.bat" "Start Jobs %MyName% ALL {%TargetDate%}"
+call "%~dp0message.bat" "Start Jobs %MyName% ALL {!TargetDate!}"
 
-for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
-    call "%~dp0message.bat" "Start %MyName% [%%~nF] {%TargetDate%}"
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
+    call "%~dp0message.bat" "Start %MyName% [%%~nF] {!TargetDate!}"
 
-    set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
-    set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.failed"
+    set "JOB_FLAG=%TEMP%\%MyName%%%~nF_!TargetDate!.running"
+    set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_!TargetDate!.failed"
     if exist "!ERROR_FLAG!" del /f /q "!ERROR_FLAG!"
 
     start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
@@ -41,7 +50,7 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
       "  & '%SCRIPT_PATH%'" ^
       "     -SourceRootDir '%CheckedFileRootDir%'" ^
       "     -TargetGroupName '%%~nF'" ^
-      "     -TargetDate '%TargetDate%'" ^
+      "     -TargetDate '!TargetDate!'" ^
       "     -CollectDataDefsPath '%CollectDataDefsPath%'" ^
       "     -CollectRootDir '%CollectRootDir%'" ^
       "     -SourceTypeFileNameMap '%SourceTypeFileNameMap%'" ^
@@ -53,15 +62,15 @@ for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
       "  Remove-Item -Path '!JOB_FLAG!' -Force" ^
       "}"
 
-    call "%~dp0message.bat" "Finished %MyName% [%%~nF] {%TargetDate%}"
+    call "%~dp0message.bat" "Finished %MyName% [%%~nF] {!TargetDate!}"
 )
 
-call "%~dp0message.bat" "Waiting Jobs %MyName% ALL {%TargetDate%}"
+call "%~dp0message.bat" "Waiting Jobs %MyName% ALL {!TargetDate!}"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
-    set "JOB_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.running"
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
+    set "JOB_FLAG=%TEMP%\%MyName%%%~nF_!TargetDate!.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
 if !ALL_DONE! EQU 0 (
@@ -69,14 +78,14 @@ if !ALL_DONE! EQU 0 (
     goto WAIT_LOOP
 )
 
-call "%~dp0message.bat" "Finished Jobs %MyName% ALL {%TargetDate%}"
+call "%~dp0message.bat" "Finished Jobs %MyName% ALL {!TargetDate!}"
 
 set "HAS_ERROR=0"
-for %%F in ("%ClientDataRootDir%\%TargetGroupNameFilter%.xlsx") do (
-    set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_%TargetDate%.failed"
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
+    set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_!TargetDate!.failed"
     if exist "!ERROR_FLAG!" (
         set "HAS_ERROR=1"
-        call "%~dp0message.bat" "Failed %MyName% [%%~nF] {%TargetDate%}" "Red"
+        call "%~dp0message.bat" "Failed %MyName% [%%~nF] {!TargetDate!}" "Red"
         del /f /q "!ERROR_FLAG!"
     )
 )

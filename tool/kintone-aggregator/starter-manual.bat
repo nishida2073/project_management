@@ -1,6 +1,7 @@
 @echo off
 chcp 932 >nul
 
+setlocal enabledelayedexpansion
 set "BATCH=all.bat"
 
 echo ===================================================================================================
@@ -40,7 +41,22 @@ echo.
 echo äJén: %BATCH% %ARGS%
 echo.
 
-call "%~dp0%BATCH%" %ARGS%
+set "ArgsFormatted="
+if "!ARGS!"=="" (
+    set "ArgsFormatted=-TargetDate:"
+) else (
+    set "count=0"
+    for %%A in (!ARGS!) do (
+        set /a count=!count!+1
+        if !count! equ 1 (
+            set "ArgsFormatted=-TargetDate:%%A"
+        ) else if !count! equ 2 (
+            set "ArgsFormatted=!ArgsFormatted! -TargetDateTerm:%%A"
+        )
+    )
+)
+call "%~dp0%BATCH%" !ArgsFormatted!
 
 
+endlocal
 echo èIóπ

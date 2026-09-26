@@ -4,27 +4,35 @@ setlocal EnableDelayedExpansion
 
 set "MyName=%~n0"
 
-if "%~1"=="" (
-    for /f %%i in ('powershell -NoProfile -Command "(Get-Date).AddDays(-1).ToString(\"yyyy-MM-dd\")"') do set "TargetDate=%%i"
-) else if /i "%~1"=="now" (
-    set "TargetDate=now"
-) else (
-    set "TargetDate=%~1"
+set "TargetDate="
+set "TargetDateTerm="
+set "TargetGroupNameFilter="
+
+for %%A in (%*) do (
+    set "arg=%%~A"
+    if "!arg:~0,1!"=="-" (
+        set "arg=!arg:~1!"
+        for /f "tokens=1* delims=:" %%K in ("!arg!") do (
+            call set "%%K=%%L"
+        )
+    )
 )
 
-if /i "%TargetDate%"=="now" (
+if "!TargetDate!"=="" (
+    for /f %%i in ('powershell -NoProfile -Command "(Get-Date).AddDays(-1).ToString(\"yyyy-MM-dd\")"') do set "TargetDate=%%i"
+)
+
+if /i "!TargetDate!"=="now" (
     for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set "TargetDate=%%i"
 )
 
-if "%~2"=="" (
+if "!TargetDateTerm!"=="" (
     set "TargetDateTerm=1"
-) else (
-    set "TargetDateTerm=%~2"
 )
 
-set /a Start=%TargetDateTerm%-1
-for /l %%i in (%Start%,-1,0) do (
-    for /f %%d in ('powershell -NoProfile -Command "(Get-Date \"%TargetDate%\").AddDays(-%%i).ToString(\"yyyy-MM-dd\")"') do (
+set /a Start=!TargetDateTerm!-1
+for /l %%i in (!Start!,-1,0) do (
+    for /f %%d in ('powershell -NoProfile -Command "(Get-Date \"!TargetDate!\").AddDays(-%%i).ToString(\"yyyy-MM-dd\")"') do (
         for %%F in (
             "%~dp0bats\create-daily-report.bat"
             "%~dp0bats\create-pulse-survey.bat"
@@ -33,7 +41,7 @@ for /l %%i in (%Start%,-1,0) do (
             
             call "%~dp0bats\message.bat" "Please wait..." "Green"
             
-            call %%F "%%d" "%~3"
+            call %%F -TargetDate:%%d -TargetGroupNameFilter:!TargetGroupNameFilter!
             
             call "%~dp0bats\message.bat" "Finished %%~nxF {%%d}"
         )

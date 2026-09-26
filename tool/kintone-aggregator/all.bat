@@ -11,10 +11,24 @@ call "%~dp0bats\common-env.bat"
 call "%~dp0bats\message.bat" "Start %MyName%"
 echo.
 
-call "%~dp0create-app-data.bat" "%~1" "%~2"
+set "TargetDate="
+set "TargetDateTerm="
+set "TargetGroupNameFilter="
 
-call "%~dp0collect-app-data.bat" "%~1" "%~2"
-call "%~dp0check-and-post-alert.bat" "%~1"
+for %%A in (%*) do (
+    set "arg=%%~A"
+    if "!arg:~0,1!"=="-" (
+        set "arg=!arg:~1!"
+        for /f "tokens=1* delims=:" %%K in ("!arg!") do (
+            call set "%%K=%%L"
+        )
+    )
+)
+
+call "%~dp0create-app-data.bat" -TargetDate:!TargetDate! -TargetDateTerm:!TargetDateTerm! -TargetGroupNameFilter:!TargetGroupNameFilter!
+
+call "%~dp0collect-app-data.bat" -TargetDate:!TargetDate! -TargetDateTerm:!TargetDateTerm! -TargetGroupNameFilter:!TargetGroupNameFilter!
+call "%~dp0check-and-post-alert.bat" -TargetDate:!TargetDate!
 
 call "%~dp0bats\message.bat" "Finished %MyName%"
 echo.

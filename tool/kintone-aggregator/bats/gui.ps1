@@ -140,7 +140,8 @@ function Start-BatchRunAll {
                     param($bd)
                     $batArgs = @()
                     foreach ($inputDef in $bd.Inputs) {
-                        $batArgs += Get-InputValue -Control $script:batchInputControls[$inputDef.Name]
+                        $value = Get-InputValue -Control $script:batchInputControls[$inputDef.Name]
+                        $batArgs += "-$($inputDef.Name):$value"
                     }
                     return $batArgs
                 }
@@ -161,7 +162,8 @@ $tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $c
             $inputMap = $bd.InputControls
             if ($inputMap) {
                 foreach ($inputDef in $bd.Inputs) {
-                    $batArgs += Get-InputValue -Control $inputMap[$inputDef.Name]
+                    $value = Get-InputValue -Control $inputMap[$inputDef.Name]
+                    $batArgs += "-$($inputDef.Name):$value"
                 }
             }
             return $batArgs
