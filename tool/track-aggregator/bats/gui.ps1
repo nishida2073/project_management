@@ -28,8 +28,7 @@ $clientsDir = Join-Path $rootPath "clients"
 function Get-GroupNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
     $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | ForEach-Object {
-        $baseName = [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
-        if ($baseName -match '^(?<group>.+)-\d{4}$') { $Matches['group'] } else { $baseName }
+        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
     }
     return @($names | Select-Object -Unique | Sort-Object)
 }
@@ -235,19 +234,19 @@ Update-LogView
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
 
-function Get-GroupXlsxPath { param([string]$GroupName, [string]$Year) Join-Path $clientsDir "$GroupName-$Year.xlsx" }
+function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
 function Get-GroupXlsxFiles {
     param([string]$GroupName)
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
-    $escaped = [regex]::Escape($GroupName)
-    return @(Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | Where-Object {
-        $_.BaseName -eq $GroupName -or $_.BaseName -match "^${escaped}-\d{4}$"
+    $result = @(Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | Where-Object {
+        $_.BaseName -eq $GroupName
     })
+    return $result
 }
 
 function Get-TemplateXlsxPath {
-    $found = Get-ChildItem -LiteralPath $clientsTemplateDir -Filter "client*.xlsx" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    $found = Get-ChildItem -LiteralPath $clientsTemplateDir -Filter "client.xlsx" -File -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($found) { return $found.FullName }
     return $null
 }
@@ -332,7 +331,6 @@ $syncUserMasterVars = @($settingsGroups["SYNC"].Vars.Keys)
 
 $settingsTrailingButtonVars = @{
     "SyncUserMasterSheetName" = { param($Panel, $Y, $Field)
-        $targetYear = $script:commonEnvVars["TargetYear"]
         Add-FieldActionButton -Panel $Panel -Y $Y -Text "同期実行" -AddStatusLabel -OnClick {
             $groupName = $cmbSettingsGroupTarget.SelectedItem
             if ([string]::IsNullOrWhiteSpace($groupName)) {
@@ -356,7 +354,7 @@ $settingsTrailingButtonVars = @{
                     return
                 }
                 
-                $batArgs = @("-TargetGroupNameFilter:$groupName-$targetYear", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
+                $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
                 $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
                 if ($exitCode -eq 0) {
                     Set-StepStatus -Label $Field.StatusLabel -Text "成功" -State "成功"
@@ -396,8 +394,10 @@ foreach ($groupKey in $settingsGroups.Keys) {
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
+        $clientBatPath = Join-Path $clientsTemplateDir "client.bat"
         $script:groupTemplateDefaults = [PSCustomObject]@{
-            Auth = Get-SetLineRawValues -Path (Join-Path $clientsTemplateDir "client.bat")
+            Auth = Get-SetLineRawValues -Path $clientBatPath
+            Sync = Get-SetLineRawValues -Path $clientBatPath
         }
     }
     return $script:groupTemplateDefaults
@@ -482,8 +482,7 @@ $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 function Get-GroupNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
     $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | ForEach-Object {
-        $baseName = [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
-        if ($baseName -match '^(?<group>.+)-\d{4}$') { $Matches['group'] } else { $baseName }
+        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
     }
     return @($names | Select-Object -Unique | Sort-Object)
 }
@@ -673,10 +672,9 @@ function Save-GroupSettings {
     [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($authLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
 
     if ((Get-GroupXlsxFiles -GroupName $GroupName).Count -eq 0) {
-        $currentYear = $script:commonEnvVars["TargetYear"]
         $templateXlsxPath = Get-TemplateXlsxPath
-        if ($currentYear -and $templateXlsxPath) {
-            Copy-Item -LiteralPath $templateXlsxPath -Destination (Get-GroupXlsxPath $GroupName $currentYear)
+        if ($templateXlsxPath) {
+            Copy-Item -LiteralPath $templateXlsxPath -Destination (Get-GroupXlsxPath $GroupName)
         }
     }
 }
@@ -702,17 +700,14 @@ $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
-    $currentYear = $script:commonEnvVars["TargetYear"]
     $openPath = $null
-    if ($currentYear) {
-        $currentYearPath = Get-GroupXlsxPath $target $currentYear
-        if (Test-Path -LiteralPath $currentYearPath) { $openPath = $currentYearPath }
-    }
+    $groupPath = Get-GroupXlsxPath $target
+    if (Test-Path -LiteralPath $groupPath) { $openPath = $groupPath }
     if (!$openPath) {
         $latest = Get-GroupXlsxFiles -GroupName $target | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if ($latest) { $openPath = $latest.FullName }
     }
-    if (!$openPath) { $openPath = Get-GroupXlsxPath $target $currentYear }
+    if (!$openPath) { $openPath = $groupPath }
     Open-TargetOrWarn -Path $openPath
 })
 

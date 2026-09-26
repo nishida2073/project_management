@@ -15,6 +15,10 @@ for %%A in (%*) do (
     )
 )
 
+if "!TargetGroupNameFilter!"=="" (
+    set "TargetGroupNameFilter=*"
+)
+
 set "SCRIPT_PATH=%~dp0collect-year-comparison-result.ps1"
 
 set "OutputTargetDir=%OutputYearComparisonCollectDir%"
@@ -22,23 +26,25 @@ set "TemplateFilePath=%TemplateRootDir%\経年比較結果.xlsx"
 
 call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 
-for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -ClientDataRootDir '%ClientDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod% -TargetGroupNameFilter '%TargetGroupNameFilter%'"') do (
-    call "%~dp0message.bat" "Start %MyName% [%%G]"
-
-    call "%~dp0resolve-env-file.bat" "%%G"
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
+    set "GroupName=%%~nF"
+    call "%~dp0message.bat" "Start %MyName% [!GroupName!]"
+    set "envFile=%ClientDataRootDir%\!GroupName!.bat"
     if exist "!envFile!" (
         call "!envFile!"
 
-        set "JOB_FLAG=%TEMP%\%MyName%%%G_.running"
-        set "ERROR_FLAG=%TEMP%\%MyName%%%G_.failed"
+        set "JOB_FLAG=%TEMP%\%MyName%!GroupName!_.running"
+        set "ERROR_FLAG=%TEMP%\%MyName%!GroupName!_.failed"
         if exist "!ERROR_FLAG!" del /f /q "!ERROR_FLAG!"
 
+        for /f "tokens=1 delims=-" %%X in ("!GroupName!") do set "TargetGroupName=%%X"
+        for /f "tokens=2 delims=-" %%X in ("!GroupName!") do set "TargetYear=%%X"
         start "" /b powershell -NoProfile -ExecutionPolicy Bypass -Command ^
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
           "     -ClientDataRootDir '!ClientDataRootDir!'" ^
-          "     -TargetGroupName '%%G'" ^
+          "     -TargetGroupName '!TargetGroupName!'" ^
           "     -TargetYear '!TargetYear!'" ^
           "     -ComparePeriod '!ComparePeriod!'" ^
           "     -OutputRootDir '!OutputTargetDir!'" ^
@@ -63,15 +69,19 @@ for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current
     ) else (
         call "%~dp0message.bat" "環境設定ファイルが見つかりません: !envFile!" "Red"
     )
-    call "%~dp0message.bat" "Finished %MyName% [%%G]"
+    call "%~dp0message.bat" "Finished %MyName% [!GroupName!]"
 )
 
 call "%~dp0message.bat" "Waiting Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -ClientDataRootDir '%ClientDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod% -TargetGroupNameFilter '%TargetGroupNameFilter%'"') do (
-    set "JOB_FLAG=%TEMP%\%MyName%%%G_.running"
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
+    set "GroupName=%%~nF"
+    set "GroupName=!GroupName:.xlsx=!"
+    for /f "tokens=1 delims=-" %%X in ("!GroupName!") do set "GroupName=%%X"
+    set "GroupName=!GroupName:.xlsx=!"
+    set "JOB_FLAG=%TEMP%\%MyName%!GroupName!_.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
 if !ALL_DONE! EQU 0 (
@@ -82,11 +92,15 @@ if !ALL_DONE! EQU 0 (
 call "%~dp0message.bat" "Finished Jobs %MyName% ALL"
 
 set "HAS_ERROR=0"
-for /f "delims=" %%G in ('powershell -NoProfile -Command "& '%~dp0select-current-master-files.ps1' -ClientDataRootDir '%ClientDataRootDir%' -TargetYear %TargetYear% -ComparePeriod %ComparePeriod% -TargetGroupNameFilter '%TargetGroupNameFilter%'"') do (
-    set "ERROR_FLAG=%TEMP%\%MyName%%%G_.failed"
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
+    set "GroupName=%%~nF"
+    set "GroupName=!GroupName:.xlsx=!"
+    for /f "tokens=1 delims=-" %%X in ("!GroupName!") do set "GroupName=%%X"
+    set "GroupName=!GroupName:.xlsx=!"
+    set "ERROR_FLAG=%TEMP%\%MyName%!GroupName!_.failed"
     if exist "!ERROR_FLAG!" (
         set "HAS_ERROR=1"
-        call "%~dp0message.bat" "Failed %MyName% [%%G]" "Red"
+        call "%~dp0message.bat" "Failed %MyName% [!GroupName!]" "Red"
         del /f /q "!ERROR_FLAG!"
     )
 )
