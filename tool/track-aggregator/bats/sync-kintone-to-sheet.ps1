@@ -172,7 +172,10 @@ $logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePr
 
             $workbook.Save()
             Write-MessageComplete "Excel書き込み完了: $ExcelFilePath (シート: $SheetName, 行数: $($dataArray.Count))"
-
+        } catch {
+            Write-MessageError "Excel操作エラー: $($_.Exception.Message)"
+            $script:hasError = $true
+            return
         } finally {
             if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
             if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
