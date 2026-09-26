@@ -236,21 +236,6 @@ $clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
-function Get-GroupXlsxFiles {
-    param([string]$GroupName)
-    if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
-    $result = @(Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | Where-Object {
-        $_.BaseName -eq $GroupName
-    })
-    return $result
-}
-
-function Get-TemplateXlsxPath {
-    $found = Get-ChildItem -LiteralPath $clientsTemplateDir -Filter "client.xlsx" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($found) { return $found.FullName }
-    return $null
-}
-
 $script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
 
 $overridableVarDefs = [ordered]@{
@@ -671,8 +656,8 @@ function Save-GroupSettings {
     $authLines += ""
     [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($authLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
 
-    if ((Get-GroupXlsxFiles -GroupName $GroupName).Count -eq 0) {
-        $templateXlsxPath = Get-TemplateXlsxPath
+    if ((Get-GroupXlsxPath -GroupName $GroupName).Count -eq 0) {
+        $templateXlsxPath = Join-Path $clientsTemplateDir "client.xlsx"
         if ($templateXlsxPath) {
             Copy-Item -LiteralPath $templateXlsxPath -Destination (Get-GroupXlsxPath $GroupName)
         }
@@ -685,7 +670,7 @@ $btnSettingsGroupNewGroup.Add_Click({
     $newName = $newName.Trim()
     if (!$newName) { return }
 
-    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Get-GroupXlsxFiles -GroupName $newName).Count -gt 0 -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
         [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
@@ -700,15 +685,7 @@ $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
-    $openPath = $null
-    $groupPath = Get-GroupXlsxPath $target
-    if (Test-Path -LiteralPath $groupPath) { $openPath = $groupPath }
-    if (!$openPath) {
-        $latest = Get-GroupXlsxFiles -GroupName $target | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-        if ($latest) { $openPath = $latest.FullName }
-    }
-    if (!$openPath) { $openPath = $groupPath }
-    Open-TargetOrWarn -Path $openPath
+    Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
