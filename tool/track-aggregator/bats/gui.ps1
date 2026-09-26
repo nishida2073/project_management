@@ -332,6 +332,7 @@ $syncUserMasterVars = @($settingsGroups["SYNC"].Vars.Keys)
 
 $settingsTrailingButtonVars = @{
     "SyncUserMasterSheetName" = { param($Panel, $Y, $Field)
+        $targetYear = $script:commonEnvVars["TargetYear"]
         Add-FieldActionButton -Panel $Panel -Y $Y -Text "同期実行" -AddStatusLabel -OnClick {
             $groupName = $cmbSettingsGroupTarget.SelectedItem
             if ([string]::IsNullOrWhiteSpace($groupName)) {
@@ -354,7 +355,8 @@ $settingsTrailingButtonVars = @{
                     Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
                     return
                 }
-                $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
+                
+                $batArgs = @("-TargetGroupNameFilter:$groupName-$targetYear", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
                 $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
                 if ($exitCode -eq 0) {
                     Set-StepStatus -Label $Field.StatusLabel -Text "成功" -State "成功"
