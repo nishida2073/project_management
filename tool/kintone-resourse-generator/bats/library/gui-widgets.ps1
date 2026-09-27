@@ -582,6 +582,7 @@ function New-BatchRunTab {
     }
 
     $checkBoxes = @()
+    $statusLabels = @()
     $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 20 } else { 20 }
     foreach ($bd in $ButtonDefs) {
         $chk = New-Object System.Windows.Forms.CheckBox
@@ -589,7 +590,7 @@ function New-BatchRunTab {
         $chk.Checked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
         $chk.AutoSize = $false
         $chk.AutoEllipsis = $true
-        $chk.Size = New-Object System.Drawing.Size(500, 22)
+        $chk.Size = New-Object System.Drawing.Size(360, 22)
         $chk.Location = New-Object System.Drawing.Point(20, $y)
         $chk.Tag = $bd
         $checkBoxes += $chk
@@ -601,11 +602,21 @@ function New-BatchRunTab {
             $lnkOpen.AutoSize = $false
             $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
             $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
-            $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
+            $lnkOpen.Location = New-Object System.Drawing.Point(390, $y)
             $lnkOpen.Tag = $bd
             $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag $inputControls }.GetNewClosure())
             $topControls += $lnkOpen
         }
+
+        $lblStepStatus = New-Object System.Windows.Forms.Label
+        $lblStepStatus.Text = ""
+        $lblStepStatus.AutoSize = $false
+        $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
+        $lblStepStatus.Location = New-Object System.Drawing.Point(440, $y)
+        $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
+        $statusLabels += $lblStepStatus
+        $topControls += $lblStepStatus
 
         $y += 26
     }
@@ -628,12 +639,13 @@ function New-BatchRunTab {
     $batchPanel.Height = $grpBatchAll.Bottom + 10
 
     return [PSCustomObject]@{
-        Panel         = $batchPanel
-        GroupBox      = $grpBatchAll
-        InputControls = $inputControls
-        CheckBoxes    = $checkBoxes
-        RunButton     = $btnRunAll
-        StatusLabel   = $lblStatus
+        Panel          = $batchPanel
+        GroupBox       = $grpBatchAll
+        InputControls  = $inputControls
+        CheckBoxes     = $checkBoxes
+        StatusLabels   = $statusLabels
+        RunButton      = $btnRunAll
+        StatusLabel    = $lblStatus
     }
 }
 
@@ -725,6 +737,7 @@ function Invoke-BatchRunAll {
         [Parameter(Mandatory)][scriptblock]$WriteLog,
         [Parameter(Mandatory)][scriptblock]$SetRunButtonsEnabled,
         [array]$ExtraControls = @(),
+        [array]$StatusLabels = @(),
         [switch]$StopOnFailure,
         [string]$HeaderSuffix = "",
         [scriptblock]$OnComplete
@@ -733,6 +746,7 @@ function Invoke-BatchRunAll {
     & $SetRunButtonsEnabled $false
     foreach ($chk in $CheckBoxes) { $chk.Enabled = $false }
     foreach ($ctrl in $ExtraControls) { $ctrl.Enabled = $false }
+    foreach ($lbl in $StatusLabels) { $lbl.Text = ""; $lbl.ForeColor = [System.Drawing.Color]::Gray }
     Set-StepStatus -Label $StatusLabel -Text "実行中..."
 
     & $WriteLog ""
@@ -746,7 +760,17 @@ function Invoke-BatchRunAll {
             & $WriteLog "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
             continue
         }
+        if ($i -lt $StatusLabels.Count) {
+            Set-StepStatus -Label $StatusLabels[$i] -Text "実行中..."
+        }
         $exitCode = & $InvokeStep $bd
+        if ($i -lt $StatusLabels.Count) {
+            if ($exitCode -eq 0) {
+                Set-StepStatus -Label $StatusLabels[$i] -Text "成功" -State "成功"
+            } else {
+                Set-StepStatus -Label $StatusLabels[$i] -Text "失敗" -State "失敗"
+            }
+        }
         if ($exitCode -ne 0) {
             $anyFailed = $true
             $failedExitCode = $exitCode
@@ -902,15 +926,26 @@ function Add-FieldActionButton {
         [int]$Y,
         [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick,
-        [int]$Width = 90
+        [int]$Width = 90,
+        [switch]$AddStatusLabel
     )
     $btn = New-Object System.Windows.Forms.Button
     $btn.Text = $Text
     $btn.Location = New-Object System.Drawing.Point(20, $Y)
     $btn.Size = New-Object System.Drawing.Size($Width, 24)
     $btn.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-    $btn.Add_Click({ & $OnClick }.GetNewClosure())
-    $Panel.Controls.Add($btn)
+    $btn.Add_Click({ & $OnClick }.GetNewClosure()) | Out-Null
+    $Panel.Controls.Add($btn) | Out-Null
+
+    if ($AddStatusLabel) {
+        $lbl = New-Object System.Windows.Forms.Label
+        $lbl.Text = "未実行"
+        $lbl.AutoSize = $true
+        $lbl.Location = New-Object System.Drawing.Point(($btn.Right + 10), ($btn.Top + 6))
+        
+        $Panel.Controls.Add($lbl) | Out-Null
+        return $lbl
+    }
 }
 
 function Render-SettingsFields {
@@ -1076,7 +1111,10 @@ function Render-SettingsFields {
         $y += if ($isMultiline) { 66 } else { 28 }
 
         if ($TrailingButtonVars.ContainsKey($field.VarName)) {
-            & $TrailingButtonVars[$field.VarName] $grp $y $field
+            $result = & $TrailingButtonVars[$field.VarName] $grp $y $field
+            if ($result) {
+                $field | Add-Member -NotePropertyName StatusLabel -NotePropertyValue $result -Force
+            }
             $y += 34
         }
     }
@@ -1104,11 +1142,13 @@ function Invoke-TestAction {
         [Parameter(Mandatory)][scriptblock]$Action,
         [Parameter(Mandatory)][scriptblock]$FormatSuccessMessage,
         [scriptblock]$FormatFailureMessage = { param($ErrorRecord) "失敗しました。`r`n$($ErrorRecord.Exception.Message)" },
-        [string]$DialogTitle = "テスト"
+        [string]$DialogTitle = "テスト",
+        [switch]$ThrowOnError
     )
 
     if ($ValidationError) {
         [System.Windows.Forms.MessageBox]::Show($ValidationError, $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        if ($ThrowOnError) { throw $ValidationError }
         return
     }
 
@@ -1116,6 +1156,8 @@ function Invoke-TestAction {
         $response = & $Action
         [System.Windows.Forms.MessageBox]::Show((& $FormatSuccessMessage $response), $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     } catch {
-        [System.Windows.Forms.MessageBox]::Show((& $FormatFailureMessage $_), $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        $errorMessage = & $FormatFailureMessage $_
+        [System.Windows.Forms.MessageBox]::Show($errorMessage, $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        if ($ThrowOnError) { throw $errorMessage }
     }
 }

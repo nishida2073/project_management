@@ -582,6 +582,7 @@ function New-BatchRunTab {
     }
 
     $checkBoxes = @()
+    $statusLabels = @()
     $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 20 } else { 20 }
     foreach ($bd in $ButtonDefs) {
         $chk = New-Object System.Windows.Forms.CheckBox
@@ -589,7 +590,7 @@ function New-BatchRunTab {
         $chk.Checked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
         $chk.AutoSize = $false
         $chk.AutoEllipsis = $true
-        $chk.Size = New-Object System.Drawing.Size(500, 22)
+        $chk.Size = New-Object System.Drawing.Size(360, 22)
         $chk.Location = New-Object System.Drawing.Point(20, $y)
         $chk.Tag = $bd
         $checkBoxes += $chk
@@ -601,11 +602,21 @@ function New-BatchRunTab {
             $lnkOpen.AutoSize = $false
             $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
             $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
-            $lnkOpen.Location = New-Object System.Drawing.Point(530, $y)
+            $lnkOpen.Location = New-Object System.Drawing.Point(390, $y)
             $lnkOpen.Tag = $bd
             $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag $inputControls }.GetNewClosure())
             $topControls += $lnkOpen
         }
+
+        $lblStepStatus = New-Object System.Windows.Forms.Label
+        $lblStepStatus.Text = ""
+        $lblStepStatus.AutoSize = $false
+        $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+        $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
+        $lblStepStatus.Location = New-Object System.Drawing.Point(440, $y)
+        $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
+        $statusLabels += $lblStepStatus
+        $topControls += $lblStepStatus
 
         $y += 26
     }
@@ -628,12 +639,13 @@ function New-BatchRunTab {
     $batchPanel.Height = $grpBatchAll.Bottom + 10
 
     return [PSCustomObject]@{
-        Panel         = $batchPanel
-        GroupBox      = $grpBatchAll
-        InputControls = $inputControls
-        CheckBoxes    = $checkBoxes
-        RunButton     = $btnRunAll
-        StatusLabel   = $lblStatus
+        Panel          = $batchPanel
+        GroupBox       = $grpBatchAll
+        InputControls  = $inputControls
+        CheckBoxes     = $checkBoxes
+        StatusLabels   = $statusLabels
+        RunButton      = $btnRunAll
+        StatusLabel    = $lblStatus
     }
 }
 
@@ -725,6 +737,7 @@ function Invoke-BatchRunAll {
         [Parameter(Mandatory)][scriptblock]$WriteLog,
         [Parameter(Mandatory)][scriptblock]$SetRunButtonsEnabled,
         [array]$ExtraControls = @(),
+        [array]$StatusLabels = @(),
         [switch]$StopOnFailure,
         [string]$HeaderSuffix = "",
         [scriptblock]$OnComplete
@@ -733,6 +746,7 @@ function Invoke-BatchRunAll {
     & $SetRunButtonsEnabled $false
     foreach ($chk in $CheckBoxes) { $chk.Enabled = $false }
     foreach ($ctrl in $ExtraControls) { $ctrl.Enabled = $false }
+    foreach ($lbl in $StatusLabels) { $lbl.Text = ""; $lbl.ForeColor = [System.Drawing.Color]::Gray }
     Set-StepStatus -Label $StatusLabel -Text "実行中..."
 
     & $WriteLog ""
@@ -746,7 +760,17 @@ function Invoke-BatchRunAll {
             & $WriteLog "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
             continue
         }
+        if ($i -lt $StatusLabels.Count) {
+            Set-StepStatus -Label $StatusLabels[$i] -Text "実行中..."
+        }
         $exitCode = & $InvokeStep $bd
+        if ($i -lt $StatusLabels.Count) {
+            if ($exitCode -eq 0) {
+                Set-StepStatus -Label $StatusLabels[$i] -Text "成功" -State "成功"
+            } else {
+                Set-StepStatus -Label $StatusLabels[$i] -Text "失敗" -State "失敗"
+            }
+        }
         if ($exitCode -ne 0) {
             $anyFailed = $true
             $failedExitCode = $exitCode
@@ -918,7 +942,7 @@ function Add-FieldActionButton {
         $lbl.Text = "未実行"
         $lbl.AutoSize = $true
         $lbl.Location = New-Object System.Drawing.Point(($btn.Right + 10), ($btn.Top + 6))
-        $lbl.Font = New-Object System.Drawing.Font($lbl.Font, [System.Drawing.FontStyle]::Bold)
+        
         $Panel.Controls.Add($lbl) | Out-Null
         return $lbl
     }

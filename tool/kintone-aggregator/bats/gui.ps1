@@ -124,13 +124,14 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
 $batchPanel = $batchTab.Panel
 $script:batchInputControls = $batchTab.InputControls
 $script:batchStepCheckboxes = $batchTab.CheckBoxes
+$script:batchStatusLabels = $batchTab.StatusLabels
 $btnRunAll = $batchTab.RunButton
 $lblBatchStatus = $batchTab.StatusLabel
 $script:batchRunButtons = @($btnRunAll)
 
 function Start-BatchRunAll {
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
-        -StatusLabel $lblBatchStatus -ExtraControls @($script:batchInputControls.Values) `
+        -StatusLabel $lblBatchStatus -StatusLabels $script:batchStatusLabels -ExtraControls @($script:batchInputControls.Values) `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -InvokeStep {
             param($bd)
