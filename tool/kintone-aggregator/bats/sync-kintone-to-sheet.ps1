@@ -32,7 +32,6 @@ $psParams = $PSBoundParameters
     try {
         if (-not $ConfigPath) {
             throw "ConfigPathが指定されていません"
-
         }
         if (-not (Test-Path $ConfigPath)) {
             throw "設定ファイルが見つかりません: $ConfigPath"
