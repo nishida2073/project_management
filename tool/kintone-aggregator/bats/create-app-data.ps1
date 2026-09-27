@@ -180,67 +180,70 @@ function Export-File {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    $newTargetAppIds = Get-FieldCodeList -Value $TargetAppIds
+        $newTargetAppIds = Get-FieldCodeList -Value $TargetAppIds
 
-    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    if ([string]::IsNullOrWhiteSpace($Authorization)) {
-        $pair = "${KintoneLoginName}:${KintonePassword}"
-        $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
+        if ([string]::IsNullOrWhiteSpace($Authorization)) {
+            $pair = "${KintoneLoginName}:${KintonePassword}"
+            $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
+        }
+
+
+        $courseScheduleDatas = Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
+        Write-Message $courseScheduleDatas -VarName "courseScheduleDatas"
+
+        $courseScheduleData = $CourseScheduleDatas | Where-Object { $_.date -eq $TargetDate } | Select-Object -First 1
+        Write-Message $courseScheduleData -VarName "courseScheduleData"
+
+        if(-not $courseScheduleData){
+            Write-MessageWarn "対象の科目がありません。日付=$($TargetDate)"
+            return
+        }
+        if($courseScheduleData.isHoliday){
+            Write-MessageWarn "休日です。日付=$($TargetDate)"
+            return
+        }
+
+        $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
+        Write-Message $userDatas -VarName "userDatas"
+
+        $appDatasResult = Get-AppDatas -TargetAppIds $newTargetAppIds -TargetDate $TargetDate -BaseUrl $BaseUrl -Authorization $Authorization
+        $appDatas = $appDatasResult.Datas
+        Write-Message $appDatas -VarName "appDatas"
+
+        $appCodeFields = $appDatasResult.AllFieldLabels
+        Write-Message $appCodeFields -VarName "appCodeFields"
+
+        $checkResults = Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData
+        Write-Message $checkResults -VarName "checkResults"
+
+        $userDataAliasFieldCodes = @(
+            "userNo", "userCode", "userName", "companyName", "className",
+            "scheduledDate", "isHoliday", "scheduledCourseName"
+        )
+        $fixedCodeFields = if ($checkResults.Count -gt 0) {
+            @($checkResults[0].userData.PSObject.Properties.Name |
+                Where-Object { $userDataAliasFieldCodes -notcontains $_ })
+        } else {
+            @()
+        }
+        Write-Message $fixedCodeFields -VarName "fixedCodeFields"
+
+        $outputFileName = "$TargetGroupName-$($OutputFileNameSuffix.TrimStart('_')).txt"
+        $outputFilePath = Join-Path $OutputRootDir $outputFileName
+        Export-File -CheckResults $checkResults -OutputFilePath $outputFilePath -FixedCodeFields $fixedCodeFields -AppCodeFields $appCodeFields
+
+        Write-MessageComplete "アプリデータを出力しました: $outputFilePath"
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
     }
-
-
-    $courseScheduleDatas = Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
-    Write-Message $courseScheduleDatas -VarName "courseScheduleDatas"
-
-    $courseScheduleData = $CourseScheduleDatas | Where-Object { $_.date -eq $TargetDate } | Select-Object -First 1
-    Write-Message $courseScheduleData -VarName "courseScheduleData"
-
-    if(-not $courseScheduleData){
-        Write-MessageWarn "対象の科目がありません。日付=$($TargetDate)"
-        return
-    }
-    if($courseScheduleData.isHoliday){
-        Write-MessageWarn "休日です。日付=$($TargetDate)"
-        return
-    }
-
-    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
-    Write-Message $userDatas -VarName "userDatas"
-
-    $appDatasResult = Get-AppDatas -TargetAppIds $newTargetAppIds -TargetDate $TargetDate -BaseUrl $BaseUrl -Authorization $Authorization
-    $appDatas = $appDatasResult.Datas
-    Write-Message $appDatas -VarName "appDatas"
-
-    $appCodeFields = $appDatasResult.AllFieldLabels
-    Write-Message $appCodeFields -VarName "appCodeFields"
-
-    $checkResults = Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData
-    Write-Message $checkResults -VarName "checkResults"
-
-    $userDataAliasFieldCodes = @(
-        "userNo", "userCode", "userName", "companyName", "className",
-        "scheduledDate", "isHoliday", "scheduledCourseName"
-    )
-    $fixedCodeFields = if ($checkResults.Count -gt 0) {
-        @($checkResults[0].userData.PSObject.Properties.Name |
-            Where-Object { $userDataAliasFieldCodes -notcontains $_ })
-    } else {
-        @()
-    }
-    Write-Message $fixedCodeFields -VarName "fixedCodeFields"
-
-    $outputFileName = "$TargetGroupName-$($OutputFileNameSuffix.TrimStart('_')).txt"
-    $outputFilePath = Join-Path $OutputRootDir $outputFileName
-    Export-File -CheckResults $checkResults -OutputFilePath $outputFilePath -FixedCodeFields $fixedCodeFields -AppCodeFields $appCodeFields
-
-    Write-MessageComplete "アプリデータを出力しました: $outputFilePath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+if ($error) {
+    throw $error
+}

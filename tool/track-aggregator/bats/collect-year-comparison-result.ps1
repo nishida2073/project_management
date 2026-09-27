@@ -427,97 +427,100 @@ function Export-Excel {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    $rowsPerCourse = $ComparePeriod + 2
+        $rowsPerCourse = $ComparePeriod + 2
 
-    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    $courseGroupDatas = Get-CourseGroupDatas -CourseGroupDefs $CourseGroupDefs
+        $courseGroupDatas = Get-CourseGroupDatas -CourseGroupDefs $CourseGroupDefs
 
-    $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
-        $year = $TargetYear - $offset
-        $yearMasterFilePath = Join-Path $ClientDataRootDir "$TargetGroupName-$year.xlsx"
+        $yearDataCache = for ($offset = 0; $offset -le $ComparePeriod; $offset++) {
+            $year = $TargetYear - $offset
+            $yearMasterFilePath = Join-Path $ClientDataRootDir "$TargetGroupName-$year.xlsx"
 
-        $yearIsExecuted = Test-Path $yearMasterFilePath
-        if ($yearIsExecuted) {
-            $yearUserDatas = Create-UserDatas -DataFilePath $yearMasterFilePath
+            $yearIsExecuted = Test-Path $yearMasterFilePath
+            if ($yearIsExecuted) {
+                $yearUserDatas = Create-UserDatas -DataFilePath $yearMasterFilePath
 
-            $yearTestDatas = Create-TestDatas -DataFilePath $yearMasterFilePath
-            $yearTestDatas = @($yearTestDatas | Where-Object { -not (ToBool $_.停止中) })
+                $yearTestDatas = Create-TestDatas -DataFilePath $yearMasterFilePath
+                $yearTestDatas = @($yearTestDatas | Where-Object { -not (ToBool $_.停止中) })
 
-            $yearSurveyDatas = Create-SurveyDatas -DataFilePath $yearMasterFilePath
-            $yearSurveyDatas = @($yearSurveyDatas | Where-Object { -not (ToBool $_.停止中) })
-        } else {
-            Write-Message "対象年度のマスタファイルが見つからないため未実施として扱います: $yearMasterFilePath" -VarName "message" -Type "Info" -ForegroundColor Yellow
-            $yearUserDatas = $null
-            $yearTestDatas = $null
-            $yearSurveyDatas = $null
+                $yearSurveyDatas = Create-SurveyDatas -DataFilePath $yearMasterFilePath
+                $yearSurveyDatas = @($yearSurveyDatas | Where-Object { -not (ToBool $_.停止中) })
+            } else {
+                Write-Message "対象年度のマスタファイルが見つからないため未実施として扱います: $yearMasterFilePath" -VarName "message" -Type "Info" -ForegroundColor Yellow
+                $yearUserDatas = $null
+                $yearTestDatas = $null
+                $yearSurveyDatas = $null
+            }
+
+            [PSCustomObject]@{
+                year        = $year
+                isExecuted  = $yearIsExecuted
+                userDatas   = $yearUserDatas
+                testDatas   = $yearTestDatas
+                surveyDatas = $yearSurveyDatas
+            }
         }
 
-        [PSCustomObject]@{
-            year        = $year
-            isExecuted  = $yearIsExecuted
-            userDatas   = $yearUserDatas
-            testDatas   = $yearTestDatas
-            surveyDatas = $yearSurveyDatas
+        $companyNameFilter = @($TargetCompanyNames -split "," | Where-Object { $_ -ne "" })
+        $rankNameFilter = @($TargetRankNames -split "," | Where-Object { $_ -ne "" })
+        $classNameFilter = @($TargetClassNames -split "," | Where-Object { $_ -ne "" })
+
+        $allYearsUserDatas = @($yearDataCache.userDatas | Where-Object { $_ })
+        $rankOrder = @("S","A","B","C","D","E")
+        $companyNames = if ($companyNameFilter.Count -gt 0) { @($companyNameFilter | Select-Object -Unique) } else { @($allYearsUserDatas.companyName | Select-Object -Unique) }
+        $rankNames = if ($rankNameFilter.Count -gt 0) { $rankNameFilter } else { $allYearsUserDatas.rankName }
+        $rankNames = @($rankNames | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
+        $classNames = if ($classNameFilter.Count -gt 0) { @($classNameFilter | Sort-Object -Unique) } else { @($allYearsUserDatas.className | Select-Object -Unique | Sort-Object) }
+
+        $dimensionDefs = @(
+            [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別";   HeaderName = "会社名" }
+            [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別"; HeaderName = "クラス" }
+            [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別"; HeaderName = "ランク" }
+        )
+
+        $yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
+            $groupName = "$TargetGroupName-$($yearData.year)"
+            $summaryDatas = if ($yearData.isExecuted) {
+                Get-YearSummaryDatas -UserDatas $yearData.userDatas -TestDatas $yearData.testDatas -SurveyDatas $yearData.surveyDatas -GroupName $groupName -Dimensions $dimensionDefs
+            } else {
+                $null
+            }
+
+            [PSCustomObject]@{
+                year         = $yearData.year
+                summaryDatas = $summaryDatas
+            }
         }
+
+        $yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -YearOrder $YearOrder
+
+        $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
+            $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names -YearOrder $YearOrder
+            [PSCustomObject]@{
+                Key        = $dimensionDef.Key
+                Datas      = $dimensionDatas
+                Count      = $dimensionDef.Names.Count + 1
+                SheetName  = $dimensionDef.SheetName
+                HeaderName = $dimensionDef.HeaderName
+            }
+        }
+
+        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-$OutputFileSuffix.xlsx"
+        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+
+        Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
+
+        Write-MessageComplete "集計結果を出力しました: $outputFilePath"
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
     }
-
-    $companyNameFilter = @($TargetCompanyNames -split "," | Where-Object { $_ -ne "" })
-    $rankNameFilter = @($TargetRankNames -split "," | Where-Object { $_ -ne "" })
-    $classNameFilter = @($TargetClassNames -split "," | Where-Object { $_ -ne "" })
-
-    $allYearsUserDatas = @($yearDataCache.userDatas | Where-Object { $_ })
-    $rankOrder = @("S","A","B","C","D","E")
-    $companyNames = if ($companyNameFilter.Count -gt 0) { @($companyNameFilter | Select-Object -Unique) } else { @($allYearsUserDatas.companyName | Select-Object -Unique) }
-    $rankNames = if ($rankNameFilter.Count -gt 0) { $rankNameFilter } else { $allYearsUserDatas.rankName }
-    $rankNames = @($rankNames | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) })
-    $classNames = if ($classNameFilter.Count -gt 0) { @($classNameFilter | Sort-Object -Unique) } else { @($allYearsUserDatas.className | Select-Object -Unique | Sort-Object) }
-
-    $dimensionDefs = @(
-        [PSCustomObject]@{ Key = "companyName"; AllLabel = "全社";     Names = $companyNames; SheetName = "経年比較-会社別";   HeaderName = "会社名" }
-        [PSCustomObject]@{ Key = "className";   AllLabel = "全クラス"; Names = $classNames;   SheetName = "経年比較-クラス別"; HeaderName = "クラス" }
-        [PSCustomObject]@{ Key = "rankName";    AllLabel = "全ランク"; Names = $rankNames;    SheetName = "経年比較-ランク別"; HeaderName = "ランク" }
-    )
-
-    $yearSummaryDatasList = foreach ($yearData in $yearDataCache) {
-        $groupName = "$TargetGroupName-$($yearData.year)"
-        $summaryDatas = if ($yearData.isExecuted) {
-            Get-YearSummaryDatas -UserDatas $yearData.userDatas -TestDatas $yearData.testDatas -SurveyDatas $yearData.surveyDatas -GroupName $groupName -Dimensions $dimensionDefs
-        } else {
-            $null
-        }
-
-        [PSCustomObject]@{
-            year         = $yearData.year
-            summaryDatas = $summaryDatas
-        }
-    }
-
-    $yearComparisonDatas = Create-YearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -YearOrder $YearOrder
-
-    $dimensionResults = foreach ($dimensionDef in $dimensionDefs) {
-        $dimensionDatas = Create-DimensionYearComparisonDatas -CourseGroupDatas $courseGroupDatas -YearSummaryDatasList $yearSummaryDatasList -DimensionKey $dimensionDef.Key -AllLabel $dimensionDef.AllLabel -DimensionNames $dimensionDef.Names -YearOrder $YearOrder
-        [PSCustomObject]@{
-            Key        = $dimensionDef.Key
-            Datas      = $dimensionDatas
-            Count      = $dimensionDef.Names.Count + 1
-            SheetName  = $dimensionDef.SheetName
-            HeaderName = $dimensionDef.HeaderName
-        }
-    }
-
-    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$TargetYear-$OutputFileSuffix.xlsx"
-    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-
-    Export-Excel -YearComparisonDatas $yearComparisonDatas -DimensionResults $dimensionResults -RowsPerCourse $rowsPerCourse -OutputFilePath $outputFilePath
-
-    Write-MessageComplete "集計結果を出力しました: $outputFilePath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+if ($error) {
+    throw $error
+}

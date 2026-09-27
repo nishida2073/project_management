@@ -743,7 +743,7 @@ function Test-KintoneConnection {
     $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
 
-    $validationError = if ($targetAppIds.Count -eq 0) { "対象アプリIDが未入力です。" } else { $null }
+    $validationError = if ($targetAppIds.Count -eq 0) { "対象アプリIDを入力してください。" } else { $null }
 
     Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError `
         -Action {

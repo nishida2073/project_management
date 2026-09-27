@@ -321,43 +321,46 @@ function Export-Excel {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
+        $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
 
-    $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
-    $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+        $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+        $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
-    $testResultDatas = Create-TestResultDatas -TestResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
+        $testResultDatas = Create-TestResultDatas -TestResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
 
-    $testUserCodes = $userDatas.userCode
-    $validTestResultDatas = $testResultDatas |
-        Where-Object {
-            $_.isExecute -and $_.userCode -in $testUserCodes
-        } |
-        Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
+        $testUserCodes = $userDatas.userCode
+        $validTestResultDatas = $testResultDatas |
+            Where-Object {
+                $_.isExecute -and $_.userCode -in $testUserCodes
+            } |
+            Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
 
-    $totalTestResultsDatas = Create-TestSummaryDataByGroup -UserDatas $userDatas -TestDatas $testDatas -ValidResultDatas $validTestResultDatas
+        $totalTestResultsDatas = Create-TestSummaryDataByGroup -UserDatas $userDatas -TestDatas $testDatas -ValidResultDatas $validTestResultDatas
 
-    $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
-    $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+        $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
+        $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-    $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+        $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
 
-    $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas -TestDatas $testDatas -ValidTestResultDatas $validTestResultDatas -TotalTestResultsDatas $totalTestResultsDatas
+        $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas -TestDatas $testDatas -ValidTestResultDatas $validTestResultDatas -TotalTestResultsDatas $totalTestResultsDatas
 
-    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
-    Export-Excel -CollectResultDatas $collectResultDatas -UserDatas $userDatas -TestDatas $testDatas -SurveyDatas $surveyDatas -OutputFilePath $outputFilePath
+        Export-Excel -CollectResultDatas $collectResultDatas -UserDatas $userDatas -TestDatas $testDatas -SurveyDatas $surveyDatas -OutputFilePath $outputFilePath
 
-    Write-MessageComplete "集計結果を出力しました: $outputFilePath"
+        Write-MessageComplete "集計結果を出力しました: $outputFilePath"
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
+    }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+if ($error) {
+    throw $error
+}

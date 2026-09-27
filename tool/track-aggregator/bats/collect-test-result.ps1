@@ -486,31 +486,33 @@ function Export-Excel {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    $showDetail = if($ShowDetail -eq 1){ $true } else { $false }
+        $showDetail = if($ShowDetail -eq 1){ $true } else { $false }
 
-    $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
-    $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+        $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+        $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
-    $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
+        $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
 
-    $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
+        $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
 
-    $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
+        $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
 
-    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-    Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
+        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+        Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
 
-    Write-MessageComplete "集計結果を出力しました: $outputFilePath"
+        Write-MessageComplete "集計結果を出力しました: $outputFilePath"
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
+    }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
-
+if ($error) {
+    throw $error
+}

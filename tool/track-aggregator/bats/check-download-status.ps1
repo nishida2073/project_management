@@ -54,19 +54,22 @@ function Write-DownloadStatusRows {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    Use-Mutex "Test-File" {
-        $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
-        $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
+        Use-Mutex "Test-File" {
+            $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+            $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
 
-        Write-DownloadStatusRows -Datas $testDatas -NameProperty "testName" -ResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TargetLabel "テスト"
-        Write-DownloadStatusRows -Datas $surveyDatas -NameProperty "surveyName" -ResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -TargetLabel "アンケート"
+            Write-DownloadStatusRows -Datas $testDatas -NameProperty "testName" -ResultRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -TargetLabel "テスト"
+            Write-DownloadStatusRows -Datas $surveyDatas -NameProperty "surveyName" -ResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -TargetLabel "アンケート"
+        }
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
     }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+if ($error) {
+    throw $error
+}

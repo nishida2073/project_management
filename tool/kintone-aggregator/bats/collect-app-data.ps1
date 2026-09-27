@@ -132,7 +132,7 @@ function Export-Datas {
         $columnIndexes = @($columnDefs | ForEach-Object {
             $index = [array]::IndexOf($headerRow, $_.OrgName)
             if ($index -lt 0) {
-                Write-MessageWarn "列が見つかりません: $($_.OrgName) (ファイル: $sourceFilePath)"
+                throw "列が見つかりません: $($_.OrgName) (ファイル: $sourceFilePath)"
             }
             $index
         })
@@ -173,34 +173,36 @@ function Export-Datas {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+        New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-    $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
-    if (-not $hasFiles) {
-        Write-MessageWarn "集計対象がありません。日付=$($TargetDate)"
-        return
+        $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
+        if (-not $hasFiles) {
+            throw "集計対象がありません。日付=$($TargetDate)"
+        }
+
+        $fileKeyMap = @{}
+        foreach ($pair in ($SourceTypeFileNameMap -split ',' | Where-Object { $_ })) {
+            $kv = $pair -split '=', 2
+            if ($kv.Count -eq 2) { $fileKeyMap[$kv[0]] = $kv[1] }
+        }
+        $sourseDataProps = Read-SourseDataDefsFile -FilePath $CollectDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName -FileKeyMap $fileKeyMap
+
+        Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
+
+        $collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
+
+        Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName
+
+        Write-MessageComplete "集計結果を出力しました: $(Join-Path $CollectRootDir $collectFileName)"
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
     }
-
-    $fileKeyMap = @{}
-    foreach ($pair in ($SourceTypeFileNameMap -split ',' | Where-Object { $_ })) {
-        $kv = $pair -split '=', 2
-        if ($kv.Count -eq 2) { $fileKeyMap[$kv[0]] = $kv[1] }
-    }
-    $sourseDataProps = Read-SourseDataDefsFile -FilePath $CollectDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName -FileKeyMap $fileKeyMap
-
-    Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
-
-    $collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
-
-    Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName
-
-    Write-MessageComplete "集計結果を出力しました: $(Join-Path $CollectRootDir $collectFileName)"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+if ($error) {
+    throw $error
+}

@@ -125,25 +125,28 @@ function Download-TrackResults {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    $downloadDetail = if($DownloadDetail -eq 1){ $true } else { $false }
+        $downloadDetail = if($DownloadDetail -eq 1){ $true } else { $false }
 
-    $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
-    $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+        $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+        $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
-    $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
-    $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+        $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
+        $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-    Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
+        Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
 
-    Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
+        Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
 
-    Write-MessageComplete "実施結果をダウンロードしました: $(Join-Path $TestResultRootDir $TargetGroupName), $(Join-Path $SurveyResultRootDir $TargetGroupName)"
+        Write-MessageComplete "実施結果をダウンロードしました: $(Join-Path $TestResultRootDir $TargetGroupName), $(Join-Path $SurveyResultRootDir $TargetGroupName)"
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
+    }
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+if ($error) {
+    throw $error
+}

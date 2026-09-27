@@ -895,58 +895,61 @@ function Export-CourseScheduleData {
 $psParams = $PSBoundParameters
 
 & {
-    $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-    $allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
-        Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath
-    } else {
-        Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
+        $allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
+            Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath
+        } else {
+            Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
+        }
+        Write-Message $allCourseScheduleDatas -VarName "allCourseScheduleDatas"
+
+        $targetCourseScheduleDatas = $allCourseScheduleDatas | Where-Object { -not $_.isHoliday }
+        Write-Message $targetCourseScheduleDatas -VarName "targetCourseScheduleDatas"
+
+        $targetDates = @($targetCourseScheduleDatas |
+            Where-Object { $_.日付 -le $TargetDate } |
+            Sort-Object 日付 |
+            ForEach-Object 日付)
+        Write-Message $targetDates -VarName "targetDates" -Type "Info"
+        if (-not $targetDates -or $targetDates.Count -eq 0) {
+            Write-MessageWarn "対象の科目がありません。日付=$($TargetDate)"
+            return
+        }
+
+        $dailyUserDatas = Create-DailyUserDatas -TargetGroupName $TargetGroupName -CollectRootDir $CollectRootDir -TargetDates $targetDates
+        Write-Message $dailyUserDatas -VarName "dailyUserDatas"
+
+        $checkedUserDatas = Add-CheckResults $dailyUserDatas $targetCourseScheduleDatas
+        Write-Message $checkedUserDatas -VarName "checkedUserDatas"
+
+        $dailySummaryDatas = Create-DailySummaryDatas $checkedUserDatas
+        Write-Message $dailySummaryDatas -VarName "dailySummaryDatas"
+
+        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+        $viewCourseScheduleDatas = if ($ViewHolidayCourseSchedule -eq 1) {
+            $allCourseScheduleDatas
+        }else{
+            $targetCourseScheduleDatas
+        }
+        Export-Excel $outputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
+
+        New-Item -Path $BackupRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+
+        $backupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
+
+        Copy-Item -Path $outputFilePath -Destination $backupFilePath -Force
+
+        Write-MessageComplete "アラート検知結果を出力しました: $outputFilePath"
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
     }
-    Write-Message $allCourseScheduleDatas -VarName "allCourseScheduleDatas"
-
-    $targetCourseScheduleDatas = $allCourseScheduleDatas | Where-Object { -not $_.isHoliday }
-    Write-Message $targetCourseScheduleDatas -VarName "targetCourseScheduleDatas"
-
-    $targetDates = @($targetCourseScheduleDatas |
-        Where-Object { $_.日付 -le $TargetDate } |
-        Sort-Object 日付 |
-        ForEach-Object 日付)
-    Write-Message $targetDates -VarName "targetDates" -Type "Info"
-    if (-not $targetDates -or $targetDates.Count -eq 0) {
-        Write-MessageWarn "対象の科目がありません。"
-        return
-    }
-
-    $dailyUserDatas = Create-DailyUserDatas -TargetGroupName $TargetGroupName -CollectRootDir $CollectRootDir -TargetDates $targetDates
-    Write-Message $dailyUserDatas -VarName "dailyUserDatas"
-
-    $checkedUserDatas = Add-CheckResults $dailyUserDatas $targetCourseScheduleDatas
-    Write-Message $checkedUserDatas -VarName "checkedUserDatas"
-
-    $dailySummaryDatas = Create-DailySummaryDatas $checkedUserDatas
-    Write-Message $dailySummaryDatas -VarName "dailySummaryDatas"
-
-    New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-    $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
-    Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-    $viewCourseScheduleDatas = if ($ViewHolidayCourseSchedule -eq 1) {
-        $allCourseScheduleDatas
-    }else{
-        $targetCourseScheduleDatas
-    }
-    Export-Excel $outputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
-
-    New-Item -Path $BackupRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-
-    $backupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
-
-    Copy-Item -Path $outputFilePath -Destination $backupFilePath -Force
-
-    Write-MessageComplete "アラート検知結果を出力しました: $outputFilePath"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+if ($error) {
+    throw $error
+}
