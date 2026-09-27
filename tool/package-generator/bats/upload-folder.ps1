@@ -20,30 +20,6 @@ $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
-$startTime = Get-Date
-
-if (!$SiteUrl -or !$SitePath -or !$TenantId -or !$LocalPath) {
-    Write-MessageError "SiteUrl と SitePath と TenantId と LocalPath を指定してください"
-    exit 1
-}
-
-if (!(Test-Path -LiteralPath $LocalPath)) {
-    Write-MessageError "アップロード元が存在しません：$LocalPath"
-    exit 1
-}
-
-New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
-
-$uploadLog = @()
-
-$az = Get-AzureCliPath
-$token = Get-GraphToken -Az $az -TenantId $TenantId
-$headers = @{ Authorization = "Bearer $token" }
-
-$siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $SiteUrl
-
-$folderParts = $SitePath -split '/'
-$relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
 
 function Send-EmptyFileToSharePoint {
     param(
@@ -167,32 +143,59 @@ function Send-FolderRecursive {
     }
 }
 
-$topLevelItems = Get-ChildItem -LiteralPath $LocalPath
+$logNamePrefix = "$($LogPrefix)_$($ClientName)"
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix
 
-if ($ItemsInclude) {
-    $includePatterns = $ItemsInclude.Split(",") | ForEach-Object { $_.Trim() }
-    $topLevelItems = $topLevelItems | Where-Object { Test-NameMatchesPatterns -Name $_.Name -Patterns $includePatterns }
-}
-
-if ($ItemsExclude) {
-    $excludePatterns = $ItemsExclude.Split(",") | ForEach-Object { $_.Trim() }
-    $topLevelItems = $topLevelItems | Where-Object { !(Test-NameMatchesPatterns -Name $_.Name -Patterns $excludePatterns) }
-}
-
-$logNamePrefix = "$($LogPrefix)$(if ($ClientName) { "${ClientName}_" } else { "${defaultClientLabel}_" })$(Split-Path $relativeFolder -Leaf)"
-$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Timestamp $startTime
-
+$script:exitCode = 0
+$psParams = $PSBoundParameters
 & {
-    $topLevelItems | ForEach-Object {
-        Send-Item -Item $_ -SubPath $_.Name
+    try {
+        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+
+        if (!$SiteUrl -or !$SitePath -or !$TenantId -or !$LocalPath) {
+            throw "SiteUrl と SitePath と TenantId と LocalPath を指定してください"
+        }
+
+        if (!(Test-Path -LiteralPath $LocalPath)) {
+            throw "アップロード元が存在しません：$LocalPath"
+        }
+
+        New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
+
+        $uploadLog = @()
+
+        $az = Get-AzureCliPath
+        $token = Get-GraphToken -Az $az -TenantId $TenantId
+        $headers = @{ Authorization = "Bearer $token" }
+
+        $siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $SiteUrl
+
+        $folderParts = $SitePath -split '/'
+        $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
+
+        $topLevelItems = Get-ChildItem -LiteralPath $LocalPath
+
+        if ($ItemsInclude) {
+            $includePatterns = $ItemsInclude.Split(",") | ForEach-Object { $_.Trim() }
+            $topLevelItems = $topLevelItems | Where-Object { Test-NameMatchesPatterns -Name $_.Name -Patterns $includePatterns }
+        }
+
+        if ($ItemsExclude) {
+            $excludePatterns = $ItemsExclude.Split(",") | ForEach-Object { $_.Trim() }
+            $topLevelItems = $topLevelItems | Where-Object { !(Test-NameMatchesPatterns -Name $_.Name -Patterns $excludePatterns) }
+        }
+
+        $topLevelItems | ForEach-Object {
+            Send-Item -Item $_ -SubPath $_.Name
+        }
+        $message = Get-RunLogMessage -ResultSectionTitle "アップロード結果" -ResultLines $uploadLog `
+            -ItemListRootPath $LocalPath -ItemListPaths @($topLevelItems | ForEach-Object { $_.FullName })
+        Write-Message $message -Type "Info" -NoHeader
+    } catch {
+        Write-MessageError "実行エラー: $($error[0])"
+        $script:exitCode = 1
     }
-    $message = Get-RunLogMessage -ResultSectionTitle "アップロード結果" -ResultLines $uploadLog `
-        -ItemListRootPath $LocalPath -ItemListPaths @($topLevelItems | ForEach-Object { $_.FullName })
-    Write-Message $message -Type "Info" -NoHeader
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-if ($error) {
-    Write-MessageError "実行エラー: $($error[0])"
-    throw
-}
 Write-MessageComplete "ログを出力しました: $logFilePath"
+exit $script:exitCode
