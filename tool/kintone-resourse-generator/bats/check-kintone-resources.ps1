@@ -4,7 +4,6 @@
 
 param(
     [string]$ConfigName,
-    [string]$Sheets,
     [string]$BaseUrl,
     [string]$ConfigRoot,
     [string]$OutputRoot,
@@ -48,22 +47,12 @@ $psParams = $PSBoundParameters
         }
         finally {
             if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-            if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
             [System.GC]::Collect()
             [System.GC]::WaitForPendingFinalizers()
         }
 
         $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${KintoneLogin}:${KintonePassword}"))
-
-        $selectedSheets = ConvertTo-SheetNameArray -Sheets $Sheets
-        if ($selectedSheets.Count -gt 0) {
-            Write-Message "対象シートを絞り込みます: $($selectedSheets -join ', ')" -ForegroundColor Cyan -Type "Info" -NoHeader
-        }
-        $checkSpaceSettings = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-settings"
-        $checkSpaceMembers  = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-member-list"
-        $checkAppList       = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-list"
-        $checkAppAcl        = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-acl"
-        $checkAppRecordAcl  = Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-app-record-acl"
 
         function Add-FieldColumns {
             param([System.Collections.Specialized.OrderedDictionary]$Row, [array]$Pairs)
@@ -90,7 +79,7 @@ $psParams = $PSBoundParameters
         $appAclDiff = New-Object System.Collections.Generic.List[psobject]
         $appRecordAclDiff = New-Object System.Collections.Generic.List[psobject]
 
-        if ($checkSpaceSettings -or $checkSpaceMembers) {
+        if ($spaceRows -or $memberRows) {
             foreach ($spaceGroup in (Group-RowsBySpaceId -Rows $spaceRows)) {
                 $spaceId = $spaceGroup.Name
                 $expectedSpaceRow = $spaceGroup.Group | Select-Object -First 1
@@ -100,87 +89,86 @@ $psParams = $PSBoundParameters
                 $current = $null
                 try {
                     $current = Get-CurrentSpace -SpaceId $spaceId -BaseUrl $BaseUrl -Authorization $authorization -HasAppAcl:$false -HasRecordAcl:$false
-                } catch {
-                    if ($checkSpaceSettings) {
-                        $row = [ordered]@{ "スペースID" = $spaceId }
-                        $row["結果"] = "kintoneに未定義"
-                        $spaceSettingsDiff.Add([PSCustomObject]$row)
-                    }
+                }
+                catch {
+                    $row = [ordered]@{ "スペースID" = $spaceId }
+                    $row["結果"] = "kintoneに未定義"
+                    $spaceSettingsDiff.Add([PSCustomObject]$row)
                     continue
                 }
 
-                if ($checkSpaceSettings) {
-                    $row = [ordered]@{ "スペースID" = $spaceId; "結果" = $null }
-                    $allMatch = Add-FieldColumns -Row $row -Pairs @(
-                        @{ Label = "スペース名";                                                       Current = $current.spaceName;      Expected = $expectedSpaceRow.'スペース名' },
-                        @{ Label = "参加メンバーだけにこのスペースを公開する";                           Current = $current.isPrivate;      Expected = (ToBool $expectedSpaceRow.'参加メンバーだけにこのスペースを公開する') },
-                        @{ Label = "スペースのポータルと複数のスレッドを使用する";                       Current = $current.useMultiThread; Expected = (ToBool $expectedSpaceRow.'スペースのポータルと複数のスレッドを使用する') },
-                        @{ Label = "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する"; Current = $current.fixedMember;    Expected = (ToBool $expectedSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') },
-                        @{ Label = "アプリ作成できるユーザーをスペースの管理者に限定する";               Current = ($current.createApp -eq "ADMIN"); Expected = (ToBool $expectedSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する') }
-                    )
-                    $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
-                    $spaceSettingsDiff.Add([PSCustomObject]$row)
+                $row = [ordered]@{ "スペースID" = $spaceId; "結果" = $null }
+                $allMatch = Add-FieldColumns -Row $row -Pairs @(
+                    @{ Label = "スペース名"; Current = $current.spaceName; Expected = $expectedSpaceRow.'スペース名' },
+                    @{ Label = "参加メンバーだけにこのスペースを公開する"; Current = $current.isPrivate; Expected = (ToBool $expectedSpaceRow.'参加メンバーだけにこのスペースを公開する') },
+                    @{ Label = "スペースのポータルと複数のスレッドを使用する"; Current = $current.useMultiThread; Expected = (ToBool $expectedSpaceRow.'スペースのポータルと複数のスレッドを使用する') },
+                    @{ Label = "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する"; Current = $current.fixedMember; Expected = (ToBool $expectedSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') },
+                    @{ Label = "アプリ作成できるユーザーをスペースの管理者に限定する"; Current = ($current.createApp -eq "ADMIN"); Expected = (ToBool $expectedSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する') }
+                )
+                $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
+                $spaceSettingsDiff.Add([PSCustomObject]$row)
+                
+                $currentMembersByCode = @{}
+                foreach ($m in $current.members) {
+                    $currentMembersByCode[$m.entity.code] = $m
                 }
+                $expectedMemberRows = @($memberRows | Where-Object { $_.'スペースID' -eq $spaceId })
+                $expectedMembersByCode = @{}
+                foreach ($r in $expectedMemberRows) { $expectedMembersByCode[$r.'ユーザー/組織/グループ'] = $r }
 
-                if ($checkSpaceMembers) {
-                    $currentMembersByCode = @{}
-                    foreach ($m in $current.members) {
-                        $currentMembersByCode[$m.entity.code] = $m
+                $allOrgCodes = @($currentMembersByCode.Keys) + @($expectedMembersByCode.Keys) | Select-Object -Unique
+                foreach ($code in $allOrgCodes) {
+                    $cur = $currentMembersByCode[$code]
+                    $exp = $expectedMembersByCode[$code]
+                    $typeLabel = if ($cur) {
+                        Get-KintoneMemberTypeLabel $cur.entity.type
                     }
-                    $expectedMemberRows = @($memberRows | Where-Object { $_.'スペースID' -eq $spaceId })
-                    $expectedMembersByCode = @{}
-                    foreach ($r in $expectedMemberRows) { $expectedMembersByCode[$r.'ユーザー/組織/グループ'] = $r }
-
-                    $allOrgCodes = @($currentMembersByCode.Keys) + @($expectedMembersByCode.Keys) | Select-Object -Unique
-                    foreach ($code in $allOrgCodes) {
-                        $cur = $currentMembersByCode[$code]
-                        $exp = $expectedMembersByCode[$code]
-                        $typeLabel = if ($cur) {
-                            Get-KintoneMemberTypeLabel $cur.entity.type
-                        } elseif ($exp.'種別') {
-                            $exp.'種別'
-                        } else {
-                            try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $code) } catch { "不明" }
-                        }
-                        $row = [ordered]@{ "スペースID" = $spaceId; "種別" = $typeLabel; "ユーザー/組織/グループ" = $code; "結果" = $null }
-                        if ($cur -and -not $exp) {
-                            $row["管理者_現状"] = $cur.isAdmin; $row["管理者_期待値"] = $null
-                            $row["下位組織も含める_現状"] = $cur.includeSubs; $row["下位組織も含める_期待値"] = $null
-                            $everyoneExp = $expectedMembersByCode["everyone"]
-                            $matchesEveryone = $cur.entity.type -eq "USER" -and $everyoneExp -and (Test-PairsMatch @(
-                                @{ Current = $cur.isAdmin;     Expected = (ToBool $everyoneExp.'管理者') },
+                    elseif ($exp.'種別') {
+                        $exp.'種別'
+                    }
+                    else {
+                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $code) } catch { "不明" }
+                    }
+                    $row = [ordered]@{ "スペースID" = $spaceId; "種別" = $typeLabel; "ユーザー/組織/グループ" = $code; "結果" = $null }
+                    if ($cur -and -not $exp) {
+                        $row["管理者_現状"] = $cur.isAdmin; $row["管理者_期待値"] = $null
+                        $row["下位組織も含める_現状"] = $cur.includeSubs; $row["下位組織も含める_期待値"] = $null
+                        $everyoneExp = $expectedMembersByCode["everyone"]
+                        $matchesEveryone = $cur.entity.type -eq "USER" -and $everyoneExp -and (Test-PairsMatch @(
+                                @{ Current = $cur.isAdmin; Expected = (ToBool $everyoneExp.'管理者') },
                                 @{ Current = $cur.includeSubs; Expected = (ToBool $everyoneExp.'下位組織も含める') }
                             ))
-                            $row["結果"] = if ($matchesEveryone) { "Everyoneの影響" } else { "設定ファイルに未定義" }
-                        } elseif (-not $cur -and $exp) {
-                            $row["管理者_現状"] = $null; $row["管理者_期待値"] = (ToBool $exp.'管理者')
-                            $row["下位組織も含める_現状"] = $null; $row["下位組織も含める_期待値"] = (ToBool $exp.'下位組織も含める')
-                            $row["結果"] = "kintoneに未定義"
-                        } else {
-                            $allMatch = Add-FieldColumns -Row $row -Pairs @(
-                                @{ Label = "管理者";           Current = $cur.isAdmin;     Expected = (ToBool $exp.'管理者') },
-                                @{ Label = "下位組織も含める"; Current = $cur.includeSubs; Expected = (ToBool $exp.'下位組織も含める') }
-                            )
-                            $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
-                        }
-                        $memberDiff.Add([PSCustomObject]$row)
+                        $row["結果"] = if ($matchesEveryone) { "Everyoneの影響" } else { "設定ファイルに未定義" }
                     }
+                    elseif (-not $cur -and $exp) {
+                        $row["管理者_現状"] = $null; $row["管理者_期待値"] = (ToBool $exp.'管理者')
+                        $row["下位組織も含める_現状"] = $null; $row["下位組織も含める_期待値"] = (ToBool $exp.'下位組織も含める')
+                        $row["結果"] = "kintoneに未定義"
+                    }
+                    else {
+                        $allMatch = Add-FieldColumns -Row $row -Pairs @(
+                            @{ Label = "管理者"; Current = $cur.isAdmin; Expected = (ToBool $exp.'管理者') },
+                            @{ Label = "下位組織も含める"; Current = $cur.includeSubs; Expected = (ToBool $exp.'下位組織も含める') }
+                        )
+                        $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
+                    }
+                    $memberDiff.Add([PSCustomObject]$row)
                 }
             }
         }
 
-        if ($checkAppList -or $checkAppAcl -or $checkAppRecordAcl) {
+        if ($appRows -or $appAclRows -or $recordAclRows) {
             Write-Message "" -Type "Info" -NoHeader
             Write-Message "## アプリの確認" -Type "Info" -NoHeader
 
             $allAppIds = @(
-                @($(if ($checkAppList) { $appRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } })) +
-                @($(if ($checkAppAcl) { $appAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } })) +
-                @($(if ($checkAppRecordAcl) { $recordAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" } }))
+                @($appRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" }) +
+                @($appAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" }) +
+                @($recordAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" })
             ) | Select-Object -Unique
 
             $skippedAppRows = @($appRows | Where-Object { -not $_.'アプリID' })
-            if ($checkAppList -and $skippedAppRows.Count -gt 0) {
+            if ($skippedAppRows.Count -gt 0) {
                 Write-Message "(アプリIDが空の行($($skippedAppRows.Count)件)は確認対象外です)" -ForegroundColor Yellow -Type "Info" -NoHeader
             }
 
@@ -189,153 +177,157 @@ $psParams = $PSBoundParameters
                 $current = Get-AppCurrentInfo -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId
                 $appLabel = $current.name
 
-                if ($checkAppList) {
-                    $expectedAppRow = $appRows | Where-Object { "$($_.'アプリID')" -eq $appId } | Select-Object -First 1
-                    if ($expectedAppRow) {
-                        if (-not $appLabel) {
-                            $row = [ordered]@{ "アプリID" = $appId; "結果" = "kintoneに未定義"; "アプリ名_現状" = $null; "アプリ名_期待値" = $expectedAppRow.'アプリ名' }
-                        } else {
-                            $row = [ordered]@{ "アプリID" = $appId; "結果" = $null }
-                            $allMatch = Add-FieldColumns -Row $row -Pairs @(
-                                @{ Label = "アプリ名"; Current = $appLabel; Expected = $expectedAppRow.'アプリ名' }
-                            )
-                            $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
-                        }
-                        $appListDiff.Add([PSCustomObject]$row)
-                        if (-not $appLabel) { $appLabel = $expectedAppRow.'アプリ名' }
+                $expectedAppRow = $appRows | Where-Object { "$($_.'アプリID')" -eq $appId } | Select-Object -First 1
+                if ($expectedAppRow) {
+                    if (-not $appLabel) {
+                        $row = [ordered]@{ "アプリID" = $appId; "結果" = "kintoneに未定義"; "アプリ名_現状" = $null; "アプリ名_期待値" = $expectedAppRow.'アプリ名' }
                     }
+                    else {
+                        $row = [ordered]@{ "アプリID" = $appId; "結果" = $null }
+                        $allMatch = Add-FieldColumns -Row $row -Pairs @(
+                            @{ Label = "アプリ名"; Current = $appLabel; Expected = $expectedAppRow.'アプリ名' }
+                        )
+                        $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
+                    }
+                    $appListDiff.Add([PSCustomObject]$row)
+                    if (-not $appLabel) { $appLabel = $expectedAppRow.'アプリ名' }
+                }
+                
+                $expectedAclRowsForApp = @($appAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
+                $expectedAclByOrg = @{}
+                foreach ($r in $expectedAclRowsForApp) {
+                    $expectedAclByOrg[$r.'ユーザー／組織／グループ'] = $r
+                    if (-not $appLabel) { $appLabel = $r.'アプリ名' }
                 }
 
-                if ($checkAppAcl) {
-                    $expectedAclRowsForApp = @($appAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
-                    $expectedAclByOrg = @{}
-                    foreach ($r in $expectedAclRowsForApp) {
-                        $expectedAclByOrg[$r.'ユーザー／組織／グループ'] = $r
-                        if (-not $appLabel) { $appLabel = $r.'アプリ名' }
-                    }
+                $currentAclByOrg = @{}
+                foreach ($r in ($current.rights | Where-Object { $_.entity.type -ne "CREATOR" })) {
+                    $currentAclByOrg[$r.entity.code] = $r
+                }
 
-                    $currentAclByOrg = @{}
-                    foreach ($r in ($current.rights | Where-Object { $_.entity.type -ne "CREATOR" })) {
-                        $currentAclByOrg[$r.entity.code] = $r
+                $allOrgCodes = @($currentAclByOrg.Keys) + @($expectedAclByOrg.Keys) | Select-Object -Unique
+                foreach ($orgName in $allOrgCodes) {
+                    $cur = $currentAclByOrg[$orgName]
+                    $exp = $expectedAclByOrg[$orgName]
+                    $typeLabel = if ($cur) {
+                        Get-KintoneMemberTypeLabel $cur.entity.type
                     }
-
-                    $allOrgCodes = @($currentAclByOrg.Keys) + @($expectedAclByOrg.Keys) | Select-Object -Unique
-                    foreach ($orgName in $allOrgCodes) {
-                        $cur = $currentAclByOrg[$orgName]
-                        $exp = $expectedAclByOrg[$orgName]
-                        $typeLabel = if ($cur) {
-                            Get-KintoneMemberTypeLabel $cur.entity.type
-                        } elseif ($exp.'種別') {
-                            $exp.'種別'
-                        } else {
-                            try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
+                    elseif ($exp.'種別') {
+                        $exp.'種別'
+                    }
+                    else {
+                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
+                    }
+                    $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
+                    if ($cur -and -not $exp) {
+                        foreach ($label in @("レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")) {
+                            $row["${label}_現状"] = $null; $row["${label}_期待値"] = $null
                         }
-                        $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
-                        if ($cur -and -not $exp) {
-                            foreach ($label in @("レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")) {
-                                $row["${label}_現状"] = $null; $row["${label}_期待値"] = $null
-                            }
-                            $row["レコード閲覧_現状"] = $cur.recordViewable; $row["レコード追加_現状"] = $cur.recordAddable
-                            $row["レコード編集_現状"] = $cur.recordEditable; $row["レコード削除_現状"] = $cur.recordDeletable
-                            $row["アプリ管理_現状"] = $cur.appEditable; $row["ファイル読み込み_現状"] = $cur.recordImportable
-                            $row["ファイル書き出し_現状"] = $cur.recordExportable
-                            $everyoneExp = $expectedAclByOrg["everyone"]
-                            $matchesEveryone = $cur.entity.type -eq "USER" -and $everyoneExp -and (Test-PairsMatch @(
-                                @{ Current = $cur.recordViewable;   Expected = (ToBool $everyoneExp.'レコード閲覧') },
-                                @{ Current = $cur.recordAddable;    Expected = (ToBool $everyoneExp.'レコード追加') },
-                                @{ Current = $cur.recordEditable;   Expected = (ToBool $everyoneExp.'レコード編集') },
-                                @{ Current = $cur.recordDeletable;  Expected = (ToBool $everyoneExp.'レコード削除') },
-                                @{ Current = $cur.appEditable;      Expected = (ToBool $everyoneExp.'アプリ管理') },
+                        $row["レコード閲覧_現状"] = $cur.recordViewable; $row["レコード追加_現状"] = $cur.recordAddable
+                        $row["レコード編集_現状"] = $cur.recordEditable; $row["レコード削除_現状"] = $cur.recordDeletable
+                        $row["アプリ管理_現状"] = $cur.appEditable; $row["ファイル読み込み_現状"] = $cur.recordImportable
+                        $row["ファイル書き出し_現状"] = $cur.recordExportable
+                        $everyoneExp = $expectedAclByOrg["everyone"]
+                        $matchesEveryone = $cur.entity.type -eq "USER" -and $everyoneExp -and (Test-PairsMatch @(
+                                @{ Current = $cur.recordViewable; Expected = (ToBool $everyoneExp.'レコード閲覧') },
+                                @{ Current = $cur.recordAddable; Expected = (ToBool $everyoneExp.'レコード追加') },
+                                @{ Current = $cur.recordEditable; Expected = (ToBool $everyoneExp.'レコード編集') },
+                                @{ Current = $cur.recordDeletable; Expected = (ToBool $everyoneExp.'レコード削除') },
+                                @{ Current = $cur.appEditable; Expected = (ToBool $everyoneExp.'アプリ管理') },
                                 @{ Current = $cur.recordImportable; Expected = (ToBool $everyoneExp.'ファイル読み込み') },
                                 @{ Current = $cur.recordExportable; Expected = (ToBool $everyoneExp.'ファイル書き出し') }
                             ))
-                            $row["結果"] = if ($matchesEveryone) { "Everyoneの影響" } else { "設定ファイルに未定義" }
-                        } elseif (-not $cur -and $exp) {
-                            $row["レコード閲覧_現状"] = $null; $row["レコード閲覧_期待値"] = (ToBool $exp.'レコード閲覧')
-                            $row["レコード追加_現状"] = $null; $row["レコード追加_期待値"] = (ToBool $exp.'レコード追加')
-                            $row["レコード編集_現状"] = $null; $row["レコード編集_期待値"] = (ToBool $exp.'レコード編集')
-                            $row["レコード削除_現状"] = $null; $row["レコード削除_期待値"] = (ToBool $exp.'レコード削除')
-                            $row["アプリ管理_現状"] = $null; $row["アプリ管理_期待値"] = (ToBool $exp.'アプリ管理')
-                            $row["ファイル読み込み_現状"] = $null; $row["ファイル読み込み_期待値"] = (ToBool $exp.'ファイル読み込み')
-                            $row["ファイル書き出し_現状"] = $null; $row["ファイル書き出し_期待値"] = (ToBool $exp.'ファイル書き出し')
-                            $row["結果"] = "kintoneに未定義"
-                        } else {
-                            $allMatch = Add-FieldColumns -Row $row -Pairs @(
-                                @{ Label = "レコード閲覧";     Current = $cur.recordViewable;   Expected = (ToBool $exp.'レコード閲覧') },
-                                @{ Label = "レコード追加";     Current = $cur.recordAddable;    Expected = (ToBool $exp.'レコード追加') },
-                                @{ Label = "レコード編集";     Current = $cur.recordEditable;   Expected = (ToBool $exp.'レコード編集') },
-                                @{ Label = "レコード削除";     Current = $cur.recordDeletable;  Expected = (ToBool $exp.'レコード削除') },
-                                @{ Label = "アプリ管理";       Current = $cur.appEditable;      Expected = (ToBool $exp.'アプリ管理') },
-                                @{ Label = "ファイル読み込み"; Current = $cur.recordImportable; Expected = (ToBool $exp.'ファイル読み込み') },
-                                @{ Label = "ファイル書き出し"; Current = $cur.recordExportable;  Expected = (ToBool $exp.'ファイル書き出し') }
-                            )
-                            $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
-                        }
-                        $appAclDiff.Add([PSCustomObject]$row)
+                        $row["結果"] = if ($matchesEveryone) { "Everyoneの影響" } else { "設定ファイルに未定義" }
+                    }
+                    elseif (-not $cur -and $exp) {
+                        $row["レコード閲覧_現状"] = $null; $row["レコード閲覧_期待値"] = (ToBool $exp.'レコード閲覧')
+                        $row["レコード追加_現状"] = $null; $row["レコード追加_期待値"] = (ToBool $exp.'レコード追加')
+                        $row["レコード編集_現状"] = $null; $row["レコード編集_期待値"] = (ToBool $exp.'レコード編集')
+                        $row["レコード削除_現状"] = $null; $row["レコード削除_期待値"] = (ToBool $exp.'レコード削除')
+                        $row["アプリ管理_現状"] = $null; $row["アプリ管理_期待値"] = (ToBool $exp.'アプリ管理')
+                        $row["ファイル読み込み_現状"] = $null; $row["ファイル読み込み_期待値"] = (ToBool $exp.'ファイル読み込み')
+                        $row["ファイル書き出し_現状"] = $null; $row["ファイル書き出し_期待値"] = (ToBool $exp.'ファイル書き出し')
+                        $row["結果"] = "kintoneに未定義"
+                    }
+                    else {
+                        $allMatch = Add-FieldColumns -Row $row -Pairs @(
+                            @{ Label = "レコード閲覧"; Current = $cur.recordViewable; Expected = (ToBool $exp.'レコード閲覧') },
+                            @{ Label = "レコード追加"; Current = $cur.recordAddable; Expected = (ToBool $exp.'レコード追加') },
+                            @{ Label = "レコード編集"; Current = $cur.recordEditable; Expected = (ToBool $exp.'レコード編集') },
+                            @{ Label = "レコード削除"; Current = $cur.recordDeletable; Expected = (ToBool $exp.'レコード削除') },
+                            @{ Label = "アプリ管理"; Current = $cur.appEditable; Expected = (ToBool $exp.'アプリ管理') },
+                            @{ Label = "ファイル読み込み"; Current = $cur.recordImportable; Expected = (ToBool $exp.'ファイル読み込み') },
+                            @{ Label = "ファイル書き出し"; Current = $cur.recordExportable; Expected = (ToBool $exp.'ファイル書き出し') }
+                        )
+                        $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
+                    }
+                    $appAclDiff.Add([PSCustomObject]$row)
+                }
+                $expectedRecordAclRowsForApp = @($recordAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
+                $expectedRecordAclByKey = @{}
+                foreach ($r in $expectedRecordAclRowsForApp) {
+                    $expectedRecordAclByKey["$($r.'レコードの条件')|$($r.'ユーザー／組織／グループ')"] = $r
+                    if (-not $appLabel) { $appLabel = $r.'アプリ名' }
+                }
+
+                $currentRecordAclByKey = @{}
+                foreach ($r in $current.recordRights) {
+                    foreach ($entity in $r.entities) {
+                        $orgName = if ($entity.entity.type -eq "CREATOR") { "作成者" } else { $entity.entity.code }
+                        $currentRecordAclByKey["$($r.filterCond)|$orgName"] = @{ FilterCond = $r.filterCond; Entity = $entity }
                     }
                 }
 
-                if ($checkAppRecordAcl) {
-                    $expectedRecordAclRowsForApp = @($recordAclRows | Where-Object { "$($_.'アプリID')" -eq $appId })
-                    $expectedRecordAclByKey = @{}
-                    foreach ($r in $expectedRecordAclRowsForApp) {
-                        $expectedRecordAclByKey["$($r.'レコードの条件')|$($r.'ユーザー／組織／グループ')"] = $r
-                        if (-not $appLabel) { $appLabel = $r.'アプリ名' }
+                $allRecordAclKeys = @($currentRecordAclByKey.Keys) + @($expectedRecordAclByKey.Keys) | Select-Object -Unique
+                foreach ($key in $allRecordAclKeys) {
+                    $parts = $key -split '\|', 2
+                    $cond = $parts[0]; $orgName = $parts[1]
+                    $cur = $currentRecordAclByKey[$key]
+                    $exp = $expectedRecordAclByKey[$key]
+                    $typeLabel = if ($cur) {
+                        if ($cur.Entity.entity.type -eq "CREATOR") { "作成者" } else { Get-KintoneMemberTypeLabel $cur.Entity.entity.type }
                     }
-
-                    $currentRecordAclByKey = @{}
-                    foreach ($r in $current.recordRights) {
-                        foreach ($entity in $r.entities) {
-                            $orgName = if ($entity.entity.type -eq "CREATOR") { "作成者" } else { $entity.entity.code }
-                            $currentRecordAclByKey["$($r.filterCond)|$orgName"] = @{ FilterCond = $r.filterCond; Entity = $entity }
-                        }
+                    elseif ($exp.'種別') {
+                        $exp.'種別'
                     }
-
-                    $allRecordAclKeys = @($currentRecordAclByKey.Keys) + @($expectedRecordAclByKey.Keys) | Select-Object -Unique
-                    foreach ($key in $allRecordAclKeys) {
-                        $parts = $key -split '\|', 2
-                        $cond = $parts[0]; $orgName = $parts[1]
-                        $cur = $currentRecordAclByKey[$key]
-                        $exp = $expectedRecordAclByKey[$key]
-                        $typeLabel = if ($cur) {
-                            if ($cur.Entity.entity.type -eq "CREATOR") { "作成者" } else { Get-KintoneMemberTypeLabel $cur.Entity.entity.type }
-                        } elseif ($exp.'種別') {
-                            $exp.'種別'
-                        } elseif ($orgName -eq "作成者") {
-                            "作成者"
-                        } else {
-                            try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
-                        }
-                        $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "レコードの条件" = $cond; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
-                        if ($cur -and -not $exp) {
-                            $row["閲覧_現状"] = $cur.Entity.viewable; $row["閲覧_期待値"] = $null
-                            $row["編集_現状"] = $cur.Entity.editable; $row["編集_期待値"] = $null
-                            $row["削除_現状"] = $cur.Entity.deletable; $row["削除_期待値"] = $null
-                            $everyoneExp = $expectedRecordAclByKey["$cond|everyone"]
-                            $matchesEveryone = $cur.Entity.entity.type -eq "USER" -and $everyoneExp -and (Test-PairsMatch @(
-                                @{ Current = $cur.Entity.viewable;  Expected = (ToBool $everyoneExp.'閲覧') },
-                                @{ Current = $cur.Entity.editable;  Expected = (ToBool $everyoneExp.'編集') },
+                    elseif ($orgName -eq "作成者") {
+                        "作成者"
+                    }
+                    else {
+                        try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
+                    }
+                    $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "レコードの条件" = $cond; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
+                    if ($cur -and -not $exp) {
+                        $row["閲覧_現状"] = $cur.Entity.viewable; $row["閲覧_期待値"] = $null
+                        $row["編集_現状"] = $cur.Entity.editable; $row["編集_期待値"] = $null
+                        $row["削除_現状"] = $cur.Entity.deletable; $row["削除_期待値"] = $null
+                        $everyoneExp = $expectedRecordAclByKey["$cond|everyone"]
+                        $matchesEveryone = $cur.Entity.entity.type -eq "USER" -and $everyoneExp -and (Test-PairsMatch @(
+                                @{ Current = $cur.Entity.viewable; Expected = (ToBool $everyoneExp.'閲覧') },
+                                @{ Current = $cur.Entity.editable; Expected = (ToBool $everyoneExp.'編集') },
                                 @{ Current = $cur.Entity.deletable; Expected = (ToBool $everyoneExp.'削除') }
                             ))
-                            $row["結果"] = if ($matchesEveryone) { "Everyoneの影響" } else { "設定ファイルに未定義" }
-                        } elseif (-not $cur -and $exp) {
-                            $row["閲覧_現状"] = $null; $row["閲覧_期待値"] = (ToBool $exp.'閲覧')
-                            $row["編集_現状"] = $null; $row["編集_期待値"] = (ToBool $exp.'編集')
-                            $row["削除_現状"] = $null; $row["削除_期待値"] = (ToBool $exp.'削除')
-                            $row["結果"] = "kintoneに未定義"
-                        } else {
-                            $allMatch = Add-FieldColumns -Row $row -Pairs @(
-                                @{ Label = "閲覧"; Current = $cur.Entity.viewable;  Expected = (ToBool $exp.'閲覧') },
-                                @{ Label = "編集"; Current = $cur.Entity.editable;  Expected = (ToBool $exp.'編集') },
-                                @{ Label = "削除"; Current = $cur.Entity.deletable; Expected = (ToBool $exp.'削除') }
-                            )
-                            $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
-                        }
-                        $appRecordAclDiff.Add([PSCustomObject]$row)
+                        $row["結果"] = if ($matchesEveryone) { "Everyoneの影響" } else { "設定ファイルに未定義" }
                     }
+                    elseif (-not $cur -and $exp) {
+                        $row["閲覧_現状"] = $null; $row["閲覧_期待値"] = (ToBool $exp.'閲覧')
+                        $row["編集_現状"] = $null; $row["編集_期待値"] = (ToBool $exp.'編集')
+                        $row["削除_現状"] = $null; $row["削除_期待値"] = (ToBool $exp.'削除')
+                        $row["結果"] = "kintoneに未定義"
+                    }
+                    else {
+                        $allMatch = Add-FieldColumns -Row $row -Pairs @(
+                            @{ Label = "閲覧"; Current = $cur.Entity.viewable; Expected = (ToBool $exp.'閲覧') },
+                            @{ Label = "編集"; Current = $cur.Entity.editable; Expected = (ToBool $exp.'編集') },
+                            @{ Label = "削除"; Current = $cur.Entity.deletable; Expected = (ToBool $exp.'削除') }
+                        )
+                        $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
+                    }
+                    $appRecordAclDiff.Add([PSCustomObject]$row)
                 }
             }
         }
+        
 
         New-Item -ItemType Directory -Path (Split-Path $outputPath -Parent) -Force | Out-Null
         Remove-Item -LiteralPath $outputPath -Force -ErrorAction SilentlyContinue
@@ -348,10 +340,10 @@ $psParams = $PSBoundParameters
             "space-app-record-acl" = $appRecordAclDiff
         }
         $colorMap = @{
-            "一致"                 = [System.Drawing.Color]::FromArgb(0, 128, 0)
-            "不一致"               = [System.Drawing.Color]::FromArgb(255, 0, 0)
-            "kintoneに未定義"        = [System.Drawing.Color]::FromArgb(255, 0, 255)
-            "設定ファイルに未定義"   = [System.Drawing.Color]::FromArgb(128, 128, 0)
+            "一致"          = [System.Drawing.Color]::FromArgb(0, 128, 0)
+            "不一致"         = [System.Drawing.Color]::FromArgb(255, 0, 0)
+            "kintoneに未定義" = [System.Drawing.Color]::FromArgb(255, 0, 255)
+            "設定ファイルに未定義"  = [System.Drawing.Color]::FromArgb(128, 128, 0)
             "Everyoneの影響" = [System.Drawing.Color]::FromArgb(128, 128, 128)
         }
         $genjoColor = [System.Drawing.Color]::FromArgb(226, 239, 218)
@@ -376,7 +368,8 @@ $psParams = $PSBoundParameters
                 if (-not $usedDefaultSheet) {
                     $ws = $workbook.Sheets.Item(1)
                     $usedDefaultSheet = $true
-                } else {
+                }
+                else {
                     $ws = $workbook.Sheets.Add([Type]::Missing, $workbook.Sheets.Item($workbook.Sheets.Count))
                 }
                 $ws.Name = $sheetName
@@ -401,14 +394,17 @@ $psParams = $PSBoundParameters
                         $label = $header.Substring(0, $header.Length - "_現状".Length)
                         if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
                         $fieldPairCols[$label]["現状"] = $c
-                    } elseif ($header.EndsWith("_期待値")) {
+                    }
+                    elseif ($header.EndsWith("_期待値")) {
                         $headerCell.Interior.Color = ConvertTo-OleColor $kitaichiColor
                         $label = $header.Substring(0, $header.Length - "_期待値".Length)
                         if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
                         $fieldPairCols[$label]["期待値"] = $c
-                    } elseif ($header -eq "結果") {
+                    }
+                    elseif ($header -eq "結果") {
                         $headerCell.Interior.Color = ConvertTo-OleColor $resultHeaderColor
-                    } else {
+                    }
+                    else {
                         $headerCell.Interior.Color = ConvertTo-OleColor $otherColor
                     }
                 }
@@ -439,7 +435,7 @@ $psParams = $PSBoundParameters
         }
         finally {
             if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-            if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
             [System.GC]::Collect()
             [System.GC]::WaitForPendingFinalizers()
         }
@@ -455,13 +451,15 @@ $psParams = $PSBoundParameters
             $breakdown = ($sheetRows | Where-Object { $_.'結果' -ne "一致" } | Group-Object -Property '結果' | ForEach-Object { "$($_.Name)$($_.Count)件" }) -join "、"
             if ($breakdown) {
                 Write-Message "  ${sheetName}: $sheetErrorCount / $($sheetRows.Count)（$breakdown）" -Type "Info" -NoHeader
-            } else {
+            }
+            else {
                 Write-Message "  ${sheetName}: $sheetErrorCount / $($sheetRows.Count)" -Type "Info" -NoHeader
             }
         }
         Write-MessageComplete "チェック結果を出力しました: $outputPath"
         if ($errorCount -gt 0) { $script:exitCode = 2 }
-    } catch {
+    }
+    catch {
         Write-MessageError "実行エラー: $($error[0])"
         $script:exitCode = 1
     }
