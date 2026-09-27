@@ -64,6 +64,8 @@ foreach ($sheetName in $sheetNames) {
     $logNamePrefix = "$($LogPrefix)$(if ($ClientName) { "${ClientName}_" } else { "${defaultClientLabel}_" })$sheetName"
     $logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Timestamp $sheetStartTime
 
+    $error.Clear()
+
     & {
         $packageWorkPath = Join-Path $WorkPath $sheetName
         New-Item $packageWorkPath -ItemType Directory -Force | Out-Null
@@ -88,7 +90,7 @@ foreach ($sheetName in $sheetNames) {
             $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
 
             if (!(Test-Path $sourcePath)) {
-                Write-MessageWarn "存在しません：$sourcePath"
+                Write-MessageWarn "取得元（フルパス）が存在しません：$sourcePath"
                 $packageLog += "$sourcePath -> 存在しません"
                 continue
             }
@@ -194,6 +196,10 @@ foreach ($sheetName in $sheetNames) {
         Write-MessageComplete "パッケージを作成しました: $packagePath"
     } *>&1 | Tee-Object -FilePath $logFilePath
     ConvertTo-Utf8LogFile -Path $logFilePath
+    if ($error) {
+        Write-MessageError "実行エラー: $($error[0])"
+        throw
+    }
     Write-MessageComplete "ログを出力しました: $logFilePath"
 }
 

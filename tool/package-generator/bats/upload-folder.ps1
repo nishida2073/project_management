@@ -191,5 +191,8 @@ $logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix -Times
     Write-Message $message -Type "Info" -NoHeader
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-
+if ($error) {
+    Write-MessageError "実行エラー: $($error[0])"
+    throw
+}
 Write-MessageComplete "ログを出力しました: $logFilePath"
