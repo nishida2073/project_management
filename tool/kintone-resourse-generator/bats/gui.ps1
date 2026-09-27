@@ -267,7 +267,6 @@ $lblBatchStatus = New-Object System.Windows.Forms.Label
 $lblBatchStatus.Text = ""
 $lblBatchStatus.AutoSize = $true
 $lblBatchStatus.Location = New-Object System.Drawing.Point(130, 56)
-$lblBatchStatus.Font = New-Object System.Drawing.Font($lblBatchStatus.Font, [System.Drawing.FontStyle]::Bold)
 
 $batchExcelPanel.Controls.AddRange(@(
     $lblBatchExcelPath, $txtBatchExcelPath, $btnBatchBrowse, $btnBatchRunAll, $lblBatchStatus
