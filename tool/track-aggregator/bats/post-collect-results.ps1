@@ -74,5 +74,8 @@ $psParams = $PSBoundParameters
     Write-MessageComplete "集計結果を投稿しました"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-
+if ($error) {
+    Write-MessageError "実行エラー: $($error[0])"
+    throw
+}
 Write-MessageComplete "ログを出力しました: $logFilePath"

@@ -49,11 +49,11 @@ function Download-File {
                 Write-Message "success [$Url]" -VarName "message" -Type "Info" -ForegroundColor Blue
             }
             else {
-                Write-Message "timeout waiting file [$Url]" -VarName "message" -Type "Error" -ForegroundColor Red
+                throw "timeout [$Url]"
             }
         }
         else {
-            Write-Message "fail [$Url]" -VarName "message" -Type "Error" -ForegroundColor Red
+            throw "fail script [$Url]"
         }
         # Start-Sleep -Milliseconds 500
     }
@@ -109,11 +109,15 @@ function Download-TrackResults {
             }
             Write-Message $Url -VarName "functionName" -Type "Url"
 
-            Download-File `
-                -Url $Url `
-                -OutFileDir $resultDir `
-                -AutoHotkeyExePath $AutoHotkeyExePath `
-                -AutoHotkeyScriptPath $AutoHotkeyScriptPath
+            try {
+                Download-File `
+                    -Url $Url `
+                    -OutFileDir $resultDir `
+                    -AutoHotkeyExePath $AutoHotkeyExePath `
+                    -AutoHotkeyScriptPath $AutoHotkeyScriptPath
+            } catch {
+                Write-MessageError "ダウンロード失敗: $Url - $_"
+            }
         }
     }
 }
@@ -138,5 +142,8 @@ $psParams = $PSBoundParameters
     Write-MessageComplete "実施結果をダウンロードしました: $(Join-Path $TestResultRootDir $TargetGroupName), $(Join-Path $SurveyResultRootDir $TargetGroupName)"
 } *>&1 | Tee-Object -FilePath $logFilePath
 ConvertTo-Utf8LogFile -Path $logFilePath
-
+if ($error) {
+    Write-MessageError "実行エラー: $($error[0])"
+    throw
+}
 Write-MessageComplete "ログを出力しました: $logFilePath"
