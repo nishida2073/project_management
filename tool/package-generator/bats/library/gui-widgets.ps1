@@ -517,7 +517,8 @@ function New-BatchRunTab {
         [array]$Inputs = @(),
         [string]$RunButtonText = "一括実行",
         [scriptblock]$ShowOpenLink = { param($bd) [bool]$bd.OpenTarget },
-        [scriptblock]$OnOpenClick = {}
+        [scriptblock]$OnOpenClick = {},
+        [string]$InitialStatusText = "未実行"
     )
 
     $batchPanel = New-Object System.Windows.Forms.Panel
@@ -609,7 +610,7 @@ function New-BatchRunTab {
         }
 
         $lblStepStatus = New-Object System.Windows.Forms.Label
-        $lblStepStatus.Text = ""
+        $lblStepStatus.Text = $InitialStatusText
         $lblStepStatus.AutoSize = $false
         $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
         $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
@@ -746,7 +747,12 @@ function Invoke-BatchRunAll {
     & $SetRunButtonsEnabled $false
     foreach ($chk in $CheckBoxes) { $chk.Enabled = $false }
     foreach ($ctrl in $ExtraControls) { $ctrl.Enabled = $false }
-    foreach ($lbl in $StatusLabels) { $lbl.Text = ""; $lbl.ForeColor = [System.Drawing.Color]::Gray }
+    for ($i = 0; $i -lt $CheckBoxes.Count; $i++) {
+        if ($CheckBoxes[$i].Checked -and $i -lt $StatusLabels.Count) {
+            $StatusLabels[$i].Text = ""
+            $StatusLabels[$i].ForeColor = [System.Drawing.Color]::Gray
+        }
+    }
     Set-StepStatus -Label $StatusLabel -Text "実行中..."
 
     & $WriteLog ""
@@ -927,7 +933,8 @@ function Add-FieldActionButton {
         [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick,
         [int]$Width = 90,
-        [switch]$AddStatusLabel
+        [switch]$AddStatusLabel,
+        [string]$InitialStatusText = "未実行"
     )
     $btn = New-Object System.Windows.Forms.Button
     $btn.Text = $Text
@@ -939,10 +946,10 @@ function Add-FieldActionButton {
 
     if ($AddStatusLabel) {
         $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = "未実行"
+        $lbl.Text = $InitialStatusText
         $lbl.AutoSize = $true
         $lbl.Location = New-Object System.Drawing.Point(($btn.Right + 10), ($btn.Top + 6))
-        
+        $lbl.ForeColor = [System.Drawing.Color]::Gray
         $Panel.Controls.Add($lbl) | Out-Null
         return $lbl
     }
