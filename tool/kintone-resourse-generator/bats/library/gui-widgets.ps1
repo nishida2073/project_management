@@ -470,7 +470,6 @@ function New-SettingsTopPanel {
     $lblStatus.Text = ""
     $lblStatus.AutoSize = $true
     $lblStatus.Location = New-Object System.Drawing.Point(244, ($ButtonRowY + 6))
-    $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
 
     $panel.Controls.AddRange(@($btnSave, $btnReload, $lblStatus))
 
@@ -632,7 +631,6 @@ function New-BatchRunTab {
     $lblStatus.Text = ""
     $lblStatus.AutoSize = $true
     $lblStatus.Location = New-Object System.Drawing.Point(154, ($y + 16))
-    $lblStatus.Font = New-Object System.Drawing.Font($lblStatus.Font, [System.Drawing.FontStyle]::Bold)
     $topControls += $lblStatus
 
     $grpBatchAll.Controls.AddRange($topControls)
