@@ -209,14 +209,15 @@ $psParams = $PSBoundParameters
 
                 if ($appChanged) {
                     if ($appHasError) {
-                        Write-Message "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップします" -ForegroundColor Yellow -Type "Info" -NoHeader
+                        Write-MessageError "アプリID[$appId]は一部の設定が失敗したため、更新（デプロイ）をスキップしました"
                     }
                     else {
                         try {
                             Update-KintoneApps -BaseUrl $BaseUrl -Authorization $authorization -AppIds @($appId)
+                            Write-ApplyStepResult -ActionLabel "アプリをデプロイしました"
                         }
                         catch {
-                            Write-MessageError "アプリ[$label](appId=$appId)の更新でエラーが発生しました: $($_.Exception.Message)"
+                            Write-MessageError "アプリ[$label](appId=$appId)の更新（デプロイ）でエラーが発生しました: $($_.Exception.Message)"
                             $hasError = $true
                         }
                     }
