@@ -113,10 +113,11 @@ $categoryDefs = @($stepMeta | ForEach-Object {
         Label = $_.Label
         ButtonDefs = @(
             [PSCustomObject]@{
-                Label      = $_.Label
-                Id         = $stepId
-                Inputs     = $_.Inputs
-                OpenTarget = if ($_.OpenTargetFn) { $_.OpenTargetFn } elseif ($_.OutputPathFn) { { $script:stepOutputPaths[$stepId] }.GetNewClosure() } else { $null }
+                Label          = $_.Label
+                Id             = $stepId
+                Inputs         = $_.Inputs
+                OpenTarget     = if ($_.OpenTargetFn) { $_.OpenTargetFn } elseif ($_.OutputPathFn) { $_.OutputPathFn } else { $null }
+                InputControls  = $null
             }
         )
     }
