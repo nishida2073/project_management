@@ -516,11 +516,11 @@ $btnRunAll.Add_Click({
     $failedLabel = Invoke-SeededAllSteps
 
     if ($failedLabel) {
-        Set-StepStatus -Label $lblOverallStatus -Text "エラーが発生しました（$failedLabel）" -State "失敗"
+        Set-StepStatus -Label $lblOverallStatus -Text "失敗（$($failedLabel)）" -State "失敗"
     } elseif ($script:runHadWarning) {
-        Set-StepStatus -Label $lblOverallStatus -Text "完了しました（警告あり、要確認）" -State "警告"
+        Set-StepStatus -Label $lblOverallStatus -Text "成功（警告あり、要確認）" -State "警告"
     } else {
-        Set-StepStatus -Label $lblOverallStatus -Text "完了しました" -State "成功"
+        Set-StepStatus -Label $lblOverallStatus -Text "成功" -State "成功"
     }
 
     Set-RunButtonsEnabled $true
@@ -624,12 +624,14 @@ $btnBatchRunAll.Add_Click({
 
     $failedCount = @($resultLines | Where-Object { $_ -match ": 失敗|: スキップ" }).Count
     $warningCount = @($resultLines | Where-Object { $_ -match "警告あり" }).Count
+    $succsessCount = $rows.Count -$failedCount -$warningCount
+    $multipleResultMessage = "終了（成功-$($succsessCount)件、警告-$($warningCount)件、失敗/スキップ-$($failedCount)件）"
     if ($failedCount -gt 0) {
-        Set-StepStatus -Label $lblBatchStatus -Text "完了（$($rows.Count)件中$failedCount件が失敗/スキップ）" -State "失敗"
+        Set-StepStatus -Label $lblBatchStatus -Text $multipleResultMessage -State "失敗"
     } elseif ($warningCount -gt 0) {
-        Set-StepStatus -Label $lblBatchStatus -Text "完了しました（$($rows.Count)件中$warningCount件で警告あり、要確認）" -State "警告"
+        Set-StepStatus -Label $lblBatchStatus -Text $multipleResultMessage -State "警告"
     } else {
-        Set-StepStatus -Label $lblBatchStatus -Text "完了しました（全$($rows.Count)件成功）" -State "成功"
+        Set-StepStatus -Label $lblBatchStatus -Text $multipleResultMessage -State "成功"
     }
 
     foreach ($sm in $stepMeta) { $script:stepInputControls[$sm.Id]['ConfigName'].Text = $origConfigNames[$sm.Id] }
