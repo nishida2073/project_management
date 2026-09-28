@@ -293,10 +293,7 @@ function New-CategoryTabControl {
                 $lnkOpen.Add_LinkClicked({
                     $target = $this.Tag.OpenTarget
                     if ($target -is [scriptblock]) {
-                        $groupValue = if ($this.Tag.InputControls -and $this.Tag.InputControls.ContainsKey("TargetGroupNameFilter")) {
-                            Get-InputValue -Control $this.Tag.InputControls["TargetGroupNameFilter"]
-                        } else { "" }
-                        $target = & $target $groupValue
+                        $target = & $target $this.Tag.InputControls
                     }
                     & $OnOpenClick $target
                 }.GetNewClosure())

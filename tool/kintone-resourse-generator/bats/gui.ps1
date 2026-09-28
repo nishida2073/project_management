@@ -116,7 +116,14 @@ $categoryDefs = @($stepMeta | ForEach-Object {
                 Label          = $_.Label
                 Id             = $stepId
                 Inputs         = $_.Inputs
-                OpenTarget     = if ($_.OpenTargetFn) { $_.OpenTargetFn } elseif ($_.OutputPathFn) { $_.OutputPathFn } else { $null }
+                OpenTarget     = if ($_.OpenTargetFn) {
+                    $_.OpenTargetFn
+                } elseif ($_.OutputPathFn) {
+                    $outputPathFn = $_.OutputPathFn
+                    { param($ic) & $outputPathFn $ic }.GetNewClosure()
+                } else {
+                    $null
+                }
                 InputControls  = $null
             }
         )
