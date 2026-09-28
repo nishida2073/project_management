@@ -165,7 +165,18 @@ $psParams = $PSBoundParameters
                     $ws = $workbook.Sheets.Add([Type]::Missing, $workbook.Sheets.Item($workbook.Sheets.Count))
                 }
                 $ws.Name = $sheetName
-                Write-RowObjects -Sheet $ws -Rows $downloadSheetData[$sheetName].Rows -Headers $downloadSheetData[$sheetName].Headers
+                $rows = $downloadSheetData[$sheetName].Rows
+                $headers = $downloadSheetData[$sheetName].Headers
+                if ($headers.Count -eq 0 -and $rows.Count -gt 0) {
+                    $headers = @($rows[0].PSObject.Properties.Name)
+                }
+                $excelDatas = @()
+                $excelDatas += ,@($headers)
+                foreach ($row in $rows) {
+                    $rowData = @($headers | ForEach-Object { "$($row.$_)" })
+                    $excelDatas += ,$rowData
+                }
+                Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
             }
             foreach ($sheetName in $downloadSheetData.Keys) {
                 Set-HeaderRowColor -Sheet $workbook.Sheets.Item($sheetName) -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))

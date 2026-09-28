@@ -373,7 +373,14 @@ $psParams = $PSBoundParameters
                     $ws = $workbook.Sheets.Add([Type]::Missing, $workbook.Sheets.Item($workbook.Sheets.Count))
                 }
                 $ws.Name = $sheetName
-                Write-RowObjects -Sheet $ws -Rows $rows
+                $headers = @($rows[0].PSObject.Properties.Name)
+                $excelDatas = @()
+                $excelDatas += ,@($headers)
+                foreach ($row in $rows) {
+                    $rowData = @($headers | ForEach-Object { "$($row.$_)" })
+                    $excelDatas += ,$rowData
+                }
+                Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
             }
 
             foreach ($sheetName in $sheetData.Keys) {

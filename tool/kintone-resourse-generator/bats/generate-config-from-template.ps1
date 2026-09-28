@@ -248,7 +248,16 @@ $psParams = $PSBoundParameters
             return $ws
         }
 
-        Write-RowObjects -Sheet (New-OutputSheet "space-settings") -Rows @($outSpaceRow) -Headers @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する")
+        $headers = @($outSpaceRow.PSObject.Properties.Name)
+        $ws = New-OutputSheet "space-settings"
+        $rows = @($outSpaceRow)
+        $excelDatas = @()
+        $excelDatas += ,@($headers)
+        foreach ($row in $rows) {
+            $rowData = @($headers | ForEach-Object { "$($row.$_)" })
+            $excelDatas += ,$rowData
+        }
+        Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
         Write-Message "" -Type "Info" -NoHeader
         Write-Message "# スペースID: $newSpaceId ($finalSpaceName)" -Type "Info" -NoHeader
         Write-ApplyStepResult -ActionLabel "スペース名を設定しました" -DetailLines @("　$finalSpaceName")
@@ -277,7 +286,16 @@ $psParams = $PSBoundParameters
                 "下位組織も含める"       = $_.'下位組織も含める'
             }
         })
-        Write-RowObjects -Sheet (New-OutputSheet "space-member-list") -Rows $outMemberRows -Headers @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める")
+        $headers = @($outMemberRows[0].PSObject.Properties.Name)
+        $ws = New-OutputSheet "space-member-list"
+        $rows = $outMemberRows
+        $excelDatas = @()
+        $excelDatas += ,@($headers)
+        foreach ($row in $rows) {
+            $rowData = @($headers | ForEach-Object { "$($row.$_)" })
+            $excelDatas += ,$rowData
+        }
+        Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
         Write-Message "" -Type "Info" -NoHeader
         $memberDetailLines = @()
         if ($templateMemberRows.Count -gt 0) {
@@ -301,7 +319,16 @@ $psParams = $PSBoundParameters
         $outAppRows = @($matchedApps | ForEach-Object {
             [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
         })
-        Write-RowObjects -Sheet (New-OutputSheet "space-app-list") -Rows $outAppRows -Headers @("アプリID", "アプリ名")
+        $headers = @($outAppRows[0].PSObject.Properties.Name)
+        $ws = New-OutputSheet "space-app-list"
+        $rows = $outAppRows
+        $excelDatas = @()
+        $excelDatas += ,@($headers)
+        foreach ($row in $rows) {
+            $rowData = @($headers | ForEach-Object { "$($row.$_)" })
+            $excelDatas += ,$rowData
+        }
+        Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
 
         $outAclRows = New-Object System.Collections.Generic.List[psobject]
         $aclRowSources = New-Object System.Collections.Generic.List[psobject]
@@ -371,8 +398,26 @@ $psParams = $PSBoundParameters
             Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定しました" -CountPhrase "条件$($recordAclCondGroups.Count)件、対象$($recordAclRows.Count)件" -DetailLines $recordAclTargetLines
         }
 
-        Write-RowObjects -Sheet (New-OutputSheet "space-app-acl") -Rows $outAclRows.ToArray() -Headers @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し")
-        Write-RowObjects -Sheet (New-OutputSheet "space-app-record-acl") -Rows $outRecordAclRows.ToArray() -Headers @("アプリID", "アプリ名", "レコードの条件", "種別", "ユーザー／組織／グループ", "閲覧", "編集", "削除")
+        $headers = @($outAclRows[0].PSObject.Properties.Name)
+        $ws = New-OutputSheet "space-app-acl"
+        $rows = $outAclRows.ToArray()
+        $excelDatas = @()
+        $excelDatas += ,@($headers)
+        foreach ($row in $rows) {
+            $rowData = @($headers | ForEach-Object { "$($row.$_)" })
+            $excelDatas += ,$rowData
+        }
+        Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
+        $headers = @($outRecordAclRows[0].PSObject.Properties.Name)
+        $ws = New-OutputSheet "space-app-record-acl"
+        $rows = $outRecordAclRows.ToArray()
+        $excelDatas = @()
+        $excelDatas += ,@($headers)
+        foreach ($row in $rows) {
+            $rowData = @($headers | ForEach-Object { "$($row.$_)" })
+            $excelDatas += ,$rowData
+        }
+        Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
 
         foreach ($sheetName in @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl")) {
             Set-HeaderRowColor -Sheet $workbook.Sheets.Item($sheetName) -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
