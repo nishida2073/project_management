@@ -706,9 +706,9 @@ $settingsGroups = [ordered]@{
     "KINTONE" = @{
         Label = "kintoneの接続情報"
         Vars = [ordered]@{
-            "KINTONE_BASE_URL" = @{ Label = "kintoneのサイトURL" }
-            "KINTONE_LOGIN"    = @{ Label = "ログイン名" }
-            "KINTONE_PASSWORD" = @{ Label = "パスワード"; Masked = $true }
+            "KINTONE_SUB_DOMAIN" = @{ Label = "サブドメイン" }
+            "KINTONE_LOGIN"      = @{ Label = "ログイン名" }
+            "KINTONE_PASSWORD"   = @{ Label = "パスワード"; Masked = $true }
         }
     }
 }
@@ -754,10 +754,11 @@ function Get-SettingsFieldRows {
 
 $settingsTrailingButtonVars = @{
     "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -OnClick {
-        $baseUrlVal = $script:fieldTextBoxes["KINTONE_BASE_URL"].Text.Trim()
+        $subDomainVal = $script:fieldTextBoxes["KINTONE_SUB_DOMAIN"].Text.Trim()
         $loginVal = $script:fieldTextBoxes["KINTONE_LOGIN"].Text
         $passwordVal = $script:fieldTextBoxes["KINTONE_PASSWORD"].Text
-        $validationError = if (!$baseUrlVal -or !$loginVal -or !$passwordVal) { "kintoneのサイトURL・ログイン名・パスワードをすべて入力してください" } else { $null }
+        $baseUrlVal = "https://$subDomainVal.cybozu.com"
+        $validationError = if (!$subDomainVal -or !$loginVal -or !$passwordVal) { "サブドメイン・ログイン名・パスワードをすべて入力してください" } else { $null }
         Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError `
             -Action {
                 $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
