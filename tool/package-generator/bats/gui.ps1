@@ -475,9 +475,12 @@ function Get-SettingsFieldRows {
 }
 
 function Update-SettingsFields {
+    $resolverValue = $script:commonEnvResolver
+    $rootPathValue = $rootPath
     Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -notin @("DOWNLOAD", "UPLOAD") }) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
+        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
 }
 
 function Get-FieldValue {

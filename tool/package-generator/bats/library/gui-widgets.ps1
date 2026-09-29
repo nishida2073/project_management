@@ -11,6 +11,38 @@
     Start-Process -FilePath $Path
 }
 
+function New-OpenLinkHandler {
+    param(
+        [Parameter(Mandatory)][System.Windows.Forms.Control]$Control,
+        [Parameter(Mandatory)][string]$Pattern,
+        [object]$Tag = $null,
+        [scriptblock]$OnOpenClick = $null
+    )
+
+    if ($Tag) { $Control.Tag = $Tag }
+
+    $Control.Add_LinkClicked({
+        switch ($Pattern) {
+            'external' {
+                $target = $this.Tag.OpenTarget
+                if ($target -is [scriptblock]) {
+                    $target = & $target $this.Tag.InputControls
+                }
+                & $OnOpenClick $target
+            }
+            'internal' {
+                $openPath = $this.Tag.Text
+                if ($OnOpenClick) { $openPath = & $OnOpenClick $openPath }
+                if (Test-Path -LiteralPath $openPath) {
+                    Start-Process -FilePath $openPath
+                } else {
+                    [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません: $openPath", "エラー") | Out-Null
+                }
+            }
+        }
+    }.GetNewClosure())
+}
+
 function Get-ConsoleColorAsDrawingColor {
     param([string]$ConsoleColorName)
     switch ($ConsoleColorName) {
@@ -89,7 +121,19 @@ function New-LogTextBox {
     $textBox.Font = New-Object System.Drawing.Font($FontFamily, $FontSize)
     $textBox.Dock = [System.Windows.Forms.DockStyle]::Fill
     $textBox.DetectUrls = $true
-    $textBox.Add_LinkClicked({ [System.Diagnostics.Process]::Start($_.LinkText) })
+    $textBox.Add_MouseClick(({
+        $urlPattern = [regex]'https?://\S+'
+        $charIndex = $this.GetCharIndexFromPosition($_.Location)
+        if ($charIndex -ge 0 -and $charIndex -lt $this.Text.Length) {
+            $urlMatches = $urlPattern.Matches($this.Text)
+            foreach ($match in $urlMatches) {
+                if ($charIndex -ge $match.Index -and $charIndex -lt $match.Index + $match.Length) {
+                    [System.Diagnostics.Process]::Start($match.Value)
+                    break
+                }
+            }
+        }
+    }).GetNewClosure())
     return $textBox
 }
 
@@ -289,14 +333,7 @@ function New-CategoryTabControl {
                 $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
                 $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
-                $lnkOpen.Tag = $bd
-                $lnkOpen.Add_LinkClicked({
-                    $target = $this.Tag.OpenTarget
-                    if ($target -is [scriptblock]) {
-                        $target = & $target $this.Tag.InputControls
-                    }
-                    & $OnOpenClick $target
-                }.GetNewClosure())
+                New-OpenLinkHandler -Control $lnkOpen -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick
                 $grp.Controls.Add($lnkOpen)
             }
 
@@ -967,7 +1004,8 @@ function Render-SettingsFields {
         [hashtable]$RadioVars = @{},
         [hashtable]$TrailingButtonVars = @{},
         [System.Windows.Forms.ComboBox]$MentionGroupCombo,
-        [string[]]$MentionTypeOptions = @()
+        [string[]]$MentionTypeOptions = @(),
+        [scriptblock]$OnOpenClick
     )
     $Panel.Controls.Clear()
     $TextBoxes.Clear()
@@ -1079,24 +1117,15 @@ function Render-SettingsFields {
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.FileName }
                 }.GetNewClosure())
 
-                $btnOpen = New-Object System.Windows.Forms.LinkLabel
-                $btnOpen.Text = "開く"
-                $btnOpen.AutoSize = $false
-                $btnOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-                $btnOpen.Size = New-Object System.Drawing.Size(50, 22)
-                $btnOpen.Location = New-Object System.Drawing.Point(640, ($y - 2))
-                $btnOpen.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-                $btnOpen.Tag = $txt
-                $btnOpen.Add_LinkClicked({
-                    $targetTxt = $this.Tag
-                    $openPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver -BasePath $RootPath
-                    if (Test-Path -LiteralPath $openPath) {
-                        Start-Process -FilePath $openPath
-                    } else {
-                        [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません: $openPath", "エラー") | Out-Null
-                    }
-                }.GetNewClosure())
-                $grp.Controls.AddRange(@($btnBrowse, $btnOpen))
+                $lnkOpen = New-Object System.Windows.Forms.LinkLabel
+                $lnkOpen.Text = "開く"
+                $lnkOpen.AutoSize = $false
+                $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+                $lnkOpen.Size = New-Object System.Drawing.Size(50, 22)
+                $lnkOpen.Location = New-Object System.Drawing.Point(640, ($y - 2))
+                $lnkOpen.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+                New-OpenLinkHandler -Control $lnkOpen -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
+                $grp.Controls.AddRange(@($btnBrowse, $lnkOpen))
             } else {
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag
