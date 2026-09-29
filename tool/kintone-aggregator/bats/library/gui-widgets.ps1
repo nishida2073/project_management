@@ -16,7 +16,8 @@ function New-OpenLinkHandler {
         [Parameter(Mandatory)][System.Windows.Forms.Control]$Control,
         [Parameter(Mandatory)][string]$Pattern,
         [object]$Tag = $null,
-        [scriptblock]$OnOpenClick = $null
+        [scriptblock]$OnOpenClick = $null,
+        [hashtable]$InputControls = $null
     )
 
     if ($Tag) { $Control.Tag = $Tag }
@@ -26,7 +27,7 @@ function New-OpenLinkHandler {
             'external' {
                 $target = $this.Tag.OpenTarget
                 if ($target -is [scriptblock]) {
-                    $target = & $target $this.Tag.InputControls
+                    $target = & $target $InputControls
                 }
                 & $OnOpenClick $target
             }
@@ -329,7 +330,7 @@ function New-CategoryTabControl {
                 $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
                 $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
                 $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
-                New-OpenLinkHandler -Control $lnkOpen -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick
+                New-OpenLinkHandler -Control $lnkOpen -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $bd.InputControls
                 $grp.Controls.Add($lnkOpen)
             }
 
@@ -634,7 +635,7 @@ function New-BatchRunTab {
             $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
             $lnkOpen.Location = New-Object System.Drawing.Point(390, $y)
             $lnkOpen.Tag = $bd
-            $lnkOpen.Add_LinkClicked({ & $OnOpenClick $this.Tag $inputControls }.GetNewClosure())
+            New-OpenLinkHandler -Control $lnkOpen -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
             $topControls += $lnkOpen
         }
 

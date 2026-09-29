@@ -178,8 +178,8 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs -Ru
     ) `
     -ShowOpenLink { param($bd) $true } `
     -OnOpenClick {
-        param($bd, $inputControls)
-        Open-TargetOrWarn -Path (Get-BatchOpenTarget -ButtonDef $bd -ClientName $inputControls["Client"].SelectedItem)
+        param($target)
+        Open-TargetOrWarn -Path $target
     }
 
 $batchPanel = $batchTab.Panel

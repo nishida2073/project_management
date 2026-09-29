@@ -139,11 +139,7 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
         [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 90; InputWidth = 150 }
     ) `
     -OnOpenClick {
-        param($bd, $inputControls)
-        $target = $bd.OpenTarget
-        if ($target -is [scriptblock]) {
-            $target = & $target $inputControls
-        }
+        param($target)
         Open-TargetOrWarn -Path $target
     }
 
