@@ -430,8 +430,7 @@ function Invoke-Step {
         -WriteLog { param($msg) Write-Log $msg } `
         -OnOutputLine { param($line) Write-Log $line; $script:lastStepOutputLines.Add($line) } `
         -CurrentProcessRef ([ref]$script:currentProc) `
-        -DisplayLabel $sm.Label -StatusLabel $script:stepStatusLabels[$Id] `
-        -IsWarningExitCode { param($ExitCode) $ExitCode -eq 2 }
+        -DisplayLabel $sm.Label -StatusLabel $script:stepStatusLabels[$Id]
 
     $outputPath = Get-StepOutputPath -Id $Id
     if ($outputPath -and (Test-Path -LiteralPath $outputPath)) {

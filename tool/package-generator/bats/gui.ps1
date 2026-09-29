@@ -281,7 +281,7 @@ function Start-BatchRunAll {
 
     $script:isRunning = $true
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
-        -StatusLabel $lblStatus -StopOnFailure -HeaderSuffix "（$clientDisplayName）" `
+        -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels -StopOnFailure -HeaderSuffix "（$clientDisplayName）" `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -InvokeStep {
             param($bd)

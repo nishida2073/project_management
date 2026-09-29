@@ -799,7 +799,6 @@ function Invoke-BatchStep {
         [string]$DisplayLabel,
         [System.Windows.Forms.Label]$StatusLabel,
         [scriptblock]$OnOutputLine,
-        [scriptblock]$IsWarningExitCode = { param($ExitCode) $false },
         [scriptblock]$OnAfterRun = {}
     )
 
@@ -817,7 +816,7 @@ function Invoke-BatchStep {
 
     Show-FormInForeground -Form $Form
 
-    $isWarning = ($exitCode -ne 0) -and (& $IsWarningExitCode $exitCode)
+    $isWarning = $exitCode -eq 2
 
     if ($exitCode -ne 0 -and -not $isWarning) {
         & $WriteLog "--------------- $DisplayLabel 失敗（終了コード: $exitCode） ---------------"
@@ -898,11 +897,15 @@ function Invoke-BatchRunAll {
         if ($i -lt $StatusLabels.Count) {
             if ($exitCode -eq 0) {
                 Set-StepStatus -Label $StatusLabels[$i] -Text "成功" -State "成功"
+            } elseif ($exitCode -eq 2) {
+                Set-StepStatus -Label $StatusLabels[$i] -Text "警告" -State "警告"
             } else {
                 Set-StepStatus -Label $StatusLabels[$i] -Text "失敗" -State "失敗"
             }
         }
-        if ($exitCode -ne 0) {
+        if ($exitCode -eq 2) {
+            $hasWarnings = $true
+        } elseif ($exitCode -ne 0) {
             $anyFailed = $true
             $failedExitCode = $exitCode
             if ($StopOnFailure) { break }
@@ -914,7 +917,9 @@ function Invoke-BatchRunAll {
     } else {
         & $WriteLog "==================== 一括実行 完了$HeaderSuffix ===================="
         if ($anyFailed) {
-            Set-StepStatus -Label $StatusLabel -Text "失敗のステップあり" -State "失敗"
+            Set-StepStatus -Label $StatusLabel -Text "失敗" -State "失敗"
+        } elseif ($hasWarnings) {
+            Set-StepStatus -Label $StatusLabel -Text "警告" -State "警告"
         } else {
             Set-StepStatus -Label $StatusLabel -Text "成功"
         }

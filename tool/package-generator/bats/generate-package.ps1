@@ -77,6 +77,7 @@ $psParams = $PSBoundParameters
                 $sourcePath = [System.IO.Path]::GetFullPath($sourcePath)
                 if (!(Test-Path $sourcePath)) {
                     Write-MessageWarn "取得元（フルパス）が存在しません：$sourcePath"
+                    if ($script:exitCode -eq 0) { $script:exitCode = 2 }
                     $packageLog += "$sourcePath -> 存在しません"
                     continue
                 }
@@ -164,6 +165,7 @@ $psParams = $PSBoundParameters
                 }
             } else {
                 Write-MessageWarn "$sheetName：対象ファイルが無いためパッケージを作成しませんでした"
+                if ($script:exitCode -eq 0) { $script:exitCode = 2 }
                 $packageLog += "対象ファイルが無いためパッケージを作成しませんでした"
             }
 
