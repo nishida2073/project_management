@@ -459,19 +459,19 @@ function Invoke-SingleStep {
 }
 
 function Invoke-AllStepsForCurrentInputs {
-    $hadWarning = $false
+    $lastExitCode = 0
     foreach ($sm in $stepMeta) {
         if (!(Test-StepPrereq -Id $sm.Id)) {
-            return @{ IsSuccess = $false; HadWarning = $hadWarning; FailedLabel = $sm.Label }
+            return 1
         }
         $exitCode = Invoke-Step -Id $sm.Id
         if ($exitCode -eq 2) {
-            $hadWarning = $true
+            $lastExitCode = 2
         } elseif ($exitCode -ne 0) {
-            return @{ IsSuccess = $false; HadWarning = $hadWarning; FailedLabel = $sm.Label }
+            return $exitCode
         }
     }
-    return @{ IsSuccess = $true; HadWarning = $hadWarning; FailedLabel = $null }
+    return $lastExitCode
 }
 
 function Copy-ComboSelection {
@@ -510,14 +510,14 @@ $btnRunAll.Add_Click({
     Set-RunButtonsEnabled $false
     Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
 
-    $result = Invoke-SeededAllSteps
+    $exitCode = Invoke-SeededAllSteps
 
-    if (!$result.IsSuccess) {
-        Set-StepStatus -Label $lblOverallStatus -Text "失敗（$($result.FailedLabel)）" -State "失敗"
-    } elseif ($result.HadWarning) {
-        Set-StepStatus -Label $lblOverallStatus -Text "成功（警告あり、要確認）" -State "警告"
-    } else {
+    if ($exitCode -eq 0) {
         Set-StepStatus -Label $lblOverallStatus -Text "成功" -State "成功"
+    } elseif ($exitCode -eq 2) {
+        Set-StepStatus -Label $lblOverallStatus -Text "警告" -State "警告"
+    } else {
+        Set-StepStatus -Label $lblOverallStatus -Text "失敗" -State "失敗"
     }
 
     Set-RunButtonsEnabled $true
@@ -605,13 +605,13 @@ $btnBatchRunAll.Add_Click({
             $cmbCustomTemplateName.Text = $rowCustomResourceTemplate
         }
 
-        $result = Invoke-AllStepsForCurrentInputs
-        if (!$result.IsSuccess) {
-            $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗（$($result.FailedLabel)）")
-        } elseif ($result.HadWarning) {
-            $resultLines.Add("行$($i + 2) ($rowConfigName): 成功（警告あり、要確認）")
-        } else {
+        $exitCode = Invoke-AllStepsForCurrentInputs
+        if ($exitCode -eq 0) {
             $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")
+        } elseif ($exitCode -eq 2) {
+            $resultLines.Add("行$($i + 2) ($rowConfigName): 警告")
+        } else {
+            $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗")
         }
     }
 
@@ -620,7 +620,7 @@ $btnBatchRunAll.Add_Click({
     foreach ($line in $resultLines) { Write-Log $line }
 
     $failedCount = @($resultLines | Where-Object { $_ -match ": 失敗|: スキップ" }).Count
-    $warningCount = @($resultLines | Where-Object { $_ -match "警告あり" }).Count
+    $warningCount = @($resultLines | Where-Object { $_ -match "警告" }).Count
     $succsessCount = $rows.Count -$failedCount -$warningCount
     $multipleResultMessage = "終了（成功-$($succsessCount)件、警告-$($warningCount)件、失敗/スキップ-$($failedCount)件）"
     if ($failedCount -gt 0) {
