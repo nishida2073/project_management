@@ -33,11 +33,7 @@ function New-OpenLinkHandler {
             'internal' {
                 $openPath = $this.Tag.Text
                 if ($OnOpenClick) { $openPath = & $OnOpenClick $openPath }
-                if (Test-Path -LiteralPath $openPath) {
-                    Start-Process -FilePath $openPath
-                } else {
-                    [System.Windows.Forms.MessageBox]::Show("ファイルが見つかりません: $openPath", "エラー") | Out-Null
-                }
+                Open-TargetOrWarn -Path $openPath
             }
         }
     }.GetNewClosure())
