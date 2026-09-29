@@ -9,4 +9,6 @@ if not defined COMMON_CUSTOM_TEMPLATE_PATH set "COMMON_CUSTOM_TEMPLATE_PATH=%BAS
 if not defined COMMON_CHECK_OUTPUT_PATH set "COMMON_CHECK_OUTPUT_PATH=%BASE_PATH%checked"
 if not defined COMMON_LOG_PATH set "COMMON_LOG_PATH=%BASE_PATH%logs"
 
-if exist "%~dp0set-kintone.bat" call "%~dp0set-kintone.bat"
+if not defined KINTONE_BASE_URL set "KINTONE_BASE_URL=https://iiglepv0966f.cybozu.com"
+if not defined KINTONE_LOGIN set "KINTONE_LOGIN=user01"
+if not defined KINTONE_PASSWORD set "KINTONE_PASSWORD=abcd1234"

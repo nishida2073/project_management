@@ -18,7 +18,6 @@ $applyBat = Join-Path $rootPath "apply-kintone-resources.bat"
 $checkBat = Join-Path $rootPath "check-kintone-resources.bat"
 $clientsDir = Join-Path $rootPath "clients"
 $setEnvBat = Join-Path $clientsDir "set-env.bat"
-$setKintoneBat = Join-Path $clientsDir "set-kintone.bat"
 
 $libraryDir = Join-Path $rootPath "bats\library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -58,7 +57,7 @@ $stepMeta = @(
             if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
                 $nextIc = $script:stepInputControls[1]
                 if ($nextIc -and $nextIc.ContainsKey('SpaceId')) { $nextIc['SpaceId'].Text = $Matches.id }
-                $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path $setKintoneBat).TrimEnd('/')
+                $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path $setEnvBat).TrimEnd('/')
                 if ($baseUrl) { $script:createdSpaceUrl = "$baseUrl/k/#/space/$($Matches.id)" }
             }
         }
@@ -740,10 +739,9 @@ $script:fieldTextBoxes = @{}
 
 function Get-SettingsFieldRows {
     $defaults = Get-SetEnvDefaults -Path $setEnvBat
-    $kintoneDefaults = Get-SetEnvDefaults -Path $setKintoneBat
     foreach ($varName in $settingsVarLabels.Keys) {
         if ($kintoneVars -contains $varName) {
-            $varValue = if ($kintoneDefaults.ContainsKey($varName)) { $kintoneDefaults[$varName] } else { "" }
+            $varValue = if ($defaults.ContainsKey($varName)) { $defaults[$varName] } else { "" }
             $group = "KINTONE"
         } else {
             if (!$defaults.ContainsKey($varName)) { continue }
@@ -781,7 +779,7 @@ $script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey
 function Get-SettingsFiles {
     return @(
         [PSCustomObject]@{ Path = $setEnvBat; Save = { Save-EnvBatFile -Path $setEnvBat -VarNames @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn }; Reload = {} }
-        [PSCustomObject]@{ Path = $setKintoneBat; Save = { Save-EnvBatFile -Path $setKintoneBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn }; Reload = {} }
+        [PSCustomObject]@{ Path = $setEnvBat; Save = { Save-EnvBatFile -Path $setEnvBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn }; Reload = {} }
     )
 }
 
