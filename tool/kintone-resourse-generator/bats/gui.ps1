@@ -137,7 +137,6 @@ $form.MinimumSize = New-Object System.Drawing.Size(600, 500)
 
 $script:currentProc = $null
 $script:stepOutputPaths = @{}
-$script:runHadWarning = $false
 $script:createdSpaceUrl = $null
 $form.Add_FormClosing({
     if ($script:currentProc -and !$script:currentProc.HasExited) {
@@ -436,15 +435,12 @@ function Invoke-Step {
         $script:stepOutputPaths[$Id] = $outputPath
     }
 
-    if ($exitCode -ne 0 -and $exitCode -ne 2) {
-        return $false
+    if ($exitCode -eq 0 -or $exitCode -eq 2) {
+        if ($sm.OnSuccessFn) { & $sm.OnSuccessFn $script:stepInputControls[$Id] $script:lastStepOutputLines }
+        Sync-NextStepConfigName -CompletedId $Id
     }
 
-    if ($exitCode -eq 2) { $script:runHadWarning = $true }
-
-    if ($sm.OnSuccessFn) { & $sm.OnSuccessFn $script:stepInputControls[$Id] $script:lastStepOutputLines }
-    Sync-NextStepConfigName -CompletedId $Id
-    return $true
+    return $exitCode
 }
 
 function Invoke-SingleStep {
@@ -463,16 +459,19 @@ function Invoke-SingleStep {
 }
 
 function Invoke-AllStepsForCurrentInputs {
-    $script:runHadWarning = $false
+    $hadWarning = $false
     foreach ($sm in $stepMeta) {
         if (!(Test-StepPrereq -Id $sm.Id)) {
-            return $sm.Label
+            return @{ IsSuccess = $false; HadWarning = $hadWarning; FailedLabel = $sm.Label }
         }
-        if (!(Invoke-Step -Id $sm.Id)) {
-            return $sm.Label
+        $exitCode = Invoke-Step -Id $sm.Id
+        if ($exitCode -eq 2) {
+            $hadWarning = $true
+        } elseif ($exitCode -ne 0) {
+            return @{ IsSuccess = $false; HadWarning = $hadWarning; FailedLabel = $sm.Label }
         }
     }
-    return $null
+    return @{ IsSuccess = $true; HadWarning = $hadWarning; FailedLabel = $null }
 }
 
 function Copy-ComboSelection {
@@ -511,11 +510,11 @@ $btnRunAll.Add_Click({
     Set-RunButtonsEnabled $false
     Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
 
-    $failedLabel = Invoke-SeededAllSteps
+    $result = Invoke-SeededAllSteps
 
-    if ($failedLabel) {
-        Set-StepStatus -Label $lblOverallStatus -Text "失敗（$($failedLabel)）" -State "失敗"
-    } elseif ($script:runHadWarning) {
+    if (!$result.IsSuccess) {
+        Set-StepStatus -Label $lblOverallStatus -Text "失敗（$($result.FailedLabel)）" -State "失敗"
+    } elseif ($result.HadWarning) {
         Set-StepStatus -Label $lblOverallStatus -Text "成功（警告あり、要確認）" -State "警告"
     } else {
         Set-StepStatus -Label $lblOverallStatus -Text "成功" -State "成功"
@@ -606,10 +605,10 @@ $btnBatchRunAll.Add_Click({
             $cmbCustomTemplateName.Text = $rowCustomResourceTemplate
         }
 
-        $failedLabel = Invoke-AllStepsForCurrentInputs
-        if ($failedLabel) {
-            $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗（$failedLabel）")
-        } elseif ($script:runHadWarning) {
+        $result = Invoke-AllStepsForCurrentInputs
+        if (!$result.IsSuccess) {
+            $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗（$($result.FailedLabel)）")
+        } elseif ($result.HadWarning) {
             $resultLines.Add("行$($i + 2) ($rowConfigName): 成功（警告あり、要確認）")
         } else {
             $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")

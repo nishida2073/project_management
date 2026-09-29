@@ -20,8 +20,7 @@
             return Invoke-RestMethod -Uri $uri -Headers $headers -Method $Method
         }
     } catch {
-        $detail = if ($_.ErrorDetails) { $_.ErrorDetails.Message } else { $_.Exception.Message }
-        throw "kintone APIエラー ($Method $Path): $detail"
+        throw
     }
 }
 
