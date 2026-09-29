@@ -85,7 +85,7 @@ function Get-CurrentSpace {
                 $acl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/app/acl.json?app=$($app.appId)"
                 $app.rights = @($acl.rights)
             } catch {
-                Write-Message "  アプリ[$($app.name)]のACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow -Type "Info" -NoHeader
+                throw "アプリ[$($app.name)]のACL取得に失敗: $($_.Exception.Message)"
             }
         }
     }
@@ -96,7 +96,7 @@ function Get-CurrentSpace {
                 $recordAcl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/record/acl.json?app=$($app.appId)"
                 $app.recordRights = @($recordAcl.rights)
             } catch {
-                Write-Message "  アプリ[$($app.name)]のレコードACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow -Type "Info" -NoHeader
+                throw "アプリ[$($app.name)]のレコードACL取得に失敗: $($_.Exception.Message)"
             }
         }
     }
@@ -131,7 +131,7 @@ function Get-AppCurrentInfo {
         $settings = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/app/settings.json?app=$AppId"
         $name = $settings.name
     } catch {
-        Write-Message "  アプリID[$AppId]の設定取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow -Type "Info" -NoHeader
+        throw "アプリID[$AppId]の設定取得に失敗: $($_.Exception.Message)"
     }
 
     $rights = @()
@@ -139,7 +139,7 @@ function Get-AppCurrentInfo {
         $acl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/app/acl.json?app=$AppId"
         $rights = @($acl.rights)
     } catch {
-        Write-Message "  アプリID[$AppId]のACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow -Type "Info" -NoHeader
+        throw "アプリID[$AppId]のACL取得に失敗: $($_.Exception.Message)"
     }
 
     $recordRights = @()
@@ -147,7 +147,7 @@ function Get-AppCurrentInfo {
         $recordAcl = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/record/acl.json?app=$AppId"
         $recordRights = @($recordAcl.rights)
     } catch {
-        Write-Message "  アプリID[$AppId]のレコードACL取得に失敗: $($_.Exception.Message)" -ForegroundColor Yellow -Type "Info" -NoHeader
+        throw "アプリID[$AppId]のレコードACL取得に失敗: $($_.Exception.Message)"
     }
 
     return [PSCustomObject]@{

@@ -91,23 +91,24 @@ $psParams = $PSBoundParameters
                     $current = Get-CurrentSpace -SpaceId $spaceId -BaseUrl $BaseUrl -Authorization $authorization -HasAppAcl:$false -HasRecordAcl:$false
                 }
                 catch {
+                    Write-MessageError "スペース取得に失敗しました: $($_.Exception.Message)"
+                }
+                if ($current) {
+                    $row = [ordered]@{ "スペースID" = $spaceId; "結果" = $null }
+                    $allMatch = Add-FieldColumns -Row $row -Pairs @(
+                        @{ Label = "スペース名"; Current = $current.spaceName; Expected = $expectedSpaceRow.'スペース名' },
+                        @{ Label = "参加メンバーだけにこのスペースを公開する"; Current = $current.isPrivate; Expected = (ToBool $expectedSpaceRow.'参加メンバーだけにこのスペースを公開する') },
+                        @{ Label = "スペースのポータルと複数のスレッドを使用する"; Current = $current.useMultiThread; Expected = (ToBool $expectedSpaceRow.'スペースのポータルと複数のスレッドを使用する') },
+                        @{ Label = "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する"; Current = $current.fixedMember; Expected = (ToBool $expectedSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') },
+                        @{ Label = "アプリ作成できるユーザーをスペースの管理者に限定する"; Current = ($current.createApp -eq "ADMIN"); Expected = (ToBool $expectedSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する') }
+                    )
+                    $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
+                    $spaceSettingsDiff.Add([PSCustomObject]$row)
+                } else {
                     $row = [ordered]@{ "スペースID" = $spaceId }
                     $row["結果"] = "kintoneに未定義"
                     $spaceSettingsDiff.Add([PSCustomObject]$row)
-                    continue
-                }
-
-                $row = [ordered]@{ "スペースID" = $spaceId; "結果" = $null }
-                $allMatch = Add-FieldColumns -Row $row -Pairs @(
-                    @{ Label = "スペース名"; Current = $current.spaceName; Expected = $expectedSpaceRow.'スペース名' },
-                    @{ Label = "参加メンバーだけにこのスペースを公開する"; Current = $current.isPrivate; Expected = (ToBool $expectedSpaceRow.'参加メンバーだけにこのスペースを公開する') },
-                    @{ Label = "スペースのポータルと複数のスレッドを使用する"; Current = $current.useMultiThread; Expected = (ToBool $expectedSpaceRow.'スペースのポータルと複数のスレッドを使用する') },
-                    @{ Label = "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する"; Current = $current.fixedMember; Expected = (ToBool $expectedSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') },
-                    @{ Label = "アプリ作成できるユーザーをスペースの管理者に限定する"; Current = ($current.createApp -eq "ADMIN"); Expected = (ToBool $expectedSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する') }
-                )
-                $row["結果"] = if ($allMatch) { "一致" } else { "不一致" }
-                $spaceSettingsDiff.Add([PSCustomObject]$row)
-                
+                }  
                 $currentMembersByCode = @{}
                 foreach ($m in $current.members) {
                     $currentMembersByCode[$m.entity.code] = $m
@@ -174,7 +175,11 @@ $psParams = $PSBoundParameters
 
             foreach ($appId in $allAppIds) {
                 Write-Message "アプリID: $appId を確認中..." -Type "Info" -NoHeader
-                $current = Get-AppCurrentInfo -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId
+                try {
+                    $current = Get-AppCurrentInfo -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId
+                } catch {
+                    Write-MessageError "アプリID $appId のデータ取得に失敗: $($_.Exception.Message)"
+                }
                 $appLabel = $current.name
 
                 $expectedAppRow = $appRows | Where-Object { "$($_.'アプリID')" -eq $appId } | Select-Object -First 1
@@ -464,7 +469,7 @@ $psParams = $PSBoundParameters
             }
         }
         Write-MessageComplete "チェック結果を出力しました: $outputPath"
-        if ($errorCount -gt 0) { $script:exitCode = 2 }
+        if ($errorCount -gt 0) { $script:exitCode = 1 }
     }
     catch {
         Write-MessageError "実行エラー: $($error[0])"
