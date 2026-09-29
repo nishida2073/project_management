@@ -793,18 +793,24 @@ function Invoke-ActionWithUpdateStatus {
         [System.Windows.Forms.Label]$StatusLabel,
         [scriptblock]$Action,
         [string]$SuccessMessage = "成功",
-        [string]$FailureMessage = "失敗"
+        [string]$WarnMessage = "警告",
+        [string]$FailureMessage = "失敗" 
     )
     Set-StepStatus -Label $StatusLabel -Text "実行中..."
     [System.Windows.Forms.Application]::DoEvents()
     try {
         $result = & $Action
-        Set-StepStatus -Label $StatusLabel -Text $SuccessMessage
+        if($result -eq 0 -or $null -eq $result){
+            Set-StepStatus -Label $StatusLabel -Text $SuccessMessage
+        } elseif ($result -eq 2) {
+            Set-StepStatus -Label $StatusLabel -Text $WarnMessage
+        } else {
+            Set-StepStatus -Label $StatusLabel -Text $FailureMessage
+        }
         return $result
     } catch {
-        $errorMsg = $_.Exception.Message
-        [System.Windows.Forms.MessageBox]::Show("$errorMsg", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
         Set-StepStatus -Label $StatusLabel -Text $FailureMessage
+        throw $_.Exception.Message
     }
 }
 
