@@ -766,13 +766,13 @@ $settingsTrailingButtonVars = @{
                 }
                 $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
                 Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
+                [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
             }
         }.GetNewClosure()
     }
 }
 
 function Update-SettingsFields {
-    $script:fieldTextBoxes.Clear()
     Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null

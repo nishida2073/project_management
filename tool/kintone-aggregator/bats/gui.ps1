@@ -331,12 +331,11 @@ $settingsTrailingButtonVars = @{
         }.GetNewClosure()
     }
     "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -AddStatusLabel -OnClick {
-        Sync-MentionRowsFromControls
-        $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
-        $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
-        $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
-
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            Sync-MentionRowsFromControls
+            $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+            $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+            $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
             if ($validationError) {
                 throw "スペースID／スレッドIDを入力してください。"
             }

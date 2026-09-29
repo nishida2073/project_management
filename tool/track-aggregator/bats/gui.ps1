@@ -536,12 +536,11 @@ function Update-GroupSettingsFields {
     $target = $cmbSettingsGroupTarget.SelectedItem
     $trailingButtons = $settingsTrailingButtonVars.Clone()
     $trailingButtons["CommentTextTemplate"] = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -AddStatusLabel -OnClick {
-        Sync-MentionRowsFromControls
-        $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
-        $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
-        $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
-
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            Sync-MentionRowsFromControls
+            $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+            $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+            $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
             if ($validationError) {
                 throw "スペースID／スレッドIDを入力してください。"
             }
@@ -558,7 +557,7 @@ function Update-GroupSettingsFields {
     $trailingButtons["SyncUserMasterAppId"] = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
             Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId"
-            [System.Windows.Forms.MessageBox]::Show("接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+            [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
         }
     }.GetNewClosure() }
     Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
