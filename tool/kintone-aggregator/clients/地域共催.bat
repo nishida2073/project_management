@@ -1,20 +1,20 @@
 @echo off
 
-set "KintoneSubdomain=7iw5x87e2mne"
+set "KintoneSubdomain=iiglepv0966f"
 set "KintoneLoginName=user01"
 set "KintonePassword=abcd1234"
 set "Authorization="
 set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
 
-set "SpaceId=3"
-set "ThreadId=24"
-set "MentionUserCodes=user02:USER"
+set "SpaceId=7"
+set "ThreadId=9"
+set "MentionUserCodes="
 set "CommentTextTemplate=アラート結果を更新しました。（{TargetGroupName} / {TargetDate}）"
 
-set "SyncUserMasterAppId=122"
+set "SyncUserMasterAppId=14"
 set "SyncUserMasterSheetName=受講生一覧"
 
-set "TargetAppIds_Daily=39"
+set "TargetAppIds_Daily=14"
 
 set "TargetAppIds_Pulse=38"
 

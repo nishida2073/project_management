@@ -297,61 +297,36 @@ foreach ($groupKey in $settingsGroups.Keys) {
 }
 $settingsTrailingButtonVars = @{
     "TargetAppIds"        = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
-        Set-StepStatus -Label $Field.StatusLabel -Text "実行中..." -State "実行中..."
-        [System.Windows.Forms.Application]::DoEvents()
-        try {
-            Test-KintoneConnection -ReportGroup $Field.Group -FieldName "$($Field.Group)_TargetAppIds" -ThrowOnError
-            Set-StepStatus -Label $Field.StatusLabel -Text "成功" -State "成功"
-        } catch {
-            Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            Test-KintoneConnection -ReportGroup $Field.Group -FieldName "$($Field.Group)_TargetAppIds"
+            [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
         }
     }.GetNewClosure() }
     "SyncUserMasterAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
-        Set-StepStatus -Label $Field.StatusLabel -Text "実行中..." -State "実行中..."
-        [System.Windows.Forms.Application]::DoEvents()
-        try {
-            Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" -ThrowOnError
-            Set-StepStatus -Label $Field.StatusLabel -Text "成功" -State "成功"
-        } catch {
-            Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId"
+            [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
         }
     }.GetNewClosure() }
     "SyncUserMasterSheetName" = { param($Panel, $Y, $Field)
         Add-FieldActionButton -Panel $Panel -Y $Y -Text "同期実行" -AddStatusLabel -OnClick {
             $batchPath = Join-Path $basePath "sync-kintone-to-sheet.bat"
-            if (-not (Test-Path $batchPath)) {
-                [System.Windows.Forms.MessageBox]::Show("バッチファイルが見つかりません: $batchPath", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
-                return
-            }
-            Set-StepStatus -Label $Field.StatusLabel -Text "実行中..." -State "実行中..."
-            [System.Windows.Forms.Application]::DoEvents()
-
-            try {
+            Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
                 $groupName = $cmbSettingsGroupTarget.SelectedItem
                 if ([string]::IsNullOrWhiteSpace($groupName)) {
-                    [System.Windows.Forms.MessageBox]::Show("グループを選択してください。", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
-                    Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
-                    return
+                    throw "グループが選択されていません"
                 }
                 $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
                 $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
                 if ([string]::IsNullOrWhiteSpace($syncAppId)) {
-                    [System.Windows.Forms.MessageBox]::Show("対象アプリIDを入力してください。", "同期実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
-                    Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
-                    return
+                    throw "対象アプリIDが入力されていません"
                 }
                 $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
                 $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
-                if ($exitCode -eq 0) {
-                    Set-StepStatus -Label $Field.StatusLabel -Text "成功" -State "成功"
-                    [System.Windows.Forms.MessageBox]::Show("同期が完了しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
-                } else {
-                    Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
-                    [System.Windows.Forms.MessageBox]::Show("同期に失敗しました。ログを確認してください。", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+                if ($exitCode -ne 0) {
+                    throw "同期処理に失敗しました"
                 }
-            } catch {
-                Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
-                [System.Windows.Forms.MessageBox]::Show("同期処理エラー: $($_.Exception.Message)", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+                [System.Windows.Forms.MessageBox]::Show("同期が完了しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
             }
         }.GetNewClosure()
     }
@@ -361,25 +336,18 @@ $settingsTrailingButtonVars = @{
         $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
         $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
 
-        Set-StepStatus -Label $Field.StatusLabel -Text "実行中..." -State "実行中..."
-        [System.Windows.Forms.Application]::DoEvents()
-
-        try {
-            Invoke-TestAction -DialogTitle "テスト投稿" -ValidationError $validationError `
-                -Action {
-                    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-                    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-                    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
-                    $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
-                    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-                    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-                    Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
-                }.GetNewClosure() `
-                -FormatSuccessMessage { param($response) "投稿に成功しました（コメントID: $($response.id)）。`r`nスレッドを確認し、不要であれば削除してください。" } `
-                -ThrowOnError
-            Set-StepStatus -Label $Field.StatusLabel -Text "成功" -State "成功"
-        } catch {
-            Set-StepStatus -Label $Field.StatusLabel -Text "失敗" -State "失敗"
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            if ($validationError) {
+                throw "スペースID／スレッドIDを入力してください。"
+            }
+            $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+            $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+            $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+            $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+            $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+            $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+            Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+            [System.Windows.Forms.MessageBox]::Show("テスト投稿に成功しました。スレッドを確認し、不要であれば削除してください。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
         }
     }.GetNewClosure() }
 }
@@ -730,7 +698,7 @@ function Update-GroupSettingsFields {
 }
 
 function Test-KintoneConnection {
-    param([string]$ReportGroup, [string]$FieldName, [switch]$ThrowOnError)
+    param([string]$ReportGroup, [string]$FieldName)
 
     $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
     $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
@@ -738,33 +706,30 @@ function Test-KintoneConnection {
     $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
 
-    $validationError = if ($targetAppIds.Count -eq 0) { "対象アプリIDを入力してください。" } else { $null }
+    if ($targetAppIds.Count -eq 0) {
+        throw "対象アプリIDを入力してください。"
+    }
 
-    Invoke-TestAction -DialogTitle "テスト接続" -ValidationError $validationError `
-        -Action {
-            $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-            $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
 
-            $resultLines = @()
-            $hasFailure = $false
-            foreach ($targetAppId in $targetAppIds) {
-                try {
-                    $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
-                    $fieldCodes = @($fieldData.PSObject.Properties.Name)
-                    $resultLines += "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
-                    $resultLines += "  $($fieldCodes -join ', ')"
-                } catch {
-                    $hasFailure = $true
-                    $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
-                }
-            }
+    $resultLines = @()
+    $hasFailure = $false
+    foreach ($targetAppId in $targetAppIds) {
+        try {
+            $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
+            $fieldCodes = @($fieldData.PSObject.Properties.Name)
+            $resultLines += "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
+            $resultLines += "  $($fieldCodes -join ', ')"
+        } catch {
+            $hasFailure = $true
+            $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
+        }
+    }
 
-            $resultText = $resultLines -join "`r`n"
-            if ($hasFailure) { throw $resultText }
-            return $resultText
-        }.GetNewClosure() `
-        -FormatSuccessMessage { param($response) $response } `
-        -FormatFailureMessage { param($ErrorRecord) $ErrorRecord.Exception.Message } -ThrowOnError:$ThrowOnError
+    $resultText = $resultLines -join "`r`n"
+    if ($hasFailure) { throw $resultText }
+    return $resultText
 }
 
 function Save-CommonSettings {

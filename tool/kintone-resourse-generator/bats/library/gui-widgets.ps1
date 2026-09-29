@@ -788,6 +788,26 @@ function Set-StepStatus {
     Set-StatusLabelText -Label $Label -Text $Text -ForeColor $color
 }
 
+function Invoke-ActionWithUpdateStatus {
+    param(
+        [System.Windows.Forms.Label]$StatusLabel,
+        [scriptblock]$Action,
+        [string]$SuccessMessage = "成功",
+        [string]$FailureMessage = "失敗"
+    )
+    Set-StepStatus -Label $StatusLabel -Text "実行中..."
+    [System.Windows.Forms.Application]::DoEvents()
+    try {
+        $result = & $Action
+        Set-StepStatus -Label $StatusLabel -Text $SuccessMessage
+        return $result
+    } catch {
+        $errorMsg = $_.Exception.Message
+        [System.Windows.Forms.MessageBox]::Show("$errorMsg", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        Set-StepStatus -Label $StatusLabel -Text $FailureMessage
+    }
+}
+
 function Invoke-BatchStep {
     param(
         $ButtonDef,
@@ -1208,28 +1228,3 @@ function Render-SettingsFields {
     return $totalHeight
 }
 
-function Invoke-TestAction {
-    param(
-        [string]$ValidationError,
-        [Parameter(Mandatory)][scriptblock]$Action,
-        [Parameter(Mandatory)][scriptblock]$FormatSuccessMessage,
-        [scriptblock]$FormatFailureMessage = { param($ErrorRecord) "失敗しました。`r`n$($ErrorRecord.Exception.Message)" },
-        [string]$DialogTitle = "テスト",
-        [switch]$ThrowOnError
-    )
-
-    if ($ValidationError) {
-        [System.Windows.Forms.MessageBox]::Show($ValidationError, $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        if ($ThrowOnError) { throw $ValidationError }
-        return
-    }
-
-    try {
-        $response = & $Action
-        [System.Windows.Forms.MessageBox]::Show((& $FormatSuccessMessage $response), $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-    } catch {
-        $errorMessage = & $FormatFailureMessage $_
-        [System.Windows.Forms.MessageBox]::Show($errorMessage, $DialogTitle, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        if ($ThrowOnError) { throw $errorMessage }
-    }
-}
