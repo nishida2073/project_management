@@ -40,6 +40,208 @@ function New-OpenLinkHandler {
     }.GetNewClosure())
 }
 
+function New-OpenLink {
+    param(
+        [string]$Text = "開く",
+        [int]$X = 0, [int]$Y = 0,
+        [int]$Width = 0, [int]$Height = 0,
+        [string]$Pattern = 'external',
+        [object]$Tag = $null,
+        [scriptblock]$OnOpenClick = $null,
+        [hashtable]$InputControls = $null
+    )
+
+    $lnk = New-Object System.Windows.Forms.LinkLabel
+    $lnk.Text = $Text
+    $lnk.AutoSize = $false
+    $lnk.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    if ($Width -gt 0 -and $Height -gt 0) { $lnk.Size = New-Object System.Drawing.Size($Width, $Height) }
+    $lnk.Location = New-Object System.Drawing.Point($X, $Y)
+    $lnk.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+
+    New-OpenLinkHandler -Control $lnk -Pattern $Pattern -Tag $Tag -OnOpenClick $OnOpenClick -InputControls $InputControls
+
+    return $lnk
+}
+
+function New-Label {
+    param(
+        [int]$X = 0, [int]$Y = 0,
+        [int]$Width = 0, [int]$Height = 0,
+        [string]$Text = "",
+        [System.Drawing.Color]$ForeColor = [System.Drawing.Color]::Black,
+        [bool]$AutoSize = $false
+    )
+
+    $lbl = New-Object System.Windows.Forms.Label
+    $lbl.Text = $Text
+    $lbl.AutoSize = $AutoSize
+    $lbl.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $lbl.Location = New-Object System.Drawing.Point($X, $Y)
+    $lbl.ForeColor = $ForeColor
+    if ($Width -gt 0 -and $Height -gt 0) { $lbl.Size = New-Object System.Drawing.Size($Width, $Height) }
+
+    return $lbl
+}
+
+function Measure-LabelWidth {
+    param(
+        [Parameter(Mandatory)][System.Windows.Forms.Label]$Label,
+        [string]$Text = "",
+        [int]$FixedHeight = 24,
+        [int]$X = 0,
+        [int]$CenterY = 0
+    )
+
+    $Label.Text = $Text
+    $Label.AutoSize = $true
+    $labelWidth = $Label.Width
+    $Label.AutoSize = $false
+    $Label.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $Label.Size = New-Object System.Drawing.Size($labelWidth, $FixedHeight)
+    $Y = $CenterY - [int]($Label.Height / 2)
+    $Label.Location = New-Object System.Drawing.Point($X, $Y)
+
+    return $Label
+}
+
+function New-Button {
+    param(
+        [string]$Text = "",
+        [int]$X = 0, [int]$Y = 0,
+        [int]$Width = 0, [int]$Height = 0
+    )
+
+    $btn = New-Object System.Windows.Forms.Button
+    $btn.Text = $Text
+    if ($Width -gt 0 -and $Height -gt 0) { $btn.Size = New-Object System.Drawing.Size($Width, $Height) }
+    $btn.Location = New-Object System.Drawing.Point($X, $Y)
+    $btn.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+
+    return $btn
+}
+
+function New-GroupBox {
+    param(
+        [string]$Text = "",
+        [int]$X = 0, [int]$Y = 0,
+        [int]$Width = 0, [int]$Height = 0,
+        [System.Windows.Forms.DockStyle]$Dock = [System.Windows.Forms.DockStyle]::None,
+        [bool]$AutoSize = $false,
+        [System.Windows.Forms.AutoSizeMode]$AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowOnly
+    )
+
+    $grp = New-Object System.Windows.Forms.GroupBox
+    $grp.Text = $Text
+    if ($Dock -ne [System.Windows.Forms.DockStyle]::None) {
+        $grp.Dock = $Dock
+    } else {
+        $grp.Location = New-Object System.Drawing.Point($X, $Y)
+        $grp.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+    }
+    if ($Width -gt 0 -and $Height -gt 0) { $grp.Size = New-Object System.Drawing.Size($Width, $Height) }
+    if ($AutoSize) {
+        $grp.AutoSize = $true
+        $grp.AutoSizeMode = $AutoSizeMode
+    }
+
+    return $grp
+}
+
+function New-CheckBox {
+    param(
+        [string]$Text = "",
+        [int]$X = 0, [int]$Y = 0,
+        [int]$Width = 0, [int]$Height = 0,
+        [bool]$Checked = $true,
+        [bool]$AutoEllipsis = $false
+    )
+
+    $chk = New-Object System.Windows.Forms.CheckBox
+    $chk.Text = $Text
+    $chk.AutoSize = $false
+    $chk.AutoEllipsis = $AutoEllipsis
+    if ($Width -gt 0 -and $Height -gt 0) { $chk.Size = New-Object System.Drawing.Size($Width, $Height) }
+    $chk.Location = New-Object System.Drawing.Point($X, $Y)
+    $chk.Checked = $Checked
+
+    return $chk
+}
+
+function New-Panel {
+    param(
+        [int]$Height = 0,
+        [System.Windows.Forms.DockStyle]$Dock = [System.Windows.Forms.DockStyle]::Top
+    )
+
+    $pnl = New-Object System.Windows.Forms.Panel
+    if ($Height -gt 0) { $pnl.Height = $Height }
+    $pnl.Dock = $Dock
+
+    return $pnl
+}
+
+function New-ComboBox {
+    param(
+        [int]$X = 0, [int]$Y = 0,
+        [int]$Width = 0, [int]$Height = 0,
+        [object[]]$Items = @(),
+        [object]$SelectedItem = $null,
+        [string]$DisplayMember = "Text"
+    )
+
+    $cmb = New-Object System.Windows.Forms.ComboBox
+    $cmb.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+    $cmb.DisplayMember = $DisplayMember
+    if ($Width -gt 0 -and $Height -gt 0) { $cmb.Size = New-Object System.Drawing.Size($Width, $Height) } else {
+        if ($Width -gt 0) { $cmb.Width = $Width }
+    }
+    $cmb.Location = New-Object System.Drawing.Point($X, $Y)
+    foreach ($item in $Items) { $cmb.Items.Add($item) | Out-Null }
+    if ($SelectedItem -ne $null) { $cmb.SelectedItem = $SelectedItem }
+
+    return $cmb
+}
+
+function New-TextBox {
+    param(
+        [int]$X = 0, [int]$Y = 0,
+        [int]$Width = 0, [int]$Height = 0,
+        [string]$Text = "",
+        [bool]$Multiline = $false,
+        [bool]$Visible = $true
+    )
+
+    $txt = New-Object System.Windows.Forms.TextBox
+    $txt.Text = $Text
+    if ($Width -gt 0 -and $Height -gt 0) { $txt.Size = New-Object System.Drawing.Size($Width, $Height) } else {
+        if ($Width -gt 0) { $txt.Width = $Width }
+    }
+    $txt.Location = New-Object System.Drawing.Point($X, $Y)
+    $txt.Multiline = $Multiline
+    $txt.Visible = $Visible
+
+    return $txt
+}
+
+function New-RadioButton {
+    param(
+        [int]$X = 0, [int]$Y = 0,
+        [string]$Text = "",
+        [object]$Tag = $null,
+        [bool]$Checked = $false
+    )
+
+    $rb = New-Object System.Windows.Forms.RadioButton
+    $rb.Text = $Text
+    $rb.AutoSize = $true
+    $rb.Location = New-Object System.Drawing.Point($X, $Y)
+    $rb.Checked = $Checked
+    if ($Tag -ne $null) { $rb.Tag = $Tag }
+
+    return $rb
+}
+
 function Get-ConsoleColorAsDrawingColor {
     param([string]$ConsoleColorName)
     switch ($ConsoleColorName) {
@@ -173,9 +375,7 @@ function Add-StackedDockedControls {
     $topControls = @($ControlsTopToBottom | Where-Object { $_.Dock -ne [System.Windows.Forms.DockStyle]::Fill })
 
     if ($Spacing -gt 0 -and $topControls.Count -gt 0 -and $fillControls.Count -gt 0) {
-        $spacer = New-Object System.Windows.Forms.Panel
-        $spacer.Height = $Spacing
-        $spacer.Dock = [System.Windows.Forms.DockStyle]::Top
+        $spacer = New-Panel -Height $Spacing
         $topControls += $spacer
     }
 
@@ -245,9 +445,7 @@ function New-CategoryTabControl {
         $tabPage.Text = $cd.Label
         $tabControl.Controls.Add($tabPage)
 
-        $buttonPanel = New-Object System.Windows.Forms.Panel
-        $buttonPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-        $buttonPanel.Height = Get-CategoryPanelHeight -ButtonDefs $cd.ButtonDefs
+        $buttonPanel = New-Panel -Height (Get-CategoryPanelHeight -ButtonDefs $cd.ButtonDefs)
         $tabPage.Controls.Add($buttonPanel)
 
         $groupY = $GroupSpacing
@@ -256,11 +454,7 @@ function New-CategoryTabControl {
             $inputRowCount = Get-InputRowCount -Inputs $bd.Inputs
             $contentY = if ($inputRowCount -gt 0) { 20 + ($InputRowHeight * $inputRowCount) } else { 20 }
 
-            $grp = New-Object System.Windows.Forms.GroupBox
-            $grp.Text = $bd.Label
-            $grp.Location = New-Object System.Drawing.Point(10, $groupY)
-            $grp.Size = New-Object System.Drawing.Size(730, $bdHeight)
-            $grp.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+            $grp = New-GroupBox -Text $bd.Label -X 10 -Y $groupY -Width 730 -Height $bdHeight
             $buttonPanel.Controls.Add($grp)
 
             if ($bd.Inputs) {
@@ -277,12 +471,7 @@ function New-CategoryTabControl {
                     $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
                     $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
-                    $lblInput = New-Object System.Windows.Forms.Label
-                    $lblInput.Text = "$($inputDef.Label)"
-                    $lblInput.AutoSize = $false
-                    $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-                    $lblInput.Size = New-Object System.Drawing.Size($labelWidth, 22)
-                    $lblInput.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($lblInput.Height / 2)))
+                    $lblInput = New-Label -X $inputX -Y ($inputRowCenterY - 11) -Width $labelWidth -Height 22 -Text "$($inputDef.Label)"
                     $grp.Controls.Add($lblInput)
                     $inputX += $labelWidth + 4
 
@@ -290,21 +479,14 @@ function New-CategoryTabControl {
                         $inputCtrl = $inputDef.ExistingControl
                         $inputCtrl.Width = $inputWidth
                     } elseif ($inputDef.Options) {
-                        $inputCtrl = New-Object System.Windows.Forms.ComboBox
-                        $inputCtrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-                        $inputCtrl.Width = $inputWidth
-                        $inputCtrl.DisplayMember = "Text"
-                        foreach ($opt in $inputDef.Options) { $inputCtrl.Items.Add($opt) | Out-Null }
                         $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
+                        $inputCtrl = New-ComboBox -Width $inputWidth -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
                         if ($selectedOption) {
-                            $inputCtrl.SelectedItem = $selectedOption
                         } elseif ($inputCtrl.Items.Count -gt 0) {
                             $inputCtrl.SelectedIndex = 0
                         }
                     } else {
-                        $inputCtrl = New-Object System.Windows.Forms.TextBox
-                        $inputCtrl.Width = $inputWidth
-                        $inputCtrl.Text = "$($inputDef.Default)"
+                        $inputCtrl = New-TextBox -Width $inputWidth -Text "$($inputDef.Default)"
                     }
                     $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
                     $grp.Controls.Add($inputCtrl)
@@ -314,33 +496,18 @@ function New-CategoryTabControl {
                 $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force
             }
 
-            $btn = New-Object System.Windows.Forms.Button
-            $btn.Text = $RunButtonText
-            $btn.Size = New-Object System.Drawing.Size(100, 30)
-            $btn.Location = New-Object System.Drawing.Point(15, $contentY)
+            $btn = New-Button -Text $RunButtonText -X 15 -Y $contentY -Width 100 -Height 30
             $btn.Tag = $bd
             $btn.Add_Click({ & $OnRunClick $this.Tag }.GetNewClosure())
             $grp.Controls.Add($btn)
             $runButtons += $btn
 
             if ($bd.OpenTarget) {
-                $lnkOpen = New-Object System.Windows.Forms.LinkLabel
-                $lnkOpen.Text = $OpenLinkText
-                $lnkOpen.AutoSize = $false
-                $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-                $lnkOpen.Size = New-Object System.Drawing.Size(60, 30)
-                $lnkOpen.Location = New-Object System.Drawing.Point(125, $contentY)
-                New-OpenLinkHandler -Control $lnkOpen -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $bd.InputControls
+                $lnkOpen = New-OpenLink -Text $OpenLinkText -X 125 -Y $contentY -Width 60 -Height 30 -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $bd.InputControls
                 $grp.Controls.Add($lnkOpen)
             }
 
-            $lblStepStatus = New-Object System.Windows.Forms.Label
-            $lblStepStatus.Text = $InitialStatusText
-            $lblStepStatus.AutoSize = $false
-            $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-            $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
-            $lblStepStatus.Location = New-Object System.Drawing.Point(200, ($contentY + 4))
-            $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
+            $lblStepStatus = New-Label -X 200 -Y ($contentY + 4) -Width 150 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
             $grp.Controls.Add($lblStepStatus)
             $bd | Add-Member -NotePropertyName StepStatusLabel -NotePropertyValue $lblStepStatus -Force
 
@@ -377,34 +544,19 @@ function New-LogTab {
 
     $logContentBox = New-LogTextBox
 
-    $logStagePanel = New-Object System.Windows.Forms.GroupBox
-    $logStagePanel.Text = "ログ"
-    $logStagePanel.Dock = [System.Windows.Forms.DockStyle]::Top
-    $logStagePanel.AutoSize = $true
-    $logStagePanel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+    $logStagePanel = New-GroupBox -Text "ログ" -Dock Top -AutoSize $true -AutoSizeMode GrowAndShrink
 
     $rowCenterY = 30
 
-    $lblLogExtra = New-Object System.Windows.Forms.Label
-    $lblLogExtra.Text = $ExtraLabelText
-    $lblLogExtra.AutoSize = $true
-    $lblLogExtraWidth = $lblLogExtra.Width
-    $lblLogExtra.AutoSize = $false
-    $lblLogExtra.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-    $lblLogExtra.Size = New-Object System.Drawing.Size($lblLogExtraWidth, 24)
-    $lblLogExtra.Location = New-Object System.Drawing.Point(20, ($rowCenterY - [int]($lblLogExtra.Height / 2)))
+    $lblLogExtra = New-Label
+    Measure-LabelWidth -Label $lblLogExtra -Text $ExtraLabelText -FixedHeight 24 -X 20 -CenterY $rowCenterY | Out-Null
     $logStagePanel.Controls.Add($lblLogExtra)
 
-    $cmbLogExtra = New-Object System.Windows.Forms.ComboBox
-    $cmbLogExtra.Size = New-Object System.Drawing.Size($ExtraComboWidth, 24)
-    $cmbLogExtra.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+    $cmbLogExtra = New-ComboBox -Width $ExtraComboWidth -Height 24
     $cmbLogExtra.Location = New-Object System.Drawing.Point(($lblLogExtra.Right + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
     $logStagePanel.Controls.Add($cmbLogExtra)
 
-    $btnClearLogs = New-Object System.Windows.Forms.Button
-    $btnClearLogs.Text = "ログをすべて削除"
-    $btnClearLogs.Size = New-Object System.Drawing.Size(140, 24)
-    $btnClearLogs.Location = New-Object System.Drawing.Point(($cmbLogExtra.Right + 20), ($rowCenterY - [int]($btnClearLogs.Height / 2)))
+    $btnClearLogs = New-Button -Text "ログをすべて削除" -X ($cmbLogExtra.Right + 20) -Y ($rowCenterY - [int](24 / 2)) -Width 140 -Height 24
     $btnClearLogs.Add_Click({
         $logPath = & $GetLogPathFn
         if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
@@ -433,12 +585,7 @@ function New-LogTab {
     $radios = @()
     for ($i = 0; $i -lt $ButtonDefs.Count; $i++) {
         $bd = $ButtonDefs[$i]
-        $radio = New-Object System.Windows.Forms.RadioButton
-        $radio.Text = & $LabelFn $bd
-        $radio.AutoSize = $true
-        $radio.Tag = $bd
-        $radio.Checked = ($i -eq 0)
-        $radio.Location = New-Object System.Drawing.Point(20, (50 + 24 * $i))
+        $radio = New-RadioButton -X 20 -Y (50 + 24 * $i) -Text (& $LabelFn $bd) -Tag $bd -Checked ($i -eq 0)
         $logStagePanel.Controls.Add($radio)
         $radios += $radio
     }
@@ -487,20 +634,11 @@ function New-SettingsTopPanel {
     $panel.AutoSize = $true
     $panel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
 
-    $btnSave = New-Object System.Windows.Forms.Button
-    $btnSave.Text = "保存"
-    $btnSave.Location = New-Object System.Drawing.Point(20, $ButtonRowY)
-    $btnSave.Size = New-Object System.Drawing.Size(100, 24)
+    $btnSave = New-Button -Text "保存" -X 20 -Y $ButtonRowY -Width 100 -Height 24
 
-    $btnReload = New-Object System.Windows.Forms.Button
-    $btnReload.Text = "再読込"
-    $btnReload.Location = New-Object System.Drawing.Point(130, $ButtonRowY)
-    $btnReload.Size = New-Object System.Drawing.Size(100, 24)
+    $btnReload = New-Button -Text "再読込" -X 130 -Y $ButtonRowY -Width 100 -Height 24
 
-    $lblStatus = New-Object System.Windows.Forms.Label
-    $lblStatus.Text = ""
-    $lblStatus.AutoSize = $true
-    $lblStatus.Location = New-Object System.Drawing.Point(244, ($ButtonRowY + 6))
+    $lblStatus = New-Label -X 244 -Y ($ButtonRowY + 6) -AutoSize $true
 
     $panel.Controls.AddRange(@($btnSave, $btnReload, $lblStatus))
 
@@ -551,15 +689,10 @@ function New-BatchRunTab {
         [string]$InitialStatusText = "未実行"
     )
 
-    $batchPanel = New-Object System.Windows.Forms.Panel
-    $batchPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+    $batchPanel = New-Panel
     $TabPage.Controls.Add($batchPanel)
 
-    $grpBatchAll = New-Object System.Windows.Forms.GroupBox
-    $grpBatchAll.Text = "一括実行"
-    $grpBatchAll.Location = New-Object System.Drawing.Point(10, 10)
-    $grpBatchAll.Size = New-Object System.Drawing.Size(730, 60)
-    $grpBatchAll.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left -bor [System.Windows.Forms.AnchorStyles]::Right
+    $grpBatchAll = New-GroupBox -Text "一括実行" -X 10 -Y 10 -Width 730 -Height 60
     $batchPanel.Controls.Add($grpBatchAll)
 
     $inputRowHeight = 35
@@ -577,12 +710,7 @@ function New-BatchRunTab {
         $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
         $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 120 }
 
-        $lblInput = New-Object System.Windows.Forms.Label
-        $lblInput.Text = $inputDef.Label
-        $lblInput.AutoSize = $false
-        $lblInput.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-        $lblInput.Size = New-Object System.Drawing.Size($labelWidth, 22)
-        $lblInput.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($lblInput.Height / 2)))
+        $lblInput = New-Label -X $inputX -Y ($inputRowCenterY - 11) -Width $labelWidth -Height 22 -Text $inputDef.Label
         $topControls += $lblInput
         $inputX += $labelWidth + 4
 
@@ -590,21 +718,13 @@ function New-BatchRunTab {
             $inputCtrl = $inputDef.ExistingControl
             $inputCtrl.Width = $inputWidth
         } elseif ($inputDef.Options) {
-            $inputCtrl = New-Object System.Windows.Forms.ComboBox
-            $inputCtrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-            $inputCtrl.DisplayMember = "Text"
-            $inputCtrl.Width = $inputWidth
-            foreach ($opt in $inputDef.Options) { $inputCtrl.Items.Add($opt) | Out-Null }
             $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
-            if ($selectedOption) {
-                $inputCtrl.SelectedItem = $selectedOption
-            } elseif ($inputCtrl.Items.Count -gt 0) {
+            $inputCtrl = New-ComboBox -Width $inputWidth -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
+            if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {
                 $inputCtrl.SelectedIndex = 0
             }
         } else {
-            $inputCtrl = New-Object System.Windows.Forms.TextBox
-            $inputCtrl.Width = $inputWidth
-            $inputCtrl.Text = "$($inputDef.Default)"
+            $inputCtrl = New-TextBox -Width $inputWidth -Text "$($inputDef.Default)"
         }
         $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
         $topControls += $inputCtrl
@@ -616,52 +736,28 @@ function New-BatchRunTab {
     $statusLabels = @()
     $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 20 } else { 20 }
     foreach ($bd in $ButtonDefs) {
-        $chk = New-Object System.Windows.Forms.CheckBox
-        $chk.Text = Get-BatchDisplayLabel -ButtonDef $bd
-        $chk.Checked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
-        $chk.AutoSize = $false
-        $chk.AutoEllipsis = $true
-        $chk.Size = New-Object System.Drawing.Size(360, 22)
-        $chk.Location = New-Object System.Drawing.Point(20, $y)
+        $isChecked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
+        $chk = New-CheckBox -Text (Get-BatchDisplayLabel -ButtonDef $bd) -X 20 -Y $y -Width 360 -Height 22 -Checked $isChecked -AutoEllipsis $true
         $chk.Tag = $bd
         $checkBoxes += $chk
         $topControls += $chk
 
         if (& $ShowOpenLink $bd) {
-            $lnkOpen = New-Object System.Windows.Forms.LinkLabel
-            $lnkOpen.Text = "開く"
-            $lnkOpen.AutoSize = $false
-            $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-            $lnkOpen.Size = New-Object System.Drawing.Size(40, $chk.Height)
-            $lnkOpen.Location = New-Object System.Drawing.Point(390, $y)
-            $lnkOpen.Tag = $bd
-            New-OpenLinkHandler -Control $lnkOpen -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
+            $lnkOpen = New-OpenLink -X 390 -Y $y -Width 40 -Height $chk.Height -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
             $topControls += $lnkOpen
         }
 
-        $lblStepStatus = New-Object System.Windows.Forms.Label
-        $lblStepStatus.Text = $InitialStatusText
-        $lblStepStatus.AutoSize = $false
-        $lblStepStatus.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-        $lblStepStatus.Size = New-Object System.Drawing.Size(150, 22)
-        $lblStepStatus.Location = New-Object System.Drawing.Point(440, $y)
-        $lblStepStatus.ForeColor = [System.Drawing.Color]::Gray
+        $lblStepStatus = New-Label -X 440 -Y $y -Width 150 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
         $statusLabels += $lblStepStatus
         $topControls += $lblStepStatus
 
         $y += 26
     }
 
-    $btnRunAll = New-Object System.Windows.Forms.Button
-    $btnRunAll.Text = $RunButtonText
-    $btnRunAll.Location = New-Object System.Drawing.Point(20, ($y + 10))
-    $btnRunAll.Size = New-Object System.Drawing.Size(120, 28)
+    $btnRunAll = New-Button -Text $RunButtonText -X 20 -Y ($y + 10) -Width 120 -Height 28
     $topControls += $btnRunAll
 
-    $lblStatus = New-Object System.Windows.Forms.Label
-    $lblStatus.Text = ""
-    $lblStatus.AutoSize = $true
-    $lblStatus.Location = New-Object System.Drawing.Point(154, ($y + 16))
+    $lblStatus = New-Label -X 154 -Y ($y + 16) -AutoSize $true
     $topControls += $lblStatus
 
     $grpBatchAll.Controls.AddRange($topControls)
@@ -899,34 +995,20 @@ function Add-MentionsEditor {
     $script:mentionRowControls = @()
 
     $y = $StartY
-    $lbl = New-Object System.Windows.Forms.Label
-    $lbl.Text = "メンション対象"
-    $lbl.AutoSize = $false
-    $lbl.Size = New-Object System.Drawing.Size(220, 20)
-    $lbl.Location = New-Object System.Drawing.Point(20, $y)
+    $lbl = New-Label -X 20 -Y $y -Width 220 -Height 20 -Text "メンション対象"
     $ToolTip.SetToolTip($lbl, "MentionUserCodes")
     $Panel.Controls.Add($lbl)
     $y += 24
 
     foreach ($row in @($script:mentionRows)) {
-        $txtCode = New-Object System.Windows.Forms.TextBox
-        $txtCode.Text = "$($row.Code)"
-        $txtCode.Location = New-Object System.Drawing.Point(40, $y)
-        $txtCode.Size = New-Object System.Drawing.Size(190, 22)
+        $txtCode = New-TextBox -X 40 -Y $y -Width 190 -Height 22 -Text "$($row.Code)"
         $Panel.Controls.Add($txtCode)
 
-        $cmbType = New-Object System.Windows.Forms.ComboBox
-        $cmbType.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-        foreach ($opt in $MentionTypeOptions) { $cmbType.Items.Add($opt) | Out-Null }
-        $cmbType.SelectedItem = if ($MentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
-        $cmbType.Location = New-Object System.Drawing.Point(240, $y)
-        $cmbType.Size = New-Object System.Drawing.Size(120, 22)
+        $selectedType = if ($MentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
+        $cmbType = New-ComboBox -X 240 -Y $y -Width 120 -Height 22 -Items $MentionTypeOptions -SelectedItem $selectedType
         $Panel.Controls.Add($cmbType)
 
-        $btnDeleteRow = New-Object System.Windows.Forms.Button
-        $btnDeleteRow.Text = "削除"
-        $btnDeleteRow.Location = New-Object System.Drawing.Point(370, ($y - 1))
-        $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
+        $btnDeleteRow = New-Button -Text "削除" -X 370 -Y ($y - 1) -Width 60 -Height 24
         $btnDeleteRow.Tag = $row
         $btnDeleteRow.Add_Click({
             Sync-MentionRowsFromControls
@@ -940,10 +1022,7 @@ function Add-MentionsEditor {
         $y += 28
     }
 
-    $btnAddRow = New-Object System.Windows.Forms.Button
-    $btnAddRow.Text = "＋ 追加"
-    $btnAddRow.Location = New-Object System.Drawing.Point(40, $y)
-    $btnAddRow.Size = New-Object System.Drawing.Size(80, 24)
+    $btnAddRow = New-Button -Text "＋ 追加" -X 40 -Y $y -Width 80 -Height 24
     $btnAddRow.Add_Click({
         Sync-MentionRowsFromControls
         $script:mentionRows += [PSCustomObject]@{ Code = ""; Type = "USER" }
@@ -965,20 +1044,13 @@ function Add-FieldActionButton {
         [switch]$AddStatusLabel,
         [string]$InitialStatusText = "未実行"
     )
-    $btn = New-Object System.Windows.Forms.Button
-    $btn.Text = $Text
-    $btn.Location = New-Object System.Drawing.Point(20, $Y)
-    $btn.Size = New-Object System.Drawing.Size($Width, 24)
-    $btn.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+    $btn = New-Button -Text $Text -X 20 -Y $Y -Width $Width -Height 24
     $btn.Add_Click({ & $OnClick }.GetNewClosure()) | Out-Null
     $Panel.Controls.Add($btn) | Out-Null
 
     if ($AddStatusLabel) {
-        $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = $InitialStatusText
-        $lbl.AutoSize = $true
+        $lbl = New-Label -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray) -AutoSize $true
         $lbl.Location = New-Object System.Drawing.Point(($btn.Right + 10), ($btn.Top + 6))
-        $lbl.ForeColor = [System.Drawing.Color]::Gray
         $Panel.Controls.Add($lbl) | Out-Null
         return $lbl
     }
@@ -1029,20 +1101,15 @@ function Render-SettingsFields {
             continue
         }
 
-        $lbl = New-Object System.Windows.Forms.Label
-        $lbl.Text = if ($VarLabels.Contains($field.VarName)) { $VarLabels[$field.VarName] } else { $field.VarName }
-        $lbl.AutoSize = $false
-        $lbl.Size = New-Object System.Drawing.Size(220, 20)
-        $lbl.Location = New-Object System.Drawing.Point(20, $y)
+        $labelText = if ($VarLabels.Contains($field.VarName)) { $VarLabels[$field.VarName] } else { $field.VarName }
+        $lbl = New-Label -X 20 -Y $y -Width 220 -Height 20 -Text $labelText
         $ToolTip.SetToolTip($lbl, $field.VarName)
         $grp.Controls.Add($lbl)
 
         $isMultiline = $MultilineVars -contains $field.VarName
 
         if ($RadioVars.ContainsKey($field.VarName)) {
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = "$($field.Value)"
-            $txt.Visible = $false
+            $txt = New-TextBox -Text "$($field.Value)" -Visible $false
             $grp.Controls.Add($txt)
 
             $radioPanel = New-Object System.Windows.Forms.Panel
@@ -1052,24 +1119,15 @@ function Render-SettingsFields {
 
             $radioX = 0
             foreach ($opt in $RadioVars[$field.VarName]) {
-                $rb = New-Object System.Windows.Forms.RadioButton
-                $rb.Text = $opt.Label
-                $rb.AutoSize = $true
-                $rb.Location = New-Object System.Drawing.Point($radioX, 2)
-                $rb.Tag = [PSCustomObject]@{ TextBox = $txt; Value = $opt.Value }
-                $rb.Checked = ($field.Value -eq $opt.Value)
+                $rbTag = [PSCustomObject]@{ TextBox = $txt; Value = $opt.Value }
+                $rb = New-RadioButton -X $radioX -Y 2 -Text $opt.Label -Tag $rbTag -Checked ($field.Value -eq $opt.Value)
                 $rb.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.TextBox.Text = $this.Tag.Value } })
                 $radioPanel.Controls.Add($rb)
                 $radioX += 80
             }
 
             if ($field.Group -eq "OVERRIDE") {
-                $rbUnset = New-Object System.Windows.Forms.RadioButton
-                $rbUnset.Text = "未設定"
-                $rbUnset.AutoSize = $true
-                $rbUnset.Location = New-Object System.Drawing.Point($radioX, 2)
-                $rbUnset.Tag = $txt
-                $rbUnset.Checked = [string]::IsNullOrEmpty($field.Value)
+                $rbUnset = New-RadioButton -X $radioX -Y 2 -Text "未設定" -Tag $txt -Checked ([string]::IsNullOrEmpty($field.Value))
                 $rbUnset.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.Text = "" } })
                 $ToolTip.SetToolTip($rbUnset, "空欄にすると共通設定の値を使用します")
                 $radioPanel.Controls.Add($rbUnset)
@@ -1077,28 +1135,18 @@ function Render-SettingsFields {
 
             $grp.Controls.Add($radioPanel)
         } else {
-            $txt = New-Object System.Windows.Forms.TextBox
-            $txt.Text = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
-            $txt.Location = New-Object System.Drawing.Point(250, ($y - 2))
-            if ($isMultiline) {
-                $txt.Multiline = $true
-                $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical
-                $txt.Size = New-Object System.Drawing.Size(300, 60)
-            } else {
-                $txt.Size = New-Object System.Drawing.Size(300, 22)
-            }
+            $txtValue = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
+            $txtSize = if ($isMultiline) { @(300, 60) } else { @(300, 22) }
+            $txt = New-TextBox -X 250 -Y ($y - 2) -Width $txtSize[0] -Height $txtSize[1] -Text $txtValue -Multiline $isMultiline
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            if ($isMultiline) { $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
             if ($MaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
             $grp.Controls.Add($txt)
         }
 
         $isFileBrowse = $FileBrowseVars -contains $field.VarName
         if (($FolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
-            $btnBrowse = New-Object System.Windows.Forms.Button
-            $btnBrowse.Text = "参照..."
-            $btnBrowse.Location = New-Object System.Drawing.Point(560, ($y - 3))
-            $btnBrowse.Size = New-Object System.Drawing.Size(70, 24)
-            $btnBrowse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
+            $btnBrowse = New-Button -Text "参照..." -X 560 -Y ($y - 3) -Width 70 -Height 24
             $btnBrowse.Tag = $txt
 
             if ($isFileBrowse) {
@@ -1114,14 +1162,7 @@ function Render-SettingsFields {
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.FileName }
                 }.GetNewClosure())
 
-                $lnkOpen = New-Object System.Windows.Forms.LinkLabel
-                $lnkOpen.Text = "開く"
-                $lnkOpen.AutoSize = $false
-                $lnkOpen.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
-                $lnkOpen.Size = New-Object System.Drawing.Size(50, 22)
-                $lnkOpen.Location = New-Object System.Drawing.Point(640, ($y - 2))
-                $lnkOpen.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
-                New-OpenLinkHandler -Control $lnkOpen -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
+                $lnkOpen = New-OpenLink -Size (New-Object System.Drawing.Size(50, 22)) -Location (New-Object System.Drawing.Point(640, ($y - 2))) -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
                 $grp.Controls.AddRange(@($btnBrowse, $lnkOpen))
             } else {
                 $btnBrowse.Add_Click({
@@ -1150,9 +1191,7 @@ function Render-SettingsFields {
     $controlsToStack = [System.Collections.Generic.List[System.Windows.Forms.Control]]::new()
     for ($i = 0; $i -lt $groupBoxes.Count; $i++) {
         if ($i -gt 0) {
-            $spacer = New-Object System.Windows.Forms.Panel
-            $spacer.Dock = [System.Windows.Forms.DockStyle]::Top
-            $spacer.Height = 10
+            $spacer = New-Panel -Height 10
             $controlsToStack.Add($spacer)
         }
         $controlsToStack.Add($groupBoxes[$i])
