@@ -321,8 +321,13 @@ function Update-LogView {
     }
 
     $logClient = $cmbLogClient.SelectedItem
-    $clientFilter = if ($logClient -and $logClient -ne "すべて") { "$logClient" + "_" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$prefix$clientFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
+    if ($logClient -and $logClient -ne "すべて") {
+        $filterPattern = "$prefix`_$logClient`_*.log"
+    } else {
+        $filterPattern = "$prefix`_*.log"
+    }
+
+    $files = Get-ChildItem -LiteralPath $logPath -Filter $filterPattern -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
 
     $sections = foreach ($file in $files) {
         try {
