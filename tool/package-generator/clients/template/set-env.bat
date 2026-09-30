@@ -2,8 +2,8 @@
 
 for %%I in ("%~dp0..\..") do set "BASE_PATH=%%~fI\"
 
-if not defined COMMON_LOG_PATH set "COMMON_LOG_PATH=%BASE_PATH%logs"
-if not defined COMMON_CONFIG_PATH set "COMMON_CONFIG_PATH=%BASE_PATH%clients"
+set "COMMON_LOG_PATH=%BASE_PATH%logs"
+set "COMMON_CONFIG_PATH=%BASE_PATH%clients"
 
 set "DOWNLOAD_SITE_URL="
 set "DOWNLOAD_SITE_PATH="
