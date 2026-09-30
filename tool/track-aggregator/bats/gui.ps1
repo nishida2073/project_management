@@ -207,7 +207,11 @@ function Set-RunButtonsEnabled {
 }
 
 
-$allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+$syncMasterButtonDef = [PSCustomObject]@{
+    Label            = "マスター同期"
+    BatchPath = "sync-kintone-to-sheet.bat"
+}
+$allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
 $script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
