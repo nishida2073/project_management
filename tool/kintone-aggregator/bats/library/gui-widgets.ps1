@@ -62,8 +62,7 @@ function New-OpenLink {
 
     $lnk = New-Object System.Windows.Forms.LinkLabel
     $lnk.Text = $Text
-    $lnk.AutoSize = $false
-    $lnk.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $lnk.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
     if ($Width -gt 0 -and $Height -gt 0) { $lnk.Size = New-Object System.Drawing.Size($Width, $Height) }
     $lnk.Location = New-Object System.Drawing.Point($X, $Y)
     $lnk.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
@@ -1146,6 +1145,7 @@ function Render-SettingsFields {
         if ($field.Group -ne $lastGroup) {
             $grp = New-Object System.Windows.Forms.GroupBox
             $grp.Text = $GroupLabels[$field.Group]
+            $grp.Padding = New-Object System.Windows.Forms.Padding(10, 35, 10, 10)
             $grp.Dock = [System.Windows.Forms.DockStyle]::Top
             $grp.AutoSize = $true
             $grp.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
@@ -1220,7 +1220,7 @@ function Render-SettingsFields {
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.FileName }
                 }.GetNewClosure())
 
-                $lnkOpen = New-OpenLink -Size (New-Object System.Drawing.Size(50, 22)) -Location (New-Object System.Drawing.Point(640, ($y - 2))) -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
+                $lnkOpen = New-OpenLink -Text "開く" -X 640 -Y ($y - 2) -Width 40 -Height 22 -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
                 $grp.Controls.AddRange(@($btnBrowse, $lnkOpen))
             } else {
                 $btnBrowse.Add_Click({

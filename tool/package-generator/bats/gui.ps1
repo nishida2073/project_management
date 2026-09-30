@@ -456,6 +456,11 @@ function Get-SettingsFieldRows {
         $defaults = Get-SetEnvDefaults -Path $setEnvBat
         $isPendingNewClient = !(Test-Path -LiteralPath (Get-ClientBatPath $client))
         $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $client $defaults } else { @{} }
+
+        $varName = "COMMON_LOG_PATH"
+        $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { $defaults[$varName] }
+        [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
+
         foreach ($varName in $clientOverridableVars) {
             $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { $defaults[$varName] }
             [PSCustomObject]@{ Group = $varName.Split("_")[0]; VarName = $varName; Value = $varValue; Key = $varName }
@@ -482,7 +487,7 @@ function Get-SettingsFieldRows {
 function Update-SettingsFields {
     $resolverValue = $script:commonEnvResolver
     $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -notin @("DOWNLOAD", "UPLOAD") }) -TargetTextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -notin @("COMMON", "DOWNLOAD", "UPLOAD") }) -TargetTextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
@@ -490,35 +495,12 @@ function Update-SettingsFields {
 
 function Get-FieldValue {
     param([string]$VarName)
-    return $script:fieldTextBoxes[$VarName].Text
+    if ($script:fieldTextBoxes.ContainsKey($VarName)) {
+        return $script:fieldTextBoxes[$VarName].Text
+    }
+    return ""
 }
 
-function Save-ClientProfile {
-    param([string]$ClientName)
-    $clientBat = Get-ClientBatPath $ClientName
-    $isNewClient = !(Test-Path -LiteralPath $clientBat)
-
-    $newLines = foreach ($varName in $clientOverridableVars) {
-        $newVal = Get-FieldValue $varName
-        if ($enabledVars -contains $varName) {
-            "if not defined $varName set `"$varName=$newVal`""
-        } else {
-            "set `"$varName=$newVal`""
-        }
-    }
-    $content = ($newLines -join "`r`n") + "`r`n"
-    [System.IO.File]::WriteAllText($clientBat, $content, $script:cp932Encoding)
-
-    if ($isNewClient) {
-        $defaults = Get-SetEnvDefaults -Path $setEnvBat
-        $defaultConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver $script:commonEnvResolver -BasePath $rootPath
-        $newConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver $script:commonEnvResolver -BasePath $rootPath
-        if ($newConfigPath -ne $defaultConfigPath -and (Test-Path -LiteralPath $defaultConfigPath) -and !(Test-Path -LiteralPath $newConfigPath)) {
-            New-Item (Split-Path $newConfigPath -Parent) -ItemType Directory -Force | Out-Null
-            Copy-Item -LiteralPath $defaultConfigPath -Destination $newConfigPath
-        }
-    }
-}
 
 function Save-DefaultSettings {
     Save-EnvBatFile -Path $setEnvBat `
@@ -529,7 +511,18 @@ function Save-DefaultSettings {
 function Get-SettingsFiles {
     $client = $cmbSettingsClient.SelectedItem
     if ($client -and $client -ne $defaultClientLabel) {
-        return @([PSCustomObject]@{ Path = (Get-ClientBatPath $client); Save = { Save-ClientProfile $client }.GetNewClosure(); Reload = {} })
+        $clientBat = Get-ClientBatPath $client
+        $vars = $clientOverridableVars
+        $textBoxes = $script:fieldTextBoxes
+        return @([PSCustomObject]@{
+            Path = $clientBat
+            Save = {
+                Save-EnvBatFile -Path $clientBat -VarNames $vars `
+                    -GetValueFn { param($name) Get-FieldValue $name } `
+                    -HasValueFn { param($name) $textBoxes.ContainsKey($name) }
+            }.GetNewClosure()
+            Reload = {}
+        })
     } else {
         return @([PSCustomObject]@{ Path = $setEnvBat; Save = { Save-DefaultSettings }; Reload = {} })
     }
