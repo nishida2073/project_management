@@ -784,19 +784,24 @@ function Update-SettingsFields {
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
 
-$script:saveEnvBatGetValueFn = { param($name) $script:fieldTextBoxes[$name].Text }
-$script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey($name) }
+$script:saveEnvBatGetValueFn = { param($name)
+    if ($script:fieldTextBoxes.ContainsKey($name)) {
+        $script:fieldTextBoxes[$name].Text
+    } else {
+        ""
+    }
+}
+$script:saveEnvBatHasValueFn = { param($name) $true }
 
-function Get-SettingsFiles {
-    return @(
-        [PSCustomObject]@{ Path = $setEnvBat; Save = { Save-EnvBatFile -Path $setEnvBat -VarNames @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ }) -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn }; Reload = {} }
-        [PSCustomObject]@{ Path = $setEnvBat; Save = { Save-EnvBatFile -Path $setEnvBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn }; Reload = {} }
-    )
+function Save-Settings {
+    $nonKintoneVars = @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ })
+    Save-EnvBatFile -Path $setEnvBat -VarNames $nonKintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+    Save-EnvBatFile -Path $setEnvBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
 }
 
 $settingsTopPanel = New-SettingsTopPanel `
-    -OnSave { foreach ($f in (Get-SettingsFiles)) { & $f.Save } } `
-    -OnReload { foreach ($f in (Get-SettingsFiles)) { & $f.Reload }; Update-SettingsFields }
+    -OnSave { Save-Settings } `
+    -OnReload { Update-SettingsFields }
 $topPanel = $settingsTopPanel.Panel
 $tabSettings.Controls.Add($topPanel)
 

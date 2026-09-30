@@ -439,11 +439,9 @@ $script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
 
 function Get-NewClientInitialValues {
     param([string]$ClientName, [hashtable]$Defaults)
-    $newConfigPath = Split-Path -Parent (Split-Path -Parent $Defaults["GENERATE_CONFIG_PATH"])
-    $defaultFilename = Split-Path -Path $Defaults["GENERATE_CONFIG_PATH"] -Leaf
-    $newConfigFilename = $($defaultFilename -replace '\.xlsx$', "_$ClientName.xlsx")
+    $newConfigPath = "$($Defaults["COMMON_CONFIG_PATH"])\package_definition_$ClientName.xlsx"
     return @{
-        "GENERATE_CONFIG_PATH" =  "$newConfigPath\$newConfigFilename"
+        "GENERATE_CONFIG_PATH" = $newConfigPath
         "GENERATE_OUTPUT_PATH" = "$($Defaults["GENERATE_OUTPUT_PATH"])\$ClientName"
         "UPLOAD_SITE_PATH" = "$($Defaults["UPLOAD_SITE_PATH"])\$ClientName"
     }
@@ -589,7 +587,24 @@ $settingsTrailingButtonVars = @{
 $settingsTopPanel = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsClient, $cmbSettingsClient, $btnNewClient) `
     -OnSave {
+        $selectedClient = $cmbSettingsClient.SelectedItem
+        $isNewClientBeforeSave = $selectedClient -and $selectedClient -ne $defaultClientLabel -and !(Test-Path -LiteralPath (Get-ClientBatPath $selectedClient))
+
         foreach ($f in (Get-SettingsFiles)) { & $f.Save }
+        if ($isNewClientBeforeSave) {
+            $newConfigRaw = Get-FieldValue "GENERATE_CONFIG_PATH"
+            $newConfigPath = Expand-VarTokens -Value $newConfigRaw -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+            $defaults = Get-SetEnvDefaults -Path $setEnvBat
+            $templateConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+            if ((Test-Path -LiteralPath $templateConfigPath) -and $newConfigPath -and !(Test-Path -LiteralPath $newConfigPath)) {
+                $newDir = Split-Path $newConfigPath -Parent
+                if (-not (Test-Path -LiteralPath $newDir)) {
+                    New-Item -ItemType Directory -Path $newDir -Force | Out-Null
+                }
+                Copy-Item -LiteralPath $templateConfigPath -Destination $newConfigPath
+            }
+        }
+
         Update-RunCheckboxesFromClient
     } `
     -OnReload { foreach ($f in (Get-SettingsFiles)) { & $f.Reload }; Update-SettingsFields }
