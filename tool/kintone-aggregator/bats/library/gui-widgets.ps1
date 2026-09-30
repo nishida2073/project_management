@@ -848,7 +848,7 @@ function Invoke-BatchStep {
         & $WriteLog "--------------- $DisplayLabel 失敗（終了コード: $exitCode） ---------------"
         if ($StatusLabel) { Set-StepStatus -Label $StatusLabel -Text "失敗" }
     } elseif ($isWarning) {
-        & $WriteLog "--------------- $DisplayLabel 完了（警告あり） ---------------"
+        & $WriteLog "--------------- $DisplayLabel 警告 ---------------"
         if ($StatusLabel) { Set-StepStatus -Label $StatusLabel -Text "警告" }
     } else {
         & $WriteLog "--------------- $DisplayLabel 完了 ---------------"
