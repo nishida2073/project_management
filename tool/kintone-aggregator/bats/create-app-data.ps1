@@ -53,7 +53,7 @@ function Get-AppDatas {
 
     $resultAllDatas = @()
     foreach ($targetAppId in $TargetAppIds) {
-        $resultDatas = Get-CurrentAppData -TargetAppId $targetAppId -BaseUrl $BaseUrl -Authorization $Authorization -TargetDateCodeField $appDefinedCodeFields.DateCodeField -TargetDate $TargetDate
+        $resultDatas = Get-DateKintoneRecords -TargetAppId $targetAppId -BaseUrl $BaseUrl -Authorization $Authorization -TargetDateCodeField $appDefinedCodeFields.DateCodeField -TargetDate $TargetDate
         $labelDatas = @()
         foreach ($resultData in $resultDatas) {
             $labelData = [PSCustomObject]@{}

@@ -30,15 +30,16 @@ function Read-FileToArray {
         [Parameter(Mandatory)]
         [string]$ReadFilePath
     )
+    if (!(Test-Path -LiteralPath $ReadFilePath)) { return @() }
     $lines = Get-Content -Path $ReadFilePath
     if ($lines.Count -lt 2) { return @() }
-    $result = @()
+    $result = [System.Collections.Generic.List[object]]::new($lines.Count)
     for ($r = 0; $r -lt $lines.Count; $r++) {
         $values = $lines[$r] -split "`t"
         $values = Restore-BreakLine $values
-        $result += ,$values
+        $result.Add($values)
     }
-    return ,$result
+    return ,$result.ToArray()
 }
 
 function Transpose-Array {

@@ -94,7 +94,7 @@ function Get-AllKintoneRecords {
 }
 
 
-function Get-CurrentAppData {
+function Get-DateKintoneRecords {
     param(
         [string]$TargetAppId,
         [string]$BaseUrl,

@@ -30,6 +30,7 @@ function Read-FileToArray {
         [Parameter(Mandatory)]
         [string]$ReadFilePath
     )
+    if (!(Test-Path -LiteralPath $ReadFilePath)) { return @() }
     $lines = Get-Content -Path $ReadFilePath
     if ($lines.Count -lt 2) { return @() }
     $result = [System.Collections.Generic.List[object]]::new($lines.Count)
