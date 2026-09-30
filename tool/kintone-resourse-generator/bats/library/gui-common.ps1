@@ -1,5 +1,5 @@
 ﻿$script:cp932Encoding = [System.Text.Encoding]::GetEncoding(932)
-$script:setEnvLineRegex = [regex]'^(?:if not defined (?<var>\S+) set "|set ")(?<var>\S+)=(?<val>.*)(?:")$'
+$script:setEnvLineRegex = [regex]'^(?:if not defined )?\s*(?<var>\S+)\s+set\s+"[^=]*=(?<val>.*)"$|^set\s+"(?<var>\S+)=(?<val>.*)"$'
 
 function Read-SetEnvLines {
     param([Parameter(Mandatory)][string]$Path)
