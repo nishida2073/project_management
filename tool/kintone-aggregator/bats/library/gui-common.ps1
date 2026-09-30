@@ -1,5 +1,5 @@
 ﻿$script:cp932Encoding = [System.Text.Encoding]::GetEncoding(932)
-$script:setEnvLineRegex = [regex]'^if not defined (?<var>\S+) set "\k<var>=(?<val>.*)"$'
+$script:setEnvLineRegex = [regex]'^(?:if not defined (?<var>\S+) set "|set ")(?<var>\S+)=(?<val>.*)(?:")$'
 
 function Read-SetEnvLines {
     param([Parameter(Mandatory)][string]$Path)
@@ -63,7 +63,8 @@ function Save-EnvBatFile {
         [Parameter(Mandatory)][string]$Path,
         [string[]]$VarNames,
         [Parameter(Mandatory)][scriptblock]$GetValueFn,
-        [Parameter(Mandatory)][scriptblock]$HasValueFn
+        [Parameter(Mandatory)][scriptblock]$HasValueFn,
+        [switch]$IfNotDefined
     )
     $existingLines = Read-SetEnvLines -Path $Path
     $writtenVars = @{}
@@ -75,7 +76,11 @@ function Save-EnvBatFile {
         if ($varName -and $matchesVarNames -and (& $HasValueFn $varName)) {
             $writtenVars[$varName] = $true
             $newVal = & $GetValueFn $varName
-            "if not defined $varName set `"$varName=$newVal`""
+            if ($IfNotDefined) {
+                "if not defined $varName set `"$varName=$newVal`""
+            } else {
+                "set `"$varName=$newVal`""
+            }
         } else {
             $line
         }
@@ -84,7 +89,11 @@ function Save-EnvBatFile {
     if ($VarNames) {
         foreach ($varName in $VarNames) {
             if (!$writtenVars.ContainsKey($varName) -and (& $HasValueFn $varName)) {
-                $newLines += "if not defined $varName set `"$varName=$(& $GetValueFn $varName)`""
+                if ($IfNotDefined) {
+                    $newLines += "if not defined $varName set `"$varName=$(& $GetValueFn $varName)`""
+                } else {
+                    $newLines += "set `"$varName=$(& $GetValueFn $varName)`""
+                }
             }
         }
     }
