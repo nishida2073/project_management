@@ -735,69 +735,84 @@ function Test-KintoneConnection {
 function Save-CommonSettings {
     $path = Join-Path $basePath "common-env.bat"
 
-    $reportVarKeyMap = @{}
+    $script:saveCommonReportVarKeyMap = @{}
     foreach ($rt in (Get-ReportTypeDefs)) {
         foreach ($varName in $commonReportVars) {
-            $reportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
+            $script:saveCommonReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
         }
     }
 
-    $newLines = foreach ($line in [System.IO.File]::ReadAllLines($path, $script:cp932Encoding)) {
-        $m = $script:groupBatLineRegex.Match($line.Trim())
-        if ($m.Success -and ($commonSettingsVars -contains $m.Groups["var"].Value)) {
-            $varName = $m.Groups["var"].Value
-            $val = Get-CommonSettingsFieldValue $varName
-            "set `"$varName=$val`""
-        } elseif ($m.Success -and $reportVarKeyMap.ContainsKey($m.Groups["var"].Value)) {
-            $rawVarName = $m.Groups["var"].Value
-            $val = Get-CommonSettingsFieldValue $reportVarKeyMap[$rawVarName]
-            "set `"$rawVarName=$val`""
-        } else {
-            $line
+    $allVars = @() + $commonSettingsVars + @($script:saveCommonReportVarKeyMap.Keys)
+    Save-EnvBatFile -Path $path -VarNames $allVars `
+        -GetValueFn { param($varName)
+            if ($script:saveCommonReportVarKeyMap.ContainsKey($varName)) {
+                Get-CommonSettingsFieldValue $script:saveCommonReportVarKeyMap[$varName]
+            } else {
+                Get-CommonSettingsFieldValue $varName
+            }
+        } `
+        -HasValueFn { param($varName)
+            $true
         }
-    }
-    $content = ($newLines -join "`r`n") + "`r`n"
-    [System.IO.File]::WriteAllText($path, $content, $script:cp932Encoding)
 }
 
 function Save-GroupSettings {
     param([string]$GroupName)
 
-    $existingAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
-    $authorizationValue = if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
+    $groupBatPath = Get-GroupBatPath $GroupName
 
-    $groupLines = @("@echo off", "")
+    $script:saveGroupAuthVarMap = @{}
     foreach ($varName in $authVars) {
-        $val = Get-GroupSettingsFieldValue "AUTH_$varName"
-        $groupLines += "set `"$varName=$val`""
+        $script:saveGroupAuthVarMap[$varName] = "AUTH_$varName"
     }
-    $groupLines += "set `"Authorization=$authorizationValue`""
-    $groupLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
-    $groupLines += ""
-    Sync-MentionRowsFromControls
+
+    $script:saveGroupPostVarMap = @{}
     foreach ($varName in $postVars) {
-        $val = if ($varName -eq "MentionUserCodes") {
-            ConvertTo-MentionUserCodesText -Rows $script:mentionRows
-        } else {
-            Get-GroupSettingsFieldValue "POST_$varName"
-        }
-        if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
-        $groupLines += "set `"$varName=$val`""
+        $script:saveGroupPostVarMap[$varName] = "POST_$varName"
     }
-    $groupLines += ""
+
+    $script:saveGroupSyncVarMap = @{}
     foreach ($varName in $syncUserMasterVars) {
-        $val = Get-GroupSettingsFieldValue "SYNC_$varName"
-        $groupLines += "set `"$varName=$val`""
+        $script:saveGroupSyncVarMap[$varName] = "SYNC_$varName"
     }
+
+    $script:saveGroupReportVarKeyMap = @{}
     foreach ($rt in (Get-ReportTypeDefs)) {
-        $groupLines += ""
         foreach ($varName in $groupReportVars) {
-            $val = Get-GroupSettingsFieldValue "$($rt.Prefix)_$varName"
-            $groupLines += "set `"$varName$($rt.Suffix)=$val`""
+            $script:saveGroupReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
         }
     }
-    $groupLines += ""
-    [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($groupLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
+
+    $allVars = @() + @($script:saveGroupAuthVarMap.Keys) + @("Authorization", "BaseUrl") + @($script:saveGroupPostVarMap.Keys) + @($script:saveGroupSyncVarMap.Keys) + @($script:saveGroupReportVarKeyMap.Keys)
+
+    Sync-MentionRowsFromControls
+
+    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
+        -GetValueFn { param($varName)
+            if ($varName -eq "Authorization") {
+                $existingAuth = Get-SetLineRawValues -Path $groupBatPath
+                if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
+            } elseif ($varName -eq "BaseUrl") {
+                "https://%KintoneSubdomain%.cybozu.com"
+            } elseif ($varName -eq "MentionUserCodes") {
+                ConvertTo-MentionUserCodesText -Rows $script:mentionRows
+            } elseif ($script:saveGroupAuthVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupAuthVarMap[$varName]
+            } elseif ($script:saveGroupPostVarMap.ContainsKey($varName)) {
+                $val = Get-GroupSettingsFieldValue $script:saveGroupPostVarMap[$varName]
+                if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+                $val
+            } elseif ($script:saveGroupSyncVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupSyncVarMap[$varName]
+            } elseif ($script:saveGroupReportVarKeyMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupReportVarKeyMap[$varName]
+            } else {
+                ""
+            }
+        } `
+        -HasValueFn { param($varName)
+            $true
+        }
 
     $xlsxPath = Get-GroupXlsxPath $GroupName
     if (!(Test-Path -LiteralPath $xlsxPath)) {

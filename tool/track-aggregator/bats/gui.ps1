@@ -569,63 +569,77 @@ function Update-GroupSettingsFields {
 
 function Save-CommonSettings {
     $path = Join-Path $basePath "common-env.bat"
-    $newLines = foreach ($line in [System.IO.File]::ReadAllLines($path, $script:cp932Encoding)) {
-        $m = $script:groupBatLineRegex.Match($line.Trim())
-        if ($m.Success -and ($commonSettingsVars -contains $m.Groups["var"].Value)) {
-            $varName = $m.Groups["var"].Value
-            $val = Get-CommonSettingsFieldValue $varName
-            "set `"$varName=$val`""
-        } else {
-            $line
+
+    Save-EnvBatFile -Path $path -VarNames $commonSettingsVars `
+        -GetValueFn { param($varName)
+            Get-CommonSettingsFieldValue $varName
+        } `
+        -HasValueFn { param($varName)
+            $true
         }
-    }
-    $content = ($newLines -join "`r`n") + "`r`n"
-    [System.IO.File]::WriteAllText($path, $content, $script:cp932Encoding)
 }
 
 function Save-GroupSettings {
     param([string]$GroupName)
 
-    $existingAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
-    $authorizationValue = if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
+    $groupBatPath = Get-GroupBatPath $GroupName
 
-    $authLines = @("@echo off", "")
+    $script:saveGroupAuthVarMap = @{}
     foreach ($varName in $authVars) {
-        $val = Get-GroupSettingsFieldValue "AUTH_$varName"
-        $authLines += "set `"$varName=$val`""
+        $script:saveGroupAuthVarMap[$varName] = "AUTH_$varName"
     }
-    $authLines += "set `"Authorization=$authorizationValue`""
-    $authLines += "set `"BaseUrl=https://%KintoneSubdomain%.cybozu.com`""
-    $authLines += ""
+
+    $script:saveGroupPostVarMap = @{}
+    foreach ($varName in $postVars) {
+        $script:saveGroupPostVarMap[$varName] = "POST_$varName"
+    }
+
+    $script:saveGroupOverrideVarMap = @{}
+    foreach ($varName in $groupOverrideVars) {
+        $script:saveGroupOverrideVarMap[$varName] = "OVERRIDE_$varName"
+    }
+
+    $script:saveGroupSyncVarMap = @{}
+    foreach ($varName in $syncUserMasterVars) {
+        $script:saveGroupSyncVarMap[$varName] = "SYNC_$varName"
+    }
+
+    $allVars = @() + @($script:saveGroupAuthVarMap.Keys) + @("Authorization", "BaseUrl") + @($script:saveGroupPostVarMap.Keys) + @($script:saveGroupOverrideVarMap.Keys) + @($script:saveGroupSyncVarMap.Keys)
 
     Sync-MentionRowsFromControls
-    foreach ($varName in $postVars) {
-        $val = if ($varName -eq "MentionUserCodes") {
-            ConvertTo-MentionUserCodesText -Rows $script:mentionRows
-        } else {
-            Get-GroupSettingsFieldValue "POST_$varName"
+
+    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
+        -GetValueFn { param($varName)
+            if ($varName -eq "Authorization") {
+                $existingAuth = Get-SetLineRawValues -Path $groupBatPath
+                if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
+            } elseif ($varName -eq "BaseUrl") {
+                "https://%KintoneSubdomain%.cybozu.com"
+            } elseif ($varName -eq "MentionUserCodes") {
+                ConvertTo-MentionUserCodesText -Rows $script:mentionRows
+            } elseif ($script:saveGroupAuthVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupAuthVarMap[$varName]
+            } elseif ($script:saveGroupPostVarMap.ContainsKey($varName)) {
+                $val = Get-GroupSettingsFieldValue $script:saveGroupPostVarMap[$varName]
+                if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+                $val
+            } elseif ($script:saveGroupOverrideVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupOverrideVarMap[$varName]
+            } elseif ($script:saveGroupSyncVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupSyncVarMap[$varName]
+            } else {
+                ""
+            }
+        } `
+        -HasValueFn { param($varName)
+            $true
         }
-        if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
-        $authLines += "set `"$varName=$val`""
-    }
-    $authLines += ""
 
-    foreach ($varName in $groupOverrideVars) {
-        $val = Get-GroupSettingsFieldValue "OVERRIDE_$varName"
-        if ($val -ne "") { $authLines += "set `"$varName=$val`"" }
-    }
-    $authLines += ""
-    foreach ($varName in $syncUserMasterVars) {
-        $val = Get-GroupSettingsFieldValue "SYNC_$varName"
-        $authLines += "set `"$varName=$val`""
-    }
-    $authLines += ""
-    [System.IO.File]::WriteAllText((Get-GroupBatPath $GroupName), (($authLines -join "`r`n") + "`r`n"), $script:cp932Encoding)
-
-    if ((Get-GroupXlsxPath -GroupName $GroupName).Count -eq 0) {
+    $xlsxPath = Get-GroupXlsxPath $GroupName
+    if (!(Test-Path -LiteralPath $xlsxPath)) {
         $templateXlsxPath = Join-Path $clientsTemplateDir "client.xlsx"
-        if ($templateXlsxPath) {
-            Copy-Item -LiteralPath $templateXlsxPath -Destination (Get-GroupXlsxPath $GroupName)
+        if (Test-Path -LiteralPath $templateXlsxPath) {
+            Copy-Item -LiteralPath $templateXlsxPath -Destination $xlsxPath
         }
     }
 }

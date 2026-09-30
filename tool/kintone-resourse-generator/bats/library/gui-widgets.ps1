@@ -1005,12 +1005,18 @@ function Update-LogView {
 
 function Get-CommonSettingsFieldValue {
     param([string]$Key)
-    return $script:settingsCommonFieldTextBoxes[$Key].Text
+    if ($script:settingsCommonFieldTextBoxes.ContainsKey($Key)) {
+        return $script:settingsCommonFieldTextBoxes[$Key].Text
+    }
+    return ""
 }
 
 function Get-GroupSettingsFieldValue {
     param([string]$Key)
-    return $script:settingsGroupFieldTextBoxes[$Key].Text
+    if ($script:settingsGroupFieldTextBoxes.ContainsKey($Key)) {
+        return $script:settingsGroupFieldTextBoxes[$Key].Text
+    }
+    return ""
 }
 
 function Update-SettingsGroupList {

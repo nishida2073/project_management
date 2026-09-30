@@ -105,8 +105,13 @@ function Get-SetLineRawValues {
     $result = @{}
     if (!(Test-Path -LiteralPath $Path)) { return $result }
     foreach ($line in [System.IO.File]::ReadAllLines($Path, $script:cp932Encoding)) {
-        $m = $script:groupBatLineRegex.Match($line.Trim())
-        if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
+        $m = $script:setEnvLineRegex.Match($line.Trim())
+        if ($m.Success) {
+            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
+        } else {
+            $m = $script:groupBatLineRegex.Match($line.Trim())
+            if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
+        }
     }
     return $result
 }

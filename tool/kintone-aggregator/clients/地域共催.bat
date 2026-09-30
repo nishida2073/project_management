@@ -1,20 +1,15 @@
 @echo off
 
-set "KintoneSubdomain=iiglepv0966f"
-set "KintoneLoginName=user01"
-set "KintonePassword=abcd1234"
-set "Authorization="
-set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
-
-set "SpaceId=3"
-set "ThreadId=5"
-set "MentionUserCodes="
-set "CommentTextTemplate=アラート結果を更新しました。（{TargetGroupName} / {TargetDate}）"
-
-set "SyncUserMasterAppId=14"
-set "SyncUserMasterSheetName=受講生一覧"
-
-set "TargetAppIds_Daily=17"
-
-set "TargetAppIds_Pulse=19"
-
+if not defined KintoneSubdomain set "KintoneSubdomain=iiglepv0966f"
+if not defined KintoneLoginName set "KintoneLoginName=user01"
+if not defined KintonePassword set "KintonePassword=abcd1234"
+if not defined Authorization set "Authorization="
+if not defined BaseUrl set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
+if not defined ThreadId set "ThreadId=5"
+if not defined SpaceId set "SpaceId=3"
+if not defined CommentTextTemplate set "CommentTextTemplate=アラート結果を更新しました。（{TargetGroupName} / {TargetDate}）"
+if not defined SyncUserMasterAppId set "SyncUserMasterAppId=14"
+if not defined SyncUserMasterSheetName set "SyncUserMasterSheetName=受講生一覧"
+if not defined TargetAppIds_Pulse set "TargetAppIds_Pulse=19"
+if not defined TargetAppIds_Daily set "TargetAppIds_Daily=17"
+if not defined MentionUserCodes set "MentionUserCodes=dd:USER"
