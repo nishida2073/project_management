@@ -512,12 +512,27 @@ function Get-SettingsFiles {
         $clientBat = Get-ClientBatPath $client
         $vars = $clientOverridableVars
         $textBoxes = $script:fieldTextBoxes
+        $isNewClient = !(Test-Path -LiteralPath $clientBat)
         return @([PSCustomObject]@{
             Path = $clientBat
             Save = {
                 Save-EnvBatFile -Path $clientBat -VarNames $vars `
                     -GetValueFn { param($name) Get-FieldValue $name } `
                     -HasValueFn { param($name) $textBoxes.ContainsKey($name) }
+
+                if ($isNewClient) {
+                    $newConfigRaw = Get-FieldValue "GENERATE_CONFIG_PATH"
+                    $newConfigPath = Expand-VarTokens -Value $newConfigRaw -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+                    $defaults = Get-SetEnvDefaults -Path $setEnvBat
+                    $templateConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+                    if ((Test-Path -LiteralPath $templateConfigPath) -and $newConfigPath -and !(Test-Path -LiteralPath $newConfigPath)) {
+                        $newDir = Split-Path $newConfigPath -Parent
+                        if (-not (Test-Path -LiteralPath $newDir)) {
+                            New-Item -ItemType Directory -Path $newDir -Force | Out-Null
+                        }
+                        Copy-Item -LiteralPath $templateConfigPath -Destination $newConfigPath
+                    }
+                }
             }.GetNewClosure()
             Reload = {}
         })
@@ -587,24 +602,7 @@ $settingsTrailingButtonVars = @{
 $settingsTopPanel = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsClient, $cmbSettingsClient, $btnNewClient) `
     -OnSave {
-        $selectedClient = $cmbSettingsClient.SelectedItem
-        $isNewClientBeforeSave = $selectedClient -and $selectedClient -ne $defaultClientLabel -and !(Test-Path -LiteralPath (Get-ClientBatPath $selectedClient))
-
         foreach ($f in (Get-SettingsFiles)) { & $f.Save }
-        if ($isNewClientBeforeSave) {
-            $newConfigRaw = Get-FieldValue "GENERATE_CONFIG_PATH"
-            $newConfigPath = Expand-VarTokens -Value $newConfigRaw -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-            $defaults = Get-SetEnvDefaults -Path $setEnvBat
-            $templateConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-            if ((Test-Path -LiteralPath $templateConfigPath) -and $newConfigPath -and !(Test-Path -LiteralPath $newConfigPath)) {
-                $newDir = Split-Path $newConfigPath -Parent
-                if (-not (Test-Path -LiteralPath $newDir)) {
-                    New-Item -ItemType Directory -Path $newDir -Force | Out-Null
-                }
-                Copy-Item -LiteralPath $templateConfigPath -Destination $newConfigPath
-            }
-        }
-
         Update-RunCheckboxesFromClient
     } `
     -OnReload { foreach ($f in (Get-SettingsFiles)) { & $f.Reload }; Update-SettingsFields }
