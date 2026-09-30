@@ -43,7 +43,8 @@ function Get-GraphChildrenRecursive {
                         Invoke-WebRequest -Uri $item.'@microsoft.graph.downloadUrl' -OutFile $dest -UseBasicParsing
                         $succeeded = $true
                         break
-                    } catch {
+                    }
+                    catch {
                         $lastErrorDetail = $_.Exception.Message
                         if ($retry -lt $maxRetry) {
                             Start-Sleep -Milliseconds (1000 * $retry)
@@ -53,10 +54,12 @@ function Get-GraphChildrenRecursive {
 
                 if ($succeeded) {
                     $script:downloadLog += "$RelativePath/$($item.Name) -> $dest"
-                } else {
+                }
+                else {
                     $script:downloadLog += "$RelativePath/$($item.Name) -> エラー: $lastErrorDetail"
                 }
-            } elseif ($item.folder) {
+            }
+            elseif ($item.folder) {
                 Get-GraphChildrenRecursive -ItemId $item.id -LocalFolder (Join-Path $LocalFolder $item.Name) -RelativePath "$RelativePath/$($item.Name)"
             }
         }
@@ -69,42 +72,48 @@ $logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters
-& {
-    try {
-        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+try {
+    & {
+        try {
+            $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-        if (!$SiteUrl -or !$SitePath -or !$TenantId) {
-            throw "SiteUrl と SitePath と TenantId を指定してください"
-        }
+            if (!$SiteUrl -or !$SitePath -or !$TenantId) {
+                throw "SiteUrl と SitePath と TenantId を指定してください"
+            }
 
-        New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
+            New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
 
-        $downloadLog = @()
+            $downloadLog = @()
 
-        $az = Get-AzureCliPath
-        $token = Get-GraphToken -Az $az -TenantId $TenantId
-        $headers = @{ Authorization = "Bearer $token" }
+            $az = Get-AzureCliPath
+            $token = Get-GraphToken -Az $az -TenantId $TenantId
+            $headers = @{ Authorization = "Bearer $token" }
 
-        $siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $SiteUrl
+            $siteId = Resolve-GraphSiteId -Headers $headers -SiteUrl $SiteUrl
 
-        $folderParts = $SitePath -split '/'
-        $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
-        $encodedRelativeFolder = Get-EncodedSitePath $relativeFolder
+            $folderParts = $SitePath -split '/'
+            $relativeFolder = ($folderParts | Select-Object -Skip 1) -join '/'
+            $encodedRelativeFolder = Get-EncodedSitePath $relativeFolder
 
-        $startUri = if ($relativeFolder) {
-            "https://graph.microsoft.com/v1.0/sites/$siteId/drive/root:/${encodedRelativeFolder}"
-        } else {
-            "https://graph.microsoft.com/v1.0/sites/$siteId/drive/root"
-        }
-        $startItem = Invoke-GraphGet -Headers $headers -Uri $startUri
+            $startUri = if ($relativeFolder) {
+                "https://graph.microsoft.com/v1.0/sites/$siteId/drive/root:/${encodedRelativeFolder}"
+            }
+            else {
+                "https://graph.microsoft.com/v1.0/sites/$siteId/drive/root"
+            }
+            $startItem = Invoke-GraphGet -Headers $headers -Uri $startUri
         
-        Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $LocalPath -RelativePath $SitePath
-        Write-Message (Get-RunLogMessage -ResultSectionTitle "ダウンロード結果" -ResultLines $downloadLog -TreeRootPath $LocalPath) -Type "Info" -NoHeader
-    } catch {
-        Write-MessageError "実行エラー: $($error[0])"
-        $script:exitCode = 1
-    }
-} *>&1 | Tee-Object -FilePath $logFilePath
-ConvertTo-Utf8LogFile -Path $logFilePath
-Write-MessageComplete "ログを出力しました: $logFilePath"
+            Get-GraphChildrenRecursive -ItemId $startItem.id -LocalFolder $LocalPath -RelativePath $SitePath
+            Write-Message (Get-RunLogMessage -ResultSectionTitle "ダウンロード結果" -ResultLines $downloadLog -TreeRootPath $LocalPath) -Type "Info" -NoHeader
+        }
+        catch {
+            Write-MessageError "実行エラー: $($error[0])"
+            $script:exitCode = 1
+        }
+    } *>&1 | Tee-Object -FilePath $logFilePath
+}
+finally {
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
+}
 exit $script:exitCode

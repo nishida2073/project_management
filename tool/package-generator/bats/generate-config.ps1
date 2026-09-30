@@ -23,101 +23,108 @@ $logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters
-& {
-    try {
-        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
-
-        $excel = $null
-        $workbook = $null
+try {
+    & {
         try {
-            $excel = New-Object -ComObject Excel.Application
-            $excel.Visible = $false
-            $excel.DisplayAlerts = $false
-            $excel.ScreenUpdating = $false
-            $excel.EnableEvents = $false
+            $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-            $workbook = $excel.Workbooks.Open($TargetConfigFilePath)
-            $ws = $workbook.Worksheets.Item("テンプレート")
+            $excel = $null
+            $workbook = $null
+            try {
+                $excel = New-Object -ComObject Excel.Application
+                $excel.Visible = $false
+                $excel.DisplayAlerts = $false
+                $excel.ScreenUpdating = $false
+                $excel.EnableEvents = $false
 
-            $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
-            $headerRow = $sourceCell.Row
-            $sourceCol = $sourceCell.Column
+                $workbook = $excel.Workbooks.Open($TargetConfigFilePath)
+                $ws = $workbook.Worksheets.Item("テンプレート")
 
-            $noCell = Get-CellByKey -Sheet $ws -Key "No" -WholeMatch
-            $noCol = if ($noCell) { $noCell.Column } else { $null }
+                $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
+                $headerRow = $sourceCell.Row
+                $sourceCol = $sourceCell.Column
 
-            $extensionCell = Get-CellByKey -Sheet $ws -Key "拡張子" -WholeMatch
-            $extensionCol = if ($extensionCell) { $extensionCell.Column } else { $null }
+                $noCell = Get-CellByKey -Sheet $ws -Key "No" -WholeMatch
+                $noCol = if ($noCell) { $noCell.Column } else { $null }
 
-            $usedRange = $ws.UsedRange
-            $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
-            $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
+                $extensionCell = Get-CellByKey -Sheet $ws -Key "拡張子" -WholeMatch
+                $extensionCol = if ($extensionCell) { $extensionCell.Column } else { $null }
 
-            if ($lastRow -gt $headerRow) {
-                $clearLastCol = [Math]::Max($lastCol, $sourceCol)
-                $ws.Range($ws.Cells.Item($headerRow + 1, 1), $ws.Cells.Item($lastRow, $clearLastCol)).ClearContents()
-            }
+                $usedRange = $ws.UsedRange
+                $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
+                $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
 
-            $sourcePathTrimmed = $SourcePath.TrimEnd('\')
-            $files = @(Get-ChildItem -LiteralPath $SourcePath -Recurse -File)
+                if ($lastRow -gt $headerRow) {
+                    $clearLastCol = [Math]::Max($lastCol, $sourceCol)
+                    $ws.Range($ws.Cells.Item($headerRow + 1, 1), $ws.Cells.Item($lastRow, $clearLastCol)).ClearContents()
+                }
 
-            $resultLines = @()
-            $row = $headerRow + 1
-            $addedFolders = @{}
+                $sourcePathTrimmed = $SourcePath.TrimEnd('\')
+                $files = @(Get-ChildItem -LiteralPath $SourcePath -Recurse -File)
 
-            foreach ($file in $files) {
-                $relativeFolderPath = ".\" + $file.DirectoryName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+                $resultLines = @()
+                $row = $headerRow + 1
+                $addedFolders = @{}
 
-                if ($relativeFolderPath -ne ".\" -and !$addedFolders.ContainsKey($relativeFolderPath)) {
-                    $ws.Cells.Item($row, $sourceCol).Value2 = $relativeFolderPath
+                foreach ($file in $files) {
+                    $relativeFolderPath = ".\" + $file.DirectoryName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+
+                    if ($relativeFolderPath -ne ".\" -and !$addedFolders.ContainsKey($relativeFolderPath)) {
+                        $ws.Cells.Item($row, $sourceCol).Value2 = $relativeFolderPath
+
+                        if ($noCol) {
+                            $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
+                        }
+
+                        if ($extensionCol) {
+                            $ws.Cells.Item($row, $extensionCol).Value2 = ""
+                        }
+
+                        $resultLines += $relativeFolderPath
+                        $addedFolders[$relativeFolderPath] = $true
+                        $row++
+                    }
+
+                    $relativePath = ".\" + $file.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
+
+                    $ws.Cells.Item($row, $sourceCol).Value2 = $relativePath
 
                     if ($noCol) {
                         $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
                     }
 
                     if ($extensionCol) {
-                        $ws.Cells.Item($row, $extensionCol).Value2 = ""
+                        $ws.Cells.Item($row, $extensionCol).Value2 = [System.IO.Path]::GetExtension($relativePath).TrimStart('.')
                     }
 
-                    $resultLines += $relativeFolderPath
-                    $addedFolders[$relativeFolderPath] = $true
+                    $resultLines += $relativePath
                     $row++
                 }
 
-                $relativePath = ".\" + $file.FullName.Substring($sourcePathTrimmed.Length).TrimStart('\')
-
-                $ws.Cells.Item($row, $sourceCol).Value2 = $relativePath
-
-                if ($noCol) {
-                    $ws.Cells.Item($row, $noCol).Value2 = [double]($row - $headerRow)
-                }
-
-                if ($extensionCol) {
-                    $ws.Cells.Item($row, $extensionCol).Value2 = [System.IO.Path]::GetExtension($relativePath).TrimStart('.')
-                }
-
-                $resultLines += $relativePath
-                $row++
+                $workbook.Save()
+                $resultText = $resultLines -join "$newLine"
+                Write-MessageComplete "テンプレートを更新しました：$TargetConfigFilePath$newLine$resultText"
             }
-
-            $workbook.Save()
-            $resultText = $resultLines -join "$newLine"
-            Write-MessageComplete "テンプレートを更新しました：$TargetConfigFilePath$newLine$resultText"
-        } catch {
-            throw "テンプレートの更新に失敗しました：$TargetConfigFilePath$newLine$($_.Exception.Message)"
-        } finally {
-            if ($workbook) { $workbook.Close($true) }
-            if ($excel) { $excel.Quit() }
-            if ($workbook) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-            if ($excel) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
-            [System.GC]::Collect()
-            [System.GC]::WaitForPendingFinalizers()
+            catch {
+                throw "テンプレートの更新に失敗しました：$TargetConfigFilePath$newLine$($_.Exception.Message)"
+            }
+            finally {
+                if ($workbook) { $workbook.Close($true) }
+                if ($excel) { $excel.Quit() }
+                if ($workbook) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+                if ($excel) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+                [System.GC]::Collect()
+                [System.GC]::WaitForPendingFinalizers()
+            }
         }
-    } catch {
-        Write-MessageError "実行エラー: $($error[0])"
-        $script:exitCode = 1
-    }
-} *>&1 | Tee-Object -FilePath $logFilePath
-ConvertTo-Utf8LogFile -Path $logFilePath
-Write-MessageComplete "ログを出力しました: $logFilePath"
+        catch {
+            Write-MessageError "実行エラー: $($error[0])"
+            $script:exitCode = 1
+        }
+    } *>&1 | Tee-Object -FilePath $logFilePath
+}
+finally {
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
+}
 exit $script:exitCode

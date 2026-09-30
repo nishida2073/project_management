@@ -34,8 +34,9 @@ function Recovery-DailyData {
     Use-Mutex "Recovery-DailyData" {
         if (Test-Path $CollectRootDir) {
             $allFiles = Get-ChildItem -Path $CollectRootDir -Filter "$TargetGroupName-*.txt" | Sort-Object Name
-            $allFileDates = $allFiles.BaseName -replace "^$TargetGroupName-",""
-        } else {
+            $allFileDates = $allFiles.BaseName -replace "^$TargetGroupName-", ""
+        }
+        else {
             $allFileDates = @()
         }
         $missingDates = $TargetDates | Where-Object { $_ -notin $allFileDates }
@@ -43,7 +44,8 @@ function Recovery-DailyData {
             if ($UseRecovery -eq 1) {
                 Write-Message "未集計のため集計を実施します。日付: $missingDate" -VarName "message" -Type "Info"
                 Start-Process $RecoveryScriptPath -ArgumentList "-TargetDate:$missingDate", "-TargetGroupNameFilter:$TargetGroupName" -WindowStyle Hidden -Wait
-            }else{
+            }
+            else {
                 Write-Message "集計データがありません。日付: $missingDate" -VarName "message" -Type "Error" -ForegroundColor Red
             }
         }
@@ -81,7 +83,7 @@ function Create-DailyUserDatas {
             for ($i = 0; $i -lt $header.Count; $i++) {
                 $row[$header[$i]] = $values[$i]
             }
-            $row["ファイル日付"] = $file.BaseName -replace "^$TargetGroupName-",""
+            $row["ファイル日付"] = $file.BaseName -replace "^$TargetGroupName-", ""
             $allData += [PSCustomObject]$row
         }
     }
@@ -92,21 +94,21 @@ function Create-DailyUserDatas {
         
         $dailyResult = $group.Group | Sort-Object ファイル日付 -Descending | ForEach-Object {
             [PSCustomObject]@{
-                日付                       = $_.ファイル日付
-                理解度                     = $_.理解度
-                人間関係                   = $_.人間関係
-                体調                       = $_.体調
+                日付             = $_.ファイル日付
+                理解度            = $_.理解度
+                人間関係           = $_.人間関係
+                体調             = $_.体調
                 パルスサーベイフリーコメント = $_.パルスサーベイフリーコメント
-                提出状況_業務日誌             = ToBool $_.提出状況_業務日誌
-                提出状況_パルスサーベイ       = ToBool $_.提出状況_パルスサーベイ
+                提出状況_業務日誌      = ToBool $_.提出状況_業務日誌
+                提出状況_パルスサーベイ   = ToBool $_.提出状況_パルスサーベイ
             }
         }
         $result += [PSCustomObject]@{
-            通番     = $first.通番
-            クラス名 = $first.クラス名
-            会社名   = $first.会社名
-            受講生ID = $first.受講生ID
-            氏名     = $first.氏名
+            通番           = $first.通番
+            クラス名         = $first.クラス名
+            会社名          = $first.会社名
+            受講生ID        = $first.受講生ID
+            氏名           = $first.氏名
             dailyResults = $dailyResult
         }
     }
@@ -139,7 +141,7 @@ function Add-CheckResults {
         
         if ($values.Count -eq 1) { return $false }
         
-        $prev = $values[1..($values.Count-1)] | Where-Object { $_ -match '^\d+$' } | ForEach-Object { [int]$_ } | Select-Object -First 1
+        $prev = $values[1..($values.Count - 1)] | Where-Object { $_ -match '^\d+$' } | ForEach-Object { [int]$_ } | Select-Object -First 1
         if ($prev -eq $null) { return $false }
         
         if ($latest -le 2 -and $prev -le 2) { return $true }
@@ -166,7 +168,7 @@ function Add-CheckResults {
 
         if ($TargetDailyResults.Count -eq 1) { return $false }
 
-        $prev = $TargetDailyResults[1..($TargetDailyResults.Count-1)] | Where-Object { $_.体調 -match '^\d+$' } | ForEach-Object { [int]$_.体調 } | Select-Object -First 1
+        $prev = $TargetDailyResults[1..($TargetDailyResults.Count - 1)] | Where-Object { $_.体調 -match '^\d+$' } | ForEach-Object { [int]$_.体調 } | Select-Object -First 1
         if ($prev -eq $null) { return $false }
 
         if ($latest -le 2 -and $prev -le 2) { return $true }
@@ -179,10 +181,10 @@ function Add-CheckResults {
     foreach ($dailyUserData in $DailyUserDatas) {
         $dailyResults = $dailyUserData.dailyResults
         $dailyResults = @($dailyResults | Sort-Object { [datetime]$_.日付 } -Descending)
-        for ($i=0; $i -lt $dailyResults.Count; $i++) {
+        for ($i = 0; $i -lt $dailyResults.Count; $i++) {
             $dailyResult = $dailyResults[$i]
             Write-Message $dailyResult -VarName "dailyResult"
-            $targetDailyResults = $dailyResults[$i..($dailyResults.Count-1)]
+            $targetDailyResults = $dailyResults[$i..($dailyResults.Count - 1)]
             
             $理解度2022 = Check-SingleAlert2022 ($targetDailyResults | ForEach-Object { $_.理解度 })
             $人間関係2022 = Check-SingleAlert2022 ($targetDailyResults | ForEach-Object { $_.人間関係 })
@@ -190,21 +192,21 @@ function Add-CheckResults {
             $体調2022 = Check-SingleAlert2022 ($targetDailyResults | ForEach-Object { $_.体調 })
             
             $dailyAlert = [PSCustomObject]@{
-                理解度     = $理解度2022
-                人間関係   = $人間関係2022
-                体調2021       = $体調2021
-                体調2022       = $体調2022
-                体調           = $体調2021 -or $体調2022
-                当日未回答_業務日誌      = -not $dailyResult.提出状況_業務日誌
+                理解度           = $理解度2022
+                人間関係          = $人間関係2022
+                体調2021        = $体調2021
+                体調2022        = $体調2022
+                体調            = $体調2021 -or $体調2022
+                当日未回答_業務日誌    = -not $dailyResult.提出状況_業務日誌
                 当日未回答_パルスサーベイ = -not $dailyResult.提出状況_パルスサーベイ
-                連続未回答_業務日誌   = $false
+                連続未回答_業務日誌    = $false
                 連続未回答_パルスサーベイ = $false
             }
             Write-Message $dailyAlert -VarName "dailyAlert"
             $startIndex = $i
-            $endIndex   = [Math]::Min($i + $LookbackDays - 1, $dailyResults.Count - 1)
+            $endIndex = [Math]::Min($i + $LookbackDays - 1, $dailyResults.Count - 1)
             $termDailyResultCount = $endIndex - $startIndex + 1
-            if($termDailyResultCount -ge $LookbackDays){
+            if ($termDailyResultCount -ge $LookbackDays) {
                 $recentDailyResults = $dailyResults[$startIndex..$endIndex]
                 if (($recentDailyResults | Where-Object { -not $_.提出状況_業務日誌 }).Count -eq $recentDailyResults.Count) {
                     $dailyAlert.連続未回答_業務日誌 = $true
@@ -217,11 +219,11 @@ function Add-CheckResults {
         }
         
         $result += [PSCustomObject]@{
-            通番         = $dailyUserData.通番
-            クラス名     = $dailyUserData.クラス名
-            会社名       = $dailyUserData.会社名
-            受講生ID     = $dailyUserData.受講生ID
-            氏名         = $dailyUserData.氏名
+            通番           = $dailyUserData.通番
+            クラス名         = $dailyUserData.クラス名
+            会社名          = $dailyUserData.会社名
+            受講生ID        = $dailyUserData.受講生ID
+            氏名           = $dailyUserData.氏名
             dailyResults = $dailyResults
         }
     }
@@ -244,29 +246,29 @@ function Create-DailySummaryDatas {
             $date = $dailyResult.日付
             if (-not $dailySummary.ContainsKey($date)) {
                 $dailySummary[$date] = [PSCustomObject]@{
-                    日付 = $date
+                    日付                  = $date
                     
-                    アラート人数理解度     = 0
-                    アラート人数人間関係   = 0
-                    アラート人数体調       = 0
-                    アラート人数体調2021   = 0
-                    アラート人数体調2022   = 0
+                    アラート人数理解度           = 0
+                    アラート人数人間関係          = 0
+                    アラート人数体調            = 0
+                    アラート人数体調2021        = 0
+                    アラート人数体調2022        = 0
                     
-                    アラート人数連続未回答_業務日誌       = 0
+                    アラート人数連続未回答_業務日誌    = 0
                     アラート人数連続未回答_パルスサーベイ = 0
-                    アラート人数合計       = 0
+                    アラート人数合計            = 0
                     
-                    アラート受講生ID一覧   = @{}
+                    アラート受講生ID一覧         = @{}
                     
-                    平均理解度             = 0.0
-                    平均人間関係           = 0.0
-                    平均体調               = 0.0
-                    合計理解度             = 0
-                    件数理解度             = 0
-                    合計人間関係           = 0
-                    件数人間関係           = 0
-                    合計体調               = 0
-                    件数体調               = 0
+                    平均理解度               = 0.0
+                    平均人間関係              = 0.0
+                    平均体調                = 0.0
+                    合計理解度               = 0
+                    件数理解度               = 0
+                    合計人間関係              = 0
+                    件数人間関係              = 0
+                    合計体調                = 0
+                    件数体調                = 0
                 }
             }
             $summary = $dailySummary[$date]
@@ -280,10 +282,10 @@ function Create-DailySummaryDatas {
             if ($dailyResult.alert.連続未回答_パルスサーベイ) { $summary.アラート人数連続未回答_パルスサーベイ++ }
             
             $hasAlert =
-                $dailyResult.alert.理解度 -or
-                $dailyResult.alert.人間関係 -or
-                $dailyResult.alert.体調 -or
-                $dailyResult.alert.連続未回答_パルスサーベイ
+            $dailyResult.alert.理解度 -or
+            $dailyResult.alert.人間関係 -or
+            $dailyResult.alert.体調 -or
+            $dailyResult.alert.連続未回答_パルスサーベイ
             if ($hasAlert -and $userId) {
                 $summary.アラート受講生ID一覧[$userId] = $true
             }
@@ -303,21 +305,24 @@ function Create-DailySummaryDatas {
     }
     foreach ($summary in $dailySummary.Values) {
         $summary.アラート人数合計 =
-            $summary.アラート受講生ID一覧.Count
+        $summary.アラート受講生ID一覧.Count
         $summary.平均理解度 =
-            if ($summary.件数理解度 -gt 0) {
-                [Math]::Round($summary.合計理解度 / $summary.件数理解度, 2)
-            } else { 0 }
+        if ($summary.件数理解度 -gt 0) {
+            [Math]::Round($summary.合計理解度 / $summary.件数理解度, 2)
+        }
+        else { 0 }
         
         $summary.平均人間関係 =
-            if ($summary.件数人間関係 -gt 0) {
-                [Math]::Round($summary.合計人間関係 / $summary.件数人間関係, 2)
-            } else { 0 }
+        if ($summary.件数人間関係 -gt 0) {
+            [Math]::Round($summary.合計人間関係 / $summary.件数人間関係, 2)
+        }
+        else { 0 }
         
         $summary.平均体調 =
-            if ($summary.件数体調 -gt 0) {
-                [Math]::Round($summary.合計体調 / $summary.件数体調, 2)
-            } else { 0 }
+        if ($summary.件数体調 -gt 0) {
+            [Math]::Round($summary.合計体調 / $summary.件数体調, 2)
+        }
+        else { 0 }
         
         $summary.PSObject.Properties.Remove('アラート受講生ID一覧')
         $summary.PSObject.Properties.Remove('合計理解度')
@@ -409,7 +414,8 @@ function Export-DailyResult {
         if (-not $dailyResult.提出状況_業務日誌) { 
             $userUrl = "$BaseUrl/k/#/people/user/$($userData.受講生ID)"
             $reminderLink = '=HYPERLINK("' + $userUrl + '","督促")'
-        } else {
+        }
+        else {
             $reminderLink = ""
         }
         $rowData = @(
@@ -426,7 +432,7 @@ function Export-DailyResult {
             $dailyResult.体調
             $dailyResult.パルスサーベイフリーコメント
         )
-        $rowDatas += ,$rowData
+        $rowDatas += , $rowData
     }
     
     $dataStartCell = Get-CellByKey $sheet "{提出状況データ}" -ErrorOnMissing
@@ -434,21 +440,21 @@ function Export-DailyResult {
     $columsStartIndex = $dataStartCell.Column
     Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
     
-    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex,$columsStartIndex) -Datas $rowDatas
+    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex, $columsStartIndex) -Datas $rowDatas
     
     Set-AutoFit $Sheet
     
     Set-SheetFirstCell -Sheet $Sheet
     
     $headerRange = $Sheet.Range(
-        $Sheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-        $Sheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count)
+        $Sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
+        $Sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count)
     )
     Set-AutoFilter $headerRange
     
     $resultRange = $sheet.Range(
-        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 2 -1 ), 
-        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 3 -1))
+        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 2 - 1 ), 
+        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 3 - 1))
     Set-CellColorByBoolean -Range $resultRange -TrueLabel "提出済" -FalseLabel "未提出"
 }
 
@@ -470,56 +476,58 @@ function Export-SummaryData {
         $summaryData = $DailySummaryDatas | Where-Object { $_.日付 -eq $courseScheduleData.日付 } | Select-Object -First 1
         if ($summaryData) {
             $colData = @(
-                                $courseScheduleData.科目名,
-                                $courseScheduleData.日付,
-                                $summaryData.アラート人数合計,
-                                $summaryData.アラート人数理解度,
-                                $summaryData.アラート人数人間関係,
-                                $summaryData.アラート人数体調,
-                                $summaryData.アラート人数体調2021,
-                                $summaryData.アラート人数体調2022,
-                                $summaryData.アラート人数連続未回答_パルスサーベイ,
-                                $summaryData.平均理解度,
-                                $summaryData.平均人間関係,
-                                $summaryData.平均体調
-                            )
-        } else {
-            $colData = @(
-                        $courseScheduleData.科目名,
-                        $courseScheduleData.日付,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0
-                    )
+                $courseScheduleData.科目名,
+                $courseScheduleData.日付,
+                $summaryData.アラート人数合計,
+                $summaryData.アラート人数理解度,
+                $summaryData.アラート人数人間関係,
+                $summaryData.アラート人数体調,
+                $summaryData.アラート人数体調2021,
+                $summaryData.アラート人数体調2022,
+                $summaryData.アラート人数連続未回答_パルスサーベイ,
+                $summaryData.平均理解度,
+                $summaryData.平均人間関係,
+                $summaryData.平均体調
+            )
         }
-        $colDatas += ,$colData
+        else {
+            $colData = @(
+                $courseScheduleData.科目名,
+                $courseScheduleData.日付,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            )
+        }
+        $colDatas += , $colData
     }
     
     $colDatas = Transpose-Array $colDatas
-    if( $colDatas ){
+    if ( $colDatas ) {
         $targetDateColumnIndex = [Array]::IndexOf($colDatas[1], $TargetDate) + $columsStartIndex
         $colDataCount = $colDatas[1].Count
-    }else{
+    }
+    else {
         Write-MessageWarn "データ不足"
         $targetDateColumnIndex = -1
         $colDataCount = 0
     }
     Expand-ColumnsFromTemplate -Sheet $Sheet -TemplateStartColumn $columsStartIndex -TotalSets $colDataCount
     
-    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex,$columsStartIndex) -Datas $colDatas
+    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex, $columsStartIndex) -Datas $colDatas
     
     Set-AutoFit $Sheet
     
     $columsStartIndex = 6
     foreach ($courseScheduleData in $CourseScheduleDatas) {
-        $courseScheduleRage = $Sheet.Range($Sheet.Cells($rowStartIndex,$columsStartIndex), $Sheet.Cells($rowStartIndex + 1,$columsStartIndex))
+        $courseScheduleRage = $Sheet.Range($Sheet.Cells($rowStartIndex, $columsStartIndex), $Sheet.Cells($rowStartIndex + 1, $columsStartIndex))
         Set-CourseScheduleDateCellColor -Range $courseScheduleRage -courseScheduleData $courseScheduleData
         $columsStartIndex++
     }
@@ -535,12 +543,12 @@ function Export-SummaryData {
 function Get-AlertStatus {
     param(
         [PSObject]$AlertData,
-        [string[]]$Exclude = @("当日未回答_業務日誌","当日未回答_パルスサーベイ","体調2021","体調2022")
+        [string[]]$Exclude = @("当日未回答_業務日誌", "当日未回答_パルスサーベイ", "体調2021", "体調2022")
     )
     
     $trueProps = $AlertData.PSObject.Properties |
-        Where-Object { $_.Value -eq $true -and $Exclude -notcontains $_.Name } |
-        Select-Object -ExpandProperty Name
+    Where-Object { $_.Value -eq $true -and $Exclude -notcontains $_.Name } |
+    Select-Object -ExpandProperty Name
         
     return [PSCustomObject]@{
         HasTrue = ($trueProps.Count -gt 0)
@@ -552,9 +560,9 @@ function Get-AlertStatus {
 
 function Set-CourseScheduleDateCellColor {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $Range,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $courseScheduleData
     )
     if ($courseScheduleData.isHoliday) {
@@ -581,7 +589,7 @@ function Export-UserData {
     $targetDateData += $TargetDate
     $targetDateData += $targetDateCourseData.科目名
     
-    Write-BodyDatas -StartCell $Sheet.Cells.Item(2,5) -Datas $targetDateData
+    Write-BodyDatas -StartCell $Sheet.Cells.Item(2, 5) -Datas $targetDateData
     
     $dataStartCell = Get-CellByKey $sheet "{スケジュールデータ}" -ErrorOnMissing
     $rowStartIndex = $dataStartCell.Row
@@ -592,20 +600,21 @@ function Export-UserData {
         $dateData += $courseScheduleData.日付
         $dateData += $courseScheduleData.科目名
     }
-    $dateDatas += ,$dateData
-    if( $dateDatas ){
+    $dateDatas += , $dateData
+    if ( $dateDatas ) {
         $targetDateColumnIndex = [Array]::IndexOf($dateData, $TargetDate) + $columsStartIndex
-    }else{
+    }
+    else {
         Write-MessageWarn "データ不足"
         $targetDateColumnIndex = -1
     }
     Write-Message $targetDateColumnIndex -VarName "targetDateColumnIndex"
     Write-Message $dateDatas -VarName "dateDatas"
     Expand-ColumnsFromTemplate -Sheet $Sheet -TemplateStartColumn $columsStartIndex -TotalSets $CourseScheduleDatas.Count -ColumnsPerSet 2
-    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex,$columsStartIndex) -Datas $dateDatas
+    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex, $columsStartIndex) -Datas $dateDatas
     
     foreach ($courseScheduleData in $CourseScheduleDatas) {
-        $courseScheduleRage = $Sheet.Range($Sheet.Cells($rowStartIndex,$columsStartIndex), $Sheet.Cells($rowStartIndex + 1,$columsStartIndex + 1))
+        $courseScheduleRage = $Sheet.Range($Sheet.Cells($rowStartIndex, $columsStartIndex), $Sheet.Cells($rowStartIndex + 1, $columsStartIndex + 1))
         Set-CourseScheduleDateCellColor -Range $courseScheduleRage -courseScheduleData $courseScheduleData
         $columsStartIndex = $columsStartIndex + 2
     }
@@ -618,21 +627,22 @@ function Export-UserData {
         $rowData += $userData.会社名
         
         $targetDailyResultData = $userData.dailyResults | Where-Object { $_.日付 -eq $TargetDate } | Select-Object -First 1
-        if( $targetDailyResultData ){
-            $excludeAlertItems = @("当日未回答_業務日誌","当日未回答_パルスサーベイ","体調2021","体調2022")
+        if ( $targetDailyResultData ) {
+            $excludeAlertItems = @("当日未回答_業務日誌", "当日未回答_パルスサーベイ", "体調2021", "体調2022")
             $targetDailyAlertStatus = Get-AlertStatus -AlertData $targetDailyResultData.alert -Exclude $excludeAlertItems
             $monitoringFlagLabel = if ($targetDailyAlertStatus.HasTrue) { "必要" } else { "" }
             
             $truePropertyNames = $targetDailyAlertStatus.Text
             $targetRecentResultDatas = $userData.dailyResults | Where-Object { $_.日付 -le $TargetDate } | Sort-Object -Property 日付 -Descending
-            if($AlertInterventionTerm -gt 0){
+            if ($AlertInterventionTerm -gt 0) {
                 $targetRecentResultDatas = $targetRecentResultDatas | Select-Object -First $AlertInterventionTerm
             }
             $alertCount = @($targetRecentResultDatas | Where-Object { (Get-AlertStatus -AlertData $_.alert -Exclude $excludeAlertItems).HasTrue }).Count
             if ($alertCount -ge $AlertInterventionLimit) { 
                 $userUrl = "$BaseUrl/k/#/people/user/$($userData.受講生ID)"
                 $interventionFlagLabel = '=HYPERLINK("' + $userUrl + '","必要")'
-            } else {
+            }
+            else {
                 $interventionFlagLabel = ""
             }
             Write-Message $targetRecentResultDatas -VarName "targetRecentResultDatas"
@@ -642,23 +652,25 @@ function Export-UserData {
             $rowData += $truePropertyNames
             $rowData += $targetDailyResultData.パルスサーベイフリーコメント
             $rowData += $interventionFlagLabel
-        } else {
-            $rowData += @("","","","")
+        }
+        else {
+            $rowData += @("", "", "", "")
         }
         
         foreach ($courseScheduleData in $CourseScheduleDatas) {
             $dailyResultData = $userData.dailyResults | Where-Object { $_.日付 -eq $courseScheduleData.日付 } | Select-Object -First 1
-            $dailyAlertStatus = Get-AlertStatus -AlertData $dailyResultData.alert -Exclude @("体調2021","体調2022")
-            if( $dailyResultData ){
+            $dailyAlertStatus = Get-AlertStatus -AlertData $dailyResultData.alert -Exclude @("体調2021", "体調2022")
+            if ( $dailyResultData ) {
                 $rowData += $dailyAlertStatus.Text
                 $rowData += $dailyResultData.パルスサーベイフリーコメント
-            } else {
+            }
+            else {
                 $rowData += ""
                 $rowData += ""
             }
         }
         
-        $rowDatas += ,$rowData
+        $rowDatas += , $rowData
     }
     
     $dataStartCell = Get-CellByKey $sheet "{受講生データ}" -ErrorOnMissing
@@ -666,7 +678,7 @@ function Export-UserData {
     $columsStartIndex = $dataStartCell.Column
     Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
     
-    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex,$columsStartIndex) -Datas $rowDatas
+    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex, $columsStartIndex) -Datas $rowDatas
     
     Set-AutoFit $Sheet
     
@@ -722,7 +734,7 @@ function Export-TotalResult {
                 $dailyResult.体調
                 $dailyResult.パルスサーベイフリーコメント
             )
-            $rowDatas += ,$rowData
+            $rowDatas += , $rowData
         }
     }
     $dataStartCell = Get-CellByKey $sheet "{受講生データ}" -ErrorOnMissing
@@ -730,7 +742,7 @@ function Export-TotalResult {
     $columsStartIndex = $dataStartCell.Column
     Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
     
-    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex,$columsStartIndex) -Datas $rowDatas
+    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex, $columsStartIndex) -Datas $rowDatas
     
     Set-AutoFit $Sheet
     
@@ -739,23 +751,23 @@ function Export-TotalResult {
     Scroll-ToIndex -Sheet $Sheet -RowIndex $($rowStartIndex + $rowDatas.Count - $UserDatas.Count)
     
     $headerRange = $Sheet.Range(
-        $Sheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-        $Sheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count)
+        $Sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
+        $Sheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count)
     )
     Set-AutoFilter $headerRange
     
     $resultRange = $sheet.Range(
-        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 3 -1 ), 
-        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 4 -1))
+        $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 3 - 1 ), 
+        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 4 - 1))
     Set-CellColorByBoolean -Range $resultRange -TrueLabel "提出済" -FalseLabel "未提出"
 }
 
 
 function Export-SummaryChart {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $DataSheet,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $WriteSheet,
         [string]$TargetGroupName
     )
@@ -763,12 +775,12 @@ function Export-SummaryChart {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $startCol = 6
-    $dateRow  = 4
+    $dateRow = 4
     $courseRow = 3
     
     $understandingRow = 12
-    $relationRow      = 13
-    $conditionRow     = 14
+    $relationRow = 13
+    $conditionRow = 14
     $totalRow = 5
     
     $lastCol = $DataSheet.Cells($dateRow, $DataSheet.Columns.Count).End(-4159).Column
@@ -794,8 +806,8 @@ function Export-SummaryChart {
     }
     
     $xRange = $DataSheet.Range(
-        $DataSheet.Cells($labelRow,$startCol),
-        $DataSheet.Cells($labelRow,$lastCol)
+        $DataSheet.Cells($labelRow, $startCol),
+        $DataSheet.Cells($labelRow, $lastCol)
     )
     $DataSheet.Rows($labelRow).Hidden = $true
     
@@ -810,35 +822,35 @@ function Export-SummaryChart {
     }
 
     $series1 = $chart.SeriesCollection().NewSeries()
-    $series1.Name = $DataSheet.Cells($understandingRow,4).Value2
+    $series1.Name = $DataSheet.Cells($understandingRow, 4).Value2
     $series1.XValues = $xRange
     $series1.Values = $DataSheet.Range(
-        $DataSheet.Cells($understandingRow,$startCol),
-        $DataSheet.Cells($understandingRow,$lastCol)
+        $DataSheet.Cells($understandingRow, $startCol),
+        $DataSheet.Cells($understandingRow, $lastCol)
     )
 
     $series2 = $chart.SeriesCollection().NewSeries()
-    $series2.Name = $DataSheet.Cells($relationRow,4).Value2
+    $series2.Name = $DataSheet.Cells($relationRow, 4).Value2
     $series2.XValues = $xRange
     $series2.Values = $DataSheet.Range(
-        $DataSheet.Cells($relationRow,$startCol),
-        $DataSheet.Cells($relationRow,$lastCol)
+        $DataSheet.Cells($relationRow, $startCol),
+        $DataSheet.Cells($relationRow, $lastCol)
     )
 
     $series3 = $chart.SeriesCollection().NewSeries()
-    $series3.Name = $DataSheet.Cells($conditionRow,4).Value2
+    $series3.Name = $DataSheet.Cells($conditionRow, 4).Value2
     $series3.XValues = $xRange
     $series3.Values = $DataSheet.Range(
-        $DataSheet.Cells($conditionRow,$startCol),
-        $DataSheet.Cells($conditionRow,$lastCol)
+        $DataSheet.Cells($conditionRow, $startCol),
+        $DataSheet.Cells($conditionRow, $lastCol)
     )
 
     $series4 = $chart.SeriesCollection().NewSeries()
-    $series4.Name = $DataSheet.Cells($totalRow,2).Value2
+    $series4.Name = $DataSheet.Cells($totalRow, 2).Value2
     $series4.XValues = $xRange
     $series4.Values = $DataSheet.Range(
-        $DataSheet.Cells($totalRow,$startCol),
-        $DataSheet.Cells($totalRow,$lastCol)
+        $DataSheet.Cells($totalRow, $startCol),
+        $DataSheet.Cells($totalRow, $lastCol)
     )
     $series4.ChartType = [Microsoft.Office.Interop.Excel.XlChartType]::xlColumnClustered
     $series4.AxisGroup = 2
@@ -854,8 +866,8 @@ function Export-SummaryChart {
     $chart.Axes(2).HasTitle = $true
     $chart.Axes(2).AxisTitle.Text = "理解度・人間関係・体調の平均値"
 
-    $chart.Axes(2,2).HasTitle = $true
-    $chart.Axes(2,2).AxisTitle.Text = "アラート人数（人）"
+    $chart.Axes(2, 2).HasTitle = $true
+    $chart.Axes(2, 2).AxisTitle.Text = "アラート人数（人）"
 
     $chart.HasLegend = $true
     $chart.Legend.Position = [Microsoft.Office.Interop.Excel.XlLegendPosition]::xlLegendPositionBottom
@@ -878,15 +890,15 @@ function Export-CourseScheduleData {
     foreach ($courseScheduleData in $CourseScheduleDatas) {
         if ($courseScheduleData) {
             $rowData = @(
-                              $courseScheduleData.科目名,
-                              $courseScheduleData.日付
-                          )
+                $courseScheduleData.科目名,
+                $courseScheduleData.日付
+            )
         }
-        $rowDatas += ,$rowData
+        $rowDatas += , $rowData
     }
     Expand-RowsFromTemplate -Sheet $Sheet -TemplateStartRow $rowStartIndex -TotalSets $rowDatas.Count
     
-    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex,$columsStartIndex) -Datas $rowDatas
+    Write-BodyDatas -StartCell $Sheet.Cells.Item($rowStartIndex, $columsStartIndex) -Datas $rowDatas
     
     Set-SheetFirstCell -Sheet $Sheet
     
@@ -894,62 +906,69 @@ function Export-CourseScheduleData {
 
 $psParams = $PSBoundParameters
 
-& {
-    try {
-        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+try {
+    & {
+        try {
+            $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-        $allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
-            Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath
-        } else {
-            Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
+            $allCourseScheduleDatas = if ($ViewAllCourseSchedule -eq 1) {
+                Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath
+            }
+            else {
+                Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate
+            }
+            Write-Message $allCourseScheduleDatas -VarName "allCourseScheduleDatas"
+
+            $targetCourseScheduleDatas = $allCourseScheduleDatas | Where-Object { -not $_.isHoliday }
+            Write-Message $targetCourseScheduleDatas -VarName "targetCourseScheduleDatas"
+
+            $targetDates = @($targetCourseScheduleDatas |
+                Where-Object { $_.日付 -le $TargetDate } |
+                Sort-Object 日付 |
+                ForEach-Object 日付)
+            Write-Message $targetDates -VarName "targetDates" -Type "Info"
+            if (-not $targetDates -or $targetDates.Count -eq 0) {
+                Write-MessageWarn "対象の科目がありません。日付=$($TargetDate)"
+                return
+            }
+
+            $dailyUserDatas = Create-DailyUserDatas -TargetGroupName $TargetGroupName -CollectRootDir $CollectRootDir -TargetDates $targetDates
+            Write-Message $dailyUserDatas -VarName "dailyUserDatas"
+
+            $checkedUserDatas = Add-CheckResults $dailyUserDatas $targetCourseScheduleDatas
+            Write-Message $checkedUserDatas -VarName "checkedUserDatas"
+
+            $dailySummaryDatas = Create-DailySummaryDatas $checkedUserDatas
+            Write-Message $dailySummaryDatas -VarName "dailySummaryDatas"
+
+            New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+            $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+            Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+            $viewCourseScheduleDatas = if ($ViewHolidayCourseSchedule -eq 1) {
+                $allCourseScheduleDatas
+            }
+            else {
+                $targetCourseScheduleDatas
+            }
+            Export-Excel $outputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
+
+            New-Item -Path $BackupRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+
+            $backupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
+
+            Copy-Item -Path $outputFilePath -Destination $backupFilePath -Force
+
+            Write-MessageComplete "アラート検知結果を出力しました: $outputFilePath"
         }
-        Write-Message $allCourseScheduleDatas -VarName "allCourseScheduleDatas"
-
-        $targetCourseScheduleDatas = $allCourseScheduleDatas | Where-Object { -not $_.isHoliday }
-        Write-Message $targetCourseScheduleDatas -VarName "targetCourseScheduleDatas"
-
-        $targetDates = @($targetCourseScheduleDatas |
-            Where-Object { $_.日付 -le $TargetDate } |
-            Sort-Object 日付 |
-            ForEach-Object 日付)
-        Write-Message $targetDates -VarName "targetDates" -Type "Info"
-        if (-not $targetDates -or $targetDates.Count -eq 0) {
-            Write-MessageWarn "対象の科目がありません。日付=$($TargetDate)"
-            return
+        catch {
+            Write-MessageError "実行エラー: $($error[0])"
         }
-
-        $dailyUserDatas = Create-DailyUserDatas -TargetGroupName $TargetGroupName -CollectRootDir $CollectRootDir -TargetDates $targetDates
-        Write-Message $dailyUserDatas -VarName "dailyUserDatas"
-
-        $checkedUserDatas = Add-CheckResults $dailyUserDatas $targetCourseScheduleDatas
-        Write-Message $checkedUserDatas -VarName "checkedUserDatas"
-
-        $dailySummaryDatas = Create-DailySummaryDatas $checkedUserDatas
-        Write-Message $dailySummaryDatas -VarName "dailySummaryDatas"
-
-        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
-        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-        $viewCourseScheduleDatas = if ($ViewHolidayCourseSchedule -eq 1) {
-            $allCourseScheduleDatas
-        }else{
-            $targetCourseScheduleDatas
-        }
-        Export-Excel $outputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
-
-        New-Item -Path $BackupRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-
-        $backupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
-
-        Copy-Item -Path $outputFilePath -Destination $backupFilePath -Force
-
-        Write-MessageComplete "アラート検知結果を出力しました: $outputFilePath"
-    } catch {
-        Write-MessageError "実行エラー: $($error[0])"
-    }
-} *>&1 | Tee-Object -FilePath $logFilePath
-ConvertTo-Utf8LogFile -Path $logFilePath
-Write-MessageComplete "ログを出力しました: $logFilePath"
+    } *>&1 | Tee-Object -FilePath $logFilePath
+}
+finally {
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
+}
 if ($error) {
     throw $error
 }

@@ -32,8 +32,8 @@ function Download-File {
         $beforeCount = @(Get-ChildItem -Path $OutFileDir -File -ErrorAction SilentlyContinue).Count
 
         $p = Start-Process -FilePath $AutoHotkeyExePath `
-                           -ArgumentList @($AutoHotkeyScriptPath, $Url, $OutFileDir) `
-                           -PassThru
+            -ArgumentList @($AutoHotkeyScriptPath, $Url, $OutFileDir) `
+            -PassThru
         $p.WaitForExit()
         $exitCode = [int]$p.ExitCode
         Write-Message $exitCode -VarName "exitCode" -Type "Info"
@@ -74,7 +74,7 @@ function Download-TrackResults {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     $Datas = @($Datas | Where-Object { ToBool $_.DL })
     Use-Mutex "Make-Dir" {
-        foreach($data in $Datas){
+        foreach ($data in $Datas) {
             $name = $data.$NameProperty
             $groupDir = Join-Path $TargetRootDir $TargetGroupName
             New-Item -Path $groupDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
@@ -84,27 +84,28 @@ function Download-TrackResults {
         }
     }
 
-    foreach($data in $Datas){
+    foreach ($data in $Datas) {
         $name = $data.$NameProperty
         $groupDir = Join-Path $TargetRootDir $TargetGroupName
         $resultDir = Join-Path $groupDir $name
         $trackID = $data.TrackID
         $trackIds = ($trackID -split "\||\r?\n") | Where-Object { $_ -ne "" }
 
-        foreach($trackId in $trackIds){
+        foreach ($trackId in $trackIds) {
             $trackIdParts = $trackId -split "-"
             $classId = $trackIdParts[0]
             $materialId = $trackIdParts[1]
             Write-Message $classId -VarName "classId" -Type "Info"
             Write-Message $materialId -VarName "materialId" -Type "Info"
 
-            if(-not $classId -or -not $materialId){
+            if (-not $classId -or -not $materialId) {
                 Write-Message "Skipping. [$TargetGroupName] [$name]" -VarName "message" -Type "Info" -ForegroundColor Yellow
                 continue
             }
-            $Url = if( $IsDetail ){
+            $Url = if ( $IsDetail ) {
                 "https://nttdata-univ.train.tracks.run/api/classes/$ClassId/materials/$MaterialId/results.csv"
-            } else {
+            }
+            else {
                 "https://nttdata-univ.train.tracks.run/api/classes/$ClassId/results.csv?cmid=$MaterialId"
             }
             Write-Message $Url -VarName "functionName" -Type "Url"
@@ -115,7 +116,8 @@ function Download-TrackResults {
                     -OutFileDir $resultDir `
                     -AutoHotkeyExePath $AutoHotkeyExePath `
                     -AutoHotkeyScriptPath $AutoHotkeyScriptPath
-            } catch {
+            }
+            catch {
                 Write-MessageError "ダウンロード失敗: $Url - $_"
             }
         }
@@ -124,29 +126,34 @@ function Download-TrackResults {
 
 $psParams = $PSBoundParameters
 
-& {
-    try {
-        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+try {
+    & {
+        try {
+            $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-        $downloadDetail = if($DownloadDetail -eq 1){ $true } else { $false }
+            $downloadDetail = if ($DownloadDetail -eq 1) { $true } else { $false }
 
-        $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
-        $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+            $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+            $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
-        $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
-        $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+            $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
+            $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-        Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
+            Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
 
-        Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
+            Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
 
-        Write-MessageComplete "実施結果をダウンロードしました: $(Join-Path $TestResultRootDir $TargetGroupName), $(Join-Path $SurveyResultRootDir $TargetGroupName)"
-    } catch {
-        Write-MessageError "実行エラー: $($error[0])"
-    }
-} *>&1 | Tee-Object -FilePath $logFilePath
-ConvertTo-Utf8LogFile -Path $logFilePath
-Write-MessageComplete "ログを出力しました: $logFilePath"
+            Write-MessageComplete "実施結果をダウンロードしました: $(Join-Path $TestResultRootDir $TargetGroupName), $(Join-Path $SurveyResultRootDir $TargetGroupName)"
+        }
+        catch {
+            Write-MessageError "実行エラー: $($error[0])"
+        }
+    } *>&1 | Tee-Object -FilePath $logFilePath
+}
+finally {
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
+}
 if ($error) {
     throw $error
 }

@@ -24,12 +24,13 @@ function Combine-ArrayHorizontal {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $maxRows = ($Arrays | ForEach-Object {
-        if ($_ -is [array] -and $_.Count -gt 0 -and $_[0] -is [array]) {
-            $_.Count
-        } else {
-            1
-        }
-    } | Measure-Object -Maximum).Maximum
+            if ($_ -is [array] -and $_.Count -gt 0 -and $_[0] -is [array]) {
+                $_.Count
+            }
+            else {
+                1
+            }
+        } | Measure-Object -Maximum).Maximum
     $result = [System.Collections.Generic.List[object]]::new($maxRows)
     for ($r = 0; $r -lt $maxRows; $r++) {
         $row = @()
@@ -51,7 +52,7 @@ function Combine-ArrayHorizontal {
         }
         $result.Add($row)
     }
-    return ,$result.ToArray()
+    return , $result.ToArray()
 }
 
 function Read-SourseDataDefsFile {
@@ -121,7 +122,7 @@ function Export-Datas {
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $allHeaderDatas = @()
-    $allBodyDatas   = @()
+    $allBodyDatas = @()
 
     foreach ($sourceDataProp in $SourseDataProps) {
         $sourceFilePath = $sourceDataProp.filePath
@@ -130,23 +131,24 @@ function Export-Datas {
         $headerRow = $range[0]
 
         $columnIndexes = @($columnDefs | ForEach-Object {
-            $index = [array]::IndexOf($headerRow, $_.OrgName)
-            if ($index -lt 0) {
-                throw "列が見つかりません: $($_.OrgName) (ファイル: $sourceFilePath)"
-            }
-            $index
-        })
+                $index = [array]::IndexOf($headerRow, $_.OrgName)
+                if ($index -lt 0) {
+                    throw "列が見つかりません: $($_.OrgName) (ファイル: $sourceFilePath)"
+                }
+                $index
+            })
 
         $headerDatas = @()
         foreach ($def in $columnDefs) {
             $headerName = if (-not [string]::IsNullOrWhiteSpace($def.NewName)) {
                 $def.NewName
-            } else {
+            }
+            else {
                 $def.OrgName
             }
-            $headerDatas += ,$headerName
+            $headerDatas += , $headerName
         }
-        $allHeaderDatas += ,$headerDatas
+        $allHeaderDatas += , $headerDatas
         $bodyDatas = [System.Collections.Generic.List[object]]::new($range.Count)
         for ($r = 1; $r -lt $range.Count; $r++) {
             $rowData = @()
@@ -156,7 +158,7 @@ function Export-Datas {
             }
             $bodyDatas.Add($rowData)
         }
-        $allBodyDatas += ,$bodyDatas.ToArray()
+        $allBodyDatas += , $bodyDatas.ToArray()
     }
     
     $allHeaderDatas = Combine-ArrayHorizontal $allHeaderDatas
@@ -172,37 +174,42 @@ function Export-Datas {
 
 $psParams = $PSBoundParameters
 
-& {
-    try {
-        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+try {
+    & {
+        try {
+            $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-        New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-        $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
-        if (-not $hasFiles) {
-            throw "集計対象がありません。日付=$($TargetDate)"
+            $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
+            if (-not $hasFiles) {
+                throw "集計対象がありません。日付=$($TargetDate)"
+            }
+
+            $fileKeyMap = @{}
+            foreach ($pair in ($SourceTypeFileNameMap -split ',' | Where-Object { $_ })) {
+                $kv = $pair -split '=', 2
+                if ($kv.Count -eq 2) { $fileKeyMap[$kv[0]] = $kv[1] }
+            }
+            $sourseDataProps = Read-SourseDataDefsFile -FilePath $CollectDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName -FileKeyMap $fileKeyMap
+
+            Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
+
+            $collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
+
+            Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName
+
+            Write-MessageComplete "集計結果を出力しました: $(Join-Path $CollectRootDir $collectFileName)"
         }
-
-        $fileKeyMap = @{}
-        foreach ($pair in ($SourceTypeFileNameMap -split ',' | Where-Object { $_ })) {
-            $kv = $pair -split '=', 2
-            if ($kv.Count -eq 2) { $fileKeyMap[$kv[0]] = $kv[1] }
+        catch {
+            Write-MessageError "実行エラー: $($error[0])"
         }
-        $sourseDataProps = Read-SourseDataDefsFile -FilePath $CollectDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName -FileKeyMap $fileKeyMap
-
-        Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
-
-        $collectFileName = "$($TargetGroupName)-$($TargetDate).txt"
-
-        Export-Datas -SourseDataProps $sourseDataProps -CollectDirPath $CollectRootDir -CollectFileName $collectFileName
-
-        Write-MessageComplete "集計結果を出力しました: $(Join-Path $CollectRootDir $collectFileName)"
-    } catch {
-        Write-MessageError "実行エラー: $($error[0])"
-    }
-} *>&1 | Tee-Object -FilePath $logFilePath
-ConvertTo-Utf8LogFile -Path $logFilePath
-Write-MessageComplete "ログを出力しました: $logFilePath"
+    } *>&1 | Tee-Object -FilePath $logFilePath
+}
+finally {
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
+}
 if ($error) {
     throw $error
 }

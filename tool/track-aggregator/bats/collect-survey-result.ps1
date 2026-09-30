@@ -28,28 +28,28 @@ function Create-CollectResultsDatas {
     
     $userCodes = $UserDatas.userCode
     $validSurveyResultDatas = $SurveyResultDatas |
-        Where-Object {
-            $_.isExecute -and $_.userCode -in $userCodes
-        } |
-        Group-Object userCode, surveyName | ForEach-Object { $_.Group[0] }
+    Where-Object {
+        $_.isExecute -and $_.userCode -in $userCodes
+    } |
+    Group-Object userCode, surveyName | ForEach-Object { $_.Group[0] }
     
     $plainSurveyResults = foreach ($userData in $UserDatas) {
         $userResults = @($validSurveyResultDatas | Where-Object { $_.userCode -eq $userData.userCode })
         foreach ($surveyData in $SurveyDatas) {
-            $filtered = $userResults | Where-Object { $_.surveyName -eq $surveyData.surveyName }| Select-Object -First 1
+            $filtered = $userResults | Where-Object { $_.surveyName -eq $surveyData.surveyName } | Select-Object -First 1
             [pscustomobject]@{
-                userCode    = $userData.userCode
-                userData    = $userData
-                surveyName  = $surveyData.surveyName
+                userCode     = $userData.userCode
+                userData     = $userData
+                surveyName   = $surveyData.surveyName
                 surveyResult = $filtered
-                isExecute   = $filtered -and $filtered.isExecute
+                isExecute    = $filtered -and $filtered.isExecute
             }
         }
     }
     
     $ClassNames = $UserDatas.className | Sort-Object -Unique
     $CompanyNames = $UserDatas.companyName | Select-Object -Unique
-    $rankOrder = @("S","A","B","C","D","E")
+    $rankOrder = @("S", "A", "B", "C", "D", "E")
     $RankNames = $UserDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) }
     
     $totalSummarySurveyResults = Create-SurveySummaryDataByGroup `
@@ -79,12 +79,12 @@ function Create-CollectResultsDatas {
         -ValidResultDatas $validSurveyResultDatas
 
     $results = [PSCustomObject]@{
-        plainSurveyResults = $plainSurveyResults
+        plainSurveyResults          = $plainSurveyResults
 
-        totalSummarySurveyResults = $totalSummarySurveyResults
+        totalSummarySurveyResults   = $totalSummarySurveyResults
         companySummarySurveyResults = $companySummarySurveyResults
-        classSummarySurveyResults = $classSummaryResults
-        rankSummarySurveyResults = $rankSummaryResults
+        classSummarySurveyResults   = $classSummaryResults
+        rankSummarySurveyResults    = $rankSummaryResults
     }
 
     return $results
@@ -129,14 +129,15 @@ function Export-UserPlainData {
             $exists = $targetTotalSummarySurveyResultData | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
             if ($exists) {
                 $rowData += $targetTotalSummarySurveyResultData.$pickedSurveyItem
-            }else{
-                $rowData +=""
+            }
+            else {
+                $rowData += ""
             }
         }
         for ($i = 0; $i -lt $surveyCount; $i++) {
             $rowData += ""
         }
-        $rowDatas += ,$rowData
+        $rowDatas += , $rowData
 
         foreach ($targetPlainSurveyResultData in $targetPlainSurveyResultDatas) {
             $targetUserData = $targetPlainSurveyResultData.userData
@@ -151,19 +152,20 @@ function Export-UserPlainData {
                 $exists = $targetSurveyResult.PSObject.Properties[$pickedSurveyItem]
                 if ($exists) {
                     $rowData += $targetSurveyResult.$pickedSurveyItem
-                }else{
-                    $rowData +=""
+                }
+                else {
+                    $rowData += ""
                 }
             }
             for ($i = 0; $i -lt $surveyCount; $i++) {
                 $propName = "S$i"
                 $rowData += $targetSurveyResult.$propName
             }
-            $rowDatas += ,$rowData
+            $rowDatas += , $rowData
         }
 
-        if($rowDatas.Count -eq 0){
-            $rowDatas += ,@("")
+        if ($rowDatas.Count -eq 0) {
+            $rowDatas += , @("")
         }
         $dataStartCell = Get-CellByKey $newSheet "{ユーザーデータ}" -ErrorOnMissing
         $rowStartIndex = $dataStartCell.Row
@@ -176,8 +178,8 @@ function Export-UserPlainData {
         Set-SheetFirstCell -Sheet $newSheet
 
         $headerRange = $newSheet.Range(
-            $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-            $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
+            $newSheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
+            $newSheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
         )
         Set-AutoFilter $headerRange
 
@@ -199,7 +201,7 @@ function Export-GroupSummaryData {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $pickedSurveyItems = @("planCount","actualCount") + (Get-PrimeSurveyItems)
+    $pickedSurveyItems = @("planCount", "actualCount") + (Get-PrimeSurveyItems)
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
 
     Export-GroupSummaryDataCore `
@@ -239,7 +241,7 @@ function Export-UserSummaryData {
         $headData += $surveyData.surveyName
         $headData += [string[]]::new($columnsPerSet - 1)
     }
-    $headDatas = ,$headData
+    $headDatas = , $headData
     Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
 
     $rowDatas = @()
@@ -256,12 +258,13 @@ function Export-UserSummaryData {
             $exists = $targetTotalSummarySurveyResultData | Where-Object { $_.PSObject.Properties[$pickedSurveyItem] }
             if ($exists) {
                 $rowData += $targetTotalSummarySurveyResultData.$pickedSurveyItem
-            } else {
+            }
+            else {
                 $rowData += ""
             }
         }
     }
-    $rowDatas += ,$rowData
+    $rowDatas += , $rowData
 
     $uniqueUsers = @($PlainSurveyResultDatas |
         Group-Object -Property { $_.userData.userCode } |
@@ -292,12 +295,13 @@ function Export-UserSummaryData {
                 $exists = $targetSurveyResult.PSObject.Properties[$pickedSurveyItem]
                 if ($exists) {
                     $rowData += $targetSurveyResult.$pickedSurveyItem
-                } else {
+                }
+                else {
                     $rowData += ""
                 }
             }
         }
-        $rowDatas += ,$rowData
+        $rowDatas += , $rowData
     }
 
     $dataStartCell = Get-CellByKey $sheet "{ユーザーデータ}" -ErrorOnMissing
@@ -365,33 +369,38 @@ function Export-Excel {
 
 $psParams = $PSBoundParameters
 
-& {
-    try {
-        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+try {
+    & {
+        try {
+            $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-        $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
+            $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
 
-        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-        $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
-        $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
+            $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
+            $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-        $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
+            $surveyResultDatas = Create-SurveyResultDatas -SurveyResultRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -SurveyDatas $surveyDatas
 
-        $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
+            $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -SurveyDatas $surveyDatas -SurveyResultDatas $surveyResultDatas
 
-        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+            $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+            Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
 
-        Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
+            Export-Excel -SurveyDatas $surveyDatas -TemplateFilePath $TemplateFilePath -CollectResultDatas $collectResultDatas -OutputFilePath $outputFilePath
 
-        Write-MessageComplete "集計結果を出力しました: $outputFilePath"
-    } catch {
-        Write-MessageError "実行エラー: $($error[0])"
-    }
-} *>&1 | Tee-Object -FilePath $logFilePath
-ConvertTo-Utf8LogFile -Path $logFilePath
-Write-MessageComplete "ログを出力しました: $logFilePath"
+            Write-MessageComplete "集計結果を出力しました: $outputFilePath"
+        }
+        catch {
+            Write-MessageError "実行エラー: $($error[0])"
+        }
+    } *>&1 | Tee-Object -FilePath $logFilePath
+}
+finally {
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
+}
 if ($error) {
     throw $error
 }

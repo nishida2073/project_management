@@ -30,27 +30,27 @@ function Create-CollectResultsDatas {
     
     $ClassNames = $UserDatas.className | Sort-Object -Unique
     $CompanyNames = $UserDatas.companyName | Select-Object -Unique
-    $rankOrder = @("S","A","B","C","D","E")
+    $rankOrder = @("S", "A", "B", "C", "D", "E")
     $RankNames = $UserDatas.rankName | Select-Object -Unique | Sort-Object { $rankOrder.IndexOf($_) }
     
     $userCodes = $UserDatas.userCode
     
     $validResultDatas = $ResultDatas |
-        Where-Object {
-            $_.isExecute -and $_.userCode -in $userCodes
-        } |
-        Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
+    Where-Object {
+        $_.isExecute -and $_.userCode -in $userCodes
+    } |
+    Group-Object userCode, testName | ForEach-Object { $_.Group[0] }
     
     $plainResults = foreach ($userData in $UserDatas) {
         $userResults = @($validResultDatas | Where-Object { $_.userCode -eq $userData.userCode })
         foreach ($testData in $TestDatas) {
-            $filtered = $userResults | Where-Object { $_.testName -eq $testData.testName }| Select-Object -First 1
+            $filtered = $userResults | Where-Object { $_.testName -eq $testData.testName } | Select-Object -First 1
             [pscustomobject]@{
-                userCode    = $userData.userCode
-                userData    = $userData
-                testName    = $testData.testName
-                testResult  = $filtered
-                isExecute   = $filtered -and $filtered.isExecute
+                userCode   = $userData.userCode
+                userData   = $userData
+                testName   = $testData.testName
+                testResult = $filtered
+                isExecute  = $filtered -and $filtered.isExecute
             }
         }
     }
@@ -115,7 +115,7 @@ function Export-UserSummaryData {
     foreach ($testData in $TestDatas) {
         $headData += $testData.testName
     }
-    $headDatas = ,$headData
+    $headDatas = , $headData
     Write-BodyDatas -StartCell $dataStartCell -Datas $headDatas
     
     $rowDatas = @()
@@ -123,17 +123,18 @@ function Export-UserSummaryData {
     $totalViewItems = @("平均点")
     foreach ($totalViewItem in $totalViewItems) {
         $rowData = @()
-        $rowData += @("全体-$totalViewItem","-","-","-","-")
+        $rowData += @("全体-$totalViewItem", "-", "-", "-", "-")
         foreach ($testData in $TestDatas) {
             $totalResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName } |
-                          Select-Object -First 1
-            if ($totalResult){
+            Select-Object -First 1
+            if ($totalResult) {
                 $rowData += "$($totalResult.$totalViewItem)"
-            } else {
+            }
+            else {
                 $rowData += ""
             }
         }
-        $rowDatas += ,$rowData
+        $rowDatas += , $rowData
     }
 
     $uniqueUsers = @($PlainResults |
@@ -162,13 +163,14 @@ function Export-UserSummaryData {
         foreach ($testData in $TestDatas) {
             $testResult = $userTestResults | Where-Object { $_.testName -eq $testData.testName } | Select-Object -First 1 -ExpandProperty testResult
             
-            if ($testResult.isExecute){
+            if ($testResult.isExecute) {
                 $rowData += $testResult.score
-            } else {
+            }
+            else {
                 $rowData += ""
             }
         }
-        $rowDatas += ,$rowData
+        $rowDatas += , $rowData
     }
 
     $dataStartCell = Get-CellByKey $sheet "{ユーザーデータ}" -ErrorOnMissing
@@ -189,8 +191,8 @@ function Export-UserSummaryData {
     Set-AutoFilter $headerRange
 
     $resultRange = $sheet.Range(
-        $Sheet.Cells.Item($rowStartIndex + $totalViewItems.Count, $columsStartIndex + 6 -1 ), 
-        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1,  $columsStartIndex + $rowDatas[0].Count -1 ))
+        $Sheet.Cells.Item($rowStartIndex + $totalViewItems.Count, $columsStartIndex + 6 - 1 ), 
+        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + $rowDatas[0].Count - 1 ))
     Set-CellColorByValue $resultRange $PassScore
 
 }
@@ -208,7 +210,7 @@ function Export-GroupSummaryData {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $viewItems = @("予定数","実施数","合格数","不合格数","平均点","中央値","修了率","最高点","最低点")
+    $viewItems = @("予定数", "実施数", "合格数", "不合格数", "平均点", "中央値", "修了率", "最高点", "最低点")
     $sheet = $Workbook.Worksheets.Item($TemplateSheetName)
 
     $result = Export-GroupSummaryDataCore `
@@ -248,7 +250,7 @@ function Export-UserPlainData {
     $newSheetNameParts = $TemplateSheetName -split "-", 2
     $newSheetNameFormat = "$($newSheetNameParts[0])-{0}-$($newSheetNameParts[1])"
         
-    if( $ShowDetail ){
+    if ( $ShowDetail ) {
         foreach ($testData in $TestDatas) {
             $sourceSheet = $Workbook.Worksheets.Item($TemplateSheetName)
             $sourceSheet.Copy([Type]::Missing, $Workbook.Sheets.Item($Workbook.Sheets.Count))
@@ -257,17 +259,17 @@ function Export-UserPlainData {
             
             $targetPlainResults = @($PlainResults | Where-Object { $_.testName -eq $testData.testName })
             $targetTotalSummaryResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName } | Select-Object -First 1
-            $questionCount = if($targetTotalSummaryResult){ [int]$targetTotalSummaryResult.questionCount } else { 0 }
+            $questionCount = if ($targetTotalSummaryResult) { [int]$targetTotalSummaryResult.questionCount } else { 0 }
 
             $rowDatas = @()
             $rowData = @()
             for ($i = 1; $i -le $questionCount; $i++) {
                 $rowData += "問題$i"
             }
-            if($questionCount -eq 0){
+            if ($questionCount -eq 0) {
                 $rowData += ""
             }
-            $rowDatas +=,$rowData
+            $rowDatas += , $rowData
 
             $dataStartCell = Get-CellByKey $newSheet "{問題データ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
@@ -288,7 +290,7 @@ function Export-UserPlainData {
                 $propValues = $targetTotalSummaryResult.$propName
                 $rowData += "$propValues%"
             }
-            $rowDatas += ,$rowData
+            $rowDatas += , $rowData
 
             foreach ($targetPlainResult in $targetPlainResults) {
                 $targetUserData = $targetPlainResult.userData
@@ -303,15 +305,16 @@ function Export-UserPlainData {
                     $propName = "Q$i"
                     $propValue = $targetResult.$propName
                     if ($targetPlainResult.isExecute) {
-                        $rowData += if( $propValue -eq 1 ){ "〇" } else { "×" }
-                    } else {
+                        $rowData += if ( $propValue -eq 1 ) { "〇" } else { "×" }
+                    }
+                    else {
                         $rowData += ""
                     }
                 }
-                $rowDatas += ,$rowData
+                $rowDatas += , $rowData
             }
-            if($rowDatas.Count -eq 0){
-                $rowDatas += ,@("")
+            if ($rowDatas.Count -eq 0) {
+                $rowDatas += , @("")
             }
             
             $dataStartCell = Get-CellByKey $newSheet "{ユーザーデータ}" -ErrorOnMissing
@@ -325,14 +328,14 @@ function Export-UserPlainData {
             Set-SheetFirstCell -Sheet $newSheet
 
             $headerRange = $newSheet.Range(
-                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
+                $newSheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
+                $newSheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
             )
             Set-AutoFilter $headerRange
 
             $resultRange = $newSheet.Range(
                 $newSheet.Cells.Item($rowStartIndex + 1, $columsStartIndex + $rowDatas[0].Count - $questionCount),
-                $newSheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1,  $columsStartIndex + $rowDatas[0].Count -1 ))
+                $newSheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + $rowDatas[0].Count - 1 ))
             Set-CellColorByWord $resultRange "〇"
 
             Set-AutoFit $newSheet
@@ -355,7 +358,7 @@ function Export-GroupPlainData {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
-    if( $ShowDetail ){
+    if ( $ShowDetail ) {
         $newSheetNameParts = $TemplateSheetName -split "-", 2
         $newSheetNameFormat = "$($newSheetNameParts[0])-{0}-$($newSheetNameParts[1])"
         
@@ -367,17 +370,17 @@ function Export-GroupPlainData {
             
             $targetUseSummaryResults = @($UseSummaryResults | Where-Object { $_.testName -eq $testData.testName })
             $targetTotalSummaryResult = $TotalSummaryResults | Where-Object { $_.testName -eq $testData.testName } | Select-Object -First 1
-            $questionCount = if($targetTotalSummaryResult){ [int]$targetTotalSummaryResult.questionCount } else { 0 }
+            $questionCount = if ($targetTotalSummaryResult) { [int]$targetTotalSummaryResult.questionCount } else { 0 }
 
             $rowDatas = @()
             $rowData = @()
             for ($i = 1; $i -le $questionCount; $i++) {
                 $rowData += "問題$i"
             }
-            if($questionCount -eq 0){
+            if ($questionCount -eq 0) {
                 $rowData += ""
             }
-            $rowDatas +=,$rowData
+            $rowDatas += , $rowData
 
             $dataStartCell = Get-CellByKey $newSheet "{問題データ}" -ErrorOnMissing
             $rowStartIndex = $dataStartCell.Row
@@ -394,7 +397,7 @@ function Export-GroupPlainData {
                 $propValue = $targetTotalSummaryResult.$propName
                 $rowData += "$propValue%"
             }
-            $rowDatas += ,$rowData
+            $rowDatas += , $rowData
 
             foreach ($targetUseSummaryResult in $targetUseSummaryResults) {
                 $rowData = @()
@@ -404,10 +407,10 @@ function Export-GroupPlainData {
                     $propValue = $targetUseSummaryResult.$propName
                     $rowData += "$propValue%"
                 }
-                $rowDatas += ,$rowData
+                $rowDatas += , $rowData
             }
-            if($rowDatas.Count -eq 0){
-                $rowDatas += ,@("")
+            if ($rowDatas.Count -eq 0) {
+                $rowDatas += , @("")
             }
             
             $dataStartCell = Get-CellByKey $newSheet "{結果データ}" -ErrorOnMissing
@@ -421,8 +424,8 @@ function Export-GroupPlainData {
             Set-SheetFirstCell -Sheet $newSheet
 
             $headerRange = $newSheet.Range(
-                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex),
-                $newSheet.Cells.Item($rowStartIndex - 1,$columsStartIndex + $rowDatas[0].Count - 1)
+                $newSheet.Cells.Item($rowStartIndex - 1, $columsStartIndex),
+                $newSheet.Cells.Item($rowStartIndex - 1, $columsStartIndex + $rowDatas[0].Count - 1)
             )
             Set-AutoFilter $headerRange
 
@@ -485,34 +488,39 @@ function Export-Excel {
 
 $psParams = $PSBoundParameters
 
-& {
-    try {
-        $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
+try {
+    & {
+        try {
+            $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-        New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
+            New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-        $showDetail = if($ShowDetail -eq 1){ $true } else { $false }
+            $showDetail = if ($ShowDetail -eq 1) { $true } else { $false }
 
-        $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
-        $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
+            $testDatas = Create-TestDatas -DataFilePath $ClientDataFilePath
+            $testDatas = @($testDatas | Where-Object { -not (ToBool $_.停止中) })
 
-        $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
+            $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
 
-        $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
+            $resultDatas = Create-TestResultDatas -TestResultRootDir $ResultRootDir -TargetGroupName $TargetGroupName -TestDatas $testDatas -PassScore $PassScore
 
-        $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
+            $collectResultDatas = Create-CollectResultsDatas -UserDatas $userDatas -TestDatas $testDatas -ResultDatas $resultDatas
 
-        $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
-        Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
-        Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
+            $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName-$OutputFileSuffix.xlsx"
+            Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+            Export-Excel -TestDatas $testDatas -CollectResultDatas $collectResultDatas -TemplateFilePath $TemplateFilePath -OutputFilePath $outputFilePath -ShowDetail $showDetail
 
-        Write-MessageComplete "集計結果を出力しました: $outputFilePath"
-    } catch {
-        Write-MessageError "実行エラー: $($error[0])"
-    }
-} *>&1 | Tee-Object -FilePath $logFilePath
-ConvertTo-Utf8LogFile -Path $logFilePath
-Write-MessageComplete "ログを出力しました: $logFilePath"
+            Write-MessageComplete "集計結果を出力しました: $outputFilePath"
+        }
+        catch {
+            Write-MessageError "実行エラー: $($error[0])"
+        }
+    } *>&1 | Tee-Object -FilePath $logFilePath
+}
+finally {
+    ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
+}
 if ($error) {
     throw $error
 }
