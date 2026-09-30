@@ -6,15 +6,15 @@ set "KintonePassword=abcd1234"
 set "Authorization="
 set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
 
-set "SpaceId=7"
-set "ThreadId=9"
+set "SpaceId=3"
+set "ThreadId=5"
 set "MentionUserCodes="
 set "CommentTextTemplate=アラート結果を更新しました。（{TargetGroupName} / {TargetDate}）"
 
 set "SyncUserMasterAppId=14"
 set "SyncUserMasterSheetName=受講生一覧"
 
-set "TargetAppIds_Daily=14"
+set "TargetAppIds_Daily=17"
 
-set "TargetAppIds_Pulse=38"
+set "TargetAppIds_Pulse=19"
 
