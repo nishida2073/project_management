@@ -1,4 +1,9 @@
-﻿
+﻿trap {
+    Write-Host "エラー: $_"
+    Write-Host $_.ScriptStackTrace
+    Write-Host $_.Exception
+}
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -198,22 +203,20 @@ $cmbRunAllBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]:
 $cmbRunAllCustomTemplateName = New-Object System.Windows.Forms.ComboBox
 $cmbRunAllCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs @() -RunButtonText "実行" `
+New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs @() -RunButtonText "実行" `
     -Inputs @(
         [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200 }
         [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true }
         [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true }
         [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 180; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true }
-    )
+    ) | Out-Null
 
-$batchPanel = $batchTab.Panel
-$txtRunAllConfigName = $batchTab.InputControls["ConfigName"]
-$txtRunAllSpaceTemplateId = $batchTab.InputControls["SpaceTemplateId"]
-$btnRunAll = $batchTab.RunButton
-$lblOverallStatus = $batchTab.StatusLabel
+$txtRunAllConfigName = $script:batchInputControls["ConfigName"]
+$txtRunAllSpaceTemplateId = $script:batchInputControls["SpaceTemplateId"]
+$lblOverallStatus = $script:batchStatusLabel
 
-$tabResult = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
-    -OnRunClick { param($bd) Invoke-SingleStep -Id $bd.Id }
+New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
+    -OnRunClick { param($bd) Invoke-SingleStep -Id $bd.Id } | Out-Null
 
 $script:stepStatusLabels = @{}
 $script:stepInputControls = @{}
@@ -228,7 +231,7 @@ $execTabControl.Location = New-Object System.Drawing.Point(0, 0)
 $execTabControl.Width = 760
 $runTopPanel.Controls.Add($execTabControl)
 
-$execTabControl.Height = 45 + $batchPanel.Height
+$execTabControl.Height = 45 + $script:batchPanel.Height
 
 $execTabControl.Add_SelectedIndexChanged({
     $runTopPanel.Height = $execTabControl.Top + $execTabControl.Height
@@ -294,11 +297,11 @@ $txtLog = New-LogTextBox
 
 Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($innerRunTabControl, $txtLog)
 
-$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $stepMeta `
+New-LogTab -TabPage $tabLogs -ButtonDefs $stepMeta `
     -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
     -OnAfterClear { Update-LogConfigNameList } `
-    -OnUpdateLogView { Update-LogView }
+    -OnUpdateLogView { Update-LogView } | Out-Null
 foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
@@ -402,7 +405,7 @@ function Set-RunButtonsEnabled {
     $txtRunAllSpaceTemplateId.Enabled = $Enabled
     $cmbRunAllBaseTemplateName.Enabled = $Enabled
     $cmbRunAllCustomTemplateName.Enabled = $Enabled
-    $btnRunAll.Enabled = $Enabled
+    $script:batchRunButton.Enabled = $Enabled
     $btnBatchBrowse.Enabled = $Enabled
     $btnBatchRunAll.Enabled = $Enabled
     foreach ($btn in $tabResult.RunButtons) { $btn.Enabled = $Enabled }
@@ -494,7 +497,7 @@ function Invoke-SeededAllSteps {
     return Invoke-AllStepsForCurrentInputs
 }
 
-$btnRunAll.Add_Click({
+$script:batchRunButton.Add_Click({
     $seedConfigName = $txtRunAllConfigName.Text.Trim()
     if (!$seedConfigName) {
         [System.Windows.Forms.MessageBox]::Show("スペース識別名を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
@@ -776,7 +779,7 @@ $settingsTrailingButtonVars = @{
 }
 
 function Update-SettingsFields {
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }

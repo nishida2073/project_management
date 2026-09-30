@@ -1,4 +1,9 @@
-﻿
+﻿trap {
+    Write-Host "エラー: $_"
+    Write-Host $_.ScriptStackTrace
+    Write-Host $_.Exception
+}
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -21,7 +26,6 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 $env:GUI_LOG_MODE = "1"
 
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
-$script:suppressComboSync = $false
 
 $clientsDir = Join-Path $rootPath "clients"
 
@@ -106,7 +110,7 @@ $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
-$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
+New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
         [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 60; InputWidth = 90 }
         [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 90; InputWidth = 120 }
@@ -114,19 +118,11 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -OnOpenClick {
         param($target)
         Open-TargetOrWarn -Path $target
-    }
-
-$batchPanel = $batchTab.Panel
-$script:batchInputControls = $batchTab.InputControls
-$script:batchStepCheckboxes = $batchTab.CheckBoxes
-$script:batchStatusLabels = $batchTab.StatusLabels
-$btnRunAll = $batchTab.RunButton
-$lblBatchStatus = $batchTab.StatusLabel
-$script:batchRunButtons = @($btnRunAll)
+    } | Out-Null
 
 function Start-BatchRunAll {
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
-        -StatusLabel $lblBatchStatus -StatusLabels $script:batchStatusLabels -ExtraControls @($script:batchInputControls.Values) `
+        -StatusLabel $script:batchStatusLabel -StatusLabels $script:batchStatusLabels -ExtraControls @($script:batchInputControls.Values) `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -InvokeStep {
             param($bd)
@@ -144,10 +140,10 @@ function Start-BatchRunAll {
         }
 }
 
-$btnRunAll.Add_Click({ Start-BatchRunAll })
+$script:batchRunButton.Add_Click({ Start-BatchRunAll })
 
 
-$tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
+New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
     Invoke-BatButton -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
@@ -164,21 +160,14 @@ $tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $c
             }
             return $batArgs
         }
-}
-$script:runButtons = $tabResult.RunButtons
+} | Out-Null
 
-$execTabControl.Height = 45 + $batchPanel.Height
+$execTabControl.Height = 45 + $script:batchPanel.Height
 
 
 $txtLog = New-LogTextBox
 
 Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
-
-function Set-RunButtonsEnabled {
-    param([bool]$Enabled)
-    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
-    Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
-}
 
 
 $syncMasterButtonDef = [PSCustomObject]@{
@@ -187,11 +176,11 @@ $syncMasterButtonDef = [PSCustomObject]@{
 }
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
-$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
+New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
     -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] } `
-    -OnUpdateLogView { Update-LogView }
+    -OnUpdateLogView { Update-LogView } | Out-Null
 $cmbLogGroup = $script:logTab.ExtraCombo
 $cmbLogGroup.DisplayMember = "Text"
 foreach ($opt in $groupOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
@@ -425,10 +414,9 @@ function Get-CommonSettingsFiles {
     )
 }
 
-$settingsCommonTopPanelResult = New-SettingsTopPanel `
+$settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
-    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }
-$settingsCommonTopPanel = $settingsCommonTopPanelResult.Panel
+    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
 
 $settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -458,7 +446,7 @@ function Get-GroupSettingsFiles {
     )
 }
 
-$settingsGroupTopPanelResult = New-SettingsTopPanel `
+$settingsGroupTopPanel = (New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
     -OnSave {
         $target = $cmbSettingsGroupTarget.SelectedItem
@@ -472,8 +460,7 @@ $settingsGroupTopPanelResult = New-SettingsTopPanel `
         $target = $cmbSettingsGroupTarget.SelectedItem
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
-    }
-$settingsGroupTopPanel = $settingsGroupTopPanelResult.Panel
+    }).Panel
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -524,13 +511,7 @@ function Get-GroupSettingsFieldRows {
     }
 }
 
-$script:settingsCommonFieldTextBoxes = @{}
-$script:settingsGroupFieldTextBoxes = @{}
-
 $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
-$script:mentionRows = @()
-$script:mentionRowsGroupName = $null
-$script:mentionRowControls = @()
 
 $collectDataDefsPath = Join-Path $basePath "collect-data-defs.txt"
 $script:collectDataDefsSections = $null
@@ -695,7 +676,7 @@ function Update-CommonSettingsFields {
     $scrollX = -$settingsCommonFieldPanel.AutoScrollPosition.X
     $scrollY = -$settingsCommonFieldPanel.AutoScrollPosition.Y
 
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes `
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
     Add-CollectDataDefsEditor
@@ -708,7 +689,7 @@ function Update-GroupSettingsFields {
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
     $target = $cmbSettingsGroupTarget.SelectedItem
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
         -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions | Out-Null

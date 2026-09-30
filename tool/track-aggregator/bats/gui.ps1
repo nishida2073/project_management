@@ -1,4 +1,9 @@
-﻿
+﻿trap {
+    Write-Host "エラー: $_"
+    Write-Host $_.ScriptStackTrace
+    Write-Host $_.Exception
+}
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -21,7 +26,6 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 $env:GUI_LOG_MODE = "1"
 
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $basePath "common-env.bat")
-$script:suppressComboSync = $false
 
 $clientsDir = Join-Path $rootPath "clients"
 
@@ -134,26 +138,18 @@ $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
-$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
+New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
         [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 90; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
         Open-TargetOrWarn -Path $target
-    }
-
-$batchPanel = $batchTab.Panel
-$cmbBatchGroup = $batchTab.InputControls["TargetGroupNameFilter"]
-$script:batchStepCheckboxes = $batchTab.CheckBoxes
-$script:batchStatusLabels = $batchTab.StatusLabels
-$btnRunAll = $batchTab.RunButton
-$lblBatchStatus = $batchTab.StatusLabel
-$script:batchRunButtons = @($btnRunAll)
+    } | Out-Null
 
 function Start-BatchRunAll {
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
-        -StatusLabel $lblBatchStatus -StatusLabels $script:batchStatusLabels `
+        -StatusLabel $script:batchStatusLabel -StatusLabels $script:batchStatusLabels `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -InvokeStep {
             param($bd)
@@ -163,7 +159,7 @@ function Start-BatchRunAll {
                     param($bd)
                     $batArgs = @()
                     foreach ($inputDef in $bd.Inputs) {
-                        $value = if ($inputDef.Name -eq "TargetGroupNameFilter") { Get-InputValue -Control $cmbBatchGroup } else { $inputDef.Default }
+                        $value = if ($inputDef.Name -eq "TargetGroupNameFilter") { Get-InputValue -Control $script:batchInputControls["TargetGroupNameFilter"] } else { $inputDef.Default }
                         $batArgs += "$($inputDef.Name):$value"
                     }
                     return $batArgs
@@ -171,10 +167,10 @@ function Start-BatchRunAll {
         }
 }
 
-$btnRunAll.Add_Click({ Start-BatchRunAll })
+$script:batchRunButton.Add_Click({ Start-BatchRunAll })
 
 
-$tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
+New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
     Invoke-BatButton -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
@@ -190,21 +186,14 @@ $tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $c
             }
             return $batArgs
         }
-}
-$script:runButtons = $tabResult.RunButtons
+} | Out-Null
 
-$execTabControl.Height = 45 + $batchPanel.Height
+$execTabControl.Height = 45 + $script:batchPanel.Height
 
 
 $txtLog = New-LogTextBox
 
 Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
-
-function Set-RunButtonsEnabled {
-    param([bool]$Enabled)
-    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
-    Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
-}
 
 
 $syncMasterButtonDef = [PSCustomObject]@{
@@ -213,11 +202,12 @@ $syncMasterButtonDef = [PSCustomObject]@{
 }
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
-$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
+New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
     -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] } `
-    -OnUpdateLogView { Update-LogView }
+    -OnUpdateLogView { Update-LogView } | Out-Null
+$script:logPath = $script:commonEnvVars["LOG_DIR"]
 $cmbLogGroup = $script:logTab.ExtraCombo
 $cmbLogGroup.DisplayMember = "Text"
 foreach ($opt in $groupOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
@@ -397,10 +387,9 @@ function Get-CommonSettingsFiles {
     )
 }
 
-$settingsCommonTopPanelResult = New-SettingsTopPanel `
+$settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
-    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }
-$settingsCommonTopPanel = $settingsCommonTopPanelResult.Panel
+    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
 
 $settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -430,7 +419,7 @@ function Get-GroupSettingsFiles {
     )
 }
 
-$settingsGroupTopPanelResult = New-SettingsTopPanel `
+$settingsGroupTopPanel = (New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
     -OnSave {
         $target = $cmbSettingsGroupTarget.SelectedItem
@@ -443,8 +432,7 @@ $settingsGroupTopPanelResult = New-SettingsTopPanel `
         $target = $cmbSettingsGroupTarget.SelectedItem
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
-    }
-$settingsGroupTopPanel = $settingsGroupTopPanelResult.Panel
+    }).Panel
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -492,17 +480,11 @@ function Get-GroupSettingsFieldRows {
     }
 }
 
-$script:settingsCommonFieldTextBoxes = @{}
-$script:settingsGroupFieldTextBoxes = @{}
-
 $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
-$script:mentionRows = @()
-$script:mentionRowsGroupName = $null
-$script:mentionRowControls = @()
 
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
@@ -559,7 +541,7 @@ function Update-GroupSettingsFields {
                 $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
                 $baseUrl = "https://$kintoneSubdomain.cybozu.com"
                 $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-                Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization
+                Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization | Out-Null
                 [System.Windows.Forms.MessageBox]::Show("テスト投稿に成功しました。スレッドを確認し、不要であれば削除してください。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
         } catch {
@@ -569,14 +551,14 @@ function Update-GroupSettingsFields {
     $trailingButtons["SyncUserMasterAppId"] = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         try {
             Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-                Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId"
+                Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
                 [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
         } catch {
             [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
         }
     }.GetNewClosure() }
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
         -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions `

@@ -1,4 +1,9 @@
-﻿
+﻿trap {
+    Write-Host "エラー: $_"
+    Write-Host $_.ScriptStackTrace
+    Write-Host $_.Exception
+}
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -172,7 +177,7 @@ function Get-SharePointFolderUrl {
     return "$($siteUri.Scheme)://$($siteUri.Authority)$($siteUri.AbsolutePath.TrimEnd('/'))/$([Uri]::EscapeDataString($library))/Forms/AllItems.aspx?id=$([Uri]::EscapeDataString($serverRelativePath))"
 }
 
-$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs -RunButtonText "実行" `
+New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs -RunButtonText "実行" `
     -Inputs @(
         [PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $cmbClient; LabelWidth = 80; InputWidth = 260 }
     ) `
@@ -180,12 +185,7 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs -Ru
     -OnOpenClick {
         param($target)
         Open-TargetOrWarn -Path $target
-    }
-
-$batchPanel = $batchTab.Panel
-$script:batchStepCheckboxes = $batchTab.CheckBoxes
-$btnRunAll = $batchTab.RunButton
-$lblStatus = $batchTab.StatusLabel
+    } | Out-Null
 
 function Update-ClientComboItems {
     param(
@@ -294,18 +294,18 @@ function Start-BatchRunAll {
     $script:currentProc = $null
 }
 
-$btnRunAll.Add_Click({ Start-BatchRunAll })
+$script:batchRunButton.Add_Click({ Start-BatchRunAll })
 
 function Update-LogClientList {
     Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo
 }
 
-$script:logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allLogButtonDefs `
+New-LogTab -TabPage $tabLogs -ButtonDefs $allLogButtonDefs `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "クライアント" -ExtraComboWidth 260 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
     -OnAfterClear { Update-LogClientList } `
-    -OnUpdateLogView { Update-LogView }
+    -OnUpdateLogView { Update-LogView } | Out-Null
 $cmbLogClient = $script:logTab.ExtraCombo
 
 function Update-LogView {
@@ -482,7 +482,7 @@ function Get-SettingsFieldRows {
 function Update-SettingsFields {
     $resolverValue = $script:commonEnvResolver
     $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -notin @("DOWNLOAD", "UPLOAD") }) -TextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -notin @("DOWNLOAD", "UPLOAD") }) -TargetTextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
@@ -671,7 +671,7 @@ function Get-ClientArgValue {
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
     foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $Enabled }
-    $btnRunAll.Enabled = $Enabled
+    $script:batchRunButton.Enabled = $Enabled
     $cmbClient.Enabled = $Enabled
     $cmbDownloadClient.Enabled = $Enabled
     $cmbGenerateClient.Enabled = $Enabled
@@ -694,12 +694,11 @@ function Invoke-IndividualStep {
     $script:isRunning = $false
 }
 
-$tabResult = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd }
-$script:runButtons = $tabResult.RunButtons
+New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd } | Out-Null
 
 $execTabControl.Controls.Remove($tabBatchAll)
 
-$execTabControl.Height = 45 + $batchPanel.Height
+$execTabControl.Height = 45 + $script:batchPanel.Height
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {

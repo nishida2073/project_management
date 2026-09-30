@@ -1,4 +1,13 @@
-﻿function Open-TargetOrWarn {
+﻿$script:settingsCommonFieldTextBoxes = @{}
+$script:settingsGroupFieldTextBoxes = @{}
+$script:batchPanel = $null
+$script:batchStatusLabel = $null
+$script:getLogPathFn = $null
+$script:runButtons = @()
+$script:batchInputControls = @{}
+$script:logTab = $null
+
+function Open-TargetOrWarn {
     param([string]$Path)
     if ($Path -match '^https?://') {
         Start-Process -FilePath $Path
@@ -344,6 +353,12 @@ function Set-ButtonsEnabled {
     foreach ($btn in $Buttons) { $btn.Enabled = $Enabled }
 }
 
+function Set-RunButtonsEnabled {
+    param([bool]$Enabled)
+    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
+}
+
 function Set-StatusLabelText {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.Label]$Label,
@@ -524,6 +539,8 @@ function New-CategoryTabControl {
     $tabControl.Add_SelectedIndexChanged($updateTabHeight)
     $tabControl.Height = $TabHeaderAllowance + (Get-CategoryPanelHeight -ButtonDefs $CategoryDefs[0].ButtonDefs)
 
+    $script:runButtons = $runButtons
+
     return [PSCustomObject]@{
         TabControl = $tabControl
         RunButtons = $runButtons
@@ -592,7 +609,8 @@ function New-LogTab {
 
     Add-StackedDockedControls -Container $TabPage -ControlsTopToBottom @($logStagePanel, $logContentBox)
 
-    return [PSCustomObject]@{
+    $script:getLogPathFn = $GetLogPathFn
+    $script:logTab = [PSCustomObject]@{
         ContentBox  = $logContentBox
         StagePanel  = $logStagePanel
         Radios      = $radios
@@ -600,6 +618,7 @@ function New-LogTab {
         ExtraCombo  = $cmbLogExtra
         ClearButton = $btnClearLogs
     }
+    return $script:logTab
 }
 
 function Get-BatchDisplayLabel {
@@ -763,6 +782,14 @@ function New-BatchRunTab {
     $grpBatchAll.Controls.AddRange($topControls)
     $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28 + 16))
     $batchPanel.Height = $grpBatchAll.Bottom + 10
+
+    $script:batchPanel = $batchPanel
+    $script:batchInputControls = $inputControls
+    $script:batchStepCheckboxes = $checkBoxes
+    $script:batchStatusLabels = $statusLabels
+    $script:batchStatusLabel = $lblStatus
+    $script:batchRunButton = $btnRunAll
+    $script:batchRunButtons = @($btnRunAll)
 
     return [PSCustomObject]@{
         Panel          = $batchPanel
@@ -960,7 +987,7 @@ function Update-LogView {
     $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
     if (-not $selectedRadio) { return }
     $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
-    $logPath = $script:commonEnvVars["LOG_DIR"]
+    $logPath = & $script:getLogPathFn
 
     $script:logTab.ContentBox.Text = ""
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
@@ -1091,7 +1118,7 @@ function Render-SettingsFields {
     param(
         [System.Windows.Forms.Panel]$Panel,
         [array]$Rows,
-        [hashtable]$TextBoxes,
+        [hashtable]$TargetTextBoxes,
         [Parameter(Mandatory)][hashtable]$GroupLabels,
         [Parameter(Mandatory)][hashtable]$VarLabels,
         [Parameter(Mandatory)][System.Windows.Forms.ToolTip]$ToolTip,
@@ -1108,7 +1135,7 @@ function Render-SettingsFields {
         [scriptblock]$OnOpenClick
     )
     $Panel.Controls.Clear()
-    $TextBoxes.Clear()
+    $TargetTextBoxes.Clear()
 
     $groupBoxes = [System.Collections.Generic.List[System.Windows.Forms.GroupBox]]::new()
     $grp = $null
@@ -1207,7 +1234,7 @@ function Render-SettingsFields {
             }
         }
 
-        $TextBoxes[$field.Key] = $txt
+        $TargetTextBoxes[$field.Key] = $txt
         $y += if ($isMultiline) { 66 } else { 28 }
 
         if ($TrailingButtonVars.ContainsKey($field.VarName)) {
@@ -1227,7 +1254,9 @@ function Render-SettingsFields {
         }
         $controlsToStack.Add($groupBoxes[$i])
     }
-    Add-StackedDockedControls -Container $Panel -ControlsTopToBottom @($controlsToStack) -Spacing 0
+    if ($controlsToStack.Count -gt 0) {
+        Add-StackedDockedControls -Container $Panel -ControlsTopToBottom @($controlsToStack) -Spacing 0
+    }
 
     $totalHeight = 10
     foreach ($ctrl in $controlsToStack) { $totalHeight += $ctrl.Height }
