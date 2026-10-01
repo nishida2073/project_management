@@ -44,7 +44,7 @@ foreach ($clientName in (Get-ClientNames)) {
 }
 function New-ClientInput {
     param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "ClientName"; Label = "クライアント"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $clientOptions; NewRow = $NewRow }
+    [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $clientOptions; NewRow = $NewRow }
 }
 
 function Get-NewClientInitialValues {
@@ -74,8 +74,8 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "個別パッケージの作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージ定義ファイル生成"; BatchLabel = "パッケージ定義ファイル生成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = $script:commonEnvVars["CommonLogPath"]; Inputs = @((New-ClientInput)) }
             [PSCustomObject]@{ Label = "個別パッケージの作成"; BatchLabel = "個別パッケージの作成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-package.bat"); OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージ定義ファイル更新"; BatchLabel = "パッケージ定義ファイル更新"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = $script:commonEnvVars["CommonLogPath"]; Inputs = @((New-ClientInput)) }
         )
     }
 )
@@ -121,11 +121,11 @@ foreach ($cd in $categoryDefs) {
 
 $tabBatchAll = New-Object System.Windows.Forms.TabPage
 $tabBatchAll.Text = "一括実行"
-$execTabControl.Controls.Add($tabBatchAll)
+# $execTabControl.Controls.Add($tabBatchAll)
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "ClientName"; Label = "クライアント"; Options = $clientOptions; LabelWidth = 90; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $clientOptions; LabelWidth = 90; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -185,7 +185,7 @@ $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
-    -ExtraLabelText "クライアント" -ExtraComboWidth 150 `
+    -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
     -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] } `
     -OnUpdateLogView { Update-LogView } | Out-Null
 $script:logPath = $script:commonEnvVars["CommonLogPath"]
@@ -255,56 +255,7 @@ $downloadVars = @($settingsGroups["DOWNLOAD"].Vars.Keys)
 $generateVars = @($settingsGroups["GENERATE"].Vars.Keys)
 $uploadVars = @($settingsGroups["UPLOAD"].Vars.Keys)
 
-function Invoke-GenerateConfigForClient {
-    param([string]$ClientName)
-
-    $clientRaw = Get-SetLineRawValues -Path (Get-GroupBatPath $ClientName)
-    $rawSourcePath = if ($clientRaw.ContainsKey("GenerateSourcePath")) { $clientRaw["GenerateSourcePath"] } else { "" }
-    $sourcePath = Expand-VarTokens -Value $rawSourcePath -Resolver { param($name) $script:commonEnvVars[$name] } -BasePath $rootPath
-
-    if ([string]::IsNullOrWhiteSpace($sourcePath) -or !(Test-Path -LiteralPath $sourcePath)) {
-        [System.Windows.Forms.MessageBox]::Show(
-            "圧縮元のフォルダが未設定か、存在しません。`r`n先に「圧縮元のフォルダ」を設定して保存してください。",
-            "パッケージ定義ファイルの作成",
-            [System.Windows.Forms.MessageBoxButtons]::OK,
-            [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    $rawDestPath = if ($clientRaw.ContainsKey("GenerateConfigPath")) { $clientRaw["GenerateConfigPath"] } else { "" }
-    $destPath = Expand-VarTokens -Value $rawDestPath -Resolver { param($name) $script:commonEnvVars[$name] } -BasePath $rootPath
-
-    $commonLogPath = $script:commonEnvVars["CommonLogPath"]
-    $batArgs = @("-ClientName:$ClientName", "-GenerateSourcePath:$sourcePath", "-GenerateConfigPath:$destPath", "-CommonLogPath:$commonLogPath")
-
-    if (Test-Path -LiteralPath $destPath) {
-        $confirm = [System.Windows.Forms.MessageBox]::Show(
-            "既に存在します。上書きしますか？`r`n$destPath",
-            "パッケージ定義ファイルの作成",
-            [System.Windows.Forms.MessageBoxButtons]::YesNo,
-            [System.Windows.Forms.MessageBoxIcon]::Warning)
-        if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
-        $batArgs += "-Force:1"
-    }
-
-    $exitCode = Invoke-BatProcess -BatPath (Join-Path $rootPath "generate-config.bat") -WorkingDirectory $rootPath -BatArgs $batArgs `
-        -OnOutputLine {}
-
-    if ($exitCode -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("パッケージ定義ファイルを作成しました。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-    }
-}
-
-$settingsTrailingButtonVars = @{
-    "GenerateConfigPath" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テンプレートの更新" -Width 120 -OnClick {
-        $client = $cmbSettingsGroupTarget.SelectedItem
-        if (!$client) {
-            [System.Windows.Forms.MessageBox]::Show("クライアントを選択してください。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        Invoke-GenerateConfigForClient -ClientName $client
-    } }
-}
+$settingsTrailingButtonVars = @{}
 
 $settingsGroupLabels = @{}
 $settingsVarLabels = @{}
@@ -581,7 +532,6 @@ Update-SettingsGroupList
 Update-CommonSettingsFields
 Update-GroupSettingsFields
 
-$execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
