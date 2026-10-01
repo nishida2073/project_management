@@ -16,110 +16,75 @@ if ($MyInvocation.MyCommand.Path) {
 } else {
     $rootPath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
-$downloadBat = Join-Path $rootPath "download-folder.bat"
-$generateBat = Join-Path $rootPath "generate-package.bat"
-$uploadBat = Join-Path $rootPath "upload-folder.bat"
-$clientsDirName = "clients"
-$clientsDir = Join-Path $rootPath $clientsDirName
-$setEnvBat = Join-Path $clientsDir "template\set-env.bat"
-$clientFilePrefix = [System.IO.Path]::GetFileNameWithoutExtension($setEnvBat)
-$clientLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
-$defaultClientLabel = "デフォルト"
-$script:suppressComboSync = $false
+$basePath = Join-Path $rootPath "bats"
 
-$libraryDir = Join-Path $rootPath "bats\library"
+$libraryDir = Join-Path $basePath "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
 $env:GUI_LOG_MODE = "1"
 
-function Get-ClientBatPath {
-    param([string]$ClientName)
-    return Join-Path $clientsDir "$clientFilePrefix-$ClientName.bat"
+$setEnvBat = Join-Path $basePath "common-env.bat"
+$script:commonEnvVars = Get-BatEnvVars -BatPath $setEnvBat
+
+$clientsDir = Join-Path $rootPath "clients"
+
+function Get-ClientNames {
+    if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
+    $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.bat" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
+    }
+    return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$cmbClient = New-Object System.Windows.Forms.ComboBox
-$cmbClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$clientOptions = @()
+foreach ($clientName in (Get-ClientNames)) {
+    $clientOptions += [PSCustomObject]@{ Text = $clientName; Value = $clientName }
+}
+function New-ClientInput {
+    param([bool]$NewRow = $false)
+    [PSCustomObject]@{ Name = "ClientName"; Label = "クライアント"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $clientOptions; NewRow = $NewRow }
+}
 
-$cmbDownloadClient = New-Object System.Windows.Forms.ComboBox
-$cmbDownloadClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+function Get-NewClientInitialValues {
+    param([string]$ClientName)
+    $templateBatPath = Join-Path $clientsTemplateDir "client.bat"
+    if (!(Test-Path -LiteralPath $templateBatPath)) { return @{} }
 
-$cmbGenerateClient = New-Object System.Windows.Forms.ComboBox
-$cmbGenerateClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-
-$cmbUploadClient = New-Object System.Windows.Forms.ComboBox
-$cmbUploadClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-
-function New-ClientInputDef {
-    param([System.Windows.Forms.ComboBox]$Combo)
-    return @([PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $Combo; LabelWidth = 80; InputWidth = 220 })
+    $templateValues = Get-SetLineRawValues -Path $templateBatPath
+    $result = @{}
+    foreach ($key in $templateValues.Keys) {
+        $value = $templateValues[$key]
+        if ($key -eq "GenerateConfigPath") {
+            $value = "%BASE_PATH%clients\$ClientName.xlsx"
+        } elseif ($key -eq "GenerateOutputPath") {
+            $value = "%BASE_PATH%generated\$ClientName"
+        } elseif ($key -eq "UploadSitePath") {
+            $value = $value -replace [regex]::Escape("サンプル"), $ClientName
+        } else {
+            $value = $value -replace [regex]::Escape("サンプル"), $ClientName
+        }
+        $result[$key] = $value
+    }
+    return $result
 }
 
 $categoryDefs = @(
     [PSCustomObject]@{
-        Label = "ファイルダウンロード"
-        ButtonDefs = @(
-            [PSCustomObject]@{
-                Label            = "ファイルダウンロード"
-                BatchLabel       = "ファイルダウンロード"
-                BatchPath        = $downloadBat
-                LogPrefixVarName = "DOWNLOAD_LOG_PREFIX"
-                LocalPathVarName = "DOWNLOAD_LOCAL_PATH"
-                Inputs           = New-ClientInputDef -Combo $cmbDownloadClient
-                OpenTarget       = { Get-ValueForClient -ClientName $cmbDownloadClient.Text -VarName "DOWNLOAD_LOCAL_PATH" }
-            }
-        )
-    }
-    [PSCustomObject]@{
         Label = "個別パッケージの作成"
         ButtonDefs = @(
-            [PSCustomObject]@{
-                Label            = "個別パッケージの作成"
-                BatchLabel       = "個別パッケージの作成"
-                BatchPath        = $generateBat
-                LogPrefixVarName = "GENERATE_LOG_PREFIX"
-                LocalPathVarName = "GENERATE_OUTPUT_PATH"
-                Inputs           = New-ClientInputDef -Combo $cmbGenerateClient
-                OpenTarget       = { Get-ValueForClient -ClientName $cmbGenerateClient.Text -VarName "GENERATE_OUTPUT_PATH" }
-            }
-        )
-    }
-    [PSCustomObject]@{
-        Label = "ファイルアップロード"
-        ButtonDefs = @(
-            [PSCustomObject]@{
-                Label            = "ファイルアップロード"
-                BatchLabel       = "ファイルアップロード"
-                BatchPath        = $uploadBat
-                LogPrefixVarName = "UPLOAD_LOG_PREFIX"
-                SiteUrlVarName   = "UPLOAD_SITE_URL"
-                SitePathVarName  = "UPLOAD_SITE_PATH"
-                Inputs           = New-ClientInputDef -Combo $cmbUploadClient
-                OpenTarget       = {
-                    Get-SharePointFolderUrl `
-                        -SiteUrl (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_URL") `
-                        -SitePath (Get-ValueForClient -ClientName $cmbUploadClient.Text -VarName "UPLOAD_SITE_PATH")
-                }
-            }
+            [PSCustomObject]@{ Label = "パッケージ定義ファイル生成"; BatchLabel = "パッケージ定義ファイル生成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = $script:commonEnvVars["CommonLogPath"]; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "個別パッケージの作成"; BatchLabel = "個別パッケージの作成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-package.bat"); OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
         )
     }
 )
-$categoryDefs = @($categoryDefs | Where-Object { $_.Label -eq "個別パッケージの作成" })
-$allButtonDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
-
-$generateConfigLogButtonDef = [PSCustomObject]@{
-    Label            = "パッケージ定義ファイル生成"
-    BatchLabel       = "パッケージ定義ファイル生成"
-    LogPrefixVarName = "GENERATE_CONFIG_LOG_PREFIX"
-}
-$allLogButtonDefs = @($allButtonDefs) + @($generateConfigLogButtonDef)
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "コース別パッケージ生成ツール"
-$form.Size = New-Object System.Drawing.Size(760, 560)
+$form.Size = New-Object System.Drawing.Size(780, 560)
 $form.StartPosition = "CenterScreen"
-$form.MinimumSize = New-Object System.Drawing.Size(520, 360)
+$form.MinimumSize = New-Object System.Drawing.Size(600, 400)
 
 $script:currentProc = $null
 $form.Add_FormClosing({
@@ -127,6 +92,7 @@ $form.Add_FormClosing({
         & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
     }
 })
+
 
 $tabControl = New-Object System.Windows.Forms.TabControl
 $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -143,6 +109,235 @@ $tabSettings.Text = "設定"
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
+
+$execTabControl = New-Object System.Windows.Forms.TabControl
+
+$allButtonDefs = @()
+foreach ($cd in $categoryDefs) {
+    foreach ($bd in $cd.ButtonDefs) {
+        if ($bd.IncludeInBatch -ne $false) { $allButtonDefs += $bd }
+    }
+}
+
+$tabBatchAll = New-Object System.Windows.Forms.TabPage
+$tabBatchAll.Text = "一括実行"
+$execTabControl.Controls.Add($tabBatchAll)
+
+New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
+    -Inputs @(
+        [PSCustomObject]@{ Name = "ClientName"; Label = "クライアント"; Options = $clientOptions; LabelWidth = 90; InputWidth = 150 }
+    ) `
+    -OnOpenClick {
+        param($target)
+        Open-TargetOrWarn -Path $target
+    } | Out-Null
+
+function Start-BatchRunAll {
+    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
+        -StatusLabel $script:batchStatusLabel -StatusLabels $script:batchStatusLabels `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -InvokeStep {
+            param($bd)
+            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+                -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
+                -GetBatArgs {
+                    param($bd)
+                    $batArgs = @()
+                    foreach ($inputDef in $bd.Inputs) {
+                        $value = Get-InputValue -Control $script:batchInputControls[$inputDef.Name]
+                        $batArgs += "-$($inputDef.Name):$value"
+                    }
+                    return $batArgs
+                }
+        }
+}
+
+$script:batchRunButton.Add_Click({ Start-BatchRunAll })
+
+
+New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
+    param($bd)
+    Invoke-BatButton -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -CurrentProcessRef ([ref]$script:currentProc) `
+        -GetBatArgs {
+            param($bd)
+            $batArgs = @()
+            $inputMap = $bd.InputControls
+            if ($inputMap) {
+                foreach ($inputName in $inputMap.Keys) {
+                    $batArgs += "-$($inputName):$(Get-InputValue -Control $inputMap[$inputName])"
+                }
+            }
+            return $batArgs
+        }
+} | Out-Null
+
+$execTabControl.Height = 45 + $script:batchPanel.Height
+
+
+$txtLog = New-LogTextBox
+
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
+
+
+$allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+
+New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
+    -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
+    -ExtraLabelText "クライアント" -ExtraComboWidth 150 `
+    -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] } `
+    -OnUpdateLogView { Update-LogView } | Out-Null
+$script:logPath = $script:commonEnvVars["CommonLogPath"]
+$cmbLogGroup = $script:logTab.ExtraCombo
+$cmbLogGroup.DisplayMember = "Text"
+foreach ($opt in $clientOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
+if ($cmbLogGroup.Items.Count -gt 0) { $cmbLogGroup.SelectedIndex = 0 }
+
+foreach ($radio in $script:logTab.Radios) {
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+}
+$cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView })
+
+Update-LogView
+
+
+$clientsDir = Join-Path $rootPath "clients"
+$clientsTemplateDir = Join-Path $clientsDir "template"
+
+function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
+
+$script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
+
+$settingsGroups = [ordered]@{
+    "COMMON" = @{
+        Label = "共通"
+        Overridable = $false
+        Vars = [ordered]@{
+            "CommonLogPath" = @{ Label = "ログの出力先"; Browse = "Folder" }
+        }
+    }
+    "DOWNLOAD" = @{
+        Label = "ダウンロード"
+        Vars = [ordered]@{
+            "DownloadSiteUrl"       = @{ Label = "ダウンロード元のサイトURL" }
+            "DownloadSitePath"      = @{ Label = "ダウンロード元のフォルダ" }
+            "DownloadSiteTenantId"  = @{ Label = "テナントID" }
+            "DownloadLocalPath"     = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
+        }
+    }
+    "GENERATE" = @{
+        Label = "パッケージ作成"
+        Vars = [ordered]@{
+            "GenerateSourcePath"      = @{ Label = "圧縮元のフォルダ"; Browse = "Folder"  }
+            "GenerateConfigPath"      = @{ Label = "パッケージ定義ファイル"; Browse = "File" }
+            "GenerateWorkPath"        = @{ Label = "作業用のフォルダ"; Browse = "Folder"  }
+            "GenerateOutputPath"      = @{ Label = "パッケージの出力先"; Browse = "Folder" }
+            "GenerateSheetsInclude"   = @{ Label = "対象のシート" }
+            "GenerateSheetsExclude"   = @{ Label = "除外のシート" }
+        }
+    }
+    "UPLOAD" = @{
+        Label = "アップロード"
+        Vars = [ordered]@{
+            "UploadSiteUrl"       = @{ Label = "アップロード先のサイトURL" }
+            "UploadSitePath"      = @{ Label = "アップロード先のフォルダ" }
+            "UploadSiteTenantId"  = @{ Label = "テナントID" }
+            "UploadLocalPath"     = @{ Label = "アップロード元のフォルダ"; Browse = "Folder" }
+            "UploadItemsInclude"  = @{ Label = "対象の項目形式" }
+            "UploadItemsExclude"  = @{ Label = "除外の項目形式" }
+        }
+    }
+}
+
+$commonSettingsVars = @($settingsGroups["COMMON"].Vars.Keys)
+$downloadVars = @($settingsGroups["DOWNLOAD"].Vars.Keys)
+$generateVars = @($settingsGroups["GENERATE"].Vars.Keys)
+$uploadVars = @($settingsGroups["UPLOAD"].Vars.Keys)
+
+function Invoke-GenerateConfigForClient {
+    param([string]$ClientName)
+
+    $clientRaw = Get-SetLineRawValues -Path (Get-GroupBatPath $ClientName)
+    $rawSourcePath = if ($clientRaw.ContainsKey("GenerateSourcePath")) { $clientRaw["GenerateSourcePath"] } else { "" }
+    $sourcePath = Expand-VarTokens -Value $rawSourcePath -Resolver { param($name) $script:commonEnvVars[$name] } -BasePath $rootPath
+
+    if ([string]::IsNullOrWhiteSpace($sourcePath) -or !(Test-Path -LiteralPath $sourcePath)) {
+        [System.Windows.Forms.MessageBox]::Show(
+            "圧縮元のフォルダが未設定か、存在しません。`r`n先に「圧縮元のフォルダ」を設定して保存してください。",
+            "パッケージ定義ファイルの作成",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    $rawDestPath = if ($clientRaw.ContainsKey("GenerateConfigPath")) { $clientRaw["GenerateConfigPath"] } else { "" }
+    $destPath = Expand-VarTokens -Value $rawDestPath -Resolver { param($name) $script:commonEnvVars[$name] } -BasePath $rootPath
+
+    $commonLogPath = $script:commonEnvVars["CommonLogPath"]
+    $batArgs = @("-ClientName:$ClientName", "-GenerateSourcePath:$sourcePath", "-GenerateConfigPath:$destPath", "-CommonLogPath:$commonLogPath")
+
+    if (Test-Path -LiteralPath $destPath) {
+        $confirm = [System.Windows.Forms.MessageBox]::Show(
+            "既に存在します。上書きしますか？`r`n$destPath",
+            "パッケージ定義ファイルの作成",
+            [System.Windows.Forms.MessageBoxButtons]::YesNo,
+            [System.Windows.Forms.MessageBoxIcon]::Warning)
+        if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
+        $batArgs += "-Force:1"
+    }
+
+    $exitCode = Invoke-BatProcess -BatPath (Join-Path $rootPath "generate-config.bat") -WorkingDirectory $rootPath -BatArgs $batArgs `
+        -OnOutputLine {}
+
+    if ($exitCode -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("パッケージ定義ファイルを作成しました。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    }
+}
+
+$settingsTrailingButtonVars = @{
+    "GenerateConfigPath" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テンプレートの更新" -Width 120 -OnClick {
+        $client = $cmbSettingsGroupTarget.SelectedItem
+        if (!$client) {
+            [System.Windows.Forms.MessageBox]::Show("クライアントを選択してください。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+            return
+        }
+        Invoke-GenerateConfigForClient -ClientName $client
+    } }
+}
+
+$settingsGroupLabels = @{}
+$settingsVarLabels = @{}
+$settingsFolderBrowseVars = @()
+$settingsFileBrowseVars = @()
+$settingsMaskedVars = @()
+$settingsMultilineVars = @()
+$radioVars = @{}
+foreach ($groupKey in $settingsGroups.Keys) {
+    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
+    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
+        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
+        $settingsVarLabels[$varKey] = $varDef.Label
+        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
+        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
+        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
+        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
+        if ($varDef.Radio) { $radioVars[$varKey] = $varDef.Radio }
+    }
+}
+
+$script:groupTemplateDefaults = $null
+function Get-GroupTemplateDefaults {
+    if ($null -eq $script:groupTemplateDefaults) {
+        $clientBatPath = Join-Path $clientsTemplateDir "client.bat"
+        $script:groupTemplateDefaults = [PSCustomObject]@{
+            Auth = Get-SetLineRawValues -Path $clientBatPath
+            Sync = Get-SetLineRawValues -Path $clientBatPath
+        }
+    }
+    return $script:groupTemplateDefaults
+}
+
 $settingsSubTabControl = New-Object System.Windows.Forms.TabControl
 $settingsSubTabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 $tabSettings.Controls.Add($settingsSubTabControl)
@@ -155,485 +350,17 @@ $tabSettingsGroup = New-Object System.Windows.Forms.TabPage
 $tabSettingsGroup.Text = "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$script:isRunning = $false
-$script:lastClientVars = @()
-$tabControl.Add_Selecting({
-    if ($script:isRunning -and $_.TabPage -ne $tabRun) {
-        $_.Cancel = $true
-    }
-})
-
-$execTabControl = New-Object System.Windows.Forms.TabControl
-$execTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
-
-$tabBatchAll = New-Object System.Windows.Forms.TabPage
-$tabBatchAll.Text = "一括実行"
-$execTabControl.Controls.Add($tabBatchAll)
-
-function Get-BatchOpenTarget {
-    param($ButtonDef, [string]$ClientName)
-    if ($ButtonDef.SiteUrlVarName) {
-        return Get-SharePointFolderUrl `
-            -SiteUrl (Get-ValueForClient -ClientName $ClientName -VarName $ButtonDef.SiteUrlVarName) `
-            -SitePath (Get-ValueForClient -ClientName $ClientName -VarName $ButtonDef.SitePathVarName)
-    }
-    return Get-ValueForClient -ClientName $ClientName -VarName $ButtonDef.LocalPathVarName
-}
-
-function Get-SharePointFolderUrl {
-    param([string]$SiteUrl, [string]$SitePath)
-    if (!$SiteUrl -or !$SitePath) { return $null }
-    $siteUri = [Uri]$SiteUrl
-    $library = ($SitePath -split '/', 2)[0]
-    $serverRelativePath = "$($siteUri.AbsolutePath.TrimEnd('/'))/$SitePath"
-    return "$($siteUri.Scheme)://$($siteUri.Authority)$($siteUri.AbsolutePath.TrimEnd('/'))/$([Uri]::EscapeDataString($library))/Forms/AllItems.aspx?id=$([Uri]::EscapeDataString($serverRelativePath))"
-}
-
-New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs -RunButtonText "実行" `
-    -Inputs @(
-        [PSCustomObject]@{ Name = "Client"; Label = "クライアント"; ExistingControl = $cmbClient; LabelWidth = 80; InputWidth = 260 }
-    ) `
-    -ShowOpenLink { param($bd) $true } `
-    -OnOpenClick {
-        param($target)
-        Open-TargetOrWarn -Path $target
-    } | Out-Null
-
-function Update-ClientComboItems {
-    param(
-        [System.Windows.Forms.ComboBox]$ComboBox,
-        [string[]]$FixedItems
-    )
-    $selected = $ComboBox.SelectedItem
-    $script:suppressComboSync = $true
-    $ComboBox.Items.Clear()
-    foreach ($item in $FixedItems) {
-        $ComboBox.Items.Add($item) | Out-Null
-    }
-    Get-ChildItem -LiteralPath $clientsDir -Filter "$clientFilePrefix-*.bat" -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object {
-        $clientName = [System.IO.Path]::GetFileNameWithoutExtension($_.Name).Substring($clientFilePrefix.Length + 1)
-        $ComboBox.Items.Add($clientName) | Out-Null
-    }
-    $ComboBox.SelectedIndex = if ($selected -and $ComboBox.Items.Contains($selected)) { $ComboBox.Items.IndexOf($selected) } else { 0 }
-    $script:suppressComboSync = $false
-}
-
-function Update-ClientList {
-    Update-ClientComboItems -ComboBox $cmbClient -FixedItems @()
-    Update-ClientComboItems -ComboBox $cmbDownloadClient -FixedItems @()
-    Update-ClientComboItems -ComboBox $cmbGenerateClient -FixedItems @()
-    Update-ClientComboItems -ComboBox $cmbUploadClient -FixedItems @()
-}
-Update-ClientList
-
-function Get-ClientProfileRawValues {
-    param([string]$ClientName)
-    $result = @{}
-    $clientBat = Get-ClientBatPath $ClientName
-    if (!(Test-Path -LiteralPath $clientBat)) {
-        return $result
-    }
-    foreach ($line in [System.IO.File]::ReadAllLines($clientBat, $script:cp932Encoding)) {
-        $trimmed = $line.Trim()
-        $m = $clientLineRegex.Match($trimmed)
-        if (!$m.Success) {
-            $m = $script:setEnvLineRegex.Match($trimmed)
-        }
-        if ($m.Success) {
-            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
-        }
-    }
-    return $result
-}
-
-function Get-ClientProfileValues {
-    param([string]$ClientName)
-    $raw = Get-ClientProfileRawValues $ClientName
-    $result = @{}
-    foreach ($varName in $raw.Keys) {
-        $result[$varName] = Expand-VarTokens -Value $raw[$varName] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-    }
-    return $result
-}
-
-$txtLog = New-LogTextBox
-
-Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
-
-function Start-BatchRunAll {
-    $selectedClient = $cmbClient.SelectedItem
-    $clientDisplayName = $selectedClient
-
-    foreach ($chk in $script:batchStepCheckboxes) {
-        if ($chk.Tag.EnabledVarName) {
-            Set-Item -Path "env:$($chk.Tag.EnabledVarName)" -Value $(if ($chk.Checked) { "1" } else { "0" })
-        }
-    }
-
-    foreach ($varName in $script:lastClientVars) {
-        [Environment]::SetEnvironmentVariable($varName, $null)
-    }
-    $script:lastClientVars = @()
-
-    if ($selectedClient) {
-        $clientValues = Get-ClientProfileValues $selectedClient
-        $appliedVars = @()
-        foreach ($varName in $clientValues.Keys) {
-            if ($clientRuntimeExcludeVars -contains $varName) {
-                continue
-            }
-            [Environment]::SetEnvironmentVariable($varName, $clientValues[$varName])
-            $appliedVars += $varName
-        }
-        $script:lastClientVars = $appliedVars
-        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $selectedClient)
-    } else {
-        [Environment]::SetEnvironmentVariable("CLIENT_NAME", $null)
-    }
-
-    $script:isRunning = $true
-    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
-        -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels -StopOnFailure -HeaderSuffix "（$clientDisplayName）" `
-        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
-        -InvokeStep {
-            param($bd)
-            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $rootPath -Form $form `
-                -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
-                -GetBatArgs { param($bd) @() }
-        }
-
-    $script:isRunning = $false
-    $script:currentProc = $null
-}
-
-$script:batchRunButton.Add_Click({ Start-BatchRunAll })
-
-function Update-LogClientList {
-    Update-ClientComboItems -ComboBox $script:logTab.ExtraCombo
-}
-
-New-LogTab -TabPage $tabLogs -ButtonDefs $allLogButtonDefs `
-    -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
-    -ExtraLabelText "クライアント" -ExtraComboWidth 260 `
-    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
-    -OnAfterClear { Update-LogClientList } `
-    -OnUpdateLogView { Update-LogView } | Out-Null
-$cmbLogClient = $script:logTab.ExtraCombo
-
-function Update-LogView {
-    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
-    if (-not $selectedRadio) { return }
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-    $prefix = Get-ResolvedVar $selectedRadio.Tag.LogPrefixVarName
-
-    $script:logTab.ContentBox.Text = ""
-
-    if (!($logPath -and $prefix -and (Test-Path -LiteralPath $logPath))) {
-        return
-    }
-
-    $logClient = $cmbLogClient.SelectedItem
-    if ($logClient -and $logClient -ne "すべて") {
-        $filterPattern = "$prefix`_$logClient`_*.log"
-    } else {
-        $filterPattern = "$prefix`_*.log"
-    }
-
-    $files = Get-ChildItem -LiteralPath $logPath -Filter $filterPattern -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
-
-    $sections = foreach ($file in $files) {
-        try {
-            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
-        } catch {
-            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
-        }
-    }
-    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
-}
-
-foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-}
-$cmbLogClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-LogView } })
-
-
-$lblSettingsClient = New-Object System.Windows.Forms.Label
-$lblSettingsClient.Text = "クライアント"
-
-$cmbSettingsClient = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsClient.Size = New-Object System.Drawing.Size(260, 24)
-$cmbSettingsClient.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-
-$btnNewClient = New-Object System.Windows.Forms.Button
-$btnNewClient.Text = "新規作成..."
-$btnNewClient.Size = New-Object System.Drawing.Size(100, 24)
-
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
-$settingsGroups = [ordered]@{
-    "COMMON" = @{
-        Label = "共通"
-        Overridable = $false
-        Vars = [ordered]@{
-            "COMMON_LOG_PATH" = @{ Label = "ログの出力先"; Browse = "Folder" }
-        }
-    }
-    "DOWNLOAD" = @{
-        Label = "ダウンロード"
-        Vars = [ordered]@{
-            "DOWNLOAD_SITE_URL"       = @{ Label = "ダウンロード元のサイトURL" }
-            "DOWNLOAD_SITE_PATH"      = @{ Label = "ダウンロード元のフォルダ" }
-            "DOWNLOAD_SITE_TENANT_ID" = @{ Label = "テナントID" }
-            "DOWNLOAD_LOCAL_PATH"     = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
-            "DOWNLOAD_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞"; Overridable = $false }
-        }
-    }
-    "GENERATE" = @{
-        Label = "パッケージ作成"
-        Vars = [ordered]@{
-            "GENERATE_SOURCE_PATH"    = @{ Label = "圧縮元のフォルダ"; Browse = "Folder"  }
-            "GENERATE_CONFIG_PATH"    = @{ Label = "パッケージ定義ファイル"; Browse = "File" }
-            "GENERATE_CONFIG_LOG_PREFIX" = @{ Label = "ログファイル名の接頭辞（定義ファイル作成）"; Overridable = $false }
-            "GENERATE_WORK_PATH"      = @{ Label = "作業用のフォルダ"; Browse = "Folder"  }
-            "GENERATE_OUTPUT_PATH"    = @{ Label = "パッケージの出力先"; Browse = "Folder" }
-            "GENERATE_SHEETS_INCLUDE" = @{ Label = "対象のシート" }
-            "GENERATE_SHEETS_EXCLUDE" = @{ Label = "除外のシート" }
-            "GENERATE_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞（パッケージ作成）"; Overridable = $false }
-        }
-    }
-    "UPLOAD" = @{
-        Label = "アップロード"
-        Vars = [ordered]@{
-            "UPLOAD_SITE_URL"       = @{ Label = "アップロード先のサイトURL" }
-            "UPLOAD_SITE_PATH"      = @{ Label = "アップロード先のフォルダ" }
-            "UPLOAD_SITE_TENANT_ID" = @{ Label = "テナントID" }
-            "UPLOAD_LOCAL_PATH"     = @{ Label = "アップロード元のフォルダ"; Browse = "Folder" }
-            "UPLOAD_ITEMS_INCLUDE"  = @{ Label = "対象の項目形式" }
-            "UPLOAD_ITEMS_EXCLUDE"  = @{ Label = "除外の項目形式" }
-            "UPLOAD_LOG_PREFIX"     = @{ Label = "ログファイル名の接頭辞"; Overridable = $false }
-        }
-    }
-}
-
-$settingsGroupLabels = @{}
-$settingsVarLabels = @{}
-$settingsFolderBrowseVars = @()
-$settingsFileBrowseVars = @()
-$settingsMaskedVars = @()
-$settingsMultilineVars = @()
-$settingsRadioVars = @{}
-$enabledVars = @()
-$clientOverridableVars = @()
-$allKnownSettingsVars = @()
-foreach ($groupKey in $settingsGroups.Keys) {
-    $group = $settingsGroups[$groupKey]
-    $settingsGroupLabels[$groupKey] = $group.Label
-    $isOverridableGroup = if ($group.ContainsKey("Overridable")) { $group.Overridable } else { $true }
-    foreach ($varKey in $group.Vars.Keys) {
-        $varDef = $group.Vars[$varKey]
-        $settingsVarLabels[$varKey] = $varDef.Label
-        $allKnownSettingsVars += $varKey
-        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
-        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
-        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
-        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
-        if ($varDef.Radio) { $settingsRadioVars[$varKey] = $varDef.Radio }
-        if ($varDef.IsEnabledFlag) { $enabledVars += $varKey }
-        $isOverridableVar = if ($varDef.ContainsKey("Overridable")) { $varDef.Overridable } else { $isOverridableGroup }
-        if ($isOverridableVar) { $clientOverridableVars += $varKey }
-    }
-}
-$clientRuntimeExcludeVars = $enabledVars
-
-$script:settingsGroupFieldTextBoxes = @{}
-$script:settingsCommonFieldTextBoxes = @{}
-
-$script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
-
-function Get-NewClientInitialValues {
-    param([string]$ClientName, [hashtable]$Defaults)
-    $newConfigPath = "$($Defaults["COMMON_CONFIG_PATH"])\package_definition_$ClientName.xlsx"
-    return @{
-        "GENERATE_CONFIG_PATH" = $newConfigPath
-        "GENERATE_OUTPUT_PATH" = "$($Defaults["GENERATE_OUTPUT_PATH"])\$ClientName"
-        "UPLOAD_SITE_PATH" = "$($Defaults["UPLOAD_SITE_PATH"])\$ClientName"
-    }
-}
-
-function Get-SettingsFieldRows {
-    $client = $cmbSettingsClient.SelectedItem
-    if ($client -and $client -ne $defaultClientLabel) {
-        $clientRaw = Get-ClientProfileRawValues $client
-        $defaults = Get-SetEnvDefaults -Path $setEnvBat
-        $isPendingNewClient = !(Test-Path -LiteralPath (Get-ClientBatPath $client))
-        $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $client $defaults } else { @{} }
-
-        $varName = "COMMON_LOG_PATH"
-        $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { $defaults[$varName] }
-        [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
-
-        foreach ($varName in $clientOverridableVars) {
-            $varValue = if ($clientRaw.ContainsKey($varName)) { $clientRaw[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { $defaults[$varName] }
-            [PSCustomObject]@{ Group = $varName.Split("_")[0]; VarName = $varName; Value = $varValue; Key = $varName }
-        }
-    } else {
-        $rowsByVarName = @{}
-        $fileVarNames = @()
-        foreach ($line in (Read-SetEnvLines -Path $setEnvBat)) {
-            $m = $script:setEnvLineRegex.Match($line.Trim())
-            if ($m.Success) {
-                $varName = $m.Groups["var"].Value
-                $rowsByVarName[$varName] = [PSCustomObject]@{ Group = $varName.Split("_")[0]; VarName = $varName; Value = $m.Groups["val"].Value; Key = $varName }
-                $fileVarNames += $varName
-            }
-        }
-        $orderedVarNames = @($allKnownSettingsVars | Where-Object { $rowsByVarName.ContainsKey($_) })
-        $orderedVarNames += @($fileVarNames | Where-Object { $allKnownSettingsVars -notcontains $_ })
-        foreach ($varName in $orderedVarNames) {
-            $rowsByVarName[$varName]
-        }
-    }
-}
-
-function Update-SettingsFields {
-    $resolverValue = $script:commonEnvResolver
-    $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -eq "COMMON" }) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars @{} `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
-        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
-
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
-        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
-}
-
-function Get-FieldValue {
-    param([string]$VarName)
-    if ($script:settingsGroupFieldTextBoxes.ContainsKey($VarName)) {
-        return $script:settingsGroupFieldTextBoxes[$VarName].Text
-    }
-    return ""
-}
-
-
-function Save-DefaultSettings {
-    Save-EnvBatFile -Path $setEnvBat -VarNames @("COMMON_LOG_PATH") `
-        -GetValueFn { param($name) if ($script:settingsCommonFieldTextBoxes.ContainsKey($name)) { $script:settingsCommonFieldTextBoxes[$name].Text } else { "" } } `
-        -HasValueFn { param($name) $script:settingsCommonFieldTextBoxes.ContainsKey($name) }
-}
-
 function Get-CommonSettingsFiles {
-    $commonVars = @("COMMON_LOG_PATH")
-    $textBoxes = $script:settingsCommonFieldTextBoxes
-    return @([PSCustomObject]@{
-        Path = $setEnvBat
-        Save = {
-            Save-EnvBatFile -Path $setEnvBat -VarNames $commonVars `
-                -GetValueFn { param($name) if ($textBoxes.ContainsKey($name)) { $textBoxes[$name].Text } else { "" } } `
-                -HasValueFn { param($name) $textBoxes.ContainsKey($name) }
-        }.GetNewClosure()
-        Reload = {}
-    })
-}
-
-function Get-GroupSettingsFiles {
-    $client = $cmbSettingsClient.SelectedItem
-    if ($client -and $client -ne $defaultClientLabel) {
-        $clientBat = Get-ClientBatPath $client
-        $vars = $clientOverridableVars
-        $textBoxes = $script:settingsGroupFieldTextBoxes
-        $isNewClient = !(Test-Path -LiteralPath $clientBat)
-        return @([PSCustomObject]@{
-            Path = $clientBat
-            Save = {
-                Save-EnvBatFile -Path $clientBat -VarNames $vars `
-                    -GetValueFn { param($name) Get-FieldValue $name } `
-                    -HasValueFn { param($name) $textBoxes.ContainsKey($name) }
-
-                if ($isNewClient) {
-                    $newConfigRaw = Get-FieldValue "GENERATE_CONFIG_PATH"
-                    $newConfigPath = Expand-VarTokens -Value $newConfigRaw -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-                    $defaults = Get-SetEnvDefaults -Path $setEnvBat
-                    $templateConfigPath = Expand-VarTokens -Value $defaults["GENERATE_CONFIG_PATH"] -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-                    if ((Test-Path -LiteralPath $templateConfigPath) -and $newConfigPath -and !(Test-Path -LiteralPath $newConfigPath)) {
-                        $newDir = Split-Path $newConfigPath -Parent
-                        if (-not (Test-Path -LiteralPath $newDir)) {
-                            New-Item -ItemType Directory -Path $newDir -Force | Out-Null
-                        }
-                        Copy-Item -LiteralPath $templateConfigPath -Destination $newConfigPath
-                    }
-                }
-            }.GetNewClosure()
-            Reload = {}
-        })
-    } else {
-        return @([PSCustomObject]@{ Path = $setEnvBat; Save = { Save-DefaultSettings }; Reload = {} })
-    }
-}
-
-function Invoke-GenerateConfigForClient {
-    param([string]$ClientName)
-
-    $clientRaw = Get-ClientProfileRawValues $ClientName
-    $defaults = Get-SetEnvDefaults -Path $setEnvBat
-    $rawSourcePath = if ($clientRaw.ContainsKey("GENERATE_SOURCE_PATH")) { $clientRaw["GENERATE_SOURCE_PATH"] } else { $defaults["GENERATE_SOURCE_PATH"] }
-    $sourcePath = Expand-VarTokens -Value $rawSourcePath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-
-    if ([string]::IsNullOrWhiteSpace($sourcePath) -or !(Test-Path -LiteralPath $sourcePath)) {
-        [System.Windows.Forms.MessageBox]::Show(
-            "圧縮元のフォルダが未設定か、存在しません。`r`n先に「圧縮元のフォルダ」を設定して保存してください。",
-            "パッケージ定義ファイルの作成",
-            [System.Windows.Forms.MessageBoxButtons]::OK,
-            [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    $rawDestPath = if ($clientRaw.ContainsKey("GENERATE_CONFIG_PATH")) { $clientRaw["GENERATE_CONFIG_PATH"] } else { $defaults["GENERATE_CONFIG_PATH"] }
-    $destPath = Expand-VarTokens -Value $rawDestPath -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
-    $batArgs = @("client:$ClientName")
-
-    if (Test-Path -LiteralPath $destPath) {
-        $confirm = [System.Windows.Forms.MessageBox]::Show(
-            "既に存在します。上書きしますか？`r`n$destPath",
-            "パッケージ定義ファイルの作成",
-            [System.Windows.Forms.MessageBoxButtons]::YesNo,
-            [System.Windows.Forms.MessageBoxIcon]::Warning)
-        if ($confirm -ne [System.Windows.Forms.DialogResult]::Yes) { return }
-        $batArgs += "force:1"
-    }
-
-    $exitCode = Invoke-BatProcess -BatPath (Join-Path $rootPath "generate-config.bat") -WorkingDirectory $rootPath -BatArgs $batArgs `
-        -OnOutputLine {}
-
-    if ($exitCode -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("作成しました：$destPath", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-    } else {
-        [System.Windows.Forms.MessageBox]::Show("作成に失敗しました。", "パッケージ定義ファイルの作成に失敗しました", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-    }
-}
-
-$settingsTrailingButtonVars = @{
-    "GENERATE_CONFIG_PATH" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テンプレートの更新" -Width 120 -OnClick {
-        $client = $cmbSettingsClient.SelectedItem
-        if (!$client -or $client -eq $defaultClientLabel) {
-            [System.Windows.Forms.MessageBox]::Show("クライアントを選択してください。", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        $newClientConfigPath = Expand-VarTokens -Value (Get-FieldValue "GENERATE_CONFIG_PATH") -Resolver $script:commonEnvResolver -BasePath $rootPath
-        if (-not (Test-Path -LiteralPath $newClientConfigPath)){
-            [System.Windows.Forms.MessageBox]::Show("ファイルが存在しません:$newClientConfigPath", "パッケージ定義ファイルの作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        Update-RunCheckboxesFromClient
-        Invoke-GenerateConfigForClient -ClientName $client
-    } }
+    return @(
+        [PSCustomObject]@{ Path = (Join-Path $basePath "common-env.bat"); Save = { Save-CommonSettings }; Reload = {} }
+    )
 }
 
 $settingsCommonTopPanel = (New-SettingsTopPanel `
-    -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-SettingsFields } `
-    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-SettingsFields }).Panel
+    -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
+    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
 
 $settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -642,13 +369,41 @@ $settingsCommonFieldPanel.AutoScroll = $true
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
+$lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
+$lblSettingsGroupTarget.Text = "対象グループ"
+
+$cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
+$cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
+$cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
+$btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
+$btnSettingsGroupNewGroup.Text = "新規作成"
+$btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
+
+$lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
+$lnkSettingsGroupOpenXlsx.Text = "開く"
+
+function Get-GroupSettingsFiles {
+    param([string]$GroupName)
+    return @(
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+    )
+}
+
 $settingsGroupTopPanel = (New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsClient, $cmbSettingsClient, $btnNewClient) `
+    -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
     -OnSave {
-        foreach ($f in (Get-GroupSettingsFiles)) { & $f.Save }
-        Update-RunCheckboxesFromClient
+        $target = $cmbSettingsGroupTarget.SelectedItem
+        if (!$target) { return }
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
+        Update-SettingsGroupList
+        Update-GroupSettingsFields
     } `
-    -OnReload { foreach ($f in (Get-GroupSettingsFiles)) { & $f.Reload }; Update-SettingsFields }).Panel
+    -OnReload {
+        $target = $cmbSettingsGroupTarget.SelectedItem
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
+        Update-GroupSettingsFields
+    }).Panel
 
 $settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
 $settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -657,115 +412,181 @@ $settingsGroupFieldPanel.AutoScroll = $true
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
-function Update-SettingsClientList {
-    Update-ClientComboItems -ComboBox $cmbSettingsClient
+function Get-GroupNames {
+    if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
+    $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
+    }
+    return @($names | Select-Object -Unique | Sort-Object)
 }
-Update-SettingsClientList
-Update-SettingsFields
 
-$cmbSettingsClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-SettingsFields } })
+function Get-CommonSettingsFieldRows {
+    $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
+    foreach ($varName in $commonSettingsVars) {
+        [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
+    }
+}
 
-$btnNewClient.Add_Click({
+function Get-GroupSettingsFieldRows {
+    param([string]$GroupName)
+    if (!$GroupName) { return }
+
+    $rawClient = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $isPendingNewClient = !(Test-Path -LiteralPath (Get-GroupBatPath $GroupName))
+    $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $GroupName } else { @{} }
+
+    foreach ($groupKey in @("DOWNLOAD", "GENERATE", "UPLOAD")) {
+        $vars = if ($groupKey -eq "DOWNLOAD") { $downloadVars } elseif ($groupKey -eq "GENERATE") { $generateVars } else { $uploadVars }
+        foreach ($varName in $vars) {
+            $value = if ($rawClient.ContainsKey($varName)) { $rawClient[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { "" }
+            [PSCustomObject]@{ Key = "$($groupKey)_$varName"; VarName = $varName; Group = $groupKey; Value = $value }
+        }
+    }
+}
+
+
+function Update-CommonSettingsFields {
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
+}
+
+function Update-GroupSettingsFields {
+    $scrollX = -$settingsGroupFieldPanel.AutoScrollPosition.X
+    $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
+
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    $trailingButtons = $settingsTrailingButtonVars.Clone()
+    $resolverValue = $script:commonEnvResolver
+    $rootPathValue = $rootPath
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
+        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
+        -TrailingButtonVars $trailingButtons | Out-Null
+
+    $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+}
+
+function Save-CommonSettings {
+    $path = Join-Path $basePath "common-env.bat"
+
+    Save-EnvBatFile -Path $path -VarNames $commonSettingsVars `
+        -GetValueFn { param($varName)
+            Get-CommonSettingsFieldValue $varName
+        } `
+        -HasValueFn { param($varName)
+            $true
+        }
+}
+
+function Save-GroupSettings {
+    param([string]$GroupName)
+
+    $groupBatPath = Get-GroupBatPath $GroupName
+
+    $script:saveGroupDownloadVarMap = @{}
+    foreach ($varName in $downloadVars) {
+        $script:saveGroupDownloadVarMap[$varName] = "DOWNLOAD_$varName"
+    }
+
+    $script:saveGroupGenerateVarMap = @{}
+    foreach ($varName in $generateVars) {
+        $script:saveGroupGenerateVarMap[$varName] = "GENERATE_$varName"
+    }
+
+    $script:saveGroupUploadVarMap = @{}
+    foreach ($varName in $uploadVars) {
+        $script:saveGroupUploadVarMap[$varName] = "UPLOAD_$varName"
+    }
+
+    $allVars = @() + @($script:saveGroupDownloadVarMap.Keys) + @($script:saveGroupGenerateVarMap.Keys) + @($script:saveGroupUploadVarMap.Keys)
+
+    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
+        -GetValueFn { param($varName)
+            if ($script:saveGroupDownloadVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupDownloadVarMap[$varName]
+            } elseif ($script:saveGroupGenerateVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupGenerateVarMap[$varName]
+            } elseif ($script:saveGroupUploadVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $script:saveGroupUploadVarMap[$varName]
+            } else {
+                ""
+            }
+        } `
+        -HasValueFn { param($varName)
+            $true
+        }
+
+    $xlsxPath = Get-GroupXlsxPath $GroupName
+    if (!(Test-Path -LiteralPath $xlsxPath)) {
+        $templateXlsxPath = Join-Path $clientsTemplateDir "client.xlsx"
+        if (Test-Path -LiteralPath $templateXlsxPath) {
+            Copy-Item -LiteralPath $templateXlsxPath -Destination $xlsxPath
+        }
+    }
+}
+
+$btnSettingsGroupNewGroup.Add_Click({
     Add-Type -AssemblyName Microsoft.VisualBasic
-    $newName = [Microsoft.VisualBasic.Interaction]::InputBox("クライアント名を入力してください", "クライアントの新規作成", "")
+    $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
     $newName = $newName.Trim()
-    if (!$newName) {
+    if (!$newName) { return }
+
+    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+        [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
 
-    $newClientBat = Get-ClientBatPath $newName
-    if ((Test-Path -LiteralPath $newClientBat) -or $cmbSettingsClient.Items.Contains($newName)) {
-        [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "クライアントの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
+    $cmbSettingsGroupTarget.Items.Add($newName) | Out-Null
+    $cmbSettingsGroupTarget.SelectedItem = $newName
 
-    $cmbSettingsClient.Items.Add($newName) | Out-Null
-    $cmbSettingsClient.SelectedItem = $newName
+    $clientOptions += [PSCustomObject]@{ Text = $newName; Value = $newName }
+
+    foreach ($control in $script:batchInputControls.Values) {
+        if ($control -is [System.Windows.Forms.ComboBox]) {
+            $control.Items.Clear()
+            foreach ($opt in $clientOptions) {
+                $control.Items.Add($opt) | Out-Null
+            }
+            if ($control.Items.Count -gt 0) {
+                $control.SelectedIndex = 0
+            }
+        }
+    }
 })
 
-
-function Get-ValueForClient {
-    param([string]$ClientName, [string]$VarName)
-    if ($ClientName) {
-        $clientValues = Get-ClientProfileValues $ClientName
-        if ($clientValues.ContainsKey($VarName)) {
-            return $clientValues[$VarName]
-        }
+$lnkSettingsGroupOpenXlsx.Add_LinkClicked({
+    $target = $cmbSettingsGroupTarget.SelectedItem
+    if (!$target) {
+        [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
     }
-    return Get-ResolvedVar $VarName
-}
+    Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
+})
 
-function Get-ClientAwareEnabledValue {
-    param([string]$VarName)
-    return Get-ValueForClient -ClientName $cmbClient.SelectedItem -VarName $VarName
-}
-
-function Update-RunCheckboxesFromClient {
-    foreach ($chk in $script:batchStepCheckboxes) {
-        $chk.Checked = (Get-ClientAwareEnabledValue $chk.Tag.EnabledVarName) -eq "1"
-    }
-}
-
-$cmbClient.Add_SelectedIndexChanged({ if (!$script:suppressComboSync) { Update-RunCheckboxesFromClient } })
-
-
-function Get-ClientArgValue {
-    param([System.Windows.Forms.ComboBox]$ComboBox)
-    $value = $ComboBox.Text.Trim()
-    if ($value) { return $value }
-    return ""
-}
-
-function Set-RunButtonsEnabled {
-    param([bool]$Enabled)
-    foreach ($chk in $script:batchStepCheckboxes) { $chk.Enabled = $Enabled }
-    $script:batchRunButton.Enabled = $Enabled
-    $cmbClient.Enabled = $Enabled
-    $cmbDownloadClient.Enabled = $Enabled
-    $cmbGenerateClient.Enabled = $Enabled
-    $cmbUploadClient.Enabled = $Enabled
-    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
-}
-
-function Invoke-IndividualStep {
-    param($ButtonDef)
-
-    $script:isRunning = $true
-    Invoke-BatButton -ButtonDef $ButtonDef -WorkingDirectory $rootPath -Form $form `
-        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
-        -CurrentProcessRef ([ref]$script:currentProc) `
-        -GetBatArgs {
-            param($bd)
-            $clientArg = Get-ClientArgValue -ComboBox $bd.InputControls['Client']
-            if ($clientArg) { @("client=$clientArg") } else { @() }
-        }
-    $script:isRunning = $false
-}
-
-New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick { param($bd) Invoke-IndividualStep -ButtonDef $bd } | Out-Null
-
-$execTabControl.Controls.Remove($tabBatchAll)
-
-$execTabControl.Height = 45 + $script:batchPanel.Height
+$cmbSettingsGroupTarget.Add_SelectedIndexChanged({
+    if (!$script:suppressComboSync) { Update-GroupSettingsFields }
+})
 
 $tabControl.Add_SelectedIndexChanged({
-    if ($tabControl.SelectedTab -eq $tabRun) {
-        Update-ClientList
+    if ($tabControl.SelectedTab -eq $tabSettings) {
+        Update-SettingsGroupList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-LogClientList
         Update-LogView
-    } elseif ($tabControl.SelectedTab -eq $tabSettings) {
-        Update-SettingsClientList
     }
 })
 
-Update-ClientList
-Update-RunCheckboxesFromClient
-Update-LogClientList
-Update-LogView
-$execTabControl.SelectedTab = $execTabControl.TabPages[0]
+Update-SettingsGroupList
+Update-CommonSettingsFields
+Update-GroupSettingsFields
+
+$execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
-$form.Add_Shown({ Update-SettingsFields })
+$form.Add_Shown({
+    Update-CommonSettingsFields
+    Update-GroupSettingsFields
+})
 
 [System.Windows.Forms.Application]::Run($form)

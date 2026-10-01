@@ -1,21 +1,28 @@
 @echo off
+setlocal enabledelayedexpansion
 
 set "BATCH_NAME=%~nx0"
-:parse_args
-if "%~1"=="" goto args_done
-set "arg=%~1"
-if /i "%arg:~0,7%"=="client=" set "CLIENT_NAME=%arg:~7%"
-shift
-goto parse_args
-:args_done
-call "%~dp0clients\template\set-env.bat"
-if defined CLIENT_NAME if exist "%~dp0clients\set-env-%CLIENT_NAME%.bat" call "%~dp0clients\set-env-%CLIENT_NAME%.bat"
+
+call "%~dp0bats\common-env.bat"
+
+for %%A in (%*) do (
+    set "arg=%%~A"
+    if "!arg:~0,1!"=="-" (
+        set "arg=!arg:~1!"
+        for /f "tokens=1* delims=:" %%K in ("!arg!") do (
+            call set "%%K=%%L"
+        )
+    )
+)
+call "%~dp0clients\!ClientName!.bat"
 
 call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
+set "LogPrefix=%~n0"
+
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0bats\download-folder.ps1" -SiteUrl "%DOWNLOAD_SITE_URL%" -SitePath "%DOWNLOAD_SITE_PATH%" -TenantId "%DOWNLOAD_SITE_TENANT_ID%" -LocalPath "%DOWNLOAD_LOCAL_PATH%" -LogPath "%COMMON_LOG_PATH%" -LogPrefix "%DOWNLOAD_LOG_PREFIX%" -ClientName "%CLIENT_NAME%"
+ -File "%~dp0bats\download-folder.ps1" -SiteUrl "!DownloadSiteUrl!" -SitePath "!DownloadSitePath!" -TenantId "!DownloadSiteTenantId!" -LocalPath "!DownloadLocalPath!" -LogPath "%CommonLogPath%" -LogPrefix "!LogPrefix!" -ClientName "!ClientName!"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"
