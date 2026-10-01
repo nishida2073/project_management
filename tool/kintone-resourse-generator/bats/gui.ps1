@@ -459,22 +459,22 @@ function Invoke-AllStepsForCurrentInputs {
     $lastExitCode = 0
     foreach ($cd in $categoryDefs) {
         $bd = $cd.ButtonDefs[0]
-        $preConditionsMet = $true
+        $canProceed = $true
 
         $ic = $script:stepInputControls[$bd.Id]
         if (-not $ic) {
-            $preConditionsMet = $false
+            $canProceed = $false
         } elseif ($bd.Id -eq 0) {
             if (-not $ic['ConfigName'].Text.Trim() -or -not $ic['SpaceTemplateId'].Text.Trim()) {
-                $preConditionsMet = $false
+                $canProceed = $false
             }
         } else {
             if (-not $ic['ConfigName'].Text.Trim()) {
-                $preConditionsMet = $false
+                $canProceed = $false
             }
         }
 
-        if (-not $preConditionsMet) { return 1 }
+        if (-not $canProceed) { return 1 }
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
             -GetBatArgs { param($bd2) & $bd.ArgsFn $ic } `
