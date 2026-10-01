@@ -512,15 +512,15 @@ function Invoke-SeededAllSteps {
             [System.Windows.Forms.MessageBox]::Show("スペース識別名を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
             return 1
         }
-        if ($sm.Id -eq 0 -and !$ic['SpaceTemplateId'].Text.Trim()) {
+        if ($bd.Id -eq 0 -and !$ic['SpaceTemplateId'].Text.Trim()) {
             [System.Windows.Forms.MessageBox]::Show("スペーステンプレートIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
             return 1
         }
-        if ($sm.Id -eq 1 -and !$ic['SpaceId'].Text.Trim()) {
+        if ($bd.Id -eq 1 -and !$ic['SpaceId'].Text.Trim()) {
             [System.Windows.Forms.MessageBox]::Show("スペースIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
             return 1
         }
-        if ($sm.Id -eq 2 -and (!$ic['BaseTemplateName'].Text.Trim() -or $ic['BaseTemplateName'].Text.Trim() -eq $script:baseTemplateNamePlaceholder)) {
+        if ($bd.Id -eq 2 -and (!$ic['BaseTemplateName'].Text.Trim() -or $ic['BaseTemplateName'].Text.Trim() -eq $script:baseTemplateNamePlaceholder)) {
             [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
             return 1
         }
@@ -529,9 +529,10 @@ function Invoke-SeededAllSteps {
     $lastExitCode = 0
     foreach ($cd in $categoryDefs) {
         $bd = $cd.ButtonDefs[0]
+        $ic = $script:stepInputControls[$bd.Id]
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $script:stepInputControls[$bd.Id] } `
+            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic } `
             -WorkingDirectory $rootPath -Form $form `
             -WriteLog { param($msg) Write-Log $msg } `
             -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
@@ -539,7 +540,7 @@ function Invoke-SeededAllSteps {
             -DisplayLabel $bd.Label -StatusLabel $script:stepStatusLabels[$bd.Id]
 
         if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
-            & $bd.OnSuccessFn $script:stepInputControls[$bd.Id] $lastOutputLines
+            & $bd.OnSuccessFn $ic $lastOutputLines
         }
 
         if ($exitCode -eq 2) {
