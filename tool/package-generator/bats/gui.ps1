@@ -60,14 +60,44 @@ function Get-NewClientInitialValues {
             $value = "%BASE_PATH%clients\$ClientName.xlsx"
         } elseif ($key -eq "GenerateOutputPath") {
             $value = "%BASE_PATH%generated\$ClientName"
-        } elseif ($key -eq "UploadSitePath") {
-            $value = $value -replace [regex]::Escape("サンプル"), $ClientName
-        } else {
-            $value = $value -replace [regex]::Escape("サンプル"), $ClientName
         }
         $result[$key] = $value
     }
     return $result
+}
+
+function Sync-ComboBoxesToFileSystemOrder {
+    $fileSystemNames = @(Get-ClientNames)
+    $script:clientOptions = @()
+    foreach ($name in $fileSystemNames) {
+        $script:clientOptions += [PSCustomObject]@{ Text = $name; Value = $name }
+    }
+
+    $allComboBoxes = @()
+    $allComboBoxes += $script:batchInputControls.Values | Where-Object { $_ -is [System.Windows.Forms.ComboBox] }
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls) {
+                $allComboBoxes += $bd.InputControls.Values | Where-Object { $_ -is [System.Windows.Forms.ComboBox] }
+            }
+        }
+    }
+    if ($cmbLogGroup) {
+        $allComboBoxes += $cmbLogGroup
+    }
+
+    foreach ($cmb in $allComboBoxes) {
+        $selectedValue = $cmb.SelectedItem
+        $cmb.Items.Clear()
+        foreach ($opt in $script:clientOptions) {
+            $cmb.Items.Add($opt) | Out-Null
+        }
+        if ($selectedValue -and $cmb.Items.Contains($selectedValue)) {
+            $cmb.SelectedItem = $selectedValue
+        } elseif ($cmb.Items.Count -gt 0) {
+            $cmb.SelectedIndex = 0
+        }
+    }
 }
 
 $categoryDefs = @(
@@ -476,6 +506,8 @@ function Save-GroupSettings {
             Copy-Item -LiteralPath $templateXlsxPath -Destination $xlsxPath
         }
     }
+
+    Sync-ComboBoxesToFileSystemOrder
 }
 
 $btnSettingsGroupNewGroup.Add_Click({
@@ -491,20 +523,6 @@ $btnSettingsGroupNewGroup.Add_Click({
 
     $cmbSettingsGroupTarget.Items.Add($newName) | Out-Null
     $cmbSettingsGroupTarget.SelectedItem = $newName
-
-    $clientOptions += [PSCustomObject]@{ Text = $newName; Value = $newName }
-
-    foreach ($control in $script:batchInputControls.Values) {
-        if ($control -is [System.Windows.Forms.ComboBox]) {
-            $control.Items.Clear()
-            foreach ($opt in $clientOptions) {
-                $control.Items.Add($opt) | Out-Null
-            }
-            if ($control.Items.Count -gt 0) {
-                $control.SelectedIndex = 0
-            }
-        }
-    }
 })
 
 $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
