@@ -143,6 +143,18 @@ $tabSettings.Text = "設定"
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
+$settingsSubTabControl = New-Object System.Windows.Forms.TabControl
+$settingsSubTabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+$tabSettings.Controls.Add($settingsSubTabControl)
+
+$tabSettingsCommon = New-Object System.Windows.Forms.TabPage
+$tabSettingsCommon.Text = "共通"
+$settingsSubTabControl.Controls.Add($tabSettingsCommon)
+
+$tabSettingsGroup = New-Object System.Windows.Forms.TabPage
+$tabSettingsGroup.Text = "グループ別"
+$settingsSubTabControl.Controls.Add($tabSettingsGroup)
+
 $script:isRunning = $false
 $script:lastClientVars = @()
 $tabControl.Add_Selecting({
@@ -433,7 +445,8 @@ foreach ($groupKey in $settingsGroups.Keys) {
 }
 $clientRuntimeExcludeVars = $enabledVars
 
-$script:fieldTextBoxes = @{}
+$script:settingsGroupFieldTextBoxes = @{}
+$script:settingsCommonFieldTextBoxes = @{}
 
 $script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
 
@@ -485,7 +498,12 @@ function Get-SettingsFieldRows {
 function Update-SettingsFields {
     $resolverValue = $script:commonEnvResolver
     $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -notin @("COMMON", "DOWNLOAD", "UPLOAD") }) -TargetTextBoxes $script:fieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -eq "COMMON" }) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars @{} `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
+        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
+
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-SettingsFieldRows | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $settingsRadioVars -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
@@ -493,25 +511,39 @@ function Update-SettingsFields {
 
 function Get-FieldValue {
     param([string]$VarName)
-    if ($script:fieldTextBoxes.ContainsKey($VarName)) {
-        return $script:fieldTextBoxes[$VarName].Text
+    if ($script:settingsGroupFieldTextBoxes.ContainsKey($VarName)) {
+        return $script:settingsGroupFieldTextBoxes[$VarName].Text
     }
     return ""
 }
 
 
 function Save-DefaultSettings {
-    Save-EnvBatFile -Path $setEnvBat `
-        -GetValueFn { param($name) Get-FieldValue $name } `
-        -HasValueFn { param($name) $script:fieldTextBoxes.ContainsKey($name) }
+    Save-EnvBatFile -Path $setEnvBat -VarNames @("COMMON_LOG_PATH") `
+        -GetValueFn { param($name) if ($script:settingsCommonFieldTextBoxes.ContainsKey($name)) { $script:settingsCommonFieldTextBoxes[$name].Text } else { "" } } `
+        -HasValueFn { param($name) $script:settingsCommonFieldTextBoxes.ContainsKey($name) }
 }
 
-function Get-SettingsFiles {
+function Get-CommonSettingsFiles {
+    $commonVars = @("COMMON_LOG_PATH")
+    $textBoxes = $script:settingsCommonFieldTextBoxes
+    return @([PSCustomObject]@{
+        Path = $setEnvBat
+        Save = {
+            Save-EnvBatFile -Path $setEnvBat -VarNames $commonVars `
+                -GetValueFn { param($name) if ($textBoxes.ContainsKey($name)) { $textBoxes[$name].Text } else { "" } } `
+                -HasValueFn { param($name) $textBoxes.ContainsKey($name) }
+        }.GetNewClosure()
+        Reload = {}
+    })
+}
+
+function Get-GroupSettingsFiles {
     $client = $cmbSettingsClient.SelectedItem
     if ($client -and $client -ne $defaultClientLabel) {
         $clientBat = Get-ClientBatPath $client
         $vars = $clientOverridableVars
-        $textBoxes = $script:fieldTextBoxes
+        $textBoxes = $script:settingsGroupFieldTextBoxes
         $isNewClient = !(Test-Path -LiteralPath $clientBat)
         return @([PSCustomObject]@{
             Path = $clientBat
@@ -599,21 +631,31 @@ $settingsTrailingButtonVars = @{
     } }
 }
 
-$settingsTopPanel = New-SettingsTopPanel `
+$settingsCommonTopPanel = (New-SettingsTopPanel `
+    -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-SettingsFields } `
+    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-SettingsFields }).Panel
+
+$settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
+$settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsCommonFieldPanel.AutoScroll = $true
+
+$tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
+$tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
+
+$settingsGroupTopPanel = (New-SettingsTopPanel `
     -ExtraControls @($lblSettingsClient, $cmbSettingsClient, $btnNewClient) `
     -OnSave {
-        foreach ($f in (Get-SettingsFiles)) { & $f.Save }
+        foreach ($f in (Get-GroupSettingsFiles)) { & $f.Save }
         Update-RunCheckboxesFromClient
     } `
-    -OnReload { foreach ($f in (Get-SettingsFiles)) { & $f.Reload }; Update-SettingsFields }
-$topPanel = $settingsTopPanel.Panel
+    -OnReload { foreach ($f in (Get-GroupSettingsFiles)) { & $f.Reload }; Update-SettingsFields }).Panel
 
-$fieldPanel = New-Object System.Windows.Forms.Panel
-$fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$fieldPanel.AutoScroll = $true
+$settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
+$settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsGroupFieldPanel.AutoScroll = $true
 
-$tabSettings.Controls.Add($fieldPanel)
-$tabSettings.Controls.Add($topPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 function Update-SettingsClientList {
     Update-ClientComboItems -ComboBox $cmbSettingsClient
