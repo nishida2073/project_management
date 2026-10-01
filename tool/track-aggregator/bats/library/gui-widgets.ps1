@@ -704,7 +704,8 @@ function New-BatchRunTab {
         [string]$RunButtonText = "一括実行",
         [scriptblock]$ShowOpenLink = { param($bd) [bool]$bd.OpenTarget },
         [scriptblock]$OnOpenClick = {},
-        [string]$InitialStatusText = "未実行"
+        [string]$InitialStatusText = "未実行",
+        [bool]$ShowSteps = $true
     )
 
     $batchPanel = New-Panel
@@ -753,23 +754,29 @@ function New-BatchRunTab {
     $checkBoxes = @()
     $statusLabels = @()
     $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 20 } else { 20 }
+
     foreach ($bd in $ButtonDefs) {
         $isChecked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
         $chk = New-CheckBox -Text (Get-BatchDisplayLabel -ButtonDef $bd) -X 20 -Y $y -Width 360 -Height 22 -Checked $isChecked -AutoEllipsis $true
         $chk.Tag = $bd
+        $chk.Visible = $ShowSteps
         $checkBoxes += $chk
         $topControls += $chk
 
         if (& $ShowOpenLink $bd) {
             $lnkOpen = New-OpenLink -X 390 -Y $y -Width 40 -Height $chk.Height -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
+            $lnkOpen.Visible = $ShowSteps
             $topControls += $lnkOpen
         }
 
         $lblStepStatus = New-Label -X 440 -Y $y -Width 150 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
+        $lblStepStatus.Visible = $ShowSteps
         $statusLabels += $lblStepStatus
         $topControls += $lblStepStatus
 
-        $y += 26
+        if ($ShowSteps) {
+            $y += 26
+        }
     }
 
     $btnRunAll = New-Button -Text $RunButtonText -X 20 -Y ($y + 10) -Width 120 -Height 28

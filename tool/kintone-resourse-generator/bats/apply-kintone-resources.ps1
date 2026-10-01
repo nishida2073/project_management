@@ -3,6 +3,7 @@
 # =========================================
 
 param(
+    [string]$LogNamePrefix,
     [string]$ConfigName,
     [string]$BaseUrl,
     [string]$ConfigRoot,
@@ -22,7 +23,7 @@ if (-not $ConfigName) {
 }
 
 $configPath = Join-Path $ConfigRoot "${ConfigName}_config.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "apply_$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'apply' })_$ConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

@@ -3,6 +3,7 @@
 # =========================================
 
 param(
+    [string]$LogNamePrefix,
     [string]$ConfigName,
     [string]$BaseUrl,
     [string]$ConfigRoot,
@@ -19,7 +20,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $configPath = Join-Path $ConfigRoot "${ConfigName}_config.xlsx"
 $outputPath = Join-Path $OutputRoot "${ConfigName}_check.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "check_$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'check' })_$ConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

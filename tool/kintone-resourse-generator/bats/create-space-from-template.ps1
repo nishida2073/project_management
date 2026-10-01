@@ -3,6 +3,7 @@
 # =========================================
 
 param(
+    [string]$LogNamePrefix,
     [string]$TemplateId,
     [string]$SpaceName,
     [string]$BaseUrl,
@@ -21,7 +22,7 @@ if (-not $SpaceName) {
     exit 1
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "createspace_$SpaceName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'createspace' })_$SpaceName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

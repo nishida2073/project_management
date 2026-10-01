@@ -3,6 +3,7 @@
 # =========================================
 
 param(
+    [string]$LogNamePrefix,
     [string]$SpaceId,
     [string]$ConfigName,
     [string]$BaseUrl,
@@ -27,7 +28,7 @@ if (-not $SpaceId) {
     exit 1
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "download_$ConfigName-$SpaceId"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'download' })_$ConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters
