@@ -315,6 +315,8 @@ $btnMultipleBatchBrowse.Text = "参照..."
 $btnMultipleBatchBrowse.Location = New-Object System.Drawing.Point(400, 13)
 $btnMultipleBatchBrowse.Size = New-Object System.Drawing.Size(70, 24)
 
+$lnkMultipleBatchOpenExcel = New-OpenLink -Text "開く" -X 480 -Y 16 -Width 40 -Height 18 -Pattern 'internal' -Tag $txtMultipleBatchExcelPath
+
 $btnMultipleBatchRunAll = New-Object System.Windows.Forms.Button
 $btnMultipleBatchRunAll.Text = "実行"
 $btnMultipleBatchRunAll.Location = New-Object System.Drawing.Point(20, 50)
@@ -326,7 +328,7 @@ $lblMultipleBatchStatus.AutoSize = $true
 $lblMultipleBatchStatus.Location = New-Object System.Drawing.Point(130, 56)
 
 $multipleBatchExcelPanel.Controls.AddRange(@(
-    $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
+    $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $lnkMultipleBatchOpenExcel, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
 ))
 
 $dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
