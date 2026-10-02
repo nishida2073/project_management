@@ -246,8 +246,8 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
                     $ctrl = $ic[$inputDef.Name]
                     $value = if ($ctrl -is [System.Windows.Forms.TextBox]) { $ctrl.Text.Trim() } else { $ctrl.SelectedItem }
                     if (!$value -or ($value -eq $script:customTemplateNamePlaceholder) -or ($value -eq $script:baseTemplateNamePlaceholder)) {
-                        [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-                        return
+                        [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+                        return 1
                     }
                 }
             }
@@ -290,56 +290,56 @@ $runTopPanel.Height = $execTabControl.Top + $execTabControl.Height
 
 function Update-InnerRunTabHeight {
     if ($innerRunTabControl.SelectedTab -eq $tabBatchRun) {
-        $innerRunTabControl.Height = $batchExcelPanel.Height + 30
+        $innerRunTabControl.Height = $multipleBatchExcelPanel.Height + 30
     } else {
         $innerRunTabControl.Height = $runTopPanel.Height + 30
     }
     $tabRun.PerformLayout()
 }
 
-$batchExcelPanel = New-Object System.Windows.Forms.Panel
-$batchExcelPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$batchExcelPanel.Height = 90
+$multipleBatchExcelPanel = New-Object System.Windows.Forms.Panel
+$multipleBatchExcelPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$multipleBatchExcelPanel.Height = 90
 
-$lblBatchExcelPath = New-Object System.Windows.Forms.Label
-$lblBatchExcelPath.Text = "実行一覧ファイル"
-$lblBatchExcelPath.AutoSize = $true
-$lblBatchExcelPath.Location = New-Object System.Drawing.Point(20, 17)
+$lblMultipleBatchExcelPath = New-Object System.Windows.Forms.Label
+$lblMultipleBatchExcelPath.Text = "実行一覧ファイル"
+$lblMultipleBatchExcelPath.AutoSize = $true
+$lblMultipleBatchExcelPath.Location = New-Object System.Drawing.Point(20, 17)
 
-$txtBatchExcelPath = New-Object System.Windows.Forms.TextBox
-$txtBatchExcelPath.Location = New-Object System.Drawing.Point(140, 14)
-$txtBatchExcelPath.Size = New-Object System.Drawing.Size(250, 22)
+$txtMultipleBatchExcelPath = New-Object System.Windows.Forms.TextBox
+$txtMultipleBatchExcelPath.Location = New-Object System.Drawing.Point(140, 14)
+$txtMultipleBatchExcelPath.Size = New-Object System.Drawing.Size(250, 22)
 
-$btnBatchBrowse = New-Object System.Windows.Forms.Button
-$btnBatchBrowse.Text = "参照..."
-$btnBatchBrowse.Location = New-Object System.Drawing.Point(400, 13)
-$btnBatchBrowse.Size = New-Object System.Drawing.Size(70, 24)
+$btnMultipleBatchBrowse = New-Object System.Windows.Forms.Button
+$btnMultipleBatchBrowse.Text = "参照..."
+$btnMultipleBatchBrowse.Location = New-Object System.Drawing.Point(400, 13)
+$btnMultipleBatchBrowse.Size = New-Object System.Drawing.Size(70, 24)
 
 $btnMultipleBatchRunAll = New-Object System.Windows.Forms.Button
 $btnMultipleBatchRunAll.Text = "実行"
 $btnMultipleBatchRunAll.Location = New-Object System.Drawing.Point(20, 50)
 $btnMultipleBatchRunAll.Size = New-Object System.Drawing.Size(100, 26)
 
-$lblBatchStatus = New-Object System.Windows.Forms.Label
-$lblBatchStatus.Text = ""
-$lblBatchStatus.AutoSize = $true
-$lblBatchStatus.Location = New-Object System.Drawing.Point(130, 56)
+$lblMultipleBatchStatus = New-Object System.Windows.Forms.Label
+$lblMultipleBatchStatus.Text = ""
+$lblMultipleBatchStatus.AutoSize = $true
+$lblMultipleBatchStatus.Location = New-Object System.Drawing.Point(130, 56)
 
-$batchExcelPanel.Controls.AddRange(@(
-    $lblBatchExcelPath, $txtBatchExcelPath, $btnBatchBrowse, $btnMultipleBatchRunAll, $lblBatchStatus
+$multipleBatchExcelPanel.Controls.AddRange(@(
+    $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
 ))
 
-$dlgBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
-$dlgBatchExcel.Filter = "Excelファイル (*.xlsx)|*.xlsx"
+$dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
+$dlgMultipleBatchExcel.Filter = "Excelファイル (*.xlsx)|*.xlsx"
 
-$btnBatchBrowse.Add_Click({
-    if ($dlgBatchExcel.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-        $txtBatchExcelPath.Text = $dlgBatchExcel.FileName
+$btnMultipleBatchBrowse.Add_Click({
+    if ($dlgMultipleBatchExcel.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+        $txtMultipleBatchExcelPath.Text = $dlgMultipleBatchExcel.FileName
     }
 })
 
 $tabSingleRun.Controls.Add($runTopPanel)
-$tabBatchRun.Controls.Add($batchExcelPanel)
+$tabBatchRun.Controls.Add($multipleBatchExcelPanel)
 
 $txtLog = New-LogTextBox
 
@@ -434,7 +434,7 @@ function Set-RunButtonsEnabled {
     $script:batchInputControls["BaseTemplateName"].Enabled = $Enabled
     $script:batchInputControls["CustomTemplateName"].Enabled = $Enabled
     $script:batchRunButton.Enabled = $Enabled
-    $btnBatchBrowse.Enabled = $Enabled
+    $btnMultipleBatchBrowse.Enabled = $Enabled
     $btnMultipleBatchRunAll.Enabled = $Enabled
     foreach ($btn in $tabResult.RunButtons) { $btn.Enabled = $Enabled }
 }
@@ -497,13 +497,13 @@ function Invoke-ExecuteAll {
             if ($ctrl -is [System.Windows.Forms.TextBox]) {
                 $value = $ctrl.Text.Trim()
                 if (!$value) {
-                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                     return 1
                 }
             } else {
                 $value = $ctrl.SelectedItem
                 if (!$value -or ($value -eq $script:baseTemplateNamePlaceholder) -or ($value -eq $script:customTemplateNamePlaceholder)) {
-                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                     return 1
                 }
             }
@@ -565,134 +565,138 @@ $script:batchRunButton.Add_Click({
 })
 
 $btnMultipleBatchRunAll.Add_Click({
-    $excelPath = $txtBatchExcelPath.Text.Trim()
-    if (!$excelPath -or !(Test-Path -LiteralPath $excelPath)) {
-        [System.Windows.Forms.MessageBox]::Show("実行一覧ファイルを選択してください。", "複数実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    $rows = $null
+    $excelPath = $txtMultipleBatchExcelPath.Text.Trim()
     try {
-        $excel = New-Object -ComObject Excel.Application
-        $excel.Visible = $false
-        $excel.DisplayAlerts = $false
-        $excel.ScreenUpdating = $false
-        $excel.EnableEvents = $false
+        Set-StepStatus -Label $lblMultipleBatchStatus -Text "実行中..."
+        if (!$excelPath) {
+            throw "実行一覧ファイルを選択してください。"
+        }
+        if (!(Test-Path -LiteralPath $excelPath)) {
+            throw "実行一覧ファイルが存在しません。"
+        }
+
+        $rows = $null
         try {
-            $workbook = $excel.Workbooks.Open($excelPath)
-            $rows = @(Get-RowObjects -Sheet $workbook.Sheets.Item(1))
+            $excel = New-Object -ComObject Excel.Application
+            $excel.Visible = $false
+            $excel.DisplayAlerts = $false
+            $excel.ScreenUpdating = $false
+            $excel.EnableEvents = $false
+            try {
+                $workbook = $excel.Workbooks.Open($excelPath)
+                $rows = @(Get-RowObjects -Sheet $workbook.Sheets.Item(1))
+            }
+            finally {
+                if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+                if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+                [System.GC]::Collect()
+                [System.GC]::WaitForPendingFinalizers()
+            }
+        } catch {
+            throw "Excelの読み込みに失敗しました: $($_.Exception.Message)"
         }
-        finally {
-            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-            if ($excel)    { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
-            [System.GC]::Collect()
-            [System.GC]::WaitForPendingFinalizers()
-        }
-    } catch {
-        [System.Windows.Forms.MessageBox]::Show("Excelの読み込みに失敗しました: $($_.Exception.Message)", "複数実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        return
-    }
-    if ($rows.Count -eq 0) {
-        [System.Windows.Forms.MessageBox]::Show("Excelに行がありません。", "複数実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    $script:isRunning = $true
-    Set-RunButtonsEnabled $false
-
-    $origConfigNames = @{}
-    for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
-        $bd = $categoryDefs[$i].ButtonDefs[0]
-        $origConfigNames[$i] = if ($bd.InputControls -and $bd.InputControls['ConfigName']) { $bd.InputControls['ConfigName'].Text } else { "" }
-    }
-    $bd0 = $categoryDefs[0].ButtonDefs[0]
-    $origSpaceTemplateId = if ($bd0.InputControls -and $bd0.InputControls['SpaceTemplateId']) { $bd0.InputControls['SpaceTemplateId'].Text } else { "" }
-    $bd1 = $categoryDefs[1].ButtonDefs[0]
-    $origSpaceId = if ($bd1.InputControls -and $bd1.InputControls['SpaceId']) { $bd1.InputControls['SpaceId'].Text } else { "" }
-    $origBaseTemplateSelectedItem = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.SelectedItem } else { $null }
-    $origBaseTemplateText = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.Text } else { "" }
-    $origCustomTemplateSelectedItem = if ($cmbCustomTemplateName) { $cmbCustomTemplateName.SelectedItem } else { $null }
-    $origCustomTemplateText = if ($cmbCustomTemplateName) { $cmbCustomTemplateName.Text } else { "" }
-
-    $resultLines = New-Object System.Collections.Generic.List[string]
-    for ($i = 0; $i -lt $rows.Count; $i++) {
-        $row = $rows[$i]
-        $rowConfigName = "$($row.'スペース識別名')".Trim()
-        $rowTemplateId = "$($row.'スペーステンプレートID')".Trim()
-        $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')".Trim()
-        $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')".Trim()
-
-        Set-StepStatus -Label $lblBatchStatus -Text "実行中... ($($i + 1)/$($rows.Count): $rowConfigName)" -State "実行中..."
-        [System.Windows.Forms.Application]::DoEvents()
-
-        Write-Log ""
-        Write-Log "==================== 複数実行 $($i + 1)/$($rows.Count): $rowConfigName ===================="
-
-        if (!$rowConfigName -or !$rowTemplateId -or !$rowBaseResourceTemplate) {
-            Write-Log "スペース識別名・スペーステンプレートID・設定テンプレート名（基本）のいずれかが空のためスキップします。"
-            $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（必須項目が空）")
-            continue
+        if ($rows.Count -eq 0) {
+            throw "Excelに行がありません。"
         }
 
-        foreach ($cd in $categoryDefs) {
-            $bd = $cd.ButtonDefs[0]
-            $bd.InputControls['ConfigName'].Text = $rowConfigName
+        $script:isRunning = $true
+        Set-RunButtonsEnabled $false
+
+        $origConfigNames = @{}
+        for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
+            $bd = $categoryDefs[$i].ButtonDefs[0]
+            $origConfigNames[$i] = if ($bd.InputControls -and $bd.InputControls['ConfigName']) { $bd.InputControls['ConfigName'].Text } else { "" }
         }
         $bd0 = $categoryDefs[0].ButtonDefs[0]
-        $bd0.InputControls['SpaceTemplateId'].Text = $rowTemplateId
+        $origSpaceTemplateId = if ($bd0.InputControls -and $bd0.InputControls['SpaceTemplateId']) { $bd0.InputControls['SpaceTemplateId'].Text } else { "" }
         $bd1 = $categoryDefs[1].ButtonDefs[0]
-        $bd1.InputControls['SpaceId'].Text = ""
-        $bd2 = $categoryDefs[2].ButtonDefs[0]
-        $bd2.InputControls['BaseTemplateName'].Text = $rowBaseResourceTemplate
-        $bd2.InputControls['CustomTemplateName'].Text = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
+        $origSpaceId = if ($bd1.InputControls -and $bd1.InputControls['SpaceId']) { $bd1.InputControls['SpaceId'].Text } else { "" }
+        $origBaseTemplateSelectedItem = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.SelectedItem } else { $null }
+        $origBaseTemplateText = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.Text } else { "" }
+        $origCustomTemplateSelectedItem = if ($cmbCustomTemplateName) { $cmbCustomTemplateName.SelectedItem } else { $null }
+        $origCustomTemplateText = if ($cmbCustomTemplateName) { $cmbCustomTemplateName.Text } else { "" }
 
-        $exitCode = Invoke-AllStepsForCurrentInputs
-        if ($exitCode -eq 0) {
-            $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")
-        } elseif ($exitCode -eq 2) {
-            $resultLines.Add("行$($i + 2) ($rowConfigName): 警告")
-        } else {
-            $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗")
+        $resultLines = New-Object System.Collections.Generic.List[string]
+        for ($i = 0; $i -lt $rows.Count; $i++) {
+            $row = $rows[$i]
+            $rowConfigName = "$($row.'スペース識別名')".Trim()
+            $rowTemplateId = "$($row.'スペーステンプレートID')".Trim()
+            $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')".Trim()
+            $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')".Trim()
+
+            Set-StepStatus -Label $lblMultipleBatchStatus -Text "実行中... ($($i + 1)/$($rows.Count): $rowConfigName)" -State "実行中..."
+            [System.Windows.Forms.Application]::DoEvents()
+
+            Write-Log "==================== 複数実行 $($i + 1)/$($rows.Count): $rowConfigName ===================="
+            
+            if (!$rowConfigName -or !$rowTemplateId -or !$rowBaseResourceTemplate) {
+                Write-Log "スペース識別名・スペーステンプレートID・設定テンプレート名（基本）のいずれかが空のためスキップします。"
+                $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（必須項目が空）")
+                continue
+            }
+
+            foreach ($cd in $categoryDefs) {
+                $bd = $cd.ButtonDefs[0]
+                $bd.InputControls['ConfigName'].Text = $rowConfigName
+            }
+            $bd0 = $categoryDefs[0].ButtonDefs[0]
+            $bd0.InputControls['SpaceTemplateId'].Text = $rowTemplateId
+            $bd1 = $categoryDefs[1].ButtonDefs[0]
+            $bd1.InputControls['SpaceId'].Text = ""
+            $bd2 = $categoryDefs[2].ButtonDefs[0]
+            $bd2.InputControls['BaseTemplateName'].Text = $rowBaseResourceTemplate
+            $bd2.InputControls['CustomTemplateName'].Text = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
+
+            $exitCode = Invoke-AllStepsForCurrentInputs
+            if ($exitCode -eq 0) {
+                $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")
+            } elseif ($exitCode -eq 2) {
+                $resultLines.Add("行$($i + 2) ($rowConfigName): 警告")
+            } else {
+                $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗")
+            }
         }
-    }
 
-    Write-Log ""
-    Write-Log "==================== 複数実行 結果 ===================="
-    foreach ($line in $resultLines) { Write-Log $line }
+        Write-Log "==================== 複数実行 結果 ===================="
+        foreach ($line in $resultLines) { Write-Log $line }
 
-    $failedCount = @($resultLines | Where-Object { $_ -match ": 失敗|: スキップ" }).Count
-    $warningCount = @($resultLines | Where-Object { $_ -match "警告" }).Count
-    $succsessCount = $rows.Count -$failedCount -$warningCount
-    $multipleResultMessage = "終了（成功-$($succsessCount)件、警告-$($warningCount)件、失敗/スキップ-$($failedCount)件）"
-    if ($failedCount -gt 0) {
-        Set-StepStatus -Label $lblBatchStatus -Text $multipleResultMessage -State "失敗"
-    } elseif ($warningCount -gt 0) {
-        Set-StepStatus -Label $lblBatchStatus -Text $multipleResultMessage -State "警告"
-    } else {
-        Set-StepStatus -Label $lblBatchStatus -Text $multipleResultMessage -State "成功"
-    }
+        $failedCount = @($resultLines | Where-Object { $_ -match ": 失敗|: スキップ" }).Count
+        $warningCount = @($resultLines | Where-Object { $_ -match "警告" }).Count
+        $succsessCount = $rows.Count -$failedCount -$warningCount
+        $multipleResultMessage = "終了（成功-$($succsessCount)件、警告-$($warningCount)件、失敗/スキップ-$($failedCount)件）"
+        if ($failedCount -gt 0) {
+            Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "失敗"
+        } elseif ($warningCount -gt 0) {
+            Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "警告"
+        } else {
+            Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "成功"
+        }
 
-    for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
-        $bd = $categoryDefs[$i].ButtonDefs[0]
-        $bd.InputControls['ConfigName'].Text = $origConfigNames[$i]
+        for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
+            $bd = $categoryDefs[$i].ButtonDefs[0]
+            $bd.InputControls['ConfigName'].Text = $origConfigNames[$i]
+        }
+        $bd0 = $categoryDefs[0].ButtonDefs[0]
+        $bd0.InputControls['SpaceTemplateId'].Text = $origSpaceTemplateId
+        $bd1 = $categoryDefs[1].ButtonDefs[0]
+        $bd1.InputControls['SpaceId'].Text = $origSpaceId
+        if ($origBaseTemplateSelectedItem -and $cmbBaseTemplateName.Items.Contains($origBaseTemplateSelectedItem)) {
+            $cmbBaseTemplateName.SelectedItem = $origBaseTemplateSelectedItem
+        } else {
+            $cmbBaseTemplateName.Text = $origBaseTemplateText
+        }
+        if ($origCustomTemplateSelectedItem -and $cmbCustomTemplateName.Items.Contains($origCustomTemplateSelectedItem)) {
+            $cmbCustomTemplateName.SelectedItem = $origCustomTemplateSelectedItem
+        } else {
+            $cmbCustomTemplateName.Text = $origCustomTemplateText
+        }
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("$_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        Set-StepStatus -Label $lblMultipleBatchStatus -Text "失敗"
+    } finally {
+        Set-RunButtonsEnabled $true
+        $script:isRunning = $false
     }
-    $bd0 = $categoryDefs[0].ButtonDefs[0]
-    $bd0.InputControls['SpaceTemplateId'].Text = $origSpaceTemplateId
-    $bd1 = $categoryDefs[1].ButtonDefs[0]
-    $bd1.InputControls['SpaceId'].Text = $origSpaceId
-    if ($origBaseTemplateSelectedItem -and $cmbBaseTemplateName.Items.Contains($origBaseTemplateSelectedItem)) {
-        $cmbBaseTemplateName.SelectedItem = $origBaseTemplateSelectedItem
-    } else {
-        $cmbBaseTemplateName.Text = $origBaseTemplateText
-    }
-    if ($origCustomTemplateSelectedItem -and $cmbCustomTemplateName.Items.Contains($origCustomTemplateSelectedItem)) {
-        $cmbCustomTemplateName.SelectedItem = $origCustomTemplateSelectedItem
-    } else {
-        $cmbCustomTemplateName.Text = $origCustomTemplateText
-    }
-
-    Set-RunButtonsEnabled $true
-    $script:isRunning = $false
 })
 
 function Get-TemplateFileNames {
