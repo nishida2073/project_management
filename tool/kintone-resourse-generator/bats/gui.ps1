@@ -43,21 +43,17 @@ $cmbCustomTemplateName = New-Object System.Windows.Forms.ComboBox
 $cmbCustomTemplateName.Size = New-Object System.Drawing.Size(180, 22)
 $cmbCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$configNameInputDef = [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200 }
-$spaceTemplateIdInputDef = [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 151; InputWidth = 200; NewRow = $true }
-$spaceIdInputDef = [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 151; InputWidth = 200; NewRow = $true }
-$baseTemplateNameInputDef = [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 151; ExistingControl = $cmbBaseTemplateName; NewRow = $true }
-$customTemplateNameInputDef = [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 151; ExistingControl = $cmbCustomTemplateName; NewRow = $true }
-
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "スペース作成"
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "スペース作成"
-                Id = 0
                 StageKey = "createspace"
-                Inputs = @($configNameInputDef, $spaceTemplateIdInputDef)
+                Inputs = @(
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 151; InputWidth = 200; NewRow = $true; Require = $true }
+                )
                 BatchPath = $createSpaceBat
                 ArgsFn = { param($ic) @("-LogNamePrefix", "createspace", "-TemplateId", $ic['SpaceTemplateId'].Text.Trim(), "-SpaceName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = $null
@@ -68,8 +64,8 @@ $categoryDefs = @(
                     param($ic, $lastOutputLines)
                     $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
                     if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
-                        $nextIc = $script:stepInputControls[1]
-                        if ($nextIc -and $nextIc.ContainsKey('SpaceId')) { $nextIc['SpaceId'].Text = $Matches.id }
+                        $bd1 = $categoryDefs[1].ButtonDefs[0]
+                        if ($bd1 -and $bd1.InputControls.ContainsKey('SpaceId')) { $bd1.InputControls['SpaceId'].Text = $Matches.id }
                         $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path $setEnvBat).TrimEnd('/')
                         if ($baseUrl) { $script:createdSpaceUrl = "$baseUrl/k/#/space/$($Matches.id)" }
                     }
@@ -82,9 +78,11 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "ダウンロード"
-                Id = 1
                 StageKey = "download"
-                Inputs = @($configNameInputDef, $spaceIdInputDef)
+                Inputs = @(
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 151; InputWidth = 200; NewRow = $true; Require = $false }
+                )
                 BatchPath = $downloadBat
                 ArgsFn = { param($ic) @("-LogNamePrefix", "download", "-SpaceId", $ic['SpaceId'].Text.Trim(), "-ConfigName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH") "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
@@ -99,9 +97,12 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "設定ファイルの生成"
-                Id = 2
                 StageKey = "generate"
-                Inputs = @($configNameInputDef, $baseTemplateNameInputDef, $customTemplateNameInputDef)
+                Inputs = @(
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 151; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
+                    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 151; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
+                )
                 BatchPath = $generateBat
                 ArgsFn = {
                     param($ic)
@@ -124,9 +125,10 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "kintoneへ反映"
-                Id = 3
                 StageKey = "apply"
-                Inputs = @($configNameInputDef)
+                Inputs = @(
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
+                )
                 BatchPath = $applyBat
                 ArgsFn = { param($ic) @("-LogNamePrefix", "apply", "-ConfigName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = $null
@@ -141,9 +143,10 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "データチェック"
-                Id = 4
                 StageKey = "check"
-                Inputs = @($configNameInputDef)
+                Inputs = @(
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
+                )
                 BatchPath = $checkBat
                 ArgsFn = { param($ic) @("-LogNamePrefix", "check", "-ConfigName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH") "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
@@ -225,38 +228,34 @@ $cmbRunAllCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle
 
 $allStepDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
-New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
-    -Inputs @(
-        [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200 }
-        [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true }
-        [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true }
-        [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 180; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true }
-    ) | Out-Null
+$batchRunAllInputs = @(
+    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true },
+    [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
+    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
+    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 180; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
+)
 
-$txtRunAllConfigName = $script:batchInputControls["ConfigName"]
-$txtRunAllSpaceTemplateId = $script:batchInputControls["SpaceTemplateId"]
+New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
+    -Inputs $batchRunAllInputs | Out-Null
+
 $lblOverallStatus = $script:batchStatusLabel
 
 New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
     -OnRunClick {
         param($bd)
-        $ic = $script:stepInputControls[$bd.Id]
+        $ic = $bd.InputControls
 
-        if ($bd.Id -ne 1 -and !$ic['ConfigName'].Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("スペース識別名を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        if ($bd.Id -eq 0 -and !$ic['SpaceTemplateId'].Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("スペーステンプレートIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        if ($bd.Id -eq 1 -and !$ic['SpaceId'].Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("スペースIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
-        }
-        if ($bd.Id -eq 2 -and (!$ic['BaseTemplateName'].Text.Trim() -or $ic['BaseTemplateName'].Text.Trim() -eq $script:baseTemplateNamePlaceholder)) {
-            [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return
+        if ($bd.Inputs) {
+            foreach ($inputDef in $bd.Inputs) {
+                if ($inputDef.Require) {
+                    $ctrl = $ic[$inputDef.Name]
+                    $value = if ($ctrl -is [System.Windows.Forms.TextBox]) { $ctrl.Text.Trim() } else { $ctrl.SelectedItem }
+                    if (!$value -or ($value -eq $script:customTemplateNamePlaceholder) -or ($value -eq $script:baseTemplateNamePlaceholder)) {
+                        [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                        return
+                    }
+                }
+            }
         }
 
         $script:isRunning = $true
@@ -265,7 +264,7 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
 
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label; StepStatusLabel = $bd.StepStatusLabel }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $script:stepInputControls[$bd.Id] } `
+            -GetBatArgs { param($bd2) & $bd.ArgsFn $bd.InputControls } `
             -WorkingDirectory $rootPath -Form $form `
             -WriteLog { param($msg) Write-Log $msg } `
             -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
@@ -273,20 +272,13 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
             -DisplayLabel $bd.Label -StatusLabel $bd.StepStatusLabel
 
         if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
-            & $bd.OnSuccessFn $script:stepInputControls[$bd.Id] $lastOutputLines
+            & $bd.OnSuccessFn $bd.InputControls $lastOutputLines
         }
 
         Set-RunButtonsEnabled $true
         $script:isRunning = $false
     } | Out-Null
 
-$script:stepStatusLabels = @{}
-$script:stepInputControls = @{}
-foreach ($cd in $categoryDefs) {
-    $bd = $cd.ButtonDefs[0]
-    $script:stepStatusLabels[$bd.Id] = $bd.StepStatusLabel
-    $script:stepInputControls[$bd.Id] = $bd.InputControls
-}
 
 $execTabControl.Dock = [System.Windows.Forms.DockStyle]::None
 $execTabControl.Location = New-Object System.Drawing.Point(0, 0)
@@ -430,15 +422,19 @@ Update-LogView
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
-    foreach ($ic in $script:stepInputControls.Values) {
-        foreach ($ctrl in $ic.Values) { $ctrl.Enabled = $Enabled }
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls) {
+                foreach ($ctrl in $bd.InputControls.Values) { $ctrl.Enabled = $Enabled }
+            }
+        }
     }
     $cmbBaseTemplateName.Enabled = $Enabled
     $cmbCustomTemplateName.Enabled = $Enabled
-    $txtRunAllConfigName.Enabled = $Enabled
-    $txtRunAllSpaceTemplateId.Enabled = $Enabled
-    $cmbRunAllBaseTemplateName.Enabled = $Enabled
-    $cmbRunAllCustomTemplateName.Enabled = $Enabled
+    $script:batchInputControls["ConfigName"].Enabled = $Enabled
+    $script:batchInputControls["SpaceTemplateId"].Enabled = $Enabled
+    $script:batchInputControls["BaseTemplateName"].Enabled = $Enabled
+    $script:batchInputControls["CustomTemplateName"].Enabled = $Enabled
     $script:batchRunButton.Enabled = $Enabled
     $btnBatchBrowse.Enabled = $Enabled
     $btnBatchRunAll.Enabled = $Enabled
@@ -461,16 +457,16 @@ function Invoke-AllStepsForCurrentInputs {
         $bd = $cd.ButtonDefs[0]
         $canProceed = $true
 
-        $ic = $script:stepInputControls[$bd.Id]
-        if (-not $ic) {
-            $canProceed = $false
-        } elseif ($bd.Id -eq 0) {
-            if (-not $ic['ConfigName'].Text.Trim() -or -not $ic['SpaceTemplateId'].Text.Trim()) {
-                $canProceed = $false
-            }
-        } else {
-            if (-not $ic['ConfigName'].Text.Trim()) {
-                $canProceed = $false
+        $ic = $bd.InputControls
+        if ($bd.Inputs) {
+            foreach ($inputDef in $bd.Inputs) {
+                if ($inputDef.Require) {
+                    $value = $ic[$inputDef.Name].Text.Trim()
+                    if (!$value -or ($value -eq $script:customTemplateNamePlaceholder)) {
+                        $canProceed = $false
+                        break
+                    }
+                }
             }
         }
 
@@ -497,39 +493,38 @@ function Invoke-AllStepsForCurrentInputs {
 }
 
 function Invoke-SeededAllSteps {
-    foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        $script:stepInputControls[$bd.Id]['ConfigName'].Text = $txtRunAllConfigName.Text.Trim()
+    foreach ($inputDef in $batchRunAllInputs) {
+        if ($inputDef.Require) {
+            $ctrl = $script:batchInputControls[$inputDef.Name]
+            if ($ctrl -is [System.Windows.Forms.TextBox]) {
+                $value = $ctrl.Text.Trim()
+                if (!$value) {
+                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                    return 1
+                }
+            } else {
+                $value = $ctrl.SelectedItem
+                if (!$value -or ($value -eq $script:baseTemplateNamePlaceholder) -or ($value -eq $script:customTemplateNamePlaceholder)) {
+                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                    return 1
+                }
+            }
+        }
     }
-    $script:stepInputControls[0]['SpaceTemplateId'].Text = $txtRunAllSpaceTemplateId.Text.Trim()
-    Copy-ComboSelection -From $cmbRunAllBaseTemplateName -To $cmbBaseTemplateName
-    Copy-ComboSelection -From $cmbRunAllCustomTemplateName -To $cmbCustomTemplateName
 
     foreach ($cd in $categoryDefs) {
         $bd = $cd.ButtonDefs[0]
-        $ic = $script:stepInputControls[$bd.Id]
-        if ($bd.Id -ne 1 -and !$ic['ConfigName'].Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("スペース識別名を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return 1
-        }
-        if ($bd.Id -eq 0 -and !$ic['SpaceTemplateId'].Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("スペーステンプレートIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return 1
-        }
-        if ($bd.Id -eq 1 -and !$ic['SpaceId'].Text.Trim()) {
-            [System.Windows.Forms.MessageBox]::Show("スペースIDを設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return 1
-        }
-        if ($bd.Id -eq 2 -and (!$ic['BaseTemplateName'].Text.Trim() -or $ic['BaseTemplateName'].Text.Trim() -eq $script:baseTemplateNamePlaceholder)) {
-            [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-            return 1
-        }
+        $bd.InputControls['ConfigName'].Text = $script:batchInputControls["ConfigName"].Text.Trim()
     }
+    $bd0 = $categoryDefs[0].ButtonDefs[0]
+    $bd0.InputControls['SpaceTemplateId'].Text = $script:batchInputControls["SpaceTemplateId"].Text.Trim()
+    Copy-ComboSelection -From $cmbRunAllBaseTemplateName -To $cmbBaseTemplateName
+    Copy-ComboSelection -From $cmbRunAllCustomTemplateName -To $cmbCustomTemplateName
 
     $lastExitCode = 0
     foreach ($cd in $categoryDefs) {
         $bd = $cd.ButtonDefs[0]
-        $ic = $script:stepInputControls[$bd.Id]
+        $ic = $bd.InputControls
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
             -GetBatArgs { param($bd2) & $bd.ArgsFn $ic } `
@@ -537,7 +532,7 @@ function Invoke-SeededAllSteps {
             -WriteLog { param($msg) Write-Log $msg } `
             -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
             -CurrentProcessRef ([ref]$script:currentProc) `
-            -DisplayLabel $bd.Label -StatusLabel $script:stepStatusLabels[$bd.Id]
+            -DisplayLabel $bd.Label -StatusLabel $bd.StepStatusLabel
 
         if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
             & $bd.OnSuccessFn $ic $lastOutputLines
@@ -553,17 +548,6 @@ function Invoke-SeededAllSteps {
 }
 
 $script:batchRunButton.Add_Click({
-    $seedConfigName = $txtRunAllConfigName.Text.Trim()
-    if (!$seedConfigName) {
-        [System.Windows.Forms.MessageBox]::Show("スペース識別名を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-    $seedBaseTemplateName = "$($cmbRunAllBaseTemplateName.SelectedItem)".Trim()
-    if (!$seedBaseTemplateName -or $seedBaseTemplateName -eq $script:baseTemplateNamePlaceholder) {
-        [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
     $script:isRunning = $true
     Set-RunButtonsEnabled $false
     Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
@@ -619,12 +603,14 @@ $btnBatchRunAll.Add_Click({
     Set-RunButtonsEnabled $false
 
     $origConfigNames = @{}
-    foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        $origConfigNames[$bd.Id] = if ($script:stepInputControls[$bd.Id] -and $script:stepInputControls[$bd.Id]['ConfigName']) { $script:stepInputControls[$bd.Id]['ConfigName'].Text } else { "" }
+    for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
+        $bd = $categoryDefs[$i].ButtonDefs[0]
+        $origConfigNames[$i] = if ($bd.InputControls -and $bd.InputControls['ConfigName']) { $bd.InputControls['ConfigName'].Text } else { "" }
     }
-    $origSpaceTemplateId = if ($script:stepInputControls[0] -and $script:stepInputControls[0]['SpaceTemplateId']) { $script:stepInputControls[0]['SpaceTemplateId'].Text } else { "" }
-    $origSpaceId = if ($script:stepInputControls[1] -and $script:stepInputControls[1]['SpaceId']) { $script:stepInputControls[1]['SpaceId'].Text } else { "" }
+    $bd0 = $categoryDefs[0].ButtonDefs[0]
+    $origSpaceTemplateId = if ($bd0.InputControls -and $bd0.InputControls['SpaceTemplateId']) { $bd0.InputControls['SpaceTemplateId'].Text } else { "" }
+    $bd1 = $categoryDefs[1].ButtonDefs[0]
+    $origSpaceId = if ($bd1.InputControls -and $bd1.InputControls['SpaceId']) { $bd1.InputControls['SpaceId'].Text } else { "" }
     $origBaseTemplateSelectedItem = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.SelectedItem } else { $null }
     $origBaseTemplateText = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.Text } else { "" }
     $origCustomTemplateSelectedItem = if ($cmbCustomTemplateName) { $cmbCustomTemplateName.SelectedItem } else { $null }
@@ -650,15 +636,17 @@ $btnBatchRunAll.Add_Click({
             continue
         }
 
-        $script:stepInputControls[0]['ConfigName'].Text = $rowConfigName
-        $script:stepInputControls[0]['SpaceTemplateId'].Text = $rowTemplateId
-        $script:stepInputControls[1]['ConfigName'].Text = $rowConfigName
-        $script:stepInputControls[1]['SpaceId'].Text = ""
-        $script:stepInputControls[2]['ConfigName'].Text = $rowConfigName
-        $script:stepInputControls[2]['BaseTemplateName'].Text = $rowBaseResourceTemplate
-        $script:stepInputControls[2]['CustomTemplateName'].Text = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
-        $script:stepInputControls[3]['ConfigName'].Text = $rowConfigName
-        $script:stepInputControls[4]['ConfigName'].Text = $rowConfigName
+        foreach ($cd in $categoryDefs) {
+            $bd = $cd.ButtonDefs[0]
+            $bd.InputControls['ConfigName'].Text = $rowConfigName
+        }
+        $bd0 = $categoryDefs[0].ButtonDefs[0]
+        $bd0.InputControls['SpaceTemplateId'].Text = $rowTemplateId
+        $bd1 = $categoryDefs[1].ButtonDefs[0]
+        $bd1.InputControls['SpaceId'].Text = ""
+        $bd2 = $categoryDefs[2].ButtonDefs[0]
+        $bd2.InputControls['BaseTemplateName'].Text = $rowBaseResourceTemplate
+        $bd2.InputControls['CustomTemplateName'].Text = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
 
         $exitCode = Invoke-AllStepsForCurrentInputs
         if ($exitCode -eq 0) {
@@ -686,12 +674,14 @@ $btnBatchRunAll.Add_Click({
         Set-StepStatus -Label $lblBatchStatus -Text $multipleResultMessage -State "成功"
     }
 
-    foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        $script:stepInputControls[$bd.Id]['ConfigName'].Text = $origConfigNames[$bd.Id]
+    for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
+        $bd = $categoryDefs[$i].ButtonDefs[0]
+        $bd.InputControls['ConfigName'].Text = $origConfigNames[$i]
     }
-    $script:stepInputControls[0]['SpaceTemplateId'].Text = $origSpaceTemplateId
-    $script:stepInputControls[1]['SpaceId'].Text = $origSpaceId
+    $bd0 = $categoryDefs[0].ButtonDefs[0]
+    $bd0.InputControls['SpaceTemplateId'].Text = $origSpaceTemplateId
+    $bd1 = $categoryDefs[1].ButtonDefs[0]
+    $bd1.InputControls['SpaceId'].Text = $origSpaceId
     if ($origBaseTemplateSelectedItem -and $cmbBaseTemplateName.Items.Contains($origBaseTemplateSelectedItem)) {
         $cmbBaseTemplateName.SelectedItem = $origBaseTemplateSelectedItem
     } else {
