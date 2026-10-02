@@ -1059,7 +1059,7 @@ function Render-Grid {
 
             if ($c -eq 0) {
                 $ctrl = New-Object System.Windows.Forms.Label
-                $ctrl.Text = "$($row.No)"
+                $ctrl.Text = "$($i + 1)"
                 $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
             } else {
                 $ctrl = New-Object System.Windows.Forms.TextBox
@@ -1072,7 +1072,7 @@ function Render-Grid {
             $ctrl.AutoSize = $false
             $ctrl.Size = New-Object System.Drawing.Size($col.Width, 22)
             $ctrl.Location = New-Object System.Drawing.Point($x, $y)
-            $ctrl.Tag = $i
+            $ctrl.Tag = $row.No
             $ContentPanel.Controls.Add($ctrl)
             $x += $col.Width + 10
         }
@@ -1126,7 +1126,7 @@ function Render-ScheduleRows {
             $updatedRows = Get-ScheduleRowsFromUI
             $script:scheduleRows = $updatedRows
         }
-        $nextNo = if ($script:scheduleRows.Count -gt 0) { ($script:scheduleRows | Measure-Object -Property No -Maximum).Maximum + 1 } else { 1 }
+        $nextNo = $script:scheduleRows.Count + 1
         $newRow = [PSCustomObject]@{ No = $nextNo; Subject = ""; StartDate = ""; EndDate = "" }
         $script:scheduleRows = @($script:scheduleRows) + @($newRow)
         Render-ScheduleRows
@@ -1149,7 +1149,7 @@ function Get-GridRows {
     while ($rowIndex * $controlsPerRow -lt $dataControlsCount) {
         $baseIndex = $rowIndex * $controlsPerRow
         $noCtrl = $controls[$baseIndex]
-        $newObj = [ordered]@{ No = $noCtrl.Text }
+        $newObj = [ordered]@{ No = $noCtrl.Tag }
 
         for ($c = 1; $c -lt $Columns.Count; $c++) {
             $col = $Columns[$c]
@@ -1268,7 +1268,18 @@ function Save-ScheduleToExcel {
         "終了日" = "EndDate"
     }
     try {
-        $rowsToSave = Get-ScheduleRowsFromUI
+        $rowsFromUI = Get-ScheduleRowsFromUI
+        $rowsToSave = @()
+        for ($i = 0; $i -lt $rowsFromUI.Count; $i++) {
+            $row = $rowsFromUI[$i]
+            $rowToSave = [PSCustomObject]@{
+                No = $i + 1
+                Subject = $row.Subject
+                StartDate = $row.StartDate
+                EndDate = $row.EndDate
+            }
+            $rowsToSave += $rowToSave
+        }
         Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $rowsToSave -ColumnMap $columnMap
         [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
