@@ -458,10 +458,15 @@ $cmbSettingsMasterOpsGroupTarget.DisplayMember = "Text"
 $lnkSettingsMasterOpsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsMasterOpsOpenXlsx.Text = "開く"
 
-$settingsMasterOpsTopPanel = (New-SettingsTopPanel `
+$script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
-    -OnSave { } `
-    -OnReload { }).Panel
+    -OnSave { Save-ScheduleToExcel } `
+    -OnReload {
+        $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+        Load-ScheduleFromExcel -GroupName $target
+    }
+
+$settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
 
 $settingsMasterOpsPanel = New-Object System.Windows.Forms.Panel
 $settingsMasterOpsPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -977,13 +982,316 @@ $btnSettingsGroupNewGroup.Add_Click({
     $cmbSettingsGroupTarget.SelectedItem = $newName
 })
 
+$grpScheduleEdit = New-Object System.Windows.Forms.GroupBox
+$grpScheduleEdit.Text = "スケジュール編集"
+$grpScheduleEdit.Dock = [System.Windows.Forms.DockStyle]::Top
+$grpScheduleEdit.AutoSize = $true
+$grpScheduleEdit.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+$grpScheduleEdit.Padding = New-Object System.Windows.Forms.Padding(10)
+
+$script:scheduleRows = @()
+$script:scheduleRowControls = @()
+$script:scheduleContentPanel = New-Object System.Windows.Forms.Panel
+$script:scheduleContentPanel.AutoSize = $false
+$script:scheduleContentPanel.Size = New-Object System.Drawing.Size(730, 400)
+$script:scheduleContentPanel.Location = New-Object System.Drawing.Point(10, 20)
+
+$grpScheduleEdit.Controls.Add($script:scheduleContentPanel)
+
+$btnScheduleAddRow = New-Object System.Windows.Forms.Button
+$btnScheduleAddRow.Text = "＋ 行追加"
+$btnScheduleAddRow.Size = New-Object System.Drawing.Size(100, 24)
+$btnScheduleAddRow.Location = New-Object System.Drawing.Point(20, 440)
+$btnScheduleAddRow.Add_Click({
+    $script:scheduleRows += [PSCustomObject]@{ Subject = ""; StartDate = ""; EndDate = "" }
+    Render-ScheduleRows
+})
+$grpScheduleEdit.Controls.Add($btnScheduleAddRow)
+
+$settingsMasterOpsPanel.Controls.Add($grpScheduleEdit)
+$settingsMasterOpsPanel.Controls.SetChildIndex($grpScheduleEdit, 0)
+
+function Render-ScheduleRows {
+    $script:scheduleRowControls = @()
+    $script:scheduleContentPanel.Controls.Clear()
+
+    $y = 0
+
+    $lblScheduleSeq = New-Object System.Windows.Forms.Label
+    $lblScheduleSeq.Text = "通番"
+    $lblScheduleSeq.AutoSize = $false
+    $lblScheduleSeq.Size = New-Object System.Drawing.Size(50, 20)
+    $lblScheduleSeq.Location = New-Object System.Drawing.Point(10, $y)
+    $script:scheduleContentPanel.Controls.Add($lblScheduleSeq)
+
+    $lblScheduleSubject = New-Object System.Windows.Forms.Label
+    $lblScheduleSubject.Text = "科目名"
+    $lblScheduleSubject.AutoSize = $false
+    $lblScheduleSubject.Size = New-Object System.Drawing.Size(200, 20)
+    $lblScheduleSubject.Location = New-Object System.Drawing.Point(70, $y)
+    $script:scheduleContentPanel.Controls.Add($lblScheduleSubject)
+
+    $lblScheduleStartDate = New-Object System.Windows.Forms.Label
+    $lblScheduleStartDate.Text = "開始日"
+    $lblScheduleStartDate.AutoSize = $false
+    $lblScheduleStartDate.Size = New-Object System.Drawing.Size(130, 20)
+    $lblScheduleStartDate.Location = New-Object System.Drawing.Point(280, $y)
+    $script:scheduleContentPanel.Controls.Add($lblScheduleStartDate)
+
+    $lblScheduleEndDate = New-Object System.Windows.Forms.Label
+    $lblScheduleEndDate.Text = "終了日"
+    $lblScheduleEndDate.AutoSize = $false
+    $lblScheduleEndDate.Size = New-Object System.Drawing.Size(130, 20)
+    $lblScheduleEndDate.Location = New-Object System.Drawing.Point(420, $y)
+    $script:scheduleContentPanel.Controls.Add($lblScheduleEndDate)
+
+    $lblScheduleDelete = New-Object System.Windows.Forms.Label
+    $lblScheduleDelete.Text = "削除"
+    $lblScheduleDelete.AutoSize = $false
+    $lblScheduleDelete.Size = New-Object System.Drawing.Size(60, 20)
+    $lblScheduleDelete.Location = New-Object System.Drawing.Point(560, $y)
+    $script:scheduleContentPanel.Controls.Add($lblScheduleDelete)
+
+    $y += 26
+
+    for ($i = 0; $i -lt $script:scheduleRows.Count; $i++) {
+        $row = $script:scheduleRows[$i]
+
+        $lblSeq = New-Object System.Windows.Forms.Label
+        $lblSeq.Text = "$($i + 1)"
+        $lblSeq.AutoSize = $false
+        $lblSeq.Size = New-Object System.Drawing.Size(50, 22)
+        $lblSeq.Location = New-Object System.Drawing.Point(10, $y)
+        $lblSeq.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+        $script:scheduleContentPanel.Controls.Add($lblSeq)
+
+        $txtSubject = New-Object System.Windows.Forms.TextBox
+        $txtSubject.Text = $row.Subject
+        $txtSubject.Size = New-Object System.Drawing.Size(200, 22)
+        $txtSubject.Location = New-Object System.Drawing.Point(70, $y)
+        $script:scheduleContentPanel.Controls.Add($txtSubject)
+
+        $txtStartDate = New-Object System.Windows.Forms.TextBox
+        $txtStartDate.Text = $row.StartDate
+        $txtStartDate.Size = New-Object System.Drawing.Size(130, 22)
+        $txtStartDate.Location = New-Object System.Drawing.Point(280, $y)
+        $script:scheduleContentPanel.Controls.Add($txtStartDate)
+
+        $txtEndDate = New-Object System.Windows.Forms.TextBox
+        $txtEndDate.Text = $row.EndDate
+        $txtEndDate.Size = New-Object System.Drawing.Size(130, 22)
+        $txtEndDate.Location = New-Object System.Drawing.Point(420, $y)
+        $script:scheduleContentPanel.Controls.Add($txtEndDate)
+
+        $btnDeleteRow = New-Object System.Windows.Forms.Button
+        $btnDeleteRow.Text = "削除"
+        $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
+        $btnDeleteRow.Location = New-Object System.Drawing.Point(560, ($y - 1))
+        $btnDeleteRow.Tag = $i
+        $btnDeleteRow.Add_Click({
+            Sync-ScheduleRowsFromControls
+            $index = $this.Tag
+            $script:scheduleRows = @($script:scheduleRows | Where-Object { $_ -ne $script:scheduleRows[$index] })
+            Render-ScheduleRows
+        })
+        $script:scheduleContentPanel.Controls.Add($btnDeleteRow)
+
+        $script:scheduleRowControls += [PSCustomObject]@{
+            Row = $row
+            No = $lblSeq
+            SubjectBox = $txtSubject
+            StartDateBox = $txtStartDate
+            EndDateBox = $txtEndDate
+        }
+
+        $y += 28
+    }
+
+    $panelHeight = $y + 10
+    $script:scheduleContentPanel.Height = $panelHeight
+    $btnY = 20 + $panelHeight + 10
+    $btnScheduleAddRow.Location = New-Object System.Drawing.Point(20, $btnY)
+    $grpScheduleEdit.PerformLayout()
+}
+
+function Sync-ScheduleRowsFromControls {
+    $updatedRows = @()
+    foreach ($entry in $script:scheduleRowControls) {
+        $newObj = [ordered]@{
+            No = [int]$entry.No.Text
+            Subject = $entry.SubjectBox.Text
+            StartDate = $entry.StartDateBox.Text
+            EndDate = $entry.EndDateBox.Text
+        }
+        $updatedRows += [PSCustomObject]$newObj
+    }
+    $script:scheduleRows = $updatedRows
+}
+
+function Read-ExcelData {
+    param(
+        [string]$ExcelPath,
+        [string]$SheetName,
+        [string[]]$DateProperties = @(),
+        [scriptblock]$DataTransformer = { param($Rows) $Rows },
+        [scriptblock]$OnLoaded = { }
+    )
+    try {
+        if (!(Test-Path -LiteralPath $ExcelPath)) {
+            throw "Excelファイルが見つかりません: $ExcelPath"
+        }
+
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+        $excel.ScreenUpdating = $false
+        $excel.EnableEvents = $false
+
+        try {
+            $workbook = $excel.Workbooks.Open($ExcelPath)
+            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
+            if (!$sheet) {
+                throw "シート '$SheetName' が見つかりません"
+            }
+            $rows = @(Get-RowObjects -Sheet $sheet)
+
+            foreach ($row in $rows) {
+                foreach ($prop in $DateProperties) {
+                    $val = $row.$prop
+                    if ($val -and [double]::TryParse($val, [ref]$null)) {
+                        $row.$prop = ([datetime]::FromOADate([double]$val)).ToString("yyyy-MM-dd")
+                    }
+                }
+            }
+
+            $transformedData = & $DataTransformer $rows
+            & $OnLoaded @{ Data = $transformedData; Sheet = $sheet }
+        }
+        finally {
+            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        }
+    }
+    catch {
+        throw $_
+    }
+}
+
+function Load-ScheduleFromExcel {
+    param([string]$GroupName)
+
+    $xlsxPath = Get-GroupXlsxPath $GroupName
+
+    try {
+        Read-ExcelData `
+            -ExcelPath $xlsxPath `
+            -SheetName "スケジュール" `
+            -DateProperties @("開始日", "終了日") `
+            -DataTransformer {
+                param($Rows)
+                $convertedRows = @()
+                foreach ($row in $Rows) {
+                    $newObj = [ordered]@{
+                        No = $row."通番"
+                        Subject = $row."科目名"
+                        StartDate = $row."開始日"
+                        EndDate = $row."終了日"
+                    }
+                    $convertedRows += [PSCustomObject]$newObj
+                }
+                $script:scheduleRows = $convertedRows
+            } `
+            -OnLoaded {
+                Render-ScheduleRows
+            }
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("スケジュール読込に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Save-ScheduleToExcel {
+    $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $xlsxPath = Get-GroupXlsxPath $groupName
+    $columnMap = [ordered]@{
+        "通番" = "No"
+        "科目名" = "Subject"
+        "開始日" = "StartDate"
+        "終了日" = "EndDate"
+    }
+    try {
+        Sync-ScheduleRowsFromControls
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $script:scheduleRows -ColumnMap $columnMap
+        [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Save-DataToExcel {
+    param(
+        [string]$ExcelPath,
+        [string]$SheetName,
+        [array]$Rows,
+        [object]$ColumnMap
+    )
+    try {
+
+        $rowsData = @()
+        for ($i = 0; $i -lt $Rows.Count; $i++) {
+            $row = $Rows[$i]
+            $rowObj = [ordered]@{}
+            foreach ($col in $ColumnMap.Keys) {
+                $rowObj[$col] = $row.($ColumnMap[$col])
+            }
+            $rowsData += [PSCustomObject]$rowObj
+        }
+
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+        $excel.ScreenUpdating = $false
+        $excel.EnableEvents = $false
+
+        try {
+            $workbook = $excel.Workbooks.Open($ExcelPath)
+            $scheduleSheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
+            if (!$scheduleSheet) {
+                throw "シート '$SheetName' が見つかりません"
+            }
+
+            $colNames = @($ColumnMap.Keys)
+            Write-RowObjects -Sheet $scheduleSheet -Rows $rowsData -Headers $colNames
+
+            $workbook.Save()
+        }
+        finally {
+            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        }
+    }
+    catch {
+        throw $_
+    }
+}
+
+
 $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
     $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
     if (!$target) {
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
-    Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
+    $xlsxPath = Get-GroupXlsxPath $target
+    Open-TargetOrWarn -Path $xlsxPath
+})
+
+$cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
+    $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $script:scheduleRows = @()
+    Render-ScheduleRows
+    Load-ScheduleFromExcel -GroupName $target
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
