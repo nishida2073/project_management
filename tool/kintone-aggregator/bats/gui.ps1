@@ -1003,27 +1003,18 @@ $script:scheduleContentPanel.Size = New-Object System.Drawing.Size(730, 370)
 $script:scheduleContentPanel.Location = New-Object System.Drawing.Point(10, 50)
 $grpScheduleEdit.Controls.Add($script:scheduleContentPanel)
 
-$btnScheduleAddRow = New-Object System.Windows.Forms.Button
-$btnScheduleAddRow.Text = "＋ 行追加"
-$btnScheduleAddRow.Size = New-Object System.Drawing.Size(100, 24)
-$btnScheduleAddRow.Location = New-Object System.Drawing.Point(20, 440)
-$btnScheduleAddRow.Add_Click({
-    $script:scheduleRows += [PSCustomObject]@{ Subject = ""; StartDate = ""; EndDate = "" }
-    Render-ScheduleRows
-})
-$grpScheduleEdit.Controls.Add($btnScheduleAddRow)
 
 $settingsMasterOpsPanel.Controls.Add($grpScheduleEdit)
 $settingsMasterOpsPanel.Controls.SetChildIndex($grpScheduleEdit, 0)
 
-function Render-DataRows {
+function Render-Grid {
     param(
         [Parameter(Mandatory)]$HeaderPanel,
         [Parameter(Mandatory)]$ContentPanel,
         [Parameter(Mandatory)][ref]$RowsData,
-        [Parameter(Mandatory)]$AddButton,
         [Parameter(Mandatory)][scriptblock]$OnDelete,
-        [Parameter(Mandatory)][array]$Columns
+        [Parameter(Mandatory)][array]$Columns,
+        [scriptblock]$OnAdd
     )
 
     if ($HeaderPanel.Controls.Count -eq 0) {
@@ -1090,10 +1081,22 @@ function Render-DataRows {
         $y += 28
     }
 
-    $panelHeight = $y + 10
+    $addButton = $ContentPanel.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Text -eq "＋ 行追加" } | Select-Object -First 1
+
+    if (-not $addButton) {
+        $addButton = New-Object System.Windows.Forms.Button
+        $addButton.Text = "＋ 行追加"
+        $addButton.Size = New-Object System.Drawing.Size(100, 24)
+        if ($OnAdd) {
+            $addButton.Add_Click($OnAdd)
+        }
+    }
+
+    $addButton.Location = New-Object System.Drawing.Point(10, ($y + 10))
+    $ContentPanel.Controls.Add($addButton)
+
+    $panelHeight = $y + 50
     $ContentPanel.Height = $panelHeight
-    $btnY = 50 + $panelHeight + 10
-    $AddButton.Location = New-Object System.Drawing.Point(20, $btnY)
 }
 
 function Render-ScheduleRows {
@@ -1103,7 +1106,7 @@ function Render-ScheduleRows {
         @{ Label = "開始日"; Width = 100; Property = "StartDate" }
         @{ Label = "終了日"; Width = 100; Property = "EndDate" }
     )
-    Render-DataRows -HeaderPanel $script:scheduleHeaderPanel -ContentPanel $script:scheduleContentPanel -RowsData ([ref]$script:scheduleRows) -AddButton $btnScheduleAddRow -OnDelete {
+    Render-Grid -HeaderPanel $script:scheduleHeaderPanel -ContentPanel $script:scheduleContentPanel -RowsData ([ref]$script:scheduleRows) -OnDelete {
         $rowIndex = $this.Tag
         $newRows = @()
         for ($j = 0; $j -lt $script:scheduleRows.Count; $j++) {
@@ -1112,6 +1115,9 @@ function Render-ScheduleRows {
             }
         }
         $script:scheduleRows = $newRows
+        Render-ScheduleRows
+    } -OnAdd {
+        $script:scheduleRows += [PSCustomObject]@{ Subject = ""; StartDate = ""; EndDate = "" }
         Render-ScheduleRows
     } -Columns $columns
 }
