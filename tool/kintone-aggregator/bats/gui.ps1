@@ -1133,25 +1133,44 @@ function Render-ScheduleRows {
     $script:scheduleContentPanel = $panels.ContentPanel
 }
 
-function Get-ScheduleRowsFromUI {
+function Get-GridRows {
+    param(
+        [Parameter(Mandatory)]$ContentPanel,
+        [Parameter(Mandatory)][array]$Columns
+    )
+
     $updatedRows = @()
-    $controls = $script:scheduleContentPanel.Controls
-    $seqNum = 1
+    $controls = $ContentPanel.Controls
+    $controlsPerRow = $Columns.Count + 1
 
-    for ($i = 0; $i + 3 -lt $controls.Count; $i += 5) {
-        $txtSubject = $controls[$i + 1]
-        $txtStartDate = $controls[$i + 2]
-        $txtEndDate = $controls[$i + 3]
+    $rowIndex = 0
+    while ($rowIndex * $controlsPerRow -lt $controls.Count - 1) {
+        $baseIndex = $rowIndex * $controlsPerRow
+        $newObj = [ordered]@{ No = $rowIndex + 1 }
 
-        $newObj = [ordered]@{
-            No = $seqNum++
-            Subject = $txtSubject.Text
-            StartDate = $txtStartDate.Text
-            EndDate = $txtEndDate.Text
+        for ($c = 0; $c -lt $Columns.Count; $c++) {
+            $col = $Columns[$c]
+            $ctrl = $controls[$baseIndex + $c]
+            if ($col.Property) {
+                $newObj[$col.Property] = $ctrl.Text
+            }
         }
+
         $updatedRows += [PSCustomObject]$newObj
+        $rowIndex++
     }
+
     return $updatedRows
+}
+
+function Get-ScheduleRowsFromUI {
+    $columns = @(
+        @{ Label = "通番"; Width = 50 }
+        @{ Label = "科目名"; Width = 200; Property = "Subject" }
+        @{ Label = "開始日"; Width = 100; Property = "StartDate" }
+        @{ Label = "終了日"; Width = 100; Property = "EndDate" }
+    )
+    Get-GridRows -ContentPanel $script:scheduleContentPanel -Columns $columns
 }
 
 function Read-ExcelData {
