@@ -20,7 +20,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'create-app-data' })-$TargetGroupName-$TargetDate"
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "${LogNamePrefix}-$TargetGroupName-$TargetDate"
 
 $appDefinedCodeFields = [PSCustomObject]@{
     DateCodeField = $TargetDateCodeField

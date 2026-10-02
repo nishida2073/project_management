@@ -17,7 +17,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'collect-combine-result' })-$TargetGroupName"
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "${LogNamePrefix}-$TargetGroupName"
 
 function Create-CollectResultsDatas {
     param(

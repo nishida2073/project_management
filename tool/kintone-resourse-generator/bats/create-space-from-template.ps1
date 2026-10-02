@@ -22,7 +22,7 @@ if (-not $SpaceName) {
     exit 1
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'createspace' })_$SpaceName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}_$SpaceName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

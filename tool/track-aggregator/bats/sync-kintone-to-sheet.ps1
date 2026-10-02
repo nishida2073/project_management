@@ -21,7 +21,7 @@ if (-not $TargetGroupName) {
     $TargetGroupName = [System.IO.Path]::GetFileNameWithoutExtension($ExcelFilePath)
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'sync-kintone-to-sheet' })-$TargetGroupName"
+$logFilePath = New-WorkerLogPath -LogRoot $env:LOG_DIR -Prefix "${LogNamePrefix}-$TargetGroupName"
 
 $psParams = $PSBoundParameters
 

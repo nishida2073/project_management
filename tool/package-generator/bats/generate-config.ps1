@@ -7,7 +7,7 @@ param(
     [string]$TargetConfigFilePath,
     [string]$Force = "",
     [string]$LogPath,
-    [string]$LogPrefix,
+    [string]$LogNamePrefix,
     [string]$ClientName = ""
 )
 $newLine = [Environment]::NewLine
@@ -18,8 +18,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 }
 
 New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
-$logNamePrefix = "$($LogPrefix)_$($ClientName)"
-$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix "${LogNamePrefix}-$ClientName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

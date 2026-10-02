@@ -28,7 +28,7 @@ if (-not $SpaceId) {
     exit 1
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "$(if ($LogNamePrefix) { $LogNamePrefix } else { 'download' })_$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}_$ConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

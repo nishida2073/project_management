@@ -286,7 +286,7 @@ $settingsGroups = [ordered]@{
         }
     }
     "OVERRIDE" = @{
-        Label = "個別設定（空欄の場合は共通設定の値を使用）"
+        Label = "個別設定"
         Vars = $overridableVarDefs
     }
     "SYNC" = @{
@@ -631,9 +631,7 @@ function Save-GroupSettings {
                 ""
             }
         } `
-        -HasValueFn { param($varName)
-            $true
-        }
+        -HasValueFn { param($varName) $true }
 
     $xlsxPath = Get-GroupXlsxPath $GroupName
     if (!(Test-Path -LiteralPath $xlsxPath)) {

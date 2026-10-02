@@ -7,7 +7,7 @@ param(
     [string]$WorkPath,
     [string]$OutputPath,
     [string]$LogPath,
-    [string]$LogPrefix,
+    [string]$LogNamePrefix,
     [string]$SheetsInclude,
     [string]$SheetsExclude,
     [string]$SourcePath,
@@ -25,8 +25,7 @@ New-Item $WorkPath -ItemType Directory | Out-Null
 New-Item $OutputPath -ItemType Directory -Force | Out-Null
 New-Item $LogPath -ItemType Directory -Force | Out-Null
 
-$logNamePrefix = "$($LogPrefix)_$($ClientName)"
-$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix "${LogNamePrefix}-$ClientName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

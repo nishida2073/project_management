@@ -18,11 +18,10 @@ call "%~dp0clients\!ClientName!.bat"
 
 call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
-set "LogPrefix=%~n0"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0bats\generate-config.ps1" -SourcePath "!GenerateSourcePath!" -TargetConfigFilePath "!GenerateConfigPath!" -Force "!Force!" -LogPath "!CommonLogPath!" -LogPrefix "!LogPrefix!" -ClientName "!ClientName!"
+ -File "%~dp0bats\generate-config.ps1" -SourcePath "!GenerateSourcePath!" -TargetConfigFilePath "!GenerateConfigPath!" -Force "!Force!" -LogPath "!CommonLogPath!" -LogNamePrefix "%~n0" -ClientName "!ClientName!"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"

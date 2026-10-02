@@ -18,11 +18,10 @@ call "%~dp0clients\!ClientName!.bat"
 
 call "%~dp0bats\message.bat" "Start %BATCH_NAME%"
 
-set "LogPrefix=%~n0"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0bats\upload-folder.ps1" -SiteUrl "!UploadSiteUrl!" -SitePath "!UploadSitePath!" -TenantId "!UploadSiteTenantId!" -LocalPath "!UploadLocalPath!" -LogPath "!CommonLogPath!" -LogPrefix "!LogPrefix!" -ItemsInclude "%UPLOAD_ITEMS_INCLUDE%" -ItemsExclude "!UploadItemsInclude!" -ClientName "!ClientName!"
+ -File "%~dp0bats\upload-folder.ps1" -SiteUrl "!UploadSiteUrl!" -SitePath "!UploadSitePath!" -TenantId "!UploadSiteTenantId!" -LocalPath "!UploadLocalPath!" -LogPath "!CommonLogPath!" -LogNamePrefix "%~n0" -ItemsInclude "%UPLOAD_ITEMS_INCLUDE%" -ItemsExclude "!UploadItemsInclude!" -ClientName "!ClientName!"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %BATCH_NAME%"

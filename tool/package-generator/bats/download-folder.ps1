@@ -8,7 +8,7 @@ param(
     [string]$TenantId,
     [string]$LocalPath,
     [string]$LogPath,
-    [string]$LogPrefix,
+    [string]$LogNamePrefix,
     [string]$ClientName = ""
 )
 
@@ -67,8 +67,7 @@ function Get-GraphChildrenRecursive {
     }
 }
 
-$logNamePrefix = "$($LogPrefix)_$($ClientName)"
-$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix $logNamePrefix
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix "${LogNamePrefix}-$ClientName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters
