@@ -426,8 +426,8 @@ $settingsGroupTopPanel = (New-SettingsTopPanel `
         $target = $cmbSettingsGroupTarget.SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
-        Update-GroupDropdowns
         Update-GroupSettingsFields
+        Update-GroupDropdowns
     } `
     -OnReload {
         $target = $cmbSettingsGroupTarget.SelectedItem
