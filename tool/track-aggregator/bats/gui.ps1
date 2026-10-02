@@ -608,7 +608,7 @@ function Save-GroupSettings {
 
     Sync-MentionRowsFromControls
 
-    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
+    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars -RemoveUnwritten `
         -GetValueFn { param($varName)
             if ($varName -eq "Authorization") {
                 $existingAuth = Get-SetLineRawValues -Path $groupBatPath
@@ -624,14 +624,21 @@ function Save-GroupSettings {
                 if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
                 $val
             } elseif ($script:saveGroupOverrideVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupOverrideVarMap[$varName]
+                $val = Get-GroupSettingsFieldValue $script:saveGroupOverrideVarMap[$varName]
+                if ([string]::IsNullOrWhiteSpace($val)) { "" } else { $val }
             } elseif ($script:saveGroupSyncVarMap.ContainsKey($varName)) {
                 Get-GroupSettingsFieldValue $script:saveGroupSyncVarMap[$varName]
             } else {
                 ""
             }
         } `
-        -HasValueFn { param($varName) $true }
+        -HasValueFn { param($varName)
+            if ($varName -in $overridableVarDefs.Keys) {
+                $value = Get-GroupSettingsFieldValue "OVERRIDE_$varName"
+                return -not [string]::IsNullOrWhiteSpace($value)
+            }
+            $true
+        }
 
     $xlsxPath = Get-GroupXlsxPath $GroupName
     if (!(Test-Path -LiteralPath $xlsxPath)) {

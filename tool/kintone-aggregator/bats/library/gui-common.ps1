@@ -64,7 +64,8 @@ function Save-EnvBatFile {
         [string[]]$VarNames,
         [Parameter(Mandatory)][scriptblock]$GetValueFn,
         [Parameter(Mandatory)][scriptblock]$HasValueFn,
-        [switch]$IfNotDefined
+        [switch]$IfNotDefined,
+        [switch]$RemoveUnwritten
     )
     $existingLines = Read-SetEnvLines -Path $Path
     $writtenVars = @{}
@@ -73,13 +74,18 @@ function Save-EnvBatFile {
         $m = $script:setEnvLineRegex.Match($line.Trim())
         $varName = if ($m.Success) { $m.Groups["var"].Value } else { $null }
         $matchesVarNames = (-not $VarNames) -or ($VarNames -contains $varName)
-        if ($varName -and $matchesVarNames -and (& $HasValueFn $varName)) {
-            $writtenVars[$varName] = $true
-            $newVal = & $GetValueFn $varName
-            if ($IfNotDefined) {
-                "if not defined $varName set `"$varName=$newVal`""
-            } else {
-                "set `"$varName=$newVal`""
+        if ($varName -and $matchesVarNames) {
+            $hasValue = & $HasValueFn $varName
+            if ($hasValue) {
+                $writtenVars[$varName] = $true
+                $newVal = & $GetValueFn $varName
+                if ($IfNotDefined) {
+                    "if not defined $varName set `"$varName=$newVal`""
+                } else {
+                    "set `"$varName=$newVal`""
+                }
+            } elseif (-not $RemoveUnwritten) {
+                $line
             }
         } else {
             $line
