@@ -304,36 +304,7 @@ $postVars = @($settingsGroups["POST"].Vars.Keys)
 $groupOverrideVars = @($settingsGroups["OVERRIDE"].Vars.Keys)
 $syncUserMasterVars = @($settingsGroups["SYNC"].Vars.Keys)
 
-$settingsTrailingButtonVars = @{
-    "SyncUserMasterSheetName" = { param($Panel, $Y, $Field)
-        Add-FieldActionButton -Panel $Panel -Y $Y -Text "同期実行" -AddStatusLabel -OnClick {
-            $groupName = $cmbSettingsGroupTarget.SelectedItem
-            if ([string]::IsNullOrWhiteSpace($groupName)) {
-                [System.Windows.Forms.MessageBox]::Show("グループを選択してください。", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning)
-                return
-            }
-            $batchPath = Join-Path $basePath "sync-kintone-to-sheet.bat"
-            try {
-                Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-                    $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
-                    $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
-                    if ([string]::IsNullOrWhiteSpace($syncAppId)) {
-                        throw "対象アプリIDが入力されていません"
-                    }
-
-                    $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
-                    $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
-                    if ($exitCode -ne 0) {
-                        throw "同期処理に失敗しました"
-                    }
-                    [System.Windows.Forms.MessageBox]::Show("同期が完了しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-                }
-            } catch {
-                [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
-            }
-        }.GetNewClosure()
-    }
-}
+$settingsTrailingButtonVars = @{}
 
 $settingsGroupLabels = @{}
 $settingsVarLabels = @{}
@@ -496,7 +467,7 @@ $btnMasterOpsSyncExecute.Add_Click({
             $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
             $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
             if ($exitCode -ne 0) {
-                throw "同期処理に失敗しました"
+                throw "同期処理に失敗しました（$($syncAppId)）"
             }
             [System.Windows.Forms.MessageBox]::Show("同期が完了しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
         }

@@ -501,7 +501,7 @@ $btnMasterOpsSyncExecute.Add_Click({
             $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
             $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
             if ($exitCode -ne 0) {
-                throw "同期処理に失敗しました"
+                throw "同期処理に失敗しました（$($syncAppId)）"
             }
             [System.Windows.Forms.MessageBox]::Show("同期が完了しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
         }
