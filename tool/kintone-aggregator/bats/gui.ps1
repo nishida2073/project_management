@@ -1139,7 +1139,7 @@ function Get-GridRows {
         [Parameter(Mandatory)][array]$Columns
     )
 
-    $updatedRows = @()
+    $rows = @()
     $controls = $ContentPanel.Controls
     $controlsPerRow = $Columns.Count + 1
 
@@ -1156,11 +1156,11 @@ function Get-GridRows {
             }
         }
 
-        $updatedRows += [PSCustomObject]$newObj
+        $rows += [PSCustomObject]$newObj
         $rowIndex++
     }
 
-    return $updatedRows
+    return $rows
 }
 
 function Get-ScheduleRowsFromUI {
