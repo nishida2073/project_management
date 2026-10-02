@@ -309,17 +309,16 @@ $lblBatchExcelPath.Location = New-Object System.Drawing.Point(20, 17)
 $txtBatchExcelPath = New-Object System.Windows.Forms.TextBox
 $txtBatchExcelPath.Location = New-Object System.Drawing.Point(140, 14)
 $txtBatchExcelPath.Size = New-Object System.Drawing.Size(250, 22)
-$txtBatchExcelPath.ReadOnly = $true
 
 $btnBatchBrowse = New-Object System.Windows.Forms.Button
 $btnBatchBrowse.Text = "参照..."
 $btnBatchBrowse.Location = New-Object System.Drawing.Point(400, 13)
 $btnBatchBrowse.Size = New-Object System.Drawing.Size(70, 24)
 
-$btnBatchRunAll = New-Object System.Windows.Forms.Button
-$btnBatchRunAll.Text = "実行"
-$btnBatchRunAll.Location = New-Object System.Drawing.Point(20, 50)
-$btnBatchRunAll.Size = New-Object System.Drawing.Size(100, 26)
+$btnMultipleBatchRunAll = New-Object System.Windows.Forms.Button
+$btnMultipleBatchRunAll.Text = "実行"
+$btnMultipleBatchRunAll.Location = New-Object System.Drawing.Point(20, 50)
+$btnMultipleBatchRunAll.Size = New-Object System.Drawing.Size(100, 26)
 
 $lblBatchStatus = New-Object System.Windows.Forms.Label
 $lblBatchStatus.Text = ""
@@ -327,7 +326,7 @@ $lblBatchStatus.AutoSize = $true
 $lblBatchStatus.Location = New-Object System.Drawing.Point(130, 56)
 
 $batchExcelPanel.Controls.AddRange(@(
-    $lblBatchExcelPath, $txtBatchExcelPath, $btnBatchBrowse, $btnBatchRunAll, $lblBatchStatus
+    $lblBatchExcelPath, $txtBatchExcelPath, $btnBatchBrowse, $btnMultipleBatchRunAll, $lblBatchStatus
 ))
 
 $dlgBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
@@ -436,7 +435,7 @@ function Set-RunButtonsEnabled {
     $script:batchInputControls["CustomTemplateName"].Enabled = $Enabled
     $script:batchRunButton.Enabled = $Enabled
     $btnBatchBrowse.Enabled = $Enabled
-    $btnBatchRunAll.Enabled = $Enabled
+    $btnMultipleBatchRunAll.Enabled = $Enabled
     foreach ($btn in $tabResult.RunButtons) { $btn.Enabled = $Enabled }
 }
 
@@ -491,7 +490,7 @@ function Invoke-AllStepsForCurrentInputs {
     return $lastExitCode
 }
 
-function Invoke-SeededAllSteps {
+function Invoke-ExecuteAll {
     foreach ($inputDef in $batchRunAllInputs) {
         if ($inputDef.Require) {
             $ctrl = $script:batchInputControls[$inputDef.Name]
@@ -551,7 +550,7 @@ $script:batchRunButton.Add_Click({
     Set-RunButtonsEnabled $false
     Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
 
-    $exitCode = Invoke-SeededAllSteps
+    $exitCode = Invoke-ExecuteAll
 
     if ($exitCode -eq 0) {
         Set-StepStatus -Label $lblOverallStatus -Text "成功" -State "成功"
@@ -565,7 +564,7 @@ $script:batchRunButton.Add_Click({
     $script:isRunning = $false
 })
 
-$btnBatchRunAll.Add_Click({
+$btnMultipleBatchRunAll.Add_Click({
     $excelPath = $txtBatchExcelPath.Text.Trim()
     if (!$excelPath -or !(Test-Path -LiteralPath $excelPath)) {
         [System.Windows.Forms.MessageBox]::Show("実行一覧ファイルを選択してください。", "複数実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
