@@ -379,6 +379,10 @@ $tabSettingsGroup = New-Object System.Windows.Forms.TabPage
 $tabSettingsGroup.Text = "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
+$tabSettingsMasterOps = New-Object System.Windows.Forms.TabPage
+$tabSettingsMasterOps.Text = "マスター操作"
+$settingsSubTabControl.Controls.Add($tabSettingsMasterOps)
+
 $settingsToolTip = New-Object System.Windows.Forms.ToolTip
 
 function Get-CommonSettingsFiles {
@@ -409,9 +413,6 @@ $btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
 $btnSettingsGroupNewGroup.Text = "新規作成"
 $btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
 
-$lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
-$lnkSettingsGroupOpenXlsx.Text = "開く"
-
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
     return @(
@@ -420,12 +421,12 @@ function Get-GroupSettingsFiles {
 }
 
 $settingsGroupTopPanel = (New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
+    -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup) `
     -OnSave {
         $target = $cmbSettingsGroupTarget.SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
-        Update-SettingsGroupList
+        Update-GroupDropdowns
         Update-GroupSettingsFields
     } `
     -OnReload {
@@ -441,13 +442,78 @@ $settingsGroupFieldPanel.AutoScroll = $true
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
-function Get-GroupNames {
-    if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
-    $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | ForEach-Object {
-        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
+$lblSettingsMasterOpsGroupTarget = New-Object System.Windows.Forms.Label
+$lblSettingsMasterOpsGroupTarget.Text = "対象グループ"
+
+$cmbSettingsMasterOpsGroupTarget = New-Object System.Windows.Forms.ComboBox
+$cmbSettingsMasterOpsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
+$cmbSettingsMasterOpsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbSettingsMasterOpsGroupTarget.DisplayMember = "Text"
+
+$lnkSettingsMasterOpsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
+$lnkSettingsMasterOpsOpenXlsx.Text = "開く"
+
+$settingsMasterOpsTopPanel = (New-SettingsTopPanel `
+    -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
+    -OnSave { } `
+    -OnReload { }).Panel
+
+$settingsMasterOpsPanel = New-Object System.Windows.Forms.Panel
+$settingsMasterOpsPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsMasterOpsPanel.AutoScroll = $true
+
+$tabSettingsMasterOps.Controls.Add($settingsMasterOpsPanel)
+$tabSettingsMasterOps.Controls.Add($settingsMasterOpsTopPanel)
+
+$grpUserMasterSync = New-Object System.Windows.Forms.GroupBox
+$grpUserMasterSync.Text = "ユーザーマスター同期"
+$grpUserMasterSync.Dock = [System.Windows.Forms.DockStyle]::Top
+$grpUserMasterSync.AutoSize = $true
+$grpUserMasterSync.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+$grpUserMasterSync.Padding = New-Object System.Windows.Forms.Padding(10)
+
+$btnMasterOpsSyncExecute = New-Object System.Windows.Forms.Button
+$btnMasterOpsSyncExecute.Text = "同期実行"
+$btnMasterOpsSyncExecute.Size = New-Object System.Drawing.Size(100, 24)
+$btnMasterOpsSyncExecute.Location = New-Object System.Drawing.Point(20, 30)
+$btnMasterOpsSyncExecute.Add_Click({
+    try {
+        $batchPath = Join-Path $basePath "sync-kintone-to-sheet.bat"
+        $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+        if ([string]::IsNullOrWhiteSpace($groupName)) {
+            throw "グループが選択されていません"
+        }
+        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterOpsStatusPlaceholder -Action {
+            $script:suppressComboSync = $true
+            $cmbSettingsGroupTarget.SelectedItem = $groupName
+            $script:suppressComboSync = $null
+            Update-GroupSettingsFields
+            $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
+            $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
+            if ([string]::IsNullOrWhiteSpace($syncAppId)) {
+                throw "対象アプリIDが入力されていません"
+            }
+            $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
+            $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $basePath -BatArgs $batArgs
+            if ($exitCode -ne 0) {
+                throw "同期処理に失敗しました"
+            }
+            [System.Windows.Forms.MessageBox]::Show("同期が完了しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+        }
+    } catch {
+        [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
-    return @($names | Select-Object -Unique | Sort-Object)
-}
+})
+$grpUserMasterSync.Controls.Add($btnMasterOpsSyncExecute)
+
+$lblMasterOpsStatusPlaceholder = New-Object System.Windows.Forms.Label
+$lblMasterOpsStatusPlaceholder.AutoSize = $false
+$lblMasterOpsStatusPlaceholder.Size = New-Object System.Drawing.Size(500, 24)
+$lblMasterOpsStatusPlaceholder.Location = New-Object System.Drawing.Point(130, 30)
+$lblMasterOpsStatusPlaceholder.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+$grpUserMasterSync.Controls.Add($lblMasterOpsStatusPlaceholder)
+
+$settingsMasterOpsPanel.Controls.Add($grpUserMasterSync)
 
 function Get-CommonSettingsFieldRows {
     $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
@@ -649,6 +715,79 @@ function Save-GroupSettings {
     }
 }
 
+function Update-GroupDropdowns {
+    $groupNames = @(Get-GroupNames)
+
+    $savedSettings = $cmbSettingsGroupTarget.SelectedItem
+    $savedLog = $cmbLogGroup.SelectedItem
+    $savedMaster = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $savedFilters = @{}
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupNameFilter")) {
+                $savedFilters[$bd.Label] = $bd.InputControls["TargetGroupNameFilter"].SelectedItem
+            }
+        }
+    }
+
+    if ($cmbSettingsGroupTarget) {
+        $cmbSettingsGroupTarget.Items.Clear()
+        foreach ($groupName in $groupNames) {
+            $cmbSettingsGroupTarget.Items.Add($groupName) | Out-Null
+        }
+        if ($savedSettings -and $cmbSettingsGroupTarget.Items.Contains($savedSettings)) {
+            $cmbSettingsGroupTarget.SelectedItem = $savedSettings
+        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+            $cmbSettingsGroupTarget.SelectedIndex = 0
+        }
+    }
+
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupNameFilter")) {
+                $cmb = $bd.InputControls["TargetGroupNameFilter"]
+                if ($cmb) {
+                    $cmb.Items.Clear()
+                    $cmb.Items.Add("すべて") | Out-Null
+                    foreach ($groupName in $groupNames) {
+                        $cmb.Items.Add($groupName) | Out-Null
+                    }
+                    if ($savedFilters[$bd.Label] -and $cmb.Items.Contains($savedFilters[$bd.Label])) {
+                        $cmb.SelectedItem = $savedFilters[$bd.Label]
+                    } elseif ($cmb.Items.Count -gt 0) {
+                        $cmb.SelectedIndex = 0
+                    }
+                }
+            }
+        }
+    }
+
+    if ($cmbLogGroup) {
+        $cmbLogGroup.Items.Clear()
+        $cmbLogGroup.Items.Add("すべて") | Out-Null
+        foreach ($groupName in $groupNames) {
+            $cmbLogGroup.Items.Add($groupName) | Out-Null
+        }
+        if ($savedLog -and $cmbLogGroup.Items.Contains($savedLog)) {
+            $cmbLogGroup.SelectedItem = $savedLog
+        } elseif ($cmbLogGroup.Items.Count -gt 0) {
+            $cmbLogGroup.SelectedIndex = 0
+        }
+    }
+
+    if ($cmbSettingsMasterOpsGroupTarget) {
+        $cmbSettingsMasterOpsGroupTarget.Items.Clear()
+        foreach ($groupName in $groupNames) {
+            $cmbSettingsMasterOpsGroupTarget.Items.Add($groupName) | Out-Null
+        }
+        if ($savedMaster -and $cmbSettingsMasterOpsGroupTarget.Items.Contains($savedMaster)) {
+            $cmbSettingsMasterOpsGroupTarget.SelectedItem = $savedMaster
+        } elseif ($cmbSettingsMasterOpsGroupTarget.Items.Count -gt 0) {
+            $cmbSettingsMasterOpsGroupTarget.SelectedIndex = 0
+        }
+    }
+}
+
 $btnSettingsGroupNewGroup.Add_Click({
     Add-Type -AssemblyName Microsoft.VisualBasic
     $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
@@ -664,8 +803,8 @@ $btnSettingsGroupNewGroup.Add_Click({
     $cmbSettingsGroupTarget.SelectedItem = $newName
 })
 
-$lnkSettingsGroupOpenXlsx.Add_LinkClicked({
-    $target = $cmbSettingsGroupTarget.SelectedItem
+$lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
+    $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
     if (!$target) {
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
@@ -688,6 +827,7 @@ $tabControl.Add_SelectedIndexChanged({
 Update-SettingsGroupList
 Update-CommonSettingsFields
 Update-GroupSettingsFields
+Update-GroupDropdowns
 
 $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
