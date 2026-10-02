@@ -49,13 +49,12 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "スペース作成"
-                StageKey = "createspace"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 151; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $createSpaceBat
-                ArgsFn = { param($ic) @("-LogNamePrefix", "createspace", "-TemplateId", $ic['SpaceTemplateId'].Text.Trim(), "-SpaceName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = { param($ic) @("-TemplateId", $ic['SpaceTemplateId'].Text.Trim(), "-SpaceName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
                 InputControls = $null
@@ -78,13 +77,12 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "ダウンロード"
-                StageKey = "download"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 151; InputWidth = 200; NewRow = $true; Require = $false }
                 )
                 BatchPath = $downloadBat
-                ArgsFn = { param($ic) @("-LogNamePrefix", "download", "-SpaceId", $ic['SpaceId'].Text.Trim(), "-ConfigName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = { param($ic) @("-SpaceId", $ic['SpaceId'].Text.Trim(), "-ConfigName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH") "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
                 OpenTarget = { param($ic) & $_.OutputPathFn $ic }
                 InputControls = $null
@@ -97,7 +95,6 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "設定ファイルの生成"
-                StageKey = "generate"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
                     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 151; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
@@ -106,7 +103,7 @@ $categoryDefs = @(
                 BatchPath = $generateBat
                 ArgsFn = {
                     param($ic)
-                    $stepArgs = @("-LogNamePrefix", "generate", "-BaseTemplateConfigName", $ic['BaseTemplateName'].Text.Trim(), "-DownloadConfigName", $ic['ConfigName'].Text.Trim())
+                    $stepArgs = @("-BaseTemplateConfigName", $ic['BaseTemplateName'].Text.Trim(), "-DownloadConfigName", $ic['ConfigName'].Text.Trim())
                     $customTemplateName = $ic['CustomTemplateName'].Text.Trim()
                     if ($customTemplateName -and $customTemplateName -ne $script:customTemplateNamePlaceholder) {
                         $stepArgs += @("-CustomTemplateConfigName", $customTemplateName)
@@ -125,12 +122,11 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "kintoneへ反映"
-                StageKey = "apply"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
                 )
                 BatchPath = $applyBat
-                ArgsFn = { param($ic) @("-LogNamePrefix", "apply", "-ConfigName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = { param($ic) @("-ConfigName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
                 InputControls = $null
@@ -143,12 +139,11 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "データチェック"
-                StageKey = "check"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
                 )
                 BatchPath = $checkBat
-                ArgsFn = { param($ic) @("-LogNamePrefix", "check", "-ConfigName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = { param($ic) @("-ConfigName", $ic['ConfigName'].Text.Trim()) }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH") "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
                 OpenTarget = { param($ic) & $_.OutputPathFn $ic }
                 InputControls = $null
@@ -351,7 +346,10 @@ $txtLog = New-LogTextBox
 
 Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($innerRunTabControl, $txtLog)
 
-$allButtonDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+$allButtonDefs = @()
+foreach ($cd in $categoryDefs) {
+    $allButtonDefs += $cd.ButtonDefs
+}
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
@@ -372,7 +370,8 @@ function Update-LogConfigNameList {
     if ($logPath -and (Test-Path -LiteralPath $logPath)) {
         $stageKeys = @()
         foreach ($bd in $allButtonDefs) {
-            if ($bd.StageKey) { $stageKeys += $bd.StageKey } else { $stageKeys += ".*" }
+            $prefix = [System.IO.Path]::GetFileNameWithoutExtension($bd.BatchPath)
+            $stageKeys += $prefix
         }
         $stageKeyPattern = $stageKeys -join '|'
         $stagePrefixPattern = "^(?:$stageKeyPattern)_(?<config>.+)_\d{8}_\d{6}$"
@@ -392,7 +391,7 @@ function Update-LogConfigNameList {
 function Update-LogView {
     $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
     if (-not $selectedRadio) { return }
-    $stage = $selectedRadio.Tag.StageKey
+    $stage = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
     $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
 
     $script:logTab.ContentBox.Text = ""
