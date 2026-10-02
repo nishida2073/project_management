@@ -990,18 +990,7 @@ $grpScheduleEdit.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShri
 $grpScheduleEdit.Padding = New-Object System.Windows.Forms.Padding(10)
 
 $script:scheduleRows = @()
-
-$script:scheduleHeaderPanel = New-Object System.Windows.Forms.Panel
-$script:scheduleHeaderPanel.AutoSize = $false
-$script:scheduleHeaderPanel.Size = New-Object System.Drawing.Size(730, 30)
-$script:scheduleHeaderPanel.Location = New-Object System.Drawing.Point(10, 20)
-$grpScheduleEdit.Controls.Add($script:scheduleHeaderPanel)
-
-$script:scheduleContentPanel = New-Object System.Windows.Forms.Panel
-$script:scheduleContentPanel.AutoSize = $false
-$script:scheduleContentPanel.Size = New-Object System.Drawing.Size(730, 370)
-$script:scheduleContentPanel.Location = New-Object System.Drawing.Point(10, 50)
-$grpScheduleEdit.Controls.Add($script:scheduleContentPanel)
+$script:scheduleContentPanel = $null
 
 
 $settingsMasterOpsPanel.Controls.Add($grpScheduleEdit)
@@ -1009,13 +998,32 @@ $settingsMasterOpsPanel.Controls.SetChildIndex($grpScheduleEdit, 0)
 
 function Render-Grid {
     param(
-        [Parameter(Mandatory)]$HeaderPanel,
-        [Parameter(Mandatory)]$ContentPanel,
+        [Parameter(Mandatory)]$GroupBox,
         [Parameter(Mandatory)][ref]$RowsData,
         [Parameter(Mandatory)][scriptblock]$OnDelete,
         [Parameter(Mandatory)][array]$Columns,
         [scriptblock]$OnAdd
     )
+
+    $existingPanels = $GroupBox.Controls | Where-Object { $_ -is [System.Windows.Forms.Panel] }
+    $HeaderPanel = $existingPanels | Where-Object { $_.Location.Y -eq 20 } | Select-Object -First 1
+    $ContentPanel = $existingPanels | Where-Object { $_.Location.Y -eq 50 } | Select-Object -First 1
+
+    if (-not $HeaderPanel) {
+        $HeaderPanel = New-Object System.Windows.Forms.Panel
+        $HeaderPanel.AutoSize = $false
+        $HeaderPanel.Size = New-Object System.Drawing.Size(730, 30)
+        $HeaderPanel.Location = New-Object System.Drawing.Point(10, 20)
+        $GroupBox.Controls.Add($HeaderPanel)
+    }
+
+    if (-not $ContentPanel) {
+        $ContentPanel = New-Object System.Windows.Forms.Panel
+        $ContentPanel.AutoSize = $false
+        $ContentPanel.Size = New-Object System.Drawing.Size(730, 370)
+        $ContentPanel.Location = New-Object System.Drawing.Point(10, 50)
+        $GroupBox.Controls.Add($ContentPanel)
+    }
 
     if ($HeaderPanel.Controls.Count -eq 0) {
         $y = 0
@@ -1097,6 +1105,8 @@ function Render-Grid {
 
     $panelHeight = $y + 50
     $ContentPanel.Height = $panelHeight
+
+    @{ HeaderPanel = $HeaderPanel; ContentPanel = $ContentPanel }
 }
 
 function Render-ScheduleRows {
@@ -1106,7 +1116,7 @@ function Render-ScheduleRows {
         @{ Label = "開始日"; Width = 100; Property = "StartDate" }
         @{ Label = "終了日"; Width = 100; Property = "EndDate" }
     )
-    Render-Grid -HeaderPanel $script:scheduleHeaderPanel -ContentPanel $script:scheduleContentPanel -RowsData ([ref]$script:scheduleRows) -OnDelete {
+    $panels = Render-Grid -GroupBox $grpScheduleEdit -RowsData ([ref]$script:scheduleRows) -OnDelete {
         $rowIndex = $this.Tag
         $newRows = @()
         for ($j = 0; $j -lt $script:scheduleRows.Count; $j++) {
@@ -1120,6 +1130,7 @@ function Render-ScheduleRows {
         $script:scheduleRows += [PSCustomObject]@{ Subject = ""; StartDate = ""; EndDate = "" }
         Render-ScheduleRows
     } -Columns $columns
+    $script:scheduleContentPanel = $panels.ContentPanel
 }
 
 function Get-ScheduleRowsFromUI {
