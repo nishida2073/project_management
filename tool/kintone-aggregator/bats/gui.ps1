@@ -1059,7 +1059,7 @@ function Render-Grid {
 
             if ($c -eq 0) {
                 $ctrl = New-Object System.Windows.Forms.Label
-                $ctrl.Text = "$($i + 1)"
+                $ctrl.Text = "$($row.No)"
                 $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
             } else {
                 $ctrl = New-Object System.Windows.Forms.TextBox
@@ -1082,7 +1082,7 @@ function Render-Grid {
         $btnDelete.AutoSize = $false
         $btnDelete.Size = New-Object System.Drawing.Size(60, 24)
         $btnDelete.Location = New-Object System.Drawing.Point($x, ($y - 1))
-        $btnDelete.Tag = $i
+        $btnDelete.Tag = $row.No
         $btnDelete.Add_Click($OnDelete)
         $ContentPanel.Controls.Add($btnDelete)
 
@@ -1117,17 +1117,18 @@ function Render-ScheduleRows {
         @{ Label = "終了日"; Width = 100; Property = "EndDate" }
     )
     $panels = Render-Grid -GroupBox $grpScheduleEdit -RowsData ([ref]$script:scheduleRows) -OnDelete {
-        $rowIndex = $this.Tag
-        $newRows = @()
-        for ($j = 0; $j -lt $script:scheduleRows.Count; $j++) {
-            if ($j -ne $rowIndex) {
-                $newRows += $script:scheduleRows[$j]
-            }
-        }
-        $script:scheduleRows = $newRows
+        $deleteRowNo = $this.Tag
+        $updatedRows = Get-ScheduleRowsFromUI
+        $script:scheduleRows = @($updatedRows | Where-Object { $_.No -ne $deleteRowNo })
         Render-ScheduleRows
     } -OnAdd {
-        $script:scheduleRows += [PSCustomObject]@{ Subject = ""; StartDate = ""; EndDate = "" }
+        if ($script:scheduleContentPanel) {
+            $updatedRows = Get-ScheduleRowsFromUI
+            $script:scheduleRows = $updatedRows
+        }
+        $nextNo = if ($script:scheduleRows.Count -gt 0) { ($script:scheduleRows | Measure-Object -Property No -Maximum).Maximum + 1 } else { 1 }
+        $newRow = [PSCustomObject]@{ No = $nextNo; Subject = ""; StartDate = ""; EndDate = "" }
+        $script:scheduleRows = @($script:scheduleRows) + @($newRow)
         Render-ScheduleRows
     } -Columns $columns
     $script:scheduleContentPanel = $panels.ContentPanel
@@ -1142,13 +1143,15 @@ function Get-GridRows {
     $rows = @()
     $controls = $ContentPanel.Controls
     $controlsPerRow = $Columns.Count + 1
+    $dataControlsCount = $controls.Count - 1
 
     $rowIndex = 0
-    while ($rowIndex * $controlsPerRow -lt $controls.Count - 1) {
+    while ($rowIndex * $controlsPerRow -lt $dataControlsCount) {
         $baseIndex = $rowIndex * $controlsPerRow
-        $newObj = [ordered]@{ No = $rowIndex + 1 }
+        $noCtrl = $controls[$baseIndex]
+        $newObj = [ordered]@{ No = $noCtrl.Text }
 
-        for ($c = 0; $c -lt $Columns.Count; $c++) {
+        for ($c = 1; $c -lt $Columns.Count; $c++) {
             $col = $Columns[$c]
             $ctrl = $controls[$baseIndex + $c]
             if ($col.Property) {
