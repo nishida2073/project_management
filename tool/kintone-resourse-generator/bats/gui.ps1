@@ -22,7 +22,7 @@ $generateBat = Join-Path $rootPath "generate-config-from-template.bat"
 $applyBat = Join-Path $rootPath "apply-kintone-resources.bat"
 $checkBat = Join-Path $rootPath "check-kintone-resources.bat"
 $clientsDir = Join-Path $rootPath "clients"
-$setEnvBat = Join-Path $clientsDir "set-env.bat"
+$setEnvBat = Join-Path $clientsDir "common.bat"
 
 $libraryDir = Join-Path $rootPath "bats\library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -374,7 +374,7 @@ function Update-LogConfigNameList {
             $stageKeys += $prefix
         }
         $stageKeyPattern = $stageKeys -join '|'
-        $stagePrefixPattern = "^(?:$stageKeyPattern)_(?<config>.+)_\d{8}_\d{6}$"
+        $stagePrefixPattern = "^(?:$stageKeyPattern)-(?<config>.+)_\d{8}_\d{6}$"
         $configNames = Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue |
             ForEach-Object {
                 $m = [regex]::Match([System.IO.Path]::GetFileNameWithoutExtension($_.Name), $stagePrefixPattern)
@@ -401,8 +401,8 @@ function Update-LogView {
     }
 
     $logConfigName = $cmbLogConfigName.SelectedItem
-    $configFilter = if ($logConfigName -and $logConfigName -ne "すべて") { "$logConfigName" + "_" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}_$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
+    $configFilter = if ($logConfigName -and $logConfigName -ne "すべて") { "-$logConfigName" } else { "" }
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
 
     $sections = foreach ($file in $files) {
         try {

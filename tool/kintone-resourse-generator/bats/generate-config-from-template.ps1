@@ -66,7 +66,7 @@ $baseTemplatePath = Join-Path $BaseTemplateRoot "$BaseTemplateConfigName.xlsx"
 $customTemplatePath = if ($CustomTemplateConfigName) { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
 $downloadPath = Join-Path $DownloadRoot "${DownloadConfigName}_download.xlsx"
 $outputPath = Join-Path $ConfigRoot "${DownloadConfigName}_config.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}_$DownloadConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$DownloadConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

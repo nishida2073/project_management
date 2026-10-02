@@ -1,5 +1,5 @@
 @echo off
-call "%~dp0clients\set-env.bat"
+call "%~dp0clients\common.bat"
 
 call "%~dp0bats\message.bat" "Start %~nx0"
 

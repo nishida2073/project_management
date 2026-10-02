@@ -31,14 +31,13 @@
 | `run-list\*.xlsx` | GUI版「一括実行」タブで読み込む実行一覧ファイル（列は[一括実行](#一括実行)を参照） |
 | `build-gui.bat` | GUI版（`kintoneリソース生成ツール.exe`）をビルドするエントリーポイント。[GUI版](#gui版)を参照 |
 | `bats\gui.ps1` / `build-gui.ps1` | GUI版の画面本体、およびそれをexe化するビルドスクリプト（`build-gui.bat`から呼び出される。ユーザーが直接実行するものではない） |
-| `clients\set-env.bat` | ローカルのフォルダパス（`COMMON_*`）の既定値をまとめて設定する（他の`.bat`から`call clients\set-env.bat`される） |
-| `clients\set-kintone.bat` | kintoneの接続情報（サイトURL・ログイン名・パスワード） |
+| `clients\common.bat` | ローカルのフォルダパス（`COMMON_*`）とkintoneの接続情報（`KINTONE_*`）の既定値をまとめて設定する（他の`.bat`から`call clients\common.bat`される） |
 
-環境変数はローカルのフォルダパス（`COMMON_*`）が`clients\set-env.bat`、kintoneの接続情報（`KINTONE_*`）が`clients\set-kintone.bat`にまとめてある。書き方は[clients\README.md](clients/README.md)を参照。
+環境変数の設定について詳しくは[clients\README.md](clients/README.md)を参照。
 
 ## kintoneへのログイン
 
-各`.ps1`は`KINTONE_BASE_URL`（接続先のkintoneサイトURL）に対してREST APIを直接呼び出す（Basic認証）。`KINTONE_LOGIN`/`KINTONE_PASSWORD`が環境変数として設定されていればそれを使い、されていなければ実行時（最初にAPIを呼ぶ直前）にコンソールでログイン名・パスワードの入力を求められる。この3変数はローカルの`clients\set-kintone.bat`にまとめてある（書き方は[clients\README.md](clients/README.md)を参照）。
+各`.ps1`は`KINTONE_BASE_URL`（接続先のkintoneサイトURL）に対してREST APIを直接呼び出す（Basic認証）。`KINTONE_LOGIN`/`KINTONE_PASSWORD`が環境変数として設定されていればそれを使い、されていなければ実行時（最初にAPIを呼ぶ直前）にコンソールでログイン名・パスワードの入力を求められる。この3変数はローカルの`clients\common.bat`にまとめてある（書き方は[clients\README.md](clients/README.md)を参照）。
 
 「0. スペース作成」で使うスペーステンプレートからのスペース作成APIは、スペース管理者（`members`）を1名以上指定しないとエラーになる。このツールはログインに使ったユーザー自身を唯一の管理者として自動的に設定する。
 
@@ -62,7 +61,7 @@ kintoneの「スペーステンプレート」機能を使って、指定した�
 #### 処理の流れ
 
 1. `create-space-from-template.bat` を実行する
-2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\common.bat` が呼び出され、環境変数の初期値がセットされる
 3. `create-space-from-template.ps1` が実行される
    1. kintoneにログインする（未設定時はコンソールでログイン名・パスワードを入力）
    2. スペーステンプレートAPIで新しいスペースを作成する（管理者はログインユーザー自身）
@@ -88,7 +87,7 @@ create-space-from-template.bat -TemplateId 12 -SpaceName "L20 クラススペー
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `createspace_<スペース名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `create-space-from-template_<スペース名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
 
 ### 1. ダウンロードについて
 
@@ -97,7 +96,7 @@ create-space-from-template.bat -TemplateId 12 -SpaceName "L20 クラススペー
 #### 処理の流れ
 
 1. `download-kintone-resources.bat` を実行する
-2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\common.bat` が呼び出され、環境変数の初期値がセットされる
 3. `download-kintone-resources.ps1` が実行される
    1. kintoneにログインする
    2. 対象スペース（`-SpaceId`）の設定・メンバー・アプリ一覧・アプリACL・レコードACLを取得する
@@ -122,7 +121,7 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | `<スペース識別名>_download.xlsx` | ダウンロード先（`COMMON_DOWNLOAD_PATH`） | 対象スペースの現在の状態（5シート構成、[設定ファイル・テンプレートの構成](#設定ファイルテンプレートの構成)を参照） |
-| `download_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `download-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
 
 #### 注意点
 
@@ -141,7 +140,7 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 #### 処理の流れ
 
 1. `generate-config-from-template.bat` を実行する
-2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\common.bat` が呼び出され、環境変数の初期値がセットされる
 3. `generate-config-from-template.ps1` が実行される
    1. 設定テンプレート（基本）（`COMMON_BASE_TEMPLATE_PATH`配下）、指定時は設定テンプレート（カスタム）（`COMMON_CUSTOM_TEMPLATE_PATH`配下）、およびダウンロード結果（`COMMON_DOWNLOAD_PATH`配下）を読み込む
    2. アプリ名の一致でテンプレートのアプリとダウンロード結果のアプリを対応付ける（対応付けられなかったアプリはコンソールに警告表示）
@@ -168,7 +167,7 @@ generate-config-from-template.bat -BaseTemplateConfigName class-space -DownloadC
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | `<スペース識別名>_config.xlsx` | 設定ファイルのフォルダ（`COMMON_CONFIG_PATH`） | kintoneに反映する設定内容（5シート構成）。テンプレートの`{PH}`置き換え部分は赤字で表示される |
-| `generate_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（対応付けられなかったアプリの警告もここに記録される） |
+| `generate-config-from-template_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（対応付けられなかったアプリの警告もここに記録される） |
 
 #### 注意点
 
@@ -183,7 +182,7 @@ generate-config-from-template.bat -BaseTemplateConfigName class-space -DownloadC
 #### 処理の流れ
 
 1. `apply-kintone-resources.bat` を実行する
-2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\common.bat` が呼び出され、環境変数の初期値がセットされる
 3. `apply-kintone-resources.ps1` が実行される
    1. kintoneにログインする
    2. `config\<スペース識別名>_config.xlsx`を読み込む
@@ -211,7 +210,7 @@ apply-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl,space-app-reco
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `apply_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `apply-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
 
 #### 注意点
 
@@ -226,7 +225,7 @@ apply-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl,space-app-reco
 #### 処理の流れ
 
 1. `check-kintone-resources.bat` を実行する
-2. `clients\set-env.bat` が呼び出され、環境変数の初期値がセットされる
+2. `clients\common.bat` が呼び出され、環境変数の初期値がセットされる
 3. `check-kintone-resources.ps1` が実行される
    1. kintoneにログインする
    2. `config\<スペース識別名>_config.xlsx`（期待値）を読み込む
@@ -255,7 +254,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 | ファイル | 出力先 | 内容 |
 |---|---|---|
 | `<スペース識別名>_check.xlsx` | チェック結果の出力先（`COMMON_CHECK_OUTPUT_PATH`） | 期待値とkintoneの現状の比較結果 |
-| `check_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `check-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
 
 「結果」列の値：
 
@@ -316,14 +315,13 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 - 「スペース識別名」ドロップダウンで、表示するログをスペース識別名別に絞り込める。「すべて」を選べば絞り込みなし
 - 「0. スペース作成」～「4. データチェック」のラジオボタンで、確認したい工程のログを切り替える
-- 選んだ工程・スペース識別名に一致するログファイル（`COMMON_LOG_PATH`配下、`<ステージ名>_<スペース識別名>_yyyyMMdd_HHmmss.log`）を、更新日時の古い順にすべて連結して表示する
+- 選んだ工程・スペース識別名に一致するログファイル（`COMMON_LOG_PATH`配下、`<バッチファイル名>-<ConfigName>_yyyyMMdd_HHmmss.log`）を、更新日時の古い順にすべて連結して表示する
 
 ### 設定タブ
 
-- `clients\set-env.bat`の内容（各フォルダパスの6項目）と、`clients\set-kintone.bat`の内容（kintoneの接続情報3項目）を一覧表示し、値を書き換えて「保存」で書き込める。テキストエディタで直接編集する代わりに使える。フォルダの項目は「参照...」ボタンでダイアログから選べる。パスワードは入力時に非表示になる
+- `clients\common.bat`の内容（各フォルダパスと接続情報の全項目）を一覧表示し、値を書き換えて「保存」で書き込める。テキストエディタで直接編集する代わりに使える。フォルダの項目は「参照...」ボタンでダイアログから選べる。パスワードは入力時に非表示になる
 - 各項目のラベルは環境変数名ではなく日本語の表示名を表示する
-- 「再読込」で現在の`clients\set-env.bat`/`clients\set-kintone.bat`の内容を読み直す（保存前の変更を取り消したい場合など）
-- `clients\set-kintone.bat`が存在しない場合でも接続情報欄は空欄で表示され、「保存」を押すと新規作成される。詳しくは[clients\README.md](clients/README.md)を参照
+- 「再読込」で現在の`clients\common.bat`の内容を読み直す（保存前の変更を取り消したい場合など）
 - 「テスト接続」ボタンで、その時点で入力欄に入っているサイトURL・ログイン名・パスワード（保存前の値でよい）でkintoneにログインできるか確認できる。結果は「保存」と同じ位置に成功/失敗（失敗時はエラー内容も）が表示される。このボタンではファイルへの保存は行われない
 
 | 環境変数名 | 表示名 |
@@ -346,4 +344,4 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 ### 注意点
 
-> kintoneのログイン情報（`KINTONE_LOGIN`/`KINTONE_PASSWORD`）が未設定の場合、GUIはコンソールを持たないため入力プロンプトを表示できない。GUI版を使う場合は`clients\set-kintone.bat`でログイン情報を設定しておくこと（書き方は[clients\README.md](clients/README.md)を参照）。
+> kintoneのログイン情報（`KINTONE_LOGIN`/`KINTONE_PASSWORD`）が未設定の場合、GUIはコンソールを持たないため入力プロンプトを表示できない。GUI版を使う場合は`clients\common.bat`でログイン情報を設定しておくこと（書き方は[clients\README.md](clients/README.md)を参照）。

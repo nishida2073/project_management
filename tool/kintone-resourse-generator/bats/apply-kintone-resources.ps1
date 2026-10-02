@@ -23,7 +23,7 @@ if (-not $ConfigName) {
 }
 
 $configPath = Join-Path $ConfigRoot "${ConfigName}_config.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}_$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$ConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

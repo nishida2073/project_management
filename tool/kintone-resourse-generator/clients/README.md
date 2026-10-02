@@ -1,9 +1,9 @@
-# set-env.bat・set-kintone.bat の書き方
+# common.bat の書き方
 
-各エントリーポイントの`.bat`（`download-kintone-resources.bat`など）が実行時に`call clients\set-env.bat`
+各エントリーポイントの`.bat`（`download-kintone-resources.bat`など）が実行時に`call clients\common.bat`
 で読み込む、環境変数の既定値ファイルを置くフォルダ。
 
-## `set-env.bat`
+## `common.bat`
 
 ローカルのフォルダパス（どの環境でも意味が変わらない、共通の設定）の既定値をまとめて設定するファイル。GUI版（`kintoneリソース生成ツール.exe`）の「設定」タブから編集できる（テキストボックスとフォルダ参照ボタンが並ぶ画面。「保存」で書き込み、「再読込」で保存前の変更を取り消せる）。テキストエディタで直接編集してもよい。
 
@@ -19,25 +19,14 @@
 | `COMMON_CUSTOM_TEMPLATE_PATH` | 設定テンプレート（カスタム）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（カスタム）」ドロップダウンに並ぶ（省略可） | `template\custom`フォルダ |
 | `COMMON_CHECK_OUTPUT_PATH` | データチェック結果（`<スペース識別名>_check.xlsx`）の出力先フォルダ | `checked`フォルダ |
 | `COMMON_LOG_PATH` | 各工程のログの出力先フォルダ | `log`フォルダ |
+| `KINTONE_BASE_URL` | kintoneのサイトURL | `https://%KINTONE_SUB_DOMAIN%.cybozu.com` |
+| `KINTONE_LOGIN` | kintoneへのログイン名（メールアドレス） | |
+| `KINTONE_PASSWORD` | kintoneへのログインパスワード | |
 
-末尾で、同じフォルダに`set-kintone.bat`が存在すれば呼び出す（`if exist ... call ...`）。存在しなくてもエラーにはならない。
-
-## `set-kintone.bat`
-
-kintoneへの接続情報（どのkintone環境に、どのユーザーで繋ぐか）を設定するファイル。`set-env.bat`のフォルダパスと違い、接続先の環境によって値が変わるものなので、あえて別ファイルに分けている。
-
-| 変数名 | 説明 |
-|---|---|
-| `KINTONE_BASE_URL` | kintoneのサイトURL |
-| `KINTONE_LOGIN` | kintoneへのログイン名（メールアドレス） |
-| `KINTONE_PASSWORD` | kintoneへのログインパスワード |
-
-- `set-env.bat`と同じ`if not defined VAR set "VAR=値"`の形式で、この3変数だけを書く。
-- GUI版（`kintoneリソース生成ツール.exe`）の「設定」タブの「kintoneの接続情報」欄からも編集できる（パスワードは入力時に非表示になる）。「保存」を押すとこのファイルが無ければ新規作成される。テキストエディタで直接編集してもよい。
-- `KINTONE_LOGIN`/`KINTONE_PASSWORD`が未設定の場合、`.ps1`は起動直後にエラーメッセージを表示して終了する（対話入力は行わない）。実行前に必ずこのファイルまたはGUIの「設定」タブでログイン情報を設定しておくこと。
+GUI版（`kintoneリソース生成ツール.exe`）の「設定」タブからも編集できます。`KINTONE_LOGIN`/`KINTONE_PASSWORD`が未設定の場合、`.ps1`は起動直後にエラーメッセージを表示して終了するため、実行前に必ずこのファイルまたはGUIの「設定」タブでログイン情報を設定しておくこと。
 
 ## 注意点
 
-> `set-env.bat`自身が`%~dp0..`（自分の場所の1つ上）から`BASE_PATH`を計算しているため、`clients`フォルダを移動する場合は、その1つ上がツールのルートになるように置くこと。
+> `common.bat`自身が`%~dp0..`（自分の場所の1つ上）から`BASE_PATH`を計算しているため、`clients`フォルダを移動する場合は、その1つ上がツールのルートになるように置くこと。
 
-> `set-env.bat`・`set-kintone.bat`の各行を`if not defined VAR set "VAR=値"`以外の形式（例：無条件の`set`）に変えると、GUIの「設定」タブが値を正しく読み書きできなくなる。
+> `common.bat`の各行を`if not defined VAR set "VAR=値"`以外の形式（例：無条件の`set`）に変えると、GUIの「設定」タブが値を正しく読み書きできなくなる。
