@@ -64,7 +64,7 @@ function Save-EnvBatFile {
         [string[]]$VarNames,
         [Parameter(Mandatory)][scriptblock]$GetValueFn,
         [Parameter(Mandatory)][scriptblock]$HasValueFn,
-        [switch]$IfNotDefined,
+        [switch]$UseConditionalSyntax,
         [switch]$RemoveUnwritten
     )
     $existingLines = Read-SetEnvLines -Path $Path
@@ -79,7 +79,7 @@ function Save-EnvBatFile {
             if ($hasValue) {
                 $writtenVars[$varName] = $true
                 $newVal = & $GetValueFn $varName
-                if ($IfNotDefined) {
+                if ($UseConditionalSyntax) {
                     "if not defined $varName set `"$varName=$newVal`""
                 } else {
                     "set `"$varName=$newVal`""
@@ -95,7 +95,7 @@ function Save-EnvBatFile {
     if ($VarNames) {
         foreach ($varName in $VarNames) {
             if (!$writtenVars.ContainsKey($varName) -and (& $HasValueFn $varName)) {
-                if ($IfNotDefined) {
+                if ($UseConditionalSyntax) {
                     $newLines += "if not defined $varName set `"$varName=$(& $GetValueFn $varName)`""
                 } else {
                     $newLines += "set `"$varName=$(& $GetValueFn $varName)`""
