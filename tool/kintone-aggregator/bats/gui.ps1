@@ -990,12 +990,17 @@ $grpScheduleEdit.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShri
 $grpScheduleEdit.Padding = New-Object System.Windows.Forms.Padding(10)
 
 $script:scheduleRows = @()
-$script:scheduleRowControls = @()
+
+$script:scheduleHeaderPanel = New-Object System.Windows.Forms.Panel
+$script:scheduleHeaderPanel.AutoSize = $false
+$script:scheduleHeaderPanel.Size = New-Object System.Drawing.Size(730, 30)
+$script:scheduleHeaderPanel.Location = New-Object System.Drawing.Point(10, 20)
+$grpScheduleEdit.Controls.Add($script:scheduleHeaderPanel)
+
 $script:scheduleContentPanel = New-Object System.Windows.Forms.Panel
 $script:scheduleContentPanel.AutoSize = $false
-$script:scheduleContentPanel.Size = New-Object System.Drawing.Size(730, 400)
-$script:scheduleContentPanel.Location = New-Object System.Drawing.Point(10, 20)
-
+$script:scheduleContentPanel.Size = New-Object System.Drawing.Size(730, 370)
+$script:scheduleContentPanel.Location = New-Object System.Drawing.Point(10, 50)
 $grpScheduleEdit.Controls.Add($script:scheduleContentPanel)
 
 $btnScheduleAddRow = New-Object System.Windows.Forms.Button
@@ -1012,47 +1017,47 @@ $settingsMasterOpsPanel.Controls.Add($grpScheduleEdit)
 $settingsMasterOpsPanel.Controls.SetChildIndex($grpScheduleEdit, 0)
 
 function Render-ScheduleRows {
-    $script:scheduleRowControls = @()
+    if ($script:scheduleHeaderPanel.Controls.Count -eq 0) {
+        $y = 0
+
+        $lblScheduleSeq = New-Object System.Windows.Forms.Label
+        $lblScheduleSeq.Text = "通番"
+        $lblScheduleSeq.AutoSize = $false
+        $lblScheduleSeq.Size = New-Object System.Drawing.Size(50, 20)
+        $lblScheduleSeq.Location = New-Object System.Drawing.Point(10, $y)
+        $script:scheduleHeaderPanel.Controls.Add($lblScheduleSeq)
+
+        $lblScheduleSubject = New-Object System.Windows.Forms.Label
+        $lblScheduleSubject.Text = "科目名"
+        $lblScheduleSubject.AutoSize = $false
+        $lblScheduleSubject.Size = New-Object System.Drawing.Size(200, 20)
+        $lblScheduleSubject.Location = New-Object System.Drawing.Point(70, $y)
+        $script:scheduleHeaderPanel.Controls.Add($lblScheduleSubject)
+
+        $lblScheduleStartDate = New-Object System.Windows.Forms.Label
+        $lblScheduleStartDate.Text = "開始日"
+        $lblScheduleStartDate.AutoSize = $false
+        $lblScheduleStartDate.Size = New-Object System.Drawing.Size(130, 20)
+        $lblScheduleStartDate.Location = New-Object System.Drawing.Point(280, $y)
+        $script:scheduleHeaderPanel.Controls.Add($lblScheduleStartDate)
+
+        $lblScheduleEndDate = New-Object System.Windows.Forms.Label
+        $lblScheduleEndDate.Text = "終了日"
+        $lblScheduleEndDate.AutoSize = $false
+        $lblScheduleEndDate.Size = New-Object System.Drawing.Size(130, 20)
+        $lblScheduleEndDate.Location = New-Object System.Drawing.Point(420, $y)
+        $script:scheduleHeaderPanel.Controls.Add($lblScheduleEndDate)
+
+        $lblScheduleDelete = New-Object System.Windows.Forms.Label
+        $lblScheduleDelete.Text = "削除"
+        $lblScheduleDelete.AutoSize = $false
+        $lblScheduleDelete.Size = New-Object System.Drawing.Size(60, 20)
+        $lblScheduleDelete.Location = New-Object System.Drawing.Point(560, $y)
+        $script:scheduleHeaderPanel.Controls.Add($lblScheduleDelete)
+    }
+
     $script:scheduleContentPanel.Controls.Clear()
-
     $y = 0
-
-    $lblScheduleSeq = New-Object System.Windows.Forms.Label
-    $lblScheduleSeq.Text = "通番"
-    $lblScheduleSeq.AutoSize = $false
-    $lblScheduleSeq.Size = New-Object System.Drawing.Size(50, 20)
-    $lblScheduleSeq.Location = New-Object System.Drawing.Point(10, $y)
-    $script:scheduleContentPanel.Controls.Add($lblScheduleSeq)
-
-    $lblScheduleSubject = New-Object System.Windows.Forms.Label
-    $lblScheduleSubject.Text = "科目名"
-    $lblScheduleSubject.AutoSize = $false
-    $lblScheduleSubject.Size = New-Object System.Drawing.Size(200, 20)
-    $lblScheduleSubject.Location = New-Object System.Drawing.Point(70, $y)
-    $script:scheduleContentPanel.Controls.Add($lblScheduleSubject)
-
-    $lblScheduleStartDate = New-Object System.Windows.Forms.Label
-    $lblScheduleStartDate.Text = "開始日"
-    $lblScheduleStartDate.AutoSize = $false
-    $lblScheduleStartDate.Size = New-Object System.Drawing.Size(130, 20)
-    $lblScheduleStartDate.Location = New-Object System.Drawing.Point(280, $y)
-    $script:scheduleContentPanel.Controls.Add($lblScheduleStartDate)
-
-    $lblScheduleEndDate = New-Object System.Windows.Forms.Label
-    $lblScheduleEndDate.Text = "終了日"
-    $lblScheduleEndDate.AutoSize = $false
-    $lblScheduleEndDate.Size = New-Object System.Drawing.Size(130, 20)
-    $lblScheduleEndDate.Location = New-Object System.Drawing.Point(420, $y)
-    $script:scheduleContentPanel.Controls.Add($lblScheduleEndDate)
-
-    $lblScheduleDelete = New-Object System.Windows.Forms.Label
-    $lblScheduleDelete.Text = "削除"
-    $lblScheduleDelete.AutoSize = $false
-    $lblScheduleDelete.Size = New-Object System.Drawing.Size(60, 20)
-    $lblScheduleDelete.Location = New-Object System.Drawing.Point(560, $y)
-    $script:scheduleContentPanel.Controls.Add($lblScheduleDelete)
-
-    $y += 26
 
     for ($i = 0; $i -lt $script:scheduleRows.Count; $i++) {
         $row = $script:scheduleRows[$i]
@@ -1063,24 +1068,28 @@ function Render-ScheduleRows {
         $lblSeq.Size = New-Object System.Drawing.Size(50, 22)
         $lblSeq.Location = New-Object System.Drawing.Point(10, $y)
         $lblSeq.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+        $lblSeq.Tag = $i
         $script:scheduleContentPanel.Controls.Add($lblSeq)
 
         $txtSubject = New-Object System.Windows.Forms.TextBox
         $txtSubject.Text = $row.Subject
         $txtSubject.Size = New-Object System.Drawing.Size(200, 22)
         $txtSubject.Location = New-Object System.Drawing.Point(70, $y)
+        $txtSubject.Tag = $i
         $script:scheduleContentPanel.Controls.Add($txtSubject)
 
         $txtStartDate = New-Object System.Windows.Forms.TextBox
         $txtStartDate.Text = $row.StartDate
         $txtStartDate.Size = New-Object System.Drawing.Size(130, 22)
         $txtStartDate.Location = New-Object System.Drawing.Point(280, $y)
+        $txtStartDate.Tag = $i
         $script:scheduleContentPanel.Controls.Add($txtStartDate)
 
         $txtEndDate = New-Object System.Windows.Forms.TextBox
         $txtEndDate.Text = $row.EndDate
         $txtEndDate.Size = New-Object System.Drawing.Size(130, 22)
         $txtEndDate.Location = New-Object System.Drawing.Point(420, $y)
+        $txtEndDate.Tag = $i
         $script:scheduleContentPanel.Controls.Add($txtEndDate)
 
         $btnDeleteRow = New-Object System.Windows.Forms.Button
@@ -1089,43 +1098,47 @@ function Render-ScheduleRows {
         $btnDeleteRow.Location = New-Object System.Drawing.Point(560, ($y - 1))
         $btnDeleteRow.Tag = $i
         $btnDeleteRow.Add_Click({
-            Sync-ScheduleRowsFromControls
-            $index = $this.Tag
-            $script:scheduleRows = @($script:scheduleRows | Where-Object { $_ -ne $script:scheduleRows[$index] })
+            $rowIndex = $this.Tag
+            $newRows = @()
+            for ($j = 0; $j -lt $script:scheduleRows.Count; $j++) {
+                if ($j -ne $rowIndex) {
+                    $newRows += $script:scheduleRows[$j]
+                }
+            }
+            $script:scheduleRows = $newRows
             Render-ScheduleRows
         })
         $script:scheduleContentPanel.Controls.Add($btnDeleteRow)
-
-        $script:scheduleRowControls += [PSCustomObject]@{
-            Row = $row
-            No = $lblSeq
-            SubjectBox = $txtSubject
-            StartDateBox = $txtStartDate
-            EndDateBox = $txtEndDate
-        }
 
         $y += 28
     }
 
     $panelHeight = $y + 10
     $script:scheduleContentPanel.Height = $panelHeight
-    $btnY = 20 + $panelHeight + 10
+    $btnY = 50 + $panelHeight + 10
     $btnScheduleAddRow.Location = New-Object System.Drawing.Point(20, $btnY)
     $grpScheduleEdit.PerformLayout()
 }
 
-function Sync-ScheduleRowsFromControls {
+function Get-ScheduleRowsFromUI {
     $updatedRows = @()
-    foreach ($entry in $script:scheduleRowControls) {
+    $controls = $script:scheduleContentPanel.Controls
+    $seqNum = 1
+
+    for ($i = 0; $i + 3 -lt $controls.Count; $i += 5) {
+        $txtSubject = $controls[$i + 1]
+        $txtStartDate = $controls[$i + 2]
+        $txtEndDate = $controls[$i + 3]
+
         $newObj = [ordered]@{
-            No = [int]$entry.No.Text
-            Subject = $entry.SubjectBox.Text
-            StartDate = $entry.StartDateBox.Text
-            EndDate = $entry.EndDateBox.Text
+            No = $seqNum++
+            Subject = $txtSubject.Text
+            StartDate = $txtStartDate.Text
+            EndDate = $txtEndDate.Text
         }
         $updatedRows += [PSCustomObject]$newObj
     }
-    $script:scheduleRows = $updatedRows
+    return $updatedRows
 }
 
 function Read-ExcelData {
@@ -1220,8 +1233,8 @@ function Save-ScheduleToExcel {
         "終了日" = "EndDate"
     }
     try {
-        Sync-ScheduleRowsFromControls
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $script:scheduleRows -ColumnMap $columnMap
+        $rowsToSave = Get-ScheduleRowsFromUI
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $rowsToSave -ColumnMap $columnMap
         [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
@@ -1260,6 +1273,8 @@ function Save-DataToExcel {
             if (!$scheduleSheet) {
                 throw "シート '$SheetName' が見つかりません"
             }
+
+            Remove-DataRows -Sheet $scheduleSheet
 
             $colNames = @($ColumnMap.Keys)
             Write-RowObjects -Sheet $scheduleSheet -Rows $rowsData -Headers $colNames
