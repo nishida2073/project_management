@@ -66,36 +66,65 @@ function Get-NewClientInitialValues {
     return $result
 }
 
-function Sync-ComboBoxesToFileSystemOrder {
-    $fileSystemNames = @(Get-ClientNames)
-    $script:clientOptions = @()
-    foreach ($name in $fileSystemNames) {
-        $script:clientOptions += [PSCustomObject]@{ Text = $name; Value = $name }
-    }
+function Update-GroupDropdowns {
+    $clientNames = @(Get-ClientNames)
 
-    $allComboBoxes = @()
-    $allComboBoxes += $script:batchInputControls.Values | Where-Object { $_ -is [System.Windows.Forms.ComboBox] }
+    $savedSettings = $cmbSettingsGroupTarget.SelectedItem
+    $savedLog = $cmbLogGroup.SelectedItem
+    $savedFilters = @{}
     foreach ($cd in $categoryDefs) {
         foreach ($bd in $cd.ButtonDefs) {
             if ($bd.InputControls) {
-                $allComboBoxes += $bd.InputControls.Values | Where-Object { $_ -is [System.Windows.Forms.ComboBox] }
+                foreach ($ctrl in $bd.InputControls.Values) {
+                    if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+                        $savedFilters[$bd.Label] = $ctrl.SelectedItem
+                    }
+                }
             }
         }
     }
-    if ($cmbLogGroup) {
-        $allComboBoxes += $cmbLogGroup
+
+    if ($cmbSettingsGroupTarget) {
+        $cmbSettingsGroupTarget.Items.Clear()
+        foreach ($clientName in $clientNames) {
+            $cmbSettingsGroupTarget.Items.Add($clientName) | Out-Null
+        }
+        if ($savedSettings -and $cmbSettingsGroupTarget.Items.Contains($savedSettings)) {
+            $cmbSettingsGroupTarget.SelectedItem = $savedSettings
+        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+            $cmbSettingsGroupTarget.SelectedIndex = 0
+        }
     }
 
-    foreach ($cmb in $allComboBoxes) {
-        $selectedValue = $cmb.SelectedItem
-        $cmb.Items.Clear()
-        foreach ($opt in $script:clientOptions) {
-            $cmb.Items.Add($opt) | Out-Null
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls) {
+                foreach ($ctrl in $bd.InputControls.Values) {
+                    if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+                        $ctrl.Items.Clear()
+                        foreach ($clientName in $clientNames) {
+                            $ctrl.Items.Add($clientName) | Out-Null
+                        }
+                        if ($savedFilters[$bd.Label] -and $ctrl.Items.Contains($savedFilters[$bd.Label])) {
+                            $ctrl.SelectedItem = $savedFilters[$bd.Label]
+                        } elseif ($ctrl.Items.Count -gt 0) {
+                            $ctrl.SelectedIndex = 0
+                        }
+                    }
+                }
+            }
         }
-        if ($selectedValue -and $cmb.Items.Contains($selectedValue)) {
-            $cmb.SelectedItem = $selectedValue
-        } elseif ($cmb.Items.Count -gt 0) {
-            $cmb.SelectedIndex = 0
+    }
+
+    if ($cmbLogGroup) {
+        $cmbLogGroup.Items.Clear()
+        foreach ($clientName in $clientNames) {
+            $cmbLogGroup.Items.Add($clientName) | Out-Null
+        }
+        if ($savedLog -and $cmbLogGroup.Items.Contains($savedLog)) {
+            $cmbLogGroup.SelectedItem = $savedLog
+        } elseif ($cmbLogGroup.Items.Count -gt 0) {
+            $cmbLogGroup.SelectedIndex = 0
         }
     }
 }
@@ -507,7 +536,7 @@ function Save-GroupSettings {
         }
     }
 
-    Sync-ComboBoxesToFileSystemOrder
+    Update-GroupDropdowns
 }
 
 $btnSettingsGroupNewGroup.Add_Click({
@@ -549,6 +578,7 @@ $tabControl.Add_SelectedIndexChanged({
 Update-SettingsGroupList
 Update-CommonSettingsFields
 Update-GroupSettingsFields
+Update-GroupDropdowns
 
 $tabControl.SelectedTab = $tabRun
 
