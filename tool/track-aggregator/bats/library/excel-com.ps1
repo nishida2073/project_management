@@ -743,17 +743,13 @@ function Save-DataToExcel {
 
     try {
         $excel = New-Object -ComObject Excel.Application
-        $excelPID = $excel.Parent.Hwnd
-        Write-Message "Save-DataToExcel: 新しい Excel プロセス起動 - PID概念: $excelPID" -Type "Info" -ForegroundColor Yellow
         $excel.Visible = $false
         $excel.DisplayAlerts = $false
         $excel.ScreenUpdating = $false
         $excel.EnableEvents = $false
 
         try {
-            Write-Message "Save-DataToExcel: Workbooks.Open 開始 - $ExcelPath" -Type "Info" -ForegroundColor Yellow
             $workbook = $excel.Workbooks.Open($ExcelPath)
-            Write-Message "Save-DataToExcel: Workbooks.Open 成功 - ファイルパス: $($workbook.FullName), ブック数: $($excel.Workbooks.Count)" -Type "Info" -ForegroundColor Yellow
 
             foreach ($sheetData in $sheetsToSave) {
                 $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $sheetData.SheetName } | Select-Object -First 1
@@ -793,9 +789,7 @@ function Save-DataToExcel {
                 Write-BodyDatas -StartCell $sheet.Range("A2") -Datas $rowDatas
             }
 
-            Write-Message "Save-DataToExcel: Save() 開始 - ReadOnly=$($workbook.ReadOnly), Saved=$($workbook.Saved)" -Type "Info" -ForegroundColor Yellow
-            $result = $workbook.Save()
-            Write-Message "Save-DataToExcel: Save() 完了 - 戻り値=$result, Saved=$($workbook.Saved)" -Type "Info" -ForegroundColor Yellow
+            $workbook.Save()
         }
         finally {
             if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
