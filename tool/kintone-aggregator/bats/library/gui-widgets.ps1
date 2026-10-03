@@ -1298,15 +1298,11 @@ function Read-GridData {
             if ($col.AutoIncrement) { continue }
             $ctrl = $controls[$baseIndex + $c]
             if ($col.Property) {
-<<<<<<< HEAD
                 if ($col.IsBool -and $ctrl -is [System.Windows.Forms.ComboBox]) {
                     $newObj[$col.Property] = $ctrl.SelectedItem
                 } else {
                     $newObj[$col.Property] = $ctrl.Text
                 }
-=======
-                $newObj[$col.Property] = $ctrl.Text
->>>>>>> ec5b97ca8babe7066a681ccbc9c6d8cabf8dc52f
             }
         }
 
@@ -1383,7 +1379,6 @@ function New-Grid {
                 $ctrl = New-Object System.Windows.Forms.Label
                 $ctrl.Text = "$($i + 1)"
                 $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
-<<<<<<< HEAD
             } elseif ($col.IsBool) {
                 $ctrl = New-Object System.Windows.Forms.ComboBox
                 $ctrl.Items.Add("TRUE")
@@ -1393,8 +1388,6 @@ function New-Grid {
                 if ($propName -and $row.PSObject.Properties[$propName]) {
                     $ctrl.SelectedItem = $row.$propName
                 }
-=======
->>>>>>> ec5b97ca8babe7066a681ccbc9c6d8cabf8dc52f
             } else {
                 $ctrl = New-Object System.Windows.Forms.TextBox
                 $propName = $col.Property

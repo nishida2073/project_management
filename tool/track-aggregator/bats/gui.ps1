@@ -426,10 +426,11 @@ $lnkSettingsMasterOpsOpenXlsx.Text = "開く"
 
 $script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
-    -OnSave { Save-SurveyToExcel } `
+    -OnSave { Save-SurveyToExcel; Save-TestToExcel } `
     -OnReload {
         $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
         Read-SurveyExcelData -GroupName $target
+        Read-TestExcelData -GroupName $target
     }
 
 $settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
@@ -499,14 +500,31 @@ $grpSurveyEdit.Padding = New-Object System.Windows.Forms.Padding(10)
 $script:surveyRows = @()
 $script:surveyContentPanel = $null
 $script:surveyColumns = @(
-    @{ Label = "通番"; Width = 50; AutoIncrement = $true }
+    @{ Label = "通番"; Width = 20; AutoIncrement = $true }
     @{ Label = "アンケート名"; Width = 150; Property = "SurveyName" }
-    @{ Label = "TrackID"; Width = 200; Property = "TrackID";}
+    @{ Label = "TrackID"; Width = 300; Property = "TrackID";}
     @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
     @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
 )
 
-$controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpSurveyEdit, (New-Panel -Height 10))
+$grpTestEdit = New-Object System.Windows.Forms.GroupBox
+$grpTestEdit.Text = "テスト編集"
+$grpTestEdit.Dock = [System.Windows.Forms.DockStyle]::Top
+$grpTestEdit.AutoSize = $true
+$grpTestEdit.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+$grpTestEdit.Padding = New-Object System.Windows.Forms.Padding(10)
+
+$script:testRows = @()
+$script:testContentPanel = $null
+$script:testColumns = @(
+    @{ Label = "通番"; Width = 20; AutoIncrement = $true }
+    @{ Label = "テスト名"; Width = 150; Property = "TestName" }
+    @{ Label = "TrackID"; Width = 300; Property = "TrackID" }
+    @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
+    @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
+)
+
+$controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpTestEdit, (New-Panel -Height 10), $grpSurveyEdit, (New-Panel -Height 10))
 Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 
 function Update-SurveyGrid {
@@ -576,6 +594,79 @@ function Save-SurveyToExcel {
         $rowsFromUI = @(Read-SurveyGridData)
         Save-DataToExcel -ExcelPath $xlsxPath -SheetName "アンケート" -Datas $rowsFromUI -Columns $script:surveyColumns
         [System.Windows.Forms.MessageBox]::Show("アンケートを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Update-TestGrid {
+    $panels = New-Grid -GroupBox $grpTestEdit -RowDatas ([ref]$script:testRows) -OnDelete {
+        $deleteRowNo = $this.Tag
+        $updatedRows = Read-TestGridData
+        $script:testRows = @($updatedRows | Where-Object { $_.No -ne $deleteRowNo })
+        Update-TestGrid
+    } -OnAdd {
+        param($ContentPanel)
+        $updatedRows = Read-TestGridData
+        $script:testRows = $updatedRows
+
+        $currentRows = @($script:testRows)
+        $nextNo = if ($currentRows.Count -gt 0) { ($currentRows | Select-Object -Last 1).No + 1 } else { 1 }
+        $newObj = [ordered]@{ No = $nextNo }
+        foreach ($col in $script:testColumns | Where-Object { $_.Property }) {
+            $newObj[$col.Property] = ""
+        }
+        $newRow = [PSCustomObject]$newObj
+        $script:testRows = @($script:testRows) + @($newRow)
+        Update-TestGrid
+    } -Columns $script:testColumns
+    $script:testContentPanel = $panels.ContentPanel
+}
+
+function Read-TestGridData {
+    Read-GridData -ContentPanel $script:testContentPanel -Columns $script:testColumns
+}
+
+function Read-TestExcelData {
+    param([string]$GroupName)
+
+    $xlsxPath = Get-GroupXlsxPath $GroupName
+
+    try {
+        Read-ExcelData `
+            -ExcelPath $xlsxPath `
+            -SheetName "テスト" `
+            -DataTransformer {
+                param($Rows)
+                $convertedRows = @()
+                foreach ($row in $Rows) {
+                    $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
+                    foreach ($col in $script:testColumns | Where-Object { $_.Property }) {
+                        $value = $row."$($col.Label)"
+                        if ($col.IsBool -and $value -is [bool]) {
+                            $value = if ($value) { "TRUE" } else { "FALSE" }
+                        }
+                        $newObj[$col.Property] = $value
+                    }
+                    $convertedRows += [PSCustomObject]$newObj
+                }
+                $script:testRows = $convertedRows
+            }
+        Update-TestGrid
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("テスト読込に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Save-TestToExcel {
+    $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $xlsxPath = Get-GroupXlsxPath $groupName
+    try {
+        $rowsFromUI = @(Read-TestGridData)
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "テスト" -Datas $rowsFromUI -Columns $script:testColumns
+        [System.Windows.Forms.MessageBox]::Show("テストを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -882,6 +973,7 @@ $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
 $cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
     $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
     Read-SurveyExcelData -GroupName $target
+    Read-TestExcelData -GroupName $target
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
