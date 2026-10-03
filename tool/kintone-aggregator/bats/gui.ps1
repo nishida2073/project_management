@@ -1063,7 +1063,7 @@ function Render-Grid {
         for ($c = 0; $c -lt $Columns.Count; $c++) {
             $col = $Columns[$c]
 
-            if ($c -eq 0) {
+            if ($col.AutoIncrement) {
                 $ctrl = New-Object System.Windows.Forms.Label
                 $ctrl.Text = "$($i + 1)"
                 $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
@@ -1126,7 +1126,8 @@ function Render-ScheduleRows {
             $updatedRows = Get-ScheduleRowsFromUI
             $script:scheduleRows = $updatedRows
         }
-        $nextNo = $script:scheduleRows.Count + 1
+        $currentRows = @($script:scheduleRows)
+        $nextNo = if ($currentRows.Count -gt 0) { ($currentRows | Select-Object -Last 1).No + 1 } else { 1 }
         $newObj = [ordered]@{ No = $nextNo }
         foreach ($col in $script:scheduleColumns | Where-Object { $_.Property }) {
             $newObj[$col.Property] = ""
@@ -1155,8 +1156,9 @@ function Get-GridRows {
         $noCtrl = $controls[$baseIndex]
         $newObj = [ordered]@{ No = $noCtrl.Tag }
 
-        for ($c = 1; $c -lt $Columns.Count; $c++) {
+        for ($c = 0; $c -lt $Columns.Count; $c++) {
             $col = $Columns[$c]
+            if ($col.AutoIncrement) { continue }
             $ctrl = $controls[$baseIndex + $c]
             if ($col.Property) {
                 $newObj[$col.Property] = $ctrl.Text
