@@ -1111,7 +1111,7 @@ function Render-Grid {
 
 function Render-ScheduleRows {
     $columns = @(
-        @{ Label = "通番"; Width = 50; Property = "No" }
+        @{ Label = "通番"; Width = 50 }
         @{ Label = "科目名"; Width = 200; Property = "Subject" }
         @{ Label = "開始日"; Width = 100; Property = "StartDate" }
         @{ Label = "終了日"; Width = 100; Property = "EndDate" }
@@ -1127,13 +1127,7 @@ function Render-ScheduleRows {
             $script:scheduleRows = $updatedRows
         }
         $nextNo = $script:scheduleRows.Count + 1
-        $newObj = [ordered]@{ No = $nextNo }
-        foreach ($col in $columns) {
-            if ($col.Property -and $col.Property -ne "No") {
-                $newObj[$col.Property] = ""
-            }
-        }
-        $newRow = [PSCustomObject]$newObj
+        $newRow = [PSCustomObject]@{ No = $nextNo; Subject = ""; StartDate = ""; EndDate = "" }
         $script:scheduleRows = @($script:scheduleRows) + @($newRow)
         Render-ScheduleRows
     } -Columns $columns
@@ -1174,10 +1168,10 @@ function Get-GridRows {
 
 function Get-ScheduleRowsFromUI {
     $columns = @(
-        @{ Label = "通番"; Property = "No" }
-        @{ Label = "科目名"; Property = "Subject" }
-        @{ Label = "開始日"; Property = "StartDate" }
-        @{ Label = "終了日"; Property = "EndDate" }
+        @{ Label = "通番"; Width = 50 }
+        @{ Label = "科目名"; Width = 200; Property = "Subject" }
+        @{ Label = "開始日"; Width = 100; Property = "StartDate" }
+        @{ Label = "終了日"; Width = 100; Property = "EndDate" }
     )
     Get-GridRows -ContentPanel $script:scheduleContentPanel -Columns $columns
 }
@@ -1235,13 +1229,7 @@ function Load-ScheduleFromExcel {
     param([string]$GroupName)
 
     $xlsxPath = Get-GroupXlsxPath $GroupName
-    $columns = @(
-        @{ Label = "通番"; Property = "No" }
-        @{ Label = "科目名"; Property = "Subject" }
-        @{ Label = "開始日"; Property = "StartDate" }
-        @{ Label = "終了日"; Property = "EndDate" }
-    )
-    
+
     try {
         Read-ExcelData `
             -ExcelPath $xlsxPath `
@@ -1251,11 +1239,11 @@ function Load-ScheduleFromExcel {
                 param($Rows)
                 $convertedRows = @()
                 foreach ($row in $Rows) {
-                    $newObj = [ordered]@{}
-                    foreach ($col in $columns) {
-                        if ($col.Property -and $col.Label) {
-                            $newObj[$col.Property] = $row."$($col.Label)"
-                        }
+                    $newObj = [ordered]@{
+                        No = $row."通番"
+                        Subject = $row."科目名"
+                        StartDate = $row."開始日"
+                        EndDate = $row."終了日"
                     }
                     $convertedRows += [PSCustomObject]$newObj
                 }
