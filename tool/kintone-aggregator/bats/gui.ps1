@@ -1127,7 +1127,13 @@ function Render-ScheduleRows {
             $script:scheduleRows = $updatedRows
         }
         $nextNo = $script:scheduleRows.Count + 1
-        $newRow = [PSCustomObject]@{ No = $nextNo; Subject = ""; StartDate = ""; EndDate = "" }
+        $newObj = @{ No = $nextNo }
+        foreach ($col in $columns) {
+            if ($col.Property) {
+                $newObj[$col.Property] = ""
+            }
+        }
+        $newRow = [PSCustomObject]$newObj
         $script:scheduleRows = @($script:scheduleRows) + @($newRow)
         Render-ScheduleRows
     } -Columns $columns
@@ -1228,6 +1234,12 @@ function Read-ExcelData {
 function Load-ScheduleFromExcel {
     param([string]$GroupName)
 
+    $columns = @(
+        @{ Label = "通番"; }
+        @{ Label = "科目名"; Property = "Subject" }
+        @{ Label = "開始日"; Property = "StartDate" }
+        @{ Label = "終了日"; Property = "EndDate" }
+    )
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
@@ -1239,11 +1251,9 @@ function Load-ScheduleFromExcel {
                 param($Rows)
                 $convertedRows = @()
                 foreach ($row in $Rows) {
-                    $newObj = [ordered]@{
-                        No = $row."通番"
-                        Subject = $row."科目名"
-                        StartDate = $row."開始日"
-                        EndDate = $row."終了日"
+                    $newObj = [ordered]@{ No = $row."通番" }
+                    foreach ($col in $columns | Where-Object { $_.Property }) {
+                        $newObj[$col.Property] = $row."$($col.Label)"
                     }
                     $convertedRows += [PSCustomObject]$newObj
                 }
@@ -1261,26 +1271,19 @@ function Load-ScheduleFromExcel {
 function Save-ScheduleToExcel {
     $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
-    $columnMap = [ordered]@{
-        "通番" = "No"
-        "科目名" = "Subject"
-        "開始日" = "StartDate"
-        "終了日" = "EndDate"
-    }
+    $columns = @(
+        @{ Label = "通番"; AutoIncrement = $true }
+        @{ Label = "科目名"; Property = "Subject" }
+        @{ Label = "開始日"; Property = "StartDate" }
+        @{ Label = "終了日"; Property = "EndDate" }
+    )
     try {
         $rowsFromUI = @(Get-ScheduleRowsFromUI)
         $rowsToSave = @()
-        for ($i = 0; $i -lt $rowsFromUI.Count; $i++) {
-            $row = $rowsFromUI[$i]
-            $rowToSave = [PSCustomObject]@{
-                No = $i + 1
-                Subject = $row.Subject
-                StartDate = $row.StartDate
-                EndDate = $row.EndDate
-            }
-            $rowsToSave += $rowToSave
+        foreach ($row in $rowsFromUI) {
+            $rowsToSave += $row
         }
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $rowsToSave -ColumnMap $columnMap
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $rowsToSave -Columns $columns
         [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
@@ -1293,7 +1296,7 @@ function Save-DataToExcel {
         [string]$ExcelPath,
         [string]$SheetName,
         [array]$Rows,
-        [object]$ColumnMap
+        [array]$Columns
     )
     try {
 
@@ -1321,17 +1324,22 @@ function Save-DataToExcel {
             }
 
             $excelDatas = @()
+            $rowIndex = 1
             foreach ($row in $Rows) {
                 $rowData = @()
                 foreach ($header in $headers) {
-                    if($ColumnMap.Contains($header)){
-                        $value = $row.($ColumnMap[$header])
+                    $col = $Columns | Where-Object { $_.Label -eq $header }
+                    if ($col -and $col.Property) {
+                        $value = $row.($col.Property)
                         $rowData += [string]$value
-                    }else{
+                    } elseif ($col -and $col.AutoIncrement) {
+                        $rowData += [string]$rowIndex
+                    } else {
                         $rowData += ""
                     }
                 }
                 $excelDatas += , $rowData
+                $rowIndex++
             }
 
             Write-BodyDatas -StartCell $sheet.Range("A2") -Datas $excelDatas
