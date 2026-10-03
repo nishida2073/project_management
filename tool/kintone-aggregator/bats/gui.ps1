@@ -525,6 +525,11 @@ $grpUserMasterSync.Controls.Add($lblMasterOpsStatusPlaceholder)
 
 $settingsMasterOpsPanel.Controls.Add($grpUserMasterSync)
 
+$spacer = New-Object System.Windows.Forms.Panel
+$spacer.Height = 10
+$spacer.Dock = [System.Windows.Forms.DockStyle]::Top
+$settingsMasterOpsPanel.Controls.Add($spacer)
+
 function Get-CommonSettingsFieldRows {
     $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
     foreach ($varName in $commonSettingsVars) {
@@ -999,8 +1004,14 @@ $script:scheduleColumns = @(
 )
 
 
+$spacer2 = New-Object System.Windows.Forms.Panel
+$spacer2.Height = 10
+$spacer2.Dock = [System.Windows.Forms.DockStyle]::Top
+$settingsMasterOpsPanel.Controls.Add($spacer2)
+
 $settingsMasterOpsPanel.Controls.Add($grpScheduleEdit)
 $settingsMasterOpsPanel.Controls.SetChildIndex($grpScheduleEdit, 0)
+$settingsMasterOpsPanel.Controls.SetChildIndex($spacer2, 1)
 
 function Render-Grid {
     param(
@@ -1012,14 +1023,15 @@ function Render-Grid {
     )
 
     $existingPanels = $GroupBox.Controls | Where-Object { $_ -is [System.Windows.Forms.Panel] }
-    $HeaderPanel = $existingPanels | Where-Object { $_.Location.Y -eq 20 } | Select-Object -First 1
-    $ContentPanel = $existingPanels | Where-Object { $_.Location.Y -eq 50 } | Select-Object -First 1
+    $HeaderPanel = $existingPanels | Where-Object { $_.Location.Y -eq 40 } | Select-Object -First 1
+    $ContentPanelY = if ($HeaderPanel) { $HeaderPanel.Location.Y + $HeaderPanel.Height } else { 60 }
+    $ContentPanel = $existingPanels | Where-Object { $_.Location.Y -eq $ContentPanelY } | Select-Object -First 1
 
     if (-not $HeaderPanel) {
         $HeaderPanel = New-Object System.Windows.Forms.Panel
         $HeaderPanel.AutoSize = $false
-        $HeaderPanel.Size = New-Object System.Drawing.Size(730, 30)
-        $HeaderPanel.Location = New-Object System.Drawing.Point(10, 20)
+        $HeaderPanel.Size = New-Object System.Drawing.Size(730, 20)
+        $HeaderPanel.Location = New-Object System.Drawing.Point(10, 40)
         $GroupBox.Controls.Add($HeaderPanel)
     }
 
@@ -1027,7 +1039,7 @@ function Render-Grid {
         $ContentPanel = New-Object System.Windows.Forms.Panel
         $ContentPanel.AutoSize = $false
         $ContentPanel.Size = New-Object System.Drawing.Size(730, 370)
-        $ContentPanel.Location = New-Object System.Drawing.Point(10, 50)
+        $ContentPanel.Location = New-Object System.Drawing.Point(10, $ContentPanelY)
         $GroupBox.Controls.Add($ContentPanel)
     }
 
