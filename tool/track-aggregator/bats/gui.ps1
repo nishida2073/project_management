@@ -424,10 +424,15 @@ $cmbSettingsMasterOpsGroupTarget.DisplayMember = "Text"
 $lnkSettingsMasterOpsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsMasterOpsOpenXlsx.Text = "開く"
 
-$settingsMasterOpsTopPanel = (New-SettingsTopPanel `
+$script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
-    -OnSave { } `
-    -OnReload { }).Panel
+    -OnSave { Save-SurveyToExcel } `
+    -OnReload {
+        $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+        Read-SurveyExcelData -GroupName $target
+    }
+
+$settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
 
 $settingsMasterOpsPanel = New-Object System.Windows.Forms.Panel
 $settingsMasterOpsPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -484,7 +489,98 @@ $lblMasterOpsStatusPlaceholder.Location = New-Object System.Drawing.Point(130, 3
 $lblMasterOpsStatusPlaceholder.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
 $grpUserMasterSync.Controls.Add($lblMasterOpsStatusPlaceholder)
 
-$settingsMasterOpsPanel.Controls.Add($grpUserMasterSync)
+$grpSurveyEdit = New-Object System.Windows.Forms.GroupBox
+$grpSurveyEdit.Text = "アンケート編集"
+$grpSurveyEdit.Dock = [System.Windows.Forms.DockStyle]::Top
+$grpSurveyEdit.AutoSize = $true
+$grpSurveyEdit.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+$grpSurveyEdit.Padding = New-Object System.Windows.Forms.Padding(10)
+
+$script:surveyRows = @()
+$script:surveyContentPanel = $null
+$script:surveyColumns = @(
+    @{ Label = "通番"; Width = 50; AutoIncrement = $true }
+    @{ Label = "アンケート名"; Width = 150; Property = "SurveyName" }
+    @{ Label = "TrackID"; Width = 200; Property = "TrackID";}
+    @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
+    @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
+)
+
+$controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpSurveyEdit, (New-Panel -Height 10))
+Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
+
+function Update-SurveyGrid {
+    $panels = New-Grid -GroupBox $grpSurveyEdit -RowDatas ([ref]$script:surveyRows) -OnDelete {
+        $deleteRowNo = $this.Tag
+        $updatedRows = Read-SurveyGridData
+        $script:surveyRows = @($updatedRows | Where-Object { $_.No -ne $deleteRowNo })
+        Update-SurveyGrid
+    } -OnAdd {
+        param($ContentPanel)
+        $updatedRows = Read-SurveyGridData
+        $script:surveyRows = $updatedRows
+
+        $currentRows = @($script:surveyRows)
+        $nextNo = if ($currentRows.Count -gt 0) { ($currentRows | Select-Object -Last 1).No + 1 } else { 1 }
+        $newObj = [ordered]@{ No = $nextNo }
+        foreach ($col in $script:surveyColumns | Where-Object { $_.Property }) {
+            $newObj[$col.Property] = ""
+        }
+        $newRow = [PSCustomObject]$newObj
+        $script:surveyRows = @($script:surveyRows) + @($newRow)
+        Update-SurveyGrid
+    } -Columns $script:surveyColumns
+    $script:surveyContentPanel = $panels.ContentPanel
+}
+
+function Read-SurveyGridData {
+    Read-GridData -ContentPanel $script:surveyContentPanel -Columns $script:surveyColumns
+}
+
+function Read-SurveyExcelData {
+    param([string]$GroupName)
+
+    $xlsxPath = Get-GroupXlsxPath $GroupName
+
+    try {
+        Read-ExcelData `
+            -ExcelPath $xlsxPath `
+            -SheetName "アンケート" `
+            -DataTransformer {
+                param($Rows)
+                $convertedRows = @()
+                foreach ($row in $Rows) {
+                    $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
+                    foreach ($col in $script:surveyColumns | Where-Object { $_.Property }) {
+                        $value = $row."$($col.Label)"
+                        if ($col.IsBool -and $value -is [bool]) {
+                            $value = if ($value) { "TRUE" } else { "FALSE" }
+                        }
+                        $newObj[$col.Property] = $value
+                    }
+                    $convertedRows += [PSCustomObject]$newObj
+                }
+                $script:surveyRows = $convertedRows
+            }
+        Update-SurveyGrid
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("アンケート読込に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Save-SurveyToExcel {
+    $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $xlsxPath = Get-GroupXlsxPath $groupName
+    try {
+        $rowsFromUI = @(Read-SurveyGridData)
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "アンケート" -Datas $rowsFromUI -Columns $script:surveyColumns
+        [System.Windows.Forms.MessageBox]::Show("アンケートを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
 
 function Get-CommonSettingsFieldRows {
     $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
@@ -781,6 +877,11 @@ $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
         return
     }
     Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
+})
+
+$cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
+    $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    Read-SurveyExcelData -GroupName $target
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
