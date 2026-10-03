@@ -1305,23 +1305,36 @@ function Save-DataToExcel {
 
         try {
             $workbook = $excel.Workbooks.Open($ExcelPath)
-            $scheduleSheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
-            if (!$scheduleSheet) {
+            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
+            if (!$sheet) {
                 throw "シート '$SheetName' が見つかりません"
             }
 
-            Remove-DataRows -Sheet $scheduleSheet
+            Remove-DataRows -Sheet $sheet
+
+            $used = $sheet.UsedRange
+            $data = $used.Value2
+            $colCount = $used.Columns.Count
+            $headers = @()
+            for ($c = 1; $c -le $colCount; $c++) {
+                $headers += "$($data[1, $c])"
+            }
 
             $excelDatas = @()
             foreach ($row in $Rows) {
                 $rowData = @()
-                foreach ($col in $ColumnMap.Keys) {
-                    $value = $row.($ColumnMap[$col])
-                    $rowData += [string]$value
+                foreach ($header in $headers) {
+                    if($ColumnMap.Contains($header)){
+                        $value = $row.($ColumnMap[$header])
+                        $rowData += [string]$value
+                    }else{
+                        $rowData += ""
+                    }
                 }
                 $excelDatas += , $rowData
             }
-            Write-BodyDatas -StartCell $scheduleSheet.Range("A2") -Datas $excelDatas
+
+            Write-BodyDatas -StartCell $sheet.Range("A2") -Datas $excelDatas
             
             $workbook.Save()
         }
