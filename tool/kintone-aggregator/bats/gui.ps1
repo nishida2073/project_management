@@ -1268,7 +1268,7 @@ function Save-ScheduleToExcel {
         "終了日" = "EndDate"
     }
     try {
-        $rowsFromUI = Get-ScheduleRowsFromUI
+        $rowsFromUI = @(Get-ScheduleRowsFromUI)
         $rowsToSave = @()
         for ($i = 0; $i -lt $rowsFromUI.Count; $i++) {
             $row = $rowsFromUI[$i]
@@ -1297,16 +1297,6 @@ function Save-DataToExcel {
     )
     try {
 
-        $rowsData = @()
-        for ($i = 0; $i -lt $Rows.Count; $i++) {
-            $row = $Rows[$i]
-            $rowObj = [ordered]@{}
-            foreach ($col in $ColumnMap.Keys) {
-                $rowObj[$col] = $row.($ColumnMap[$col])
-            }
-            $rowsData += [PSCustomObject]$rowObj
-        }
-
         $excel = New-Object -ComObject Excel.Application
         $excel.Visible = $false
         $excel.DisplayAlerts = $false
@@ -1322,9 +1312,17 @@ function Save-DataToExcel {
 
             Remove-DataRows -Sheet $scheduleSheet
 
-            $colNames = @($ColumnMap.Keys)
-            Write-RowObjects -Sheet $scheduleSheet -Rows $rowsData -Headers $colNames
-
+            $excelDatas = @()
+            foreach ($row in $Rows) {
+                $rowData = @()
+                foreach ($col in $ColumnMap.Keys) {
+                    $value = $row.($ColumnMap[$col])
+                    $rowData += [string]$value
+                }
+                $excelDatas += , $rowData
+            }
+            Write-BodyDatas -StartCell $scheduleSheet.Range("A2") -Datas $excelDatas
+            
             $workbook.Save()
         }
         finally {
