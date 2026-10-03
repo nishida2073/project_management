@@ -1104,10 +1104,10 @@ function Render-Grid {
         if ($OnAdd) {
             $addButton.Add_Click($OnAdd)
         }
+        $ContentPanel.Controls.Add($addButton)
     }
 
     $addButton.Location = New-Object System.Drawing.Point(10, ($y + 10))
-    $ContentPanel.Controls.Add($addButton)
 
     $panelHeight = $y + 50
     $ContentPanel.Height = $panelHeight
