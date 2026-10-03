@@ -1166,13 +1166,7 @@ function Get-GridRows {
 }
 
 function Get-ScheduleRowsFromUI {
-    $columns = @(
-        @{ Label = "通番"; Width = 50; AutoIncrement = $true }
-        @{ Label = "科目名"; Width = 200; Property = "Subject" }
-        @{ Label = "開始日"; Width = 100; Property = "StartDate" }
-        @{ Label = "終了日"; Width = 100; Property = "EndDate" }
-    )
-    Get-GridRows -ContentPanel $script:scheduleContentPanel -Columns $columns
+    Get-GridRows -ContentPanel $script:scheduleContentPanel -Columns $script:scheduleColumns
 }
 
 function Read-ExcelData {
