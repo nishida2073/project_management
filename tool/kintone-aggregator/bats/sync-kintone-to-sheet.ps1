@@ -71,6 +71,12 @@ try {
 
             Write-Message "Excel書き込み中..." -Type "Info"
             Use-Mutex "ExcelWriteLock" {
+                try {
+                    $fileStream = [System.IO.File]::Open($ExcelFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
+                    $fileStream.Close()
+                } catch {
+                    throw "ファイルが別のプロセスで開かれています。Excel を閉じてから再度保存してください: $ExcelFilePath"
+                }
                 $excel = New-Object -ComObject Excel.Application
                 $excel.Visible = $false
                 $excel.DisplayAlerts = $false
