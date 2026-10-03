@@ -642,3 +642,125 @@ function Set-ColumnWidth {
         $Worksheet.Columns.Item($c).ColumnWidth += 4
     }
 }
+
+function Remove-DataRows {
+    param(
+        [Parameter(Mandatory)]
+        $Sheet,
+        [int]$StartRow = 2,
+        [int]$StartCol = 1
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+
+    $usedRange = $Sheet.UsedRange
+    if ($usedRange.Rows.Count -le 1) {
+        return
+    }
+
+    $lastRow = $usedRange.Row + $usedRange.Rows.Count - 1
+    $lastCol = $usedRange.Column + $usedRange.Columns.Count - 1
+
+    $dataRange = $Sheet.Range($Sheet.Cells.Item($StartRow, $StartCol), $Sheet.Cells.Item($lastRow, $lastCol))
+    $dataRange.Delete([Microsoft.Office.Interop.Excel.XlDeleteShiftDirection]::xlShiftUp) | Out-Null
+}
+
+function Read-ExcelData {
+    param(
+        [string]$ExcelPath,
+        [string]$SheetName,
+        [scriptblock]$DataTransformer = { param($Rows) $Rows }
+    )
+    try {
+        if (!(Test-Path -LiteralPath $ExcelPath)) {
+            throw "Excelファイルが見つかりません: $ExcelPath"
+        }
+
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+        $excel.ScreenUpdating = $false
+        $excel.EnableEvents = $false
+
+        try {
+            $workbook = $excel.Workbooks.Open($ExcelPath)
+            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
+            if (!$sheet) {
+                throw "シート '$SheetName' が見つかりません"
+            }
+            $rows = @(Get-RowObjects -Sheet $sheet)
+            & $DataTransformer $rows
+        }
+        finally {
+            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        }
+    }
+    catch {
+        throw $_
+    }
+}
+
+function Save-DataToExcel {
+    param(
+        [string]$ExcelPath,
+        [string]$SheetName,
+        [array]$Datas,
+        [array]$Columns
+    )
+    try {
+
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+        $excel.ScreenUpdating = $false
+        $excel.EnableEvents = $false
+
+        try {
+            $workbook = $excel.Workbooks.Open($ExcelPath)
+            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
+            if (!$sheet) {
+                throw "シート '$SheetName' が見つかりません"
+            }
+
+            Remove-DataRows -Sheet $sheet
+
+            $used = $sheet.UsedRange
+            $data = $used.Value2
+            $colCount = $used.Columns.Count
+            $headers = @()
+            for ($c = 1; $c -le $colCount; $c++) {
+                $headers += "$($data[1, $c])"
+            }
+
+            $rowDatas = @()
+            $rowIndex = 1
+            foreach ($row in $Datas) {
+                $rowData = @()
+                foreach ($header in $headers) {
+                    $col = $Columns | Where-Object { $_.Label -eq $header }
+                    if ($col -and $col.Property) {
+                        $value = $row.($col.Property)
+                        $rowData += [string]$value
+                    } elseif ($col -and $col.AutoIncrement) {
+                        $rowData += [string]$rowIndex
+                    } else {
+                        $rowData += ""
+                    }
+                }
+                $rowDatas += , $rowData
+                $rowIndex++
+            }
+
+            Write-BodyDatas -StartCell $sheet.Range("A2") -Datas $rowDatas
+
+            $workbook.Save()
+        }
+        finally {
+            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
+            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+        }
+    }
+    catch {
+        throw $_
+    }
+}

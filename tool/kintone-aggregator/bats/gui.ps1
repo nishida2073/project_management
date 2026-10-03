@@ -463,7 +463,7 @@ $script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -OnSave { Save-ScheduleToExcel } `
     -OnReload {
         $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
-        Load-ScheduleFromExcel -GroupName $target
+        Read-ScheduleExcelData -GroupName $target
     }
 
 $settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
@@ -987,138 +987,24 @@ $script:scheduleContentPanel = $null
 $script:scheduleColumns = @(
     @{ Label = "通番"; Width = 50; AutoIncrement = $true }
     @{ Label = "科目名"; Width = 200; Property = "Subject" }
-    @{ Label = "開始日"; Width = 100; Property = "StartDate" }
-    @{ Label = "終了日"; Width = 100; Property = "EndDate" }
+    @{ Label = "開始日"; Width = 100; Property = "StartDate"; IsDate = $true }
+    @{ Label = "終了日"; Width = 100; Property = "EndDate"; IsDate = $true }
 )
 
 $controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpScheduleEdit, (New-Panel -Height 10))
 Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 
-function Render-Grid {
-    param(
-        [Parameter(Mandatory)]$GroupBox,
-        [Parameter(Mandatory)][ref]$RowsData,
-        [Parameter(Mandatory)][scriptblock]$OnDelete,
-        [Parameter(Mandatory)][array]$Columns,
-        [scriptblock]$OnAdd
-    )
-
-    $existingPanels = $GroupBox.Controls | Where-Object { $_ -is [System.Windows.Forms.Panel] }
-    $HeaderPanel = $existingPanels | Where-Object { $_.Location.Y -eq 40 } | Select-Object -First 1
-    $ContentPanelY = if ($HeaderPanel) { $HeaderPanel.Location.Y + $HeaderPanel.Height } else { 60 }
-    $ContentPanel = $existingPanels | Where-Object { $_.Location.Y -eq $ContentPanelY } | Select-Object -First 1
-
-    if (-not $HeaderPanel) {
-        $HeaderPanel = New-Object System.Windows.Forms.Panel
-        $HeaderPanel.AutoSize = $false
-        $HeaderPanel.Size = New-Object System.Drawing.Size(730, 20)
-        $HeaderPanel.Location = New-Object System.Drawing.Point(10, 40)
-        $GroupBox.Controls.Add($HeaderPanel)
-    }
-
-    if (-not $ContentPanel) {
-        $ContentPanel = New-Object System.Windows.Forms.Panel
-        $ContentPanel.AutoSize = $false
-        $ContentPanel.Size = New-Object System.Drawing.Size(730, 370)
-        $ContentPanel.Location = New-Object System.Drawing.Point(10, $ContentPanelY)
-        $GroupBox.Controls.Add($ContentPanel)
-    }
-
-    if ($HeaderPanel.Controls.Count -eq 0) {
-        $y = 0
-        $x = 10
-
-        foreach ($col in $Columns) {
-            $lbl = New-Object System.Windows.Forms.Label
-            $lbl.Text = $col.Label
-            $lbl.AutoSize = $false
-            $lbl.Size = New-Object System.Drawing.Size($col.Width, 20)
-            $lbl.Location = New-Object System.Drawing.Point($x, $y)
-            $HeaderPanel.Controls.Add($lbl)
-            $x += $col.Width + 10
-        }
-
-        $lblDelete = New-Object System.Windows.Forms.Label
-        $lblDelete.Text = "削除"
-        $lblDelete.AutoSize = $false
-        $lblDelete.Size = New-Object System.Drawing.Size(60, 20)
-        $lblDelete.Location = New-Object System.Drawing.Point($x, $y)
-        $HeaderPanel.Controls.Add($lblDelete)
-    }
-
-    $ContentPanel.Controls.Clear()
-    $y = 0
-
-    for ($i = 0; $i -lt $RowsData.Value.Count; $i++) {
-        $row = $RowsData.Value[$i]
-        $x = 10
-
-        for ($c = 0; $c -lt $Columns.Count; $c++) {
-            $col = $Columns[$c]
-
-            if ($col.AutoIncrement) {
-                $ctrl = New-Object System.Windows.Forms.Label
-                $ctrl.Text = "$($i + 1)"
-                $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
-            } else {
-                $ctrl = New-Object System.Windows.Forms.TextBox
-                $propName = $col.Property
-                if ($propName -and $row.PSObject.Properties[$propName]) {
-                    $ctrl.Text = $row.$propName
-                }
-            }
-
-            $ctrl.AutoSize = $false
-            $ctrl.Size = New-Object System.Drawing.Size($col.Width, 22)
-            $ctrl.Location = New-Object System.Drawing.Point($x, $y)
-            $ctrl.Tag = $row.No
-            $ContentPanel.Controls.Add($ctrl)
-            $x += $col.Width + 10
-        }
-
-        $btnDelete = New-Object System.Windows.Forms.Button
-        $btnDelete.Text = "削除"
-        $btnDelete.AutoSize = $false
-        $btnDelete.Size = New-Object System.Drawing.Size(60, 24)
-        $btnDelete.Location = New-Object System.Drawing.Point($x, ($y - 1))
-        $btnDelete.Tag = $row.No
-        $btnDelete.Add_Click($OnDelete)
-        $ContentPanel.Controls.Add($btnDelete)
-
-        $y += 28
-    }
-
-    $addButton = $ContentPanel.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Text -eq "＋ 行追加" } | Select-Object -First 1
-
-    if (-not $addButton) {
-        $addButton = New-Object System.Windows.Forms.Button
-        $addButton.Text = "＋ 行追加"
-        $addButton.Size = New-Object System.Drawing.Size(100, 24)
-        if ($OnAdd) {
-            $addButton.Add_Click($OnAdd)
-        }
-        $ContentPanel.Controls.Add($addButton)
-    }
-
-    $addButton.Location = New-Object System.Drawing.Point(10, ($y + 10))
-
-    $panelHeight = $y + 50
-    $ContentPanel.Height = $panelHeight
-
-    @{ HeaderPanel = $HeaderPanel; ContentPanel = $ContentPanel }
-}
-
-function Render-ScheduleRows {
-    $panels = Render-Grid -GroupBox $grpScheduleEdit -RowsData ([ref]$script:scheduleRows) -OnDelete {
+function Update-ScheduleGrid {
+    $panels = New-Grid -GroupBox $grpScheduleEdit -RowDatas ([ref]$script:scheduleRows) -OnDelete {
         $deleteRowNo = $this.Tag
-        $updatedRows = Get-ScheduleRowsFromUI
+        $updatedRows = Read-ScheduleGridData
         $script:scheduleRows = @($updatedRows | Where-Object { $_.No -ne $deleteRowNo })
-        Render-ScheduleRows
+        Update-ScheduleGrid
     } -OnAdd {
-        if ($script:scheduleContentPanel) {
-            $updatedRows = Get-ScheduleRowsFromUI
-            $script:scheduleRows = $updatedRows
-        }
+        param($ContentPanel)
+        $updatedRows = Read-ScheduleGridData
+        $script:scheduleRows = $updatedRows
+
         $currentRows = @($script:scheduleRows)
         $nextNo = if ($currentRows.Count -gt 0) { ($currentRows | Select-Object -Last 1).No + 1 } else { 1 }
         $newObj = [ordered]@{ No = $nextNo }
@@ -1127,98 +1013,16 @@ function Render-ScheduleRows {
         }
         $newRow = [PSCustomObject]$newObj
         $script:scheduleRows = @($script:scheduleRows) + @($newRow)
-        Render-ScheduleRows
+        Update-ScheduleGrid
     } -Columns $script:scheduleColumns
     $script:scheduleContentPanel = $panels.ContentPanel
 }
 
-function Get-GridRows {
-    param(
-        [Parameter(Mandatory)]$ContentPanel,
-        [Parameter(Mandatory)][array]$Columns
-    )
-
-    $rows = @()
-    $controls = $ContentPanel.Controls
-    $controlsPerRow = $Columns.Count + 1
-    $dataControlsCount = $controls.Count - 1
-
-    $rowIndex = 0
-    while ($rowIndex * $controlsPerRow -lt $dataControlsCount) {
-        $baseIndex = $rowIndex * $controlsPerRow
-        $noCtrl = $controls[$baseIndex]
-        $newObj = [ordered]@{ No = $noCtrl.Tag }
-
-        for ($c = 0; $c -lt $Columns.Count; $c++) {
-            $col = $Columns[$c]
-            if ($col.AutoIncrement) { continue }
-            $ctrl = $controls[$baseIndex + $c]
-            if ($col.Property) {
-                $newObj[$col.Property] = $ctrl.Text
-            }
-        }
-
-        $rows += [PSCustomObject]$newObj
-        $rowIndex++
-    }
-
-    return $rows
+function Read-ScheduleGridData {
+    Read-GridData -ContentPanel $script:scheduleContentPanel -Columns $script:scheduleColumns
 }
 
-function Get-ScheduleRowsFromUI {
-    Get-GridRows -ContentPanel $script:scheduleContentPanel -Columns $script:scheduleColumns
-}
-
-function Read-ExcelData {
-    param(
-        [string]$ExcelPath,
-        [string]$SheetName,
-        [string[]]$DateProperties = @(),
-        [scriptblock]$DataTransformer = { param($Rows) $Rows },
-        [scriptblock]$OnLoaded = { }
-    )
-    try {
-        if (!(Test-Path -LiteralPath $ExcelPath)) {
-            throw "Excelファイルが見つかりません: $ExcelPath"
-        }
-
-        $excel = New-Object -ComObject Excel.Application
-        $excel.Visible = $false
-        $excel.DisplayAlerts = $false
-        $excel.ScreenUpdating = $false
-        $excel.EnableEvents = $false
-
-        try {
-            $workbook = $excel.Workbooks.Open($ExcelPath)
-            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
-            if (!$sheet) {
-                throw "シート '$SheetName' が見つかりません"
-            }
-            $rows = @(Get-RowObjects -Sheet $sheet)
-
-            foreach ($row in $rows) {
-                foreach ($prop in $DateProperties) {
-                    $val = $row.$prop
-                    if ($val -and [double]::TryParse($val, [ref]$null)) {
-                        $row.$prop = ([datetime]::FromOADate([double]$val)).ToString("yyyy-MM-dd")
-                    }
-                }
-            }
-
-            $transformedData = & $DataTransformer $rows
-            & $OnLoaded @{ Data = $transformedData; Sheet = $sheet }
-        }
-        finally {
-            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
-        }
-    }
-    catch {
-        throw $_
-    }
-}
-
-function Load-ScheduleFromExcel {
+function Read-ScheduleExcelData {
     param([string]$GroupName)
 
     $xlsxPath = Get-GroupXlsxPath $GroupName
@@ -1227,22 +1031,23 @@ function Load-ScheduleFromExcel {
         Read-ExcelData `
             -ExcelPath $xlsxPath `
             -SheetName "スケジュール" `
-            -DateProperties @("開始日", "終了日") `
             -DataTransformer {
                 param($Rows)
                 $convertedRows = @()
                 foreach ($row in $Rows) {
-                    $newObj = [ordered]@{ No = $row."通番" }
+                    $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
                     foreach ($col in $script:scheduleColumns | Where-Object { $_.Property }) {
-                        $newObj[$col.Property] = $row."$($col.Label)"
+                        $value = $row."$($col.Label)"
+                        if ($col.IsDate -and $value -and [double]::TryParse($value, [ref]$null)) {
+                            $value = ([datetime]::FromOADate([double]$value)).ToString("yyyy-MM-dd")
+                        }
+                        $newObj[$col.Property] = $value
                     }
                     $convertedRows += [PSCustomObject]$newObj
                 }
                 $script:scheduleRows = $convertedRows
-            } `
-            -OnLoaded {
-                Render-ScheduleRows
             }
+        Update-ScheduleGrid
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("スケジュール読込に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -1253,80 +1058,14 @@ function Save-ScheduleToExcel {
     $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
-        $rowsFromUI = @(Get-ScheduleRowsFromUI)
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $rowsFromUI -Columns $script:scheduleColumns
+        $rowsFromUI = @(Read-ScheduleGridData)
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Datas $rowsFromUI -Columns $script:scheduleColumns
         [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
 }
-
-function Save-DataToExcel {
-    param(
-        [string]$ExcelPath,
-        [string]$SheetName,
-        [array]$Rows,
-        [array]$Columns
-    )
-    try {
-
-        $excel = New-Object -ComObject Excel.Application
-        $excel.Visible = $false
-        $excel.DisplayAlerts = $false
-        $excel.ScreenUpdating = $false
-        $excel.EnableEvents = $false
-
-        try {
-            $workbook = $excel.Workbooks.Open($ExcelPath)
-            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
-            if (!$sheet) {
-                throw "シート '$SheetName' が見つかりません"
-            }
-
-            Remove-DataRows -Sheet $sheet
-
-            $used = $sheet.UsedRange
-            $data = $used.Value2
-            $colCount = $used.Columns.Count
-            $headers = @()
-            for ($c = 1; $c -le $colCount; $c++) {
-                $headers += "$($data[1, $c])"
-            }
-
-            $excelDatas = @()
-            $rowIndex = 1
-            foreach ($row in $Rows) {
-                $rowData = @()
-                foreach ($header in $headers) {
-                    $col = $Columns | Where-Object { $_.Label -eq $header }
-                    if ($col -and $col.Property) {
-                        $value = $row.($col.Property)
-                        $rowData += [string]$value
-                    } elseif ($col -and $col.AutoIncrement) {
-                        $rowData += [string]$rowIndex
-                    } else {
-                        $rowData += ""
-                    }
-                }
-                $excelDatas += , $rowData
-                $rowIndex++
-            }
-
-            Write-BodyDatas -StartCell $sheet.Range("A2") -Datas $excelDatas
-            
-            $workbook.Save()
-        }
-        finally {
-            if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-            if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
-        }
-    }
-    catch {
-        throw $_
-    }
-}
-
 
 $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
     $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
@@ -1340,9 +1079,7 @@ $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
 
 $cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
     $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
-    $script:scheduleRows = @()
-    Render-ScheduleRows
-    Load-ScheduleFromExcel -GroupName $target
+    Read-ScheduleExcelData -GroupName $target
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({

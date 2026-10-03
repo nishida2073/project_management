@@ -1276,3 +1276,152 @@ function Render-SettingsFields {
     return $totalHeight
 }
 
+function Read-GridData {
+    param(
+        [Parameter(Mandatory)]$ContentPanel,
+        [Parameter(Mandatory)][array]$Columns
+    )
+
+    $rows = @()
+    $controls = $ContentPanel.Controls
+    $controlsPerRow = $Columns.Count + 1
+    $dataControlsCount = $controls.Count - 1
+
+    $rowIndex = 0
+    while ($rowIndex * $controlsPerRow -lt $dataControlsCount) {
+        $baseIndex = $rowIndex * $controlsPerRow
+        $noCtrl = $controls[$baseIndex]
+        $newObj = [ordered]@{ No = $noCtrl.Tag }
+
+        for ($c = 0; $c -lt $Columns.Count; $c++) {
+            $col = $Columns[$c]
+            if ($col.AutoIncrement) { continue }
+            $ctrl = $controls[$baseIndex + $c]
+            if ($col.Property) {
+                $newObj[$col.Property] = $ctrl.Text
+            }
+        }
+
+        $rows += [PSCustomObject]$newObj
+        $rowIndex++
+    }
+
+    return $rows
+}
+
+function New-Grid {
+    param(
+        [Parameter(Mandatory)]$GroupBox,
+        [Parameter(Mandatory)][ref]$RowDatas,
+        [Parameter(Mandatory)][scriptblock]$OnDelete,
+        [Parameter(Mandatory)][array]$Columns,
+        [scriptblock]$OnAdd
+    )
+
+    $existingPanels = $GroupBox.Controls | Where-Object { $_ -is [System.Windows.Forms.Panel] }
+    $HeaderPanel = $existingPanels | Where-Object { $_.Location.Y -eq 40 } | Select-Object -First 1
+    $ContentPanelY = if ($HeaderPanel) { $HeaderPanel.Location.Y + $HeaderPanel.Height } else { 60 }
+    $ContentPanel = $existingPanels | Where-Object { $_.Location.Y -eq $ContentPanelY } | Select-Object -First 1
+
+    if (-not $HeaderPanel) {
+        $HeaderPanel = New-Object System.Windows.Forms.Panel
+        $HeaderPanel.AutoSize = $false
+        $HeaderPanel.Size = New-Object System.Drawing.Size(730, 20)
+        $HeaderPanel.Location = New-Object System.Drawing.Point(10, 40)
+        $GroupBox.Controls.Add($HeaderPanel)
+    }
+
+    if (-not $ContentPanel) {
+        $ContentPanel = New-Object System.Windows.Forms.Panel
+        $ContentPanel.AutoSize = $false
+        $ContentPanel.Size = New-Object System.Drawing.Size(730, 370)
+        $ContentPanel.Location = New-Object System.Drawing.Point(10, $ContentPanelY)
+        $GroupBox.Controls.Add($ContentPanel)
+    }
+
+    if ($HeaderPanel.Controls.Count -eq 0) {
+        $y = 0
+        $x = 10
+
+        foreach ($col in $Columns) {
+            $lbl = New-Object System.Windows.Forms.Label
+            $lbl.Text = $col.Label
+            $lbl.AutoSize = $false
+            $lbl.Size = New-Object System.Drawing.Size($col.Width, 20)
+            $lbl.Location = New-Object System.Drawing.Point($x, $y)
+            $HeaderPanel.Controls.Add($lbl)
+            $x += $col.Width + 10
+        }
+
+        $lblDelete = New-Object System.Windows.Forms.Label
+        $lblDelete.Text = "削除"
+        $lblDelete.AutoSize = $false
+        $lblDelete.Size = New-Object System.Drawing.Size(60, 20)
+        $lblDelete.Location = New-Object System.Drawing.Point($x, $y)
+        $HeaderPanel.Controls.Add($lblDelete)
+    }
+
+    $ContentPanel.Controls.Clear()
+    $y = 0
+
+    for ($i = 0; $i -lt $RowDatas.Value.Count; $i++) {
+        $row = $RowDatas.Value[$i]
+        $x = 10
+
+        for ($c = 0; $c -lt $Columns.Count; $c++) {
+            $col = $Columns[$c]
+
+            if ($col.AutoIncrement) {
+                $ctrl = New-Object System.Windows.Forms.Label
+                $ctrl.Text = "$($i + 1)"
+                $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+            } else {
+                $ctrl = New-Object System.Windows.Forms.TextBox
+                $propName = $col.Property
+                if ($propName -and $row.PSObject.Properties[$propName]) {
+                    $ctrl.Text = $row.$propName
+                }
+            }
+
+            $ctrl.AutoSize = $false
+            $ctrl.Size = New-Object System.Drawing.Size($col.Width, 22)
+            $ctrl.Location = New-Object System.Drawing.Point($x, $y)
+            $ctrl.Tag = $row.No
+            $ContentPanel.Controls.Add($ctrl)
+            $x += $col.Width + 10
+        }
+
+        $btnDelete = New-Object System.Windows.Forms.Button
+        $btnDelete.Text = "削除"
+        $btnDelete.AutoSize = $false
+        $btnDelete.Size = New-Object System.Drawing.Size(60, 24)
+        $btnDelete.Location = New-Object System.Drawing.Point($x, ($y - 1))
+        $btnDelete.Tag = $row.No
+        $btnDelete.Add_Click($OnDelete)
+        $ContentPanel.Controls.Add($btnDelete)
+
+        $y += 28
+    }
+
+    $addButton = $ContentPanel.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Text -eq "＋ 行追加" } | Select-Object -First 1
+
+    if (-not $addButton) {
+        $addButton = New-Object System.Windows.Forms.Button
+        $addButton.Text = "＋ 行追加"
+        $addButton.Size = New-Object System.Drawing.Size(100, 24)
+        if ($OnAdd) {
+            $addButton.Add_Click({
+                & $OnAdd $ContentPanel
+            }.GetNewClosure())
+        }
+        $ContentPanel.Controls.Add($addButton)
+    }
+
+    $addButton.Location = New-Object System.Drawing.Point(10, ($y + 10))
+
+    $panelHeight = $y + 50
+    $ContentPanel.Height = $panelHeight
+
+    @{ HeaderPanel = $HeaderPanel; ContentPanel = $ContentPanel }
+}
+
