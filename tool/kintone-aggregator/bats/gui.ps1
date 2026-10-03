@@ -523,13 +523,6 @@ $lblMasterOpsStatusPlaceholder.Location = New-Object System.Drawing.Point(130, 3
 $lblMasterOpsStatusPlaceholder.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
 $grpUserMasterSync.Controls.Add($lblMasterOpsStatusPlaceholder)
 
-$settingsMasterOpsPanel.Controls.Add($grpUserMasterSync)
-
-$spacer = New-Object System.Windows.Forms.Panel
-$spacer.Height = 10
-$spacer.Dock = [System.Windows.Forms.DockStyle]::Top
-$settingsMasterOpsPanel.Controls.Add($spacer)
-
 function Get-CommonSettingsFieldRows {
     $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
     foreach ($varName in $commonSettingsVars) {
@@ -718,13 +711,8 @@ function Add-CollectDataDefsEditor {
         $y += 36
     }
 
-    $spacer = New-Object System.Windows.Forms.Panel
-    $spacer.Dock = [System.Windows.Forms.DockStyle]::Top
-    $spacer.Height = 10
-    $settingsCommonFieldPanel.Controls.Add($grp)
-    $settingsCommonFieldPanel.Controls.SetChildIndex($grp, 0)
-    $settingsCommonFieldPanel.Controls.Add($spacer)
-    $settingsCommonFieldPanel.Controls.SetChildIndex($spacer, 1)
+    $controlsToStack = @($grp, (New-Panel -Height 10))
+    Add-StackedDockedControls -Container $settingsCommonFieldPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 }
 
 function Save-CollectDataDefs {
@@ -1003,15 +991,8 @@ $script:scheduleColumns = @(
     @{ Label = "終了日"; Width = 100; Property = "EndDate" }
 )
 
-
-$spacer2 = New-Object System.Windows.Forms.Panel
-$spacer2.Height = 10
-$spacer2.Dock = [System.Windows.Forms.DockStyle]::Top
-$settingsMasterOpsPanel.Controls.Add($spacer2)
-
-$settingsMasterOpsPanel.Controls.Add($grpScheduleEdit)
-$settingsMasterOpsPanel.Controls.SetChildIndex($grpScheduleEdit, 0)
-$settingsMasterOpsPanel.Controls.SetChildIndex($spacer2, 1)
+$controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpScheduleEdit, (New-Panel -Height 10))
+Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 
 function Render-Grid {
     param(
