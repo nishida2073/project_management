@@ -424,16 +424,40 @@ $cmbSettingsMasterOpsGroupTarget.DisplayMember = "Text"
 $lnkSettingsMasterOpsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsMasterOpsOpenXlsx.Text = "開く"
 
+$lblSettingsMasterOpsSaveTarget = New-Object System.Windows.Forms.Label
+$lblSettingsMasterOpsSaveTarget.Text = "保存対象"
+$lblSettingsMasterOpsSaveTarget.AutoSize = $true
+
+$cmbSettingsMasterOpsSaveTarget = New-Object System.Windows.Forms.ComboBox
+$cmbSettingsMasterOpsSaveTarget.Items.Add("すべて") | Out-Null
+$cmbSettingsMasterOpsSaveTarget.Items.Add("テスト") | Out-Null
+$cmbSettingsMasterOpsSaveTarget.Items.Add("アンケート") | Out-Null
+$cmbSettingsMasterOpsSaveTarget.SelectedIndex = 0
+$cmbSettingsMasterOpsSaveTarget.Size = New-Object System.Drawing.Size(120, 24)
+$cmbSettingsMasterOpsSaveTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+
 $script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
-    -OnSave { Save-SurveyToExcel; Save-TestToExcel } `
+    -ButtonRowY 78 `
+    -OnSave {
+        switch ($cmbSettingsMasterOpsSaveTarget.SelectedItem) {
+            "すべて" { Save-SurveyToExcel; Save-TestToExcel }
+            "テスト" { Save-TestToExcel }
+            "アンケート" { Save-SurveyToExcel }
+        }
+    } `
     -OnReload {
         $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
-        Read-SurveyExcelData -GroupName $target
         Read-TestExcelData -GroupName $target
+        Read-SurveyExcelData -GroupName $target
     }
 
 $settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
+
+$lblSettingsMasterOpsSaveTarget.Location = New-Object System.Drawing.Point($lblSettingsMasterOpsGroupTarget.Location.X, 48)
+$cmbSettingsMasterOpsSaveTarget.Location = New-Object System.Drawing.Point($cmbSettingsMasterOpsGroupTarget.Location.X, 46)
+$settingsMasterOpsTopPanel.Controls.Add($lblSettingsMasterOpsSaveTarget)
+$settingsMasterOpsTopPanel.Controls.Add($cmbSettingsMasterOpsSaveTarget)
 
 $settingsMasterOpsPanel = New-Object System.Windows.Forms.Panel
 $settingsMasterOpsPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
@@ -972,8 +996,8 @@ $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
 
 $cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
     $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
-    Read-SurveyExcelData -GroupName $target
     Read-TestExcelData -GroupName $target
+    Read-SurveyExcelData -GroupName $target
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
