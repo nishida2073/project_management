@@ -1028,7 +1028,7 @@ function Read-ScheduleExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
-        Read-ExcelData `
+        $script:scheduleRows = Read-ExcelData `
             -ExcelPath $xlsxPath `
             -SheetName "スケジュール" `
             -DataTransformer {
@@ -1045,7 +1045,7 @@ function Read-ScheduleExcelData {
                     }
                     $convertedRows += [PSCustomObject]$newObj
                 }
-                $script:scheduleRows = $convertedRows
+                $convertedRows
             }
         Update-ScheduleGrid
     }

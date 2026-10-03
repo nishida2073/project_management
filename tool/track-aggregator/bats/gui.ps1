@@ -439,17 +439,10 @@ $cmbSettingsMasterOpsSaveTarget.DropDownStyle = [System.Windows.Forms.ComboBoxSt
 $script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
     -ButtonRowY 78 `
-    -OnSave {
-        switch ($cmbSettingsMasterOpsSaveTarget.SelectedItem) {
-            "すべて" { Save-SurveyToExcel; Save-TestToExcel }
-            "テスト" { Save-TestToExcel }
-            "アンケート" { Save-SurveyToExcel }
-        }
-    } `
+    -OnSave { Save-MasterOpsToExcel } `
     -OnReload {
         $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
-        Read-TestExcelData -GroupName $target
-        Read-SurveyExcelData -GroupName $target
+        Read-MasterOpsExcelData -GroupName $target
     }
 
 $settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
@@ -585,7 +578,7 @@ function Read-SurveyExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
-        Read-ExcelData `
+        $script:surveyRows = Read-ExcelData `
             -ExcelPath $xlsxPath `
             -SheetName "アンケート" `
             -DataTransformer {
@@ -602,7 +595,7 @@ function Read-SurveyExcelData {
                     }
                     $convertedRows += [PSCustomObject]$newObj
                 }
-                $script:surveyRows = $convertedRows
+                $convertedRows
             }
         Update-SurveyGrid
     }
@@ -658,7 +651,7 @@ function Read-TestExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
-        Read-ExcelData `
+        $script:testRows = Read-ExcelData `
             -ExcelPath $xlsxPath `
             -SheetName "テスト" `
             -DataTransformer {
@@ -675,12 +668,98 @@ function Read-TestExcelData {
                     }
                     $convertedRows += [PSCustomObject]$newObj
                 }
-                $script:testRows = $convertedRows
+                $convertedRows
             }
         Update-TestGrid
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("テスト読込に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Save-MasterOpsToExcel {
+    $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $xlsxPath = Get-GroupXlsxPath $groupName
+    try {
+        switch ($cmbSettingsMasterOpsSaveTarget.SelectedItem) {
+            "すべて" {
+                $surveyDatas = @(Read-SurveyGridData)
+                $testDatas = @(Read-TestGridData)
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetDatasMap @(
+                    @{ SheetName = "アンケート"; Datas = $surveyDatas; Columns = $script:surveyColumns }
+                    @{ SheetName = "テスト"; Datas = $testDatas; Columns = $script:testColumns }
+                )
+                [System.Windows.Forms.MessageBox]::Show("すべて保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            }
+            "テスト" {
+                $testDatas = @(Read-TestGridData)
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetName "テスト" -Datas $testDatas -Columns $script:testColumns
+                [System.Windows.Forms.MessageBox]::Show("テストを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            }
+            "アンケート" {
+                $surveyDatas = @(Read-SurveyGridData)
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetName "アンケート" -Datas $surveyDatas -Columns $script:surveyColumns
+                [System.Windows.Forms.MessageBox]::Show("アンケートを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            }
+        }
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+    }
+}
+
+function Read-MasterOpsExcelData {
+    param([string]$GroupName)
+
+    $xlsxPath = Get-GroupXlsxPath $GroupName
+
+    try {
+        $surveyTransformer = {
+            param($Rows)
+            $convertedRows = @()
+            foreach ($row in $Rows) {
+                $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
+                foreach ($col in $script:surveyColumns | Where-Object { $_.Property }) {
+                    $value = $row."$($col.Label)"
+                    if ($col.IsBool -and $value -is [bool]) {
+                        $value = if ($value) { "TRUE" } else { "FALSE" }
+                    }
+                    $newObj[$col.Property] = $value
+                }
+                $convertedRows += [PSCustomObject]$newObj
+            }
+            $convertedRows
+        }
+
+        $testTransformer = {
+            param($Rows)
+            $convertedRows = @()
+            foreach ($row in $Rows) {
+                $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
+                foreach ($col in $script:testColumns | Where-Object { $_.Property }) {
+                    $value = $row."$($col.Label)"
+                    if ($col.IsBool -and $value -is [bool]) {
+                        $value = if ($value) { "TRUE" } else { "FALSE" }
+                    }
+                    $newObj[$col.Property] = $value
+                }
+                $convertedRows += [PSCustomObject]$newObj
+            }
+            $convertedRows
+        }
+
+        $results = Read-ExcelData -ExcelPath $xlsxPath -SheetTransformerMap @(
+            @{ SheetName = "アンケート"; DataTransformer = $surveyTransformer }
+            @{ SheetName = "テスト"; DataTransformer = $testTransformer }
+        )
+
+        $script:surveyRows = $results["アンケート"]
+        $script:testRows = $results["テスト"]
+        Update-SurveyGrid
+        Update-TestGrid
+    }
+    catch {
+        [System.Windows.Forms.MessageBox]::Show("読込に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
 }
 
@@ -996,8 +1075,7 @@ $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
 
 $cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
     $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
-    Read-TestExcelData -GroupName $target
-    Read-SurveyExcelData -GroupName $target
+    Read-MasterOpsExcelData -GroupName $target
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({

@@ -668,12 +668,15 @@ function Read-ExcelData {
     param(
         [string]$ExcelPath,
         [string]$SheetName,
-        [scriptblock]$DataTransformer = { param($Rows) $Rows }
+        [scriptblock]$DataTransformer = { param($Rows) $Rows },
+        [array]$SheetTransformerMap
     )
     try {
         if (!(Test-Path -LiteralPath $ExcelPath)) {
             throw "Excelファイルが見つかりません: $ExcelPath"
         }
+
+        $sheetsToRead = if ($SheetTransformerMap) { $SheetTransformerMap } else { @(@{ SheetName = $SheetName; DataTransformer = $DataTransformer }) }
 
         $excel = New-Object -ComObject Excel.Application
         $excel.Visible = $false
@@ -683,12 +686,23 @@ function Read-ExcelData {
 
         try {
             $workbook = $excel.Workbooks.Open($ExcelPath)
-            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
-            if (!$sheet) {
-                throw "シート '$SheetName' が見つかりません"
+            $results = @{}
+
+            foreach ($sheetConfig in $sheetsToRead) {
+                $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $sheetConfig.SheetName } | Select-Object -First 1
+                if (!$sheet) {
+                    throw "シート '$($sheetConfig.SheetName)' が見つかりません"
+                }
+                $rows = @(Get-RowObjects -Sheet $sheet)
+                $transformer = if ($sheetConfig.DataTransformer) { $sheetConfig.DataTransformer } else { { param($Rows) $Rows } }
+                $results[$sheetConfig.SheetName] = & $transformer $rows
             }
-            $rows = @(Get-RowObjects -Sheet $sheet)
-            & $DataTransformer $rows
+
+            if ($SheetTransformerMap) {
+                return $results
+            } else {
+                return $results[$SheetName]
+            }
         }
         finally {
             if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
@@ -705,10 +719,13 @@ function Save-DataToExcel {
         [string]$ExcelPath,
         [string]$SheetName,
         [array]$Datas,
-        [array]$Columns
+        [array]$Columns,
+        [array]$SheetDatasMap
     )
-    try {
 
+    $sheetsToSave = if ($SheetDatasMap) { $SheetDatasMap } else { @(@{ SheetName = $SheetName; Datas = $Datas; Columns = $Columns }) }
+
+    try {
         $excel = New-Object -ComObject Excel.Application
         $excel.Visible = $false
         $excel.DisplayAlerts = $false
@@ -717,41 +734,44 @@ function Save-DataToExcel {
 
         try {
             $workbook = $excel.Workbooks.Open($ExcelPath)
-            $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $SheetName } | Select-Object -First 1
-            if (!$sheet) {
-                throw "シート '$SheetName' が見つかりません"
-            }
 
-            Remove-DataRows -Sheet $sheet
-
-            $used = $sheet.UsedRange
-            $data = $used.Value2
-            $colCount = $used.Columns.Count
-            $headers = @()
-            for ($c = 1; $c -le $colCount; $c++) {
-                $headers += "$($data[1, $c])"
-            }
-
-            $rowDatas = @()
-            $rowIndex = 1
-            foreach ($row in $Datas) {
-                $rowData = @()
-                foreach ($header in $headers) {
-                    $col = $Columns | Where-Object { $_.Label -eq $header }
-                    if ($col -and $col.Property) {
-                        $value = $row.($col.Property)
-                        $rowData += [string]$value
-                    } elseif ($col -and $col.AutoIncrement) {
-                        $rowData += [string]$rowIndex
-                    } else {
-                        $rowData += ""
-                    }
+            foreach ($sheetData in $sheetsToSave) {
+                $sheet = $workbook.Sheets | Where-Object { $_.Name -eq $sheetData.SheetName } | Select-Object -First 1
+                if (!$sheet) {
+                    throw "シート '$($sheetData.SheetName)' が見つかりません"
                 }
-                $rowDatas += , $rowData
-                $rowIndex++
-            }
 
-            Write-BodyDatas -StartCell $sheet.Range("A2") -Datas $rowDatas
+                Remove-DataRows -Sheet $sheet
+
+                $used = $sheet.UsedRange
+                $data = $used.Value2
+                $colCount = $used.Columns.Count
+                $headers = @()
+                for ($c = 1; $c -le $colCount; $c++) {
+                    $headers += "$($data[1, $c])"
+                }
+
+                $rowDatas = @()
+                $rowIndex = 1
+                foreach ($row in $sheetData.Datas) {
+                    $rowData = @()
+                    foreach ($header in $headers) {
+                        $col = $sheetData.Columns | Where-Object { $_.Label -eq $header }
+                        if ($col -and $col.Property) {
+                            $value = $row.($col.Property)
+                            $rowData += [string]$value
+                        } elseif ($col -and $col.AutoIncrement) {
+                            $rowData += [string]$rowIndex
+                        } else {
+                            $rowData += ""
+                        }
+                    }
+                    $rowDatas += , $rowData
+                    $rowIndex++
+                }
+
+                Write-BodyDatas -StartCell $sheet.Range("A2") -Datas $rowDatas
+            }
 
             $workbook.Save()
         }
