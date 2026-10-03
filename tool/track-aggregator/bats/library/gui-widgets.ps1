@@ -371,7 +371,12 @@ function Set-StatusLabelText {
 function Get-InputValue {
     param([Parameter(Mandatory)]$Control)
     if ($Control -is [System.Windows.Forms.ComboBox]) {
-        if ($Control.SelectedItem) { return "$($Control.SelectedItem.Value)" }
+        if ($Control.SelectedIndex -ge 0) {
+            $selectedItem = $Control.Items[$Control.SelectedIndex]
+            if ($selectedItem -is [string]) { return $selectedItem }
+            if ($selectedItem.PSObject.Properties['Value']) { return "$($selectedItem.Value)" }
+            return "$selectedItem"
+        }
         return ""
     }
     return $Control.Text

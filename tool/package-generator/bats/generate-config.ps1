@@ -27,6 +27,12 @@ try {
         try {
             $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
+            try {
+                $fileStream = [System.IO.File]::Open($TargetConfigFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
+                $fileStream.Close()
+            } catch {
+                throw "ファイルが別のプロセスで開かれています。Excel を閉じてから再度保存してください: $TargetConfigFilePath"
+            }
             $excel = $null
             $workbook = $null
             try {
