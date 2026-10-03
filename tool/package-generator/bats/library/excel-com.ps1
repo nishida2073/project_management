@@ -722,6 +722,13 @@ function Save-DataToExcel {
         [array]$SheetDefDatasMap
     )
 
+    try {
+        $fileStream = [System.IO.File]::Open($ExcelPath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
+        $fileStream.Close()
+    } catch {
+        throw "ファイルが別のプロセスで開かれています。Excel を閉じてから再度保存してください: $ExcelPath"
+    }
+
     $sheetsToSave = if ($SheetDefDatasMap) {
         $SheetDefDatasMap | ForEach-Object {
             @{ SheetName = $_.SheetDef.SheetName; Datas = $_.Datas; Columns = $_.SheetDef.Columns }
