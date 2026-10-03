@@ -984,12 +984,15 @@ $grpScheduleEdit.Padding = New-Object System.Windows.Forms.Padding(10)
 
 $script:scheduleRows = @()
 $script:scheduleContentPanel = $null
-$script:scheduleColumns = @(
-    @{ Label = "通番"; Width = 50; AutoIncrement = $true }
-    @{ Label = "科目名"; Width = 200; Property = "Subject" }
-    @{ Label = "開始日"; Width = 100; Property = "StartDate"; IsDate = $true }
-    @{ Label = "終了日"; Width = 100; Property = "EndDate"; IsDate = $true }
-)
+$script:scheduleSheetDef = @{
+    SheetName = "スケジュール"
+    Columns = @(
+        @{ Label = "通番"; Width = 50; AutoIncrement = $true }
+        @{ Label = "科目名"; Width = 200; Property = "Subject" }
+        @{ Label = "開始日"; Width = 100; Property = "StartDate"; IsDate = $true }
+        @{ Label = "終了日"; Width = 100; Property = "EndDate"; IsDate = $true }
+    )
+}
 
 $controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpScheduleEdit, (New-Panel -Height 10))
 Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
@@ -1002,24 +1005,26 @@ function Update-ScheduleGrid {
         Update-ScheduleGrid
     } -OnAdd {
         param($ContentPanel)
+        $scheduleSheetDef = $script:scheduleSheetDef
+
         $updatedRows = Read-ScheduleGridData
         $script:scheduleRows = $updatedRows
 
         $currentRows = @($script:scheduleRows)
         $nextNo = if ($currentRows.Count -gt 0) { ($currentRows | Select-Object -Last 1).No + 1 } else { 1 }
         $newObj = [ordered]@{ No = $nextNo }
-        foreach ($col in $script:scheduleColumns | Where-Object { $_.Property }) {
+        foreach ($col in $scheduleSheetDef.Columns | Where-Object { $_.Property }) {
             $newObj[$col.Property] = ""
         }
         $newRow = [PSCustomObject]$newObj
         $script:scheduleRows = @($script:scheduleRows) + @($newRow)
         Update-ScheduleGrid
-    } -Columns $script:scheduleColumns
+    } -Columns $script:scheduleSheetDef.Columns
     $script:scheduleContentPanel = $panels.ContentPanel
 }
 
 function Read-ScheduleGridData {
-    Read-GridData -ContentPanel $script:scheduleContentPanel -Columns $script:scheduleColumns
+    Read-GridData -ContentPanel $script:scheduleContentPanel -Columns $script:scheduleSheetDef.Columns
 }
 
 function Read-ScheduleExcelData {
@@ -1028,25 +1033,28 @@ function Read-ScheduleExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
+        $scheduleSheetDef = $script:scheduleSheetDef
+        $scheduleTransformer = {
+            param($Rows)
+            $convertedRows = @()
+            foreach ($row in $Rows) {
+                $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
+                foreach ($col in $scheduleSheetDef.Columns | Where-Object { $_.Property }) {
+                    $value = $row."$($col.Label)"
+                    if ($col.IsDate -and $value -and [double]::TryParse($value, [ref]$null)) {
+                        $value = ([datetime]::FromOADate([double]$value)).ToString("yyyy-MM-dd")
+                    }
+                    $newObj[$col.Property] = $value
+                }
+                $convertedRows += [PSCustomObject]$newObj
+            }
+            @($convertedRows)
+        }
+
         $script:scheduleRows = Read-ExcelData `
             -ExcelPath $xlsxPath `
-            -SheetName "スケジュール" `
-            -DataTransformer {
-                param($Rows)
-                $convertedRows = @()
-                foreach ($row in $Rows) {
-                    $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
-                    foreach ($col in $script:scheduleColumns | Where-Object { $_.Property }) {
-                        $value = $row."$($col.Label)"
-                        if ($col.IsDate -and $value -and [double]::TryParse($value, [ref]$null)) {
-                            $value = ([datetime]::FromOADate([double]$value)).ToString("yyyy-MM-dd")
-                        }
-                        $newObj[$col.Property] = $value
-                    }
-                    $convertedRows += [PSCustomObject]$newObj
-                }
-                $convertedRows
-            }
+            -SheetName $scheduleSheetDef.SheetName `
+            -DataTransformer $scheduleTransformer
         Update-ScheduleGrid
     }
     catch {
@@ -1059,7 +1067,7 @@ function Save-ScheduleToExcel {
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-ScheduleGridData)
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Datas $rowsFromUI -Columns $script:scheduleColumns
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:scheduleSheetDef -Datas $rowsFromUI
         [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
@@ -1108,3 +1116,4 @@ $form.Add_Shown({
 })
 
 [System.Windows.Forms.Application]::Run($form)
+

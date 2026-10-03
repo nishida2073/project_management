@@ -516,13 +516,16 @@ $grpSurveyEdit.Padding = New-Object System.Windows.Forms.Padding(10)
 
 $script:surveyRows = @()
 $script:surveyContentPanel = $null
-$script:surveyColumns = @(
-    @{ Label = "通番"; Width = 20; AutoIncrement = $true }
-    @{ Label = "アンケート名"; Width = 150; Property = "SurveyName" }
-    @{ Label = "TrackID"; Width = 300; Property = "TrackID";}
-    @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
-    @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
-)
+$script:surveySheetDef = @{
+    SheetName = "アンケート"
+    Columns = @(
+        @{ Label = "通番"; Width = 20; AutoIncrement = $true }
+        @{ Label = "アンケート名"; Width = 150; Property = "SurveyName" }
+        @{ Label = "TrackID"; Width = 300; Property = "TrackID";}
+        @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
+        @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
+    )
+}
 
 $grpTestEdit = New-Object System.Windows.Forms.GroupBox
 $grpTestEdit.Text = "テスト編集"
@@ -533,13 +536,16 @@ $grpTestEdit.Padding = New-Object System.Windows.Forms.Padding(10)
 
 $script:testRows = @()
 $script:testContentPanel = $null
-$script:testColumns = @(
-    @{ Label = "通番"; Width = 20; AutoIncrement = $true }
-    @{ Label = "テスト名"; Width = 150; Property = "TestName" }
-    @{ Label = "TrackID"; Width = 300; Property = "TrackID" }
-    @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
-    @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
-)
+$script:testSheetDef = @{
+    SheetName = "テスト"
+    Columns = @(
+        @{ Label = "通番"; Width = 20; AutoIncrement = $true }
+        @{ Label = "テスト名"; Width = 150; Property = "TestName" }
+        @{ Label = "TrackID"; Width = 300; Property = "TrackID" }
+        @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
+        @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
+    )
+}
 
 $controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpTestEdit, (New-Panel -Height 10), $grpSurveyEdit, (New-Panel -Height 10))
 Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
@@ -552,24 +558,26 @@ function Update-SurveyGrid {
         Update-SurveyGrid
     } -OnAdd {
         param($ContentPanel)
+        $surveySheetDef = $script:surveySheetDef
+
         $updatedRows = Read-SurveyGridData
         $script:surveyRows = $updatedRows
 
         $currentRows = @($script:surveyRows)
         $nextNo = if ($currentRows.Count -gt 0) { ($currentRows | Select-Object -Last 1).No + 1 } else { 1 }
         $newObj = [ordered]@{ No = $nextNo }
-        foreach ($col in $script:surveyColumns | Where-Object { $_.Property }) {
+        foreach ($col in $surveySheetDef.Columns | Where-Object { $_.Property }) {
             $newObj[$col.Property] = ""
         }
         $newRow = [PSCustomObject]$newObj
         $script:surveyRows = @($script:surveyRows) + @($newRow)
         Update-SurveyGrid
-    } -Columns $script:surveyColumns
+    } -Columns $script:surveySheetDef.Columns
     $script:surveyContentPanel = $panels.ContentPanel
 }
 
 function Read-SurveyGridData {
-    Read-GridData -ContentPanel $script:surveyContentPanel -Columns $script:surveyColumns
+    Read-GridData -ContentPanel $script:surveyContentPanel -Columns $script:surveySheetDef.Columns
 }
 
 function Read-SurveyExcelData {
@@ -578,25 +586,28 @@ function Read-SurveyExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
+        $surveySheetDef = $script:surveySheetDef
+        $surveyTransformer = {
+            param($Rows)
+            $convertedRows = @()
+            foreach ($row in $Rows) {
+                $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
+                foreach ($col in $surveySheetDef.Columns | Where-Object { $_.Property }) {
+                    $value = $row."$($col.Label)"
+                    if ($col.IsBool -and $value -is [bool]) {
+                        $value = if ($value) { "TRUE" } else { "FALSE" }
+                    }
+                    $newObj[$col.Property] = $value
+                }
+                $convertedRows += [PSCustomObject]$newObj
+            }
+            @($convertedRows)
+        }
+
         $script:surveyRows = Read-ExcelData `
             -ExcelPath $xlsxPath `
-            -SheetName "アンケート" `
-            -DataTransformer {
-                param($Rows)
-                $convertedRows = @()
-                foreach ($row in $Rows) {
-                    $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
-                    foreach ($col in $script:surveyColumns | Where-Object { $_.Property }) {
-                        $value = $row."$($col.Label)"
-                        if ($col.IsBool -and $value -is [bool]) {
-                            $value = if ($value) { "TRUE" } else { "FALSE" }
-                        }
-                        $newObj[$col.Property] = $value
-                    }
-                    $convertedRows += [PSCustomObject]$newObj
-                }
-                $convertedRows
-            }
+            -SheetName $surveySheetDef.SheetName `
+            -DataTransformer $surveyTransformer
         Update-SurveyGrid
     }
     catch {
@@ -609,7 +620,7 @@ function Save-SurveyToExcel {
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-SurveyGridData)
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "アンケート" -Datas $rowsFromUI -Columns $script:surveyColumns
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:surveySheetDef -Datas $rowsFromUI
         [System.Windows.Forms.MessageBox]::Show("アンケートを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
@@ -625,24 +636,26 @@ function Update-TestGrid {
         Update-TestGrid
     } -OnAdd {
         param($ContentPanel)
+        $testSheetDef = $script:testSheetDef
+
         $updatedRows = Read-TestGridData
         $script:testRows = $updatedRows
 
         $currentRows = @($script:testRows)
         $nextNo = if ($currentRows.Count -gt 0) { ($currentRows | Select-Object -Last 1).No + 1 } else { 1 }
         $newObj = [ordered]@{ No = $nextNo }
-        foreach ($col in $script:testColumns | Where-Object { $_.Property }) {
+        foreach ($col in $testSheetDef.Columns | Where-Object { $_.Property }) {
             $newObj[$col.Property] = ""
         }
         $newRow = [PSCustomObject]$newObj
         $script:testRows = @($script:testRows) + @($newRow)
         Update-TestGrid
-    } -Columns $script:testColumns
+    } -Columns $script:testSheetDef.Columns
     $script:testContentPanel = $panels.ContentPanel
 }
 
 function Read-TestGridData {
-    Read-GridData -ContentPanel $script:testContentPanel -Columns $script:testColumns
+    Read-GridData -ContentPanel $script:testContentPanel -Columns $script:testSheetDef.Columns
 }
 
 function Read-TestExcelData {
@@ -651,25 +664,28 @@ function Read-TestExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
+        $testSheetDef = $script:testSheetDef
+        $testTransformer = {
+            param($Rows)
+            $convertedRows = @()
+            foreach ($row in $Rows) {
+                $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
+                foreach ($col in $testSheetDef.Columns | Where-Object { $_.Property }) {
+                    $value = $row."$($col.Label)"
+                    if ($col.IsBool -and $value -is [bool]) {
+                        $value = if ($value) { "TRUE" } else { "FALSE" }
+                    }
+                    $newObj[$col.Property] = $value
+                }
+                $convertedRows += [PSCustomObject]$newObj
+            }
+            @($convertedRows)
+        }
+
         $script:testRows = Read-ExcelData `
             -ExcelPath $xlsxPath `
-            -SheetName "テスト" `
-            -DataTransformer {
-                param($Rows)
-                $convertedRows = @()
-                foreach ($row in $Rows) {
-                    $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
-                    foreach ($col in $script:testColumns | Where-Object { $_.Property }) {
-                        $value = $row."$($col.Label)"
-                        if ($col.IsBool -and $value -is [bool]) {
-                            $value = if ($value) { "TRUE" } else { "FALSE" }
-                        }
-                        $newObj[$col.Property] = $value
-                    }
-                    $convertedRows += [PSCustomObject]$newObj
-                }
-                $convertedRows
-            }
+            -SheetName $testSheetDef.SheetName `
+            -DataTransformer $testTransformer
         Update-TestGrid
     }
     catch {
@@ -685,20 +701,20 @@ function Save-MasterOpsToExcel {
             "すべて" {
                 $surveyDatas = @(Read-SurveyGridData)
                 $testDatas = @(Read-TestGridData)
-                Save-DataToExcel -ExcelPath $xlsxPath -SheetDatasMap @(
-                    @{ SheetName = "アンケート"; Datas = $surveyDatas; Columns = $script:surveyColumns }
-                    @{ SheetName = "テスト"; Datas = $testDatas; Columns = $script:testColumns }
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetDefDatasMap @(
+                    @{ SheetDef = $script:surveySheetDef; Datas = $surveyDatas }
+                    @{ SheetDef = $script:testSheetDef; Datas = $testDatas }
                 )
                 [System.Windows.Forms.MessageBox]::Show("すべて保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
             "テスト" {
                 $testDatas = @(Read-TestGridData)
-                Save-DataToExcel -ExcelPath $xlsxPath -SheetName "テスト" -Datas $testDatas -Columns $script:testColumns
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:testSheetDef -Datas $testDatas
                 [System.Windows.Forms.MessageBox]::Show("テストを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
             "アンケート" {
                 $surveyDatas = @(Read-SurveyGridData)
-                Save-DataToExcel -ExcelPath $xlsxPath -SheetName "アンケート" -Datas $surveyDatas -Columns $script:surveyColumns
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:surveySheetDef -Datas $surveyDatas
                 [System.Windows.Forms.MessageBox]::Show("アンケートを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
         }
@@ -714,12 +730,15 @@ function Read-MasterOpsExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
+        $surveySheetDef = $script:surveySheetDef
+        $testSheetDef = $script:testSheetDef
+
         $surveyTransformer = {
             param($Rows)
             $convertedRows = @()
             foreach ($row in $Rows) {
                 $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
-                foreach ($col in $script:surveyColumns | Where-Object { $_.Property }) {
+                foreach ($col in $surveySheetDef.Columns | Where-Object { $_.Property }) {
                     $value = $row."$($col.Label)"
                     if ($col.IsBool -and $value -is [bool]) {
                         $value = if ($value) { "TRUE" } else { "FALSE" }
@@ -728,7 +747,7 @@ function Read-MasterOpsExcelData {
                 }
                 $convertedRows += [PSCustomObject]$newObj
             }
-            $convertedRows
+            @($convertedRows)
         }
 
         $testTransformer = {
@@ -736,7 +755,7 @@ function Read-MasterOpsExcelData {
             $convertedRows = @()
             foreach ($row in $Rows) {
                 $newObj = [ordered]@{ No = @($convertedRows).Count + 1 }
-                foreach ($col in $script:testColumns | Where-Object { $_.Property }) {
+                foreach ($col in $testSheetDef.Columns | Where-Object { $_.Property }) {
                     $value = $row."$($col.Label)"
                     if ($col.IsBool -and $value -is [bool]) {
                         $value = if ($value) { "TRUE" } else { "FALSE" }
@@ -745,12 +764,12 @@ function Read-MasterOpsExcelData {
                 }
                 $convertedRows += [PSCustomObject]$newObj
             }
-            $convertedRows
+            @($convertedRows)
         }
 
         $results = Read-ExcelData -ExcelPath $xlsxPath -SheetTransformerMap @(
-            @{ SheetName = "アンケート"; DataTransformer = $surveyTransformer }
-            @{ SheetName = "テスト"; DataTransformer = $testTransformer }
+            @{ SheetName = $surveySheetDef.SheetName; DataTransformer = $surveyTransformer }
+            @{ SheetName = $testSheetDef.SheetName; DataTransformer = $testTransformer }
         )
 
         $script:surveyRows = $results["アンケート"]
@@ -768,7 +787,7 @@ function Save-TestToExcel {
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-TestGridData)
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "テスト" -Datas $rowsFromUI -Columns $script:testColumns
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:testSheetDef -Datas $rowsFromUI
         [System.Windows.Forms.MessageBox]::Show("テストを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
@@ -1104,3 +1123,5 @@ $form.Add_Shown({
 })
 
 [System.Windows.Forms.Application]::Run($form)
+
+

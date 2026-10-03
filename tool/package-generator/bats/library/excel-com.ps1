@@ -695,7 +695,7 @@ function Read-ExcelData {
                 }
                 $rows = @(Get-RowObjects -Sheet $sheet)
                 $transformer = if ($sheetConfig.DataTransformer) { $sheetConfig.DataTransformer } else { { param($Rows) $Rows } }
-                $results[$sheetConfig.SheetName] = & $transformer $rows
+                $results[$sheetConfig.SheetName] = @(& $transformer $rows)
             }
 
             if ($SheetTransformerMap) {
@@ -717,13 +717,22 @@ function Read-ExcelData {
 function Save-DataToExcel {
     param(
         [string]$ExcelPath,
-        [string]$SheetName,
+        [object]$SheetDef,
         [array]$Datas,
-        [array]$Columns,
-        [array]$SheetDatasMap
+        [array]$SheetDefDatasMap
     )
 
-    $sheetsToSave = if ($SheetDatasMap) { $SheetDatasMap } else { @(@{ SheetName = $SheetName; Datas = $Datas; Columns = $Columns }) }
+    $sheetsToSave = if ($SheetDefDatasMap) {
+        $SheetDefDatasMap | ForEach-Object {
+            @{ SheetName = $_.SheetDef.SheetName; Datas = $_.Datas; Columns = $_.SheetDef.Columns }
+        }
+    } elseif ($SheetDef -is [array]) {
+        $SheetDef | ForEach-Object {
+            @{ SheetName = $_.SheetName; Datas = $Datas; Columns = $_.Columns }
+        }
+    } else {
+        @(@{ SheetName = $SheetDef.SheetName; Datas = $Datas; Columns = $SheetDef.Columns })
+    }
 
     try {
         $excel = New-Object -ComObject Excel.Application

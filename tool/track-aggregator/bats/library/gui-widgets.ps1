@@ -1368,8 +1368,10 @@ function New-Grid {
     $ContentPanel.Controls.Clear()
     $y = 0
 
-    for ($i = 0; $i -lt $RowDatas.Value.Count; $i++) {
-        $row = $RowDatas.Value[$i]
+    $rowCount = @($RowDatas.Value).Count
+    $rowArray = @($RowDatas.Value)
+    for ($i = 0; $i -lt $rowCount; $i++) {
+        $row = $rowArray[$i]
         $x = 10
 
         for ($c = 0; $c -lt $Columns.Count; $c++) {
