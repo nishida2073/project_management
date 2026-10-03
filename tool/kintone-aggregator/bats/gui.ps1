@@ -991,6 +991,12 @@ $grpScheduleEdit.Padding = New-Object System.Windows.Forms.Padding(10)
 
 $script:scheduleRows = @()
 $script:scheduleContentPanel = $null
+$script:scheduleColumns = @(
+    @{ Label = "通番"; Width = 50; AutoIncrement = $true }
+    @{ Label = "科目名"; Width = 200; Property = "Subject" }
+    @{ Label = "開始日"; Width = 100; Property = "StartDate" }
+    @{ Label = "終了日"; Width = 100; Property = "EndDate" }
+)
 
 
 $settingsMasterOpsPanel.Controls.Add($grpScheduleEdit)
@@ -1110,12 +1116,6 @@ function Render-Grid {
 }
 
 function Render-ScheduleRows {
-    $columns = @(
-        @{ Label = "通番"; Width = 50 }
-        @{ Label = "科目名"; Width = 200; Property = "Subject" }
-        @{ Label = "開始日"; Width = 100; Property = "StartDate" }
-        @{ Label = "終了日"; Width = 100; Property = "EndDate" }
-    )
     $panels = Render-Grid -GroupBox $grpScheduleEdit -RowsData ([ref]$script:scheduleRows) -OnDelete {
         $deleteRowNo = $this.Tag
         $updatedRows = Get-ScheduleRowsFromUI
@@ -1127,16 +1127,14 @@ function Render-ScheduleRows {
             $script:scheduleRows = $updatedRows
         }
         $nextNo = $script:scheduleRows.Count + 1
-        $newObj = @{ No = $nextNo }
-        foreach ($col in $columns) {
-            if ($col.Property) {
-                $newObj[$col.Property] = ""
-            }
+        $newObj = [ordered]@{ No = $nextNo }
+        foreach ($col in $script:scheduleColumns | Where-Object { $_.Property }) {
+            $newObj[$col.Property] = ""
         }
         $newRow = [PSCustomObject]$newObj
         $script:scheduleRows = @($script:scheduleRows) + @($newRow)
         Render-ScheduleRows
-    } -Columns $columns
+    } -Columns $script:scheduleColumns
     $script:scheduleContentPanel = $panels.ContentPanel
 }
 
@@ -1174,7 +1172,7 @@ function Get-GridRows {
 
 function Get-ScheduleRowsFromUI {
     $columns = @(
-        @{ Label = "通番"; Width = 50 }
+        @{ Label = "通番"; Width = 50; AutoIncrement = $true }
         @{ Label = "科目名"; Width = 200; Property = "Subject" }
         @{ Label = "開始日"; Width = 100; Property = "StartDate" }
         @{ Label = "終了日"; Width = 100; Property = "EndDate" }
@@ -1234,12 +1232,6 @@ function Read-ExcelData {
 function Load-ScheduleFromExcel {
     param([string]$GroupName)
 
-    $columns = @(
-        @{ Label = "通番"; }
-        @{ Label = "科目名"; Property = "Subject" }
-        @{ Label = "開始日"; Property = "StartDate" }
-        @{ Label = "終了日"; Property = "EndDate" }
-    )
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
@@ -1252,7 +1244,7 @@ function Load-ScheduleFromExcel {
                 $convertedRows = @()
                 foreach ($row in $Rows) {
                     $newObj = [ordered]@{ No = $row."通番" }
-                    foreach ($col in $columns | Where-Object { $_.Property }) {
+                    foreach ($col in $script:scheduleColumns | Where-Object { $_.Property }) {
                         $newObj[$col.Property] = $row."$($col.Label)"
                     }
                     $convertedRows += [PSCustomObject]$newObj
@@ -1271,19 +1263,9 @@ function Load-ScheduleFromExcel {
 function Save-ScheduleToExcel {
     $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
-    $columns = @(
-        @{ Label = "通番"; AutoIncrement = $true }
-        @{ Label = "科目名"; Property = "Subject" }
-        @{ Label = "開始日"; Property = "StartDate" }
-        @{ Label = "終了日"; Property = "EndDate" }
-    )
     try {
         $rowsFromUI = @(Get-ScheduleRowsFromUI)
-        $rowsToSave = @()
-        foreach ($row in $rowsFromUI) {
-            $rowsToSave += $row
-        }
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $rowsToSave -Columns $columns
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetName "スケジュール" -Rows $rowsFromUI -Columns $script:scheduleColumns
         [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
