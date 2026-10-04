@@ -147,7 +147,7 @@ function New-Label {
     $lbl = New-Object System.Windows.Forms.Label
     $lbl.Text = $Text
     $lbl.AutoSize = $AutoSize
-    $lbl.TextAlign = $TextAlign
+    $lbl.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
     $lbl.Location = New-Object System.Drawing.Point($X, $Y)
     $lbl.ForeColor = $ForeColor
     if ($Width -gt 0 -and $Height -gt 0) { $lbl.Size = New-Object System.Drawing.Size($Width, $Height) }
@@ -574,17 +574,18 @@ function New-CategoryTabControl {
                     if ($inputDef.ExistingControl) {
                         $inputCtrl = $inputDef.ExistingControl
                         $inputCtrl.Width = $inputWidth
+                        $inputCtrl.Height = 22
                     } elseif ($inputDef.Options) {
                         $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
-                        $inputCtrl = New-ComboBox -Width $inputWidth -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
+                        $inputCtrl = New-ComboBox -Width $inputWidth -Height 22 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
                         if ($selectedOption) {
                         } elseif ($inputCtrl.Items.Count -gt 0) {
                             $inputCtrl.SelectedIndex = 0
                         }
                     } else {
-                        $inputCtrl = New-TextBox -Width $inputWidth -Text "$($inputDef.Default)"
+                        $inputCtrl = New-TextBox -Width $inputWidth -Height 22 -Text "$($inputDef.Default)"
                     }
-                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
+                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
                     $grp.Controls.Add($inputCtrl)
                     $inputMap[$inputDef.Name] = $inputCtrl
                     $inputX += $inputWidth + 15
@@ -634,6 +635,7 @@ function New-LogTab {
         [Parameter(Mandatory)][array]$ButtonDefs,
         [scriptblock]$LabelFn = { param($bd) $bd.Label },
         [Parameter(Mandatory)][string]$ExtraLabelText,
+        [int]$ExtraLabelWidth = 75,
         [int]$ExtraComboWidth = 200,
         [Parameter(Mandatory)][scriptblock]$GetLogPathFn,
         [scriptblock]$OnAfterClear = {},
@@ -647,8 +649,7 @@ function New-LogTab {
 
     $rowCenterY = 30
 
-    $lblLogExtra = New-Label
-    Measure-LabelWidth -Label $lblLogExtra -Text $ExtraLabelText -FixedHeight 24 -X 20 -CenterY $rowCenterY | Out-Null
+    $lblLogExtra = New-Label -X 20 -Y ($rowCenterY - 11) -Width $ExtraLabelWidth -Height 24 -Text $ExtraLabelText
     $logStagePanel.Controls.Add($lblLogExtra)
 
     $cmbLogExtra = New-ComboBox -Width $ExtraComboWidth -Height 24
@@ -656,7 +657,7 @@ function New-LogTab {
     $cmbLogExtra.ValueMember = "Value"
     foreach ($opt in $Options) { $cmbLogExtra.Items.Add($opt) | Out-Null }
     if ($cmbLogExtra.Items.Count -gt 0) { $cmbLogExtra.SelectedIndex = 0 }
-    $cmbLogExtra.Location = New-Object System.Drawing.Point(($lblLogExtra.Right + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
+    $cmbLogExtra.Location = New-Object System.Drawing.Point((20 + $ExtraLabelWidth + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
     $logStagePanel.Controls.Add($cmbLogExtra)
 
     $btnClearLogs = New-Button -Text "ログをすべて削除" -X ($cmbLogExtra.Right + 20) -Y ($rowCenterY - [int](24 / 2)) -Width 140 -Height 24
@@ -792,29 +793,30 @@ function New-BatchRunTab {
         [scriptblock]$ShowOpenLink = { param($bd) [bool]$bd.OpenTarget },
         [scriptblock]$OnOpenClick = {},
         [string]$InitialStatusText = "未実行",
-        [bool]$ShowSteps = $true
+        [bool]$ShowSteps = $true,
+        [int]$InputRowHeight = 30
     )
 
     $batchPanel = New-Panel
     $TabPage.Controls.Add($batchPanel)
 
-    $grpBatchAll = New-GroupBox -Text "一括実行" -X 10 -Y 10 -Width 730 -Height 60
+    $grpBatchAll = New-GroupBox -Text "一括実行" -X 10 -Y 10 -Width 730
     $batchPanel.Controls.Add($grpBatchAll)
 
-    $inputRowHeight = 35
+    $inputRowHeight = $InputRowHeight
     $topControls = @()
     $inputControls = @{}
-    $inputX = 20
+    $inputX = 15
     $currentInputRow = 0
     foreach ($inputDef in $Inputs) {
         if ($inputDef.NewRow) {
             $currentInputRow++
-            $inputX = 20
+            $inputX = 15
         }
-        $inputRowCenterY = 26 + ($inputRowHeight * $currentInputRow)
+        $inputRowCenterY = 15 + ($inputRowHeight * $currentInputRow) + [int]($inputRowHeight / 2)
 
         $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
-        $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 120 }
+        $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
         $lblInput = New-Label -X $inputX -Y ($inputRowCenterY - 11) -Width $labelWidth -Height 22 -Text $inputDef.Label
         $topControls += $lblInput
@@ -823,16 +825,17 @@ function New-BatchRunTab {
         if ($inputDef.ExistingControl) {
             $inputCtrl = $inputDef.ExistingControl
             $inputCtrl.Width = $inputWidth
+            $inputCtrl.Height = 22
         } elseif ($inputDef.Options) {
             $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
-            $inputCtrl = New-ComboBox -Width $inputWidth -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
+            $inputCtrl = New-ComboBox -Width $inputWidth -Height 22 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
             if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {
                 $inputCtrl.SelectedIndex = 0
             }
         } else {
-            $inputCtrl = New-TextBox -Width $inputWidth -Text "$($inputDef.Default)"
+            $inputCtrl = New-TextBox -Width $inputWidth -Height 22 -Text "$($inputDef.Default)"
         }
-        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
+        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
         $topControls += $inputCtrl
         $inputControls[$inputDef.Name] = $inputCtrl
         $inputX += $inputWidth + 15

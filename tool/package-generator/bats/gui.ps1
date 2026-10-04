@@ -202,7 +202,7 @@ $tabBatchAll = New-TabPage -Text "一括実行"
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $clientOptions; LabelWidth = 90; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $clientOptions; LabelWidth = 75; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)

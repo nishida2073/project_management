@@ -48,8 +48,8 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "スペース作成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
-                    [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 151; InputWidth = 200; NewRow = $true; Require = $true }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $createSpaceBat
                 ArgsFn = { param($ic) @("-TemplateId", $ic['SpaceTemplateId'].Text.Trim(), "-SpaceName", $ic['ConfigName'].Text.Trim()) }
@@ -76,8 +76,8 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "ダウンロード"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
-                    [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 151; InputWidth = 200; NewRow = $true; Require = $false }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $false }
                 )
                 BatchPath = $downloadBat
                 ArgsFn = { param($ic) @("-SpaceId", $ic['SpaceId'].Text.Trim(), "-ConfigName", $ic['ConfigName'].Text.Trim()) }
@@ -121,7 +121,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "kintoneへ反映"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
                 )
                 BatchPath = $applyBat
                 ArgsFn = { param($ic) @("-ConfigName", $ic['ConfigName'].Text.Trim()) }
@@ -138,7 +138,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "データチェック"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
                 )
                 BatchPath = $checkBat
                 ArgsFn = { param($ic) @("-ConfigName", $ic['ConfigName'].Text.Trim()) }
@@ -326,7 +326,7 @@ if (Test-Path -LiteralPath $configDir) {
 }
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
-    -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
+    -ExtraLabelText "スペース識別名" -ExtraLabelWidth 150 -ExtraComboWidth 220 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
     -OnUpdateLogView { Update-LogView } -Options $configOptions | Out-Null
 foreach ($radio in $script:logTab.Radios) {
