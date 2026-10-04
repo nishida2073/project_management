@@ -1323,7 +1323,7 @@ function Read-GridData {
             $ctrl = $controls[$baseIndex + $c]
             if ($col.Property) {
                 if ($col.IsBool -and $ctrl -is [System.Windows.Forms.ComboBox]) {
-                    $newObj[$col.Property] = $ctrl.SelectedItem
+                    $newObj[$col.Property] = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
                 } else {
                     $newObj[$col.Property] = $ctrl.Text
                 }
@@ -1407,12 +1407,18 @@ function New-Grid {
                 $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
             } elseif ($col.IsBool) {
                 $ctrl = New-Object System.Windows.Forms.ComboBox
-                $ctrl.Items.Add("TRUE")
-                $ctrl.Items.Add("FALSE")
+                $ctrl.DisplayMember = "Text"
+                $ctrl.ValueMember = "Value"
+                $ctrl.Items.Add([PSCustomObject]@{ Text = "TRUE"; Value = "TRUE" })
+                $ctrl.Items.Add([PSCustomObject]@{ Text = "FALSE"; Value = "FALSE" })
                 $ctrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
                 $propName = $col.Property
                 if ($propName -and $row.PSObject.Properties[$propName]) {
-                    $ctrl.SelectedItem = $row.$propName
+                    $propValue = $row.$propName
+                    $matchingItem = $ctrl.Items | Where-Object { $_.Value -eq $propValue } | Select-Object -First 1
+                    if ($matchingItem) {
+                        $ctrl.SelectedItem = $matchingItem
+                    }
                 }
             } else {
                 $ctrl = New-Object System.Windows.Forms.TextBox
