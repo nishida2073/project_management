@@ -159,16 +159,6 @@ $script:createdSpaceUrl = $null
 $tabControl = New-TabControl
 $tabRun = New-TabPage -Text "実行"
 
-$innerRunTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Top)
-$tabSingleRun = New-TabPage -Text "単体実行"
-$tabBatchRun = New-TabPage -Text "複数実行"
-
-$innerRunTabControl.Controls.AddRange(@($tabBatchRun, $tabSingleRun))
-$innerRunTabControl.Add_Selecting({
-    if ($script:isRunning) { $_.Cancel = $true }
-})
-
-$innerRunTabControl.Add_SelectedIndexChanged({ Update-InnerRunTabHeight })
 
 $tabLogs = New-TabPage -Text "ログ"
 $tabSettings = New-TabPage -Text "設定"
@@ -183,9 +173,10 @@ $tabControl.Add_Selecting({
     }
 })
 
-$runTopPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Top)
+$execTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 
-$execTabControl = New-TabControl
+$tabBatchRun = New-TabPage -Text "複数実行"
+$execTabControl.Controls.Add($tabBatchRun)
 
 $tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
@@ -207,6 +198,12 @@ New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "�
     -Inputs $batchRunAllInputs | Out-Null
 
 $lblOverallStatus = $script:batchStatusLabel
+
+$execTabControl.Add_Selecting({
+    if ($script:isRunning) { $_.Cancel = $true }
+})
+
+$tabRun.Controls.Add($execTabControl)
 
 New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
     -OnRunClick {
@@ -248,47 +245,23 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
     } | Out-Null
 
 
-$execTabControl.Dock = [System.Windows.Forms.DockStyle]::None
-$execTabControl.Location = New-Object System.Drawing.Point(0, 0)
-$execTabControl.Width = 760
-$runTopPanel.Controls.Add($execTabControl)
+$multipleBatchExcelPanel = New-Panel
+$tabBatchRun.Controls.Add($multipleBatchExcelPanel)
 
-$execTabControl.Height = 45 + $script:batchPanel.Height
+$grpMultipleBatchExcel = New-GroupBox -Text "複数実行" -X 10 -Y 10 -Width 730
+$multipleBatchExcelPanel.Controls.Add($grpMultipleBatchExcel)
 
-$execTabControl.Add_SelectedIndexChanged({
-    $runTopPanel.Height = $execTabControl.Top + $execTabControl.Height
-    Update-InnerRunTabHeight
-})
-$runTopPanel.Height = $execTabControl.Top + $execTabControl.Height
+$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y 21 -Width 150 -Height 22
+$txtMultipleBatchExcelPath = New-TextBox -X 165 -Y 21 -Width 250 -Height 22
+$btnMultipleBatchBrowse = New-Button -Text "参照..." -X 420 -Y 20 -Width 70 -Height 24
+$btnMultipleBatchRunAll = New-Button -Text "実行" -X 20 -Y 56 -Width 120 -Height 28
+$lblMultipleBatchStatus = New-Label -X 154 -Y 62 -AutoSize $true
 
-function Update-InnerRunTabHeight {
-    if ($innerRunTabControl.SelectedTab -eq $tabBatchRun) {
-        $innerRunTabControl.Height = $multipleBatchExcelPanel.Height + 30
-    } else {
-        $innerRunTabControl.Height = $runTopPanel.Height + 30
-    }
-    $tabRun.PerformLayout()
-}
-
-$multipleBatchExcelPanel = New-Panel -Height 90 -Dock ([System.Windows.Forms.DockStyle]::Top)
-
-$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 20 -Y 17
-
-$txtMultipleBatchExcelPath = New-Object System.Windows.Forms.TextBox
-$txtMultipleBatchExcelPath.Location = New-Object System.Drawing.Point(140, 14)
-$txtMultipleBatchExcelPath.Size = New-Object System.Drawing.Size(250, 22)
-
-$btnMultipleBatchBrowse = New-Button -Text "参照..." -X 400 -Y 13 -Width 70 -Height 24
-
-$lnkMultipleBatchOpenExcel = New-OpenLink -Text "開く" -X 480 -Y 16 -Width 40 -Height 18 -Pattern 'internal' -Tag $txtMultipleBatchExcelPath
-
-$btnMultipleBatchRunAll = New-Button -Text "実行" -X 20 -Y 50 -Width 100 -Height 26
-
-$lblMultipleBatchStatus = New-Label -X 130 -Y 56
-
-$multipleBatchExcelPanel.Controls.AddRange(@(
-    $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $lnkMultipleBatchOpenExcel, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
+$grpMultipleBatchExcel.Controls.AddRange(@(
+    $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
 ))
+$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, 100)
+$multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom + 10
 
 $dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
 $dlgMultipleBatchExcel.Filter = "Excelファイル (*.xlsx)|*.xlsx"
@@ -299,12 +272,9 @@ $btnMultipleBatchBrowse.Add_Click({
     }
 })
 
-$tabSingleRun.Controls.Add($runTopPanel)
-$tabBatchRun.Controls.Add($multipleBatchExcelPanel)
-
 $txtLog = New-LogTextBox
 
-Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($innerRunTabControl, $txtLog)
+Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
 
 $allButtonDefs = @()
 foreach ($cd in $categoryDefs) {
@@ -830,7 +800,6 @@ $tabControl.Add_SelectedIndexChanged({
 $form.Add_Shown({
     Update-BaseTemplateNameList
     Update-CustomTemplateNameList
-    Update-InnerRunTabHeight
     Update-GroupDropdowns
 })
 $tabControl.SelectedTab = $tabRun
