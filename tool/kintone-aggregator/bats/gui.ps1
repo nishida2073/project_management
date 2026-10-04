@@ -870,21 +870,6 @@ function Save-GroupSettings {
     }
 }
 
-function Update-GroupComboBoxItems {
-    param([System.Windows.Forms.ComboBox]$ComboBox, [array]$Options)
-    if (-not $ComboBox) { return }
-    $selectedValue = if ($ComboBox.SelectedItem) { "$($ComboBox.SelectedItem.Value)" } else { "" }
-    $ComboBox.DisplayMember = "Text"
-    $ComboBox.Items.Clear()
-    foreach ($opt in $Options) { $ComboBox.Items.Add($opt) | Out-Null }
-    $matchedOption = $Options | Where-Object { "$($_.Value)" -eq $selectedValue } | Select-Object -First 1
-    if ($matchedOption) {
-        $ComboBox.SelectedItem = $matchedOption
-    } elseif ($ComboBox.Items.Count -gt 0) {
-        $ComboBox.SelectedIndex = 0
-    }
-}
-
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
 
