@@ -65,7 +65,7 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "}"
 
     ) else (
-        call "%~dp0message.bat" "Ë®≠ÂÆö„Éï„Ç°„Ç§„É´„ÅåË¶ã„Å§„Åã„Çä„Åæ„Åõ„Çì: !envFile!" "Red"
+        call "%~dp0message.bat" "ê›íËÉtÉ@ÉCÉãÇ™å©Ç¬Ç©ÇËÇ‹ÇπÇÒ: !envFile!" "Red"
     )
     call "%~dp0message.bat" "Finished %MyName% [%%~nF]"
 )
@@ -74,7 +74,7 @@ call "%~dp0message.bat" "Waiting Jobs %MyName% ALL"
 
 :WAIT_LOOP
 set "ALL_DONE=1"
-for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!*.xlsx") do (
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
     set "JOB_FLAG=%TEMP%\%MyName%%%~nF_.running"
     if exist "!JOB_FLAG!" set "ALL_DONE=0"
 )
@@ -86,7 +86,7 @@ if !ALL_DONE! EQU 0 (
 call "%~dp0message.bat" "Finished Jobs %MyName% ALL"
 
 set "HAS_ERROR=0"
-for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!*.xlsx") do (
+for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
     set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_.failed"
     if exist "!ERROR_FLAG!" (
         set "HAS_ERROR=1"

@@ -368,6 +368,14 @@ function Set-StatusLabelText {
     $Label.ForeColor = $ForeColor
 }
 
+function Get-ComboBoxValue {
+    param([object]$SelectedItem)
+    if ($SelectedItem -is [PSCustomObject] -and $SelectedItem.PSObject.Properties['Value']) {
+        return $SelectedItem.Value
+    }
+    return $SelectedItem
+}
+
 function Get-InputValue {
     param([Parameter(Mandatory)]$Control)
     if ($Control -is [System.Windows.Forms.ComboBox]) {
@@ -1003,7 +1011,7 @@ function Update-LogView {
     $script:logTab.ContentBox.Text = ""
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
 
-    $groupValue = if ($cmbLogGroup.SelectedItem) { "$($cmbLogGroup.SelectedItem.Value)" } else { "" }
+    $groupValue = if ($cmbLogGroup.SelectedIndex -ge 0) { "$(Get-ComboBoxValue -SelectedItem $cmbLogGroup.SelectedItem)" } else { "" }
     $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$groupValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
     $sections = foreach ($file in $files) {
         try {

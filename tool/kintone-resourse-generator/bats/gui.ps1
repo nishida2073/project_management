@@ -35,6 +35,8 @@ $script:baseTemplateNamePlaceholder = "未選択"
 
 $script:customTemplateNamePlaceholder = "指定なし"
 
+$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
+
 $cmbBaseTemplateName = New-Object System.Windows.Forms.ComboBox
 $cmbBaseTemplateName.Size = New-Object System.Drawing.Size(220, 22)
 $cmbBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
@@ -365,7 +367,7 @@ $cmbLogConfigName = $script:logTab.ExtraCombo
 function Update-LogConfigNameList {
     $selected = $cmbLogConfigName.SelectedItem
     $cmbLogConfigName.Items.Clear()
-    $cmbLogConfigName.Items.Add("すべて") | Out-Null
+    $cmbLogConfigName.Items.Add($allGroupsOption) | Out-Null
 
     $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
     if ($logPath -and (Test-Path -LiteralPath $logPath)) {
@@ -401,8 +403,8 @@ function Update-LogView {
         return
     }
 
-    $logConfigName = $cmbLogConfigName.SelectedItem
-    $configFilter = if ($logConfigName -and $logConfigName -ne "すべて") { "-$logConfigName" } else { "" }
+    $logConfigName = Get-ComboBoxValue -SelectedItem $cmbLogConfigName.SelectedItem
+    $configFilter = if ($logConfigName -and $logConfigName -ne "") { "-$logConfigName" } else { "" }
     $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
 
     $sections = foreach ($file in $files) {

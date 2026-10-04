@@ -37,7 +37,8 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$groupOptions = @([PSCustomObject]@{ Text = "すべて"; Value = "" })
+$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
+$groupOptions = @($allGroupsOption)
 foreach ($groupName in (Get-GroupNames)) {
     $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
 }
@@ -1028,9 +1029,9 @@ function Update-GroupDropdowns {
                 $cmb = $bd.InputControls["TargetGroupNameFilter"]
                 if ($cmb) {
                     $cmb.Items.Clear()
-                    $cmb.Items.Add("すべて") | Out-Null
+                    $cmb.Items.Add($allGroupsOption) | Out-Null
                     foreach ($groupName in $groupNames) {
-                        $cmb.Items.Add($groupName) | Out-Null
+                        $cmb.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
                     }
                     if ($savedFilters[$bd.Label] -and $cmb.Items.Contains($savedFilters[$bd.Label])) {
                         $cmb.SelectedItem = $savedFilters[$bd.Label]
@@ -1044,9 +1045,9 @@ function Update-GroupDropdowns {
 
     if ($cmbLogGroup) {
         $cmbLogGroup.Items.Clear()
-        $cmbLogGroup.Items.Add("すべて") | Out-Null
+        $cmbLogGroup.Items.Add($allGroupsOption) | Out-Null
         foreach ($groupName in $groupNames) {
-            $cmbLogGroup.Items.Add($groupName) | Out-Null
+            $cmbLogGroup.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
         }
         if ($savedLog -and $cmbLogGroup.Items.Contains($savedLog)) {
             $cmbLogGroup.SelectedItem = $savedLog
