@@ -184,18 +184,23 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
     -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] } `
-    -OnUpdateLogView { Update-LogView -FilterCombo $cmbLogGroup } | Out-Null
-$cmbLogGroup = $script:logTab.ExtraCombo
-$cmbLogGroup.DisplayMember = "Text"
-foreach ($opt in $groupOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
-if ($cmbLogGroup.Items.Count -gt 0) { $cmbLogGroup.SelectedIndex = 0 }
+    -OnUpdateLogView { Update-LogView } | Out-Null
+
+function Update-LogGroupList {
+    $script:logTab.ExtraCombo.Items.Clear()
+    $script:logTab.ExtraCombo.DisplayMember = "Text"
+    $script:logTab.ExtraCombo.ValueMember = "Value"
+    foreach ($opt in $groupOptions) { $script:logTab.ExtraCombo.Items.Add($opt) | Out-Null }
+    if ($script:logTab.ExtraCombo.Items.Count -gt 0) { $script:logTab.ExtraCombo.SelectedIndex = 0 }
+}
 
 foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView -FilterCombo $cmbLogGroup } })
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
-$cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView -FilterCombo $cmbLogGroup })
+$script:logTab.ExtraCombo.Add_SelectedIndexChanged({ Update-LogView })
 
-Update-LogView -FilterCombo $cmbLogGroup
+Update-LogGroupList
+Update-LogView
 
 
 $clientsTemplateDir = Join-Path $clientsDir "template"
@@ -414,6 +419,7 @@ $cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
 $cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
 $cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 $cmbSettingsGroupTarget.DisplayMember = "Text"
+$cmbSettingsGroupTarget.ValueMember = "Value"
 
 $btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
 $btnSettingsGroupNewGroup.Text = "新規作成"
@@ -429,14 +435,14 @@ function Get-GroupSettingsFiles {
 $settingsGroupTopPanel = (New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup) `
     -OnSave {
-        $target = $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
         Update-GroupSettingsFields
         Update-GroupDropdowns
     } `
     -OnReload {
-        $target = $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
     }).Panel
@@ -455,6 +461,7 @@ $cmbSettingsMasterOpsGroupTarget = New-Object System.Windows.Forms.ComboBox
 $cmbSettingsMasterOpsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
 $cmbSettingsMasterOpsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 $cmbSettingsMasterOpsGroupTarget.DisplayMember = "Text"
+$cmbSettingsMasterOpsGroupTarget.ValueMember = "Value"
 
 $lnkSettingsMasterOpsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
 $lnkSettingsMasterOpsOpenXlsx.Text = "開く"
@@ -463,7 +470,7 @@ $script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
     -OnSave { Save-ScheduleToExcel } `
     -OnReload {
-        $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
         Read-ScheduleExcelData -GroupName $target
     }
 
@@ -490,13 +497,14 @@ $btnMasterOpsSyncExecute.Location = New-Object System.Drawing.Point(20, 30)
 $btnMasterOpsSyncExecute.Add_Click({
     try {
         $batchPath = Join-Path $basePath "sync-kintone-to-sheet.bat"
-        $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
         if ([string]::IsNullOrWhiteSpace($groupName)) {
             throw "グループが選択されていません"
         }
         Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterOpsStatusPlaceholder -Action {
             $script:suppressComboSync = $true
-            $cmbSettingsGroupTarget.SelectedItem = $groupName
+            $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
+            if ($matchingItem) { $cmbSettingsGroupTarget.SelectedItem = $matchingItem }
             $script:suppressComboSync = $null
             Update-GroupSettingsFields
             $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
@@ -738,7 +746,7 @@ function Update-GroupSettingsFields {
     $scrollX = -$settingsGroupFieldPanel.AutoScrollPosition.X
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
-    $target = $cmbSettingsGroupTarget.SelectedItem
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
@@ -891,14 +899,14 @@ function Update-GroupComboBoxItems {
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
 
-    $savedSettings = $cmbSettingsGroupTarget.SelectedItem
-    $savedLog = $cmbLogGroup.SelectedItem
-    $savedMaster = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+    $savedLog = Get-ComboBoxValue -SelectedItem $cmbLogGroup.SelectedItem
+    $savedMaster = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
     $savedFilters = @{}
     foreach ($cd in $categoryDefs) {
         foreach ($bd in $cd.ButtonDefs) {
             if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupNameFilter")) {
-                $savedFilters[$bd.Label] = $bd.InputControls["TargetGroupNameFilter"].SelectedItem
+                $savedFilters[$bd.Label] = Get-ComboBoxValue -SelectedItem $bd.InputControls["TargetGroupNameFilter"].SelectedItem
             }
         }
     }
@@ -906,10 +914,15 @@ function Update-GroupDropdowns {
     if ($cmbSettingsGroupTarget) {
         $cmbSettingsGroupTarget.Items.Clear()
         foreach ($groupName in $groupNames) {
-            $cmbSettingsGroupTarget.Items.Add($groupName) | Out-Null
+            $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
         }
-        if ($savedSettings -and $cmbSettingsGroupTarget.Items.Contains($savedSettings)) {
-            $cmbSettingsGroupTarget.SelectedItem = $savedSettings
+        if ($savedSettings) {
+            $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedSettings } | Select-Object -First 1
+            if ($matchingItem) {
+                $cmbSettingsGroupTarget.SelectedItem = $matchingItem
+            } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+                $cmbSettingsGroupTarget.SelectedIndex = 0
+            }
         } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
             $cmbSettingsGroupTarget.SelectedIndex = 0
         }
@@ -925,8 +938,13 @@ function Update-GroupDropdowns {
                     foreach ($groupName in $groupNames) {
                         $cmb.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
                     }
-                    if ($savedFilters[$bd.Label] -and $cmb.Items.Contains($savedFilters[$bd.Label])) {
-                        $cmb.SelectedItem = $savedFilters[$bd.Label]
+                    if ($savedFilters[$bd.Label]) {
+                        $matchingItem = $cmb.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedFilters[$bd.Label] } | Select-Object -First 1
+                        if ($matchingItem) {
+                            $cmb.SelectedItem = $matchingItem
+                        } elseif ($cmb.Items.Count -gt 0) {
+                            $cmb.SelectedIndex = 0
+                        }
                     } elseif ($cmb.Items.Count -gt 0) {
                         $cmb.SelectedIndex = 0
                     }
@@ -941,8 +959,13 @@ function Update-GroupDropdowns {
         foreach ($groupName in $groupNames) {
             $cmbLogGroup.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
         }
-        if ($savedLog -and $cmbLogGroup.Items.Contains($savedLog)) {
-            $cmbLogGroup.SelectedItem = $savedLog
+        if ($savedLog) {
+            $matchingItem = $cmbLogGroup.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
+            if ($matchingItem) {
+                $cmbLogGroup.SelectedItem = $matchingItem
+            } elseif ($cmbLogGroup.Items.Count -gt 0) {
+                $cmbLogGroup.SelectedIndex = 0
+            }
         } elseif ($cmbLogGroup.Items.Count -gt 0) {
             $cmbLogGroup.SelectedIndex = 0
         }
@@ -959,6 +982,27 @@ function Update-GroupDropdowns {
             $cmbSettingsMasterOpsGroupTarget.SelectedIndex = 0
         }
     }
+
+    foreach ($ctrl in $script:batchInputControls.Values) {
+        if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+            $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
+            $ctrl.Items.Clear()
+            $ctrl.Items.Add($allGroupsOption) | Out-Null
+            foreach ($groupName in $groupNames) {
+                $ctrl.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+            }
+            if ($savedBatchValue) {
+                $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedBatchValue } | Select-Object -First 1
+                if ($matchingItem) {
+                    $ctrl.SelectedItem = $matchingItem
+                } elseif ($ctrl.Items.Count -gt 0) {
+                    $ctrl.SelectedIndex = 0
+                }
+            } elseif ($ctrl.Items.Count -gt 0) {
+                $ctrl.SelectedIndex = 0
+            }
+        }
+    }
 }
 
 $btnSettingsGroupNewGroup.Add_Click({
@@ -972,8 +1016,8 @@ $btnSettingsGroupNewGroup.Add_Click({
         return
     }
 
-    $cmbSettingsGroupTarget.Items.Add($newName) | Out-Null
-    $cmbSettingsGroupTarget.SelectedItem = $newName
+    $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
+    $cmbSettingsGroupTarget.SelectedItem = $cmbSettingsGroupTarget.Items[-1]
 })
 
 $grpScheduleEdit = New-Object System.Windows.Forms.GroupBox
@@ -1064,7 +1108,7 @@ function Read-ScheduleExcelData {
 }
 
 function Save-ScheduleToExcel {
-    $groupName = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-ScheduleGridData)
@@ -1077,7 +1121,7 @@ function Save-ScheduleToExcel {
 }
 
 $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
-    $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
     if (!$target) {
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
@@ -1087,7 +1131,7 @@ $lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
 })
 
 $cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
-    $target = $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
     Read-ScheduleExcelData -GroupName $target
 })
 
@@ -1099,7 +1143,7 @@ $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsGroupList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-LogView -FilterCombo $cmbLogGroup
+        Update-LogView
     }
 })
 

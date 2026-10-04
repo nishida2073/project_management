@@ -1003,10 +1003,6 @@ function Invoke-BatchRunAll {
 }
 
 function Update-LogView {
-    param(
-        [System.Windows.Forms.ComboBox]$FilterCombo
-    )
-
     $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
     if (-not $selectedRadio) { return }
     $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
@@ -1016,7 +1012,7 @@ function Update-LogView {
     $script:logTab.ContentBox.Text = ""
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
 
-    $filterValue = if ($FilterCombo.SelectedIndex -ge 0) { "$(Get-ComboBoxValue -SelectedItem $FilterCombo.SelectedItem)" } else { "" }
+    $filterValue = if ($script:logTab.ExtraCombo.SelectedIndex -ge 0) { "$(Get-ComboBoxValue -SelectedItem $script:logTab.ExtraCombo.SelectedItem)" } else { "" }
     $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$filterValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
     $sections = foreach ($file in $files) {
         try {
@@ -1045,14 +1041,19 @@ function Get-GroupSettingsFieldValue {
 }
 
 function Update-SettingsGroupList {
-    $selected = $cmbSettingsGroupTarget.SelectedItem
+    $selected = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     $script:suppressComboSync = $true
     $cmbSettingsGroupTarget.Items.Clear()
     foreach ($groupName in (Get-GroupNames)) {
-        $cmbSettingsGroupTarget.Items.Add($groupName) | Out-Null
+        $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
     }
-    if ($selected -and $cmbSettingsGroupTarget.Items.Contains($selected)) {
-        $cmbSettingsGroupTarget.SelectedItem = $selected
+    if ($selected) {
+        $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selected } | Select-Object -First 1
+        if ($matchingItem) {
+            $cmbSettingsGroupTarget.SelectedItem = $matchingItem
+        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+            $cmbSettingsGroupTarget.SelectedIndex = 0
+        }
     } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
         $cmbSettingsGroupTarget.SelectedIndex = 0
     }

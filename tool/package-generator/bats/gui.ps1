@@ -69,15 +69,15 @@ function Get-NewClientInitialValues {
 function Update-GroupDropdowns {
     $clientNames = @(Get-ClientNames)
 
-    $savedSettings = $cmbSettingsGroupTarget.SelectedItem
-    $savedLog = $cmbLogGroup.SelectedItem
+    $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+    $savedLog = Get-ComboBoxValue -SelectedItem $cmbLogGroup.SelectedItem
     $savedFilters = @{}
     foreach ($cd in $categoryDefs) {
         foreach ($bd in $cd.ButtonDefs) {
             if ($bd.InputControls) {
                 foreach ($ctrl in $bd.InputControls.Values) {
                     if ($ctrl -is [System.Windows.Forms.ComboBox]) {
-                        $savedFilters[$bd.Label] = $ctrl.SelectedItem
+                        $savedFilters[$bd.Label] = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
                     }
                 }
             }
@@ -87,10 +87,15 @@ function Update-GroupDropdowns {
     if ($cmbSettingsGroupTarget) {
         $cmbSettingsGroupTarget.Items.Clear()
         foreach ($clientName in $clientNames) {
-            $cmbSettingsGroupTarget.Items.Add($clientName) | Out-Null
+            $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
         }
-        if ($savedSettings -and $cmbSettingsGroupTarget.Items.Contains($savedSettings)) {
-            $cmbSettingsGroupTarget.SelectedItem = $savedSettings
+        if ($savedSettings) {
+            $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedSettings } | Select-Object -First 1
+            if ($matchingItem) {
+                $cmbSettingsGroupTarget.SelectedItem = $matchingItem
+            } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+                $cmbSettingsGroupTarget.SelectedIndex = 0
+            }
         } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
             $cmbSettingsGroupTarget.SelectedIndex = 0
         }
@@ -103,10 +108,15 @@ function Update-GroupDropdowns {
                     if ($ctrl -is [System.Windows.Forms.ComboBox]) {
                         $ctrl.Items.Clear()
                         foreach ($clientName in $clientNames) {
-                            $ctrl.Items.Add($clientName) | Out-Null
+                            $ctrl.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
                         }
-                        if ($savedFilters[$bd.Label] -and $ctrl.Items.Contains($savedFilters[$bd.Label])) {
-                            $ctrl.SelectedItem = $savedFilters[$bd.Label]
+                        if ($savedFilters[$bd.Label]) {
+                            $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedFilters[$bd.Label] } | Select-Object -First 1
+                            if ($matchingItem) {
+                                $ctrl.SelectedItem = $matchingItem
+                            } elseif ($ctrl.Items.Count -gt 0) {
+                                $ctrl.SelectedIndex = 0
+                            }
                         } elseif ($ctrl.Items.Count -gt 0) {
                             $ctrl.SelectedIndex = 0
                         }
@@ -119,12 +129,37 @@ function Update-GroupDropdowns {
     if ($cmbLogGroup) {
         $cmbLogGroup.Items.Clear()
         foreach ($clientName in $clientNames) {
-            $cmbLogGroup.Items.Add($clientName) | Out-Null
+            $cmbLogGroup.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
         }
-        if ($savedLog -and $cmbLogGroup.Items.Contains($savedLog)) {
-            $cmbLogGroup.SelectedItem = $savedLog
+        if ($savedLog) {
+            $matchingItem = $cmbLogGroup.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
+            if ($matchingItem) {
+                $cmbLogGroup.SelectedItem = $matchingItem
+            } elseif ($cmbLogGroup.Items.Count -gt 0) {
+                $cmbLogGroup.SelectedIndex = 0
+            }
         } elseif ($cmbLogGroup.Items.Count -gt 0) {
             $cmbLogGroup.SelectedIndex = 0
+        }
+    }
+
+    foreach ($ctrl in $script:batchInputControls.Values) {
+        if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+            $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
+            $ctrl.Items.Clear()
+            foreach ($clientName in $clientNames) {
+                $ctrl.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
+            }
+            if ($savedBatchValue) {
+                $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedBatchValue } | Select-Object -First 1
+                if ($matchingItem) {
+                    $ctrl.SelectedItem = $matchingItem
+                } elseif ($ctrl.Items.Count -gt 0) {
+                    $ctrl.SelectedIndex = 0
+                }
+            } elseif ($ctrl.Items.Count -gt 0) {
+                $ctrl.SelectedIndex = 0
+            }
         }
     }
 }
@@ -246,19 +281,25 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
     -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] } `
-    -OnUpdateLogView { Update-LogView -FilterCombo $cmbLogGroup } | Out-Null
+    -OnUpdateLogView { Update-LogView } | Out-Null
 $script:logPath = $script:commonEnvVars["CommonLogPath"]
 $cmbLogGroup = $script:logTab.ExtraCombo
-$cmbLogGroup.DisplayMember = "Text"
-foreach ($opt in $clientOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
-if ($cmbLogGroup.Items.Count -gt 0) { $cmbLogGroup.SelectedIndex = 0 }
+
+function Update-LogGroupList {
+    $script:logTab.ExtraCombo.Items.Clear()
+    $script:logTab.ExtraCombo.DisplayMember = "Text"
+    $script:logTab.ExtraCombo.ValueMember = "Value"
+    foreach ($opt in $clientOptions) { $script:logTab.ExtraCombo.Items.Add($opt) | Out-Null }
+    if ($script:logTab.ExtraCombo.Items.Count -gt 0) { $script:logTab.ExtraCombo.SelectedIndex = 0 }
+}
 
 foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView -FilterCombo $cmbLogGroup } })
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
-$cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView -FilterCombo $cmbLogGroup })
+$script:logTab.ExtraCombo.Add_SelectedIndexChanged({ Update-LogView })
 
-Update-LogView -FilterCombo $cmbLogGroup
+Update-LogGroupList
+Update-LogView
 
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -385,6 +426,8 @@ $lblSettingsGroupTarget.Text = "対象グループ"
 $cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
 $cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
 $cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbSettingsGroupTarget.DisplayMember = "Text"
+$cmbSettingsGroupTarget.ValueMember = "Value"
 
 $btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
 $btnSettingsGroupNewGroup.Text = "新規作成"
@@ -403,14 +446,14 @@ function Get-GroupSettingsFiles {
 $settingsGroupTopPanel = (New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup, $lnkSettingsGroupOpenXlsx) `
     -OnSave {
-        $target = $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
         Update-SettingsGroupList
         Update-GroupSettingsFields
     } `
     -OnReload {
-        $target = $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
     }).Panel
@@ -465,7 +508,7 @@ function Update-GroupSettingsFields {
     $scrollX = -$settingsGroupFieldPanel.AutoScrollPosition.X
     $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
 
-    $target = $cmbSettingsGroupTarget.SelectedItem
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     $trailingButtons = $settingsTrailingButtonVars.Clone()
     $resolverValue = $script:commonEnvResolver
     $rootPathValue = $rootPath
@@ -545,17 +588,17 @@ $btnSettingsGroupNewGroup.Add_Click({
     $newName = $newName.Trim()
     if (!$newName) { return }
 
-    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+    if (($cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $newName }) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
         [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
     }
 
-    $cmbSettingsGroupTarget.Items.Add($newName) | Out-Null
-    $cmbSettingsGroupTarget.SelectedItem = $newName
+    $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
+    $cmbSettingsGroupTarget.SelectedIndex = $cmbSettingsGroupTarget.Items.Count - 1
 })
 
 $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
-    $target = $cmbSettingsGroupTarget.SelectedItem
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     if (!$target) {
         [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
         return
@@ -571,7 +614,7 @@ $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsGroupList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-LogView -FilterCombo $cmbLogGroup
+        Update-LogView
     }
 })
 

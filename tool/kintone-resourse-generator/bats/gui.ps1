@@ -246,7 +246,7 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
             foreach ($inputDef in $bd.Inputs) {
                 if ($inputDef.Require) {
                     $ctrl = $ic[$inputDef.Name]
-                    $value = if ($ctrl -is [System.Windows.Forms.TextBox]) { $ctrl.Text.Trim() } else { $ctrl.SelectedItem }
+                    $value = if ($ctrl -is [System.Windows.Forms.TextBox]) { $ctrl.Text.Trim() } else { Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem }
                     if (!$value -or ($value -eq $script:customTemplateNamePlaceholder) -or ($value -eq $script:baseTemplateNamePlaceholder)) {
                         [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                         return 1
@@ -357,44 +357,48 @@ foreach ($cd in $categoryDefs) {
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
-    -OnAfterClear { Update-LogConfigNameList } `
-    -OnUpdateLogView { Update-LogView -FilterCombo $cmbLogConfigName } | Out-Null
+    -OnUpdateLogView { Update-LogView } | Out-Null
 foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView -FilterCombo $cmbLogConfigName } })
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
 $cmbLogConfigName = $script:logTab.ExtraCombo
 
-function Update-LogConfigNameList {
-    $selected = $cmbLogConfigName.SelectedItem
+function Update-LogGroupList {
+    $selected = Get-ComboBoxValue -SelectedItem $cmbLogConfigName.SelectedItem
+    $cmbLogConfigName.DisplayMember = "Text"
+    $cmbLogConfigName.ValueMember = "Value"
     $cmbLogConfigName.Items.Clear()
     $cmbLogConfigName.Items.Add($allGroupsOption) | Out-Null
 
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-    if ($logPath -and (Test-Path -LiteralPath $logPath)) {
-        $stageKeys = @()
-        foreach ($bd in $allButtonDefs) {
-            $prefix = [System.IO.Path]::GetFileNameWithoutExtension($bd.BatchPath)
-            $stageKeys += $prefix
-        }
-        $stageKeyPattern = $stageKeys -join '|'
-        $stagePrefixPattern = "^(?:$stageKeyPattern)-(?<config>.+)_\d{8}_\d{6}$"
-        $configNames = Get-ChildItem -LiteralPath $logPath -Filter "*.log" -ErrorAction SilentlyContinue |
+    $configDir = Join-Path $rootPath "config"
+    if (Test-Path -LiteralPath $configDir) {
+        $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
             ForEach-Object {
-                $m = [regex]::Match([System.IO.Path]::GetFileNameWithoutExtension($_.Name), $stagePrefixPattern)
-                if ($m.Success) { $m.Groups["config"].Value }
-            } | Sort-Object -Unique
+                $basename = $_.BaseName
+                $basename -replace '_config$', ''
+            } |
+            Sort-Object)
         foreach ($name in $configNames) {
-            $cmbLogConfigName.Items.Add($name) | Out-Null
+            $cmbLogConfigName.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
         }
     }
 
-    $cmbLogConfigName.SelectedIndex = if ($selected -and $cmbLogConfigName.Items.Contains($selected)) { $cmbLogConfigName.Items.IndexOf($selected) } else { 0 }
+    if ($selected) {
+        $matchingItem = $cmbLogConfigName.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selected } | Select-Object -First 1
+        if ($matchingItem) {
+            $cmbLogConfigName.SelectedItem = $matchingItem
+        } else {
+            $cmbLogConfigName.SelectedIndex = 0
+        }
+    } else {
+        $cmbLogConfigName.SelectedIndex = 0
+    }
 }
 
-$cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView -FilterCombo $cmbLogConfigName })
+$cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
 
-Update-LogConfigNameList
-Update-LogView -FilterCombo $cmbLogConfigName
+Update-LogGroupList
+Update-LogView
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -419,9 +423,10 @@ function Set-RunButtonsEnabled {
 
 function Copy-ComboSelection {
     param([System.Windows.Forms.ComboBox]$From, [System.Windows.Forms.ComboBox]$To)
-    $value = "$($From.SelectedItem)"
-    if ($To.Items.Contains($value)) {
-        $To.SelectedItem = $value
+    $value = Get-ComboBoxValue -SelectedItem $From.SelectedItem
+    $matchingItem = $To.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $value } | Select-Object -First 1
+    if ($matchingItem) {
+        $To.SelectedItem = $matchingItem
     } else {
         $To.Text = $value
     }
@@ -479,7 +484,7 @@ function Invoke-ExecuteAll {
                     return 1
                 }
             } else {
-                $value = $ctrl.SelectedItem
+                $value = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
                 if (!$value -or ($value -eq $script:baseTemplateNamePlaceholder) -or ($value -eq $script:customTemplateNamePlaceholder)) {
                     [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                     return 1
@@ -658,13 +663,25 @@ $btnMultipleBatchRunAll.Add_Click({
         $bd0.InputControls['SpaceTemplateId'].Text = $origSpaceTemplateId
         $bd1 = $categoryDefs[1].ButtonDefs[0]
         $bd1.InputControls['SpaceId'].Text = $origSpaceId
-        if ($origBaseTemplateSelectedItem -and $cmbBaseTemplateName.Items.Contains($origBaseTemplateSelectedItem)) {
-            $cmbBaseTemplateName.SelectedItem = $origBaseTemplateSelectedItem
+        if ($origBaseTemplateSelectedItem) {
+            $origBaseTemplateValue = Get-ComboBoxValue -SelectedItem $origBaseTemplateSelectedItem
+            $matchingBaseItem = $cmbBaseTemplateName.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $origBaseTemplateValue } | Select-Object -First 1
+            if ($matchingBaseItem) {
+                $cmbBaseTemplateName.SelectedItem = $matchingBaseItem
+            } else {
+                $cmbBaseTemplateName.Text = $origBaseTemplateText
+            }
         } else {
             $cmbBaseTemplateName.Text = $origBaseTemplateText
         }
-        if ($origCustomTemplateSelectedItem -and $cmbCustomTemplateName.Items.Contains($origCustomTemplateSelectedItem)) {
-            $cmbCustomTemplateName.SelectedItem = $origCustomTemplateSelectedItem
+        if ($origCustomTemplateSelectedItem) {
+            $origCustomTemplateValue = Get-ComboBoxValue -SelectedItem $origCustomTemplateSelectedItem
+            $matchingCustomItem = $cmbCustomTemplateName.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $origCustomTemplateValue } | Select-Object -First 1
+            if ($matchingCustomItem) {
+                $cmbCustomTemplateName.SelectedItem = $matchingCustomItem
+            } else {
+                $cmbCustomTemplateName.Text = $origCustomTemplateText
+            }
         } else {
             $cmbCustomTemplateName.Text = $origCustomTemplateText
         }
@@ -688,15 +705,22 @@ function Get-TemplateFileNames {
 
 function Set-ComboItems {
     param([System.Windows.Forms.ComboBox]$ComboBox, [string[]]$Names, [string]$Placeholder)
-    $selected = $ComboBox.SelectedItem
+    $selected = Get-ComboBoxValue -SelectedItem $ComboBox.SelectedItem
+    $ComboBox.DisplayMember = "Text"
+    $ComboBox.ValueMember = "Value"
     $ComboBox.Items.Clear()
-    $ComboBox.Items.Add($Placeholder) | Out-Null
-    foreach ($name in $Names) { $ComboBox.Items.Add($name) | Out-Null }
+    $ComboBox.Items.Add([PSCustomObject]@{ Text = $Placeholder; Value = $Placeholder }) | Out-Null
+    foreach ($name in $Names) { $ComboBox.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null }
 
-    if ($selected -and $ComboBox.Items.Contains($selected)) {
-        $ComboBox.SelectedItem = $selected
+    if ($selected) {
+        $matchingItem = $ComboBox.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selected } | Select-Object -First 1
+        if ($matchingItem) {
+            $ComboBox.SelectedItem = $matchingItem
+        } else {
+            $ComboBox.SelectedItem = $ComboBox.Items[0]
+        }
     } else {
-        $ComboBox.SelectedItem = $Placeholder
+        $ComboBox.SelectedItem = $ComboBox.Items[0]
     }
 }
 
@@ -837,8 +861,8 @@ $tabControl.Add_SelectedIndexChanged({
         Update-BaseTemplateNameList
         Update-CustomTemplateNameList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-LogConfigNameList
-        Update-LogView -FilterCombo $cmbLogConfigName
+        Update-LogGroupList
+        Update-LogView
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsFields
     }
