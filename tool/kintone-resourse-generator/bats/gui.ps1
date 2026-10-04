@@ -166,12 +166,6 @@ $tabSettings = New-TabPage -Text "設定"
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
-$script:isRunning = $false
-$tabControl.Add_Selecting({
-    if ($script:isRunning -and $_.TabPage -ne $tabRun) {
-        $_.Cancel = $true
-    }
-})
 
 $execTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 
@@ -199,9 +193,6 @@ New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "�
 
 $lblOverallStatus = $script:batchStatusLabel
 
-$execTabControl.Add_Selecting({
-    if ($script:isRunning) { $_.Cancel = $true }
-})
 
 $tabRun.Controls.Add($execTabControl)
 
@@ -223,7 +214,6 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
             }
         }
 
-        $script:isRunning = $true
         Set-RunButtonsEnabled $false
         $lblOverallStatus.Text = ""
 
@@ -241,7 +231,6 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
         }
 
         Set-RunButtonsEnabled $true
-        $script:isRunning = $false
     } | Out-Null
 
 
@@ -463,7 +452,6 @@ function Invoke-ExecuteAll {
 }
 
 $script:batchRunButton.Add_Click({
-    $script:isRunning = $true
     Set-RunButtonsEnabled $false
     Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
 
@@ -478,7 +466,6 @@ $script:batchRunButton.Add_Click({
     }
 
     Set-RunButtonsEnabled $true
-    $script:isRunning = $false
 })
 
 $btnMultipleBatchRunAll.Add_Click({
@@ -516,7 +503,6 @@ $btnMultipleBatchRunAll.Add_Click({
             throw "Excelに行がありません。"
         }
 
-        $script:isRunning = $true
         Set-RunButtonsEnabled $false
 
         $origConfigNames = @{}
@@ -624,7 +610,6 @@ $btnMultipleBatchRunAll.Add_Click({
         Set-StepStatus -Label $lblMultipleBatchStatus -Text "失敗"
     } finally {
         Set-RunButtonsEnabled $true
-        $script:isRunning = $false
     }
 })
 
