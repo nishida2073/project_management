@@ -1003,16 +1003,21 @@ function Invoke-BatchRunAll {
 }
 
 function Update-LogView {
+    param(
+        [System.Windows.Forms.ComboBox]$FilterCombo
+    )
+
     $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
     if (-not $selectedRadio) { return }
     $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
+
     $logPath = & $script:getLogPathFn
 
     $script:logTab.ContentBox.Text = ""
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
 
-    $groupValue = if ($cmbLogGroup.SelectedIndex -ge 0) { "$(Get-ComboBoxValue -SelectedItem $cmbLogGroup.SelectedItem)" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$groupValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
+    $filterValue = if ($FilterCombo.SelectedIndex -ge 0) { "$(Get-ComboBoxValue -SelectedItem $FilterCombo.SelectedItem)" } else { "" }
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$filterValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
     $sections = foreach ($file in $files) {
         try {
             [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)

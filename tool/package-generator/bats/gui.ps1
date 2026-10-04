@@ -246,7 +246,7 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
     -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] } `
-    -OnUpdateLogView { Update-LogView } | Out-Null
+    -OnUpdateLogView { Update-LogView -FilterCombo $cmbLogGroup } | Out-Null
 $script:logPath = $script:commonEnvVars["CommonLogPath"]
 $cmbLogGroup = $script:logTab.ExtraCombo
 $cmbLogGroup.DisplayMember = "Text"
@@ -254,11 +254,11 @@ foreach ($opt in $clientOptions) { $cmbLogGroup.Items.Add($opt) | Out-Null }
 if ($cmbLogGroup.Items.Count -gt 0) { $cmbLogGroup.SelectedIndex = 0 }
 
 foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView -FilterCombo $cmbLogGroup } })
 }
-$cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView })
+$cmbLogGroup.Add_SelectedIndexChanged({ Update-LogView -FilterCombo $cmbLogGroup })
 
-Update-LogView
+Update-LogView -FilterCombo $cmbLogGroup
 
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -571,7 +571,7 @@ $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsGroupList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-LogView
+        Update-LogView -FilterCombo $cmbLogGroup
     }
 })
 

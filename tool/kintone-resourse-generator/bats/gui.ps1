@@ -358,9 +358,9 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
     -OnAfterClear { Update-LogConfigNameList } `
-    -OnUpdateLogView { Update-LogView } | Out-Null
+    -OnUpdateLogView { Update-LogView -FilterCombo $cmbLogConfigName } | Out-Null
 foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
+    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView -FilterCombo $cmbLogConfigName } })
 }
 $cmbLogConfigName = $script:logTab.ExtraCombo
 
@@ -391,36 +391,10 @@ function Update-LogConfigNameList {
     $cmbLogConfigName.SelectedIndex = if ($selected -and $cmbLogConfigName.Items.Contains($selected)) { $cmbLogConfigName.Items.IndexOf($selected) } else { 0 }
 }
 
-function Update-LogView {
-    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
-    if (-not $selectedRadio) { return }
-    $stage = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
-    $logPath = Get-ResolvedVar "COMMON_LOG_PATH"
-
-    $script:logTab.ContentBox.Text = ""
-
-    if (!($logPath -and (Test-Path -LiteralPath $logPath))) {
-        return
-    }
-
-    $logConfigName = Get-ComboBoxValue -SelectedItem $cmbLogConfigName.SelectedItem
-    $configFilter = if ($logConfigName -and $logConfigName -ne "") { "-$logConfigName" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "${stage}$configFilter*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
-
-    $sections = foreach ($file in $files) {
-        try {
-            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
-        } catch {
-            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
-        }
-    }
-    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
-}
-
-$cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
+$cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView -FilterCombo $cmbLogConfigName })
 
 Update-LogConfigNameList
-Update-LogView
+Update-LogView -FilterCombo $cmbLogConfigName
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -864,7 +838,7 @@ $tabControl.Add_SelectedIndexChanged({
         Update-CustomTemplateNameList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-LogConfigNameList
-        Update-LogView
+        Update-LogView -FilterCombo $cmbLogConfigName
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsFields
     }
