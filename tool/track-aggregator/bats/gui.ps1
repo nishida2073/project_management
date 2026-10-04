@@ -228,13 +228,13 @@ $settingsGroups = [ordered]@{
             "SurveyResultRootDir"                   = @{ Label = "アンケート結果の取得先"; Browse = "Folder" }
             "OutputRootDir"                         = @{ Label = "集計結果の出力先（共通）"; Browse = "Folder" }
             "OutputTestCollectDir"                  = @{ Label = "テスト集計結果の出力先"; Browse = "Folder" }
-            "OutputTestResultFileSuffix"            = @{ Label = "テスト結果ファイル名の接尾辞" }
+            "OutputTestResultFileSuffix"            = @{ Label = "テスト結果ファイル名の接尾語" }
             "OutputSurveyCollectDir"                = @{ Label = "アンケート集計結果の出力先"; Browse = "Folder" }
-            "OutputSurveyResultFileSuffix"          = @{ Label = "アンケート結果ファイル名の接尾辞" }
+            "OutputSurveyResultFileSuffix"          = @{ Label = "アンケート結果ファイル名の接尾語" }
             "OutputCombineCollectDir"               = @{ Label = "統合結果の出力先"; Browse = "Folder" }
-            "OutputCombineResultFileSuffix"         = @{ Label = "統合結果ファイル名の接尾辞" }
+            "OutputCombineResultFileSuffix"         = @{ Label = "統合結果ファイル名の接尾語" }
             "OutputYearComparisonCollectDir"        = @{ Label = "経年比較結果の出力先"; Browse = "Folder" }
-            "OutputYearComparisonResultFileSuffix"  = @{ Label = "経年比較結果ファイル名の接尾辞" }
+            "OutputYearComparisonResultFileSuffix"  = @{ Label = "経年比較結果ファイル名の接尾語" }
             "PassScore"                             = $overridableVarDefs["PassScore"]
             "AutoHotkeyExePath"                     = @{ Label = "AutoHotkey実行ファイルのパス" }
             "AutoHotkeyScriptPath"                  = @{ Label = "ダウンロード用スクリプトのパス" }
