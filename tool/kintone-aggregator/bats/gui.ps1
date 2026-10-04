@@ -972,8 +972,9 @@ function Update-GroupDropdowns {
         }
     }
 
-    foreach ($ctrl in $script:batchInputControls.Values) {
-        if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+    if ($script:batchInputControls.ContainsKey("TargetGroupNameFilter")) {
+        $ctrl = $script:batchInputControls["TargetGroupNameFilter"]
+        if ($ctrl) {
             $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
             $ctrl.Items.Clear()
             $ctrl.Items.Add($allGroupsOption) | Out-Null
