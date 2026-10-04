@@ -334,14 +334,14 @@ function Set-RunButtonsEnabled {
     }
     $cmbBaseTemplateName.Enabled = $Enabled
     $cmbCustomTemplateName.Enabled = $Enabled
-    $script:batchInputControls["ConfigName"].Enabled = $Enabled
-    $script:batchInputControls["SpaceTemplateId"].Enabled = $Enabled
-    $script:batchInputControls["BaseTemplateName"].Enabled = $Enabled
-    $script:batchInputControls["CustomTemplateName"].Enabled = $Enabled
-    $script:batchRunButton.Enabled = $Enabled
+    foreach ($ctrl in $script:batchInputControls.Values) {
+        $ctrl.Enabled = $Enabled
+    }
+    $txtMultipleBatchExcelPath.Enabled = $Enabled
     $btnMultipleBatchBrowse.Enabled = $Enabled
     $btnMultipleBatchRunAll.Enabled = $Enabled
-    foreach ($btn in $tabResult.RunButtons) { $btn.Enabled = $Enabled }
+    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
 }
 
 function Copy-ComboSelection {
