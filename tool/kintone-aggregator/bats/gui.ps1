@@ -272,7 +272,7 @@ $settingsTrailingButtonVars = @{
         try {
             Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
                 Test-KintoneConnection -ReportGroup $Field.Group -FieldName "$($Field.Group)_TargetAppIds" | Out-Null
-                [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            #    [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
         } catch {
             [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -282,7 +282,7 @@ $settingsTrailingButtonVars = @{
         try {
             Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
                 Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
-                [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            #    [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
         } catch {
             [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -305,7 +305,7 @@ $settingsTrailingButtonVars = @{
                 $baseUrl = "https://$kintoneSubdomain.cybozu.com"
                 $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
                 Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization | Out-Null
-                [System.Windows.Forms.MessageBox]::Show("テスト投稿に成功しました。スレッドを確認し、不要であれば削除してください。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            #    [System.Windows.Forms.MessageBox]::Show("テスト投稿に成功しました。スレッドを確認し、不要であれば削除してください。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
             }
         } catch {
             [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -456,7 +456,6 @@ $btnMasterOpsSyncExecute.Add_Click({
             if ($exitCode -ne 0) {
                 throw "同期処理に失敗しました（$($syncAppId)）"
             }
-            [System.Windows.Forms.MessageBox]::Show("同期が完了しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
         }
     } catch {
         [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -1005,7 +1004,6 @@ function Save-ScheduleToExcel {
     try {
         $rowsFromUI = @(Read-ScheduleGridData)
         Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:scheduleSheetDef -Datas $rowsFromUI
-        [System.Windows.Forms.MessageBox]::Show("スケジュールを保存しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)

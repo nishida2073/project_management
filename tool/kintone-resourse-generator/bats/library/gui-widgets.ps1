@@ -660,7 +660,7 @@ function New-LogTab {
     $cmbLogExtra.Location = New-Object System.Drawing.Point((20 + $ExtraLabelWidth + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
     $logStagePanel.Controls.Add($cmbLogExtra)
 
-    $btnClearLogs = New-Button -Text "ログをすべて削除" -X ($cmbLogExtra.Right + 20) -Y ($rowCenterY - [int](24 / 2)) -Width 140 -Height 24
+    $btnClearLogs = New-Button -Text "すべて削除" -X ($cmbLogExtra.Right + 20) -Y ($rowCenterY - [int](24 / 2)) -Width 140 -Height 24
     $btnClearLogs.Add_Click({
         $logPath = & $GetLogPathFn
         if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
@@ -742,11 +742,13 @@ function New-SettingsTopPanel {
 
     $btnSave = New-Button -Text "保存" -X 20 -Y $ButtonRowY -Width 100 -Height 24
 
-    $btnReload = New-Button -Text "再読込" -X 130 -Y $ButtonRowY -Width 100 -Height 24
+    $lblSaveStatus = New-Label -X 130 -Y ($ButtonRowY + 6) -AutoSize $true
 
-    $lblStatus = New-Label -X 244 -Y ($ButtonRowY + 6) -AutoSize $true
+    $btnReload = New-Button -Text "再読込" -X 20 -Y ($ButtonRowY + 30) -Width 100 -Height 24
 
-    $panel.Controls.AddRange(@($btnSave, $btnReload, $lblStatus))
+    $lblReloadStatus = New-Label -X 130 -Y ($ButtonRowY + 36) -AutoSize $true
+
+    $panel.Controls.AddRange(@($btnSave, $lblSaveStatus, $btnReload, $lblReloadStatus))
 
     if ($ExtraControls.Count -gt 0) {
         $extraX = $ExtraControlsX
@@ -765,22 +767,19 @@ function New-SettingsTopPanel {
     }
 
     $btnSave.Add_Click({
-        & $OnSave
-        $lblStatus.ForeColor = [System.Drawing.Color]::DarkGreen
-        $lblStatus.Text = "保存しました"
+        Invoke-ActionWithUpdateStatus -StatusLabel $lblSaveStatus -Action $OnSave -SuccessMessage "完了"
     }.GetNewClosure())
 
     $btnReload.Add_Click({
-        & $OnReload
-        $lblStatus.ForeColor = [System.Drawing.Color]::Black
-        $lblStatus.Text = "再読込しました"
+        Invoke-ActionWithUpdateStatus -StatusLabel $lblReloadStatus -Action $OnReload -SuccessMessage "完了"
     }.GetNewClosure())
 
     return [PSCustomObject]@{
         Panel        = $panel
         SaveButton   = $btnSave
         ReloadButton = $btnReload
-        StatusLabel  = $lblStatus
+        SaveStatus   = $lblSaveStatus
+        ReloadStatus = $lblReloadStatus
     }
 }
 
@@ -924,15 +923,15 @@ function Invoke-ActionWithUpdateStatus {
     try {
         $result = & $Action
         if($result -eq 0 -or $null -eq $result){
-            Set-StepStatus -Label $StatusLabel -Text $SuccessMessage
+            Set-StepStatus -Label $StatusLabel -Text $SuccessMessage -State "成功"
         } elseif ($result -eq 2) {
-            Set-StepStatus -Label $StatusLabel -Text $WarnMessage
+            Set-StepStatus -Label $StatusLabel -Text $WarnMessage -State "警告"
         } else {
-            Set-StepStatus -Label $StatusLabel -Text $FailureMessage
+            Set-StepStatus -Label $StatusLabel -Text $FailureMessage -State "失敗"
         }
         return $result
     } catch {
-        Set-StepStatus -Label $StatusLabel -Text $FailureMessage
+        Set-StepStatus -Label $StatusLabel -Text $FailureMessage -State "失敗"
         throw $_.Exception.Message
     }
 }
