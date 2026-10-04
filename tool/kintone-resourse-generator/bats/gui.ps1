@@ -873,15 +873,9 @@ $tabControl.Add_SelectedIndexChanged({
     }
 })
 
-Update-GroupDropdowns
-Update-LogView
-Update-SettingsFields
-Update-BaseTemplateNameList
-Update-CustomTemplateNameList
-
 $form.Add_Shown({
     Update-InnerRunTabHeight
-    Update-SettingsFields
+    Update-GroupDropdowns
 })
 $tabControl.SelectedTab = $tabRun
 

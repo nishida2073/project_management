@@ -1136,17 +1136,11 @@ $tabControl.Add_SelectedIndexChanged({
     }
 })
 
-Update-SettingsGroupList
-Update-CommonSettingsFields
-Update-GroupSettingsFields
-Update-GroupDropdowns
-
 $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
-    Update-CommonSettingsFields
-    Update-GroupSettingsFields
+    Update-GroupDropdowns
 })
 
 [System.Windows.Forms.Application]::Run($form)
