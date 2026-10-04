@@ -867,7 +867,6 @@ $tabControl.Add_SelectedIndexChanged({
         Update-CustomTemplateNameList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-GroupDropdowns
-        Update-LogView
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsFields
     }
