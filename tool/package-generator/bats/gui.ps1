@@ -38,6 +38,7 @@ function Get-ClientNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
+$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
 $clientOptions = @()
 foreach ($clientName in (Get-ClientNames)) {
     $clientOptions += [PSCustomObject]@{ Text = $clientName; Value = $clientName }
@@ -70,7 +71,7 @@ function Update-GroupDropdowns {
     $clientNames = @(Get-ClientNames)
 
     $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    $savedLog = Get-ComboBoxValue -SelectedItem $cmbLogGroup.SelectedItem
+    $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.ExtraCombo.SelectedItem
     $savedFilters = @{}
     foreach ($cd in $categoryDefs) {
         foreach ($bd in $cd.ButtonDefs) {
@@ -126,20 +127,21 @@ function Update-GroupDropdowns {
         }
     }
 
-    if ($cmbLogGroup) {
-        $cmbLogGroup.Items.Clear()
+    if ($script:logTab -and $script:logTab.ExtraCombo) {
+        $script:logTab.ExtraCombo.Items.Clear()
+        $script:logTab.ExtraCombo.Items.Add($allGroupsOption) | Out-Null
         foreach ($clientName in $clientNames) {
-            $cmbLogGroup.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
+            $script:logTab.ExtraCombo.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
         }
         if ($savedLog) {
-            $matchingItem = $cmbLogGroup.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
+            $matchingItem = $script:logTab.ExtraCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
             if ($matchingItem) {
-                $cmbLogGroup.SelectedItem = $matchingItem
-            } elseif ($cmbLogGroup.Items.Count -gt 0) {
-                $cmbLogGroup.SelectedIndex = 0
+                $script:logTab.ExtraCombo.SelectedItem = $matchingItem
+            } elseif ($script:logTab.ExtraCombo.Items.Count -gt 0) {
+                $script:logTab.ExtraCombo.SelectedIndex = 0
             }
-        } elseif ($cmbLogGroup.Items.Count -gt 0) {
-            $cmbLogGroup.SelectedIndex = 0
+        } elseif ($script:logTab.ExtraCombo.Items.Count -gt 0) {
+            $script:logTab.ExtraCombo.SelectedIndex = 0
         }
     }
 
@@ -281,26 +283,13 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
     -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] } `
-    -OnUpdateLogView { Update-LogView } | Out-Null
+    -OnUpdateLogView { Update-LogView } -Options @($allGroupsOption, $clientOptions) | Out-Null
 $script:logPath = $script:commonEnvVars["CommonLogPath"]
-$cmbLogGroup = $script:logTab.ExtraCombo
-
-function Update-LogGroupList {
-    $script:logTab.ExtraCombo.Items.Clear()
-    $script:logTab.ExtraCombo.DisplayMember = "Text"
-    $script:logTab.ExtraCombo.ValueMember = "Value"
-    foreach ($opt in $clientOptions) { $script:logTab.ExtraCombo.Items.Add($opt) | Out-Null }
-    if ($script:logTab.ExtraCombo.Items.Count -gt 0) { $script:logTab.ExtraCombo.SelectedIndex = 0 }
-}
 
 foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
 $script:logTab.ExtraCombo.Add_SelectedIndexChanged({ Update-LogView })
-
-Update-LogGroupList
-Update-LogView
-
 
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"

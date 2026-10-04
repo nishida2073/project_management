@@ -354,21 +354,31 @@ foreach ($cd in $categoryDefs) {
     $allButtonDefs += $cd.ButtonDefs
 }
 
+$configOptions = @($allGroupsOption)
+$configDir = Join-Path $rootPath "config"
+if (Test-Path -LiteralPath $configDir) {
+    $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $basename = $_.BaseName
+            $basename -replace '_config$', ''
+        } |
+        Sort-Object)
+    foreach ($name in $configNames) {
+        $configOptions += [PSCustomObject]@{ Text = $name; Value = $name }
+    }
+}
+
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -ExtraLabelText "スペース識別名" -ExtraComboWidth 220 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
-    -OnUpdateLogView { Update-LogView } | Out-Null
+    -OnUpdateLogView { Update-LogView } -Options $configOptions | Out-Null
 foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
-$cmbLogConfigName = $script:logTab.ExtraCombo
-
-function Update-LogGroupList {
-    $selected = Get-ComboBoxValue -SelectedItem $cmbLogConfigName.SelectedItem
-    $cmbLogConfigName.DisplayMember = "Text"
-    $cmbLogConfigName.ValueMember = "Value"
-    $cmbLogConfigName.Items.Clear()
-    $cmbLogConfigName.Items.Add($allGroupsOption) | Out-Null
+function Update-GroupDropdowns {
+    $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.ExtraCombo.SelectedItem
+    $script:logTab.ExtraCombo.Items.Clear()
+    $script:logTab.ExtraCombo.Items.Add($allGroupsOption) | Out-Null
 
     $configDir = Join-Path $rootPath "config"
     if (Test-Path -LiteralPath $configDir) {
@@ -379,26 +389,23 @@ function Update-LogGroupList {
             } |
             Sort-Object)
         foreach ($name in $configNames) {
-            $cmbLogConfigName.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
+            $script:logTab.ExtraCombo.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
         }
     }
 
-    if ($selected) {
-        $matchingItem = $cmbLogConfigName.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selected } | Select-Object -First 1
+    if ($savedLog) {
+        $matchingItem = $script:logTab.ExtraCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
         if ($matchingItem) {
-            $cmbLogConfigName.SelectedItem = $matchingItem
+            $script:logTab.ExtraCombo.SelectedItem = $matchingItem
         } else {
-            $cmbLogConfigName.SelectedIndex = 0
+            $script:logTab.ExtraCombo.SelectedIndex = 0
         }
     } else {
-        $cmbLogConfigName.SelectedIndex = 0
+        $script:logTab.ExtraCombo.SelectedIndex = 0
     }
 }
 
-$cmbLogConfigName.Add_SelectedIndexChanged({ Update-LogView })
-
-Update-LogGroupList
-Update-LogView
+$script:logTab.ExtraCombo.Add_SelectedIndexChanged({ Update-LogView })
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -854,20 +861,21 @@ $settingsTopPanel = New-SettingsTopPanel `
 $topPanel = $settingsTopPanel.Panel
 $tabSettings.Controls.Add($topPanel)
 
-Update-SettingsFields
-
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
         Update-BaseTemplateNameList
         Update-CustomTemplateNameList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-LogGroupList
+        Update-GroupDropdowns
         Update-LogView
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsFields
     }
 })
 
+Update-GroupDropdowns
+Update-LogView
+Update-SettingsFields
 Update-BaseTemplateNameList
 Update-CustomTemplateNameList
 

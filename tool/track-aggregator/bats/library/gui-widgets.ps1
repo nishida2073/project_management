@@ -568,7 +568,8 @@ function New-LogTab {
         [int]$ExtraComboWidth = 200,
         [Parameter(Mandatory)][scriptblock]$GetLogPathFn,
         [scriptblock]$OnAfterClear = {},
-        [Parameter(Mandatory)][scriptblock]$OnUpdateLogView
+        [Parameter(Mandatory)][scriptblock]$OnUpdateLogView,
+        [array]$Options = @()
     )
 
     $logContentBox = New-LogTextBox
@@ -582,6 +583,10 @@ function New-LogTab {
     $logStagePanel.Controls.Add($lblLogExtra)
 
     $cmbLogExtra = New-ComboBox -Width $ExtraComboWidth -Height 24
+    $cmbLogExtra.DisplayMember = "Text"
+    $cmbLogExtra.ValueMember = "Value"
+    foreach ($opt in $Options) { $cmbLogExtra.Items.Add($opt) | Out-Null }
+    if ($cmbLogExtra.Items.Count -gt 0) { $cmbLogExtra.SelectedIndex = 0 }
     $cmbLogExtra.Location = New-Object System.Drawing.Point(($lblLogExtra.Right + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
     $logStagePanel.Controls.Add($cmbLogExtra)
 
