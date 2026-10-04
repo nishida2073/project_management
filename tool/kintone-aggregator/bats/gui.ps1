@@ -1131,6 +1131,7 @@ $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
+    Update-CommonSettingsFields
     Update-GroupDropdowns
 })
 
