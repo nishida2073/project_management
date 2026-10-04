@@ -427,9 +427,11 @@ $lblSettingsMasterOpsSaveTarget.Text = "保存対象"
 $lblSettingsMasterOpsSaveTarget.AutoSize = $true
 
 $cmbSettingsMasterOpsSaveTarget = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsMasterOpsSaveTarget.Items.Add("すべて") | Out-Null
-$cmbSettingsMasterOpsSaveTarget.Items.Add("テスト") | Out-Null
-$cmbSettingsMasterOpsSaveTarget.Items.Add("アンケート") | Out-Null
+$cmbSettingsMasterOpsSaveTarget.DisplayMember = "Text"
+$cmbSettingsMasterOpsSaveTarget.ValueMember = "Value"
+$cmbSettingsMasterOpsSaveTarget.Items.Add([PSCustomObject]@{ Text = "すべて"; Value = "すべて" }) | Out-Null
+$cmbSettingsMasterOpsSaveTarget.Items.Add([PSCustomObject]@{ Text = "テスト"; Value = "テスト" }) | Out-Null
+$cmbSettingsMasterOpsSaveTarget.Items.Add([PSCustomObject]@{ Text = "アンケート"; Value = "アンケート" }) | Out-Null
 $cmbSettingsMasterOpsSaveTarget.SelectedIndex = 0
 $cmbSettingsMasterOpsSaveTarget.Size = New-Object System.Drawing.Size(120, 24)
 $cmbSettingsMasterOpsSaveTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
@@ -696,7 +698,8 @@ function Save-MasterOpsToExcel {
     $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
-        switch ($cmbSettingsMasterOpsSaveTarget.SelectedItem) {
+        $saveTarget = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsSaveTarget.SelectedItem
+        switch ($saveTarget) {
             "すべて" {
                 $surveyDatas = @(Read-SurveyGridData)
                 $testDatas = @(Read-TestGridData)
