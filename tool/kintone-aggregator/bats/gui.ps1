@@ -46,7 +46,7 @@ foreach ($groupName in (Get-GroupNames)) {
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
 $dateAndGroupInputs = @(
     [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 75; InputWidth = 90 }
-    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 120; Options = $groupOptions }
+    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $groupOptions }
 )
 $categoryDefs = @(
     [PSCustomObject]@{
@@ -98,7 +98,7 @@ $execTabControl.Controls.Add($tabBatchAll)
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
         [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 75; InputWidth = 90 }
-        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 75; InputWidth = 120 }
+        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 75; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -378,7 +378,7 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象グループ"
 
-$cmbSettingsGroupTarget = New-ComboBox -Width 260 -Height 24 -DisplayMember "Text" -ValueMember "Value"
+$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
 $btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
@@ -411,7 +411,7 @@ $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 $lblSettingsMasterOpsGroupTarget = New-Label -Text "対象グループ"
 
-$cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 260 -Height 24 -DisplayMember "Text" -ValueMember "Value"
+$cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
 $lnkSettingsMasterOpsOpenXlsx = New-LinkLabel -Text "開く"
 

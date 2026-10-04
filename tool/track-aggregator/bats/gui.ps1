@@ -345,7 +345,7 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象グループ"
 
-$cmbSettingsGroupTarget = New-ComboBox -Width 260 -Height 24 -DisplayMember "Text" -ValueMember "Value"
+$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
 $btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
@@ -378,7 +378,7 @@ $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 $lblSettingsMasterOpsGroupTarget = New-Label -Text "対象グループ"
 
-$cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 260 -Height 24 -DisplayMember "Text" -ValueMember "Value"
+$cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
 $lnkSettingsMasterOpsOpenXlsx = New-LinkLabel -Text "開く"
 
