@@ -97,7 +97,7 @@ $categoryDefs = @(
 )
 
 $script:currentProc = $null
-$form = New-Form -Title "trackデータ集計ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
+$form = New-Form -Title "trackデータ集計ツール" -Width 900 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
 
 $tabControl = New-TabControl
 $tabRun = New-TabPage -Text "実行"
@@ -459,9 +459,9 @@ $script:surveyContentPanel = $null
 $script:surveySheetDef = @{
     SheetName = "アンケート"
     Columns = @(
-        @{ Label = "通番"; Width = 20; AutoIncrement = $true }
+        @{ Label = "通番"; Width = 40; AutoIncrement = $true }
         @{ Label = "アンケート名"; Width = 150; Property = "SurveyName" }
-        @{ Label = "TrackID"; Width = 300; Property = "TrackID";}
+        @{ Label = "TrackId"; Width = 400; Property = "TrackID";}
         @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
         @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
     )
@@ -474,9 +474,9 @@ $script:testContentPanel = $null
 $script:testSheetDef = @{
     SheetName = "テスト"
     Columns = @(
-        @{ Label = "通番"; Width = 20; AutoIncrement = $true }
+        @{ Label = "通番"; Width = 40; AutoIncrement = $true }
         @{ Label = "テスト名"; Width = 150; Property = "TestName" }
-        @{ Label = "TrackID"; Width = 300; Property = "TrackID" }
+        @{ Label = "TrackId"; Width = 400; Property = "TrackID" }
         @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
         @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
     )

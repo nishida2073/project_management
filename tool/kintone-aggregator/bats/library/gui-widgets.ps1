@@ -1187,7 +1187,7 @@ function Add-MentionsEditor {
         $y += 28
     }
 
-    $btnAddRow = New-Button -Text "＋ 追加" -X 40 -Y $y -Width 80 -Height 24
+    $btnAddRow = New-Button -Text "追加" -X 40 -Y $y -Width 80 -Height 24
     $btnAddRow.Add_Click({
         Sync-MentionRowsFromControls
         $script:mentionRows += [PSCustomObject]@{ Code = ""; Type = "USER" }
@@ -1422,20 +1422,26 @@ function New-Grid {
     $ContentPanelY = if ($HeaderPanel) { $HeaderPanel.Location.Y + $HeaderPanel.Height } else { 60 }
     $ContentPanel = $existingPanels | Where-Object { $_.Location.Y -eq $ContentPanelY } | Select-Object -First 1
 
+    $panelWidth = $GroupBox.Width - 20
+
     if (-not $HeaderPanel) {
         $HeaderPanel = New-Object System.Windows.Forms.Panel
         $HeaderPanel.AutoSize = $false
-        $HeaderPanel.Size = New-Object System.Drawing.Size(730, 20)
+        $HeaderPanel.Size = New-Object System.Drawing.Size($panelWidth, 20)
         $HeaderPanel.Location = New-Object System.Drawing.Point(10, 40)
         $GroupBox.Controls.Add($HeaderPanel)
+    } else {
+        $HeaderPanel.Width = $panelWidth
     }
 
     if (-not $ContentPanel) {
         $ContentPanel = New-Object System.Windows.Forms.Panel
         $ContentPanel.AutoSize = $false
-        $ContentPanel.Size = New-Object System.Drawing.Size(730, 370)
+        $ContentPanel.Size = New-Object System.Drawing.Size($panelWidth, 370)
         $ContentPanel.Location = New-Object System.Drawing.Point(10, $ContentPanelY)
         $GroupBox.Controls.Add($ContentPanel)
+    } else {
+        $ContentPanel.Width = $panelWidth
     }
 
     if ($HeaderPanel.Controls.Count -eq 0) {
@@ -1519,11 +1525,11 @@ function New-Grid {
         $y += 28
     }
 
-    $addButton = $ContentPanel.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Text -eq "＋ 行追加" } | Select-Object -First 1
+    $addButton = $ContentPanel.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Text -eq "追加" } | Select-Object -First 1
 
     if (-not $addButton) {
         $addButton = New-Object System.Windows.Forms.Button
-        $addButton.Text = "＋ 行追加"
+        $addButton.Text = "追加"
         $addButton.Size = New-Object System.Drawing.Size(100, 24)
         if ($OnAdd) {
             $addButton.Add_Click({

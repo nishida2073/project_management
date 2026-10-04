@@ -575,12 +575,8 @@ function Add-CollectDataDefsEditor {
 
     $y = 25
     foreach ($section in $script:collectDataDefsSections) {
-        $lblFileNameCaption = New-Label -Text "ファイル名" -X 20 -Y $y -Width 220 -Height 20
-        $lblFileNameCaption.Font = New-Object System.Drawing.Font($lblFileNameCaption.Font.FontFamily, 9, [System.Drawing.FontStyle]::Bold)
-        $grp.Controls.Add($lblFileNameCaption)
-
         $fileNameText = if ($script:commonEnvVars.ContainsKey($section.Key)) { $script:commonEnvVars[$section.Key] } else { $section.Key }
-        $lblFileNameValue = New-Label -Text $fileNameText -X 250 -Y $y -Width 300 -Height 20
+        $lblFileNameValue = New-Label -Text "■$fileNameText" -X 20 -Y $y -Width 300 -Height 20
         $grp.Controls.Add($lblFileNameValue)
         $y += 26
 
@@ -614,7 +610,7 @@ function Add-CollectDataDefsEditor {
             $y += 26
         }
 
-        $btnAddRow = New-Button -Text "＋ 行を追加" -X 20 -Y $y -Width 100 -Height 24
+        $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 100 -Height 24
         $btnAddRow.Tag = $section
         $btnAddRow.Add_Click({
             Sync-CollectDataDefsFromControls
