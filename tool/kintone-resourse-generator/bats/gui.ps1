@@ -37,13 +37,9 @@ $script:customTemplateNamePlaceholder = "指定なし"
 
 $allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
 
-$cmbBaseTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbBaseTemplateName.Size = New-Object System.Drawing.Size(220, 22)
-$cmbBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbBaseTemplateName = New-ComboBox -Width 220 -Height 22
 
-$cmbCustomTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbCustomTemplateName.Size = New-Object System.Drawing.Size(180, 22)
-$cmbCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbCustomTemplateName = New-ComboBox -Width 180 -Height 22
 
 $categoryDefs = @(
     [PSCustomObject]@{
@@ -98,9 +94,9 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "設定ファイルの生成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 151; InputWidth = 200; Require = $true }
-                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 151; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
-                    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 151; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
+                    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
                 )
                 BatchPath = $generateBat
                 ArgsFn = {
@@ -155,35 +151,17 @@ $categoryDefs = @(
     }
 )
 
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "kintoneリソース生成ツール"
-$form.Size = New-Object System.Drawing.Size(780, 560)
-$form.StartPosition = "CenterScreen"
-$form.MinimumSize = New-Object System.Drawing.Size(600, 500)
-
+$form = New-Form -Title "kintoneリソース生成ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 500 -CenterScreen
 $script:currentProc = $null
 $script:stepOutputPaths = @{}
 $script:createdSpaceUrl = $null
-$form.Add_FormClosing({
-    if ($script:currentProc -and !$script:currentProc.HasExited) {
-        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
-    }
-})
 
-$tabControl = New-Object System.Windows.Forms.TabControl
-$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+$tabControl = New-TabControl
+$tabRun = New-TabPage -Text "実行"
 
-$tabRun = New-Object System.Windows.Forms.TabPage
-$tabRun.Text = "実行"
-
-$innerRunTabControl = New-Object System.Windows.Forms.TabControl
-$innerRunTabControl.Dock = [System.Windows.Forms.DockStyle]::Top
-
-$tabSingleRun = New-Object System.Windows.Forms.TabPage
-$tabSingleRun.Text = "単体実行"
-
-$tabBatchRun = New-Object System.Windows.Forms.TabPage
-$tabBatchRun.Text = "複数実行"
+$innerRunTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Top)
+$tabSingleRun = New-TabPage -Text "単体実行"
+$tabBatchRun = New-TabPage -Text "複数実行"
 
 $innerRunTabControl.Controls.AddRange(@($tabBatchRun, $tabSingleRun))
 $innerRunTabControl.Add_Selecting({
@@ -192,11 +170,8 @@ $innerRunTabControl.Add_Selecting({
 
 $innerRunTabControl.Add_SelectedIndexChanged({ Update-InnerRunTabHeight })
 
-$tabLogs = New-Object System.Windows.Forms.TabPage
-$tabLogs.Text = "ログ"
-
-$tabSettings = New-Object System.Windows.Forms.TabPage
-$tabSettings.Text = "設定"
+$tabLogs = New-TabPage -Text "ログ"
+$tabSettings = New-TabPage -Text "設定"
 
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
@@ -208,20 +183,16 @@ $tabControl.Add_Selecting({
     }
 })
 
-$runTopPanel = New-Object System.Windows.Forms.Panel
-$runTopPanel.Dock = [System.Windows.Forms.DockStyle]::Top
+$runTopPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Top)
 
-$execTabControl = New-Object System.Windows.Forms.TabControl
+$execTabControl = New-TabControl
 
-$tabBatchAll = New-Object System.Windows.Forms.TabPage
-$tabBatchAll.Text = "一括実行"
+$tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
-$cmbRunAllBaseTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbRunAllBaseTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbRunAllBaseTemplateName = New-ComboBox
 
-$cmbRunAllCustomTemplateName = New-Object System.Windows.Forms.ComboBox
-$cmbRunAllCustomTemplateName.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbRunAllCustomTemplateName = New-ComboBox
 
 $allStepDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
@@ -229,7 +200,7 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true },
     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
-    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 180; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
+    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
 )
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
@@ -299,35 +270,21 @@ function Update-InnerRunTabHeight {
     $tabRun.PerformLayout()
 }
 
-$multipleBatchExcelPanel = New-Object System.Windows.Forms.Panel
-$multipleBatchExcelPanel.Dock = [System.Windows.Forms.DockStyle]::Top
-$multipleBatchExcelPanel.Height = 90
+$multipleBatchExcelPanel = New-Panel -Height 90 -Dock ([System.Windows.Forms.DockStyle]::Top)
 
-$lblMultipleBatchExcelPath = New-Object System.Windows.Forms.Label
-$lblMultipleBatchExcelPath.Text = "実行一覧ファイル"
-$lblMultipleBatchExcelPath.AutoSize = $true
-$lblMultipleBatchExcelPath.Location = New-Object System.Drawing.Point(20, 17)
+$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 20 -Y 17
 
 $txtMultipleBatchExcelPath = New-Object System.Windows.Forms.TextBox
 $txtMultipleBatchExcelPath.Location = New-Object System.Drawing.Point(140, 14)
 $txtMultipleBatchExcelPath.Size = New-Object System.Drawing.Size(250, 22)
 
-$btnMultipleBatchBrowse = New-Object System.Windows.Forms.Button
-$btnMultipleBatchBrowse.Text = "参照..."
-$btnMultipleBatchBrowse.Location = New-Object System.Drawing.Point(400, 13)
-$btnMultipleBatchBrowse.Size = New-Object System.Drawing.Size(70, 24)
+$btnMultipleBatchBrowse = New-Button -Text "参照..." -X 400 -Y 13 -Width 70 -Height 24
 
 $lnkMultipleBatchOpenExcel = New-OpenLink -Text "開く" -X 480 -Y 16 -Width 40 -Height 18 -Pattern 'internal' -Tag $txtMultipleBatchExcelPath
 
-$btnMultipleBatchRunAll = New-Object System.Windows.Forms.Button
-$btnMultipleBatchRunAll.Text = "実行"
-$btnMultipleBatchRunAll.Location = New-Object System.Drawing.Point(20, 50)
-$btnMultipleBatchRunAll.Size = New-Object System.Drawing.Size(100, 26)
+$btnMultipleBatchRunAll = New-Button -Text "実行" -X 20 -Y 50 -Width 100 -Height 26
 
-$lblMultipleBatchStatus = New-Object System.Windows.Forms.Label
-$lblMultipleBatchStatus.Text = ""
-$lblMultipleBatchStatus.AutoSize = $true
-$lblMultipleBatchStatus.Location = New-Object System.Drawing.Point(130, 56)
+$lblMultipleBatchStatus = New-Label -X 130 -Y 56
 
 $multipleBatchExcelPanel.Controls.AddRange(@(
     $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $lnkMultipleBatchOpenExcel, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
@@ -743,9 +700,7 @@ function Update-CustomTemplateNameList {
     Set-ComboItems -ComboBox $cmbRunAllCustomTemplateName -Names $names -Placeholder $script:customTemplateNamePlaceholder
 }
 
-$fieldPanel = New-Object System.Windows.Forms.Panel
-$fieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$fieldPanel.AutoScroll = $true
+$fieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettings.Controls.Add($fieldPanel)
 
@@ -789,7 +744,7 @@ foreach ($groupKey in $settingsGroups.Keys) {
     }
 }
 
-$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+$settingsToolTip = New-ToolTip
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
 $script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
@@ -873,6 +828,8 @@ $tabControl.Add_SelectedIndexChanged({
 })
 
 $form.Add_Shown({
+    Update-BaseTemplateNameList
+    Update-CustomTemplateNameList
     Update-InnerRunTabHeight
     Update-GroupDropdowns
 })

@@ -71,37 +71,19 @@ $categoryDefs = @(
     }
 )
 
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "kintoneデータ集計ツール"
-$form.Size = New-Object System.Drawing.Size(780, 560)
-$form.StartPosition = "CenterScreen"
-$form.MinimumSize = New-Object System.Drawing.Size(600, 400)
-
+$form = New-Form -Title "kintoneデータ集計ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
 $script:currentProc = $null
-$form.Add_FormClosing({
-    if ($script:currentProc -and !$script:currentProc.HasExited) {
-        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
-    }
-})
 
-
-$tabControl = New-Object System.Windows.Forms.TabControl
-$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
-
-$tabRun = New-Object System.Windows.Forms.TabPage
-$tabRun.Text = "実行"
-
-$tabLogs = New-Object System.Windows.Forms.TabPage
-$tabLogs.Text = "ログ"
-
-$tabSettings = New-Object System.Windows.Forms.TabPage
-$tabSettings.Text = "設定"
+$tabControl = New-TabControl
+$tabRun = New-TabPage -Text "実行"
+$tabLogs = New-TabPage -Text "ログ"
+$tabSettings = New-TabPage -Text "設定"
 
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
 
-$execTabControl = New-Object System.Windows.Forms.TabControl
+$execTabControl = New-TabControl
 
 $allButtonDefs = @()
 foreach ($cd in $categoryDefs) {
@@ -110,8 +92,7 @@ foreach ($cd in $categoryDefs) {
     }
 }
 
-$tabBatchAll = New-Object System.Windows.Forms.TabPage
-$tabBatchAll.Text = "一括実行"
+$tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
@@ -365,23 +346,19 @@ function Get-GroupTemplateDefaults {
     return $script:groupTemplateDefaults
 }
 
-$settingsSubTabControl = New-Object System.Windows.Forms.TabControl
-$settingsSubTabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsSubTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 $tabSettings.Controls.Add($settingsSubTabControl)
 
-$tabSettingsCommon = New-Object System.Windows.Forms.TabPage
-$tabSettingsCommon.Text = "共通"
+$tabSettingsCommon = New-TabPage -Text "共通"
 $settingsSubTabControl.Controls.Add($tabSettingsCommon)
 
-$tabSettingsGroup = New-Object System.Windows.Forms.TabPage
-$tabSettingsGroup.Text = "グループ別"
+$tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$tabSettingsMasterOps = New-Object System.Windows.Forms.TabPage
-$tabSettingsMasterOps.Text = "マスター操作"
+$tabSettingsMasterOps = New-TabPage -Text "マスター操作"
 $settingsSubTabControl.Controls.Add($tabSettingsMasterOps)
 
-$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+$settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
@@ -394,25 +371,16 @@ $settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
     -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
 
-$settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
-$settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$settingsCommonFieldPanel.AutoScroll = $true
+$settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
-$lblSettingsGroupTarget.Text = "対象グループ"
+$lblSettingsGroupTarget = New-Label -Text "対象グループ"
 
-$cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
-$cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$cmbSettingsGroupTarget.DisplayMember = "Text"
-$cmbSettingsGroupTarget.ValueMember = "Value"
+$cmbSettingsGroupTarget = New-ComboBox -Width 260 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
-$btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
-$btnSettingsGroupNewGroup.Text = "新規作成"
-$btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
+$btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
@@ -436,24 +404,16 @@ $settingsGroupTopPanel = (New-SettingsTopPanel `
         Update-GroupSettingsFields
     }).Panel
 
-$settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
-$settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$settingsGroupFieldPanel.AutoScroll = $true
+$settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
-$lblSettingsMasterOpsGroupTarget = New-Object System.Windows.Forms.Label
-$lblSettingsMasterOpsGroupTarget.Text = "対象グループ"
+$lblSettingsMasterOpsGroupTarget = New-Label -Text "対象グループ"
 
-$cmbSettingsMasterOpsGroupTarget = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsMasterOpsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
-$cmbSettingsMasterOpsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$cmbSettingsMasterOpsGroupTarget.DisplayMember = "Text"
-$cmbSettingsMasterOpsGroupTarget.ValueMember = "Value"
+$cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 260 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
-$lnkSettingsMasterOpsOpenXlsx = New-Object System.Windows.Forms.LinkLabel
-$lnkSettingsMasterOpsOpenXlsx.Text = "開く"
+$lnkSettingsMasterOpsOpenXlsx = New-LinkLabel -Text "開く"
 
 $script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
     -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
@@ -465,24 +425,14 @@ $script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
 
 $settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
 
-$settingsMasterOpsPanel = New-Object System.Windows.Forms.Panel
-$settingsMasterOpsPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$settingsMasterOpsPanel.AutoScroll = $true
+$settingsMasterOpsPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettingsMasterOps.Controls.Add($settingsMasterOpsPanel)
 $tabSettingsMasterOps.Controls.Add($settingsMasterOpsTopPanel)
 
-$grpUserMasterSync = New-Object System.Windows.Forms.GroupBox
-$grpUserMasterSync.Text = "ユーザーマスター同期"
-$grpUserMasterSync.Dock = [System.Windows.Forms.DockStyle]::Top
-$grpUserMasterSync.AutoSize = $true
-$grpUserMasterSync.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
-$grpUserMasterSync.Padding = New-Object System.Windows.Forms.Padding(10)
+$grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
-$btnMasterOpsSyncExecute = New-Object System.Windows.Forms.Button
-$btnMasterOpsSyncExecute.Text = "同期実行"
-$btnMasterOpsSyncExecute.Size = New-Object System.Drawing.Size(100, 24)
-$btnMasterOpsSyncExecute.Location = New-Object System.Drawing.Point(20, 30)
+$btnMasterOpsSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
 $btnMasterOpsSyncExecute.Add_Click({
     try {
         $batchPath = Join-Path $basePath "sync-kintone-to-sheet.bat"
@@ -514,11 +464,7 @@ $btnMasterOpsSyncExecute.Add_Click({
 })
 $grpUserMasterSync.Controls.Add($btnMasterOpsSyncExecute)
 
-$lblMasterOpsStatusPlaceholder = New-Object System.Windows.Forms.Label
-$lblMasterOpsStatusPlaceholder.AutoSize = $false
-$lblMasterOpsStatusPlaceholder.Size = New-Object System.Drawing.Size(500, 24)
-$lblMasterOpsStatusPlaceholder.Location = New-Object System.Drawing.Point(130, 30)
-$lblMasterOpsStatusPlaceholder.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+$lblMasterOpsStatusPlaceholder = New-Label -X 130 -Y 30 -Width 500 -Height 24 -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
 $grpUserMasterSync.Controls.Add($lblMasterOpsStatusPlaceholder)
 
 function Get-CommonSettingsFieldRows {
@@ -626,62 +572,36 @@ function Add-CollectDataDefsEditor {
     }
     $script:collectDataDefsRowControls = @()
 
-    $grp = New-Object System.Windows.Forms.GroupBox
-    $grp.Text = "アプリデータ集計の列定義"
-    $grp.Dock = [System.Windows.Forms.DockStyle]::Top
-    $grp.AutoSize = $true
-    $grp.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
+    $grp = New-GroupBox -Text "アプリデータ集計の列定義" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize
 
     $y = 25
     foreach ($section in $script:collectDataDefsSections) {
-        $lblFileNameCaption = New-Object System.Windows.Forms.Label
-        $lblFileNameCaption.Text = "ファイル名"
-        $lblFileNameCaption.AutoSize = $false
-        $lblFileNameCaption.Size = New-Object System.Drawing.Size(220, 20)
-        $lblFileNameCaption.Location = New-Object System.Drawing.Point(20, $y)
+        $lblFileNameCaption = New-Label -Text "ファイル名" -X 20 -Y $y -Width 220 -Height 20
         $lblFileNameCaption.Font = New-Object System.Drawing.Font($lblFileNameCaption.Font.FontFamily, 9, [System.Drawing.FontStyle]::Bold)
         $grp.Controls.Add($lblFileNameCaption)
 
-        $lblFileNameValue = New-Object System.Windows.Forms.Label
-        $lblFileNameValue.Text = if ($script:commonEnvVars.ContainsKey($section.Key)) { $script:commonEnvVars[$section.Key] } else { $section.Key }
-        $lblFileNameValue.AutoSize = $false
-        $lblFileNameValue.Size = New-Object System.Drawing.Size(300, 20)
-        $lblFileNameValue.Location = New-Object System.Drawing.Point(250, $y)
+        $fileNameText = if ($script:commonEnvVars.ContainsKey($section.Key)) { $script:commonEnvVars[$section.Key] } else { $section.Key }
+        $lblFileNameValue = New-Label -Text $fileNameText -X 250 -Y $y -Width 300 -Height 20
         $grp.Controls.Add($lblFileNameValue)
         $y += 26
 
-        $lblOrgHeader = New-Object System.Windows.Forms.Label
-        $lblOrgHeader.Text = "変更前"
-        $lblOrgHeader.AutoSize = $false
-        $lblOrgHeader.Size = New-Object System.Drawing.Size(210, 18)
-        $lblOrgHeader.Location = New-Object System.Drawing.Point(20, $y)
+        $lblOrgHeader = New-Label -Text "変更前" -X 20 -Y $y -Width 210 -Height 18
         $grp.Controls.Add($lblOrgHeader)
 
-        $lblNewHeader = New-Object System.Windows.Forms.Label
-        $lblNewHeader.Text = "変更後"
-        $lblNewHeader.AutoSize = $false
-        $lblNewHeader.Size = New-Object System.Drawing.Size(210, 18)
-        $lblNewHeader.Location = New-Object System.Drawing.Point(250, $y)
+        $lblNewHeader = New-Label -Text "変更後" -X 250 -Y $y -Width 210 -Height 18
         $grp.Controls.Add($lblNewHeader)
         $y += 20
 
         foreach ($row in @($section.Rows)) {
-            $txtOrg = New-Object System.Windows.Forms.TextBox
+            $txtOrg = New-TextBox -X 20 -Y $y -Width 210 -Height 22
             $txtOrg.Text = "$($row.OrgName)"
-            $txtOrg.Location = New-Object System.Drawing.Point(20, $y)
-            $txtOrg.Size = New-Object System.Drawing.Size(210, 22)
             $grp.Controls.Add($txtOrg)
 
-            $txtNew = New-Object System.Windows.Forms.TextBox
+            $txtNew = New-TextBox -X 250 -Y $y -Width 210 -Height 22
             $txtNew.Text = "$($row.NewName)"
-            $txtNew.Location = New-Object System.Drawing.Point(250, $y)
-            $txtNew.Size = New-Object System.Drawing.Size(210, 22)
             $grp.Controls.Add($txtNew)
 
-            $btnDeleteRow = New-Object System.Windows.Forms.Button
-            $btnDeleteRow.Text = "削除"
-            $btnDeleteRow.Location = New-Object System.Drawing.Point(460, ($y - 1))
-            $btnDeleteRow.Size = New-Object System.Drawing.Size(60, 24)
+            $btnDeleteRow = New-Button -Text "削除" -X 460 -Y ($y - 1) -Width 60 -Height 24
             $btnDeleteRow.Tag = [PSCustomObject]@{ Section = $section; Row = $row }
             $btnDeleteRow.Add_Click({
                 Sync-CollectDataDefsFromControls
@@ -695,10 +615,7 @@ function Add-CollectDataDefsEditor {
             $y += 26
         }
 
-        $btnAddRow = New-Object System.Windows.Forms.Button
-        $btnAddRow.Text = "＋ 行を追加"
-        $btnAddRow.Location = New-Object System.Drawing.Point(20, $y)
-        $btnAddRow.Size = New-Object System.Drawing.Size(100, 24)
+        $btnAddRow = New-Button -Text "＋ 行を追加" -X 20 -Y $y -Width 100 -Height 24
         $btnAddRow.Tag = $section
         $btnAddRow.Add_Click({
             Sync-CollectDataDefsFromControls
@@ -1000,12 +917,7 @@ $btnSettingsGroupNewGroup.Add_Click({
     $cmbSettingsGroupTarget.SelectedItem = $cmbSettingsGroupTarget.Items[-1]
 })
 
-$grpScheduleEdit = New-Object System.Windows.Forms.GroupBox
-$grpScheduleEdit.Text = "スケジュール編集"
-$grpScheduleEdit.Dock = [System.Windows.Forms.DockStyle]::Top
-$grpScheduleEdit.AutoSize = $true
-$grpScheduleEdit.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
-$grpScheduleEdit.Padding = New-Object System.Windows.Forms.Padding(10)
+$grpScheduleEdit = New-GroupBox -Text "スケジュール編集" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
 $script:scheduleRows = @()
 $script:scheduleContentPanel = $null

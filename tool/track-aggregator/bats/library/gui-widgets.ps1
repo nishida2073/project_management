@@ -72,19 +72,82 @@ function New-OpenLink {
     return $lnk
 }
 
+function New-Form {
+    param(
+        [string]$Title = "",
+        [int]$Width = 780,
+        [int]$Height = 560,
+        [int]$MinWidth = 600,
+        [int]$MinHeight = 400,
+        [switch]$CenterScreen
+    )
+
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = $Title
+    $form.Size = New-Object System.Drawing.Size($Width, $Height)
+    if ($CenterScreen) { $form.StartPosition = "CenterScreen" }
+    $form.MinimumSize = New-Object System.Drawing.Size($MinWidth, $MinHeight)
+
+    $form.Add_FormClosing({
+        if ($script:currentProc -and !$script:currentProc.HasExited) {
+            & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
+        }
+    })
+
+    return $form
+}
+
+function New-TabControl {
+    param(
+        [System.Windows.Forms.DockStyle]$Dock = [System.Windows.Forms.DockStyle]::Fill
+    )
+
+    $tabControl = New-Object System.Windows.Forms.TabControl
+    $tabControl.Dock = $Dock
+
+    return $tabControl
+}
+
+function New-TabPage {
+    param(
+        [string]$Text = ""
+    )
+
+    $tabPage = New-Object System.Windows.Forms.TabPage
+    $tabPage.Text = $Text
+
+    return $tabPage
+}
+
+function New-LinkLabel {
+    param(
+        [string]$Text = ""
+    )
+
+    $linkLabel = New-Object System.Windows.Forms.LinkLabel
+    $linkLabel.Text = $Text
+
+    return $linkLabel
+}
+
+function New-ToolTip {
+    return New-Object System.Windows.Forms.ToolTip
+}
+
 function New-Label {
     param(
         [int]$X = 0, [int]$Y = 0,
         [int]$Width = 0, [int]$Height = 0,
         [string]$Text = "",
         [System.Drawing.Color]$ForeColor = [System.Drawing.Color]::Black,
-        [bool]$AutoSize = $false
+        [bool]$AutoSize = $false,
+        [System.Drawing.ContentAlignment]$TextAlign = [System.Drawing.ContentAlignment]::TopLeft
     )
 
     $lbl = New-Object System.Windows.Forms.Label
     $lbl.Text = $Text
     $lbl.AutoSize = $AutoSize
-    $lbl.TextAlign = [System.Drawing.ContentAlignment]::MiddleLeft
+    $lbl.TextAlign = $TextAlign
     $lbl.Location = New-Object System.Drawing.Point($X, $Y)
     $lbl.ForeColor = $ForeColor
     if ($Width -gt 0 -and $Height -gt 0) { $lbl.Size = New-Object System.Drawing.Size($Width, $Height) }
@@ -135,7 +198,8 @@ function New-GroupBox {
         [int]$X = 0, [int]$Y = 0,
         [int]$Width = 0, [int]$Height = 0,
         [System.Windows.Forms.DockStyle]$Dock = [System.Windows.Forms.DockStyle]::None,
-        [bool]$AutoSize = $false,
+        [switch]$AutoSize,
+        [int]$Padding = 0,
         [System.Windows.Forms.AutoSizeMode]$AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowOnly
     )
 
@@ -151,6 +215,9 @@ function New-GroupBox {
     if ($AutoSize) {
         $grp.AutoSize = $true
         $grp.AutoSizeMode = $AutoSizeMode
+    }
+    if ($Padding -gt 0) {
+        $grp.Padding = New-Object System.Windows.Forms.Padding($Padding)
     }
 
     return $grp
@@ -179,12 +246,14 @@ function New-CheckBox {
 function New-Panel {
     param(
         [int]$Height = 0,
-        [System.Windows.Forms.DockStyle]$Dock = [System.Windows.Forms.DockStyle]::Top
+        [System.Windows.Forms.DockStyle]$Dock = [System.Windows.Forms.DockStyle]::Top,
+        [switch]$AutoScroll
     )
 
     $pnl = New-Object System.Windows.Forms.Panel
     if ($Height -gt 0) { $pnl.Height = $Height }
     $pnl.Dock = $Dock
+    if ($AutoScroll) { $pnl.AutoScroll = $true }
 
     return $pnl
 }
@@ -1382,7 +1451,7 @@ function New-Grid {
         }
 
         $lblDelete = New-Object System.Windows.Forms.Label
-        $lblDelete.Text = "削除"
+        $lblDelete.Text = ""
         $lblDelete.AutoSize = $false
         $lblDelete.Size = New-Object System.Drawing.Size(60, 20)
         $lblDelete.Location = New-Object System.Drawing.Point($x, $y)

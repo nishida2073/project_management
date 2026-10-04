@@ -176,37 +176,19 @@ $categoryDefs = @(
     }
 )
 
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "コース別パッケージ生成ツール"
-$form.Size = New-Object System.Drawing.Size(780, 560)
-$form.StartPosition = "CenterScreen"
-$form.MinimumSize = New-Object System.Drawing.Size(600, 400)
-
+$form = New-Form -Title "コース別パッケージ生成ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
 $script:currentProc = $null
-$form.Add_FormClosing({
-    if ($script:currentProc -and !$script:currentProc.HasExited) {
-        & taskkill.exe /T /F /PID $script:currentProc.Id 2>&1 | Out-Null
-    }
-})
 
-
-$tabControl = New-Object System.Windows.Forms.TabControl
-$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
-
-$tabRun = New-Object System.Windows.Forms.TabPage
-$tabRun.Text = "実行"
-
-$tabLogs = New-Object System.Windows.Forms.TabPage
-$tabLogs.Text = "ログ"
-
-$tabSettings = New-Object System.Windows.Forms.TabPage
-$tabSettings.Text = "設定"
+$tabControl = New-TabControl
+$tabRun = New-TabPage -Text "実行"
+$tabLogs = New-TabPage -Text "ログ"
+$tabSettings = New-TabPage -Text "設定"
 
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
 
 
-$execTabControl = New-Object System.Windows.Forms.TabControl
+$execTabControl = New-TabControl
 
 $allButtonDefs = @()
 foreach ($cd in $categoryDefs) {
@@ -215,8 +197,7 @@ foreach ($cd in $categoryDefs) {
     }
 }
 
-$tabBatchAll = New-Object System.Windows.Forms.TabPage
-$tabBatchAll.Text = "一括実行"
+$tabBatchAll = New-TabPage -Text "一括実行"
 # $execTabControl.Controls.Add($tabBatchAll)
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
@@ -378,19 +359,16 @@ function Get-GroupTemplateDefaults {
     return $script:groupTemplateDefaults
 }
 
-$settingsSubTabControl = New-Object System.Windows.Forms.TabControl
-$settingsSubTabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+$settingsSubTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 $tabSettings.Controls.Add($settingsSubTabControl)
 
-$tabSettingsCommon = New-Object System.Windows.Forms.TabPage
-$tabSettingsCommon.Text = "共通"
+$tabSettingsCommon = New-TabPage -Text "共通"
 $settingsSubTabControl.Controls.Add($tabSettingsCommon)
 
-$tabSettingsGroup = New-Object System.Windows.Forms.TabPage
-$tabSettingsGroup.Text = "グループ別"
+$tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$settingsToolTip = New-Object System.Windows.Forms.ToolTip
+$settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
@@ -402,28 +380,18 @@ $settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
     -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
 
-$settingsCommonFieldPanel = New-Object System.Windows.Forms.Panel
-$settingsCommonFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$settingsCommonFieldPanel.AutoScroll = $true
+$settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Object System.Windows.Forms.Label
-$lblSettingsGroupTarget.Text = "対象グループ"
+$lblSettingsGroupTarget = New-Label -Text "対象グループ"
 
-$cmbSettingsGroupTarget = New-Object System.Windows.Forms.ComboBox
-$cmbSettingsGroupTarget.Size = New-Object System.Drawing.Size(260, 24)
-$cmbSettingsGroupTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
-$cmbSettingsGroupTarget.DisplayMember = "Text"
-$cmbSettingsGroupTarget.ValueMember = "Value"
+$cmbSettingsGroupTarget = New-ComboBox -Width 260 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
-$btnSettingsGroupNewGroup = New-Object System.Windows.Forms.Button
-$btnSettingsGroupNewGroup.Text = "新規作成"
-$btnSettingsGroupNewGroup.Size = New-Object System.Drawing.Size(140, 24)
+$btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
-$lnkSettingsGroupOpenXlsx = New-Object System.Windows.Forms.LinkLabel
-$lnkSettingsGroupOpenXlsx.Text = "開く"
+$lnkSettingsGroupOpenXlsx = New-LinkLabel -Text "開く"
 
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
@@ -447,9 +415,7 @@ $settingsGroupTopPanel = (New-SettingsTopPanel `
         Update-GroupSettingsFields
     }).Panel
 
-$settingsGroupFieldPanel = New-Object System.Windows.Forms.Panel
-$settingsGroupFieldPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-$settingsGroupFieldPanel.AutoScroll = $true
+$settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
@@ -610,6 +576,7 @@ $tabControl.Add_SelectedIndexChanged({
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
+    Update-CommonSettingsFields
     Update-GroupDropdowns
 })
 
