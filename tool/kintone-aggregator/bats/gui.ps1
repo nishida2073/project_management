@@ -963,10 +963,15 @@ function Update-GroupDropdowns {
     if ($cmbSettingsMasterOpsGroupTarget) {
         $cmbSettingsMasterOpsGroupTarget.Items.Clear()
         foreach ($groupName in $groupNames) {
-            $cmbSettingsMasterOpsGroupTarget.Items.Add($groupName) | Out-Null
+            $cmbSettingsMasterOpsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
         }
-        if ($savedMaster -and $cmbSettingsMasterOpsGroupTarget.Items.Contains($savedMaster)) {
-            $cmbSettingsMasterOpsGroupTarget.SelectedItem = $savedMaster
+        if ($savedMaster) {
+            $matchingItem = $cmbSettingsMasterOpsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedMaster } | Select-Object -First 1
+            if ($matchingItem) {
+                $cmbSettingsMasterOpsGroupTarget.SelectedItem = $matchingItem
+            } elseif ($cmbSettingsMasterOpsGroupTarget.Items.Count -gt 0) {
+                $cmbSettingsMasterOpsGroupTarget.SelectedIndex = 0
+            }
         } elseif ($cmbSettingsMasterOpsGroupTarget.Items.Count -gt 0) {
             $cmbSettingsMasterOpsGroupTarget.SelectedIndex = 0
         }
