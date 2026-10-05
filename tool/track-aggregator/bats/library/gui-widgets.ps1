@@ -645,7 +645,7 @@ function New-LogTab {
 
     $logContentBox = New-LogTextBox
 
-    $logStagePanel = New-GroupBox -Text "ログ" -Dock Top -AutoSize $true -AutoSizeMode GrowAndShrink
+    $logStagePanel = New-GroupBox -Text "" -Dock Top -AutoSize $true -AutoSizeMode GrowAndShrink
 
     $rowCenterY = 30
 
