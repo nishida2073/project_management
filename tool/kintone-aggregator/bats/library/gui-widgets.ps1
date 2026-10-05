@@ -1571,29 +1571,24 @@ function New-Grid {
 
             if ($col.AutoIncrement) {
                 $ctrl.Text = "$($i + 1)"
-            } elseif ($col.IsBool) {
-                $propName = $col.Property
-                $propValue = ""
-                if ($propName -and $row.PSObject.Properties[$propName]) {
-                    $propValue = $row.$propName
-                }
-                if ([string]::IsNullOrEmpty($propValue) -and $null -ne $col.Default) {
-                    $propValue = $col.Default
-                }
-                $matchingItem = $ctrl.Items | Where-Object { $_.Value -eq $propValue } | Select-Object -First 1
-                if ($matchingItem) {
-                    $ctrl.SelectedItem = $matchingItem
-                }
             } else {
                 $propName = $col.Property
                 $propValue = ""
                 if ($propName -and $row.PSObject.Properties[$propName]) {
                     $propValue = $row.$propName
                 }
-                if ([string]::IsNullOrEmpty($propValue) -and $null -ne $col.Default) {
+                if ([string]::IsNullOrEmpty($propValue) -and $col.Default) {
                     $propValue = $col.Default
                 }
-                $ctrl.Text = $propValue
+
+                if ($col.IsBool) {
+                    $matchingItem = $ctrl.Items | Where-Object { $_.Value -eq $propValue } | Select-Object -First 1
+                    if ($matchingItem) {
+                        $ctrl.SelectedItem = $matchingItem
+                    }
+                } else {
+                    $ctrl.Text = $propValue
+                }
             }
         }
     }
