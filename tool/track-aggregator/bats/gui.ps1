@@ -462,8 +462,8 @@ $script:surveySheetDef = @{
         @{ Label = "通番"; Width = 40; AutoIncrement = $true }
         @{ Label = "アンケート名"; Width = 150; Property = "SurveyName" }
         @{ Label = "TrackId"; Width = 400; Property = "TrackID";}
-        @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
-        @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
+        @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true; Default = "FALSE" }
+        @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true; Default = "TRUE" }
     )
 }
 
@@ -475,10 +475,10 @@ $script:testSheetDef = @{
     SheetName = "テスト"
     Columns = @(
         @{ Label = "通番"; Width = 40; AutoIncrement = $true }
-        @{ Label = "テスト名"; Width = 150; Property = "TestName" }
+        @{ Label = "テスト名"; Width = 150; Property = "TestName"; }
         @{ Label = "TrackId"; Width = 400; Property = "TrackID" }
-        @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true }
-        @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true }
+        @{ Label = "DL"; Width = 60; Property = "IsDownload"; IsBool = $true; Default = "FALSE" }
+        @{ Label = "停止中"; Width = 60; Property = "IsStop"; IsBool = $true; Default = "TRUE" }
     )
 }
 
