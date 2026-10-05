@@ -14,18 +14,14 @@ function Create-MasterDatas {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $dataLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex $SheetIndex -Delimiter ","
+    $dataLines = Convert-ExcelToCsvString -ExcelFilePath $DataFilePath -SheetIndex $SheetIndex -Delimiter "," -QuoteFields $true
 
     $bodies = @()
-    $headers = $dataLines[0] -split ',' | ForEach-Object { $_.Trim() }
-    $bodyLines = $dataLines | Select-Object -Skip 1
-    foreach ($line in $bodyLines) {
-        $parts = $line -split ',' | ForEach-Object { $_.Trim() }
-        $body = [PSCustomObject]@{}
-        for ($i = 0; $i -lt $headers.Count; $i++) {
-            $header = $headers[$i]
-            $value  = $parts[$i]
-            $body | Add-Member -NotePropertyName $header -NotePropertyValue $value
+    $csv = $dataLines -join "`n" | ConvertFrom-Csv
+    foreach ($row in $csv) {
+        $body = $row
+        foreach ($header in $row.PSObject.Properties.Name) {
+            $value = $row.$header
             if ($HeaderMap.ContainsKey($header)) {
                 $internalName = $HeaderMap[$header]
                 $body | Add-Member -NotePropertyName $internalName -NotePropertyValue $value -Force

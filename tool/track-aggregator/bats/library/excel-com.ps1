@@ -7,7 +7,8 @@ function Convert-ExcelToCsvString {
         [int]$SheetIndex = 1,
         [int]$HeaderRowIndex = 1,
         [int[]]$DateColumnIndexes = @(),
-        [string]$Delimiter = "`t"
+        [string]$Delimiter = "`t",
+        [bool]$QuoteFields = $false
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -47,7 +48,12 @@ function Convert-ExcelToCsvString {
                 }
                 if ($text.Length -gt 0) {
                     $isEmpty = $false
-                    $null = $sb.Append($text)
+                    if ($QuoteFields) {
+                        $text = $text -replace '"', '""'
+                        $null = $sb.Append("`"$text`"")
+                    } else {
+                        $null = $sb.Append($text)
+                    }
                 }
             }
             if (-not $isEmpty) {

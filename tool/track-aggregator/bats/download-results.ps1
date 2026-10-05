@@ -89,7 +89,7 @@ function Download-TrackResults {
         $groupDir = Join-Path $TargetRootDir $TargetGroupName
         $resultDir = Join-Path $groupDir $name
         $trackID = $data.TrackID
-        $trackIds = ($trackID -split "\||\r?\n") | Where-Object { $_ -ne "" }
+        $trackIds = ($trackID -split "[,，`r`n]") | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
 
         foreach ($trackId in $trackIds) {
             $trackIdParts = $trackId -split "-"
