@@ -1414,7 +1414,10 @@ function New-Grid {
         [Parameter(Mandatory)][ref]$RowDatas,
         [Parameter(Mandatory)][scriptblock]$OnDelete,
         [Parameter(Mandatory)][array]$Columns,
-        [scriptblock]$OnAdd
+        [scriptblock]$OnAdd,
+        [int]$Margin = 10,
+        [int]$Spacing = 10,
+        [int]$DeleteButtonWidth = 60
     )
 
     $existingPanels = $GroupBox.Controls | Where-Object { $_ -is [System.Windows.Forms.Panel] }
@@ -1422,7 +1425,21 @@ function New-Grid {
     $ContentPanelY = if ($HeaderPanel) { $HeaderPanel.Location.Y + $HeaderPanel.Height } else { 60 }
     $ContentPanel = $existingPanels | Where-Object { $_.Location.Y -eq $ContentPanelY } | Select-Object -First 1
 
-    $panelWidth = $GroupBox.Width - 20
+    $neededWidth = $Margin
+    foreach ($col in $Columns) {
+        $neededWidth += $col.Width + $Spacing
+    }
+    $neededWidth += $DeleteButtonWidth + $Spacing
+
+    $groupBoxPadding = $GroupBox.Padding.Left + $GroupBox.Padding.Right
+    $panelWidth = [Math]::Max($GroupBox.Width - $groupBoxPadding, $neededWidth)
+
+    if ($panelWidth -gt $GroupBox.Width - $groupBoxPadding) {
+        $GroupBox.Width = $panelWidth + $groupBoxPadding
+        if ($GroupBox.Parent) {
+            $GroupBox.Parent.Width = [Math]::Max($GroupBox.Parent.Width, $GroupBox.Width + $groupBoxPadding)
+        }
+    }
 
     if (-not $HeaderPanel) {
         $HeaderPanel = New-Object System.Windows.Forms.Panel
@@ -1446,7 +1463,7 @@ function New-Grid {
 
     if ($HeaderPanel.Controls.Count -eq 0) {
         $y = 0
-        $x = 10
+        $x = $Margin
 
         foreach ($col in $Columns) {
             $lbl = New-Object System.Windows.Forms.Label
@@ -1455,7 +1472,7 @@ function New-Grid {
             $lbl.Size = New-Object System.Drawing.Size($col.Width, 20)
             $lbl.Location = New-Object System.Drawing.Point($x, $y)
             $HeaderPanel.Controls.Add($lbl)
-            $x += $col.Width + 10
+            $x += $col.Width + $Spacing
         }
 
         $lblDelete = New-Object System.Windows.Forms.Label
@@ -1473,7 +1490,7 @@ function New-Grid {
     $rowArray = @($RowDatas.Value)
     for ($i = 0; $i -lt $rowCount; $i++) {
         $row = $rowArray[$i]
-        $x = 10
+        $x = $Margin
 
         for ($c = 0; $c -lt $Columns.Count; $c++) {
             $col = $Columns[$c]
@@ -1510,13 +1527,13 @@ function New-Grid {
             $ctrl.Location = New-Object System.Drawing.Point($x, $y)
             $ctrl.Tag = $row.No
             $ContentPanel.Controls.Add($ctrl)
-            $x += $col.Width + 10
+            $x += $col.Width + $Spacing
         }
 
         $btnDelete = New-Object System.Windows.Forms.Button
         $btnDelete.Text = "削除"
         $btnDelete.AutoSize = $false
-        $btnDelete.Size = New-Object System.Drawing.Size(60, 24)
+        $btnDelete.Size = New-Object System.Drawing.Size($DeleteButtonWidth, 24)
         $btnDelete.Location = New-Object System.Drawing.Point($x, ($y - 1))
         $btnDelete.Tag = $row.No
         $btnDelete.Add_Click($OnDelete)
@@ -1541,7 +1558,7 @@ function New-Grid {
 
     $addButton.Location = New-Object System.Drawing.Point(10, ($y + 10))
 
-    $panelHeight = $y + 50
+    $panelHeight = $addButton.Location.Y + $addButton.Height
     $ContentPanel.Height = $panelHeight
 
     @{ HeaderPanel = $HeaderPanel; ContentPanel = $ContentPanel }
