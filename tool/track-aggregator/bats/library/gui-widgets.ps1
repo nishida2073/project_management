@@ -1528,7 +1528,7 @@ function New-Grid {
             $btnDelete.Text = "削除"
             $btnDelete.AutoSize = $false
             $btnDelete.Size = New-Object System.Drawing.Size($DeleteButtonWidth, 22)
-            $btnDelete.Location = New-Object System.Drawing.Point($x, $y)
+            $btnDelete.Location = New-Object System.Drawing.Point($x, ($y -1))
             $btnDelete.Tag = $row.No
             $btnDelete.Add_Click($OnDelete)
             $ContentPanel.Controls.Add($btnDelete)
