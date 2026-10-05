@@ -1483,29 +1483,95 @@ function New-Grid {
         $HeaderPanel.Controls.Add($lblDelete)
     }
 
-    $ContentPanel.Controls.Clear()
-    $y = 0
-
     $rowCount = @($RowDatas.Value).Count
     $rowArray = @($RowDatas.Value)
+
+    $previousRowCount = [int]($ContentPanel.Tag -as [string])
+    if ($null -eq $previousRowCount -or ($previousRowCount -eq 0 -and $ContentPanel.Tag -ne 0)) { $previousRowCount = 0 }
+
+    if ($previousRowCount -ne $rowCount) {
+        $ContentPanel.SuspendLayout()
+        $ContentPanel.Controls.Clear()
+        $y = 0
+
+        for ($i = 0; $i -lt $rowCount; $i++) {
+            $row = $rowArray[$i]
+            $x = $Margin
+
+            for ($c = 0; $c -lt $Columns.Count; $c++) {
+                $col = $Columns[$c]
+
+                if ($col.AutoIncrement) {
+                    $ctrl = New-Object System.Windows.Forms.Label
+                    $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+                } elseif ($col.IsBool) {
+                    $ctrl = New-Object System.Windows.Forms.ComboBox
+                    $ctrl.DisplayMember = "Text"
+                    $ctrl.ValueMember = "Value"
+                    $ctrl.Items.Add([PSCustomObject]@{ Text = "TRUE"; Value = "TRUE" })
+                    $ctrl.Items.Add([PSCustomObject]@{ Text = "FALSE"; Value = "FALSE" })
+                    $ctrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+                } else {
+                    $ctrl = New-Object System.Windows.Forms.TextBox
+                }
+
+                $ctrl.AutoSize = $false
+                $ctrl.Size = New-Object System.Drawing.Size($col.Width, 22)
+                $ctrl.Location = New-Object System.Drawing.Point($x, $y)
+                $ctrl.Tag = $row.No
+
+                $ContentPanel.Controls.Add($ctrl)
+                $x += $col.Width + $Spacing
+            }
+
+            $btnDelete = New-Object System.Windows.Forms.Button
+            $btnDelete.Text = "削除"
+            $btnDelete.AutoSize = $false
+            $btnDelete.Size = New-Object System.Drawing.Size($DeleteButtonWidth, 22)
+            $btnDelete.Location = New-Object System.Drawing.Point($x, $y)
+            $btnDelete.Tag = $row.No
+            $btnDelete.Add_Click($OnDelete)
+            $ContentPanel.Controls.Add($btnDelete)
+
+            $y += 28
+        }
+
+        $ContentPanel.Tag = $rowCount
+        $addButton = $ContentPanel.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Text -eq "追加" } | Select-Object -First 1
+
+        if (-not $addButton) {
+            $addButton = New-Object System.Windows.Forms.Button
+            $addButton.Text = "追加"
+            $addButton.Size = New-Object System.Drawing.Size(100, 24)
+            if ($OnAdd) {
+                $addButton.Add_Click({
+                    & $OnAdd $ContentPanel
+                }.GetNewClosure())
+            }
+            $ContentPanel.Controls.Add($addButton)
+        }
+
+        $addButton.Location = New-Object System.Drawing.Point(10, ($y + 10))
+
+        $panelHeight = $addButton.Location.Y + $addButton.Height
+        $ContentPanel.Height = $panelHeight
+
+        $ContentPanel.ResumeLayout($true)
+    }
+
+    $ContentPanel.SuspendLayout()
+
     for ($i = 0; $i -lt $rowCount; $i++) {
         $row = $rowArray[$i]
-        $x = $Margin
+        $dataCtrlIndex = $i * ($Columns.Count + 1)
 
         for ($c = 0; $c -lt $Columns.Count; $c++) {
             $col = $Columns[$c]
+            $ctrl = $ContentPanel.Controls[$dataCtrlIndex + $c]
 
             if ($col.AutoIncrement) {
-                $ctrl = New-Object System.Windows.Forms.Label
                 $ctrl.Text = "$($i + 1)"
-                $ctrl.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
             } elseif ($col.IsBool) {
-                $ctrl = New-Object System.Windows.Forms.ComboBox
-                $ctrl.DisplayMember = "Text"
-                $ctrl.ValueMember = "Value"
-                $ctrl.Items.Add([PSCustomObject]@{ Text = "TRUE"; Value = "TRUE" })
-                $ctrl.Items.Add([PSCustomObject]@{ Text = "FALSE"; Value = "FALSE" })
-                $ctrl.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
                 $propName = $col.Property
                 if ($propName -and $row.PSObject.Properties[$propName]) {
                     $propValue = $row.$propName
@@ -1515,51 +1581,15 @@ function New-Grid {
                     }
                 }
             } else {
-                $ctrl = New-Object System.Windows.Forms.TextBox
                 $propName = $col.Property
                 if ($propName -and $row.PSObject.Properties[$propName]) {
                     $ctrl.Text = $row.$propName
                 }
             }
-
-            $ctrl.AutoSize = $false
-            $ctrl.Size = New-Object System.Drawing.Size($col.Width, 22)
-            $ctrl.Location = New-Object System.Drawing.Point($x, $y)
-            $ctrl.Tag = $row.No
-            $ContentPanel.Controls.Add($ctrl)
-            $x += $col.Width + $Spacing
         }
-
-        $btnDelete = New-Object System.Windows.Forms.Button
-        $btnDelete.Text = "削除"
-        $btnDelete.AutoSize = $false
-        $btnDelete.Size = New-Object System.Drawing.Size($DeleteButtonWidth, 24)
-        $btnDelete.Location = New-Object System.Drawing.Point($x, ($y - 1))
-        $btnDelete.Tag = $row.No
-        $btnDelete.Add_Click($OnDelete)
-        $ContentPanel.Controls.Add($btnDelete)
-
-        $y += 28
     }
 
-    $addButton = $ContentPanel.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Text -eq "追加" } | Select-Object -First 1
-
-    if (-not $addButton) {
-        $addButton = New-Object System.Windows.Forms.Button
-        $addButton.Text = "追加"
-        $addButton.Size = New-Object System.Drawing.Size(100, 24)
-        if ($OnAdd) {
-            $addButton.Add_Click({
-                & $OnAdd $ContentPanel
-            }.GetNewClosure())
-        }
-        $ContentPanel.Controls.Add($addButton)
-    }
-
-    $addButton.Location = New-Object System.Drawing.Point(10, ($y + 10))
-
-    $panelHeight = $addButton.Location.Y + $addButton.Height
-    $ContentPanel.Height = $panelHeight
+    $ContentPanel.ResumeLayout($true)
 
     @{ HeaderPanel = $HeaderPanel; ContentPanel = $ContentPanel }
 }
