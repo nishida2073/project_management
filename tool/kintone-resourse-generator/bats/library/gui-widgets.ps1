@@ -1535,7 +1535,7 @@ function New-Grid {
     $previousRowCount = [int]($ContentPanel.Tag -as [string])
     if ($null -eq $previousRowCount -or ($previousRowCount -eq 0 -and $ContentPanel.Tag -ne 0)) { $previousRowCount = 0 }
 
-    if ($previousRowCount -ne $rowCount) {
+    if ($previousRowCount -ne $rowCount -or $rowCount -eq 0) {
         $ContentPanel.SuspendLayout()
         $ContentPanel.Controls.Clear()
         $y = 0
