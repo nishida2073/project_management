@@ -398,21 +398,24 @@ function Invoke-AllStepsForCurrentInputs {
 
 function Invoke-ExecuteAll {
     foreach ($inputDef in $batchRunAllInputs) {
-        if ($inputDef.Require) {
-            $ctrl = $script:batchInputControls[$inputDef.Name]
-            if ($ctrl -is [System.Windows.Forms.TextBox]) {
-                $value = $ctrl.Text.Trim()
-                if (!$value) {
-                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-                    return 1
-                }
-            } else {
-                $value = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-                if (!$value -or ($value -eq $script:baseTemplateNamePlaceholder) -or ($value -eq $script:customTemplateNamePlaceholder)) {
-                    [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-                    return 1
-                }
-            }
+        if (-not $inputDef.Require) { continue }
+
+        $ctrl = $script:batchInputControls[$inputDef.Name]
+        $value = if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+            Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
+        } else {
+            $ctrl.Text.Trim()
+        }
+
+        $isValid = if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+            $value -and ($value -ne $script:baseTemplateNamePlaceholder) -and ($value -ne $script:customTemplateNamePlaceholder)
+        } else {
+            $value
+        }
+
+        if (-not $isValid) {
+            [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+            return 1
         }
     }
 

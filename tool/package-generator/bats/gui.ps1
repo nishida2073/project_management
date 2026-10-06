@@ -554,10 +554,6 @@ $btnSettingsGroupNewGroup.Add_Click({
 
 $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
     $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    if (!$target) {
-        [System.Windows.Forms.MessageBox]::Show("対象グループが選択されていません。", "受講生データを開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
     Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
 })
 
