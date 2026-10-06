@@ -423,9 +423,6 @@ $btnMasterOpsSyncExecute.Add_Click({
     try {
         $batchPath = Join-Path $basePath "sync-kintone-to-sheet.bat"
         $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
-        if ([string]::IsNullOrWhiteSpace($groupName)) {
-            throw "グループが選択されていません"
-        }
         Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterOpsStatusPlaceholder -Action {
             $script:suppressComboSync = $true
             $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
