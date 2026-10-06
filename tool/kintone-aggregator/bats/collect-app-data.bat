@@ -28,7 +28,7 @@ if "!TargetGroupNameFilter!"=="" (
 set "SCRIPT_PATH=%~dp0collect-app-data.ps1"
 set "ClientDataRootDir=%ClientDataRootDir%"
 
-set "CollectDataDefsPath=%~dp0collect-data-defs.txt"
+set "CollectDataDefsPath=%~dp0collect-data-defs.json"
 
 set "CollectRootDir=%OutputCollectDataRootDir%"
 set "SourceTypeFileNameMap=SourceType_Daily=%SourceType_Daily%,SourceType_Pulse=%SourceType_Pulse%"

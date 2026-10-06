@@ -1,0 +1,62 @@
+[
+    {
+        "type": "Daily",
+        "orgName": "提出状況",
+        "newName": "提出状況_業務日誌"
+    },
+    {
+        "type": "Daily",
+        "orgName": "通番",
+        "newName": ""
+    },
+    {
+        "type": "Daily",
+        "orgName": "会社名",
+        "newName": ""
+    },
+    {
+        "type": "Daily",
+        "orgName": "受講生ID",
+        "newName": ""
+    },
+    {
+        "type": "Daily",
+        "orgName": "氏名",
+        "newName": ""
+    },
+    {
+        "type": "Daily",
+        "orgName": "クラス名",
+        "newName": ""
+    },
+    {
+        "type": "Daily",
+        "orgName": "日付",
+        "newName": ""
+    },
+    {
+        "type": "Daily",
+        "orgName": "本日の理解度",
+        "newName": "理解度"
+    },
+    {
+        "type": "Pulse",
+        "orgName": "提出状況",
+        "newName": "提出状況_パルスサーベイ"
+    },
+    {
+        "type": "Pulse",
+        "orgName": "聞きたいことや困ったことがあったときに、気軽に相談できる相手（グループのメンバー、講師、事務局等）や環境はありましたか？",
+        "newName": "人間関係"
+    },
+    {
+        "type": "Pulse",
+        "orgName": "心身の調子はいかがですか？",
+        "newName": "体調"
+    },
+    {
+        "type": "Pulse",
+        "orgName": "気になること、相談したいこと等ありましたら自由に記入してください。",
+        "newName": "パルスサーベイフリーコメント"
+    }
+]

@@ -69,40 +69,28 @@ function Read-SourseDataDefsFile {
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
-    $lines = Get-Content -Path $FilePath -Encoding UTF8
+    $json = Get-Content -Path $FilePath -Encoding UTF8 | ConvertFrom-Json
+    $json = @($json)
 
     $sourseDataProps = @()
-    $currentFileKey = $null
-    $currentColumnDefs = @()
+    $lastSourceType = $null
 
-    foreach ($line in $lines) {
-        $trimmed = $line.Trim()
-        if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
+    foreach ($item in $json) {
+        $sourceType = $item.type
+        $sourceTypeKey = "SourceType_$sourceType"
+        $sourceTypeValue = if ($FileKeyMap.ContainsKey($sourceTypeKey)) { $FileKeyMap[$sourceTypeKey] } else { $sourceType }
 
-        if ($trimmed -match '^\[(.+)\]$') {
-            if ($currentFileKey) {
-                $sourceType = if ($FileKeyMap.ContainsKey($currentFileKey)) { $FileKeyMap[$currentFileKey] } else { $currentFileKey }
-                $sourseDataProps += [PSCustomObject]@{
-                    filePath   = Join-Path $SourceRootDir "$TargetGroupName-$sourceType.txt"
-                    columnDefs = $currentColumnDefs
-                }
+        if ($sourceType -ne $lastSourceType) {
+            $sourseDataProps += [PSCustomObject]@{
+                filePath   = Join-Path $SourceRootDir "$TargetGroupName-$sourceTypeValue.txt"
+                columnDefs = @()
             }
-            $currentFileKey = $Matches[1]
-            $currentColumnDefs = @()
-            continue
+            $lastSourceType = $sourceType
         }
 
-        $parts = $trimmed -split ','
-        $currentColumnDefs += [PSCustomObject]@{
-            OrgName = $parts[0]
-            NewName = if ($parts.Count -ge 2 -and -not [string]::IsNullOrWhiteSpace($parts[1])) { $parts[1] } else { $null }
-        }
-    }
-    if ($currentFileKey) {
-        $sourceType = if ($FileKeyMap.ContainsKey($currentFileKey)) { $FileKeyMap[$currentFileKey] } else { $currentFileKey }
-        $sourseDataProps += [PSCustomObject]@{
-            filePath   = Join-Path $SourceRootDir "$TargetGroupName-$sourceType.txt"
-            columnDefs = $currentColumnDefs
+        $sourseDataProps[-1].columnDefs += [PSCustomObject]@{
+            OrgName = $item.orgName
+            NewName = $item.newName
         }
     }
 

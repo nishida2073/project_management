@@ -1239,7 +1239,9 @@ function Render-SettingsFields {
         [hashtable]$TrailingButtonVars = @{},
         [System.Windows.Forms.ComboBox]$MentionGroupCombo,
         [string[]]$MentionTypeOptions = @(),
-        [scriptblock]$OnOpenClick
+        [scriptblock]$OnOpenClick,
+        [array]$ExtraGrps = @(),
+        [ValidateSet("Top", "Bottom")][string]$ExtraGrpsPosition = "Bottom"
     )
     $Panel.Controls.Clear()
     $TargetTextBoxes.Clear()
@@ -1355,6 +1357,17 @@ function Render-SettingsFields {
     }
 
     $controlsToStack = [System.Collections.Generic.List[System.Windows.Forms.Control]]::new()
+
+    if ($ExtraGrpsPosition -eq "Top") {
+        foreach ($grp in $ExtraGrps) {
+            $controlsToStack.Add($grp)
+        }
+        if ($ExtraGrps.Count -gt 0 -and $groupBoxes.Count -gt 0) {
+            $spacer = New-Panel -Height 10
+            $controlsToStack.Add($spacer)
+        }
+    }
+
     for ($i = 0; $i -lt $groupBoxes.Count; $i++) {
         if ($i -gt 0) {
             $spacer = New-Panel -Height 10
@@ -1362,8 +1375,19 @@ function Render-SettingsFields {
         }
         $controlsToStack.Add($groupBoxes[$i])
     }
+
+    if ($ExtraGrpsPosition -eq "Bottom") {
+        if ($ExtraGrps.Count -gt 0 -and $groupBoxes.Count -gt 0) {
+            $spacer = New-Panel -Height 10
+            $controlsToStack.Add($spacer)
+        }
+        foreach ($grp in $ExtraGrps) {
+            $controlsToStack.Add($grp)
+        }
+    }
+
     if ($controlsToStack.Count -gt 0) {
-        Add-StackedDockedControls -Container $Panel -ControlsTopToBottom @($controlsToStack) -Spacing 0
+        Add-StackedDockedControls -Container $Panel -Controls @($controlsToStack) -Spacing 0
     }
 
     $totalHeight = 10

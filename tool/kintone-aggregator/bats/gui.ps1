@@ -363,7 +363,7 @@ $settingsToolTip = New-ToolTip
 function Get-CommonSettingsFiles {
     return @(
         [PSCustomObject]@{ Path = (Join-Path $basePath "common-env.bat"); Save = { Save-CommonSettings }; Reload = {} }
-        [PSCustomObject]@{ Path = $collectDataDefsPath; Save = { Save-CollectDataDefs }; Reload = { $script:collectDataDefsSections = $null } }
+        [PSCustomObject]@{ Path = $collectDataDefsPath; Save = { Save-CollectDataDefs }; Reload = { $script:collectDataDefsItems = @() } }
     )
 }
 
@@ -510,136 +510,99 @@ function Get-GroupSettingsFieldRows {
 
 $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 
-$collectDataDefsPath = Join-Path $basePath "collect-data-defs.txt"
-$script:collectDataDefsSections = $null
+$collectDataDefsPath = Join-Path $basePath "collect-data-defs.json"
+$script:collectDataDefsItems = @()
 $script:collectDataDefsRowControls = @()
-
-function ConvertFrom-CollectDataDefsText {
-    param([string]$Text)
-    $sections = [System.Collections.Generic.List[object]]::new()
-    $currentKey = $null
-    $currentRows = $null
-    foreach ($rawLine in ($Text -split "`r`n|`n")) {
-        $trimmed = $rawLine.Trim()
-        if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
-        if ($trimmed -match '^\[(.+)\]$') {
-            if ($currentKey) { $sections.Add([PSCustomObject]@{ Key = $currentKey; Rows = $currentRows }) }
-            $currentKey = $Matches[1]
-            $currentRows = [System.Collections.Generic.List[object]]::new()
-            continue
-        }
-        if ($null -eq $currentRows) { continue }
-        $parts = $trimmed -split ',', 2
-        $currentRows.Add([PSCustomObject]@{
-            OrgName = $parts[0]
-            NewName = if ($parts.Count -ge 2) { $parts[1] } else { "" }
-        })
-    }
-    if ($currentKey) { $sections.Add([PSCustomObject]@{ Key = $currentKey; Rows = $currentRows }) }
-    return $sections
-}
-
-function ConvertTo-CollectDataDefsText {
-    param($Sections)
-    $lines = @()
-    foreach ($section in $Sections) {
-        $lines += "[$($section.Key)]"
-        foreach ($row in $section.Rows) {
-            if ([string]::IsNullOrWhiteSpace($row.OrgName)) { continue }
-            $lines += if ([string]::IsNullOrWhiteSpace($row.NewName)) { $row.OrgName } else { "$($row.OrgName),$($row.NewName)" }
-        }
-        $lines += ""
-    }
-    return ($lines -join "`r`n")
-}
 
 function Sync-CollectDataDefsFromControls {
     foreach ($entry in $script:collectDataDefsRowControls) {
-        $entry.Row.OrgName = $entry.OrgBox.Text
-        $entry.Row.NewName = $entry.NewBox.Text
+        $entry.Item.orgName = $entry.OrgBox.Text
+        $entry.Item.newName = $entry.NewBox.Text
+        if ($entry.TypeBox) {
+            $entry.Item.type = $entry.TypeBox.SelectedItem.Value
+        }
     }
 }
 
-function Add-CollectDataDefsEditor {
-    if ($null -eq $script:collectDataDefsSections) {
-        $text = if (Test-Path -LiteralPath $collectDataDefsPath) {
-            [System.IO.File]::ReadAllText($collectDataDefsPath, (New-Object System.Text.UTF8Encoding($false)))
-        } else {
-            ""
+function New-CollectDataDefsEditor {
+    if ($script:collectDataDefsItems.Count -eq 0) {
+        if (Test-Path -LiteralPath $collectDataDefsPath) {
+            $json = Get-Content -Path $collectDataDefsPath -Encoding UTF8 | ConvertFrom-Json
+            $script:collectDataDefsItems = if ($json -is [array]) { $json } else { @($json) }
         }
-        $script:collectDataDefsSections = ConvertFrom-CollectDataDefsText -Text $text
     }
     $script:collectDataDefsRowControls = @()
 
     $grp = New-GroupBox -Text "アプリデータ集計の列定義" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize
+    $typeOptions = @(Get-ReportTypeDefs | ForEach-Object { [PSCustomObject]@{ Text = $_.Label; Value = $_.Prefix; Display = $_.Label } })
 
     $y = 25
-    foreach ($section in $script:collectDataDefsSections) {
-        $fileNameText = if ($script:commonEnvVars.ContainsKey($section.Key)) { $script:commonEnvVars[$section.Key] } else { $section.Key }
-        $lblFileNameValue = New-Label -Text "■$fileNameText" -X 20 -Y $y -Width 300 -Height 20
-        $grp.Controls.Add($lblFileNameValue)
-        $y += 26
+    $lblTypeHeader = New-Label -Text "タイプ" -X 20 -Y $y -Width 100 -Height 18
+    $grp.Controls.Add($lblTypeHeader)
+    $lblOrgHeader = New-Label -Text "変更前" -X 130 -Y $y -Width 140 -Height 18
+    $grp.Controls.Add($lblOrgHeader)
 
-        $lblOrgHeader = New-Label -Text "変更前" -X 20 -Y $y -Width 210 -Height 18
-        $grp.Controls.Add($lblOrgHeader)
+    $lblNewHeader = New-Label -Text "変更後" -X 280 -Y $y -Width 140 -Height 18
+    $grp.Controls.Add($lblNewHeader)
+    $y += 20
 
-        $lblNewHeader = New-Label -Text "変更後" -X 250 -Y $y -Width 210 -Height 18
-        $grp.Controls.Add($lblNewHeader)
-        $y += 20
-
-        foreach ($row in @($section.Rows)) {
-            $txtOrg = New-TextBox -X 20 -Y $y -Width 210 -Height 22
-            $txtOrg.Text = "$($row.OrgName)"
-            $grp.Controls.Add($txtOrg)
-
-            $txtNew = New-TextBox -X 250 -Y $y -Width 210 -Height 22
-            $txtNew.Text = "$($row.NewName)"
-            $grp.Controls.Add($txtNew)
-
-            $btnDeleteRow = New-Button -Text "削除" -X 460 -Y ($y - 1) -Width 60 -Height 24
-            $btnDeleteRow.Tag = [PSCustomObject]@{ Section = $section; Row = $row }
-            $btnDeleteRow.Add_Click({
-                Sync-CollectDataDefsFromControls
-                $ctx = $this.Tag
-                $ctx.Section.Rows.Remove($ctx.Row) | Out-Null
-                Update-CommonSettingsFields
-            })
-            $grp.Controls.Add($btnDeleteRow)
-
-            $script:collectDataDefsRowControls += [PSCustomObject]@{ Section = $section; Row = $row; OrgBox = $txtOrg; NewBox = $txtNew }
-            $y += 26
+    foreach ($item in @($script:collectDataDefsItems)) {
+        $cmbType = New-ComboBox -X 20 -Y $y -Width 100 -Height 22 -DisplayMember "Text" -ValueMember "Value"
+        foreach ($opt in $typeOptions) {
+            $cmbType.Items.Add($opt) | Out-Null
         }
+        $cmbType.SelectedItem = $cmbType.Items | Where-Object { $_.Value -eq $item.type } | Select-Object -First 1
+        $grp.Controls.Add($cmbType)
 
-        $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 100 -Height 24
-        $btnAddRow.Tag = $section
-        $btnAddRow.Add_Click({
+        $txtOrg = New-TextBox -X 130 -Y $y -Width 140 -Height 22
+        $txtOrg.Text = "$($item.orgName)"
+        $grp.Controls.Add($txtOrg)
+
+        $txtNew = New-TextBox -X 280 -Y $y -Width 140 -Height 22
+        $txtNew.Text = "$($item.newName)"
+        $grp.Controls.Add($txtNew)
+
+        $btnDeleteRow = New-Button -Text "削除" -X 430 -Y ($y - 1) -Width 60 -Height 24
+        $btnDeleteRow.Tag = $item
+        $btnDeleteRow.Add_Click({
             Sync-CollectDataDefsFromControls
-            $this.Tag.Rows.Add([PSCustomObject]@{ OrgName = ""; NewName = "" })
+            $ctx = $this.Tag
+            $script:collectDataDefsItems = @($script:collectDataDefsItems | Where-Object { $_ -ne $ctx })
             Update-CommonSettingsFields
         })
-        $grp.Controls.Add($btnAddRow)
-        $y += 36
+        $grp.Controls.Add($btnDeleteRow)
+
+        $script:collectDataDefsRowControls += [PSCustomObject]@{ Item = $item; TypeBox = $cmbType; OrgBox = $txtOrg; NewBox = $txtNew }
+        $y += 26
     }
 
-    $controlsToStack = @($grp, (New-Panel -Height 10))
-    Add-StackedDockedControls -Container $settingsCommonFieldPanel -ControlsTopToBottom $controlsToStack -Spacing 0
+    $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 100 -Height 24
+    $btnAddRow.Add_Click({
+        Sync-CollectDataDefsFromControls
+        $script:collectDataDefsItems += [PSCustomObject]@{ type = ""; orgName = ""; newName = "" }
+        Update-CommonSettingsFields
+    })
+    $grp.Controls.Add($btnAddRow)
+
+    return $grp
 }
 
 function Save-CollectDataDefs {
     Sync-CollectDataDefsFromControls
-    $text = ConvertTo-CollectDataDefsText -Sections $script:collectDataDefsSections
-    [System.IO.File]::WriteAllText($collectDataDefsPath, $text, (New-Object System.Text.UTF8Encoding($false)))
+    $json = $script:collectDataDefsItems | ConvertTo-Json
+    [System.IO.File]::WriteAllText($collectDataDefsPath, $json, (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function Update-CommonSettingsFields {
     $scrollX = -$settingsCommonFieldPanel.AutoScrollPosition.X
     $scrollY = -$settingsCommonFieldPanel.AutoScrollPosition.Y
 
+    $grp = New-CollectDataDefsEditor
+    $controlsToStack = @($grp)
+
     Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
-    Add-CollectDataDefsEditor
-
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -ExtraGrps $controlsToStack | Out-Null
     $settingsCommonFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
