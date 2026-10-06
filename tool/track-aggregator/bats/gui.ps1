@@ -803,36 +803,26 @@ function Update-GroupSettingsFields {
     $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     $trailingButtons = $settingsTrailingButtonVars.Clone()
     $trailingButtons["CommentTextTemplate"] = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -AddStatusLabel -OnClick {
-        try {
-            Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-                Sync-MentionRowsFromControls
-                $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
-                $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
-                $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
-                if ($validationError) {
-                    throw "スペースID／スレッドIDを入力してください。"
-                }
-                $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-                $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-                $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
-                $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
-                $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-                $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-                Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization | Out-Null
-            #    [System.Windows.Forms.MessageBox]::Show("テスト投稿に成功しました。スレッドを確認し、不要であれば削除してください。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            Sync-MentionRowsFromControls
+            $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
+            $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+            $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
+            if ($validationError) {
+                throw "スペースID／スレッドIDを入力してください。"
             }
-        } catch {
-            [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+            $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
+            $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+            $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+            $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
+            $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+            $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+            Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization | Out-Null
         }
     }.GetNewClosure() }
     $trailingButtons["SyncUserMasterAppId"] = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
-        try {
-            Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-                Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
-            #    [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
-            }
-        } catch {
-            [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
         }
     }.GetNewClosure() }
     Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `

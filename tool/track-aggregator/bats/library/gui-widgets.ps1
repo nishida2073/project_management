@@ -595,7 +595,13 @@ function New-CategoryTabControl {
 
             $btn = New-Button -Text $RunButtonText -X 15 -Y $contentY -Width 100 -Height 30
             $btn.Tag = $bd
-            $btn.Add_Click({ & $OnRunClick $this.Tag }.GetNewClosure())
+            $btn.Add_Click({ 
+                try {
+                    & $OnRunClick $this.Tag
+                } catch {
+                    [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+                }
+            }.GetNewClosure())
             $grp.Controls.Add($btn)
             $runButtons += $btn
 
@@ -767,11 +773,21 @@ function New-SettingsTopPanel {
     }
 
     $btnSave.Add_Click({
-        Invoke-ActionWithUpdateStatus -StatusLabel $lblSaveStatus -Action $OnSave -SuccessMessage "完了"
+        try {
+            Invoke-ActionWithUpdateStatus -StatusLabel $lblSaveStatus -Action $OnSave -SuccessMessage "完了"
+        }
+        catch {
+            [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        }
     }.GetNewClosure())
 
     $btnReload.Add_Click({
-        Invoke-ActionWithUpdateStatus -StatusLabel $lblReloadStatus -Action $OnReload -SuccessMessage "完了"
+        try {
+            Invoke-ActionWithUpdateStatus -StatusLabel $lblReloadStatus -Action $OnReload -SuccessMessage "完了"
+        }
+        catch {
+            [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        }
     }.GetNewClosure())
 
     return [PSCustomObject]@{
@@ -1210,7 +1226,13 @@ function Add-FieldActionButton {
         [string]$InitialStatusText = "未実行"
     )
     $btn = New-Button -Text $Text -X 20 -Y $Y -Width $Width -Height 24
-    $btn.Add_Click({ & $OnClick }.GetNewClosure()) | Out-Null
+    $btn.Add_Click({ 
+        try {
+            & $OnClick 
+        }catch {
+            [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        }
+    }.GetNewClosure()) | Out-Null
     $Panel.Controls.Add($btn) | Out-Null
 
     if ($AddStatusLabel) {

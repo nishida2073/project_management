@@ -724,21 +724,16 @@ $settingsTrailingButtonVars = @{
     "KINTONE_PASSWORD" = { param($Panel, $Y, $Field)
         $fieldTextBoxes = $script:fieldTextBoxes
         Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
-            try {
-                Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-                    $subDomainVal = $fieldTextBoxes["KINTONE_SUB_DOMAIN"].Text.Trim()
-                    $loginVal = $fieldTextBoxes["KINTONE_LOGIN"].Text
-                    $passwordVal = $fieldTextBoxes["KINTONE_PASSWORD"].Text
-                    $baseUrlVal = "https://$subDomainVal.cybozu.com"
-                    if (!$subDomainVal -or !$loginVal -or !$passwordVal) {
-                        throw "サブドメイン・ログイン名・パスワードをすべて入力してください"
-                    }
-                    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
-                    Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
-                #    [System.Windows.Forms.MessageBox]::Show("テスト接続に成功しました。", "完了", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information) | Out-Null
+            Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+                $subDomainVal = $fieldTextBoxes["KINTONE_SUB_DOMAIN"].Text.Trim()
+                $loginVal = $fieldTextBoxes["KINTONE_LOGIN"].Text
+                $passwordVal = $fieldTextBoxes["KINTONE_PASSWORD"].Text
+                $baseUrlVal = "https://$subDomainVal.cybozu.com"
+                if (!$subDomainVal -or !$loginVal -or !$passwordVal) {
+                    throw "サブドメイン・ログイン名・パスワードをすべて入力してください"
                 }
-            } catch {
-                [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+                $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
+                Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
             }
         }.GetNewClosure()
     }
