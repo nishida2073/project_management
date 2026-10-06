@@ -9,12 +9,16 @@ $script:logTab = $null
 
 function Open-TargetOrWarn {
     param([string]$Path)
+    if (!$Path) {
+        [System.Windows.Forms.MessageBox]::Show("パスの選択をしてください", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        return
+    }
     if ($Path -match '^https?://') {
         Start-Process -FilePath $Path
         return
     }
-    if (!$Path -or !(Test-Path -LiteralPath $Path)) {
-        [System.Windows.Forms.MessageBox]::Show("パスが見つかりません:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+    if (!(Test-Path -LiteralPath $Path)) {
+        [System.Windows.Forms.MessageBox]::Show("パスが不正です:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
         return
     }
     Start-Process -FilePath $Path
