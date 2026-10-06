@@ -187,5 +187,5 @@ finally {
     Write-MessageComplete "ログを出力しました: $logFilePath"
 }
 if ($error) {
-    throw $error
+    throw $error[0]
 }

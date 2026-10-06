@@ -89,7 +89,7 @@ function Download-TrackResults {
         $groupDir = Join-Path $TargetRootDir $TargetGroupName
         $resultDir = Join-Path $groupDir $name
         $trackID = $data.TrackID
-        $trackIds = ($trackID -split "[,，`r`n]") | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
+        $trackIds = ($trackID -split "[,，]|\r?\n") | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
 
         foreach ($trackId in $trackIds) {
             $trackIdParts = $trackId -split "-"
@@ -118,7 +118,7 @@ function Download-TrackResults {
                     -AutoHotkeyScriptPath $AutoHotkeyScriptPath
             }
             catch {
-                Write-MessageError "ダウンロード失敗: $Url - $_"
+                throw "ダウンロード失敗: $Url - $_"
             }
         }
     }
@@ -155,5 +155,5 @@ finally {
     Write-MessageComplete "ログを出力しました: $logFilePath"
 }
 if ($error) {
-    throw $error
+    throw $error[0]
 }
