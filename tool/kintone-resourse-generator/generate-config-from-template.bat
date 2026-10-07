@@ -1,5 +1,17 @@
 @echo off
-call "%~dp0clients\common.bat"
+setlocal enabledelayedexpansion
+
+for %%A in (%*) do (
+    set "arg=%%~A"
+    if "!arg:~0,1!"=="-" (
+        set "arg=!arg:~1!"
+        for /f "tokens=1* delims=:" %%K in ("!arg!") do (
+            call set "%%K=%%L"
+        )
+    )
+)
+
+call "%~dp0clients\!TargetGroupName!.bat"
 
 call "%~dp0bats\message.bat" "Start %~nx0"
 

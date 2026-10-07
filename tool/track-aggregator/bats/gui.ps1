@@ -184,17 +184,21 @@ $syncMasterButtonDef = [PSCustomObject]@{
 }
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
+$logTabExtras = @(
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $groupOptions }
+)
+
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
-    -ExtraLabelText "対象グループ" -ExtraComboWidth 150 `
+    -Extras $logTabExtras `
     -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] } `
-    -OnUpdateLogView { Update-LogView } -Options $groupOptions | Out-Null
+    -OnUpdateLogView { Update-LogView } | Out-Null
 $script:logPath = $script:commonEnvVars["LOG_DIR"]
 
 foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
-$script:logTab.ExtraCombo.Add_SelectedIndexChanged({ Update-LogView })
+$script:logTab.GroupCombo.Add_SelectedIndexChanged({ Update-LogView })
 
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -917,7 +921,7 @@ function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
 
     $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.ExtraCombo.SelectedItem
+    $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
     $savedMaster = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
     $savedFilters = @{}
     foreach ($cd in $categoryDefs) {
@@ -970,21 +974,21 @@ function Update-GroupDropdowns {
         }
     }
 
-    if ($script:logTab -and $script:logTab.ExtraCombo) {
-        $script:logTab.ExtraCombo.Items.Clear()
-        $script:logTab.ExtraCombo.Items.Add($allGroupsOption) | Out-Null
+    if ($script:logTab -and $script:logTab.GroupCombo) {
+        $script:logTab.GroupCombo.Items.Clear()
+        $script:logTab.GroupCombo.Items.Add($allGroupsOption) | Out-Null
         foreach ($groupName in $groupNames) {
-            $script:logTab.ExtraCombo.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+            $script:logTab.GroupCombo.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
         }
         if ($savedLog) {
-            $matchingItem = $script:logTab.ExtraCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
+            $matchingItem = $script:logTab.GroupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
             if ($matchingItem) {
-                $script:logTab.ExtraCombo.SelectedItem = $matchingItem
-            } elseif ($script:logTab.ExtraCombo.Items.Count -gt 0) {
-                $script:logTab.ExtraCombo.SelectedIndex = 0
+                $script:logTab.GroupCombo.SelectedItem = $matchingItem
+            } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
+                $script:logTab.GroupCombo.SelectedIndex = 0
             }
-        } elseif ($script:logTab.ExtraCombo.Items.Count -gt 0) {
-            $script:logTab.ExtraCombo.SelectedIndex = 0
+        } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
+            $script:logTab.GroupCombo.SelectedIndex = 0
         }
     }
 

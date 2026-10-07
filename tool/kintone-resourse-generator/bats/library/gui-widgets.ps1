@@ -765,7 +765,7 @@ function Update-LogView {
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
 
     $filterPatterns = @($stagePrefix)
-    if ($script:logTab.Extras -and $script:logTab.Extras.Count -gt 0) {
+    if ($script:logTab.Extras) {
         foreach ($extra in $script:logTab.Extras) {
             if ($extra.PropertyName) {
                 $cmb = $script:logTab.$($extra.PropertyName)
