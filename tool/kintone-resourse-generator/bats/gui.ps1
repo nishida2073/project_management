@@ -81,7 +81,9 @@ $categoryDefs = @(
                     if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
                         $bd1 = $categoryDefs[1].ButtonDefs[0]
                         if ($bd1 -and $bd1.InputControls.ContainsKey('SpaceId')) { $bd1.InputControls['SpaceId'].Text = $Matches.id }
-                        $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path $setEnvBat).TrimEnd('/')
+                        $groupValue = Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem
+                        $groupBatPath = Get-GroupBatPath $groupValue
+                        $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path $groupBatPath).TrimEnd('/')
                         if ($baseUrl) { $script:createdSpaceUrl = "$baseUrl/k/#/space/$($Matches.id)" }
                     }
                 }
