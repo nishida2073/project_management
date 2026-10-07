@@ -303,7 +303,7 @@ $grpMultipleBatchExcel.Controls.AddRange(@(
 ))
 $y = $btnRunAllY
 $grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28 + 16))
-$multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom + 10
+$multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom
 
 $dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
 $dlgMultipleBatchExcel.Filter = "Excelファイル (*.xlsx)|*.xlsx"

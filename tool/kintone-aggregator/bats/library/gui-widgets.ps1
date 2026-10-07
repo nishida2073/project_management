@@ -525,7 +525,7 @@ function New-CategoryTabControl {
 
     function Get-CategoryPanelHeight {
         param($ButtonDefs)
-        $total = $GroupSpacing
+        $total = 0
         foreach ($bd in $ButtonDefs) {
             $total += (Get-ButtonGroupHeight -ButtonDef $bd) + $GroupSpacing
         }
@@ -962,7 +962,7 @@ function New-BatchRunTab {
 
     $grpBatchAll.Controls.AddRange($topControls)
     $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28 + 16))
-    $batchPanel.Height = $grpBatchAll.Bottom + 10
+    $batchPanel.Height = $grpBatchAll.Bottom
 
     $script:batchPanel = $batchPanel
     $script:batchInputControls = $inputControls

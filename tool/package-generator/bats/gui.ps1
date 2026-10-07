@@ -168,10 +168,10 @@ function Update-GroupDropdowns {
 
 $categoryDefs = @(
     [PSCustomObject]@{
-        Label = "個別パッケージの作成"
+        Label = "パッケージ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "個別パッケージの作成"; BatchLabel = "個別パッケージの作成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-package.bat"); OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
-            [PSCustomObject]@{ Label = "パッケージ定義ファイル更新"; BatchLabel = "パッケージ定義ファイル更新"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = $script:commonEnvVars["CommonLogPath"]; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "個別パッケージの作成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-package.bat"); OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイル更新"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = $script:commonEnvVars["CommonLogPath"]; Inputs = @((New-ClientInput)) }
         )
     }
 )
