@@ -5,6 +5,7 @@
 param(
     [string]$LogNamePrefix,
     [string]$ConfigName,
+    [string]$TargetGroupName,
     [string]$BaseUrl,
     [string]$ConfigRoot,
     [string]$OutputRoot,
@@ -20,7 +21,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $configPath = Join-Path $ConfigRoot "${ConfigName}_config.xlsx"
 $outputPath = Join-Path $OutputRoot "${ConfigName}_check.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$TargetGroupName-$ConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

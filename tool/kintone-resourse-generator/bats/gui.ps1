@@ -22,6 +22,7 @@ $generateBat = Join-Path $rootPath "generate-config-from-template.bat"
 $applyBat = Join-Path $rootPath "apply-kintone-resources.bat"
 $checkBat = Join-Path $rootPath "check-kintone-resources.bat"
 $clientsDir = Join-Path $rootPath "clients"
+$clientsTemplateDir = Join-Path $clientsDir "template"
 $setEnvBat = Join-Path $clientsDir "common.bat"
 
 $libraryDir = Join-Path $rootPath "bats\library"
@@ -31,12 +32,22 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
+function Get-GroupNames {
+    if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
+    $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.bat" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
+    }
+    return @($names | Select-Object -Unique | Sort-Object)
+}
+
 $script:baseTemplateNamePlaceholder = "未選択"
 
 $script:customTemplateNamePlaceholder = "指定なし"
 
-$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
-
+$targetGroupOptions = @()
+foreach ($groupName in (Get-GroupNames)) {
+    $targetGroupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
+}
 $cmbBaseTemplateName = New-ComboBox -Width 220 -Height 22
 
 $cmbCustomTemplateName = New-ComboBox -Width 180 -Height 22
@@ -48,11 +59,16 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "スペース作成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $true }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $createSpaceBat
-                ArgsFn = { param($ic) @("-TemplateId", $ic['SpaceTemplateId'].Text.Trim(), "-SpaceName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = {
+                    param($ic)
+                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
+                    @("-TargetGroupName:$groupValue", "-TemplateId:$($ic['SpaceTemplateId'].Text.Trim())", "-SpaceName:$($ic['ConfigName'].Text.Trim())")
+                }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
                 InputControls = $null
@@ -76,11 +92,16 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "ダウンロード"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $false }
                 )
                 BatchPath = $downloadBat
-                ArgsFn = { param($ic) @("-SpaceId", $ic['SpaceId'].Text.Trim(), "-ConfigName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = {
+                    param($ic)
+                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
+                    @("-TargetGroupName:$groupValue", "-SpaceId:$($ic['SpaceId'].Text.Trim())", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
+                }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH") "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
                 OpenTarget = { param($ic) & $_.OutputPathFn $ic }
                 InputControls = $null
@@ -94,17 +115,19 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "設定ファイルの生成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
                 )
                 BatchPath = $generateBat
                 ArgsFn = {
                     param($ic)
-                    $stepArgs = @("-BaseTemplateConfigName", $ic['BaseTemplateName'].Text.Trim(), "-DownloadConfigName", $ic['ConfigName'].Text.Trim())
+                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
+                    $stepArgs = @("-TargetGroupName:$groupValue", "-BaseTemplateConfigName:$($ic['BaseTemplateName'].Text.Trim())", "-DownloadConfigName:$($ic['ConfigName'].Text.Trim())")
                     $customTemplateName = $ic['CustomTemplateName'].Text.Trim()
                     if ($customTemplateName -and $customTemplateName -ne $script:customTemplateNamePlaceholder) {
-                        $stepArgs += @("-CustomTemplateConfigName", $customTemplateName)
+                        $stepArgs += "-CustomTemplateConfigName:$customTemplateName"
                     }
                     $stepArgs
                 }
@@ -121,10 +144,15 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "kintoneへ反映"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $applyBat
-                ArgsFn = { param($ic) @("-ConfigName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = {
+                    param($ic)
+                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
+                    @("-TargetGroupName:$groupValue", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
+                }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
                 InputControls = $null
@@ -138,10 +166,15 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "データチェック"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $checkBat
-                ArgsFn = { param($ic) @("-ConfigName", $ic['ConfigName'].Text.Trim()) }
+                ArgsFn = {
+                    param($ic)
+                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
+                    @("-TargetGroupName:$groupValue", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
+                }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH") "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
                 OpenTarget = { param($ic) & $_.OutputPathFn $ic }
                 InputControls = $null
@@ -182,7 +215,8 @@ $cmbRunAllCustomTemplateName = New-ComboBox
 $allStepDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $batchRunAllInputs = @(
-    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; Require = $true },
+    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $true },
+    [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
@@ -240,16 +274,34 @@ $tabBatchRun.Controls.Add($multipleBatchExcelPanel)
 $grpMultipleBatchExcel = New-GroupBox -Text "複数実行" -X 10 -Y 10 -Width 730
 $multipleBatchExcelPanel.Controls.Add($grpMultipleBatchExcel)
 
-$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y 21 -Width 150 -Height 22
-$txtMultipleBatchExcelPath = New-TextBox -X 165 -Y 21 -Width 250 -Height 22
-$btnMultipleBatchBrowse = New-Button -Text "参照..." -X 420 -Y 20 -Width 70 -Height 24
-$btnMultipleBatchRunAll = New-Button -Text "実行" -X 20 -Y 56 -Width 120 -Height 28
-$lblMultipleBatchStatus = New-Label -X 154 -Y 62 -AutoSize $true
+$inputRowHeight = 30
+$labelWidth = 150
+$inputWidth1 = 200
+$inputWidth2 = 250
+$inputRowCenterY1 = 15 + ($inputRowHeight * 0) + [int]($inputRowHeight / 2)
+$inputRowCenterY2 = 15 + ($inputRowHeight * 1) + [int]($inputRowHeight / 2)
+$inputX1 = 15 + $labelWidth + 4
+
+$lblMultipleBatchTargetGroup = New-Label -Text "対象グループ" -X 15 -Y ($inputRowCenterY1 - 11) -Width $labelWidth -Height 22
+$cmbMultipleBatchTargetGroup = New-ComboBox -X $inputX1 -Y ($inputRowCenterY1 - 11) -Width $inputWidth1 -Height 22 -DisplayMember "Text"
+foreach ($option in $targetGroupOptions) {
+    $cmbMultipleBatchTargetGroup.Items.Add($option) | Out-Null
+}
+if ($cmbMultipleBatchTargetGroup.Items.Count -gt 0) {
+    $cmbMultipleBatchTargetGroup.SelectedIndex = 0
+}
+
+$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y ($inputRowCenterY2 - 11) -Width $labelWidth -Height 22
+$txtMultipleBatchExcelPath = New-TextBox -X $inputX1 -Y ($inputRowCenterY2 - 11) -Width $inputWidth2 -Height 22
+$btnMultipleBatchBrowse = New-Button -Text "参照..." -X ($inputX1 + $inputWidth2 + 5) -Y ($inputRowCenterY2 - 12) -Width 70 -Height 24
+$btnRunAllY = 26 + ($inputRowHeight * 1) + 20
+$btnMultipleBatchRunAll = New-Button -Text "実行" -X 20 -Y $btnRunAllY -Width 120 -Height 28
+$lblMultipleBatchStatus = New-Label -X 154 -Y ($btnRunAllY + 6) -AutoSize $true
 
 $grpMultipleBatchExcel.Controls.AddRange(@(
-    $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
+    $lblMultipleBatchTargetGroup, $cmbMultipleBatchTargetGroup, $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
 ))
-$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, 100)
+$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, 114)
 $multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom + 10
 
 $dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
@@ -270,7 +322,8 @@ foreach ($cd in $categoryDefs) {
     $allButtonDefs += $cd.ButtonDefs
 }
 
-$configOptions = @($allGroupsOption)
+$targetConfigOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
+$targetConfigOptions = @($targetConfigOption)
 $configDir = Join-Path $rootPath "config"
 if (Test-Path -LiteralPath $configDir) {
     $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
@@ -280,21 +333,40 @@ if (Test-Path -LiteralPath $configDir) {
         } |
         Sort-Object)
     foreach ($name in $configNames) {
-        $configOptions += [PSCustomObject]@{ Text = $name; Value = $name }
+        $targetConfigOptions += [PSCustomObject]@{ Text = $name; Value = $name }
     }
 }
 
+$groupOptions = @()
+foreach ($groupName in (Get-GroupNames)) {
+    $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
+}
+
+$logTabExtras = @(
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 180; Options = $groupOptions }
+    @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 220; Options = $targetConfigOptions }
+)
+
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
-    -ExtraLabelText "スペース識別名" -ExtraLabelWidth 150 -ExtraComboWidth 220 `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
-    -OnUpdateLogView { Update-LogView } -Options $configOptions | Out-Null
+    -OnUpdateLogView { Update-LogView } -Extras $logTabExtras | Out-Null
+
 foreach ($radio in $script:logTab.Radios) {
     $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
 }
 function Update-GroupDropdowns {
-    $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.ExtraCombo.SelectedItem
-    $script:logTab.ExtraCombo.Items.Clear()
-    $script:logTab.ExtraCombo.Items.Add($allGroupsOption) | Out-Null
+    $groupNames = @(Get-GroupNames)
+    $savedGroup = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
+    $savedConfig = Get-ComboBoxValue -SelectedItem $script:logTab.ConfigCombo.SelectedItem
+    $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+
+    $script:logTab.GroupCombo.Items.Clear()
+    foreach ($groupName in $groupNames) {
+        $script:logTab.GroupCombo.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+    }
+
+    $script:logTab.ConfigCombo.Items.Clear()
+    $script:logTab.ConfigCombo.Items.Add($targetConfigOption) | Out-Null
 
     $configDir = Join-Path $rootPath "config"
     if (Test-Path -LiteralPath $configDir) {
@@ -305,23 +377,88 @@ function Update-GroupDropdowns {
             } |
             Sort-Object)
         foreach ($name in $configNames) {
-            $script:logTab.ExtraCombo.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
+            $script:logTab.ConfigCombo.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
         }
     }
 
-    if ($savedLog) {
-        $matchingItem = $script:logTab.ExtraCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
+    $cmbSettingsGroupTarget.Items.Clear()
+    foreach ($groupName in $groupNames) {
+        $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+    }
+
+    if ($savedGroup) {
+        $matchingItem = $script:logTab.GroupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedGroup } | Select-Object -First 1
         if ($matchingItem) {
-            $script:logTab.ExtraCombo.SelectedItem = $matchingItem
+            $script:logTab.GroupCombo.SelectedItem = $matchingItem
+        } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
+            $script:logTab.GroupCombo.SelectedIndex = 0
+        }
+    } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
+        $script:logTab.GroupCombo.SelectedIndex = 0
+    }
+
+    if ($savedConfig) {
+        $matchingItem = $script:logTab.ConfigCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedConfig } | Select-Object -First 1
+        if ($matchingItem) {
+            $script:logTab.ConfigCombo.SelectedItem = $matchingItem
         } else {
-            $script:logTab.ExtraCombo.SelectedIndex = 0
+            $script:logTab.ConfigCombo.SelectedIndex = 0
         }
     } else {
-        $script:logTab.ExtraCombo.SelectedIndex = 0
+        $script:logTab.ConfigCombo.SelectedIndex = 0
+    }
+
+    if ($savedGroup) {
+        $matchingItem = $script:logTab.GroupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedGroup } | Select-Object -First 1
+        if ($matchingItem) {
+            $script:logTab.GroupCombo.SelectedItem = $matchingItem
+        } else {
+            $script:logTab.GroupCombo.SelectedIndex = 0
+        }
+    } else {
+        $script:logTab.GroupCombo.SelectedIndex = 0
+    }
+
+    if ($savedSettings) {
+        $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedSettings } | Select-Object -First 1
+        if ($matchingItem) {
+            $cmbSettingsGroupTarget.SelectedItem = $matchingItem
+        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+            $cmbSettingsGroupTarget.SelectedIndex = 0
+        }
+    } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+        $cmbSettingsGroupTarget.SelectedIndex = 0
+    }
+
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupName")) {
+                $cmb = $bd.InputControls["TargetGroupName"]
+                if ($cmb) {
+                    $savedValue = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
+                    $cmb.Items.Clear()
+                    foreach ($groupName in $groupNames) {
+                        $cmb.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+                    }
+                    if ($savedValue) {
+                        $matchingItem = $cmb.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedValue } | Select-Object -First 1
+                        if ($matchingItem) {
+                            $cmb.SelectedItem = $matchingItem
+                        } elseif ($cmb.Items.Count -gt 0) {
+                            $cmb.SelectedIndex = 0
+                        }
+                    } elseif ($cmb.Items.Count -gt 0) {
+                        $cmb.SelectedIndex = 0
+                    }
+                }
+            }
+        }
     }
 }
 
-$script:logTab.ExtraCombo.Add_SelectedIndexChanged({ Update-LogView })
+foreach ($cmb in $script:logTab.ExtraCombos) {
+    $cmb.Add_SelectedIndexChanged({ Update-LogView })
+}
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -421,6 +558,13 @@ function Invoke-ExecuteAll {
 
     foreach ($cd in $categoryDefs) {
         $bd = $cd.ButtonDefs[0]
+        if ($bd.InputControls.ContainsKey("TargetGroupName")) {
+            $selectedValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["TargetGroupName"].SelectedItem
+            $matchingItem = $bd.InputControls['TargetGroupName'].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selectedValue } | Select-Object -First 1
+            if ($matchingItem) {
+                $bd.InputControls['TargetGroupName'].SelectedItem = $matchingItem
+            }
+        }
         $bd.InputControls['ConfigName'].Text = $script:batchInputControls["ConfigName"].Text.Trim()
     }
     $bd0 = $categoryDefs[0].ButtonDefs[0]
@@ -508,20 +652,6 @@ $btnMultipleBatchRunAll.Add_Click({
 
         Set-RunButtonsEnabled $false
 
-        $origConfigNames = @{}
-        for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
-            $bd = $categoryDefs[$i].ButtonDefs[0]
-            $origConfigNames[$i] = if ($bd.InputControls -and $bd.InputControls['ConfigName']) { $bd.InputControls['ConfigName'].Text } else { "" }
-        }
-        $bd0 = $categoryDefs[0].ButtonDefs[0]
-        $origSpaceTemplateId = if ($bd0.InputControls -and $bd0.InputControls['SpaceTemplateId']) { $bd0.InputControls['SpaceTemplateId'].Text } else { "" }
-        $bd1 = $categoryDefs[1].ButtonDefs[0]
-        $origSpaceId = if ($bd1.InputControls -and $bd1.InputControls['SpaceId']) { $bd1.InputControls['SpaceId'].Text } else { "" }
-        $origBaseTemplateSelectedItem = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.SelectedItem } else { $null }
-        $origBaseTemplateText = if ($cmbBaseTemplateName) { $cmbBaseTemplateName.Text } else { "" }
-        $origCustomTemplateSelectedItem = if ($cmbCustomTemplateName) { $cmbCustomTemplateName.SelectedItem } else { $null }
-        $origCustomTemplateText = if ($cmbCustomTemplateName) { $cmbCustomTemplateName.Text } else { "" }
-
         $resultLines = New-Object System.Collections.Generic.List[string]
         for ($i = 0; $i -lt $rows.Count; $i++) {
             $row = $rows[$i]
@@ -543,6 +673,13 @@ $btnMultipleBatchRunAll.Add_Click({
 
             foreach ($cd in $categoryDefs) {
                 $bd = $cd.ButtonDefs[0]
+                if ($bd.InputControls.ContainsKey("TargetGroupName")) {
+                    $selectedValue = Get-ComboBoxValue -SelectedItem $cmbMultipleBatchTargetGroup.SelectedItem
+                    $matchingItem = $bd.InputControls['TargetGroupName'].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selectedValue } | Select-Object -First 1
+                    if ($matchingItem) {
+                        $bd.InputControls['TargetGroupName'].SelectedItem = $matchingItem
+                    }
+                }
                 $bd.InputControls['ConfigName'].Text = $rowConfigName
             }
             $bd0 = $categoryDefs[0].ButtonDefs[0]
@@ -576,37 +713,6 @@ $btnMultipleBatchRunAll.Add_Click({
             Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "警告"
         } else {
             Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "成功"
-        }
-
-        for ($i = 0; $i -lt $categoryDefs.Count; $i++) {
-            $bd = $categoryDefs[$i].ButtonDefs[0]
-            $bd.InputControls['ConfigName'].Text = $origConfigNames[$i]
-        }
-        $bd0 = $categoryDefs[0].ButtonDefs[0]
-        $bd0.InputControls['SpaceTemplateId'].Text = $origSpaceTemplateId
-        $bd1 = $categoryDefs[1].ButtonDefs[0]
-        $bd1.InputControls['SpaceId'].Text = $origSpaceId
-        if ($origBaseTemplateSelectedItem) {
-            $origBaseTemplateValue = Get-ComboBoxValue -SelectedItem $origBaseTemplateSelectedItem
-            $matchingBaseItem = $cmbBaseTemplateName.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $origBaseTemplateValue } | Select-Object -First 1
-            if ($matchingBaseItem) {
-                $cmbBaseTemplateName.SelectedItem = $matchingBaseItem
-            } else {
-                $cmbBaseTemplateName.Text = $origBaseTemplateText
-            }
-        } else {
-            $cmbBaseTemplateName.Text = $origBaseTemplateText
-        }
-        if ($origCustomTemplateSelectedItem) {
-            $origCustomTemplateValue = Get-ComboBoxValue -SelectedItem $origCustomTemplateSelectedItem
-            $matchingCustomItem = $cmbCustomTemplateName.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $origCustomTemplateValue } | Select-Object -First 1
-            if ($matchingCustomItem) {
-                $cmbCustomTemplateName.SelectedItem = $matchingCustomItem
-            } else {
-                $cmbCustomTemplateName.Text = $origCustomTemplateText
-            }
-        } else {
-            $cmbCustomTemplateName.Text = $origCustomTemplateText
         }
     } catch {
         [System.Windows.Forms.MessageBox]::Show("$_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -658,6 +764,18 @@ function Update-CustomTemplateNameList {
     Set-ComboItems -ComboBox $cmbRunAllCustomTemplateName -Names $names -Placeholder $script:customTemplateNamePlaceholder
 }
 
+$lblSettingsGroupTarget = New-Label -Text "対象グループ"
+
+$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
+foreach ($option in $targetGroupOptions) {
+    $cmbSettingsGroupTarget.Items.Add($option) | Out-Null
+}
+if ($cmbSettingsGroupTarget.Items.Count -gt 0) {
+    $cmbSettingsGroupTarget.SelectedIndex = 0
+}
+
+$btnSettingsNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
+
 $fieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettings.Controls.Add($fieldPanel)
@@ -708,21 +826,6 @@ $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 $script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
 $script:fieldTextBoxes = @{}
 
-function Get-SettingsFieldRows {
-    $defaults = Get-SetEnvDefaults -Path $setEnvBat
-    foreach ($varName in $settingsVarLabels.Keys) {
-        if ($kintoneVars -contains $varName) {
-            $varValue = if ($defaults.ContainsKey($varName)) { $defaults[$varName] } else { "" }
-            $group = "KINTONE"
-        } else {
-            if (!$defaults.ContainsKey($varName)) { continue }
-            $varValue = $defaults[$varName]
-            $group = "COMMON"
-        }
-        [PSCustomObject]@{ Group = $group; VarName = $varName; Value = $varValue; Key = $varName }
-    }
-}
-
 $settingsTrailingButtonVars = @{
     "KINTONE_PASSWORD" = { param($Panel, $Y, $Field)
         $fieldTextBoxes = $script:fieldTextBoxes
@@ -742,12 +845,6 @@ $settingsTrailingButtonVars = @{
     }
 }
 
-function Update-SettingsFields {
-    Render-SettingsFields -Panel $fieldPanel -Rows (Get-SettingsFieldRows) -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
-}
-
 $script:saveEnvBatGetValueFn = { param($name)
     if ($script:fieldTextBoxes.ContainsKey($name)) {
         $script:fieldTextBoxes[$name].Text
@@ -757,17 +854,97 @@ $script:saveEnvBatGetValueFn = { param($name)
 }
 $script:saveEnvBatHasValueFn = { param($name) $true }
 
-function Save-Settings {
-    $nonKintoneVars = @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ })
-    Save-EnvBatFile -Path $setEnvBat -VarNames $nonKintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
-    Save-EnvBatFile -Path $setEnvBat -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+function Get-GroupSettingsFiles {
+    param([string]$GroupName)
+    if (!$GroupName) { return @() }
+    return @(
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+    )
 }
 
-$settingsTopPanel = New-SettingsTopPanel `
-    -OnSave { Save-Settings } `
-    -OnReload { Update-SettingsFields }
-$topPanel = $settingsTopPanel.Panel
-$tabSettings.Controls.Add($topPanel)
+function Save-GroupSettings {
+    param([string]$GroupName)
+    if (!$GroupName) { return }
+
+    $groupBatPath = Get-GroupBatPath $GroupName
+    if (!(Test-Path -LiteralPath $groupBatPath)) {
+        $templatePath = Join-Path $clientsTemplateDir "client.bat"
+        if (Test-Path -LiteralPath $templatePath) {
+            Copy-Item -LiteralPath $templatePath -Destination $groupBatPath
+        }
+    }
+
+    $nonKintoneVars = @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ })
+    Save-EnvBatFile -Path $groupBatPath -VarNames $nonKintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+    Save-EnvBatFile -Path $groupBatPath -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$VarName)
+    if ($script:fieldTextBoxes.ContainsKey($VarName)) {
+        return $script:fieldTextBoxes[$VarName].Text.Trim()
+    }
+    return $null
+}
+
+
+function Update-GroupSettingsFields {
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+    if (!$target) {
+        $fieldPanel.Controls.Clear()
+        return
+    }
+
+    $templateDefaults = Get-SetEnvDefaults -Path (Join-Path $clientsTemplateDir "client.bat")
+    $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $target)
+
+    $rows = @()
+    foreach ($varName in $settingsVarLabels.Keys) {
+        $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
+        $group = if ($kintoneVars -contains $varName) { "KINTONE" } else { "COMMON" }
+        $rows += [PSCustomObject]@{ Group = $group; VarName = $varName; Value = $varValue; Key = $varName }
+    }
+    Render-SettingsFields -Panel $fieldPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
+}
+
+$settingsGroupTopPanel = (New-SettingsTopPanel `
+    -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsNewGroup) `
+    -OnSave {
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        if (!$target) { return }
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
+        Update-GroupSettingsFields
+        Update-GroupDropdowns
+    } `
+    -OnReload {
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        if (!$target) { return }
+        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
+        Update-GroupSettingsFields
+    }).Panel
+
+$tabSettings.Controls.Add($settingsGroupTopPanel)
+
+$btnSettingsNewGroup.Add_Click({
+    Add-Type -AssemblyName Microsoft.VisualBasic
+    $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
+    $newName = $newName.Trim()
+    if (!$newName) { return }
+
+    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+        [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+
+    $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
+    $cmbSettingsGroupTarget.SelectedItem = $cmbSettingsGroupTarget.Items[-1]
+})
+
+$cmbSettingsGroupTarget.Add_SelectedIndexChanged({
+    Update-GroupSettingsFields
+})
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
@@ -776,7 +953,7 @@ $tabControl.Add_SelectedIndexChanged({
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-GroupDropdowns
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
-        Update-SettingsFields
+        Update-GroupSettingsFields
     }
 })
 

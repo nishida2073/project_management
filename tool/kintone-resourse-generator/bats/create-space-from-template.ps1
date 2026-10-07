@@ -6,6 +6,7 @@ param(
     [string]$LogNamePrefix,
     [string]$TemplateId,
     [string]$SpaceName,
+    [string]$TargetGroupName,
     [string]$BaseUrl,
     [string]$LogRoot,
     [string]$KintoneLogin,
@@ -22,7 +23,7 @@ if (-not $SpaceName) {
     exit 1
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$SpaceName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$TargetGroupName-$SpaceName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

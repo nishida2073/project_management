@@ -7,6 +7,7 @@ param(
     [string]$BaseTemplateConfigName,
     [string]$CustomTemplateConfigName,
     [string]$DownloadConfigName,
+    [string]$TargetGroupName,
     [string]$BaseTemplateRoot,
     [string]$CustomTemplateRoot,
     [string]$ConfigRoot,
@@ -66,7 +67,7 @@ $baseTemplatePath = Join-Path $BaseTemplateRoot "$BaseTemplateConfigName.xlsx"
 $customTemplatePath = if ($CustomTemplateConfigName) { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
 $downloadPath = Join-Path $DownloadRoot "${DownloadConfigName}_download.xlsx"
 $outputPath = Join-Path $ConfigRoot "${DownloadConfigName}_config.xlsx"
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$DownloadConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$TargetGroupName-$DownloadConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters

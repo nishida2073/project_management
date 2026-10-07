@@ -644,13 +644,14 @@ function New-LogTab {
         [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
         [Parameter(Mandatory)][array]$ButtonDefs,
         [scriptblock]$LabelFn = { param($bd) $bd.Label },
-        [Parameter(Mandatory)][string]$ExtraLabelText,
+        [string]$ExtraLabelText,
         [int]$ExtraLabelWidth = 75,
         [int]$ExtraComboWidth = 200,
         [Parameter(Mandatory)][scriptblock]$GetLogPathFn,
         [scriptblock]$OnAfterClear = {},
         [Parameter(Mandatory)][scriptblock]$OnUpdateLogView,
-        [array]$Options = @()
+        [array]$Options = @(),
+        [array]$Extras = @()
     )
 
     $logContentBox = New-LogTextBox
@@ -658,19 +659,41 @@ function New-LogTab {
     $logStagePanel = New-GroupBox -Text "" -Dock Top -AutoSize $true -AutoSizeMode GrowAndShrink
 
     $rowCenterY = 30
+    $extraCombos = @()
 
-    $lblLogExtra = New-Label -X 20 -Y ($rowCenterY - 11) -Width $ExtraLabelWidth -Height 24 -Text $ExtraLabelText
-    $logStagePanel.Controls.Add($lblLogExtra)
+    if ($Extras.Count -gt 0) {
+        foreach ($idx in 0..($Extras.Count - 1)) {
+            $extra = $Extras[$idx]
+            $y = 30 + ($idx * 34)
 
-    $cmbLogExtra = New-ComboBox -Width $ExtraComboWidth -Height 24
-    $cmbLogExtra.DisplayMember = "Text"
-    $cmbLogExtra.ValueMember = "Value"
-    foreach ($opt in $Options) { $cmbLogExtra.Items.Add($opt) | Out-Null }
-    if ($cmbLogExtra.Items.Count -gt 0) { $cmbLogExtra.SelectedIndex = 0 }
-    $cmbLogExtra.Location = New-Object System.Drawing.Point((20 + $ExtraLabelWidth + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
-    $logStagePanel.Controls.Add($cmbLogExtra)
+            $lbl = New-Label -X 20 -Y ($y - 11) -Width $extra.LabelWidth -Height 24 -Text $extra.LabelText
+            $logStagePanel.Controls.Add($lbl)
 
-    $btnClearLogs = New-Button -Text "すべて削除" -X ($cmbLogExtra.Right + 20) -Y ($rowCenterY - [int](24 / 2)) -Width 140 -Height 24
+            $cmb = New-ComboBox -Width $extra.ComboWidth -Height 24
+            $cmb.DisplayMember = "Text"
+            $cmb.ValueMember = "Value"
+            foreach ($opt in $extra.Options) { $cmb.Items.Add($opt) | Out-Null }
+            if ($cmb.Items.Count -gt 0) { $cmb.SelectedIndex = 0 }
+            $cmb.Location = New-Object System.Drawing.Point((20 + $extra.LabelWidth + 10), ($y - [int]($cmb.Height / 2)))
+            $logStagePanel.Controls.Add($cmb)
+            $extraCombos += $cmb
+        }
+        $rowCenterY = 30 + ($Extras.Count * 34)
+    } elseif ($ExtraLabelText) {
+        $lblLogExtra = New-Label -X 20 -Y ($rowCenterY - 11) -Width $ExtraLabelWidth -Height 24 -Text $ExtraLabelText
+        $logStagePanel.Controls.Add($lblLogExtra)
+
+        $cmbLogExtra = New-ComboBox -Width $ExtraComboWidth -Height 24
+        $cmbLogExtra.DisplayMember = "Text"
+        $cmbLogExtra.ValueMember = "Value"
+        foreach ($opt in $Options) { $cmbLogExtra.Items.Add($opt) | Out-Null }
+        if ($cmbLogExtra.Items.Count -gt 0) { $cmbLogExtra.SelectedIndex = 0 }
+        $cmbLogExtra.Location = New-Object System.Drawing.Point((20 + $ExtraLabelWidth + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
+        $logStagePanel.Controls.Add($cmbLogExtra)
+        $extraCombos += $cmbLogExtra
+    }
+
+    $btnClearLogs = New-Button -Text "すべて削除" -X ($extraCombos[0].Right + 20) -Y (30 - [int](24 / 2)) -Width 140 -Height 24
     $btnClearLogs.Add_Click({
         $logPath = & $GetLogPathFn
         if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
@@ -697,9 +720,10 @@ function New-LogTab {
     $logStagePanel.Controls.Add($btnClearLogs)
 
     $radios = @()
+    $radioStartY = if ($Extras.Count -gt 0) { 30 + ($Extras.Count * 34) } else { $rowCenterY + 20 }
     for ($i = 0; $i -lt $ButtonDefs.Count; $i++) {
         $bd = $ButtonDefs[$i]
-        $radio = New-RadioButton -X 20 -Y (50 + 24 * $i) -Text (& $LabelFn $bd) -Tag $bd -Checked ($i -eq 0)
+        $radio = New-RadioButton -X 20 -Y ($radioStartY + 24 * $i) -Text (& $LabelFn $bd) -Tag $bd -Checked ($i -eq 0)
         $logStagePanel.Controls.Add($radio)
         $radios += $radio
     }
@@ -707,20 +731,62 @@ function New-LogTab {
     Add-StackedDockedControls -Container $TabPage -ControlsTopToBottom @($logStagePanel, $logContentBox)
 
     $script:getLogPathFn = $GetLogPathFn
-    $script:logTab = [PSCustomObject]@{
+    $logTabProps = @{
         ContentBox  = $logContentBox
         StagePanel  = $logStagePanel
         Radios      = $radios
-        ExtraLabel  = $lblLogExtra
-        ExtraCombo  = $cmbLogExtra
+        ExtraCombo  = if ($extraCombos.Count -gt 0) { $extraCombos[0] } else { $null }
+        ExtraCombos = $extraCombos
         ClearButton = $btnClearLogs
+        Extras      = $Extras
     }
+    foreach ($i in 0..($extraCombos.Count - 1)) {
+        if ($Extras[$i] -and $Extras[$i].PropertyName) {
+            $logTabProps[$Extras[$i].PropertyName] = $extraCombos[$i]
+        }
+    }
+    $script:logTab = [PSCustomObject]$logTabProps
     return $script:logTab
 }
 
 function Get-BatchDisplayLabel {
     param($ButtonDef)
     if ($ButtonDef.BatchLabel) { $ButtonDef.BatchLabel } else { $ButtonDef.Label }
+}
+
+function Update-LogView {
+    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
+    if (-not $selectedRadio) { return }
+    $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
+
+    $logPath = & $script:getLogPathFn
+
+    $script:logTab.ContentBox.Text = ""
+    if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
+
+    $filterPatterns = @($stagePrefix)
+    if ($script:logTab.Extras -and $script:logTab.Extras.Count -gt 0) {
+        foreach ($extra in $script:logTab.Extras) {
+            if ($extra.PropertyName) {
+                $cmb = $script:logTab.$($extra.PropertyName)
+                if ($cmb -and $cmb.SelectedIndex -ge 0) {
+                    $value = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
+                    if ($value) { $filterPatterns += $value }
+                }
+            }
+        }
+    }
+
+    $filterPattern = $filterPatterns -join "-"
+    $files = Get-ChildItem -LiteralPath $logPath -Filter "$filterPattern*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
+    $sections = foreach ($file in $files) {
+        try {
+            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
+        } catch {
+            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
+        }
+    }
+    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
 }
 
 function New-SettingsTopPanel {
@@ -1096,28 +1162,6 @@ function Invoke-BatchRunAll {
     foreach ($chk in $CheckBoxes) { $chk.Enabled = $true }
     foreach ($ctrl in $ExtraControls) { $ctrl.Enabled = $true }
     & $SetRunButtonsEnabled $true
-}
-
-function Update-LogView {
-    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
-    if (-not $selectedRadio) { return }
-    $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
-
-    $logPath = & $script:getLogPathFn
-
-    $script:logTab.ContentBox.Text = ""
-    if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
-
-    $filterValue = if ($script:logTab.ExtraCombo.SelectedIndex -ge 0) { "$(Get-ComboBoxValue -SelectedItem $script:logTab.ExtraCombo.SelectedItem)" } else { "" }
-    $files = Get-ChildItem -LiteralPath $logPath -Filter "$stagePrefix-$filterValue*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
-    $sections = foreach ($file in $files) {
-        try {
-            [System.IO.File]::ReadAllText($file.FullName, $script:cp932Encoding)
-        } catch {
-            "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
-        }
-    }
-    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
 }
 
 function Get-CommonSettingsFieldValue {

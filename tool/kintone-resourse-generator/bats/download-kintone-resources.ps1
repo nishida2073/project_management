@@ -6,6 +6,7 @@ param(
     [string]$LogNamePrefix,
     [string]$SpaceId,
     [string]$ConfigName,
+    [string]$TargetGroupName,
     [string]$BaseUrl,
     [string]$DownloadRoot,
     [string]$LogRoot,
@@ -28,7 +29,7 @@ if (-not $SpaceId) {
     exit 1
 }
 
-$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$ConfigName"
+$logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$TargetGroupName-$ConfigName"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters
