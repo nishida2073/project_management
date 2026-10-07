@@ -370,9 +370,6 @@ function Update-GroupDropdowns {
     Update-ComboItems -ComboBox $script:logTab.GroupCombo -Items $groupNames
     Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedGroup
 
-    $script:logTab.ConfigCombo.Items.Clear()
-    $script:logTab.ConfigCombo.Items.Add($targetConfigOption) | Out-Null
-
     $configDir = Join-Path $rootPath "config"
     $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
         ForEach-Object {
@@ -380,9 +377,8 @@ function Update-GroupDropdowns {
             $basename -replace '_config$', ''
         } |
         Sort-Object)
-    foreach ($name in $configNames) {
-        $script:logTab.ConfigCombo.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
-    }
+    $configItems = @($targetConfigOption) + $configNames
+    Update-ComboItems -ComboBox $script:logTab.ConfigCombo -Items $configItems
     Restore-ComboSelection -ComboBox $script:logTab.ConfigCombo -SavedValue $savedConfig
 
     Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames

@@ -72,19 +72,7 @@ function Update-GroupDropdowns {
 
     $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
-    $savedFilters = @{}
-    foreach ($cd in $categoryDefs) {
-        foreach ($bd in $cd.ButtonDefs) {
-            if ($bd.InputControls) {
-                foreach ($ctrl in $bd.InputControls.Values) {
-                    if ($ctrl -is [System.Windows.Forms.ComboBox]) {
-                        $savedFilters[$bd.Label] = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-                    }
-                }
-            }
-        }
-    }
-
+    
     if ($cmbSettingsGroupTarget) {
         Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $clientNames
         Restore-ComboSelection -ComboBox $cmbSettingsGroupTarget -SavedValue $savedSettings
@@ -94,9 +82,10 @@ function Update-GroupDropdowns {
         foreach ($bd in $cd.ButtonDefs) {
             if ($bd.InputControls -and $bd.InputControls.ContainsKey("ClientName")) {
                 $cmb = $bd.InputControls["ClientName"]
+                $savedValue = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
                 if ($cmb) {
                     Update-ComboItems -ComboBox $cmb -Items $clientNames
-                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedFilters[$bd.Label]
+                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedValue
                 }
             }
         }
