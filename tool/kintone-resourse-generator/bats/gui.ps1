@@ -380,16 +380,14 @@ function Update-GroupDropdowns {
     $script:logTab.ConfigCombo.Items.Add($targetConfigOption) | Out-Null
 
     $configDir = Join-Path $rootPath "config"
-    if (Test-Path -LiteralPath $configDir) {
-        $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
-            ForEach-Object {
-                $basename = $_.BaseName
-                $basename -replace '_config$', ''
-            } |
-            Sort-Object)
-        foreach ($name in $configNames) {
-            $script:logTab.ConfigCombo.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
-        }
+    $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $basename = $_.BaseName
+            $basename -replace '_config$', ''
+        } |
+        Sort-Object)
+    foreach ($name in $configNames) {
+        $script:logTab.ConfigCombo.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
     }
 
     $cmbSettingsGroupTarget.Items.Clear()
@@ -446,17 +444,6 @@ function Update-GroupDropdowns {
         }
     } else {
         $script:logTab.ConfigCombo.SelectedIndex = 0
-    }
-
-    if ($savedGroup) {
-        $matchingItem = $script:logTab.GroupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedGroup } | Select-Object -First 1
-        if ($matchingItem) {
-            $script:logTab.GroupCombo.SelectedItem = $matchingItem
-        } else {
-            $script:logTab.GroupCombo.SelectedIndex = 0
-        }
-    } else {
-        $script:logTab.GroupCombo.SelectedIndex = 0
     }
 
     if ($savedSettings) {
