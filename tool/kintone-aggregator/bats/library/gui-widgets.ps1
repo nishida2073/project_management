@@ -1698,3 +1698,26 @@ function Adjust-InitialTabHeight {
     }
 }
 
+function Update-ComboItems {
+    param($ComboBox, $Items)
+    $ComboBox.Items.Clear()
+    foreach ($item in $Items) {
+        if ($item -is [PSCustomObject] -and $item.PSObject.Properties['Text']) {
+            $ComboBox.Items.Add($item) | Out-Null
+        } else {
+            $ComboBox.Items.Add([PSCustomObject]@{ Text = $item; Value = $item }) | Out-Null
+        }
+    }
+}
+
+function Restore-ComboSelection {
+    param($ComboBox, $SavedValue)
+    if ($SavedValue) {
+        $matchingItem = $ComboBox.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $SavedValue } | Select-Object -First 1
+        if ($matchingItem) { $ComboBox.SelectedItem = $matchingItem }
+        elseif ($ComboBox.Items.Count -gt 0) { $ComboBox.SelectedIndex = 0 }
+    } elseif ($ComboBox.Items.Count -gt 0) {
+        $ComboBox.SelectedIndex = 0
+    }
+}
+

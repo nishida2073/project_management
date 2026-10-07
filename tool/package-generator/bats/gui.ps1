@@ -86,20 +86,8 @@ function Update-GroupDropdowns {
     }
 
     if ($cmbSettingsGroupTarget) {
-        $cmbSettingsGroupTarget.Items.Clear()
-        foreach ($clientName in $clientNames) {
-            $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
-        }
-        if ($savedSettings) {
-            $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedSettings } | Select-Object -First 1
-            if ($matchingItem) {
-                $cmbSettingsGroupTarget.SelectedItem = $matchingItem
-            } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-                $cmbSettingsGroupTarget.SelectedIndex = 0
-            }
-        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-            $cmbSettingsGroupTarget.SelectedIndex = 0
-        }
+        Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $clientNames
+        Restore-ComboSelection -ComboBox $cmbSettingsGroupTarget -SavedValue $savedSettings
     }
 
     foreach ($cd in $categoryDefs) {
@@ -107,20 +95,8 @@ function Update-GroupDropdowns {
             if ($bd.InputControls) {
                 foreach ($ctrl in $bd.InputControls.Values) {
                     if ($ctrl -is [System.Windows.Forms.ComboBox]) {
-                        $ctrl.Items.Clear()
-                        foreach ($clientName in $clientNames) {
-                            $ctrl.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
-                        }
-                        if ($savedFilters[$bd.Label]) {
-                            $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedFilters[$bd.Label] } | Select-Object -First 1
-                            if ($matchingItem) {
-                                $ctrl.SelectedItem = $matchingItem
-                            } elseif ($ctrl.Items.Count -gt 0) {
-                                $ctrl.SelectedIndex = 0
-                            }
-                        } elseif ($ctrl.Items.Count -gt 0) {
-                            $ctrl.SelectedIndex = 0
-                        }
+                        Update-ComboItems -ComboBox $ctrl -Items $clientNames
+                        Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedFilters[$bd.Label]
                     }
                 }
             }
@@ -128,40 +104,16 @@ function Update-GroupDropdowns {
     }
 
     if ($script:logTab -and $script:logTab.GroupCombo) {
-        $script:logTab.GroupCombo.Items.Clear()
-        $script:logTab.GroupCombo.Items.Add($allGroupsOption) | Out-Null
-        foreach ($clientName in $clientNames) {
-            $script:logTab.GroupCombo.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
-        }
-        if ($savedLog) {
-            $matchingItem = $script:logTab.GroupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
-            if ($matchingItem) {
-                $script:logTab.GroupCombo.SelectedItem = $matchingItem
-            } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
-                $script:logTab.GroupCombo.SelectedIndex = 0
-            }
-        } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
-            $script:logTab.GroupCombo.SelectedIndex = 0
-        }
+        $logItems = @($allGroupsOption) + $clientNames
+        Update-ComboItems -ComboBox $script:logTab.GroupCombo -Items $logItems
+        Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedLog
     }
 
     foreach ($ctrl in $script:batchInputControls.Values) {
         if ($ctrl -is [System.Windows.Forms.ComboBox]) {
             $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-            $ctrl.Items.Clear()
-            foreach ($clientName in $clientNames) {
-                $ctrl.Items.Add([PSCustomObject]@{ Text = $clientName; Value = $clientName }) | Out-Null
-            }
-            if ($savedBatchValue) {
-                $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedBatchValue } | Select-Object -First 1
-                if ($matchingItem) {
-                    $ctrl.SelectedItem = $matchingItem
-                } elseif ($ctrl.Items.Count -gt 0) {
-                    $ctrl.SelectedIndex = 0
-                }
-            } elseif ($ctrl.Items.Count -gt 0) {
-                $ctrl.SelectedIndex = 0
-            }
+            Update-ComboItems -ComboBox $ctrl -Items $clientNames
+            Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedBatchValue
         }
     }
 }

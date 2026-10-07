@@ -746,20 +746,8 @@ function Update-GroupDropdowns {
     }
 
     if ($cmbSettingsGroupTarget) {
-        $cmbSettingsGroupTarget.Items.Clear()
-        foreach ($groupName in $groupNames) {
-            $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-        }
-        if ($savedSettings) {
-            $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedSettings } | Select-Object -First 1
-            if ($matchingItem) {
-                $cmbSettingsGroupTarget.SelectedItem = $matchingItem
-            } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-                $cmbSettingsGroupTarget.SelectedIndex = 0
-            }
-        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-            $cmbSettingsGroupTarget.SelectedIndex = 0
-        }
+        Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
+        Restore-ComboSelection -ComboBox $cmbSettingsGroupTarget -SavedValue $savedSettings
     }
 
     foreach ($cd in $categoryDefs) {
@@ -767,80 +755,32 @@ function Update-GroupDropdowns {
             if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupNameFilter")) {
                 $cmb = $bd.InputControls["TargetGroupNameFilter"]
                 if ($cmb) {
-                    $cmb.Items.Clear()
-                    $cmb.Items.Add($allGroupsOption) | Out-Null
-                    foreach ($groupName in $groupNames) {
-                        $cmb.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-                    }
-                    if ($savedFilters[$bd.Label]) {
-                        $matchingItem = $cmb.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedFilters[$bd.Label] } | Select-Object -First 1
-                        if ($matchingItem) {
-                            $cmb.SelectedItem = $matchingItem
-                        } elseif ($cmb.Items.Count -gt 0) {
-                            $cmb.SelectedIndex = 0
-                        }
-                    } elseif ($cmb.Items.Count -gt 0) {
-                        $cmb.SelectedIndex = 0
-                    }
+                    $filterItems = @($allGroupsOption) + $groupNames
+                    Update-ComboItems -ComboBox $cmb -Items $filterItems
+                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedFilters[$bd.Label]
                 }
             }
         }
     }
 
     if ($script:logTab -and $script:logTab.GroupCombo) {
-        $script:logTab.GroupCombo.Items.Clear()
-        $script:logTab.GroupCombo.Items.Add($allGroupsOption) | Out-Null
-        foreach ($groupName in $groupNames) {
-            $script:logTab.GroupCombo.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-        }
-        if ($savedLog) {
-            $matchingItem = $script:logTab.GroupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedLog } | Select-Object -First 1
-            if ($matchingItem) {
-                $script:logTab.GroupCombo.SelectedItem = $matchingItem
-            } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
-                $script:logTab.GroupCombo.SelectedIndex = 0
-            }
-        } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
-            $script:logTab.GroupCombo.SelectedIndex = 0
-        }
+        $logItems = @($allGroupsOption) + $groupNames
+        Update-ComboItems -ComboBox $script:logTab.GroupCombo -Items $logItems
+        Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedLog
     }
 
     if ($cmbSettingsMasterOpsGroupTarget) {
-        $cmbSettingsMasterOpsGroupTarget.Items.Clear()
-        foreach ($groupName in $groupNames) {
-            $cmbSettingsMasterOpsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-        }
-        if ($savedMaster) {
-            $matchingItem = $cmbSettingsMasterOpsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedMaster } | Select-Object -First 1
-            if ($matchingItem) {
-                $cmbSettingsMasterOpsGroupTarget.SelectedItem = $matchingItem
-            } elseif ($cmbSettingsMasterOpsGroupTarget.Items.Count -gt 0) {
-                $cmbSettingsMasterOpsGroupTarget.SelectedIndex = 0
-            }
-        } elseif ($cmbSettingsMasterOpsGroupTarget.Items.Count -gt 0) {
-            $cmbSettingsMasterOpsGroupTarget.SelectedIndex = 0
-        }
+        Update-ComboItems -ComboBox $cmbSettingsMasterOpsGroupTarget -Items $groupNames
+        Restore-ComboSelection -ComboBox $cmbSettingsMasterOpsGroupTarget -SavedValue $savedMaster
     }
 
     if ($script:batchInputControls.ContainsKey("TargetGroupNameFilter")) {
         $ctrl = $script:batchInputControls["TargetGroupNameFilter"]
         if ($ctrl) {
             $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-            $ctrl.Items.Clear()
-            $ctrl.Items.Add($allGroupsOption) | Out-Null
-            foreach ($groupName in $groupNames) {
-                $ctrl.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-            }
-            if ($savedBatchValue) {
-                $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedBatchValue } | Select-Object -First 1
-                if ($matchingItem) {
-                    $ctrl.SelectedItem = $matchingItem
-                } elseif ($ctrl.Items.Count -gt 0) {
-                    $ctrl.SelectedIndex = 0
-                }
-            } elseif ($ctrl.Items.Count -gt 0) {
-                $ctrl.SelectedIndex = 0
-            }
+            $batchItems = @($allGroupsOption) + $groupNames
+            Update-ComboItems -ComboBox $ctrl -Items $batchItems
+            Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedBatchValue
         }
     }
 }

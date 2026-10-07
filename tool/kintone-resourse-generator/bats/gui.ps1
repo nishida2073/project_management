@@ -297,12 +297,6 @@ $inputX1 = 15 + $labelWidth + 4
 
 $lblMultipleBatchTargetGroup = New-Label -Text "対象グループ" -X 15 -Y ($inputRowCenterY1 - 11) -Width $labelWidth -Height 22
 $cmbMultipleBatchTargetGroup = New-ComboBox -X $inputX1 -Y ($inputRowCenterY1 - 11) -Width $inputWidth1 -Height 22 -DisplayMember "Text"
-foreach ($option in $targetGroupOptions) {
-    $cmbMultipleBatchTargetGroup.Items.Add($option) | Out-Null
-}
-if ($cmbMultipleBatchTargetGroup.Items.Count -gt 0) {
-    $cmbMultipleBatchTargetGroup.SelectedIndex = 0
-}
 
 $lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y ($inputRowCenterY2 - 11) -Width $labelWidth -Height 22
 $txtMultipleBatchExcelPath = New-TextBox -X $inputX1 -Y ($inputRowCenterY2 - 11) -Width $inputWidth2 -Height 22
@@ -365,16 +359,16 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
     -OnUpdateLogView { Update-LogView } -Conditions $logTabConditions | Out-Null
 
+
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
     $savedGroup = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
     $savedConfig = Get-ComboBoxValue -SelectedItem $script:logTab.ConfigCombo.SelectedItem
     $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+    $savedMultipleBatch = Get-ComboBoxValue -SelectedItem $cmbMultipleBatchTargetGroup.SelectedItem
 
-    $script:logTab.GroupCombo.Items.Clear()
-    foreach ($groupName in $groupNames) {
-        $script:logTab.GroupCombo.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-    }
+    Update-ComboItems -ComboBox $script:logTab.GroupCombo -Items $groupNames
+    Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedGroup
 
     $script:logTab.ConfigCombo.Items.Clear()
     $script:logTab.ConfigCombo.Items.Add($targetConfigOption) | Out-Null
@@ -389,72 +383,21 @@ function Update-GroupDropdowns {
     foreach ($name in $configNames) {
         $script:logTab.ConfigCombo.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null
     }
+    Restore-ComboSelection -ComboBox $script:logTab.ConfigCombo -SavedValue $savedConfig
 
-    $cmbSettingsGroupTarget.Items.Clear()
-    foreach ($groupName in $groupNames) {
-        $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-    }
+    Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
+    Restore-ComboSelection -ComboBox $cmbSettingsGroupTarget -SavedValue $savedSettings
 
-    $cmbMultipleBatchTargetGroup.Items.Clear()
-    foreach ($groupName in $groupNames) {
-        $cmbMultipleBatchTargetGroup.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-    }
-    if ($cmbMultipleBatchTargetGroup.Items.Count -gt 0) {
-        $cmbMultipleBatchTargetGroup.SelectedIndex = 0
-    }
+    Update-ComboItems -ComboBox $cmbMultipleBatchTargetGroup -Items $groupNames
+    Restore-ComboSelection -ComboBox $cmbMultipleBatchTargetGroup -SavedValue $savedMultipleBatch
 
     if ($script:batchInputControls -and $script:batchInputControls.ContainsKey("TargetGroupName")) {
         $ctrl = $script:batchInputControls["TargetGroupName"]
         if ($ctrl) {
             $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-            $ctrl.Items.Clear()
-            foreach ($groupName in $groupNames) {
-                $ctrl.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-            }
-            if ($savedBatchValue) {
-                $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedBatchValue } | Select-Object -First 1
-                if ($matchingItem) {
-                    $ctrl.SelectedItem = $matchingItem
-                } elseif ($ctrl.Items.Count -gt 0) {
-                    $ctrl.SelectedIndex = 0
-                }
-            } elseif ($ctrl.Items.Count -gt 0) {
-                $ctrl.SelectedIndex = 0
-            }
+            Update-ComboItems -ComboBox $ctrl -Items $groupNames
+            Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedBatchValue
         }
-    }
-
-    if ($savedGroup) {
-        $matchingItem = $script:logTab.GroupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedGroup } | Select-Object -First 1
-        if ($matchingItem) {
-            $script:logTab.GroupCombo.SelectedItem = $matchingItem
-        } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
-            $script:logTab.GroupCombo.SelectedIndex = 0
-        }
-    } elseif ($script:logTab.GroupCombo.Items.Count -gt 0) {
-        $script:logTab.GroupCombo.SelectedIndex = 0
-    }
-
-    if ($savedConfig) {
-        $matchingItem = $script:logTab.ConfigCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedConfig } | Select-Object -First 1
-        if ($matchingItem) {
-            $script:logTab.ConfigCombo.SelectedItem = $matchingItem
-        } else {
-            $script:logTab.ConfigCombo.SelectedIndex = 0
-        }
-    } else {
-        $script:logTab.ConfigCombo.SelectedIndex = 0
-    }
-
-    if ($savedSettings) {
-        $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedSettings } | Select-Object -First 1
-        if ($matchingItem) {
-            $cmbSettingsGroupTarget.SelectedItem = $matchingItem
-        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-            $cmbSettingsGroupTarget.SelectedIndex = 0
-        }
-    } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-        $cmbSettingsGroupTarget.SelectedIndex = 0
     }
 
     foreach ($cd in $categoryDefs) {
@@ -463,20 +406,8 @@ function Update-GroupDropdowns {
                 $cmb = $bd.InputControls["TargetGroupName"]
                 if ($cmb) {
                     $savedValue = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
-                    $cmb.Items.Clear()
-                    foreach ($groupName in $groupNames) {
-                        $cmb.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-                    }
-                    if ($savedValue) {
-                        $matchingItem = $cmb.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedValue } | Select-Object -First 1
-                        if ($matchingItem) {
-                            $cmb.SelectedItem = $matchingItem
-                        } elseif ($cmb.Items.Count -gt 0) {
-                            $cmb.SelectedIndex = 0
-                        }
-                    } elseif ($cmb.Items.Count -gt 0) {
-                        $cmb.SelectedIndex = 0
-                    }
+                    Update-ComboItems -ComboBox $cmb -Items $groupNames
+                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedValue
                 }
             }
         }
@@ -805,12 +736,6 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 $lblSettingsGroupTarget = New-Label -Text "対象グループ"
 
 $cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
-foreach ($option in $targetGroupOptions) {
-    $cmbSettingsGroupTarget.Items.Add($option) | Out-Null
-}
-if ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-    $cmbSettingsGroupTarget.SelectedIndex = 0
-}
 
 $btnSettingsNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
