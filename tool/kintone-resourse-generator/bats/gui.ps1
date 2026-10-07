@@ -301,7 +301,8 @@ $lblMultipleBatchStatus = New-Label -X 154 -Y ($btnRunAllY + 6) -AutoSize $true
 $grpMultipleBatchExcel.Controls.AddRange(@(
     $lblMultipleBatchTargetGroup, $cmbMultipleBatchTargetGroup, $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
 ))
-$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, 114)
+$y = $btnRunAllY
+$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28 + 16))
 $multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom + 10
 
 $dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
@@ -957,11 +958,14 @@ $tabControl.Add_SelectedIndexChanged({
     }
 })
 
+$tabControl.SelectedTab = $tabRun
+
 $form.Add_Shown({
     Update-BaseTemplateNameList
     Update-CustomTemplateNameList
     Update-GroupDropdowns
+
+    Adjust-InitialTabHeight -NestedTabControl $execTabControl
 })
-$tabControl.SelectedTab = $tabRun
 
 [System.Windows.Forms.Application]::Run($form)

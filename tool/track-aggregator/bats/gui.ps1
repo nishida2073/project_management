@@ -1075,6 +1075,8 @@ $tabControl.SelectedTab = $tabRun
 $form.Add_Shown({
     Update-GroupDropdowns
     Update-CommonSettingsFields
+
+    Adjust-InitialTabHeight -NestedTabControl $execTabControl
 })
 
 [System.Windows.Forms.Application]::Run($form)
