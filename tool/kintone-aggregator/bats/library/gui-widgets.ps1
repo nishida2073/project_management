@@ -644,14 +644,10 @@ function New-LogTab {
         [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
         [Parameter(Mandatory)][array]$ButtonDefs,
         [scriptblock]$LabelFn = { param($bd) $bd.Label },
-        [string]$ExtraLabelText,
-        [int]$ExtraLabelWidth = 75,
-        [int]$ExtraComboWidth = 200,
         [Parameter(Mandatory)][scriptblock]$GetLogPathFn,
         [scriptblock]$OnAfterClear = {},
-        [Parameter(Mandatory)][scriptblock]$OnUpdateLogView,
-        [array]$Options = @(),
-        [array]$Extras = @()
+        [scriptblock]$OnUpdateLogView = { Update-LogView },
+        [array]$Conditions = @()
     )
 
     $logContentBox = New-LogTextBox
@@ -661,9 +657,9 @@ function New-LogTab {
     $rowCenterY = 30
     $extraCombos = @()
 
-    if ($Extras.Count -gt 0) {
-        foreach ($idx in 0..($Extras.Count - 1)) {
-            $extra = $Extras[$idx]
+    if (@($Conditions).Count -gt 0) {
+        foreach ($idx in 0..(@($Conditions).Count - 1)) {
+            $extra = $Conditions[$idx]
             $y = 30 + ($idx * 34)
 
             $lbl = New-Label -X 20 -Y ($y - 11) -Width $extra.LabelWidth -Height 24 -Text $extra.LabelText
@@ -678,19 +674,7 @@ function New-LogTab {
             $logStagePanel.Controls.Add($cmb)
             $extraCombos += $cmb
         }
-        $rowCenterY = 30 + ($Extras.Count * 34)
-    } elseif ($ExtraLabelText) {
-        $lblLogExtra = New-Label -X 20 -Y ($rowCenterY - 11) -Width $ExtraLabelWidth -Height 24 -Text $ExtraLabelText
-        $logStagePanel.Controls.Add($lblLogExtra)
-
-        $cmbLogExtra = New-ComboBox -Width $ExtraComboWidth -Height 24
-        $cmbLogExtra.DisplayMember = "Text"
-        $cmbLogExtra.ValueMember = "Value"
-        foreach ($opt in $Options) { $cmbLogExtra.Items.Add($opt) | Out-Null }
-        if ($cmbLogExtra.Items.Count -gt 0) { $cmbLogExtra.SelectedIndex = 0 }
-        $cmbLogExtra.Location = New-Object System.Drawing.Point((20 + $ExtraLabelWidth + 10), ($rowCenterY - [int]($cmbLogExtra.Height / 2)))
-        $logStagePanel.Controls.Add($cmbLogExtra)
-        $extraCombos += $cmbLogExtra
+        $rowCenterY = 30 + (@($Conditions).Count * 34)
     }
 
     $btnClearLogs = New-Button -Text "すべて削除" -X ($extraCombos[0].Right + 20) -Y (30 - [int](24 / 2)) -Width 140 -Height 24
@@ -720,7 +704,7 @@ function New-LogTab {
     $logStagePanel.Controls.Add($btnClearLogs)
 
     $radios = @()
-    $radioStartY = if ($Extras.Count -gt 0) { 30 + ($Extras.Count * 34) } else { $rowCenterY + 20 }
+    $radioStartY = if (@($Conditions).Count -gt 0) { 30 + (@($Conditions).Count * 34) } else { $rowCenterY + 20 }
     for ($i = 0; $i -lt $ButtonDefs.Count; $i++) {
         $bd = $ButtonDefs[$i]
         $radio = New-RadioButton -X 20 -Y ($radioStartY + 24 * $i) -Text (& $LabelFn $bd) -Tag $bd -Checked ($i -eq 0)
@@ -738,14 +722,22 @@ function New-LogTab {
         ExtraCombo  = if ($extraCombos.Count -gt 0) { $extraCombos[0] } else { $null }
         ExtraCombos = $extraCombos
         ClearButton = $btnClearLogs
-        Extras      = $Extras
+        Conditions  = $Conditions
     }
     foreach ($i in 0..($extraCombos.Count - 1)) {
-        if ($Extras[$i] -and $Extras[$i].PropertyName) {
-            $logTabProps[$Extras[$i].PropertyName] = $extraCombos[$i]
+        if ($Conditions[$i] -and $Conditions[$i].PropertyName) {
+            $logTabProps[$Conditions[$i].PropertyName] = $extraCombos[$i]
         }
     }
     $script:logTab = [PSCustomObject]$logTabProps
+
+    foreach ($radio in $radios) {
+        $radio.Add_CheckedChanged(({ if ($this.Checked) { & $OnUpdateLogView } }).GetNewClosure())
+    }
+    foreach ($cmb in $extraCombos) {
+        $cmb.Add_SelectedIndexChanged(({ & $OnUpdateLogView }).GetNewClosure())
+    }
+
     return $script:logTab
 }
 
@@ -765,8 +757,8 @@ function Update-LogView {
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
 
     $filterPatterns = @($stagePrefix)
-    if ($script:logTab.Extras) {
-        foreach ($extra in $script:logTab.Extras) {
+    if ($script:logTab.Conditions) {
+        foreach ($extra in $script:logTab.Conditions) {
             if ($extra.PropertyName) {
                 $cmb = $script:logTab.$($extra.PropertyName)
                 if ($cmb -and $cmb.SelectedIndex -ge 0) {

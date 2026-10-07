@@ -343,18 +343,14 @@ foreach ($groupName in (Get-GroupNames)) {
     $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
 }
 
-$logTabExtras = @(
+$logTabConditions = @(
     @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 180; Options = $groupOptions }
     @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 220; Options = $targetConfigOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
-    -OnUpdateLogView { Update-LogView } -Extras $logTabExtras | Out-Null
-
-foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-}
+    -OnUpdateLogView { Update-LogView } -Conditions $logTabConditions | Out-Null
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
     $savedGroup = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem

@@ -260,21 +260,16 @@ Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabCont
 
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
-$logTabExtras = @(
+$logTabConditions = @(
     @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = @($allGroupsOption, $clientOptions) }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
-    -Extras $logTabExtras `
+    -Conditions $logTabConditions `
     -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] } `
     -OnUpdateLogView { Update-LogView } | Out-Null
 $script:logPath = $script:commonEnvVars["CommonLogPath"]
-
-foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-}
-$script:logTab.GroupCombo.Add_SelectedIndexChanged({ Update-LogView })
 
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"

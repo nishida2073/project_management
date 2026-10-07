@@ -161,21 +161,14 @@ $syncMasterButtonDef = [PSCustomObject]@{
 }
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
-$logTabExtras = @(
+$logTabConditions = @(
     @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $groupOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
-    -Extras $logTabExtras `
-    -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] } `
-    -OnUpdateLogView { Update-LogView } | Out-Null
-
-foreach ($radio in $script:logTab.Radios) {
-    $radio.Add_CheckedChanged({ if ($this.Checked) { Update-LogView } })
-}
-$script:logTab.GroupCombo.Add_SelectedIndexChanged({ Update-LogView })
-
+    -Conditions $logTabConditions `
+    -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] } | Out-Null
 
 $clientsTemplateDir = Join-Path $clientsDir "template"
 
