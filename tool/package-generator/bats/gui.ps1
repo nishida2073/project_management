@@ -45,7 +45,7 @@ foreach ($clientName in (Get-ClientNames)) {
 }
 function New-ClientInput {
     param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $clientOptions; NewRow = $NewRow }
+    [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $clientOptions; NewRow = $NewRow }
 }
 
 function Get-NewClientInitialValues {
@@ -92,12 +92,11 @@ function Update-GroupDropdowns {
 
     foreach ($cd in $categoryDefs) {
         foreach ($bd in $cd.ButtonDefs) {
-            if ($bd.InputControls) {
-                foreach ($ctrl in $bd.InputControls.Values) {
-                    if ($ctrl -is [System.Windows.Forms.ComboBox]) {
-                        Update-ComboItems -ComboBox $ctrl -Items $clientNames
-                        Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedFilters[$bd.Label]
-                    }
+            if ($bd.InputControls -and $bd.InputControls.ContainsKey("ClientName")) {
+                $cmb = $bd.InputControls["ClientName"]
+                if ($cmb) {
+                    Update-ComboItems -ComboBox $cmb -Items $clientNames
+                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedFilters[$bd.Label]
                 }
             }
         }
@@ -109,8 +108,9 @@ function Update-GroupDropdowns {
         Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedLog
     }
 
-    foreach ($ctrl in $script:batchInputControls.Values) {
-        if ($ctrl -is [System.Windows.Forms.ComboBox]) {
+    if ($script:batchInputControls.ContainsKey("ClientName")) {
+        $ctrl = $script:batchInputControls["ClientName"]
+        if ($ctrl) {
             $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
             Update-ComboItems -ComboBox $ctrl -Items $clientNames
             Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedBatchValue
@@ -154,7 +154,7 @@ $tabBatchAll = New-TabPage -Text "一括実行"
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $clientOptions; LabelWidth = 75; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $clientOptions; LabelWidth = 150; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
