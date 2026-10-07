@@ -14,7 +14,9 @@ if ($MyInvocation.MyCommand.Path) {
     $scriptDir = Split-Path $MyInvocation.MyCommand.Path
     $rootPath = Split-Path $scriptDir -Parent
 } else {
-    $rootPath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
+    $exePath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    $rootPath = Split-Path $exePath
+    $scriptDir = Join-Path $rootPath "bats"
 }
 $createSpaceBat = Join-Path $rootPath "create-space-from-template.bat"
 $downloadBat = Join-Path $rootPath "download-kintone-resources.bat"
@@ -23,7 +25,7 @@ $applyBat = Join-Path $rootPath "apply-kintone-resources.bat"
 $checkBat = Join-Path $rootPath "check-kintone-resources.bat"
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
-$setEnvBat = Join-Path $clientsDir "common.bat"
+$setEnvBat = Join-Path $scriptDir "common.bat"
 
 $libraryDir = Join-Path $rootPath "bats\library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -195,6 +197,15 @@ $tabRun = New-TabPage -Text "実行"
 
 $tabLogs = New-TabPage -Text "ログ"
 $tabSettings = New-TabPage -Text "設定"
+$settingsSubTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
+
+$tabSettingsCommon = New-TabPage -Text "共通"
+$settingsSubTabControl.Controls.Add($tabSettingsCommon)
+
+$tabSettingsGroup = New-TabPage -Text "グループ別"
+$settingsSubTabControl.Controls.Add($tabSettingsGroup)
+
+$tabSettings.Controls.Add($settingsSubTabControl)
 
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
@@ -351,6 +362,7 @@ $logTabConditions = @(
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
     -OnUpdateLogView { Update-LogView } -Conditions $logTabConditions | Out-Null
+
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
     $savedGroup = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
@@ -451,10 +463,6 @@ function Update-GroupDropdowns {
             }
         }
     }
-}
-
-foreach ($cmb in $script:logTab.ExtraCombos) {
-    $cmb.Add_SelectedIndexChanged({ Update-LogView })
 }
 
 function Set-RunButtonsEnabled {
@@ -761,6 +769,21 @@ function Update-CustomTemplateNameList {
     Set-ComboItems -ComboBox $cmbRunAllCustomTemplateName -Names $names -Placeholder $script:customTemplateNamePlaceholder
 }
 
+$settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
+
+$settingsCommonTopPanel = (New-SettingsTopPanel `
+    -OnSave {
+        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }
+        Update-CommonSettingsFields
+    } `
+    -OnReload {
+        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }
+        Update-CommonSettingsFields
+    }).Panel
+
+$tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
+$tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
+
 $lblSettingsGroupTarget = New-Label -Text "対象グループ"
 
 $cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
@@ -773,9 +796,7 @@ if ($cmbSettingsGroupTarget.Items.Count -gt 0) {
 
 $btnSettingsNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
-$fieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
-
-$tabSettings.Controls.Add($fieldPanel)
+$settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $settingsGroups = [ordered]@{
     "COMMON" = @{
@@ -851,6 +872,33 @@ $script:saveEnvBatGetValueFn = { param($name)
 }
 $script:saveEnvBatHasValueFn = { param($name) $true }
 
+function Get-CommonSettingsFiles {
+    return @(
+        [PSCustomObject]@{ Path = (Join-Path $scriptDir "common.bat"); Save = { Save-CommonSettings }; Reload = {} }
+    )
+}
+
+function Save-CommonSettings {
+    $commonBatPath = Join-Path $scriptDir "common.bat"
+    $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
+    Save-EnvBatFile -Path $commonBatPath -VarNames $commonVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+}
+
+function Update-CommonSettingsFields {
+    $commonBatPath = Join-Path $scriptDir "common.bat"
+    $commonDefaults = Get-SetEnvDefaults -Path $commonBatPath
+
+    $rows = @()
+    $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
+    foreach ($varName in $commonVars) {
+        $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
+        $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
+    }
+    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars @{} `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
+}
+
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
     if (!$GroupName) { return @() }
@@ -871,8 +919,6 @@ function Save-GroupSettings {
         }
     }
 
-    $nonKintoneVars = @($settingsVarLabels.Keys | Where-Object { $kintoneVars -notcontains $_ })
-    Save-EnvBatFile -Path $groupBatPath -VarNames $nonKintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
     Save-EnvBatFile -Path $groupBatPath -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
 }
 
@@ -888,7 +934,7 @@ function Get-GroupSettingsFieldValue {
 function Update-GroupSettingsFields {
     $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     if (!$target) {
-        $fieldPanel.Controls.Clear()
+        $settingsGroupFieldPanel.Controls.Clear()
         return
     }
 
@@ -896,15 +942,24 @@ function Update-GroupSettingsFields {
     $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $target)
 
     $rows = @()
-    foreach ($varName in $settingsVarLabels.Keys) {
+    foreach ($varName in $kintoneVars) {
         $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
-        $group = if ($kintoneVars -contains $varName) { "KINTONE" } else { "COMMON" }
-        $rows += [PSCustomObject]@{ Group = $group; VarName = $varName; Value = $varValue; Key = $varName }
+        $rows += [PSCustomObject]@{ Group = "KINTONE"; VarName = $varName; Value = $varValue; Key = $varName }
     }
-    Render-SettingsFields -Panel $fieldPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
+
+$settingsCommonTopPanel = (New-SettingsTopPanel `
+    -OnSave {
+        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }
+        Update-CommonSettingsFields
+    } `
+    -OnReload {
+        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }
+        Update-CommonSettingsFields
+    }).Panel
 
 $settingsGroupTopPanel = (New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsNewGroup) `
@@ -922,7 +977,8 @@ $settingsGroupTopPanel = (New-SettingsTopPanel `
         Update-GroupSettingsFields
     }).Panel
 
-$tabSettings.Controls.Add($settingsGroupTopPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 $btnSettingsNewGroup.Add_Click({
     Add-Type -AssemblyName Microsoft.VisualBasic
@@ -943,6 +999,14 @@ $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
     Update-GroupSettingsFields
 })
 
+$settingsSubTabControl.Add_SelectedIndexChanged({
+    if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
+        Update-CommonSettingsFields
+    } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
+        Update-GroupSettingsFields
+    }
+})
+
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
         Update-BaseTemplateNameList
@@ -950,7 +1014,11 @@ $tabControl.Add_SelectedIndexChanged({
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-GroupDropdowns
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
-        Update-GroupSettingsFields
+        if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
+            Update-CommonSettingsFields
+        } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
+            Update-GroupSettingsFields
+        }
     }
 })
 
@@ -959,8 +1027,10 @@ $tabControl.SelectedTab = $tabRun
 $form.Add_Shown({
     Update-BaseTemplateNameList
     Update-CustomTemplateNameList
+    Update-CommonSettingsFields
+    Update-GroupSettingsFields
     Update-GroupDropdowns
-
+    
     Adjust-InitialTabHeight -NestedTabControl $execTabControl
 })
 
