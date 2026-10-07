@@ -1,6 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
+call "%~dp0bats\common.bat"
+
 for %%A in (%*) do (
     set "arg=%%~A"
     if "!arg:~0,1!"=="-" (

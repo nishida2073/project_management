@@ -121,8 +121,8 @@ $categoryDefs = @(
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
-                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
-                    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
+                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
+                    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
                 )
                 BatchPath = $generateBat
                 ArgsFn = {
@@ -231,8 +231,8 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $true },
     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
-    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
-    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 220; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
+    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
+    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
 )
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
@@ -290,7 +290,7 @@ $multipleBatchExcelPanel.Controls.Add($grpMultipleBatchExcel)
 $inputRowHeight = 30
 $labelWidth = 150
 $inputWidth1 = 200
-$inputWidth2 = 250
+$inputWidth2 = 200
 $inputRowCenterY1 = 15 + ($inputRowHeight * 0) + [int]($inputRowHeight / 2)
 $inputRowCenterY2 = 15 + ($inputRowHeight * 1) + [int]($inputRowHeight / 2)
 $inputX1 = 15 + $labelWidth + 4
@@ -357,8 +357,8 @@ foreach ($groupName in (Get-GroupNames)) {
 }
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 180; Options = $groupOptions }
-    @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 220; Options = $targetConfigOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 200; Options = $groupOptions }
+    @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 200; Options = $targetConfigOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
@@ -395,6 +395,35 @@ function Update-GroupDropdowns {
     $cmbSettingsGroupTarget.Items.Clear()
     foreach ($groupName in $groupNames) {
         $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+    }
+
+    $cmbMultipleBatchTargetGroup.Items.Clear()
+    foreach ($groupName in $groupNames) {
+        $cmbMultipleBatchTargetGroup.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+    }
+    if ($cmbMultipleBatchTargetGroup.Items.Count -gt 0) {
+        $cmbMultipleBatchTargetGroup.SelectedIndex = 0
+    }
+
+    if ($script:batchInputControls -and $script:batchInputControls.ContainsKey("TargetGroupName")) {
+        $ctrl = $script:batchInputControls["TargetGroupName"]
+        if ($ctrl) {
+            $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
+            $ctrl.Items.Clear()
+            foreach ($groupName in $groupNames) {
+                $ctrl.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
+            }
+            if ($savedBatchValue) {
+                $matchingItem = $ctrl.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $savedBatchValue } | Select-Object -First 1
+                if ($matchingItem) {
+                    $ctrl.SelectedItem = $matchingItem
+                } elseif ($ctrl.Items.Count -gt 0) {
+                    $ctrl.SelectedIndex = 0
+                }
+            } elseif ($ctrl.Items.Count -gt 0) {
+                $ctrl.SelectedIndex = 0
+            }
+        }
     }
 
     if ($savedGroup) {
@@ -872,7 +901,7 @@ $script:saveEnvBatGetValueFn = { param($name)
         ""
     }
 }
-$script:saveEnvBatHasValueFn = { param($name) $true }
+$script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 
 function Get-CommonSettingsFiles {
     return @(
