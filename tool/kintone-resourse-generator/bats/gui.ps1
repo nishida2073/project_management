@@ -108,7 +108,7 @@ $categoryDefs = @(
                     $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
                     @("-TargetGroupName:$groupValue", "-SpaceId:$($ic['SpaceId'].Text.Trim())", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH") "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
                 OpenTarget = { param($ic) & $_.OutputPathFn $ic }
                 InputControls = $null
                 StepStatusLabel = $null
@@ -137,7 +137,7 @@ $categoryDefs = @(
                     }
                     $stepArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH") "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
                 OpenTarget = { param($ic) & $_.OutputPathFn $ic }
                 InputControls = $null
                 StepStatusLabel = $null
@@ -181,7 +181,7 @@ $categoryDefs = @(
                     $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
                     @("-TargetGroupName:$groupValue", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH") "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
                 OpenTarget = { param($ic) & $_.OutputPathFn $ic }
                 InputControls = $null
                 StepStatusLabel = $null
@@ -358,7 +358,7 @@ $logTabConditions = @(
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
-    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" } `
+    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" $setEnvBat } `
     -OnUpdateLogView { Update-LogView } -Conditions $logTabConditions | Out-Null
 
 
@@ -654,7 +654,7 @@ $btnMultipleBatchRunAll.Add_Click({
 
 function Get-TemplateFileNames {
     param([string]$EnvVarName)
-    $templatePath = Get-ResolvedVar $EnvVarName
+    $templatePath = Get-ResolvedVar $EnvVarName $setEnvBat
     if (!$templatePath -or !(Test-Path -LiteralPath $templatePath)) { return @() }
     return @(Get-ChildItem -LiteralPath $templatePath -Filter "*.xlsx" -ErrorAction SilentlyContinue |
         ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) } |
@@ -760,7 +760,7 @@ foreach ($groupKey in $settingsGroups.Keys) {
 $settingsToolTip = New-ToolTip
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
-$script:commonEnvResolver = { param($name) Get-ResolvedVar $name }
+$script:commonEnvResolver = { param($name) Get-ResolvedVar $name $setEnvBat }
 $script:fieldTextBoxes = @{}
 
 $settingsTrailingButtonVars = @{

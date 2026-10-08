@@ -46,7 +46,7 @@ function Get-SetEnvDefaults {
 }
 
 function Get-ResolvedVar {
-    param([string]$VarName, [string]$Path = $setEnvBat)
+    param([Parameter(Mandatory)][string]$VarName, [Parameter(Mandatory)][string]$Path)
     $val = [Environment]::GetEnvironmentVariable($VarName)
     if (!$val) {
         $defaults = Get-SetEnvDefaults -Path $Path
@@ -55,7 +55,7 @@ function Get-ResolvedVar {
         }
     }
     if (!$val) { return $val }
-    return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name } -BasePath $rootPath
+    return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name $Path } -BasePath $rootPath
 }
 
 function Save-EnvBatFile {
