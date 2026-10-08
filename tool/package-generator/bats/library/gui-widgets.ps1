@@ -1707,7 +1707,7 @@ function New-Grid {
     @{ HeaderPanel = $HeaderPanel; ContentPanel = $ContentPanel }
 }
 
-function Adjust-InitialTabHeight {
+function Update-TabHeight {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.TabControl]$NestedTabControl,
         [int]$TabHeaderAllowance = 45
