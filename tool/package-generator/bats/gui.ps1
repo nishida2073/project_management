@@ -84,8 +84,13 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "個別パッケージの作成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-package.bat"); OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
-            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイル更新"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = $script:commonEnvVars["CommonLogPath"]; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-package.bat"); OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
+        )
+    },
+    [PSCustomObject]@{
+        Label = "パッケージ定義"
+        ButtonDefs = @(
+            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
         )
     }
 )

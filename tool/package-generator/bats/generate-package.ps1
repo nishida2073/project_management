@@ -10,6 +10,7 @@ param(
     [string]$LogNamePrefix,
     [string]$SheetsInclude,
     [string]$SheetsExclude,
+    [string]$TemplateSheetName = "テンプレート",
     [string]$SourcePath,
     [string]$ClientName = ""
 )
@@ -47,6 +48,7 @@ try {
                 for ($i = 1; $i -le $workbook.Sheets.Count; $i++) {
                     $sheetNames += $workbook.Sheets.Item($i).Name
                 }
+                $sheetNames = $sheetNames | Where-Object { !(Test-NameMatchesPatterns -Name $_ -Patterns $TemplateSheetName) }
                 if ($SheetsInclude) {
                     $includePatterns = $SheetsInclude.Split(",") | ForEach-Object { $_.Trim() }
                     $sheetNames = $sheetNames | Where-Object { Test-NameMatchesPatterns -Name $_ -Patterns $includePatterns }

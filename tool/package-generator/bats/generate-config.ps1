@@ -5,7 +5,7 @@
 param(
     [string]$SourcePath,
     [string]$TargetConfigFilePath,
-    [string]$Force = "",
+    [string]$TemplateSheetName = "テンプレート",
     [string]$LogPath,
     [string]$LogNamePrefix,
     [string]$ClientName = ""
@@ -43,7 +43,7 @@ try {
                 $excel.EnableEvents = $false
 
                 $workbook = $excel.Workbooks.Open($TargetConfigFilePath)
-                $ws = $workbook.Worksheets.Item("テンプレート")
+                $ws = $workbook.Worksheets.Item($TemplateSheetName)
 
                 $sourceCell = Get-CellByKey -Sheet $ws -Key "取得元（フルパス）" -WholeMatch -ErrorOnMissing
                 $headerRow = $sourceCell.Row
@@ -108,7 +108,10 @@ try {
 
                 $workbook.Save()
                 $resultText = $resultLines -join "$newLine"
-                Write-MessageComplete "テンプレートを更新しました：$TargetConfigFilePath$newLine$resultText"
+                Write-Message "# 更新内容" -Type "Info" -NoHeader
+                Write-Message $resultText -Type "Info" -NoHeader
+                
+                Write-MessageComplete "テンプレートを更新しました：$TargetConfigFilePath"
             }
             catch {
                 throw "テンプレートの更新に失敗しました：$TargetConfigFilePath$newLine$($_.Exception.Message)"
