@@ -70,41 +70,21 @@ function Get-NewClientInitialValues {
 function Update-GroupDropdowns {
     $clientNames = @(Get-ClientNames)
 
-    $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
-    
-    if ($cmbSettingsGroupTarget) {
-        Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $clientNames
-        Restore-ComboSelection -ComboBox $cmbSettingsGroupTarget -SavedValue $savedSettings
-    }
-
     foreach ($cd in $categoryDefs) {
         foreach ($bd in $cd.ButtonDefs) {
             if ($bd.InputControls -and $bd.InputControls.ContainsKey("ClientName")) {
-                $cmb = $bd.InputControls["ClientName"]
-                $savedValue = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
-                if ($cmb) {
-                    Update-ComboItems -ComboBox $cmb -Items $clientNames
-                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedValue
-                }
+                Update-ComboBoxItems -ComboBox $bd.InputControls["ClientName"] -Items $clientNames
             }
         }
     }
 
-    if ($script:logTab -and $script:logTab.GroupCombo) {
-        $logItems = @($allGroupsOption) + $clientNames
-        Update-ComboItems -ComboBox $script:logTab.GroupCombo -Items $logItems
-        Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedLog
-    }
+    $logItems = @($allGroupsOption) + $clientNames
+    Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
 
-    if ($script:batchInputControls.ContainsKey("ClientName")) {
-        $ctrl = $script:batchInputControls["ClientName"]
-        if ($ctrl) {
-            $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-            Update-ComboItems -ComboBox $ctrl -Items $clientNames
-            Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedBatchValue
-        }
-    }
+    Update-ComboBoxItems -ComboBox $script:batchInputControls["ClientName"] -Items $clientNames
+
+    Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $clientNames
+
 }
 
 $categoryDefs = @(

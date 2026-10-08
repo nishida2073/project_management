@@ -46,6 +46,8 @@ $script:baseTemplateNamePlaceholder = "未選択"
 
 $script:customTemplateNamePlaceholder = "指定なし"
 
+$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
+
 $targetGroupOptions = @()
 foreach ($groupName in (Get-GroupNames)) {
     $targetGroupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
@@ -351,7 +353,7 @@ foreach ($groupName in (Get-GroupNames)) {
 }
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 200; Options = $groupOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 200; Options = $(@($allGroupsOption) + $groupOptions) }
     @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 200; Options = $targetConfigOptions }
 )
 
@@ -362,13 +364,17 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
 
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
-    $savedGroup = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
-    $savedConfig = Get-ComboBoxValue -SelectedItem $script:logTab.ConfigCombo.SelectedItem
-    $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    $savedMultipleBatch = Get-ComboBoxValue -SelectedItem $cmbMultipleBatchTargetGroup.SelectedItem
 
-    Update-ComboItems -ComboBox $script:logTab.GroupCombo -Items $groupNames
-    Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedGroup
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupName")) {
+                Update-ComboBoxItems -ComboBox $bd.InputControls["TargetGroupName"] -Items $groupNames
+            }
+        }
+    }
+
+    $logItems = @($allGroupsOption) + $groupNames
+    Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
 
     $configDir = Join-Path $rootPath "config"
     $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
@@ -378,36 +384,14 @@ function Update-GroupDropdowns {
         } |
         Sort-Object)
     $configItems = @($targetConfigOption) + $configNames
-    Update-ComboItems -ComboBox $script:logTab.ConfigCombo -Items $configItems
-    Restore-ComboSelection -ComboBox $script:logTab.ConfigCombo -SavedValue $savedConfig
+    Update-ComboBoxItems -ComboBox $script:logTab.ConfigCombo -Items $configItems
+    
+    Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupName"] -Items $groupNames
 
-    Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
-    Restore-ComboSelection -ComboBox $cmbSettingsGroupTarget -SavedValue $savedSettings
+    Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
 
-    Update-ComboItems -ComboBox $cmbMultipleBatchTargetGroup -Items $groupNames
-    Restore-ComboSelection -ComboBox $cmbMultipleBatchTargetGroup -SavedValue $savedMultipleBatch
+    Update-ComboBoxItems -ComboBox $cmbMultipleBatchTargetGroup -Items $groupNames
 
-    if ($script:batchInputControls -and $script:batchInputControls.ContainsKey("TargetGroupName")) {
-        $ctrl = $script:batchInputControls["TargetGroupName"]
-        if ($ctrl) {
-            $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-            Update-ComboItems -ComboBox $ctrl -Items $groupNames
-            Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedBatchValue
-        }
-    }
-
-    foreach ($cd in $categoryDefs) {
-        foreach ($bd in $cd.ButtonDefs) {
-            if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupName")) {
-                $cmb = $bd.InputControls["TargetGroupName"]
-                if ($cmb) {
-                    $savedValue = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
-                    Update-ComboItems -ComboBox $cmb -Items $groupNames
-                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedValue
-                }
-            }
-        }
-    }
 }
 
 function Set-RunButtonsEnabled {

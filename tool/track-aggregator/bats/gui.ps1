@@ -914,50 +914,26 @@ function Save-GroupSettings {
 
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
-
-    $savedSettings = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    $savedLog = Get-ComboBoxValue -SelectedItem $script:logTab.GroupCombo.SelectedItem
-    $savedMaster = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
     
-    if ($cmbSettingsGroupTarget) {
-        Update-ComboItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
-        Restore-ComboSelection -ComboBox $cmbSettingsGroupTarget -SavedValue $savedSettings
-    }
-
     foreach ($cd in $categoryDefs) {
         foreach ($bd in $cd.ButtonDefs) {
             if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupNameFilter")) {
-                $cmb = $bd.InputControls["TargetGroupNameFilter"]
-                $savedValue = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
-                if ($cmb) {
-                    $filterItems = @($allGroupsOption) + $groupNames
-                    Update-ComboItems -ComboBox $cmb -Items $filterItems
-                    Restore-ComboSelection -ComboBox $cmb -SavedValue $savedValue
-                }
+                $filterItems = @($allGroupsOption) + $groupNames
+                Update-ComboBoxItems -ComboBox $bd.InputControls["TargetGroupNameFilter"] -Items $filterItems
             }
         }
     }
 
-    if ($script:logTab -and $script:logTab.GroupCombo) {
-        $logItems = @($allGroupsOption) + $groupNames
-        Update-ComboItems -ComboBox $script:logTab.GroupCombo -Items $logItems
-        Restore-ComboSelection -ComboBox $script:logTab.GroupCombo -SavedValue $savedLog
-    }
+    $logItems = @($allGroupsOption) + $groupNames
+    Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
 
-    if ($cmbSettingsMasterOpsGroupTarget) {
-        Update-ComboItems -ComboBox $cmbSettingsMasterOpsGroupTarget -Items $groupNames
-        Restore-ComboSelection -ComboBox $cmbSettingsMasterOpsGroupTarget -SavedValue $savedMaster
-    }
+    $batchItems = @($allGroupsOption) + $groupNames
+    Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupNameFilter"] -Items $batchItems
 
-    if ($script:batchInputControls.ContainsKey("TargetGroupNameFilter")) {
-        $ctrl = $script:batchInputControls["TargetGroupNameFilter"]
-        if ($ctrl) {
-            $savedBatchValue = Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-            $batchItems = @($allGroupsOption) + $groupNames
-            Update-ComboItems -ComboBox $ctrl -Items $batchItems
-            Restore-ComboSelection -ComboBox $ctrl -SavedValue $savedBatchValue
-        }
-    }
+    Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
+
+    Update-ComboBoxItems -ComboBox $cmbSettingsMasterOpsGroupTarget -Items $groupNames
+
 }
 
 $btnSettingsGroupNewGroup.Add_Click({

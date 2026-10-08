@@ -1721,3 +1721,10 @@ function Restore-ComboSelection {
     }
 }
 
+function Update-ComboBoxItems {
+    param($ComboBox, $Items)
+    $savedValue = Get-ComboBoxValue -SelectedItem $ComboBox.SelectedItem
+    Update-ComboItems -ComboBox $ComboBox -Items $Items
+    Restore-ComboSelection -ComboBox $ComboBox -SavedValue $savedValue
+}
+
