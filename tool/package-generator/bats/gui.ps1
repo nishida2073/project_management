@@ -41,7 +41,7 @@ $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
 function New-ClientInput {
     param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
+    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
 }
 
 function Get-NewClientInitialValues {
@@ -116,7 +116,7 @@ $tabBatchAll = New-TabPage -Text "一括実行"
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -175,7 +175,7 @@ Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabCont
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象のグループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -298,7 +298,7 @@ $settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::F
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Label -Text "対象グループ"
+$lblSettingsGroupTarget = New-Label -Text "対象のグループ"
 
 $cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 

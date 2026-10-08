@@ -40,8 +40,8 @@ $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
 $dateAndGroupInputs = @(
-    [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 75; InputWidth = 90 }
-    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $blankOptions }
+    [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 150; InputWidth = 150 }
+    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
 )
 $categoryDefs = @(
     [PSCustomObject]@{
@@ -92,8 +92,8 @@ $execTabControl.Controls.Add($tabBatchAll)
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 75; InputWidth = 90 }
-        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $blankOptions; LabelWidth = 75; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 150; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -157,7 +157,7 @@ $syncMasterButtonDef = [PSCustomObject]@{
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象のグループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -353,7 +353,7 @@ $settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::F
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Label -Text "対象グループ"
+$lblSettingsGroupTarget = New-Label -Text "対象のグループ"
 
 $cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
@@ -386,7 +386,7 @@ $settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fi
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
-$lblSettingsMasterOpsGroupTarget = New-Label -Text "対象グループ"
+$lblSettingsMasterOpsGroupTarget = New-Label -Text "対象のグループ"
 
 $cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 

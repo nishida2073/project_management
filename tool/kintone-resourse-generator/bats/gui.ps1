@@ -57,7 +57,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "スペース作成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
@@ -92,7 +92,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "ダウンロード"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $false }
                 )
@@ -115,7 +115,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "設定ファイルの生成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
@@ -144,7 +144,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "kintoneへ反映"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $applyBat
@@ -166,7 +166,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "データチェック"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $checkBat
@@ -224,7 +224,7 @@ $cmbRunAllCustomTemplateName = New-ComboBox
 $allStepDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $batchRunAllInputs = @(
-    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true },
+    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true },
     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
@@ -291,7 +291,7 @@ $inputRowCenterY1 = 15 + ($inputRowHeight * 0) + [int]($inputRowHeight / 2)
 $inputRowCenterY2 = 15 + ($inputRowHeight * 1) + [int]($inputRowHeight / 2)
 $inputX1 = 15 + $labelWidth + 4
 
-$lblMultipleBatchTargetGroup = New-Label -Text "対象グループ" -X 15 -Y ($inputRowCenterY1 - 11) -Width $labelWidth -Height 22
+$lblMultipleBatchTargetGroup = New-Label -Text "対象のグループ" -X 15 -Y ($inputRowCenterY1 - 11) -Width $labelWidth -Height 22
 $cmbMultipleBatchTargetGroup = New-ComboBox -X $inputX1 -Y ($inputRowCenterY1 - 11) -Width $inputWidth1 -Height 22 -DisplayMember "Text"
 
 $lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y ($inputRowCenterY2 - 11) -Width $labelWidth -Height 22
@@ -332,7 +332,7 @@ foreach ($groupName in (Get-GroupNames)) {
 }
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 200; Options = $blankOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象のグループ"; LabelWidth = 150; ComboWidth = 200; Options = $blankOptions }
     @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 200; Options = $blankOptions }
 )
 
@@ -689,7 +689,7 @@ $settingsCommonTopPanel = (New-SettingsTopPanel `
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Label -Text "対象グループ"
+$lblSettingsGroupTarget = New-Label -Text "対象のグループ" -Width 150 -Height 24
 
 $cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 

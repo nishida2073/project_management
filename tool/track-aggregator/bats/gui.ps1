@@ -40,7 +40,7 @@ $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
 function New-TargetGroupInput {
     param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
+    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
 }
 
 $categoryDefs = @(
@@ -77,7 +77,7 @@ $categoryDefs = @(
                 OpenTarget = $script:commonEnvVars["OutputYearComparisonCollectDir"]
                 Inputs = @(
                     (New-TargetGroupInput)
-                    [PSCustomObject]@{ Name = "TargetCompanyNames"; Label = "対象の会社名"; Default = $script:commonEnvVars["TargetCompanyNames"]; LabelWidth = 85; InputWidth = 260; NewRow = $true }
+                    [PSCustomObject]@{ Name = "TargetCompanyNames"; Label = "対象の会社名"; Default = $script:commonEnvVars["TargetCompanyNames"]; LabelWidth = 150; InputWidth = 150; NewRow = $true }
                     [PSCustomObject]@{ Name = "ComparePeriod"; Label = "比較年"; Default = $script:commonEnvVars["ComparePeriod"]; LabelWidth = 50; InputWidth = 40 }
                     [PSCustomObject]@{
                         Name = "YearOrder"; Label = "表示順"; Default = $script:commonEnvVars["YearOrder"]; LabelWidth = 55; InputWidth = 70
@@ -118,7 +118,7 @@ $execTabControl.Controls.Add($tabBatchAll)
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $blankOptions; LabelWidth = 75; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -181,7 +181,7 @@ $syncMasterButtonDef = [PSCustomObject]@{
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象のグループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -338,7 +338,7 @@ $settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::F
 $tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Label -Text "対象グループ"
+$lblSettingsGroupTarget = New-Label -Text "対象のグループ"
 
 $cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
@@ -371,7 +371,7 @@ $settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fi
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
-$lblSettingsMasterOpsGroupTarget = New-Label -Text "対象グループ"
+$lblSettingsMasterOpsGroupTarget = New-Label -Text "対象のグループ"
 
 $cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
