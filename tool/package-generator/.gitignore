@@ -1,9 +1,7 @@
 /logs
 /generated
-/download/*
-!/download/サンプル/
 /work
 /test
 *.exe
-!/clients/サンプル*
+!/clients/*
 !/clients/README.md
