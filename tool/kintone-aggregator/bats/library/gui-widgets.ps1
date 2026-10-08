@@ -1176,24 +1176,6 @@ function Get-GroupSettingsFieldValue {
     return ""
 }
 
-function Update-SettingsGroupList {
-    $selected = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    $cmbSettingsGroupTarget.Items.Clear()
-    foreach ($groupName in (Get-GroupNames)) {
-        $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
-    }
-    if ($selected) {
-        $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selected } | Select-Object -First 1
-        if ($matchingItem) {
-            $cmbSettingsGroupTarget.SelectedItem = $matchingItem
-        } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-            $cmbSettingsGroupTarget.SelectedIndex = 0
-        }
-    } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
-        $cmbSettingsGroupTarget.SelectedIndex = 0
-    }
-}
-
 function Sync-MentionRowsFromControls {
     foreach ($entry in $script:mentionRowControls) {
         $entry.Row.Code = $entry.CodeBox.Text

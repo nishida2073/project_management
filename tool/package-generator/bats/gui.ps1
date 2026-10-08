@@ -324,7 +324,6 @@ $settingsGroupTopPanel = (New-SettingsTopPanel `
         $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
-        Update-SettingsGroupList
         Update-GroupSettingsFields
     } `
     -OnReload {
