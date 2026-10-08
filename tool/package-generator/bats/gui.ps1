@@ -70,12 +70,8 @@ function Get-NewClientInitialValues {
 function Update-GroupDropdowns {
     $clientNames = @(Get-ClientNames)
 
-    foreach ($cd in $categoryDefs) {
-        foreach ($bd in $cd.ButtonDefs) {
-            if ($bd.InputControls -and $bd.InputControls.ContainsKey("ClientName")) {
-                Update-ComboBoxItems -ComboBox $bd.InputControls["ClientName"] -Items $clientNames
-            }
-        }
+    $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["ClientName"] } | ForEach-Object {
+        Update-ComboBoxItems -ComboBox $_.InputControls["ClientName"] -Items $clientNames
     }
 
     $logItems = @($allGroupsOption) + $clientNames

@@ -914,26 +914,16 @@ function Save-GroupSettings {
 
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
-    
-    foreach ($cd in $categoryDefs) {
-        foreach ($bd in $cd.ButtonDefs) {
-            if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupNameFilter")) {
-                $filterItems = @($allGroupsOption) + $groupNames
-                Update-ComboBoxItems -ComboBox $bd.InputControls["TargetGroupNameFilter"] -Items $filterItems
-            }
-        }
+    $filterItems = @($allGroupsOption) + $groupNames
+
+    $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["TargetGroupNameFilter"] } | ForEach-Object {
+        Update-ComboBoxItems -ComboBox $_.InputControls["TargetGroupNameFilter"] -Items $filterItems
     }
 
-    $logItems = @($allGroupsOption) + $groupNames
-    Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
-
-    $batchItems = @($allGroupsOption) + $groupNames
-    Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupNameFilter"] -Items $batchItems
-
+    Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $filterItems
+    Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupNameFilter"] -Items $filterItems
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
-
     Update-ComboBoxItems -ComboBox $cmbSettingsMasterOpsGroupTarget -Items $groupNames
-
 }
 
 $btnSettingsGroupNewGroup.Add_Click({

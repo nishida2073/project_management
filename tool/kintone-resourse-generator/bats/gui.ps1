@@ -365,12 +365,8 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
 function Update-GroupDropdowns {
     $groupNames = @(Get-GroupNames)
 
-    foreach ($cd in $categoryDefs) {
-        foreach ($bd in $cd.ButtonDefs) {
-            if ($bd.InputControls -and $bd.InputControls.ContainsKey("TargetGroupName")) {
-                Update-ComboBoxItems -ComboBox $bd.InputControls["TargetGroupName"] -Items $groupNames
-            }
-        }
+    $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["TargetGroupName"] } | ForEach-Object {
+        Update-ComboBoxItems -ComboBox $_.InputControls["TargetGroupName"] -Items $groupNames
     }
 
     $logItems = @($allGroupsOption) + $groupNames
