@@ -79,7 +79,9 @@ function Download-TrackResults {
             $groupDir = Join-Path $TargetRootDir $TargetGroupName
             New-Item -Path $groupDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
             $resultDir = Join-Path $groupDir $name
-            Remove-Item $resultDir -Recurse -Force -ErrorAction SilentlyContinue
+            if (Test-Path -LiteralPath $resultDir) {
+                Remove-Item $resultDir -Recurse -Force
+            }
             New-Item -Path $resultDir -ItemType Directory | Out-Null
         }
     }

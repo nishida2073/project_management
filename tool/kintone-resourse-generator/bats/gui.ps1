@@ -11,13 +11,12 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
 
 if ($MyInvocation.MyCommand.Path) {
-    $scriptDir = Split-Path $MyInvocation.MyCommand.Path
     $rootPath = Split-Path $scriptDir -Parent
 } else {
-    $exePath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
-    $rootPath = Split-Path $exePath
-    $scriptDir = Join-Path $rootPath "bats"
+    $rootPath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
+$scriptDir = Join-Path $rootPath "bats"
+
 $createSpaceBat = Join-Path $rootPath "create-space-from-template.bat"
 $downloadBat = Join-Path $rootPath "download-kintone-resources.bat"
 $generateBat = Join-Path $rootPath "generate-config-from-template.bat"
@@ -27,7 +26,7 @@ $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
 $setEnvBat = Join-Path $scriptDir "common.bat"
 
-$libraryDir = Join-Path $rootPath "bats\library"
+$libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }

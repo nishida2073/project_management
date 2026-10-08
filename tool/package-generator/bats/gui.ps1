@@ -11,21 +11,20 @@ Add-Type -AssemblyName System.Drawing
 [System.Windows.Forms.Application]::SetCompatibleTextRenderingDefault($false)
 
 if ($MyInvocation.MyCommand.Path) {
-    $scriptDir = Split-Path $MyInvocation.MyCommand.Path
     $rootPath = Split-Path $scriptDir -Parent
 } else {
     $rootPath = Split-Path ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
-$basePath = Join-Path $rootPath "bats"
+$scriptDir = Join-Path $rootPath "bats"
 
-$libraryDir = Join-Path $basePath "library"
+$libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
 $env:GUI_LOG_MODE = "1"
 
-$setEnvBat = Join-Path $basePath "common-env.bat"
+$setEnvBat = Join-Path $scriptDir "common-env.bat"
 $script:commonEnvVars = Get-BatEnvVars -BatPath $setEnvBat
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -132,7 +131,7 @@ function Start-BatchRunAll {
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -InvokeStep {
             param($bd)
-            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $scriptDir -Form $form `
                 -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
                 -GetBatArgs {
                     param($bd)
@@ -151,7 +150,7 @@ $script:batchRunButton.Add_Click({ Start-BatchRunAll })
 
 New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
-    Invoke-BatButton -ButtonDef $bd -WorkingDirectory $basePath -Form $form `
+    Invoke-BatButton -ButtonDef $bd -WorkingDirectory $scriptDir -Form $form `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -CurrentProcessRef ([ref]$script:currentProc) `
         -GetBatArgs {
@@ -288,7 +287,7 @@ $settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
-        [PSCustomObject]@{ Path = (Join-Path $basePath "common-env.bat"); Save = { Save-CommonSettings }; Reload = {} }
+        [PSCustomObject]@{ Path = (Join-Path $scriptDir "common-env.bat"); Save = { Save-CommonSettings }; Reload = {} }
     )
 }
 
@@ -345,7 +344,7 @@ function Get-GroupNames {
 }
 
 function Get-CommonSettingsFieldRows {
-    $raw = Get-SetLineRawValues -Path (Join-Path $basePath "common-env.bat")
+    $raw = Get-SetLineRawValues -Path (Join-Path $scriptDir "common-env.bat")
     foreach ($varName in $commonSettingsVars) {
         [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
     }
@@ -386,14 +385,14 @@ function Update-GroupSettingsFields {
     Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
-        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
+        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -scriptDir $rootPathValue }).GetNewClosure() `
         -TrailingButtonVars $trailingButtons | Out-Null
 
     $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
 function Save-CommonSettings {
-    $path = Join-Path $basePath "common-env.bat"
+    $path = Join-Path $scriptDir "common-env.bat"
 
     Save-EnvBatFile -Path $path -VarNames $commonSettingsVars `
         -GetValueFn { param($varName)
