@@ -945,9 +945,11 @@ $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabSettings) {
-        Update-SettingsGroupList
-        Update-CommonSettingsFields
-        Update-GroupSettingsFields
+        if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
+            Update-CommonSettingsFields
+        } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
+            Update-GroupSettingsFields
+        }
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-LogView
     }
@@ -958,8 +960,6 @@ $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
     Update-GroupDropdowns
-    Update-CommonSettingsFields
-    Update-GroupSettingsFields
     Adjust-InitialTabHeight -NestedTabControl $execTabControl
 })
 

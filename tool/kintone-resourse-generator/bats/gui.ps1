@@ -910,26 +910,21 @@ $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabRun) {
         Update-BaseTemplateNameList
         Update-CustomTemplateNameList
-    } elseif ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-GroupDropdowns
     } elseif ($tabControl.SelectedTab -eq $tabSettings) {
         if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
             Update-CommonSettingsFields
         } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
             Update-GroupSettingsFields
         }
+    } elseif ($tabControl.SelectedTab -eq $tabLogs) {
+            Update-LogView
     }
 })
 
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
-    Update-BaseTemplateNameList
-    Update-CustomTemplateNameList
-    Update-CommonSettingsFields
-    Update-GroupSettingsFields
     Update-GroupDropdowns
-    
     Adjust-InitialTabHeight -NestedTabControl $execTabControl
 })
 
