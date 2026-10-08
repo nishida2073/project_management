@@ -318,8 +318,8 @@ $settingsSubTabControl.Controls.Add($tabSettingsCommon)
 $tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$tabSettingsMasterOps = New-TabPage -Text "マスター操作"
-$settingsSubTabControl.Controls.Add($tabSettingsMasterOps)
+$tabSettingsMaster = New-TabPage -Text "マスター操作"
+$settingsSubTabControl.Controls.Add($tabSettingsMaster)
 
 $settingsToolTip = New-ToolTip
 
@@ -371,54 +371,52 @@ $settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fi
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
-$lblSettingsMasterOpsGroupTarget = New-Label -Text "対象のグループ"
+$lblSettingsMasterGroupTarget = New-Label -Text "対象のグループ"
 
-$cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
+$cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
-$lnkSettingsMasterOpsOpenXlsx = New-LinkLabel -Text "開く"
+$lnkSettingsMasterOpenXlsx = New-LinkLabel -Text "開く"
 
-$lblSettingsMasterOpsSaveTarget = New-Label -Text "保存対象"
-$lblSettingsMasterOpsSaveTarget.AutoSize = $true
+$lblSettingsMasterSaveTarget = New-Label -Text "保存対象"
+$lblSettingsMasterSaveTarget.AutoSize = $true
 
-$cmbSettingsMasterOpsSaveTarget = New-ComboBox -DisplayMember "Text" -ValueMember "Value"
-$cmbSettingsMasterOpsSaveTarget.DisplayMember = "Text"
-$cmbSettingsMasterOpsSaveTarget.ValueMember = "Value"
-$cmbSettingsMasterOpsSaveTarget.Items.Add([PSCustomObject]@{ Text = "すべて"; Value = "すべて" }) | Out-Null
-$cmbSettingsMasterOpsSaveTarget.Items.Add([PSCustomObject]@{ Text = "テスト"; Value = "テスト" }) | Out-Null
-$cmbSettingsMasterOpsSaveTarget.Items.Add([PSCustomObject]@{ Text = "アンケート"; Value = "アンケート" }) | Out-Null
-$cmbSettingsMasterOpsSaveTarget.SelectedIndex = 0
-$cmbSettingsMasterOpsSaveTarget.Size = New-Object System.Drawing.Size(120, 24)
-$cmbSettingsMasterOpsSaveTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbSettingsMasterSaveTarget = New-ComboBox -DisplayMember "Text" -ValueMember "Value"
+$cmbSettingsMasterSaveTarget.DisplayMember = "Text"
+$cmbSettingsMasterSaveTarget.ValueMember = "Value"
+$cmbSettingsMasterSaveTarget.Items.Add([PSCustomObject]@{ Text = "すべて"; Value = "すべて" }) | Out-Null
+$cmbSettingsMasterSaveTarget.Items.Add([PSCustomObject]@{ Text = "テスト"; Value = "テスト" }) | Out-Null
+$cmbSettingsMasterSaveTarget.Items.Add([PSCustomObject]@{ Text = "アンケート"; Value = "アンケート" }) | Out-Null
+$cmbSettingsMasterSaveTarget.SelectedIndex = 0
+$cmbSettingsMasterSaveTarget.Size = New-Object System.Drawing.Size(120, 24)
+$cmbSettingsMasterSaveTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 
-$script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
+$settingsMasterTopPanel = (New-SettingsTopPanel `
+    -ExtraControls @($lblSettingsMasterGroupTarget, $cmbSettingsMasterGroupTarget, $lnkSettingsMasterOpenXlsx) `
     -ButtonRowY 78 `
-    -OnSave { Save-MasterOpsToExcel } `
+    -OnSave { Save-MasterToExcel } `
     -OnReload {
-        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
-        Read-MasterOpsExcelData -GroupName $target
-    }
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
+        Read-MasterExcelData -GroupName $target
+    }).Panel
 
-$settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
+$lblSettingsMasterSaveTarget.Location = New-Object System.Drawing.Point($lblSettingsMasterGroupTarget.Location.X, 48)
+$cmbSettingsMasterSaveTarget.Location = New-Object System.Drawing.Point($cmbSettingsMasterGroupTarget.Location.X, 46)
+$settingsMasterTopPanel.Controls.Add($lblSettingsMasterSaveTarget)
+$settingsMasterTopPanel.Controls.Add($cmbSettingsMasterSaveTarget)
 
-$lblSettingsMasterOpsSaveTarget.Location = New-Object System.Drawing.Point($lblSettingsMasterOpsGroupTarget.Location.X, 48)
-$cmbSettingsMasterOpsSaveTarget.Location = New-Object System.Drawing.Point($cmbSettingsMasterOpsGroupTarget.Location.X, 46)
-$settingsMasterOpsTopPanel.Controls.Add($lblSettingsMasterOpsSaveTarget)
-$settingsMasterOpsTopPanel.Controls.Add($cmbSettingsMasterOpsSaveTarget)
+$settingsMasterBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
-$settingsMasterOpsPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
-
-$tabSettingsMasterOps.Controls.Add($settingsMasterOpsPanel)
-$tabSettingsMasterOps.Controls.Add($settingsMasterOpsTopPanel)
+$tabSettingsMaster.Controls.Add($settingsMasterBottomPanel)
+$tabSettingsMaster.Controls.Add($settingsMasterTopPanel)
 
 $grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
-$btnMasterOpsSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
-$btnMasterOpsSyncExecute.Add_Click({
+$btnMasterSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
+$btnMasterSyncExecute.Add_Click({
     try {
         $batchPath = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
-        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
-        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterOpsStatusPlaceholder -Action {
+        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
+        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterStatusPlaceholder -Action {
             $script:suppressComboSync = $true
             $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
             if ($matchingItem) { $cmbSettingsGroupTarget.SelectedItem = $matchingItem }
@@ -439,10 +437,10 @@ $btnMasterOpsSyncExecute.Add_Click({
         [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
 })
-$grpUserMasterSync.Controls.Add($btnMasterOpsSyncExecute)
+$grpUserMasterSync.Controls.Add($btnMasterSyncExecute)
 
-$lblMasterOpsStatusPlaceholder = New-Label -X 130 -Y 30 -Width 500 -Height 24 -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
-$grpUserMasterSync.Controls.Add($lblMasterOpsStatusPlaceholder)
+$lblMasterStatusPlaceholder = New-Label -X 130 -Y 30 -Width 500 -Height 24 -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
+$grpUserMasterSync.Controls.Add($lblMasterStatusPlaceholder)
 
 $grpSurveyEdit = New-GroupBox -Text "アンケート編集" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
@@ -475,7 +473,7 @@ $script:testSheetDef = @{
 }
 
 $controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpTestEdit, (New-Panel -Height 10), $grpSurveyEdit, (New-Panel -Height 10))
-Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
+Add-StackedDockedControls -Container $settingsMasterBottomPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 
 function Update-SurveyGrid {
     $panels = New-Grid -GroupBox $grpSurveyEdit -RowDatas ([ref]$script:surveyRows) -OnDelete {
@@ -543,7 +541,7 @@ function Read-SurveyExcelData {
 }
 
 function Save-SurveyToExcel {
-    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-SurveyGridData)
@@ -619,11 +617,11 @@ function Read-TestExcelData {
     }
 }
 
-function Save-MasterOpsToExcel {
-    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+function Save-MasterToExcel {
+    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
-        $saveTarget = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsSaveTarget.SelectedItem
+        $saveTarget = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterSaveTarget.SelectedItem
         switch ($saveTarget) {
             "すべて" {
                 $surveyDatas = @(Read-SurveyGridData)
@@ -648,7 +646,7 @@ function Save-MasterOpsToExcel {
     }
 }
 
-function Read-MasterOpsExcelData {
+function Read-MasterExcelData {
     param([string]$GroupName)
 
     $xlsxPath = Get-GroupXlsxPath $GroupName
@@ -707,7 +705,7 @@ function Read-MasterOpsExcelData {
 }
 
 function Save-TestToExcel {
-    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-TestGridData)
@@ -920,7 +918,7 @@ function Update-GroupDropdowns {
     Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $filterItems
     Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupNameFilter"] -Items $filterItems
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
-    Update-ComboBoxItems -ComboBox $cmbSettingsMasterOpsGroupTarget -Items $groupNames
+    Update-ComboBoxItems -ComboBox $cmbSettingsMasterGroupTarget -Items $groupNames
 }
 
 $btnSettingsGroupNewGroup.Add_Click({
@@ -938,14 +936,14 @@ $btnSettingsGroupNewGroup.Add_Click({
     $cmbSettingsGroupTarget.SelectedItem = $cmbSettingsGroupTarget.Items[-1]
 })
 
-$lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+$lnkSettingsMasterOpenXlsx.Add_LinkClicked({
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
     Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
 })
 
-$cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
-    Read-MasterOpsExcelData -GroupName $target
+$cmbSettingsMasterGroupTarget.Add_SelectedIndexChanged({
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
+    Read-MasterExcelData -GroupName $target
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({

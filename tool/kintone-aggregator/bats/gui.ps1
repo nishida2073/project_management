@@ -332,8 +332,8 @@ $settingsSubTabControl.Controls.Add($tabSettingsCommon)
 $tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$tabSettingsMasterOps = New-TabPage -Text "マスター操作"
-$settingsSubTabControl.Controls.Add($tabSettingsMasterOps)
+$tabSettingsMaster = New-TabPage -Text "マスター操作"
+$settingsSubTabControl.Controls.Add($tabSettingsMaster)
 
 $settingsToolTip = New-ToolTip
 
@@ -386,35 +386,33 @@ $settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fi
 $tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
-$lblSettingsMasterOpsGroupTarget = New-Label -Text "対象のグループ"
+$lblSettingsMasterGroupTarget = New-Label -Text "対象のグループ"
 
-$cmbSettingsMasterOpsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
+$cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
 
-$lnkSettingsMasterOpsOpenXlsx = New-LinkLabel -Text "開く"
+$lnkSettingsMasterOpenXlsx = New-LinkLabel -Text "開く"
 
-$script:settingsMasterOpsTopPanelObj = New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsMasterOpsGroupTarget, $cmbSettingsMasterOpsGroupTarget, $lnkSettingsMasterOpsOpenXlsx) `
+$settingsMasterTopPanel = (New-SettingsTopPanel `
+    -ExtraControls @($lblSettingsMasterGroupTarget, $cmbSettingsMasterGroupTarget, $lnkSettingsMasterOpenXlsx) `
     -OnSave { Save-ScheduleToExcel } `
     -OnReload {
-        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
         Read-ScheduleExcelData -GroupName $target
-    }
+    }).Panel
 
-$settingsMasterOpsTopPanel = $script:settingsMasterOpsTopPanelObj.Panel
+$settingsMasterBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
-$settingsMasterOpsPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
-
-$tabSettingsMasterOps.Controls.Add($settingsMasterOpsPanel)
-$tabSettingsMasterOps.Controls.Add($settingsMasterOpsTopPanel)
+$tabSettingsMaster.Controls.Add($settingsMasterBottomPanel)
+$tabSettingsMaster.Controls.Add($settingsMasterTopPanel)
 
 $grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
-$btnMasterOpsSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
-$btnMasterOpsSyncExecute.Add_Click({
+$btnMasterSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
+$btnMasterSyncExecute.Add_Click({
     try {
         $batchPath = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
-        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
-        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterOpsStatusPlaceholder -Action {
+        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
+        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterStatusPlaceholder -Action {
             $script:suppressComboSync = $true
             $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
             if ($matchingItem) { $cmbSettingsGroupTarget.SelectedItem = $matchingItem }
@@ -435,10 +433,10 @@ $btnMasterOpsSyncExecute.Add_Click({
         [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
     }
 })
-$grpUserMasterSync.Controls.Add($btnMasterOpsSyncExecute)
+$grpUserMasterSync.Controls.Add($btnMasterSyncExecute)
 
-$lblMasterOpsStatusPlaceholder = New-Label -X 130 -Y 30 -Width 500 -Height 24 -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
-$grpUserMasterSync.Controls.Add($lblMasterOpsStatusPlaceholder)
+$lblMasterStatusPlaceholder = New-Label -X 130 -Y 30 -Width 500 -Height 24 -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
+$grpUserMasterSync.Controls.Add($lblMasterStatusPlaceholder)
 
 function Get-CommonSettingsFieldRows {
     $raw = Get-SetLineRawValues -Path (Join-Path $scriptDir "common-env.bat")
@@ -737,7 +735,7 @@ function Update-GroupDropdowns {
     Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $filterItems
     Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupNameFilter"] -Items $filterItems
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
-    Update-ComboBoxItems -ComboBox $cmbSettingsMasterOpsGroupTarget -Items $groupNames
+    Update-ComboBoxItems -ComboBox $cmbSettingsMasterGroupTarget -Items $groupNames
 }
 
 $btnSettingsGroupNewGroup.Add_Click({
@@ -770,7 +768,7 @@ $script:scheduleSheetDef = @{
 }
 
 $controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpScheduleEdit, (New-Panel -Height 10))
-Add-StackedDockedControls -Container $settingsMasterOpsPanel -ControlsTopToBottom $controlsToStack -Spacing 0
+Add-StackedDockedControls -Container $settingsMasterBottomPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 
 function Update-ScheduleGrid {
     $panels = New-Grid -GroupBox $grpScheduleEdit -RowDatas ([ref]$script:scheduleRows) -OnDelete {
@@ -838,7 +836,7 @@ function Read-ScheduleExcelData {
 }
 
 function Save-ScheduleToExcel {
-    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-ScheduleGridData)
@@ -849,14 +847,14 @@ function Save-ScheduleToExcel {
     }
 }
 
-$lnkSettingsMasterOpsOpenXlsx.Add_LinkClicked({
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+$lnkSettingsMasterOpenXlsx.Add_LinkClicked({
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
     $xlsxPath = Get-GroupXlsxPath $target
     Open-TargetOrWarn -Path $xlsxPath
 })
 
-$cmbSettingsMasterOpsGroupTarget.Add_SelectedIndexChanged({
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterOpsGroupTarget.SelectedItem
+$cmbSettingsMasterGroupTarget.Add_SelectedIndexChanged({
+    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
     Read-ScheduleExcelData -GroupName $target
 })
 
