@@ -36,14 +36,11 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
-$groupOptions = @($allGroupsOption)
-foreach ($groupName in (Get-GroupNames)) {
-    $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
-}
+$blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
+
 function New-TargetGroupInput {
     param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $groupOptions; NewRow = $NewRow }
+    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
 }
 
 $categoryDefs = @(
@@ -121,7 +118,7 @@ $execTabControl.Controls.Add($tabBatchAll)
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 75; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $blankOptions; LabelWidth = 75; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -184,7 +181,7 @@ $syncMasterButtonDef = [PSCustomObject]@{
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $groupOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -912,8 +909,9 @@ function Save-GroupSettings {
 }
 
 function Update-GroupDropdowns {
+    $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
     $groupNames = @(Get-GroupNames)
-    $filterItems = @($allGroupsOption) + $groupNames
+    $filterItems = @($allOption) + $groupNames
 
     $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["TargetGroupNameFilter"] } | ForEach-Object {
         Update-ComboBoxItems -ComboBox $_.InputControls["TargetGroupNameFilter"] -Items $filterItems

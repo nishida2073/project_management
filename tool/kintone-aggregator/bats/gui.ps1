@@ -36,16 +36,12 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
-$groupOptions = @($allGroupsOption)
-foreach ($groupName in (Get-GroupNames)) {
-    $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
-}
+$blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
 $dateAndGroupInputs = @(
     [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 75; InputWidth = 90 }
-    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $groupOptions }
+    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Default = ""; LabelWidth = 75; InputWidth = 150; Options = $blankOptions }
 )
 $categoryDefs = @(
     [PSCustomObject]@{
@@ -97,7 +93,7 @@ $execTabControl.Controls.Add($tabBatchAll)
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
         [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 75; InputWidth = 90 }
-        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $groupOptions; LabelWidth = 75; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象グループ"; Options = $blankOptions; LabelWidth = 75; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -161,7 +157,7 @@ $syncMasterButtonDef = [PSCustomObject]@{
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $groupOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
@@ -730,8 +726,9 @@ function Save-GroupSettings {
 }
 
 function Update-GroupDropdowns {
+    $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
     $groupNames = @(Get-GroupNames)
-    $filterItems = @($allGroupsOption) + $groupNames
+    $filterItems = @($allOption) + $groupNames
 
     $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["TargetGroupNameFilter"] } | ForEach-Object {
         Update-ComboBoxItems -ComboBox $_.InputControls["TargetGroupNameFilter"] -Items $filterItems

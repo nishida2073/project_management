@@ -37,14 +37,11 @@ function Get-ClientNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
-$clientOptions = @()
-foreach ($clientName in (Get-ClientNames)) {
-    $clientOptions += [PSCustomObject]@{ Text = $clientName; Value = $clientName }
-}
+$blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
+
 function New-ClientInput {
     param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $clientOptions; NewRow = $NewRow }
+    [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
 }
 
 function Get-NewClientInitialValues {
@@ -67,13 +64,14 @@ function Get-NewClientInitialValues {
 }
 
 function Update-GroupDropdowns {
+    $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
     $clientNames = @(Get-ClientNames)
 
     $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["ClientName"] } | ForEach-Object {
         Update-ComboBoxItems -ComboBox $_.InputControls["ClientName"] -Items $clientNames
     }
 
-    $logItems = @($allGroupsOption) + $clientNames
+    $logItems = @($allOption) + $clientNames
     Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
 
     Update-ComboBoxItems -ComboBox $script:batchInputControls["ClientName"] -Items $clientNames
@@ -118,7 +116,7 @@ $tabBatchAll = New-TabPage -Text "一括実行"
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
-        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $clientOptions; LabelWidth = 150; InputWidth = 150 }
+        [PSCustomObject]@{ Name = "ClientName"; Label = "対象グループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
@@ -177,7 +175,7 @@ Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabCont
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = @($allGroupsOption, $clientOptions) }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `

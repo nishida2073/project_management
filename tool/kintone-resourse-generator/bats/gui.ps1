@@ -45,12 +45,7 @@ $script:baseTemplateNamePlaceholder = "未選択"
 
 $script:customTemplateNamePlaceholder = "指定なし"
 
-$allGroupsOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
-
-$targetGroupOptions = @()
-foreach ($groupName in (Get-GroupNames)) {
-    $targetGroupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
-}
+$blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 $cmbBaseTemplateName = New-ComboBox -Width 220 -Height 22
 
 $cmbCustomTemplateName = New-ComboBox -Width 180 -Height 22
@@ -62,7 +57,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "スペース作成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $true }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
@@ -97,7 +92,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "ダウンロード"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $false }
                 )
@@ -120,7 +115,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "設定ファイルの生成"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
@@ -149,7 +144,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "kintoneへ反映"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $applyBat
@@ -171,7 +166,7 @@ $categoryDefs = @(
             [PSCustomObject]@{
                 Label = "データチェック"
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $false }
+                    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
                 BatchPath = $checkBat
@@ -229,7 +224,7 @@ $cmbRunAllCustomTemplateName = New-ComboBox
 $allStepDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
 
 $batchRunAllInputs = @(
-    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $targetGroupOptions; Require = $true },
+    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象グループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true },
     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
@@ -331,29 +326,14 @@ foreach ($cd in $categoryDefs) {
     $allButtonDefs += $cd.ButtonDefs
 }
 
-$targetConfigOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
-$targetConfigOptions = @($targetConfigOption)
-$configDir = Join-Path $rootPath "config"
-if (Test-Path -LiteralPath $configDir) {
-    $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
-        ForEach-Object {
-            $basename = $_.BaseName
-            $basename -replace '_config$', ''
-        } |
-        Sort-Object)
-    foreach ($name in $configNames) {
-        $targetConfigOptions += [PSCustomObject]@{ Text = $name; Value = $name }
-    }
-}
-
 $groupOptions = @()
 foreach ($groupName in (Get-GroupNames)) {
     $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
 }
 
 $logTabConditions = @(
-    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 200; Options = $(@($allGroupsOption) + $groupOptions) }
-    @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 200; Options = $targetConfigOptions }
+    @{ PropertyName = "GroupCombo"; LabelText = "対象グループ"; LabelWidth = 150; ComboWidth = 200; Options = $blankOptions }
+    @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 200; Options = $blankOptions }
 )
 
 New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
@@ -362,13 +342,14 @@ New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
 
 
 function Update-GroupDropdowns {
+    $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
     $groupNames = @(Get-GroupNames)
 
     $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["TargetGroupName"] } | ForEach-Object {
         Update-ComboBoxItems -ComboBox $_.InputControls["TargetGroupName"] -Items $groupNames
     }
 
-    $logItems = @($allGroupsOption) + $groupNames
+    $logItems = @($allOption) + $groupNames
     Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
 
     $configDir = Join-Path $rootPath "config"
@@ -378,7 +359,7 @@ function Update-GroupDropdowns {
             $basename -replace '_config$', ''
         } |
         Sort-Object)
-    $configItems = @($targetConfigOption) + $configNames
+    $configItems = @($allOption) + $configNames
     Update-ComboBoxItems -ComboBox $script:logTab.ConfigCombo -Items $configItems
     
     Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupName"] -Items $groupNames
