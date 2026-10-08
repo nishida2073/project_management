@@ -1203,6 +1203,33 @@ function Sync-MentionRowsFromControls {
     }
 }
 
+function Register-MentionEditorHandlers {
+    param([scriptblock]$OnChange)
+
+    $script:mentionEditorOnChange = $OnChange
+
+    if ($script:mentionEditorAddButton) {
+        $script:mentionEditorAddButton.Add_Click({
+            Sync-MentionRowsFromControls
+            if ($null -eq $script:mentionRows) { $script:mentionRows = @() }
+            $script:mentionRows += @([PSCustomObject]@{ Code = ""; Type = "USER" })
+            & $script:mentionEditorOnChange
+        })
+        $script:mentionEditorAddButton = $null
+    }
+
+    foreach ($btnDelete in $script:mentionEditorDeleteButtons) {
+        if ($btnDelete) {
+            $btnDelete.Add_Click({
+                Sync-MentionRowsFromControls
+                $target = $this.Tag
+                $script:mentionRows = @($script:mentionRows | Where-Object { $_ -ne $target })
+                & $script:mentionEditorOnChange
+            })
+        }
+    }
+}
+
 function Add-MentionsEditor {
     param(
         [System.Windows.Forms.Control]$Panel,
@@ -1226,34 +1253,26 @@ function Add-MentionsEditor {
     $y += 24
 
     foreach ($row in @($script:mentionRows)) {
-        $txtCode = New-TextBox -X 40 -Y $y -Width 190 -Height 22 -Text "$($row.Code)"
+        $txtCode = New-TextBox -X 250 -Y $y -Width 190 -Height 22 -Text "$($row.Code)"
         $Panel.Controls.Add($txtCode)
 
         $selectedType = if ($MentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
-        $cmbType = New-ComboBox -X 240 -Y $y -Width 120 -Height 22 -Items $MentionTypeOptions -SelectedItem $selectedType
+        $cmbType = New-ComboBox -X 450 -Y $y -Width 120 -Height 22 -Items $MentionTypeOptions -SelectedItem $selectedType
         $Panel.Controls.Add($cmbType)
 
-        $btnDeleteRow = New-Button -Text "削除" -X 370 -Y ($y - 1) -Width 60 -Height 24
+        $btnDeleteRow = New-Button -Text "削除" -X 580 -Y ($y - 1) -Width 60 -Height 24
         $btnDeleteRow.Tag = $row
-        $btnDeleteRow.Add_Click({
-            Sync-MentionRowsFromControls
-            $target = $this.Tag
-            $script:mentionRows = @($script:mentionRows | Where-Object { $_ -ne $target })
-            Update-GroupSettingsFields
-        })
         $Panel.Controls.Add($btnDeleteRow)
 
-        $script:mentionRowControls += [PSCustomObject]@{ Row = $row; CodeBox = $txtCode; TypeCombo = $cmbType }
+        $script:mentionRowControls += [PSCustomObject]@{ Row = $row; CodeBox = $txtCode; TypeCombo = $cmbType; DeleteButton = $btnDeleteRow }
         $y += 28
     }
 
-    $btnAddRow = New-Button -Text "追加" -X 40 -Y $y -Width 80 -Height 24
-    $btnAddRow.Add_Click({
-        Sync-MentionRowsFromControls
-        $script:mentionRows += [PSCustomObject]@{ Code = ""; Type = "USER" }
-        Update-GroupSettingsFields
-    })
+    $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 80 -Height 24
     $Panel.Controls.Add($btnAddRow)
+
+    $script:mentionEditorAddButton = $btnAddRow
+    $script:mentionEditorDeleteButtons = @($script:mentionRowControls | ForEach-Object { $_.DeleteButton })
     $y += 34
 
     return $y

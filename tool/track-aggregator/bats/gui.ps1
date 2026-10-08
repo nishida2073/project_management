@@ -813,6 +813,8 @@ function Update-GroupSettingsFields {
         -TrailingButtonVars $trailingButtons | Out-Null
 
     $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+
+    Register-MentionEditorHandlers -OnChange { Update-GroupSettingsFields }
 }
 
 function Save-CommonSettings {
@@ -944,6 +946,8 @@ $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabSettings) {
         Update-SettingsGroupList
+        Update-CommonSettingsFields
+        Update-GroupSettingsFields
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-LogView
     }
@@ -955,7 +959,7 @@ $tabControl.SelectedTab = $tabRun
 $form.Add_Shown({
     Update-GroupDropdowns
     Update-CommonSettingsFields
-
+    Update-GroupSettingsFields
     Adjust-InitialTabHeight -NestedTabControl $execTabControl
 })
 
