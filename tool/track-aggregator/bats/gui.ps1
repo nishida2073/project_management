@@ -333,9 +333,9 @@ $settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
     -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
 
-$settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
+$settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
-$tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
+$tabSettingsCommon.Controls.Add($settingsCommonBottomPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象のグループ"
@@ -366,9 +366,9 @@ $settingsGroupTopPanel = (New-SettingsTopPanel `
         Update-GroupSettingsFields
     }).Panel
 
-$settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
+$settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
-$tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 $lblSettingsMasterGroupTarget = New-Label -Text "対象のグループ"
@@ -378,31 +378,22 @@ $cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMembe
 $lnkSettingsMasterOpenXlsx = New-LinkLabel -Text "開く"
 
 $lblSettingsMasterSaveTarget = New-Label -Text "保存対象"
-$lblSettingsMasterSaveTarget.AutoSize = $true
 
-$cmbSettingsMasterSaveTarget = New-ComboBox -DisplayMember "Text" -ValueMember "Value"
-$cmbSettingsMasterSaveTarget.DisplayMember = "Text"
-$cmbSettingsMasterSaveTarget.ValueMember = "Value"
-$cmbSettingsMasterSaveTarget.Items.Add([PSCustomObject]@{ Text = "すべて"; Value = "すべて" }) | Out-Null
-$cmbSettingsMasterSaveTarget.Items.Add([PSCustomObject]@{ Text = "テスト"; Value = "テスト" }) | Out-Null
-$cmbSettingsMasterSaveTarget.Items.Add([PSCustomObject]@{ Text = "アンケート"; Value = "アンケート" }) | Out-Null
-$cmbSettingsMasterSaveTarget.SelectedIndex = 0
-$cmbSettingsMasterSaveTarget.Size = New-Object System.Drawing.Size(120, 24)
-$cmbSettingsMasterSaveTarget.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
+$cmbSettingsMasterSaveTarget = New-ComboBox -Width 120 -Height 24 -DisplayMember "Text" -ValueMember "Value" `
+    -Items @(
+        [PSCustomObject]@{ Text = "すべて"; Value = "すべて" }
+        [PSCustomObject]@{ Text = "テスト"; Value = "テスト" }
+        [PSCustomObject]@{ Text = "アンケート"; Value = "アンケート" }
+    ) `
+    -SelectedItem ([PSCustomObject]@{ Text = "すべて"; Value = "すべて" })
 
 $settingsMasterTopPanel = (New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsMasterGroupTarget, $cmbSettingsMasterGroupTarget, $lnkSettingsMasterOpenXlsx) `
-    -ButtonRowY 78 `
+    -ExtraControls @($lblSettingsMasterGroupTarget, $cmbSettingsMasterGroupTarget, $lnkSettingsMasterOpenXlsx, $lblSettingsMasterSaveTarget, $cmbSettingsMasterSaveTarget) `
     -OnSave { Save-MasterToExcel } `
     -OnReload {
         $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
         Read-MasterExcelData -GroupName $target
     }).Panel
-
-$lblSettingsMasterSaveTarget.Location = New-Object System.Drawing.Point($lblSettingsMasterGroupTarget.Location.X, 48)
-$cmbSettingsMasterSaveTarget.Location = New-Object System.Drawing.Point($cmbSettingsMasterGroupTarget.Location.X, 46)
-$settingsMasterTopPanel.Controls.Add($lblSettingsMasterSaveTarget)
-$settingsMasterTopPanel.Controls.Add($cmbSettingsMasterSaveTarget)
 
 $settingsMasterBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
@@ -751,7 +742,7 @@ $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
@@ -787,8 +778,8 @@ function Test-KintoneConnection {
 }
 
 function Update-GroupSettingsFields {
-    $scrollX = -$settingsGroupFieldPanel.AutoScrollPosition.X
-    $scrollY = -$settingsGroupFieldPanel.AutoScrollPosition.Y
+    $scrollX = -$settingsGroupBottomPanel.AutoScrollPosition.X
+    $scrollY = -$settingsGroupBottomPanel.AutoScrollPosition.Y
 
     $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     $trailingButtons = $settingsTrailingButtonVars.Clone()
@@ -815,13 +806,13 @@ function Update-GroupSettingsFields {
             Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
         }
     }.GetNewClosure() }
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
         -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions `
         -TrailingButtonVars $trailingButtons | Out-Null
 
-    $settingsGroupFieldPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+    $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
 function Save-CommonSettings {

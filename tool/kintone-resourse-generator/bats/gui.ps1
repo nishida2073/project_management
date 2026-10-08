@@ -674,7 +674,7 @@ function Update-CustomTemplateNameList {
     Set-ComboItems -ComboBox $cmbRunAllCustomTemplateName -Names $names -Placeholder $script:customTemplateNamePlaceholder
 }
 
-$settingsCommonFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
+$settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave {
@@ -686,7 +686,7 @@ $settingsCommonTopPanel = (New-SettingsTopPanel `
         Update-CommonSettingsFields
     }).Panel
 
-$tabSettingsCommon.Controls.Add($settingsCommonFieldPanel)
+$tabSettingsCommon.Controls.Add($settingsCommonBottomPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象のグループ" -Width 150 -Height 24
@@ -695,7 +695,7 @@ $cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Tex
 
 $btnSettingsNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
-$settingsGroupFieldPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
+$settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $settingsGroups = [ordered]@{
     "COMMON" = @{
@@ -793,7 +793,7 @@ function Update-CommonSettingsFields {
         $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
         $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
     }
-    Render-SettingsFields -Panel $settingsCommonFieldPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars @{} `
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars @{} `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
@@ -833,7 +833,7 @@ function Get-GroupSettingsFieldValue {
 function Update-GroupSettingsFields {
     $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     if (!$target) {
-        $settingsGroupFieldPanel.Controls.Clear()
+        $settingsGroupBottomPanel.Controls.Clear()
         return
     }
 
@@ -845,7 +845,7 @@ function Update-GroupSettingsFields {
         $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
         $rows += [PSCustomObject]@{ Group = "KINTONE"; VarName = $varName; Value = $varValue; Key = $varName }
     }
-    Render-SettingsFields -Panel $settingsGroupFieldPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
@@ -876,7 +876,7 @@ $settingsGroupTopPanel = (New-SettingsTopPanel `
         Update-GroupSettingsFields
     }).Panel
 
-$tabSettingsGroup.Controls.Add($settingsGroupFieldPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 $btnSettingsNewGroup.Add_Click({
