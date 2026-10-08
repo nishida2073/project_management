@@ -609,14 +609,16 @@ function New-CategoryTabControl {
             $grp.Controls.Add($btn)
             $runButtons += $btn
 
-            if ($bd.OpenTarget) {
-                $lnkOpen = New-OpenLink -Text $OpenLinkText -X 125 -Y $contentY -Width 60 -Height 30 -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $bd.InputControls
-                $grp.Controls.Add($lnkOpen)
-            }
-
-            $lblStepStatus = New-Label -X 200 -Y ($contentY + 4) -Width 150 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
+            $lblStepStatusX = $btn.Location.X + $btn.Width + 10
+            $lblStepStatus = New-Label -X $lblStepStatusX -Y ($contentY + 4) -Width 50 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
             $grp.Controls.Add($lblStepStatus)
             $bd | Add-Member -NotePropertyName StepStatusLabel -NotePropertyValue $lblStepStatus -Force
+
+            if ($bd.OpenTarget) {
+                $lnkOpenX = $lblStepStatus.Location.X + $lblStepStatus.Width + 5
+                $lnkOpen = New-OpenLink -Text $OpenLinkText -X $lnkOpenX -Y $contentY -Width 60 -Height 30 -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $bd.InputControls
+                $grp.Controls.Add($lnkOpen)
+            }
 
             $groupY += $bdHeight + $GroupSpacing
         }
@@ -930,16 +932,18 @@ function New-BatchRunTab {
         $checkBoxes += $chk
         $topControls += $chk
 
-        if (& $ShowOpenLink $bd) {
-            $lnkOpen = New-OpenLink -X 390 -Y $y -Width 40 -Height $chk.Height -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
-            $lnkOpen.Visible = $ShowSteps
-            $topControls += $lnkOpen
-        }
-
-        $lblStepStatus = New-Label -X 440 -Y $y -Width 150 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
+        $lblStepStatusX = $chk.Location.X + $chk.Width + 10
+        $lblStepStatus = New-Label -X $lblStepStatusX -Y $y -Width 50 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
         $lblStepStatus.Visible = $ShowSteps
         $statusLabels += $lblStepStatus
         $topControls += $lblStepStatus
+
+        if (& $ShowOpenLink $bd) {
+            $lnkOpenX = $lblStepStatus.Location.X + $lblStepStatus.Width + 5
+            $lnkOpen = New-OpenLink -X $lnkOpenX -Y $y -Width 40 -Height $chk.Height -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
+            $lnkOpen.Visible = $ShowSteps
+            $topControls += $lnkOpen
+        }
 
         if ($ShowSteps) {
             $y += 26
