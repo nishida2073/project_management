@@ -1178,7 +1178,6 @@ function Get-GroupSettingsFieldValue {
 
 function Update-SettingsGroupList {
     $selected = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-    $script:suppressComboSync = $true
     $cmbSettingsGroupTarget.Items.Clear()
     foreach ($groupName in (Get-GroupNames)) {
         $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $groupName; Value = $groupName }) | Out-Null
@@ -1193,7 +1192,6 @@ function Update-SettingsGroupList {
     } elseif ($cmbSettingsGroupTarget.Items.Count -gt 0) {
         $cmbSettingsGroupTarget.SelectedIndex = 0
     }
-    $script:suppressComboSync = $false
 }
 
 function Sync-MentionRowsFromControls {

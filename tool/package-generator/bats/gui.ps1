@@ -476,7 +476,7 @@ $lnkSettingsGroupOpenXlsx.Add_LinkClicked({
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
-    if (!$script:suppressComboSync) { Update-GroupSettingsFields }
+    Update-GroupSettingsFields
 })
 
 $tabControl.Add_SelectedIndexChanged({

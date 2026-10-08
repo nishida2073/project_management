@@ -408,10 +408,8 @@ $btnMasterSyncExecute.Add_Click({
         $batchPath = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
         $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
         Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterStatusPlaceholder -Action {
-            $script:suppressComboSync = $true
             $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
             if ($matchingItem) { $cmbSettingsGroupTarget.SelectedItem = $matchingItem }
-            $script:suppressComboSync = $null
             Update-GroupSettingsFields
             $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
             $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
@@ -940,7 +938,7 @@ $cmbSettingsMasterGroupTarget.Add_SelectedIndexChanged({
 })
 
 $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
-    if (!$script:suppressComboSync) { Update-GroupSettingsFields }
+    Update-GroupSettingsFields
 })
 
 $tabControl.Add_SelectedIndexChanged({
