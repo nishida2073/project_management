@@ -186,6 +186,8 @@ try {
                 foreach ($sheetName in $downloadSheetData.Keys) {
                     Set-HeaderRowColor -Sheet $workbook.Sheets.Item($sheetName) -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
                 }
+                
+                Set-FirstVisibleSheet -Workbook $workbook
                 $workbook.SaveAs($downloadPath, 51)
             }
             finally {

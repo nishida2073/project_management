@@ -151,6 +151,8 @@ try {
                     }
                     Write-BodyDatas -StartCell $ws.Range("A2") -Datas $excelDatas
                 }
+                
+                Set-FirstVisibleSheet -Workbook $workbook
                 $workbook.Save()
 
                 Write-MessageComplete "テンプレートを作成しました: $outputPath"

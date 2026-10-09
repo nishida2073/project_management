@@ -448,6 +448,7 @@ try {
                     }
                     Set-ColumnWidth -Worksheet $ws
                 }
+                Set-FirstVisibleSheet -Workbook $workbook
                 $workbook.SaveAs($outputPath, 51)
             }
             finally {
