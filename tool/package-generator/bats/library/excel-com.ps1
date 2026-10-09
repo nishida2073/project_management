@@ -548,6 +548,24 @@ function Get-RowObjects {
     return $rows
 }
 
+function Get-HeaderRow {
+    param(
+        [Parameter(Mandatory)]$Sheet,
+        [int]$RowIndex = 1
+    )
+
+    $used = $Sheet.UsedRange
+    if (-not $used) { return @() }
+
+    $colCount = $used.Columns.Count
+    $data = $used.Value2
+    $result = @()
+    for ($c = 1; $c -le $colCount; $c++) {
+        $result += "$($data[$RowIndex, $c])"
+    }
+    return $result
+}
+
 function Write-RowObjects {
     param(
         [Parameter(Mandatory)]$Sheet,

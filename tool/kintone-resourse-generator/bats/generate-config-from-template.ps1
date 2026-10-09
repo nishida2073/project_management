@@ -137,6 +137,16 @@ try {
                 $downloadAppRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-list") | Where-Object { $_.'アプリID' })
                 $downloadAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-acl"))
                 $downloadRecordAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-record-acl"))
+
+                $downloadHeaders = @{
+                    "space-settings"       = @(Get-HeaderRow -Sheet $workbook.Sheets.Item("space-settings"))
+                    "space-member-list"    = @(Get-HeaderRow -Sheet $workbook.Sheets.Item("space-member-list"))
+                    "space-app-list"       = @(Get-HeaderRow -Sheet $workbook.Sheets.Item("space-app-list"))
+                    "space-app-acl"        = @(Get-HeaderRow -Sheet $workbook.Sheets.Item("space-app-acl"))
+                    "space-app-record-acl" = @(Get-HeaderRow -Sheet $workbook.Sheets.Item("space-app-record-acl"))
+                }
+                Write-Message "ダウンロードファイルのヘッダ:" -Type "Info"
+                $downloadHeaders.GetEnumerator() | ForEach-Object { Write-Message "  $($_.Key): $($_.Value -join ', ')" -Type "Info" }
             }
             finally {
                 if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
@@ -255,7 +265,7 @@ try {
                 return $ws
             }
 
-            $headers = @($outSpaceRow.PSObject.Properties.Name)
+            $headers = $downloadHeaders["space-settings"]
             $ws = New-OutputSheet "space-settings"
             $rows = @($outSpaceRow)
             $excelDatas = @()
@@ -293,7 +303,7 @@ try {
                         "下位組織も含める"     = $_.'下位組織も含める'
                     }
                 })
-            $headers = @($outMemberRows[0].PSObject.Properties.Name)
+            $headers = $downloadHeaders["space-member-list"]
             $ws = New-OutputSheet "space-member-list"
             $rows = $outMemberRows
             $excelDatas = @()
@@ -326,7 +336,7 @@ try {
             $outAppRows = @($matchedApps | ForEach-Object {
                     [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
                 })
-            $headers = @($outAppRows[0].PSObject.Properties.Name)
+            $headers = $downloadHeaders["space-app-list"]
             $ws = New-OutputSheet "space-app-list"
             $rows = $outAppRows
             $excelDatas = @()
@@ -405,7 +415,7 @@ try {
                 Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定しました" -CountPhrase "条件$($recordAclCondGroups.Count)件、対象$($recordAclRows.Count)件" -DetailLines $recordAclTargetLines
             }
 
-            $headers = @($outAclRows[0].PSObject.Properties.Name)
+            $headers = $downloadHeaders["space-app-acl"]
             $ws = New-OutputSheet "space-app-acl"
             $rows = $outAclRows.ToArray()
             $excelDatas = @()
@@ -415,7 +425,7 @@ try {
                 $excelDatas += , $rowData
             }
             Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
-            $headers = @($outRecordAclRows[0].PSObject.Properties.Name)
+            $headers = $downloadHeaders["space-app-record-acl"]
             $ws = New-OutputSheet "space-app-record-acl"
             $rows = $outRecordAclRows.ToArray()
             $excelDatas = @()
