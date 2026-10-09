@@ -170,8 +170,8 @@ try {
                         $ws = $workbook.Sheets.Add([Type]::Missing, $workbook.Sheets.Item($workbook.Sheets.Count))
                     }
                     $ws.Name = $sheetName
-                    $rows = $downloadSheetData[$sheetName].Rows
                     $headers = $downloadSheetData[$sheetName].Headers
+                    $rows = $downloadSheetData[$sheetName].Rows | Sort-Object -Property $headers[0]
                     if ($headers.Count -eq 0 -and $rows.Count -gt 0) {
                         $headers = @($rows[0].PSObject.Properties.Name)
                     }
@@ -186,7 +186,7 @@ try {
                 foreach ($sheetName in $downloadSheetData.Keys) {
                     Set-HeaderRowColor -Sheet $workbook.Sheets.Item($sheetName) -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
                 }
-                
+
                 Set-FirstVisibleSheet -Workbook $workbook
                 $workbook.SaveAs($downloadPath, 51)
             }

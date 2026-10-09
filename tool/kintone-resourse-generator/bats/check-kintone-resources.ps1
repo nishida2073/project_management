@@ -384,6 +384,7 @@ try {
                     }
                     $ws.Name = $sheetName
                     $headers = @($rows[0].PSObject.Properties.Name)
+                    $rows = $rows | Sort-Object -Property $headers[0]
                     $excelDatas = @()
                     $excelDatas += , @($headers)
                     foreach ($row in $rows) {

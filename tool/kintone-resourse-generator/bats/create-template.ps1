@@ -139,8 +139,8 @@ try {
                 }
                 foreach ($sheetName in $downloadSheetData.Keys) {
                     $ws = $workbook.Sheets.Item($sheetName)
-                    $rows = $downloadSheetData[$sheetName].Rows
                     $headers = $downloadSheetData[$sheetName].Headers
+                    $rows = $downloadSheetData[$sheetName].Rows | Sort-Object -Property $headers[0]
                     if ($headers.Count -eq 0 -and $rows.Count -gt 0) {
                         $headers = @($rows[0].PSObject.Properties.Name)
                     }
@@ -151,7 +151,7 @@ try {
                     }
                     Write-BodyDatas -StartCell $ws.Range("A2") -Datas $excelDatas
                 }
-                
+
                 Set-FirstVisibleSheet -Workbook $workbook
                 $workbook.Save()
 
