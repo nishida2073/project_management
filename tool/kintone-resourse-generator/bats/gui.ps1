@@ -141,12 +141,6 @@ $categoryDefs = @(
                 BatchPath = $generateBat
                 ArgsFn = {
                     param($ic, $inputDefs)
-                    $baseTemplateValue = Get-InputValue -Control $ic["BaseTemplateName"]
-                    $customTemplateValue = Get-InputValue -Control $ic["CustomTemplateName"]
-                    if (($null -eq $baseTemplateValue -or $baseTemplateValue -eq $script:baseTemplateNamePlaceholder) -and `
-                        ($null -eq $customTemplateValue -or $customTemplateValue -eq $script:customTemplateNamePlaceholder)) {
-                        throw "設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください"
-                    }
                     $batArgs = @()
                     $nameMap = @{
                         "TargetGroupName" = "TargetGroupName"
@@ -462,14 +456,23 @@ function Invoke-AllStepsForCurrentInputs {
 
         $ic = $bd.InputControls
         if ($bd.Inputs) {
+            $baseTemplateValue = $null
+            $customTemplateValue = $null
             foreach ($inputDef in $bd.Inputs) {
+                $value = $ic[$inputDef.Name].Text.Trim()
+                if ($inputDef.Name -eq "BaseTemplateName") { $baseTemplateValue = $value }
+                if ($inputDef.Name -eq "CustomTemplateName") { $customTemplateValue = $value }
                 if ($inputDef.Require) {
-                    $value = $ic[$inputDef.Name].Text.Trim()
                     if (!$value -or ($value -eq $script:customTemplateNamePlaceholder)) {
                         $canProceed = $false
                         break
                     }
                 }
+            }
+            if (($null -eq $baseTemplateValue -or $baseTemplateValue -eq $script:baseTemplateNamePlaceholder) -and `
+                ($null -eq $customTemplateValue -or $customTemplateValue -eq $script:customTemplateNamePlaceholder)) {
+                [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください", "入力エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                return 1
             }
         }
 

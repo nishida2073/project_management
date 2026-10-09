@@ -86,8 +86,13 @@ try {
                 }
 
                 if (Test-SheetSelected -SelectedSheets $selectedSheets -Name "space-member-list") {
+                    $targetMemberRows = @($memberRows | Where-Object { $_.'スペースID' -eq $spaceId })
+                    if ($targetMemberRows.Count -gt 0) {
+                        Write-Message "スペースメンバー設定: $($targetMemberRows.Count)件を処理" -Type "Info"
+                    } else {
+                        Write-Message "スペースメンバー設定: 0件のため処理をスキップ" -Type "Info"
+                    }
                     try {
-                        $targetMemberRows = @($memberRows | Where-Object { $_.'スペースID' -eq $spaceId })
                         $targetMemberLines = @($targetMemberRows | ForEach-Object {
                                 $row = $_
                                 $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
@@ -157,6 +162,13 @@ try {
                         }
                     }
 
+                    if ($applyAppAcl) {
+                        if ($aclRowsForApp.Count -gt 0) {
+                            Write-Message "アプリACL設定: $($aclRowsForApp.Count)件を処理" -Type "Info"
+                        } else {
+                            Write-Message "アプリACL設定: 0件のため処理をスキップ" -Type "Info"
+                        }
+                    }
                     if ($applyAppAcl -and $aclRowsForApp.Count -gt 0) {
                         try {
                             $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $BaseUrl -Authorization $authorization -Row $_ })
@@ -183,6 +195,13 @@ try {
                         }
                     }
 
+                    if ($applyAppRecordAcl) {
+                        if ($recordAclRowsForApp.Count -gt 0) {
+                            Write-Message "アプリレコードACL設定: $($recordAclRowsForApp.Count)件を処理" -Type "Info"
+                        } else {
+                            Write-Message "アプリレコードACL設定: 0件のため処理をスキップ" -Type "Info"
+                        }
+                    }
                     if ($applyAppRecordAcl -and $recordAclRowsForApp.Count -gt 0) {
                         try {
                             $recordRights = New-RecordAclRightsFromRows -BaseUrl $BaseUrl -Authorization $authorization -Rows $recordAclRowsForApp

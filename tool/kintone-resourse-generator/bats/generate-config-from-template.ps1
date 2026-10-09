@@ -76,16 +76,6 @@ try {
         try {
             $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-            if (-not (Test-Path -LiteralPath $baseTemplatePath)) {
-                throw "設定テンプレート（基本）が見つかりません: $baseTemplatePath"
-            }
-            if ($customTemplatePath -and -not (Test-Path -LiteralPath $customTemplatePath)) {
-                throw "設定テンプレート（カスタム）が見つかりません: $customTemplatePath"
-            }
-            if (-not (Test-Path -LiteralPath $downloadPath)) {
-                throw "ダウンロード結果が見つかりません: $downloadPath"
-            }
-
             $excel = New-Object -ComObject Excel.Application
             $excel.Visible = $false
             $excel.DisplayAlerts = $false
@@ -214,11 +204,19 @@ try {
             if ($hasUnmatched) {
                 Write-Message "" -Type "Info" -NoHeader
                 Write-Message "## アプリの対応付けで確認が必要な項目" -Type "Info" -NoHeader
-                foreach ($m in $unmatchedBaseTemplateApps) {
-                    Write-Message "  設定テンプレート（基本）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+                if ($BaseTemplateConfigName) {
+                    foreach ($m in $unmatchedBaseTemplateApps) {
+                        Write-Message "  設定テンプレート（基本）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+                    }
+                } else {
+                    foreach ($m in $unmatchedBaseTemplateApps) {
+                        Write-Message "  設定テンプレート（カスタム）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+                    }
                 }
-                foreach ($m in $unmatchedCustomTemplateApps) {
-                    Write-Message "  設定テンプレート（カスタム）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+                if ($BaseTemplateConfigName -and $CustomTemplateConfigName) {
+                    foreach ($m in $unmatchedCustomTemplateApps) {
+                        Write-Message "  設定テンプレート（カスタム）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+                    }
                 }
                 foreach ($m in $unmatchedDownloadApps) {
                     Write-Message "  新スペースのアプリ[$($m.'アプリ名')](appId=$($m.'アプリID'))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
