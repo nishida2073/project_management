@@ -784,74 +784,48 @@ $settingsToolTip = New-ToolTip
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
 $script:commonEnvResolver = { param($name) Get-ResolvedVar $name $setEnvBat }
-$script:fieldTextBoxes = @{}
 
 $settingsTrailingButtonVars = @{
-    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field)
-        $fieldTextBoxes = $script:fieldTextBoxes
-        Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
-            Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-                $subDomainVal = $fieldTextBoxes["KINTONE_SUB_DOMAIN"].Text.Trim()
-                $loginVal = $fieldTextBoxes["KINTONE_LOGIN"].Text
-                $passwordVal = $fieldTextBoxes["KINTONE_PASSWORD"].Text
-                $baseUrlVal = "https://$subDomainVal.cybozu.com"
-                if (!$subDomainVal -or !$loginVal -or !$passwordVal) {
-                    throw "サブドメイン・ログイン名・パスワードをすべて入力してください"
-                }
-                $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
-                Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
+    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            $subDomainVal = Get-GroupSettingsFieldValue "KINTONE_SUB_DOMAIN"
+            $loginVal = Get-GroupSettingsFieldValue "KINTONE_LOGIN"
+            $passwordVal = Get-GroupSettingsFieldValue "KINTONE_PASSWORD"
+            if (!$subDomainVal.Trim() -or !$loginVal -or !$passwordVal) {
+                throw "サブドメイン・ログイン名・パスワードをすべて入力してください"
             }
-        }.GetNewClosure()
-    }
-    "TemplateName" = { param($Panel, $Y, $Field)
-        Add-FieldActionButton -Panel $Panel -Y $Y -Text "実行" -AddStatusLabel -OnClick {
-            Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-                $allLabels = @($Panel.Controls | Where-Object { $_ -is [System.Windows.Forms.Label] })
-                $allTextBoxes = @($Panel.Controls | Where-Object { $_ -is [System.Windows.Forms.TextBox] })
+            $baseUrlVal = "https://$($subDomainVal.Trim()).cybozu.com"
+            $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
+            Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
+        }
+    }.GetNewClosure() }
+    "TemplateName" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "実行" -AddStatusLabel -OnClick {
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            $spaceId = Get-GroupSettingsFieldValue "SpaceId"
+            $templateName = Get-GroupSettingsFieldValue "TemplateName"
+            $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
 
-                $spaceIdLabel = $allLabels | Where-Object { $_.Text -like "*スペース*" } | Select-Object -First 1
-                $templateNameLabel = $allLabels | Where-Object { $_.Text -eq "テンプレート名" } | Select-Object -First 1
-
-                $txtSpaceId = $allTextBoxes[$allLabels.IndexOf($spaceIdLabel)]
-                $txtTemplateName = $allTextBoxes[$allLabels.IndexOf($templateNameLabel)]
-
-                $spaceId = Get-InputValue -Control $txtSpaceId
-                $templateName = Get-InputValue -Control $txtTemplateName
-                $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
-
-                $templateLabels = @($spaceIdLabel, $templateNameLabel) | Where-Object { $_ }
-                foreach ($lbl in $templateLabels) {
-                    $value = Get-InputValue -Control $allTextBoxes[$allLabels.IndexOf($lbl)]
-                    if (-not $value) {
-                        throw "「$($lbl.Text)」を入力してください。"
-                    }
-                }
-
-                if (-not $groupName) {
-                    throw "グループを選択してください。"
-                }
-
-                $batchArgs = @("-TargetGroupName:$groupName", "-SpaceId:$spaceId", "-TemplateName:$templateName")
-                $exitCode = Invoke-BatProcess -BatPath $createTemplateBat -WorkingDirectory $rootPath -BatArgs $batchArgs
-
-                if ($exitCode -eq 0) {
-                    Update-CustomTemplateNameList
-                } else {
-                    throw "エラーが発生しました（終了コード: $exitCode）"
-                }
+            if (!$spaceId) {
+                throw "スペースIDを入力してください。"
             }
-        }.GetNewClosure()
-    }
-}
+            if (!$templateName) {
+                throw "テンプレート名を入力してください。"
+            }
+            if (!$groupName) {
+                throw "グループを選択してください。"
+            }
 
-$script:saveEnvBatGetValueFn = { param($name)
-    if ($script:fieldTextBoxes.ContainsKey($name)) {
-        $script:fieldTextBoxes[$name].Text
-    } else {
-        ""
-    }
+            $batchArgs = @("-TargetGroupName:$groupName", "-SpaceId:$spaceId", "-TemplateName:$templateName")
+            $exitCode = Invoke-BatProcess -BatPath $createTemplateBat -WorkingDirectory $rootPath -BatArgs $batchArgs
+
+            if ($exitCode -eq 0) {
+                Update-CustomTemplateNameList
+            } else {
+                throw "エラーが発生しました（終了コード: $exitCode）"
+            }
+        }
+    }.GetNewClosure() }
 }
-$script:saveEnvBatHasValueFn = { param($name) $script:fieldTextBoxes.ContainsKey($name) }
 
 function Get-CommonSettingsFiles {
     return @(
@@ -862,7 +836,9 @@ function Get-CommonSettingsFiles {
 function Save-CommonSettings {
     $commonBatPath = Join-Path $scriptDir "common.bat"
     $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
-    Save-EnvBatFile -Path $commonBatPath -VarNames $commonVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+    Save-EnvBatFile -Path $commonBatPath -VarNames $commonVars `
+        -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
+        -HasValueFn { param($name) $script:settingsCommonFieldTextBoxes.ContainsKey($name) }
 }
 
 function Update-CommonSettingsFields {
@@ -875,7 +851,7 @@ function Update-CommonSettingsFields {
         $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
         $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
     }
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars @{} `
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $script:settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
@@ -900,17 +876,10 @@ function Save-GroupSettings {
         }
     }
 
-    Save-EnvBatFile -Path $groupBatPath -VarNames $kintoneVars -GetValueFn $script:saveEnvBatGetValueFn -HasValueFn $script:saveEnvBatHasValueFn
+    Save-EnvBatFile -Path $groupBatPath -VarNames $kintoneVars `
+        -GetValueFn { param($name) Get-GroupSettingsFieldValue $name } `
+        -HasValueFn { param($name) $script:settingsGroupFieldTextBoxes.ContainsKey($name) }
 }
-
-function Get-GroupSettingsFieldValue {
-    param([string]$VarName)
-    if ($script:fieldTextBoxes.ContainsKey($VarName)) {
-        return $script:fieldTextBoxes[$VarName].Text.Trim()
-    }
-    return $null
-}
-
 
 function Update-GroupSettingsFields {
     $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
@@ -940,7 +909,7 @@ function Update-GroupSettingsFields {
         "TemplateName" = "テンプレート名"
     }
 
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
