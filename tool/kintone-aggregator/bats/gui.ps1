@@ -562,7 +562,7 @@ function Save-CollectDataDefs {
         $fileStream = [System.IO.File]::Open($collectDataDefsPath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
         $fileStream.Close()
     } catch {
-        throw "ファイルが別のプロセスで開かれています。ファイルを閉じてから再度保存してください: $collectDataDefsPath"
+        throw "ファイルが別のプロセスで開かれています：$collectDataDefsPath"
     }
     Sync-CollectDataDefsFromControls
     $json = $script:collectDataDefsItems | ConvertTo-Json

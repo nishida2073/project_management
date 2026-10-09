@@ -850,6 +850,9 @@ $settingsTrailingButtonVars = @{
                 throw "エラーが発生しました（終了コード: $exitCode）"
             }
         }
+    }.GetNewClosure() -OnOpenClick {
+        $templatePath = Get-ResolvedVar "COMMON_CUSTOM_TEMPLATE_PATH" $setEnvBat
+        Open-TargetOrWarn -Path $templatePath
     }.GetNewClosure() }
 }
 

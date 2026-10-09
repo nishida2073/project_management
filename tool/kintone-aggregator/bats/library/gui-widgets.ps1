@@ -125,11 +125,15 @@ function New-TabPage {
 
 function New-LinkLabel {
     param(
-        [string]$Text = ""
+        [string]$Text = "",
+        [int]$X = 0, [int]$Y = 0,
+        [bool]$AutoSize = $false
     )
 
     $linkLabel = New-Object System.Windows.Forms.LinkLabel
     $linkLabel.Text = $Text
+    $linkLabel.AutoSize = $AutoSize
+    $linkLabel.Location = New-Object System.Drawing.Point($X, $Y)
 
     return $linkLabel
 }
@@ -1264,6 +1268,7 @@ function Add-FieldActionButton {
         [int]$Y,
         [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick,
+        [scriptblock]$OnOpenClick,
         [int]$Width = 90,
         [switch]$AddStatusLabel,
         [string]$InitialStatusText = "未実行"
@@ -1278,12 +1283,28 @@ function Add-FieldActionButton {
     }.GetNewClosure()) | Out-Null
     $Panel.Controls.Add($btn) | Out-Null
 
+    $lbl = $null
     if ($AddStatusLabel) {
         $lbl = New-Label -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray) -AutoSize $true
         $lbl.Location = New-Object System.Drawing.Point(($btn.Right + 10), ($btn.Top + 6))
         $Panel.Controls.Add($lbl) | Out-Null
-        return $lbl
     }
+
+    if ($OnOpenClick) {
+        $linkX = if ($lbl) { $lbl.Right + 10 } else { $btn.Right + 10 }
+        $link = New-LinkLabel -Text "開く" -AutoSize $true
+        $link.Location = New-Object System.Drawing.Point($linkX, ($btn.Top + 6))
+        $link.Add_LinkClicked({
+            try {
+                & $OnOpenClick
+            } catch {
+                [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+            }
+        }.GetNewClosure()) | Out-Null
+        $Panel.Controls.Add($link) | Out-Null
+    }
+
+    return $lbl
 }
 
 function Render-SettingsFields {

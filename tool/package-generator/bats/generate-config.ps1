@@ -31,7 +31,7 @@ try {
                 $fileStream = [System.IO.File]::Open($TargetConfigFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
                 $fileStream.Close()
             } catch {
-                throw "ファイルが別のプロセスで開かれています。Excel を閉じてから再度保存してください: $TargetConfigFilePath"
+                throw "ファイルが別のプロセスで開かれています：$TargetConfigFilePath"
             }
             $excel = $null
             $workbook = $null

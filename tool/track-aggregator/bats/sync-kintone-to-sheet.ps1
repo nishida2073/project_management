@@ -74,7 +74,7 @@ try {
                     $fileStream = [System.IO.File]::Open($ExcelFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
                     $fileStream.Close()
                 } catch {
-                    throw "ファイルが別のプロセスで開かれています。Excel を閉じてから再度保存してください: $ExcelFilePath"
+                    throw "ファイルが別のプロセスで開かれています：$ExcelFilePath"
                 }
                 $excel = New-Object -ComObject Excel.Application
                 $excel.Visible = $false

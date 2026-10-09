@@ -750,7 +750,7 @@ function Save-DataToExcel {
         $fileStream = [System.IO.File]::Open($ExcelPath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite)
         $fileStream.Close()
     } catch {
-        throw "ファイルが別のプロセスで開かれています。Excel を閉じてから再度保存してください: $ExcelPath"
+        throw "ファイルが別のプロセスで開かれています：$ExcelPath"
     }
 
     $sheetsToSave = if ($SheetDefDatasMap) {
