@@ -605,58 +605,41 @@ $btnMultipleBatchRunAll.Add_Click({
         $resultLines = New-Object System.Collections.Generic.List[string]
         for ($i = 0; $i -lt $rows.Count; $i++) {
             $row = $rows[$i]
+            $rowNumber = $i + 1
             $rowConfigName = "$($row.'スペース識別名')".Trim()
             $rowTemplateId = "$($row.'スペーステンプレートID')".Trim()
             $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')".Trim()
             $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')".Trim()
 
-            Set-StepStatus -Label $lblMultipleBatchStatus -Text "実行中... ($($i + 1)/$($rows.Count): $rowConfigName)" -State "実行中..."
+            Set-StepStatus -Label $lblMultipleBatchStatus -Text "実行中... ($rowNumber/$($rows.Count): $rowConfigName)" -State "実行中..."
             [System.Windows.Forms.Application]::DoEvents()
 
-            Write-Log "==================== 複数実行 $($i + 1)/$($rows.Count): $rowConfigName ===================="
-            
+            Write-Log "==================== 複数実行 $rowNumber/$($rows.Count): $rowConfigName ===================="
+
             if (!$rowConfigName -or !$rowTemplateId) {
                 Write-Log "スペース識別名・スペーステンプレートIDが空のためスキップします。"
-                $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（必須項目が空）")
+                $resultLines.Add("行$rowNumber ($rowConfigName): スキップ（必須項目が空）")
                 continue
             }
 
             if (!$rowBaseResourceTemplate -and !$rowCustomResourceTemplate) {
                 Write-Log "設定テンプレート名（基本）・設定テンプレート名（カスタム）のいずれかが必要のためスキップします。"
-                $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（テンプレート指定がない）")
+                $resultLines.Add("行$rowNumber ($rowConfigName): スキップ（テンプレート指定がない）")
                 continue
             }
 
-            foreach ($cd in $categoryDefs) {
-                $bd = $cd.ButtonDefs[0]
-                if ($bd.InputControls.ContainsKey("TargetGroupName")) {
-                    $selectedValue = Get-ComboBoxValue -SelectedItem $cmbMultipleBatchTargetGroup.SelectedItem
-                    $matchingItem = $bd.InputControls['TargetGroupName'].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selectedValue } | Select-Object -First 1
-                    if ($matchingItem) {
-                        $bd.InputControls['TargetGroupName'].SelectedItem = $matchingItem
-                    }
-                }
-                $bd.InputControls['ConfigName'].Text = $rowConfigName
-            }
-            $bd0 = $categoryDefs[0].ButtonDefs[0]
-            $bd0.InputControls['SpaceTemplateId'].Text = $rowTemplateId
+            $script:batchInputControls["ConfigName"].Text = $rowConfigName
+            $script:batchInputControls["SpaceTemplateId"].Text = $rowTemplateId
+            $script:batchInputControls["BaseTemplateName"].Text = $rowBaseResourceTemplate
+            $script:batchInputControls["CustomTemplateName"].Text = $rowCustomResourceTemplate
             
-            $bd1 = $categoryDefs[1].ButtonDefs[0]
-            $bd1.InputControls['SpaceId'].Text = ""
-            
-            $bd2 = $categoryDefs[2].ButtonDefs[0]
-            $baseValue = if ($rowBaseResourceTemplate) { $rowBaseResourceTemplate } else { $script:baseTemplateNamePlaceholder }
-            $customValue = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
-            $bd2.InputControls['BaseTemplateName'].Text = $baseValue
-            $bd2.InputControls['CustomTemplateName'].Text = $customValue
-            
-            $exitCode = Invoke-AllStepsForCurrentInputs
+            $exitCode = Invoke-ExecuteAll
             if ($exitCode -eq 0) {
-                $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")
+                $resultLines.Add("行$rowNumber ($rowConfigName): 成功")
             } elseif ($exitCode -eq 2) {
-                $resultLines.Add("行$($i + 2) ($rowConfigName): 警告")
+                $resultLines.Add("行$rowNumber ($rowConfigName): 警告")
             } else {
-                $resultLines.Add("行$($i + 2) ($rowConfigName): 失敗")
+                $resultLines.Add("行$rowNumber ($rowConfigName): 失敗")
             }
         }
 
