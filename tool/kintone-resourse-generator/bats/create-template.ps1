@@ -11,7 +11,8 @@ param(
     [string]$KintoneLogin,
     [string]$KintonePassword,
     [string]$TargetGroupName,
-    [string]$TemplateName
+    [string]$TemplateName,
+    [string]$OrgFileName
 )
 
 $libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
@@ -51,7 +52,7 @@ try {
 
             $outputPath = Join-Path $outputDir "${TargetGroupName}_${TemplateName}.xlsx"
 
-            $templateFile = Join-Path $TemplateRoot "create-template.xlsx"
+            $templateFile = Join-Path $TemplateRoot $OrgFileName
             if (-not (Test-Path $templateFile)) {
                 throw "テンプレートファイルが見つかりません: $templateFile"
             }
