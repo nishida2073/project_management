@@ -17,6 +17,7 @@ if ($MyInvocation.MyCommand.Path) {
 }
 $scriptDir = Join-Path $rootPath "bats"
 
+$createTemplateBat = Join-Path $rootPath "create-template.bat"
 $createSpaceBat = Join-Path $rootPath "create-space-from-template.bat"
 $downloadBat = Join-Path $rootPath "download-kintone-resources.bat"
 $generateBat = Join-Path $rootPath "generate-config-from-template.bat"
@@ -63,9 +64,20 @@ $categoryDefs = @(
                 )
                 BatchPath = $createSpaceBat
                 ArgsFn = {
-                    param($ic)
-                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
-                    @("-TargetGroupName:$groupValue", "-TemplateId:$($ic['SpaceTemplateId'].Text.Trim())", "-SpaceName:$($ic['ConfigName'].Text.Trim())")
+                    param($ic, $inputDefs)
+                    $batArgs = @()
+                    $nameMap = @{
+                        "ConfigName" = "SpaceName"
+                        "SpaceTemplateId" = "TemplateId"
+                        "TargetGroupName" = "TargetGroupName"
+                    }
+                    foreach ($inputDef in $inputDefs) {
+                        if (-not $ic.ContainsKey($inputDef.Name)) { continue }
+                        $value = Get-InputValue -Control $ic[$inputDef.Name]
+                        $paramName = if ($nameMap.ContainsKey($inputDef.Name)) { $nameMap[$inputDef.Name] } else { $inputDef.Name }
+                        $batArgs += "-${paramName}:$value"
+                    }
+                    $batArgs
                 }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
@@ -83,6 +95,7 @@ $categoryDefs = @(
                         if ($baseUrl) { $script:createdSpaceUrl = "$baseUrl/k/#/space/$($Matches.id)" }
                     }
                 }
+                IncludeInBatch = $true;
             }
         )
     }
@@ -98,12 +111,17 @@ $categoryDefs = @(
                 )
                 BatchPath = $downloadBat
                 ArgsFn = {
-                    param($ic)
-                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
-                    @("-TargetGroupName:$groupValue", "-SpaceId:$($ic['SpaceId'].Text.Trim())", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
+                    param($ic, $inputDefs)
+                    $batArgs = @()
+                    foreach ($inputDef in $inputDefs) {
+                        if (-not $ic.ContainsKey($inputDef.Name)) { continue }
+                        $value = Get-InputValue -Control $ic[$inputDef.Name]
+                        $batArgs += "-$($inputDef.Name):$value"
+                    }
+                    $batArgs
                 }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
-                OpenTarget = { param($ic) & $_.OutputPathFn $ic }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
                 InputControls = $null
                 StepStatusLabel = $null
             }
@@ -122,17 +140,27 @@ $categoryDefs = @(
                 )
                 BatchPath = $generateBat
                 ArgsFn = {
-                    param($ic)
-                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
-                    $stepArgs = @("-TargetGroupName:$groupValue", "-BaseTemplateConfigName:$($ic['BaseTemplateName'].Text.Trim())", "-DownloadConfigName:$($ic['ConfigName'].Text.Trim())")
-                    $customTemplateName = $ic['CustomTemplateName'].Text.Trim()
-                    if ($customTemplateName -and $customTemplateName -ne $script:customTemplateNamePlaceholder) {
-                        $stepArgs += "-CustomTemplateConfigName:$customTemplateName"
+                    param($ic, $inputDefs)
+                    $batArgs = @()
+                    $nameMap = @{
+                        "TargetGroupName" = "TargetGroupName"
+                        "ConfigName" = "DownloadConfigName"
+                        "BaseTemplateName" = "BaseTemplateConfigName"
+                        "CustomTemplateName" = "CustomTemplateConfigName"
                     }
-                    $stepArgs
+                    foreach ($inputDef in $inputDefs) {
+                        if (-not $ic.ContainsKey($inputDef.Name)) { continue }
+                        $value = Get-InputValue -Control $ic[$inputDef.Name]
+                        if ($inputDef.Name -eq "CustomTemplateName" -and ($null -eq $value -or $value -eq $script:customTemplateNamePlaceholder)) {
+                            continue
+                        }
+                        $paramName = if ($nameMap.ContainsKey($inputDef.Name)) { $nameMap[$inputDef.Name] } else { $inputDef.Name }
+                        $batArgs += "-${paramName}:$value"
+                    }
+                    $batArgs
                 }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
-                OpenTarget = { param($ic) & $_.OutputPathFn $ic }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
                 InputControls = $null
                 StepStatusLabel = $null
             }
@@ -149,9 +177,14 @@ $categoryDefs = @(
                 )
                 BatchPath = $applyBat
                 ArgsFn = {
-                    param($ic)
-                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
-                    @("-TargetGroupName:$groupValue", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
+                    param($ic, $inputDefs)
+                    $batArgs = @()
+                    foreach ($inputDef in $inputDefs) {
+                        if (-not $ic.ContainsKey($inputDef.Name)) { continue }
+                        $value = Get-InputValue -Control $ic[$inputDef.Name]
+                        $batArgs += "-$($inputDef.Name):$value"
+                    }
+                    $batArgs
                 }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
@@ -171,12 +204,17 @@ $categoryDefs = @(
                 )
                 BatchPath = $checkBat
                 ArgsFn = {
-                    param($ic)
-                    $groupValue = if ($ic.ContainsKey("TargetGroupName")) { Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem } else { "" }
-                    @("-TargetGroupName:$groupValue", "-ConfigName:$($ic['ConfigName'].Text.Trim())")
+                    param($ic, $inputDefs)
+                    $batArgs = @()
+                    foreach ($inputDef in $inputDefs) {
+                        if (-not $ic.ContainsKey($inputDef.Name)) { continue }
+                        $value = Get-InputValue -Control $ic[$inputDef.Name]
+                        $batArgs += "-$($inputDef.Name):$value"
+                    }
+                    $batArgs
                 }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
-                OpenTarget = { param($ic) & $_.OutputPathFn $ic }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
                 InputControls = $null
                 StepStatusLabel = $null
             }
@@ -221,7 +259,12 @@ $cmbRunAllBaseTemplateName = New-ComboBox
 
 $cmbRunAllCustomTemplateName = New-ComboBox
 
-$allStepDefs = @($categoryDefs | ForEach-Object { $_.ButtonDefs })
+$allStepDefs = @()
+foreach ($cd in $categoryDefs) {
+    foreach ($bd in $cd.ButtonDefs) {
+        if ($bd.IncludeInBatch -ne $false) { $allStepDefs += $bd }
+    }
+}
 
 $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true },
@@ -262,7 +305,7 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
 
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label; StepStatusLabel = $bd.StepStatusLabel }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $bd.InputControls } `
+            -GetBatArgs { param($bd2) & $bd.ArgsFn $bd.InputControls $bd.Inputs } `
             -WorkingDirectory $rootPath -Form $form `
             -WriteLog { param($msg) Write-Log $msg } `
             -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
@@ -424,7 +467,7 @@ function Invoke-AllStepsForCurrentInputs {
         if (-not $canProceed) { return 1 }
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic } `
+            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
             -WorkingDirectory $rootPath -Form $form `
             -WriteLog { param($msg) Write-Log $msg } `
             -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
@@ -488,7 +531,7 @@ function Invoke-ExecuteAll {
         $ic = $bd.InputControls
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic } `
+            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
             -WorkingDirectory $rootPath -Form $form `
             -WriteLog { param($msg) Write-Log $msg } `
             -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
@@ -760,6 +803,45 @@ $settingsTrailingButtonVars = @{
             }
         }.GetNewClosure()
     }
+    "TemplateName" = { param($Panel, $Y, $Field)
+        Add-FieldActionButton -Panel $Panel -Y $Y -Text "実行" -AddStatusLabel -OnClick {
+            Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+                $allLabels = @($Panel.Controls | Where-Object { $_ -is [System.Windows.Forms.Label] })
+                $allTextBoxes = @($Panel.Controls | Where-Object { $_ -is [System.Windows.Forms.TextBox] })
+
+                $spaceIdLabel = $allLabels | Where-Object { $_.Text -like "*スペース*" } | Select-Object -First 1
+                $templateNameLabel = $allLabels | Where-Object { $_.Text -eq "テンプレート名" } | Select-Object -First 1
+
+                $txtSpaceId = $allTextBoxes[$allLabels.IndexOf($spaceIdLabel)]
+                $txtTemplateName = $allTextBoxes[$allLabels.IndexOf($templateNameLabel)]
+
+                $spaceId = Get-InputValue -Control $txtSpaceId
+                $templateName = Get-InputValue -Control $txtTemplateName
+                $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+
+                $templateLabels = @($spaceIdLabel, $templateNameLabel) | Where-Object { $_ }
+                foreach ($lbl in $templateLabels) {
+                    $value = Get-InputValue -Control $allTextBoxes[$allLabels.IndexOf($lbl)]
+                    if (-not $value) {
+                        throw "「$($lbl.Text)」を入力してください。"
+                    }
+                }
+
+                if (-not $groupName) {
+                    throw "グループを選択してください。"
+                }
+
+                $batchArgs = @("-TargetGroupName:$groupName", "-SpaceId:$spaceId", "-TemplateName:$templateName")
+                $exitCode = Invoke-BatProcess -BatPath $createTemplateBat -WorkingDirectory $rootPath -BatArgs $batchArgs
+
+                if ($exitCode -eq 0) {
+                    Update-CustomTemplateNameList
+                } else {
+                    throw "エラーが発生しました（終了コード: $exitCode）"
+                }
+            }
+        }.GetNewClosure()
+    }
 }
 
 $script:saveEnvBatGetValueFn = { param($name)
@@ -845,6 +927,19 @@ function Update-GroupSettingsFields {
         $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
         $rows += [PSCustomObject]@{ Group = "KINTONE"; VarName = $varName; Value = $varValue; Key = $varName }
     }
+
+    $rows += @(
+        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "SpaceId"; Value = ""; Key = "SpaceId" }
+        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "TemplateName"; Value = ""; Key = "TemplateName" }
+    )
+
+    $settingsGroupLabels["テンプレート作成"] = "テンプレート作成"
+
+    $settingsVarLabels = $settingsVarLabels + @{
+        "SpaceId" = "スペースID"
+        "TemplateName" = "テンプレート名"
+    }
+
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $script:fieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
