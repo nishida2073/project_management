@@ -54,8 +54,8 @@ function Merge-KintoneRowsByKey {
     return $result.ToArray()
 }
 
-if (-not $BaseTemplateConfigName) {
-    Write-MessageError "BaseTemplateConfigName を指定してください"
+if (-not $BaseTemplateConfigName -and -not $CustomTemplateConfigName) {
+    Write-MessageError "BaseTemplateConfigName または CustomTemplateConfigName を指定してください"
     exit 1
 }
 if (-not $DownloadConfigName) {
@@ -63,8 +63,8 @@ if (-not $DownloadConfigName) {
     exit 1
 }
 
-$baseTemplatePath = Join-Path $BaseTemplateRoot "$BaseTemplateConfigName.xlsx"
-$customTemplatePath = if ($CustomTemplateConfigName) { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
+$baseTemplatePath = if ($BaseTemplateConfigName) { Join-Path $BaseTemplateRoot "$BaseTemplateConfigName.xlsx" } else { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" }
+$customTemplatePath = if ($CustomTemplateConfigName -and $BaseTemplateConfigName) { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
 $downloadPath = Join-Path $DownloadRoot "${DownloadConfigName}_download.xlsx"
 $outputPath = Join-Path $ConfigRoot "${DownloadConfigName}_config.xlsx"
 $logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$TargetGroupName-$DownloadConfigName"

@@ -42,7 +42,7 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$script:baseTemplateNamePlaceholder = "未選択"
+$script:baseTemplateNamePlaceholder = "指定なし"
 
 $script:customTemplateNamePlaceholder = "指定なし"
 
@@ -135,12 +135,18 @@ $categoryDefs = @(
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
-                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $true }
+                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $false }
                     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
                 )
                 BatchPath = $generateBat
                 ArgsFn = {
                     param($ic, $inputDefs)
+                    $baseTemplateValue = Get-InputValue -Control $ic["BaseTemplateName"]
+                    $customTemplateValue = Get-InputValue -Control $ic["CustomTemplateName"]
+                    if (($null -eq $baseTemplateValue -or $baseTemplateValue -eq $script:baseTemplateNamePlaceholder) -and `
+                        ($null -eq $customTemplateValue -or $customTemplateValue -eq $script:customTemplateNamePlaceholder)) {
+                        throw "設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください"
+                    }
                     $batArgs = @()
                     $nameMap = @{
                         "TargetGroupName" = "TargetGroupName"
@@ -151,6 +157,9 @@ $categoryDefs = @(
                     foreach ($inputDef in $inputDefs) {
                         if (-not $ic.ContainsKey($inputDef.Name)) { continue }
                         $value = Get-InputValue -Control $ic[$inputDef.Name]
+                        if ($inputDef.Name -eq "BaseTemplateName" -and ($null -eq $value -or $value -eq $script:baseTemplateNamePlaceholder)) {
+                            continue
+                        }
                         if ($inputDef.Name -eq "CustomTemplateName" -and ($null -eq $value -or $value -eq $script:customTemplateNamePlaceholder)) {
                             continue
                         }
@@ -270,7 +279,7 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true },
     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
-    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $true },
+    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $false },
     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
 )
 
@@ -509,6 +518,14 @@ function Invoke-ExecuteAll {
         }
     }
 
+    $baseTemplateValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["BaseTemplateName"].SelectedItem
+    $customTemplateValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["CustomTemplateName"].SelectedItem
+    if (($null -eq $baseTemplateValue -or $baseTemplateValue -eq $script:baseTemplateNamePlaceholder) -and `
+        ($null -eq $customTemplateValue -or $customTemplateValue -eq $script:customTemplateNamePlaceholder)) {
+        [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        return 1
+    }
+
     foreach ($cd in $categoryDefs) {
         $bd = $cd.ButtonDefs[0]
         if ($bd.InputControls.ContainsKey("TargetGroupName")) {
@@ -618,9 +635,15 @@ $btnMultipleBatchRunAll.Add_Click({
 
             Write-Log "==================== 複数実行 $($i + 1)/$($rows.Count): $rowConfigName ===================="
             
-            if (!$rowConfigName -or !$rowTemplateId -or !$rowBaseResourceTemplate) {
-                Write-Log "スペース識別名・スペーステンプレートID・設定テンプレート名（基本）のいずれかが空のためスキップします。"
+            if (!$rowConfigName -or !$rowTemplateId) {
+                Write-Log "スペース識別名・スペーステンプレートIDが空のためスキップします。"
                 $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（必須項目が空）")
+                continue
+            }
+
+            if (!$rowBaseResourceTemplate -and !$rowCustomResourceTemplate) {
+                Write-Log "設定テンプレート名（基本）・設定テンプレート名（カスタム）のいずれかが必要のためスキップします。"
+                $resultLines.Add("行$($i + 2) ($rowConfigName): スキップ（テンプレート指定がない）")
                 continue
             }
 
@@ -640,7 +663,7 @@ $btnMultipleBatchRunAll.Add_Click({
             $bd1 = $categoryDefs[1].ButtonDefs[0]
             $bd1.InputControls['SpaceId'].Text = ""
             $bd2 = $categoryDefs[2].ButtonDefs[0]
-            $bd2.InputControls['BaseTemplateName'].Text = $rowBaseResourceTemplate
+            $bd2.InputControls['BaseTemplateName'].Text = if ($rowBaseResourceTemplate) { $rowBaseResourceTemplate } else { $script:baseTemplateNamePlaceholder }
             $bd2.InputControls['CustomTemplateName'].Text = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
 
             $exitCode = Invoke-AllStepsForCurrentInputs
