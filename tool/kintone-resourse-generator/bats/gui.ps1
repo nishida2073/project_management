@@ -451,7 +451,7 @@ function Copy-ComboSelection {
 function Invoke-AllStepsForCurrentInputs {
     $lastExitCode = 0
     foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]        
+        $bd = $cd.ButtonDefs[0]
         $ic = $bd.InputControls
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
