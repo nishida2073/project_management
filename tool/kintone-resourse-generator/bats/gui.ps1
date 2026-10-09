@@ -451,32 +451,8 @@ function Copy-ComboSelection {
 function Invoke-AllStepsForCurrentInputs {
     $lastExitCode = 0
     foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        $canProceed = $true
-
+        $bd = $cd.ButtonDefs[0]        
         $ic = $bd.InputControls
-        if ($bd.Inputs) {
-            $baseTemplateValue = $null
-            $customTemplateValue = $null
-            foreach ($inputDef in $bd.Inputs) {
-                $value = $ic[$inputDef.Name].Text.Trim()
-                if ($inputDef.Name -eq "BaseTemplateName") { $baseTemplateValue = $value }
-                if ($inputDef.Name -eq "CustomTemplateName") { $customTemplateValue = $value }
-                if ($inputDef.Require) {
-                    if (!$value -or ($value -eq $script:customTemplateNamePlaceholder)) {
-                        $canProceed = $false
-                        break
-                    }
-                }
-            }
-            if (($null -eq $baseTemplateValue -or $baseTemplateValue -eq $script:baseTemplateNamePlaceholder) -and `
-                ($null -eq $customTemplateValue -or $customTemplateValue -eq $script:customTemplateNamePlaceholder)) {
-                [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください", "入力エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-                return 1
-            }
-        }
-
-        if (-not $canProceed) { return 1 }
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
             -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
@@ -523,6 +499,7 @@ function Invoke-ExecuteAll {
 
     $baseTemplateValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["BaseTemplateName"].SelectedItem
     $customTemplateValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["CustomTemplateName"].SelectedItem
+    
     if (($null -eq $baseTemplateValue -or $baseTemplateValue -eq $script:baseTemplateNamePlaceholder) -and `
         ($null -eq $customTemplateValue -or $customTemplateValue -eq $script:customTemplateNamePlaceholder)) {
         [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
@@ -663,12 +640,16 @@ $btnMultipleBatchRunAll.Add_Click({
             }
             $bd0 = $categoryDefs[0].ButtonDefs[0]
             $bd0.InputControls['SpaceTemplateId'].Text = $rowTemplateId
+            
             $bd1 = $categoryDefs[1].ButtonDefs[0]
             $bd1.InputControls['SpaceId'].Text = ""
+            
             $bd2 = $categoryDefs[2].ButtonDefs[0]
-            $bd2.InputControls['BaseTemplateName'].Text = if ($rowBaseResourceTemplate) { $rowBaseResourceTemplate } else { $script:baseTemplateNamePlaceholder }
-            $bd2.InputControls['CustomTemplateName'].Text = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
-
+            $baseValue = if ($rowBaseResourceTemplate) { $rowBaseResourceTemplate } else { $script:baseTemplateNamePlaceholder }
+            $customValue = if ($rowCustomResourceTemplate) { $rowCustomResourceTemplate } else { $script:customTemplateNamePlaceholder }
+            $bd2.InputControls['BaseTemplateName'].Text = $baseValue
+            $bd2.InputControls['CustomTemplateName'].Text = $customValue
+            
             $exitCode = Invoke-AllStepsForCurrentInputs
             if ($exitCode -eq 0) {
                 $resultLines.Add("行$($i + 2) ($rowConfigName): 成功")
