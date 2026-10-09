@@ -616,15 +616,19 @@ $btnMultipleBatchRunAll.Add_Click({
 
             Write-Log "==================== 複数実行 $rowNumber/$($rows.Count): $rowConfigName ===================="
 
-            if (!$rowConfigName -or !$rowTemplateId) {
-                Write-Log "スペース識別名・スペーステンプレートIDが空のためスキップします。"
-                $resultLines.Add("行$rowNumber ($rowConfigName): スキップ（必須項目が空）")
+            if (!$rowConfigName) {
+                Write-Log "行$($rowNumber): スペース識別名が空のためスキップします。"
+                $resultLines.Add("行$($rowNumber): スキップ（スペース識別名が空）")
                 continue
             }
-
+            if (!$rowTemplateId) {
+                Write-Log "行$($rowNumber): スペーステンプレートIDが空のためスキップします。"
+                $resultLines.Add("行$($rowNumber): スキップ（スペーステンプレートIDが空）")
+                continue
+            }
             if (!$rowBaseResourceTemplate -and !$rowCustomResourceTemplate) {
-                Write-Log "設定テンプレート名（基本）・設定テンプレート名（カスタム）のいずれかが必要のためスキップします。"
-                $resultLines.Add("行$rowNumber ($rowConfigName): スキップ（テンプレート指定がない）")
+                Write-Log "行$($rowNumber) $($rowConfigName): 設定テンプレート名（基本）・設定テンプレート名（カスタム）のいずれかが必要のためスキップします。"
+                $resultLines.Add("行$($rowNumber) $($rowConfigName): スキップ（テンプレート指定がない）")
                 continue
             }
 
@@ -635,11 +639,11 @@ $btnMultipleBatchRunAll.Add_Click({
             
             $exitCode = Invoke-ExecuteAll
             if ($exitCode -eq 0) {
-                $resultLines.Add("行$rowNumber ($rowConfigName): 成功")
+                $resultLines.Add("行$($rowNumber) $($rowConfigName): 成功")
             } elseif ($exitCode -eq 2) {
-                $resultLines.Add("行$rowNumber ($rowConfigName): 警告")
+                $resultLines.Add("行$($rowNumber) $($rowConfigName): 警告")
             } else {
-                $resultLines.Add("行$rowNumber ($rowConfigName): 失敗")
+                $resultLines.Add("行$($rowNumber) $($rowConfigName): 失敗")
             }
         }
 
