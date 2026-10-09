@@ -916,6 +916,8 @@ $tabControl.Add_SelectedIndexChanged({
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
+    Update-BaseTemplateNameList
+    Update-CustomTemplateNameList
     Update-GroupDropdowns
     Update-TabHeight -NestedTabControl $execTabControl
 })
