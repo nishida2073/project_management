@@ -12,7 +12,8 @@ param(
     [string]$CustomTemplateRoot,
     [string]$ConfigRoot,
     [string]$DownloadRoot,
-    [string]$LogRoot
+    [string]$LogRoot,
+    [ValidateSet("Template", "Download")][string]$PreferredDataSource = "Template"
 )
 
 $libraryDir = Join-Path (Split-Path $MyInvocation.MyCommand.Path) "library"
@@ -149,11 +150,22 @@ try {
                 $downloadHeaders.GetEnumerator() | ForEach-Object { Write-Message "  $($_.Key): $($_.Value -join ', ')" -Type "Info" }
             }
             finally {
-                if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-                if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+                if ($workbook) {
+                    try { $workbook.Close($false) } catch {}
+                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook)
+                    $workbook = $null
+                }
+                if ($excel) {
+                    try { $excel.Quit() } catch {}
+                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
+                    $excel = $null
+                }
                 [System.GC]::Collect()
                 [System.GC]::WaitForPendingFinalizers()
+                [System.GC]::Collect()
             }
+
+            Start-Sleep -Milliseconds 100
 
             if (-not $baseSpaceRow -or -not $downloadSpaceRow) {
                 throw "テンプレートまたはダウンロード結果のspace-settingsが空です"
@@ -167,8 +179,7 @@ try {
                 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' = Get-PreferredValue $customSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' $baseSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
                 'アプリ作成できるユーザーをスペースの管理者に限定する'       = Get-PreferredValue $customSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する' $baseSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
             }
-
-            $spaceNameSource = if ("$($templateSpaceRow.'スペース名')" -ne "") { $templateSpaceRow.'スペース名' } else { $downloadSpaceRow.'スペース名' }
+            $spaceNameSource = if ($PreferredDataSource -eq "Download") { $downloadSpaceRow.'スペース名' } else { $templateSpaceRow.'スペース名' }
             $finalSpaceName = Expand-KintonePlaceholder -Value $spaceNameSource -ConfigName $DownloadConfigName
 
             $templateMemberRows = @(Merge-KintoneRowsByKey -BaseRows $baseMemberRows -CustomRows $customMemberRows -KeyProperties @("種別", "ユーザー/組織/グループ"))
@@ -176,39 +187,36 @@ try {
             $baseAppMapping = Get-AppNameMapping -TemplateApps $baseAppRows -DownloadApps $downloadAppRows
             $customAppMapping = if ($customAppRows.Count -gt 0) { Get-AppNameMapping -TemplateApps $customAppRows -DownloadApps $downloadAppRows } else { @() }
 
-            $matchedByDownloadId = @{}
-            foreach ($m in ($baseAppMapping | Where-Object { $_.DownloadAppId })) {
-                $matchedByDownloadId[$m.DownloadAppId] = [PSCustomObject]@{
-                    DownloadAppId         = $m.DownloadAppId
-                    DownloadAppName       = $m.DownloadAppName
-                    BaseTemplateAppName   = $m.TemplateAppName
-                    CustomTemplateAppName = $null
-                }
+            $baseAppMappingByDownloadId = @{}
+            foreach ($m in $baseAppMapping) {
+                if ($m.DownloadAppId) { $baseAppMappingByDownloadId[$m.DownloadAppId] = $m }
             }
-            foreach ($m in ($customAppMapping | Where-Object { $_.DownloadAppId })) {
-                if ($matchedByDownloadId.ContainsKey($m.DownloadAppId)) {
-                    $matchedByDownloadId[$m.DownloadAppId].CustomTemplateAppName = $m.TemplateAppName
-                }
-                else {
-                    $matchedByDownloadId[$m.DownloadAppId] = [PSCustomObject]@{
-                        DownloadAppId         = $m.DownloadAppId
-                        DownloadAppName       = $m.DownloadAppName
-                        BaseTemplateAppName   = $null
-                        CustomTemplateAppName = $m.TemplateAppName
-                    }
-                }
+            $customAppMappingByDownloadId = @{}
+            foreach ($m in $customAppMapping) {
+                if ($m.DownloadAppId) { $customAppMappingByDownloadId[$m.DownloadAppId] = $m }
             }
 
-            $matchedApps = @($matchedByDownloadId.Values | ForEach-Object {
-                    $finalTemplateAppName = if ($_.CustomTemplateAppName) { $_.CustomTemplateAppName } else { $_.BaseTemplateAppName }
-                    $finalAppName = Expand-KintonePlaceholder -Value $finalTemplateAppName -ConfigName $DownloadConfigName
-                    $_ | Add-Member -NotePropertyName "TemplateAppName" -NotePropertyValue $finalTemplateAppName -PassThru |
-                    Add-Member -NotePropertyName "FinalAppName" -NotePropertyValue $finalAppName -PassThru
+            $matchedApps = @($downloadAppRows | ForEach-Object {
+                    $dlApp = $_
+                    $baseMatch = $baseAppMappingByDownloadId[$dlApp.'アプリID']
+                    $customMatch = $customAppMappingByDownloadId[$dlApp.'アプリID']
+                    $baseTemplateAppName = if ($baseMatch -and $baseMatch.Status -eq "対応") { $baseMatch.TemplateAppName } else { $null }
+                    $customTemplateAppName = if ($customMatch -and $customMatch.Status -eq "対応") { $customMatch.TemplateAppName } else { $null }
+                    $finalTemplateAppName = if ($customTemplateAppName) { $customTemplateAppName } else { $baseTemplateAppName }
+                    $finalAppName = if ($finalTemplateAppName) { Expand-KintonePlaceholder -Value $finalTemplateAppName -ConfigName $DownloadConfigName } else { $dlApp.'アプリ名' }
+                    [PSCustomObject]@{
+                        DownloadAppId         = $dlApp.'アプリID'
+                        DownloadAppName       = $dlApp.'アプリ名'
+                        BaseTemplateAppName   = $baseTemplateAppName
+                        CustomTemplateAppName = $customTemplateAppName
+                        TemplateAppName       = $finalTemplateAppName
+                        FinalAppName          = $finalAppName
+                    }
                 })
 
             $unmatchedBaseTemplateApps = @($baseAppMapping | Where-Object { $_.Status -ne "対応" -and $_.TemplateAppName })
             $unmatchedCustomTemplateApps = @($customAppMapping | Where-Object { $_.Status -ne "対応" -and $_.TemplateAppName })
-            $unmatchedDownloadApps = @($downloadAppRows | Where-Object { -not $matchedByDownloadId.ContainsKey($_.'アプリID') })
+            $unmatchedDownloadApps = @($matchedApps | Where-Object { -not $_.BaseTemplateAppName -and -not $_.CustomTemplateAppName })
             $hasUnmatched = ($unmatchedBaseTemplateApps.Count -gt 0) -or ($unmatchedCustomTemplateApps.Count -gt 0) -or ($unmatchedDownloadApps.Count -gt 0)
 
             if ($hasUnmatched) {
@@ -218,7 +226,8 @@ try {
                     foreach ($m in $unmatchedBaseTemplateApps) {
                         Write-Message "  設定テンプレート（基本）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
                     }
-                } else {
+                }
+                if ($CustomTemplateConfigName -and -not $BaseTemplateConfigName) {
                     foreach ($m in $unmatchedBaseTemplateApps) {
                         Write-Message "  設定テンプレート（カスタム）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
                     }
@@ -229,17 +238,19 @@ try {
                     }
                 }
                 foreach ($m in $unmatchedDownloadApps) {
-                    Write-Message "  新スペースのアプリ[$($m.'アプリ名')](appId=$($m.'アプリID'))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
+                    Write-Message "  新スペースのアプリ[$($m.DownloadAppName)](appId=$($m.DownloadAppId))に対応するテンプレートのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
                 }
             }
+
+            $spaceRowSource = if ($PreferredDataSource -eq "Download") { $downloadSpaceRow } else { $templateSpaceRow }
 
             $outSpaceRow = [PSCustomObject]@{
                 "スペースID"                           = $newSpaceId
                 "スペース名"                            = $finalSpaceName
-                "参加メンバーだけにこのスペースを公開する"             = $templateSpaceRow.'参加メンバーだけにこのスペースを公開する'
-                "スペースのポータルと複数のスレッドを使用する"           = $templateSpaceRow.'スペースのポータルと複数のスレッドを使用する'
-                "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する" = $templateSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
-                "アプリ作成できるユーザーをスペースの管理者に限定する"       = $templateSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
+                "参加メンバーだけにこのスペースを公開する"             = $spaceRowSource.'参加メンバーだけにこのスペースを公開する'
+                "スペースのポータルと複数のスレッドを使用する"           = $spaceRowSource.'スペースのポータルと複数のスレッドを使用する'
+                "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する" = $spaceRowSource.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
+                "アプリ作成できるユーザーをスペースの管理者に限定する"       = $spaceRowSource.'アプリ作成できるユーザーをスペースの管理者に限定する'
             }
             New-Item -ItemType Directory -Path (Split-Path $outputPath -Parent) -Force | Out-Null
             $excel = New-Object -ComObject Excel.Application
@@ -283,26 +294,41 @@ try {
             }
             Write-ApplyStepResult -ActionLabel "スペース権限を設定しました" -DetailLines $spaceRightLines
 
-            $templateMemberCodes = @($templateMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' })
-            $keptMemberRows = @($downloadMemberRows | Where-Object { $templateMemberCodes -notcontains $_.'ユーザー/組織/グループ' })
-
-            $outMemberRows = @($templateMemberRows | ForEach-Object {
-                    [PSCustomObject]@{
-                        "スペースID"       = $newSpaceId
-                        "種別"           = $_.'種別'
-                        "ユーザー/組織/グループ" = $_.'ユーザー/組織/グループ'
-                        "管理者"          = $_.'管理者'
-                        "下位組織も含める"     = $_.'下位組織も含める'
-                    }
-                }) + @($keptMemberRows | ForEach-Object {
-                    [PSCustomObject]@{
-                        "スペースID"       = $newSpaceId
-                        "種別"           = $_.'種別'
-                        "ユーザー/組織/グループ" = $_.'ユーザー/組織/グループ'
-                        "管理者"          = $_.'管理者'
-                        "下位組織も含める"     = $_.'下位組織も含める'
-                    }
-                })
+            if ($PreferredDataSource -eq "Template") {
+                $templateMemberCodes = @($templateMemberRows | ForEach-Object { $_.'ユーザー/組織/グループ' })
+                $keptMemberRows = @($downloadMemberRows | Where-Object { $templateMemberCodes -notcontains $_.'ユーザー/組織/グループ' })
+                $outMemberRows = @($templateMemberRows | ForEach-Object {
+                        [PSCustomObject]@{
+                            "スペースID"       = $newSpaceId
+                            "種別"           = $_.'種別'
+                            "ユーザー/組織/グループ" = $_.'ユーザー/組織/グループ'
+                            "管理者"          = $_.'管理者'
+                            "下位組織も含める"     = $_.'下位組織も含める'
+                        }
+                    }) + @($keptMemberRows | ForEach-Object {
+                        [PSCustomObject]@{
+                            "スペースID"       = $newSpaceId
+                            "種別"           = $_.'種別'
+                            "ユーザー/組織/グループ" = $_.'ユーザー/組織/グループ'
+                            "管理者"          = $_.'管理者'
+                            "下位組織も含める"     = $_.'下位組織も含める'
+                        }
+                    })
+            }
+            else {
+                $outMemberRows = @($downloadMemberRows | ForEach-Object {
+                        $dlMember = $_
+                        $tmplMember = $templateMemberRows | Where-Object { $_.'種別' -eq $dlMember.'種別' -and $_.'ユーザー/組織/グループ' -eq $dlMember.'ユーザー/組織/グループ' } | Select-Object -First 1
+                        [PSCustomObject]@{
+                            "スペースID"       = $newSpaceId
+                            "種別"           = $dlMember.'種別'
+                            "ユーザー/組織/グループ" = $dlMember.'ユーザー/組織/グループ'
+                            "管理者"          = if ($tmplMember) { $tmplMember.'管理者' } else { $dlMember.'管理者' }
+                            "下位組織も含める"     = if ($tmplMember) { $tmplMember.'下位組織も含める' } else { $dlMember.'下位組織も含める' }
+                        }
+                    })
+                $keptMemberRows = $outMemberRows
+            }
             $headers = $downloadHeaders["space-member-list"]
             $ws = New-OutputSheet "space-member-list"
             $rows = $outMemberRows
@@ -324,7 +350,8 @@ try {
                     })
             }
             if ($keptMemberRows.Count -gt 0) {
-                $memberDetailLines += "  テンプレート外のメンバー ($($keptMemberRows.Count)件)"
+                $labelPhrase = if ($PreferredDataSource -eq "Template") { "テンプレート外のメンバー" } else { "ダウンロード側のメンバー（テンプレート上書き済み）" }
+                $memberDetailLines += "  $labelPhrase ($($keptMemberRows.Count)件)"
                 $memberDetailLines += @($keptMemberRows | ForEach-Object {
                         $row = $_
                         $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
@@ -333,9 +360,16 @@ try {
             }
             Write-ApplyStepResult -ActionLabel "スペースメンバーを設定しました" -CountPhrase "$($outMemberRows.Count)件" -DetailLines $memberDetailLines
 
-            $outAppRows = @($matchedApps | ForEach-Object {
-                    [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
-                })
+            if ($PreferredDataSource -eq "Template") {
+                $outAppRows = @($matchedApps | Where-Object { $_.BaseTemplateAppName -or $_.CustomTemplateAppName } | ForEach-Object {
+                        [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
+                    })
+            }
+            else {
+                $outAppRows = @($matchedApps | ForEach-Object {
+                        [PSCustomObject]@{ "アプリID" = $_.DownloadAppId; "アプリ名" = $_.FinalAppName }
+                    })
+            }
             $headers = $downloadHeaders["space-app-list"]
             $ws = New-OutputSheet "space-app-list"
             $rows = $outAppRows
@@ -352,15 +386,30 @@ try {
             $outRecordAclRows = New-Object System.Collections.Generic.List[psobject]
             $recordAclRowSources = New-Object System.Collections.Generic.List[psobject]
 
-            foreach ($m in $matchedApps) {
+            $appsToProcess = if ($PreferredDataSource -eq "Template") {
+                @($matchedApps | Where-Object { $_.BaseTemplateAppName -or $_.CustomTemplateAppName })
+            } else {
+                $matchedApps
+            }
+
+            foreach ($m in $appsToProcess) {
                 Write-Message "" -Type "Info" -NoHeader
                 Write-Message "## アプリID: $($m.DownloadAppId) ($($m.FinalAppName)) ===" -Type "Info" -NoHeader
 
                 Write-ApplyStepResult -ActionLabel "アプリ名を設定しました" -DetailLines @("　$($m.FinalAppName)")
 
-                $baseAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-                $customAclRowsForApp = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-                $aclRows = @(Merge-KintoneRowsByKey -BaseRows $baseAclRowsForApp -CustomRows $customAclRowsForApp -KeyProperties @("種別", "ユーザー／組織／グループ"))
+                if ($PreferredDataSource -eq "Template") {
+                    $baseAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+                    $customAclRowsForApp = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+                    $aclRows = @(Merge-KintoneRowsByKey -BaseRows $baseAclRowsForApp -CustomRows $customAclRowsForApp -KeyProperties @("種別", "ユーザー／組織／グループ"))
+                }
+                else {
+                    $downloadAclRowsForApp = @($downloadAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.DownloadAppName)" })
+                    $baseAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+                    $customAclRowsForApp = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+                    $templateAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseAclRowsForApp -CustomRows $customAclRowsForApp -KeyProperties @("種別", "ユーザー／組織／グループ"))
+                    $aclRows = @(Merge-KintoneRowsByKey -BaseRows $downloadAclRowsForApp -CustomRows $templateAclRows -KeyProperties @("種別", "ユーザー／組織／グループ"))
+                }
                 $aclTargetLines = @($aclRows | ForEach-Object {
                         $row = $_
                         $grantedRights = @('レコード閲覧', 'レコード追加', 'レコード編集', 'レコード削除', 'アプリ管理', 'ファイル読み込み', 'ファイル書き出し') | Where-Object { ToBool $row.$_ }
@@ -384,9 +433,18 @@ try {
                 }
                 Write-ApplyStepResult -ActionLabel "アプリの権限を設定しました" -CountPhrase "$($aclRows.Count)件" -DetailLines $aclTargetLines
 
-                $baseRecordAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-                $customRecordAclRowsForApp = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-                $recordAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseRecordAclRowsForApp -CustomRows $customRecordAclRowsForApp -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
+                if ($PreferredDataSource -eq "Template") {
+                    $baseRecordAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+                    $customRecordAclRowsForApp = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+                    $recordAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseRecordAclRowsForApp -CustomRows $customRecordAclRowsForApp -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
+                }
+                else {
+                    $downloadRecordAclRowsForApp = @($downloadRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.DownloadAppName)" })
+                    $baseRecordAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+                    $customRecordAclRowsForApp = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+                    $templateRecordAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseRecordAclRowsForApp -CustomRows $customRecordAclRowsForApp -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
+                    $recordAclRows = @(Merge-KintoneRowsByKey -BaseRows $downloadRecordAclRowsForApp -CustomRows $templateRecordAclRows -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
+                }
                 $recordAclCondGroups = @($recordAclRows | Group-Object -Property 'レコードの条件')
                 $recordAclTargetLines = @($recordAclCondGroups | ForEach-Object {
                         $condGroup = $_
@@ -439,6 +497,8 @@ try {
             foreach ($sheetName in @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl")) {
                 Set-HeaderRowColor -Sheet $workbook.Sheets.Item($sheetName) -Color ([System.Drawing.Color]::FromArgb(217, 217, 217))
             }
+            [System.GC]::Collect()
+            [System.GC]::WaitForPendingFinalizers()
 
             $applyDiffColoring = $true
 
@@ -462,8 +522,13 @@ try {
                     Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 6) -DownloadValue "$($downloadSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')" -FinalValue "$($templateSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
 
                     $wsAppList = $workbook.Sheets.Item("space-app-list")
-                    for ($i = 0; $i -lt $matchedApps.Count; $i++) {
-                        Set-PlaceholderRichText -Cell $wsAppList.Cells.Item(($i + 2), 2) -OriginalValue $matchedApps[$i].TemplateAppName -Replacement $DownloadConfigName -Color $diffColor
+                    $appsForDiffColor = if ($PreferredDataSource -eq "Template") {
+                        @($matchedApps | Where-Object { $_.BaseTemplateAppName -or $_.CustomTemplateAppName })
+                    } else {
+                        $matchedApps
+                    }
+                    for ($i = 0; $i -lt $appsForDiffColor.Count; $i++) {
+                        Set-PlaceholderRichText -Cell $wsAppList.Cells.Item(($i + 2), 2) -OriginalValue $appsForDiffColor[$i].TemplateAppName -Replacement $DownloadConfigName -Color $diffColor
                     }
 
                     $wsMember = $null
@@ -472,9 +537,10 @@ try {
                         $memberUsed = $wsMember.UsedRange
                         $memberLastRow = $memberUsed.Row + $memberUsed.Rows.Count - 1
                         $memberLastCol = $memberUsed.Column + $memberUsed.Columns.Count - 1
-                        $templateRowEnd = [Math]::Min(1 + $templateMemberRows.Count, $memberLastRow)
+                        $memberRowsForDiffColor = if ($PreferredDataSource -eq "Template") { $templateMemberRows } else { $downloadMemberRows }
+                        $templateRowEnd = [Math]::Min(1 + $memberRowsForDiffColor.Count, $memberLastRow)
                         for ($row = 2; $row -le $templateRowEnd; $row++) {
-                            $tmplRow = $templateMemberRows[$row - 2]
+                            $tmplRow = $memberRowsForDiffColor[$row - 2]
                             $dlRow = $downloadMemberRows | Where-Object {
                                 "$($_.'種別')" -eq "$($tmplRow.'種別')" -and
                                 "$($_.'ユーザー/組織/グループ')" -eq "$($tmplRow.'ユーザー/組織/グループ')"
@@ -554,6 +620,14 @@ try {
                     }
                 }
 
+                if ($wsSettings) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsSettings); $wsSettings = $null }
+                if ($wsAppList) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsAppList); $wsAppList = $null }
+                if ($wsMember) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsMember); $wsMember = $null }
+                if ($wsAcl) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsAcl); $wsAcl = $null }
+                if ($wsRecordAcl) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsRecordAcl); $wsRecordAcl = $null }
+                [System.GC]::Collect()
+                [System.GC]::WaitForPendingFinalizers()
+
                 foreach ($sheetName in @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl")) {
                     $ws = $null
                     try { $ws = $workbook.Sheets.Item($sheetName) } catch { $ws = $null }
@@ -578,6 +652,8 @@ try {
         }
         catch {
             Write-MessageError "実行エラー: $($error[0])"
+            Write-MessageError "行番号: $($error[0].InvocationInfo.ScriptLineNumber)"
+            Write-MessageError "スタックトレース: $($error[0].ScriptStackTrace)"
             $script:exitCode = 1
         }
     } *>&1 | Tee-Object -FilePath $logFilePath
