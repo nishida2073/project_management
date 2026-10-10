@@ -418,16 +418,15 @@ try {
 
                 Write-ApplyStepResult -ActionLabel "アプリ名を設定しました" -DetailLines @("　$($m.FinalAppName)")
 
+                $baseAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+                $customAclRowsForApp = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+                $templateAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseAclRowsForApp -CustomRows $customAclRowsForApp -KeyProperties @("種別", "ユーザー／組織／グループ"))
+
                 if ($PreferredDataSource -eq "Template") {
-                    $baseAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-                    $customAclRowsForApp = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-                    $aclRows = @(Merge-KintoneRowsByKey -BaseRows $baseAclRowsForApp -CustomRows $customAclRowsForApp -KeyProperties @("種別", "ユーザー／組織／グループ"))
+                    $aclRows = $templateAclRows
                 }
                 else {
                     $downloadAclRowsForApp = @($downloadAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.DownloadAppName)" })
-                    $baseAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-                    $customAclRowsForApp = if ($m.CustomTemplateAppName) { @($customAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-                    $templateAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseAclRowsForApp -CustomRows $customAclRowsForApp -KeyProperties @("種別", "ユーザー／組織／グループ"))
                     $aclRows = @(Merge-KintoneRowsByKey -BaseRows $downloadAclRowsForApp -CustomRows $templateAclRows -KeyProperties @("種別", "ユーザー／組織／グループ"))
                 }
                 $aclTargetLines = @($aclRows | ForEach-Object {
@@ -453,16 +452,15 @@ try {
                 }
                 Write-ApplyStepResult -ActionLabel "アプリの権限を設定しました" -CountPhrase "$($aclRows.Count)件" -DetailLines $aclTargetLines
 
+                $baseRecordAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
+                $customRecordAclRowsForApp = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
+                $templateRecordAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseRecordAclRowsForApp -CustomRows $customRecordAclRowsForApp -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
+
                 if ($PreferredDataSource -eq "Template") {
-                    $baseRecordAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-                    $customRecordAclRowsForApp = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-                    $recordAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseRecordAclRowsForApp -CustomRows $customRecordAclRowsForApp -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
+                    $recordAclRows = $templateRecordAclRows
                 }
                 else {
                     $downloadRecordAclRowsForApp = @($downloadRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.DownloadAppName)" })
-                    $baseRecordAclRowsForApp = if ($m.BaseTemplateAppName) { @($baseRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.BaseTemplateAppName)" }) } else { @() }
-                    $customRecordAclRowsForApp = if ($m.CustomTemplateAppName) { @($customRecordAclRows | Where-Object { "$($_.'アプリ名')" -eq "$($m.CustomTemplateAppName)" }) } else { @() }
-                    $templateRecordAclRows = @(Merge-KintoneRowsByKey -BaseRows $baseRecordAclRowsForApp -CustomRows $customRecordAclRowsForApp -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
                     $recordAclRows = @(Merge-KintoneRowsByKey -BaseRows $downloadRecordAclRowsForApp -CustomRows $templateRecordAclRows -KeyProperties @("レコードの条件", "種別", "ユーザー／組織／グループ"))
                 }
                 $recordAclCondGroups = @($recordAclRows | Group-Object -Property 'レコードの条件')
