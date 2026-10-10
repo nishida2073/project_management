@@ -769,12 +769,15 @@ function Update-LogView {
                 $cmb = $script:logTab.$($extra.PropertyName)
                 if ($cmb -and $cmb.SelectedIndex -ge 0) {
                     $value = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
-                    if ($value) { $filterPatterns += $value }
+                    if ($value) {
+                        $filterPatterns += $value
+                    } else {
+                        $filterPatterns += "*"
+                    }
                 }
             }
         }
     }
-
     $filterPattern = $filterPatterns -join "-"
     $files = Get-ChildItem -LiteralPath $logPath -Filter "$filterPattern*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime
     $sections = foreach ($file in $files) {

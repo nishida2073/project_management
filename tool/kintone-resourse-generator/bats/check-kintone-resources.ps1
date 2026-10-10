@@ -83,7 +83,7 @@ try {
             $appRecordAclDiff = New-Object System.Collections.Generic.List[psobject]
 
             if ($spaceRows -or $memberRows) {
-                foreach ($spaceGroup in (Group-RowsBySpaceId -Rows $spaceRows)) {
+                foreach ($spaceGroup in ($spaceRows | Group-Object -Property 'スペースID')) {
                     $spaceId = $spaceGroup.Name
                     $expectedSpaceRow = $spaceGroup.Group | Select-Object -First 1
                     Write-Message "" -Type "Info" -NoHeader

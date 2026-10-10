@@ -941,14 +941,16 @@ $cmbSettingsGroupTarget.Add_SelectedIndexChanged({
     Update-GroupSettingsFields
 })
 
+$settingsSubTabControl.Add_SelectedIndexChanged({
+    if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
+        Update-CommonSettingsFields
+    } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
+        Update-GroupSettingsFields
+    }
+})
+
 $tabControl.Add_SelectedIndexChanged({
-    if ($tabControl.SelectedTab -eq $tabSettings) {
-        if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
-            Update-CommonSettingsFields
-        } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
-            Update-GroupSettingsFields
-        }
-    } elseif ($tabControl.SelectedTab -eq $tabLogs) {
+    if ($tabControl.SelectedTab -eq $tabLogs) {
         Update-LogView
     }
 })

@@ -61,7 +61,7 @@ try {
 
             $hasError = $false
 
-            foreach ($spaceGroup in (Group-RowsBySpaceId -Rows $spaceRows)) {
+            foreach ($spaceGroup in ($spaceRows | Group-Object -Property 'スペースID')) {
                 $spaceId = $spaceGroup.Name
                 $spaceRow = $spaceGroup.Group | Select-Object -First 1
 
