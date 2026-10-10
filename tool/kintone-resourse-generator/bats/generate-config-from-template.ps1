@@ -64,8 +64,16 @@ if (-not $DownloadConfigName) {
     exit 1
 }
 
-$baseTemplatePath = if ($BaseTemplateConfigName) { Join-Path $BaseTemplateRoot "$BaseTemplateConfigName.xlsx" } else { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" }
-$customTemplatePath = if ($CustomTemplateConfigName -and $BaseTemplateConfigName) { Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx" } else { $null }
+$baseTemplatePath = $null
+$customTemplatePath = $null
+
+if ($BaseTemplateConfigName) {
+    $baseTemplatePath = Join-Path $BaseTemplateRoot "$BaseTemplateConfigName.xlsx"
+}
+if ($CustomTemplateConfigName) {
+    $customTemplatePath = Join-Path $CustomTemplateRoot "$CustomTemplateConfigName.xlsx"
+}
+
 $downloadPath = Join-Path $DownloadRoot "${DownloadConfigName}_download.xlsx"
 $outputPath = Join-Path $ConfigRoot "${DownloadConfigName}_config.xlsx"
 $logFilePath = New-WorkerLogPath -LogRoot $LogRoot -Prefix "${LogNamePrefix}-$TargetGroupName-$DownloadConfigName"
@@ -77,36 +85,45 @@ try {
         try {
             $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
-            $excel = New-Object -ComObject Excel.Application
-            $excel.Visible = $false
-            $excel.DisplayAlerts = $false
-            $excel.ScreenUpdating = $false
-            $excel.EnableEvents = $false
-            try {
-                $workbook = $excel.Workbooks.Open($baseTemplatePath)
-                $baseSpaceRow = Get-RowObjects -Sheet $workbook.Sheets.Item("space-settings") | Select-Object -First 1
-                $baseMemberRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-member-list"))
-                $baseAppRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-list") | Where-Object { $_.'アプリ名' })
-                $baseAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-acl"))
-                $baseRecordAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-record-acl"))
-            }
-            finally {
-                if ($workbook) {
-                    try { $workbook.Close($false) } catch {}
-                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook)
-                    $workbook = $null
+            if ($baseTemplatePath) {
+                $excel = New-Object -ComObject Excel.Application
+                $excel.Visible = $false
+                $excel.DisplayAlerts = $false
+                $excel.ScreenUpdating = $false
+                $excel.EnableEvents = $false
+                try {
+                    $workbook = $excel.Workbooks.Open($baseTemplatePath)
+                    $baseSpaceRow = Get-RowObjects -Sheet $workbook.Sheets.Item("space-settings") | Select-Object -First 1
+                    $baseMemberRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-member-list"))
+                    $baseAppRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-list") | Where-Object { $_.'アプリ名' })
+                    $baseAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-acl"))
+                    $baseRecordAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-record-acl"))
                 }
-                if ($excel) {
-                    try { $excel.Quit() } catch {}
-                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
-                    $excel = $null
+                finally {
+                    if ($workbook) {
+                        try { $workbook.Close($false) } catch {}
+                        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook)
+                        $workbook = $null
+                    }
+                    if ($excel) {
+                        try { $excel.Quit() } catch {}
+                        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
+                        $excel = $null
+                    }
+                    [System.GC]::Collect()
+                    [System.GC]::WaitForPendingFinalizers()
+                    [System.GC]::Collect()
                 }
-                [System.GC]::Collect()
-                [System.GC]::WaitForPendingFinalizers()
-                [System.GC]::Collect()
-            }
 
-            Start-Sleep -Milliseconds 100
+                Start-Sleep -Milliseconds 100
+            }
+            else {
+                $baseSpaceRow = $null
+                $baseMemberRows = @()
+                $baseAppRows = @()
+                $baseAclRows = @()
+                $baseRecordAclRows = @()
+            }
 
             if ($customTemplatePath) {
                 $excel = New-Object -ComObject Excel.Application
@@ -187,24 +204,29 @@ try {
 
             Start-Sleep -Milliseconds 100
 
-            if (-not $baseSpaceRow -or -not $downloadSpaceRow) {
-                throw "テンプレートまたはダウンロード結果のspace-settingsが空です"
+            if (-not $downloadSpaceRow) {
+                throw "ダウンロード結果のspace-settingsが空です"
             }
             $newSpaceId = $downloadSpaceRow.'スペースID'
 
+            $primarySpaceRow = if ($baseSpaceRow) { $baseSpaceRow } else { $customSpaceRow }
+            if (-not $primarySpaceRow) {
+                throw "テンプレートのspace-settingsが空です"
+            }
+
             $templateSpaceRow = [PSCustomObject]@{
-                'スペース名'                            = Get-PreferredValue $customSpaceRow.'スペース名' $baseSpaceRow.'スペース名'
-                '参加メンバーだけにこのスペースを公開する'             = Get-PreferredValue $customSpaceRow.'参加メンバーだけにこのスペースを公開する' $baseSpaceRow.'参加メンバーだけにこのスペースを公開する'
-                'スペースのポータルと複数のスレッドを使用する'           = Get-PreferredValue $customSpaceRow.'スペースのポータルと複数のスレッドを使用する' $baseSpaceRow.'スペースのポータルと複数のスレッドを使用する'
-                'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' = Get-PreferredValue $customSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' $baseSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
-                'アプリ作成できるユーザーをスペースの管理者に限定する'       = Get-PreferredValue $customSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する' $baseSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
+                'スペース名'                            = Get-PreferredValue $customSpaceRow.'スペース名' $primarySpaceRow.'スペース名'
+                '参加メンバーだけにこのスペースを公開する'             = Get-PreferredValue $customSpaceRow.'参加メンバーだけにこのスペースを公開する' $primarySpaceRow.'参加メンバーだけにこのスペースを公開する'
+                'スペースのポータルと複数のスレッドを使用する'           = Get-PreferredValue $customSpaceRow.'スペースのポータルと複数のスレッドを使用する' $primarySpaceRow.'スペースのポータルと複数のスレッドを使用する'
+                'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' = Get-PreferredValue $customSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' $primarySpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
+                'アプリ作成できるユーザーをスペースの管理者に限定する'       = Get-PreferredValue $customSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する' $primarySpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する'
             }
             $spaceNameSource = if ($PreferredDataSource -eq "Download") { $downloadSpaceRow.'スペース名' } else { $templateSpaceRow.'スペース名' }
             $finalSpaceName = Expand-KintonePlaceholder -Value $spaceNameSource -ConfigName $DownloadConfigName
 
             $templateMemberRows = @(Merge-KintoneRowsByKey -BaseRows $baseMemberRows -CustomRows $customMemberRows -KeyProperties @("種別", "ユーザー/組織/グループ"))
 
-            $baseAppMapping = Get-AppNameMapping -TemplateApps $baseAppRows -DownloadApps $downloadAppRows
+            $baseAppMapping = if ($baseAppRows.Count -gt 0) { Get-AppNameMapping -TemplateApps $baseAppRows -DownloadApps $downloadAppRows } else { @() }
             $customAppMapping = if ($customAppRows.Count -gt 0) { Get-AppNameMapping -TemplateApps $customAppRows -DownloadApps $downloadAppRows } else { @() }
 
             $baseAppMappingByDownloadId = @{}
@@ -247,12 +269,7 @@ try {
                         Write-Message "  設定テンプレート（基本）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
                     }
                 }
-                if ($CustomTemplateConfigName -and -not $BaseTemplateConfigName) {
-                    foreach ($m in $unmatchedBaseTemplateApps) {
-                        Write-Message "  設定テンプレート（カスタム）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
-                    }
-                }
-                if ($BaseTemplateConfigName -and $CustomTemplateConfigName) {
+                if ($CustomTemplateConfigName) {
                     foreach ($m in $unmatchedCustomTemplateApps) {
                         Write-Message "  設定テンプレート（カスタム）のアプリ[$($m.TemplateAppName)]に対応する新スペースのアプリが見つかりません" -ForegroundColor Yellow -Type "Info" -NoHeader
                     }
@@ -671,8 +688,6 @@ try {
         }
         catch {
             Write-MessageError "実行エラー: $($error[0])"
-            Write-MessageError "行番号: $($error[0].InvocationInfo.ScriptLineNumber)"
-            Write-MessageError "スタックトレース: $($error[0].ScriptStackTrace)"
             $script:exitCode = 1
         }
     } *>&1 | Tee-Object -FilePath $logFilePath
