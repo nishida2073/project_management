@@ -613,34 +613,6 @@ function Write-RowObjects {
     $Sheet.UsedRange.Columns.AutoFit() | Out-Null
 }
 
-function Set-PlaceholderRichText {
-    param(
-        [Parameter(Mandatory)]$Cell,
-        [string]$OriginalValue,
-        [Parameter(Mandatory)][string]$Replacement,
-        [Parameter(Mandatory)][System.Drawing.Color]$Color
-    )
-    if (-not $OriginalValue -or -not $OriginalValue.Contains('{PH}')) { return }
-
-    $segments = $OriginalValue.Split([string[]]@('{PH}'), [System.StringSplitOptions]::None)
-    $Cell.Value2 = $OriginalValue.Replace('{PH}', $Replacement)
-
-    $oleColor = ConvertTo-OleColor -Color $Color
-    $pos = 0
-    for ($i = 0; $i -lt $segments.Length; $i++) {
-        $pos += $segments[$i].Length
-        if ($i -lt $segments.Length - 1) {
-            $len = $Replacement.Length
-            if ($len -gt 0) {
-                $chars = $Cell.Characters($pos + 1, $len)
-                $chars.Font.Color = $oleColor
-                $chars.Font.Bold = $true
-            }
-            $pos += $len
-        }
-    }
-}
-
 function Set-HeaderRowColor {
     param(
         [Parameter(Mandatory)]$Sheet,
