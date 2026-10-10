@@ -91,11 +91,22 @@ try {
                 $baseRecordAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-record-acl"))
             }
             finally {
-                if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-                if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+                if ($workbook) {
+                    try { $workbook.Close($false) } catch {}
+                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook)
+                    $workbook = $null
+                }
+                if ($excel) {
+                    try { $excel.Quit() } catch {}
+                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
+                    $excel = $null
+                }
                 [System.GC]::Collect()
                 [System.GC]::WaitForPendingFinalizers()
+                [System.GC]::Collect()
             }
+
+            Start-Sleep -Milliseconds 100
 
             if ($customTemplatePath) {
                 $excel = New-Object -ComObject Excel.Application
@@ -112,10 +123,19 @@ try {
                     $customRecordAclRows = @(Get-RowObjects -Sheet $workbook.Sheets.Item("space-app-record-acl"))
                 }
                 finally {
-                    if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-                    if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+                    if ($workbook) {
+                        try { $workbook.Close($false) } catch {}
+                        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook)
+                        $workbook = $null
+                    }
+                    if ($excel) {
+                        try { $excel.Quit() } catch {}
+                        [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
+                        $excel = $null
+                    }
                     [System.GC]::Collect()
                     [System.GC]::WaitForPendingFinalizers()
+                    [System.GC]::Collect()
                 }
             }
             else {
@@ -620,14 +640,6 @@ try {
                     }
                 }
 
-                if ($wsSettings) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsSettings); $wsSettings = $null }
-                if ($wsAppList) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsAppList); $wsAppList = $null }
-                if ($wsMember) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsMember); $wsMember = $null }
-                if ($wsAcl) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsAcl); $wsAcl = $null }
-                if ($wsRecordAcl) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($wsRecordAcl); $wsRecordAcl = $null }
-                [System.GC]::Collect()
-                [System.GC]::WaitForPendingFinalizers()
-
                 foreach ($sheetName in @("space-settings", "space-member-list", "space-app-list", "space-app-acl", "space-app-record-acl")) {
                     $ws = $null
                     try { $ws = $workbook.Sheets.Item($sheetName) } catch { $ws = $null }
@@ -639,10 +651,19 @@ try {
                 $workbook.SaveAs($outputPath, 51)
             }
             finally {
-                if ($workbook) { $workbook.Close($false); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
-                if ($excel) { $excel.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
+                if ($workbook) {
+                    try { $workbook.Close($false) } catch {}
+                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook)
+                    $workbook = $null
+                }
+                if ($excel) {
+                    try { $excel.Quit() } catch {}
+                    [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
+                    $excel = $null
+                }
                 [System.GC]::Collect()
                 [System.GC]::WaitForPendingFinalizers()
+                [System.GC]::Collect()
             }
 
             Write-MessageComplete "設定内容を出力しました: $outputPath"
