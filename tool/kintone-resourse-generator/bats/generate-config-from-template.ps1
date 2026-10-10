@@ -541,7 +541,7 @@ try {
             $diffColorOle = ConvertTo-OleColor $diffColor
 
             try {
-                function Set-PlaceholderRichText {
+                function Update-CellValue {
                     param(
                         [Parameter(Mandatory)]$Cell,
                         [Parameter(Mandatory)][string]$Replacement
@@ -575,7 +575,7 @@ try {
 
                 if ($applyDiffColoring) {
                     $wsSettings = $workbook.Sheets.Item("space-settings")
-                    Set-PlaceholderRichText -Cell $wsSettings.Cells.Item(2, 2) -Replacement $DownloadConfigName
+                    Update-CellValue -Cell $wsSettings.Cells.Item(2, 2) -Replacement $DownloadConfigName
                     Set-KintoneCellDiffColor -OleColor $diffColorOle -Cell $wsSettings.Cells.Item(2, 2) -DownloadValue "$($downloadSpaceRow.'スペース名')" -FinalValue "$($outSpaceRow.'スペース名')"
                     Set-KintoneCellDiffColor -OleColor $diffColorOle -Cell $wsSettings.Cells.Item(2, 3) -DownloadValue "$($downloadSpaceRow.'参加メンバーだけにこのスペースを公開する')" -FinalValue "$($outSpaceRow.'参加メンバーだけにこのスペースを公開する')"
                     Set-KintoneCellDiffColor -OleColor $diffColorOle -Cell $wsSettings.Cells.Item(2, 4) -DownloadValue "$($downloadSpaceRow.'スペースのポータルと複数のスレッドを使用する')" -FinalValue "$($outSpaceRow.'スペースのポータルと複数のスレッドを使用する')"
@@ -589,7 +589,7 @@ try {
                         $matchedApps
                     }
                     for ($i = 0; $i -lt $appsForDiffColor.Count; $i++) {
-                        Set-PlaceholderRichText -Cell $wsAppList.Cells.Item(($i + 2), 2) -Replacement $DownloadConfigName
+                        Update-CellValue -Cell $wsAppList.Cells.Item(($i + 2), 2) -Replacement $DownloadConfigName
                         Set-KintoneCellDiffColor -OleColor $diffColorOle -Cell $wsAppList.Cells.Item(($i + 2), 2) -DownloadValue "$($appsForDiffColor[$i].DownloadAppName)" -FinalValue "$($appsForDiffColor[$i].FinalAppName)"
                     }
 
