@@ -551,10 +551,10 @@ try {
                 if ($applyDiffColoring) {
                     $wsSettings = $workbook.Sheets.Item("space-settings")
                     Set-PlaceholderRichText -Cell $wsSettings.Cells.Item(2, 2) -OriginalValue $spaceNameSource -Replacement $DownloadConfigName -Color $diffColor
-                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 3) -DownloadValue "$($downloadSpaceRow.'参加メンバーだけにこのスペースを公開する')" -FinalValue "$($templateSpaceRow.'参加メンバーだけにこのスペースを公開する')"
-                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 4) -DownloadValue "$($downloadSpaceRow.'スペースのポータルと複数のスレッドを使用する')" -FinalValue "$($templateSpaceRow.'スペースのポータルと複数のスレッドを使用する')"
-                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 5) -DownloadValue "$($downloadSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')" -FinalValue "$($templateSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')"
-                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 6) -DownloadValue "$($downloadSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')" -FinalValue "$($templateSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
+                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 3) -DownloadValue "$($downloadSpaceRow.'参加メンバーだけにこのスペースを公開する')" -FinalValue "$($outSpaceRow.'参加メンバーだけにこのスペースを公開する')"
+                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 4) -DownloadValue "$($downloadSpaceRow.'スペースのポータルと複数のスレッドを使用する')" -FinalValue "$($outSpaceRow.'スペースのポータルと複数のスレッドを使用する')"
+                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 5) -DownloadValue "$($downloadSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')" -FinalValue "$($outSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する')"
+                    Set-KintoneCellDiffColor -Cell $wsSettings.Cells.Item(2, 6) -DownloadValue "$($downloadSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')" -FinalValue "$($outSpaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')"
 
                     $wsAppList = $workbook.Sheets.Item("space-app-list")
                     $appsForDiffColor = if ($PreferredDataSource -eq "Template") {
@@ -587,8 +587,9 @@ try {
                                 }
                                 continue
                             }
-                            Set-KintoneCellDiffColor -Cell $wsMember.Cells.Item($row, 4) -DownloadValue "$($dlRow.'管理者')" -FinalValue "$($tmplRow.'管理者')"
-                            Set-KintoneCellDiffColor -Cell $wsMember.Cells.Item($row, 5) -DownloadValue "$($dlRow.'下位組織も含める')" -FinalValue "$($tmplRow.'下位組織も含める')"
+                            $outMemberRow = $outMemberRows[$row - 2]
+                            Set-KintoneCellDiffColor -Cell $wsMember.Cells.Item($row, 4) -DownloadValue "$($dlRow.'管理者')" -FinalValue "$($outMemberRow.'管理者')"
+                            Set-KintoneCellDiffColor -Cell $wsMember.Cells.Item($row, 5) -DownloadValue "$($dlRow.'下位組織も含める')" -FinalValue "$($outMemberRow.'下位組織も含める')"
                         }
                     }
 
@@ -615,13 +616,14 @@ try {
                                 }
                                 continue
                             }
-                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 5) -DownloadValue "$($dlRow.'レコード閲覧')" -FinalValue "$($tmplRow.'レコード閲覧')"
-                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 6) -DownloadValue "$($dlRow.'レコード追加')" -FinalValue "$($tmplRow.'レコード追加')"
-                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 7) -DownloadValue "$($dlRow.'レコード編集')" -FinalValue "$($tmplRow.'レコード編集')"
-                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 8) -DownloadValue "$($dlRow.'レコード削除')" -FinalValue "$($tmplRow.'レコード削除')"
-                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 9) -DownloadValue "$($dlRow.'アプリ管理')" -FinalValue "$($tmplRow.'アプリ管理')"
-                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 10) -DownloadValue "$($dlRow.'ファイル読み込み')" -FinalValue "$($tmplRow.'ファイル読み込み')"
-                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 11) -DownloadValue "$($dlRow.'ファイル書き出し')" -FinalValue "$($tmplRow.'ファイル書き出し')"
+                            $outAclRow = $outAclRows.ToArray()[$row - 2]
+                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 5) -DownloadValue "$($dlRow.'レコード閲覧')" -FinalValue "$($outAclRow.'レコード閲覧')"
+                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 6) -DownloadValue "$($dlRow.'レコード追加')" -FinalValue "$($outAclRow.'レコード追加')"
+                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 7) -DownloadValue "$($dlRow.'レコード編集')" -FinalValue "$($outAclRow.'レコード編集')"
+                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 8) -DownloadValue "$($dlRow.'レコード削除')" -FinalValue "$($outAclRow.'レコード削除')"
+                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 9) -DownloadValue "$($dlRow.'アプリ管理')" -FinalValue "$($outAclRow.'アプリ管理')"
+                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 10) -DownloadValue "$($dlRow.'ファイル読み込み')" -FinalValue "$($outAclRow.'ファイル読み込み')"
+                            Set-KintoneCellDiffColor -Cell $wsAcl.Cells.Item($row, 11) -DownloadValue "$($dlRow.'ファイル書き出し')" -FinalValue "$($outAclRow.'ファイル書き出し')"
                         }
                     }
 
@@ -648,9 +650,10 @@ try {
                                 }
                                 continue
                             }
-                            Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells.Item($row, 6) -DownloadValue "$($dlRow.'閲覧')" -FinalValue "$($tmplRow.'閲覧')"
-                            Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells.Item($row, 7) -DownloadValue "$($dlRow.'編集')" -FinalValue "$($tmplRow.'編集')"
-                            Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells.Item($row, 8) -DownloadValue "$($dlRow.'削除')" -FinalValue "$($tmplRow.'削除')"
+                            $outRecordAclRow = $outRecordAclRows.ToArray()[$row - 2]
+                            Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells.Item($row, 6) -DownloadValue "$($dlRow.'閲覧')" -FinalValue "$($outRecordAclRow.'閲覧')"
+                            Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells.Item($row, 7) -DownloadValue "$($dlRow.'編集')" -FinalValue "$($outRecordAclRow.'編集')"
+                            Set-KintoneCellDiffColor -Cell $wsRecordAcl.Cells.Item($row, 8) -DownloadValue "$($dlRow.'削除')" -FinalValue "$($outRecordAclRow.'削除')"
                         }
                     }
                 }
