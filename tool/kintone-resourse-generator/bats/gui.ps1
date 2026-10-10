@@ -42,9 +42,7 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$script:baseTemplateNamePlaceholder = "指定なし"
-
-$script:customTemplateNamePlaceholder = "指定なし"
+$noSelectOption = [PSCustomObject]@{ Text = "指定なし"; Value = "" }
 
 $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 $cmbBaseTemplateName = New-ComboBox -Width 220 -Height 22
@@ -151,12 +149,6 @@ $categoryDefs = @(
                     foreach ($inputDef in $inputDefs) {
                         if (-not $ic.ContainsKey($inputDef.Name)) { continue }
                         $value = Get-InputValue -Control $ic[$inputDef.Name]
-                        if ($inputDef.Name -eq "BaseTemplateName" -and ($null -eq $value -or $value -eq $script:baseTemplateNamePlaceholder)) {
-                            continue
-                        }
-                        if ($inputDef.Name -eq "CustomTemplateName" -and ($null -eq $value -or $value -eq $script:customTemplateNamePlaceholder)) {
-                            continue
-                        }
                         $paramName = if ($nameMap.ContainsKey($inputDef.Name)) { $nameMap[$inputDef.Name] } else { $inputDef.Name }
                         $batArgs += "-${paramName}:$value"
                     }
@@ -293,9 +285,8 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
         if ($bd.Inputs) {
             foreach ($inputDef in $bd.Inputs) {
                 if ($inputDef.Require) {
-                    $ctrl = $ic[$inputDef.Name]
-                    $value = if ($ctrl -is [System.Windows.Forms.TextBox]) { $ctrl.Text.Trim() } else { Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem }
-                    if (!$value -or ($value -eq $script:customTemplateNamePlaceholder) -or ($value -eq $script:baseTemplateNamePlaceholder)) {
+                    $value = Get-InputValue -Control $ic[$inputDef.Name]
+                    if (!$value) {
                         [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                         return 1
                     }
@@ -479,29 +470,18 @@ function Invoke-ExecuteAll {
         if (-not $inputDef.Require) { continue }
 
         $ctrl = $script:batchInputControls[$inputDef.Name]
-        $value = if ($ctrl -is [System.Windows.Forms.ComboBox]) {
-            Get-ComboBoxValue -SelectedItem $ctrl.SelectedItem
-        } else {
-            $ctrl.Text.Trim()
-        }
+        $value = Get-InputValue -Control $ctrl
 
-        $isValid = if ($ctrl -is [System.Windows.Forms.ComboBox]) {
-            $value -and ($value -ne $script:baseTemplateNamePlaceholder) -and ($value -ne $script:customTemplateNamePlaceholder)
-        } else {
-            $value
-        }
-
-        if (-not $isValid) {
+        if (-not $value) {
             [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
             return 1
         }
     }
 
-    $baseTemplateValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["BaseTemplateName"].SelectedItem
-    $customTemplateValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["CustomTemplateName"].SelectedItem
+    $baseTemplateValue = Get-InputValue -Control $script:batchInputControls["BaseTemplateName"]
+    $customTemplateValue = Get-InputValue -Control $script:batchInputControls["CustomTemplateName"]
     
-    if (($null -eq $baseTemplateValue -or $baseTemplateValue -eq $script:baseTemplateNamePlaceholder) -and `
-        ($null -eq $customTemplateValue -or $customTemplateValue -eq $script:customTemplateNamePlaceholder)) {
+    if (-not $baseTemplateValue -and -not $customTemplateValue) {
         [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
         return 1
     }
@@ -678,37 +658,18 @@ function Get-TemplateFileNames {
         Sort-Object)
 }
 
-function Set-ComboItems {
-    param([System.Windows.Forms.ComboBox]$ComboBox, [string[]]$Names, [string]$Placeholder)
-    $selected = Get-ComboBoxValue -SelectedItem $ComboBox.SelectedItem
-    $ComboBox.DisplayMember = "Text"
-    $ComboBox.ValueMember = "Value"
-    $ComboBox.Items.Clear()
-    $ComboBox.Items.Add([PSCustomObject]@{ Text = $Placeholder; Value = $Placeholder }) | Out-Null
-    foreach ($name in $Names) { $ComboBox.Items.Add([PSCustomObject]@{ Text = $name; Value = $name }) | Out-Null }
-
-    if ($selected) {
-        $matchingItem = $ComboBox.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selected } | Select-Object -First 1
-        if ($matchingItem) {
-            $ComboBox.SelectedItem = $matchingItem
-        } else {
-            $ComboBox.SelectedItem = $ComboBox.Items[0]
-        }
-    } else {
-        $ComboBox.SelectedItem = $ComboBox.Items[0]
-    }
-}
-
 function Update-BaseTemplateNameList {
     $names = Get-TemplateFileNames -EnvVarName "COMMON_BASE_TEMPLATE_PATH"
-    Set-ComboItems -ComboBox $cmbBaseTemplateName -Names $names -Placeholder $script:baseTemplateNamePlaceholder
-    Set-ComboItems -ComboBox $cmbRunAllBaseTemplateName -Names $names -Placeholder $script:baseTemplateNamePlaceholder
+    $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
+    Update-ComboBoxItems -ComboBox $cmbBaseTemplateName -Items $items
+    Update-ComboBoxItems -ComboBox $cmbRunAllBaseTemplateName -Items $items
 }
 
 function Update-CustomTemplateNameList {
     $names = Get-TemplateFileNames -EnvVarName "COMMON_CUSTOM_TEMPLATE_PATH"
-    Set-ComboItems -ComboBox $cmbCustomTemplateName -Names $names -Placeholder $script:customTemplateNamePlaceholder
-    Set-ComboItems -ComboBox $cmbRunAllCustomTemplateName -Names $names -Placeholder $script:customTemplateNamePlaceholder
+    $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
+    Update-ComboBoxItems -ComboBox $cmbCustomTemplateName -Items $items
+    Update-ComboBoxItems -ComboBox $cmbRunAllCustomTemplateName -Items $items
 }
 
 $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll

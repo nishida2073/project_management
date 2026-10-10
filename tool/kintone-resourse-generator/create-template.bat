@@ -17,7 +17,7 @@ call "%~dp0clients\!TargetGroupName!.bat"
 
 call "%~dp0bats\message.bat" "Start %~nx0"
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0bats\create-template.ps1" -BaseUrl "%KINTONE_BASE_URL%" -TemplateRoot "%BASE_PATH%template" -LogRoot "%COMMON_LOG_PATH%" -KintoneLogin "%KINTONE_LOGIN%" -KintonePassword "%KINTONE_PASSWORD%" -LogNamePrefix "%~n0" -OrgFileName "template.xlsx" %*
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0bats\create-template.ps1" -BaseUrl "%KINTONE_BASE_URL%" -TemplateRoot "%BASE_PATH%template" -LogRoot "%COMMON_LOG_PATH%" -KintoneLogin "%KINTONE_LOGIN%" -KintonePassword "%KINTONE_PASSWORD%" -LogNamePrefix "%~n0" -OrgFileName "template.xlsx" -SpaceId "%SpaceId%" -TargetGroupName "%TargetGroupName%" -TemplateName "%TemplateName%"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %~nx0"

@@ -17,7 +17,7 @@ call "%~dp0clients\!TargetGroupName!.bat"
 
 call "%~dp0bats\message.bat" "Start %~nx0"
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0bats\check-kintone-resources.ps1" -BaseUrl "%KINTONE_BASE_URL%" -ConfigRoot "%COMMON_CONFIG_PATH%" -OutputRoot "%COMMON_CHECK_OUTPUT_PATH%" -LogRoot "%COMMON_LOG_PATH%" -KintoneLogin "%KINTONE_LOGIN%" -KintonePassword "%KINTONE_PASSWORD%" -LogNamePrefix "%~n0" %*
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0bats\check-kintone-resources.ps1" -BaseUrl "%KINTONE_BASE_URL%" -ConfigRoot "%COMMON_CONFIG_PATH%" -OutputRoot "%COMMON_CHECK_OUTPUT_PATH%" -LogRoot "%COMMON_LOG_PATH%" -KintoneLogin "%KINTONE_LOGIN%" -KintonePassword "%KINTONE_PASSWORD%" -LogNamePrefix "%~n0" -ConfigName "%ConfigName%" -TargetGroupName "%TargetGroupName%"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %~nx0"

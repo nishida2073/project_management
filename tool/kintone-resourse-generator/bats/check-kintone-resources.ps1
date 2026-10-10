@@ -170,7 +170,7 @@ try {
                     @($appRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" }) +
                     @($appAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" }) +
                     @($recordAclRows | Where-Object { $_.'アプリID' } | ForEach-Object { "$($_.'アプリID')" })
-                ) | Select-Object -Unique
+                ) | Select-Object -Unique | Sort-Object
 
                 $skippedAppRows = @($appRows | Where-Object { -not $_.'アプリID' })
                 if ($skippedAppRows.Count -gt 0) {
