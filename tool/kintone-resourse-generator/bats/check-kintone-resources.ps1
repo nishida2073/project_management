@@ -374,7 +374,6 @@ try {
                     $workbook.Sheets.Item($workbook.Sheets.Count).Delete()
                 }
                 $usedDefaultSheet = $false
-                $sheetHasError = @{}
                 foreach ($sheetData in $sheetDatas) {
                     $rows = @($sheetData.Rows)
                     if (@($rows).Count -eq 0) { continue }
@@ -444,7 +443,7 @@ try {
                                 $expCell.Font.Color = $diffColorOle
                                 $curCell.Font.Bold = $true
                                 $expCell.Font.Bold = $true
-                                $sheetHasError[$sheetData.Name] = $true
+                                $ws.Tab.Color = ConvertTo-OleColor ([System.Drawing.Color]::FromArgb(255, 0, 0))
                             }
                         }
                         if ($resultCol -eq 0) { continue }
@@ -455,9 +454,6 @@ try {
                         }
                     }
                     Set-ColumnWidth -Worksheet $ws
-                    if ($sheetHasError[$sheetData.Name]) {
-                        $ws.Tab.Color = ConvertTo-OleColor ([System.Drawing.Color]::Red)
-                    }
                 }
                 Set-FirstVisibleSheet -Workbook $workbook
                 $workbook.SaveAs($outputPath, 51)
