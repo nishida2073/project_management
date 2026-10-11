@@ -375,6 +375,7 @@ try {
                 $usedDefaultSheet = $false
                 foreach ($sheetName in $sheetData.Keys) {
                     $rows = @($sheetData[$sheetName])
+                    if ($rows.Count -eq 0) { continue }
                     if (-not $usedDefaultSheet) {
                         $ws = $workbook.Sheets.Item(1)
                         $usedDefaultSheet = $true
