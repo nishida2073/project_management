@@ -133,7 +133,7 @@ try {
                             $exp.'種別'
                         }
                         else {
-                            try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $code) } catch { "不明" }
+                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $code) } catch { $typeLabel = "不明" }
                         }
                         $row = [ordered]@{ "スペースID" = $spaceId; "種別" = $typeLabel; "ユーザー/組織/グループ" = $code; "結果" = $null }
                         if ($cur -and -not $exp) {
@@ -227,7 +227,7 @@ try {
                             $exp.'種別'
                         }
                         else {
-                            try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
+                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { $typeLabel = "不明" }
                         }
                         $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
                         if ($cur -and -not $exp) {
@@ -305,7 +305,7 @@ try {
                             "作成者"
                         }
                         else {
-                            try { Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { "不明" }
+                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { $typeLabel = "不明" }
                         }
                         $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "レコードの条件" = $cond; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
                         if ($cur -and -not $exp) {
@@ -343,13 +343,14 @@ try {
             New-Item -ItemType Directory -Path (Split-Path $outputPath -Parent) -Force | Out-Null
             Remove-Item -LiteralPath $outputPath -Force -ErrorAction SilentlyContinue
 
-            $sheetData = [ordered]@{
-                "space-settings"       = $spaceSettingsDiff
-                "space-member-list"    = $memberDiff
-                "space-app-list"       = $appListDiff
-                "space-app-acl"        = $appAclDiff
-                "space-app-record-acl" = $appRecordAclDiff
-            }
+            $sheetDatas = @(
+                [PSCustomObject]@{ Name = "space-settings"; Rows = $spaceSettingsDiff },
+                [PSCustomObject]@{ Name = "space-member-list"; Rows = $memberDiff },
+                [PSCustomObject]@{ Name = "space-app-list"; Rows = $appListDiff },
+                [PSCustomObject]@{ Name = "space-app-acl"; Rows = $appAclDiff },
+                [PSCustomObject]@{ Name = "space-app-record-acl"; Rows = $appRecordAclDiff }
+            )
+
             $colorMap = @{
                 "一致"          = [System.Drawing.Color]::FromArgb(0, 128, 0)
                 "不一致"         = [System.Drawing.Color]::FromArgb(255, 0, 0)
@@ -373,9 +374,10 @@ try {
                     $workbook.Sheets.Item($workbook.Sheets.Count).Delete()
                 }
                 $usedDefaultSheet = $false
-                foreach ($sheetName in $sheetData.Keys) {
-                    $rows = @($sheetData[$sheetName])
-                    if ($rows.Count -eq 0) { continue }
+                $sheetHasError = @{}
+                foreach ($sheetData in $sheetDatas) {
+                    $rows = @($sheetData.Rows)
+                    if (@($rows).Count -eq 0) { continue }
                     if (-not $usedDefaultSheet) {
                         $ws = $workbook.Sheets.Item(1)
                         $usedDefaultSheet = $true
@@ -383,7 +385,7 @@ try {
                     else {
                         $ws = $workbook.Sheets.Add([Type]::Missing, $workbook.Sheets.Item($workbook.Sheets.Count))
                     }
-                    $ws.Name = $sheetName
+                    $ws.Name = $sheetData.Name
                     $headers = @($rows[0].PSObject.Properties.Name)
                     $rows = $rows | Sort-Object -Property $headers[0]
                     $excelDatas = @()
@@ -395,10 +397,9 @@ try {
                     Write-BodyDatas -StartCell $ws.Range("A1") -Datas $excelDatas
                 }
 
-                foreach ($sheetName in $sheetData.Keys) {
-                    $ws = $null
-                    try { $ws = $workbook.Sheets.Item($sheetName) } catch { $ws = $null }
-                    if (-not $ws) { continue }
+                foreach ($sheetData in $sheetDatas) {
+                    if (@($sheetData.Rows).Count -eq 0) { continue }
+                    $ws = $workbook.Sheets.Item($sheetData.Name)
                     $used = $ws.UsedRange
                     $lastRow = $used.Row + $used.Rows.Count - 1
                     $lastCol = $used.Column + $used.Columns.Count - 1
@@ -443,6 +444,7 @@ try {
                                 $expCell.Font.Color = $diffColorOle
                                 $curCell.Font.Bold = $true
                                 $expCell.Font.Bold = $true
+                                $sheetHasError[$sheetData.Name] = $true
                             }
                         }
                         if ($resultCol -eq 0) { continue }
@@ -453,6 +455,9 @@ try {
                         }
                     }
                     Set-ColumnWidth -Worksheet $ws
+                    if ($sheetHasError[$sheetData.Name]) {
+                        $ws.Tab.Color = ConvertTo-OleColor ([System.Drawing.Color]::Red)
+                    }
                 }
                 Set-FirstVisibleSheet -Workbook $workbook
                 $workbook.SaveAs($outputPath, 51)
@@ -468,15 +473,15 @@ try {
             $errorCount = @($allDiffRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count
             Write-Message "" -Type "Info" -NoHeader
             Write-Message "差分件数: $errorCount / $($allDiffRows.Count)" -Type "Info" -NoHeader
-            foreach ($sheetName in $sheetData.Keys) {
-                $sheetRows = @($sheetData[$sheetName])
+            foreach ($sheetData in $sheetDatas) {
+                $sheetRows = @($sheetData.Rows)
                 $sheetErrorCount = @($sheetRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count
                 $breakdown = ($sheetRows | Where-Object { $_.'結果' -ne "一致" } | Group-Object -Property '結果' | ForEach-Object { "$($_.Name)$($_.Count)件" }) -join "、"
                 if ($breakdown) {
-                    Write-Message "  ${sheetName}: $sheetErrorCount / $($sheetRows.Count)（$breakdown）" -Type "Info" -NoHeader
+                    Write-Message "  $($sheetData.Name): $sheetErrorCount / $($sheetRows.Count)（$breakdown）" -Type "Info" -NoHeader
                 }
                 else {
-                    Write-Message "  ${sheetName}: $sheetErrorCount / $($sheetRows.Count)" -Type "Info" -NoHeader
+                    Write-Message "  $($sheetData.Name): $sheetErrorCount / $($sheetRows.Count)" -Type "Info" -NoHeader
                 }
             }
             Write-MessageComplete "チェック結果を出力しました: $outputPath"
@@ -484,6 +489,8 @@ try {
         }
         catch {
             Write-MessageError "実行エラー: $($error[0])"
+            Write-MessageError "エラー詳細: $($error[0].Exception.Message)"
+            Write-MessageError "スタックトレース: $($error[0].InvocationInfo.PositionMessage)"
             $script:exitCode = 1
         }
     } *>&1 | Tee-Object -FilePath $logFilePath
