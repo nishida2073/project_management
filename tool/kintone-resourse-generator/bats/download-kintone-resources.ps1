@@ -64,9 +64,18 @@ try {
 
             Write-ApplyStepResult -ActionLabel "スペース名を取得しました" -DetailLines @("　$($space.spaceName)")
 
+            $bodyDetailLines = @()
+            if ([string]::IsNullOrEmpty($space.body)) {
+                $bodyDetailLines = @("　(本文なし)")
+            } else {
+                $bodyDetailLines = @("　$($space.body)")
+            }
+            Write-ApplyStepResult -ActionLabel "スペース本文を取得しました" -DetailLines $bodyDetailLines
+
             $spaceListRows = @([PSCustomObject]@{
                     "スペースID"                           = $space.spaceId
                     "スペース名"                            = $space.spaceName
+                    "本文"                                = $space.body
                     "参加メンバーだけにこのスペースを公開する"             = $space.isPrivate
                     "スペースのポータルと複数のスレッドを使用する"           = $space.useMultiThread
                     "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する" = $space.fixedMember
@@ -154,7 +163,7 @@ try {
                     $workbook.Sheets.Item($workbook.Sheets.Count).Delete()
                 }
                 $downloadSheetData = [ordered]@{
-                    "space-settings"       = @{ Rows = $spaceListRows; Headers = @("スペースID", "スペース名", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する") }
+                    "space-settings"       = @{ Rows = $spaceListRows; Headers = @("スペースID", "スペース名", "本文", "参加メンバーだけにこのスペースを公開する", "スペースのポータルと複数のスレッドを使用する", "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する", "アプリ作成できるユーザーをスペースの管理者に限定する") }
                     "space-member-list"    = @{ Rows = $memberRows; Headers = @("スペースID", "種別", "ユーザー/組織/グループ", "管理者", "下位組織も含める") }
                     "space-app-list"       = @{ Rows = $appListRows; Headers = @("アプリID", "アプリ名") }
                     "space-app-acl"        = @{ Rows = $appAclRows; Headers = @("アプリID", "アプリ名", "種別", "ユーザー／組織／グループ", "レコード閲覧", "レコード追加", "レコード編集", "レコード削除", "アプリ管理", "ファイル読み込み", "ファイル書き出し") }

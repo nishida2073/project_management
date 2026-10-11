@@ -100,6 +100,7 @@ try {
                         $row = [ordered]@{ "スペースID" = $spaceId; "結果" = $null }
                         $allMatch = Add-FieldColumns -Row $row -Pairs @(
                             @{ Label = "スペース名"; Current = $current.spaceName; Expected = $expectedSpaceRow.'スペース名' },
+                            @{ Label = "本文"; Current = $current.body; Expected = $expectedSpaceRow.'本文' },
                             @{ Label = "参加メンバーだけにこのスペースを公開する"; Current = $current.isPrivate; Expected = (ToBool $expectedSpaceRow.'参加メンバーだけにこのスペースを公開する') },
                             @{ Label = "スペースのポータルと複数のスレッドを使用する"; Current = $current.useMultiThread; Expected = (ToBool $expectedSpaceRow.'スペースのポータルと複数のスレッドを使用する') },
                             @{ Label = "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する"; Current = $current.fixedMember; Expected = (ToBool $expectedSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') },
@@ -374,7 +375,6 @@ try {
                 $usedDefaultSheet = $false
                 foreach ($sheetName in $sheetData.Keys) {
                     $rows = @($sheetData[$sheetName])
-                    if ($rows.Count -eq 0) { continue }
                     if (-not $usedDefaultSheet) {
                         $ws = $workbook.Sheets.Item(1)
                         $usedDefaultSheet = $true
@@ -465,7 +465,10 @@ try {
             Write-Message "差分件数: $errorCount / $($allDiffRows.Count)" -Type "Info" -NoHeader
             foreach ($sheetName in $sheetData.Keys) {
                 $sheetRows = @($sheetData[$sheetName])
-                if ($sheetRows.Count -eq 0) { continue }
+                if ($sheetRows.Count -eq 0) {
+                    Write-Message "  $($sheetName): 0 / 0" -Type "Info"
+                    continue
+                }
                 $sheetErrorCount = @($sheetRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count
                 $breakdown = ($sheetRows | Where-Object { $_.'結果' -ne "一致" } | Group-Object -Property '結果' | ForEach-Object { "$($_.Name)$($_.Count)件" }) -join "、"
                 if ($breakdown) {

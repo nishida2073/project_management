@@ -113,6 +113,7 @@ function Get-CurrentSpace {
         useMultiThread = $space.useMultiThread
         fixedMember    = $space.fixedMember
         createApp      = $space.permissions.createApp
+        body           = $space.body
         apps           = $apps
         members        = $members
     }
@@ -166,24 +167,30 @@ function Set-Space {
         $IsPrivate = $null,
         $UseMultiThread = $null,
         $FixedMember = $null,
-        $CreateAppAdminOnly = $null
+        $CreateAppAdminOnly = $null,
+        [string]$Body = $null
     )
 
-    $body = @{ id = $SpaceId }
-    if ($Name) { $body["name"] = $Name }
-    if ($null -ne $IsPrivate) { $body["isPrivate"] = $IsPrivate }
-    if ($null -ne $UseMultiThread) { $body["useMultiThread"] = $UseMultiThread }
-    if ($null -ne $FixedMember) { $body["fixedMember"] = $FixedMember }
+    $spaceBody = @{ id = $SpaceId }
+    if ($Name) { $spaceBody["name"] = $Name }
+    if ($null -ne $IsPrivate) { $spaceBody["isPrivate"] = $IsPrivate }
+    if ($null -ne $UseMultiThread) { $spaceBody["useMultiThread"] = $UseMultiThread }
+    if ($null -ne $FixedMember) { $spaceBody["fixedMember"] = $FixedMember }
     if ($null -ne $CreateAppAdminOnly) {
-        $body["permissions"] = @{ createApp = $(if ($CreateAppAdminOnly) { "ADMIN" } else { "EVERYONE" }) }
+        $spaceBody["permissions"] = @{ createApp = $(if ($CreateAppAdminOnly) { "ADMIN" } else { "EVERYONE" }) }
     }
-    Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space.json" -Body $body | Out-Null
+    Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space.json" -Body $spaceBody | Out-Null
 
     if ($Name) {
         $space = Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method GET -Path "/k/v1/space.json?id=$SpaceId"
         if ($space.defaultThread) {
             Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space/thread.json" -Body @{ id = $space.defaultThread; name = $Name } | Out-Null
         }
+    }
+
+    if ($Body) {
+        $bodyRequest = @{ id = $SpaceId; body = $Body }
+        Invoke-KintoneRequest -BaseUrl $BaseUrl -Authorization $Authorization -Method PUT -Path "/k/v1/space/body.json" -Body $bodyRequest | Out-Null
     }
 }
 

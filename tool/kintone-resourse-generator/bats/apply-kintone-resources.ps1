@@ -73,11 +73,20 @@ try {
                         "　${_}: $($spaceRow.$_)"
                     }
                     Set-Space -BaseUrl $BaseUrl -Authorization $authorization -SpaceId $spaceId `
-                        -Name $spaceRow.'スペース名' -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
+                        -Name $spaceRow.'スペース名' `
+                        -Body $(if ([string]::IsNullOrEmpty($spaceRow.'本文')) { $null } else { $spaceRow.'本文' }) `
+                        -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
                         -UseMultiThread (ToBool $spaceRow.'スペースのポータルと複数のスレッドを使用する') `
                         -FixedMember (ToBool $spaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する') `
                         -CreateAppAdminOnly (ToBool $spaceRow.'アプリ作成できるユーザーをスペースの管理者に限定する')
                     Write-ApplyStepResult -ActionLabel "スペース名を設定しました" -DetailLines @("　$($spaceRow.'スペース名')")
+                    $bodyDetailLines = @()
+                    if ([string]::IsNullOrEmpty($spaceRow.'本文')) {
+                        $bodyDetailLines = @("　(本文なし)")
+                    } else {
+                        $bodyDetailLines = @("　$($spaceRow.'本文')")
+                    }
+                    Write-ApplyStepResult -ActionLabel "スペース本文を設定しました" -DetailLines $bodyDetailLines
                     Write-ApplyStepResult -ActionLabel "スペース権限を設定しました" -DetailLines $spaceRightLines
                 }
                 catch {

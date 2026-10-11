@@ -281,6 +281,7 @@ try {
 
             $templateSpaceRow = [PSCustomObject]@{
                 'スペース名'                            = Get-PreferredValue $customSpaceRow.'スペース名' $primarySpaceRow.'スペース名'
+                '本文'                                = Get-PreferredValue $customSpaceRow.'本文' $primarySpaceRow.'本文'
                 '参加メンバーだけにこのスペースを公開する'             = Get-PreferredValue $customSpaceRow.'参加メンバーだけにこのスペースを公開する' $primarySpaceRow.'参加メンバーだけにこのスペースを公開する'
                 'スペースのポータルと複数のスレッドを使用する'           = Get-PreferredValue $customSpaceRow.'スペースのポータルと複数のスレッドを使用する' $primarySpaceRow.'スペースのポータルと複数のスレッドを使用する'
                 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' = Get-PreferredValue $customSpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する' $primarySpaceRow.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
@@ -349,6 +350,7 @@ try {
             $outSpaceRow = [PSCustomObject]@{
                 "スペースID"                           = $newSpaceId
                 "スペース名"                            = $finalSpaceName
+                "本文"                                = $spaceRowSource.'本文'
                 "参加メンバーだけにこのスペースを公開する"             = $spaceRowSource.'参加メンバーだけにこのスペースを公開する'
                 "スペースのポータルと複数のスレッドを使用する"           = $spaceRowSource.'スペースのポータルと複数のスレッドを使用する'
                 "スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する" = $spaceRowSource.'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する'
@@ -391,6 +393,13 @@ try {
             Write-Message "" -Type "Info" -NoHeader
             Write-Message "# スペースID: $newSpaceId ($finalSpaceName)" -Type "Info" -NoHeader
             Write-ApplyStepResult -ActionLabel "スペース名を設定しました" -DetailLines @("　$finalSpaceName")
+            $bodyDetailLines = @()
+            if ([string]::IsNullOrEmpty($outSpaceRow.'本文')) {
+                $bodyDetailLines = @("　(本文なし)")
+            } else {
+                $bodyDetailLines = @("　$($outSpaceRow.'本文')")
+            }
+            Write-ApplyStepResult -ActionLabel "スペース本文を設定しました" -DetailLines $bodyDetailLines
             $spaceRightLines = @('参加メンバーだけにこのスペースを公開する', 'スペースのポータルと複数のスレッドを使用する', 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する', 'アプリ作成できるユーザーをスペースの管理者に限定する') | ForEach-Object {
                 "　${_}: $($outSpaceRow.$_)"
             }
