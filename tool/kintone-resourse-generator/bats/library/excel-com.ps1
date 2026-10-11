@@ -625,6 +625,7 @@ function Set-HeaderRowColor {
     $lastCol = $used.Column + $used.Columns.Count - 1
     $headerRange = $Sheet.Range($Sheet.Cells.Item(1, 1), $Sheet.Cells.Item(1, $lastCol))
     $headerRange.Interior.Color = $oleColor
+    $headerRange.HorizontalAlignment = -4108
     Set-ColumnWidth -Worksheet $Sheet
 }
 

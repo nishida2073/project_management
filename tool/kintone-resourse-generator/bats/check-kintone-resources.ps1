@@ -409,21 +409,25 @@ try {
                         $headerCell = $ws.Cells.Item(1, $c)
                         if ($header.EndsWith("_現状")) {
                             $headerCell.Interior.Color = ConvertTo-OleColor $genjoColor
+                            $headerCell.HorizontalAlignment = -4108
                             $label = $header.Substring(0, $header.Length - "_現状".Length)
                             if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
                             $fieldPairCols[$label]["現状"] = $c
                         }
                         elseif ($header.EndsWith("_期待値")) {
                             $headerCell.Interior.Color = ConvertTo-OleColor $kitaichiColor
+                            $headerCell.HorizontalAlignment = -4108
                             $label = $header.Substring(0, $header.Length - "_期待値".Length)
                             if (-not $fieldPairCols.ContainsKey($label)) { $fieldPairCols[$label] = @{} }
                             $fieldPairCols[$label]["期待値"] = $c
                         }
                         elseif ($header -eq "結果") {
                             $headerCell.Interior.Color = ConvertTo-OleColor $resultHeaderColor
+                            $headerCell.HorizontalAlignment = -4108
                         }
                         else {
                             $headerCell.Interior.Color = ConvertTo-OleColor $otherColor
+                            $headerCell.HorizontalAlignment = -4108
                         }
                     }
                     $diffColorOle = ConvertTo-OleColor $colorMap["不一致"]
