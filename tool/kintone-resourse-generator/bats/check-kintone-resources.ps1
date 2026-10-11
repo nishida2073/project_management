@@ -469,10 +469,6 @@ try {
             Write-Message "差分件数: $errorCount / $($allDiffRows.Count)" -Type "Info" -NoHeader
             foreach ($sheetName in $sheetData.Keys) {
                 $sheetRows = @($sheetData[$sheetName])
-                if ($sheetRows.Count -eq 0) {
-                    Write-Message "  $($sheetName): 0 / 0" -Type "Info"
-                    continue
-                }
                 $sheetErrorCount = @($sheetRows | Where-Object { $_.'結果' -ne "一致" -and $_.'結果' -ne "Everyoneの影響" }).Count
                 $breakdown = ($sheetRows | Where-Object { $_.'結果' -ne "一致" } | Group-Object -Property '結果' | ForEach-Object { "$($_.Name)$($_.Count)件" }) -join "、"
                 if ($breakdown) {
