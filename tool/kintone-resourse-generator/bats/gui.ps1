@@ -348,7 +348,7 @@ $cmbMultipleBatchTargetGroup = New-ComboBox -X $inputX1 -Y ($inputRowCenterY1 - 
 $lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y ($inputRowCenterY2 - 11) -Width $labelWidth -Height 22
 $txtMultipleBatchExcelPath = New-TextBox -X $inputX1 -Y ($inputRowCenterY2 - 11) -Width $inputWidth2 -Height 22
 $btnMultipleBatchBrowse = New-Button -Text "参照..." -X ($inputX1 + $inputWidth2 + 5) -Y ($inputRowCenterY2 - 12) -Width 70 -Height 24
-$btnRunAllY = 26 + ($inputRowHeight * 1) + 20
+$btnRunAllY = 26 + ($inputRowHeight * 1) + 30
 $btnMultipleBatchRunAll = New-Button -Text "実行" -X 20 -Y $btnRunAllY -Width 120 -Height 28
 $lblMultipleBatchStatus = New-Label -X 154 -Y ($btnRunAllY + 6) -AutoSize $true
 
@@ -356,7 +356,7 @@ $grpMultipleBatchExcel.Controls.AddRange(@(
     $lblMultipleBatchTargetGroup, $cmbMultipleBatchTargetGroup, $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
 ))
 $y = $btnRunAllY
-$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28 + 16))
+$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28))
 $multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom
 
 $dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
@@ -438,6 +438,7 @@ function Set-RunButtonsEnabled {
     $txtMultipleBatchExcelPath.Enabled = $Enabled
     $btnMultipleBatchBrowse.Enabled = $Enabled
     $btnMultipleBatchRunAll.Enabled = $Enabled
+    $cmbMultipleBatchTargetGroup.Enabled = $Enabled
     Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
     Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
 }
@@ -480,41 +481,42 @@ function Invoke-AllStepsForCurrentInputs {
 }
 
 function Invoke-ExecuteAll {
+    $batchInputs = $script:batchInputControls
+
     foreach ($inputDef in $batchRunAllInputs) {
         if (-not $inputDef.Require) { continue }
+        if (Get-InputValue -Control $batchInputs[$inputDef.Name]) { continue }
 
-        $ctrl = $script:batchInputControls[$inputDef.Name]
-        $value = Get-InputValue -Control $ctrl
-
-        if (-not $value) {
-            [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-            return 1
-        }
+        [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        return 1
     }
 
-    $baseTemplateValue = Get-InputValue -Control $script:batchInputControls["BaseTemplateName"]
-    $customTemplateValue = Get-InputValue -Control $script:batchInputControls["CustomTemplateName"]
-    
+    $baseTemplateValue = Get-InputValue -Control $batchInputs["BaseTemplateName"]
+    $customTemplateValue = Get-InputValue -Control $batchInputs["CustomTemplateName"]
     if (-not $baseTemplateValue -and -not $customTemplateValue) {
         [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
         return 1
     }
 
+    $groupValue = Get-ComboBoxValue -SelectedItem $batchInputs["TargetGroupName"].SelectedItem
+    $configName = $batchInputs["ConfigName"].Text.Trim()
     foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        if ($bd.InputControls.ContainsKey("TargetGroupName")) {
-            $selectedValue = Get-ComboBoxValue -SelectedItem $script:batchInputControls["TargetGroupName"].SelectedItem
-            $matchingItem = $bd.InputControls['TargetGroupName'].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selectedValue } | Select-Object -First 1
-            if ($matchingItem) {
-                $bd.InputControls['TargetGroupName'].SelectedItem = $matchingItem
-            }
+        $inputControls = $cd.ButtonDefs[0].InputControls
+
+        $groupCombo = $inputControls["TargetGroupName"]
+        if ($groupCombo) {
+            $matchingItem = $groupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupValue } | Select-Object -First 1
+            if ($matchingItem) { $groupCombo.SelectedItem = $matchingItem }
         }
-        $bd.InputControls['ConfigName'].Text = $script:batchInputControls["ConfigName"].Text.Trim()
+
+        $inputControls["ConfigName"].Text = $configName
     }
-    $bd0 = $categoryDefs[0].ButtonDefs[0]
-    $bd0.InputControls['SpaceTemplateId'].Text = $script:batchInputControls["SpaceTemplateId"].Text.Trim()
-    Copy-ComboSelection -From $cmbRunAllBaseTemplateName -To $cmbBaseTemplateName
-    Copy-ComboSelection -From $cmbRunAllCustomTemplateName -To $cmbCustomTemplateName
+
+    $createSpaceBd = $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $createSpaceBat } | Select-Object -First 1
+    $createSpaceBd.InputControls["SpaceTemplateId"].Text = $batchInputs["SpaceTemplateId"].Text.Trim()
+    $generateBd = $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $generateBat } | Select-Object -First 1
+    Copy-ComboSelection -From $batchInputs["BaseTemplateName"] -To $generateBd.InputControls["BaseTemplateName"]
+    Copy-ComboSelection -From $batchInputs["CustomTemplateName"] -To $generateBd.InputControls["CustomTemplateName"]
 
     $lastExitCode = 0
     foreach ($cd in $categoryDefs) {
