@@ -965,7 +965,7 @@ function New-BatchRunTab {
     $btnRunAll = New-Button -Text $RunButtonText -X 15 -Y ($y + 10) -Width 120 -Height 30
     $topControls += $btnRunAll
 
-    $lblStatus = New-Label -X 149 -Y ($y + 16) -AutoSize $true
+    $lblStatus = New-Label -X 145 -Y ($y + 14) -Width 50 -Height 22
     $topControls += $lblStatus
 
     $grpBatchAll.Controls.AddRange($topControls)

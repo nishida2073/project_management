@@ -334,29 +334,27 @@ $tabBatchRun.Controls.Add($multipleBatchExcelPanel)
 $grpMultipleBatchExcel = New-GroupBox -Text "複数実行" -X 10 -Y 10 -Width 730
 $multipleBatchExcelPanel.Controls.Add($grpMultipleBatchExcel)
 
-$inputRowHeight = 30
 $labelWidth = 150
-$inputWidth1 = 200
-$inputWidth2 = 200
-$inputRowCenterY1 = 15 + ($inputRowHeight * 0) + [int]($inputRowHeight / 2)
-$inputRowCenterY2 = 15 + ($inputRowHeight * 1) + [int]($inputRowHeight / 2)
-$inputX1 = 15 + $labelWidth + 4
+$inputWidth = 200
+$inputX = 15 + $labelWidth + 4
+$inputY1 = 19
+$inputY2 = 49
+$btnRunAllY = 80
 
-$lblMultipleBatchTargetGroup = New-Label -Text "対象のグループ" -X 15 -Y ($inputRowCenterY1 - 11) -Width $labelWidth -Height 22
-$cmbMultipleBatchTargetGroup = New-ComboBox -X $inputX1 -Y ($inputRowCenterY1 - 11) -Width $inputWidth1 -Height 22 -DisplayMember "Text"
+$lblMultipleBatchTargetGroup = New-Label -Text "対象のグループ" -X 15 -Y $inputY1 -Width $labelWidth -Height 22
+$cmbMultipleBatchTargetGroup = New-ComboBox -X $inputX -Y $inputY1 -Width $inputWidth -Height 22 -DisplayMember "Text"
 
-$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y ($inputRowCenterY2 - 11) -Width $labelWidth -Height 22
-$txtMultipleBatchExcelPath = New-TextBox -X $inputX1 -Y ($inputRowCenterY2 - 11) -Width $inputWidth2 -Height 22
-$btnMultipleBatchBrowse = New-Button -Text "参照..." -X ($inputX1 + $inputWidth2 + 5) -Y ($inputRowCenterY2 - 12) -Width 70 -Height 24
-$btnRunAllY = 26 + ($inputRowHeight * 1) + 30
-$btnMultipleBatchRunAll = New-Button -Text "実行" -X 20 -Y $btnRunAllY -Width 120 -Height 28
-$lblMultipleBatchStatus = New-Label -X 154 -Y ($btnRunAllY + 6) -AutoSize $true
+$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y $inputY2 -Width $labelWidth -Height 22
+$txtMultipleBatchExcelPath = New-TextBox -X $inputX -Y $inputY2 -Width $inputWidth -Height 22
+$btnMultipleBatchBrowse = New-Button -Text "参照..." -X ($inputX + $inputWidth + 15) -Y $inputY2 -Width 70 -Height 22
+$btnMultipleBatchRunAll = New-Button -Text "実行" -X 15 -Y $btnRunAllY -Width 120 -Height 30
+$lblMultipleBatchStatus = New-Label -X 145 -Y ($btnRunAllY + 4) -Width 50 -Height 22
 
 $grpMultipleBatchExcel.Controls.AddRange(@(
     $lblMultipleBatchTargetGroup, $cmbMultipleBatchTargetGroup, $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
 ))
 $y = $btnRunAllY
-$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28))
+$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, ($y + 30 + 10))
 $multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom
 
 $dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
