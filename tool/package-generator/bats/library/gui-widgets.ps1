@@ -18,8 +18,13 @@ function Open-TargetOrWarn {
         return
     }
     if (!(Test-Path -LiteralPath $Path)) {
-        [System.Windows.Forms.MessageBox]::Show("パスが不正です:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        return
+        $parent = Split-Path -Parent $Path
+        if (!$parent -or !(Test-Path -LiteralPath $parent)) {
+            [System.Windows.Forms.MessageBox]::Show("パスが不正です:`r`n$Path", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+            return
+        }
+        [System.Windows.Forms.MessageBox]::Show("パスが不正なため親フォルダを開きます:`r`n$parent", "開く", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        $Path = $parent
     }
     Start-Process -FilePath $Path
 }

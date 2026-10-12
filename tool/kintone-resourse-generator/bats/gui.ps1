@@ -781,7 +781,9 @@ $settingsTrailingButtonVars = @{
         }
     }.GetNewClosure() -OnOpenClick {
         $templatePath = Get-ResolvedVar "COMMON_CUSTOM_TEMPLATE_PATH" $setEnvBat
-        Open-TargetOrWarn -Path $templatePath
+        $templateName = Get-GroupSettingsFieldValue "TemplateName"
+        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        Open-TargetOrWarn -Path (Join-Path $templatePath "$($groupName)_$($templateName).xlsx")
     }.GetNewClosure() }
 }
 
