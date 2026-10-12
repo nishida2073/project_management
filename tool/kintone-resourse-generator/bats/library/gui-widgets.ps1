@@ -962,14 +962,14 @@ function New-BatchRunTab {
         }
     }
 
-    $btnRunAll = New-Button -Text $RunButtonText -X 20 -Y ($y + 10) -Width 120 -Height 28
+    $btnRunAll = New-Button -Text $RunButtonText -X 15 -Y ($y + 10) -Width 120 -Height 30
     $topControls += $btnRunAll
 
-    $lblStatus = New-Label -X 154 -Y ($y + 16) -AutoSize $true
+    $lblStatus = New-Label -X 149 -Y ($y + 16) -AutoSize $true
     $topControls += $lblStatus
 
     $grpBatchAll.Controls.AddRange($topControls)
-    $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($y + 10 + 28 + 16))
+    $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($y + 10 + 30 + 10))
     $batchPanel.Height = $grpBatchAll.Bottom
 
     $script:batchPanel = $batchPanel
