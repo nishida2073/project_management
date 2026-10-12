@@ -42,6 +42,15 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
+function Set-CreatedSpaceUrlFromGroup {
+    param($GroupValue, [string]$SpaceId)
+    $script:createdSpaceUrl = $null
+    if (!$GroupValue) { return }
+    $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path (Get-GroupBatPath $GroupValue)).TrimEnd('/')
+    if (!$baseUrl) { return }
+    $script:createdSpaceUrl = if ($SpaceId) { "$baseUrl/k/#/space/$SpaceId" } else { $baseUrl }
+}
+
 $noSelectOption = [PSCustomObject]@{ Text = "指定なし"; Value = "" }
 
 $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
@@ -85,12 +94,11 @@ $categoryDefs = @(
                     param($ic, $lastOutputLines)
                     $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
                     if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
-                        $bd1 = $categoryDefs[1].ButtonDefs[0]
-                        if ($bd1 -and $bd1.InputControls.ContainsKey('SpaceId')) { $bd1.InputControls['SpaceId'].Text = $Matches.id }
+                        $spaceId = $Matches.id
+                        $downloadBd = $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $downloadBat } | Select-Object -First 1
+                        $downloadBd.InputControls['SpaceId'].Text = $spaceId
                         $groupValue = Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem
-                        $groupBatPath = Get-GroupBatPath $groupValue
-                        $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path $groupBatPath).TrimEnd('/')
-                        if ($baseUrl) { $script:createdSpaceUrl = "$baseUrl/k/#/space/$($Matches.id)" }
+                        Set-CreatedSpaceUrlFromGroup -GroupValue $groupValue -SpaceId $spaceId
                     }
                 }
                 IncludeInBatch = $true;
@@ -313,6 +321,12 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
         Set-RunButtonsEnabled $true
     } | Out-Null
 
+
+$groupCombos = @($categoryDefs | ForEach-Object { $_.ButtonDefs } | ForEach-Object { $_.InputControls['TargetGroupName'] } | Where-Object { $_ })
+$groupCombos += $script:batchInputControls['TargetGroupName']
+foreach ($cmb in $groupCombos) {
+    $cmb.Add_SelectedIndexChanged({ Set-CreatedSpaceUrlFromGroup -GroupValue (Get-ComboBoxValue -SelectedItem $this.SelectedItem) })
+}
 
 $multipleBatchExcelPanel = New-Panel
 $tabBatchRun.Controls.Add($multipleBatchExcelPanel)
