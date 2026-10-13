@@ -802,7 +802,11 @@ function New-SettingsTopPanel {
     $extraControlList = @($ExtraControls)
     foreach ($def in $ExtraControlDefs) {
         $ctrl = switch ($def.Kind) {
-            "Label" { New-Label -Text $def.Text -Width $def.Width -Height $ExtraControlsHeight }
+            "Label" {
+                $lbl = New-Label -Text $def.Text -Width $def.Width -Height $ExtraControlsHeight
+                $lbl.Tag = "FixedWidth"
+                $lbl
+            }
             "Combo" {
                 $cmb = New-ComboBox -Width $def.Width -Height $ExtraControlsHeight -Items $def.Items -SelectedItem $def.SelectedItem
                 if ($def.OnChange) { $cmb.Add_SelectedIndexChanged($def.OnChange) }
@@ -848,7 +852,7 @@ function New-SettingsTopPanel {
     if ($extraControlList.Count -gt 0) {
         $extraX = $ExtraControlsX
         foreach ($ctrl in $extraControlList) {
-            if ($ctrl -is [System.Windows.Forms.Label] -or $ctrl -is [System.Windows.Forms.LinkLabel]) {
+            if (($ctrl -is [System.Windows.Forms.Label] -or $ctrl -is [System.Windows.Forms.LinkLabel]) -and $ctrl.Tag -ne "FixedWidth") {
                 $ctrl.AutoSize = $true
                 $autoWidth = $ctrl.Width
                 $ctrl.AutoSize = $false
@@ -872,7 +876,6 @@ function New-SettingsTopPanel {
 
     $btnReload.Add_Click({
         try {
-            Clear-MentionRowsCache
             Invoke-ActionWithUpdateStatus -StatusLabel $lblReloadStatus -Action $OnReload -SuccessMessage "完了"
         }
         catch {
@@ -1411,6 +1414,8 @@ function Render-SettingsFields {
         [string[]]$FolderBrowseVars = @(),
         [string[]]$FileBrowseVars = @(),
         [hashtable]$WidthVars = @{},
+        [int]$LabelWidth = 220,
+        [int]$LabelHeight = 20,
         [hashtable]$RadioVars = @{},
         [hashtable]$TrailingButtonVars = @{},
         [System.Windows.Forms.ComboBox]$MentionGroupCombo,
@@ -1446,7 +1451,7 @@ function Render-SettingsFields {
         }
 
         $labelText = if ($VarLabels.Contains($field.VarName)) { $VarLabels[$field.VarName] } else { $field.VarName }
-        $lbl = New-Label -X 20 -Y $y -Width 220 -Height 20 -Text $labelText
+        $lbl = New-Label -X 20 -Y $y -Width $LabelWidth -Height $LabelHeight -Text $labelText
         $ToolTip.SetToolTip($lbl, $field.VarName)
         $grp.Controls.Add($lbl)
 
@@ -1457,7 +1462,7 @@ function Render-SettingsFields {
             $grp.Controls.Add($txt)
 
             $radioPanel = New-Object System.Windows.Forms.Panel
-            $radioPanel.Location = New-Object System.Drawing.Point(250, ($y - 2))
+            $radioPanel.Location = New-Object System.Drawing.Point((20 + $LabelWidth + 10), ($y - 2))
             $radioPanel.Size = New-Object System.Drawing.Size(300, 22)
             $radioPanel.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
 
@@ -1482,7 +1487,7 @@ function Render-SettingsFields {
             $txtValue = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
             $txtWidth = if ($WidthVars.ContainsKey($field.VarName)) { $WidthVars[$field.VarName] } else { 300 }
             $txtHeight = if ($isMultiline) { 60 } else { 22 }
-            $txt = New-TextBox -X 250 -Y ($y - 2) -Width $txtWidth -Height $txtHeight -Text $txtValue -Multiline $isMultiline
+            $txt = New-TextBox -X (20 + $LabelWidth + 10) -Y ($y - 2) -Width $txtWidth -Height $txtHeight -Text $txtValue -Multiline $isMultiline
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
             if ($isMultiline) { $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
             if ($MaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
@@ -1491,7 +1496,7 @@ function Render-SettingsFields {
 
         $isFileBrowse = $FileBrowseVars -contains $field.VarName
         if (($FolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
-            $btnBrowse = New-Button -Text "参照..." -X 560 -Y ($y - 3) -Width 70 -Height 24
+            $btnBrowse = New-Button -Text "参照..." -X ($txt.Right + 10) -Y ($y - 3) -Width 70 -Height 24
             $btnBrowse.Tag = $txt
 
             if ($isFileBrowse) {
@@ -1507,7 +1512,7 @@ function Render-SettingsFields {
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.FileName }
                 }.GetNewClosure())
 
-                $lnkOpen = New-OpenLink -Text "開く" -X 640 -Y ($y - 2) -Width 40 -Height 22 -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
+                $lnkOpen = New-OpenLink -Text "開く" -X ($btnBrowse.Right + 10) -Y ($y - 2) -Width 40 -Height 22 -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
                 $grp.Controls.AddRange(@($btnBrowse, $lnkOpen))
             } else {
                 $btnBrowse.Add_Click({
