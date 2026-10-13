@@ -88,8 +88,6 @@ $categoryDefs = @(
                 }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
-                InputControls = $null
-                StepStatusLabel = $null
                 OnSuccessFn = {
                     param($ic, $lastOutputLines)
                     $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
@@ -128,8 +126,6 @@ $categoryDefs = @(
                 }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
                 OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
-                InputControls = $null
-                StepStatusLabel = $null
             }
         )
     }
@@ -164,8 +160,6 @@ $categoryDefs = @(
                 }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
                 OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
-                InputControls = $null
-                StepStatusLabel = $null
             }
         )
     }
@@ -191,8 +185,6 @@ $categoryDefs = @(
                 }
                 OutputPathFn = $null
                 OpenTarget = { $script:createdSpaceUrl }
-                InputControls = $null
-                StepStatusLabel = $null
             }
         )
     }
@@ -218,8 +210,6 @@ $categoryDefs = @(
                 }
                 OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
                 OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
-                InputControls = $null
-                StepStatusLabel = $null
             }
         )
     }
