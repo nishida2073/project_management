@@ -870,6 +870,78 @@ function New-SettingsTopPanel {
     }
 }
 
+function New-InputRunTab {
+    param(
+        [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
+        [Parameter(Mandatory)][array]$Inputs,
+        [Parameter(Mandatory)][scriptblock]$OnRunClick,
+        [string]$GroupText = "",
+        [string]$RunButtonText = "実行"
+    )
+
+    $panel = New-Panel
+    $TabPage.Controls.Add($panel)
+
+    $grp = New-GroupBox -Text $GroupText -X 10 -Y 10 -Width 730
+    $panel.Controls.Add($grp)
+
+    $rowHeight = 30
+    $row = 0
+    $x = 15
+    $controls = @{}
+
+    foreach ($def in $Inputs) {
+        if ($def.NewRow) {
+            $row++
+            $x = 15
+        }
+        $y = 19 + $rowHeight * $row
+        $labelWidth = if ($def.LabelWidth) { $def.LabelWidth } else { 80 }
+        $width = if ($def.InputWidth) { $def.InputWidth } else { 90 }
+
+        $grp.Controls.Add((New-Label -Text $def.Label -X $x -Y $y -Width $labelWidth -Height 22))
+        $x += $labelWidth + 4
+
+        if ($def.Kind -eq "Combo") {
+            $ctrl = New-ComboBox -X $x -Y $y -Width $width -Height 22 -Items $def.Options -DisplayMember "Text"
+        } else {
+            $ctrl = New-TextBox -X $x -Y $y -Width $width -Height 22 -Text "$($def.Default)"
+        }
+        $grp.Controls.Add($ctrl)
+        $controls[$def.Name] = $ctrl
+        $x += $width + 15
+
+        if ($def.Kind -eq "File") {
+            $dlg = New-Object System.Windows.Forms.OpenFileDialog
+            $dlg.Filter = if ($def.Filter) { $def.Filter } else { "すべてのファイル (*.*)|*.*" }
+            $browse = New-Button -Text "参照..." -X $x -Y $y -Width 70 -Height 22
+            $browse.Add_Click({
+                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+                    $ctrl.Text = $dlg.FileName
+                }
+            }.GetNewClosure())
+            $grp.Controls.Add($browse)
+            $controls["$($def.Name)Browse"] = $browse
+            $x += 70 + 15
+        }
+    }
+
+    $btnRunY = 20 + $rowHeight * ($row + 1)
+    $btnRun = New-Button -Text $RunButtonText -X 15 -Y $btnRunY -Width 120 -Height 30
+    $lblStatus = New-Label -X 145 -Y ($btnRunY + 4) -Width 570 -Height 22
+    $grp.Controls.AddRange(@($btnRun, $lblStatus))
+    $btnRun.Add_Click({ & $OnRunClick $controls $lblStatus }.GetNewClosure())
+    $grp.Size = New-Object System.Drawing.Size(730, ($btnRunY + 30 + 10))
+    $panel.Height = $grp.Bottom
+
+    return [PSCustomObject]@{
+        Panel       = $panel
+        Controls    = $controls
+        RunButton   = $btnRun
+        StatusLabel = $lblStatus
+    }
+}
+
 function New-BatchRunTab {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,

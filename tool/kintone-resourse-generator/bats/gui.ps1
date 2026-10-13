@@ -380,7 +380,7 @@ function Update-GroupDropdowns {
 
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
 
-    Update-ComboBoxItems -ComboBox $cmbMultipleBatchTargetGroup -Items $groupNames
+    Update-ComboBoxItems -ComboBox $multipleBatchTab.Controls["TargetGroup"] -Items $groupNames
 
 }
 
@@ -398,10 +398,10 @@ function Set-RunButtonsEnabled {
     foreach ($ctrl in $script:batchInputControls.Values) {
         $ctrl.Enabled = $Enabled
     }
-    $txtMultipleBatchExcelPath.Enabled = $Enabled
-    $btnMultipleBatchBrowse.Enabled = $Enabled
-    $btnMultipleBatchRunAll.Enabled = $Enabled
-    $cmbMultipleBatchTargetGroup.Enabled = $Enabled
+    $multipleBatchTab.Controls["ExcelPath"].Enabled = $Enabled
+    $multipleBatchTab.Controls["ExcelPathBrowse"].Enabled = $Enabled
+    $multipleBatchTab.RunButton.Enabled = $Enabled
+    $multipleBatchTab.Controls["TargetGroup"].Enabled = $Enabled
     Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
     Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
 }
@@ -524,7 +524,7 @@ $script:batchRunButton.Add_Click({
     Set-RunButtonsEnabled $true
 })
 
-$multipleBatch = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
+$multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
     [PSCustomObject]@{ Name = "TargetGroup"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
     [PSCustomObject]@{ Name = "ExcelPath"; Label = "実行一覧ファイル"; LabelWidth = 150; InputWidth = 200; Kind = "File"; Filter = "Excelファイル (*.xlsx)|*.xlsx"; NewRow = $true }
 ) -OnRunClick {
@@ -631,10 +631,6 @@ $multipleBatch = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行"
         Set-RunButtonsEnabled $true
     }
 }
-$cmbMultipleBatchTargetGroup = $multipleBatch.Controls["TargetGroup"]
-$txtMultipleBatchExcelPath = $multipleBatch.Controls["ExcelPath"]
-$btnMultipleBatchBrowse = $multipleBatch.Controls["ExcelPathBrowse"]
-$btnMultipleBatchRunAll = $multipleBatch.RunButton
 
 function Get-TemplateFileNames {
     param([string]$EnvVarName)
