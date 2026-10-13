@@ -42,13 +42,16 @@ function Get-GroupNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-function Set-CreatedSpaceUrlFromGroup {
-    param($GroupValue, [string]$SpaceId)
-    $script:createdSpaceUrl = $null
-    if (!$GroupValue) { return }
-    $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path (Get-GroupBatPath $GroupValue)).TrimEnd('/')
-    if (!$baseUrl) { return }
-    $script:createdSpaceUrl = if ($SpaceId) { "$baseUrl/k/#/space/$SpaceId" } else { $baseUrl }
+function Get-KintoneOpenUrl {
+    param($InputControls)
+    $groupValue = Get-ComboBoxValue -SelectedItem $InputControls["TargetGroupName"].SelectedItem
+    if (!$groupValue) { return $null }
+    $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path (Get-GroupBatPath $groupValue)).TrimEnd('/')
+    if (!$baseUrl) { return $null }
+    if ($script:createdSpace -and $script:createdSpace.Group -eq $groupValue) {
+        return "$baseUrl/k/#/space/$($script:createdSpace.Id)"
+    }
+    return $baseUrl
 }
 
 function Get-ButtonDefByBatchPath {
@@ -88,7 +91,7 @@ $categoryDefs = @(
                     $batArgs
                 }
                 OutputPathFn = $null
-                OpenTarget = { $script:createdSpaceUrl }
+                OpenTarget = { param($ic) Get-KintoneOpenUrl -InputControls $ic }
                 OnSuccessFn = {
                     param($ic, $lastOutputLines)
                     $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
@@ -96,8 +99,7 @@ $categoryDefs = @(
                         $spaceId = $Matches.id
                         $downloadBd = Get-ButtonDefByBatchPath $downloadKintoneResourcesBat
                         $downloadBd.InputControls['SpaceId'].Text = $spaceId
-                        $groupValue = Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem
-                        Set-CreatedSpaceUrlFromGroup -GroupValue $groupValue -SpaceId $spaceId
+                        $script:createdSpace = @{ Group = Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem; Id = $spaceId }
                     }
                 }
                 IncludeInBatch = $true;
@@ -193,7 +195,7 @@ $categoryDefs = @(
                     $batArgs
                 }
                 OutputPathFn = $null
-                OpenTarget = { $script:createdSpaceUrl }
+                OpenTarget = { param($ic) Get-KintoneOpenUrl -InputControls $ic }
             }
         )
     }
@@ -226,12 +228,10 @@ $categoryDefs = @(
 
 $form = New-Form -Title "kintoneリソース生成ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 500 -CenterScreen
 $script:currentProc = $null
-$script:stepOutputPaths = @{}
-$script:createdSpaceUrl = $null
+$script:createdSpace = $null
 
 $tabControl = New-TabControl
 $tabRun = New-TabPage -Text "実行"
-
 
 $tabLogs = New-TabPage -Text "ログ"
 $tabSettings = New-TabPage -Text "設定"
@@ -291,9 +291,6 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunB
     Set-RunButtonsEnabled $true
 }
 
-$lblOverallStatus = $batchTab.StatusLabel
-
-
 $tabRun.Controls.Add($execTabControl)
 
 $categoryTab = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
@@ -316,7 +313,6 @@ $categoryTab = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $e
         if ($bd.Validator -and -not (& $bd.Validator $ic)) { return 1 }
 
         Set-RunButtonsEnabled $false
-        $lblOverallStatus.Text = ""
 
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label; StepStatusLabel = $bd.StepStatusLabel }) `
@@ -333,13 +329,6 @@ $categoryTab = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $e
 
         Set-RunButtonsEnabled $true
     }
-
-
-$groupCombos = @($categoryDefs | ForEach-Object { $_.ButtonDefs } | ForEach-Object { $_.InputControls['TargetGroupName'] } | Where-Object { $_ })
-$groupCombos += $batchTab.InputControls['TargetGroupName']
-foreach ($cmb in $groupCombos) {
-    $cmb.Add_SelectedIndexChanged({ Set-CreatedSpaceUrlFromGroup -GroupValue (Get-ComboBoxValue -SelectedItem $this.SelectedItem) })
-}
 
 
 $txtLog = New-LogTextBox
@@ -386,7 +375,7 @@ function Update-GroupDropdowns {
 
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
 
-    Update-ComboBoxItems -ComboBox $multipleBatchTab.Controls["TargetGroupName"] -Items $groupNames
+    Update-ComboBoxItems -ComboBox $multipleBatchTab.InputControls["TargetGroupName"] -Items $groupNames
 
 }
 
@@ -404,10 +393,10 @@ function Set-RunButtonsEnabled {
     foreach ($ctrl in $batchTab.InputControls.Values) {
         $ctrl.Enabled = $Enabled
     }
-    $multipleBatchTab.Controls["ExcelPath"].Enabled = $Enabled
-    $multipleBatchTab.Controls["ExcelPathBrowse"].Enabled = $Enabled
+    $multipleBatchTab.InputControls["ExcelPath"].Enabled = $Enabled
+    $multipleBatchTab.InputControls["ExcelPathBrowse"].Enabled = $Enabled
     $multipleBatchTab.RunButton.Enabled = $Enabled
-    $multipleBatchTab.Controls["TargetGroupName"].Enabled = $Enabled
+    $multipleBatchTab.InputControls["TargetGroupName"].Enabled = $Enabled
     Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
     Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
 }

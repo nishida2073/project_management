@@ -927,7 +927,7 @@ function New-InputRunTab {
 
     return [PSCustomObject]@{
         Panel       = $panel
-        Controls    = $controls
+        InputControls = $controls
         RunButton   = $btnRun
         StatusLabel = $lblStatus
     }
