@@ -1,11 +1,5 @@
 ﻿$script:settingsCommonFieldTextBoxes = @{}
 $script:settingsGroupFieldTextBoxes = @{}
-$script:batchPanel = $null
-$script:batchStatusLabel = $null
-$script:getLogPathFn = $null
-$script:runButtons = @()
-$script:batchInputControls = @{}
-$script:logTab = $null
 
 function Open-TargetOrWarn {
     param([string]$Path)
@@ -434,12 +428,6 @@ function Set-ButtonsEnabled {
     foreach ($btn in $Buttons) { $btn.Enabled = $Enabled }
 }
 
-function Set-RunButtonsEnabled {
-    param([bool]$Enabled)
-    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
-    Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
-}
-
 function Set-StatusLabelText {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.Label]$Label,
@@ -637,7 +625,6 @@ function New-CategoryTabControl {
     $tabControl.Add_SelectedIndexChanged($updateTabHeight)
     $tabControl.Height = $TabHeaderAllowance + (Get-CategoryPanelHeight -ButtonDefs $CategoryDefs[0].ButtonDefs)
 
-    $script:runButtons = $runButtons
 
     return [PSCustomObject]@{
         TabControl = $tabControl
@@ -652,7 +639,7 @@ function New-LogTab {
         [scriptblock]$LabelFn = { param($bd) $bd.Label },
         [Parameter(Mandatory)][scriptblock]$GetLogPathFn,
         [scriptblock]$OnAfterClear = {},
-        [scriptblock]$OnUpdateLogView = { Update-LogView },
+        [scriptblock]$OnUpdateLogView = { param($lt) Update-LogView -LogTab $lt },
         [array]$Conditions = @()
     )
 
@@ -684,6 +671,38 @@ function New-LogTab {
     }
 
     $btnClearLogs = New-Button -Text "すべて削除" -X ($extraCombos[0].Right + 20) -Y (30 - [int](24 / 2)) -Width 140 -Height 24
+    $logStagePanel.Controls.Add($btnClearLogs)
+
+    $radios = @()
+    $radioStartY = if (@($Conditions).Count -gt 0) { 30 + (@($Conditions).Count * 34) } else { $rowCenterY + 20 }
+    for ($i = 0; $i -lt $ButtonDefs.Count; $i++) {
+        $bd = $ButtonDefs[$i]
+        $radio = New-RadioButton -X 20 -Y ($radioStartY + 24 * $i) -Text (& $LabelFn $bd) -Tag $bd -Checked ($i -eq 0)
+        $logStagePanel.Controls.Add($radio)
+        $radios += $radio
+    }
+
+    Add-StackedDockedControls -Container $TabPage -ControlsTopToBottom @($logStagePanel, $logContentBox)
+
+    $logTabProps = @{
+        GetLogPathFn = $GetLogPathFn
+        ContentBox  = $logContentBox
+        StagePanel  = $logStagePanel
+        Radios      = $radios
+        ExtraCombo  = if ($extraCombos.Count -gt 0) { $extraCombos[0] } else { $null }
+        ExtraCombos = $extraCombos
+        ClearButton = $btnClearLogs
+        Conditions  = $Conditions
+    }
+    $inputControls = @{}
+    foreach ($i in 0..($extraCombos.Count - 1)) {
+        if ($Conditions[$i] -and $Conditions[$i].PropertyName) {
+            $inputControls[$Conditions[$i].PropertyName] = $extraCombos[$i]
+        }
+    }
+    $logTabProps["InputControls"] = $inputControls
+    $logTab = [PSCustomObject]$logTabProps
+
     $btnClearLogs.Add_Click({
         $logPath = & $GetLogPathFn
         if (-not $logPath -or -not (Test-Path -LiteralPath $logPath)) { return }
@@ -705,46 +724,17 @@ function New-LogTab {
             }
         }
         & $OnAfterClear
-        & $OnUpdateLogView
+        & $OnUpdateLogView $logTab
     }.GetNewClosure())
-    $logStagePanel.Controls.Add($btnClearLogs)
-
-    $radios = @()
-    $radioStartY = if (@($Conditions).Count -gt 0) { 30 + (@($Conditions).Count * 34) } else { $rowCenterY + 20 }
-    for ($i = 0; $i -lt $ButtonDefs.Count; $i++) {
-        $bd = $ButtonDefs[$i]
-        $radio = New-RadioButton -X 20 -Y ($radioStartY + 24 * $i) -Text (& $LabelFn $bd) -Tag $bd -Checked ($i -eq 0)
-        $logStagePanel.Controls.Add($radio)
-        $radios += $radio
-    }
-
-    Add-StackedDockedControls -Container $TabPage -ControlsTopToBottom @($logStagePanel, $logContentBox)
-
-    $script:getLogPathFn = $GetLogPathFn
-    $logTabProps = @{
-        ContentBox  = $logContentBox
-        StagePanel  = $logStagePanel
-        Radios      = $radios
-        ExtraCombo  = if ($extraCombos.Count -gt 0) { $extraCombos[0] } else { $null }
-        ExtraCombos = $extraCombos
-        ClearButton = $btnClearLogs
-        Conditions  = $Conditions
-    }
-    foreach ($i in 0..($extraCombos.Count - 1)) {
-        if ($Conditions[$i] -and $Conditions[$i].PropertyName) {
-            $logTabProps[$Conditions[$i].PropertyName] = $extraCombos[$i]
-        }
-    }
-    $script:logTab = [PSCustomObject]$logTabProps
 
     foreach ($radio in $radios) {
-        $radio.Add_CheckedChanged(({ if ($this.Checked) { & $OnUpdateLogView } }).GetNewClosure())
+        $radio.Add_CheckedChanged(({ if ($this.Checked) { & $OnUpdateLogView $logTab } }).GetNewClosure())
     }
     foreach ($cmb in $extraCombos) {
-        $cmb.Add_SelectedIndexChanged(({ & $OnUpdateLogView }).GetNewClosure())
+        $cmb.Add_SelectedIndexChanged(({ & $OnUpdateLogView $logTab }).GetNewClosure())
     }
 
-    return $script:logTab
+    return $logTab
 }
 
 function Get-BatchDisplayLabel {
@@ -753,20 +743,21 @@ function Get-BatchDisplayLabel {
 }
 
 function Update-LogView {
-    $selectedRadio = $script:logTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
+    param([Parameter(Mandatory)]$LogTab)
+    $selectedRadio = $LogTab.Radios | Where-Object { $_.Checked } | Select-Object -First 1
     if (-not $selectedRadio) { return }
     $stagePrefix = [System.IO.Path]::GetFileNameWithoutExtension($selectedRadio.Tag.BatchPath)
 
-    $logPath = & $script:getLogPathFn
+    $logPath = & $LogTab.GetLogPathFn
 
-    $script:logTab.ContentBox.Text = ""
+    $LogTab.ContentBox.Text = ""
     if (!($logPath -and (Test-Path -LiteralPath $logPath))) { return }
 
     $filterPatterns = @($stagePrefix)
-    if ($script:logTab.Conditions) {
-        foreach ($extra in $script:logTab.Conditions) {
+    if ($LogTab.Conditions) {
+        foreach ($extra in $LogTab.Conditions) {
             if ($extra.PropertyName) {
-                $cmb = $script:logTab.$($extra.PropertyName)
+                $cmb = $LogTab.InputControls[$extra.PropertyName]
                 if ($cmb -and $cmb.SelectedIndex -ge 0) {
                     $value = Get-ComboBoxValue -SelectedItem $cmb.SelectedItem
                     if ($value) {
@@ -787,7 +778,7 @@ function Update-LogView {
             "$($file.Name) は他のプロセスで使用中のため表示できません（実行中の可能性があります）。"
         }
     }
-    $script:logTab.ContentBox.Text = $sections -join "`r`n`r`n"
+    $LogTab.ContentBox.Text = $sections -join "`r`n`r`n"
 }
 
 function New-SettingsTopPanel {
@@ -945,6 +936,7 @@ function New-InputRunTab {
 function New-BatchRunTab {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
+        [Parameter(Mandatory)][scriptblock]$OnRunClick,
         [array]$ButtonDefs = @(),
         [array]$Inputs = @(),
         [string]$RunButtonText = "一括実行",
@@ -1032,16 +1024,9 @@ function New-BatchRunTab {
     $topControls += $lblStatus
 
     $grpBatchAll.Controls.AddRange($topControls)
+    $btnRunAll.Add_Click({ & $OnRunClick $inputControls $lblStatus }.GetNewClosure())
     $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($y + 10 + 30 + 10))
     $batchPanel.Height = $grpBatchAll.Bottom
-
-    $script:batchPanel = $batchPanel
-    $script:batchInputControls = $inputControls
-    $script:batchStepCheckboxes = $checkBoxes
-    $script:batchStatusLabels = $statusLabels
-    $script:batchStatusLabel = $lblStatus
-    $script:batchRunButton = $btnRunAll
-    $script:batchRunButtons = @($btnRunAll)
 
     return [PSCustomObject]@{
         Panel          = $batchPanel

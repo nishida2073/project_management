@@ -272,15 +272,31 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false }
 )
 
-New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
-    -Inputs $batchRunAllInputs | Out-Null
+$batchTab = $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
+    -Inputs $batchRunAllInputs -OnRunClick {
+    param($controls, $statusLabel)
+    Set-RunButtonsEnabled $false
+    Set-StepStatus -Label $statusLabel -Text "実行中..."
 
-$lblOverallStatus = $script:batchStatusLabel
+    $exitCode = Invoke-ExecuteAll
+
+    if ($exitCode -eq 0) {
+        Set-StepStatus -Label $statusLabel -Text "成功" -State "成功"
+    } elseif ($exitCode -eq 2) {
+        Set-StepStatus -Label $statusLabel -Text "警告" -State "警告"
+    } else {
+        Set-StepStatus -Label $statusLabel -Text "失敗" -State "失敗"
+    }
+
+    Set-RunButtonsEnabled $true
+}
+
+$lblOverallStatus = $batchTab.StatusLabel
 
 
 $tabRun.Controls.Add($execTabControl)
 
-New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
+$categoryTab = New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
     -OnRunClick {
         param($bd)
         $ic = $bd.InputControls
@@ -316,11 +332,11 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
         }
 
         Set-RunButtonsEnabled $true
-    } | Out-Null
+    }
 
 
 $groupCombos = @($categoryDefs | ForEach-Object { $_.ButtonDefs } | ForEach-Object { $_.InputControls['TargetGroupName'] } | Where-Object { $_ })
-$groupCombos += $script:batchInputControls['TargetGroupName']
+$groupCombos += $batchTab.InputControls['TargetGroupName']
 foreach ($cmb in $groupCombos) {
     $cmb.Add_SelectedIndexChanged({ Set-CreatedSpaceUrlFromGroup -GroupValue (Get-ComboBoxValue -SelectedItem $this.SelectedItem) })
 }
@@ -328,8 +344,8 @@ foreach ($cmb in $groupCombos) {
 $generateInputs = (Get-ButtonDefByBatchPath $generateBat).InputControls
 $cmbBaseTemplateName = $generateInputs["BaseTemplateName"]
 $cmbCustomTemplateName = $generateInputs["CustomTemplateName"]
-$cmbRunAllBaseTemplateName = $script:batchInputControls["BaseTemplateName"]
-$cmbRunAllCustomTemplateName = $script:batchInputControls["CustomTemplateName"]
+$cmbRunAllBaseTemplateName = $batchTab.InputControls["BaseTemplateName"]
+$cmbRunAllCustomTemplateName = $batchTab.InputControls["CustomTemplateName"]
 
 $txtLog = New-LogTextBox
 
@@ -350,9 +366,9 @@ $logTabConditions = @(
     @{ PropertyName = "ConfigCombo"; LabelText = "スペース識別名"; LabelWidth = 150; ComboWidth = 200; Options = $blankOptions }
 )
 
-New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
+$logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" $setEnvBat } `
-    -OnUpdateLogView { Update-LogView } -Conditions $logTabConditions | Out-Null
+    -Conditions $logTabConditions
 
 
 function Update-GroupDropdowns {
@@ -364,7 +380,7 @@ function Update-GroupDropdowns {
     }
 
     $logItems = @($allOption) + $groupNames
-    Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
+    Update-ComboBoxItems -ComboBox $logTab.InputControls["GroupCombo"] -Items $logItems
 
     $configDir = Join-Path $rootPath "config"
     $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
@@ -374,9 +390,9 @@ function Update-GroupDropdowns {
         } |
         Sort-Object)
     $configItems = @($allOption) + $configNames
-    Update-ComboBoxItems -ComboBox $script:logTab.ConfigCombo -Items $configItems
+    Update-ComboBoxItems -ComboBox $logTab.InputControls["ConfigCombo"] -Items $configItems
     
-    Update-ComboBoxItems -ComboBox $script:batchInputControls["TargetGroupName"] -Items $groupNames
+    Update-ComboBoxItems -ComboBox $batchTab.InputControls["TargetGroupName"] -Items $groupNames
 
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
 
@@ -395,15 +411,15 @@ function Set-RunButtonsEnabled {
     }
     $cmbBaseTemplateName.Enabled = $Enabled
     $cmbCustomTemplateName.Enabled = $Enabled
-    foreach ($ctrl in $script:batchInputControls.Values) {
+    foreach ($ctrl in $batchTab.InputControls.Values) {
         $ctrl.Enabled = $Enabled
     }
     $multipleBatchTab.Controls["ExcelPath"].Enabled = $Enabled
     $multipleBatchTab.Controls["ExcelPathBrowse"].Enabled = $Enabled
     $multipleBatchTab.RunButton.Enabled = $Enabled
     $multipleBatchTab.Controls["TargetGroup"].Enabled = $Enabled
-    Set-ButtonsEnabled -Buttons $script:runButtons -Enabled $Enabled
-    Set-ButtonsEnabled -Buttons $script:batchRunButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
 }
 
 function Copy-ComboSelection {
@@ -444,7 +460,7 @@ function Invoke-AllStepsForCurrentInputs {
 }
 
 function Invoke-ExecuteAll {
-    $batchInputs = $script:batchInputControls
+    $batchInputs = $batchTab.InputControls
 
     foreach ($inputDef in $batchRunAllInputs) {
         if (-not $inputDef.Require) { continue }
@@ -506,23 +522,6 @@ function Invoke-ExecuteAll {
     }
     return $lastExitCode
 }
-
-$script:batchRunButton.Add_Click({
-    Set-RunButtonsEnabled $false
-    Set-StepStatus -Label $lblOverallStatus -Text "実行中..."
-
-    $exitCode = Invoke-ExecuteAll
-
-    if ($exitCode -eq 0) {
-        Set-StepStatus -Label $lblOverallStatus -Text "成功" -State "成功"
-    } elseif ($exitCode -eq 2) {
-        Set-StepStatus -Label $lblOverallStatus -Text "警告" -State "警告"
-    } else {
-        Set-StepStatus -Label $lblOverallStatus -Text "失敗" -State "失敗"
-    }
-
-    Set-RunButtonsEnabled $true
-})
 
 $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
     [PSCustomObject]@{ Name = "TargetGroup"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
@@ -595,10 +594,10 @@ $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実�
                 continue
             }
 
-            $script:batchInputControls["ConfigName"].Text = $rowConfigName
-            $script:batchInputControls["SpaceTemplateId"].Text = $rowTemplateId
-            $script:batchInputControls["BaseTemplateName"].Text = $rowBaseResourceTemplate
-            $script:batchInputControls["CustomTemplateName"].Text = $rowCustomResourceTemplate
+            $batchTab.InputControls["ConfigName"].Text = $rowConfigName
+            $batchTab.InputControls["SpaceTemplateId"].Text = $rowTemplateId
+            $batchTab.InputControls["BaseTemplateName"].Text = $rowBaseResourceTemplate
+            $batchTab.InputControls["CustomTemplateName"].Text = $rowCustomResourceTemplate
             
             $exitCode = Invoke-ExecuteAll
             if ($exitCode -eq 0) {
@@ -919,7 +918,7 @@ $tabControl.Add_SelectedIndexChanged({
         Update-CustomTemplateNameList
     } elseif ($tabControl.SelectedTab -eq $tabLogs) {
         Update-GroupDropdowns
-        Update-LogView
+        Update-LogView -LogTab $logTab
     }
 })
 

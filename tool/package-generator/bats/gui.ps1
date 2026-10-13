@@ -72,9 +72,9 @@ function Update-GroupDropdowns {
     }
 
     $logItems = @($allOption) + $clientNames
-    Update-ComboBoxItems -ComboBox $script:logTab.GroupCombo -Items $logItems
+    Update-ComboBoxItems -ComboBox $logTab.InputControls["GroupCombo"] -Items $logItems
 
-    Update-ComboBoxItems -ComboBox $script:batchInputControls["ClientName"] -Items $clientNames
+    Update-ComboBoxItems -ComboBox $batchTab.InputControls["ClientName"] -Items $clientNames
 
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $clientNames
 
@@ -119,18 +119,25 @@ foreach ($cd in $categoryDefs) {
 $tabBatchAll = New-TabPage -Text "一括実行"
 # $execTabControl.Controls.Add($tabBatchAll)
 
-New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
+$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
         [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
     ) `
     -OnOpenClick {
         param($target)
         Open-TargetOrWarn -Path $target
-    } | Out-Null
+    } `
+    -OnRunClick { Start-BatchRunAll }
+
+function Set-RunButtonsEnabled {
+    param([bool]$Enabled)
+    Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
+}
 
 function Start-BatchRunAll {
-    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $script:batchStepCheckboxes `
-        -StatusLabel $script:batchStatusLabel -StatusLabels $script:batchStatusLabels `
+    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $batchTab.CheckBoxes `
+        -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -InvokeStep {
             param($bd)
@@ -140,7 +147,7 @@ function Start-BatchRunAll {
                     param($bd)
                     $batArgs = @()
                     foreach ($inputDef in $bd.Inputs) {
-                        $value = Get-InputValue -Control $script:batchInputControls[$inputDef.Name]
+                        $value = Get-InputValue -Control $batchTab.InputControls[$inputDef.Name]
                         $batArgs += "-$($inputDef.Name):$value"
                     }
                     return $batArgs
@@ -148,10 +155,7 @@ function Start-BatchRunAll {
         }
 }
 
-$script:batchRunButton.Add_Click({ Start-BatchRunAll })
-
-
-New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
+$categoryTab = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
     Invoke-BatButton -ButtonDef $bd -WorkingDirectory $scriptDir -Form $form `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
@@ -167,9 +171,9 @@ New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -
             }
             return $batArgs
         }
-} | Out-Null
+}
 
-$execTabControl.Height = 45 + $script:batchPanel.Height
+$execTabControl.Height = 45 + $batchTab.Panel.Height
 
 
 $txtLog = New-LogTextBox
@@ -183,11 +187,10 @@ $logTabConditions = @(
     @{ PropertyName = "GroupCombo"; LabelText = "対象のグループ"; LabelWidth = 150; ComboWidth = 150; Options = $blankOptions }
 )
 
-New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
+$logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
-    -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] } `
-    -OnUpdateLogView { Update-LogView } | Out-Null
+    -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] }
 $script:logPath = $script:commonEnvVars["CommonLogPath"]
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -488,7 +491,7 @@ $settingsSubTabControl.Add_SelectedIndexChanged({
 
 $tabControl.Add_SelectedIndexChanged({
     if ($tabControl.SelectedTab -eq $tabLogs) {
-        Update-LogView
+        Update-LogView -LogTab $logTab
     }
 })
 
