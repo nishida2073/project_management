@@ -584,15 +584,10 @@ function New-CategoryTabControl {
                     $grp.Controls.Add($lblInput)
                     $inputX += $labelWidth + 4
 
-                    if ($inputDef.ExistingControl) {
-                        $inputCtrl = $inputDef.ExistingControl
-                        $inputCtrl.Width = $inputWidth
-                        $inputCtrl.Height = 22
-                    } elseif ($inputDef.Options) {
+                    if ($inputDef.Options -or $inputDef.Combo) {
                         $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
                         $inputCtrl = New-ComboBox -Width $inputWidth -Height 22 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
-                        if ($selectedOption) {
-                        } elseif ($inputCtrl.Items.Count -gt 0) {
+                        if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {
                             $inputCtrl.SelectedIndex = 0
                         }
                     } else {
@@ -913,11 +908,7 @@ function New-BatchRunTab {
         $topControls += $lblInput
         $inputX += $labelWidth + 4
 
-        if ($inputDef.ExistingControl) {
-            $inputCtrl = $inputDef.ExistingControl
-            $inputCtrl.Width = $inputWidth
-            $inputCtrl.Height = 22
-        } elseif ($inputDef.Options) {
+        if ($inputDef.Options -or $inputDef.Combo) {
             $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
             $inputCtrl = New-ComboBox -Width $inputWidth -Height 22 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
             if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {

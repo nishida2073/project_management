@@ -51,13 +51,14 @@ function Set-CreatedSpaceUrlFromGroup {
     $script:createdSpaceUrl = if ($SpaceId) { "$baseUrl/k/#/space/$SpaceId" } else { $baseUrl }
 }
 
+function Get-ButtonDefByBatchPath {
+    param([string]$BatchPath)
+    return $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $BatchPath } | Select-Object -First 1
+}
+
 $noSelectOption = [PSCustomObject]@{ Text = "指定なし"; Value = "" }
 
 $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
-$cmbBaseTemplateName = New-ComboBox -Width 220 -Height 22
-
-$cmbCustomTemplateName = New-ComboBox -Width 180 -Height 22
-
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "スペース作成"
@@ -93,7 +94,7 @@ $categoryDefs = @(
                     $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
                     if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
                         $spaceId = $Matches.id
-                        $downloadBd = $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $downloadBat } | Select-Object -First 1
+                        $downloadBd = Get-ButtonDefByBatchPath $downloadBat
                         $downloadBd.InputControls['SpaceId'].Text = $spaceId
                         $groupValue = Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem
                         Set-CreatedSpaceUrlFromGroup -GroupValue $groupValue -SpaceId $spaceId
@@ -137,8 +138,8 @@ $categoryDefs = @(
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
-                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $false }
-                    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
+                    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false }
+                    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false }
                 )
                 Validator = {
                     param($ic)
@@ -256,10 +257,6 @@ $execTabControl.Controls.Add($tabBatchRun)
 $tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
-$cmbRunAllBaseTemplateName = New-ComboBox
-
-$cmbRunAllCustomTemplateName = New-ComboBox
-
 $allStepDefs = @()
 foreach ($cd in $categoryDefs) {
     foreach ($bd in $cd.ButtonDefs) {
@@ -271,8 +268,8 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true },
     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true },
-    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllBaseTemplateName; NewRow = $true; Require = $false },
-    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbRunAllCustomTemplateName; NewRow = $true; Require = $false }
+    [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false },
+    [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false }
 )
 
 New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
@@ -327,6 +324,12 @@ $groupCombos += $script:batchInputControls['TargetGroupName']
 foreach ($cmb in $groupCombos) {
     $cmb.Add_SelectedIndexChanged({ Set-CreatedSpaceUrlFromGroup -GroupValue (Get-ComboBoxValue -SelectedItem $this.SelectedItem) })
 }
+
+$generateInputs = (Get-ButtonDefByBatchPath $generateBat).InputControls
+$cmbBaseTemplateName = $generateInputs["BaseTemplateName"]
+$cmbCustomTemplateName = $generateInputs["CustomTemplateName"]
+$cmbRunAllBaseTemplateName = $script:batchInputControls["BaseTemplateName"]
+$cmbRunAllCustomTemplateName = $script:batchInputControls["CustomTemplateName"]
 
 $multipleBatchExcelPanel = New-Panel
 $tabBatchRun.Controls.Add($multipleBatchExcelPanel)
@@ -510,9 +513,9 @@ function Invoke-ExecuteAll {
         $inputControls["ConfigName"].Text = $configName
     }
 
-    $createSpaceBd = $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $createSpaceBat } | Select-Object -First 1
+    $createSpaceBd = Get-ButtonDefByBatchPath $createSpaceBat
     $createSpaceBd.InputControls["SpaceTemplateId"].Text = $batchInputs["SpaceTemplateId"].Text.Trim()
-    $generateBd = $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $generateBat } | Select-Object -First 1
+    $generateBd = Get-ButtonDefByBatchPath $generateBat
     Copy-ComboSelection -From $batchInputs["BaseTemplateName"] -To $generateBd.InputControls["BaseTemplateName"]
     Copy-ComboSelection -From $batchInputs["CustomTemplateName"] -To $generateBd.InputControls["CustomTemplateName"]
 
