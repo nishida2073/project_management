@@ -331,44 +331,6 @@ $cmbCustomTemplateName = $generateInputs["CustomTemplateName"]
 $cmbRunAllBaseTemplateName = $script:batchInputControls["BaseTemplateName"]
 $cmbRunAllCustomTemplateName = $script:batchInputControls["CustomTemplateName"]
 
-$multipleBatchExcelPanel = New-Panel
-$tabBatchRun.Controls.Add($multipleBatchExcelPanel)
-
-$grpMultipleBatchExcel = New-GroupBox -Text "複数実行" -X 10 -Y 10 -Width 730
-$multipleBatchExcelPanel.Controls.Add($grpMultipleBatchExcel)
-
-$labelWidth = 150
-$inputWidth = 200
-$inputX = 15 + $labelWidth + 4
-$inputY1 = 19
-$inputY2 = 49
-$btnRunAllY = 80
-
-$lblMultipleBatchTargetGroup = New-Label -Text "対象のグループ" -X 15 -Y $inputY1 -Width $labelWidth -Height 22
-$cmbMultipleBatchTargetGroup = New-ComboBox -X $inputX -Y $inputY1 -Width $inputWidth -Height 22 -DisplayMember "Text"
-
-$lblMultipleBatchExcelPath = New-Label -Text "実行一覧ファイル" -X 15 -Y $inputY2 -Width $labelWidth -Height 22
-$txtMultipleBatchExcelPath = New-TextBox -X $inputX -Y $inputY2 -Width $inputWidth -Height 22
-$btnMultipleBatchBrowse = New-Button -Text "参照..." -X ($inputX + $inputWidth + 15) -Y $inputY2 -Width 70 -Height 22
-$btnMultipleBatchRunAll = New-Button -Text "実行" -X 15 -Y $btnRunAllY -Width 120 -Height 30
-$lblMultipleBatchStatus = New-Label -X 145 -Y ($btnRunAllY + 4) -Width 50 -Height 22
-
-$grpMultipleBatchExcel.Controls.AddRange(@(
-    $lblMultipleBatchTargetGroup, $cmbMultipleBatchTargetGroup, $lblMultipleBatchExcelPath, $txtMultipleBatchExcelPath, $btnMultipleBatchBrowse, $btnMultipleBatchRunAll, $lblMultipleBatchStatus
-))
-$y = $btnRunAllY
-$grpMultipleBatchExcel.Size = New-Object System.Drawing.Size(730, ($y + 30 + 10))
-$multipleBatchExcelPanel.Height = $grpMultipleBatchExcel.Bottom
-
-$dlgMultipleBatchExcel = New-Object System.Windows.Forms.OpenFileDialog
-$dlgMultipleBatchExcel.Filter = "Excelファイル (*.xlsx)|*.xlsx"
-
-$btnMultipleBatchBrowse.Add_Click({
-    if ($dlgMultipleBatchExcel.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-        $txtMultipleBatchExcelPath.Text = $dlgMultipleBatchExcel.FileName
-    }
-})
-
 $txtLog = New-LogTextBox
 
 Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabControl, $txtLog)
@@ -562,10 +524,14 @@ $script:batchRunButton.Add_Click({
     Set-RunButtonsEnabled $true
 })
 
-$btnMultipleBatchRunAll.Add_Click({
-    $excelPath = $txtMultipleBatchExcelPath.Text.Trim()
+$multipleBatch = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
+    [PSCustomObject]@{ Name = "TargetGroup"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
+    [PSCustomObject]@{ Name = "ExcelPath"; Label = "実行一覧ファイル"; LabelWidth = 150; InputWidth = 200; Kind = "File"; Filter = "Excelファイル (*.xlsx)|*.xlsx"; NewRow = $true }
+) -OnRunClick {
+    param($controls, $statusLabel)
+    $excelPath = $controls["ExcelPath"].Text.Trim()
     try {
-        Set-StepStatus -Label $lblMultipleBatchStatus -Text "実行中..."
+        Set-StepStatus -Label $statusLabel -Text "実行中..."
         if (!$excelPath) {
             throw "実行一覧ファイルを選択してください。"
         }
@@ -608,7 +574,7 @@ $btnMultipleBatchRunAll.Add_Click({
             $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')".Trim()
             $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')".Trim()
 
-            Set-StepStatus -Label $lblMultipleBatchStatus -Text "実行中... ($rowNumber/$($rows.Count): $rowConfigName)" -State "実行中..."
+            Set-StepStatus -Label $statusLabel -Text "実行中... ($rowNumber/$($rows.Count): $rowConfigName)" -State "実行中..."
             [System.Windows.Forms.Application]::DoEvents()
 
             Write-Log "==================== 複数実行 $rowNumber/$($rows.Count): $rowConfigName ===================="
@@ -652,19 +618,23 @@ $btnMultipleBatchRunAll.Add_Click({
         $succsessCount = $rows.Count -$failedCount -$warningCount
         $multipleResultMessage = "終了（成功-$($succsessCount)件、警告-$($warningCount)件、失敗/スキップ-$($failedCount)件）"
         if ($failedCount -gt 0) {
-            Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "失敗"
+            Set-StepStatus -Label $statusLabel -Text $multipleResultMessage -State "失敗"
         } elseif ($warningCount -gt 0) {
-            Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "警告"
+            Set-StepStatus -Label $statusLabel -Text $multipleResultMessage -State "警告"
         } else {
-            Set-StepStatus -Label $lblMultipleBatchStatus -Text $multipleResultMessage -State "成功"
+            Set-StepStatus -Label $statusLabel -Text $multipleResultMessage -State "成功"
         }
     } catch {
         [System.Windows.Forms.MessageBox]::Show("$_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
-        Set-StepStatus -Label $lblMultipleBatchStatus -Text "失敗"
+        Set-StepStatus -Label $statusLabel -Text "失敗"
     } finally {
         Set-RunButtonsEnabled $true
     }
-})
+}
+$cmbMultipleBatchTargetGroup = $multipleBatch.Controls["TargetGroup"]
+$txtMultipleBatchExcelPath = $multipleBatch.Controls["ExcelPath"]
+$btnMultipleBatchBrowse = $multipleBatch.Controls["ExcelPathBrowse"]
+$btnMultipleBatchRunAll = $multipleBatch.RunButton
 
 function Get-TemplateFileNames {
     param([string]$EnvVarName)
