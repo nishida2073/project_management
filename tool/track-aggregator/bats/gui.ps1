@@ -33,7 +33,7 @@ $postCollectResultsBat = Join-Path $scriptDir "post-collect-results.bat"
 $collectYearComparisonResultBat = Join-Path $scriptDir "collect-year-comparison-result.bat"
 $syncKintoneToSheetBat = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
 
-$script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $scriptDir "common-env.bat")
+$commonEnvBat = Join-Path $scriptDir "common-env.bat"
 
 $clientsDir = Join-Path $rootPath "clients"
 
@@ -56,21 +56,21 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "実施データ取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $downloadResultsBat; OpenTarget = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $downloadResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
         Label = "実施状況確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $collectCombineResultBat; OpenTarget = $script:commonEnvVars["OutputCombineCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $collectCombineResultBat; OpenTarget = Get-ResolvedVar "OutputCombineCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
         Label = "実施結果確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = $script:commonEnvVars["OutputSurveyCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = Get-ResolvedVar "OutputTestCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = Get-ResolvedVar "OutputSurveyCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
             [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue }; Inputs = @((New-TargetGroupInput)) }
         )
     }
@@ -83,13 +83,13 @@ $categoryDefs = @(
                 IncludeInBatch = $true
                 DefaultChecked = $false
                 BatchPath = $collectYearComparisonResultBat
-                OpenTarget = $script:commonEnvVars["OutputYearComparisonCollectDir"]
+                OpenTarget = Get-ResolvedVar "OutputYearComparisonCollectDir" $commonEnvBat
                 Inputs = @(
                     (New-TargetGroupInput)
-                    [PSCustomObject]@{ Name = "TargetCompanyNames"; Label = "対象の会社名"; Default = $script:commonEnvVars["TargetCompanyNames"]; LabelWidth = 150; InputWidth = 150; NewRow = $true }
-                    [PSCustomObject]@{ Name = "ComparePeriod"; Label = "比較年"; Default = $script:commonEnvVars["ComparePeriod"]; LabelWidth = 50; InputWidth = 40 }
+                    [PSCustomObject]@{ Name = "TargetCompanyNames"; Label = "対象の会社名"; Default = Get-ResolvedVar "TargetCompanyNames" $commonEnvBat; LabelWidth = 150; InputWidth = 150; NewRow = $true }
+                    [PSCustomObject]@{ Name = "ComparePeriod"; Label = "比較年"; Default = Get-ResolvedVar "ComparePeriod" $commonEnvBat; LabelWidth = 50; InputWidth = 40 }
                     [PSCustomObject]@{
-                        Name = "YearOrder"; Label = "表示順"; Default = $script:commonEnvVars["YearOrder"]; LabelWidth = 55; InputWidth = 70
+                        Name = "YearOrder"; Label = "表示順"; Default = Get-ResolvedVar "YearOrder" $commonEnvBat; LabelWidth = 55; InputWidth = 70
                         Options = @(
                             [PSCustomObject]@{ Text = "昇順"; Value = "0" }
                             [PSCustomObject]@{ Text = "降順"; Value = "1" }
@@ -200,8 +200,7 @@ $logTabConditions = @(
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
-    -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] }
-$script:logPath = $script:commonEnvVars["LOG_DIR"]
+    -GetLogPathFn { Get-ResolvedVar "LOG_DIR" $commonEnvBat }
 
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -209,7 +208,7 @@ $clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
-$script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
+$commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
 $overridableVarDefs = [ordered]@{
     "ComparePeriod" = @{ Label = "経年比較の比較年数" }
@@ -768,7 +767,7 @@ $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 
 function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 | Out-Null
 }
 
@@ -832,7 +831,7 @@ function Update-GroupSettingsFields {
         }
     }.GetNewClosure() }
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions `
         -TrailingButtonVars $trailingButtons | Out-Null

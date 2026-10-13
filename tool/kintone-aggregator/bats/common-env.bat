@@ -2,7 +2,7 @@
 
 for %%I in ("%~dp0..") do set "BASE_PATH=%%~fI\"
 
-set "ClientDataRootDir=%BASE_PATH%clients3"
+set "ClientDataRootDir=%BASE_PATH%clients"
 
 set "OutputRootDir=%BASE_PATH%output"
 

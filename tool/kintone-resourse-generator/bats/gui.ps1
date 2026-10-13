@@ -668,7 +668,7 @@ foreach ($groupKey in $settingsGroups.Keys) {
 $settingsToolTip = New-ToolTip
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
-$script:commonEnvResolver = { param($name) Get-ResolvedVar $name $setEnvBat }
+$commonEnvResolver = { param($name) Get-ResolvedVar $name $setEnvBat }
 
 $settingsTrailingButtonVars = @{
     "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
@@ -742,7 +742,7 @@ function Update-CommonSettingsFields {
         $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
     }
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $script:settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 220 | Out-Null
 }
 
@@ -800,7 +800,7 @@ function Update-GroupSettingsFields {
     }
 
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
 }
 

@@ -27,7 +27,7 @@ $env:GUI_LOG_MODE = "1"
 $setEnvBat = Join-Path $scriptDir "common-env.bat"
 $generatePackageBat = Join-Path $rootPath "generate-package.bat"
 $generateConfigBat = Join-Path $rootPath "generate-config.bat"
-$script:commonEnvVars = Get-BatEnvVars -BatPath $setEnvBat
+
 
 $clientsDir = Join-Path $rootPath "clients"
 
@@ -86,7 +86,7 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = Get-ResolvedVar "GenerateOutputPath" $setEnvBat; Inputs = @((New-ClientInput)) }
         )
     },
     [PSCustomObject]@{
@@ -192,15 +192,14 @@ $logTabConditions = @(
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
-    -GetLogPathFn { $script:commonEnvVars["CommonLogPath"] }
-$script:logPath = $script:commonEnvVars["CommonLogPath"]
+    -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $setEnvBat }
 
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
-$script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
+$commonEnvResolver = { param($name) Get-ResolvedVar $name $setEnvBat }
 
 $settingsGroups = [ordered]@{
     "COMMON" = @{
@@ -390,7 +389,7 @@ function Get-GroupSettingsFieldRows {
 
 function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
 }
 
@@ -400,10 +399,10 @@ function Update-GroupSettingsFields {
 
     $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
     $trailingButtons = $settingsTrailingButtonVars.Clone()
-    $resolverValue = $script:commonEnvResolver
+    $resolverValue = $commonEnvResolver
     $rootPathValue = $rootPath
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
         -TrailingButtonVars $trailingButtons | Out-Null

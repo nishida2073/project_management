@@ -31,7 +31,7 @@ $checkAlertBat = Join-Path $scriptDir "check-alert.bat"
 $postAlertResultBat = Join-Path $scriptDir "post-alert-result.bat"
 $syncKintoneToSheetBat = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
 
-$script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $scriptDir "common-env.bat")
+$commonEnvBat = Join-Path $scriptDir "common-env.bat"
 
 $clientsDir = Join-Path $rootPath "clients"
 
@@ -54,20 +54,20 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "アプリデータ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = $createDailyReportBat; OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
-            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = $createPulseSurveyBat; OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = $createDailyReportBat; OpenTarget = Get-ResolvedVar "OutputReportDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = $createPulseSurveyBat; OpenTarget = Get-ResolvedVar "OutputReportDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アプリデータ集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = $collectAppDataBat; OpenTarget = $script:commonEnvVars["OutputCollectDataRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = $collectAppDataBat; OpenTarget = Get-ResolvedVar "OutputCollectDataRootDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アラート集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アラート集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = $checkAlertBat; OpenTarget = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アラート集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = $checkAlertBat; OpenTarget = Get-ResolvedVar "OutputAlertRootDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
             [PSCustomObject]@{ Label = "投稿"; BatchLabel = "アラート集計-投稿"; IncludeInBatch = $true; BatchPath = $postAlertResultBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue }; Inputs = $dateAndGroupInputs }
         )
     }
@@ -174,13 +174,13 @@ $logTabConditions = @(
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
-    -GetLogPathFn { $script:commonEnvVars["LOG_DIR"] }
+    -GetLogPathFn { Get-ResolvedVar "LOG_DIR" $commonEnvBat }
 
 $clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
-$script:commonEnvResolver = { param($name) $script:commonEnvVars[$name] }
+$commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
 $groupReportVars = @("TargetAppIds")
 $commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
@@ -188,13 +188,13 @@ $syncUserMasterVars = @("SyncUserMasterAppId", "SyncUserMasterSheetName")
 
 function Get-ReportTypeDefs {
     $types = @()
-    foreach ($key in $script:commonEnvVars.Keys) {
+    foreach ($key in (Get-SetEnvDefaults -Path $commonEnvBat).Keys) {
         if ($key -notmatch '^SourceType(_.+)$') { continue }
         $suffix = $Matches[1]
         $types += [PSCustomObject]@{
             Prefix = $suffix.TrimStart('_')
             Suffix = $suffix
-            Label  = $script:commonEnvVars[$key]
+            Label  = Get-ResolvedVar $key $commonEnvBat
         }
     }
     return @($types | Sort-Object Prefix)
@@ -603,7 +603,7 @@ function Update-CommonSettingsFields {
     $controlsToStack = @($grp)
 
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 -ExtraGrps $controlsToStack | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
@@ -614,7 +614,7 @@ function Update-GroupSettingsFields {
 
     $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions | Out-Null
 
