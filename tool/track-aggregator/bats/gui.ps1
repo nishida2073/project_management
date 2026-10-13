@@ -480,7 +480,7 @@ $grpSurveyEdit = New-GroupBox -Text "アンケート編集" -Dock ([System.Windo
 
 $script:surveyRows = @()
 $script:surveyContentPanel = $null
-$script:surveySheetDef = @{
+$surveySheetDef = @{
     SheetName = "アンケート"
     Columns = @(
         @{ Label = "通番"; Width = 40; AutoIncrement = $true }
@@ -495,7 +495,7 @@ $grpTestEdit = New-GroupBox -Text "テスト編集" -Dock ([System.Windows.Forms
 
 $script:testRows = @()
 $script:testContentPanel = $null
-$script:testSheetDef = @{
+$testSheetDef = @{
     SheetName = "テスト"
     Columns = @(
         @{ Label = "通番"; Width = 40; AutoIncrement = $true }
@@ -517,7 +517,6 @@ function Update-SurveyGrid {
         Update-SurveyGrid
     } -OnAdd {
         param($ContentPanel)
-        $surveySheetDef = $script:surveySheetDef
 
         $updatedRows = Read-SurveyGridData
         $script:surveyRows = $updatedRows
@@ -531,12 +530,12 @@ function Update-SurveyGrid {
         $newRow = [PSCustomObject]$newObj
         $script:surveyRows = @($script:surveyRows) + @($newRow)
         Update-SurveyGrid
-    } -Columns $script:surveySheetDef.Columns
+    } -Columns $surveySheetDef.Columns
     $script:surveyContentPanel = $panels.ContentPanel
 }
 
 function Read-SurveyGridData {
-    Read-GridData -ContentPanel $script:surveyContentPanel -Columns $script:surveySheetDef.Columns
+    Read-GridData -ContentPanel $script:surveyContentPanel -Columns $surveySheetDef.Columns
 }
 
 function Read-SurveyExcelData {
@@ -545,7 +544,6 @@ function Read-SurveyExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
-        $surveySheetDef = $script:surveySheetDef
         $surveyTransformer = {
             param($Rows)
             $convertedRows = @()
@@ -579,7 +577,7 @@ function Save-SurveyToExcel {
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-SurveyGridData)
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:surveySheetDef -Datas $rowsFromUI
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $surveySheetDef -Datas $rowsFromUI
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
@@ -594,7 +592,6 @@ function Update-TestGrid {
         Update-TestGrid
     } -OnAdd {
         param($ContentPanel)
-        $testSheetDef = $script:testSheetDef
 
         $updatedRows = Read-TestGridData
         $script:testRows = $updatedRows
@@ -608,12 +605,12 @@ function Update-TestGrid {
         $newRow = [PSCustomObject]$newObj
         $script:testRows = @($script:testRows) + @($newRow)
         Update-TestGrid
-    } -Columns $script:testSheetDef.Columns
+    } -Columns $testSheetDef.Columns
     $script:testContentPanel = $panels.ContentPanel
 }
 
 function Read-TestGridData {
-    Read-GridData -ContentPanel $script:testContentPanel -Columns $script:testSheetDef.Columns
+    Read-GridData -ContentPanel $script:testContentPanel -Columns $testSheetDef.Columns
 }
 
 function Read-TestExcelData {
@@ -622,7 +619,6 @@ function Read-TestExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
-        $testSheetDef = $script:testSheetDef
         $testTransformer = {
             param($Rows)
             $convertedRows = @()
@@ -661,17 +657,17 @@ function Save-MasterToExcel {
                 $surveyDatas = @(Read-SurveyGridData)
                 $testDatas = @(Read-TestGridData)
                 Save-DataToExcel -ExcelPath $xlsxPath -SheetDefDatasMap @(
-                    @{ SheetDef = $script:surveySheetDef; Datas = $surveyDatas }
-                    @{ SheetDef = $script:testSheetDef; Datas = $testDatas }
+                    @{ SheetDef = $surveySheetDef; Datas = $surveyDatas }
+                    @{ SheetDef = $testSheetDef; Datas = $testDatas }
                 )
             }
             "テスト" {
                 $testDatas = @(Read-TestGridData)
-                Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:testSheetDef -Datas $testDatas
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $testSheetDef -Datas $testDatas
             }
             "アンケート" {
                 $surveyDatas = @(Read-SurveyGridData)
-                Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:surveySheetDef -Datas $surveyDatas
+                Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $surveySheetDef -Datas $surveyDatas
             }
         }
     }
@@ -686,8 +682,6 @@ function Read-MasterExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
-        $surveySheetDef = $script:surveySheetDef
-        $testSheetDef = $script:testSheetDef
 
         $surveyTransformer = {
             param($Rows)
@@ -743,7 +737,7 @@ function Save-TestToExcel {
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-TestGridData)
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:testSheetDef -Datas $rowsFromUI
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $testSheetDef -Datas $rowsFromUI
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)

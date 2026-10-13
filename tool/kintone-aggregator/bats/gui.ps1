@@ -787,7 +787,7 @@ $grpScheduleEdit = New-GroupBox -Text "スケジュール編集" -Dock ([System.
 
 $script:scheduleRows = @()
 $script:scheduleContentPanel = $null
-$script:scheduleSheetDef = @{
+$scheduleSheetDef = @{
     SheetName = "スケジュール"
     Columns = @(
         @{ Label = "通番"; Width = 50; AutoIncrement = $true }
@@ -808,7 +808,6 @@ function Update-ScheduleGrid {
         Update-ScheduleGrid
     } -OnAdd {
         param($ContentPanel)
-        $scheduleSheetDef = $script:scheduleSheetDef
 
         $updatedRows = Read-ScheduleGridData
         $script:scheduleRows = $updatedRows
@@ -822,12 +821,12 @@ function Update-ScheduleGrid {
         $newRow = [PSCustomObject]$newObj
         $script:scheduleRows = @($script:scheduleRows) + @($newRow)
         Update-ScheduleGrid
-    } -Columns $script:scheduleSheetDef.Columns
+    } -Columns $scheduleSheetDef.Columns
     $script:scheduleContentPanel = $panels.ContentPanel
 }
 
 function Read-ScheduleGridData {
-    Read-GridData -ContentPanel $script:scheduleContentPanel -Columns $script:scheduleSheetDef.Columns
+    Read-GridData -ContentPanel $script:scheduleContentPanel -Columns $scheduleSheetDef.Columns
 }
 
 function Read-ScheduleExcelData {
@@ -836,7 +835,6 @@ function Read-ScheduleExcelData {
     $xlsxPath = Get-GroupXlsxPath $GroupName
 
     try {
-        $scheduleSheetDef = $script:scheduleSheetDef
         $scheduleTransformer = {
             param($Rows)
             $convertedRows = @()
@@ -870,7 +868,7 @@ function Save-ScheduleToExcel {
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-ScheduleGridData)
-        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $script:scheduleSheetDef -Datas $rowsFromUI
+        Save-DataToExcel -ExcelPath $xlsxPath -SheetDef $scheduleSheetDef -Datas $rowsFromUI
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
