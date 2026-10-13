@@ -366,11 +366,6 @@ $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::
 $tabSettingsCommon.Controls.Add($settingsCommonBottomPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Label -Text "対象のグループ"
-
-$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24
-$btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
-
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
     return @(
@@ -378,43 +373,66 @@ function Get-GroupSettingsFiles {
     )
 }
 
-$settingsGroupTopPanel = (New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsGroupNewGroup) `
+$settingsGroupTop = (New-SettingsTopPanel `
+    -ExtraControlDefs @(
+        [PSCustomObject]@{ Name = "GroupTargetLabel"; Kind = "Label"; Text = "対象のグループ"; Width = 150 }
+        [PSCustomObject]@{ Name = "GroupTarget"; Kind = "Combo"; Width = 150; OnChange = { Update-GroupSettingsFields } }
+        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 140; OnClick = {
+            Add-Type -AssemblyName Microsoft.VisualBasic
+            $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
+            $newName = $newName.Trim()
+            if (!$newName) { return }
+
+            if ($settingsGroupTop.Controls["GroupTarget"].Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+                [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                return
+            }
+
+            $settingsGroupTop.Controls["GroupTarget"].Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
+            $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $settingsGroupTop.Controls["GroupTarget"].Items[-1]
+        } }
+    ) `
     -OnSave {
-        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
         Update-GroupSettingsFields
         Update-GroupDropdowns
     } `
     -OnReload {
-        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
-    }).Panel
+    })
 
 $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
-$tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
+$tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
 
-$lblSettingsMasterGroupTarget = New-Label -Text "対象のグループ"
-
-$cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24
-$lnkSettingsMasterOpenXlsx = New-LinkLabel -Text "開く"
-
-$settingsMasterTopPanel = (New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsMasterGroupTarget, $cmbSettingsMasterGroupTarget, $lnkSettingsMasterOpenXlsx) `
+$settingsMasterTop = (New-SettingsTopPanel `
+    -ExtraControlDefs @(
+        [PSCustomObject]@{ Name = "GroupTargetLabel"; Kind = "Label"; Text = "対象のグループ"; Width = 150 }
+        [PSCustomObject]@{ Name = "GroupTarget"; Kind = "Combo"; Width = 150; OnChange = {
+            $target = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
+            Read-ScheduleExcelData -GroupName $target
+        } }
+        [PSCustomObject]@{ Name = "OpenXlsx"; Kind = "Link"; Text = "開く"; OnClick = {
+            $target = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
+            $xlsxPath = Get-GroupXlsxPath $target
+            Open-TargetOrWarn -Path $xlsxPath
+        } }
+    ) `
     -OnSave { Save-ScheduleToExcel } `
     -OnReload {
-        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
         Read-ScheduleExcelData -GroupName $target
-    }).Panel
+    })
 
 $settingsMasterBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $tabSettingsMaster.Controls.Add($settingsMasterBottomPanel)
-$tabSettingsMaster.Controls.Add($settingsMasterTopPanel)
+$tabSettingsMaster.Controls.Add($settingsMasterTop.Panel)
 
 $grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
@@ -422,10 +440,10 @@ $btnMasterSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -
 $btnMasterSyncExecute.Add_Click({
     try {
         $batchPath = $syncKintoneToSheetBat
-        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
+        $groupName = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
         Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterStatusPlaceholder -Action {
-            $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
-            if ($matchingItem) { $cmbSettingsGroupTarget.SelectedItem = $matchingItem }
+            $matchingItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
+            if ($matchingItem) { $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $matchingItem }
             Update-GroupSettingsFields
             $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
             $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
@@ -594,11 +612,11 @@ function Update-GroupSettingsFields {
     $scrollX = -$settingsGroupBottomPanel.AutoScrollPosition.X
     $scrollY = -$settingsGroupBottomPanel.AutoScrollPosition.Y
 
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+    $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars `
-        -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions | Out-Null
+        -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions | Out-Null
 
     $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 
@@ -742,24 +760,9 @@ function Update-GroupDropdowns {
 
     Update-ComboBoxItems -ComboBox $logTab.InputControls["GroupCombo"] -Items $filterItems
     Update-ComboBoxItems -ComboBox $batchTab.InputControls["TargetGroupNameFilter"] -Items $filterItems
-    Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
-    Update-ComboBoxItems -ComboBox $cmbSettingsMasterGroupTarget -Items $groupNames
+    Update-ComboBoxItems -ComboBox $settingsGroupTop.Controls["GroupTarget"] -Items $groupNames
+    Update-ComboBoxItems -ComboBox $settingsMasterTop.Controls["GroupTarget"] -Items $groupNames
 }
-
-$btnSettingsGroupNewGroup.Add_Click({
-    Add-Type -AssemblyName Microsoft.VisualBasic
-    $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
-    $newName = $newName.Trim()
-    if (!$newName) { return }
-
-    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
-        [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
-    $cmbSettingsGroupTarget.SelectedItem = $cmbSettingsGroupTarget.Items[-1]
-})
 
 $grpScheduleEdit = New-GroupBox -Text "スケジュール編集" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
@@ -844,7 +847,7 @@ function Read-ScheduleExcelData {
 }
 
 function Save-ScheduleToExcel {
-    $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
+    $groupName = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
     $xlsxPath = Get-GroupXlsxPath $groupName
     try {
         $rowsFromUI = @(Read-ScheduleGridData)
@@ -855,20 +858,6 @@ function Save-ScheduleToExcel {
     }
 }
 
-$lnkSettingsMasterOpenXlsx.Add_LinkClicked({
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
-    $xlsxPath = Get-GroupXlsxPath $target
-    Open-TargetOrWarn -Path $xlsxPath
-})
-
-$cmbSettingsMasterGroupTarget.Add_SelectedIndexChanged({
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
-    Read-ScheduleExcelData -GroupName $target
-})
-
-$cmbSettingsGroupTarget.Add_SelectedIndexChanged({
-    Update-GroupSettingsFields
-})
 
 $settingsSubTabControl.Add_SelectedIndexChanged({
     if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {

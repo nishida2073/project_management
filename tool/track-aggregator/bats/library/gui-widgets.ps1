@@ -788,6 +788,7 @@ function New-SettingsTopPanel {
         [Parameter(Mandatory)][scriptblock]$OnSave,
         [Parameter(Mandatory)][scriptblock]$OnReload,
         [System.Windows.Forms.Control[]]$ExtraControls = @(),
+        [array]$ExtraControlDefs = @(),
         [string]$Title = "",
         [int]$ExtraControlsHeight = 24,
         [int]$ExtraControlsX = 20,
@@ -797,7 +798,31 @@ function New-SettingsTopPanel {
     )
 
     $rowCenterSpacing = 30
-    if ($ExtraControls.Count -gt 0) {
+    $controls = @{}
+    $extraControlList = @($ExtraControls)
+    foreach ($def in $ExtraControlDefs) {
+        $ctrl = switch ($def.Kind) {
+            "Label" { New-Label -Text $def.Text -Width $def.Width -Height $ExtraControlsHeight }
+            "Combo" {
+                $cmb = New-ComboBox -Width $def.Width -Height $ExtraControlsHeight -Items $def.Items -SelectedItem $def.SelectedItem
+                if ($def.OnChange) { $cmb.Add_SelectedIndexChanged($def.OnChange) }
+                $cmb
+            }
+            "Button" {
+                $btn = New-Button -Text $def.Text -Width $def.Width -Height $ExtraControlsHeight
+                if ($def.OnClick) { $btn.Add_Click($def.OnClick) }
+                $btn
+            }
+            "Link" {
+                $lnk = New-LinkLabel -Text $def.Text
+                if ($def.OnClick) { $lnk.Add_LinkClicked($def.OnClick) }
+                $lnk
+            }
+        }
+        $controls[$def.Name] = $ctrl
+        $extraControlList += $ctrl
+    }
+    if ($extraControlList.Count -gt 0) {
         $extraCenterY = if ($ExtraControlsY -eq -1) { $rowCenterSpacing } else { $ExtraControlsY + [int]($ExtraControlsHeight / 2) }
         if ($ButtonRowY -eq -1) { $ButtonRowY = (2 * $rowCenterSpacing) - 12 }
     } else {
@@ -820,9 +845,9 @@ function New-SettingsTopPanel {
 
     $panel.Controls.AddRange(@($btnSave, $lblSaveStatus, $btnReload, $lblReloadStatus))
 
-    if ($ExtraControls.Count -gt 0) {
+    if ($extraControlList.Count -gt 0) {
         $extraX = $ExtraControlsX
-        foreach ($ctrl in $ExtraControls) {
+        foreach ($ctrl in $extraControlList) {
             if ($ctrl -is [System.Windows.Forms.Label] -or $ctrl -is [System.Windows.Forms.LinkLabel]) {
                 $ctrl.AutoSize = $true
                 $autoWidth = $ctrl.Width
@@ -833,7 +858,7 @@ function New-SettingsTopPanel {
             $ctrl.Location = New-Object System.Drawing.Point($extraX, ($extraCenterY - [int]($ctrl.Height / 2)))
             $extraX = $ctrl.Right + $ExtraControlsSpacing
         }
-        $panel.Controls.AddRange($ExtraControls)
+        $panel.Controls.AddRange($extraControlList)
     }
 
     $btnSave.Add_Click({
@@ -847,6 +872,7 @@ function New-SettingsTopPanel {
 
     $btnReload.Add_Click({
         try {
+            Clear-MentionRowsCache
             Invoke-ActionWithUpdateStatus -StatusLabel $lblReloadStatus -Action $OnReload -SuccessMessage "完了"
         }
         catch {
@@ -860,6 +886,7 @@ function New-SettingsTopPanel {
         ReloadButton = $btnReload
         SaveStatus   = $lblSaveStatus
         ReloadStatus = $lblReloadStatus
+        Controls     = $controls
     }
 }
 
@@ -1270,6 +1297,10 @@ function Register-MentionEditorHandlers {
             })
         }
     }
+}
+
+function Clear-MentionRowsCache {
+    $script:mentionRowsGroupName = $null
 }
 
 function Add-MentionsEditor {

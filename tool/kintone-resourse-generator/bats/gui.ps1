@@ -373,7 +373,7 @@ function Update-GroupDropdowns {
     
     Update-ComboBoxItems -ComboBox $batchTab.InputControls["TargetGroupName"] -Items $groupNames
 
-    Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
+    Update-ComboBoxItems -ComboBox $settingsGroupTop.Controls["GroupTarget"] -Items $groupNames
 
     Update-ComboBoxItems -ComboBox $multipleBatchTab.InputControls["TargetGroupName"] -Items $groupNames
 
@@ -623,11 +623,6 @@ $settingsCommonTopPanel = (New-SettingsTopPanel `
 $tabSettingsCommon.Controls.Add($settingsCommonBottomPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
-$lblSettingsGroupTarget = New-Label -Text "対象のグループ" -Width 150 -Height 24
-
-$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24
-$btnSettingsNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
-
 $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $settingsGroups = [ordered]@{
@@ -693,7 +688,7 @@ $settingsTrailingButtonVars = @{
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
             $spaceId = Get-GroupSettingsFieldValue "SpaceId"
             $templateName = Get-GroupSettingsFieldValue "TemplateName"
-            $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+            $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
 
             if (!$spaceId) {
                 throw "スペースIDを入力してください。"
@@ -717,7 +712,7 @@ $settingsTrailingButtonVars = @{
     }.GetNewClosure() -OnOpenClick {
         $templatePath = Get-ResolvedVar "COMMON_CUSTOM_TEMPLATE_PATH" $setEnvBat
         $templateName = Get-GroupSettingsFieldValue "TemplateName"
-        $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         Open-TargetOrWarn -Path (Join-Path $templatePath "$($groupName)_$($templateName).xlsx")
     }.GetNewClosure() }
 }
@@ -777,7 +772,7 @@ function Save-GroupSettings {
 }
 
 function Update-GroupSettingsFields {
-    $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+    $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
     if (!$target) {
         $settingsGroupBottomPanel.Controls.Clear()
         return
@@ -809,43 +804,41 @@ function Update-GroupSettingsFields {
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
 
-$settingsGroupTopPanel = (New-SettingsTopPanel `
-    -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsNewGroup) `
+$settingsGroupTop = (New-SettingsTopPanel `
+    -ExtraControlDefs @(
+        [PSCustomObject]@{ Name = "GroupTargetLabel"; Kind = "Label"; Text = "対象のグループ"; Width = 150 }
+        [PSCustomObject]@{ Name = "GroupTarget"; Kind = "Combo"; Width = 150; OnChange = { Update-GroupSettingsFields } }
+        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 140; OnClick = {
+            Add-Type -AssemblyName Microsoft.VisualBasic
+            $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
+            $newName = $newName.Trim()
+            if (!$newName) { return }
+
+            if ($settingsGroupTop.Controls["GroupTarget"].Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+                [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+                return
+            }
+
+            $settingsGroupTop.Controls["GroupTarget"].Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
+            $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $settingsGroupTop.Controls["GroupTarget"].Items[-1]
+        } }
+    ) `
     -OnSave {
-        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
         Update-GroupSettingsFields
         Update-GroupDropdowns
     } `
     -OnReload {
-        $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
+        $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         if (!$target) { return }
         foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
-    }).Panel
+    })
 
 $tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
-$tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
-
-$btnSettingsNewGroup.Add_Click({
-    Add-Type -AssemblyName Microsoft.VisualBasic
-    $newName = [Microsoft.VisualBasic.Interaction]::InputBox("グループ名を入力してください", "グループの新規作成", "")
-    $newName = $newName.Trim()
-    if (!$newName) { return }
-
-    if ($cmbSettingsGroupTarget.Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
-        [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
-        return
-    }
-
-    $cmbSettingsGroupTarget.Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
-    $cmbSettingsGroupTarget.SelectedItem = $cmbSettingsGroupTarget.Items[-1]
-})
-
-$cmbSettingsGroupTarget.Add_SelectedIndexChanged({
-    Update-GroupSettingsFields
-})
+$tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
 
 $settingsSubTabControl.Add_SelectedIndexChanged({
     if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
