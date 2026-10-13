@@ -24,6 +24,13 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
+$createDailyReportBat = Join-Path $scriptDir "create-daily-report.bat"
+$createPulseSurveyBat = Join-Path $scriptDir "create-pulse-survey.bat"
+$collectAppDataBat = Join-Path $scriptDir "collect-app-data.bat"
+$checkAlertBat = Join-Path $scriptDir "check-alert.bat"
+$postAlertResultBat = Join-Path $scriptDir "post-alert-result.bat"
+$syncKintoneToSheetBat = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
+
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $scriptDir "common-env.bat")
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -47,21 +54,21 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "アプリデータ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "create-daily-report.bat"); OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
-            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "create-pulse-survey.bat"); OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = $createDailyReportBat; OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = $createPulseSurveyBat; OpenTarget = $script:commonEnvVars["OutputReportDir"]; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アプリデータ集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "collect-app-data.bat"); OpenTarget = $script:commonEnvVars["OutputCollectDataRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = $collectAppDataBat; OpenTarget = $script:commonEnvVars["OutputCollectDataRootDir"]; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アラート集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アラート集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "check-alert.bat"); OpenTarget = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
-            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "アラート集計-投稿"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "post-alert-result.bat"); OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue }; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アラート集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = $checkAlertBat; OpenTarget = $script:commonEnvVars["OutputAlertRootDir"]; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "アラート集計-投稿"; IncludeInBatch = $true; BatchPath = $postAlertResultBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue }; Inputs = $dateAndGroupInputs }
         )
     }
 )
@@ -156,7 +163,7 @@ Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabCont
 
 $syncMasterButtonDef = [PSCustomObject]@{
     Label            = "マスター同期"
-    BatchPath = "sync-kintone-to-sheet.bat"
+    BatchPath = $syncKintoneToSheetBat
 }
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
@@ -414,7 +421,7 @@ $grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock (
 $btnMasterSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
 $btnMasterSyncExecute.Add_Click({
     try {
-        $batchPath = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
+        $batchPath = $syncKintoneToSheetBat
         $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
         Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterStatusPlaceholder -Action {
             $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1

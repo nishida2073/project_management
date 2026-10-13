@@ -24,6 +24,15 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
+$downloadResultsBat = Join-Path $scriptDir "download-results.bat"
+$checkDownloadStatusBat = Join-Path $scriptDir "check-download-status.bat"
+$collectCombineResultBat = Join-Path $scriptDir "collect-combine-result.bat"
+$collectTestResultBat = Join-Path $scriptDir "collect-test-result.bat"
+$collectSurveyResultBat = Join-Path $scriptDir "collect-survey-result.bat"
+$postCollectResultsBat = Join-Path $scriptDir "post-collect-results.bat"
+$collectYearComparisonResultBat = Join-Path $scriptDir "collect-year-comparison-result.bat"
+$syncKintoneToSheetBat = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
+
 $script:commonEnvVars = Get-BatEnvVars -BatPath (Join-Path $scriptDir "common-env.bat")
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -47,22 +56,22 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "実施データ取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "download-results.bat"); OpenTarget = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = (Join-Path $scriptDir "check-download-status.bat"); OpenTarget = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $downloadResultsBat; OpenTarget = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = $script:commonEnvVars["ResultRootDir"]; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
         Label = "実施状況確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "collect-combine-result.bat"); OpenTarget = $script:commonEnvVars["OutputCombineCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $collectCombineResultBat; OpenTarget = $script:commonEnvVars["OutputCombineCollectDir"]; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
         Label = "実施結果確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "collect-test-result.bat"); OpenTarget = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = (Join-Path $scriptDir "collect-survey-result.bat"); OpenTarget = $script:commonEnvVars["OutputSurveyCollectDir"]; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = (Join-Path $scriptDir "post-collect-results.bat"); OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue }; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = $script:commonEnvVars["OutputTestCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = $script:commonEnvVars["OutputSurveyCollectDir"]; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue }; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
@@ -73,7 +82,7 @@ $categoryDefs = @(
                 BatchLabel = "経年比較-アンケート・テスト"
                 IncludeInBatch = $true
                 DefaultChecked = $false
-                BatchPath = (Join-Path $scriptDir "collect-year-comparison-result.bat")
+                BatchPath = $collectYearComparisonResultBat
                 OpenTarget = $script:commonEnvVars["OutputYearComparisonCollectDir"]
                 Inputs = @(
                     (New-TargetGroupInput)
@@ -180,7 +189,7 @@ Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabCont
 
 $syncMasterButtonDef = [PSCustomObject]@{
     Label            = "マスター同期"
-    BatchPath = "sync-kintone-to-sheet.bat"
+    BatchPath = $syncKintoneToSheetBat
 }
 $allButtonDefsForLog = @($categoryDefs | ForEach-Object { $_.ButtonDefs }) + @($syncMasterButtonDef)
 
@@ -408,7 +417,7 @@ $grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock (
 $btnMasterSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
 $btnMasterSyncExecute.Add_Click({
     try {
-        $batchPath = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
+        $batchPath = $syncKintoneToSheetBat
         $groupName = Get-ComboBoxValue -SelectedItem $cmbSettingsMasterGroupTarget.SelectedItem
         Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterStatusPlaceholder -Action {
             $matchingItem = $cmbSettingsGroupTarget.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1

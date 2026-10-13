@@ -224,7 +224,7 @@ try {
             $appCodeFields = $appDatasResult.AllFieldLabels
             Write-Message $appCodeFields -VarName "appCodeFields"
 
-            $checkResults = Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData
+            $checkResults = @(Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData)
             Write-Message $checkResults -VarName "checkResults"
 
             $userDataAliasFieldCodes = @(

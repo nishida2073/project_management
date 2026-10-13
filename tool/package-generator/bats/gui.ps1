@@ -25,6 +25,8 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 $env:GUI_LOG_MODE = "1"
 
 $setEnvBat = Join-Path $scriptDir "common-env.bat"
+$generatePackageBat = Join-Path $rootPath "generate-package.bat"
+$generateConfigBat = Join-Path $rootPath "generate-config.bat"
 $script:commonEnvVars = Get-BatEnvVars -BatPath $setEnvBat
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -84,13 +86,13 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-package.bat"); OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = $script:commonEnvVars["GenerateOutputPath"]; Inputs = @((New-ClientInput)) }
         )
     },
     [PSCustomObject]@{
         Label = "パッケージ定義"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; BatchPath = (Join-Path $rootPath "generate-config.bat"); OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
         )
     }
 )

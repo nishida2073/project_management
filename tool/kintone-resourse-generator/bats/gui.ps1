@@ -18,11 +18,11 @@ if ($MyInvocation.MyCommand.Path) {
 $scriptDir = Join-Path $rootPath "bats"
 
 $createTemplateBat = Join-Path $rootPath "create-template.bat"
-$createSpaceBat = Join-Path $rootPath "create-space-from-template.bat"
-$downloadBat = Join-Path $rootPath "download-kintone-resources.bat"
-$generateBat = Join-Path $rootPath "generate-config-from-template.bat"
-$applyBat = Join-Path $rootPath "apply-kintone-resources.bat"
-$checkBat = Join-Path $rootPath "check-kintone-resources.bat"
+$createSpaceFromTemplateBat = Join-Path $rootPath "create-space-from-template.bat"
+$downloadKintoneResourcesBat = Join-Path $rootPath "download-kintone-resources.bat"
+$generateConfigFromTemplateBat = Join-Path $rootPath "generate-config-from-template.bat"
+$applyKintoneResourcesBat = Join-Path $rootPath "apply-kintone-resources.bat"
+$checkKintoneResourcesBat = Join-Path $rootPath "check-kintone-resources.bat"
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
 $setEnvBat = Join-Path $scriptDir "common.bat"
@@ -70,7 +70,7 @@ $categoryDefs = @(
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceTemplateId"; Label = "スペーステンプレートID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
-                BatchPath = $createSpaceBat
+                BatchPath = $createSpaceFromTemplateBat
                 ArgsFn = {
                     param($ic, $inputDefs)
                     $batArgs = @()
@@ -94,7 +94,7 @@ $categoryDefs = @(
                     $idLine = $lastOutputLines | Where-Object { $_ -match 'SPACE_ID=(\d+)' } | Select-Object -Last 1
                     if ($idLine -and $idLine -match 'SPACE_ID=(?<id>\d+)') {
                         $spaceId = $Matches.id
-                        $downloadBd = Get-ButtonDefByBatchPath $downloadBat
+                        $downloadBd = Get-ButtonDefByBatchPath $downloadKintoneResourcesBat
                         $downloadBd.InputControls['SpaceId'].Text = $spaceId
                         $groupValue = Get-ComboBoxValue -SelectedItem $ic["TargetGroupName"].SelectedItem
                         Set-CreatedSpaceUrlFromGroup -GroupValue $groupValue -SpaceId $spaceId
@@ -114,7 +114,7 @@ $categoryDefs = @(
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                     [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $false }
                 )
-                BatchPath = $downloadBat
+                BatchPath = $downloadKintoneResourcesBat
                 ArgsFn = {
                     param($ic, $inputDefs)
                     $batArgs = @()
@@ -149,7 +149,7 @@ $categoryDefs = @(
                     [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                     return $false
                 }
-                BatchPath = $generateBat
+                BatchPath = $generateConfigFromTemplateBat
                 ArgsFn = {
                     param($ic, $inputDefs)
                     $batArgs = @()
@@ -181,7 +181,7 @@ $categoryDefs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
-                BatchPath = $applyBat
+                BatchPath = $applyKintoneResourcesBat
                 ArgsFn = {
                     param($ic, $inputDefs)
                     $batArgs = @()
@@ -206,7 +206,7 @@ $categoryDefs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
                 )
-                BatchPath = $checkBat
+                BatchPath = $checkKintoneResourcesBat
                 ArgsFn = {
                     param($ic, $inputDefs)
                     $batArgs = @()
@@ -341,7 +341,7 @@ foreach ($cmb in $groupCombos) {
     $cmb.Add_SelectedIndexChanged({ Set-CreatedSpaceUrlFromGroup -GroupValue (Get-ComboBoxValue -SelectedItem $this.SelectedItem) })
 }
 
-$generateInputs = (Get-ButtonDefByBatchPath $generateBat).InputControls
+$generateInputs = (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls
 $cmbBaseTemplateName = $generateInputs["BaseTemplateName"]
 $cmbCustomTemplateName = $generateInputs["CustomTemplateName"]
 $cmbRunAllBaseTemplateName = $batchTab.InputControls["BaseTemplateName"]
@@ -396,7 +396,7 @@ function Update-GroupDropdowns {
 
     Update-ComboBoxItems -ComboBox $cmbSettingsGroupTarget -Items $groupNames
 
-    Update-ComboBoxItems -ComboBox $multipleBatchTab.Controls["TargetGroup"] -Items $groupNames
+    Update-ComboBoxItems -ComboBox $multipleBatchTab.Controls["TargetGroupName"] -Items $groupNames
 
 }
 
@@ -417,7 +417,7 @@ function Set-RunButtonsEnabled {
     $multipleBatchTab.Controls["ExcelPath"].Enabled = $Enabled
     $multipleBatchTab.Controls["ExcelPathBrowse"].Enabled = $Enabled
     $multipleBatchTab.RunButton.Enabled = $Enabled
-    $multipleBatchTab.Controls["TargetGroup"].Enabled = $Enabled
+    $multipleBatchTab.Controls["TargetGroupName"].Enabled = $Enabled
     Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
     Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
 }
@@ -491,9 +491,9 @@ function Invoke-ExecuteAll {
         $inputControls["ConfigName"].Text = $configName
     }
 
-    $createSpaceBd = Get-ButtonDefByBatchPath $createSpaceBat
+    $createSpaceBd = Get-ButtonDefByBatchPath $createSpaceFromTemplateBat
     $createSpaceBd.InputControls["SpaceTemplateId"].Text = $batchInputs["SpaceTemplateId"].Text.Trim()
-    $generateBd = Get-ButtonDefByBatchPath $generateBat
+    $generateBd = Get-ButtonDefByBatchPath $generateConfigFromTemplateBat
     Copy-ComboSelection -From $batchInputs["BaseTemplateName"] -To $generateBd.InputControls["BaseTemplateName"]
     Copy-ComboSelection -From $batchInputs["CustomTemplateName"] -To $generateBd.InputControls["CustomTemplateName"]
 
@@ -524,7 +524,7 @@ function Invoke-ExecuteAll {
 }
 
 $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
-    [PSCustomObject]@{ Name = "TargetGroup"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
+    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
     [PSCustomObject]@{ Name = "ExcelPath"; Label = "実行一覧ファイル"; LabelWidth = 150; InputWidth = 200; Kind = "File"; Filter = "Excelファイル (*.xlsx)|*.xlsx"; NewRow = $true }
 ) -OnRunClick {
     param($controls, $statusLabel)
@@ -594,6 +594,7 @@ $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実�
                 continue
             }
 
+            Copy-ComboSelection -From $controls["TargetGroupName"] -To $batchTab.InputControls["TargetGroupName"]
             $batchTab.InputControls["ConfigName"].Text = $rowConfigName
             $batchTab.InputControls["SpaceTemplateId"].Text = $rowTemplateId
             $batchTab.InputControls["BaseTemplateName"].Text = $rowBaseResourceTemplate
