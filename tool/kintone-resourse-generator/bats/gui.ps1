@@ -341,11 +341,6 @@ foreach ($cmb in $groupCombos) {
     $cmb.Add_SelectedIndexChanged({ Set-CreatedSpaceUrlFromGroup -GroupValue (Get-ComboBoxValue -SelectedItem $this.SelectedItem) })
 }
 
-$generateInputs = (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls
-$cmbBaseTemplateName = $generateInputs["BaseTemplateName"]
-$cmbCustomTemplateName = $generateInputs["CustomTemplateName"]
-$cmbRunAllBaseTemplateName = $batchTab.InputControls["BaseTemplateName"]
-$cmbRunAllCustomTemplateName = $batchTab.InputControls["CustomTemplateName"]
 
 $txtLog = New-LogTextBox
 
@@ -354,11 +349,6 @@ Add-StackedDockedControls -Container $tabRun -ControlsTopToBottom @($execTabCont
 $allButtonDefs = @()
 foreach ($cd in $categoryDefs) {
     $allButtonDefs += $cd.ButtonDefs
-}
-
-$groupOptions = @()
-foreach ($groupName in (Get-GroupNames)) {
-    $groupOptions += [PSCustomObject]@{ Text = $groupName; Value = $groupName }
 }
 
 $logTabConditions = @(
@@ -409,8 +399,8 @@ function Set-RunButtonsEnabled {
             }
         }
     }
-    $cmbBaseTemplateName.Enabled = $Enabled
-    $cmbCustomTemplateName.Enabled = $Enabled
+    (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["BaseTemplateName"].Enabled = $Enabled
+    (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["CustomTemplateName"].Enabled = $Enabled
     foreach ($ctrl in $batchTab.InputControls.Values) {
         $ctrl.Enabled = $Enabled
     }
@@ -431,32 +421,6 @@ function Copy-ComboSelection {
     } else {
         $To.Text = $value
     }
-}
-
-function Invoke-AllStepsForCurrentInputs {
-    $lastExitCode = 0
-    foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        $ic = $bd.InputControls
-        $lastOutputLines = New-Object System.Collections.Generic.List[string]
-        $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
-            -WorkingDirectory $rootPath -Form $form `
-            -WriteLog { param($msg) Write-Log $msg } `
-            -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
-            -CurrentProcessRef ([ref]$script:currentProc)
-
-        if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
-            & $bd.OnSuccessFn $ic $lastOutputLines
-        }
-
-        if ($exitCode -eq 2) {
-            $lastExitCode = 2
-        } elseif ($exitCode -ne 0) {
-            return $exitCode
-        }
-    }
-    return $lastExitCode
 }
 
 function Invoke-ExecuteAll {
@@ -644,15 +608,15 @@ function Get-TemplateFileNames {
 function Update-BaseTemplateNameList {
     $names = Get-TemplateFileNames -EnvVarName "COMMON_BASE_TEMPLATE_PATH"
     $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
-    Update-ComboBoxItems -ComboBox $cmbBaseTemplateName -Items $items
-    Update-ComboBoxItems -ComboBox $cmbRunAllBaseTemplateName -Items $items
+    Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["BaseTemplateName"] -Items $items
+    Update-ComboBoxItems -ComboBox $batchTab.InputControls["BaseTemplateName"] -Items $items
 }
 
 function Update-CustomTemplateNameList {
     $names = Get-TemplateFileNames -EnvVarName "COMMON_CUSTOM_TEMPLATE_PATH"
     $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
-    Update-ComboBoxItems -ComboBox $cmbCustomTemplateName -Items $items
-    Update-ComboBoxItems -ComboBox $cmbRunAllCustomTemplateName -Items $items
+    Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["CustomTemplateName"] -Items $items
+    Update-ComboBoxItems -ComboBox $batchTab.InputControls["CustomTemplateName"] -Items $items
 }
 
 $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
@@ -856,16 +820,6 @@ function Update-GroupSettingsFields {
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
 }
-
-$settingsCommonTopPanel = (New-SettingsTopPanel `
-    -OnSave {
-        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }
-        Update-CommonSettingsFields
-    } `
-    -OnReload {
-        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }
-        Update-CommonSettingsFields
-    }).Panel
 
 $settingsGroupTopPanel = (New-SettingsTopPanel `
     -ExtraControls @($lblSettingsGroupTarget, $cmbSettingsGroupTarget, $btnSettingsNewGroup) `
