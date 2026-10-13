@@ -680,18 +680,18 @@ function Test-KintoneConnection {
 function Save-CommonSettings {
     $path = Join-Path $scriptDir "common-env.bat"
 
-    $script:saveCommonReportVarKeyMap = @{}
+    $saveCommonReportVarKeyMap = @{}
     foreach ($rt in (Get-ReportTypeDefs)) {
         foreach ($varName in $commonReportVars) {
-            $script:saveCommonReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
+            $saveCommonReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
         }
     }
 
-    $allVars = @() + $commonSettingsVars + @($script:saveCommonReportVarKeyMap.Keys)
+    $allVars = @() + $commonSettingsVars + @($saveCommonReportVarKeyMap.Keys)
     Save-EnvBatFile -Path $path -VarNames $allVars `
         -GetValueFn { param($varName)
-            if ($script:saveCommonReportVarKeyMap.ContainsKey($varName)) {
-                Get-CommonSettingsFieldValue $script:saveCommonReportVarKeyMap[$varName]
+            if ($saveCommonReportVarKeyMap.ContainsKey($varName)) {
+                Get-CommonSettingsFieldValue $saveCommonReportVarKeyMap[$varName]
             } else {
                 Get-CommonSettingsFieldValue $varName
             }
@@ -706,29 +706,29 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $script:saveGroupAuthVarMap = @{}
+    $saveGroupAuthVarMap = @{}
     foreach ($varName in $authVars) {
-        $script:saveGroupAuthVarMap[$varName] = "AUTH_$varName"
+        $saveGroupAuthVarMap[$varName] = "AUTH_$varName"
     }
 
-    $script:saveGroupPostVarMap = @{}
+    $saveGroupPostVarMap = @{}
     foreach ($varName in $postVars) {
-        $script:saveGroupPostVarMap[$varName] = "POST_$varName"
+        $saveGroupPostVarMap[$varName] = "POST_$varName"
     }
 
-    $script:saveGroupSyncVarMap = @{}
+    $saveGroupSyncVarMap = @{}
     foreach ($varName in $syncUserMasterVars) {
-        $script:saveGroupSyncVarMap[$varName] = "SYNC_$varName"
+        $saveGroupSyncVarMap[$varName] = "SYNC_$varName"
     }
 
-    $script:saveGroupReportVarKeyMap = @{}
+    $saveGroupReportVarKeyMap = @{}
     foreach ($rt in (Get-ReportTypeDefs)) {
         foreach ($varName in $groupReportVars) {
-            $script:saveGroupReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
+            $saveGroupReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
         }
     }
 
-    $allVars = @() + @($script:saveGroupAuthVarMap.Keys) + @("Authorization", "BaseUrl") + @($script:saveGroupPostVarMap.Keys) + @($script:saveGroupSyncVarMap.Keys) + @($script:saveGroupReportVarKeyMap.Keys)
+    $allVars = @() + @($saveGroupAuthVarMap.Keys) + @("Authorization", "BaseUrl") + @($saveGroupPostVarMap.Keys) + @($saveGroupSyncVarMap.Keys) + @($saveGroupReportVarKeyMap.Keys)
 
     Sync-MentionRowsFromControls
 
@@ -741,16 +741,16 @@ function Save-GroupSettings {
                 "https://%KintoneSubdomain%.cybozu.com"
             } elseif ($varName -eq "MentionUserCodes") {
                 ConvertTo-MentionUserCodesText -Rows $script:mentionRows
-            } elseif ($script:saveGroupAuthVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupAuthVarMap[$varName]
-            } elseif ($script:saveGroupPostVarMap.ContainsKey($varName)) {
-                $val = Get-GroupSettingsFieldValue $script:saveGroupPostVarMap[$varName]
+            } elseif ($saveGroupAuthVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupAuthVarMap[$varName]
+            } elseif ($saveGroupPostVarMap.ContainsKey($varName)) {
+                $val = Get-GroupSettingsFieldValue $saveGroupPostVarMap[$varName]
                 if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
                 $val
-            } elseif ($script:saveGroupSyncVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupSyncVarMap[$varName]
-            } elseif ($script:saveGroupReportVarKeyMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupReportVarKeyMap[$varName]
+            } elseif ($saveGroupSyncVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupSyncVarMap[$varName]
+            } elseif ($saveGroupReportVarKeyMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupReportVarKeyMap[$varName]
             } else {
                 ""
             }

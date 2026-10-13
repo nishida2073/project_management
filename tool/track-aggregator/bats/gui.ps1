@@ -877,27 +877,27 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $script:saveGroupAuthVarMap = @{}
+    $saveGroupAuthVarMap = @{}
     foreach ($varName in $authVars) {
-        $script:saveGroupAuthVarMap[$varName] = "AUTH_$varName"
+        $saveGroupAuthVarMap[$varName] = "AUTH_$varName"
     }
 
-    $script:saveGroupPostVarMap = @{}
+    $saveGroupPostVarMap = @{}
     foreach ($varName in $postVars) {
-        $script:saveGroupPostVarMap[$varName] = "POST_$varName"
+        $saveGroupPostVarMap[$varName] = "POST_$varName"
     }
 
-    $script:saveGroupOverrideVarMap = @{}
+    $saveGroupOverrideVarMap = @{}
     foreach ($varName in $groupOverrideVars) {
-        $script:saveGroupOverrideVarMap[$varName] = "OVERRIDE_$varName"
+        $saveGroupOverrideVarMap[$varName] = "OVERRIDE_$varName"
     }
 
-    $script:saveGroupSyncVarMap = @{}
+    $saveGroupSyncVarMap = @{}
     foreach ($varName in $syncUserMasterVars) {
-        $script:saveGroupSyncVarMap[$varName] = "SYNC_$varName"
+        $saveGroupSyncVarMap[$varName] = "SYNC_$varName"
     }
 
-    $allVars = @() + @($script:saveGroupAuthVarMap.Keys) + @("Authorization", "BaseUrl") + @($script:saveGroupPostVarMap.Keys) + @($script:saveGroupOverrideVarMap.Keys) + @($script:saveGroupSyncVarMap.Keys)
+    $allVars = @() + @($saveGroupAuthVarMap.Keys) + @("Authorization", "BaseUrl") + @($saveGroupPostVarMap.Keys) + @($saveGroupOverrideVarMap.Keys) + @($saveGroupSyncVarMap.Keys)
 
     Sync-MentionRowsFromControls
 
@@ -910,17 +910,17 @@ function Save-GroupSettings {
                 "https://%KintoneSubdomain%.cybozu.com"
             } elseif ($varName -eq "MentionUserCodes") {
                 ConvertTo-MentionUserCodesText -Rows $script:mentionRows
-            } elseif ($script:saveGroupAuthVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupAuthVarMap[$varName]
-            } elseif ($script:saveGroupPostVarMap.ContainsKey($varName)) {
-                $val = Get-GroupSettingsFieldValue $script:saveGroupPostVarMap[$varName]
+            } elseif ($saveGroupAuthVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupAuthVarMap[$varName]
+            } elseif ($saveGroupPostVarMap.ContainsKey($varName)) {
+                $val = Get-GroupSettingsFieldValue $saveGroupPostVarMap[$varName]
                 if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
                 $val
-            } elseif ($script:saveGroupOverrideVarMap.ContainsKey($varName)) {
-                $val = Get-GroupSettingsFieldValue $script:saveGroupOverrideVarMap[$varName]
+            } elseif ($saveGroupOverrideVarMap.ContainsKey($varName)) {
+                $val = Get-GroupSettingsFieldValue $saveGroupOverrideVarMap[$varName]
                 if ([string]::IsNullOrWhiteSpace($val)) { "" } else { $val }
-            } elseif ($script:saveGroupSyncVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupSyncVarMap[$varName]
+            } elseif ($saveGroupSyncVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupSyncVarMap[$varName]
             } else {
                 ""
             }

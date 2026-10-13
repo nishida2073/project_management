@@ -446,31 +446,31 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $script:saveGroupDownloadVarMap = @{}
+    $saveGroupDownloadVarMap = @{}
     foreach ($varName in $downloadVars) {
-        $script:saveGroupDownloadVarMap[$varName] = "DOWNLOAD_$varName"
+        $saveGroupDownloadVarMap[$varName] = "DOWNLOAD_$varName"
     }
 
-    $script:saveGroupGenerateVarMap = @{}
+    $saveGroupGenerateVarMap = @{}
     foreach ($varName in $generateVars) {
-        $script:saveGroupGenerateVarMap[$varName] = "GENERATE_$varName"
+        $saveGroupGenerateVarMap[$varName] = "GENERATE_$varName"
     }
 
-    $script:saveGroupUploadVarMap = @{}
+    $saveGroupUploadVarMap = @{}
     foreach ($varName in $uploadVars) {
-        $script:saveGroupUploadVarMap[$varName] = "UPLOAD_$varName"
+        $saveGroupUploadVarMap[$varName] = "UPLOAD_$varName"
     }
 
-    $allVars = @() + @($script:saveGroupDownloadVarMap.Keys) + @($script:saveGroupGenerateVarMap.Keys) + @($script:saveGroupUploadVarMap.Keys)
+    $allVars = @() + @($saveGroupDownloadVarMap.Keys) + @($saveGroupGenerateVarMap.Keys) + @($saveGroupUploadVarMap.Keys)
 
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
         -GetValueFn { param($varName)
-            if ($script:saveGroupDownloadVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupDownloadVarMap[$varName]
-            } elseif ($script:saveGroupGenerateVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupGenerateVarMap[$varName]
-            } elseif ($script:saveGroupUploadVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $script:saveGroupUploadVarMap[$varName]
+            if ($saveGroupDownloadVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupDownloadVarMap[$varName]
+            } elseif ($saveGroupGenerateVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupGenerateVarMap[$varName]
+            } elseif ($saveGroupUploadVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupUploadVarMap[$varName]
             } else {
                 ""
             }
