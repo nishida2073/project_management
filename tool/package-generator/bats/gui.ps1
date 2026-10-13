@@ -307,10 +307,29 @@ $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::
 $tabSettingsCommon.Controls.Add($settingsCommonBottomPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
+$settingsCommonFieldTextBoxes = @{}
+$settingsGroupFieldTextBoxes = @{}
+
+function Get-CommonSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsCommonFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsGroupFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsGroupFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
     return @(
-        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
     )
 }
 
@@ -324,7 +343,7 @@ $settingsGroupTop = (New-SettingsTopPanel `
             $newName = $newName.Trim()
             if (!$newName) { return }
 
-            if (($settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $newName }) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+            if (($settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $newName }) -or (Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName $clientsDir))) {
                 [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
                 return
             }
@@ -373,8 +392,8 @@ function Get-GroupSettingsFieldRows {
     param([string]$GroupName)
     if (!$GroupName) { return }
 
-    $rawClient = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
-    $isPendingNewClient = !(Test-Path -LiteralPath (Get-GroupBatPath $GroupName))
+    $rawClient = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName $clientsDir)
+    $isPendingNewClient = !(Test-Path -LiteralPath (Get-GroupBatPath $GroupName $clientsDir))
     $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $GroupName } else { @{} }
 
     foreach ($groupKey in @("DOWNLOAD", "GENERATE", "UPLOAD")) {
@@ -388,7 +407,7 @@ function Get-GroupSettingsFieldRows {
 
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
 }
@@ -401,7 +420,7 @@ function Update-GroupSettingsFields {
     $trailingButtons = $settingsTrailingButtonVars.Clone()
     $resolverValue = $commonEnvResolver
     $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
@@ -425,7 +444,7 @@ function Save-CommonSettings {
 function Save-GroupSettings {
     param([string]$GroupName)
 
-    $groupBatPath = Get-GroupBatPath $GroupName
+    $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
     $script:saveGroupDownloadVarMap = @{}
     foreach ($varName in $downloadVars) {

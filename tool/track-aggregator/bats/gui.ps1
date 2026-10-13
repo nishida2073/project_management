@@ -71,7 +71,7 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = Get-ResolvedVar "OutputTestCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
             [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = Get-ResolvedVar "OutputSurveyCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue }; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue -ClientsDir $clientsDir }; Inputs = @((New-TargetGroupInput)) }
         )
     }
     [PSCustomObject]@{
@@ -351,10 +351,29 @@ $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::
 $tabSettingsCommon.Controls.Add($settingsCommonBottomPanel)
 $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
+$settingsCommonFieldTextBoxes = @{}
+$settingsGroupFieldTextBoxes = @{}
+
+function Get-CommonSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsCommonFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsGroupFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsGroupFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
     return @(
-        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
     )
 }
 
@@ -368,7 +387,7 @@ $settingsGroupTop = (New-SettingsTopPanel `
             $newName = $newName.Trim()
             if (!$newName) { return }
 
-            if ((Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+            if ((Test-Path -LiteralPath (Get-GroupXlsxPath $newName)) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName $clientsDir))) {
                 [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
                 return
             }
@@ -743,7 +762,7 @@ function Get-GroupSettingsFieldRows {
     if (!$GroupName) { return }
 
     $templateDefaults = Get-GroupTemplateDefaults
-    $rawAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $rawAuth = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName $clientsDir)
     foreach ($varName in $authVars) {
         $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } else { $templateDefaults.Auth[$varName] }
         [PSCustomObject]@{ Key = "AUTH_$varName"; VarName = $varName; Group = "AUTH"; Value = $value }
@@ -766,7 +785,7 @@ $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 | Out-Null
 }
@@ -830,7 +849,7 @@ function Update-GroupSettingsFields {
             Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
         }
     }.GetNewClosure() }
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions `
@@ -856,7 +875,7 @@ function Save-CommonSettings {
 function Save-GroupSettings {
     param([string]$GroupName)
 
-    $groupBatPath = Get-GroupBatPath $GroupName
+    $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
     $script:saveGroupAuthVarMap = @{}
     foreach ($varName in $authVars) {

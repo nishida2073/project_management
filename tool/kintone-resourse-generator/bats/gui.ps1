@@ -46,7 +46,7 @@ function Get-KintoneOpenUrl {
     param($InputControls)
     $groupValue = Get-ComboBoxValue -SelectedItem $InputControls["TargetGroupName"].SelectedItem
     if (!$groupValue) { return $null }
-    $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path (Get-GroupBatPath $groupValue)).TrimEnd('/')
+    $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path (Get-GroupBatPath $groupValue $clientsDir)).TrimEnd('/')
     if (!$baseUrl) { return $null }
     if ($script:createdSpace -and $script:createdSpace.Group -eq $groupValue) {
         return "$baseUrl/k/#/space/$($script:createdSpace.Id)"
@@ -728,7 +728,7 @@ function Save-CommonSettings {
     $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
     Save-EnvBatFile -Path $commonBatPath -VarNames $commonVars `
         -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
-        -HasValueFn { param($name) $script:settingsCommonFieldTextBoxes.ContainsKey($name) }
+        -HasValueFn { param($name) $settingsCommonFieldTextBoxes.ContainsKey($name) }
 }
 
 function Update-CommonSettingsFields {
@@ -741,16 +741,35 @@ function Update-CommonSettingsFields {
         $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
         $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
     }
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $script:settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 220 | Out-Null
+}
+
+$settingsCommonFieldTextBoxes = @{}
+$settingsGroupFieldTextBoxes = @{}
+
+function Get-CommonSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsCommonFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsGroupFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsGroupFieldTextBoxes[$Key].Text
+    }
+    return ""
 }
 
 function Get-GroupSettingsFiles {
     param([string]$GroupName)
     if (!$GroupName) { return @() }
     return @(
-        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
     )
 }
 
@@ -758,7 +777,7 @@ function Save-GroupSettings {
     param([string]$GroupName)
     if (!$GroupName) { return }
 
-    $groupBatPath = Get-GroupBatPath $GroupName
+    $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
     if (!(Test-Path -LiteralPath $groupBatPath)) {
         $templatePath = Join-Path $clientsTemplateDir "client.bat"
         if (Test-Path -LiteralPath $templatePath) {
@@ -768,7 +787,7 @@ function Save-GroupSettings {
 
     Save-EnvBatFile -Path $groupBatPath -VarNames $kintoneVars `
         -GetValueFn { param($name) Get-GroupSettingsFieldValue $name } `
-        -HasValueFn { param($name) $script:settingsGroupFieldTextBoxes.ContainsKey($name) }
+        -HasValueFn { param($name) $settingsGroupFieldTextBoxes.ContainsKey($name) }
 }
 
 function Update-GroupSettingsFields {
@@ -779,7 +798,7 @@ function Update-GroupSettingsFields {
     }
 
     $templateDefaults = Get-SetEnvDefaults -Path (Join-Path $clientsTemplateDir "client.bat")
-    $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $target)
+    $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $target $clientsDir)
 
     $rows = @()
     foreach ($varName in $kintoneVars) {
@@ -799,7 +818,7 @@ function Update-GroupSettingsFields {
         "TemplateName" = "テンプレート名"
     }
 
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
 }
@@ -814,7 +833,7 @@ $settingsGroupTop = (New-SettingsTopPanel `
             $newName = $newName.Trim()
             if (!$newName) { return }
 
-            if ($settingsGroupTop.Controls["GroupTarget"].Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName))) {
+            if ($settingsGroupTop.Controls["GroupTarget"].Items.Contains($newName) -or (Test-Path -LiteralPath (Get-GroupBatPath $newName $clientsDir))) {
                 [System.Windows.Forms.MessageBox]::Show("「$newName」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
                 return
             }

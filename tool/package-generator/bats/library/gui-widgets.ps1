@@ -1,6 +1,4 @@
-﻿$script:settingsCommonFieldTextBoxes = @{}
-$script:settingsGroupFieldTextBoxes = @{}
-
+﻿
 function Open-TargetOrWarn {
     param([string]$Path)
     if (!$Path) {
@@ -284,7 +282,11 @@ function New-ComboBox {
     }
     $cmb.Location = New-Object System.Drawing.Point($X, $Y)
     foreach ($item in $Items) { $cmb.Items.Add($item) | Out-Null }
-    if ($SelectedItem -ne $null) { $cmb.SelectedItem = $SelectedItem }
+    if ($SelectedItem -ne $null) {
+        $selectedValue = Get-ComboBoxValue -SelectedItem $SelectedItem
+        $matchingItem = $cmb.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $selectedValue } | Select-Object -First 1
+        if ($matchingItem) { $cmb.SelectedItem = $matchingItem }
+    }
 
     return $cmb
 }
@@ -876,6 +878,7 @@ function New-SettingsTopPanel {
 
     $btnReload.Add_Click({
         try {
+            Clear-MentionRowsCache
             Invoke-ActionWithUpdateStatus -StatusLabel $lblReloadStatus -Action $OnReload -SuccessMessage "完了"
         }
         catch {
@@ -1252,21 +1255,6 @@ function Invoke-BatchRunAll {
     & $SetRunButtonsEnabled $true
 }
 
-function Get-CommonSettingsFieldValue {
-    param([string]$Key)
-    if ($script:settingsCommonFieldTextBoxes.ContainsKey($Key)) {
-        return $script:settingsCommonFieldTextBoxes[$Key].Text
-    }
-    return ""
-}
-
-function Get-GroupSettingsFieldValue {
-    param([string]$Key)
-    if ($script:settingsGroupFieldTextBoxes.ContainsKey($Key)) {
-        return $script:settingsGroupFieldTextBoxes[$Key].Text
-    }
-    return ""
-}
 
 function Sync-MentionRowsFromControls {
     foreach ($entry in $script:mentionRowControls) {
@@ -1317,7 +1305,7 @@ function Add-MentionsEditor {
     )
     $groupName = $GroupCombo.SelectedItem
     if ($script:mentionRowsGroupName -ne $groupName) {
-        $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue)
+        $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue -TypeOptions $MentionTypeOptions)
         $script:mentionRowsGroupName = $groupName
     }
     $script:mentionRowControls = @()

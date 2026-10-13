@@ -55,7 +55,7 @@ function Get-ResolvedVar {
         }
     }
     if (!$val) { return $val }
-    return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name $Path } -BasePath $rootPath
+    return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name $Path } -BasePath (Split-Path (Split-Path $Path -Parent) -Parent)
 }
 
 function Save-EnvBatFile {
@@ -113,7 +113,7 @@ function Save-EnvBatFile {
 
 $script:groupBatLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
 
-function Get-GroupBatPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.bat" }
+function Get-GroupBatPath { param([string]$GroupName, [string]$ClientsDir) Join-Path $ClientsDir "$GroupName.bat" }
 
 function Get-SetLineRawValues {
     param([string]$Path)
@@ -132,9 +132,9 @@ function Get-SetLineRawValues {
 }
 
 function Get-GroupKintoneThreadUrl {
-    param([string]$GroupName)
+    param([string]$GroupName, [string]$ClientsDir)
     if (!$GroupName) { return $null }
-    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName)
+    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName $ClientsDir)
     $subdomain = $raw["KintoneSubdomain"]
     $spaceId = $raw["SpaceId"]
     $threadId = $raw["ThreadId"]
@@ -143,7 +143,7 @@ function Get-GroupKintoneThreadUrl {
 }
 
 function ConvertFrom-MentionUserCodesText {
-    param([string]$Text)
+    param([string]$Text, [Parameter(Mandatory)][string[]]$TypeOptions)
     $rows = [System.Collections.Generic.List[object]]::new()
     foreach ($part in ($Text -split ',')) {
         $trimmed = $part.Trim()
@@ -152,7 +152,7 @@ function ConvertFrom-MentionUserCodesText {
         $code = $pair[0].Trim()
         if (!$code) { continue }
         $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
-        if ($mentionTypeOptions -notcontains $type) { $type = "USER" }
+        if ($TypeOptions -notcontains $type) { $type = "USER" }
         $rows.Add([PSCustomObject]@{ Code = $code; Type = $type })
     }
     return $rows
