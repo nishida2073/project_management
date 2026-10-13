@@ -271,12 +271,14 @@ function New-ComboBox {
         [int]$Width = 0, [int]$Height = 0,
         [object[]]$Items = @(),
         [object]$SelectedItem = $null,
-        [string]$DisplayMember = "Text"
+        [string]$DisplayMember = "Text",
+        [string]$ValueMember = "Value"
     )
 
     $cmb = New-Object System.Windows.Forms.ComboBox
     $cmb.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
     $cmb.DisplayMember = $DisplayMember
+    $cmb.ValueMember = $ValueMember
     if ($Width -gt 0 -and $Height -gt 0) { $cmb.Size = New-Object System.Drawing.Size($Width, $Height) } else {
         if ($Width -gt 0) { $cmb.Width = $Width }
     }
@@ -1377,6 +1379,7 @@ function Render-SettingsFields {
         [string[]]$MaskedVars = @(),
         [string[]]$FolderBrowseVars = @(),
         [string[]]$FileBrowseVars = @(),
+        [hashtable]$WidthVars = @{},
         [hashtable]$RadioVars = @{},
         [hashtable]$TrailingButtonVars = @{},
         [System.Windows.Forms.ComboBox]$MentionGroupCombo,
@@ -1446,8 +1449,9 @@ function Render-SettingsFields {
             $grp.Controls.Add($radioPanel)
         } else {
             $txtValue = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
-            $txtSize = if ($isMultiline) { @(300, 60) } else { @(300, 22) }
-            $txt = New-TextBox -X 250 -Y ($y - 2) -Width $txtSize[0] -Height $txtSize[1] -Text $txtValue -Multiline $isMultiline
+            $txtWidth = if ($WidthVars.ContainsKey($field.VarName)) { $WidthVars[$field.VarName] } else { 300 }
+            $txtHeight = if ($isMultiline) { 60 } else { 22 }
+            $txt = New-TextBox -X 250 -Y ($y - 2) -Width $txtWidth -Height $txtHeight -Text $txtValue -Multiline $isMultiline
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
             if ($isMultiline) { $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
             if ($MaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }

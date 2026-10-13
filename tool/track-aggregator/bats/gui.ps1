@@ -265,7 +265,7 @@ $settingsGroups = [ordered]@{
             "SpaceId"             = @{ Label = "投稿先スペースID" }
             "ThreadId"            = @{ Label = "投稿先スレッドID" }
             "MentionUserCodes"    = @{ Label = "メンション対象" }
-            "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Multiline = $true }
+            "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Width=400; Multiline = $true }
         }
     }
     "OVERRIDE" = @{
@@ -295,6 +295,7 @@ $settingsFolderBrowseVars = @()
 $settingsFileBrowseVars = @()
 $settingsMaskedVars = @()
 $settingsMultilineVars = @()
+$settingsWidthVars = @{}
 $radioVars = @{}
 foreach ($groupKey in $settingsGroups.Keys) {
     $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
@@ -305,6 +306,7 @@ foreach ($groupKey in $settingsGroups.Keys) {
         if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
         if ($varDef.Masked) { $settingsMaskedVars += $varKey }
         if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
+        if ($varDef.Width) { $settingsWidthVars[$varKey] = $varDef.Width }
         if ($varDef.Radio) { $radioVars[$varKey] = $varDef.Radio }
     }
 }
@@ -352,8 +354,7 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象のグループ"
 
-$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
-
+$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24
 $btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
 function Get-GroupSettingsFiles {
@@ -385,13 +386,12 @@ $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 $lblSettingsMasterGroupTarget = New-Label -Text "対象のグループ"
 
-$cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
-
+$cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24
 $lnkSettingsMasterOpenXlsx = New-LinkLabel -Text "開く"
 
 $lblSettingsMasterSaveTarget = New-Label -Text "保存対象"
 
-$cmbSettingsMasterSaveTarget = New-ComboBox -Width 120 -Height 24 -DisplayMember "Text" -ValueMember "Value" `
+$cmbSettingsMasterSaveTarget = New-ComboBox -Width 120 -Height 24 `
     -Items @(
         [PSCustomObject]@{ Text = "すべて"; Value = "すべて" }
         [PSCustomObject]@{ Text = "テスト"; Value = "テスト" }
@@ -754,7 +754,7 @@ $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars | Out-Null
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars | Out-Null
 }
 
 function Test-KintoneConnection {
@@ -818,7 +818,7 @@ function Update-GroupSettingsFields {
     }.GetNewClosure() }
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars `
         -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions `
         -TrailingButtonVars $trailingButtons | Out-Null
 
@@ -971,6 +971,7 @@ $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
+    Update-CommonSettingsFields
     Update-GroupDropdowns
     Update-TabHeight -NestedTabControl $execTabControl
 })

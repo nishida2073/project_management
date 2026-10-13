@@ -228,7 +228,7 @@ $settingsGroups = [ordered]@{
             "SpaceId"             = @{ Label = "投稿先スペースID" }
             "ThreadId"            = @{ Label = "投稿先スレッドID" }
             "MentionUserCodes"    = @{ Label = "メンション対象" }
-            "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Multiline = $true }
+            "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Width=400; Multiline = $true }
         }
     }
     "SYNC" = @{
@@ -259,6 +259,7 @@ $settingsFolderBrowseVars = @()
 $settingsFileBrowseVars = @()
 $settingsMaskedVars = @()
 $settingsMultilineVars = @()
+$settingsWidthVars = @{}
 foreach ($groupKey in $settingsGroups.Keys) {
     $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
     foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
@@ -268,6 +269,7 @@ foreach ($groupKey in $settingsGroups.Keys) {
         if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
         if ($varDef.Masked) { $settingsMaskedVars += $varKey }
         if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
+        if ($varDef.Width) { $settingsWidthVars[$varKey] = $varDef.Width }
     }
 }
 $settingsTrailingButtonVars = @{
@@ -366,8 +368,7 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象のグループ"
 
-$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
-
+$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24
 $btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
 function Get-GroupSettingsFiles {
@@ -399,8 +400,7 @@ $tabSettingsGroup.Controls.Add($settingsGroupTopPanel)
 
 $lblSettingsMasterGroupTarget = New-Label -Text "対象のグループ"
 
-$cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
-
+$cmbSettingsMasterGroupTarget = New-ComboBox -Width 150 -Height 24
 $lnkSettingsMasterOpenXlsx = New-LinkLabel -Text "開く"
 
 $settingsMasterTopPanel = (New-SettingsTopPanel `
@@ -528,10 +528,7 @@ function New-CollectDataDefsEditor {
     $y += 20
 
     foreach ($item in @($script:collectDataDefsItems)) {
-        $cmbType = New-ComboBox -X 20 -Y $y -Width 100 -Height 22 -DisplayMember "Text" -ValueMember "Value"
-        foreach ($opt in $typeOptions) {
-            $cmbType.Items.Add($opt) | Out-Null
-        }
+        $cmbType = New-ComboBox -X 20 -Y $y -Width 100 -Height 22 -Items $typeOptions
         $cmbType.SelectedItem = $cmbType.Items | Where-Object { $_.Value -eq $item.type } | Select-Object -First 1
         $grp.Controls.Add($cmbType)
 
@@ -589,7 +586,7 @@ function Update-CommonSettingsFields {
 
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $script:settingsCommonFieldTextBoxes `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -ExtraGrps $controlsToStack | Out-Null
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -ExtraGrps $controlsToStack | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
@@ -600,7 +597,7 @@ function Update-GroupSettingsFields {
     $target = Get-ComboBoxValue -SelectedItem $cmbSettingsGroupTarget.SelectedItem
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars `
         -MentionGroupCombo $cmbSettingsGroupTarget -MentionTypeOptions $mentionTypeOptions | Out-Null
 
     $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
@@ -891,6 +888,7 @@ $execTabControl.SelectedTab = $tabBatchAll
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
+    Update-CommonSettingsFields
     Update-GroupDropdowns
     Update-TabHeight -NestedTabControl $execTabControl
 })

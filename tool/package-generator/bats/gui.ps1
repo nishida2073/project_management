@@ -310,8 +310,7 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象のグループ"
 
-$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
-
+$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24
 $btnSettingsGroupNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
 $lnkSettingsGroupOpenXlsx = New-LinkLabel -Text "開く"
@@ -392,7 +391,7 @@ function Update-GroupSettingsFields {
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $script:settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $script:commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars `
-        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -scriptDir $rootPathValue }).GetNewClosure() `
+        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
         -TrailingButtonVars $trailingButtons | Out-Null
 
     $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
@@ -500,6 +499,7 @@ $tabControl.Add_SelectedIndexChanged({
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
+    Update-CommonSettingsFields
     Update-GroupDropdowns
     Update-TabHeight -NestedTabControl $execTabControl
 })

@@ -625,8 +625,7 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $lblSettingsGroupTarget = New-Label -Text "対象のグループ" -Width 150 -Height 24
 
-$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24 -DisplayMember "Text" -ValueMember "Value"
-
+$cmbSettingsGroupTarget = New-ComboBox -Width 150 -Height 24
 $btnSettingsNewGroup = New-Button -Text "新規作成" -Width 140 -Height 24
 
 $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
@@ -869,6 +868,7 @@ $tabControl.Add_SelectedIndexChanged({
 $tabControl.SelectedTab = $tabRun
 
 $form.Add_Shown({
+    Update-CommonSettingsFields
     Update-BaseTemplateNameList
     Update-CustomTemplateNameList
     Update-GroupDropdowns
