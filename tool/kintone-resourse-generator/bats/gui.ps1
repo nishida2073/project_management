@@ -140,6 +140,14 @@ $categoryDefs = @(
                     [PSCustomObject]@{ Name = "BaseTemplateName"; Label = "設定テンプレート名（基本）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbBaseTemplateName; NewRow = $true; Require = $false }
                     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; ExistingControl = $cmbCustomTemplateName; NewRow = $true; Require = $false }
                 )
+                Validator = {
+                    param($ic)
+                    if ((Get-InputValue -Control $ic["BaseTemplateName"]) -or (Get-InputValue -Control $ic["CustomTemplateName"])) {
+                        return $true 
+                    }
+                    [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+                    return $false
+                }
                 BatchPath = $generateBat
                 ArgsFn = {
                     param($ic, $inputDefs)
@@ -291,6 +299,8 @@ New-CategoryTabControl -CategoryDefs $categoryDefs -TabControl $execTabControl `
                 }
             }
         }
+
+        if ($bd.Validator -and -not (& $bd.Validator $ic)) { return 1 }
 
         Set-RunButtonsEnabled $false
         $lblOverallStatus.Text = ""
