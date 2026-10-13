@@ -272,7 +272,7 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false }
 )
 
-$batchTab = $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
+$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
     -Inputs $batchRunAllInputs -OnRunClick {
     param($controls, $statusLabel)
     Set-RunButtonsEnabled $false
