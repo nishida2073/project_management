@@ -513,6 +513,7 @@ function New-CategoryTabControl {
         $rows = 1
         foreach ($inputDef in $Inputs) {
             if ($inputDef.NewRow) { $rows++ }
+            if ($inputDef.Multiline) { $rows += 2 }
         }
         return $rows
     }
@@ -583,12 +584,24 @@ function New-CategoryTabControl {
                             $inputCtrl.SelectedIndex = 0
                         }
                     } else {
-                        $inputCtrl = New-TextBox -Width $inputWidth -Height 22 -Text "$($inputDef.Default)"
+                        $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { 82 } else { 22 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
                     }
                     $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
                     $grp.Controls.Add($inputCtrl)
                     $inputMap[$inputDef.Name] = $inputCtrl
                     $inputX += $inputWidth + 15
+                    if ($inputDef.Browse -eq "File") {
+                        $dlg = New-Object System.Windows.Forms.OpenFileDialog
+                        $dlg.Filter = if ($inputDef.Filter) { $inputDef.Filter } else { "すべてのファイル (*.*)|*.*" }
+                        $dlg.Multiselect = [bool]$inputDef.Multiple
+                        $browseBtn = New-Button -Text "参照..." -X $inputX -Y ($inputRowCenterY - 12) -Width 70 -Height 24
+                        $browseBtn.Add_Click({
+                            if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $inputCtrl.Text = ($dlg.FileNames -join ";") }
+                        }.GetNewClosure())
+                        $grp.Controls.Add($browseBtn)
+                        $inputMap["$($inputDef.Name)Browse"] = $browseBtn
+                        $inputX += 70 + 15
+                    }
                 }
                 $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force
             }

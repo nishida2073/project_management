@@ -27,6 +27,7 @@ $env:GUI_LOG_MODE = "1"
 $setEnvBat = Join-Path $scriptDir "common-env.bat"
 $generatePackageBat = Join-Path $rootPath "generate-package.bat"
 $generateConfigBat = Join-Path $rootPath "generate-config.bat"
+$uploadKintoneFileBat = Join-Path $rootPath "upload-kintone-file.bat"
 
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -82,6 +83,10 @@ function Update-GroupDropdowns {
 
 }
 
+$zipFileInputs = @(1..5 | ForEach-Object {
+    [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "zipファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip" }
+})
+
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ作成"
@@ -93,6 +98,59 @@ $categoryDefs = @(
         Label = "パッケージ定義"
         ButtonDefs = @(
             [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
+        )
+    },
+    [PSCustomObject]@{
+        Label = "kintoneへアップロード"
+        ButtonDefs = @(
+            [PSCustomObject]@{
+                Label = "kintoneへアップロード"
+                IncludeInBatch = $false
+                Inputs = @(
+                    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
+                    [PSCustomObject]@{ Name = "Title"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true }
+                    $zipFileInputs
+                    [PSCustomObject]@{ Name = "Description"; Label = "説明"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Multiline = $true }
+                )
+                BatchPath = $uploadKintoneFileBat
+                ArgsFn = {
+                    param($ic, $inputDefs)
+                    $batArgs = @()
+                    $zipFiles = @()
+                    foreach ($inputDef in $inputDefs) {
+                        if (-not $ic.ContainsKey($inputDef.Name)) { continue }
+                        $value = (Get-InputValue -Control $ic[$inputDef.Name]) -replace "`r?`n", '\n'
+                        if ($inputDef.Name -like "TargetFilePath*") {
+                            if ($value) { $zipFiles += $value }
+                            continue
+                        }
+                        $batArgs += "-$($inputDef.Name):$value"
+                    }
+                    $batArgs += "-TargetFilePath:$($zipFiles -join ';')"
+                    $batArgs
+                }
+                Validator = {
+                    param($ic)
+                    if (-not (Get-InputValue -Control $ic["Title"])) {
+                        [System.Windows.Forms.MessageBox]::Show("タイトルを入力してください", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+                        return $false
+                    }
+                    $zipValues = @(1..5 | ForEach-Object { Get-InputValue -Control $ic["TargetFilePath$_"] } | Where-Object { $_ })
+                    if ($zipValues.Count -eq 0) {
+                        [System.Windows.Forms.MessageBox]::Show("zipファイルを1つ以上指定してください", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+                        return $false
+                    }
+                    return $true
+                }
+                OpenTarget = {
+                    param($ic)
+                    $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
+                    if (!$client) { return $null }
+                    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $client $clientsDir)
+                    if (!$raw["KintoneSubdomain"] -or !$raw["TargetAppId"]) { return $null }
+                    "https://$($raw['KintoneSubdomain']).cybozu.com/k/$($raw['TargetAppId'])/"
+                }
+            }
         )
     }
 )
@@ -119,7 +177,7 @@ foreach ($cd in $categoryDefs) {
 }
 
 $tabBatchAll = New-TabPage -Text "一括実行"
-# $execTabControl.Controls.Add($tabBatchAll)
+$execTabControl.Controls.Add($tabBatchAll)
 
 $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs @(
@@ -159,11 +217,13 @@ function Start-BatchRunAll {
 
 $categoryTab = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
+    if ($bd.Validator -and -not (& $bd.Validator $bd.InputControls)) { return 1 }
     Invoke-BatButton -ButtonDef $bd -WorkingDirectory $scriptDir -Form $form `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -CurrentProcessRef ([ref]$script:currentProc) `
         -GetBatArgs {
             param($bd)
+            if ($bd.ArgsFn) { return & $bd.ArgsFn $bd.InputControls $bd.Inputs }
             $batArgs = @()
             $inputMap = $bd.InputControls
             if ($inputMap) {
@@ -209,6 +269,20 @@ $settingsGroups = [ordered]@{
             "CommonLogPath" = @{ Label = "ログの出力先"; Browse = "Folder" }
         }
     }
+    "KINTONE" = @{
+        Label = "kintone接続"
+        Vars = [ordered]@{
+            "KintoneSubdomain"  = @{ Label = "サブドメイン" }
+            "KintoneLoginName"  = @{ Label = "ログイン名" }
+            "KintonePassword"   = @{ Label = "パスワード"; Masked = $true }
+        }
+    }
+    "UPLOAD_KINTONE" = @{
+        Label = "ファイル管理"
+        Vars = [ordered]@{
+            "TargetAppId"       = @{ Label = "対象アプリID" }
+        }
+    }
     "DOWNLOAD" = @{
         Label = "ダウンロード"
         Vars = [ordered]@{
@@ -246,8 +320,36 @@ $commonSettingsVars = @($settingsGroups["COMMON"].Vars.Keys)
 $downloadVars = @($settingsGroups["DOWNLOAD"].Vars.Keys)
 $generateVars = @($settingsGroups["GENERATE"].Vars.Keys)
 $uploadVars = @($settingsGroups["UPLOAD"].Vars.Keys)
+$kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
+$uploadKintoneVars = @($settingsGroups["UPLOAD_KINTONE"].Vars.Keys)
 
-$settingsTrailingButtonVars = @{}
+function Test-KintoneConnection {
+    param([string]$FieldName)
+
+    $kintoneSubdomain = (Get-GroupSettingsFieldValue "KINTONE_KintoneSubdomain").Trim()
+    $kintoneLoginName = Get-GroupSettingsFieldValue "KINTONE_KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "KINTONE_KintonePassword"
+    $targetAppId = (Get-GroupSettingsFieldValue $FieldName).Trim()
+    if (!$kintoneSubdomain -or !$kintoneLoginName -or !$kintonePassword -or !$targetAppId) {
+        throw "サブドメイン・ログイン名・パスワード・対象アプリIDをすべて入力してください。"
+    }
+
+    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
+
+    $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
+    $fieldCodes = @($fieldData.PSObject.Properties.Name)
+    Write-Log "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
+    Write-Log "  $($fieldCodes -join ', ')"
+}
+
+$settingsTrailingButtonVars = @{
+    "TargetAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            Test-KintoneConnection -FieldName "UPLOAD_KINTONE_TargetAppId"
+        }
+    }.GetNewClosure() }
+}
 
 $settingsGroupLabels = @{}
 $settingsVarLabels = @{}
@@ -396,8 +498,8 @@ function Get-GroupSettingsFieldRows {
     $isPendingNewClient = !(Test-Path -LiteralPath (Get-GroupBatPath $GroupName $clientsDir))
     $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $GroupName } else { @{} }
 
-    foreach ($groupKey in @("DOWNLOAD", "GENERATE", "UPLOAD")) {
-        $vars = if ($groupKey -eq "DOWNLOAD") { $downloadVars } elseif ($groupKey -eq "GENERATE") { $generateVars } else { $uploadVars }
+    foreach ($groupKey in @("KINTONE", "UPLOAD_KINTONE", "DOWNLOAD", "GENERATE", "UPLOAD")) {
+        $vars = switch ($groupKey) { "KINTONE" { $kintoneVars } "UPLOAD_KINTONE" { $uploadKintoneVars } "DOWNLOAD" { $downloadVars } "GENERATE" { $generateVars } default { $uploadVars } }
         foreach ($varName in $vars) {
             $value = if ($rawClient.ContainsKey($varName)) { $rawClient[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { "" }
             [PSCustomObject]@{ Key = "$($groupKey)_$varName"; VarName = $varName; Group = $groupKey; Value = $value }
@@ -420,7 +522,7 @@ function Update-GroupSettingsFields {
     $trailingButtons = $settingsTrailingButtonVars.Clone()
     $resolverValue = $commonEnvResolver
     $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -eq "GENERATE" }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -in @("KINTONE", "UPLOAD_KINTONE", "GENERATE") }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
@@ -461,7 +563,16 @@ function Save-GroupSettings {
         $saveGroupUploadVarMap[$varName] = "UPLOAD_$varName"
     }
 
-    $allVars = @() + @($saveGroupDownloadVarMap.Keys) + @($saveGroupGenerateVarMap.Keys) + @($saveGroupUploadVarMap.Keys)
+    $saveGroupKintoneVarMap = @{}
+    foreach ($varName in $kintoneVars) {
+        $saveGroupKintoneVarMap[$varName] = "KINTONE_$varName"
+    }
+    $saveGroupUploadKintoneVarMap = @{}
+    foreach ($varName in $uploadKintoneVars) {
+        $saveGroupUploadKintoneVarMap[$varName] = "UPLOAD_KINTONE_$varName"
+    }
+
+    $allVars = @() + @($saveGroupKintoneVarMap.Keys) + @($saveGroupUploadKintoneVarMap.Keys) + @($saveGroupDownloadVarMap.Keys) + @($saveGroupGenerateVarMap.Keys) + @($saveGroupUploadVarMap.Keys)
 
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
         -GetValueFn { param($varName)
@@ -471,6 +582,10 @@ function Save-GroupSettings {
                 Get-GroupSettingsFieldValue $saveGroupGenerateVarMap[$varName]
             } elseif ($saveGroupUploadVarMap.ContainsKey($varName)) {
                 Get-GroupSettingsFieldValue $saveGroupUploadVarMap[$varName]
+            } elseif ($saveGroupKintoneVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupKintoneVarMap[$varName]
+            } elseif ($saveGroupUploadKintoneVarMap.ContainsKey($varName)) {
+                Get-GroupSettingsFieldValue $saveGroupUploadKintoneVarMap[$varName]
             } else {
                 ""
             }
