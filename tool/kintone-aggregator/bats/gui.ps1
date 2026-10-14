@@ -275,12 +275,23 @@ foreach ($groupKey in $settingsGroups.Keys) {
 $settingsTrailingButtonVars = @{
     "TargetAppIds"        = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            Test-KintoneConnection -ReportGroup $Field.Group -FieldName "$($Field.Group)_TargetAppIds" | Out-Null
+            Test-KintoneConnectionFromSettings -ReportGroup $Field.Group -FieldName "$($Field.Group)_TargetAppIds" | Out-Null
         }
     }.GetNewClosure() }
     "SyncUserMasterAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            Test-KintoneConnection -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
+            Test-KintoneConnectionFromSettings -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
+        }
+    }.GetNewClosure() }
+    "KintonePassword" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            $kintoneSubdomain = (Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain").Trim()
+            $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
+            $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+            if (!$kintoneSubdomain -or !$kintoneLoginName -or !$kintonePassword) {
+                throw "サブドメイン・ログイン名・パスワードをすべて入力してください。"
+            }
+            Test-KintoneConnection -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword
         }
     }.GetNewClosure() }
     "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -AddStatusLabel -OnClick {
@@ -642,39 +653,17 @@ function Update-GroupSettingsFields {
     Register-MentionEditorHandlers -OnChange { Update-GroupSettingsFields }
 }
 
-function Test-KintoneConnection {
+function Test-KintoneConnectionFromSettings {
     param([string]$ReportGroup, [string]$FieldName)
-
     $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
     $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
     $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
     $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
-
     if ($targetAppIds.Count -eq 0) {
         throw "対象アプリIDを入力してください。"
     }
-
-    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-
-    $resultLines = @()
-    $hasFailure = $false
-    foreach ($targetAppId in $targetAppIds) {
-        try {
-            $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
-            $fieldCodes = @($fieldData.PSObject.Properties.Name)
-            $resultLines += "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
-            $resultLines += "  $($fieldCodes -join ', ')"
-        } catch {
-            $hasFailure = $true
-            $resultLines += "[失敗] $targetAppId： $($_.Exception.Message)"
-        }
-    }
-
-    $resultText = $resultLines -join "`r`n"
-    if ($hasFailure) { throw $resultText }
-    return $resultText
+    return Test-KintoneConnectionWithAppId -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword -AppIds $targetAppIds
 }
 
 function Save-CommonSettings {

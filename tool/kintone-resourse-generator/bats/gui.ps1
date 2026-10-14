@@ -677,11 +677,9 @@ $settingsTrailingButtonVars = @{
             $loginVal = Get-GroupSettingsFieldValue "KINTONE_LOGIN"
             $passwordVal = Get-GroupSettingsFieldValue "KINTONE_PASSWORD"
             if (!$subDomainVal.Trim() -or !$loginVal -or !$passwordVal) {
-                throw "サブドメイン・ログイン名・パスワードをすべて入力してください"
+                throw "サブドメイン・ログイン名・パスワードをすべて入力してください。"
             }
-            $baseUrlVal = "https://$($subDomainVal.Trim()).cybozu.com"
-            $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${loginVal}:${passwordVal}"))
-            Invoke-KintoneRequest -BaseUrl $baseUrlVal -Authorization $authorization -Method GET -Path "/k/v1/apps.json?limit=1" | Out-Null
+            Test-KintoneConnection -Subdomain $subDomainVal.Trim() -LoginName $loginVal -Password $passwordVal
         }
     }.GetNewClosure() }
     "TemplateName" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "実行" -AddStatusLabel -OnClick {

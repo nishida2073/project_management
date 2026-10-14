@@ -352,30 +352,34 @@ $uploadVars = @($settingsGroups["UPLOAD"].Vars.Keys)
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 $uploadKintoneVars = @($settingsGroups["UPLOAD_KINTONE"].Vars.Keys)
 
-function Test-KintoneConnection {
+function Test-KintoneConnectionFromSettings {
     param([string]$FieldName)
 
     $kintoneSubdomain = (Get-GroupSettingsFieldValue "KINTONE_KintoneSubdomain").Trim()
     $kintoneLoginName = Get-GroupSettingsFieldValue "KINTONE_KintoneLoginName"
     $kintonePassword = Get-GroupSettingsFieldValue "KINTONE_KintonePassword"
     $targetAppId = (Get-GroupSettingsFieldValue $FieldName).Trim()
-    if (!$kintoneSubdomain -or !$kintoneLoginName -or !$kintonePassword -or !$targetAppId) {
-        throw "サブドメイン・ログイン名・パスワード・対象アプリIDをすべて入力してください。"
+    if (!$targetAppId) {
+        throw "対象アプリIDを入力してください。"
     }
 
-    $baseUrl = "https://$kintoneSubdomain.cybozu.com"
-    $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-
-    $fieldData = Get-CurrentAppFieldData -TargetAppId $targetAppId -BaseUrl $baseUrl -Authorization $authorization
-    $fieldCodes = @($fieldData.PSObject.Properties.Name)
-    Write-Log "[成功] $targetAppId（フィールド数: $($fieldCodes.Count)）"
-    Write-Log "  $($fieldCodes -join ', ')"
+    return Test-KintoneConnectionWithAppId -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword -AppIds @($targetAppId)
 }
-
 $settingsTrailingButtonVars = @{
     "TargetAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            Test-KintoneConnection -FieldName "UPLOAD_KINTONE_TargetAppId"
+            Test-KintoneConnectionFromSettings -FieldName "UPLOAD_KINTONE_TargetAppId" | Out-Null
+        }
+    }.GetNewClosure() }
+    "KintonePassword" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+            $kintoneSubdomain = (Get-GroupSettingsFieldValue "KINTONE_KintoneSubdomain").Trim()
+            $kintoneLoginName = Get-GroupSettingsFieldValue "KINTONE_KintoneLoginName"
+            $kintonePassword = Get-GroupSettingsFieldValue "KINTONE_KintonePassword"
+            if (!$kintoneSubdomain -or !$kintoneLoginName -or !$kintonePassword) {
+                throw "サブドメイン・ログイン名・パスワードをすべて入力してください。"
+            }
+            Test-KintoneConnection -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword
         }
     }.GetNewClosure() }
 }
