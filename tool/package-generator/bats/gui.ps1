@@ -83,21 +83,23 @@ function Update-GroupDropdowns {
 
 }
 
-$zipFileInputs = @(1..5 | ForEach-Object {
-    [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "zipファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip" }
+$zipFileCount = 3
+
+$zipFileInputs = @(1..$zipFileCount | ForEach-Object {
+    [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "ファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip" }
 })
 
 $categoryDefs = @(
     [PSCustomObject]@{
-        Label = "パッケージ作成"
-        ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = Get-ResolvedVar "GenerateOutputPath" $setEnvBat; Inputs = @((New-ClientInput)) }
-        )
-    },
-    [PSCustomObject]@{
         Label = "パッケージ定義"
         ButtonDefs = @(
             [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
+        )
+    },
+    [PSCustomObject]@{
+        Label = "パッケージ作成"
+        ButtonDefs = @(
+            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = Get-ResolvedVar "GenerateOutputPath" $setEnvBat; Inputs = @((New-ClientInput)) }
         )
     },
     [PSCustomObject]@{
@@ -135,7 +137,7 @@ $categoryDefs = @(
                         [System.Windows.Forms.MessageBox]::Show("タイトルを入力してください", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                         return $false
                     }
-                    $zipValues = @(1..5 | ForEach-Object { Get-InputValue -Control $ic["TargetFilePath$_"] } | Where-Object { $_ })
+                    $zipValues = @(1..$zipFileCount | ForEach-Object { Get-InputValue -Control $ic["TargetFilePath$_"] } | Where-Object { $_ })
                     if ($zipValues.Count -eq 0) {
                         [System.Windows.Forms.MessageBox]::Show("zipファイルを1つ以上指定してください", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                         return $false
