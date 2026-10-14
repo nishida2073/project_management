@@ -63,6 +63,8 @@ function Create-UserDatas {
         '氏名'     = 'userName'
         '会社名'   = 'companyName'
         'クラス名'  = 'className'
+        '除外日-開始'  = 'excludeStartDate'
+        '除外日-終了'  = 'excludeEndDate'
     }
     $bodies = ConvertTo-MappedRecords -DataLines $dataLines -HeaderMap $headerMap
     return @($bodies | Where-Object { -not (ToBool $_.停止中) })

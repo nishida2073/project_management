@@ -94,6 +94,7 @@ function Create-DailyUserDatas {
         
         $dailyResult = $group.Group | Sort-Object ファイル日付 -Descending | ForEach-Object {
             [PSCustomObject]@{
+                除外対象   = ToBool $_.除外対象
                 日付             = $_.ファイル日付
                 理解度            = $_.理解度
                 人間関係           = $_.人間関係
@@ -181,10 +182,11 @@ function Add-CheckResults {
     foreach ($dailyUserData in $DailyUserDatas) {
         $dailyResults = $dailyUserData.dailyResults
         $dailyResults = @($dailyResults | Sort-Object { [datetime]$_.日付 } -Descending)
-        for ($i = 0; $i -lt $dailyResults.Count; $i++) {
-            $dailyResult = $dailyResults[$i]
+        $alertDailyResults = @($dailyResults | Where-Object { -not $_.除外対象 })
+        for ($i = 0; $i -lt $alertDailyResults.Count; $i++) {
+            $dailyResult = $alertDailyResults[$i]
             Write-Message $dailyResult -VarName "dailyResult"
-            $targetDailyResults = $dailyResults[$i..($dailyResults.Count - 1)]
+            $targetDailyResults = $alertDailyResults[$i..($alertDailyResults.Count - 1)]
             
             $理解度2022 = Check-SingleAlert2022 ($targetDailyResults | ForEach-Object { $_.理解度 })
             $人間関係2022 = Check-SingleAlert2022 ($targetDailyResults | ForEach-Object { $_.人間関係 })
@@ -204,10 +206,10 @@ function Add-CheckResults {
             }
             Write-Message $dailyAlert -VarName "dailyAlert"
             $startIndex = $i
-            $endIndex = [Math]::Min($i + $LookbackDays - 1, $dailyResults.Count - 1)
+            $endIndex = [Math]::Min($i + $LookbackDays - 1, $alertDailyResults.Count - 1)
             $termDailyResultCount = $endIndex - $startIndex + 1
             if ($termDailyResultCount -ge $LookbackDays) {
-                $recentDailyResults = $dailyResults[$startIndex..$endIndex]
+                $recentDailyResults = $alertDailyResults[$startIndex..$endIndex]
                 if (($recentDailyResults | Where-Object { -not $_.提出状況_業務日誌 }).Count -eq $recentDailyResults.Count) {
                     $dailyAlert.連続未回答_業務日誌 = $true
                 }
@@ -411,7 +413,7 @@ function Export-DailyResult {
     $rowDatas = @()
     foreach ($userData in $UserDatas) {
         $dailyResult = $userData.dailyResults | Where-Object { $_.日付 -eq $TargetDate }
-        if (-not $dailyResult.提出状況_業務日誌) { 
+        if (-not $dailyResult.提出状況_業務日誌 -and -not $dailyResult.除外対象 ) { 
             $userUrl = "$BaseUrl/k/#/people/user/$($userData.受講生ID)"
             $reminderLink = '=HYPERLINK("' + $userUrl + '","督促")'
         }
@@ -420,8 +422,8 @@ function Export-DailyResult {
         }
         $rowData = @(
             $reminderLink
-            $dailyResult.提出状況_業務日誌
-            $dailyResult.提出状況_パルスサーベイ
+            if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_業務日誌 }
+            if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_パルスサーベイ }
             $userData.通番
             $userData.受講生ID
             $userData.クラス名
@@ -722,8 +724,8 @@ function Export-TotalResult {
             $rowData = @(
                 $targetDate
                 $courseScheduleData.科目名
-                $dailyResult.提出状況_業務日誌
-                $dailyResult.提出状況_パルスサーベイ
+                if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_業務日誌 }
+                if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_パルスサーベイ }
                 $userData.通番
                 $userData.受講生ID
                 $userData.クラス名

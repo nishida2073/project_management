@@ -1,6 +1,11 @@
 [
     {
         "type":  "Daily",
+        "orgName":  "除外対象",
+        "newName":  ""
+    },
+    {
+        "type":  "Daily",
         "orgName":  "提出状況",
         "newName":  "提出状況_業務日誌"
     },

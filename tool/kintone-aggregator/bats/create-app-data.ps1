@@ -99,7 +99,6 @@ function Get-AppDatas {
     }
 }
 
-
 function Check-Result {
     param(
         [array]$AppDatas,
@@ -130,7 +129,21 @@ function Check-Result {
         $userData | Add-Member -MemberType NoteProperty -Name "isHoliday" -Value $CourseScheduleData.isHoliday -Force
         $userData | Add-Member -MemberType NoteProperty -Name "scheduledCourseName" -Value $courseName -Force
         $userData | Add-Member -MemberType NoteProperty -Name "科目名" -Value $courseName -Force
-        if ( $CreateReminderLink -eq 1) {
+        foreach ($excludeField in @("除外日-開始", "excludeStartDate", "除外日-終了", "excludeEndDate")) {
+            $excelDate = $userData.$excludeField
+            if ($excelDate -match '^\d+(\.\d+)?$') {
+                $userData.$excludeField = [datetime]::FromOADate([double]$excelDate).ToString("yyyy-MM-dd")
+            }
+        }
+        $isExcluded = $false
+        if ($userData.excludeStartDate -or $userData.excludeEndDate) {
+            $targetDateValue = [datetime]$TargetDate
+            $excludeStartValue = if ($userData.excludeStartDate) { [datetime]$userData.excludeStartDate }
+            $excludeEndValue = if ($userData.excludeEndDate) { [datetime]$userData.excludeEndDate }
+            $isExcluded = (-not $excludeStartValue -or $targetDateValue -ge $excludeStartValue) -and (-not $excludeEndValue -or $targetDateValue -le $excludeEndValue)
+        }
+        $userData | Add-Member -MemberType NoteProperty -Name "除外対象" -Value $isExcluded -Force
+        if ( $CreateReminderLink -eq 1 -and -not $isExcluded ) {
             $userUrl = "$BaseUrl/k/#/people/user/$($userData.userCode)"
             $reminderLink = '=HYPERLINK("' + $userUrl + '","督促")'
         }
@@ -227,13 +240,13 @@ try {
             $checkResults = @(Check-Result -AppDatas $appDatas -UserDatas $userDatas -TargetDate $TargetDate -CourseScheduleData $courseScheduleData)
             Write-Message $checkResults -VarName "checkResults"
 
-            $userDataAliasFieldCodes = @(
+            $skipFixedFields = @(
                 "userNo", "userCode", "userName", "companyName", "className",
-                "scheduledDate", "isHoliday", "scheduledCourseName"
+                "scheduledDate", "isHoliday", "scheduledCourseName", "excludeStartDate", "excludeEndDate"
             )
             $fixedCodeFields = if ($checkResults.Count -gt 0) {
                 @($checkResults[0].userData.PSObject.Properties.Name |
-                    Where-Object { $userDataAliasFieldCodes -notcontains $_ })
+                    Where-Object { $skipFixedFields -notcontains $_ })
             }
             else {
                 @()
