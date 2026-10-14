@@ -129,10 +129,10 @@ function Check-Result {
         $userData | Add-Member -MemberType NoteProperty -Name "isHoliday" -Value $CourseScheduleData.isHoliday -Force
         $userData | Add-Member -MemberType NoteProperty -Name "scheduledCourseName" -Value $courseName -Force
         $userData | Add-Member -MemberType NoteProperty -Name "科目名" -Value $courseName -Force
-        foreach ($excludeField in @("除外日-開始", "excludeStartDate", "除外日-終了", "excludeEndDate")) {
-            $excelDate = $userData.$excludeField
+        foreach ($dateFieldName in @("除外日-開始", "excludeStartDate", "除外日-終了", "excludeEndDate")) {
+            $excelDate = $userData.$dateFieldName
             if ($excelDate -match '^\d+(\.\d+)?$') {
-                $userData.$excludeField = [datetime]::FromOADate([double]$excelDate).ToString("yyyy-MM-dd")
+                $userData.$dateFieldName = [datetime]::FromOADate([double]$excelDate).ToString("yyyy-MM-dd")
             }
         }
         $isExcluded = $false
