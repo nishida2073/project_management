@@ -67,7 +67,7 @@ $categoryDefs = @(
         Label = "スペース作成"
         ButtonDefs = @(
             [PSCustomObject]@{
-                Label = "スペース作成"
+                Label = "スペースの作成"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
@@ -107,10 +107,10 @@ $categoryDefs = @(
         )
     }
     [PSCustomObject]@{
-        Label = "ダウンロード"
+        Label = "スペースダウンロード"
         ButtonDefs = @(
             [PSCustomObject]@{
-                Label = "ダウンロード"
+                Label = "スペースのダウンロード"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
@@ -133,10 +133,10 @@ $categoryDefs = @(
         )
     }
     [PSCustomObject]@{
-        Label = "設定ファイルの生成"
+        Label = "設定ファイル作成"
         ButtonDefs = @(
             [PSCustomObject]@{
-                Label = "設定ファイルの生成"
+                Label = "設定ファイルの作成"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
@@ -175,10 +175,10 @@ $categoryDefs = @(
         )
     }
     [PSCustomObject]@{
-        Label = "kintoneへ反映"
+        Label = "スペース更新"
         ButtonDefs = @(
             [PSCustomObject]@{
-                Label = "kintoneへ反映"
+                Label = "スペースの更新"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
@@ -200,10 +200,10 @@ $categoryDefs = @(
         )
     }
     [PSCustomObject]@{
-        Label = "データチェック"
+        Label = "スペース確認"
         ButtonDefs = @(
             [PSCustomObject]@{
-                Label = "データチェック"
+                Label = "スペースの確認"
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }

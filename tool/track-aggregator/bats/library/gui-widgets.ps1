@@ -1054,6 +1054,7 @@ function New-BatchRunTab {
             if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {
                 $inputCtrl.SelectedIndex = 0
             }
+            if ($inputDef.OnChange) { $inputCtrl.Add_SelectedIndexChanged(({ & $inputDef.OnChange $inputControls }).GetNewClosure()) }
         } else {
             $inputCtrl = New-TextBox -Width $inputWidth -Height 22 -Text "$($inputDef.Default)"
         }
@@ -1061,8 +1062,19 @@ function New-BatchRunTab {
         $topControls += $inputCtrl
         $inputControls[$inputDef.Name] = $inputCtrl
         $inputX += $inputWidth + 15
+        if ($inputDef.Browse -eq "Folder") {
+            $batchBrowseBtn = New-Button -Text "参照..." -X $inputX -Y ($inputRowCenterY - 12) -Width 70 -Height 24
+            $batchBrowseBtn.Tag = $inputCtrl
+            $batchBrowseBtn.Add_Click({
+                param($sender, $e)
+                $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+                if ($sender.Tag.Text -and (Test-Path -LiteralPath $sender.Tag.Text -PathType Container)) { $dlg.SelectedPath = $sender.Tag.Text }
+                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $sender.Tag.Text = $dlg.SelectedPath }
+            })
+            $topControls += $batchBrowseBtn
+            $inputX += 70 + 15
+        }
     }
-
     $checkBoxes = @()
     $statusLabels = @()
     $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 20 } else { 20 }

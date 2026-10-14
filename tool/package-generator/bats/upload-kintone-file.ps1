@@ -12,6 +12,7 @@ param(
     [string]$KintoneLoginName,
     [string]$KintonePassword,
     [string]$ClientName,
+    [string]$LogPath,
     [string]$LogNamePrefix
 )
 
@@ -25,8 +26,8 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
-$logRoot = Join-Path (Split-Path $scriptDir -Parent) "logs"
-$logFilePath = New-WorkerLogPath -LogRoot $logRoot -Prefix "${LogNamePrefix}-${ClientName}-${TargetAppId}"
+New-Item -ItemType Directory -Path $LogPath -Force | Out-Null
+$logFilePath = New-WorkerLogPath -LogRoot $LogPath -Prefix "${LogNamePrefix}-${ClientName}-${TargetAppId}"
 
 $script:exitCode = 0
 $psParams = $PSBoundParameters
@@ -35,6 +36,9 @@ try {
         try {
             $psParams.Keys | ForEach-Object { Write-Message $psParams[$_] -VarName "param:$_" -Type "Info" -ForegroundColor Blue }
 
+            if (-not $Title) {
+                throw "タイトルを入力してください"
+            }
             $files = @($TargetFilePath -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
             if ($files.Count -eq 0) {
                 throw "zipファイルを指定してください"
@@ -78,12 +82,15 @@ try {
                 $body = @{ app = $TargetAppId; record = $record }
                 $resp = Invoke-RestMethod -Method Post -Uri "$BaseUrl/k/v1/record.json" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ($body | ConvertTo-Json -Depth 10)
                 Write-MessageComplete "アップロードが完了しました: レコードID $($resp.id)"
-            }        } catch {
+            }
+        } catch {
+            Write-MessageError "実行エラー: $($error[0])"
             $script:exitCode = 1
-            Write-MessageError "エラーが発生しました: $_"
         }
     } *>&1 | Tee-Object -FilePath $logFilePath
-} finally {
+}
+finally {
     ConvertTo-Utf8LogFile -Path $logFilePath
+    Write-MessageComplete "ログを出力しました: $logFilePath"
 }
 exit $script:exitCode

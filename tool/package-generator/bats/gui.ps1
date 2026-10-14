@@ -110,29 +110,35 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ定義"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
         )
     },
     [PSCustomObject]@{
         Label = "パッケージ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = Get-ResolvedVar "GenerateOutputPath" $setEnvBat; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = { param($ic) $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem; if (!$client) { return $null }; Get-ResolvedVar "GenerateOutputPath" (Get-GroupBatPath $client $clientsDir) }; Inputs = @((New-ClientInput)) }
         )
     },
     [PSCustomObject]@{
-        Label = "kintoneへアップロード"
+        Label = "パッケージ反映"
         ButtonDefs = @(
             [PSCustomObject]@{
-                Label = "kintoneへアップロード"
-                IncludeInBatch = $false
+                Label = "パッケージのアップロード"
+                IncludeInBatch = $true
+                DefaultChecked = $false
+                BatchArgsFn = {
+                    param($bic)
+                    $client = Get-InputValue -Control $bic["ClientName"]
+                    $title = Get-InputValue -Control $bic["UploadTitle"]
+                    $folder = Get-InputValue -Control $bic["UploadFolderPath"]
+                    $zipFiles = @()
+                    if ($folder -and (Test-Path -LiteralPath $folder -PathType Container)) {
+                        $zipFiles = @(Get-ChildItem -LiteralPath $folder -Filter *.zip -File | ForEach-Object { $_.FullName })
+                    }
+                    @("-ClientName:$client", "-Title:$title", "-TargetFilePath:$($zipFiles -join ';')")
+                }
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; OnChange = {
-                        param($ic)
-                        $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
-                        if (!$client) { return }
-                        $groupBat = Get-GroupBatPath $client $clientsDir
-                        if (Test-Path -LiteralPath $groupBat) { $ic["TargetFolderPath"].Text = Get-ResolvedVar "GenerateOutputPath" $groupBat }
-                    } }
+                    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; OnChange = { param($ic) Update-FolderFromGroup $ic "TargetFolderPath" } }
                     [PSCustomObject]@{ Name = "Title"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true }
                     $folderInput
                     $zipFileInputs
@@ -205,15 +211,19 @@ foreach ($cd in $categoryDefs) {
 $tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
+$batchRunAllInputs = @(
+        [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150; OnChange = { param($ic) Update-FolderFromGroup $ic "UploadFolderPath" "UploadTitle" } }
+        [PSCustomObject]@{ Name = "UploadTitle"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Require = $true }
+        [PSCustomObject]@{ Name = "UploadFolderPath"; Label = "フォルダ"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "Folder"; Require = $true }
+)
+
 $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
-    -Inputs @(
-        [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
-    ) `
+    -Inputs $batchRunAllInputs `
     -OnOpenClick {
         param($target)
         Open-TargetOrWarn -Path $target
     } `
-    -OnRunClick { Start-BatchRunAll }
+    -OnRunClick { Invoke-ExecuteAll }
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -221,7 +231,19 @@ function Set-RunButtonsEnabled {
     Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
 }
 
-function Start-BatchRunAll {
+function Invoke-ExecuteAll {
+    $uploadBd = $allButtonDefs | Where-Object { $_.BatchArgsFn } | Select-Object -First 1
+    $uploadChk = $batchTab.CheckBoxes | Where-Object { $_.Tag -eq $uploadBd } | Select-Object -First 1
+    if ($uploadChk -and $uploadChk.Checked) {
+        $ic = $batchTab.InputControls
+        foreach ($inputDef in $batchRunAllInputs) {
+            if (-not $inputDef.Require) { continue }
+            if (Get-InputValue -Control $ic[$inputDef.Name]) { continue }
+            [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+            return
+        }
+    }
+    
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $batchTab.CheckBoxes `
         -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
@@ -231,6 +253,8 @@ function Start-BatchRunAll {
                 -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
                 -GetBatArgs {
                     param($bd)
+                    if ($bd.BatchArgsFn) { return & $bd.BatchArgsFn $batchTab.InputControls }
+                    if ($bd.ArgsFn) { return & $bd.ArgsFn $bd.InputControls $bd.Inputs }
                     $batArgs = @()
                     foreach ($inputDef in $bd.Inputs) {
                         $value = Get-InputValue -Control $batchTab.InputControls[$inputDef.Name]
@@ -284,6 +308,14 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $setEnvBat }
 
 $clientsDir = Join-Path $rootPath "clients"
+function Update-FolderFromGroup {
+    param($ic, [string]$FolderKey, [string]$TitleKey = "")
+    $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
+    if (!$client) { return }
+    if ($TitleKey) { $ic[$TitleKey].Text = $client }
+    $groupBat = Get-GroupBatPath $client $clientsDir
+    if (Test-Path -LiteralPath $groupBat) { $ic[$FolderKey].Text = Get-ResolvedVar "GenerateOutputPath" $groupBat }
+}
 $clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }

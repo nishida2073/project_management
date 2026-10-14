@@ -106,7 +106,7 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
         param($target)
         Open-TargetOrWarn -Path $target
     } `
-    -OnRunClick { Start-BatchRunAll }
+    -OnRunClick { Invoke-ExecuteAll }
 
 function Set-RunButtonsEnabled {
     param([bool]$Enabled)
@@ -114,7 +114,7 @@ function Set-RunButtonsEnabled {
     Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
 }
 
-function Start-BatchRunAll {
+function Invoke-ExecuteAll {
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $batchTab.CheckBoxes `
         -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels -ExtraControls @($batchTab.InputControls.Values) `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
