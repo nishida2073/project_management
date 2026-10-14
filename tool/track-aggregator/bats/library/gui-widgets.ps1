@@ -488,6 +488,11 @@ function Add-StackedDockedControls {
     $Container.ResumeLayout($true)
 }
 
+function Get-MultilineInputHeight {
+    param($InputDef, [int]$RowHeight)
+    if ($InputDef.Height) { return [int]$InputDef.Height }
+    return 82
+}
 function New-CategoryTabControl {
     param(
         [Parameter(Mandatory)][array]$CategoryDefs,
@@ -513,7 +518,7 @@ function New-CategoryTabControl {
         $rows = 1
         foreach ($inputDef in $Inputs) {
             if ($inputDef.NewRow) { $rows++ }
-            if ($inputDef.Multiline) { $rows += 2 }
+            if ($inputDef.Multiline) { $rows += [math]::Max(0, [math]::Ceiling((Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight) / $InputRowHeight) - 1) }
         }
         return $rows
     }
@@ -583,24 +588,47 @@ function New-CategoryTabControl {
                         if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {
                             $inputCtrl.SelectedIndex = 0
                         }
+                        if ($inputDef.OnChange) { $inputCtrl.Add_SelectedIndexChanged(({ & $inputDef.OnChange $inputMap }).GetNewClosure()) }
                     } else {
-                        $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { 82 } else { 22 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
+                        $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight } else { 22 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
                     }
                     $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
+                    if ($inputDef.Multiline) { $inputCtrl.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
                     $grp.Controls.Add($inputCtrl)
                     $inputMap[$inputDef.Name] = $inputCtrl
                     $inputX += $inputWidth + 15
-                    if ($inputDef.Browse -eq "File") {
-                        $dlg = New-Object System.Windows.Forms.OpenFileDialog
-                        $dlg.Filter = if ($inputDef.Filter) { $inputDef.Filter } else { "すべてのファイル (*.*)|*.*" }
-                        $dlg.Multiselect = [bool]$inputDef.Multiple
+                    $browseBtn = $null
+                    if ($inputDef.Browse -eq "File" -or $inputDef.Browse -eq "Folder") {
                         $browseBtn = New-Button -Text "参照..." -X $inputX -Y ($inputRowCenterY - 12) -Width 70 -Height 24
                         $browseBtn.Add_Click({
-                            if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $inputCtrl.Text = ($dlg.FileNames -join ";") }
+                            $start = if ($inputDef.BrowseStartFn) { & $inputDef.BrowseStartFn $inputMap } else { $inputCtrl.Text }
+                            $hasStart = [bool]($start -and (Test-Path -LiteralPath $start -PathType Container))
+                            if ($inputDef.Browse -eq "Folder") {
+                                $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+                                if ($hasStart) { $dlg.SelectedPath = $start }
+                                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $inputCtrl.Text = $dlg.SelectedPath }
+                            } else {
+                                $dlg = New-Object System.Windows.Forms.OpenFileDialog
+                                $dlg.Filter = if ($inputDef.Filter) { $inputDef.Filter } else { "すべてのファイル (*.*)|*.*" }
+                                $dlg.Multiselect = [bool]$inputDef.Multiple
+                                if ($hasStart) { $dlg.InitialDirectory = $start }
+                                if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $inputCtrl.Text = ($dlg.FileNames -join ";") }
+                            }
                         }.GetNewClosure())
                         $grp.Controls.Add($browseBtn)
                         $inputMap["$($inputDef.Name)Browse"] = $browseBtn
                         $inputX += 70 + 15
+                    }
+                    if ($inputDef.Clear) {
+                        $lastBtn = if ($browseBtn) { $browseBtn } else { $inputCtrl }
+                        $clearBtn = New-Button -Text "クリア" -X ($lastBtn.Right + 5) -Y ($inputRowCenterY - 12) -Width 50 -Height 24
+                        $clearBtn.Tag = $inputCtrl
+                        $clearBtn.Add_Click({
+                            param($sender, $e)
+                            $sender.Tag.Text = ""
+                        })
+                        $grp.Controls.Add($clearBtn)
+                        $inputMap["$($inputDef.Name)Clear"] = $clearBtn
                     }
                 }
                 $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force

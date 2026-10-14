@@ -85,10 +85,27 @@ function Update-GroupDropdowns {
 
 $zipFileCount = 3
 
+function Get-UploadZipFiles {
+    param($ic)
+    $files = @()
+    $inputNames = @(1..$zipFileCount | ForEach-Object { "TargetFilePath$_" }) + "TargetFolderPath"
+    foreach ($name in $inputNames) {
+        $value = Get-InputValue -Control $ic[$name]
+        foreach ($p in @($value -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+            if (Test-Path -LiteralPath $p -PathType Container) {
+                $files += @(Get-ChildItem -LiteralPath $p -Filter *.zip -File | ForEach-Object { $_.FullName })
+            } else {
+                $files += $p
+            }
+        }
+    }
+    return @($files)
+}
 $zipFileInputs = @(1..$zipFileCount | ForEach-Object {
-    [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "ファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip" }
+    [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "ファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip"; BrowseStartFn = { param($ic) $ic["TargetFolderPath"].Text }; Clear = $true }
 })
 
+$folderInput = [PSCustomObject]@{ Name = "TargetFolderPath"; Label = "フォルダ"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "Folder"; Clear = $true }
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ定義"
@@ -109,26 +126,29 @@ $categoryDefs = @(
                 Label = "kintoneへアップロード"
                 IncludeInBatch = $false
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
+                    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; OnChange = {
+                        param($ic)
+                        $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
+                        if (!$client) { return }
+                        $groupBat = Get-GroupBatPath $client $clientsDir
+                        if (Test-Path -LiteralPath $groupBat) { $ic["TargetFolderPath"].Text = Get-ResolvedVar "GenerateOutputPath" $groupBat }
+                    } }
                     [PSCustomObject]@{ Name = "Title"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true }
+                    $folderInput
                     $zipFileInputs
-                    [PSCustomObject]@{ Name = "Description"; Label = "説明"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Multiline = $true }
+                    [PSCustomObject]@{ Name = "Description"; Label = "説明"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Multiline = $true; Height = 60 }
                 )
                 BatchPath = $uploadKintoneFileBat
                 ArgsFn = {
                     param($ic, $inputDefs)
                     $batArgs = @()
-                    $zipFiles = @()
                     foreach ($inputDef in $inputDefs) {
                         if (-not $ic.ContainsKey($inputDef.Name)) { continue }
+                        if ($inputDef.Name -like "TargetFilePath*" -or $inputDef.Name -eq "TargetFolderPath") { continue }
                         $value = (Get-InputValue -Control $ic[$inputDef.Name]) -replace "`r?`n", '\n'
-                        if ($inputDef.Name -like "TargetFilePath*") {
-                            if ($value) { $zipFiles += $value }
-                            continue
-                        }
                         $batArgs += "-$($inputDef.Name):$value"
                     }
-                    $batArgs += "-TargetFilePath:$($zipFiles -join ';')"
+                    $batArgs += "-TargetFilePath:$((Get-UploadZipFiles $ic) -join ';')"
                     $batArgs
                 }
                 Validator = {
@@ -137,8 +157,12 @@ $categoryDefs = @(
                         [System.Windows.Forms.MessageBox]::Show("タイトルを入力してください", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                         return $false
                     }
-                    $zipValues = @(1..$zipFileCount | ForEach-Object { Get-InputValue -Control $ic["TargetFilePath$_"] } | Where-Object { $_ })
-                    if ($zipValues.Count -eq 0) {
+                    $dupNames = @(Get-UploadZipFiles $ic | ForEach-Object { [System.IO.Path]::GetFileName($_) } | Group-Object | Where-Object { $_.Count -gt 1 } | ForEach-Object { $_.Name })
+                    if ($dupNames.Count -gt 0) {
+                        [System.Windows.Forms.MessageBox]::Show("同じ名前のzipファイルがあります：`n" + ($dupNames -join "`n"), "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+                        return $false
+                    }
+                    if ((Get-UploadZipFiles $ic).Count -eq 0) {
                         [System.Windows.Forms.MessageBox]::Show("zipファイルを1つ以上指定してください", "実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                         return $false
                     }
@@ -237,8 +261,11 @@ $categoryTab = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs 
         }
 }
 
+function Get-ButtonDefByBatchPath {
+    param([string]$BatchPath)
+    return $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $BatchPath } | Select-Object -First 1
+}
 $execTabControl.Height = 45 + $batchTab.Panel.Height
-
 
 $txtLog = New-LogTextBox
 
