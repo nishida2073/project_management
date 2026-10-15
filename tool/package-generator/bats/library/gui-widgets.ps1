@@ -1073,7 +1073,7 @@ function New-BatchRunTab {
     }
     $checkBoxes = @()
     $statusLabels = @()
-    $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 20 } else { 20 }
+    $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 30 } else { 20 }
 
     foreach ($bd in $ButtonDefs) {
         $isChecked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
