@@ -618,6 +618,12 @@ function Save-GroupSettings {
 
     $allVars = @() + @($saveGroupKintoneVarMap.Keys) + @($saveGroupUploadKintoneVarMap.Keys) + @($saveGroupDownloadVarMap.Keys) + @($saveGroupGenerateVarMap.Keys) + @($saveGroupUploadVarMap.Keys)
 
+    if (!(Test-Path -LiteralPath $groupBatPath)) {
+        $templatePath = Join-Path $clientsTemplateDir "client.bat"
+        if (Test-Path -LiteralPath $templatePath) {
+            Copy-Item -LiteralPath $templatePath -Destination $groupBatPath
+        }
+    }
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
         -GetValueFn { param($varName)
             if ($saveGroupDownloadVarMap.ContainsKey($varName)) {

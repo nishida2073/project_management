@@ -868,17 +868,25 @@ function Save-GroupSettings {
         $saveGroupSyncVarMap[$varName] = "SYNC_$varName"
     }
 
-    $allVars = @() + @($saveGroupAuthVarMap.Keys) + @("Authorization", "KintoneBaseUrl") + @($saveGroupPostVarMap.Keys) + @($saveGroupOverrideVarMap.Keys) + @($saveGroupSyncVarMap.Keys)
+    $allVars = @() + @($saveGroupAuthVarMap.Keys) + @("Authorization") + @($saveGroupPostVarMap.Keys) + @($saveGroupOverrideVarMap.Keys) + @($saveGroupSyncVarMap.Keys)
 
     Sync-MentionRowsFromControls
 
+    if (!(Test-Path -LiteralPath $groupBatPath)) {
+        $templatePath = Join-Path $clientsTemplateDir "client.bat"
+        if (Test-Path -LiteralPath $templatePath) {
+            Copy-Item -LiteralPath $templatePath -Destination $groupBatPath
+        }
+    }
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars -RemoveUnwritten `
         -GetValueFn { param($varName)
             if ($varName -eq "Authorization") {
                 $existingAuth = Get-SetLineRawValues -Path $groupBatPath
                 if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
-            } elseif ($varName -eq "KintoneBaseUrl") {
-                "https://%KintoneSubdomain%.cybozu.com"
+
+
+
+
             } elseif ($varName -eq "MentionUserCodes") {
                 ConvertTo-MentionUserCodesText -Rows $script:mentionRows
             } elseif ($saveGroupAuthVarMap.ContainsKey($varName)) {
