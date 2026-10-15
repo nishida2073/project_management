@@ -665,7 +665,6 @@ foreach ($groupKey in $settingsGroups.Keys) {
     }
 }
 
-$settingsToolTip = New-ToolTip
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
@@ -738,7 +737,7 @@ function Update-CommonSettingsFields {
         $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
     }
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 220 | Out-Null
 }
 
@@ -815,7 +814,7 @@ function Update-GroupSettingsFields {
     }
 
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
 }
 

@@ -457,7 +457,6 @@ $settingsSubTabControl.Controls.Add($tabSettingsCommon)
 $tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
@@ -575,7 +574,7 @@ function Get-GroupSettingsFieldRows {
 
 function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
 }
 
@@ -588,7 +587,7 @@ function Update-GroupSettingsFields {
     $resolverValue = $commonEnvResolver
     $rootPathValue = $rootPath
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -in @("KINTONE", "UPLOAD_KINTONE", "GENERATE") }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
         -TrailingButtonVars $trailingButtons | Out-Null

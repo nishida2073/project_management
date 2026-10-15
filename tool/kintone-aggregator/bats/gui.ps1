@@ -207,11 +207,11 @@ $settingsGroups = [ordered]@{
             "ClientDataRootDir"        = @{ Label = "グループデータのフォルダ"; Browse = "Folder" }
             "OutputRootDir"            = @{ Label = "出力のルートフォルダ"; Browse = "Folder" }
             "TemplateRootDir"          = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
-            "CommonLogPath"                  = @{ Label = "ログの出力先"; Browse = "Folder" }
-            "OutputReportDir"          = @{ Label = "業務日誌・パルスサーベイの出力先"; Browse = "Folder" }
+            "CommonLogPath"            = @{ Label = "ログの出力先"; Browse = "Folder" }
+            "OutputReportDir"          = @{ Label = "提出状況の出力先"; Browse = "Folder" }
             "OutputCollectDataRootDir" = @{ Label = "アプリデータ集計の出力先"; Browse = "Folder" }
             "OutputAlertRootDir"       = @{ Label = "アラート検知結果の出力先"; Browse = "Folder" }
-            "OutputAlertBackupDir"     = @{ Label = "アラート検知結果のバックアップ先"; Browse = "Folder" }
+            "OutputAlertBackupDir"     = @{ Label = "バックアップの出力先"; Browse = "Folder" }
         }
     }
     "AUTH" = @{
@@ -366,7 +366,6 @@ $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 $tabSettingsMaster = New-TabPage -Text "マスター操作"
 $settingsSubTabControl.Controls.Add($tabSettingsMaster)
 
-$settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
@@ -640,7 +639,7 @@ function Update-CommonSettingsFields {
     $controlsToStack = @($grp)
 
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 -ExtraGrps $controlsToStack | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
@@ -651,7 +650,7 @@ function Update-GroupSettingsFields {
 
     $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions | Out-Null
 

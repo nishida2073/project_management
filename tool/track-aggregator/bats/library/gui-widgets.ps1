@@ -135,10 +135,6 @@ function New-LinkLabel {
     return $linkLabel
 }
 
-function New-ToolTip {
-    return New-Object System.Windows.Forms.ToolTip
-}
-
 function New-Label {
     param(
         [int]$X = 0, [int]$Y = 0,
@@ -1374,7 +1370,6 @@ function Add-MentionsEditor {
         [int]$StartY,
         [string]$RawValue,
         [Parameter(Mandatory)][System.Windows.Forms.ComboBox]$GroupCombo,
-        [Parameter(Mandatory)][System.Windows.Forms.ToolTip]$ToolTip,
         [Parameter(Mandatory)][string[]]$MentionTypeOptions
     )
     $groupName = $GroupCombo.SelectedItem
@@ -1386,7 +1381,6 @@ function Add-MentionsEditor {
 
     $y = $StartY
     $lbl = New-Label -X 20 -Y $y -Width 220 -Height 20 -Text "メンション対象"
-    $ToolTip.SetToolTip($lbl, "MentionUserCodes")
     $Panel.Controls.Add($lbl)
     $y += 24
 
@@ -1468,7 +1462,6 @@ function Render-SettingsFields {
         [hashtable]$TargetTextBoxes,
         [Parameter(Mandatory)][hashtable]$GroupLabels,
         [Parameter(Mandatory)][hashtable]$VarLabels,
-        [Parameter(Mandatory)][System.Windows.Forms.ToolTip]$ToolTip,
         [Parameter(Mandatory)][string]$RootPath,
         [Parameter(Mandatory)][scriptblock]$EnvResolver,
         [string[]]$MultilineVars = @(),
@@ -1508,13 +1501,12 @@ function Render-SettingsFields {
         }
 
         if ($field.VarName -eq "MentionUserCodes") {
-            $y = Add-MentionsEditor -Panel $grp -StartY $y -RawValue "$($field.Value)" -GroupCombo $MentionGroupCombo -ToolTip $ToolTip -MentionTypeOptions $MentionTypeOptions
+            $y = Add-MentionsEditor -Panel $grp -StartY $y -RawValue "$($field.Value)" -GroupCombo $MentionGroupCombo -MentionTypeOptions $MentionTypeOptions
             continue
         }
 
         $labelText = if ($VarLabels.Contains($field.VarName)) { $VarLabels[$field.VarName] } else { $field.VarName }
         $lbl = New-Label -X 20 -Y $y -Width $LabelWidth -Height $LabelHeight -Text $labelText
-        $ToolTip.SetToolTip($lbl, $field.VarName)
         $grp.Controls.Add($lbl)
 
         $isMultiline = $MultilineVars -contains $field.VarName
@@ -1540,7 +1532,6 @@ function Render-SettingsFields {
             if ($field.Group -eq "OVERRIDE") {
                 $rbUnset = New-RadioButton -X $radioX -Y 2 -Text "未設定" -Tag $txt -Checked ([string]::IsNullOrEmpty($field.Value))
                 $rbUnset.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.Text = "" } })
-                $ToolTip.SetToolTip($rbUnset, "空欄にすると共通設定の値を使用します")
                 $radioPanel.Controls.Add($rbUnset)
             }
 

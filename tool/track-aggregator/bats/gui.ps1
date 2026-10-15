@@ -334,7 +334,6 @@ $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 $tabSettingsMaster = New-TabPage -Text "マスター操作"
 $settingsSubTabControl.Controls.Add($tabSettingsMaster)
 
-$settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
@@ -780,8 +779,8 @@ $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 
 function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 | Out-Null
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 230 | Out-Null
 }
 
 function Test-KintoneConnectionFromSettings {
@@ -844,8 +843,8 @@ function Update-GroupSettingsFields {
         }
     }.GetNewClosure() }
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -ToolTip $settingsToolTip -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 `
+        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 230 `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions `
         -TrailingButtonVars $trailingButtons | Out-Null
 
