@@ -713,15 +713,16 @@ function Save-CommonSettings {
         -HasValueFn { param($name) $settingsCommonFieldTextBoxes.ContainsKey($name) }
 }
 
-function Update-CommonSettingsFields {
+function Get-CommonSettingsFieldRows {
     $commonDefaults = Get-SetEnvDefaults -Path $commonEnvBat
-
-    $rows = @()
     $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
     foreach ($varName in $commonVars) {
         $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
-        $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
+        [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
     }
+}
+function Update-CommonSettingsFields {
+    $rows = @(Get-CommonSettingsFieldRows)
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
         -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 220 | Out-Null
@@ -770,6 +771,18 @@ function Save-GroupSettings {
         -HasValueFn { param($name) $settingsGroupFieldTextBoxes.ContainsKey($name) }
 }
 
+function Get-GroupSettingsFieldRows {
+    param([string]$GroupName)
+    if (!$GroupName) { return }
+
+    $templateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
+    $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
+
+    foreach ($varName in $kintoneVars) {
+        $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
+        [PSCustomObject]@{ Group = "KINTONE"; VarName = $varName; Value = $varValue; Key = $varName }
+    }
+}
 function Update-GroupSettingsFields {
     $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
     if (!$target) {
@@ -777,14 +790,7 @@ function Update-GroupSettingsFields {
         return
     }
 
-    $templateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
-    $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $target $clientsDir)
-
-    $rows = @()
-    foreach ($varName in $kintoneVars) {
-        $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
-        $rows += [PSCustomObject]@{ Group = "KINTONE"; VarName = $varName; Value = $varValue; Key = $varName }
-    }
+    $rows = @(Get-GroupSettingsFieldRows -GroupName $target)
 
     $rows += @(
         [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "SpaceId"; Value = ""; Key = "SpaceId" }
