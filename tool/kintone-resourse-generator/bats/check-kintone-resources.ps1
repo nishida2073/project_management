@@ -6,7 +6,7 @@ param(
     [string]$LogNamePrefix,
     [string]$ConfigName,
     [string]$TargetGroupName,
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$ConfigRoot,
     [string]$OutputRoot,
     [string]$LogRoot,
@@ -91,7 +91,7 @@ try {
 
                     $current = $null
                     try {
-                        $current = Get-CurrentSpace -SpaceId $spaceId -BaseUrl $BaseUrl -Authorization $authorization -HasAppAcl:$false -HasRecordAcl:$false
+                        $current = Get-CurrentSpace -SpaceId $spaceId -BaseUrl $KintoneBaseUrl -Authorization $authorization -HasAppAcl:$false -HasRecordAcl:$false
                     }
                     catch {
                         Write-MessageError "スペース取得に失敗しました: $($_.Exception.Message)"
@@ -133,7 +133,7 @@ try {
                             $exp.'種別'
                         }
                         else {
-                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $code) } catch { $typeLabel = "不明" }
+                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $KintoneBaseUrl -Authorization $authorization -Code $code) } catch { $typeLabel = "不明" }
                         }
                         $row = [ordered]@{ "スペースID" = $spaceId; "種別" = $typeLabel; "ユーザー/組織/グループ" = $code; "結果" = $null }
                         if ($cur -and -not $exp) {
@@ -181,7 +181,7 @@ try {
                 foreach ($appId in $allAppIds) {
                     Write-Message "アプリID: $appId を確認中..." -Type "Info" -NoHeader
                     try {
-                        $current = Get-AppCurrentInfo -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId
+                        $current = Get-AppCurrentInfo -BaseUrl $KintoneBaseUrl -Authorization $authorization -AppId $appId
                     }
                     catch {
                         Write-MessageError "アプリID $appId のデータ取得に失敗: $($_.Exception.Message)"
@@ -227,7 +227,7 @@ try {
                             $exp.'種別'
                         }
                         else {
-                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { $typeLabel = "不明" }
+                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $KintoneBaseUrl -Authorization $authorization -Code $orgName) } catch { $typeLabel = "不明" }
                         }
                         $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
                         if ($cur -and -not $exp) {
@@ -305,7 +305,7 @@ try {
                             "作成者"
                         }
                         else {
-                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $BaseUrl -Authorization $authorization -Code $orgName) } catch { $typeLabel = "不明" }
+                            try { $typeLabel = Get-KintoneMemberTypeLabel (Get-KintoneMemberEntityType -BaseUrl $KintoneBaseUrl -Authorization $authorization -Code $orgName) } catch { $typeLabel = "不明" }
                         }
                         $row = [ordered]@{ "アプリID" = $appId; "アプリ名" = $appLabel; "レコードの条件" = $cond; "種別" = $typeLabel; "ユーザー／組織／グループ" = $orgName; "結果" = $null }
                         if ($cur -and -not $exp) {

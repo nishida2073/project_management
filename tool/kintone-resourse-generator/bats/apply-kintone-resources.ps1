@@ -6,7 +6,7 @@ param(
     [string]$LogNamePrefix,
     [string]$ConfigName,
     [string]$TargetGroupName,
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$ConfigRoot,
     [string]$LogRoot,
     [string]$KintoneLogin,
@@ -72,7 +72,7 @@ try {
                     $spaceRightLines = @('参加メンバーだけにこのスペースを公開する', 'スペースのポータルと複数のスレッドを使用する', 'スペースの参加/退会、スレッドのフォロー/フォロー解除を禁止する', 'アプリ作成できるユーザーをスペースの管理者に限定する') | ForEach-Object {
                         "　${_}: $($spaceRow.$_)"
                     }
-                    Set-Space -BaseUrl $BaseUrl -Authorization $authorization -SpaceId $spaceId `
+                    Set-Space -BaseUrl $KintoneBaseUrl -Authorization $authorization -SpaceId $spaceId `
                         -Name $spaceRow.'スペース名' `
                         -Body $(if ([string]::IsNullOrEmpty($spaceRow.'本文')) { $null } else { $spaceRow.'本文' }) `
                         -IsPrivate (ToBool $spaceRow.'参加メンバーだけにこのスペースを公開する') `
@@ -107,7 +107,7 @@ try {
                                 $flags = @('管理者', '下位組織も含める') | Where-Object { ToBool $row.$_ }
                                 "　　$($row.'種別'):$($row.'ユーザー/組織/グループ') - $($flags -join ',')"
                             })
-                        $memberResult = Set-SpaceMembers -BaseUrl $BaseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
+                        $memberResult = Set-SpaceMembers -BaseUrl $KintoneBaseUrl -Authorization $authorization -SpaceId $spaceId -MemberRows $targetMemberRows
                         $memberDetailLines = @()
                         if ($targetMemberRows.Count -gt 0) {
                             $memberDetailLines += "　テンプレート内のメンバー ($($targetMemberRows.Count)件)"
@@ -160,7 +160,7 @@ try {
                     if ($applyAppList -and $appNameRow) {
                         $finalName = $appNameRow.'アプリ名'
                         try {
-                            Set-AppName -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId -Name $finalName
+                            Set-AppName -BaseUrl $KintoneBaseUrl -Authorization $authorization -AppId $appId -Name $finalName
                             $appChanged = $true
                             Write-ApplyStepResult -ActionLabel "アプリ名を設定しました" -DetailLines @("　$finalName")
                         }
@@ -180,7 +180,7 @@ try {
                     }
                     if ($applyAppAcl -and $aclRowsForApp.Count -gt 0) {
                         try {
-                            $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $BaseUrl -Authorization $authorization -Row $_ })
+                            $rights = @($aclRowsForApp | ForEach-Object { New-AppAclRightFromRow -BaseUrl $KintoneBaseUrl -Authorization $authorization -Row $_ })
 
                             $aclTargetLines = @($aclRowsForApp | ForEach-Object {
                                     $row = $_
@@ -193,7 +193,7 @@ try {
                                 $aclTargetLines += "　アプリ作成者(自動追加) - レコード閲覧,レコード追加,レコード編集,レコード削除,アプリ管理,ファイル読み込み,ファイル書き出し"
                             }
 
-                            Set-AppAcl -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId -Rights $rights
+                            Set-AppAcl -BaseUrl $KintoneBaseUrl -Authorization $authorization -AppId $appId -Rights $rights
                             $appChanged = $true
                             Write-ApplyStepResult -ActionLabel "アプリの権限を設定しました" -CountPhrase "$($aclTotalCount)件" -DetailLines $aclTargetLines
                         }
@@ -213,7 +213,7 @@ try {
                     }
                     if ($applyAppRecordAcl -and $recordAclRowsForApp.Count -gt 0) {
                         try {
-                            $recordRights = New-RecordAclRightsFromRows -BaseUrl $BaseUrl -Authorization $authorization -Rows $recordAclRowsForApp
+                            $recordRights = New-RecordAclRightsFromRows -BaseUrl $KintoneBaseUrl -Authorization $authorization -Rows $recordAclRowsForApp
 
                             $recordAclTargetLines = @($recordAclRowsForApp | Group-Object -Property 'レコードの条件' | ForEach-Object {
                                     $condGroup = $_
@@ -227,7 +227,7 @@ try {
                                     }
                                 })
 
-                            Set-AppRecordAcl -BaseUrl $BaseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
+                            Set-AppRecordAcl -BaseUrl $KintoneBaseUrl -Authorization $authorization -AppId $appId -Rights $recordRights
                             $appChanged = $true
                             Write-ApplyStepResult -ActionLabel "アプリのレコード権限を設定しました" -CountPhrase "条件$($recordRights.Count)件、対象$($recordAclRowsForApp.Count)件" -DetailLines $recordAclTargetLines
                         }
@@ -244,7 +244,7 @@ try {
                         }
                         else {
                             try {
-                                Update-KintoneApps -BaseUrl $BaseUrl -Authorization $authorization -AppIds @($appId)
+                                Update-KintoneApps -BaseUrl $KintoneBaseUrl -Authorization $authorization -AppIds @($appId)
                                 Write-ApplyStepResult -ActionLabel "アプリをデプロイしました"
                             }
                             catch {

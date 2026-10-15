@@ -816,9 +816,9 @@ function Update-GroupSettingsFields {
             $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
             $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
             $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
-            $baseUrl = "https://$kintoneSubdomain.cybozu.com"
+            $kintoneBaseUrl = "https://$kintoneSubdomain.cybozu.com"
             $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
-            Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization | Out-Null
+            Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $kintoneBaseUrl -Authorization $authorization | Out-Null
         }
     }.GetNewClosure() -OnOpenClick {
         $subdomain = (Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain").Trim()
@@ -889,7 +889,7 @@ function Save-GroupSettings {
         $saveGroupSyncVarMap[$varName] = "SYNC_$varName"
     }
 
-    $allVars = @() + @($saveGroupAuthVarMap.Keys) + @("Authorization", "BaseUrl") + @($saveGroupPostVarMap.Keys) + @($saveGroupOverrideVarMap.Keys) + @($saveGroupSyncVarMap.Keys)
+    $allVars = @() + @($saveGroupAuthVarMap.Keys) + @("Authorization", "KintoneBaseUrl") + @($saveGroupPostVarMap.Keys) + @($saveGroupOverrideVarMap.Keys) + @($saveGroupSyncVarMap.Keys)
 
     Sync-MentionRowsFromControls
 
@@ -898,7 +898,7 @@ function Save-GroupSettings {
             if ($varName -eq "Authorization") {
                 $existingAuth = Get-SetLineRawValues -Path $groupBatPath
                 if ($existingAuth.ContainsKey("Authorization")) { $existingAuth["Authorization"] } else { (Get-GroupTemplateDefaults).Auth["Authorization"] }
-            } elseif ($varName -eq "BaseUrl") {
+            } elseif ($varName -eq "KintoneBaseUrl") {
                 "https://%KintoneSubdomain%.cybozu.com"
             } elseif ($varName -eq "MentionUserCodes") {
                 ConvertTo-MentionUserCodesText -Rows $script:mentionRows

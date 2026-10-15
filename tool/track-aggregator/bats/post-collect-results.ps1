@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$TargetGroupName,
     [string]$TestOutputDir,
     [string]$TestOutputFileSuffix,
@@ -72,7 +72,7 @@ try {
             $commentText = $commentTextTemplate -replace '\{グループ名\}', $TargetGroupName
             Write-Message $commentText -VarName "投稿コメント" -Type "Info"
 
-            $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths $filePaths -Mentions $mentions -BaseUrl $BaseUrl -Authorization $Authorization
+            $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths $filePaths -Mentions $mentions -BaseUrl $KintoneBaseUrl -Authorization $Authorization
             Write-Message $commentResponse -VarName "commentResponse" -Type "Info"
 
             Write-MessageComplete "集計結果を投稿しました"

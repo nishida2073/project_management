@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,
@@ -223,7 +223,7 @@ function Export-ExecutionStatusData {
     foreach ($userData in $UserDatas) {
         $userRowDatas += , @($userData.userCode, $userData.userName, $userData.companyName, $userData.className, $userData.rankName)
 
-        $userUrl = "$BaseUrl/k/#/people/user/$($userData.userCode)"
+        $userUrl = "$KintoneBaseUrl/k/#/people/user/$($userData.userCode)"
         $userTestResults = @($PlainTestResults | Where-Object { $_.userCode -eq $userData.userCode })
         $userSurveyResults = @($PlainSurveyResults | Where-Object { $_.userCode -eq $userData.userCode })
 

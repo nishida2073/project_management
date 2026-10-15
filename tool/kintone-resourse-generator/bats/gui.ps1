@@ -46,12 +46,12 @@ function Get-KintoneOpenUrl {
     param($InputControls)
     $groupValue = Get-ComboBoxValue -SelectedItem $InputControls["TargetGroupName"].SelectedItem
     if (!$groupValue) { return $null }
-    $baseUrl = (Get-ResolvedVar -VarName "BaseUrl" -Path (Get-GroupBatPath $groupValue $clientsDir)).TrimEnd('/')
-    if (!$baseUrl) { return $null }
+    $kintoneBaseUrl = (Get-ResolvedVar -VarName "KintoneBaseUrl" -Path (Get-GroupBatPath $groupValue $clientsDir)).TrimEnd('/')
+    if (!$kintoneBaseUrl) { return $null }
     if ($script:createdSpace -and $script:createdSpace.Group -eq $groupValue) {
-        return "$baseUrl/k/#/space/$($script:createdSpace.Id)"
+        return "$kintoneBaseUrl/k/#/space/$($script:createdSpace.Id)"
     }
-    return $baseUrl
+    return $kintoneBaseUrl
 }
 
 function Get-ButtonDefByBatchPath {

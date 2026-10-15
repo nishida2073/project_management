@@ -7,7 +7,7 @@ param(
     [string]$TemplateId,
     [string]$SpaceName,
     [string]$TargetGroupName,
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$LogRoot,
     [string]$KintoneLogin,
     [string]$KintonePassword
@@ -39,7 +39,7 @@ try {
             $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${KintoneLogin}:${KintonePassword}"))
 
             try {
-                $newSpaceId = New-KintoneSpaceFromTemplate -BaseUrl $BaseUrl -Authorization $authorization -TemplateId $TemplateId -Name $SpaceName -AdminLogin $KintoneLogin
+                $newSpaceId = New-KintoneSpaceFromTemplate -BaseUrl $KintoneBaseUrl -Authorization $authorization -TemplateId $TemplateId -Name $SpaceName -AdminLogin $KintoneLogin
             } catch {
                 throw "スペース作成に失敗しました: $($_.Exception.Message)"
             }

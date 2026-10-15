@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$TemplateFilePath,
@@ -452,7 +452,7 @@ function Export-DailyResult {
     foreach ($userData in $UserDatas) {
         $dailyResult = $userData.dailyResults | Where-Object { $_.日付 -eq $TargetDate }
         if (-not $dailyResult.提出状況_業務日誌 -and -not $dailyResult.除外対象 ) { 
-            $userUrl = "$BaseUrl/k/#/people/user/$($userData.受講生ID)"
+            $userUrl = "$KintoneBaseUrl/k/#/people/user/$($userData.受講生ID)"
             $reminderLink = '=HYPERLINK("' + $userUrl + '","督促")'
         }
         else {
@@ -680,7 +680,7 @@ function Export-UserData {
             }
             $alertCount = @($targetRecentResultDatas | Where-Object { (Get-AlertStatus -AlertData $_.alert -Exclude $excludeAlertItems).HasTrue }).Count
             if ($alertCount -ge $AlertInterventionLimit) { 
-                $userUrl = "$BaseUrl/k/#/people/user/$($userData.受講生ID)"
+                $userUrl = "$KintoneBaseUrl/k/#/people/user/$($userData.受講生ID)"
                 $interventionFlagLabel = '=HYPERLINK("' + $userUrl + '","必要")'
             }
             else {

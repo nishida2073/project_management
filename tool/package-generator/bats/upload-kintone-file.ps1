@@ -8,7 +8,7 @@ param(
     [string]$Description,
     [string]$AllowUpdate = "true",
     [string]$TargetAppId,
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$KintoneLoginName,
     [string]$KintonePassword,
     [string]$ClientName,
@@ -59,14 +59,14 @@ try {
             $recordId = $null
             if ($Title) {
                 $query = "$titleFieldCode = `"$($Title.Replace('\', '\\').Replace('"', '\"'))`""
-                $search = Invoke-RestMethod -Method Get -Uri "$BaseUrl/k/v1/records.json?app=$TargetAppId&query=$([System.Uri]::EscapeDataString($query))" -Headers $headers
+                $search = Invoke-RestMethod -Method Get -Uri "$KintoneBaseUrl/k/v1/records.json?app=$TargetAppId&query=$([System.Uri]::EscapeDataString($query))" -Headers $headers
                 if ($search.records.Count -gt 0) { $recordId = $search.records[0].'$id'.value }
             }
             if ($recordId -and -not $allowUpdate) {
                 throw "同じタイトルのレコードが既にあります（更新しない設定です）：レコードID $recordId"
             }
 
-            $fileKeys = @($files | ForEach-Object { Add-KintoneFile -FilePath $_ -BaseUrl $BaseUrl -Authorization $authorization })
+            $fileKeys = @($files | ForEach-Object { Add-KintoneFile -FilePath $_ -BaseUrl $KintoneBaseUrl -Authorization $authorization })
 
             $record = @{
                 $titleFieldCode = @{ value = $Title }
@@ -76,11 +76,11 @@ try {
 
             if ($recordId) {
                 $body = @{ app = $TargetAppId; id = $recordId; record = $record }
-                $resp = Invoke-RestMethod -Method Put -Uri "$BaseUrl/k/v1/record.json" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ($body | ConvertTo-Json -Depth 10)
+                $resp = Invoke-RestMethod -Method Put -Uri "$KintoneBaseUrl/k/v1/record.json" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ($body | ConvertTo-Json -Depth 10)
                 Write-MessageComplete "同じタイトルのレコードを更新しました: レコードID $recordId"
             } else {
                 $body = @{ app = $TargetAppId; record = $record }
-                $resp = Invoke-RestMethod -Method Post -Uri "$BaseUrl/k/v1/record.json" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ($body | ConvertTo-Json -Depth 10)
+                $resp = Invoke-RestMethod -Method Post -Uri "$KintoneBaseUrl/k/v1/record.json" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ($body | ConvertTo-Json -Depth 10)
                 Write-MessageComplete "アップロードが完了しました: レコードID $($resp.id)"
             }
         } catch {

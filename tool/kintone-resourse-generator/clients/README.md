@@ -19,7 +19,7 @@
 | `CommonCustomTemplatePath` | 設定テンプレート（カスタム）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（カスタム）」ドロップダウンに並ぶ（省略可） | `template\custom`フォルダ |
 | `CommonCheckOutputPath` | データチェック結果（`<スペース識別名>_check.xlsx`）の出力先フォルダ | `checked`フォルダ |
 | `CommonLogPath` | 各工程のログの出力先フォルダ | `log`フォルダ |
-| `BaseUrl` | kintoneのサイトURL | `https://%KintoneSubdomain%.cybozu.com` |
+| `KintoneBaseUrl` | kintoneのサイトURL | `https://%KintoneSubdomain%.cybozu.com` |
 | `KintoneLoginName` | kintoneへのログイン名（メールアドレス） | |
 | `KintonePassword` | kintoneへのログインパスワード | |
 

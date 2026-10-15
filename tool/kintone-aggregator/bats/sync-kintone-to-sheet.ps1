@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$TargetGroupName,
     [string]$KintoneLoginName,
     [string]$KintonePassword,
@@ -49,7 +49,7 @@ try {
             }
 
             Write-Message "kintoneからデータ取得中..." -Type "Info"
-            $records = Get-AllKintoneRecords -TargetAppId $AppId -BaseUrl $BaseUrl -Authorization $Authorization
+            $records = Get-AllKintoneRecords -TargetAppId $AppId -BaseUrl $KintoneBaseUrl -Authorization $Authorization
 
             $recordCount = @($records).Count
             Write-Message "取得レコード数: $recordCount" -Type "Info"

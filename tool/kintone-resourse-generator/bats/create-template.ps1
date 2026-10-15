@@ -5,7 +5,7 @@
 param(
     [string]$LogNamePrefix,
     [string]$SpaceId,
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$TemplateRoot,
     [string]$LogRoot,
     [string]$KintoneLogin,
@@ -36,7 +36,7 @@ try {
 
             $space = $null
             try {
-                $space = Get-CurrentSpace -SpaceId $SpaceId -BaseUrl $BaseUrl -Authorization $authorization
+                $space = Get-CurrentSpace -SpaceId $SpaceId -BaseUrl $KintoneBaseUrl -Authorization $authorization
             }
             catch {
                 throw "スペース取得に失敗しました: $($_.Exception.Message)"

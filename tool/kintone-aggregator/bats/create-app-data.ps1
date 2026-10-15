@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$KintoneLoginName,
@@ -39,14 +39,14 @@ function Get-AppDatas {
     param(
         [array]$TargetAppIds,
         [string]$TargetDate,
-        [string]$BaseUrl,
+        [string]$KintoneBaseUrl,
         [string]$Authorization
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
     
     $fieldDatas = if ($TargetAppIds.Count -gt 0) {
-        Get-CurrentAppFieldData -TargetAppId $TargetAppIds[0] -BaseUrl $BaseUrl -Authorization $Authorization
+        Get-CurrentAppFieldData -TargetAppId $TargetAppIds[0] -BaseUrl $KintoneBaseUrl -Authorization $Authorization
     }
     else {
         $null
@@ -54,7 +54,7 @@ function Get-AppDatas {
 
     $resultAllDatas = @()
     foreach ($targetAppId in $TargetAppIds) {
-        $resultDatas = Get-DateKintoneRecords -TargetAppId $targetAppId -BaseUrl $BaseUrl -Authorization $Authorization -TargetDateCodeField $appDefinedCodeFields.DateCodeField -TargetDate $TargetDate
+        $resultDatas = Get-DateKintoneRecords -TargetAppId $targetAppId -BaseUrl $KintoneBaseUrl -Authorization $Authorization -TargetDateCodeField $appDefinedCodeFields.DateCodeField -TargetDate $TargetDate
         $labelDatas = @()
         foreach ($resultData in $resultDatas) {
             $labelData = [PSCustomObject]@{}
@@ -144,7 +144,7 @@ function Check-Result {
         }
         $userData | Add-Member -MemberType NoteProperty -Name "除外対象" -Value $isExcluded -Force
         if ( $CreateReminderLink -eq 1 -and -not $isExcluded ) {
-            $userUrl = "$BaseUrl/k/#/people/user/$($userData.userCode)"
+            $userUrl = "$KintoneBaseUrl/k/#/people/user/$($userData.userCode)"
             $reminderLink = '=HYPERLINK("' + $userUrl + '","督促")'
         }
         else {
@@ -230,7 +230,7 @@ try {
             $userDatas = Create-UserDatas -DataFilePath $ClientDataFilePath
             Write-Message $userDatas -VarName "userDatas"
 
-            $appDatasResult = Get-AppDatas -TargetAppIds $newTargetAppIds -TargetDate $TargetDate -BaseUrl $BaseUrl -Authorization $Authorization
+            $appDatasResult = Get-AppDatas -TargetAppIds $newTargetAppIds -TargetDate $TargetDate -KintoneBaseUrl $KintoneBaseUrl -Authorization $Authorization
             $appDatas = $appDatasResult.Datas
             Write-Message $appDatas -VarName "appDatas"
 

@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$ClientDataFilePath,
     [string]$TargetGroupName,
     [string]$OutputRootDir,

@@ -41,7 +41,7 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "New-Item -Path '!JOB_FLAG!' -ItemType File -Force | Out-Null;" ^
           "try {" ^
           "  & '%SCRIPT_PATH%'" ^
-          "     -BaseUrl '!BaseUrl!'" ^
+          "     -KintoneBaseUrl '!KintoneBaseUrl!'" ^
           "     -ClientDataFilePath '%%F'" ^
           "     -TargetGroupName '%%~nF'" ^
           "     -OutputRootDir '!OutputTargetDir!'" ^

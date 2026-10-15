@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$BaseUrl,
+    [string]$KintoneBaseUrl,
     [string]$TargetGroupName,
     [string]$TargetDate,
     [string]$BackupRootDir,
@@ -82,7 +82,7 @@ try {
             $commentText = $commentText + "`n`n" + ($summaryLines -join "`n")
             Write-Message $commentText -VarName "投稿コメント" -Type "Info"
 
-            $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths @($backupFilePath) -Mentions $mentions -BaseUrl $BaseUrl -Authorization $Authorization
+            $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths @($backupFilePath) -Mentions $mentions -BaseUrl $KintoneBaseUrl -Authorization $Authorization
             Write-Message $commentResponse -VarName "スレッド投稿" -Type "Info"
             
             Write-MessageComplete "集計結果を投稿しました"

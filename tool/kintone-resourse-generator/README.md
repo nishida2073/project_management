@@ -37,7 +37,7 @@
 
 ## kintoneへのログイン
 
-各`.ps1`は`BaseUrl`（接続先のkintoneサイトURL）に対してREST APIを直接呼び出す（Basic認証）。`KintoneLoginName`/`KintonePassword`が環境変数として設定されていればそれを使い、されていなければ実行時（最初にAPIを呼ぶ直前）にコンソールでログイン名・パスワードの入力を求められる。この3変数はローカルの`clients\common.bat`にまとめてある（書き方は[clients\README.md](clients/README.md)を参照）。
+各`.ps1`は`KintoneBaseUrl`（接続先のkintoneサイトURL）に対してREST APIを直接呼び出す（Basic認証）。`KintoneLoginName`/`KintonePassword`が環境変数として設定されていればそれを使い、されていなければ実行時（最初にAPIを呼ぶ直前）にコンソールでログイン名・パスワードの入力を求められる。この3変数はローカルの`clients\common.bat`にまとめてある（書き方は[clients\README.md](clients/README.md)を参照）。
 
 「0. スペース作成」で使うスペーステンプレートからのスペース作成APIは、スペース管理者（`members`）を1名以上指定しないとエラーになる。このツールはログインに使ったユーザー自身を唯一の管理者として自動的に設定する。
 
@@ -332,7 +332,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 | `CommonConfigPath` | 設定ファイルのフォルダ |
 | `CommonCheckOutputPath` | チェック結果の出力先フォルダ |
 | `CommonLogPath` | ログの出力先フォルダ |
-| `BaseUrl` | kintoneのサイトURL |
+| `KintoneBaseUrl` | kintoneのサイトURL |
 | `KintoneLoginName` | ログイン名 |
 | `KintonePassword` | パスワード |
 

@@ -17,7 +17,7 @@ call "%~dp0clients\!TargetGroupName!.bat"
 
 call "%~dp0bats\message.bat" "Start %~nx0"
 
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0bats\create-space-from-template.ps1" -BaseUrl "%BaseUrl%" -LogRoot "%CommonLogPath%" -KintoneLogin "%KintoneLoginName%" -KintonePassword "%KintonePassword%" -LogNamePrefix "%~n0" -TargetGroupName "%TargetGroupName%" -TemplateId "%TemplateId%" -SpaceName "%SpaceName%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0bats\create-space-from-template.ps1" -KintoneBaseUrl "%KintoneBaseUrl%" -LogRoot "%CommonLogPath%" -KintoneLogin "%KintoneLoginName%" -KintonePassword "%KintonePassword%" -LogNamePrefix "%~n0" -TargetGroupName "%TargetGroupName%" -TemplateId "%TemplateId%" -SpaceName "%SpaceName%"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0bats\message.bat" "Finished %~nx0"
