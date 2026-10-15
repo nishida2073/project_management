@@ -61,11 +61,3 @@ function Transpose-Array {
     }
     return $result
 }
-
-function Convert-TsvPsObject {
-    param(
-        [Parameter(Mandatory)]
-        [string]$Path
-    )
-    return Import-Csv -Path $Path -Delimiter "`t" -Encoding Default
-}

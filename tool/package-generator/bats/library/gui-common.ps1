@@ -120,8 +120,13 @@ function Get-SetLineRawValues {
     $result = @{}
     if (!(Test-Path -LiteralPath $Path)) { return $result }
     foreach ($line in [System.IO.File]::ReadAllLines($Path, $script:cp932Encoding)) {
-        $m = $script:groupBatLineRegex.Match($line.Trim())
-        if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
+        $m = $script:setEnvLineRegex.Match($line.Trim())
+        if ($m.Success) {
+            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
+        } else {
+            $m = $script:groupBatLineRegex.Match($line.Trim())
+            if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
+        }
     }
     return $result
 }
@@ -135,27 +140,6 @@ function Get-GroupKintoneThreadUrl {
     $threadId = $raw["ThreadId"]
     if (!$subdomain -or !$spaceId -or !$threadId) { return $null }
     return "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId"
-}
-
-function ConvertFrom-MentionUserCodesText {
-    param([string]$Text, [Parameter(Mandatory)][string[]]$TypeOptions)
-    $rows = [System.Collections.Generic.List[object]]::new()
-    foreach ($part in ($Text -split ',')) {
-        $trimmed = $part.Trim()
-        if (!$trimmed) { continue }
-        $pair = $trimmed -split ':', 2
-        $code = $pair[0].Trim()
-        if (!$code) { continue }
-        $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
-        if ($TypeOptions -notcontains $type) { $type = "USER" }
-        $rows.Add([PSCustomObject]@{ Code = $code; Type = $type })
-    }
-    return $rows
-}
-
-function ConvertTo-MentionUserCodesText {
-    param($Rows)
-    return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
 }
 
 Add-Type @'

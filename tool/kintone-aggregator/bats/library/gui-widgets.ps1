@@ -1347,6 +1347,27 @@ function Clear-MentionRowsCache {
     $script:mentionRowsGroupName = $null
 }
 
+function ConvertFrom-MentionUserCodesText {
+    param([string]$Text, [Parameter(Mandatory)][string[]]$TypeOptions)
+    $rows = [System.Collections.Generic.List[object]]::new()
+    foreach ($part in ($Text -split ',')) {
+        $trimmed = $part.Trim()
+        if (!$trimmed) { continue }
+        $pair = $trimmed -split ':', 2
+        $code = $pair[0].Trim()
+        if (!$code) { continue }
+        $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
+        if ($TypeOptions -notcontains $type) { $type = "USER" }
+        $rows.Add([PSCustomObject]@{ Code = $code; Type = $type })
+    }
+    return $rows
+}
+
+function ConvertTo-MentionUserCodesText {
+    param($Rows)
+    return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
+}
+
 function Add-MentionsEditor {
     param(
         [System.Windows.Forms.Control]$Panel,
