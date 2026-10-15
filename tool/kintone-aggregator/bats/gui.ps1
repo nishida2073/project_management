@@ -174,7 +174,7 @@ $logTabConditions = @(
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
-    -GetLogPathFn { Get-ResolvedVar "LOG_DIR" $commonEnvBat }
+    -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat }
 
 $clientsTemplateDir = Join-Path $clientsDir "template"
 
@@ -207,7 +207,7 @@ $settingsGroups = [ordered]@{
             "ClientDataRootDir"        = @{ Label = "グループデータのフォルダ"; Browse = "Folder" }
             "OutputRootDir"            = @{ Label = "出力のルートフォルダ"; Browse = "Folder" }
             "TemplateRootDir"          = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
-            "LOG_DIR"                  = @{ Label = "ログの出力先"; Browse = "Folder" }
+            "CommonLogPath"                  = @{ Label = "ログの出力先"; Browse = "Folder" }
             "OutputReportDir"          = @{ Label = "業務日誌・パルスサーベイの出力先"; Browse = "Folder" }
             "OutputCollectDataRootDir" = @{ Label = "アプリデータ集計の出力先"; Browse = "Folder" }
             "OutputAlertRootDir"       = @{ Label = "アラート検知結果の出力先"; Browse = "Folder" }

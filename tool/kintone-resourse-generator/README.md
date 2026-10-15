@@ -37,7 +37,7 @@
 
 ## kintoneへのログイン
 
-各`.ps1`は`KINTONE_BASE_URL`（接続先のkintoneサイトURL）に対してREST APIを直接呼び出す（Basic認証）。`KINTONE_LOGIN`/`KINTONE_PASSWORD`が環境変数として設定されていればそれを使い、されていなければ実行時（最初にAPIを呼ぶ直前）にコンソールでログイン名・パスワードの入力を求められる。この3変数はローカルの`clients\common.bat`にまとめてある（書き方は[clients\README.md](clients/README.md)を参照）。
+各`.ps1`は`BaseUrl`（接続先のkintoneサイトURL）に対してREST APIを直接呼び出す（Basic認証）。`KintoneLoginName`/`KintonePassword`が環境変数として設定されていればそれを使い、されていなければ実行時（最初にAPIを呼ぶ直前）にコンソールでログイン名・パスワードの入力を求められる。この3変数はローカルの`clients\common.bat`にまとめてある（書き方は[clients\README.md](clients/README.md)を参照）。
 
 「0. スペース作成」で使うスペーステンプレートからのスペース作成APIは、スペース管理者（`members`）を1名以上指定しないとエラーになる。このツールはログインに使ったユーザー自身を唯一の管理者として自動的に設定する。
 
@@ -47,12 +47,12 @@
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
-| `COMMON_DOWNLOAD_PATH` | 「1. ダウンロード」の出力先フォルダ | `download`フォルダ |
-| `COMMON_CONFIG_PATH` | 設定ファイル（`*_config.xlsx`）のフォルダ | `config`フォルダ |
-| `COMMON_BASE_TEMPLATE_PATH` | 設定テンプレート（基本）（`template\base\*.xlsx`）のフォルダ | `template\base`フォルダ |
-| `COMMON_CUSTOM_TEMPLATE_PATH` | 設定テンプレート（カスタム）（`template\custom\*.xlsx`）のフォルダ（省略可） | `template\custom`フォルダ |
-| `COMMON_CHECK_OUTPUT_PATH` | 「4. データチェック」の出力先フォルダ | `checked`フォルダ |
-| `COMMON_LOG_PATH` | 各段階のログの出力先フォルダ | `log`フォルダ |
+| `CommonDownloadPath` | 「1. ダウンロード」の出力先フォルダ | `download`フォルダ |
+| `CommonConfigPath` | 設定ファイル（`*_config.xlsx`）のフォルダ | `config`フォルダ |
+| `CommonBaseTemplatePath` | 設定テンプレート（基本）（`template\base\*.xlsx`）のフォルダ | `template\base`フォルダ |
+| `CommonCustomTemplatePath` | 設定テンプレート（カスタム）（`template\custom\*.xlsx`）のフォルダ（省略可） | `template\custom`フォルダ |
+| `CommonCheckOutputPath` | 「4. データチェック」の出力先フォルダ | `checked`フォルダ |
+| `CommonLogPath` | 各段階のログの出力先フォルダ | `log`フォルダ |
 
 ### 0. スペース作成について
 
@@ -66,7 +66,7 @@ kintoneの「スペーステンプレート」機能を使って、指定した�
    1. kintoneにログインする（未設定時はコンソールでログイン名・パスワードを入力）
    2. スペーステンプレートAPIで新しいスペースを作成する（管理者はログインユーザー自身）
    3. 作成されたスペースIDをコンソールとログに出力する
-   4. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
+   4. ログの出力先（`CommonLogPath`）に処理ログを出力する
 
 #### 引数
 
@@ -87,7 +87,7 @@ create-space-from-template.bat -TemplateId 12 -SpaceName "L20 クラススペー
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `create-space-from-template_<スペース名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `create-space-from-template_<スペース名>_yyyyMMdd_HHmmss.log` | ログの出力先（`CommonLogPath`） | 処理内容のログ |
 
 ### 1. ダウンロードについて
 
@@ -101,7 +101,7 @@ create-space-from-template.bat -TemplateId 12 -SpaceName "L20 クラススペー
    1. kintoneにログインする
    2. 対象スペース（`-SpaceId`）の設定・メンバー・アプリ一覧・アプリACL・レコードACLを取得する
    3. 取得結果を`download\<スペース識別名>_download.xlsx`の5シートに書き出す（既存内容は上書き）
-   4. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
+   4. ログの出力先（`CommonLogPath`）に処理ログを出力する
 
 #### 引数
 
@@ -120,8 +120,8 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `<スペース識別名>_download.xlsx` | ダウンロード先（`COMMON_DOWNLOAD_PATH`） | 対象スペースの現在の状態（5シート構成、[設定ファイル・テンプレートの構成](#設定ファイルテンプレートの構成)を参照） |
-| `download-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `<スペース識別名>_download.xlsx` | ダウンロード先（`CommonDownloadPath`） | 対象スペースの現在の状態（5シート構成、[設定ファイル・テンプレートの構成](#設定ファイルテンプレートの構成)を参照） |
+| `download-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`CommonLogPath`） | 処理内容のログ |
 
 #### 注意点
 
@@ -142,11 +142,11 @@ download-kintone-resources.bat -SpaceId 123 -ConfigName L20
 1. `generate-config-from-template.bat` を実行する
 2. `clients\common.bat` が呼び出され、環境変数の初期値がセットされる
 3. `generate-config-from-template.ps1` が実行される
-   1. 設定テンプレート（基本）（`COMMON_BASE_TEMPLATE_PATH`配下）、指定時は設定テンプレート（カスタム）（`COMMON_CUSTOM_TEMPLATE_PATH`配下）、およびダウンロード結果（`COMMON_DOWNLOAD_PATH`配下）を読み込む
+   1. 設定テンプレート（基本）（`CommonBaseTemplatePath`配下）、指定時は設定テンプレート（カスタム）（`CommonCustomTemplatePath`配下）、およびダウンロード結果（`CommonDownloadPath`配下）を読み込む
    2. アプリ名の一致でテンプレートのアプリとダウンロード結果のアプリを対応付ける（対応付けられなかったアプリはコンソールに警告表示）
    3. スペース設定・メンバー・アプリ名・アプリACL・レコードACLをテンプレートの内容（スペース名・アプリ名は`{PH}`をスペース識別名に置き換えた値。スペース名はテンプレートに列が無ければダウンロード結果の値を使う）で組み立てる
    4. `config\<スペース識別名>_config.xlsx`に書き出す
-   5. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
+   5. ログの出力先（`CommonLogPath`）に処理ログを出力する
 
 #### 引数
 
@@ -166,8 +166,8 @@ generate-config-from-template.bat -BaseTemplateConfigName class-space -DownloadC
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `<スペース識別名>_config.xlsx` | 設定ファイルのフォルダ（`COMMON_CONFIG_PATH`） | kintoneに反映する設定内容（5シート構成）。テンプレートの`{PH}`置き換え部分は赤字で表示される |
-| `generate-config-from-template_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ（対応付けられなかったアプリの警告もここに記録される） |
+| `<スペース識別名>_config.xlsx` | 設定ファイルのフォルダ（`CommonConfigPath`） | kintoneに反映する設定内容（5シート構成）。テンプレートの`{PH}`置き換え部分は赤字で表示される |
+| `generate-config-from-template_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`CommonLogPath`） | 処理内容のログ（対応付けられなかったアプリの警告もここに記録される） |
 
 #### 注意点
 
@@ -188,7 +188,7 @@ generate-config-from-template.bat -BaseTemplateConfigName class-space -DownloadC
    2. `config\<スペース識別名>_config.xlsx`を読み込む
    3. スペースIDごとにスペース設定・メンバーを反映する
    4. アプリIDごとにアプリ名・アプリACL・レコードACLを反映し、変更したアプリはデプロイ（更新の反映）する
-   5. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
+   5. ログの出力先（`CommonLogPath`）に処理ログを出力する
 
 #### 引数
 
@@ -210,7 +210,7 @@ apply-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl,space-app-reco
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `apply-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `apply-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`CommonLogPath`） | 処理内容のログ |
 
 #### 注意点
 
@@ -231,7 +231,7 @@ apply-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl,space-app-reco
    2. `config\<スペース識別名>_config.xlsx`（期待値）を読み込む
    3. 同じ対象のkintoneの現在の状態を取得し、項目ごとに比較する
    4. 比較結果を`checked\<スペース識別名>_check.xlsx`に出力する
-   5. ログの出力先（`COMMON_LOG_PATH`）に処理ログを出力する
+   5. ログの出力先（`CommonLogPath`）に処理ログを出力する
 
 #### 引数
 
@@ -253,8 +253,8 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 | ファイル | 出力先 | 内容 |
 |---|---|---|
-| `<スペース識別名>_check.xlsx` | チェック結果の出力先（`COMMON_CHECK_OUTPUT_PATH`） | 期待値とkintoneの現状の比較結果 |
-| `check-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`COMMON_LOG_PATH`） | 処理内容のログ |
+| `<スペース識別名>_check.xlsx` | チェック結果の出力先（`CommonCheckOutputPath`） | 期待値とkintoneの現状の比較結果 |
+| `check-kintone-resources_<スペース識別名>_yyyyMMdd_HHmmss.log` | ログの出力先（`CommonLogPath`） | 処理内容のログ |
 
 「結果」列の値：
 
@@ -297,7 +297,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 「単体実行」と「一括実行」の2つの内部タブがある。
 
-- 「スペース識別名」「スペーステンプレートID」「スペースID」「設定テンプレート名（基本）」「設定テンプレート名（カスタム）」の入力欄（「設定テンプレート名（基本）」は`COMMON_BASE_TEMPLATE_PATH`配下、「設定テンプレート名（カスタム）」は`COMMON_CUSTOM_TEMPLATE_PATH`配下の`.xlsx`ファイル名の一覧から選ぶドロップダウン。カスタム側は省略可）
+- 「スペース識別名」「スペーステンプレートID」「スペースID」「設定テンプレート名（基本）」「設定テンプレート名（カスタム）」の入力欄（「設定テンプレート名（基本）」は`CommonBaseTemplatePath`配下、「設定テンプレート名（カスタム）」は`CommonCustomTemplatePath`配下の`.xlsx`ファイル名の一覧から選ぶドロップダウン。カスタム側は省略可）
 - 「詳細を表示」で0～4の各工程を個別に実行するボタン・状態表示が並ぶカードを開閉できる（初期状態は非表示）
 - 各工程のカードには「実行」ボタン（その工程だけを実行）、状態表示（未実行/実行中.../成功/失敗）、出力ファイルがある工程（1・2・4）には結果ファイルを開く「開く」ボタンがある
 - 「まとめて実行」ボタンで0→4を順番に実行する。「0. スペース作成」が成功すると、作成されたスペースIDが「スペースID」欄に自動入力される
@@ -315,7 +315,7 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 - 「スペース識別名」ドロップダウンで、表示するログをスペース識別名別に絞り込める。「すべて」を選べば絞り込みなし
 - 「0. スペース作成」～「4. データチェック」のラジオボタンで、確認したい工程のログを切り替える
-- 選んだ工程・スペース識別名に一致するログファイル（`COMMON_LOG_PATH`配下、`<バッチファイル名>-<ConfigName>_yyyyMMdd_HHmmss.log`）を、更新日時の古い順にすべて連結して表示する
+- 選んだ工程・スペース識別名に一致するログファイル（`CommonLogPath`配下、`<バッチファイル名>-<ConfigName>_yyyyMMdd_HHmmss.log`）を、更新日時の古い順にすべて連結して表示する
 
 ### 設定タブ
 
@@ -326,15 +326,15 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 | 環境変数名 | 表示名 |
 |---|---|
-| `COMMON_DOWNLOAD_PATH` | ダウンロード先のフォルダ |
-| `COMMON_BASE_TEMPLATE_PATH` | 設定テンプレート（基本）ファイルのフォルダ |
-| `COMMON_CUSTOM_TEMPLATE_PATH` | 設定テンプレート（カスタム）ファイルのフォルダ |
-| `COMMON_CONFIG_PATH` | 設定ファイルのフォルダ |
-| `COMMON_CHECK_OUTPUT_PATH` | チェック結果の出力先フォルダ |
-| `COMMON_LOG_PATH` | ログの出力先フォルダ |
-| `KINTONE_BASE_URL` | kintoneのサイトURL |
-| `KINTONE_LOGIN` | ログイン名 |
-| `KINTONE_PASSWORD` | パスワード |
+| `CommonDownloadPath` | ダウンロード先のフォルダ |
+| `CommonBaseTemplatePath` | 設定テンプレート（基本）ファイルのフォルダ |
+| `CommonCustomTemplatePath` | 設定テンプレート（カスタム）ファイルのフォルダ |
+| `CommonConfigPath` | 設定ファイルのフォルダ |
+| `CommonCheckOutputPath` | チェック結果の出力先フォルダ |
+| `CommonLogPath` | ログの出力先フォルダ |
+| `BaseUrl` | kintoneのサイトURL |
+| `KintoneLoginName` | ログイン名 |
+| `KintonePassword` | パスワード |
 
 ### 必要なもの
 
@@ -344,4 +344,4 @@ check-kintone-resources.bat -ConfigName L20 -Sheets space-app-acl
 
 ### 注意点
 
-> kintoneのログイン情報（`KINTONE_LOGIN`/`KINTONE_PASSWORD`）が未設定の場合、GUIはコンソールを持たないため入力プロンプトを表示できない。GUI版を使う場合は`clients\common.bat`でログイン情報を設定しておくこと（書き方は[clients\README.md](clients/README.md)を参照）。
+> kintoneのログイン情報（`KintoneLoginName`/`KintonePassword`）が未設定の場合、GUIはコンソールを持たないため入力プロンプトを表示できない。GUI版を使う場合は`clients\common.bat`でログイン情報を設定しておくこと（書き方は[clients\README.md](clients/README.md)を参照）。

@@ -6,7 +6,7 @@ set "ClientDataRootDir=%BASE_PATH%clients"
 
 set "TemplateRootDir=%BASE_PATH%template"
 
-set "LOG_DIR=%BASE_PATH%logs"
+set "CommonLogPath=%BASE_PATH%logs"
 
 set "ResultRootDir=%BASE_PATH%output\ŽÀŽ{Œ‹‰Ê"
 set "TestResultRootDir=%ResultRootDir%\01_ƒeƒXƒg"

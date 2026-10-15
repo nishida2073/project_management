@@ -13,17 +13,17 @@
 
 | 変数名 | 説明 | デフォルト |
 |---|---|---|
-| `COMMON_DOWNLOAD_PATH` | ダウンロード先フォルダ（`<スペース識別名>_download.xlsx`の出力先） | `download`フォルダ |
-| `COMMON_CONFIG_PATH` | 設定ファイル（`<スペース識別名>_config.xlsx`）のフォルダ | `config`フォルダ |
-| `COMMON_BASE_TEMPLATE_PATH` | 設定テンプレート（基本）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（基本）」ドロップダウンに並ぶ | `template\base`フォルダ |
-| `COMMON_CUSTOM_TEMPLATE_PATH` | 設定テンプレート（カスタム）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（カスタム）」ドロップダウンに並ぶ（省略可） | `template\custom`フォルダ |
-| `COMMON_CHECK_OUTPUT_PATH` | データチェック結果（`<スペース識別名>_check.xlsx`）の出力先フォルダ | `checked`フォルダ |
-| `COMMON_LOG_PATH` | 各工程のログの出力先フォルダ | `log`フォルダ |
-| `KINTONE_BASE_URL` | kintoneのサイトURL | `https://%KINTONE_SUB_DOMAIN%.cybozu.com` |
-| `KINTONE_LOGIN` | kintoneへのログイン名（メールアドレス） | |
-| `KINTONE_PASSWORD` | kintoneへのログインパスワード | |
+| `CommonDownloadPath` | ダウンロード先フォルダ（`<スペース識別名>_download.xlsx`の出力先） | `download`フォルダ |
+| `CommonConfigPath` | 設定ファイル（`<スペース識別名>_config.xlsx`）のフォルダ | `config`フォルダ |
+| `CommonBaseTemplatePath` | 設定テンプレート（基本）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（基本）」ドロップダウンに並ぶ | `template\base`フォルダ |
+| `CommonCustomTemplatePath` | 設定テンプレート（カスタム）（`.xlsx`）のフォルダ。ここに置いたファイル名（拡張子抜き）がGUIの「設定テンプレート名（カスタム）」ドロップダウンに並ぶ（省略可） | `template\custom`フォルダ |
+| `CommonCheckOutputPath` | データチェック結果（`<スペース識別名>_check.xlsx`）の出力先フォルダ | `checked`フォルダ |
+| `CommonLogPath` | 各工程のログの出力先フォルダ | `log`フォルダ |
+| `BaseUrl` | kintoneのサイトURL | `https://%KintoneSubdomain%.cybozu.com` |
+| `KintoneLoginName` | kintoneへのログイン名（メールアドレス） | |
+| `KintonePassword` | kintoneへのログインパスワード | |
 
-GUI版（`kintoneリソース生成ツール.exe`）の「設定」タブからも編集できます。`KINTONE_LOGIN`/`KINTONE_PASSWORD`が未設定の場合、`.ps1`は起動直後にエラーメッセージを表示して終了するため、実行前に必ずこのファイルまたはGUIの「設定」タブでログイン情報を設定しておくこと。
+GUI版（`kintoneリソース生成ツール.exe`）の「設定」タブからも編集できます。`KintoneLoginName`/`KintonePassword`が未設定の場合、`.ps1`は起動直後にエラーメッセージを表示して終了するため、実行前に必ずこのファイルまたはGUIの「設定」タブでログイン情報を設定しておくこと。
 
 ## 注意点
 

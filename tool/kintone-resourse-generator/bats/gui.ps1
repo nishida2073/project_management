@@ -46,7 +46,7 @@ function Get-KintoneOpenUrl {
     param($InputControls)
     $groupValue = Get-ComboBoxValue -SelectedItem $InputControls["TargetGroupName"].SelectedItem
     if (!$groupValue) { return $null }
-    $baseUrl = (Get-ResolvedVar -VarName "KINTONE_BASE_URL" -Path (Get-GroupBatPath $groupValue $clientsDir)).TrimEnd('/')
+    $baseUrl = (Get-ResolvedVar -VarName "BaseUrl" -Path (Get-GroupBatPath $groupValue $clientsDir)).TrimEnd('/')
     if (!$baseUrl) { return $null }
     if ($script:createdSpace -and $script:createdSpace.Group -eq $groupValue) {
         return "$baseUrl/k/#/space/$($script:createdSpace.Id)"
@@ -127,8 +127,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonDownloadPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonDownloadPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
             }
         )
     }
@@ -169,8 +169,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonConfigPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonConfigPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
             }
         )
     }
@@ -219,8 +219,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonCheckOutputPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonCheckOutputPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
             }
         )
     }
@@ -346,7 +346,7 @@ $logTabConditions = @(
 )
 
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
-    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" $commonEnvBat } `
+    -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat } `
     -Conditions $logTabConditions
 
 
@@ -595,14 +595,14 @@ function Get-TemplateFileNames {
 }
 
 function Update-BaseTemplateNameList {
-    $names = Get-TemplateFileNames -EnvVarName "COMMON_BASE_TEMPLATE_PATH"
+    $names = Get-TemplateFileNames -EnvVarName "CommonBaseTemplatePath"
     $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
     Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["BaseTemplateName"] -Items $items
     Update-ComboBoxItems -ComboBox $batchTab.InputControls["BaseTemplateName"] -Items $items
 }
 
 function Update-CustomTemplateNameList {
-    $names = Get-TemplateFileNames -EnvVarName "COMMON_CUSTOM_TEMPLATE_PATH"
+    $names = Get-TemplateFileNames -EnvVarName "CommonCustomTemplatePath"
     $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
     Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["CustomTemplateName"] -Items $items
     Update-ComboBoxItems -ComboBox $batchTab.InputControls["CustomTemplateName"] -Items $items
@@ -629,20 +629,20 @@ $settingsGroups = [ordered]@{
     "COMMON" = @{
         Label = "基本設定"
         Vars = [ordered]@{
-            "COMMON_DOWNLOAD_PATH"        = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
-            "COMMON_BASE_TEMPLATE_PATH"   = @{ Label = "設定テンプレート（基本）ファイルのフォルダ"; Browse = "Folder" }
-            "COMMON_CUSTOM_TEMPLATE_PATH" = @{ Label = "設定テンプレート（カスタム）ファイルのフォルダ"; Browse = "Folder" }
-            "COMMON_CONFIG_PATH"          = @{ Label = "設定ファイルのフォルダ"; Browse = "Folder" }
-            "COMMON_CHECK_OUTPUT_PATH"    = @{ Label = "チェック結果の出力先フォルダ"; Browse = "Folder" }
-            "COMMON_LOG_PATH"             = @{ Label = "ログの出力先フォルダ"; Browse = "Folder" }
+            "CommonDownloadPath"        = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
+            "CommonBaseTemplatePath"   = @{ Label = "設定テンプレート（基本）ファイルのフォルダ"; Browse = "Folder" }
+            "CommonCustomTemplatePath" = @{ Label = "設定テンプレート（カスタム）ファイルのフォルダ"; Browse = "Folder" }
+            "CommonConfigPath"          = @{ Label = "設定ファイルのフォルダ"; Browse = "Folder" }
+            "CommonCheckOutputPath"    = @{ Label = "チェック結果の出力先フォルダ"; Browse = "Folder" }
+            "CommonLogPath"             = @{ Label = "ログの出力先フォルダ"; Browse = "Folder" }
         }
     }
     "KINTONE" = @{
         Label = "kintoneの接続情報"
         Vars = [ordered]@{
-            "KINTONE_SUB_DOMAIN" = @{ Label = "サブドメイン" }
-            "KINTONE_LOGIN"      = @{ Label = "ログイン名" }
-            "KINTONE_PASSWORD"   = @{ Label = "パスワード"; Masked = $true }
+            "KintoneSubdomain" = @{ Label = "サブドメイン" }
+            "KintoneLoginName"      = @{ Label = "ログイン名" }
+            "KintonePassword"   = @{ Label = "パスワード"; Masked = $true }
         }
     }
 }
@@ -671,11 +671,11 @@ $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
 $settingsTrailingButtonVars = @{
-    "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+    "KintonePassword" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            $subDomainVal = Get-GroupSettingsFieldValue "KINTONE_SUB_DOMAIN"
-            $loginVal = Get-GroupSettingsFieldValue "KINTONE_LOGIN"
-            $passwordVal = Get-GroupSettingsFieldValue "KINTONE_PASSWORD"
+            $subDomainVal = Get-GroupSettingsFieldValue "KintoneSubdomain"
+            $loginVal = Get-GroupSettingsFieldValue "KintoneLoginName"
+            $passwordVal = Get-GroupSettingsFieldValue "KintonePassword"
             if (!$subDomainVal.Trim() -or !$loginVal -or !$passwordVal) {
                 throw "サブドメイン・ログイン名・パスワードをすべて入力してください。"
             }
@@ -708,7 +708,7 @@ $settingsTrailingButtonVars = @{
             }
         }
     }.GetNewClosure() -OnOpenClick {
-        $templatePath = Get-ResolvedVar "COMMON_CUSTOM_TEMPLATE_PATH" $commonEnvBat
+        $templatePath = Get-ResolvedVar "CommonCustomTemplatePath" $commonEnvBat
         $templateName = Get-GroupSettingsFieldValue "TemplateName"
         $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         Open-TargetOrWarn -Path (Join-Path $templatePath "$($groupName)_$($templateName).xlsx")

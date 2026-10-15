@@ -200,7 +200,7 @@ $logTabConditions = @(
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
-    -GetLogPathFn { Get-ResolvedVar "LOG_DIR" $commonEnvBat }
+    -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat }
 
 
 $clientsDir = Join-Path $rootPath "clients"
@@ -228,7 +228,7 @@ $settingsGroups = [ordered]@{
         Vars = [ordered]@{
             "ClientDataRootDir"                    = @{ Label = "受講生データのフォルダ"; Browse = "Folder" }
             "TemplateRootDir"                      = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
-            "LOG_DIR"                               = @{ Label = "ログの出力先"; Browse = "Folder" }
+            "CommonLogPath"                               = @{ Label = "ログの出力先"; Browse = "Folder" }
             "ResultRootDir"                         = @{ Label = "実施結果の取得先（共通）"; Browse = "Folder" }
             "TestResultRootDir"                     = @{ Label = "テスト結果の取得先"; Browse = "Folder" }
             "SurveyResultRootDir"                   = @{ Label = "アンケート結果の取得先"; Browse = "Folder" }

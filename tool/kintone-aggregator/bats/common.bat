@@ -8,7 +8,7 @@ set "OutputRootDir=%BASE_PATH%output"
 
 set "TemplateRootDir=%BASE_PATH%template"
 
-set "LOG_DIR=%BASE_PATH%logs"
+set "CommonLogPath=%BASE_PATH%logs"
 
 if not defined SourceType_Daily set "SourceType_Daily=業務日誌"
 if not defined SourceType_Pulse set "SourceType_Pulse=パルスサーベイ"
