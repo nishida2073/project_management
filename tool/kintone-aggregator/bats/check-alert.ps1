@@ -422,6 +422,7 @@ function Export-DailyResult {
         }
         $rowData = @(
             $reminderLink
+            -not $dailyResult.除外対象
             if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_業務日誌 }
             if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_パルスサーベイ }
             $userData.通番
@@ -456,7 +457,7 @@ function Export-DailyResult {
     
     $resultRange = $sheet.Range(
         $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 2 - 1 ), 
-        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 3 - 1))
+        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 4 - 1))
     Set-CellColorByBoolean -Range $resultRange -TrueLabel "提出済" -FalseLabel "未提出"
 }
 
@@ -724,6 +725,7 @@ function Export-TotalResult {
             $rowData = @(
                 $targetDate
                 $courseScheduleData.科目名
+                -not $dailyResult.除外対象
                 if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_業務日誌 }
                 if ($dailyResult.除外対象) { "" } else { $dailyResult.提出状況_パルスサーベイ }
                 $userData.通番
@@ -760,7 +762,7 @@ function Export-TotalResult {
     
     $resultRange = $sheet.Range(
         $Sheet.Cells.Item($rowStartIndex, $columsStartIndex + 3 - 1 ), 
-        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 4 - 1))
+        $Sheet.Cells.Item($rowStartIndex + $rowDatas.Count - 1, $columsStartIndex + 5 - 1))
     Set-CellColorByBoolean -Range $resultRange -TrueLabel "提出済" -FalseLabel "未提出"
 }
 
