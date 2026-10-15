@@ -370,7 +370,7 @@ $settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
-        [PSCustomObject]@{ Path = (Join-Path $scriptDir "common.bat"); Save = { Save-CommonSettings }; Reload = {} }
+        [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
         [PSCustomObject]@{ Path = $collectDataDefsPath; Save = { Save-CollectDataDefs }; Reload = { $script:collectDataDefsItems = @() } }
     )
 }
@@ -503,7 +503,7 @@ $lblMasterStatusPlaceholder = New-Label -X 130 -Y 30 -Width 500 -Height 24 -Text
 $grpUserMasterSync.Controls.Add($lblMasterStatusPlaceholder)
 
 function Get-CommonSettingsFieldRows {
-    $raw = Get-SetLineRawValues -Path (Join-Path $scriptDir "common.bat")
+    $raw = Get-SetLineRawValues -Path $commonEnvBat
     foreach ($varName in $commonSettingsVars) {
         [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "BASE"; Value = $raw[$varName] }
     }
@@ -674,8 +674,6 @@ function Test-KintoneConnectionFromSettings {
 }
 
 function Save-CommonSettings {
-    $path = Join-Path $scriptDir "common.bat"
-
     $saveCommonReportVarKeyMap = @{}
     foreach ($rt in (Get-ReportTypeDefs)) {
         foreach ($varName in $commonReportVars) {
@@ -684,7 +682,7 @@ function Save-CommonSettings {
     }
 
     $allVars = @() + $commonSettingsVars + @($saveCommonReportVarKeyMap.Keys)
-    Save-EnvBatFile -Path $path -VarNames $allVars `
+    Save-EnvBatFile -Path $commonEnvBat -VarNames $allVars `
         -GetValueFn { param($varName)
             if ($saveCommonReportVarKeyMap.ContainsKey($varName)) {
                 Get-CommonSettingsFieldValue $saveCommonReportVarKeyMap[$varName]

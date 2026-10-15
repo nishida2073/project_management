@@ -597,9 +597,7 @@ function Update-GroupSettingsFields {
 }
 
 function Save-CommonSettings {
-    $path = $commonEnvBat
-
-    Save-EnvBatFile -Path $path -VarNames $commonSettingsVars `
+    Save-EnvBatFile -Path $commonEnvBat -VarNames $commonSettingsVars `
         -GetValueFn { param($varName)
             Get-CommonSettingsFieldValue $varName
         } `

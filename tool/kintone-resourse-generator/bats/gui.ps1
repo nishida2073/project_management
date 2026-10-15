@@ -722,16 +722,14 @@ function Get-CommonSettingsFiles {
 }
 
 function Save-CommonSettings {
-    $commonBatPath = $commonEnvBat
     $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
-    Save-EnvBatFile -Path $commonBatPath -VarNames $commonVars `
+    Save-EnvBatFile -Path $commonEnvBat -VarNames $commonVars `
         -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
         -HasValueFn { param($name) $settingsCommonFieldTextBoxes.ContainsKey($name) }
 }
 
 function Update-CommonSettingsFields {
-    $commonBatPath = $commonEnvBat
-    $commonDefaults = Get-SetEnvDefaults -Path $commonBatPath
+    $commonDefaults = Get-SetEnvDefaults -Path $commonEnvBat
 
     $rows = @()
     $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
