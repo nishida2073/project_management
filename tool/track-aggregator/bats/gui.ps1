@@ -33,7 +33,7 @@ $postCollectResultsBat = Join-Path $scriptDir "post-collect-results.bat"
 $collectYearComparisonResultBat = Join-Path $scriptDir "collect-year-comparison-result.bat"
 $syncKintoneToSheetBat = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
 
-$commonEnvBat = Join-Path $scriptDir "common-env.bat"
+$commonEnvBat = Join-Path $scriptDir "common.bat"
 
 $clientsDir = Join-Path $rootPath "clients"
 
@@ -338,7 +338,7 @@ $settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
-        [PSCustomObject]@{ Path = (Join-Path $scriptDir "common-env.bat"); Save = { Save-CommonSettings }; Reload = {} }
+        [PSCustomObject]@{ Path = (Join-Path $scriptDir "common.bat"); Save = { Save-CommonSettings }; Reload = {} }
     )
 }
 
@@ -745,7 +745,7 @@ function Save-TestToExcel {
 }
 
 function Get-CommonSettingsFieldRows {
-    $raw = Get-SetLineRawValues -Path (Join-Path $scriptDir "common-env.bat")
+    $raw = Get-SetLineRawValues -Path (Join-Path $scriptDir "common.bat")
     foreach ($varName in $commonSettingsVars) {
         [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
     }
@@ -855,7 +855,7 @@ function Update-GroupSettingsFields {
 }
 
 function Save-CommonSettings {
-    $path = Join-Path $scriptDir "common-env.bat"
+    $path = Join-Path $scriptDir "common.bat"
 
     Save-EnvBatFile -Path $path -VarNames $commonSettingsVars `
         -GetValueFn { param($varName)

@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 set "MyName=%~nx0"
 
-call "%~dp0common-env.bat"
+call "%~dp0common.bat"
 
 set "TargetDate="
 set "TargetGroupNameFilter="

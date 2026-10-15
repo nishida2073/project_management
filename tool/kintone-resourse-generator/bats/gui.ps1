@@ -25,7 +25,7 @@ $applyKintoneResourcesBat = Join-Path $rootPath "apply-kintone-resources.bat"
 $checkKintoneResourcesBat = Join-Path $rootPath "check-kintone-resources.bat"
 $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
-$setEnvBat = Join-Path $scriptDir "common.bat"
+$commonEnvBat = Join-Path $scriptDir "common.bat"
 
 $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
@@ -127,8 +127,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_DOWNLOAD_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
             }
         )
     }
@@ -169,8 +169,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CONFIG_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
             }
         )
     }
@@ -219,8 +219,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $setEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "COMMON_CHECK_OUTPUT_PATH" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
             }
         )
     }
@@ -346,7 +346,7 @@ $logTabConditions = @(
 )
 
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
-    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" $setEnvBat } `
+    -GetLogPathFn { Get-ResolvedVar "COMMON_LOG_PATH" $commonEnvBat } `
     -Conditions $logTabConditions
 
 
@@ -587,7 +587,7 @@ $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実�
 
 function Get-TemplateFileNames {
     param([string]$EnvVarName)
-    $templatePath = Get-ResolvedVar $EnvVarName $setEnvBat
+    $templatePath = Get-ResolvedVar $EnvVarName $commonEnvBat
     if (!$templatePath -or !(Test-Path -LiteralPath $templatePath)) { return @() }
     return @(Get-ChildItem -LiteralPath $templatePath -Filter "*.xlsx" -ErrorAction SilentlyContinue |
         ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) } |
@@ -668,7 +668,7 @@ foreach ($groupKey in $settingsGroups.Keys) {
 $settingsToolTip = New-ToolTip
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
-$commonEnvResolver = { param($name) Get-ResolvedVar $name $setEnvBat }
+$commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
 $settingsTrailingButtonVars = @{
     "KINTONE_PASSWORD" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
@@ -708,7 +708,7 @@ $settingsTrailingButtonVars = @{
             }
         }
     }.GetNewClosure() -OnOpenClick {
-        $templatePath = Get-ResolvedVar "COMMON_CUSTOM_TEMPLATE_PATH" $setEnvBat
+        $templatePath = Get-ResolvedVar "COMMON_CUSTOM_TEMPLATE_PATH" $commonEnvBat
         $templateName = Get-GroupSettingsFieldValue "TemplateName"
         $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         Open-TargetOrWarn -Path (Join-Path $templatePath "$($groupName)_$($templateName).xlsx")
@@ -717,12 +717,12 @@ $settingsTrailingButtonVars = @{
 
 function Get-CommonSettingsFiles {
     return @(
-        [PSCustomObject]@{ Path = (Join-Path $scriptDir "common.bat"); Save = { Save-CommonSettings }; Reload = {} }
+        [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
     )
 }
 
 function Save-CommonSettings {
-    $commonBatPath = Join-Path $scriptDir "common.bat"
+    $commonBatPath = $commonEnvBat
     $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
     Save-EnvBatFile -Path $commonBatPath -VarNames $commonVars `
         -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
@@ -730,7 +730,7 @@ function Save-CommonSettings {
 }
 
 function Update-CommonSettingsFields {
-    $commonBatPath = Join-Path $scriptDir "common.bat"
+    $commonBatPath = $commonEnvBat
     $commonDefaults = Get-SetEnvDefaults -Path $commonBatPath
 
     $rows = @()

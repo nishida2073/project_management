@@ -6,7 +6,7 @@ set "MyName=%~nx0"
 
 call "%~dp0bats\excel-clean.bat"
 
-call "%~dp0bats\common-env.bat"
+call "%~dp0bats\common.bat"
 
 call "%~dp0bats\message.bat" "Start %MyName%"
 echo.

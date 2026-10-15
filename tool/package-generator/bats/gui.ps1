@@ -24,7 +24,7 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
-$setEnvBat = Join-Path $scriptDir "common.bat"
+$commonEnvBat = Join-Path $scriptDir "common.bat"
 $generatePackageBat = Join-Path $rootPath "generate-package.bat"
 $generateConfigBat = Join-Path $rootPath "generate-config.bat"
 $uploadKintoneFileBat = Join-Path $rootPath "upload-kintone-file.bat"
@@ -305,7 +305,7 @@ $logTabConditions = @(
 $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
-    -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $setEnvBat }
+    -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat }
 
 $clientsDir = Join-Path $rootPath "clients"
 function Update-FolderFromGroup {
@@ -320,7 +320,7 @@ $clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
-$commonEnvResolver = { param($name) Get-ResolvedVar $name $setEnvBat }
+$commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
 $settingsGroups = [ordered]@{
     "COMMON" = @{
@@ -461,7 +461,7 @@ $settingsToolTip = New-ToolTip
 
 function Get-CommonSettingsFiles {
     return @(
-        [PSCustomObject]@{ Path = (Join-Path $scriptDir "common.bat"); Save = { Save-CommonSettings }; Reload = {} }
+        [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
     )
 }
 
@@ -549,7 +549,7 @@ function Get-GroupNames {
 }
 
 function Get-CommonSettingsFieldRows {
-    $raw = Get-SetLineRawValues -Path (Join-Path $scriptDir "common.bat")
+    $raw = Get-SetLineRawValues -Path $commonEnvBat
     foreach ($varName in $commonSettingsVars) {
         [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
     }
@@ -597,7 +597,7 @@ function Update-GroupSettingsFields {
 }
 
 function Save-CommonSettings {
-    $path = Join-Path $scriptDir "common.bat"
+    $path = $commonEnvBat
 
     Save-EnvBatFile -Path $path -VarNames $commonSettingsVars `
         -GetValueFn { param($varName)
