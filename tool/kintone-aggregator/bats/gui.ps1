@@ -229,6 +229,7 @@ $settingsGroups = [ordered]@{
             "ThreadId"            = @{ Label = "投稿先スレッドID" }
             "MentionUserCodes"    = @{ Label = "メンション対象" }
             "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Width=400; Multiline = $true }
+            "CommentSummaryTemplate" = @{ Label = "投稿集計文言"; Width=400; Multiline = $true }
         }
     }
     "SYNC" = @{
@@ -294,7 +295,7 @@ $settingsTrailingButtonVars = @{
             Test-KintoneConnection -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword
         }
     }.GetNewClosure() }
-    "CommentTextTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -AddStatusLabel -OnClick {
+    "CommentSummaryTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
             Sync-MentionRowsFromControls
             $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
@@ -311,6 +312,12 @@ $settingsTrailingButtonVars = @{
             $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
             Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $baseUrl -Authorization $authorization | Out-Null
         }
+    }.GetNewClosure() -OnOpenClick {
+        $subdomain = (Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain").Trim()
+        $spaceId = (Get-GroupSettingsFieldValue "POST_SpaceId").Trim()
+        $threadId = (Get-GroupSettingsFieldValue "POST_ThreadId").Trim()
+        $threadUrl = if ($subdomain -and $spaceId -and $threadId) { "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId" } else { $null }
+        Open-TargetOrWarn -Path $threadUrl
     }.GetNewClosure() }
 }
 
