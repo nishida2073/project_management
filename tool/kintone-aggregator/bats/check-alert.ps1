@@ -338,6 +338,44 @@ function Create-DailySummaryDatas {
 }
 
 
+function Export-Json {
+    param(
+        [string]$OutputFilePath,
+        [string]$TargetDate,
+        [array]$UserDatas
+    )
+    Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
+    $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
+
+    $classSummaries = @{}
+    foreach ($userData in $UserDatas) {
+        $className = $userData.クラス名
+        if (-not $classSummaries.ContainsKey($className)) {
+            $classSummaries[$className] = [PSCustomObject]@{
+                クラス名          = $className
+                業務日誌未提出人数     = 0
+                パルスサーベイ未提出人数 = 0
+                アラート人数        = 0
+            }
+        }
+        $summary = $classSummaries[$className]
+        $dailyResult = $userData.dailyResults | Where-Object { $_.日付 -eq $TargetDate } | Select-Object -First 1
+        if ($dailyResult -and $dailyResult.除外対象) {
+            continue
+        }
+        if (-not $dailyResult.提出状況_業務日誌) { $summary.業務日誌未提出人数++ }
+        if (-not $dailyResult.提出状況_パルスサーベイ) { $summary.パルスサーベイ未提出人数++ }
+        if ($dailyResult.alert.理解度 -or $dailyResult.alert.人間関係 -or $dailyResult.alert.体調 -or $dailyResult.alert.連続未回答_パルスサーベイ) { $summary.アラート人数++ }
+    }
+
+    $classSummaryList = @($classSummaries.Values | Sort-Object クラス名 | Select-Object クラス名, 業務日誌未提出人数, パルスサーベイ未提出人数, アラート人数)
+    Write-Message $classSummaryList -VarName "サマリ結果" -Type "Info"
+    
+    $classSummaryJson = ConvertTo-Json -InputObject $classSummaryList -Depth 3
+    [System.IO.File]::WriteAllText($OutputFilePath, $classSummaryJson, (New-Object System.Text.UTF8Encoding($true)))
+
+}
+
 function Export-Excel {
     param(
         [string]$OutputFilePath,
@@ -946,23 +984,28 @@ try {
             Write-Message $dailySummaryDatas -VarName "dailySummaryDatas"
 
             New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-            $outputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
-            Copy-Item -Path $TemplateFilePath -Destination $outputFilePath -Force
+            $excelOutputFilePath = Join-Path $OutputRootDir "$TargetGroupName.xlsx"
+            Copy-Item -Path $TemplateFilePath -Destination $excelOutputFilePath -Force
             $viewCourseScheduleDatas = if ($ViewHolidayCourseSchedule -eq 1) {
                 $allCourseScheduleDatas
             }
             else {
                 $targetCourseScheduleDatas
             }
-            Export-Excel $outputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
+            Export-Excel $excelOutputFilePath $viewCourseScheduleDatas $dailySummaryDatas $checkedUserDatas $targetDates[-1] -TargetGroupName $TargetGroupName
+            $jsonOutputFilePath = Join-Path $OutputRootDir "$TargetGroupName.json"
+            Export-Json $jsonOutputFilePath $TargetDate $checkedUserDatas
 
             New-Item -Path $BackupRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-            $backupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
+            $excelBackupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
+            Copy-Item -Path $excelOutputFilePath -Destination $excelBackupFilePath -Force
 
-            Copy-Item -Path $outputFilePath -Destination $backupFilePath -Force
+            $jsonBackupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.json"
+            Copy-Item -Path $jsonOutputFilePath -Destination $jsonBackupFilePath -Force
 
-            Write-MessageComplete "アラート検知結果を出力しました: $outputFilePath"
+            Write-MessageComplete "アラート検知結果（Excel）を出力しました: $excelOutputFilePath"
+            Write-MessageComplete "アラート検知結果（Json）を出力しました: $jsonOutputFilePath"
         }
         catch {
             Write-MessageError "実行エラー: $($error[0])"

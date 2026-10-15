@@ -37,8 +37,6 @@ try {
                 $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
             }
 
-            # 日付なしファイル（$TargetGroupName.xlsx）は直近に実行した日の内容で上書きされるため、
-            # 過去の特定日を指定して単独で投稿し直しても内容が食い違わないよう、backupの日付付きファイルを使う
             $backupFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.xlsx"
             if (-not (Test-Path -LiteralPath $backupFilePath)) {
                 throw "アラート結果ファイルが見つかりません: $backupFilePath"
@@ -51,9 +49,32 @@ try {
                     @{ code = $code; type = $type }
                 })
 
-            # client.batは1行1変数のため、複数行の文言は"\n"リテラルで1行に収めて渡ってくる。ここで実改行に戻す
             $commentTextTemplate = if ([string]::IsNullOrWhiteSpace($CommentTextTemplate)) { "アラート結果を更新しました。（{TargetGroupName} / {TargetDate}）" } else { $CommentTextTemplate -replace '\\n', "`n" }
             $commentText = $commentTextTemplate -replace '\{TargetGroupName\}', $TargetGroupName -replace '\{TargetDate\}', $TargetDate
+            $summaryJsonFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.json"
+            if (-not (Test-Path -LiteralPath $summaryJsonFilePath)) {
+                throw "集計テキストファイルが見つかりません: $summaryJsonFilePath"
+            }
+            $parsedSummaries = ConvertFrom-Json -InputObject (Get-Content -LiteralPath $summaryJsonFilePath -Raw -Encoding UTF8)
+            $summaries = @($parsedSummaries)
+            $summaryTemplate = @(
+                "■ {クラス名}"
+                "・業務日誌（未提出）: {業務日誌未提出人数}"
+                "・パルスサーベイ（未提出）: {パルスサーベイ未提出人数}"
+                "・アラート: {アラート人数}"
+            )
+            $summaryLines = @()
+            foreach ($summary in $summaries) {
+                if ($summaryLines.Count -gt 0) { $summaryLines += "" }
+                foreach ($templateLine in $summaryTemplate) {
+                    $line = $templateLine
+                    foreach ($property in $summary.PSObject.Properties) {
+                        $line = $line -replace "\{$($property.Name)\}", $property.Value
+                    }
+                    $summaryLines += $line
+                }
+            }
+            $commentText = $commentText + "`n`n" + ($summaryLines -join "`n")
 
             $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths @($backupFilePath) -Mentions $mentions -BaseUrl $BaseUrl -Authorization $Authorization
             Write-Message $commentResponse -VarName "スレッド投稿" -Type "Info"
