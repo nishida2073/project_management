@@ -450,7 +450,7 @@ $btnMasterSyncExecute.Add_Click({
 })
 $grpUserMasterSync.Controls.Add($btnMasterSyncExecute)
 
-$lblMasterStatusPlaceholder = New-Label -X 130 -Y 30 -Width 500 -Height 24 -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
+$lblMasterStatusPlaceholder = New-Label -X ($btnMasterSyncExecute.Right + 10) -Y $btnMasterSyncExecute.Top -Width 500 -Height $btnMasterSyncExecute.Height -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
 $grpUserMasterSync.Controls.Add($lblMasterStatusPlaceholder)
 
 $grpSurveyEdit = New-GroupBox -Text "アンケート編集" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
