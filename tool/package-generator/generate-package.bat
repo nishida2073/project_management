@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 set "BATCH_NAME=%~nx0"
 
-call "%~dp0bats\common-env.bat"
+call "%~dp0bats\common.bat"
 
 for %%A in (%*) do (
     set "arg=%%~A"
