@@ -1468,6 +1468,8 @@ function Render-SettingsFields {
         [string[]]$MaskedVars = @(),
         [string[]]$FolderBrowseVars = @(),
         [string[]]$FileBrowseVars = @(),
+        [hashtable]$FileBrowseFilters = @{},
+        [string[]]$NoOpenVars = @(),
         [hashtable]$WidthVars = @{},
         [int]$LabelWidth = 220,
         [int]$LabelHeight = 20,
@@ -1553,10 +1555,11 @@ function Render-SettingsFields {
             $btnBrowse.Tag = $txt
 
             if ($isFileBrowse) {
+                $browseFilter = if ($FileBrowseFilters.ContainsKey($field.VarName)) { $FileBrowseFilters[$field.VarName] } else { "すべてのファイル (*.*)|*.*" }
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.OpenFileDialog
-                    $dlg.Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*"
+                    $dlg.Filter = $browseFilter
                     $startPath = Resolve-BrowseStart -RawValue $targetTxt.Text -DefaultPath $RootPath -Resolver $EnvResolver -BasePath $RootPath
                     if ($startPath -and (Test-Path -LiteralPath $startPath)) {
                         $dlg.InitialDirectory = Split-Path $startPath -Parent
@@ -1565,8 +1568,12 @@ function Render-SettingsFields {
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.FileName }
                 }.GetNewClosure())
 
-                $lnkOpen = New-OpenLink -Text "開く" -X ($btnBrowse.Right + 10) -Y ($y - 2) -Width 40 -Height 22 -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
-                $grp.Controls.AddRange(@($btnBrowse, $lnkOpen))
+                $fileControls = @($btnBrowse)
+                if (-not ($NoOpenVars -contains $field.VarName)) {
+                    $lnkOpen = New-OpenLink -Text "開く" -X ($btnBrowse.Right + 10) -Y ($y - 2) -Width 40 -Height 22 -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
+                    $fileControls += $lnkOpen
+                }
+                $grp.Controls.AddRange($fileControls)
             } else {
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag

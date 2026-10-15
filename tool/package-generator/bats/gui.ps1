@@ -357,7 +357,7 @@ $settingsGroups = [ordered]@{
         Label = "パッケージ作成"
         Vars = [ordered]@{
             "GenerateSourcePath"      = @{ Label = "圧縮元のフォルダ"; Browse = "Folder"  }
-            "GenerateConfigPath"      = @{ Label = "パッケージ定義ファイル"; Browse = "File" }
+            "GenerateConfigPath"      = @{ Label = "パッケージ定義ファイル"; Browse = "File"; Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*" }
             "GenerateWorkPath"        = @{ Label = "作業用のフォルダ"; Browse = "Folder"  }
             "GenerateOutputPath"      = @{ Label = "パッケージの出力先"; Browse = "Folder" }
             "GenerateSheetsInclude"   = @{ Label = "対象のシート" }
@@ -420,6 +420,8 @@ $settingsGroupLabels = @{}
 $settingsVarLabels = @{}
 $settingsFolderBrowseVars = @()
 $settingsFileBrowseVars = @()
+$settingsFileBrowseFilters = @{}
+$settingsNoOpenVars = @()
 $settingsMaskedVars = @()
 $settingsMultilineVars = @()
 $radioVars = @{}
@@ -429,7 +431,8 @@ foreach ($groupKey in $settingsGroups.Keys) {
         $varDef = $settingsGroups[$groupKey].Vars[$varKey]
         $settingsVarLabels[$varKey] = $varDef.Label
         if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
-        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
+        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey; if ($varDef.Filter) { $settingsFileBrowseFilters[$varKey] = $varDef.Filter } }
+        if ($varDef.NoOpen) { $settingsNoOpenVars += $varKey }
         if ($varDef.Masked) { $settingsMaskedVars += $varKey }
         if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
         if ($varDef.Radio) { $radioVars[$varKey] = $varDef.Radio }
@@ -575,7 +578,7 @@ function Get-GroupSettingsFieldRows {
 function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -LabelWidth 150 | Out-Null
 }
 
 function Update-GroupSettingsFields {
@@ -588,7 +591,7 @@ function Update-GroupSettingsFields {
     $rootPathValue = $rootPath
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -in @("KINTONE", "UPLOAD_KINTONE", "GENERATE") }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -LabelWidth 150 `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
         -TrailingButtonVars $trailingButtons | Out-Null
 

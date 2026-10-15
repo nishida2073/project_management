@@ -242,8 +242,8 @@ $settingsGroups = [ordered]@{
             "OutputYearComparisonCollectDir"        = @{ Label = "経年比較結果の出力先"; Browse = "Folder" }
             "OutputYearComparisonResultFileSuffix"  = @{ Label = "経年比較結果ファイル名の接尾語" }
             "PassScore"                             = $overridableVarDefs["PassScore"]
-            "AutoHotkeyExePath"                     = @{ Label = "AutoHotkey実行ファイルのパス" }
-            "AutoHotkeyScriptPath"                  = @{ Label = "ダウンロード用スクリプトのパス" }
+            "AutoHotkeyExePath"                     = @{ Label = "AutoHotkey実行ファイルのパス"; Browse = "File"; Filter = "実行ファイル (*.exe)|*.exe|すべてのファイル (*.*)|*.*"; NoOpen = $true }
+            "AutoHotkeyScriptPath"                  = @{ Label = "ダウンロード用スクリプトのパス"; Browse = "File"; Filter = "AutoHotkeyスクリプト (*.ahk)|*.ahk|すべてのファイル (*.*)|*.*" }
             "TrackLoginUrl"                         = @{ Label = "trackログインURL" }
             "ComparePeriod"                         = $overridableVarDefs["ComparePeriod"]
             "CourseGroupDefs"                       = @{ Label = "コースグループ定義" }
@@ -292,6 +292,8 @@ $settingsGroupLabels = @{}
 $settingsVarLabels = @{}
 $settingsFolderBrowseVars = @()
 $settingsFileBrowseVars = @()
+$settingsFileBrowseFilters = @{}
+$settingsNoOpenVars = @()
 $settingsMaskedVars = @()
 $settingsMultilineVars = @()
 $settingsWidthVars = @{}
@@ -302,7 +304,8 @@ foreach ($groupKey in $settingsGroups.Keys) {
         $varDef = $settingsGroups[$groupKey].Vars[$varKey]
         $settingsVarLabels[$varKey] = $varDef.Label
         if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
-        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
+        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey; if ($varDef.Filter) { $settingsFileBrowseFilters[$varKey] = $varDef.Filter } }
+        if ($varDef.NoOpen) { $settingsNoOpenVars += $varKey }
         if ($varDef.Masked) { $settingsMaskedVars += $varKey }
         if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
         if ($varDef.Width) { $settingsWidthVars[$varKey] = $varDef.Width }
@@ -780,7 +783,7 @@ $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 function Update-CommonSettingsFields {
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 230 | Out-Null
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -WidthVars $settingsWidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() | Out-Null
 }
 
 function Test-KintoneConnectionFromSettings {
@@ -844,7 +847,7 @@ function Update-GroupSettingsFields {
     }.GetNewClosure() }
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
         -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 230 `
+        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -WidthVars $settingsWidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions `
         -TrailingButtonVars $trailingButtons | Out-Null
 
