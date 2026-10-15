@@ -288,30 +288,7 @@ $syncUserMasterVars = @($settingsGroups["SYNC"].Vars.Keys)
 
 $settingsTrailingButtonVars = @{}
 
-$settingsGroupLabels = @{}
-$settingsVarLabels = @{}
-$settingsFolderBrowseVars = @()
-$settingsFileBrowseVars = @()
-$settingsFileBrowseFilters = @{}
-$settingsNoOpenVars = @()
-$settingsMaskedVars = @()
-$settingsMultilineVars = @()
-$settingsWidthVars = @{}
-$radioVars = @{}
-foreach ($groupKey in $settingsGroups.Keys) {
-    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
-    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
-        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
-        $settingsVarLabels[$varKey] = $varDef.Label
-        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
-        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey; if ($varDef.Filter) { $settingsFileBrowseFilters[$varKey] = $varDef.Filter } }
-        if ($varDef.NoOpen) { $settingsNoOpenVars += $varKey }
-        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
-        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
-        if ($varDef.Width) { $settingsWidthVars[$varKey] = $varDef.Width }
-        if ($varDef.Radio) { $radioVars[$varKey] = $varDef.Radio }
-    }
-}
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
@@ -781,9 +758,9 @@ $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")
 
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -WidthVars $settingsWidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() | Out-Null
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() | Out-Null
 }
 
 function Test-KintoneConnectionFromSettings {
@@ -845,9 +822,9 @@ function Update-GroupSettingsFields {
             Test-KintoneConnection -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword
         }
     }.GetNewClosure() }
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -WidthVars $settingsWidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions `
         -TrailingButtonVars $trailingButtons | Out-Null
 
@@ -908,7 +885,7 @@ function Save-GroupSettings {
                 Get-GroupSettingsFieldValue $saveGroupAuthVarMap[$varName]
             } elseif ($saveGroupPostVarMap.ContainsKey($varName)) {
                 $val = Get-GroupSettingsFieldValue $saveGroupPostVarMap[$varName]
-                if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+                if ($settingsRenderLists.MultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
                 $val
             } elseif ($saveGroupOverrideVarMap.ContainsKey($varName)) {
                 $val = Get-GroupSettingsFieldValue $saveGroupOverrideVarMap[$varName]

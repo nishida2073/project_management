@@ -83,7 +83,13 @@ try {
 
                 try {
                     $workbook = $excel.Workbooks.Open($ExcelFilePath)
-                    $sheet = $workbook.Sheets.Item($SheetName)
+                    $sheet = $null
+                    foreach ($ws in $workbook.Worksheets) {
+                        if ($ws.Name -eq $SheetName) { $sheet = $ws; break }
+                    }
+                    if (-not $sheet) {
+                        throw "シートが見つかりません：$SheetName"
+                    }
 
                     Write-Message "ヘッダ検索中..." -Type "Info"
 

@@ -254,25 +254,7 @@ $commonSettingsVars = @($settingsGroups["BASE"].Vars.Keys)
 $authVars = @($settingsGroups["AUTH"].Vars.Keys)
 $postVars = @($settingsGroups["POST"].Vars.Keys)
 
-$settingsGroupLabels = @{}
-$settingsVarLabels = @{}
-$settingsFolderBrowseVars = @()
-$settingsFileBrowseVars = @()
-$settingsMaskedVars = @()
-$settingsMultilineVars = @()
-$settingsWidthVars = @{}
-foreach ($groupKey in $settingsGroups.Keys) {
-    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
-    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
-        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
-        $settingsVarLabels[$varKey] = $varDef.Label
-        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
-        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
-        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
-        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
-        if ($varDef.Width) { $settingsWidthVars[$varKey] = $varDef.Width }
-    }
-}
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 $settingsTrailingButtonVars = @{
     "TargetAppIds"        = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
@@ -639,8 +621,8 @@ function Update-CommonSettingsFields {
     $controlsToStack = @($grp)
 
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 -ExtraGrps $controlsToStack | Out-Null
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 150 -ExtraGrps $controlsToStack | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
@@ -650,8 +632,8 @@ function Update-GroupSettingsFields {
 
     $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -WidthVars $settingsWidthVars -LabelWidth 150 `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 150 `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions | Out-Null
 
     $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
@@ -738,7 +720,7 @@ function Save-GroupSettings {
                 Get-GroupSettingsFieldValue $saveGroupAuthVarMap[$varName]
             } elseif ($saveGroupPostVarMap.ContainsKey($varName)) {
                 $val = Get-GroupSettingsFieldValue $saveGroupPostVarMap[$varName]
-                if ($settingsMultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+                if ($settingsRenderLists.MultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
                 $val
             } elseif ($saveGroupSyncVarMap.ContainsKey($varName)) {
                 Get-GroupSettingsFieldValue $saveGroupSyncVarMap[$varName]

@@ -1455,6 +1455,36 @@ function Add-FieldActionButton {
     return $lbl
 }
 
+function Get-SettingsRenderLists {
+    param([Parameter(Mandatory)]$SettingsGroups)
+    $lists = [PSCustomObject]@{
+        GroupLabels      = @{}
+        VarLabels        = @{}
+        FolderBrowseVars = @()
+        FileBrowseVars   = @()
+        FileBrowseFilters = @{}
+        NoOpenVars       = @()
+        MaskedVars       = @()
+        MultilineVars    = @()
+        WidthVars        = @{}
+        RadioVars        = @{}
+    }
+    foreach ($groupKey in $SettingsGroups.Keys) {
+        $lists.GroupLabels[$groupKey] = $SettingsGroups[$groupKey].Label
+        foreach ($varKey in $SettingsGroups[$groupKey].Vars.Keys) {
+            $varDef = $SettingsGroups[$groupKey].Vars[$varKey]
+            $lists.VarLabels[$varKey] = $varDef.Label
+            if ($varDef.Browse -eq "Folder") { $lists.FolderBrowseVars += $varKey }
+            if ($varDef.Browse -eq "File") { $lists.FileBrowseVars += $varKey; if ($varDef.Filter) { $lists.FileBrowseFilters[$varKey] = $varDef.Filter } }
+            if ($varDef.NoOpen) { $lists.NoOpenVars += $varKey }
+            if ($varDef.Masked) { $lists.MaskedVars += $varKey }
+            if ($varDef.Multiline) { $lists.MultilineVars += $varKey }
+            if ($varDef.Width) { $lists.WidthVars[$varKey] = $varDef.Width }
+            if ($varDef.Radio) { $lists.RadioVars[$varKey] = $varDef.Radio }
+        }
+    }
+    return $lists
+}
 function Render-SettingsFields {
     param(
         [System.Windows.Forms.Panel]$Panel,

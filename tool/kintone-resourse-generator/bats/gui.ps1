@@ -647,23 +647,7 @@ $settingsGroups = [ordered]@{
     }
 }
 
-$settingsGroupLabels = @{}
-$settingsVarLabels = [ordered]@{}
-$settingsFolderBrowseVars = @()
-$settingsFileBrowseVars = @()
-$settingsMaskedVars = @()
-$settingsMultilineVars = @()
-foreach ($groupKey in $settingsGroups.Keys) {
-    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
-    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
-        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
-        $settingsVarLabels[$varKey] = $varDef.Label
-        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
-        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey }
-        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
-        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
-    }
-}
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 
 $kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
 
@@ -737,8 +721,8 @@ function Update-CommonSettingsFields {
         $rows += [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
     }
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 220 | Out-Null
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 220 | Out-Null
 }
 
 $settingsCommonFieldTextBoxes = @{}
@@ -806,16 +790,14 @@ function Update-GroupSettingsFields {
         [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "TemplateName"; Value = ""; Key = "TemplateName" }
     )
 
-    $settingsGroupLabels["テンプレート作成"] = "テンプレート作成"
+    $settingsRenderLists.GroupLabels["テンプレート作成"] = "テンプレート作成"
 
-    $settingsVarLabels = $settingsVarLabels + @{
-        "SpaceId" = "スペースID"
-        "TemplateName" = "テンプレート名"
-    }
+    $settingsRenderLists.VarLabels["SpaceId"] = "スペースID"
+    $settingsRenderLists.VarLabels["TemplateName"] = "テンプレート名"
 
     Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -LabelWidth 150 | Out-Null
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 150 | Out-Null
 }
 
 $settingsGroupTop = (New-SettingsTopPanel `

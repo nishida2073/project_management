@@ -416,28 +416,7 @@ $settingsTrailingButtonVars = @{
     }.GetNewClosure() }
 }
 
-$settingsGroupLabels = @{}
-$settingsVarLabels = @{}
-$settingsFolderBrowseVars = @()
-$settingsFileBrowseVars = @()
-$settingsFileBrowseFilters = @{}
-$settingsNoOpenVars = @()
-$settingsMaskedVars = @()
-$settingsMultilineVars = @()
-$radioVars = @{}
-foreach ($groupKey in $settingsGroups.Keys) {
-    $settingsGroupLabels[$groupKey] = $settingsGroups[$groupKey].Label
-    foreach ($varKey in $settingsGroups[$groupKey].Vars.Keys) {
-        $varDef = $settingsGroups[$groupKey].Vars[$varKey]
-        $settingsVarLabels[$varKey] = $varDef.Label
-        if ($varDef.Browse -eq "Folder") { $settingsFolderBrowseVars += $varKey }
-        if ($varDef.Browse -eq "File") { $settingsFileBrowseVars += $varKey; if ($varDef.Filter) { $settingsFileBrowseFilters[$varKey] = $varDef.Filter } }
-        if ($varDef.NoOpen) { $settingsNoOpenVars += $varKey }
-        if ($varDef.Masked) { $settingsMaskedVars += $varKey }
-        if ($varDef.Multiline) { $settingsMultilineVars += $varKey }
-        if ($varDef.Radio) { $radioVars[$varKey] = $varDef.Radio }
-    }
-}
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
@@ -576,9 +555,9 @@ function Get-GroupSettingsFieldRows {
 
 
 function Update-CommonSettingsFields {
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -LabelWidth 150 | Out-Null
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -LabelWidth 150 | Out-Null
 }
 
 function Update-GroupSettingsFields {
@@ -589,9 +568,9 @@ function Update-GroupSettingsFields {
     $trailingButtons = $settingsTrailingButtonVars.Clone()
     $resolverValue = $commonEnvResolver
     $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -in @("KINTONE", "UPLOAD_KINTONE", "GENERATE") }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $radioVars `
-        -GroupLabels $settingsGroupLabels -VarLabels $settingsVarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsMultilineVars -MaskedVars $settingsMaskedVars -FolderBrowseVars $settingsFolderBrowseVars -FileBrowseVars $settingsFileBrowseVars -FileBrowseFilters $settingsFileBrowseFilters -NoOpenVars $settingsNoOpenVars -LabelWidth 150 `
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -in @("KINTONE", "UPLOAD_KINTONE", "GENERATE") }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -LabelWidth 150 `
         -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
         -TrailingButtonVars $trailingButtons | Out-Null
 
