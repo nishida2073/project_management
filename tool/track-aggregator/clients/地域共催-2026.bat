@@ -1,16 +1,5 @@
 @echo off
 
-set "KintoneLoginName=user01"
-set "KintonePassword=abcd1234"
-set "KintoneSubdomain=iiglepv0966f"
-set "Authorization="
-set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
-
-set "SpaceId=7"
-set "ThreadId=9"
-set "MentionUserCodes="
-set "CommentTextTemplate=集計結果を更新しました。（{TargetGroupName}）"
-
 set "KintoneSubdomain=iiglepv0966f"
 set "KintoneLoginName=user01"
 set "KintonePassword=abcd1234"
@@ -19,7 +8,7 @@ set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
 set "ThreadId=9"
 set "MentionUserCodes="
 set "SpaceId=7"
-set "CommentTextTemplate=集計結果を更新しました。（{TargetGroupName}）"
+set "CommentTextTemplate=集計結果を更新しました。（{グループ名}）"
 set "SyncUserMasterAppId=136"
 set "SyncUserMasterSheetName=受講生一覧"
 set "YearOrder=1"

@@ -9,7 +9,7 @@ if not defined BaseUrl set "BaseUrl=https://%KintoneSubdomain%.cybozu.com"
 if not defined SpaceId set "SpaceId="
 if not defined ThreadId set "ThreadId="
 if not defined MentionUserCodes set "MentionUserCodes="
-if not defined CommentTextTemplate set "CommentTextTemplate=アラートの内容が更新されました。({TargetGroupName})"
+if not defined CommentTextTemplate set "CommentTextTemplate=集計結果を更新しました。（{グループ名}）"
 
 if not defined SyncUserMasterAppId set "SyncUserMasterAppId="
 if not defined SyncUserMasterSheetName set "SyncUserMasterSheetName=受講生一覧"

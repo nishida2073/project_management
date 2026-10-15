@@ -67,8 +67,10 @@ try {
                     @{ code = $code; type = $type }
                 })
 
-            $commentTextTemplate = if ([string]::IsNullOrWhiteSpace($CommentTextTemplate)) { "テスト・アンケート結果を更新しました。（{TargetGroupName}）" } else { $CommentTextTemplate -replace '\\n', "`n" }
-            $commentText = $commentTextTemplate -replace '\{TargetGroupName\}', $TargetGroupName
+            $defaultCommentTextTemplate = "集計結果を更新しました。（{グループ名}）"
+            $commentTextTemplate = if ([string]::IsNullOrWhiteSpace($CommentTextTemplate)) { $defaultCommentTextTemplate } else { $CommentTextTemplate -replace '\\n', "`n" }
+            $commentText = $commentTextTemplate -replace '\{グループ名\}', $TargetGroupName
+            Write-Message $commentText -VarName "投稿コメント" -Type "Info"
 
             $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths $filePaths -Mentions $mentions -BaseUrl $BaseUrl -Authorization $Authorization
             Write-Message $commentResponse -VarName "commentResponse" -Type "Info"

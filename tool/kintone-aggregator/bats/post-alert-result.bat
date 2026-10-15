@@ -59,6 +59,7 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "     -ThreadId '!ThreadId!'" ^
           "     -MentionUserCodes '!MentionUserCodes!'" ^
           "     -CommentTextTemplate '!CommentTextTemplate!'" ^
+          "     -CommentSummaryTemplate '!CommentSummaryTemplate!'" ^
           "     -LogNamePrefix '%~n0'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^

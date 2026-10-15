@@ -10,6 +10,7 @@
     [string]$ThreadId,
     [string]$MentionUserCodes,
     [string]$CommentTextTemplate,
+    [string]$CommentSummaryTemplate,
     [string]$LogNamePrefix
 )
 
@@ -48,25 +49,28 @@ try {
                     $type = if ($pair.Count -ge 2 -and $pair[1].Trim()) { $pair[1].Trim().ToUpper() } else { "USER" }
                     @{ code = $code; type = $type }
                 })
-
-            $commentTextTemplate = if ([string]::IsNullOrWhiteSpace($CommentTextTemplate)) { "アラート結果を更新しました。（{TargetGroupName} / {TargetDate}）" } else { $CommentTextTemplate -replace '\\n', "`n" }
-            $commentText = $commentTextTemplate -replace '\{TargetGroupName\}', $TargetGroupName -replace '\{TargetDate\}', $TargetDate
+            
+            $defaultCommentTextTemplate = "集計結果を更新しました。（{グループ名} / {対象日}）"
+            $commentTextTemplate = if ([string]::IsNullOrWhiteSpace($CommentTextTemplate)) { $defaultCommentTextTemplate } else { $CommentTextTemplate -replace '\\n', "`n" }
+            $commentText = $commentTextTemplate -replace '\{グループ名\}', $TargetGroupName -replace '\{対象日\}', $TargetDate
+            
             $summaryJsonFilePath = Join-Path $BackupRootDir "$TargetGroupName-$TargetDate.json"
             if (-not (Test-Path -LiteralPath $summaryJsonFilePath)) {
                 throw "集計テキストファイルが見つかりません: $summaryJsonFilePath"
             }
             $parsedSummaries = ConvertFrom-Json -InputObject (Get-Content -LiteralPath $summaryJsonFilePath -Raw -Encoding UTF8)
             $summaries = @($parsedSummaries)
-            $summaryTemplate = @(
+            $defaultCommentSummaryTemplate = @(
                 "■ {クラス名}"
                 "・業務日誌（未提出）: {業務日誌未提出人数}"
                 "・パルスサーベイ（未提出）: {パルスサーベイ未提出人数}"
                 "・アラート: {アラート人数}"
             )
+            $summaryCommentTemplate = if ([string]::IsNullOrWhiteSpace($CommentSummaryTemplate)) { $defaultCommentSummaryTemplate } else { @(($CommentSummaryTemplate -replace '\\n', "`n") -split "`n") }
             $summaryLines = @()
             foreach ($summary in $summaries) {
                 if ($summaryLines.Count -gt 0) { $summaryLines += "" }
-                foreach ($templateLine in $summaryTemplate) {
+                foreach ($templateLine in $summaryCommentTemplate) {
                     $line = $templateLine
                     foreach ($property in $summary.PSObject.Properties) {
                         $line = $line -replace "\{$($property.Name)\}", $property.Value
@@ -74,11 +78,13 @@ try {
                     $summaryLines += $line
                 }
             }
+            
             $commentText = $commentText + "`n`n" + ($summaryLines -join "`n")
+            Write-Message $commentText -VarName "投稿コメント" -Type "Info"
 
             $commentResponse = Add-KintoneThreadComment -SpaceId $SpaceId -ThreadId $ThreadId -Text $commentText -FilePaths @($backupFilePath) -Mentions $mentions -BaseUrl $BaseUrl -Authorization $Authorization
             Write-Message $commentResponse -VarName "スレッド投稿" -Type "Info"
-
+            
             Write-MessageComplete "集計結果を投稿しました"
         }
         catch {
