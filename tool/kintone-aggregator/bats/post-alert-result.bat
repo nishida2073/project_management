@@ -54,7 +54,6 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "     -BackupRootDir '%BackupTargetDir%'" ^
           "     -KintoneLoginName '!KintoneLoginName!'" ^
           "     -KintonePassword '!KintonePassword!'" ^
-          "     -Authorization '!Authorization!'" ^
           "     -SpaceId '!SpaceId!'" ^
           "     -ThreadId '!ThreadId!'" ^
           "     -MentionUserCodes '!MentionUserCodes!'" ^

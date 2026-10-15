@@ -46,7 +46,6 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "     -SurveyOutputFileSuffix '!OutputSurveyResultFileSuffix!'" ^
           "     -KintoneLoginName '!KintoneLoginName!'" ^
           "     -KintonePassword '!KintonePassword!'" ^
-          "     -Authorization '!Authorization!'" ^
           "     -SpaceId '!SpaceId!'" ^
           "     -ThreadId '!ThreadId!'" ^
           "     -MentionUserCodes '!MentionUserCodes!'" ^

@@ -2,7 +2,6 @@
 
 set "KintoneLoginName="
 set "KintonePassword="
-set "Authorization="
 set "KintoneSubdomain=univ-kyousai-{x}"
 set "KintoneBaseUrl=https://%KintoneSubdomain%.cybozu.com"
 

@@ -4,7 +4,6 @@
     [string]$TargetGroupName,
     [string]$KintoneLoginName,
     [string]$KintonePassword,
-    [string]$Authorization,
     [string]$OutputRootDir,
     [string]$OutputFileNameSuffix,
     [int]$CreateReminderLink,
@@ -206,10 +205,9 @@ try {
 
             New-Item -Path $OutputRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-            if ([string]::IsNullOrWhiteSpace($Authorization)) {
-                $pair = "${KintoneLoginName}:${KintonePassword}"
-                $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
-            }
+            $pair = "${KintoneLoginName}:${KintonePassword}"
+
+            $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
 
 
             $courseScheduleDatas = Create-CourseScheduleDatas -DataFilePath $ClientDataFilePath -CurrentDate $TargetDate

@@ -62,7 +62,6 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "     -TargetGroupName '%%~nF'" ^
           "     -KintoneLoginName '!KintoneLoginName!'" ^
           "     -KintonePassword '!KintonePassword!'" ^
-          "     -Authorization '!Authorization!'" ^
           "     -OutputRootDir '%OutputTargetDir%'" ^
           "     -CreateReminderLink '%CreateReminderLink%'" ^
           "     -OutputFileNameSuffix '%OutputFileNameSuffix%'" ^

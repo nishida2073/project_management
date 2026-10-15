@@ -3,7 +3,6 @@
     [string]$TargetGroupName,
     [string]$KintoneLoginName,
     [string]$KintonePassword,
-    [string]$Authorization,
     [string]$AppId,
     [string]$ExcelFilePath,
     [string]$SheetName = "受講生一覧",
@@ -43,10 +42,9 @@ try {
             $config = Get-Content -Path $ConfigPath -Encoding UTF8 | ConvertFrom-Json
             Write-Message $config -VarName "config" -Type "Info" -ForegroundColor Green
 
-            if ([string]::IsNullOrWhiteSpace($Authorization)) {
-                $pair = "${KintoneLoginName}:${KintonePassword}"
-                $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
-            }
+            $pair = "${KintoneLoginName}:${KintonePassword}"
+
+            $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
 
             Write-Message "kintoneからデータ取得中..." -Type "Info"
             $records = Get-AllKintoneRecords -TargetAppId $AppId -BaseUrl $KintoneBaseUrl -Authorization $Authorization

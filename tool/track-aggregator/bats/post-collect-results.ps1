@@ -7,7 +7,6 @@
     [string]$SurveyOutputFileSuffix,
     [string]$KintoneLoginName,
     [string]$KintonePassword,
-    [string]$Authorization,
     [string]$SpaceId,
     [string]$ThreadId,
     [string]$MentionUserCodes,
@@ -34,10 +33,9 @@ try {
                 throw "SpaceIdまたはThreadIdが未設定のため、スレッド投稿をスキップします。"
             }
 
-            if ([string]::IsNullOrWhiteSpace($Authorization)) {
-                $pair = "${KintoneLoginName}:${KintonePassword}"
-                $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
-            }
+            $pair = "${KintoneLoginName}:${KintonePassword}"
+
+            $Authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($pair))
 
             $testFilePath = Join-Path $TestOutputDir "$TargetGroupName-$TestOutputFileSuffix.xlsx"
             $surveyFilePath = Join-Path $SurveyOutputDir "$TargetGroupName-$SurveyOutputFileSuffix.xlsx"
