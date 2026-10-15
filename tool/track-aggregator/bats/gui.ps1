@@ -429,7 +429,7 @@ $btnMasterSyncExecute.Add_Click({
     try {
         $batchPath = $syncKintoneToSheetBat
         $groupName = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
-        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterStatusPlaceholder -Action {
+        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterSyncStatus -Action {
             $matchingItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
             if ($matchingItem) { $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $matchingItem }
             Update-GroupSettingsFields
@@ -450,8 +450,8 @@ $btnMasterSyncExecute.Add_Click({
 })
 $grpUserMasterSync.Controls.Add($btnMasterSyncExecute)
 
-$lblMasterStatusPlaceholder = New-Label -X ($btnMasterSyncExecute.Right + 10) -Y $btnMasterSyncExecute.Top -Width 500 -Height $btnMasterSyncExecute.Height -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
-$grpUserMasterSync.Controls.Add($lblMasterStatusPlaceholder)
+$lblMasterSyncStatus = New-Label -X ($btnMasterSyncExecute.Right + 10) -Y $btnMasterSyncExecute.Top -Width 500 -Height $btnMasterSyncExecute.Height -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
+$grpUserMasterSync.Controls.Add($lblMasterSyncStatus)
 
 $grpSurveyEdit = New-GroupBox -Text "アンケート編集" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
