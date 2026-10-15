@@ -32,8 +32,9 @@ $postAlertResultBat = Join-Path $scriptDir "post-alert-result.bat"
 $syncKintoneToSheetBat = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
 
 $commonEnvBat = Join-Path $scriptDir "common.bat"
-
 $clientsDir = Join-Path $rootPath "clients"
+$clientsTemplateDir = Join-Path $clientsDir "template"
+$clientTemplateBat = Join-Path $clientsTemplateDir "client.bat"
 
 function Get-GroupNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
@@ -176,7 +177,6 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -Conditions $logTabConditions `
     -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat }
 
-$clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
@@ -316,7 +316,7 @@ function Get-SuffixedRawValues {
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
-        $rawTemplate = Get-SetLineRawValues -Path (Join-Path $clientsTemplateDir "client.bat")
+        $rawTemplate = Get-SetLineRawValues -Path ($clientTemplateBat)
         $byType = @{}
         foreach ($rt in (Get-ReportTypeDefs)) {
             $byType[$rt.Prefix] = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $rt.Suffix -VarNames $groupReportVars
@@ -708,9 +708,8 @@ function Save-GroupSettings {
     Sync-MentionRowsFromControls
 
     if (!(Test-Path -LiteralPath $groupBatPath)) {
-        $templatePath = Join-Path $clientsTemplateDir "client.bat"
-        if (Test-Path -LiteralPath $templatePath) {
-            Copy-Item -LiteralPath $templatePath -Destination $groupBatPath
+        if (Test-Path -LiteralPath $clientTemplateBat) {
+            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
         }
     }
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `

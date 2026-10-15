@@ -34,8 +34,9 @@ $collectYearComparisonResultBat = Join-Path $scriptDir "collect-year-comparison-
 $syncKintoneToSheetBat = Join-Path $scriptDir "sync-kintone-to-sheet.bat"
 
 $commonEnvBat = Join-Path $scriptDir "common.bat"
-
 $clientsDir = Join-Path $rootPath "clients"
+$clientsTemplateDir = Join-Path $clientsDir "template"
+$clientTemplateBat = Join-Path $clientsTemplateDir "client.bat"
 
 function Get-GroupNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
@@ -203,8 +204,6 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat }
 
 
-$clientsDir = Join-Path $rootPath "clients"
-$clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
@@ -293,10 +292,9 @@ $settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
-        $clientBatPath = Join-Path $clientsTemplateDir "client.bat"
         $script:groupTemplateDefaults = [PSCustomObject]@{
-            Auth = Get-SetLineRawValues -Path $clientBatPath
-            Sync = Get-SetLineRawValues -Path $clientBatPath
+            Auth = Get-SetLineRawValues -Path $clientTemplateBat
+            Sync = Get-SetLineRawValues -Path $clientTemplateBat
         }
     }
     return $script:groupTemplateDefaults
@@ -873,9 +871,8 @@ function Save-GroupSettings {
     Sync-MentionRowsFromControls
 
     if (!(Test-Path -LiteralPath $groupBatPath)) {
-        $templatePath = Join-Path $clientsTemplateDir "client.bat"
-        if (Test-Path -LiteralPath $templatePath) {
-            Copy-Item -LiteralPath $templatePath -Destination $groupBatPath
+        if (Test-Path -LiteralPath $clientTemplateBat) {
+            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
         }
     }
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars -RemoveUnwritten `

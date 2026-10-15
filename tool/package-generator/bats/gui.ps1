@@ -24,13 +24,14 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
-$commonEnvBat = Join-Path $scriptDir "common.bat"
 $generatePackageBat = Join-Path $rootPath "generate-package.bat"
 $generateConfigBat = Join-Path $rootPath "generate-config.bat"
 $uploadKintoneFileBat = Join-Path $rootPath "upload-kintone-file.bat"
 
-
+$commonEnvBat = Join-Path $scriptDir "common.bat"
 $clientsDir = Join-Path $rootPath "clients"
+$clientsTemplateDir = Join-Path $clientsDir "template"
+$clientTemplateBat = Join-Path $clientsTemplateDir "client.bat"
 
 function Get-ClientNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
@@ -49,10 +50,9 @@ function New-ClientInput {
 
 function Get-NewClientInitialValues {
     param([string]$ClientName)
-    $templateBatPath = Join-Path $clientsTemplateDir "client.bat"
-    if (!(Test-Path -LiteralPath $templateBatPath)) { return @{} }
+    if (!(Test-Path -LiteralPath $clientTemplateBat)) { return @{} }
 
-    $templateValues = Get-SetLineRawValues -Path $templateBatPath
+    $templateValues = Get-SetLineRawValues -Path $clientTemplateBat
     $result = @{}
     foreach ($key in $templateValues.Keys) {
         $value = $templateValues[$key]
@@ -307,7 +307,6 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -Conditions $logTabConditions `
     -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat }
 
-$clientsDir = Join-Path $rootPath "clients"
 function Update-FolderFromGroup {
     param($ic, [string]$FolderKey, [string]$TitleKey = "")
     $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
@@ -316,7 +315,6 @@ function Update-FolderFromGroup {
     $groupBat = Get-GroupBatPath $client $clientsDir
     if (Test-Path -LiteralPath $groupBat) { $ic[$FolderKey].Text = Get-ResolvedVar "GenerateOutputPath" $groupBat }
 }
-$clientsTemplateDir = Join-Path $clientsDir "template"
 
 function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
@@ -421,10 +419,9 @@ $settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
-        $clientBatPath = Join-Path $clientsTemplateDir "client.bat"
         $script:groupTemplateDefaults = [PSCustomObject]@{
-            Auth = Get-SetLineRawValues -Path $clientBatPath
-            Sync = Get-SetLineRawValues -Path $clientBatPath
+            Auth = Get-SetLineRawValues -Path $clientTemplateBat
+            Sync = Get-SetLineRawValues -Path $clientTemplateBat
         }
     }
     return $script:groupTemplateDefaults
@@ -619,9 +616,8 @@ function Save-GroupSettings {
     $allVars = @() + @($saveGroupKintoneVarMap.Keys) + @($saveGroupUploadKintoneVarMap.Keys) + @($saveGroupDownloadVarMap.Keys) + @($saveGroupGenerateVarMap.Keys) + @($saveGroupUploadVarMap.Keys)
 
     if (!(Test-Path -LiteralPath $groupBatPath)) {
-        $templatePath = Join-Path $clientsTemplateDir "client.bat"
-        if (Test-Path -LiteralPath $templatePath) {
-            Copy-Item -LiteralPath $templatePath -Destination $groupBatPath
+        if (Test-Path -LiteralPath $clientTemplateBat) {
+            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
         }
     }
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `

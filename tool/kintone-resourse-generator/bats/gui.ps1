@@ -17,22 +17,24 @@ if ($MyInvocation.MyCommand.Path) {
 }
 $scriptDir = Join-Path $rootPath "bats"
 
-$createTemplateBat = Join-Path $rootPath "create-template.bat"
-$createSpaceFromTemplateBat = Join-Path $rootPath "create-space-from-template.bat"
-$downloadKintoneResourcesBat = Join-Path $rootPath "download-kintone-resources.bat"
-$generateConfigFromTemplateBat = Join-Path $rootPath "generate-config-from-template.bat"
-$applyKintoneResourcesBat = Join-Path $rootPath "apply-kintone-resources.bat"
-$checkKintoneResourcesBat = Join-Path $rootPath "check-kintone-resources.bat"
-$clientsDir = Join-Path $rootPath "clients"
-$clientsTemplateDir = Join-Path $clientsDir "template"
-$commonEnvBat = Join-Path $scriptDir "common.bat"
-
 $libraryDir = Join-Path $scriptDir "library"
 Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
     . $_.FullName
 }
 
 $env:GUI_LOG_MODE = "1"
+
+$createTemplateBat = Join-Path $rootPath "create-template.bat"
+$createSpaceFromTemplateBat = Join-Path $rootPath "create-space-from-template.bat"
+$downloadKintoneResourcesBat = Join-Path $rootPath "download-kintone-resources.bat"
+$generateConfigFromTemplateBat = Join-Path $rootPath "generate-config-from-template.bat"
+$applyKintoneResourcesBat = Join-Path $rootPath "apply-kintone-resources.bat"
+$checkKintoneResourcesBat = Join-Path $rootPath "check-kintone-resources.bat"
+
+$commonEnvBat = Join-Path $scriptDir "common.bat"
+$clientsDir = Join-Path $rootPath "clients"
+$clientsTemplateDir = Join-Path $clientsDir "template"
+$clientTemplateBat = Join-Path $clientsTemplateDir "client.bat"
 
 function Get-GroupNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
@@ -758,9 +760,8 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
     if (!(Test-Path -LiteralPath $groupBatPath)) {
-        $templatePath = Join-Path $clientsTemplateDir "client.bat"
-        if (Test-Path -LiteralPath $templatePath) {
-            Copy-Item -LiteralPath $templatePath -Destination $groupBatPath
+        if (Test-Path -LiteralPath $clientTemplateBat) {
+            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
         }
     }
 
@@ -776,7 +777,7 @@ function Update-GroupSettingsFields {
         return
     }
 
-    $templateDefaults = Get-SetEnvDefaults -Path (Join-Path $clientsTemplateDir "client.bat")
+    $templateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
     $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $target $clientsDir)
 
     $rows = @()
