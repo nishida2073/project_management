@@ -424,34 +424,25 @@ $tabSettingsMaster.Controls.Add($settingsMasterTop.Panel)
 
 $grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
-$btnMasterSyncExecute = New-Button -Text "同期実行" -X 20 -Y 30 -Width 100 -Height 24
-$btnMasterSyncExecute.Add_Click({
-    try {
-        $batchPath = $syncKintoneToSheetBat
-        $groupName = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
-        Invoke-ActionWithUpdateStatus -StatusLabel $lblMasterSyncStatus -Action {
-            $matchingItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
-            if ($matchingItem) { $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $matchingItem }
-            Update-GroupSettingsFields
-            $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
-            $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
-            if ([string]::IsNullOrWhiteSpace($syncAppId)) {
-                throw "対象アプリIDが入力されていません"
-            }
-            $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
-            $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $scriptDir -BatArgs $batArgs
-            if ($exitCode -ne 0) {
-                throw "同期処理に失敗しました（$($syncAppId)）"
-            }
+$masterSync = Add-FieldActionButton -Panel $grpUserMasterSync -Y 30 -Text "同期実行" -Width 100 -AddStatusLabel -OnClick {
+    $batchPath = $syncKintoneToSheetBat
+    $groupName = Get-ComboBoxValue -SelectedItem $settingsMasterTop.Controls["GroupTarget"].SelectedItem
+    Invoke-ActionWithUpdateStatus -StatusLabel $masterSync -Action {
+        $matchingItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
+        if ($matchingItem) { $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $matchingItem }
+        Update-GroupSettingsFields
+        $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
+        $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
+        if ([string]::IsNullOrWhiteSpace($syncAppId)) {
+            throw "対象アプリIDが入力されていません"
         }
-    } catch {
-        [System.Windows.Forms.MessageBox]::Show("エラーが発生しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
+        $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
+        $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $scriptDir -BatArgs $batArgs
+        if ($exitCode -ne 0) {
+            throw "同期処理に失敗しました（$($syncAppId)）"
+        }
     }
-})
-$grpUserMasterSync.Controls.Add($btnMasterSyncExecute)
-
-$lblMasterSyncStatus = New-Label -X ($btnMasterSyncExecute.Right + 10) -Y $btnMasterSyncExecute.Top -Width 500 -Height $btnMasterSyncExecute.Height -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
-$grpUserMasterSync.Controls.Add($lblMasterSyncStatus)
+}
 
 $grpSurveyEdit = New-GroupBox -Text "アンケート編集" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 

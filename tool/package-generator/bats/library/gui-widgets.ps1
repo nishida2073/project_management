@@ -1413,6 +1413,7 @@ function Add-MentionsEditor {
 function Add-FieldActionButton {
     param(
         [System.Windows.Forms.Control]$Panel,
+        [int]$X = 20,
         [int]$Y,
         [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick,
@@ -1421,7 +1422,7 @@ function Add-FieldActionButton {
         [switch]$AddStatusLabel,
         [string]$InitialStatusText = "未実行"
     )
-    $btn = New-Button -Text $Text -X 20 -Y $Y -Width $Width -Height 24
+    $btn = New-Button -Text $Text -X $X -Y $Y -Width $Width -Height 24
     $btn.Add_Click({ 
         try {
             & $OnClick 
