@@ -56,9 +56,266 @@ function Get-KintoneOpenUrl {
     return $kintoneBaseUrl
 }
 
+function Get-TemplateFileNames {
+    param([string]$EnvVarName)
+    $templatePath = Get-ResolvedVar $EnvVarName $commonEnvBat
+    if (!$templatePath -or !(Test-Path -LiteralPath $templatePath)) { return @() }
+    return @(Get-ChildItem -LiteralPath $templatePath -Filter "*.xlsx" -ErrorAction SilentlyContinue |
+        ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) } |
+        Sort-Object)
+}
+
+function Set-RunButtonsEnabled {
+    param([bool]$Enabled)
+    foreach ($cd in $categoryDefs) {
+        foreach ($bd in $cd.ButtonDefs) {
+            if ($bd.InputControls) {
+                foreach ($ctrl in $bd.InputControls.Values) { $ctrl.Enabled = $Enabled }
+            }
+        }
+    }
+    (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["BaseTemplateName"].Enabled = $Enabled
+    (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["CustomTemplateName"].Enabled = $Enabled
+    foreach ($ctrl in $batchTab.InputControls.Values) {
+        $ctrl.Enabled = $Enabled
+    }
+    $multipleBatchTab.InputControls["ExcelPath"].Enabled = $Enabled
+    $multipleBatchTab.InputControls["ExcelPathBrowse"].Enabled = $Enabled
+    $multipleBatchTab.RunButton.Enabled = $Enabled
+    $multipleBatchTab.InputControls["TargetGroupName"].Enabled = $Enabled
+    Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
+}
+
+function Invoke-ExecuteAll {
+    $batchInputs = $batchTab.InputControls
+
+    foreach ($inputDef in $batchRunAllInputs) {
+        if (-not $inputDef.Require) { continue }
+        if (Get-InputValue -Control $batchInputs[$inputDef.Name]) { continue }
+
+        [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        return 1
+    }
+
+    $baseTemplateValue = Get-InputValue -Control $batchInputs["BaseTemplateName"]
+    $customTemplateValue = Get-InputValue -Control $batchInputs["CustomTemplateName"]
+    if (-not $baseTemplateValue -and -not $customTemplateValue) {
+        [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        return 1
+    }
+
+    $groupValue = Get-ComboBoxValue -SelectedItem $batchInputs["TargetGroupName"].SelectedItem
+    $configName = $batchInputs["ConfigName"].Text
+    foreach ($cd in $categoryDefs) {
+        $inputControls = $cd.ButtonDefs[0].InputControls
+
+        $groupCombo = $inputControls["TargetGroupName"]
+        if ($groupCombo) {
+            $matchingItem = $groupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupValue } | Select-Object -First 1
+            if ($matchingItem) { $groupCombo.SelectedItem = $matchingItem }
+        }
+
+        $inputControls["ConfigName"].Text = $configName
+    }
+
+    $createSpaceBd = Get-ButtonDefByBatchPath $createSpaceFromTemplateBat
+    $createSpaceBd.InputControls["SpaceTemplateId"].Text = $batchInputs["SpaceTemplateId"].Text
+    $generateBd = Get-ButtonDefByBatchPath $generateConfigFromTemplateBat
+    Copy-ComboSelection -From $batchInputs["BaseTemplateName"] -To $generateBd.InputControls["BaseTemplateName"]
+    Copy-ComboSelection -From $batchInputs["CustomTemplateName"] -To $generateBd.InputControls["CustomTemplateName"]
+
+    $lastExitCode = 0
+    foreach ($cd in $categoryDefs) {
+        $bd = $cd.ButtonDefs[0]
+        $ic = $bd.InputControls
+        $lastOutputLines = New-Object System.Collections.Generic.List[string]
+        $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
+            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
+            -WorkingDirectory $rootPath -Form $form `
+            -WriteLog { param($msg) Write-Log $msg } `
+            -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
+            -CurrentProcessRef ([ref]$script:currentProc) `
+            -DisplayLabel $bd.Label -StatusLabel $bd.StepStatusLabel
+
+        if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
+            & $bd.OnSuccessFn $ic $lastOutputLines
+        }
+
+        if ($exitCode -eq 2) {
+            $lastExitCode = 2
+        } elseif ($exitCode -ne 0) {
+            return $exitCode
+        }
+    }
+    return $lastExitCode
+}
+
+function Get-CommonSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsCommonFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsGroupFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsGroupFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
+function Get-CommonSettingsFieldRows {
+    $commonDefaults = Get-SetEnvDefaults -Path $commonEnvBat
+    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
+            $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
+            [PSCustomObject]@{ Group = $groupName; VarName = $varName; Value = $varValue; Key = $varName }
+        }
+    }
+}
+
+function Get-GroupSettingsFieldRows {
+    param([string]$GroupName)
+
+    $templateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
+    $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
+
+    foreach ($groupName in $settingsGroups["Group"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Group"].Sections[$groupName].Vars.Keys)) {
+            $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
+            [PSCustomObject]@{ Group = $groupName; VarName = $varName; Value = $varValue; Key = $varName }
+        }
+    }
+}
+
+function Get-CommonSettingsTargets {
+    return @(
+        [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
+    )
+}
+
+function Get-GroupSettingsTargets {
+    param([string]$GroupName)
+    return @(
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+    )
+}
+
+function Save-CommonSettings {
+    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
+        -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
+        -HasValueFn { param($name) $settingsCommonFieldTextBoxes.ContainsKey($name) }
+}
+
+function Save-GroupSettings {
+    param([string]$GroupName)
+
+    $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
+    if (!(Test-Path -LiteralPath $groupBatPath)) {
+        if (Test-Path -LiteralPath $clientTemplateBat) {
+            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
+        }
+    }
+
+    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
+        -GetValueFn { param($name) Get-GroupSettingsFieldValue $name } `
+        -HasValueFn { param($name) $settingsGroupFieldTextBoxes.ContainsKey($name) }
+}
+
+function Update-CommonSettingsFields {
+    $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
+    $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
+    $rows = @(Get-CommonSettingsFieldRows)
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 220 | Out-Null
+    $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+}
+
+function Update-GroupSettingsFields {
+    $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
+    if (!$target) {
+        $settingsGroupBottomPanel.Controls.Clear()
+        return
+    }
+
+    $rows = @(Get-GroupSettingsFieldRows -GroupName $target)
+
+    $rows += @(
+        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "SpaceId"; Value = ""; Key = "SpaceId" }
+        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "TemplateName"; Value = ""; Key = "TemplateName" }
+    )
+
+    $settingsRenderLists.GroupLabels["テンプレート作成"] = "テンプレート作成"
+
+    $settingsRenderLists.VarLabels["SpaceId"] = "スペースID"
+    $settingsRenderLists.VarLabels["TemplateName"] = "テンプレート名"
+
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 150 | Out-Null
+}
+
+function Update-GroupDropdowns {
+    $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
+    $groupNames = @(Get-GroupNames)
+
+    $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["TargetGroupName"] } | ForEach-Object {
+        Update-ComboBoxItems -ComboBox $_.InputControls["TargetGroupName"] -Items $groupNames
+    }
+
+    $logItems = @($allOption) + $groupNames
+    Update-ComboBoxItems -ComboBox $logTab.InputControls["GroupCombo"] -Items $logItems
+
+    $configDir = Join-Path $rootPath "config"
+    $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $basename = $_.BaseName
+            $basename -replace '_config$', ''
+        } |
+        Sort-Object)
+    $configItems = @($allOption) + $configNames
+    Update-ComboBoxItems -ComboBox $logTab.InputControls["ConfigCombo"] -Items $configItems
+    
+    Update-ComboBoxItems -ComboBox $batchTab.InputControls["TargetGroupName"] -Items $groupNames
+
+    Update-ComboBoxItems -ComboBox $settingsGroupTop.Controls["GroupTarget"] -Items $groupNames
+
+    Update-ComboBoxItems -ComboBox $multipleBatchTab.InputControls["TargetGroupName"] -Items $groupNames
+
+}
+
 function Get-ButtonDefByBatchPath {
     param([string]$BatchPath)
     return $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $BatchPath } | Select-Object -First 1
+}
+
+function Copy-ComboSelection {
+    param([System.Windows.Forms.ComboBox]$From, [System.Windows.Forms.ComboBox]$To)
+    $value = Get-ComboBoxValue -SelectedItem $From.SelectedItem
+    $matchingItem = $To.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $value } | Select-Object -First 1
+    if ($matchingItem) {
+        $To.SelectedItem = $matchingItem
+    } else {
+        $To.Text = $value
+    }
+}
+
+function Update-BaseTemplateNameList {
+    $names = Get-TemplateFileNames -EnvVarName "CommonBaseTemplatePath"
+    $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
+    Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["BaseTemplateName"] -Items $items
+    Update-ComboBoxItems -ComboBox $batchTab.InputControls["BaseTemplateName"] -Items $items
+}
+
+function Update-CustomTemplateNameList {
+    $names = Get-TemplateFileNames -EnvVarName "CommonCustomTemplatePath"
+    $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
+    Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["CustomTemplateName"] -Items $items
+    Update-ComboBoxItems -ComboBox $batchTab.InputControls["CustomTemplateName"] -Items $items
 }
 
 $noSelectOption = [PSCustomObject]@{ Text = "指定なし"; Value = "" }
@@ -352,132 +609,6 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -Conditions $logTabConditions
 
 
-function Update-GroupDropdowns {
-    $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
-    $groupNames = @(Get-GroupNames)
-
-    $categoryDefs.ButtonDefs | Where-Object { $_.InputControls["TargetGroupName"] } | ForEach-Object {
-        Update-ComboBoxItems -ComboBox $_.InputControls["TargetGroupName"] -Items $groupNames
-    }
-
-    $logItems = @($allOption) + $groupNames
-    Update-ComboBoxItems -ComboBox $logTab.InputControls["GroupCombo"] -Items $logItems
-
-    $configDir = Join-Path $rootPath "config"
-    $configNames = @(Get-ChildItem -LiteralPath $configDir -Filter "*_config.xlsx" -ErrorAction SilentlyContinue |
-        ForEach-Object {
-            $basename = $_.BaseName
-            $basename -replace '_config$', ''
-        } |
-        Sort-Object)
-    $configItems = @($allOption) + $configNames
-    Update-ComboBoxItems -ComboBox $logTab.InputControls["ConfigCombo"] -Items $configItems
-    
-    Update-ComboBoxItems -ComboBox $batchTab.InputControls["TargetGroupName"] -Items $groupNames
-
-    Update-ComboBoxItems -ComboBox $settingsGroupTop.Controls["GroupTarget"] -Items $groupNames
-
-    Update-ComboBoxItems -ComboBox $multipleBatchTab.InputControls["TargetGroupName"] -Items $groupNames
-
-}
-
-function Set-RunButtonsEnabled {
-    param([bool]$Enabled)
-    foreach ($cd in $categoryDefs) {
-        foreach ($bd in $cd.ButtonDefs) {
-            if ($bd.InputControls) {
-                foreach ($ctrl in $bd.InputControls.Values) { $ctrl.Enabled = $Enabled }
-            }
-        }
-    }
-    (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["BaseTemplateName"].Enabled = $Enabled
-    (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["CustomTemplateName"].Enabled = $Enabled
-    foreach ($ctrl in $batchTab.InputControls.Values) {
-        $ctrl.Enabled = $Enabled
-    }
-    $multipleBatchTab.InputControls["ExcelPath"].Enabled = $Enabled
-    $multipleBatchTab.InputControls["ExcelPathBrowse"].Enabled = $Enabled
-    $multipleBatchTab.RunButton.Enabled = $Enabled
-    $multipleBatchTab.InputControls["TargetGroupName"].Enabled = $Enabled
-    Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
-    Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
-}
-
-function Copy-ComboSelection {
-    param([System.Windows.Forms.ComboBox]$From, [System.Windows.Forms.ComboBox]$To)
-    $value = Get-ComboBoxValue -SelectedItem $From.SelectedItem
-    $matchingItem = $To.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $value } | Select-Object -First 1
-    if ($matchingItem) {
-        $To.SelectedItem = $matchingItem
-    } else {
-        $To.Text = $value
-    }
-}
-
-function Invoke-ExecuteAll {
-    $batchInputs = $batchTab.InputControls
-
-    foreach ($inputDef in $batchRunAllInputs) {
-        if (-not $inputDef.Require) { continue }
-        if (Get-InputValue -Control $batchInputs[$inputDef.Name]) { continue }
-
-        [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        return 1
-    }
-
-    $baseTemplateValue = Get-InputValue -Control $batchInputs["BaseTemplateName"]
-    $customTemplateValue = Get-InputValue -Control $batchInputs["CustomTemplateName"]
-    if (-not $baseTemplateValue -and -not $customTemplateValue) {
-        [System.Windows.Forms.MessageBox]::Show("設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-        return 1
-    }
-
-    $groupValue = Get-ComboBoxValue -SelectedItem $batchInputs["TargetGroupName"].SelectedItem
-    $configName = $batchInputs["ConfigName"].Text
-    foreach ($cd in $categoryDefs) {
-        $inputControls = $cd.ButtonDefs[0].InputControls
-
-        $groupCombo = $inputControls["TargetGroupName"]
-        if ($groupCombo) {
-            $matchingItem = $groupCombo.Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupValue } | Select-Object -First 1
-            if ($matchingItem) { $groupCombo.SelectedItem = $matchingItem }
-        }
-
-        $inputControls["ConfigName"].Text = $configName
-    }
-
-    $createSpaceBd = Get-ButtonDefByBatchPath $createSpaceFromTemplateBat
-    $createSpaceBd.InputControls["SpaceTemplateId"].Text = $batchInputs["SpaceTemplateId"].Text
-    $generateBd = Get-ButtonDefByBatchPath $generateConfigFromTemplateBat
-    Copy-ComboSelection -From $batchInputs["BaseTemplateName"] -To $generateBd.InputControls["BaseTemplateName"]
-    Copy-ComboSelection -From $batchInputs["CustomTemplateName"] -To $generateBd.InputControls["CustomTemplateName"]
-
-    $lastExitCode = 0
-    foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        $ic = $bd.InputControls
-        $lastOutputLines = New-Object System.Collections.Generic.List[string]
-        $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
-            -WorkingDirectory $rootPath -Form $form `
-            -WriteLog { param($msg) Write-Log $msg } `
-            -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
-            -CurrentProcessRef ([ref]$script:currentProc) `
-            -DisplayLabel $bd.Label -StatusLabel $bd.StepStatusLabel
-
-        if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
-            & $bd.OnSuccessFn $ic $lastOutputLines
-        }
-
-        if ($exitCode -eq 2) {
-            $lastExitCode = 2
-        } elseif ($exitCode -ne 0) {
-            return $exitCode
-        }
-    }
-    return $lastExitCode
-}
-
 $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
     [PSCustomObject]@{ Name = "ExcelPath"; Label = "実行一覧ファイル"; LabelWidth = 150; InputWidth = 200; Kind = "File"; Filter = "Excelファイル (*.xlsx)|*.xlsx"; NewRow = $true }
@@ -587,29 +718,6 @@ $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実�
     }
 }
 
-function Get-TemplateFileNames {
-    param([string]$EnvVarName)
-    $templatePath = Get-ResolvedVar $EnvVarName $commonEnvBat
-    if (!$templatePath -or !(Test-Path -LiteralPath $templatePath)) { return @() }
-    return @(Get-ChildItem -LiteralPath $templatePath -Filter "*.xlsx" -ErrorAction SilentlyContinue |
-        ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) } |
-        Sort-Object)
-}
-
-function Update-BaseTemplateNameList {
-    $names = Get-TemplateFileNames -EnvVarName "CommonBaseTemplatePath"
-    $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
-    Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["BaseTemplateName"] -Items $items
-    Update-ComboBoxItems -ComboBox $batchTab.InputControls["BaseTemplateName"] -Items $items
-}
-
-function Update-CustomTemplateNameList {
-    $names = Get-TemplateFileNames -EnvVarName "CommonCustomTemplatePath"
-    $items = @($noSelectOption) + @($names | ForEach-Object { [PSCustomObject]@{ Text = $_; Value = $_ } })
-    Update-ComboBoxItems -ComboBox (Get-ButtonDefByBatchPath $generateConfigFromTemplateBat).InputControls["CustomTemplateName"] -Items $items
-    Update-ComboBoxItems -ComboBox $batchTab.InputControls["CustomTemplateName"] -Items $items
-}
-
 $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $settingsCommonTopPanel = (New-SettingsTopPanel `
@@ -708,114 +816,8 @@ $settingsTrailingButtonVars = @{
     }.GetNewClosure() }
 }
 
-function Get-CommonSettingsTargets {
-    return @(
-        [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
-    )
-}
-
-function Save-CommonSettings {
-    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
-        -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
-        -HasValueFn { param($name) $settingsCommonFieldTextBoxes.ContainsKey($name) }
-}
-
-function Get-CommonSettingsFieldRows {
-    $commonDefaults = Get-SetEnvDefaults -Path $commonEnvBat
-    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
-        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
-            $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
-            [PSCustomObject]@{ Group = $groupName; VarName = $varName; Value = $varValue; Key = $varName }
-        }
-    }
-}
-function Update-CommonSettingsFields {
-    $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
-    $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
-    $rows = @(Get-CommonSettingsFieldRows)
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 220 | Out-Null
-    $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
-}
-
 $settingsCommonFieldTextBoxes = @{}
 $settingsGroupFieldTextBoxes = @{}
-
-function Get-CommonSettingsFieldValue {
-    param([string]$Key)
-    if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
-        return $settingsCommonFieldTextBoxes[$Key].Text
-    }
-    return ""
-}
-
-function Get-GroupSettingsFieldValue {
-    param([string]$Key)
-    if ($settingsGroupFieldTextBoxes.ContainsKey($Key)) {
-        return $settingsGroupFieldTextBoxes[$Key].Text
-    }
-    return ""
-}
-
-function Get-GroupSettingsTargets {
-    param([string]$GroupName)
-    return @(
-        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
-    )
-}
-
-function Save-GroupSettings {
-    param([string]$GroupName)
-
-    $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
-    if (!(Test-Path -LiteralPath $groupBatPath)) {
-        if (Test-Path -LiteralPath $clientTemplateBat) {
-            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
-        }
-    }
-
-    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
-        -GetValueFn { param($name) Get-GroupSettingsFieldValue $name } `
-        -HasValueFn { param($name) $settingsGroupFieldTextBoxes.ContainsKey($name) }
-}
-
-function Get-GroupSettingsFieldRows {
-    param([string]$GroupName)
-
-    $templateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
-    $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
-
-    foreach ($groupName in $settingsGroups["Group"].Sections.Keys) {
-        foreach ($varName in @($settingsGroups["Group"].Sections[$groupName].Vars.Keys)) {
-            $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
-            [PSCustomObject]@{ Group = $groupName; VarName = $varName; Value = $varValue; Key = $varName }
-        }
-    }
-}
-function Update-GroupSettingsFields {
-    $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-    if (!$target) {
-        $settingsGroupBottomPanel.Controls.Clear()
-        return
-    }
-
-    $rows = @(Get-GroupSettingsFieldRows -GroupName $target)
-
-    $rows += @(
-        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "SpaceId"; Value = ""; Key = "SpaceId" }
-        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "TemplateName"; Value = ""; Key = "TemplateName" }
-    )
-
-    $settingsRenderLists.GroupLabels["テンプレート作成"] = "テンプレート作成"
-
-    $settingsRenderLists.VarLabels["SpaceId"] = "スペースID"
-    $settingsRenderLists.VarLabels["TemplateName"] = "テンプレート名"
-
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 150 | Out-Null
-}
 
 $settingsGroupTop = (New-SettingsTopPanel `
     -ExtraControlDefs @(

@@ -33,6 +33,14 @@ $clientsDir = Join-Path $rootPath "clients"
 $clientsTemplateDir = Join-Path $clientsDir "template"
 $clientTemplateBat = Join-Path $clientsTemplateDir "client.bat"
 
+function Get-GroupNames {
+    if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
+    $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | ForEach-Object {
+        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
+    }
+    return @($names | Select-Object -Unique | Sort-Object)
+}
+
 function Get-ClientNames {
     if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
     $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.bat" -File -ErrorAction SilentlyContinue | ForEach-Object {
@@ -41,9 +49,72 @@ function Get-ClientNames {
     return @($names | Select-Object -Unique | Sort-Object)
 }
 
-$blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
+function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
-$clientInput = [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
+function Set-RunButtonsEnabled {
+    param([bool]$Enabled)
+    Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
+    Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
+}
+
+function Invoke-ExecuteAll {
+    $uploadBd = $allButtonDefs | Where-Object { $_.BatchArgsFn } | Select-Object -First 1
+    $uploadChk = $batchTab.CheckBoxes | Where-Object { $_.Tag -eq $uploadBd } | Select-Object -First 1
+    if ($uploadChk -and $uploadChk.Checked) {
+        $ic = $batchTab.InputControls
+        foreach ($inputDef in $batchRunAllInputs) {
+            if (-not $inputDef.Require) { continue }
+            if (Get-InputValue -Control $ic[$inputDef.Name]) { continue }
+            [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+            return
+        }
+    }
+    
+    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $batchTab.CheckBoxes `
+        -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -InvokeStep {
+            param($bd)
+            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $scriptDir -Form $form `
+                -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
+                -GetBatArgs {
+                    param($bd)
+                    if ($bd.BatchArgsFn) { return & $bd.BatchArgsFn $batchTab.InputControls }
+                    if ($bd.ArgsFn) { return & $bd.ArgsFn $bd.InputControls $bd.Inputs }
+                    $batArgs = @()
+                    foreach ($inputDef in $bd.Inputs) {
+                        $value = Get-InputValue -Control $batchTab.InputControls[$inputDef.Name]
+                        $batArgs += "-$($inputDef.Name):$value"
+                    }
+                    return $batArgs
+                }
+        }
+}
+
+function Get-CommonSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsCommonFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
+function Get-GroupSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsGroupFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsGroupFieldTextBoxes[$Key].Text
+    }
+    return ""
+}
+
+function Get-CommonSettingsFieldRows {
+    $raw = Get-SetEnvDefaults -Path $commonEnvBat
+    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $raw[$varName] }
+        }
+    }
+}
 
 function Get-NewClientInitialValues {
     param([string]$ClientName)
@@ -63,6 +134,99 @@ function Get-NewClientInitialValues {
     return $result
 }
 
+function Get-GroupSettingsFieldRows {
+    param([string]$GroupName)
+
+    $rawClient = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
+    $isPendingNewClient = !(Test-Path -LiteralPath (Get-GroupBatPath $GroupName $clientsDir))
+    $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $GroupName } else { @{} }
+
+    foreach ($groupKey in $settingsGroups["Group"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Group"].Sections[$groupKey].Vars.Keys)) {
+            $value = if ($rawClient.ContainsKey($varName)) { $rawClient[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { "" }
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupKey; Value = $value }
+        }
+    }
+}
+
+function Get-CommonSettingsTargets {
+    return @(
+        [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
+    )
+}
+
+function Get-GroupSettingsTargets {
+    param([string]$GroupName)
+    return @(
+        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
+    )
+}
+
+function Save-CommonSettings {
+    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
+        -GetValueFn { param($varName)
+            Get-CommonSettingsFieldValue $varName
+        } `
+        -HasValueFn { param($varName)
+            $true
+        }
+}
+
+function Save-GroupSettings {
+    param([string]$GroupName)
+
+    $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
+
+    if (!(Test-Path -LiteralPath $groupBatPath)) {
+        if (Test-Path -LiteralPath $clientTemplateBat) {
+            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
+        }
+    }
+    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
+        -GetValueFn { param($varName)
+            Get-GroupSettingsFieldValue $varName
+        } `
+        -HasValueFn { param($varName)
+            $true
+        }
+
+    $xlsxPath = Get-GroupXlsxPath $GroupName
+    if (!(Test-Path -LiteralPath $xlsxPath)) {
+        $templateXlsxPath = Join-Path $clientsTemplateDir "client.xlsx"
+        if (Test-Path -LiteralPath $templateXlsxPath) {
+            Copy-Item -LiteralPath $templateXlsxPath -Destination $xlsxPath
+        }
+    }
+
+    Update-GroupDropdowns
+}
+
+function Update-CommonSettingsFields {
+    $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
+    $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
+    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -LabelWidth 150 | Out-Null
+    $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+}
+
+function Update-GroupSettingsFields {
+    $scrollX = -$settingsGroupBottomPanel.AutoScrollPosition.X
+    $scrollY = -$settingsGroupBottomPanel.AutoScrollPosition.Y
+
+    $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
+    $trailingButtons = $settingsTrailingButtonVars.Clone()
+    $resolverValue = $commonEnvResolver
+    $rootPathValue = $rootPath
+    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -in @("KINTONE", "UPLOAD_KINTONE", "GENERATE") }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
+        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -LabelWidth 150 `
+        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
+        -TrailingButtonVars $trailingButtons | Out-Null
+
+    $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+}
+
 function Update-GroupDropdowns {
     $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
     $clientNames = @(Get-ClientNames)
@@ -80,7 +244,19 @@ function Update-GroupDropdowns {
 
 }
 
-$zipFileCount = 3
+function Test-KintoneConnectionFromSettings {
+    param([string]$FieldName)
+
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "KintoneSubdomain"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
+    $targetAppId = Get-GroupSettingsFieldValue $FieldName
+    if (!$targetAppId) {
+        throw "対象アプリIDを入力してください。"
+    }
+
+    return Test-KintoneConnectionWithAppId -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword -AppIds @($targetAppId)
+}
 
 function Get-UploadZipFiles {
     param($ic)
@@ -98,6 +274,27 @@ function Get-UploadZipFiles {
     }
     return @($files)
 }
+
+function Get-ButtonDefByBatchPath {
+    param([string]$BatchPath)
+    return $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $BatchPath } | Select-Object -First 1
+}
+
+function Update-FolderFromGroup {
+    param($ic, [string]$FolderKey, [string]$TitleKey = "")
+    $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
+    if (!$client) { return }
+    if ($TitleKey) { $ic[$TitleKey].Text = $client }
+    $groupBat = Get-GroupBatPath $client $clientsDir
+    if (Test-Path -LiteralPath $groupBat) { $ic[$FolderKey].Text = Get-ResolvedVar "GenerateOutputPath" $groupBat }
+}
+
+$blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
+
+$clientInput = [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
+
+$zipFileCount = 3
+
 $zipFileInputs = @(1..$zipFileCount | ForEach-Object {
     [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "ファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip"; BrowseStartFn = { param($ic) $ic["TargetFolderPath"].Text }; Clear = $true }
 })
@@ -222,46 +419,6 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     } `
     -OnRunClick { Invoke-ExecuteAll }
 
-function Set-RunButtonsEnabled {
-    param([bool]$Enabled)
-    Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
-    Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
-}
-
-function Invoke-ExecuteAll {
-    $uploadBd = $allButtonDefs | Where-Object { $_.BatchArgsFn } | Select-Object -First 1
-    $uploadChk = $batchTab.CheckBoxes | Where-Object { $_.Tag -eq $uploadBd } | Select-Object -First 1
-    if ($uploadChk -and $uploadChk.Checked) {
-        $ic = $batchTab.InputControls
-        foreach ($inputDef in $batchRunAllInputs) {
-            if (-not $inputDef.Require) { continue }
-            if (Get-InputValue -Control $ic[$inputDef.Name]) { continue }
-            [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", "一括実行", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
-            return
-        }
-    }
-    
-    Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $batchTab.CheckBoxes `
-        -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels `
-        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
-        -InvokeStep {
-            param($bd)
-            Invoke-BatchStep -ButtonDef $bd -WorkingDirectory $scriptDir -Form $form `
-                -WriteLog { param($msg) Write-Log $msg } -CurrentProcessRef ([ref]$script:currentProc) `
-                -GetBatArgs {
-                    param($bd)
-                    if ($bd.BatchArgsFn) { return & $bd.BatchArgsFn $batchTab.InputControls }
-                    if ($bd.ArgsFn) { return & $bd.ArgsFn $bd.InputControls $bd.Inputs }
-                    $batArgs = @()
-                    foreach ($inputDef in $bd.Inputs) {
-                        $value = Get-InputValue -Control $batchTab.InputControls[$inputDef.Name]
-                        $batArgs += "-$($inputDef.Name):$value"
-                    }
-                    return $batArgs
-                }
-        }
-}
-
 $categoryTab = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
     if ($bd.Validator -and -not (& $bd.Validator $bd.InputControls)) { return 1 }
@@ -282,10 +439,6 @@ $categoryTab = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs 
         }
 }
 
-function Get-ButtonDefByBatchPath {
-    param([string]$BatchPath)
-    return $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $BatchPath } | Select-Object -First 1
-}
 $execTabControl.Height = 45 + $batchTab.Panel.Height
 
 $txtLog = New-LogTextBox
@@ -303,17 +456,6 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefsForLog `
     -LabelFn { param($bd) Get-BatchDisplayLabel -ButtonDef $bd } `
     -Conditions $logTabConditions `
     -GetLogPathFn { Get-ResolvedVar "CommonLogPath" $commonEnvBat }
-
-function Update-FolderFromGroup {
-    param($ic, [string]$FolderKey, [string]$TitleKey = "")
-    $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
-    if (!$client) { return }
-    if ($TitleKey) { $ic[$TitleKey].Text = $client }
-    $groupBat = Get-GroupBatPath $client $clientsDir
-    if (Test-Path -LiteralPath $groupBat) { $ic[$FolderKey].Text = Get-ResolvedVar "GenerateOutputPath" $groupBat }
-}
-
-function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$GroupName.xlsx" }
 
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
@@ -383,19 +525,6 @@ $settingsGroups = [ordered]@{
 
 
 
-function Test-KintoneConnectionFromSettings {
-    param([string]$FieldName)
-
-    $kintoneSubdomain = Get-GroupSettingsFieldValue "KintoneSubdomain"
-    $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
-    $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
-    $targetAppId = Get-GroupSettingsFieldValue $FieldName
-    if (!$targetAppId) {
-        throw "対象アプリIDを入力してください。"
-    }
-
-    return Test-KintoneConnectionWithAppId -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword -AppIds @($targetAppId)
-}
 $settingsTrailingButtonVars = @{
     "TargetAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
@@ -427,12 +556,6 @@ $tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
 
-function Get-CommonSettingsTargets {
-    return @(
-        [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
-    )
-}
-
 $settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave { foreach ($f in (Get-CommonSettingsTargets)) { & $f.Save }; Update-CommonSettingsFields } `
     -OnReload { foreach ($f in (Get-CommonSettingsTargets)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
@@ -444,29 +567,6 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $settingsCommonFieldTextBoxes = @{}
 $settingsGroupFieldTextBoxes = @{}
-
-function Get-CommonSettingsFieldValue {
-    param([string]$Key)
-    if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
-        return $settingsCommonFieldTextBoxes[$Key].Text
-    }
-    return ""
-}
-
-function Get-GroupSettingsFieldValue {
-    param([string]$Key)
-    if ($settingsGroupFieldTextBoxes.ContainsKey($Key)) {
-        return $settingsGroupFieldTextBoxes[$Key].Text
-    }
-    return ""
-}
-
-function Get-GroupSettingsTargets {
-    param([string]$GroupName)
-    return @(
-        [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
-    )
-}
 
 $settingsGroupTop = (New-SettingsTopPanel `
     -ExtraControlDefs @(
@@ -508,103 +608,6 @@ $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::F
 $tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
 
-function Get-GroupNames {
-    if (!(Test-Path -LiteralPath $clientsDir)) { return @() }
-    $names = Get-ChildItem -LiteralPath $clientsDir -Filter "*.xlsx" -File -ErrorAction SilentlyContinue | ForEach-Object {
-        [System.IO.Path]::GetFileNameWithoutExtension($_.Name)
-    }
-    return @($names | Select-Object -Unique | Sort-Object)
-}
-
-function Get-CommonSettingsFieldRows {
-    $raw = Get-SetEnvDefaults -Path $commonEnvBat
-    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
-        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
-            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $raw[$varName] }
-        }
-    }
-}
-
-function Get-GroupSettingsFieldRows {
-    param([string]$GroupName)
-
-    $rawClient = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
-    $isPendingNewClient = !(Test-Path -LiteralPath (Get-GroupBatPath $GroupName $clientsDir))
-    $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $GroupName } else { @{} }
-
-    foreach ($groupKey in $settingsGroups["Group"].Sections.Keys) {
-        foreach ($varName in @($settingsGroups["Group"].Sections[$groupKey].Vars.Keys)) {
-            $value = if ($rawClient.ContainsKey($varName)) { $rawClient[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { "" }
-            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupKey; Value = $value }
-        }
-    }
-}
-
-
-function Update-CommonSettingsFields {
-    $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
-    $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -LabelWidth 150 | Out-Null
-    $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
-}
-
-function Update-GroupSettingsFields {
-    $scrollX = -$settingsGroupBottomPanel.AutoScrollPosition.X
-    $scrollY = -$settingsGroupBottomPanel.AutoScrollPosition.Y
-
-    $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-    $trailingButtons = $settingsTrailingButtonVars.Clone()
-    $resolverValue = $commonEnvResolver
-    $rootPathValue = $rootPath
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target | Where-Object { $_.Group -in @("KINTONE", "UPLOAD_KINTONE", "GENERATE") }) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -LabelWidth 150 `
-        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() `
-        -TrailingButtonVars $trailingButtons | Out-Null
-
-    $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
-}
-
-function Save-CommonSettings {
-    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
-        -GetValueFn { param($varName)
-            Get-CommonSettingsFieldValue $varName
-        } `
-        -HasValueFn { param($varName)
-            $true
-        }
-}
-
-function Save-GroupSettings {
-    param([string]$GroupName)
-
-    $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
-
-    if (!(Test-Path -LiteralPath $groupBatPath)) {
-        if (Test-Path -LiteralPath $clientTemplateBat) {
-            Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
-        }
-    }
-    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
-        -GetValueFn { param($varName)
-            Get-GroupSettingsFieldValue $varName
-        } `
-        -HasValueFn { param($varName)
-            $true
-        }
-
-    $xlsxPath = Get-GroupXlsxPath $GroupName
-    if (!(Test-Path -LiteralPath $xlsxPath)) {
-        $templateXlsxPath = Join-Path $clientsTemplateDir "client.xlsx"
-        if (Test-Path -LiteralPath $templateXlsxPath) {
-            Copy-Item -LiteralPath $templateXlsxPath -Destination $xlsxPath
-        }
-    }
-
-    Update-GroupDropdowns
-}
 
 
 $settingsSubTabControl.Add_SelectedIndexChanged({
