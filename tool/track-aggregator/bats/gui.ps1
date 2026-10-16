@@ -294,22 +294,11 @@ $settingsGroups = [ordered]@{
     }
 }
 
-$settingsFlatGroups = [ordered]@{}
-foreach ($section in $settingsGroups.Values) {
-    foreach ($key in $section.Sections.Keys) { $settingsFlatGroups[$key] = $section.Sections[$key] }
-}
-$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsFlatGroups
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 
 
 $settingsTrailingButtonVars = @{}
 
-$script:groupTemplateDefaults = $null
-function Get-GroupTemplateDefaults {
-    if ($null -eq $script:groupTemplateDefaults) {
-        $script:groupTemplateDefaults = Get-SetEnvDefaults -Path $clientTemplateBat
-    }
-    return $script:groupTemplateDefaults
-}
 
 $settingsSubTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 $tabSettings.Controls.Add($settingsSubTabControl)
@@ -324,15 +313,15 @@ $tabSettingsMaster = New-TabPage -Text "マスター操作"
 $settingsSubTabControl.Controls.Add($tabSettingsMaster)
 
 
-function Get-CommonSettingsFiles {
+function Get-CommonSettingsTargets {
     return @(
         [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
     )
 }
 
 $settingsCommonTopPanel = (New-SettingsTopPanel `
-    -OnSave { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }; Update-CommonSettingsFields } `
-    -OnReload { foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
+    -OnSave { foreach ($f in (Get-CommonSettingsTargets)) { & $f.Save }; Update-CommonSettingsFields } `
+    -OnReload { foreach ($f in (Get-CommonSettingsTargets)) { & $f.Reload }; Update-CommonSettingsFields }).Panel
 
 $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
@@ -358,7 +347,7 @@ function Get-GroupSettingsFieldValue {
     return ""
 }
 
-function Get-GroupSettingsFiles {
+function Get-GroupSettingsTargets {
     param([string]$GroupName)
     return @(
         [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
@@ -387,13 +376,13 @@ $settingsGroupTop = (New-SettingsTopPanel `
     -OnSave {
         $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         if (!$target) { return }
-        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
+        foreach ($f in (Get-GroupSettingsTargets -GroupName $target)) { & $f.Save }
         Update-GroupSettingsFields
         Update-GroupDropdowns
     } `
     -OnReload {
         $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
+        foreach ($f in (Get-GroupSettingsTargets -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
     })
 
@@ -734,9 +723,8 @@ function Get-CommonSettingsFieldRows {
 
 function Get-GroupSettingsFieldRows {
     param([string]$GroupName)
-    if (!$GroupName) { return }
 
-    $templateDefaults = Get-GroupTemplateDefaults
+    $templateDefaults = Get-SetEnvDefaults -Path $clientTemplateBat
     $rawAuth = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
     foreach ($groupName in $settingsGroups["Group"].Sections.Keys) {
         foreach ($varName in @($settingsGroups["Group"].Sections[$groupName].Vars.Keys)) {
@@ -797,9 +785,9 @@ function Update-GroupSettingsFields {
             Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】track-aggregatorの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $kintoneBaseUrl -Authorization $authorization | Out-Null
         }
     }.GetNewClosure() -OnOpenClick {
-        $subdomain = (Get-GroupSettingsFieldValue "KintoneSubdomain").Trim()
-        $spaceId = (Get-GroupSettingsFieldValue "SpaceId").Trim()
-        $threadId = (Get-GroupSettingsFieldValue "ThreadId").Trim()
+        $subdomain = Get-GroupSettingsFieldValue "KintoneSubdomain"
+        $spaceId = Get-GroupSettingsFieldValue "SpaceId"
+        $threadId = Get-GroupSettingsFieldValue "ThreadId"
         $threadUrl = if ($subdomain -and $spaceId -and $threadId) { "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId" } else { $null }
         Open-TargetOrWarn -Path $threadUrl
     }.GetNewClosure() }
@@ -810,7 +798,7 @@ function Update-GroupSettingsFields {
     }.GetNewClosure() }
     $trailingButtons["KintonePassword"] = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            $kintoneSubdomain = (Get-GroupSettingsFieldValue "KintoneSubdomain").Trim()
+            $kintoneSubdomain = Get-GroupSettingsFieldValue "KintoneSubdomain"
             $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
             $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
             if (!$kintoneSubdomain -or !$kintoneLoginName -or !$kintonePassword) {

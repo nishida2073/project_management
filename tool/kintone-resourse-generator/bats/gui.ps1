@@ -129,8 +129,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonDownloadPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonDownloadPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_download.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonDownloadPath" $commonEnvBat) "$($ic['ConfigName'].Text)_download.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonDownloadPath" $commonEnvBat) "$($ic['ConfigName'].Text)_download.xlsx" }
             }
         )
     }
@@ -171,8 +171,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonConfigPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonConfigPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_config.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonConfigPath" $commonEnvBat) "$($ic['ConfigName'].Text)_config.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonConfigPath" $commonEnvBat) "$($ic['ConfigName'].Text)_config.xlsx" }
             }
         )
     }
@@ -221,8 +221,8 @@ $categoryDefs = @(
                     }
                     $batArgs
                 }
-                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonCheckOutputPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
-                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonCheckOutputPath" $commonEnvBat) "$($ic['ConfigName'].Text.Trim())_check.xlsx" }
+                OutputPathFn = { param($ic) Join-Path (Get-ResolvedVar "CommonCheckOutputPath" $commonEnvBat) "$($ic['ConfigName'].Text)_check.xlsx" }
+                OpenTarget = { param($ic) Join-Path (Get-ResolvedVar "CommonCheckOutputPath" $commonEnvBat) "$($ic['ConfigName'].Text)_check.xlsx" }
             }
         )
     }
@@ -433,7 +433,7 @@ function Invoke-ExecuteAll {
     }
 
     $groupValue = Get-ComboBoxValue -SelectedItem $batchInputs["TargetGroupName"].SelectedItem
-    $configName = $batchInputs["ConfigName"].Text.Trim()
+    $configName = $batchInputs["ConfigName"].Text
     foreach ($cd in $categoryDefs) {
         $inputControls = $cd.ButtonDefs[0].InputControls
 
@@ -447,7 +447,7 @@ function Invoke-ExecuteAll {
     }
 
     $createSpaceBd = Get-ButtonDefByBatchPath $createSpaceFromTemplateBat
-    $createSpaceBd.InputControls["SpaceTemplateId"].Text = $batchInputs["SpaceTemplateId"].Text.Trim()
+    $createSpaceBd.InputControls["SpaceTemplateId"].Text = $batchInputs["SpaceTemplateId"].Text
     $generateBd = Get-ButtonDefByBatchPath $generateConfigFromTemplateBat
     Copy-ComboSelection -From $batchInputs["BaseTemplateName"] -To $generateBd.InputControls["BaseTemplateName"]
     Copy-ComboSelection -From $batchInputs["CustomTemplateName"] -To $generateBd.InputControls["CustomTemplateName"]
@@ -483,7 +483,7 @@ $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実�
     [PSCustomObject]@{ Name = "ExcelPath"; Label = "実行一覧ファイル"; LabelWidth = 150; InputWidth = 200; Kind = "File"; Filter = "Excelファイル (*.xlsx)|*.xlsx"; NewRow = $true }
 ) -OnRunClick {
     param($controls, $statusLabel)
-    $excelPath = $controls["ExcelPath"].Text.Trim()
+    $excelPath = $controls["ExcelPath"].Text
     try {
         Set-StepStatus -Label $statusLabel -Text "実行中..."
         if (!$excelPath) {
@@ -523,10 +523,10 @@ $multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実�
         for ($i = 0; $i -lt $rows.Count; $i++) {
             $row = $rows[$i]
             $rowNumber = $i + 1
-            $rowConfigName = "$($row.'スペース識別名')".Trim()
-            $rowTemplateId = "$($row.'スペーステンプレートID')".Trim()
-            $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')".Trim()
-            $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')".Trim()
+            $rowConfigName = "$($row.'スペース識別名')"
+            $rowTemplateId = "$($row.'スペーステンプレートID')"
+            $rowBaseResourceTemplate = "$($row.'設定テンプレート名（基本）')"
+            $rowCustomResourceTemplate = "$($row.'設定テンプレート名（カスタム）')"
 
             Set-StepStatus -Label $statusLabel -Text "実行中... ($rowNumber/$($rows.Count): $rowConfigName)" -State "実行中..."
             [System.Windows.Forms.Application]::DoEvents()
@@ -614,11 +614,11 @@ $settingsCommonBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::
 
 $settingsCommonTopPanel = (New-SettingsTopPanel `
     -OnSave {
-        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Save }
+        foreach ($f in (Get-CommonSettingsTargets)) { & $f.Save }
         Update-CommonSettingsFields
     } `
     -OnReload {
-        foreach ($f in (Get-CommonSettingsFiles)) { & $f.Reload }
+        foreach ($f in (Get-CommonSettingsTargets)) { & $f.Reload }
         Update-CommonSettingsFields
     }).Panel
 
@@ -659,11 +659,7 @@ $settingsGroups = [ordered]@{
     }
 }
 
-$settingsFlatGroups = [ordered]@{}
-foreach ($section in $settingsGroups.Values) {
-    foreach ($key in $section.Sections.Keys) { $settingsFlatGroups[$key] = $section.Sections[$key] }
-}
-$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsFlatGroups
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
@@ -673,10 +669,10 @@ $settingsTrailingButtonVars = @{
             $subDomainVal = Get-GroupSettingsFieldValue "KintoneSubdomain"
             $loginVal = Get-GroupSettingsFieldValue "KintoneLoginName"
             $passwordVal = Get-GroupSettingsFieldValue "KintonePassword"
-            if (!$subDomainVal.Trim() -or !$loginVal -or !$passwordVal) {
+            if (!$subDomainVal -or !$loginVal -or !$passwordVal) {
                 throw "サブドメイン・ログイン名・パスワードをすべて入力してください。"
             }
-            Test-KintoneConnection -Subdomain $subDomainVal.Trim() -LoginName $loginVal -Password $passwordVal
+            Test-KintoneConnection -Subdomain $subDomainVal -LoginName $loginVal -Password $passwordVal
         }
     }.GetNewClosure() }
     "TemplateName" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "実行" -AddStatusLabel -OnClick {
@@ -712,7 +708,7 @@ $settingsTrailingButtonVars = @{
     }.GetNewClosure() }
 }
 
-function Get-CommonSettingsFiles {
+function Get-CommonSettingsTargets {
     return @(
         [PSCustomObject]@{ Path = $commonEnvBat; Save = { Save-CommonSettings }; Reload = {} }
     )
@@ -762,9 +758,8 @@ function Get-GroupSettingsFieldValue {
     return ""
 }
 
-function Get-GroupSettingsFiles {
+function Get-GroupSettingsTargets {
     param([string]$GroupName)
-    if (!$GroupName) { return @() }
     return @(
         [PSCustomObject]@{ Path = (Get-GroupBatPath $GroupName $clientsDir); Save = { Save-GroupSettings -GroupName $GroupName }.GetNewClosure(); Reload = {} }
     )
@@ -772,7 +767,6 @@ function Get-GroupSettingsFiles {
 
 function Save-GroupSettings {
     param([string]$GroupName)
-    if (!$GroupName) { return }
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
     if (!(Test-Path -LiteralPath $groupBatPath)) {
@@ -788,7 +782,6 @@ function Save-GroupSettings {
 
 function Get-GroupSettingsFieldRows {
     param([string]$GroupName)
-    if (!$GroupName) { return }
 
     $templateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
     $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
@@ -846,14 +839,14 @@ $settingsGroupTop = (New-SettingsTopPanel `
     -OnSave {
         $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         if (!$target) { return }
-        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Save }
+        foreach ($f in (Get-GroupSettingsTargets -GroupName $target)) { & $f.Save }
         Update-GroupSettingsFields
         Update-GroupDropdowns
     } `
     -OnReload {
         $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         if (!$target) { return }
-        foreach ($f in (Get-GroupSettingsFiles -GroupName $target)) { & $f.Reload }
+        foreach ($f in (Get-GroupSettingsTargets -GroupName $target)) { & $f.Reload }
         Update-GroupSettingsFields
     })
 
