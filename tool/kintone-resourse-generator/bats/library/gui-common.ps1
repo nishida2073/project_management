@@ -111,30 +111,12 @@ function Save-EnvBatFile {
     [System.IO.File]::WriteAllText($Path, $content, $script:cp932Encoding)
 }
 
-$script:groupBatLineRegex = [regex]'^set "(?<var>\S+?)=(?<val>.*)"$'
-
 function Get-GroupBatPath { param([string]$GroupName, [string]$ClientsDir) Join-Path $ClientsDir "$GroupName.bat" }
-
-function Get-SetLineRawValues {
-    param([string]$Path)
-    $result = @{}
-    if (!(Test-Path -LiteralPath $Path)) { return $result }
-    foreach ($line in [System.IO.File]::ReadAllLines($Path, $script:cp932Encoding)) {
-        $m = $script:setEnvLineRegex.Match($line.Trim())
-        if ($m.Success) {
-            $result[$m.Groups["var"].Value] = $m.Groups["val"].Value
-        } else {
-            $m = $script:groupBatLineRegex.Match($line.Trim())
-            if ($m.Success) { $result[$m.Groups["var"].Value] = $m.Groups["val"].Value }
-        }
-    }
-    return $result
-}
 
 function Get-GroupKintoneThreadUrl {
     param([string]$GroupName, [string]$ClientsDir)
     if (!$GroupName) { return $null }
-    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName $ClientsDir)
+    $raw = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $ClientsDir)
     $subdomain = $raw["KintoneSubdomain"]
     $spaceId = $raw["SpaceId"]
     $threadId = $raw["ThreadId"]

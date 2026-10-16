@@ -628,30 +628,42 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $settingsGroups = [ordered]@{
-    "COMMON" = @{
-        Label = "基本設定"
-        Vars = [ordered]@{
-            "CommonDownloadPath"        = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
-            "CommonBaseTemplatePath"   = @{ Label = "設定テンプレート（基本）ファイルのフォルダ"; Browse = "Folder" }
-            "CommonCustomTemplatePath" = @{ Label = "設定テンプレート（カスタム）ファイルのフォルダ"; Browse = "Folder" }
-            "CommonConfigPath"          = @{ Label = "設定ファイルのフォルダ"; Browse = "Folder" }
-            "CommonCheckOutputPath"    = @{ Label = "チェック結果の出力先フォルダ"; Browse = "Folder" }
-            "CommonLogPath"             = @{ Label = "ログの出力先フォルダ"; Browse = "Folder" }
+    "Common" = @{
+        Label = "共通"
+        Sections = [ordered]@{
+            "COMMON" = @{
+                Label = "基本設定"
+                Vars = [ordered]@{
+                    "CommonDownloadPath"        = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
+                    "CommonBaseTemplatePath"   = @{ Label = "設定テンプレート（基本）ファイルのフォルダ"; Browse = "Folder" }
+                    "CommonCustomTemplatePath" = @{ Label = "設定テンプレート（カスタム）ファイルのフォルダ"; Browse = "Folder" }
+                    "CommonConfigPath"          = @{ Label = "設定ファイルのフォルダ"; Browse = "Folder" }
+                    "CommonCheckOutputPath"    = @{ Label = "チェック結果の出力先フォルダ"; Browse = "Folder" }
+                    "CommonLogPath"             = @{ Label = "ログの出力先フォルダ"; Browse = "Folder" }
+                }
+            }
         }
     }
-    "KINTONE" = @{
-        Label = "kintoneの接続情報"
-        Vars = [ordered]@{
-            "KintoneSubdomain" = @{ Label = "サブドメイン" }
-            "KintoneLoginName"      = @{ Label = "ログイン名" }
-            "KintonePassword"   = @{ Label = "パスワード"; Masked = $true }
+    "Group" = @{
+        Label = "グループ別"
+        Sections = [ordered]@{
+            "KINTONE" = @{
+                Label = "kintoneの接続情報"
+                Vars = [ordered]@{
+                    "KintoneSubdomain" = @{ Label = "サブドメイン" }
+                    "KintoneLoginName" = @{ Label = "ログイン名" }
+                    "KintonePassword"  = @{ Label = "パスワード"; Masked = $true }
+                }
+            }
         }
     }
 }
 
-$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
-
-$kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
+$settingsFlatGroups = [ordered]@{}
+foreach ($section in $settingsGroups.Values) {
+    foreach ($key in $section.Sections.Keys) { $settingsFlatGroups[$key] = $section.Sections[$key] }
+}
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsFlatGroups
 
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
@@ -707,7 +719,7 @@ function Get-CommonSettingsFiles {
 }
 
 function Save-CommonSettings {
-    $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
+    $commonVars = @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys })
     Save-EnvBatFile -Path $commonEnvBat -VarNames $commonVars `
         -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
         -HasValueFn { param($name) $settingsCommonFieldTextBoxes.ContainsKey($name) }
@@ -715,17 +727,21 @@ function Save-CommonSettings {
 
 function Get-CommonSettingsFieldRows {
     $commonDefaults = Get-SetEnvDefaults -Path $commonEnvBat
-    $commonVars = @($settingsGroups["COMMON"].Vars.Keys)
-    foreach ($varName in $commonVars) {
-        $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
-        [PSCustomObject]@{ Group = "COMMON"; VarName = $varName; Value = $varValue; Key = $varName }
+    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
+            $varValue = if ($commonDefaults.ContainsKey($varName)) { $commonDefaults[$varName] } else { $null }
+            [PSCustomObject]@{ Group = $groupName; VarName = $varName; Value = $varValue; Key = $varName }
+        }
     }
 }
 function Update-CommonSettingsFields {
+    $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
+    $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
     $rows = @(Get-CommonSettingsFieldRows)
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
         -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 220 | Out-Null
+    $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
 $settingsCommonFieldTextBoxes = @{}
@@ -766,7 +782,7 @@ function Save-GroupSettings {
         }
     }
 
-    Save-EnvBatFile -Path $groupBatPath -VarNames $kintoneVars `
+    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($name) Get-GroupSettingsFieldValue $name } `
         -HasValueFn { param($name) $settingsGroupFieldTextBoxes.ContainsKey($name) }
 }
@@ -778,9 +794,11 @@ function Get-GroupSettingsFieldRows {
     $templateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
     $groupDefaults = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
 
-    foreach ($varName in $kintoneVars) {
-        $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
-        [PSCustomObject]@{ Group = "KINTONE"; VarName = $varName; Value = $varValue; Key = $varName }
+    foreach ($groupName in $settingsGroups["Group"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Group"].Sections[$groupName].Vars.Keys)) {
+            $varValue = if ($groupDefaults.ContainsKey($varName)) { $groupDefaults[$varName] } else { $templateDefaults[$varName] }
+            [PSCustomObject]@{ Group = $groupName; VarName = $varName; Value = $varValue; Key = $varName }
+        }
     }
 }
 function Update-GroupSettingsFields {

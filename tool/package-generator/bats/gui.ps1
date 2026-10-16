@@ -52,7 +52,7 @@ function Get-NewClientInitialValues {
     param([string]$ClientName)
     if (!(Test-Path -LiteralPath $clientTemplateBat)) { return @{} }
 
-    $templateValues = Get-SetLineRawValues -Path $clientTemplateBat
+    $templateValues = Get-SetEnvDefaults -Path $clientTemplateBat
     $result = @{}
     foreach ($key in $templateValues.Keys) {
         $value = $templateValues[$key]
@@ -178,7 +178,7 @@ $categoryDefs = @(
                     param($ic)
                     $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
                     if (!$client) { return $null }
-                    $raw = Get-SetLineRawValues -Path (Get-GroupBatPath $client $clientsDir)
+                    $raw = Get-SetEnvDefaults -Path (Get-GroupBatPath $client $clientsDir)
                     if (!$raw["KintoneSubdomain"] -or !$raw["TargetAppId"]) { return $null }
                     "https://$($raw['KintoneSubdomain']).cybozu.com/k/$($raw['TargetAppId'])/"
                 }
@@ -321,73 +321,82 @@ function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$G
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
 $settingsGroups = [ordered]@{
-    "COMMON" = @{
+    "Common" = @{
         Label = "共通"
-        Overridable = $false
-        Vars = [ordered]@{
-            "CommonLogPath" = @{ Label = "ログの出力先"; Browse = "Folder" }
+        Sections = [ordered]@{
+            "COMMON" = @{
+                Label = "共通"
+                Vars = [ordered]@{
+                    "CommonLogPath" = @{ Label = "ログの出力先"; Browse = "Folder" }
+                }
+            }
         }
     }
-    "KINTONE" = @{
-        Label = "kintone接続"
-        Vars = [ordered]@{
-            "KintoneSubdomain"  = @{ Label = "サブドメイン" }
-            "KintoneLoginName"  = @{ Label = "ログイン名" }
-            "KintonePassword"   = @{ Label = "パスワード"; Masked = $true }
-        }
-    }
-    "UPLOAD_KINTONE" = @{
-        Label = "ファイル管理"
-        Vars = [ordered]@{
-            "TargetAppId"       = @{ Label = "対象アプリID" }
-        }
-    }
-    "DOWNLOAD" = @{
-        Label = "ダウンロード"
-        Vars = [ordered]@{
-            "DownloadSiteUrl"       = @{ Label = "ダウンロード元のサイトURL" }
-            "DownloadSitePath"      = @{ Label = "ダウンロード元のフォルダ" }
-            "DownloadSiteTenantId"  = @{ Label = "テナントID" }
-            "DownloadLocalPath"     = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
-        }
-    }
-    "GENERATE" = @{
-        Label = "パッケージ作成"
-        Vars = [ordered]@{
-            "GenerateSourcePath"      = @{ Label = "圧縮元のフォルダ"; Browse = "Folder"  }
-            "GenerateConfigPath"      = @{ Label = "パッケージ定義ファイル"; Browse = "File"; Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*" }
-            "GenerateWorkPath"        = @{ Label = "作業用のフォルダ"; Browse = "Folder"  }
-            "GenerateOutputPath"      = @{ Label = "パッケージの出力先"; Browse = "Folder" }
-            "GenerateSheetsInclude"   = @{ Label = "対象のシート" }
-            "GenerateSheetsExclude"   = @{ Label = "除外のシート" }
-        }
-    }
-    "UPLOAD" = @{
-        Label = "アップロード"
-        Vars = [ordered]@{
-            "UploadSiteUrl"       = @{ Label = "アップロード先のサイトURL" }
-            "UploadSitePath"      = @{ Label = "アップロード先のフォルダ" }
-            "UploadSiteTenantId"  = @{ Label = "テナントID" }
-            "UploadLocalPath"     = @{ Label = "アップロード元のフォルダ"; Browse = "Folder" }
-            "UploadItemsInclude"  = @{ Label = "対象の項目形式" }
-            "UploadItemsExclude"  = @{ Label = "除外の項目形式" }
+    "Group" = @{
+        Label = "グループ別"
+        Sections = [ordered]@{
+            "KINTONE" = @{
+                Label = "kintone接続"
+                Vars = [ordered]@{
+                    "KintoneSubdomain"  = @{ Label = "サブドメイン" }
+                    "KintoneLoginName"  = @{ Label = "ログイン名" }
+                    "KintonePassword"   = @{ Label = "パスワード"; Masked = $true }
+                }
+            }
+            "UPLOAD_KINTONE" = @{
+                Label = "ファイル管理"
+                Vars = [ordered]@{
+                    "TargetAppId"       = @{ Label = "対象アプリID" }
+                }
+            }
+            "DOWNLOAD" = @{
+                Label = "ダウンロード"
+                Vars = [ordered]@{
+                    "DownloadSiteUrl"       = @{ Label = "ダウンロード元のサイトURL" }
+                    "DownloadSitePath"      = @{ Label = "ダウンロード元のフォルダ" }
+                    "DownloadSiteTenantId"  = @{ Label = "テナントID" }
+                    "DownloadLocalPath"     = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
+                }
+            }
+            "GENERATE" = @{
+                Label = "パッケージ作成"
+                Vars = [ordered]@{
+                    "GenerateSourcePath"      = @{ Label = "圧縮元のフォルダ"; Browse = "Folder"  }
+                    "GenerateConfigPath"      = @{ Label = "パッケージ定義ファイル"; Browse = "File"; Filter = "Excel ファイル (*.xlsx)|*.xlsx|すべてのファイル (*.*)|*.*" }
+                    "GenerateWorkPath"        = @{ Label = "作業用のフォルダ"; Browse = "Folder"  }
+                    "GenerateOutputPath"      = @{ Label = "パッケージの出力先"; Browse = "Folder" }
+                    "GenerateSheetsInclude"   = @{ Label = "対象のシート" }
+                    "GenerateSheetsExclude"   = @{ Label = "除外のシート" }
+                }
+            }
+            "UPLOAD" = @{
+                Label = "アップロード"
+                Vars = [ordered]@{
+                    "UploadSiteUrl"       = @{ Label = "アップロード先のサイトURL" }
+                    "UploadSitePath"      = @{ Label = "アップロード先のフォルダ" }
+                    "UploadSiteTenantId"  = @{ Label = "テナントID" }
+                    "UploadLocalPath"     = @{ Label = "アップロード元のフォルダ"; Browse = "Folder" }
+                    "UploadItemsInclude"  = @{ Label = "対象の項目形式" }
+                    "UploadItemsExclude"  = @{ Label = "除外の項目形式" }
+                }
+            }
         }
     }
 }
 
-$commonSettingsVars = @($settingsGroups["COMMON"].Vars.Keys)
-$downloadVars = @($settingsGroups["DOWNLOAD"].Vars.Keys)
-$generateVars = @($settingsGroups["GENERATE"].Vars.Keys)
-$uploadVars = @($settingsGroups["UPLOAD"].Vars.Keys)
-$kintoneVars = @($settingsGroups["KINTONE"].Vars.Keys)
-$uploadKintoneVars = @($settingsGroups["UPLOAD_KINTONE"].Vars.Keys)
+$settingsFlatGroups = [ordered]@{}
+foreach ($section in $settingsGroups.Values) {
+    foreach ($key in $section.Sections.Keys) { $settingsFlatGroups[$key] = $section.Sections[$key] }
+}
+
+$commonSettingsVars = @($settingsGroups["Common"].Sections["COMMON"].Vars.Keys)
 
 function Test-KintoneConnectionFromSettings {
     param([string]$FieldName)
 
-    $kintoneSubdomain = (Get-GroupSettingsFieldValue "KINTONE_KintoneSubdomain").Trim()
-    $kintoneLoginName = Get-GroupSettingsFieldValue "KINTONE_KintoneLoginName"
-    $kintonePassword = Get-GroupSettingsFieldValue "KINTONE_KintonePassword"
+    $kintoneSubdomain = (Get-GroupSettingsFieldValue "KintoneSubdomain").Trim()
+    $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
     $targetAppId = (Get-GroupSettingsFieldValue $FieldName).Trim()
     if (!$targetAppId) {
         throw "対象アプリIDを入力してください。"
@@ -398,14 +407,14 @@ function Test-KintoneConnectionFromSettings {
 $settingsTrailingButtonVars = @{
     "TargetAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            Test-KintoneConnectionFromSettings -FieldName "UPLOAD_KINTONE_TargetAppId" | Out-Null
+            Test-KintoneConnectionFromSettings -FieldName "TargetAppId" | Out-Null
         }
     }.GetNewClosure() }
     "KintonePassword" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            $kintoneSubdomain = (Get-GroupSettingsFieldValue "KINTONE_KintoneSubdomain").Trim()
-            $kintoneLoginName = Get-GroupSettingsFieldValue "KINTONE_KintoneLoginName"
-            $kintonePassword = Get-GroupSettingsFieldValue "KINTONE_KintonePassword"
+            $kintoneSubdomain = (Get-GroupSettingsFieldValue "KintoneSubdomain").Trim()
+            $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
+            $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
             if (!$kintoneSubdomain -or !$kintoneLoginName -or !$kintonePassword) {
                 throw "サブドメイン・ログイン名・パスワードをすべて入力してください。"
             }
@@ -414,18 +423,7 @@ $settingsTrailingButtonVars = @{
     }.GetNewClosure() }
 }
 
-$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
-
-$script:groupTemplateDefaults = $null
-function Get-GroupTemplateDefaults {
-    if ($null -eq $script:groupTemplateDefaults) {
-        $script:groupTemplateDefaults = [PSCustomObject]@{
-            Auth = Get-SetLineRawValues -Path $clientTemplateBat
-            Sync = Get-SetLineRawValues -Path $clientTemplateBat
-        }
-    }
-    return $script:groupTemplateDefaults
-}
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsFlatGroups
 
 $settingsSubTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 $tabSettings.Controls.Add($settingsSubTabControl)
@@ -527,9 +525,11 @@ function Get-GroupNames {
 }
 
 function Get-CommonSettingsFieldRows {
-    $raw = Get-SetLineRawValues -Path $commonEnvBat
-    foreach ($varName in $commonSettingsVars) {
-        [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "COMMON"; Value = $raw[$varName] }
+    $raw = Get-SetEnvDefaults -Path $commonEnvBat
+    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $raw[$varName] }
+        }
     }
 }
 
@@ -537,24 +537,26 @@ function Get-GroupSettingsFieldRows {
     param([string]$GroupName)
     if (!$GroupName) { return }
 
-    $rawClient = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName $clientsDir)
+    $rawClient = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
     $isPendingNewClient = !(Test-Path -LiteralPath (Get-GroupBatPath $GroupName $clientsDir))
     $newClientDefaults = if ($isPendingNewClient) { Get-NewClientInitialValues $GroupName } else { @{} }
 
-    foreach ($groupKey in @("KINTONE", "UPLOAD_KINTONE", "DOWNLOAD", "GENERATE", "UPLOAD")) {
-        $vars = switch ($groupKey) { "KINTONE" { $kintoneVars } "UPLOAD_KINTONE" { $uploadKintoneVars } "DOWNLOAD" { $downloadVars } "GENERATE" { $generateVars } default { $uploadVars } }
-        foreach ($varName in $vars) {
+    foreach ($groupKey in $settingsGroups["Group"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Group"].Sections[$groupKey].Vars.Keys)) {
             $value = if ($rawClient.ContainsKey($varName)) { $rawClient[$varName] } elseif ($newClientDefaults.ContainsKey($varName)) { $newClientDefaults[$varName] } else { "" }
-            [PSCustomObject]@{ Key = "$($groupKey)_$varName"; VarName = $varName; Group = $groupKey; Value = $value }
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupKey; Value = $value }
         }
     }
 }
 
 
 function Update-CommonSettingsFields {
+    $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
+    $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
     Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
         -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -LabelWidth 150 | Out-Null
+    $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
 function Update-GroupSettingsFields {
@@ -589,31 +591,7 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $saveGroupDownloadVarMap = @{}
-    foreach ($varName in $downloadVars) {
-        $saveGroupDownloadVarMap[$varName] = "DOWNLOAD_$varName"
-    }
-
-    $saveGroupGenerateVarMap = @{}
-    foreach ($varName in $generateVars) {
-        $saveGroupGenerateVarMap[$varName] = "GENERATE_$varName"
-    }
-
-    $saveGroupUploadVarMap = @{}
-    foreach ($varName in $uploadVars) {
-        $saveGroupUploadVarMap[$varName] = "UPLOAD_$varName"
-    }
-
-    $saveGroupKintoneVarMap = @{}
-    foreach ($varName in $kintoneVars) {
-        $saveGroupKintoneVarMap[$varName] = "KINTONE_$varName"
-    }
-    $saveGroupUploadKintoneVarMap = @{}
-    foreach ($varName in $uploadKintoneVars) {
-        $saveGroupUploadKintoneVarMap[$varName] = "UPLOAD_KINTONE_$varName"
-    }
-
-    $allVars = @() + @($saveGroupKintoneVarMap.Keys) + @($saveGroupUploadKintoneVarMap.Keys) + @($saveGroupDownloadVarMap.Keys) + @($saveGroupGenerateVarMap.Keys) + @($saveGroupUploadVarMap.Keys)
+    $allVars = @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys })
 
     if (!(Test-Path -LiteralPath $groupBatPath)) {
         if (Test-Path -LiteralPath $clientTemplateBat) {
@@ -622,19 +600,7 @@ function Save-GroupSettings {
     }
     Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
         -GetValueFn { param($varName)
-            if ($saveGroupDownloadVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupDownloadVarMap[$varName]
-            } elseif ($saveGroupGenerateVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupGenerateVarMap[$varName]
-            } elseif ($saveGroupUploadVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupUploadVarMap[$varName]
-            } elseif ($saveGroupKintoneVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupKintoneVarMap[$varName]
-            } elseif ($saveGroupUploadKintoneVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupUploadKintoneVarMap[$varName]
-            } else {
-                ""
-            }
+            Get-GroupSettingsFieldValue $varName
         } `
         -HasValueFn { param($varName)
             $true

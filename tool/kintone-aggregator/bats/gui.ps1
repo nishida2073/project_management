@@ -182,95 +182,108 @@ function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$G
 
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
-$groupReportVars = @("TargetAppIds")
-$commonReportVars = @("TargetDateCodeField", "TargetUserCodeField")
-$syncUserMasterVars = @("SyncUserMasterAppId", "SyncUserMasterSheetName")
 
-function Get-ReportTypeDefs {
-    $types = @()
-    foreach ($key in (Get-SetEnvDefaults -Path $commonEnvBat).Keys) {
-        if ($key -notmatch '^SourceType(_.+)$') { continue }
-        $suffix = $Matches[1]
-        $types += [PSCustomObject]@{
-            Prefix = $suffix.TrimStart('_')
-            Suffix = $suffix
-            Label  = Get-ResolvedVar $key $commonEnvBat
-        }
-    }
-    return @($types | Sort-Object Prefix)
-}
 
 $settingsGroups = [ordered]@{
-    "BASE" = @{
-        Label = "基本設定"
-        Vars = [ordered]@{
-            "ClientDataRootDir"        = @{ Label = "グループデータのフォルダ"; Browse = "Folder" }
-            "OutputRootDir"            = @{ Label = "出力のルートフォルダ"; Browse = "Folder" }
-            "TemplateRootDir"          = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
-            "CommonLogPath"            = @{ Label = "ログの出力先"; Browse = "Folder" }
-            "OutputReportDir"          = @{ Label = "提出状況の出力先"; Browse = "Folder" }
-            "OutputCollectDataRootDir" = @{ Label = "アプリデータ集計の出力先"; Browse = "Folder" }
-            "OutputAlertRootDir"       = @{ Label = "アラート検知結果の出力先"; Browse = "Folder" }
-            "OutputAlertBackupDir"     = @{ Label = "バックアップの出力先"; Browse = "Folder" }
+    "Common" = @{
+        Label = "共通"
+        Sections = [ordered]@{
+            "COMMON" = @{
+                Label = "基本設定"
+                Vars = [ordered]@{
+                    "ClientDataRootDir"        = @{ Label = "グループデータのフォルダ"; Browse = "Folder" }
+                    "OutputRootDir"            = @{ Label = "出力のルートフォルダ"; Browse = "Folder" }
+                    "TemplateRootDir"          = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
+                    "CommonLogPath"            = @{ Label = "ログの出力先"; Browse = "Folder" }
+                    "OutputReportDir"          = @{ Label = "提出状況の出力先"; Browse = "Folder" }
+                    "OutputCollectDataRootDir" = @{ Label = "アプリデータ集計の出力先"; Browse = "Folder" }
+                    "OutputAlertRootDir"       = @{ Label = "アラート検知結果の出力先"; Browse = "Folder" }
+                    "OutputAlertBackupDir"     = @{ Label = "バックアップの出力先"; Browse = "Folder" }
+                }
+            }
+            "CommonDaily" = @{
+                Label = "業務日誌（共通）"
+                Vars = [ordered]@{
+                    "TargetDateCodeField_Daily" = @{ Label = "日付フィールドコード" }
+                    "TargetUserCodeField_Daily" = @{ Label = "受講生IDフィールドコード" }
+                }
+            }
+            "CommonPulse" = @{
+                Label = "パルスサーベイ（共通）"
+                Vars = [ordered]@{
+                    "TargetDateCodeField_Pulse" = @{ Label = "日付フィールドコード" }
+                    "TargetUserCodeField_Pulse" = @{ Label = "受講生IDフィールドコード" }
+                }
+            }
         }
     }
-    "AUTH" = @{
-        Label = "認証情報"
-        Vars = [ordered]@{
-            "KintoneSubdomain" = @{ Label = "サブドメイン" }
-            "KintoneLoginName" = @{ Label = "ログイン名" }
-            "KintonePassword"  = @{ Label = "パスワード"; Masked = $true }
-        }
-    }
-    "POST" = @{
-        Label = "投稿先"
-        Vars = [ordered]@{
-            "SpaceId"             = @{ Label = "投稿先スペースID" }
-            "ThreadId"            = @{ Label = "投稿先スレッドID" }
-            "MentionUserCodes"    = @{ Label = "メンション対象" }
-            "CommentTextTemplate" = @{ Label = "投稿コメント文言"; Width=400; Multiline = $true }
-            "CommentSummaryTemplate" = @{ Label = "投稿集計文言"; Width=400; Multiline = $true }
-        }
-    }
-    "SYNC" = @{
-        Label = "ユーザーマスター同期"
-        Vars = [ordered]@{
-            "SyncUserMasterAppId"   = @{ Label = "対象アプリID" }
-            "SyncUserMasterSheetName" = @{ Label = "対象シート名" }
+    "Group" = @{
+        Label = "グループ別"
+        Sections = [ordered]@{
+            "AUTH" = @{
+                Label = "認証情報"
+                Vars = [ordered]@{
+                    "KintoneSubdomain" = @{ Label = "サブドメイン" }
+                    "KintoneLoginName" = @{ Label = "ログイン名" }
+                    "KintonePassword"  = @{ Label = "パスワード"; Masked = $true }
+                }
+            }
+            "POST" = @{
+                Label = "投稿先"
+                Vars = [ordered]@{
+                    "SpaceId"                = @{ Label = "投稿先スペースID" }
+                    "ThreadId"               = @{ Label = "投稿先スレッドID" }
+                    "MentionUserCodes"       = @{ Label = "メンション対象" }
+                    "CommentTextTemplate"    = @{ Label = "投稿コメント文言"; Width = 400; Multiline = $true }
+                    "CommentSummaryTemplate" = @{ Label = "投稿集計文言"; Width = 400; Multiline = $true }
+                }
+            }
+            "SYNC" = @{
+                Label = "ユーザーマスター同期"
+                Vars = [ordered]@{
+                    "SyncUserMasterAppId"     = @{ Label = "対象アプリID" }
+                    "SyncUserMasterSheetName" = @{ Label = "対象シート名" }
+                }
+            }
+            "Daily" = @{
+                Label = "業務日誌"
+                Vars = [ordered]@{
+                    "TargetAppIds_Daily" = @{ Label = "対象アプリID" }
+                }
+            }
+            "Pulse" = @{
+                Label = "パルスサーベイ"
+                Vars = [ordered]@{
+                    "TargetAppIds_Pulse" = @{ Label = "対象アプリID" }
+                }
+            }
         }
     }
 }
 
-$reportTypeVarDefs = [ordered]@{
-    "TargetAppIds"        = @{ Label = "対象アプリID" }
-    "TargetDateCodeField" = @{ Label = "日付フィールドコード" }
-    "TargetUserCodeField" = @{ Label = "受講生IDフィールドコード" }
+$settingsFlatGroups = [ordered]@{}
+foreach ($section in $settingsGroups.Values) {
+    foreach ($key in $section.Sections.Keys) { $settingsFlatGroups[$key] = $section.Sections[$key] }
 }
-foreach ($rt in (Get-ReportTypeDefs)) {
-    $settingsGroups[$rt.Prefix] = @{ Label = $rt.Label; Vars = $reportTypeVarDefs }
-}
-
-$commonSettingsVars = @($settingsGroups["BASE"].Vars.Keys)
-$authVars = @($settingsGroups["AUTH"].Vars.Keys)
-$postVars = @($settingsGroups["POST"].Vars.Keys)
-
-$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
+$settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsFlatGroups
+$targetAppIdsTestButton = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+    Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
+        Test-KintoneConnectionFromSettings -FieldName $Field.Key | Out-Null
+    }
+}.GetNewClosure() }
 $settingsTrailingButtonVars = @{
-    "TargetAppIds"        = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
-        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            Test-KintoneConnectionFromSettings -ReportGroup $Field.Group -FieldName "$($Field.Group)_TargetAppIds" | Out-Null
-        }
-    }.GetNewClosure() }
+    "TargetAppIds_Daily"  = $targetAppIdsTestButton
+    "TargetAppIds_Pulse"  = $targetAppIdsTestButton
     "SyncUserMasterAppId" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            Test-KintoneConnectionFromSettings -ReportGroup "SYNC" -FieldName "SYNC_SyncUserMasterAppId" | Out-Null
+            Test-KintoneConnectionFromSettings -FieldName "SyncUserMasterAppId" | Out-Null
         }
     }.GetNewClosure() }
     "KintonePassword" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            $kintoneSubdomain = (Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain").Trim()
-            $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-            $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+            $kintoneSubdomain = (Get-GroupSettingsFieldValue "KintoneSubdomain").Trim()
+            $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
+            $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
             if (!$kintoneSubdomain -or !$kintoneLoginName -or !$kintonePassword) {
                 throw "サブドメイン・ログイン名・パスワードをすべて入力してください。"
             }
@@ -280,58 +293,33 @@ $settingsTrailingButtonVars = @{
     "CommentSummaryTemplate" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト投稿" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
             Sync-MentionRowsFromControls
-            $spaceId = Get-GroupSettingsFieldValue "POST_SpaceId"
-            $threadId = Get-GroupSettingsFieldValue "POST_ThreadId"
+            $spaceId = Get-GroupSettingsFieldValue "SpaceId"
+            $threadId = Get-GroupSettingsFieldValue "ThreadId"
             $validationError = if ([string]::IsNullOrWhiteSpace($spaceId) -or [string]::IsNullOrWhiteSpace($threadId)) { "スペースIDとスレッドIDを入力してください。" } else { $null }
             if ($validationError) {
                 throw "スペースID／スレッドIDを入力してください。"
             }
-            $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-            $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-            $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+            $kintoneSubdomain = Get-GroupSettingsFieldValue "KintoneSubdomain"
+            $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
+            $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
             $mentions = @($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { @{ code = $_.Code; type = $_.Type } })
             $kintoneBaseUrl = "https://$kintoneSubdomain.cybozu.com"
             $authorization = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("${kintoneLoginName}:${kintonePassword}"))
             Add-KintoneThreadComment -SpaceId $spaceId -ThreadId $threadId -Text "【テスト投稿】kintoneデータ集計ツールの設定確認用コメントです。不要であれば削除してください。" -Mentions $mentions -BaseUrl $kintoneBaseUrl -Authorization $authorization | Out-Null
         }
     }.GetNewClosure() -OnOpenClick {
-        $subdomain = (Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain").Trim()
-        $spaceId = (Get-GroupSettingsFieldValue "POST_SpaceId").Trim()
-        $threadId = (Get-GroupSettingsFieldValue "POST_ThreadId").Trim()
+        $subdomain = (Get-GroupSettingsFieldValue "KintoneSubdomain").Trim()
+        $spaceId = (Get-GroupSettingsFieldValue "SpaceId").Trim()
+        $threadId = (Get-GroupSettingsFieldValue "ThreadId").Trim()
         $threadUrl = if ($subdomain -and $spaceId -and $threadId) { "https://$subdomain.cybozu.com/k/#/space/$spaceId/thread/$threadId" } else { $null }
         Open-TargetOrWarn -Path $threadUrl
     }.GetNewClosure() }
 }
 
-function Get-SuffixedRawValues {
-    param([hashtable]$RawValues, [string]$Suffix, [array]$VarNames)
-    $result = @{}
-    foreach ($varName in $VarNames) {
-        $key = "$varName$Suffix"
-        if ($RawValues.ContainsKey($key)) { $result[$varName] = $RawValues[$key] }
-    }
-    return $result
-}
-
 $script:groupTemplateDefaults = $null
 function Get-GroupTemplateDefaults {
     if ($null -eq $script:groupTemplateDefaults) {
-        $rawTemplate = Get-SetLineRawValues -Path ($clientTemplateBat)
-        $byType = @{}
-        foreach ($rt in (Get-ReportTypeDefs)) {
-            $byType[$rt.Prefix] = Get-SuffixedRawValues -RawValues $rawTemplate -Suffix $rt.Suffix -VarNames $groupReportVars
-        }
-        $syncValues = @{}
-        foreach ($varName in $syncUserMasterVars) {
-            if ($rawTemplate.ContainsKey($varName)) {
-                $syncValues[$varName] = $rawTemplate[$varName]
-            }
-        }
-        $script:groupTemplateDefaults = [PSCustomObject]@{
-            Auth   = $rawTemplate
-            ByType = $byType
-            Sync   = $syncValues
-        }
+        $script:groupTemplateDefaults = Get-SetEnvDefaults -Path ($clientTemplateBat)
     }
     return $script:groupTemplateDefaults
 }
@@ -461,8 +449,8 @@ $masterSync = Add-FieldActionButton -Panel $grpUserMasterSync -Y 30 -Text "同�
         $matchingItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
         if ($matchingItem) { $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $matchingItem }
         Update-GroupSettingsFields
-        $syncAppId = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterAppId"
-        $syncSheetName = Get-GroupSettingsFieldValue "SYNC_SyncUserMasterSheetName"
+        $syncAppId = Get-GroupSettingsFieldValue "SyncUserMasterAppId"
+        $syncSheetName = Get-GroupSettingsFieldValue "SyncUserMasterSheetName"
         if ([string]::IsNullOrWhiteSpace($syncAppId)) {
             throw "対象アプリIDが入力されていません"
         }
@@ -476,14 +464,10 @@ $masterSync = Add-FieldActionButton -Panel $grpUserMasterSync -Y 30 -Text "同�
 
 
 function Get-CommonSettingsFieldRows {
-    $raw = Get-SetLineRawValues -Path $commonEnvBat
-    foreach ($varName in $commonSettingsVars) {
-        [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = "BASE"; Value = $raw[$varName] }
-    }
-    foreach ($rt in (Get-ReportTypeDefs)) {
-        $rawForType = Get-SuffixedRawValues -RawValues $raw -Suffix $rt.Suffix -VarNames $commonReportVars
-        foreach ($varName in $commonReportVars) {
-            [PSCustomObject]@{ Key = "$($rt.Prefix)_$varName"; VarName = $varName; Group = $rt.Prefix; Value = $rawForType[$varName] }
+    $raw = Get-SetEnvDefaults -Path $commonEnvBat
+    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $raw[$varName] }
         }
     }
 }
@@ -493,27 +477,13 @@ function Get-GroupSettingsFieldRows {
     if (!$GroupName) { return }
 
     $templateDefaults = Get-GroupTemplateDefaults
-    $rawGroup = Get-SetLineRawValues -Path (Get-GroupBatPath $GroupName $clientsDir)
+    $rawGroup = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
 
-    foreach ($varName in $authVars) {
-        $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Auth[$varName] }
-        [PSCustomObject]@{ Key = "AUTH_$varName"; VarName = $varName; Group = "AUTH"; Value = $value }
-    }
-    foreach ($varName in $postVars) {
-        $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Auth[$varName] }
-        [PSCustomObject]@{ Key = "POST_$varName"; VarName = $varName; Group = "POST"; Value = $value }
-    }
-    foreach ($rt in (Get-ReportTypeDefs)) {
-        $rawForType = Get-SuffixedRawValues -RawValues $rawGroup -Suffix $rt.Suffix -VarNames $groupReportVars
-        $defaultsForType = $templateDefaults.ByType[$rt.Prefix]
-        foreach ($varName in $groupReportVars) {
-            $value = if ($rawForType.ContainsKey($varName)) { $rawForType[$varName] } else { $defaultsForType[$varName] }
-            [PSCustomObject]@{ Key = "$($rt.Prefix)_$varName"; VarName = $varName; Group = $rt.Prefix; Value = $value }
+    foreach ($sectionName in $settingsGroups["Group"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Group"].Sections[$sectionName].Vars.Keys)) {
+            $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults[$varName] }
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $sectionName; Value = $value }
         }
-    }
-    foreach ($varName in $syncUserMasterVars) {
-        $value = if ($rawGroup.ContainsKey($varName)) { $rawGroup[$varName] } else { $templateDefaults.Sync[$varName] }
-        [PSCustomObject]@{ Key = "SYNC_$varName"; VarName = $varName; Group = "SYNC"; Value = $value }
     }
 }
 
@@ -543,7 +513,10 @@ function New-CollectDataDefsEditor {
     $script:collectDataDefsRowControls = @()
 
     $grp = New-GroupBox -Text "アプリデータ集計の列定義" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize
-    $typeOptions = @(Get-ReportTypeDefs | ForEach-Object { [PSCustomObject]@{ Text = $_.Label; Value = $_.Prefix; Display = $_.Label } })
+    $typeOptions = @(
+        [PSCustomObject]@{ Text = "業務日誌"; Value = "Daily"; Display = "業務日誌" }
+        [PSCustomObject]@{ Text = "パルスサーベイ"; Value = "Pulse"; Display = "パルスサーベイ" }
+    )
 
     $y = 25
     $lblTypeHeader = New-Label -Text "タイプ" -X 20 -Y $y -Width 100 -Height 18
@@ -618,6 +591,7 @@ function Update-CommonSettingsFields {
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
+
 function Update-GroupSettingsFields {
     $scrollX = -$settingsGroupBottomPanel.AutoScrollPosition.X
     $scrollY = -$settingsGroupBottomPanel.AutoScrollPosition.Y
@@ -634,10 +608,10 @@ function Update-GroupSettingsFields {
 }
 
 function Test-KintoneConnectionFromSettings {
-    param([string]$ReportGroup, [string]$FieldName)
-    $kintoneSubdomain = Get-GroupSettingsFieldValue "AUTH_KintoneSubdomain"
-    $kintoneLoginName = Get-GroupSettingsFieldValue "AUTH_KintoneLoginName"
-    $kintonePassword = Get-GroupSettingsFieldValue "AUTH_KintonePassword"
+    param([string]$FieldName)
+    $kintoneSubdomain = Get-GroupSettingsFieldValue "KintoneSubdomain"
+    $kintoneLoginName = Get-GroupSettingsFieldValue "KintoneLoginName"
+    $kintonePassword = Get-GroupSettingsFieldValue "KintonePassword"
     $targetAppIdsValue = Get-GroupSettingsFieldValue $FieldName
     $targetAppIds = @($targetAppIdsValue -split '[,\s]+' | Where-Object { $_ })
     if ($targetAppIds.Count -eq 0) {
@@ -647,25 +621,10 @@ function Test-KintoneConnectionFromSettings {
 }
 
 function Save-CommonSettings {
-    $saveCommonReportVarKeyMap = @{}
-    foreach ($rt in (Get-ReportTypeDefs)) {
-        foreach ($varName in $commonReportVars) {
-            $saveCommonReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
-        }
-    }
-
-    $allVars = @() + $commonSettingsVars + @($saveCommonReportVarKeyMap.Keys)
+    $allVars = @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys })
     Save-EnvBatFile -Path $commonEnvBat -VarNames $allVars `
-        -GetValueFn { param($varName)
-            if ($saveCommonReportVarKeyMap.ContainsKey($varName)) {
-                Get-CommonSettingsFieldValue $saveCommonReportVarKeyMap[$varName]
-            } else {
-                Get-CommonSettingsFieldValue $varName
-            }
-        } `
-        -HasValueFn { param($varName)
-            $true
-        }
+        -GetValueFn { param($varName) Get-CommonSettingsFieldValue $varName } `
+        -HasValueFn { param($varName) $true }
 }
 
 function Save-GroupSettings {
@@ -673,29 +632,7 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $saveGroupAuthVarMap = @{}
-    foreach ($varName in $authVars) {
-        $saveGroupAuthVarMap[$varName] = "AUTH_$varName"
-    }
-
-    $saveGroupPostVarMap = @{}
-    foreach ($varName in $postVars) {
-        $saveGroupPostVarMap[$varName] = "POST_$varName"
-    }
-
-    $saveGroupSyncVarMap = @{}
-    foreach ($varName in $syncUserMasterVars) {
-        $saveGroupSyncVarMap[$varName] = "SYNC_$varName"
-    }
-
-    $saveGroupReportVarKeyMap = @{}
-    foreach ($rt in (Get-ReportTypeDefs)) {
-        foreach ($varName in $groupReportVars) {
-            $saveGroupReportVarKeyMap["$varName$($rt.Suffix)"] = "$($rt.Prefix)_$varName"
-        }
-    }
-
-    $allVars = @() + @($saveGroupAuthVarMap.Keys) + @($saveGroupPostVarMap.Keys) + @($saveGroupSyncVarMap.Keys) + @($saveGroupReportVarKeyMap.Keys)
+    $allVars = @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys })
 
     Sync-MentionRowsFromControls
 
@@ -708,18 +645,10 @@ function Save-GroupSettings {
         -GetValueFn { param($varName)
             if ($varName -eq "MentionUserCodes") {
                 ConvertTo-MentionUserCodesText -Rows $script:mentionRows
-            } elseif ($saveGroupAuthVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupAuthVarMap[$varName]
-            } elseif ($saveGroupPostVarMap.ContainsKey($varName)) {
-                $val = Get-GroupSettingsFieldValue $saveGroupPostVarMap[$varName]
+            } else {
+                $val = Get-GroupSettingsFieldValue $varName
                 if ($settingsRenderLists.MultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
                 $val
-            } elseif ($saveGroupSyncVarMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupSyncVarMap[$varName]
-            } elseif ($saveGroupReportVarKeyMap.ContainsKey($varName)) {
-                Get-GroupSettingsFieldValue $saveGroupReportVarKeyMap[$varName]
-            } else {
-                ""
             }
         } `
         -HasValueFn { param($varName)
@@ -867,4 +796,3 @@ $form.Add_Shown({
 })
 
 [System.Windows.Forms.Application]::Run($form)
-
