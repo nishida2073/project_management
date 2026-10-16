@@ -48,31 +48,28 @@ function Get-GroupNames {
 
 $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
-function New-TargetGroupInput {
-    param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
-}
+$targetGroupInput = [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
 
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "実施データ取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $downloadResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $downloadResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
         )
     }
     [PSCustomObject]@{
         Label = "実施状況確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $collectCombineResultBat; OpenTarget = Get-ResolvedVar "OutputCombineCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施状況確認-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $collectCombineResultBat; OpenTarget = Get-ResolvedVar "OutputCombineCollectDir" $commonEnvBat; Inputs = @($targetGroupInput) }
         )
     }
     [PSCustomObject]@{
         Label = "実施結果確認"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = Get-ResolvedVar "OutputTestCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = Get-ResolvedVar "OutputSurveyCollectDir" $commonEnvBat; Inputs = @((New-TargetGroupInput)) }
-            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue -ClientsDir $clientsDir }; Inputs = @((New-TargetGroupInput)) }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = Get-ResolvedVar "OutputTestCollectDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = Get-ResolvedVar "OutputSurveyCollectDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue -ClientsDir $clientsDir }; Inputs = @($targetGroupInput) }
         )
     }
     [PSCustomObject]@{
@@ -86,7 +83,7 @@ $categoryDefs = @(
                 BatchPath = $collectYearComparisonResultBat
                 OpenTarget = Get-ResolvedVar "OutputYearComparisonCollectDir" $commonEnvBat
                 Inputs = @(
-                    (New-TargetGroupInput)
+                    $targetGroupInput
                     [PSCustomObject]@{ Name = "TargetCompanyNames"; Label = "対象の会社名"; Default = Get-ResolvedVar "TargetCompanyNames" $commonEnvBat; LabelWidth = 150; InputWidth = 150; NewRow = $true }
                     [PSCustomObject]@{ Name = "ComparePeriod"; Label = "比較年"; Default = Get-ResolvedVar "ComparePeriod" $commonEnvBat; LabelWidth = 50; InputWidth = 40 }
                     [PSCustomObject]@{
@@ -295,6 +292,31 @@ $settingsGroups = [ordered]@{
 }
 
 $settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
+
+function Get-CommonSettingsFieldRows {
+    $raw = Get-SetEnvDefaults -Path $commonEnvBat
+    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $raw[$varName] }
+        }
+    }
+}
+
+function Get-GroupSettingsFieldRows {
+    param([string]$GroupName)
+
+    $templateDefaults = Get-SetEnvDefaults -Path $clientTemplateBat
+    $rawAuth = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
+    foreach ($groupName in $settingsGroups["Group"].Sections.Keys) {
+        foreach ($varName in @($settingsGroups["Group"].Sections[$groupName].Vars.Keys)) {
+            $def = $settingsGroups["Group"].Sections[$groupName].Vars[$varName]
+            $isOverride = [bool]$def.OverrideRef
+            $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } elseif ($isOverride) { "" } else { $templateDefaults[$varName] }
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $value; Unset = $isOverride }
+        }
+    }
+}
+
 
 
 $settingsTrailingButtonVars = @{}
@@ -709,30 +731,6 @@ function Save-TestToExcel {
     }
     catch {
         [System.Windows.Forms.MessageBox]::Show("保存に失敗しました: $_", "エラー", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
-    }
-}
-
-function Get-CommonSettingsFieldRows {
-    $raw = Get-SetEnvDefaults -Path $commonEnvBat
-    foreach ($groupName in $settingsGroups["Common"].Sections.Keys) {
-        foreach ($varName in @($settingsGroups["Common"].Sections[$groupName].Vars.Keys)) {
-            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $raw[$varName] }
-        }
-    }
-}
-
-function Get-GroupSettingsFieldRows {
-    param([string]$GroupName)
-
-    $templateDefaults = Get-SetEnvDefaults -Path $clientTemplateBat
-    $rawAuth = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
-    foreach ($groupName in $settingsGroups["Group"].Sections.Keys) {
-        foreach ($varName in @($settingsGroups["Group"].Sections[$groupName].Vars.Keys)) {
-            $def = $settingsGroups["Group"].Sections[$groupName].Vars[$varName]
-            $isOverride = [bool]$def.OverrideRef
-            $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } elseif ($isOverride) { "" } else { $templateDefaults[$varName] }
-            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $value; Unset = $isOverride }
-        }
     }
 }
 

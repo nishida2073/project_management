@@ -43,10 +43,7 @@ function Get-ClientNames {
 
 $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
-function New-ClientInput {
-    param([bool]$NewRow = $false)
-    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; NewRow = $NewRow }
-}
+$clientInput = [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
 
 function Get-NewClientInitialValues {
     param([string]$ClientName)
@@ -110,13 +107,13 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ定義"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @($clientInput) }
         )
     },
     [PSCustomObject]@{
         Label = "パッケージ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = { param($ic) $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem; if (!$client) { return $null }; Get-ResolvedVar "GenerateOutputPath" (Get-GroupBatPath $client $clientsDir) }; Inputs = @((New-ClientInput)) }
+            [PSCustomObject]@{ Label = "パッケージの作成"; BatchLabel = "パッケージの作成"; IncludeInBatch = $true; BatchPath = $generatePackageBat; OpenTarget = { param($ic) $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem; if (!$client) { return $null }; Get-ResolvedVar "GenerateOutputPath" (Get-GroupBatPath $client $clientsDir) }; Inputs = @($clientInput) }
         )
     },
     [PSCustomObject]@{
