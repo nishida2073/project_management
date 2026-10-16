@@ -178,9 +178,9 @@ function Update-CommonSettingsFields {
     $grp = New-CollectDataDefsEditor
     $controlsToStack = @($grp)
 
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 150 -ExtraGrps $controlsToStack | Out-Null
+    Set-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes `
+        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -LabelWidth 150 -ExtraGrps $controlsToStack | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
@@ -189,9 +189,9 @@ function Update-GroupSettingsFields {
     $scrollY = -$settingsGroupBottomPanel.AutoScrollPosition.Y
 
     $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 150 `
+    Set-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -LabelWidth 150 `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions | Out-Null
 
     $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
@@ -289,7 +289,7 @@ function New-CollectDataDefsEditor {
         $y += 26
     }
 
-    $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 100 -Height 24
+    $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 60 -Height 24
     $btnAddRow.Add_Click({
         Sync-CollectDataDefsFromControls
         $script:collectDataDefsItems += [PSCustomObject]@{ type = ""; orgName = ""; newName = "" }
@@ -660,7 +660,7 @@ $settingsGroupTop = (New-SettingsTopPanel `
     -ExtraControlDefs @(
         [PSCustomObject]@{ Name = "GroupTargetLabel"; Kind = "Label"; Text = "対象のグループ"; Width = 150 }
         [PSCustomObject]@{ Name = "GroupTarget"; Kind = "Combo"; Width = 150; OnChange = { Update-GroupSettingsFields } }
-        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 140; OnClick = {
+        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 100; OnClick = {
             $newName = Show-GroupNameDialog -Title "グループの新規作成" -Prompt "グループ名を入力してください" -Exists {
                 param($name)
                 ($settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $name }) -or (Test-Path -LiteralPath (Get-GroupBatPath $name $clientsDir))

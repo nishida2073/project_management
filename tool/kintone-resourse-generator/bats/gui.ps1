@@ -229,9 +229,9 @@ function Update-CommonSettingsFields {
     $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
     $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
     $rows = @(Get-CommonSettingsFieldRows)
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 220 | Out-Null
+    Set-SettingsFields -Panel $settingsCommonBottomPanel -Rows $rows -TargetTextBoxes $settingsCommonFieldTextBoxes -TrailingButtonVars @{} `
+        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -LabelWidth 220 | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
@@ -254,9 +254,9 @@ function Update-GroupSettingsFields {
     $settingsRenderLists.VarLabels["SpaceId"] = "スペースID"
     $settingsRenderLists.VarLabels["TemplateName"] = "テンプレート名"
 
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -LabelWidth 150 | Out-Null
+    Set-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -LabelWidth 150 | Out-Null
 }
 
 function Update-GroupDropdowns {
@@ -823,7 +823,7 @@ $settingsGroupTop = (New-SettingsTopPanel `
     -ExtraControlDefs @(
         [PSCustomObject]@{ Name = "GroupTargetLabel"; Kind = "Label"; Text = "対象のグループ"; Width = 150 }
         [PSCustomObject]@{ Name = "GroupTarget"; Kind = "Combo"; Width = 150; OnChange = { Update-GroupSettingsFields } }
-        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 140; OnClick = {
+        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 100; OnClick = {
             $newName = Show-GroupNameDialog -Title "グループの新規作成" -Prompt "グループ名を入力してください" -Exists {
                 param($name)
                 ($settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $name }) -or (Test-Path -LiteralPath (Get-GroupBatPath $name $clientsDir))

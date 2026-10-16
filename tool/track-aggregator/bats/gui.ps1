@@ -187,9 +187,9 @@ function Save-GroupSettings {
 function Update-CommonSettingsFields {
     $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
     $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
-    Render-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() | Out-Null
+    Set-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes `
+        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
@@ -239,9 +239,9 @@ function Update-GroupSettingsFields {
             Test-KintoneConnection -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword
         }
     }.GetNewClosure() }
-    Render-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -RadioVars $settingsRenderLists.RadioVars `
-        -GroupLabels $settingsRenderLists.GroupLabels -VarLabels $settingsRenderLists.VarLabels -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -MultilineVars $settingsRenderLists.MultilineVars -MaskedVars $settingsRenderLists.MaskedVars -FolderBrowseVars $settingsRenderLists.FolderBrowseVars -FileBrowseVars $settingsRenderLists.FileBrowseVars -FileBrowseFilters $settingsRenderLists.FileBrowseFilters -NoOpenVars $settingsRenderLists.NoOpenVars -WidthVars $settingsRenderLists.WidthVars -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() `
+    Set-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes `
+        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -LabelWidth 230 -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPath -Resolver $commonEnvResolver -BasePath $rootPath }).GetNewClosure() `
         -MentionGroupCombo $settingsGroupTop.Controls["GroupTarget"] -MentionTypeOptions $mentionTypeOptions `
         -TrailingButtonVars $trailingButtons | Out-Null
 
@@ -766,7 +766,7 @@ $settingsGroupTop = (New-SettingsTopPanel `
     -ExtraControlDefs @(
         [PSCustomObject]@{ Name = "GroupTargetLabel"; Kind = "Label"; Text = "対象のグループ"; Width = 150 }
         [PSCustomObject]@{ Name = "GroupTarget"; Kind = "Combo"; Width = 150; OnChange = { Update-GroupSettingsFields } }
-        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 140; OnClick = {
+        [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 100; OnClick = {
             $newName = Show-GroupNameDialog -Title "グループの新規作成" -Prompt "グループ名を入力してください" -Exists {
                 param($name)
                 ($settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $name }) -or (Test-Path -LiteralPath (Get-GroupBatPath $name $clientsDir))

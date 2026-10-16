@@ -116,8 +116,8 @@ function Show-GroupNameDialog {
 
     $label = New-Label -X 12 -Y 12 -Width 336 -Height 18 -Text $Prompt
     $textBox = New-TextBox -X 12 -Y 36 -Width 336 -Height 22
-    $okButton = New-Button -Text "OK" -X 180 -Y 74 -Width 80 -Height 26
-    $cancelButton = New-Button -Text "キャンセル" -X 268 -Y 74 -Width 80 -Height 26
+    $okButton = New-Button -Text "OK" -X 180 -Y 74 -Width 80 -Height 24
+    $cancelButton = New-Button -Text "キャンセル" -X 268 -Y 74 -Width 80 -Height 24
     $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
     $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
     $dialog.AcceptButton = $okButton
@@ -666,7 +666,7 @@ function New-CategoryTabControl {
                 $bd | Add-Member -NotePropertyName InputControls -NotePropertyValue $inputMap -Force
             }
 
-            $btn = New-Button -Text $RunButtonText -X 15 -Y $contentY -Width 100 -Height 30
+            $btn = New-Button -Text $RunButtonText -X 15 -Y $contentY -Width 100 -Height 24
             $btn.Tag = $bd
             $btn.Add_Click({ 
                 try {
@@ -679,13 +679,14 @@ function New-CategoryTabControl {
             $runButtons += $btn
 
             $lblStepStatusX = $btn.Location.X + $btn.Width + 10
-            $lblStepStatus = New-Label -X $lblStepStatusX -Y ($contentY + 4) -Width 50 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
+            $lblStepStatus = New-Label -X $lblStepStatusX -Y ($btn.Top + 6) -AutoSize $true -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
             $grp.Controls.Add($lblStepStatus)
             $bd | Add-Member -NotePropertyName StepStatusLabel -NotePropertyValue $lblStepStatus -Force
 
             if ($bd.OpenTarget) {
-                $lnkOpenX = $lblStepStatus.Location.X + $lblStepStatus.Width + 5
-                $lnkOpen = New-OpenLink -Text $OpenLinkText -X $lnkOpenX -Y $contentY -Width 60 -Height 30 -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $bd.InputControls
+                $lnkOpenX = $lblStepStatus.Location.X + $lblStepStatus.PreferredWidth + 10
+                $lnkOpen = New-OpenLink -Text $OpenLinkText -X $lnkOpenX -Y ($btn.Top + 6) -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $bd.InputControls
+                $lnkOpen.AutoSize = $true
                 $grp.Controls.Add($lnkOpen)
             }
 
@@ -1013,7 +1014,7 @@ function New-InputRunTab {
         if ($def.Kind -eq "File") {
             $dlg = New-Object System.Windows.Forms.OpenFileDialog
             $dlg.Filter = if ($def.Filter) { $def.Filter } else { "すべてのファイル (*.*)|*.*" }
-            $browse = New-Button -Text "参照..." -X $x -Y $y -Width 70 -Height 22
+            $browse = New-Button -Text "参照..." -X $x -Y $y -Width 70 -Height 24
             $browse.Add_Click({
                 if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
                     $ctrl.Text = $dlg.FileName
@@ -1026,8 +1027,8 @@ function New-InputRunTab {
     }
 
     $btnRunY = 20 + $rowHeight * ($row + 1)
-    $btnRun = New-Button -Text $RunButtonText -X 15 -Y $btnRunY -Width 120 -Height 30
-    $lblStatus = New-Label -X 145 -Y ($btnRunY + 4) -Width 570 -Height 22
+    $btnRun = New-Button -Text $RunButtonText -X 15 -Y $btnRunY -Width 120 -Height 24
+    $lblStatus = New-Label -X ($btnRun.Right + 10) -Y ($btnRun.Top + 6) -AutoSize $true
     $grp.Controls.AddRange(@($btnRun, $lblStatus))
     $btnRun.Add_Click({ & $OnRunClick $controls $lblStatus }.GetNewClosure())
     $grp.Size = New-Object System.Drawing.Size(730, ($btnRunY + 30 + 10))
@@ -1120,14 +1121,15 @@ function New-BatchRunTab {
         $topControls += $chk
 
         $lblStepStatusX = $chk.Location.X + $chk.Width + 10
-        $lblStepStatus = New-Label -X $lblStepStatusX -Y $y -Width 50 -Height 22 -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
+        $lblStepStatus = New-Label -X $lblStepStatusX -Y $y -AutoSize $true -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
         $lblStepStatus.Visible = $ShowSteps
         $statusLabels += $lblStepStatus
         $topControls += $lblStepStatus
 
         if (& $ShowOpenLink $bd) {
-            $lnkOpenX = $lblStepStatus.Location.X + $lblStepStatus.Width + 5
-            $lnkOpen = New-OpenLink -X $lnkOpenX -Y $y -Width 40 -Height $chk.Height -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
+            $lnkOpenX = $lblStepStatus.Location.X + $lblStepStatus.PreferredWidth + 10
+            $lnkOpen = New-OpenLink -X $lnkOpenX -Y $y -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
+            $lnkOpen.AutoSize = $true
             $lnkOpen.Visible = $ShowSteps
             $topControls += $lnkOpen
         }
@@ -1137,10 +1139,10 @@ function New-BatchRunTab {
         }
     }
 
-    $btnRunAll = New-Button -Text $RunButtonText -X 15 -Y ($y + 10) -Width 120 -Height 30
+    $btnRunAll = New-Button -Text $RunButtonText -X 15 -Y ($y + 10) -Width 100 -Height 24
     $topControls += $btnRunAll
 
-    $lblStatus = New-Label -X 145 -Y ($y + 14) -Width 50 -Height 22
+    $lblStatus = New-Label -X ($btnRunAll.Right + 10) -Y ($btnRunAll.Top + 6) -AutoSize $true
     $topControls += $lblStatus
 
     $grpBatchAll.Controls.AddRange($topControls)
@@ -1437,7 +1439,7 @@ function Add-MentionsEditor {
         $y += 28
     }
 
-    $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 80 -Height 24
+    $btnAddRow = New-Button -Text "追加" -X 20 -Y $y -Width 60 -Height 24
     $Panel.Controls.Add($btnAddRow)
 
     $script:mentionEditorAddButton = $btnAddRow
@@ -1455,7 +1457,7 @@ function Add-FieldActionButton {
         [Parameter(Mandatory)][string]$Text,
         [Parameter(Mandatory)][scriptblock]$OnClick,
         [scriptblock]$OnOpenClick,
-        [int]$Width = 90,
+        [int]$Width = 100,
         [switch]$AddStatusLabel,
         [string]$InitialStatusText = "未実行"
     )
@@ -1526,25 +1528,16 @@ function Get-SettingsRenderLists {
     }
     return $lists
 }
-function Render-SettingsFields {
+function Set-SettingsFields {
     param(
         [System.Windows.Forms.Panel]$Panel,
         [array]$Rows,
         [hashtable]$TargetTextBoxes,
-        [Parameter(Mandatory)][hashtable]$GroupLabels,
-        [Parameter(Mandatory)][hashtable]$VarLabels,
+        [Parameter(Mandatory)]$RenderLists,
         [Parameter(Mandatory)][string]$RootPath,
         [Parameter(Mandatory)][scriptblock]$EnvResolver,
-        [string[]]$MultilineVars = @(),
-        [string[]]$MaskedVars = @(),
-        [string[]]$FolderBrowseVars = @(),
-        [string[]]$FileBrowseVars = @(),
-        [hashtable]$FileBrowseFilters = @{},
-        [string[]]$NoOpenVars = @(),
-        [hashtable]$WidthVars = @{},
         [int]$LabelWidth = 220,
         [int]$LabelHeight = 20,
-        [hashtable]$RadioVars = @{},
         [hashtable]$TrailingButtonVars = @{},
         [System.Windows.Forms.ComboBox]$MentionGroupCombo,
         [string[]]$MentionTypeOptions = @(),
@@ -1563,7 +1556,7 @@ function Render-SettingsFields {
     foreach ($field in $Rows) {
         if ($field.Group -ne $lastGroup) {
             $grp = New-Object System.Windows.Forms.GroupBox
-            $grp.Text = $GroupLabels[$field.Group]
+            $grp.Text = $RenderLists.GroupLabels[$field.Group]
             $grp.Padding = New-Object System.Windows.Forms.Padding(10, 35, 10, 10)
             $grp.Dock = [System.Windows.Forms.DockStyle]::Top
             $grp.AutoSize = $true
@@ -1578,13 +1571,13 @@ function Render-SettingsFields {
             continue
         }
 
-        $labelText = if ($VarLabels.Contains($field.VarName)) { $VarLabels[$field.VarName] } else { $field.VarName }
+        $labelText = if ($RenderLists.VarLabels.Contains($field.VarName)) { $RenderLists.VarLabels[$field.VarName] } else { $field.VarName }
         $lbl = New-Label -X 20 -Y $y -Width $LabelWidth -Height $LabelHeight -Text $labelText
         $grp.Controls.Add($lbl)
 
-        $isMultiline = $MultilineVars -contains $field.VarName
+        $isMultiline = $RenderLists.MultilineVars -contains $field.VarName
 
-        if ($RadioVars.ContainsKey($field.VarName)) {
+        if ($RenderLists.RadioVars.ContainsKey($field.VarName)) {
             $txt = New-TextBox -Text "$($field.Value)" -Visible $false
             $grp.Controls.Add($txt)
 
@@ -1594,7 +1587,7 @@ function Render-SettingsFields {
             $radioPanel.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
 
             $radioX = 0
-            foreach ($opt in $RadioVars[$field.VarName]) {
+            foreach ($opt in $RenderLists.RadioVars[$field.VarName]) {
                 $rbTag = [PSCustomObject]@{ TextBox = $txt; Value = $opt.Value }
                 $rb = New-RadioButton -X $radioX -Y 2 -Text $opt.Label -Tag $rbTag -Checked ($field.Value -eq $opt.Value)
                 $rb.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.TextBox.Text = $this.Tag.Value } })
@@ -1611,22 +1604,22 @@ function Render-SettingsFields {
             $grp.Controls.Add($radioPanel)
         } else {
             $txtValue = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
-            $txtWidth = if ($WidthVars.ContainsKey($field.VarName)) { $WidthVars[$field.VarName] } else { 300 }
+            $txtWidth = if ($RenderLists.WidthVars.ContainsKey($field.VarName)) { $RenderLists.WidthVars[$field.VarName] } else { 300 }
             $txtHeight = if ($isMultiline) { 60 } else { 22 }
             $txt = New-TextBox -X (20 + $LabelWidth + 10) -Y ($y - 2) -Width $txtWidth -Height $txtHeight -Text $txtValue -Multiline $isMultiline
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
             if ($isMultiline) { $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
-            if ($MaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
+            if ($RenderLists.MaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
             $grp.Controls.Add($txt)
         }
 
-        $isFileBrowse = $FileBrowseVars -contains $field.VarName
-        if (($FolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
+        $isFileBrowse = $RenderLists.FileBrowseVars -contains $field.VarName
+        if (($RenderLists.FolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
             $btnBrowse = New-Button -Text "参照..." -X ($txt.Right + 10) -Y ($y - 3) -Width 70 -Height 24
             $btnBrowse.Tag = $txt
 
             if ($isFileBrowse) {
-                $browseFilter = if ($FileBrowseFilters.ContainsKey($field.VarName)) { $FileBrowseFilters[$field.VarName] } else { "すべてのファイル (*.*)|*.*" }
+                $browseFilter = if ($RenderLists.FileBrowseFilters.ContainsKey($field.VarName)) { $RenderLists.FileBrowseFilters[$field.VarName] } else { "すべてのファイル (*.*)|*.*" }
                 $btnBrowse.Add_Click({
                     $targetTxt = $this.Tag
                     $dlg = New-Object System.Windows.Forms.OpenFileDialog
@@ -1640,7 +1633,7 @@ function Render-SettingsFields {
                 }.GetNewClosure())
 
                 $fileControls = @($btnBrowse)
-                if (-not ($NoOpenVars -contains $field.VarName)) {
+                if (-not ($RenderLists.NoOpenVars -contains $field.VarName)) {
                     $lnkOpen = New-OpenLink -Text "開く" -X ($btnBrowse.Right + 10) -Y ($y - 2) -Width 40 -Height 22 -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
                     $fileControls += $lnkOpen
                 }
@@ -1864,7 +1857,7 @@ function New-Grid {
             $btnDelete = New-Object System.Windows.Forms.Button
             $btnDelete.Text = "削除"
             $btnDelete.AutoSize = $false
-            $btnDelete.Size = New-Object System.Drawing.Size($DeleteButtonWidth, 22)
+            $btnDelete.Size = New-Object System.Drawing.Size($DeleteButtonWidth, 24)
             $btnDelete.Location = New-Object System.Drawing.Point($x, ($y -1))
             $btnDelete.Tag = $row.No
             $btnDelete.Add_Click($OnDelete)
