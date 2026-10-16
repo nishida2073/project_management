@@ -149,7 +149,7 @@ function Save-GroupSettings {
     Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($varName)
             if ($varName -eq "MentionUserCodes") {
-                ConvertTo-MentionUserCodesText
+                Get-MentionUserCodesText
             } else {
                 $val = Get-GroupSettingsFieldValue $varName
                 if ($settingsRenderLists.MultilineVars -contains $varName) {

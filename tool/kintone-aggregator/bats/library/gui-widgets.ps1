@@ -1399,7 +1399,7 @@ function ConvertFrom-MentionUserCodesText {
     return $rows
 }
 
-function ConvertTo-MentionUserCodesText {
+function Get-MentionUserCodesText {
     return (($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
 }
 

@@ -155,7 +155,7 @@ function Save-GroupSettings {
     Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) -RemoveUnwritten `
         -GetValueFn { param($varName)
             if ($varName -eq "MentionUserCodes") {
-                ConvertTo-MentionUserCodesText
+                Get-MentionUserCodesText
             } elseif (@($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.GetEnumerator() } | Where-Object { $_.Value.OverrideRef } | ForEach-Object { $_.Key }) -contains $varName) {
                 $val = Get-GroupSettingsFieldValue $varName
                 if ([string]::IsNullOrWhiteSpace($val)) { "" } else { $val }
