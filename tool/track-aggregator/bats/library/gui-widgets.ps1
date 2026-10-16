@@ -1396,8 +1396,7 @@ function ConvertFrom-MentionUserCodesText {
 }
 
 function ConvertTo-MentionUserCodesText {
-    param($Rows)
-    return (($Rows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
+    return (($script:mentionRows | Where-Object { $_.Code } | ForEach-Object { "$($_.Code):$($_.Type)" }) -join ',')
 }
 
 function Add-MentionsEditor {
@@ -1406,8 +1405,10 @@ function Add-MentionsEditor {
         [int]$StartY,
         [string]$RawValue,
         [Parameter(Mandatory)][System.Windows.Forms.ComboBox]$GroupCombo,
-        [Parameter(Mandatory)][string[]]$MentionTypeOptions
+        [Parameter(Mandatory)][string[]]$MentionTypeOptions,
+        [int]$LabelWidth = 220
     )
+    $inputX = 20 + $LabelWidth + 10
     $groupName = $GroupCombo.SelectedItem
     if ($script:mentionRowsGroupName -ne $groupName) {
         $script:mentionRows = @(ConvertFrom-MentionUserCodesText -Text $RawValue -TypeOptions $MentionTypeOptions)
@@ -1421,14 +1422,14 @@ function Add-MentionsEditor {
     $y += 24
 
     foreach ($row in @($script:mentionRows)) {
-        $txtCode = New-TextBox -X 250 -Y $y -Width 190 -Height 22 -Text "$($row.Code)"
+        $txtCode = New-TextBox -X $inputX -Y $y -Width 190 -Height 22 -Text "$($row.Code)"
         $Panel.Controls.Add($txtCode)
 
         $selectedType = if ($MentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
-        $cmbType = New-ComboBox -X 450 -Y $y -Width 120 -Height 22 -Items $MentionTypeOptions -SelectedItem $selectedType
+        $cmbType = New-ComboBox -X ($inputX + 200) -Y $y -Width 120 -Height 22 -Items $MentionTypeOptions -SelectedItem $selectedType
         $Panel.Controls.Add($cmbType)
 
-        $btnDeleteRow = New-Button -Text "削除" -X 580 -Y ($y - 1) -Width 60 -Height 24
+        $btnDeleteRow = New-Button -Text "削除" -X ($inputX + 330) -Y ($y - 1) -Width 60 -Height 24
         $btnDeleteRow.Tag = $row
         $Panel.Controls.Add($btnDeleteRow)
 
@@ -1573,7 +1574,7 @@ function Render-SettingsFields {
         }
 
         if ($field.VarName -eq "MentionUserCodes") {
-            $y = Add-MentionsEditor -Panel $grp -StartY $y -RawValue "$($field.Value)" -GroupCombo $MentionGroupCombo -MentionTypeOptions $MentionTypeOptions
+            $y = Add-MentionsEditor -Panel $grp -StartY $y -RawValue "$($field.Value)" -GroupCombo $MentionGroupCombo -MentionTypeOptions $MentionTypeOptions -LabelWidth $LabelWidth
             continue
         }
 

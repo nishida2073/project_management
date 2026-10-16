@@ -149,10 +149,12 @@ function Save-GroupSettings {
     Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($varName)
             if ($varName -eq "MentionUserCodes") {
-                ConvertTo-MentionUserCodesText -Rows $script:mentionRows
+                ConvertTo-MentionUserCodesText
             } else {
                 $val = Get-GroupSettingsFieldValue $varName
-                if ($settingsRenderLists.MultilineVars -contains $varName) { $val = $val -replace "`r`n", '\n' -replace "`n", '\n' }
+                if ($settingsRenderLists.MultilineVars -contains $varName) {
+                    $val = $val -replace "`r`n", '\n' -replace "`n", '\n'
+                }
                 $val
             }
         } `
