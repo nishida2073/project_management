@@ -98,6 +98,42 @@ function New-Form {
     return $form
 }
 
+function Show-GroupNameDialog {
+    param(
+        [string]$Title,
+        [string]$Prompt,
+        [scriptblock]$Exists
+    )
+
+    $dialog = New-Object System.Windows.Forms.Form
+    $dialog.Text = $Title
+    $dialog.ClientSize = New-Object System.Drawing.Size(360, 120)
+    $dialog.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+    $dialog.MaximizeBox = $false
+    $dialog.MinimizeBox = $false
+    $dialog.ShowInTaskbar = $false
+    $dialog.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+
+    $label = New-Label -X 12 -Y 12 -Width 336 -Height 18 -Text $Prompt
+    $textBox = New-TextBox -X 12 -Y 36 -Width 336 -Height 22
+    $okButton = New-Button -Text "OK" -X 180 -Y 74 -Width 80 -Height 26
+    $cancelButton = New-Button -Text "キャンセル" -X 268 -Y 74 -Width 80 -Height 26
+    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $dialog.AcceptButton = $okButton
+    $dialog.CancelButton = $cancelButton
+    $dialog.Controls.AddRange(@($label, $textBox, $okButton, $cancelButton))
+
+    $result = if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $textBox.Text.Trim() } else { "" }
+    $dialog.Dispose()
+    if (!$result) { return "" }
+    if ($Exists -and (& $Exists $result)) {
+        [System.Windows.Forms.MessageBox]::Show("「$result」は既に存在します。", "グループの新規作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return ""
+    }
+    return $result
+}
+
 function New-TabControl {
     param(
         [System.Windows.Forms.DockStyle]$Dock = [System.Windows.Forms.DockStyle]::Fill
