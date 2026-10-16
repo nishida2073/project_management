@@ -610,7 +610,7 @@ function New-CategoryTabControl {
                     $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
                     $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
-                    $lblInput = New-Label -X $inputX -Y ($inputRowCenterY - 11) -Width $labelWidth -Height 22 -Text "$($inputDef.Label)"
+                    $lblInput = New-Label -X $inputX -Y ($inputRowCenterY - 12) -Width $labelWidth -Height 24 -Text "$($inputDef.Label)" -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
                     $grp.Controls.Add($lblInput)
                     $inputX += $labelWidth + 4
 
@@ -624,7 +624,7 @@ function New-CategoryTabControl {
                     } else {
                         $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight } else { 24 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
                     }
-                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
+                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
                     if ($inputDef.Multiline) { $inputCtrl.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
                     $grp.Controls.Add($inputCtrl)
                     $inputMap[$inputDef.Name] = $inputCtrl
@@ -632,6 +632,7 @@ function New-CategoryTabControl {
                     $browseBtn = $null
                     if ($inputDef.Browse -eq "File" -or $inputDef.Browse -eq "Folder") {
                         $browseBtn = New-Button -Text "参照..." -X $inputX -Y ($inputRowCenterY - 12) -Width 70 -Height 24
+                        $inputCtrl.Top = $browseBtn.Top + [int](($browseBtn.Height - $inputCtrl.Height) / 2)
                         $browseBtn.Add_Click({
                             $start = if ($inputDef.BrowseStartFn) { & $inputDef.BrowseStartFn $inputMap } else { $inputCtrl.Text }
                             $hasStart = [bool]($start -and (Test-Path -LiteralPath $start -PathType Container))
@@ -1077,7 +1078,7 @@ function New-BatchRunTab {
         $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
         $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
 
-        $lblInput = New-Label -X $inputX -Y ($inputRowCenterY - 11) -Width $labelWidth -Height 22 -Text $inputDef.Label
+        $lblInput = New-Label -X $inputX -Y ($inputRowCenterY - 12) -Width $labelWidth -Height 24 -Text $inputDef.Label -TextAlign ([System.Drawing.ContentAlignment]::MiddleLeft)
         $topControls += $lblInput
         $inputX += $labelWidth + 4
 
@@ -1091,12 +1092,13 @@ function New-BatchRunTab {
         } else {
             $inputCtrl = New-TextBox -Width $inputWidth -Height 24 -Text "$($inputDef.Default)"
         }
-        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
+        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
         $topControls += $inputCtrl
         $inputControls[$inputDef.Name] = $inputCtrl
         $inputX += $inputWidth + 15
         if ($inputDef.Browse -eq "Folder") {
             $batchBrowseBtn = New-Button -Text "参照..." -X $inputX -Y ($inputRowCenterY - 12) -Width 70 -Height 24
+            $inputCtrl.Top = $batchBrowseBtn.Top + [int](($batchBrowseBtn.Height - $inputCtrl.Height) / 2)
             $batchBrowseBtn.Tag = $inputCtrl
             $batchBrowseBtn.Add_Click({
                 param($sender, $e)
@@ -1431,7 +1433,8 @@ function Add-MentionsEditor {
         $cmbType = New-ComboBox -X ($inputX + 200) -Y $y -Width 120 -Height 24 -Items $MentionTypeOptions -SelectedItem $selectedType
         $Panel.Controls.Add($cmbType)
 
-        $btnDeleteRow = New-Button -Text "削除" -X ($inputX + 330) -Y ($y - 1) -Width 60 -Height 24
+        $btnDeleteRow = New-Button -Text "削除" -X ($inputX + 330) -Y $y -Width 60 -Height 24
+        $btnDeleteRow.Top = $txtCode.Top + [int](($txtCode.Height - $btnDeleteRow.Height) / 2)
         $btnDeleteRow.Tag = $row
         $Panel.Controls.Add($btnDeleteRow)
 
@@ -1572,7 +1575,7 @@ function Set-SettingsFields {
         }
 
         $labelText = if ($RenderLists.VarLabels.Contains($field.VarName)) { $RenderLists.VarLabels[$field.VarName] } else { $field.VarName }
-        $lbl = New-Label -X 20 -Y $y -Width $LabelWidth -Height $LabelHeight -Text $labelText
+        $lbl = New-Label -X 20 -Y ($y - 1) -Width $LabelWidth -Height $LabelHeight -Text $labelText
         $grp.Controls.Add($lbl)
 
         $isMultiline = $RenderLists.MultilineVars -contains $field.VarName
@@ -1606,7 +1609,7 @@ function Set-SettingsFields {
             $txtValue = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
             $txtWidth = if ($RenderLists.WidthVars.ContainsKey($field.VarName)) { $RenderLists.WidthVars[$field.VarName] } else { 300 }
             $txtHeight = if ($isMultiline) { 60 } else { 24 }
-            $txt = New-TextBox -X (20 + $LabelWidth + 10) -Y ($y - 2) -Width $txtWidth -Height $txtHeight -Text $txtValue -Multiline $isMultiline
+            $txt = New-TextBox -X (20 + $LabelWidth + 10) -Y ($y - 3) -Width $txtWidth -Height $txtHeight -Text $txtValue -Multiline $isMultiline
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
             if ($isMultiline) { $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
             if ($RenderLists.MaskedVars -contains $field.VarName) { $txt.UseSystemPasswordChar = $true }
@@ -1616,6 +1619,7 @@ function Set-SettingsFields {
         $isFileBrowse = $RenderLists.FileBrowseVars -contains $field.VarName
         if (($RenderLists.FolderBrowseVars -contains $field.VarName) -or $isFileBrowse) {
             $btnBrowse = New-Button -Text "参照..." -X ($txt.Right + 10) -Y ($y - 3) -Width 70 -Height 24
+            $txt.Top = $btnBrowse.Top + [int](($btnBrowse.Height - $txt.Height) / 2)
             $btnBrowse.Tag = $txt
 
             if ($isFileBrowse) {

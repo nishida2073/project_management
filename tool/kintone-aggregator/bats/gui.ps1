@@ -275,7 +275,8 @@ function New-CollectDataDefsEditor {
         $txtNew.Text = "$($item.newName)"
         $grp.Controls.Add($txtNew)
 
-        $btnDeleteRow = New-Button -Text "削除" -X 430 -Y ($y - 1) -Width 60 -Height 24
+        $btnDeleteRow = New-Button -Text "削除" -X 430 -Y $y -Width 60 -Height 24
+        $btnDeleteRow.Top = $txtOrg.Top + [int](($txtOrg.Height - $btnDeleteRow.Height) / 2)
         $btnDeleteRow.Tag = $item
         $btnDeleteRow.Add_Click({
             Sync-CollectDataDefsFromControls
