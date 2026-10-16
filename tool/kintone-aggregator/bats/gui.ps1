@@ -621,8 +621,7 @@ function Test-KintoneConnectionFromSettings {
 }
 
 function Save-CommonSettings {
-    $allVars = @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys })
-    Save-EnvBatFile -Path $commonEnvBat -VarNames $allVars `
+    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($varName) Get-CommonSettingsFieldValue $varName } `
         -HasValueFn { param($varName) $true }
 }
@@ -632,8 +631,6 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $allVars = @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys })
-
     Sync-MentionRowsFromControls
 
     if (!(Test-Path -LiteralPath $groupBatPath)) {
@@ -641,7 +638,7 @@ function Save-GroupSettings {
             Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
         }
     }
-    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
+    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($varName)
             if ($varName -eq "MentionUserCodes") {
                 ConvertTo-MentionUserCodesText -Rows $script:mentionRows

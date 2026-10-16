@@ -209,18 +209,6 @@ function Get-GroupXlsxPath { param([string]$GroupName) Join-Path $clientsDir "$G
 
 $commonEnvResolver = { param($name) Get-ResolvedVar $name $commonEnvBat }
 
-$overridableVarDefs = [ordered]@{
-    "ComparePeriod" = @{ Label = "経年比較の比較年数" }
-    "YearOrder"     = @{
-        Label = "経年比較の年度表示順（0:昇順 1:降順）"
-        Radio = @(
-            [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
-            [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
-        )
-    }
-    "PassScore"     = @{ Label = "合格点" }
-}
-
 $settingsGroups = [ordered]@{
     "Common" = @{
         Label = "共通"
@@ -243,9 +231,15 @@ $settingsGroups = [ordered]@{
                     "OutputCombineResultFileSuffix"        = @{ Label = "統合結果ファイル名の接尾語" }
                     "OutputYearComparisonCollectDir"       = @{ Label = "経年比較結果の出力先"; Browse = "Folder" }
                     "OutputYearComparisonResultFileSuffix" = @{ Label = "経年比較結果ファイル名の接尾語" }
-                    "PassScore"                            = $overridableVarDefs["PassScore"]
-                    "ComparePeriod"                        = $overridableVarDefs["ComparePeriod"]
-                    "YearOrder"                            = $overridableVarDefs["YearOrder"]
+                    "PassScore"                            = @{ Label = "合格点" }
+                    "ComparePeriod"                        = @{ Label = "経年比較の比較年数" }
+                    "YearOrder"                            = @{
+                        Label = "経年比較の年度表示順（0:昇順 1:降順）"
+                        Radio = @(
+                            [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
+                            [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
+                        )
+                    }
                     "CourseGroupDefs"                      = @{ Label = "経年比較のコースグループ" }
                     "TrackLoginUrl"                        = @{ Label = "trackログインURL" }
                     "AutoHotkeyScriptPath"                 = @{ Label = "trackダウンロード用スクリプトのパス"; Browse = "File"; Filter = "AutoHotkeyスクリプト (*.ahk)|*.ahk|すべてのファイル (*.*)|*.*" }
@@ -276,7 +270,18 @@ $settingsGroups = [ordered]@{
             }
             "OVERRIDE" = @{
                 Label = "経年比較の個別設定"
-                Vars = $overridableVarDefs
+                Vars = [ordered]@{
+                    "ComparePeriod" = @{ Label = "経年比較の比較年数"; OverrideRef = @{ Group = "Common"; Key = "ComparePeriod" } }
+                    "YearOrder"     = @{
+                        Label = "経年比較の年度表示順（0:昇順 1:降順）"
+                        Radio = @(
+                            [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
+                            [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
+                        )
+                        OverrideRef = @{ Group = "Common"; Key = "YearOrder" }
+                    }
+                    "PassScore"     = @{ Label = "合格点"; OverrideRef = @{ Group = "Common"; Key = "PassScore" } }
+                }
             }
             "SYNC" = @{
                 Label = "ユーザーマスター同期"
@@ -295,8 +300,6 @@ foreach ($section in $settingsGroups.Values) {
 }
 $settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsFlatGroups
 
-$commonSettingsVars = @($settingsGroups["Common"].Sections["COMMON"].Vars.Keys)
-$groupOverrideVars = @($settingsGroups["Group"].Sections["OVERRIDE"].Vars.Keys)
 
 $settingsTrailingButtonVars = @{}
 
@@ -737,8 +740,10 @@ function Get-GroupSettingsFieldRows {
     $rawAuth = Get-SetEnvDefaults -Path (Get-GroupBatPath $GroupName $clientsDir)
     foreach ($groupName in $settingsGroups["Group"].Sections.Keys) {
         foreach ($varName in @($settingsGroups["Group"].Sections[$groupName].Vars.Keys)) {
-            $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } elseif ($groupName -eq "OVERRIDE") { "" } else { $templateDefaults[$varName] }
-            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $value }
+            $def = $settingsGroups["Group"].Sections[$groupName].Vars[$varName]
+            $isOverride = [bool]$def.OverrideRef
+            $value = if ($rawAuth.ContainsKey($varName)) { $rawAuth[$varName] } elseif ($isOverride) { "" } else { $templateDefaults[$varName] }
+            [PSCustomObject]@{ Key = $varName; VarName = $varName; Group = $groupName; Value = $value; Unset = $isOverride }
         }
     }
 }
@@ -826,7 +831,7 @@ function Update-GroupSettingsFields {
 }
 
 function Save-CommonSettings {
-    Save-EnvBatFile -Path $commonEnvBat -VarNames $commonSettingsVars `
+    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($varName)
             Get-CommonSettingsFieldValue $varName
         } `
@@ -840,8 +845,6 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $allVars = @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys })
-
     Sync-MentionRowsFromControls
 
     if (!(Test-Path -LiteralPath $groupBatPath)) {
@@ -849,11 +852,11 @@ function Save-GroupSettings {
             Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
         }
     }
-    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars -RemoveUnwritten `
+    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) -RemoveUnwritten `
         -GetValueFn { param($varName)
             if ($varName -eq "MentionUserCodes") {
                 ConvertTo-MentionUserCodesText -Rows $script:mentionRows
-            } elseif ($groupOverrideVars -contains $varName) {
+            } elseif (@($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.GetEnumerator() } | Where-Object { $_.Value.OverrideRef } | ForEach-Object { $_.Key }) -contains $varName) {
                 $val = Get-GroupSettingsFieldValue $varName
                 if ([string]::IsNullOrWhiteSpace($val)) { "" } else { $val }
             } else {
@@ -863,7 +866,7 @@ function Save-GroupSettings {
             }
         } `
         -HasValueFn { param($varName)
-            if ($varName -in $overridableVarDefs.Keys) {
+            if ($varName -in @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.GetEnumerator() } | Where-Object { $_.Value.OverrideRef } | ForEach-Object { $_.Key })) {
                 $value = Get-GroupSettingsFieldValue $varName
                 return -not [string]::IsNullOrWhiteSpace($value)
             }

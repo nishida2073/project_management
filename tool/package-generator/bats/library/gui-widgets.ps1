@@ -1562,7 +1562,7 @@ function Render-SettingsFields {
                 $radioX += 80
             }
 
-            if ($field.Group -eq "OVERRIDE") {
+            if ($field.Unset) {
                 $rbUnset = New-RadioButton -X $radioX -Y 2 -Text "未設定" -Tag $txt -Checked ([string]::IsNullOrEmpty($field.Value))
                 $rbUnset.Add_CheckedChanged({ if ($this.Checked) { $this.Tag.Text = "" } })
                 $radioPanel.Controls.Add($rbUnset)

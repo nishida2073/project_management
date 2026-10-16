@@ -719,8 +719,7 @@ function Get-CommonSettingsFiles {
 }
 
 function Save-CommonSettings {
-    $commonVars = @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys })
-    Save-EnvBatFile -Path $commonEnvBat -VarNames $commonVars `
+    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($name) Get-CommonSettingsFieldValue $name } `
         -HasValueFn { param($name) $settingsCommonFieldTextBoxes.ContainsKey($name) }
 }

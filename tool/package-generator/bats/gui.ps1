@@ -389,7 +389,6 @@ foreach ($section in $settingsGroups.Values) {
     foreach ($key in $section.Sections.Keys) { $settingsFlatGroups[$key] = $section.Sections[$key] }
 }
 
-$commonSettingsVars = @($settingsGroups["Common"].Sections["COMMON"].Vars.Keys)
 
 function Test-KintoneConnectionFromSettings {
     param([string]$FieldName)
@@ -577,7 +576,7 @@ function Update-GroupSettingsFields {
 }
 
 function Save-CommonSettings {
-    Save-EnvBatFile -Path $commonEnvBat -VarNames $commonSettingsVars `
+    Save-EnvBatFile -Path $commonEnvBat -VarNames @($settingsGroups["Common"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($varName)
             Get-CommonSettingsFieldValue $varName
         } `
@@ -591,14 +590,12 @@ function Save-GroupSettings {
 
     $groupBatPath = Get-GroupBatPath $GroupName $clientsDir
 
-    $allVars = @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys })
-
     if (!(Test-Path -LiteralPath $groupBatPath)) {
         if (Test-Path -LiteralPath $clientTemplateBat) {
             Copy-Item -LiteralPath $clientTemplateBat -Destination $groupBatPath
         }
     }
-    Save-EnvBatFile -Path $groupBatPath -VarNames $allVars `
+    Save-EnvBatFile -Path $groupBatPath -VarNames @($settingsGroups["Group"].Sections.Values | ForEach-Object { $_.Vars.Keys }) `
         -GetValueFn { param($varName)
             Get-GroupSettingsFieldValue $varName
         } `
