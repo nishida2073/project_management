@@ -115,7 +115,7 @@ function Show-GroupNameDialog {
     $dialog.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 
     $label = New-Label -X 12 -Y 12 -Width 336 -Height 18 -Text $Prompt
-    $textBox = New-TextBox -X 12 -Y 36 -Width 336 -Height 22
+    $textBox = New-TextBox -X 12 -Y 36 -Width 336 -Height 24
     $okButton = New-Button -Text "OK" -X 180 -Y 74 -Width 80 -Height 24
     $cancelButton = New-Button -Text "キャンセル" -X 268 -Y 74 -Width 80 -Height 24
     $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
@@ -550,7 +550,7 @@ function New-CategoryTabControl {
         $rows = 1
         foreach ($inputDef in $Inputs) {
             if ($inputDef.NewRow) { $rows++ }
-            if ($inputDef.Multiline) { $rows += [math]::Max(0, [math]::Ceiling((Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight) / $InputRowHeight) - 1) }
+            if ($inputDef.Multiline) { $rows += [math]::Max(0, [math]::Ceiling(((Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight) + 10) / $InputRowHeight) - 1) }
         }
         return $rows
     }
@@ -616,13 +616,13 @@ function New-CategoryTabControl {
 
                     if ($inputDef.Options -or $inputDef.Combo) {
                         $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
-                        $inputCtrl = New-ComboBox -Width $inputWidth -Height 22 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
+                        $inputCtrl = New-ComboBox -Width $inputWidth -Height 24 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
                         if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {
                             $inputCtrl.SelectedIndex = 0
                         }
                         if ($inputDef.OnChange) { $inputCtrl.Add_SelectedIndexChanged(({ & $inputDef.OnChange $inputMap }).GetNewClosure()) }
                     } else {
-                        $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight } else { 22 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
+                        $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight } else { 24 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
                     }
                     $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
                     if ($inputDef.Multiline) { $inputCtrl.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
@@ -1003,9 +1003,9 @@ function New-InputRunTab {
         $x += $labelWidth + 4
 
         if ($def.Kind -eq "Combo") {
-            $ctrl = New-ComboBox -X $x -Y $y -Width $width -Height 22 -Items $def.Options -DisplayMember "Text"
+            $ctrl = New-ComboBox -X $x -Y $y -Width $width -Height 24 -Items $def.Options -DisplayMember "Text"
         } else {
-            $ctrl = New-TextBox -X $x -Y $y -Width $width -Height 22 -Text "$($def.Default)"
+            $ctrl = New-TextBox -X $x -Y $y -Width $width -Height 24 -Text "$($def.Default)"
         }
         $grp.Controls.Add($ctrl)
         $controls[$def.Name] = $ctrl
@@ -1083,13 +1083,13 @@ function New-BatchRunTab {
 
         if ($inputDef.Options -or $inputDef.Combo) {
             $selectedOption = $inputDef.Options | Where-Object { "$($_.Value)" -eq "$($inputDef.Default)" } | Select-Object -First 1
-            $inputCtrl = New-ComboBox -Width $inputWidth -Height 22 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
+            $inputCtrl = New-ComboBox -Width $inputWidth -Height 24 -Items $inputDef.Options -SelectedItem $selectedOption -DisplayMember "Text"
             if (!$selectedOption -and $inputCtrl.Items.Count -gt 0) {
                 $inputCtrl.SelectedIndex = 0
             }
             if ($inputDef.OnChange) { $inputCtrl.Add_SelectedIndexChanged(({ & $inputDef.OnChange $inputControls }).GetNewClosure()) }
         } else {
-            $inputCtrl = New-TextBox -Width $inputWidth -Height 22 -Text "$($inputDef.Default)"
+            $inputCtrl = New-TextBox -Width $inputWidth -Height 24 -Text "$($inputDef.Default)"
         }
         $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - 11))
         $topControls += $inputCtrl
@@ -1424,11 +1424,11 @@ function Add-MentionsEditor {
     $y += 24
 
     foreach ($row in @($script:mentionRows)) {
-        $txtCode = New-TextBox -X $inputX -Y $y -Width 190 -Height 22 -Text "$($row.Code)"
+        $txtCode = New-TextBox -X $inputX -Y $y -Width 190 -Height 24 -Text "$($row.Code)"
         $Panel.Controls.Add($txtCode)
 
         $selectedType = if ($MentionTypeOptions -contains $row.Type) { $row.Type } else { "USER" }
-        $cmbType = New-ComboBox -X ($inputX + 200) -Y $y -Width 120 -Height 22 -Items $MentionTypeOptions -SelectedItem $selectedType
+        $cmbType = New-ComboBox -X ($inputX + 200) -Y $y -Width 120 -Height 24 -Items $MentionTypeOptions -SelectedItem $selectedType
         $Panel.Controls.Add($cmbType)
 
         $btnDeleteRow = New-Button -Text "削除" -X ($inputX + 330) -Y ($y - 1) -Width 60 -Height 24
@@ -1605,7 +1605,7 @@ function Set-SettingsFields {
         } else {
             $txtValue = if ($isMultiline) { "$($field.Value)" -replace '\\n', "`r`n" } else { "$($field.Value)" }
             $txtWidth = if ($RenderLists.WidthVars.ContainsKey($field.VarName)) { $RenderLists.WidthVars[$field.VarName] } else { 300 }
-            $txtHeight = if ($isMultiline) { 60 } else { 22 }
+            $txtHeight = if ($isMultiline) { 60 } else { 24 }
             $txt = New-TextBox -X (20 + $LabelWidth + 10) -Y ($y - 2) -Width $txtWidth -Height $txtHeight -Text $txtValue -Multiline $isMultiline
             $txt.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Left
             if ($isMultiline) { $txt.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
