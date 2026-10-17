@@ -418,13 +418,13 @@ $categoryDefs = @(
     }
 )
 
-$form = New-Form -Title "kintoneデータ集計ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
 $script:currentProc = $null
+$form = New-Form -Title "kintoneデータ集計ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
 
 $tabControl = New-TabControl
 $tabRun = New-TabPage -Text "実行"
 $tabLogs = New-TabPage -Text "ログ"
-$tabSettings = New-TabPage -Text "設定"
+$tabSettings = New-TabPage -Text "環境設定"
 
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)
@@ -555,7 +555,7 @@ $settingsGroups = [ordered]@{
                 }
             }
             "SYNC" = @{
-                Label = "ユーザーマスター同期"
+                Label = "ユーザー"
                 Vars = [ordered]@{
                     "SyncUserMasterAppId"     = @{ Label = "対象アプリID" }
                     "SyncUserMasterSheetName" = @{ Label = "対象シート名" }
@@ -641,7 +641,7 @@ $settingsSubTabControl.Controls.Add($tabSettingsCommon)
 $tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
-$tabSettingsMaster = New-TabPage -Text "マスター操作"
+$tabSettingsMaster = New-TabPage -Text "マスター"
 $settingsSubTabControl.Controls.Add($tabSettingsMaster)
 
 
@@ -714,7 +714,7 @@ $settingsMasterBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::
 $tabSettingsMaster.Controls.Add($settingsMasterBottomPanel)
 $tabSettingsMaster.Controls.Add($settingsMasterTop.Panel)
 
-$grpUserMasterSync = New-GroupBox -Text "ユーザーマスター同期" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
+$grpUserMasterSync = New-GroupBox -Text "ユーザー" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
 $masterSync = Add-FieldActionButton -Panel $grpUserMasterSync -Y 30 -Text "同期実行" -Width 100 -AddStatusLabel -OnClick {
     $batchPath = $syncKintoneToSheetBat
@@ -744,7 +744,7 @@ $script:collectDataDefsItems = @()
 $script:collectDataDefsRowControls = @()
 
 
-$grpScheduleEdit = New-GroupBox -Text "スケジュール編集" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
+$grpScheduleEdit = New-GroupBox -Text "スケジュール" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize -Padding 10
 
 $script:scheduleRows = @()
 $script:scheduleContentPanel = $null

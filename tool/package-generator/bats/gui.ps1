@@ -384,13 +384,13 @@ $categoryDefs = @(
     }
 )
 
-$form = New-Form -Title "コース別パッケージ生成ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
 $script:currentProc = $null
+$form = New-Form -Title "コース別パッケージ生成ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 400 -CenterScreen
 
 $tabControl = New-TabControl
 $tabRun = New-TabPage -Text "実行"
 $tabLogs = New-TabPage -Text "ログ"
-$tabSettings = New-TabPage -Text "設定"
+$tabSettings = New-TabPage -Text "環境設定"
 
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
 $form.Controls.Add($tabControl)

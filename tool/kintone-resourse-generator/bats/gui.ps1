@@ -485,15 +485,16 @@ $categoryDefs = @(
     }
 )
 
-$form = New-Form -Title "kintoneリソース生成ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 500 -CenterScreen
 $script:currentProc = $null
 $script:createdSpace = $null
+
+$form = New-Form -Title "kintoneリソース生成ツール" -Width 780 -Height 560 -MinWidth 600 -MinHeight 500 -CenterScreen
 
 $tabControl = New-TabControl
 $tabRun = New-TabPage -Text "実行"
 
 $tabLogs = New-TabPage -Text "ログ"
-$tabSettings = New-TabPage -Text "設定"
+$tabSettings = New-TabPage -Text "環境設定"
 $settingsSubTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 
 $tabSettingsCommon = New-TabPage -Text "共通"
@@ -510,8 +511,8 @@ $form.Controls.Add($tabControl)
 
 $execTabControl = New-TabControl -Dock ([System.Windows.Forms.DockStyle]::Fill)
 
-$tabBatchRun = New-TabPage -Text "複数実行"
-$execTabControl.Controls.Add($tabBatchRun)
+$tabMultipleRun = New-TabPage -Text "複数実行"
+$execTabControl.Controls.Add($tabMultipleRun)
 
 $tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
@@ -609,7 +610,7 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -Conditions $logTabConditions
 
 
-$multipleBatchTab = New-InputRunTab -TabPage $tabBatchRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
+$multipleBatchTab = New-InputRunTab -TabPage $tabMultipleRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
     [PSCustomObject]@{ Name = "ExcelPath"; Label = "実行一覧ファイル"; LabelWidth = 150; InputWidth = 200; Kind = "File"; Filter = "Excelファイル (*.xlsx)|*.xlsx"; NewRow = $true }
 ) -OnRunClick {
