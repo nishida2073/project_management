@@ -10,8 +10,8 @@ set "TemplateRootDir=%BASE_PATH%template"
 
 set "CommonLogPath=%BASE_PATH%logs"
 
-if not defined SourceType_Daily set "SourceType_Daily=業務日誌"
-if not defined SourceType_Pulse set "SourceType_Pulse=パルスサーベイ"
+set "SourceType_Daily=業務日誌"
+set "SourceType_Pulse=パルスサーベイ"
 
 set "TargetDateCodeField_Daily=日付"
 set "TargetUserCodeField_Daily=個人ID"
