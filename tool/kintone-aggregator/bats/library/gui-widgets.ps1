@@ -280,6 +280,11 @@ function New-CheckBox {
     return $chk
 }
 
+function New-Spacer {
+    param([int]$Height = 10)
+    return New-Panel -Height $Height
+}
+
 function New-Panel {
     param(
         [int]$Height = 0,
@@ -508,7 +513,7 @@ function Add-StackedDockedControls {
     $topControls = @($ControlsTopToBottom | Where-Object { $_.Dock -ne [System.Windows.Forms.DockStyle]::Fill })
 
     if ($Spacing -gt 0 -and $topControls.Count -gt 0 -and $fillControls.Count -gt 0) {
-        $spacer = New-Panel -Height $Spacing
+        $spacer = New-Spacer -Height $Spacing
         $topControls += $spacer
     }
 
@@ -1546,7 +1551,8 @@ function Set-SettingsFields {
         [string[]]$MentionTypeOptions = @(),
         [scriptblock]$OnOpenClick,
         [array]$ExtraGrps = @(),
-        [ValidateSet("Top", "Bottom")][string]$ExtraGrpsPosition = "Bottom"
+        [ValidateSet("Top", "Bottom")][string]$ExtraGrpsPosition = "Bottom",
+        [int]$GroupTopMargin = 10
     )
     $Panel.Controls.Clear()
     $TargetTextBoxes.Clear()
@@ -1673,22 +1679,20 @@ function Set-SettingsFields {
             $controlsToStack.Add($grp)
         }
         if ($ExtraGrps.Count -gt 0 -and $groupBoxes.Count -gt 0) {
-            $spacer = New-Panel -Height 10
+            $spacer = New-Spacer -Height 10
             $controlsToStack.Add($spacer)
         }
     }
 
     for ($i = 0; $i -lt $groupBoxes.Count; $i++) {
-        if ($i -gt 0) {
-            $spacer = New-Panel -Height 10
-            $controlsToStack.Add($spacer)
-        }
+        $spacer = New-Spacer -Height $GroupTopMargin
+        $controlsToStack.Add($spacer)
         $controlsToStack.Add($groupBoxes[$i])
     }
 
     if ($ExtraGrpsPosition -eq "Bottom") {
         if ($ExtraGrps.Count -gt 0 -and $groupBoxes.Count -gt 0) {
-            $spacer = New-Panel -Height 10
+            $spacer = New-Spacer -Height 10
             $controlsToStack.Add($spacer)
         }
         foreach ($grp in $ExtraGrps) {

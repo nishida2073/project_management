@@ -878,7 +878,7 @@ $testSheetDef = @{
     )
 }
 
-$controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpTestEdit, (New-Panel -Height 10), $grpSurveyEdit, (New-Panel -Height 10))
+$controlsToStack = @((New-Spacer), $grpUserMasterSync, (New-Spacer), $grpTestEdit, (New-Spacer), $grpSurveyEdit, (New-Spacer))
 Add-StackedDockedControls -Container $settingsMasterBottomPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 
 $mentionTypeOptions = @("USER", "GROUP", "ORGANIZATION")

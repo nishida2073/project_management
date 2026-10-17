@@ -758,7 +758,7 @@ $scheduleSheetDef = @{
     )
 }
 
-$controlsToStack = @($grpUserMasterSync, (New-Panel -Height 10), $grpScheduleEdit, (New-Panel -Height 10))
+$controlsToStack = @((New-Spacer), $grpUserMasterSync, (New-Spacer), $grpScheduleEdit, (New-Spacer))
 Add-StackedDockedControls -Container $settingsMasterBottomPanel -ControlsTopToBottom $controlsToStack -Spacing 0
 
 

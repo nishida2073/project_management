@@ -236,15 +236,27 @@ function Update-CommonSettingsFields {
 }
 
 function Update-GroupSettingsFields {
+    $scrollX = -$settingsGroupBottomPanel.AutoScrollPosition.X
+    $scrollY = -$settingsGroupBottomPanel.AutoScrollPosition.Y
+
     $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-    if (!$target) {
-        $settingsGroupBottomPanel.Controls.Clear()
-        return
+    Set-SettingsFields -Panel $settingsGroupBottomPanel -Rows (Get-GroupSettingsFieldRows -GroupName $target) -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
+        -LabelWidth 150 | Out-Null
+
+    $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
+}
+
+function Get-TemplateSettingsFieldValue {
+    param([string]$Key)
+    if ($settingsTemplateFieldTextBoxes.ContainsKey($Key)) {
+        return $settingsTemplateFieldTextBoxes[$Key].Text
     }
+    return ""
+}
 
-    $rows = @(Get-GroupSettingsFieldRows -GroupName $target)
-
-    $rows += @(
+function Update-TemplateSettingsFields {
+    $rows = @(
         [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "SpaceId"; Value = ""; Key = "SpaceId" }
         [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "TemplateName"; Value = ""; Key = "TemplateName" }
     )
@@ -254,7 +266,7 @@ function Update-GroupSettingsFields {
     $settingsRenderLists.VarLabels["SpaceId"] = "スペースID"
     $settingsRenderLists.VarLabels["TemplateName"] = "テンプレート名"
 
-    Set-SettingsFields -Panel $settingsGroupBottomPanel -Rows $rows -TargetTextBoxes $settingsGroupFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
+    Set-SettingsFields -Panel $settingsTemplateBottomPanel -Rows $rows -TargetTextBoxes $settingsTemplateFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
         -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
         -LabelWidth 150 | Out-Null
 }
@@ -503,6 +515,9 @@ $settingsSubTabControl.Controls.Add($tabSettingsCommon)
 $tabSettingsGroup = New-TabPage -Text "グループ別"
 $settingsSubTabControl.Controls.Add($tabSettingsGroup)
 
+$tabSettingsTemplate = New-TabPage -Text "テンプレート"
+$settingsSubTabControl.Controls.Add($tabSettingsTemplate)
+
 $tabSettings.Controls.Add($settingsSubTabControl)
 
 $tabControl.Controls.AddRange(@($tabRun, $tabLogs, $tabSettings))
@@ -736,6 +751,8 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
+$settingsTemplateBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
+
 $settingsGroups = [ordered]@{
     "Common" = @{
         Label = "共通"
@@ -786,8 +803,8 @@ $settingsTrailingButtonVars = @{
     }.GetNewClosure() }
     "TemplateName" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "実行" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            $spaceId = Get-GroupSettingsFieldValue "SpaceId"
-            $templateName = Get-GroupSettingsFieldValue "TemplateName"
+            $spaceId = Get-TemplateSettingsFieldValue "SpaceId"
+            $templateName = Get-TemplateSettingsFieldValue "TemplateName"
             $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
 
             if (!$spaceId) {
@@ -811,7 +828,7 @@ $settingsTrailingButtonVars = @{
         }
     }.GetNewClosure() -OnOpenClick {
         $templatePath = Get-ResolvedVar "CommonCustomTemplatePath" $commonEnvBat
-        $templateName = Get-GroupSettingsFieldValue "TemplateName"
+        $templateName = Get-TemplateSettingsFieldValue "TemplateName"
         $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
         Open-TargetOrWarn -Path (Join-Path $templatePath "$($groupName)_$($templateName).xlsx")
     }.GetNewClosure() }
@@ -819,6 +836,7 @@ $settingsTrailingButtonVars = @{
 
 $settingsCommonFieldTextBoxes = @{}
 $settingsGroupFieldTextBoxes = @{}
+$settingsTemplateFieldTextBoxes = @{}
 
 $settingsGroupTop = (New-SettingsTopPanel `
     -ExtraControlDefs @(
@@ -851,12 +869,15 @@ $settingsGroupTop = (New-SettingsTopPanel `
 
 $tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
+$tabSettingsTemplate.Controls.Add($settingsTemplateBottomPanel)
 
 $settingsSubTabControl.Add_SelectedIndexChanged({
     if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
         Update-CommonSettingsFields
     } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
         Update-GroupSettingsFields
+    } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsTemplate) {
+        Update-TemplateSettingsFields
     }
 })
 
