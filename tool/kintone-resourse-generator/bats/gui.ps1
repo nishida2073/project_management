@@ -89,6 +89,7 @@ function Set-RunButtonsEnabled {
 }
 
 function Invoke-ExecuteAll {
+    param([switch]$UseCheckBoxes)
     $batchInputs = $batchTab.InputControls
 
     foreach ($inputDef in $batchRunAllInputs) {
@@ -129,6 +130,11 @@ function Invoke-ExecuteAll {
     $lastExitCode = 0
     foreach ($cd in $categoryDefs) {
         $bd = $cd.ButtonDefs[0]
+        $checkIndex = [array]::IndexOf($allStepDefs, $bd)
+        if ($UseCheckBoxes -and $checkIndex -ge 0 -and -not $batchTab.CheckBoxes[$checkIndex].Checked) {
+            Write-Log "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
+            continue
+        }
         $ic = $bd.InputControls
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
@@ -526,13 +532,13 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false }
 )
 
-$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $false `
+$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $true `
     -Inputs $batchRunAllInputs -OnRunClick {
     param($controls, $statusLabel)
     Set-RunButtonsEnabled $false
     Set-StepStatus -Label $statusLabel -Text "実行中..."
 
-    $exitCode = Invoke-ExecuteAll
+    $exitCode = Invoke-ExecuteAll -UseCheckBoxes
 
     if ($exitCode -eq 0) {
         Set-StepStatus -Label $statusLabel -Text "成功" -State "成功"
