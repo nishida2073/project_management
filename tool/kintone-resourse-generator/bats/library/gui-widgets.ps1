@@ -682,7 +682,7 @@ function New-CategoryTabControl {
                     } else {
                         $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight } else { 24 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
                     }
-                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
+                    $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - $(if ($inputDef.Multiline) { 12 } else { [int]($inputCtrl.Height / 2) })))
                     if ($inputDef.Multiline) { $inputCtrl.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
                     $grp.Controls.Add($inputCtrl)
                     $inputMap[$inputDef.Name] = $inputCtrl
@@ -1107,12 +1107,12 @@ function New-BatchRunTab {
         [Parameter(Mandatory)][scriptblock]$OnRunClick,
         [array]$ButtonDefs = @(),
         [array]$Inputs = @(),
-        [string]$RunButtonText = "一括実行",
+        [string]$RunButtonText = "実行",
         [scriptblock]$ShowOpenLink = { param($bd) [bool]$bd.OpenTarget },
         [scriptblock]$OnOpenClick = {},
         [string]$InitialStatusText = "未実行",
-        [bool]$ShowSteps = $true,
-        [int]$InputRowHeight = 30
+        [int]$InputRowHeight = 30,
+        [switch]$EnableStepToggle
     )
 
     $batchPanel = New-Panel
@@ -1150,7 +1150,7 @@ function New-BatchRunTab {
         } else {
             $inputCtrl = New-TextBox -Width $inputWidth -Height 24 -Text "$($inputDef.Default)"
         }
-        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - [int]($inputCtrl.Height / 2)))
+        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - $(if ($inputDef.Multiline) { 12 } else { [int]($inputCtrl.Height / 2) })))
         $topControls += $inputCtrl
         $inputControls[$inputDef.Name] = $inputCtrl
         $inputX += $inputWidth + 15
@@ -1168,46 +1168,76 @@ function New-BatchRunTab {
             $inputX += 70 + 15
         }
     }
+
     $checkBoxes = @()
     $statusLabels = @()
-    $y = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 30 } else { 20 }
+    $stepsY = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 30 } else { 20 }
+    $toggleY = $stepsY
+    if ($EnableStepToggle) { $stepsY += 26 }
+    $stepPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::None)
+    $stepPanel.Location = New-Object System.Drawing.Point(0, $stepsY)
+    $stepPanel.Width = 730
 
+    $y = 0
     foreach ($bd in $ButtonDefs) {
         $isChecked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
         $chk = New-CheckBox -Text (Get-BatchDisplayLabel -ButtonDef $bd) -X 20 -Y $y -Width 360 -Height 22 -Checked $isChecked -AutoEllipsis $true
         $chk.Tag = $bd
-        $chk.Visible = $ShowSteps
         $checkBoxes += $chk
-        $topControls += $chk
+        $stepPanel.Controls.Add($chk)
 
         $lblStepStatusX = $chk.Location.X + $chk.Width + 10
         $lblStepStatus = New-Label -X $lblStepStatusX -Y $y -AutoSize $true -Text $InitialStatusText -ForeColor ([System.Drawing.Color]::Gray)
-        $lblStepStatus.Visible = $ShowSteps
         $statusLabels += $lblStepStatus
-        $topControls += $lblStepStatus
+        $stepPanel.Controls.Add($lblStepStatus)
 
         if (& $ShowOpenLink $bd) {
             $lnkOpenX = $lblStepStatus.Location.X + $lblStepStatus.PreferredWidth + 10
             $lnkOpen = New-OpenLink -X $lnkOpenX -Y $y -Pattern 'external' -Tag $bd -OnOpenClick $OnOpenClick -InputControls $inputControls
             $lnkOpen.AutoSize = $true
-            $lnkOpen.Visible = $ShowSteps
-            $topControls += $lnkOpen
+            $stepPanel.Controls.Add($lnkOpen)
         }
 
-        if ($ShowSteps) {
-            $y += 26
-        }
+        $y += 26
     }
+    $stepsHeight = $y
+    $stepPanel.Height = $stepsHeight
+    $topControls += $stepPanel
 
-    $btnRunAll = New-Button -Text $RunButtonText -X 15 -Y ($y + 10) -Width 100 -Height 24
+    $runY = $stepsY + $stepsHeight + 10
+    $btnRunAll = New-Button -Text $RunButtonText -X 15 -Y $runY -Width 100 -Height 24
     $topControls += $btnRunAll
 
     $lblStatus = New-Label -X ($btnRunAll.Right + 10) -Y ($btnRunAll.Top + 6) -AutoSize $true
     $topControls += $lblStatus
 
+    if ($EnableStepToggle) {
+        $stepState = @{ Visible = $false }
+        $toggleLink = New-LinkLabel -Text "隠す" -AutoSize $true
+        $toggleLink.Location = New-Object System.Drawing.Point(15, ($toggleY + 4))
+        $stepPanel.Visible = $false
+        $btnRunAll.Top = $stepsY + 10
+        $lblStatus.Top = $btnRunAll.Top + 6
+        $toggleLink.Top = $toggleY + 4
+        $toggleLink.Text = "表示"
+        $toggleLink.Add_LinkClicked(({
+            $stepState.Visible = -not $stepState.Visible
+            $stepPanel.Visible = $stepState.Visible
+            $shownHeight = if ($stepState.Visible) { $stepsHeight } else { 0 }
+            $btnRunAll.Top = $stepsY + $shownHeight + 10
+            $lblStatus.Top = $btnRunAll.Top + 6
+            $toggleLink.Top = $toggleY + 4
+            $toggleLink.Text = if ($stepState.Visible) { "隠す" } else { "表示" }
+            $grpBatchAll.Height = $stepsY + $shownHeight + 50
+            $batchPanel.Height = $grpBatchAll.Bottom
+            Update-TabHeight -NestedTabControl $batchPanel.Parent.Parent
+        }.GetNewClosure()))
+        $topControls += $toggleLink
+    }
+
     $grpBatchAll.Controls.AddRange($topControls)
     $btnRunAll.Add_Click({ & $OnRunClick $inputControls $lblStatus }.GetNewClosure())
-    $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($y + 10 + 30 + 10))
+    $grpBatchAll.Size = New-Object System.Drawing.Size(730, ($btnRunAll.Top + 40))
     $batchPanel.Height = $grpBatchAll.Bottom
 
     return [PSCustomObject]@{
@@ -1220,7 +1250,6 @@ function New-BatchRunTab {
         StatusLabel    = $lblStatus
     }
 }
-
 function Set-StepStatus {
     param([System.Windows.Forms.Label]$Label, [string]$Text, [string]$State)
     if (-not $State) { $State = $Text }
@@ -1808,7 +1837,7 @@ function New-Grid {
         [scriptblock]$OnAdd,
         [int]$Margin = 10,
         [int]$Spacing = 10,
-        [int]$DeleteButtonWidth = 60
+        [int]$ButtonWidth = 60
     )
 
     $existingPanels = $GroupBox.Controls | Where-Object { $_ -is [System.Windows.Forms.Panel] }
@@ -1820,7 +1849,7 @@ function New-Grid {
     foreach ($col in $Columns) {
         $neededWidth += $col.Width + $Spacing
     }
-    $neededWidth += $DeleteButtonWidth + $Spacing
+    $neededWidth += $ButtonWidth + $Spacing
 
     $groupBoxPadding = $GroupBox.Padding.Left + $GroupBox.Padding.Right
     $panelWidth = [Math]::Max($GroupBox.Width - $groupBoxPadding, $neededWidth)
@@ -1918,7 +1947,7 @@ function New-Grid {
             $btnDelete = New-Object System.Windows.Forms.Button
             $btnDelete.Text = "削除"
             $btnDelete.AutoSize = $false
-            $btnDelete.Size = New-Object System.Drawing.Size($DeleteButtonWidth, 24)
+            $btnDelete.Size = New-Object System.Drawing.Size($ButtonWidth, 24)
             $btnDelete.Location = New-Object System.Drawing.Point($x, ($y -1))
             $btnDelete.Tag = $row.No
             $btnDelete.Add_Click($OnDelete)
@@ -1933,7 +1962,7 @@ function New-Grid {
         if (-not $addButton) {
             $addButton = New-Object System.Windows.Forms.Button
             $addButton.Text = "追加"
-            $addButton.Size = New-Object System.Drawing.Size(100, 24)
+            $addButton.Size = New-Object System.Drawing.Size($ButtonWidth, 24)
             if ($OnAdd) {
                 $addButton.Add_Click({
                     & $OnAdd $ContentPanel

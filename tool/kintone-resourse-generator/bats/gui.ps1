@@ -133,8 +133,10 @@ function Invoke-ExecuteAll {
         $checkIndex = [array]::IndexOf($allStepDefs, $bd)
         if ($UseCheckBoxes -and $checkIndex -ge 0 -and -not $batchTab.CheckBoxes[$checkIndex].Checked) {
             Write-Log "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
+            Set-StepStatus -Label $batchTab.StatusLabels[$checkIndex] -Text "スキップ"
             continue
         }
+        $stepStatusLabel = if ($UseCheckBoxes -and $checkIndex -ge 0) { $batchTab.StatusLabels[$checkIndex] } else { $bd.StepStatusLabel }
         $ic = $bd.InputControls
         $lastOutputLines = New-Object System.Collections.Generic.List[string]
         $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
@@ -143,7 +145,7 @@ function Invoke-ExecuteAll {
             -WriteLog { param($msg) Write-Log $msg } `
             -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
             -CurrentProcessRef ([ref]$script:currentProc) `
-            -DisplayLabel $bd.Label -StatusLabel $bd.StepStatusLabel
+            -DisplayLabel $bd.Label -StatusLabel $stepStatusLabel
 
         if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
             & $bd.OnSuccessFn $ic $lastOutputLines
@@ -532,7 +534,7 @@ $batchRunAllInputs = @(
     [PSCustomObject]@{ Name = "CustomTemplateName"; Label = "設定テンプレート名（カスタム）"; LabelWidth = 150; InputWidth = 200; Combo = $true; NewRow = $true; Require = $false }
 )
 
-$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -RunButtonText "実行" -ShowSteps $true `
+$batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -EnableStepToggle `
     -Inputs $batchRunAllInputs -OnRunClick {
     param($controls, $statusLabel)
     Set-RunButtonsEnabled $false
@@ -610,7 +612,7 @@ $logTab = New-LogTab -TabPage $tabLogs -ButtonDefs $allButtonDefs `
     -Conditions $logTabConditions
 
 
-$multipleBatchTab = New-InputRunTab -TabPage $tabMultipleRun -GroupText "複数実行" -RunButtonText "実行" -Inputs @(
+$multipleBatchTab = New-InputRunTab -TabPage $tabMultipleRun -GroupText "複数実行" -Inputs @(
     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo" }
     [PSCustomObject]@{ Name = "ExcelPath"; Label = "実行一覧ファイル"; LabelWidth = 150; InputWidth = 200; Kind = "File"; Filter = "Excelファイル (*.xlsx)|*.xlsx"; NewRow = $true }
 ) -OnRunClick {
