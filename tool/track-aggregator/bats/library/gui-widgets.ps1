@@ -1389,6 +1389,9 @@ function Invoke-BatchRunAll {
         $bd = $ButtonDefs[$i]
         if (-not $CheckBoxes[$i].Checked) {
             & $WriteLog "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
+            if ($i -lt $StatusLabels.Count) {
+                Set-StepStatus -Label $StatusLabels[$i] -Text "スキップ"
+            }
             continue
         }
         if ($i -lt $StatusLabels.Count) {

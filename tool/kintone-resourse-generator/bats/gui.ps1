@@ -88,6 +88,24 @@ function Set-RunButtonsEnabled {
     Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
 }
 
+function Invoke-CategoryStep {
+    param($bd, $statusLabel)
+    $ic = $bd.InputControls
+    $lastOutputLines = New-Object System.Collections.Generic.List[string]
+    $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
+        -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
+        -WorkingDirectory $rootPath -Form $form `
+        -WriteLog { param($msg) Write-Log $msg } `
+        -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
+        -CurrentProcessRef ([ref]$script:currentProc) `
+        -DisplayLabel $bd.Label -StatusLabel $statusLabel
+
+    if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
+        & $bd.OnSuccessFn $ic $lastOutputLines | Out-Null
+    }
+    return $exitCode
+}
+
 function Invoke-ExecuteAll {
     param([switch]$UseCheckBoxes)
     $batchInputs = $batchTab.InputControls
@@ -127,30 +145,43 @@ function Invoke-ExecuteAll {
     Copy-ComboSelection -From $batchInputs["BaseTemplateName"] -To $generateBd.InputControls["BaseTemplateName"]
     Copy-ComboSelection -From $batchInputs["CustomTemplateName"] -To $generateBd.InputControls["CustomTemplateName"]
 
+    $defs = @($categoryDefs | ForEach-Object { $_.ButtonDefs[0] })
+
+    if ($UseCheckBoxes) {
+        $checks = @()
+        $labels = @()
+        foreach ($bd in $defs) {
+            $idx = [array]::IndexOf($allStepDefs, $bd)
+            if ($idx -ge 0) {
+                $checks += $batchTab.CheckBoxes[$idx]
+                $labels += $batchTab.StatusLabels[$idx]
+            } else {
+                $checks += [PSCustomObject]@{ Checked = $true; Enabled = $true }
+                $labels += $bd.StepStatusLabel
+            }
+        }
+        $script:batchStepExitCodes = @()
+        Invoke-BatchRunAll -ButtonDefs $defs -CheckBoxes $checks -StatusLabel $batchTab.StatusLabel -StatusLabels $labels `
+            -ExtraControls @($batchTab.InputControls.Values) `
+            -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+            -InvokeStep {
+                param($bd)
+                $code = Invoke-CategoryStep -bd $bd -statusLabel $labels[[array]::IndexOf($defs, $bd)]
+                $script:batchStepExitCodes += $code
+                return $code
+            } `
+            -StopOnFailure | Out-Null
+
+        $codes = @($script:batchStepExitCodes)
+        $failure = $codes | Where-Object { $_ -ne 0 -and $_ -ne 2 } | Select-Object -First 1
+        if ($failure) { return $failure }
+        if ($codes -contains 2) { return 2 }
+        return 0
+    }
+
     $lastExitCode = 0
-    foreach ($cd in $categoryDefs) {
-        $bd = $cd.ButtonDefs[0]
-        $checkIndex = [array]::IndexOf($allStepDefs, $bd)
-        if ($UseCheckBoxes -and $checkIndex -ge 0 -and -not $batchTab.CheckBoxes[$checkIndex].Checked) {
-            Write-Log "$(Get-BatchDisplayLabel -ButtonDef $bd) はチェックが外れているためスキップします。"
-            Set-StepStatus -Label $batchTab.StatusLabels[$checkIndex] -Text "スキップ"
-            continue
-        }
-        $stepStatusLabel = if ($UseCheckBoxes -and $checkIndex -ge 0) { $batchTab.StatusLabels[$checkIndex] } else { $bd.StepStatusLabel }
-        $ic = $bd.InputControls
-        $lastOutputLines = New-Object System.Collections.Generic.List[string]
-        $exitCode = Invoke-BatchStep -ButtonDef ([PSCustomObject]@{ BatchPath = $bd.BatchPath; Label = $bd.Label }) `
-            -GetBatArgs { param($bd2) & $bd.ArgsFn $ic $bd.Inputs } `
-            -WorkingDirectory $rootPath -Form $form `
-            -WriteLog { param($msg) Write-Log $msg } `
-            -OnOutputLine { param($line) Write-Log $line; $lastOutputLines.Add($line) } `
-            -CurrentProcessRef ([ref]$script:currentProc) `
-            -DisplayLabel $bd.Label -StatusLabel $stepStatusLabel
-
-        if (($exitCode -eq 0 -or $exitCode -eq 2) -and $bd.OnSuccessFn) {
-            & $bd.OnSuccessFn $ic $lastOutputLines
-        }
-
+    foreach ($bd in $defs) {
+        $exitCode = Invoke-CategoryStep -bd $bd -statusLabel $bd.StepStatusLabel
         if ($exitCode -eq 2) {
             $lastExitCode = 2
         } elseif ($exitCode -ne 0) {
@@ -159,7 +190,6 @@ function Invoke-ExecuteAll {
     }
     return $lastExitCode
 }
-
 function Get-CommonSettingsFieldValue {
     param([string]$Key)
     if ($settingsCommonFieldTextBoxes.ContainsKey($Key)) {
