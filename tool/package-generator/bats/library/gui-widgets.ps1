@@ -280,6 +280,46 @@ function New-CheckBox {
     return $chk
 }
 
+function New-SettingsRunPanel {
+    param(
+        [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
+        [Parameter(Mandatory)][string]$GroupText,
+        [Parameter(Mandatory)][array]$Inputs,
+        [string]$RunButtonText = "実行",
+        [Parameter(Mandatory)][scriptblock]$OnRunClick,
+        [scriptblock]$OnOpenClick,
+        [bool]$ShowLog = $false
+    )
+
+    $group = New-GroupBox -Text $GroupText -X 10 -Y 10 -Width 730 -Height 90 -Dock ([System.Windows.Forms.DockStyle]::Top)
+    $controls = @{}
+    $x = 20
+    foreach ($def in $Inputs) {
+        $group.Controls.Add((New-Label -X $x -Y 30 -Width $def.LabelWidth -Height 22 -Text $def.Label))
+        $x += $def.LabelWidth + 10
+        if ($def.Kind -eq "Combo") {
+            $ctrl = New-ComboBox -X $x -Y 30 -Width $def.InputWidth -Height 24 -Items $def.Options -DisplayMember "Text"
+        } else {
+            $ctrl = New-TextBox -X $x -Y 30 -Width $def.InputWidth -Height 24 -Text "$($def.Default)"
+        }
+        $group.Controls.Add($ctrl)
+        $controls[$def.Name] = $ctrl
+    }
+
+    $state = @{}
+    $openClick = if ($OnOpenClick) { ({ & $OnOpenClick $controls }.GetNewClosure()) } else { $null }
+    $state.Status = Add-FieldActionButton -Panel $group -X 20 -Y 58 -Text $RunButtonText -Width 100 -AddStatusLabel -OnClick ({ & $OnRunClick $controls $state.Status }.GetNewClosure()) -OnOpenClick $openClick
+
+    $log = if ($ShowLog) { New-LogTextBox } else { $null }
+    $stack = @((New-Spacer), $group)
+    if ($log) {
+        $script:additionalLogBoxes = @($script:additionalLogBoxes) + $log
+        $stack += $log
+    }
+    Add-StackedDockedControls -Container $TabPage -ControlsTopToBottom $stack
+    return [PSCustomObject]@{ Group = $group; Controls = $controls; StatusLabel = $state.Status; LogBox = $log }
+}
+
 function New-Spacer {
     param([int]$Height = 10)
     return New-Panel -Height $Height
@@ -426,9 +466,12 @@ function Write-ColoredLine {
     $TextBox.ScrollToCaret()
 }
 
+$script:additionalLogBoxes = @()
+
 function Write-Log {
     param([string]$Text)
     Write-ColoredLine -TextBox $txtLog -Text $Text
+    foreach ($box in @($script:additionalLogBoxes)) { Write-ColoredLine -TextBox $box -Text $Text }
 }
 
 function New-LogTextBox {
@@ -1033,7 +1076,7 @@ function New-InputRunTab {
     }
 
     $btnRunY = 20 + $rowHeight * ($row + 1)
-    $btnRun = New-Button -Text $RunButtonText -X 15 -Y $btnRunY -Width 120 -Height 24
+    $btnRun = New-Button -Text $RunButtonText -X 15 -Y $btnRunY -Width 100 -Height 24
     $lblStatus = New-Label -X ($btnRun.Right + 10) -Y ($btnRun.Top + 6) -AutoSize $true
     $grp.Controls.AddRange(@($btnRun, $lblStatus))
     $btnRun.Add_Click({ & $OnRunClick $controls $lblStatus }.GetNewClosure())

@@ -1,7 +1,5 @@
 @echo off
 
-for %%I in ("%~dp0..\..") do set "BASE_PATH=%%~fI\"
-
 set "DownloadSiteUrl="
 set "DownloadSitePath="
 set "DownloadSiteTenantId="

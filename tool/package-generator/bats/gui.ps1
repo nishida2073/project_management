@@ -238,6 +238,8 @@ function Update-GroupDropdowns {
         Update-ComboBoxItems -ComboBox $_.InputControls["ClientName"] -Items $clientNames
     }
 
+    Update-ComboBoxItems -ComboBox $settingsRunPanel.Controls["ClientName"] -Items $clientNames
+
     $logItems = @($allOption) + $clientNames
     Update-ComboBoxItems -ComboBox $logTab.InputControls["GroupCombo"] -Items $logItems
 
@@ -304,12 +306,6 @@ $zipFileInputs = @(1..$zipFileCount | ForEach-Object {
 
 $folderInput = [PSCustomObject]@{ Name = "TargetFolderPath"; Label = "フォルダ"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "Folder"; Clear = $true }
 $categoryDefs = @(
-    [PSCustomObject]@{
-        Label = "パッケージ定義"
-        ButtonDefs = @(
-            [PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchLabel = "パッケージ定義ファイルの更新"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $generateConfigBat; OpenTarget = { param($ic) Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem) }; Inputs = @($clientInput) }
-        )
-    },
     [PSCustomObject]@{
         Label = "パッケージ作成"
         ButtonDefs = @(
@@ -606,6 +602,32 @@ $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::F
 
 $tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
+
+$tabSettingsPackage = New-TabPage -Text "パッケージ定義"
+$settingsSubTabControl.Controls.Add($tabSettingsPackage)
+$settingsRunPanel = New-SettingsRunPanel -TabPage $tabSettingsPackage -GroupText "パッケージ定義ファイルの更新" -ShowLog $true -Inputs @(
+    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 150; Kind = "Combo"; Options = $blankOptions }
+) -OnRunClick {
+    param($controls, $statusLabel)
+    Invoke-BatButton -ButtonDef ([PSCustomObject]@{ Label = "パッケージ定義ファイルの更新"; BatchPath = $generateConfigBat; Inputs = @($clientInput); InputControls = $controls; StepStatusLabel = $statusLabel }) -WorkingDirectory $scriptDir -Form $form `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -CurrentProcessRef ([ref]$script:currentProc) `
+        -GetBatArgs {
+            param($bd)
+            if ($bd.ArgsFn) { return & $bd.ArgsFn $bd.InputControls $bd.Inputs }
+            $batArgs = @()
+            $inputMap = $bd.InputControls
+            if ($inputMap) {
+                foreach ($inputName in $inputMap.Keys) {
+                    $batArgs += "-$($inputName):$(Get-InputValue -Control $inputMap[$inputName])"
+                }
+            }
+            return $batArgs
+        }
+} -OnOpenClick {
+    param($controls)
+    Open-TargetOrWarn -Path (Get-GroupXlsxPath (Get-ComboBoxValue -SelectedItem $controls["ClientName"].SelectedItem))
+}
 
 
 
