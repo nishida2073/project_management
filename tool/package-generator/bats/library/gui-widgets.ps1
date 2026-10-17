@@ -293,22 +293,31 @@ function New-SettingsRunPanel {
 
     $group = New-GroupBox -Text $GroupText -X 10 -Y 10 -Width 730 -Height 90 -Dock ([System.Windows.Forms.DockStyle]::Top)
     $controls = @{}
-    $x = 20
+    $row = 0
+    $x = 15
     foreach ($def in $Inputs) {
-        $group.Controls.Add((New-Label -X $x -Y 30 -Width $def.LabelWidth -Height 22 -Text $def.Label))
-        $x += $def.LabelWidth + 10
+        if ($def.NewRow) {
+            $row++
+            $x = 15
+        }
+        $y = 19 + 30 * $row
+        $group.Controls.Add((New-Label -X $x -Y $y -Width $def.LabelWidth -Height 22 -Text $def.Label))
+        $x += $def.LabelWidth + 4
         if ($def.Kind -eq "Combo") {
-            $ctrl = New-ComboBox -X $x -Y 30 -Width $def.InputWidth -Height 24 -Items $def.Options -DisplayMember "Text"
+            $ctrl = New-ComboBox -X $x -Y $y -Width $def.InputWidth -Height 24 -Items $def.Options -DisplayMember "Text"
         } else {
-            $ctrl = New-TextBox -X $x -Y 30 -Width $def.InputWidth -Height 24 -Text "$($def.Default)"
+            $ctrl = New-TextBox -X $x -Y $y -Width $def.InputWidth -Height 24 -Text "$($def.Default)"
         }
         $group.Controls.Add($ctrl)
         $controls[$def.Name] = $ctrl
+        $x += $def.InputWidth + 15
     }
+    $buttonY = 20 + 30 * ($row + 1)
+    $group.Height = $buttonY + 40
 
     $state = @{}
     $openClick = if ($OnOpenClick) { ({ & $OnOpenClick $controls }.GetNewClosure()) } else { $null }
-    $state.Status = Add-FieldActionButton -Panel $group -X 20 -Y 58 -Text $RunButtonText -Width 100 -AddStatusLabel -OnClick ({ & $OnRunClick $controls $state.Status }.GetNewClosure()) -OnOpenClick $openClick
+    $state.Status = Add-FieldActionButton -Panel $group -X 15 -Y $buttonY -Text $RunButtonText -Width 100 -AddStatusLabel -OnClick ({ & $OnRunClick $controls $state.Status }.GetNewClosure()) -OnOpenClick $openClick
 
     $log = if ($ShowLog) { New-LogTextBox } else { $null }
     $stack = @((New-Spacer), $group)

@@ -247,30 +247,6 @@ function Update-GroupSettingsFields {
     $settingsGroupBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
-function Get-TemplateSettingsFieldValue {
-    param([string]$Key)
-    if ($settingsTemplateFieldTextBoxes.ContainsKey($Key)) {
-        return $settingsTemplateFieldTextBoxes[$Key].Text
-    }
-    return ""
-}
-
-function Update-TemplateSettingsFields {
-    $rows = @(
-        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "SpaceId"; Value = ""; Key = "SpaceId" }
-        [PSCustomObject]@{ Group = "テンプレート作成"; VarName = "TemplateName"; Value = ""; Key = "TemplateName" }
-    )
-
-    $settingsRenderLists.GroupLabels["テンプレート作成"] = "テンプレート作成"
-
-    $settingsRenderLists.VarLabels["SpaceId"] = "スペースID"
-    $settingsRenderLists.VarLabels["TemplateName"] = "テンプレート名"
-
-    Set-SettingsFields -Panel $settingsTemplateBottomPanel -Rows $rows -TargetTextBoxes $settingsTemplateFieldTextBoxes -TrailingButtonVars $settingsTrailingButtonVars `
-        -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -LabelWidth 150 | Out-Null
-}
-
 function Update-GroupDropdowns {
     $allOption = [PSCustomObject]@{ Text = "すべて"; Value = "" }
     $groupNames = @(Get-GroupNames)
@@ -297,6 +273,8 @@ function Update-GroupDropdowns {
     Update-ComboBoxItems -ComboBox $settingsGroupTop.Controls["GroupTarget"] -Items $groupNames
 
     Update-ComboBoxItems -ComboBox $multipleBatchTab.InputControls["TargetGroupName"] -Items $groupNames
+
+    Update-ComboBoxItems -ComboBox $settingsTemplateRun.Controls["TargetGroupName"] -Items $groupNames
 
 }
 
@@ -751,7 +729,6 @@ $tabSettingsCommon.Controls.Add($settingsCommonTopPanel)
 
 $settingsGroupBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
-$settingsTemplateBottomPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::Fill) -AutoScroll
 
 $settingsGroups = [ordered]@{
     "Common" = @{
@@ -801,42 +778,10 @@ $settingsTrailingButtonVars = @{
             Test-KintoneConnection -Subdomain $subDomainVal -LoginName $loginVal -Password $passwordVal
         }
     }.GetNewClosure() }
-    "TemplateName" = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "実行" -AddStatusLabel -OnClick {
-        Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
-            $spaceId = Get-TemplateSettingsFieldValue "SpaceId"
-            $templateName = Get-TemplateSettingsFieldValue "TemplateName"
-            $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-
-            if (!$spaceId) {
-                throw "スペースIDを入力してください。"
-            }
-            if (!$templateName) {
-                throw "テンプレート名を入力してください。"
-            }
-            if (!$groupName) {
-                throw "グループを選択してください。"
-            }
-
-            $batchArgs = @("-TargetGroupName:$groupName", "-SpaceId:$spaceId", "-TemplateName:$templateName")
-            $exitCode = Invoke-BatProcess -BatPath $createTemplateBat -WorkingDirectory $rootPath -BatArgs $batchArgs
-
-            if ($exitCode -eq 0) {
-                Update-CustomTemplateNameList
-            } else {
-                throw "エラーが発生しました（終了コード: $exitCode）"
-            }
-        }
-    }.GetNewClosure() -OnOpenClick {
-        $templatePath = Get-ResolvedVar "CommonCustomTemplatePath" $commonEnvBat
-        $templateName = Get-TemplateSettingsFieldValue "TemplateName"
-        $groupName = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-        Open-TargetOrWarn -Path (Join-Path $templatePath "$($groupName)_$($templateName).xlsx")
-    }.GetNewClosure() }
 }
 
 $settingsCommonFieldTextBoxes = @{}
 $settingsGroupFieldTextBoxes = @{}
-$settingsTemplateFieldTextBoxes = @{}
 
 $settingsGroupTop = (New-SettingsTopPanel `
     -ExtraControlDefs @(
@@ -869,15 +814,49 @@ $settingsGroupTop = (New-SettingsTopPanel `
 
 $tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
-$tabSettingsTemplate.Controls.Add($settingsTemplateBottomPanel)
+$settingsTemplateRun = New-SettingsRunPanel -TabPage $tabSettingsTemplate -GroupText "テンプレート作成" -ShowLog $true -Inputs @(
+    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 150; Kind = "Combo"; Options = $blankOptions }
+    [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 150; NewRow = $true }
+    [PSCustomObject]@{ Name = "TemplateName"; Label = "テンプレート名"; LabelWidth = 150; InputWidth = 150; NewRow = $true }
+) -OnRunClick {
+    param($controls, $statusLabel)
+    Invoke-ActionWithUpdateStatus -StatusLabel $statusLabel -Action {
+        $groupName = Get-ComboBoxValue -SelectedItem $controls["TargetGroupName"].SelectedItem
+        $spaceId = $controls["SpaceId"].Text
+        $templateName = $controls["TemplateName"].Text
+
+        if (!$groupName) {
+            throw "グループを選択してください。"
+        }
+        if (!$spaceId) {
+            throw "スペースIDを入力してください。"
+        }
+        if (!$templateName) {
+            throw "テンプレート名を入力してください。"
+        }
+
+        $batchArgs = @("-TargetGroupName:$groupName", "-SpaceId:$spaceId", "-TemplateName:$templateName")
+        $exitCode = Invoke-BatProcess -BatPath $createTemplateBat -WorkingDirectory $rootPath -BatArgs $batchArgs -OnOutputLine { param($line) Write-Log $line }
+
+        if ($exitCode -eq 0) {
+            Update-CustomTemplateNameList
+        } else {
+            throw "エラーが発生しました（終了コード: $exitCode）"
+        }
+    }
+} -OnOpenClick {
+    param($controls)
+    $templatePath = Get-ResolvedVar "CommonCustomTemplatePath" $commonEnvBat
+    $groupName = Get-ComboBoxValue -SelectedItem $controls["TargetGroupName"].SelectedItem
+    $templateName = $controls["TemplateName"].Text
+    Open-TargetOrWarn -Path (Join-Path $templatePath "$($groupName)_$($templateName).xlsx")
+}
 
 $settingsSubTabControl.Add_SelectedIndexChanged({
     if ($settingsSubTabControl.SelectedTab -eq $tabSettingsCommon) {
         Update-CommonSettingsFields
     } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsGroup) {
         Update-GroupSettingsFields
-    } elseif ($settingsSubTabControl.SelectedTab -eq $tabSettingsTemplate) {
-        Update-TemplateSettingsFields
     }
 })
 
