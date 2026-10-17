@@ -280,7 +280,7 @@ function New-CheckBox {
     return $chk
 }
 
-function New-SettingsRunPanel {
+function New-SimpleRunPanel {
     param(
         [Parameter(Mandatory)][System.Windows.Forms.TabPage]$TabPage,
         [Parameter(Mandatory)][string]$GroupText,
@@ -318,6 +318,7 @@ function New-SettingsRunPanel {
     $state = @{}
     $openClick = if ($OnOpenClick) { ({ & $OnOpenClick $controls }.GetNewClosure()) } else { $null }
     $state.Status = Add-FieldActionButton -Panel $group -X 15 -Y $buttonY -Text $RunButtonText -Width 100 -AddStatusLabel -OnClick ({ & $OnRunClick $controls $state.Status }.GetNewClosure()) -OnOpenClick $openClick
+    $runButton = @($group.Controls | Where-Object { $_ -is [System.Windows.Forms.Button] -and $_.Top -eq $buttonY })[0]
 
     $log = if ($ShowLog) { New-LogTextBox } else { $null }
     $stack = @((New-Spacer), $group)
@@ -326,7 +327,7 @@ function New-SettingsRunPanel {
         $stack += $log
     }
     Add-StackedDockedControls -Container $TabPage -ControlsTopToBottom $stack
-    return [PSCustomObject]@{ Group = $group; Controls = $controls; StatusLabel = $state.Status; LogBox = $log }
+    return [PSCustomObject]@{ Group = $group; Controls = $controls; StatusLabel = $state.Status; RunButton = $runButton; LogBox = $log }
 }
 
 function New-Spacer {

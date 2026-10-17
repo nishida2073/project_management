@@ -82,6 +82,7 @@ function Set-RunButtonsEnabled {
     $multipleBatchTab.InputControls["ExcelPath"].Enabled = $Enabled
     $multipleBatchTab.InputControls["ExcelPathBrowse"].Enabled = $Enabled
     $multipleBatchTab.RunButton.Enabled = $Enabled
+    $settingsTemplateRun.RunButton.Enabled = $Enabled
     $multipleBatchTab.InputControls["TargetGroupName"].Enabled = $Enabled
     Set-ButtonsEnabled -Buttons $categoryTab.RunButtons -Enabled $Enabled
     Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
@@ -814,36 +815,27 @@ $settingsGroupTop = (New-SettingsTopPanel `
 
 $tabSettingsGroup.Controls.Add($settingsGroupBottomPanel)
 $tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
-$settingsTemplateRun = New-SettingsRunPanel -TabPage $tabSettingsTemplate -GroupText "テンプレート作成" -ShowLog $true -Inputs @(
-    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 150; Kind = "Combo"; Options = $blankOptions }
-    [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 150; NewRow = $true }
-    [PSCustomObject]@{ Name = "TemplateName"; Label = "テンプレート名"; LabelWidth = 150; InputWidth = 150; NewRow = $true }
+$settingsTemplateRun = New-SimpleRunPanel -TabPage $tabSettingsTemplate -GroupText "テンプレート作成" -ShowLog $true -Inputs @(
+    [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Kind = "Combo"; Options = $blankOptions }
+    [PSCustomObject]@{ Name = "SpaceId"; Label = "スペースID"; LabelWidth = 150; InputWidth = 200; NewRow = $true }
+    [PSCustomObject]@{ Name = "TemplateName"; Label = "テンプレート名"; LabelWidth = 150; InputWidth = 200; NewRow = $true }
 ) -OnRunClick {
     param($controls, $statusLabel)
-    Invoke-ActionWithUpdateStatus -StatusLabel $statusLabel -Action {
-        $groupName = Get-ComboBoxValue -SelectedItem $controls["TargetGroupName"].SelectedItem
-        $spaceId = $controls["SpaceId"].Text
-        $templateName = $controls["TemplateName"].Text
+    $groupName = Get-ComboBoxValue -SelectedItem $controls["TargetGroupName"].SelectedItem
+    $spaceId = $controls["SpaceId"].Text
+    $templateName = $controls["TemplateName"].Text
 
-        if (!$groupName) {
-            throw "グループを選択してください。"
-        }
-        if (!$spaceId) {
-            throw "スペースIDを入力してください。"
-        }
-        if (!$templateName) {
-            throw "テンプレート名を入力してください。"
-        }
-
-        $batchArgs = @("-TargetGroupName:$groupName", "-SpaceId:$spaceId", "-TemplateName:$templateName")
-        $exitCode = Invoke-BatProcess -BatPath $createTemplateBat -WorkingDirectory $rootPath -BatArgs $batchArgs -OnOutputLine { param($line) Write-Log $line }
-
-        if ($exitCode -eq 0) {
-            Update-CustomTemplateNameList
-        } else {
-            throw "エラーが発生しました（終了コード: $exitCode）"
-        }
+    if (!$groupName -or !$spaceId -or !$templateName) {
+        [System.Windows.Forms.MessageBox]::Show("対象のグループ、スペースID、テンプレート名を入力してください。", "テンプレート作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
     }
+
+    $bd = [PSCustomObject]@{ Label = "テンプレート作成"; BatchPath = $createTemplateBat; InputControls = $controls; StepStatusLabel = $statusLabel }
+    $exitCode = Invoke-BatButton -ButtonDef $bd -WorkingDirectory $rootPath -Form $form `
+        -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
+        -CurrentProcessRef ([ref]$script:currentProc) `
+        -GetBatArgs { param($bd) @($bd.InputControls.Keys | ForEach-Object { "-$($_):$(Get-InputValue -Control $bd.InputControls[$_])" }) }
+
 } -OnOpenClick {
     param($controls)
     $templatePath = Get-ResolvedVar "CommonCustomTemplatePath" $commonEnvBat

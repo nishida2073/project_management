@@ -605,7 +605,7 @@ $tabSettingsGroup.Controls.Add($settingsGroupTop.Panel)
 
 $tabSettingsPackage = New-TabPage -Text "パッケージ定義"
 $settingsSubTabControl.Controls.Add($tabSettingsPackage)
-$settingsRunPanel = New-SettingsRunPanel -TabPage $tabSettingsPackage -GroupText "パッケージ定義ファイルの更新" -ShowLog $true -Inputs @(
+$settingsRunPanel = New-SimpleRunPanel -TabPage $tabSettingsPackage -GroupText "パッケージ定義ファイルの更新" -ShowLog $true -Inputs @(
     [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 150; Kind = "Combo"; Options = $blankOptions }
 ) -OnRunClick {
     param($controls, $statusLabel)
