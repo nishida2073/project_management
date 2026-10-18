@@ -24,9 +24,9 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
-$generatePackageBat = Join-Path $rootPath "generate-package.bat"
-$generateConfigBat = Join-Path $rootPath "generate-config.bat"
-$uploadKintoneFileBat = Join-Path $rootPath "upload-kintone-file.bat"
+$generatePackageBat = Join-Path $scriptDir "generate-package.bat"
+$generateConfigBat = Join-Path $scriptDir "generate-config.bat"
+$uploadKintoneFileBat = Join-Path $scriptDir "upload-kintone-file.bat"
 
 $commonEnvBat = Join-Path $scriptDir "common.bat"
 $clientsDir = Join-Path $rootPath "clients"

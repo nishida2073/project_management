@@ -24,12 +24,12 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
-$createTemplateBat = Join-Path $rootPath "create-template.bat"
-$createSpaceFromTemplateBat = Join-Path $rootPath "create-space-from-template.bat"
-$downloadKintoneResourcesBat = Join-Path $rootPath "download-kintone-resources.bat"
-$generateConfigFromTemplateBat = Join-Path $rootPath "generate-config-from-template.bat"
-$applyKintoneResourcesBat = Join-Path $rootPath "apply-kintone-resources.bat"
-$checkKintoneResourcesBat = Join-Path $rootPath "check-kintone-resources.bat"
+$createTemplateBat = Join-Path $scriptDir "create-template.bat"
+$createSpaceFromTemplateBat = Join-Path $scriptDir "create-space-from-template.bat"
+$downloadKintoneResourcesBat = Join-Path $scriptDir "download-kintone-resources.bat"
+$generateConfigFromTemplateBat = Join-Path $scriptDir "generate-config-from-template.bat"
+$applyKintoneResourcesBat = Join-Path $scriptDir "apply-kintone-resources.bat"
+$checkKintoneResourcesBat = Join-Path $scriptDir "check-kintone-resources.bat"
 
 $commonEnvBat = Join-Path $scriptDir "common.bat"
 $clientsDir = Join-Path $rootPath "clients"
