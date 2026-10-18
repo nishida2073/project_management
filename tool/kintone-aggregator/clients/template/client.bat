@@ -13,4 +13,3 @@ set "CommentSummaryTemplate=¡ ƒNƒ‰ƒX–¼ : {ƒNƒ‰ƒX–¼}\nE‹Æ–±“úi–¢’ñoj: {‹Æ–
 set "TargetAppIds_Daily="
 set "TargetAppIds_Pulse="
 set "SyncUserMasterAppId="
-set "SyncUserMasterSheetName=óu¶ˆê——"

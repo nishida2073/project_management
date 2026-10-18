@@ -23,6 +23,7 @@ if "!TargetGroupNameFilter!"=="" (
 set "SCRIPT_PATH=%~dp0sync-kintone-to-sheet.ps1"
 set "ConfigFile=%~dp0sync-kintone-to-sheet.json"
 set "ClientDataRootDir=%ClientDataRootDir%"
+set "SyncUserMasterSheetName=éÛçuê∂àÍóó"
 
 call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 

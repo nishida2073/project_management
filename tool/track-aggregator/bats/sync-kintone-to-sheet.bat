@@ -21,6 +21,7 @@ if "!TargetGroupNameFilter!"=="" (
 
 set "SCRIPT_PATH=%~dp0sync-kintone-to-sheet.ps1"
 set "ConfigFile=%~dp0sync-kintone-to-sheet.json"
+set "SyncUserMasterSheetName=óu¶ˆê——"
 
 call "%~dp0message.bat" "Start Jobs %MyName% ALL"
 
@@ -64,7 +65,7 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "}"
 
     ) else (
-        call "%~dp0message.bat" "İ’èƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ: !envFile!" "Red"
+        call "%~dp0message.bat" "?¿½İ’ï¿½t?¿½@?¿½C?¿½?¿½?¿½?¿½?¿½?¿½?¿½Â‚ï¿½?¿½?¿½Ü‚ï¿½?¿½?¿½: !envFile!" "Red"
     )
     call "%~dp0message.bat" "Finished %MyName% [%%~nF]"
 )

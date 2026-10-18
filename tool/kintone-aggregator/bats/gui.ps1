@@ -558,7 +558,6 @@ $settingsGroups = [ordered]@{
                 Label = "ユーザー"
                 Vars = [ordered]@{
                     "SyncUserMasterAppId"     = @{ Label = "対象アプリID" }
-                    "SyncUserMasterSheetName" = @{ Label = "対象シート名" }
                 }
             }
             "Daily" = @{
@@ -724,11 +723,10 @@ $masterSync = Add-FieldActionButton -Panel $grpUserMasterSync -Y 30 -Text "同�
         if ($matchingItem) { $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $matchingItem }
         Update-GroupSettingsFields
         $syncAppId = Get-GroupSettingsFieldValue "SyncUserMasterAppId"
-        $syncSheetName = Get-GroupSettingsFieldValue "SyncUserMasterSheetName"
         if ([string]::IsNullOrWhiteSpace($syncAppId)) {
             throw "対象アプリIDが入力されていません"
         }
-        $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId", "-SyncUserMasterSheetName:$syncSheetName")
+        $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId")
         $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $scriptDir -BatArgs $batArgs
         if ($exitCode -ne 0) {
             throw "同期処理に失敗しました（$($syncAppId)）"
