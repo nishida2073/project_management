@@ -31,7 +31,7 @@ set "ClientDataRootDir=%ClientDataRootDir%"
 set "CollectDataDefsPath=%~dp0collect-data-defs.json"
 
 set "CollectRootDir=%OutputCollectDataRootDir%"
-set "SourceTypeFileNameMap=SourceType_Daily=%SourceType_Daily%,SourceType_Pulse=%SourceType_Pulse%"
+set "SourceTypeFileNameMap=SourceTypeDaily=%SourceTypeDaily%,SourceTypePulse=%SourceTypePulse%"
 
 set "CheckedFileRootDir=%OutputReportDir%\!TargetDate!"
 

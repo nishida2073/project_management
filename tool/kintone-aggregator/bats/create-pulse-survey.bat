@@ -25,7 +25,7 @@ if "!TargetGroupNameFilter!"=="" (
     set "TargetGroupNameFilter=*"
 )
 
-set "SOURCE_TYPE=%SourceType_Pulse%"
+set "SOURCE_TYPE=%SourceTypePulse%"
 
 set "SCRIPT_PATH=%~dp0create-app-data.ps1"
 
@@ -46,8 +46,8 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
         call "!envFile!"
 
         set "TargetAppIds=!TargetAppIds_Pulse!"
-        set "TargetDateCodeField=!TargetDateCodeField_Pulse!"
-        set "TargetUserCodeField=!TargetUserCodeField_Pulse!"
+        set "TargetDateCodeField=!TargetDateCodeFieldPulse!"
+        set "TargetUserCodeField=!TargetUserCodeFieldPulse!"
 
         set "JOB_FLAG=%TEMP%\%MyName%%%~nF_!TargetDate!.running"
         set "ERROR_FLAG=%TEMP%\%MyName%%%~nF_!TargetDate!.failed"

@@ -10,13 +10,13 @@ set "TemplateRootDir=%BASE_PATH%template"
 
 set "CommonLogPath=%BASE_PATH%logs"
 
-set "SourceType_Daily=業務日誌"
-set "SourceType_Pulse=パルスサーベイ"
+set "SourceTypeDaily=業務日誌"
+set "SourceTypePulse=パルスサーベイ"
 
-set "TargetDateCodeField_Daily=日付"
-set "TargetUserCodeField_Daily=個人ID"
-set "TargetDateCodeField_Pulse=日付_0"
-set "TargetUserCodeField_Pulse=個人ID"
+set "TargetDateCodeFieldDaily=日付"
+set "TargetUserCodeFieldDaily=個人ID"
+set "TargetDateCodeFieldPulse=日付_0"
+set "TargetUserCodeFieldPulse=個人ID"
 
 set "OutputReportDir=%OutputRootDir%\01_提出状況"
 set "OutputCollectDataRootDir=%OutputRootDir%\02_アプリデータ集計"

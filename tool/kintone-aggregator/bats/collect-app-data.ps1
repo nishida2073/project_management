@@ -77,7 +77,7 @@ function Read-SourseDataDefsFile {
 
     foreach ($item in $json) {
         $sourceType = $item.type
-        $sourceTypeKey = "SourceType_$sourceType"
+        $sourceTypeKey = "SourceType$sourceType"
         $sourceTypeValue = if ($FileKeyMap.ContainsKey($sourceTypeKey)) { $FileKeyMap[$sourceTypeKey] } else { $sourceType }
 
         if ($sourceType -ne $lastSourceType) {
