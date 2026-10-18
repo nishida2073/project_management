@@ -25,10 +25,62 @@ for %%A in (%*) do (
     )
 )
 
-call "%~dp0create-app-data.bat" -TargetDate:!TargetDate! -TargetDateTerm:!TargetDateTerm! -TargetGroupNameFilter:!TargetGroupNameFilter!
+if "!TargetDate!"=="" (
+    for /f %%i in ('powershell -NoProfile -Command "(Get-Date).AddDays(-1).ToString(\"yyyy-MM-dd\")"') do set "TargetDate=%%i"
+)
 
-call "%~dp0collect-app-data.bat" -TargetDate:!TargetDate! -TargetDateTerm:!TargetDateTerm! -TargetGroupNameFilter:!TargetGroupNameFilter!
-call "%~dp0check-and-post-alert.bat" -TargetDate:!TargetDate!
+if /i "!TargetDate!"=="now" (
+    for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set "TargetDate=%%i"
+)
+
+if "!TargetDateTerm!"=="" (
+    set "TargetDateTerm=1"
+)
+
+set /a Start=!TargetDateTerm!-1
+for /l %%i in (!Start!,-1,0) do (
+    for /f %%d in ('powershell -NoProfile -Command "(Get-Date \"!TargetDate!\").AddDays(-%%i).ToString(\"yyyy-MM-dd\")"') do (
+        for %%F in (
+            "%~dp0bats\create-daily-report.bat"
+            "%~dp0bats\create-pulse-survey.bat"
+        ) do (
+            call "%~dp0bats\message.bat" "Start %%~nxF {%%d}"
+
+            call "%~dp0bats\message.bat" "Please wait..." "Green"
+
+            call %%F -TargetDate:%%d -TargetGroupNameFilter:!TargetGroupNameFilter!
+
+            call "%~dp0bats\message.bat" "Finished %%~nxF {%%d}"
+        )
+    )
+)
+
+set /a Start=!TargetDateTerm!-1
+for /l %%i in (!Start!,-1,0) do (
+    for /f %%d in ('powershell -NoProfile -Command "(Get-Date \"!TargetDate!\").AddDays(-%%i).ToString(\"yyyy-MM-dd\")"') do (
+        for %%F in (
+            "%~dp0bats\collect-app-data.bat"
+        ) do (
+            call "%~dp0bats\message.bat" "Start %%~nxF {%%d}"
+
+            call "%~dp0bats\message.bat" "Please wait..." "Green"
+
+            call %%F -TargetDate:%%d -TargetGroupNameFilter:!TargetGroupNameFilter!
+
+            call "%~dp0bats\message.bat" "Finished %%~nxF {%%d}"
+        )
+    )
+)
+
+call "%~dp0bats\message.bat" "Start check-alert.bat {!TargetDate!}"
+call "%~dp0bats\message.bat" "Please wait..." "Green"
+call "%~dp0bats\check-alert.bat" -TargetDate:!TargetDate!
+call "%~dp0bats\message.bat" "Finished check-alert.bat {!TargetDate!}"
+
+call "%~dp0bats\message.bat" "Start post-alert-result.bat {!TargetDate!}"
+call "%~dp0bats\message.bat" "Please wait..." "Green"
+call "%~dp0bats\post-alert-result.bat" -TargetDate:!TargetDate!
+call "%~dp0bats\message.bat" "Finished post-alert-result.bat {!TargetDate!}"
 
 call "%~dp0bats\message.bat" "Finished %MyName%"
 echo.
