@@ -15,9 +15,9 @@ function buildHtml(mdPath, anchorLevels = [2, 3, 5], styleCss = defaultStyle) {
   });
 
   const mermaidBlocks = [];
-  md = md.replace(/```mermaid\n([\s\S]*?)```/g, (m, code) => {
+  md = md.replace(/```mermaid\r?\n([\s\S]*?)```/g, (m, code) => {
     const token = `@@MERMAID_${mermaidBlocks.length}@@`;
-    mermaidBlocks.push(code);
+    mermaidBlocks.push(code.replace(/\r/g, ''));
     return token;
   });
 

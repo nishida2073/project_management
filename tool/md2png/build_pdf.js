@@ -208,6 +208,9 @@ async function mergeFrontMatter(frontPath, restPath, frontCount, outFile) {
     });
   }
 
+  const htmlPath = path.join(path.dirname(path.resolve(outPath)), path.basename(outPath, path.extname(outPath)) + '.html');
+  fs.writeFileSync(htmlPath, styledPage);
+
   const browser = await puppeteer.launch();
 
   let finalPage = styledPage;
