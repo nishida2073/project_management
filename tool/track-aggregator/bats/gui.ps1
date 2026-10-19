@@ -520,11 +520,11 @@ $targetGroupInput = [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "
 
 $categoryDefs = @(
     [PSCustomObject]@{
-        Label = "実施データ取得"
+        Label = "実施結果取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施データ取得-テスト"; IncludeInBatch = $true; BatchPath = $downloadTestResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
-            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施データ取得-アンケート"; IncludeInBatch = $true; BatchPath = $downloadSurveyResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
-            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果取得-テスト"; IncludeInBatch = $true; BatchPath = $downloadTestResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果取得-アンケート"; IncludeInBatch = $true; BatchPath = $downloadSurveyResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施結果取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
         )
     }
     [PSCustomObject]@{
