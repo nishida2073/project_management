@@ -6,6 +6,8 @@
     [string]$TestResultRootDir,
     [string]$SurveyResultRootDir,
     [int]$DownloadDetail,
+    [ValidateSet("all", "test", "survey")]
+    [string]$DownloadTarget = "all",
     [string]$LogNamePrefix
 )
 
@@ -141,9 +143,13 @@ try {
             $surveyDatas = Create-SurveyDatas -DataFilePath $ClientDataFilePath
             $surveyDatas = @($surveyDatas | Where-Object { -not (ToBool $_.停止中) })
 
-            Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
+            if ($DownloadTarget -in @("all", "test")) {
+                Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $TestResultRootDir -TargetGroupName $TargetGroupName -Datas $testDatas -NameProperty "testName" -IsDetail $downloadDetail
+            }
 
-            Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
+            if ($DownloadTarget -in @("all", "survey")) {
+                Download-TrackResults -AutoHotkeyExePath $AutoHotkeyExePath -AutoHotkeyScriptPath $AutoHotkeyScriptPath -TargetRootDir $SurveyResultRootDir -TargetGroupName $TargetGroupName -Datas $surveyDatas -NameProperty "surveyName"
+            }
 
             Write-MessageComplete "実施結果をダウンロードしました: $(Join-Path $TestResultRootDir $TargetGroupName), $(Join-Path $SurveyResultRootDir $TargetGroupName)"
         }

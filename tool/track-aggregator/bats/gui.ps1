@@ -24,7 +24,8 @@ Get-ChildItem -Path $libraryDir -Filter *.ps1 -Recurse | ForEach-Object {
 
 $env:GUI_LOG_MODE = "1"
 
-$downloadResultsBat = Join-Path $scriptDir "download-results.bat"
+$downloadTestResultsBat = Join-Path $scriptDir "download-test-results.bat"
+$downloadSurveyResultsBat = Join-Path $scriptDir "download-survey-results.bat"
 $checkDownloadStatusBat = Join-Path $scriptDir "check-download-status.bat"
 $collectCombineResultBat = Join-Path $scriptDir "collect-combine-result.bat"
 $collectTestResultBat = Join-Path $scriptDir "collect-test-result.bat"
@@ -521,7 +522,8 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "実施データ取得"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト・アンケート"; BatchLabel = "実施データ取得-テスト・アンケート"; IncludeInBatch = $true; BatchPath = $downloadResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施データ取得-テスト"; IncludeInBatch = $true; BatchPath = $downloadTestResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施データ取得-アンケート"; IncludeInBatch = $true; BatchPath = $downloadSurveyResultsBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
             [PSCustomObject]@{ Label = "取得状況確認"; BatchLabel = "実施データ取得-取得状況確認"; IncludeInBatch = $false; BatchPath = $checkDownloadStatusBat; OpenTarget = Get-ResolvedVar "ResultRootDir" $commonEnvBat; Inputs = @($targetGroupInput) }
         )
     }

@@ -24,6 +24,7 @@ function Test-HasResultFiles {
     # $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
 
     $dir = Join-Path (Join-Path $ResultRootDir $TargetGroupName) $Name
+    if (-not (Test-Path -LiteralPath $dir)) { return $false }
     return @(Get-ChildItem -Path $dir -Filter *.csv -ErrorAction SilentlyContinue).Count -gt 0
 }
 

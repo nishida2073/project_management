@@ -7,6 +7,10 @@ call "%~dp0common.bat"
 
 set "TargetGroupNameFilter=*"
 
+set "DownloadTarget=all"
+
+set "LogNamePrefix=%~n0"
+
 for %%A in (%*) do (
     set "arg=%%~A"
     if "!arg:~0,1!"=="-" set "arg=!arg:~1!"
@@ -47,7 +51,8 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
           "     -TestResultRootDir '!TestResultRootDir!'" ^
           "     -SurveyResultRootDir '!SurveyResultRootDir!'" ^
           "     -DownloadDetail '!DownloadDetail!'" ^
-          "     -LogNamePrefix '%~n0'" ^
+          "     -DownloadTarget '!DownloadTarget!'" ^
+          "     -LogNamePrefix '!LogNamePrefix!'" ^
           "} catch {" ^
           "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^
           "  throw" ^
