@@ -534,11 +534,11 @@ $categoryDefs = @(
         )
     }
     [PSCustomObject]@{
-        Label = "実施結果確認"
+        Label = "実施結果集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果確認-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = Get-ResolvedVar "OutputTestCollectDir" $commonEnvBat; Inputs = @($targetGroupInput) }
-            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果確認-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = Get-ResolvedVar "OutputSurveyCollectDir" $commonEnvBat; Inputs = @($targetGroupInput) }
-            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果確認-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue -ClientsDir $clientsDir }; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "テスト"; BatchLabel = "実施結果集計-テスト"; IncludeInBatch = $true; BatchPath = $collectTestResultBat; OpenTarget = Get-ResolvedVar "OutputTestCollectDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "アンケート"; BatchLabel = "実施結果集計-アンケート"; IncludeInBatch = $true; BatchPath = $collectSurveyResultBat; OpenTarget = Get-ResolvedVar "OutputSurveyCollectDir" $commonEnvBat; Inputs = @($targetGroupInput) }
+            [PSCustomObject]@{ Label = "投稿"; BatchLabel = "実施結果集計-投稿"; IncludeInBatch = $true; DefaultChecked = $false; BatchPath = $postCollectResultsBat; OpenTarget = { param($ic) if ($ic -and $ic.ContainsKey("TargetGroupNameFilter")) { $groupValue = Get-InputValue -Control $ic["TargetGroupNameFilter"] } else { $groupValue = "" }; Get-GroupKintoneThreadUrl -GroupName $groupValue -ClientsDir $clientsDir }; Inputs = @($targetGroupInput) }
         )
     }
     [PSCustomObject]@{
