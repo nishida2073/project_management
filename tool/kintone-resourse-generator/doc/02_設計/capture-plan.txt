@@ -1,0 +1,25 @@
+click 34 50
+click 212 79
+shot space-create-01.png
+click 325 79
+shot space-download-02.png
+click 449 79
+shot config-file-03.png
+click 552 79
+shot space-update-04.png
+click 646 79
+shot space-check-05.png
+click 54 79
+shot multi-run-06.png
+click 129 79
+shot batch-run-07.png
+click 155 52
+click 188 79
+shot template-08.png
+click 83 52
+shot log-09.png
+click 155 52
+click 45 79
+shot settings-common-10.png
+click 107 79
+shot settings-group-11.png
