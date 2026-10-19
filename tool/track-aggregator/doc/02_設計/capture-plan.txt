@@ -1,0 +1,26 @@
+click 34 50
+click 54 79
+shot run-batch-01.png
+click 146 79
+shot fetch-02.png
+click 254 79
+shot status-03.png
+click 359 79
+shot result-04.png
+click 449 79
+shot compare-05.png
+click 83 52
+shot log-06.png
+click 155 52
+click 45 79
+shot settings-common-07.png
+click 529 260
+wheel 489 400 -1200
+shot settings-common-08.png
+click 107 79
+shot settings-group-09.png
+click 529 330
+wheel 489 400 -1200
+shot settings-group-10.png
+click 174 79
+shot settings-master-11.png

@@ -1,6 +1,6 @@
 ﻿param([string]$Root, [string]$OutDir, [string]$PlanFile)
 Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing, System.Windows.Forms
-Add-Type -Namespace Win -Name User -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y); [DllImport("user32.dll")] public static extern void mouse_event(uint f, uint dx, uint dy, uint d, IntPtr e);'
+Add-Type -Namespace Win -Name User -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y); [DllImport("user32.dll")] public static extern void mouse_event(uint f, uint dx, uint dy, uint d, IntPtr e); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int c); [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();'
 Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
@@ -31,7 +31,16 @@ for ($i = 0; $i -lt 30 -and -not $win; $i++) {
 if (-not $win) { Stop-Process -Id $proc.Id -Force; throw "window not found" }
 $h = [IntPtr]$win.Current.NativeWindowHandle
 
-function Focus { [Win.User]::SetForegroundWindow($h) | Out-Null; Start-Sleep -Milliseconds 500 }
+function Focus {
+  for ($i = 0; $i -lt 5; $i++) {
+    [Win.User]::ShowWindow($h, 9) | Out-Null
+    [System.Windows.Forms.SendKeys]::SendWait('%')
+    [Win.User]::SetForegroundWindow($h) | Out-Null
+    Start-Sleep -Milliseconds 400
+    if ([Win.User]::GetForegroundWindow() -eq $h) { break }
+  }
+  Start-Sleep -Milliseconds 300
+}
 
 function Click-At([int]$dx, [int]$dy) {
   $r = $win.Current.BoundingRectangle
