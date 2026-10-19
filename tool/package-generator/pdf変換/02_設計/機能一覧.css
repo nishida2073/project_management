@@ -1,0 +1,15 @@
+.mermaid {
+  display: block;
+  text-align: center;
+  white-space: normal;
+}
+.mermaid svg {
+  display: block;
+  margin: 0 auto;
+  width: 200px !important;
+  height: auto;
+}
+
+table {
+  font-size: 0.85em;
+}
