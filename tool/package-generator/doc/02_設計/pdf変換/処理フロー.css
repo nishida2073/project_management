@@ -9,3 +9,7 @@
   width: 200px !important;
   height: auto;
 }
+
+table {
+  font-size: 0.85em;
+}
