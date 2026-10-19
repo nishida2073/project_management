@@ -77,6 +77,8 @@ if (!mdPath || !outPath) {
   process.exit(1);
 }
 
+fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
+
 const pdfMargin = narrowMargins
   ? { top: '15mm', bottom: '15mm', left: '8mm', right: '8mm' }
   : { top: '15mm', bottom: '15mm', left: '15mm', right: '15mm' };
