@@ -45,7 +45,7 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
     if exist "!envFile!" (
         call "!envFile!"
 
-        set "TargetAppIds=!TargetAppIds_Pulse!"
+        set "TargetAppIds=!PulseTargetAppIds!"
         set "TargetDateCodeField=!TargetDateCodeFieldPulse!"
         set "TargetUserCodeField=!TargetUserCodeFieldPulse!"
 

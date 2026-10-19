@@ -563,13 +563,13 @@ $settingsGroups = [ordered]@{
             "Daily" = @{
                 Label = "業務日誌"
                 Vars = [ordered]@{
-                    "TargetAppIds_Daily" = @{ Label = "対象アプリID" }
+                    "DailyTargetAppIds" = @{ Label = "対象アプリID" }
                 }
             }
             "Pulse" = @{
                 Label = "パルスサーベイ"
                 Vars = [ordered]@{
-                    "TargetAppIds_Pulse" = @{ Label = "対象アプリID" }
+                    "PulseTargetAppIds" = @{ Label = "対象アプリID" }
                 }
             }
         }
@@ -578,12 +578,12 @@ $settingsGroups = [ordered]@{
 
 $settingsRenderLists = Get-SettingsRenderLists -SettingsGroups $settingsGroups
 $settingsTrailingButtonVars = @{
-    "TargetAppIds_Daily"  = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+    "DailyTargetAppIds"  = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
             Test-KintoneConnectionFromSettings -FieldName $Field.Key | Out-Null
         }
     }.GetNewClosure() }
-    "TargetAppIds_Pulse"  = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
+    "PulseTargetAppIds"  = { param($Panel, $Y, $Field) Add-FieldActionButton -Panel $Panel -Y $Y -Text "テスト接続" -AddStatusLabel -OnClick {
         Invoke-ActionWithUpdateStatus -StatusLabel $Field.StatusLabel -Action {
             Test-KintoneConnectionFromSettings -FieldName $Field.Key | Out-Null
         }
