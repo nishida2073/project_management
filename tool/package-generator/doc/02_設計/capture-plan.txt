@@ -1,0 +1,16 @@
+shot run-batch-01.png
+click 143 78
+shot run-generate-02.png
+click 246 78
+shot run-upload-03.png
+click 82 52
+shot log-04.png
+click 152 52
+click 40 79
+shot settings-common-05.png
+click 107 79
+shot settings-group-06.png
+wheel 480 400 -1200
+shot settings-group-07.png
+click 198 79
+shot settings-package-definition-08.png
