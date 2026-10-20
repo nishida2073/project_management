@@ -1,0 +1,44 @@
+{
+  "name": "2.10-04 まだ保存していないグループはコピーできない",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 100,
+      "y": 79
+    },
+    {
+      "action": "clickAt",
+      "x": 497,
+      "y": 131
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "TestNew"
+    },
+    {
+      "action": "clickAt",
+      "x": 635,
+      "y": 131
+    },
+    {
+      "action": "expectMessage",
+      "window": "コピー作成",
+      "contains": "コピー元のグループが存在しません"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestNew.bat",
+      "exists": false
+    }
+  ]
+}

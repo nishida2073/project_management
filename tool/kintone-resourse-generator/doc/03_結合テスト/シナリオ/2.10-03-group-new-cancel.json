@@ -1,0 +1,34 @@
+{
+  "name": "2.10-03 グループの新規作成の入力をキャンセルすると、グループは追加されない",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 100,
+      "y": 79
+    },
+    {
+      "action": "clickAt",
+      "x": 497,
+      "y": 131
+    },
+    {
+      "action": "pressKey",
+      "window": "グループの新規作成",
+      "key": "{ESC}"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestCancel.bat",
+      "exists": false
+    }
+  ]
+}

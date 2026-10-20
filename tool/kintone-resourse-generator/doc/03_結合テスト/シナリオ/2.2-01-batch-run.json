@@ -1,0 +1,58 @@
+{
+  "name": "2.2-01 一括実行で選んだ処理を順に実行し、処理ごとに状態が表示される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 120,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "batchok"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 218,
+      "value": "2"
+    },
+    {
+      "action": "keysAt",
+      "x": 360,
+      "y": 256,
+      "keys": "{DOWN}{ENTER}"
+    },
+    {
+      "action": "clickAt",
+      "x": 58,
+      "y": 339
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 548
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 900
+    }
+  ]
+}

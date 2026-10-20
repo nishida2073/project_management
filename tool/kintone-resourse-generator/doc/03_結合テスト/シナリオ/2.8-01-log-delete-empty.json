@@ -1,0 +1,29 @@
+{
+  "name": "2.8-01 削除対象のログがないときは、すべて削除でメッセージが出る",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "logs"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 82,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 593,
+      "y": 103
+    },
+    {
+      "action": "expectMessage",
+      "window": "ログの削除",
+      "contains": "削除対象のログファイルがありません"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "2.9-01 共通の環境設定でダウンロード先を変えて保存すると、設定ファイルに保存される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 35,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 510,
+      "y": 261,
+      "value": "%BASE_PATH%download2"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 131
+    },
+    {
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "download2"
+    }
+  ]
+}

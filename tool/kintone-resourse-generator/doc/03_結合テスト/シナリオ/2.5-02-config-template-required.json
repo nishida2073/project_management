@@ -1,0 +1,41 @@
+{
+  "name": "2.5-02 設定ファイル作成で、設定テンプレートを両方とも選ばないと、メッセージが出る",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 440,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "TestId"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 296
+    },
+    {
+      "action": "expectMessage",
+      "window": "実行",
+      "contains": "設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください"
+    }
+  ]
+}

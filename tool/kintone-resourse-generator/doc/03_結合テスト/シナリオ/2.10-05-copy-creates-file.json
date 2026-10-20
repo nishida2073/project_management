@@ -1,0 +1,44 @@
+{
+  "name": "2.10-05 保存済みのグループをコピーすると、設定ファイルができる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 100,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 635,
+      "y": 131
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループのコピー作成",
+      "value": "TestDst"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestDst.bat",
+      "exists": true
+    },
+    {
+      "action": "expectText",
+      "text": "TestDst"
+    }
+  ]
+}

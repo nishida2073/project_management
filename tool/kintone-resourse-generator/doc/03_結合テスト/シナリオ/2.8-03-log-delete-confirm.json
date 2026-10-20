@@ -1,0 +1,44 @@
+{
+  "name": "2.8-03 ログの削除の確認で「はい」を選ぶと、ログが削除される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "logs"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ok_20260101_000000.log",
+      "text": "LOG_MARKER\r\n"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 82,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 593,
+      "y": 103
+    },
+    {
+      "action": "expectDialogText",
+      "window": "ログの削除",
+      "contains": "ログファイルを削除します"
+    },
+    {
+      "action": "pressKey",
+      "window": "ログの削除",
+      "key": "{ENTER}"
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/create-space-from-template-ok_20260101_000000.log",
+      "exists": false
+    }
+  ]
+}

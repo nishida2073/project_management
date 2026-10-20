@@ -1,0 +1,57 @@
+{
+  "name": "2.3-02 スペース作成で、スペーステンプレートを使ってスペースを作成すると、作成したスペースのIDがスペースダウンロードのスペースIDに入る",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 204,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "createok"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 218,
+      "value": "2"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 259
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 900
+    },
+    {
+      "action": "clickAt",
+      "x": 316,
+      "y": 79
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^\\d+$",
+      "timeoutSec": 30
+    }
+  ]
+}

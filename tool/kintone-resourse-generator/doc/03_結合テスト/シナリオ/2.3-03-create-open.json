@@ -1,0 +1,39 @@
+{
+  "name": "2.3-03 スペース作成の開くを押すと、kintone の画面が開く",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 204,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 257,
+      "y": 259
+    },
+    {
+      "action": "expectWindow",
+      "title": "kintone",
+      "timeoutSec": 30
+    },
+    {
+      "action": "closeWindow",
+      "title": "kintone"
+    }
+  ]
+}

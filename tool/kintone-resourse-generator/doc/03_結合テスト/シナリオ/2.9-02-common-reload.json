@@ -1,0 +1,34 @@
+{
+  "name": "2.9-02 共通の環境設定で変えた値を再読込すると、保存されている値に戻る",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 35,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 510,
+      "y": 261,
+      "value": "changed"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 168
+    },
+    {
+      "action": "expectText",
+      "text": "%BASE_PATH%download"
+    }
+  ]
+}

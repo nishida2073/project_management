@@ -1,0 +1,41 @@
+{
+  "name": "2.2-03 一括実行で、スペーステンプレートIDが空だと、メッセージが出る",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 120,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "TestId"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 386
+    },
+    {
+      "action": "expectMessage",
+      "window": "一括実行",
+      "contains": "スペーステンプレートID を設定してください"
+    }
+  ]
+}

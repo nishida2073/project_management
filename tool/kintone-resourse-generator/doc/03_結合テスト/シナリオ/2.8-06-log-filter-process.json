@@ -1,0 +1,48 @@
+{
+  "name": "2.8-06 ログの処理のラジオボタンを切り替えると、選んだ処理のログだけが表示される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "logs"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ok-ok_20260101_000000.log",
+      "text": "LOG_OK_OK\r\n"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ng-ng_20260101_000000.log",
+      "text": "LOG_NG_NG\r\n"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-kintone-resources-ok-ok_20260101_000000.log",
+      "text": "LOG_DL_OK\r\n"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 82,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 228
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_DL_OK",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_OK_OK"
+    }
+  ]
+}

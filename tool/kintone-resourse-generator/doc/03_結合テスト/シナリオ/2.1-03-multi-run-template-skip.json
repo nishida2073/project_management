@@ -1,0 +1,41 @@
+{
+  "name": "2.1-03 複数実行で、設定テンプレートが両方とも空の行はスキップされる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 142,
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "x": 360,
+      "y": 181,
+      "value": "{{root}}\\run-list\\skip-template.xlsx"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 221
+    },
+    {
+      "action": "expectEditContains",
+      "text": "いずれかが必要のためスキップ",
+      "timeoutSec": 60
+    }
+  ]
+}
