@@ -4,6 +4,7 @@ Add-Type -Namespace UiTest -Name Native -MemberDefinition @'
 [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool SetForegroundWindow(System.IntPtr hWnd);
 [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
 [System.Runtime.InteropServices.DllImport("user32.dll")] public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, System.UIntPtr dwExtraInfo);
+[System.Runtime.InteropServices.DllImport("user32.dll")] public static extern System.IntPtr GetForegroundWindow();
 '@
 
 function Invoke-UiMouseClick {
@@ -16,8 +17,12 @@ function Invoke-UiMouseClick {
 
 function Focus-UiWindow {
     param([System.Windows.Automation.AutomationElement]$Window)
-    [UiTest.Native]::SetForegroundWindow([IntPtr]$Window.Current.NativeWindowHandle) | Out-Null
-    Start-Sleep -Milliseconds 200
+    $handle = [IntPtr]$Window.Current.NativeWindowHandle
+    for ($attempt = 0; $attempt -lt 5; $attempt++) {
+        [UiTest.Native]::SetForegroundWindow($handle) | Out-Null
+        Start-Sleep -Milliseconds 300
+        if ([UiTest.Native]::GetForegroundWindow() -eq $handle) { break }
+    }
 }
 
 function Invoke-UiClickAt {
