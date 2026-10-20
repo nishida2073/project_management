@@ -29,7 +29,10 @@ function Create-TestResultDatas {
         $testName = $testData.testName
         $testGroupDir = Join-Path $TestResultRootDir $TargetGroupName
         $testResultDir = Join-Path $testGroupDir $testName
-        $resultFiles = @(Get-ChildItem $testResultDir -Filter *.csv -ErrorAction SilentlyContinue)
+        $resultFiles = @()
+        if (Test-Path -LiteralPath $testResultDir) {
+            $resultFiles = @(Get-ChildItem -LiteralPath $testResultDir -Filter *.csv -ErrorAction SilentlyContinue)
+        }
         foreach($resultFile in $resultFiles){
             $csv = Import-Csv $resultFile.FullName
             foreach ($row in $csv) {

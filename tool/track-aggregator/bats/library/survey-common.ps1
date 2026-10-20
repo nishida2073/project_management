@@ -33,7 +33,10 @@ function Create-SurveyResultDatas {
         $surveyName = $surveyData.surveyName
         $surveyGroupDir = Join-Path $SurveyResultRootDir $TargetGroupName
         $surveyResultDir = Join-Path $surveyGroupDir $surveyName
-        $resultFiles = @(Get-ChildItem $surveyResultDir -Filter *.csv -ErrorAction SilentlyContinue)
+        $resultFiles = @()
+        if (Test-Path -LiteralPath $surveyResultDir) {
+            $resultFiles = @(Get-ChildItem -LiteralPath $surveyResultDir -Filter *.csv -ErrorAction SilentlyContinue)
+        }
         foreach($resultFile in $resultFiles){
             $csv = Import-Csv $resultFile.FullName
             foreach ($row in $csv) {
