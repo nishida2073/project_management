@@ -1,5 +1,8 @@
 {
   "name": "2.6-14 kintone接続のテスト接続で、正しい接続情報なら成功になる",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [],
   "steps": [
     {
@@ -16,7 +19,7 @@
       "action": "selectComboAt",
       "x": 330,
       "y": 131,
-      "value": "test"
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

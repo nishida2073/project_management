@@ -1,4 +1,4 @@
-﻿param([switch]$KeepTemp)
+﻿param([string]$Filter = "", [switch]$KeepTemp)
 
 $projectRoot = Split-Path (Split-Path (Split-Path $PSScriptRoot -Parent) -Parent) -Parent
 $toolRoot = Split-Path $projectRoot -Parent
@@ -11,4 +11,5 @@ $toolRoot = Split-Path $projectRoot -Parent
     -FixtureRoot (Join-Path $PSScriptRoot "..\test-data") `
     -FixtureDirs @("clients", "download") `
     -WindowTitle "コース別パッケージ生成ツール" `
+    -Filter $Filter `
     -KeepTemp:$KeepTemp

@@ -1,0 +1,12 @@
+set "GenerateSourcePath=%BASE_PATH%download\ok"
+set "GenerateConfigPath=%BASE_PATH%clients\ok.xlsx"
+set "GenerateWorkPath=%BASE_PATH%work"
+set "GenerateOutputPath=%BASE_PATH%generated\ok"
+set "GenerateSheetsInclude="
+set "GenerateSheetsExclude="
+
+set "KintoneSubdomain=iiglepv0966f"
+set "KintoneLoginName=user01"
+set "KintonePassword=abcd1234"
+set "KintoneBaseUrl=https://%KintoneSubdomain%.cybozu.com"
+set "TargetAppId=460"

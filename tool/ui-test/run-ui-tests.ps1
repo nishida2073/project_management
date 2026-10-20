@@ -6,6 +6,7 @@
     [string]$WindowTitle = "",
     [string]$FixtureRoot = "",
     [string[]]$FixtureDirs = @(),
+    [string]$Filter = "",
     [switch]$KeepTemp
 )
 
@@ -26,6 +27,8 @@ if ($newerSource) {
 }
 
 $scenarioFiles = @(Get-ChildItem -LiteralPath $ScenariosDir -Filter *.json | Sort-Object Name)
+if ($Filter) { $scenarioFiles = @($scenarioFiles | Where-Object { $_.BaseName -like "$Filter*" }) }
+if ($scenarioFiles.Count -eq 0) { throw "実行するシナリオがありません（指定: $Filter）" }
 
 $workRoot = Join-Path $env:TEMP ("uitest-" + (Get-Date -Format "yyyyMMddHHmmss"))
 $evidenceDir = Join-Path (Join-Path $ProjectRoot "doc\03_結合テスト\エビデンス") (Get-Date -Format "yyyyMMdd-HHmmss")

@@ -1,0 +1,45 @@
+{
+  "name": "2.1-04 一括実行で両方にチェックを付けると、パッケージが作られアップロードされ、状態が成功になる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 57,
+      "y": 296
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 344
+    },
+    {
+      "action": "expectTextGone",
+      "text": "未実行",
+      "timeoutSec": 300
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 300
+    }
+  ]
+}

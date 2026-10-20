@@ -1,5 +1,8 @@
 {
   "name": "2.7-01 パッケージ定義ファイルの更新で、対象のグループのパッケージ定義が更新される",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [
     {
       "action": "writeFile",
@@ -22,7 +25,7 @@
       "action": "selectComboAt",
       "x": 315,
       "y": 142,
-      "value": "test"
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

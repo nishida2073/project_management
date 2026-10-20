@@ -1,7 +1,7 @@
-set "GenerateSourcePath=%BASE_PATH%download\test"
-set "GenerateConfigPath=%BASE_PATH%clients\test.xlsx"
+set "GenerateSourcePath=%BASE_PATH%download\ng"
+set "GenerateConfigPath=%BASE_PATH%clients\ng.xlsx"
 set "GenerateWorkPath=%BASE_PATH%work"
-set "GenerateOutputPath=%BASE_PATH%generated\test"
+set "GenerateOutputPath=%BASE_PATH%generated\ng"
 set "GenerateSheetsInclude="
 set "GenerateSheetsExclude="
 

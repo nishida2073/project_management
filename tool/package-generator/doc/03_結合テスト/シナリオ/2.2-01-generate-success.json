@@ -1,5 +1,8 @@
 {
   "name": "2.2-01 パッケージ作成で実行すると、パッケージが作られ、状態が成功になる",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [
     {
       "action": "writeFile",
@@ -22,7 +25,7 @@
       "action": "selectComboAt",
       "x": 330,
       "y": 144,
-      "value": "test"
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

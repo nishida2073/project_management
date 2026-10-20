@@ -92,6 +92,9 @@ function Invoke-UiStep {
             $path = Join-Path $Context.Root $Step.path
             Wait-Until -Message "ファイルの内容 $($Step.path)" -Condition { (Test-Path -LiteralPath $path) -and ((Get-Content -LiteralPath $path -Raw).Contains($Step.contains)) } | Out-Null
         }
+        "deleteFile" {
+            Remove-Item -LiteralPath (Join-Path $Context.Root $Step.path) -Force
+        }
         "makeDir" {
             New-Item -ItemType Directory -Path (Join-Path $Context.Root $Step.path) -Force | Out-Null
         }
@@ -142,6 +145,18 @@ function Invoke-UiStep {
                 Find-UiElement -Parent $Context.Window -Props @{ Name = $Step.text }
             } | Out-Null
         }
+        "expectTextGone" {
+            $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
+            Wait-Until -TimeoutSec $timeout -Message "消える $($Step.text)" -Condition {
+                @(Find-UiElements -Parent $Context.Window -Props @{ Name = $Step.text }).Count -eq 0
+            } | Out-Null
+        }
+        "expectLogFile" {
+            $dir = Join-Path $Context.Root $Step.path
+            Wait-Until -Message "ログファイル $($Step.path)" -Condition {
+                @(Get-ChildItem -LiteralPath $dir -Filter *.log -File -ErrorAction SilentlyContinue).Count -gt 0
+            } | Out-Null
+        }
         "expectFile" {
             $path = Join-Path $Context.Root $Step.path
             $expected = [bool]$Step.exists
@@ -151,11 +166,20 @@ function Invoke-UiStep {
     }
 }
 
+function Expand-UiStep {
+    param($Step, $Vars)
+    if (!$Vars) { return $Step }
+    $json = $Step | ConvertTo-Json -Compress -Depth 5
+    foreach ($name in $Vars.PSObject.Properties.Name) { $json = $json.Replace("{{$name}}", [string]$Vars.$name) }
+    return ($json | ConvertFrom-Json)
+}
+
 function Invoke-UiSetup {
     param($Scenario, [string]$Root)
     $index = 0
     foreach ($step in @($Scenario.setup)) {
         $index++
+        $step = Expand-UiStep -Step $step -Vars $Scenario.vars
         try { Invoke-UiStep -Step $step -Context ([pscustomobject]@{ Root = $Root }) } catch { throw "準備 $index : $($_.Exception.Message)" }
     }
 }
@@ -165,6 +189,7 @@ function Invoke-UiSteps {
     $index = 0
     foreach ($step in @($Scenario.steps)) {
         $index++
+        $step = Expand-UiStep -Step $step -Vars $Scenario.vars
         try { Invoke-UiStep -Step $step -Context $Context } catch {
             $message = $_.Exception.Message
             if ($message -like "タイムアウト*") { $message += Get-UiDiagnostics -Window $Context.Window }

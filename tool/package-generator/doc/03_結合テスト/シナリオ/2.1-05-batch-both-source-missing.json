@@ -1,0 +1,45 @@
+{
+  "name": "2.1-05 圧縮元のフォルダが存在しない（異常のクライアント）と、パッケージ作成は失敗しても後続のアップロードは続けて実行される",
+  "vars": {
+    "client": "ng"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 57,
+      "y": 296
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 344
+    },
+    {
+      "action": "expectText",
+      "text": "失敗",
+      "timeoutSec": 300
+    },
+    {
+      "action": "expectTextGone",
+      "text": "未実行",
+      "timeoutSec": 300
+    }
+  ]
+}

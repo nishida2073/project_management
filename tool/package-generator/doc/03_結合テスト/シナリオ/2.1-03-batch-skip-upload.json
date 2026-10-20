@@ -1,5 +1,8 @@
 {
   "name": "2.1-03 一括実行で、パッケージのアップロードのチェックを外すと、アップロードはスキップされる",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [
     {
       "action": "writeFile",
@@ -22,7 +25,7 @@
       "action": "selectComboAt",
       "x": 330,
       "y": 144,
-      "value": "test"
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

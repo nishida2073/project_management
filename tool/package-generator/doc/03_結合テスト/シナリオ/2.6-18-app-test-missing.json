@@ -1,5 +1,8 @@
 {
   "name": "2.6-18 ファイル管理のテスト接続で、存在しないアプリIDなら失敗になる",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [],
   "steps": [
     {
@@ -16,7 +19,7 @@
       "action": "selectComboAt",
       "x": 330,
       "y": 131,
-      "value": "test"
+      "value": "{{client}}"
     },
     {
       "action": "typeAt",
