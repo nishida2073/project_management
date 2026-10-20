@@ -16,10 +16,10 @@
       "y": 80
     },
     {
-      "action": "typeAt",
+      "action": "pasteAt",
       "x": 420,
-      "y": 366,
-      "value": "%BASE_PATH%logs_tmp"
+      "y": 261,
+      "value": "%BASE_PATH%clients_tmp"
     },
     {
       "action": "clickAt",
@@ -31,11 +31,11 @@
       "x": 200,
       "y": 169,
       "pattern": "^完了$",
-      "timeoutSec": 60
+      "timeoutSec": 15
     },
     {
       "action": "expectEditNotContains",
-      "text": "logs_tmp",
+      "text": "clients_tmp",
       "timeoutSec": 60
     }
   ]

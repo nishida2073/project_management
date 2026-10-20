@@ -16,10 +16,10 @@
       "y": 80
     },
     {
-      "action": "typeAt",
+      "action": "pasteAt",
       "x": 420,
-      "y": 366,
-      "value": "%BASE_PATH%logs_test"
+      "y": 261,
+      "value": "%BASE_PATH%clients_test"
     },
     {
       "action": "clickAt",
@@ -31,12 +31,12 @@
       "x": 200,
       "y": 131,
       "pattern": "^完了$",
-      "timeoutSec": 60
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditContains",
-      "text": "logs_test",
-      "timeoutSec": 60
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "clients_test"
     }
   ]
 }

@@ -31,7 +31,7 @@
       "x": 200,
       "y": 131,
       "pattern": "^完了$",
-      "timeoutSec": 60
+      "timeoutSec": 15
     },
     {
       "action": "expectFileContains",
