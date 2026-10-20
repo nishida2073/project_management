@@ -35,7 +35,7 @@
     {
       "action": "expectTextPattern",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
+      "timeoutSec": 60
     },
     {
       "action": "wait",

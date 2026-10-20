@@ -29,7 +29,7 @@
     {
       "action": "expectTextPattern",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 1800
+      "timeoutSec": 60
     }
   ]
 }

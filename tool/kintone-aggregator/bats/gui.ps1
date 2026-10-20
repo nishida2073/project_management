@@ -55,7 +55,19 @@ function Set-RunButtonsEnabled {
     Set-ButtonsEnabled -Buttons @($batchTab.RunButton) -Enabled $Enabled
 }
 
+function Test-RequiredInputs {
+    param($Inputs, $Controls, [string]$Title)
+    foreach ($inputDef in $Inputs) {
+        if (-not $inputDef.Require) { continue }
+        if (Get-InputValue -Control $Controls[$inputDef.Name]) { continue }
+        [System.Windows.Forms.MessageBox]::Show("$($inputDef.Label) を設定してください。", $Title, [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+        return $false
+    }
+    return $true
+}
+
 function Invoke-ExecuteAll {
+    if (-not (Test-RequiredInputs -Inputs $batchRunAllInputs -Controls $batchTab.InputControls -Title "一括実行")) { return }
     Invoke-BatchRunAll -ButtonDefs $allButtonDefs -CheckBoxes $batchTab.CheckBoxes `
         -StatusLabel $batchTab.StatusLabel -StatusLabels $batchTab.StatusLabels -ExtraControls @($batchTab.InputControls.Values) `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
@@ -415,7 +427,7 @@ $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
 $defaultTargetDate = (Get-Date).ToString("yyyy-MM-dd")
 $dateAndGroupInputs = @(
-    [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 150; InputWidth = 150 }
+    [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 150; InputWidth = 150; Require = $true }
     [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
 )
 $categoryDefs = @(
@@ -465,11 +477,12 @@ foreach ($cd in $categoryDefs) {
 $tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
+$batchRunAllInputs = @(
+    [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 150; InputWidth = 150; Require = $true }
+    [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
+)
 $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
-    -Inputs @(
-        [PSCustomObject]@{ Name = "TargetDate"; Label = "対象日"; Default = $defaultTargetDate; LabelWidth = 150; InputWidth = 150 }
-        [PSCustomObject]@{ Name = "TargetGroupNameFilter"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150 }
-    ) `
+    -Inputs $batchRunAllInputs `
     -OnOpenClick {
         param($target)
         Open-TargetOrWarn -Path $target
@@ -478,6 +491,7 @@ $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
 
 $categoryTab = New-CategoryTabControl -TabControl $execTabControl -CategoryDefs $categoryDefs -OnRunClick {
     param($bd)
+    if (-not (Test-RequiredInputs -Inputs $bd.Inputs -Controls $bd.InputControls -Title "実行")) { return }
     Invoke-BatButton -ButtonDef $bd -WorkingDirectory $scriptDir -Form $form `
         -WriteLog { param($msg) Write-Log $msg } -SetRunButtonsEnabled { param($e) Set-RunButtonsEnabled $e } `
         -CurrentProcessRef ([ref]$script:currentProc) `

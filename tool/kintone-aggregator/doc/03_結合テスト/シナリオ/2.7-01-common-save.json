@@ -27,8 +27,16 @@
       "y": 131
     },
     {
+      "action": "expectTextAt",
+      "x": 200,
+      "y": 131,
+      "pattern": "^完了$",
+      "timeoutSec": 60
+    },
+    {
       "action": "expectEditContains",
-      "text": "logs_test"
+      "text": "logs_test",
+      "timeoutSec": 60
     }
   ]
 }

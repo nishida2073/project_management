@@ -21,6 +21,55 @@
       "y": 189
     },
     {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 189,
+      "checked": false,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 221,
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 254,
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 286,
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 319,
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 351,
+      "checked": false,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 384,
+      "checked": false,
+      "timeoutSec": 15
+    },
+    {
       "action": "selectComboAt",
       "x": 328,
       "y": 144,
@@ -32,14 +81,39 @@
       "y": 431
     },
     {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告|失敗)$",
-      "timeoutSec": 1800
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 216,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
     },
     {
-      "action": "expectText",
-      "text": "未実行",
-      "timeoutSec": 300
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 248,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 281,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 313,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 183,
+      "pattern": "^未実行$",
+      "timeoutSec": 5
     }
   ]
 }

@@ -33,6 +33,13 @@
       "y": 169
     },
     {
+      "action": "expectTextAt",
+      "x": 200,
+      "y": 169,
+      "pattern": "^完了$",
+      "timeoutSec": 60
+    },
+    {
       "action": "expectEditContains",
       "text": "テスト科目"
     }

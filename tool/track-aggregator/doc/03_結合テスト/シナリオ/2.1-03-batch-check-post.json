@@ -21,6 +21,13 @@
       "y": 351
     },
     {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 351,
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
       "action": "selectComboAt",
       "x": 328,
       "y": 144,
@@ -32,9 +39,11 @@
       "y": 431
     },
     {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告|失敗)$",
-      "timeoutSec": 1800
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 346,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
     }
   ]
 }

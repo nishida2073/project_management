@@ -33,6 +33,10 @@
       "y": 309
     },
     {
+      "action": "wait",
+      "ms": 30000
+    },
+    {
       "action": "expectTextPattern",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 900

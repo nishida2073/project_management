@@ -3,7 +3,12 @@
   "vars": {
     "client": "ok"
   },
-  "setup": [],
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "logs"
+    }
+  ],
   "steps": [
     {
       "action": "clickAt",
@@ -17,8 +22,8 @@
     },
     {
       "action": "expectMessage",
-      "window": "情報",
-      "contains": "削除対象のログファイルはありません"
+      "window": "ログの削除",
+      "contains": "削除対象のログファイルがありません"
     }
   ]
 }

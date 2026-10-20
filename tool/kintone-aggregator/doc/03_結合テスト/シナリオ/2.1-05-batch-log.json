@@ -33,9 +33,44 @@
       "y": 366
     },
     {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告)$",
+      "action": "expectEditContains",
+      "text": "一括実行 完了",
       "timeoutSec": 900
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 183,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 216,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 248,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 281,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 313,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
     },
     {
       "action": "expectFile",
