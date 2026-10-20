@@ -10,6 +10,7 @@ click 40 79
 shot settings-common-05.png
 click 107 79
 shot settings-group-06.png
+click 420 330
 wheel 480 400 -1200
 shot settings-group-07.png
 click 198 79
