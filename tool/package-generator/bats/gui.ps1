@@ -487,15 +487,6 @@ $settingsGroups = [ordered]@{
                     "TargetAppId"       = @{ Label = "対象アプリID" }
                 }
             }
-            "DOWNLOAD" = @{
-                Label = "ダウンロード"
-                Vars = [ordered]@{
-                    "DownloadSiteUrl"       = @{ Label = "ダウンロード元のサイトURL" }
-                    "DownloadSitePath"      = @{ Label = "ダウンロード元のフォルダ" }
-                    "DownloadSiteTenantId"  = @{ Label = "テナントID" }
-                    "DownloadLocalPath"     = @{ Label = "ダウンロード先のフォルダ"; Browse = "Folder" }
-                }
-            }
             "GENERATE" = @{
                 Label = "パッケージ作成"
                 Vars = [ordered]@{
@@ -505,17 +496,6 @@ $settingsGroups = [ordered]@{
                     "GenerateOutputPath"      = @{ Label = "パッケージの出力先"; Browse = "Folder" }
                     "GenerateSheetsInclude"   = @{ Label = "対象のシート" }
                     "GenerateSheetsExclude"   = @{ Label = "除外のシート" }
-                }
-            }
-            "UPLOAD" = @{
-                Label = "アップロード"
-                Vars = [ordered]@{
-                    "UploadSiteUrl"       = @{ Label = "アップロード先のサイトURL" }
-                    "UploadSitePath"      = @{ Label = "アップロード先のフォルダ" }
-                    "UploadSiteTenantId"  = @{ Label = "テナントID" }
-                    "UploadLocalPath"     = @{ Label = "アップロード元のフォルダ"; Browse = "Folder" }
-                    "UploadItemsInclude"  = @{ Label = "対象の項目形式" }
-                    "UploadItemsExclude"  = @{ Label = "除外の項目形式" }
                 }
             }
         }
