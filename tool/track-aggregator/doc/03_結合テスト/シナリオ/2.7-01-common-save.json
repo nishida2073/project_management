@@ -1,0 +1,34 @@
+{
+  "name": "2.7-01 環境設定（共通）で値を変えて保存を押すと、変えた値が保存され、画面の表示が更新される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 35,
+      "y": 80
+    },
+    {
+      "action": "typeAt",
+      "x": 520,
+      "y": 539,
+      "value": "suffix-test"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 131
+    },
+    {
+      "action": "expectEditContains",
+      "text": "suffix-test"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "2.1-01 一括実行で、対象のグループを選び、チェックされている処理のまま実行すると、処理ごとの状態が成功または警告になる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 431
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 1800
+    }
+  ]
+}

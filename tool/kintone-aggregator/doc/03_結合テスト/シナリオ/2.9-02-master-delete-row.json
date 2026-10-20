@@ -1,0 +1,35 @@
+{
+  "name": "2.9-02 環境設定（マスター）のスケジュールの表で行を選んで削除を押すと、選んだ行が削除される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 167,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 685,
+      "y": 454
+    },
+    {
+      "action": "expectTextGone",
+      "text": "1",
+      "timeoutSec": 10
+    }
+  ]
+}

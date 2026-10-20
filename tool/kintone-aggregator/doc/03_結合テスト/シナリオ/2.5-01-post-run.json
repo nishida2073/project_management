@@ -1,0 +1,41 @@
+{
+  "name": "2.5-01 投稿で、対象日と対象のグループを入力して実行すると、状態が成功または警告になり、投稿先のスレッドにコメントが投稿される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 350,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 328,
+      "y": 268,
+      "value": "2026-09-01"
+    },
+    {
+      "action": "selectComboAt",
+      "x": 726,
+      "y": 269,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 309
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 900
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "2.8-10 環境設定（グループ別）で業務日誌の対象アプリIDを空にして、テスト接続（業務日誌）を押すと、状態が失敗になり、接続は行われない",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 453,
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 493
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^失敗$",
+      "timeoutSec": 60
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "2.2-01 アプリデータ作成の業務日誌で、対象日と対象のグループを入力して実行すると、状態が成功または警告になり、集計用データが作られる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 138,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 328,
+      "y": 143,
+      "value": "2026-09-01"
+    },
+    {
+      "action": "selectComboAt",
+      "x": 726,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 184
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 900
+    }
+  ]
+}

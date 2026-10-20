@@ -1,0 +1,35 @@
+{
+  "name": "2.2-01 実施結果取得（テスト）で、対象のグループを選び実行すると、状態が成功または警告になり、テストの実施結果が取得される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 135,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 184
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 1800
+    }
+  ]
+}

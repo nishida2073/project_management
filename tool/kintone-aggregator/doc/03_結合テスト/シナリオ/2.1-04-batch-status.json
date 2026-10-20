@@ -1,0 +1,46 @@
+{
+  "name": "2.1-04 一括実行が終わると、処理ごとに成功、警告、失敗、スキップのいずれかが表示される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 328,
+      "y": 143,
+      "value": "2026-09-01"
+    },
+    {
+      "action": "selectComboAt",
+      "x": 726,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 366
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 900
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告|失敗|スキップ)$",
+      "timeoutSec": 900
+    }
+  ]
+}

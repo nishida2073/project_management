@@ -1,0 +1,34 @@
+{
+  "name": "2.7-02 環境設定（共通）で値を変えたあと再読込を押すと、保存されている値で表示し直され、変えた内容は消える",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 35,
+      "y": 80
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 366,
+      "value": "%BASE_PATH%logs_tmp"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 169
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "logs_tmp"
+    }
+  ]
+}

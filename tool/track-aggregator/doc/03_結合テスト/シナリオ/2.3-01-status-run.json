@@ -1,0 +1,35 @@
+{
+  "name": "2.3-01 実施状況確認で、対象のグループを選び実行すると、状態が成功または警告になり、取得した結果が統合される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 240,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 184
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 1800
+    }
+  ]
+}

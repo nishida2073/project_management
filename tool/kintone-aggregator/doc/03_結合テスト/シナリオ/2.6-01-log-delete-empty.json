@@ -1,0 +1,24 @@
+{
+  "name": "2.6-01 ログのファイルがない状態で、すべて削除を押すと、削除対象のログファイルがないことが表示される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 82,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 530,
+      "y": 103
+    },
+    {
+      "action": "expectMessage",
+      "window": "情報",
+      "contains": "削除対象のログファイルはありません"
+    }
+  ]
+}

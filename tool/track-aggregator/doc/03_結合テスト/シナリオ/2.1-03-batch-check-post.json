@@ -1,0 +1,40 @@
+{
+  "name": "2.1-03 一括実行で実施結果集計-投稿のチェックを入れて実行すると、投稿が実行され状態が成功または警告になる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "clickAt",
+      "x": 57,
+      "y": 351
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 431
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告|失敗)$",
+      "timeoutSec": 1800
+    }
+  ]
+}

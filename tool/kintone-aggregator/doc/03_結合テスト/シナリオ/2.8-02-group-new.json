@@ -1,0 +1,34 @@
+{
+  "name": "2.8-02 環境設定（グループ別）で、新しい名前で新規作成すると、名前が一覧に追加され選ばれる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "clickAt",
+      "x": 497,
+      "y": 131
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "AggNew"
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^AggNew$",
+      "timeoutSec": 300
+    }
+  ]
+}

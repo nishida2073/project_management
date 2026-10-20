@@ -1,0 +1,29 @@
+{
+  "name": "2.7-04 環境設定（共通）のアプリデータ集計の列定義で、行を選んで削除を押すと、選んだ行が削除される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "clickAt",
+      "x": 585,
+      "y": 607
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "パルスサーベイフリーコメント"
+    }
+  ]
+}

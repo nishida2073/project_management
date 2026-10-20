@@ -1,0 +1,40 @@
+{
+  "name": "2.8-07 環境設定（グループ別）で入力欄の値を変えたあと再読込を押すと、保存されている値で表示し直され、変えた内容は消える",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 520,
+      "y": 297,
+      "value": "track-temp"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 206
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "track-temp"
+    }
+  ]
+}

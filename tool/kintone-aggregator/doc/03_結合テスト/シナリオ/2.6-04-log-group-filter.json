@@ -1,0 +1,30 @@
+{
+  "name": "2.6-04 ログの対象のグループで 1 つのグループを選ぶと、そのグループの実行ログだけが表示される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "logs/ok_test.log",
+      "text": "ok run"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 82,
+      "y": 52
+    },
+    {
+      "action": "selectComboAt",
+      "x": 324,
+      "y": 104,
+      "value": "{{client}}"
+    },
+    {
+      "action": "expectEditContains",
+      "text": "{{client}}"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "name": "2.2-02 実施結果取得（テスト）の実行が終わったあと、開くを押すと、取得した結果のフォルダが開く",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 135,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 184
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 1800
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 257,
+      "y": 184
+    },
+    {
+      "action": "expectWindow",
+      "title": "01_テスト",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "01_テスト"
+    }
+  ]
+}

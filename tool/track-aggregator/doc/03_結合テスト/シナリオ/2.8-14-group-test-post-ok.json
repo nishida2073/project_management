@@ -1,0 +1,41 @@
+{
+  "name": "2.8-14 環境設定（グループ別）で正しい投稿先で、テスト投稿を押すと、状態が成功になり、テスト用のコメントが投稿される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 328
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^成功$",
+      "timeoutSec": 120
+    }
+  ]
+}

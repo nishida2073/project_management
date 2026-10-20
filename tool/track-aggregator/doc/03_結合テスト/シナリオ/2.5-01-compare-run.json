@@ -1,0 +1,41 @@
+{
+  "name": "2.5-01 経年比較で、対象のグループと比較年を指定して実行すると、状態が成功または警告になり、経年比較の結果が作られる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 435,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 328,
+      "y": 181,
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 221
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 1800
+    }
+  ]
+}

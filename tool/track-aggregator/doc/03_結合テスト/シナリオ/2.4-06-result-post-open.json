@@ -1,0 +1,54 @@
+{
+  "name": "2.4-06 実施結果集計（投稿）の実行が終わったあと、開くを押すと、投稿先のスレッドがブラウザで開く",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 345,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 394,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 434
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 1800
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 257,
+      "y": 434
+    },
+    {
+      "action": "expectWindow",
+      "title": "Google Chrome",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "Google Chrome",
+      "keys": "^w"
+    }
+  ]
+}

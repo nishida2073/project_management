@@ -1,0 +1,40 @@
+{
+  "name": "2.9-03 環境設定（マスター）で科目名などを変えて保存を押すと、値が保存され、画面の表示が更新される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 167,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "x": 235,
+      "y": 454,
+      "value": "テスト科目"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 169
+    },
+    {
+      "action": "expectEditContains",
+      "text": "テスト科目"
+    }
+  ]
+}
