@@ -1,0 +1,38 @@
+{
+  "name": "2.1-03 一括実行で、パッケージのアップロードのチェックを外すと、アップロードはスキップされる",
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "download/test/sample.txt",
+      "text": "sample\r\n"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 144,
+      "value": "test"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 344
+    },
+    {
+      "action": "expectText",
+      "text": "スキップ",
+      "timeoutSec": 120
+    }
+  ]
+}

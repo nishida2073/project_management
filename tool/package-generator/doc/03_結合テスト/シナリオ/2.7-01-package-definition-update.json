@@ -1,0 +1,38 @@
+{
+  "name": "2.7-01 パッケージ定義ファイルの更新で、対象のグループのパッケージ定義が更新される",
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "download/test/sample.txt",
+      "text": "sample\r\n"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 198,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 315,
+      "y": 142,
+      "value": "test"
+    },
+    {
+      "action": "clickAt",
+      "x": 92,
+      "y": 183
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 120
+    }
+  ]
+}

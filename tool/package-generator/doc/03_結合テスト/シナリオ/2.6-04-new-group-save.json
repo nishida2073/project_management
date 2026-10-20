@@ -1,0 +1,40 @@
+{
+  "name": "2.6-04 新規作成したグループは、保存すると設定ファイルと Excel ファイルができる",
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "click",
+      "target": "新規作成"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "TestNew"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 169
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestNew.bat",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestNew.xlsx",
+      "exists": true
+    }
+  ]
+}

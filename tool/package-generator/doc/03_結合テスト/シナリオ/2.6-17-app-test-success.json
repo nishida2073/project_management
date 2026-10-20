@@ -1,0 +1,32 @@
+{
+  "name": "2.6-17 ファイル管理のテスト接続で、存在するアプリIDなら成功になる",
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "test"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 547
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 60
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "2.5-01 共通の設定でログの出力先を変えて保存すると、設定ファイルに保存される",
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 35,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 261,
+      "value": "%BASE_PATH%logs2"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 131
+    },
+    {
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "logs2"
+    }
+  ]
+}

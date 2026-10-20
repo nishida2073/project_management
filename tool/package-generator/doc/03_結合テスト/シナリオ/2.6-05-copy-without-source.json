@@ -1,0 +1,43 @@
+{
+  "name": "2.6-05 コピー元が保存されていないグループはコピーできない",
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "click",
+      "target": "新規作成"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "TestNew"
+    },
+    {
+      "action": "expectText",
+      "text": "TestNew"
+    },
+    {
+      "action": "click",
+      "target": "コピー"
+    },
+    {
+      "action": "expectMessage",
+      "window": "コピー作成",
+      "contains": "コピー元のグループが存在しません"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestNew.bat",
+      "exists": false
+    }
+  ]
+}
