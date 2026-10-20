@@ -50,6 +50,11 @@ function Get-KintoneOpenUrl {
     if (!$groupValue) { return $null }
     $kintoneBaseUrl = (Get-ResolvedVar -VarName "KintoneBaseUrl" -Path (Get-GroupBatPath $groupValue $clientsDir)).TrimEnd('/')
     if (!$kintoneBaseUrl) { return $null }
+    $downloadBd = Get-ButtonDefByBatchPath $downloadKintoneResourcesBat
+    $downloadSpaceId = if ($downloadBd -and $downloadBd.InputControls["SpaceId"]) { $downloadBd.InputControls["SpaceId"].Text.Trim() } else { "" }
+    if ($downloadSpaceId) {
+        return "$kintoneBaseUrl/k/#/space/$downloadSpaceId"
+    }
     if ($script:createdSpace -and $script:createdSpace.Group -eq $groupValue) {
         return "$kintoneBaseUrl/k/#/space/$($script:createdSpace.Id)"
     }

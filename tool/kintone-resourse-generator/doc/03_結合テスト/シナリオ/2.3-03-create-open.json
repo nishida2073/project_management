@@ -1,5 +1,5 @@
 {
-  "name": "2.3-03 スペース作成の開くを押すと、kintone の画面が開く",
+  "name": "2.3-03 スペース作成の開くを押すと、作成したスペースの kintone の画面が開く",
   "vars": {
     "client": "ok"
   },
@@ -22,18 +22,45 @@
       "value": "{{client}}"
     },
     {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "createok"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 218,
+      "value": "3"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 259
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 900
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
       "action": "clickAt",
       "x": 257,
       "y": 259
     },
     {
       "action": "expectWindow",
-      "title": "kintone",
-      "timeoutSec": 30
+      "title": "createok",
+      "timeoutSec": 60
     },
     {
       "action": "closeWindow",
-      "title": "kintone"
+      "title": "createok",
+      "keys": "^w"
     }
   ]
 }

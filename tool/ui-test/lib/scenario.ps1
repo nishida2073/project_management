@@ -239,19 +239,22 @@ function Invoke-UiStep {
         "expectWindow" {
             $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
             try {
-                Wait-Until -TimeoutSec $timeout -Message "ウィンドウ $($Step.title)" -Condition {
-                    @(Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | Where-Object { $_.Current.Name -like "*$($Step.title)*" }).Count -gt 0
-                } | Out-Null
+                $found = Wait-Until -TimeoutSec $timeout -Message "ウィンドウ $($Step.title)" -Condition {
+                    Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | Where-Object { $_.Current.Name -clike "*$($Step.title)*" } | Select-Object -First 1
+                }
+                Start-Sleep -Milliseconds 5000
+                Write-UiLog ("    ウィンドウ: " + $found.Current.Name + " 位置=" + $found.Current.BoundingRectangle + " 画面外=" + $found.Current.IsOffscreen)
+                Save-UiEvidence -Context $Context -Element $found
             } catch {
                 $names = @(Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | ForEach-Object { $_.Current.Name } | Where-Object { $_ })
                 throw "$($_.Exception.Message) / 画面のウィンドウ=[$($names -join ' | ')]"
             }
         }
         "closeWindow" {
-            $window = @(Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | Where-Object { $_.Current.Name -like "*$($Step.title)*" }) | Select-Object -First 1
+            $window = @(Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | Where-Object { $_.Current.Name -clike "*$($Step.title)*" }) | Select-Object -First 1
             if ($window) {
                 Focus-UiWindow -Window $window
-                Send-UiKeys -Keys "%{F4}"
+                Send-UiKeys -Keys $(if ($Step.keys) { $Step.keys } else { "%{F4}" })
             }
         }
         "expectFile" {

@@ -23,12 +23,13 @@
     },
     {
       "action": "expectWindow",
-      "title": "kintone",
+      "title": "ファイル管理",
       "timeoutSec": 30
     },
     {
       "action": "closeWindow",
-      "title": "kintone"
+      "title": "ファイル管理",
+      "keys": "^w"
     }
   ]
 }
