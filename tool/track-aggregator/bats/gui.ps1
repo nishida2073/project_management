@@ -124,6 +124,27 @@ function Get-CommonSettingsTargets {
     )
 }
 
+function Read-NewGroupName {
+    param([string]$Title, [string]$Prompt)
+    return Show-GroupNameDialog -Title $Title -Prompt $Prompt -Exists {
+        param($name)
+        ($settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $name }) -or (Test-Path -LiteralPath (Get-GroupBatPath $name $clientsDir))
+    }
+}
+
+function Copy-GroupSettingsFiles {
+    param([string]$SourceGroup, [string]$GroupName)
+
+    Copy-EnvBatFile -SourcePath (Get-GroupBatPath $SourceGroup $clientsDir) -DestinationPath (Get-GroupBatPath $GroupName $clientsDir)
+
+    $sourceXlsxPath = Get-GroupXlsxPath $SourceGroup
+    if (Test-Path -LiteralPath $sourceXlsxPath) {
+        Copy-Item -LiteralPath $sourceXlsxPath -Destination (Get-GroupXlsxPath $GroupName)
+    }
+
+    Update-GroupDropdowns
+}
+
 function Get-GroupSettingsTargets {
     param([string]$GroupName)
     return @(
@@ -768,14 +789,23 @@ $settingsGroupTop = (New-SettingsTopPanel `
         [PSCustomObject]@{ Name = "GroupTargetLabel"; Kind = "Label"; Text = "対象のグループ"; Width = 150 }
         [PSCustomObject]@{ Name = "GroupTarget"; Kind = "Combo"; Width = 150; OnChange = { Update-GroupSettingsFields } }
         [PSCustomObject]@{ Name = "NewGroup"; Kind = "Button"; Text = "新規作成"; Width = 100; OnClick = {
-            $newName = Show-GroupNameDialog -Title "グループの新規作成" -Prompt "グループ名を入力してください" -Exists {
-                param($name)
-                ($settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $name }) -or (Test-Path -LiteralPath (Get-GroupBatPath $name $clientsDir))
-            }
+            $newName = Read-NewGroupName -Title "グループの新規作成" -Prompt "グループ名を入力してください"
             if (!$newName) { return }
 
             $settingsGroupTop.Controls["GroupTarget"].Items.Add([PSCustomObject]@{ Text = $newName; Value = $newName }) | Out-Null
-            $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $settingsGroupTop.Controls["GroupTarget"].Items[-1]
+            $settingsGroupTop.Controls["GroupTarget"].SelectedIndex = $settingsGroupTop.Controls["GroupTarget"].Items.Count - 1
+        } }
+        [PSCustomObject]@{ Name = "CopyGroup"; Kind = "Button"; Text = "コピー"; Width = 100; OnClick = {
+            $source = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
+            if (!(Test-Path -LiteralPath (Get-GroupBatPath $source $clientsDir))) {
+                [System.Windows.Forms.MessageBox]::Show("コピー元のグループが存在しません", "コピー作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+                return
+            }
+            $newName = Read-NewGroupName -Title "グループのコピー作成" -Prompt "コピー先のグループ名を入力してください"
+            if (!$newName) { return }
+
+            Copy-GroupSettingsFiles -SourceGroup $source -GroupName $newName
+            $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $newName } | Select-Object -First 1
         } }
     ) `
     -OnSave {

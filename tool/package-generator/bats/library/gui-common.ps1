@@ -58,6 +58,26 @@ function Get-ResolvedVar {
     return Expand-VarTokens -Value $val -Resolver { param($name) Get-ResolvedVar $name $Path } -BasePath (Split-Path (Split-Path $Path -Parent) -Parent)
 }
 
+function Copy-EnvBatFile {
+    param(
+        [Parameter(Mandatory)][string]$SourcePath,
+        [Parameter(Mandatory)][string]$DestinationPath,
+        [string[]]$ReplaceVarNames = @(),
+        [string]$OldText = "",
+        [string]$NewText = ""
+    )
+    Copy-Item -LiteralPath $SourcePath -Destination $DestinationPath
+    if (!$ReplaceVarNames) { return }
+    $sourceValues = Get-SetEnvDefaults -Path $SourcePath
+    Save-EnvBatFile -Path $DestinationPath -VarNames $ReplaceVarNames `
+        -GetValueFn { param($varName)
+            ([string]$sourceValues[$varName]).Replace($OldText, $NewText)
+        } `
+        -HasValueFn { param($varName)
+            $true
+        }
+}
+
 function Save-EnvBatFile {
     param(
         [Parameter(Mandatory)][string]$Path,
