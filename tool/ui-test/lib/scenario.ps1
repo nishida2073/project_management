@@ -159,6 +159,21 @@ function Invoke-UiStep {
                 Assert-True ($value -ne $Step.notEquals) "セル $($Step.cell) の値が $($Step.notEquals) ではない（実際: $value）"
             }
         }
+        "keysAt" {
+            Invoke-UiClickAt -Window $Context.Window -X ([int]$Step.x) -Y ([int]$Step.y)
+            Send-UiKeys -Keys $Step.keys
+        }
+        "expectTextPattern" {
+            $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
+            Wait-Until -TimeoutSec $timeout -Message "表示 $($Step.pattern)" -Condition {
+                $all = $Context.Window.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
+                foreach ($element in $all) {
+                    $name = $element.Current.Name
+                    if ($name -and ($name -match $Step.pattern)) { return $true }
+                }
+                return $false
+            } | Out-Null
+        }
         "makeDir" {
             New-Item -ItemType Directory -Path (Join-Path $Context.Root $Step.path) -Force | Out-Null
         }
