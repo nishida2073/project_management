@@ -95,6 +95,70 @@ function Invoke-UiStep {
         "deleteFile" {
             Remove-Item -LiteralPath (Join-Path $Context.Root $Step.path) -Force
         }
+        "wait" {
+            Start-Sleep -Milliseconds ([int]$Step.ms)
+        }
+        "pasteAt" {
+            Invoke-UiClickAt -Window $Context.Window -X ([int]$Step.x) -Y ([int]$Step.y)
+            Set-Clipboard -Value $Step.value
+            Send-UiKeys -Keys "^a"
+            Send-UiKeys -Keys "^v"
+        }
+        "expectLogContains" {
+            $dir = Join-Path $Context.Root $Step.path
+            Wait-Until -Message "ログの内容 $($Step.contains)" -Condition {
+                @(Get-ChildItem -LiteralPath $dir -Filter $Step.filter -File -ErrorAction SilentlyContinue | Where-Object { (Get-Content -LiteralPath $_.FullName -Raw -Encoding UTF8).Contains($Step.contains) }).Count -gt 0
+            } | Out-Null
+        }
+        "expectEditContains" {
+            $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
+            Wait-Until -TimeoutSec $timeout -Message "欄に $($Step.text)" -Condition {
+                @(Get-UiEditValues -Window $Context.Window | Where-Object { $_.Contains($Step.text) }).Count -gt 0
+            } | Out-Null
+        }
+        "expectEditNotContains" {
+            Start-Sleep -Milliseconds 1000
+            $found = @(Get-UiEditValues -Window $Context.Window | Where-Object { $_.Contains($Step.text) })
+            Assert-True ($found.Count -eq 0) "欄に $($Step.text) が含まれない"
+        }
+        "wheelAt" {
+            Invoke-UiWheel -Window $Context.Window -X ([int]$Step.x) -Y ([int]$Step.y) -Delta ([int]$Step.delta)
+        }
+        "openFile" {
+            Start-Process -FilePath (Join-Path $Context.Root $Step.path)
+        }
+        "excelWrite" {
+            $file = Join-Path $Context.Root $Step.path
+            $excel = New-Object -ComObject Excel.Application
+            try {
+                $excel.DisplayAlerts = $false
+                $book = $excel.Workbooks.Open($file)
+                $book.Worksheets.Item($Step.sheet).Range($Step.cell).Value2 = $Step.value
+                $book.Save()
+                $book.Close($false)
+            } finally {
+                $excel.Quit()
+                [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
+            }
+        }
+        "excelExpect" {
+            $file = Join-Path $Context.Root $Step.path
+            $excel = New-Object -ComObject Excel.Application
+            try {
+                $excel.DisplayAlerts = $false
+                $book = $excel.Workbooks.Open($file, 0, $true)
+                $value = [string]$book.Worksheets.Item($Step.sheet).Range($Step.cell).Value2
+                $book.Close($false)
+            } finally {
+                $excel.Quit()
+                [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel)
+            }
+            if ($Step.PSObject.Properties.Name -contains "equals") {
+                Assert-Equal $Step.equals $value "セル $($Step.cell) の値"
+            } else {
+                Assert-True ($value -ne $Step.notEquals) "セル $($Step.cell) の値が $($Step.notEquals) ではない（実際: $value）"
+            }
+        }
         "makeDir" {
             New-Item -ItemType Directory -Path (Join-Path $Context.Root $Step.path) -Force | Out-Null
         }
@@ -117,7 +181,7 @@ function Invoke-UiStep {
         }
         "selectComboAt" {
             Invoke-UiClickAt -Window $Context.Window -X ([int]$Step.x) -Y ([int]$Step.y)
-            Send-UiKeys -Keys (ConvertTo-UiSendKeys -Text $Step.value)
+            if ($Step.value) { Send-UiKeys -Keys (ConvertTo-UiSendKeys -Text $Step.value) } else { Send-UiKeys -Keys "{HOME}" }
             Send-UiKeys -Keys "{ENTER}"
             Save-UiEvidence -Context $Context
         }
@@ -157,6 +221,24 @@ function Invoke-UiStep {
                 @(Get-ChildItem -LiteralPath $dir -Filter *.log -File -ErrorAction SilentlyContinue).Count -gt 0
             } | Out-Null
         }
+        "expectWindow" {
+            $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
+            try {
+                Wait-Until -TimeoutSec $timeout -Message "ウィンドウ $($Step.title)" -Condition {
+                    @(Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | Where-Object { $_.Current.Name -like "*$($Step.title)*" }).Count -gt 0
+                } | Out-Null
+            } catch {
+                $names = @(Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | ForEach-Object { $_.Current.Name } | Where-Object { $_ })
+                throw "$($_.Exception.Message) / 画面のウィンドウ=[$($names -join ' | ')]"
+            }
+        }
+        "closeWindow" {
+            $window = @(Find-UiElements -Props @{ ControlType = [System.Windows.Automation.ControlType]::Window } | Where-Object { $_.Current.Name -like "*$($Step.title)*" }) | Select-Object -First 1
+            if ($window) {
+                Focus-UiWindow -Window $window
+                Send-UiKeys -Keys "%{F4}"
+            }
+        }
         "expectFile" {
             $path = Join-Path $Context.Root $Step.path
             $expected = [bool]$Step.exists
@@ -167,10 +249,12 @@ function Invoke-UiStep {
 }
 
 function Expand-UiStep {
-    param($Step, $Vars)
-    if (!$Vars) { return $Step }
+    param($Step, $Vars, [string]$Root)
     $json = $Step | ConvertTo-Json -Compress -Depth 5
-    foreach ($name in $Vars.PSObject.Properties.Name) { $json = $json.Replace("{{$name}}", [string]$Vars.$name) }
+    $json = $json.Replace("{{root}}", ([string]$Root).Replace("\", "\\"))
+    if ($Vars) {
+        foreach ($name in $Vars.PSObject.Properties.Name) { $json = $json.Replace("{{$name}}", ([string]$Vars.$name).Replace("\", "\\")) }
+    }
     return ($json | ConvertFrom-Json)
 }
 
@@ -179,7 +263,7 @@ function Invoke-UiSetup {
     $index = 0
     foreach ($step in @($Scenario.setup)) {
         $index++
-        $step = Expand-UiStep -Step $step -Vars $Scenario.vars
+        $step = Expand-UiStep -Step $step -Vars $Scenario.vars -Root $Root
         try { Invoke-UiStep -Step $step -Context ([pscustomobject]@{ Root = $Root }) } catch { throw "準備 $index : $($_.Exception.Message)" }
     }
 }
@@ -189,7 +273,7 @@ function Invoke-UiSteps {
     $index = 0
     foreach ($step in @($Scenario.steps)) {
         $index++
-        $step = Expand-UiStep -Step $step -Vars $Scenario.vars
+        $step = Expand-UiStep -Step $step -Vars $Scenario.vars -Root $Context.Root
         try { Invoke-UiStep -Step $step -Context $Context } catch {
             $message = $_.Exception.Message
             if ($message -like "タイムアウト*") { $message += Get-UiDiagnostics -Window $Context.Window }

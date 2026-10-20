@@ -135,3 +135,14 @@ function Enter-UiDialogText {
     Invoke-UiElement (Find-UiButton -Parent $dialog -Name "OK")
     Start-Sleep -Milliseconds 300
 }
+
+function Get-UiEditValues {
+    param([System.Windows.Automation.AutomationElement]$Window)
+    $values = @()
+    $all = $Window.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
+    foreach ($element in $all) {
+        if ($element.Current.Name) { $values += $element.Current.Name }
+        try { $values += $element.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value } catch { }
+    }
+    return $values
+}

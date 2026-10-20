@@ -49,3 +49,12 @@ function Send-UiKeys {
     [System.Windows.Forms.SendKeys]::SendWait($Keys)
     Start-Sleep -Milliseconds 300
 }
+
+function Invoke-UiWheel {
+    param([System.Windows.Automation.AutomationElement]$Window, [int]$X, [int]$Y, [int]$Delta)
+    $rect = $Window.Current.BoundingRectangle
+    Focus-UiWindow -Window $Window
+    [UiTest.Native]::SetCursorPos([int]($rect.Left + $X), [int]($rect.Top + $Y)) | Out-Null
+    [UiTest.Native]::mouse_event(0x0800, 0, 0, ([BitConverter]::ToUInt32([BitConverter]::GetBytes([int]$Delta), 0)), [System.UIntPtr]::Zero)
+    Start-Sleep -Milliseconds 700
+}
