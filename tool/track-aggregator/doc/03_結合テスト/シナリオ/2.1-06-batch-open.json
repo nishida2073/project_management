@@ -1,5 +1,5 @@
 {
-  "name": "2.1-06 一括実行の処理の開くを押すと、処理の結果のフォルダが開く",
+  "name": "2.1-06 一括実行の処理の開くを、すべての行で押すと、それぞれの出力先のフォルダ（またはブラウザ）が開く",
   "vars": {
     "client": "ok"
   },
@@ -23,8 +23,23 @@
     },
     {
       "action": "clickAt",
+      "x": 57,
+      "y": 351
+    },
+    {
+      "action": "clickAt",
+      "x": 57,
+      "y": 384
+    },
+    {
+      "action": "clickAt",
       "x": 104,
       "y": 431
+    },
+    {
+      "action": "expectEditContains",
+      "text": "一括実行 完了",
+      "timeoutSec": 900
     },
     {
       "action": "expectTextAt",
@@ -78,6 +93,115 @@
     {
       "action": "closeWindow",
       "title": "01_テスト"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 216
+    },
+    {
+      "action": "expectWindow",
+      "title": "02_アンケート",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "02_アンケート"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 248
+    },
+    {
+      "action": "expectWindow",
+      "title": "統合",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "統合"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 281
+    },
+    {
+      "action": "expectWindow",
+      "title": "テスト",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "テスト"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 313
+    },
+    {
+      "action": "expectWindow",
+      "title": "アンケート",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "アンケート"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 346
+    },
+    {
+      "action": "expectWindow",
+      "title": "Google Chrome",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "Google Chrome",
+      "keys": "^w"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 378
+    },
+    {
+      "action": "expectWindow",
+      "title": "経年比較",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "経年比較"
     }
   ]
 }

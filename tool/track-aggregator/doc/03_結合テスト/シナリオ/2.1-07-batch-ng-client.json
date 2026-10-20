@@ -1,0 +1,49 @@
+{
+  "name": "2.1-07 一括実行で、異常のクライアント（ng）で実行すると、実施結果取得-テストの状態が失敗になり、後続の処理は実行される",
+  "vars": {
+    "client": "ng"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 431
+    },
+    {
+      "action": "expectEditContains",
+      "text": "一括実行 完了",
+      "timeoutSec": 900
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 183,
+      "pattern": "^失敗$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 216,
+      "pattern": "^(成功|警告|失敗)$",
+      "timeoutSec": 60
+    }
+  ]
+}

@@ -7,7 +7,7 @@ $toolRoot = Split-Path $projectRoot -Parent
     -ProjectRoot $projectRoot `
     -ExeName "trackデータ集計ツール.exe" `
     -ScenariosDir (Join-Path $projectRoot "doc\03_結合テスト\シナリオ") `
-    -CopyDirs @("bats") `
+    -CopyDirs @("bats", "AutoHotkey") `
     -FixtureRoot (Join-Path $PSScriptRoot "..\test-data") `
     -FixtureDirs @("clients", "template") `
     -WindowTitle "trackデータ集計ツール" `

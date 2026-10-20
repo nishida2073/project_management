@@ -81,6 +81,11 @@
       "y": 431
     },
     {
+      "action": "expectEditContains",
+      "text": "一括実行 完了",
+      "timeoutSec": 900
+    },
+    {
       "action": "expectTextAt",
       "x": 535,
       "y": 216,
@@ -109,10 +114,8 @@
       "timeoutSec": 60
     },
     {
-      "action": "expectTextAt",
-      "x": 535,
-      "y": 183,
-      "pattern": "^未実行$",
+      "action": "expectTextGone",
+      "text": "未実行",
       "timeoutSec": 5
     }
   ]
