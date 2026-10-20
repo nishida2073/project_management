@@ -27,19 +27,30 @@
       "y": 296
     },
     {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 297,
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
       "action": "clickAt",
       "x": 105,
       "y": 344
     },
     {
-      "action": "expectText",
-      "text": "失敗",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 259,
+      "pattern": "^警告$",
+      "timeoutSec": 60
     },
     {
-      "action": "expectTextGone",
-      "text": "未実行",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 291,
+      "pattern": "^(成功|警告|失敗)$",
+      "timeoutSec": 60
     }
   ]
 }

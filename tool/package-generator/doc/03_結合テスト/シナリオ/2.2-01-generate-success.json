@@ -35,7 +35,7 @@
     {
       "action": "expectText",
       "text": "成功",
-      "timeoutSec": 120
+      "timeoutSec": 60
     },
     {
       "action": "expectFile",

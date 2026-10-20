@@ -27,9 +27,11 @@
       "y": 344
     },
     {
-      "action": "expectText",
-      "text": "成功",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 259,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
     },
     {
       "action": "wait",

@@ -34,7 +34,7 @@
     {
       "action": "expectText",
       "text": "失敗",
-      "timeoutSec": 120
+      "timeoutSec": 60
     }
   ]
 }

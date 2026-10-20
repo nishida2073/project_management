@@ -36,6 +36,14 @@
       "action": "expectEditContains",
       "text": "終了（",
       "timeoutSec": 900
+    },
+    {
+      "action": "expectTextAt",
+      "x": 322,
+      "y": 221,
+      "pattern": "^終了（成功-1件、警告-0件、失敗/スキップ-1件）$",
+      "tolX": 150,
+      "timeoutSec": 60
     }
   ]
 }

@@ -3,13 +3,7 @@
   "vars": {
     "client": "ok"
   },
-  "setup": [
-    {
-      "action": "writeFile",
-      "path": "download/test/sample.txt",
-      "text": "sample\r\n"
-    }
-  ],
+  "setup": [],
   "steps": [
     {
       "action": "clickAt",
@@ -20,6 +14,13 @@
       "action": "clickAt",
       "x": 45,
       "y": 79
+    },
+    {
+      "action": "expectCheckedAt",
+      "x": 57,
+      "y": 297,
+      "checked": false,
+      "timeoutSec": 15
     },
     {
       "action": "selectComboAt",
@@ -33,9 +34,18 @@
       "y": 344
     },
     {
-      "action": "expectText",
-      "text": "スキップ",
-      "timeoutSec": 120
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 259,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 291,
+      "pattern": "^スキップ$",
+      "timeoutSec": 60
     }
   ]
 }
