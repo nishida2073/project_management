@@ -39,7 +39,7 @@
     },
     {
       "action": "expectFile",
-      "path": "generated/test",
+      "path": "generated/ok",
       "exists": true
     }
   ]

@@ -1,0 +1,50 @@
+{
+  "name": "2.4-05 ログの対象のグループで「すべて」を選ぶと、すべてのグループのログが表示される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "logs"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-package-ok_20260101_000000.log",
+      "text": "LOG_OK_MARKER\r\n"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-package-ng_20260101_000000.log",
+      "text": "LOG_NG_MARKER\r\n"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/upload-kintone-file-ok-460_20260101_000000.log",
+      "text": "LOG_UPLOAD_MARKER\r\n"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 82,
+      "y": 52
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 103,
+      "value": ""
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_OK_MARKER",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_NG_MARKER",
+      "timeoutSec": 15
+    }
+  ]
+}

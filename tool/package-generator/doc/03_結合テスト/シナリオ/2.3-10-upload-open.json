@@ -1,0 +1,34 @@
+{
+  "name": "2.3-10 パッケージ反映の開くを押すと、対象の kintone アプリが開く",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 238,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 257,
+      "y": 483
+    },
+    {
+      "action": "expectWindow",
+      "title": "kintone",
+      "timeoutSec": 30
+    },
+    {
+      "action": "closeWindow",
+      "title": "kintone"
+    }
+  ]
+}

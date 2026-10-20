@@ -1,0 +1,39 @@
+{
+  "name": "2.2-03 パッケージ作成が成功し、実行のログがログの出力先に保存される",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 134,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 183
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectLogFile",
+      "path": "logs"
+    }
+  ]
+}

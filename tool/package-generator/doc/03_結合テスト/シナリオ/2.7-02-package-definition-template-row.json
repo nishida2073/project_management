@@ -1,0 +1,50 @@
+{
+  "name": "2.7-02 パッケージ定義ファイルの「テンプレート」シートの 2 行目に値があっても、更新すると書き換えられる",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "excelWrite",
+      "path": "clients/ok.xlsx",
+      "sheet": "テンプレート",
+      "cell": "A2",
+      "value": "MARKER_ROW2"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 198,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 315,
+      "y": 142,
+      "value": "ok"
+    },
+    {
+      "action": "clickAt",
+      "x": 92,
+      "y": 183
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 120
+    },
+    {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "テンプレート",
+      "cell": "A2",
+      "notEquals": "MARKER_ROW2"
+    }
+  ]
+}

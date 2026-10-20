@@ -34,12 +34,12 @@
     {
       "action": "expectTextGone",
       "text": "未実行",
-      "timeoutSec": 300
+      "timeoutSec": 30
     },
     {
       "action": "expectText",
       "text": "成功",
-      "timeoutSec": 300
+      "timeoutSec": 30
     }
   ]
 }
