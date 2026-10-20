@@ -1,0 +1,53 @@
+{
+  "name": "2.1-07 一括実行のパッケージの作成の開くを押すと、パッケージの出力先のフォルダが開く",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 344
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 30
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 588,
+      "y": 258
+    },
+    {
+      "action": "expectWindow",
+      "title": "{{client}}",
+      "timeoutSec": 30
+    },
+    {
+      "action": "closeWindow",
+      "title": "{{client}}"
+    }
+  ]
+}
