@@ -247,9 +247,11 @@ function New-CollectDataDefsEditor {
     $script:collectDataDefsRowControls = @()
 
     $grp = New-GroupBox -Text "アプリデータ集計の列定義" -Dock ([System.Windows.Forms.DockStyle]::Top) -AutoSize
+    $sourceTypeDaily = Get-ResolvedVar "SourceTypeDaily" $commonEnvBat
+    $sourceTypePulse = Get-ResolvedVar "SourceTypePulse" $commonEnvBat
     $typeOptions = @(
-        [PSCustomObject]@{ Text = "業務日誌"; Value = "Daily"; Display = "業務日誌" }
-        [PSCustomObject]@{ Text = "パルスサーベイ"; Value = "Pulse"; Display = "パルスサーベイ" }
+        [PSCustomObject]@{ Text = $sourceTypeDaily; Value = $sourceTypeDaily; Display = $sourceTypeDaily }
+        [PSCustomObject]@{ Text = $sourceTypePulse; Value = $sourceTypePulse; Display = $sourceTypePulse }
     )
 
     $y = 25

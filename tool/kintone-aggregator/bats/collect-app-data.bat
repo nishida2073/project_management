@@ -31,7 +31,6 @@ set "ClientDataRootDir=%ClientDataRootDir%"
 set "CollectDataDefsPath=%~dp0collect-data-defs.json"
 
 set "CollectRootDir=%OutputCollectDataRootDir%"
-set "SourceTypeFileNameMap=SourceTypeDaily=%SourceTypeDaily%,SourceTypePulse=%SourceTypePulse%"
 
 set "CheckedFileRootDir=%OutputReportDir%\!TargetDate!"
 
@@ -53,7 +52,6 @@ for %%F in ("%ClientDataRootDir%\!TargetGroupNameFilter!.xlsx") do (
       "     -TargetDate '!TargetDate!'" ^
       "     -CollectDataDefsPath '%CollectDataDefsPath%'" ^
       "     -CollectRootDir '%CollectRootDir%'" ^
-      "     -SourceTypeFileNameMap '%SourceTypeFileNameMap%'" ^
       "     -LogNamePrefix '%~n0'" ^
       "} catch {" ^
       "  New-Item -Path '!ERROR_FLAG!' -ItemType File -Force | Out-Null;" ^

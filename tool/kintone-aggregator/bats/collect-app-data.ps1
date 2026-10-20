@@ -4,7 +4,6 @@
     [string]$TargetDate,
     [string]$CollectDataDefsPath,
     [string]$CollectRootDir,
-    [string]$SourceTypeFileNameMap,
     [string]$LogNamePrefix
 )
 $libraryDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -62,9 +61,7 @@ function Read-SourseDataDefsFile {
         [Parameter(Mandatory)]
         [string]$SourceRootDir,
         [Parameter(Mandatory)]
-        [string]$TargetGroupName,
-        [Parameter(Mandatory)]
-        [hashtable]$FileKeyMap
+        [string]$TargetGroupName
     )
     Write-Message $MyInvocation.MyCommand.Name -VarName "functionName" -Type "Info" -ForegroundColor Magenta
     $PSBoundParameters.Keys | ForEach-Object { Write-Message $PSBoundParameters[$_] -VarName "$_" }
@@ -77,12 +74,10 @@ function Read-SourseDataDefsFile {
 
     foreach ($item in $json) {
         $sourceType = $item.type
-        $sourceTypeKey = "SourceType$sourceType"
-        $sourceTypeValue = if ($FileKeyMap.ContainsKey($sourceTypeKey)) { $FileKeyMap[$sourceTypeKey] } else { $sourceType }
 
         if ($sourceType -ne $lastSourceType) {
             $sourseDataProps += [PSCustomObject]@{
-                filePath   = Join-Path $SourceRootDir "$TargetGroupName-$sourceTypeValue.txt"
+                filePath   = Join-Path $SourceRootDir "$TargetGroupName-$sourceType.txt"
                 columnDefs = @()
             }
             $lastSourceType = $sourceType
@@ -174,12 +169,7 @@ try {
                 throw "集計対象がありません。日付=$($TargetDate)"
             }
 
-            $fileKeyMap = @{}
-            foreach ($pair in ($SourceTypeFileNameMap -split ',' | Where-Object { $_ })) {
-                $kv = $pair -split '=', 2
-                if ($kv.Count -eq 2) { $fileKeyMap[$kv[0]] = $kv[1] }
-            }
-            $sourseDataProps = Read-SourseDataDefsFile -FilePath $CollectDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName -FileKeyMap $fileKeyMap
+            $sourseDataProps = Read-SourseDataDefsFile -FilePath $CollectDataDefsPath -SourceRootDir $SourceRootDir -TargetGroupName $TargetGroupName
 
             Write-Message $sourseDataProps -VarName "sourseDataProps" -Type "Info" -ForegroundColor Green
 
