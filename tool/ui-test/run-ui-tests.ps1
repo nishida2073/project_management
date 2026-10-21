@@ -7,7 +7,8 @@
     [string]$FixtureRoot = "",
     [string[]]$FixtureDirs = @(),
     [string]$Filter = "",
-    [switch]$KeepTemp
+    [switch]$KeepTemp,
+    [switch]$StopOnFail
 )
 
 . "$PSScriptRoot\lib\ui-automation.ps1"
@@ -34,6 +35,7 @@ $workRoot = Join-Path $env:TEMP ("uitest-" + (Get-Date -Format "yyyyMMddHHmmss")
 $evidenceDir = Join-Path (Join-Path $ProjectRoot "doc\03_結合テスト\エビデンス") (Get-Date -Format "yyyyMMdd-HHmmss")
 New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
 $results = @()
+$resultFile = Join-Path $evidenceDir "結果.txt"
 
 foreach ($file in $scenarioFiles) {
     $scenario = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -79,6 +81,14 @@ foreach ($file in $scenarioFiles) {
                 Copy-Item -LiteralPath $source -Destination (Join-Path $outputDir $out) -Recurse -Force
             }
         }
+    }
+    $last = $results[-1]
+    $line = "$($last.Result)  $($last.Name)"
+    if ($last.Message) { $line += "  -- $($last.Message)" }
+    Add-Content -LiteralPath $resultFile -Value $line -Encoding UTF8
+    if ($StopOnFail -and $last.Result -eq "FAIL") {
+        Write-UiLog "失敗があったため、ここで中断します。"
+        break
     }
 }
 if (!$KeepTemp) { Remove-Item -LiteralPath $workRoot -Recurse -Force -ErrorAction SilentlyContinue }

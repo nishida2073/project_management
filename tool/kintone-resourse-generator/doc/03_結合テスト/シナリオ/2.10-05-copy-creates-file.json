@@ -30,16 +30,16 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "TestDst"
+      "value": "KrgCopy"
     },
     {
       "action": "expectFile",
-      "path": "clients/TestDst.bat",
+      "path": "clients/KrgCopy.bat",
       "exists": true
     },
     {
       "action": "expectText",
-      "text": "TestDst"
+      "text": "KrgCopy"
     }
   ]
 }

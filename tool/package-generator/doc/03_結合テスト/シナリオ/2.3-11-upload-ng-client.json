@@ -32,7 +32,7 @@
       "action": "pasteAt",
       "x": 420,
       "y": 255,
-      "value": "{{root}}/generated/ng/コースA.zip"
+      "value": "{{root}}\\generated\\ng\\コースA.zip"
     },
     {
       "action": "clickAt",

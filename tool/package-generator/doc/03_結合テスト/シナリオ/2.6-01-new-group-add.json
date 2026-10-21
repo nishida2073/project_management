@@ -23,11 +23,11 @@
     {
       "action": "enterDialog",
       "window": "グループの新規作成",
-      "value": "TestAdd"
+      "value": "PkgNew"
     },
     {
       "action": "expectText",
-      "text": "TestAdd"
+      "text": "PkgNew"
     }
   ]
 }

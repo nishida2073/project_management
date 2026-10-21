@@ -37,21 +37,21 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "TestDst"
+      "value": "PkgCopy"
     },
     {
       "action": "expectFile",
-      "path": "clients/TestDst.bat",
+      "path": "clients/PkgCopy.bat",
       "exists": true
     },
     {
       "action": "expectFile",
-      "path": "clients/TestDst.xlsx",
+      "path": "clients/PkgCopy.xlsx",
       "exists": true
     },
     {
       "action": "expectText",
-      "text": "TestDst"
+      "text": "PkgCopy"
     }
   ]
 }

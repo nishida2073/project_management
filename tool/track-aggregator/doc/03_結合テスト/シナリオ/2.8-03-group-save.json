@@ -26,7 +26,7 @@
       "action": "typeAt",
       "x": 520,
       "y": 297,
-      "value": "track-saved"
+      "value": "saved"
     },
     {
       "action": "clickAt",
@@ -42,7 +42,7 @@
     },
     {
       "action": "expectEditContains",
-      "text": "track-saved"
+      "text": "saved"
     }
   ]
 }

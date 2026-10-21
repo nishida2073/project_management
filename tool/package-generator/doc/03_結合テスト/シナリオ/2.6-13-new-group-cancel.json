@@ -24,7 +24,7 @@
     },
     {
       "action": "expectFile",
-      "path": "clients/TestCancel.bat",
+      "path": "clients/PkgCancel.bat",
       "exists": false
     }
   ]

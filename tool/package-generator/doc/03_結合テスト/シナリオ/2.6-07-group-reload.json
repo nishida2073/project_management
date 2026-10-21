@@ -34,7 +34,7 @@
       "action": "typeAt",
       "x": 420,
       "y": 297,
-      "value": "changed"
+      "value": "tmp"
     },
     {
       "action": "clickAt",

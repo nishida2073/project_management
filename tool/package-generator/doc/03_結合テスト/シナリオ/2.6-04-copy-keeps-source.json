@@ -5,7 +5,7 @@
     {
       "action": "writeFile",
       "path": "clients/CopySrc.bat",
-      "text": "set \"GenerateOutputPath=%BASE_PATH%generatedCopySrc\"\r\nset \"KintoneSubdomain=univ-kyousai-{x}\"\r\n"
+      "text": "set \"GenerateOutputPath=%BASE_PATH%generated\\CopySrc\"\r\nset \"KintoneSubdomain=univ-kyousai-{x}\"\r\n"
     },
     {
       "action": "copyFile",
@@ -37,22 +37,22 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "TestDst"
+      "value": "PkgCopy"
     },
     {
       "action": "expectFile",
-      "path": "clients/TestDst.bat",
+      "path": "clients/PkgCopy.bat",
       "exists": true
     },
     {
       "action": "expectFile",
-      "path": "clients/TestDst.xlsx",
+      "path": "clients/PkgCopy.xlsx",
       "exists": true
     },
     {
       "action": "expectFileContains",
       "path": "clients/CopySrc.bat",
-      "contains": "generatedCopySrc"
+      "contains": "generated\\CopySrc"
     },
     {
       "action": "expectFile",

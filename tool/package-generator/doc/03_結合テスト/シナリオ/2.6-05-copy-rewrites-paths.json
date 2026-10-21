@@ -37,12 +37,12 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "TestDst"
+      "value": "PkgCopy"
     },
     {
       "action": "expectFileContains",
-      "path": "clients/TestDst.bat",
-      "contains": "generated\\TestDst"
+      "path": "clients/PkgCopy.bat",
+      "contains": "generated\\PkgCopy"
     }
   ]
 }

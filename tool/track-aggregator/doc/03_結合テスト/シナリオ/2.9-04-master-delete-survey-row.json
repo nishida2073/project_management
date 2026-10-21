@@ -29,6 +29,10 @@
       "delta": -1200
     },
     {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
       "action": "clickAt",
       "x": 1022,
       "y": 257

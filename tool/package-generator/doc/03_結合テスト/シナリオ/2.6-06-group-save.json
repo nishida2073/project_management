@@ -34,7 +34,7 @@
       "action": "typeAt",
       "x": 420,
       "y": 297,
-      "value": "newsub"
+      "value": "saved"
     },
     {
       "action": "clickAt",
@@ -51,7 +51,7 @@
     {
       "action": "expectFileContains",
       "path": "clients/CopySrc.bat",
-      "contains": "newsub"
+      "contains": "saved"
     }
   ]
 }

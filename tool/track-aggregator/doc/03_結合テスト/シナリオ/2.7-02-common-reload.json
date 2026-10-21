@@ -20,7 +20,7 @@
       "action": "typeAt",
       "x": 520,
       "y": 539,
-      "value": "suffix-tmp"
+      "value": "tmp"
     },
     {
       "action": "clickAt",
@@ -36,7 +36,7 @@
     },
     {
       "action": "expectEditNotContains",
-      "text": "suffix-tmp"
+      "text": "tmp"
     }
   ]
 }

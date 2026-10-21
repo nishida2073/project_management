@@ -24,7 +24,7 @@
     {
       "action": "enterDialog",
       "window": "グループの新規作成",
-      "value": "TestNew"
+      "value": "KrgUnsaved"
     },
     {
       "action": "clickAt",
@@ -38,7 +38,7 @@
     },
     {
       "action": "expectFile",
-      "path": "clients/TestNew.bat",
+      "path": "clients/KrgUnsaved.bat",
       "exists": false
     }
   ]

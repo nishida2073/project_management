@@ -20,7 +20,7 @@
       "action": "typeAt",
       "x": 520,
       "y": 539,
-      "value": "suffix-test"
+      "value": "saved"
     },
     {
       "action": "clickAt",
@@ -37,7 +37,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "suffix-test"
+      "contains": "saved"
     }
   ]
 }

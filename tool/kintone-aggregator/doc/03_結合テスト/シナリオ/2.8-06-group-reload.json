@@ -26,7 +26,7 @@
       "action": "typeAt",
       "x": 420,
       "y": 297,
-      "value": "agg-temp"
+      "value": "tmp"
     },
     {
       "action": "clickAt",
@@ -35,7 +35,7 @@
     },
     {
       "action": "expectEditNotContains",
-      "text": "agg-temp"
+      "text": "tmp"
     }
   ]
 }
