@@ -1,0 +1,41 @@
+{
+  "name": "2.10-12 異常のクライアント（ng）を選び、誤ったパスワードでテスト接続を押すと、状態に失敗と表示される",
+  "vars": {
+    "client": "ng"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 100,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 367,
+      "value": "wrong-password"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 406
+    },
+    {
+      "action": "expectText",
+      "text": "失敗",
+      "timeoutSec": 60
+    }
+  ]
+}

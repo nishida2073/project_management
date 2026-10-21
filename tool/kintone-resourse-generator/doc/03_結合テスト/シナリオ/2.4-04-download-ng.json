@@ -1,0 +1,47 @@
+{
+  "name": "2.4-04 異常のクライアント（ng）でスペースダウンロードを実行すると、状態に失敗と表示される",
+  "vars": {
+    "client": "ng"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 316,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "dlng"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 218,
+      "value": "3"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 259
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^失敗$",
+      "timeoutSec": 900
+    }
+  ]
+}

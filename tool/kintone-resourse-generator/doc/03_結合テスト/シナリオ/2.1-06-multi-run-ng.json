@@ -1,0 +1,41 @@
+{
+  "name": "2.1-06 異常のクライアント（ng）の行がある実行一覧で実行すると、ng の行は失敗し、ログ欄に終了が表示される",
+  "vars": {
+    "client": "ng"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 142,
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "x": 360,
+      "y": 181,
+      "value": "{{root}}/run-list/ng.xlsx"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 221
+    },
+    {
+      "action": "expectEditContains",
+      "text": "終了（",
+      "timeoutSec": 900
+    }
+  ]
+}

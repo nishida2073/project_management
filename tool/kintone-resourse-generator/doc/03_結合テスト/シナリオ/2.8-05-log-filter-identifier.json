@@ -1,5 +1,5 @@
 {
-  "name": "2.8-05 ログのスペース識別名で 1 つの識別名を選ぶと、その識別名の実行ログだけが表示される",
+  "name": "2.8-05 ログのスペース識別名を、すべて・okと切り替えると、選んだ識別名の実行ログだけが表示される",
   "vars": {
     "client": "ok"
   },
@@ -34,16 +34,33 @@
       "action": "selectComboAt",
       "x": 355,
       "y": 147,
-      "value": "ng"
+      "value": ""
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_OK_OK",
+      "timeoutSec": 30
     },
     {
       "action": "expectEditContains",
       "text": "LOG_NG_NG",
-      "timeoutSec": 15
+      "timeoutSec": 30
+    },
+    {
+      "action": "selectComboAt",
+      "x": 355,
+      "y": 147,
+      "value": "ok"
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_OK_OK",
+      "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_OK_OK"
+      "text": "LOG_NG_NG",
+      "timeoutSec": 30
     }
   ]
 }

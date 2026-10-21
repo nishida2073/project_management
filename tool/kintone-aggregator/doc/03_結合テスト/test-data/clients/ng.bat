@@ -2,7 +2,7 @@
 
 set "KintoneSubdomain=iiglepv0966f"
 set "KintoneLoginName=user01"
-set "KintonePassword=abcd1234"
+set "KintonePassword=wrong-password"
 set "KintoneBaseUrl=https://%KintoneSubdomain%.cybozu.com"
 set "ThreadId=230"
 set "SpaceId=3"
