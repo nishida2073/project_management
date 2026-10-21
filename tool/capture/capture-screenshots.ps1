@@ -43,6 +43,7 @@ function Focus {
 }
 
 function Click-At([int]$dx, [int]$dy) {
+  Focus
   $r = $win.Current.BoundingRectangle
   [Win.User]::SetCursorPos([int]($r.Left + $dx), [int]($r.Top + $dy)) | Out-Null
   [Win.User]::mouse_event(0x0002, 0, 0, 0, [IntPtr]::Zero)
@@ -51,6 +52,7 @@ function Click-At([int]$dx, [int]$dy) {
 }
 
 function Wheel-At([int]$dx, [int]$dy, [int]$delta) {
+  Focus
   $r = $win.Current.BoundingRectangle
   [Win.User]::SetCursorPos([int]($r.Left + $dx), [int]($r.Top + $dy)) | Out-Null
   [Win.User]::mouse_event(0x0800, 0, 0, ([BitConverter]::ToUInt32([BitConverter]::GetBytes([int]$delta), 0)), [IntPtr]::Zero)
@@ -76,11 +78,13 @@ try {
   foreach ($line in (Get-Content -LiteralPath $PlanFile -Encoding UTF8)) {
     if (-not $line.Trim()) { continue }
     $step = $line.Trim()
+    if ($step.StartsWith('#')) { continue }
     $p = $step -split '\s+'
     switch ($p[0]) {
       'shot'  { Save-Shot $p[1] }
       'click' { Click-At ([int]$p[1]) ([int]$p[2]) }
       'wheel' { Wheel-At ([int]$p[1]) ([int]$p[2]) ([int]$p[3]) }
+      'wait'  { Start-Sleep -Milliseconds ([int]$p[1]) }
       default { throw "unknown step: $step" }
     }
   }

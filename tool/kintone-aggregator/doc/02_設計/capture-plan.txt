@@ -1,24 +1,46 @@
+# 3.1 実行（一括実行）: 項目 1〜12
 click 34 50
 click 54 79
 shot run-batch-01.png
+# 3.2 実行（アプリデータ作成）: 業務日誌・パルスサーベイ
 click 147 79
 shot app-data-create-02.png
+# 3.3 実行（アプリデータ集計）: 業務日誌・パルスサーベイ
 click 258 79
 shot app-data-collect-03.png
+# 3.4 実行（アラート集計）: 業務日誌・パルスサーベイ、投稿
 click 358 79
 shot alert-collect-04.png
+# 3.5 ログ: 項目 1〜12
 click 83 52
 shot log-05.png
+# 3.6 環境設定（共通）: 上部（保存・再読込、基本設定、業務日誌（共通））
 click 155 52
 click 45 79
 shot settings-common-06.png
+# 3.6 環境設定（共通）: 途中1（業務日誌（共通）の続き）
+wheel 489 400 -360
+shot settings-common-06b.png
+# 3.6 環境設定（共通）: 途中2（パルスサーベイ（共通））
+wheel 489 400 -360
+shot settings-common-06c.png
+# 3.6 環境設定（共通）: 下部（パルスサーベイ（共通）、アプリデータ集計の列定義）
 click 429 260
 wheel 489 400 -1200
 shot settings-common-07.png
+# 3.7 環境設定（グループ別）: 上部（対象のグループ、認証情報、投稿先）
 click 107 79
 shot settings-group-08.png
+# 3.7 環境設定（グループ別）: 途中1（投稿先の続き）
+wheel 489 400 -360
+shot settings-group-08b.png
+# 3.7 環境設定（グループ別）: 途中2（テスト投稿、投稿集計文言）
+wheel 489 400 -360
+shot settings-group-08c.png
+# 3.7 環境設定（グループ別）: 下部（投稿先、ユーザー、業務日誌、パルスサーベイ）
 click 429 330
 wheel 489 400 -1200
 shot settings-group-09.png
+# 3.8 環境設定（マスター）: ユーザー、スケジュール
 click 174 79
 shot settings-master-10.png
