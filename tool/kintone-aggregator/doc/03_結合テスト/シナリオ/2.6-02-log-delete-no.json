@@ -7,8 +7,13 @@
   "setup": [
     {
       "action": "writeFile",
-      "path": "logs/test.log",
-      "text": "test"
+      "path": "logs/create-daily-report-ok_20260101_000000.log",
+      "text": "create-daily-report-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ng_20260101_000000.log",
+      "text": "create-daily-report-ng"
     }
   ],
   "steps": [
@@ -32,7 +37,12 @@
     },
     {
       "action": "expectFile",
-      "path": "logs/test.log",
+      "path": "logs/create-daily-report-ok_20260101_000000.log",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/create-daily-report-ng_20260101_000000.log",
       "exists": true
     }
   ]

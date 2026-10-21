@@ -12,17 +12,22 @@
     {
       "action": "writeFile",
       "path": "logs/generate-package-ok_20260101_000000.log",
-      "text": "LOG_OK_MARKER\r\n"
+      "text": "generate-package-ok"
     },
     {
       "action": "writeFile",
       "path": "logs/generate-package-ng_20260101_000000.log",
-      "text": "LOG_NG_MARKER\r\n"
+      "text": "generate-package-ng"
     },
     {
       "action": "writeFile",
       "path": "logs/upload-kintone-file-ok-460_20260101_000000.log",
-      "text": "LOG_UPLOAD_MARKER\r\n"
+      "text": "upload-kintone-file-ok-460"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/upload-kintone-file-ng-460_20260101_000000.log",
+      "text": "upload-kintone-file-ng-460"
     }
   ],
   "steps": [
@@ -37,12 +42,12 @@
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_OK_MARKER",
+      "text": "generate-package-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_NG_MARKER",
+      "text": "generate-package-ng",
       "timeoutSec": 30
     },
     {
@@ -52,12 +57,12 @@
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_OK_MARKER",
+      "text": "generate-package-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_NG_MARKER",
+      "text": "generate-package-ng",
       "timeoutSec": 30
     }
   ]

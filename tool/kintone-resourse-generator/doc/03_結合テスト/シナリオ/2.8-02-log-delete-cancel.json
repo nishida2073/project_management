@@ -11,8 +11,23 @@
     },
     {
       "action": "writeFile",
-      "path": "logs/create-space-from-template-ok_20260101_000000.log",
-      "text": "LOG_MARKER\r\n"
+      "path": "logs/create-space-from-template-ok-config1_20260101_000000.log",
+      "text": "create-space-from-template-ok-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ok-config2_20260101_000000.log",
+      "text": "create-space-from-template-ok-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ng-config1_20260101_000000.log",
+      "text": "create-space-from-template-ng-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ng-config2_20260101_000000.log",
+      "text": "create-space-from-template-ng-config2"
     }
   ],
   "steps": [
@@ -36,7 +51,22 @@
     },
     {
       "action": "expectFile",
-      "path": "logs/create-space-from-template-ok_20260101_000000.log",
+      "path": "logs/create-space-from-template-ok-config1_20260101_000000.log",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/create-space-from-template-ok-config2_20260101_000000.log",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/create-space-from-template-ng-config1_20260101_000000.log",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/create-space-from-template-ng-config2_20260101_000000.log",
       "exists": true
     }
   ]

@@ -8,12 +8,12 @@
     {
       "action": "writeFile",
       "path": "logs/download-test-results-ok_20261021_000000.log",
-      "text": "test ok run"
+      "text": "download-test-results-ok"
     },
     {
       "action": "writeFile",
       "path": "logs/download-test-results-ng_20261021_000000.log",
-      "text": "test ng run"
+      "text": "download-test-results-ng"
     }
   ],
   "steps": [
@@ -32,12 +32,12 @@
     },
     {
       "action": "expectEditContains",
-      "text": "test ok run",
+      "text": "download-test-results-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditContains",
-      "text": "test ng run",
+      "text": "download-test-results-ng",
       "timeoutSec": 30
     },
     {
@@ -47,12 +47,12 @@
     },
     {
       "action": "expectEditContains",
-      "text": "test ok run",
+      "text": "download-test-results-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "test ng run",
+      "text": "download-test-results-ng",
       "timeoutSec": 30
     }
   ]

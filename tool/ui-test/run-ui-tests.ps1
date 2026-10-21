@@ -35,7 +35,7 @@ $workRoot = Join-Path $env:TEMP ("uitest-" + (Get-Date -Format "yyyyMMddHHmmss")
 $evidenceDir = Join-Path (Join-Path $ProjectRoot "doc\03_結合テスト\エビデンス") (Get-Date -Format "yyyyMMdd-HHmmss")
 New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
 $results = @()
-$resultFile = Join-Path $evidenceDir "結果.txt"
+$resultFile = Join-Path $evidenceDir "実施結果.txt"
 
 $partsFile = Join-Path (Split-Path -Parent $ScenariosDir) "部品座標.json"
 $parts = @{}
@@ -119,7 +119,7 @@ $results | ForEach-Object {
 }
 $failed = @($results | Where-Object { $_.Result -eq "FAIL" }).Count
 Write-UiLog "合計 $($results.Count) 件、失敗 $failed 件"
-$resultFile = Join-Path $evidenceDir "結果.txt"
+$resultFile = Join-Path $evidenceDir "実施結果.txt"
 $resultLines = @("合計 $($results.Count) 件、失敗 $failed 件") + @($results | ForEach-Object { if ($_.Message) { "$($_.Result)  $($_.Name)  -- $($_.Message)" } else { "$($_.Result)  $($_.Name)" } })
 Set-Content -LiteralPath $resultFile -Value $resultLines -Encoding UTF8
 Write-UiLog "結果ファイル: $resultFile"

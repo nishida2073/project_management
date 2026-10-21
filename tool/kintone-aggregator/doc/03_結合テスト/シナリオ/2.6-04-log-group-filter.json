@@ -8,12 +8,12 @@
     {
       "action": "writeFile",
       "path": "logs/create-daily-report-ok-2026-09-01_20261021_000000.log",
-      "text": "daily ok run"
+      "text": "create-daily-report-ok"
     },
     {
       "action": "writeFile",
       "path": "logs/create-daily-report-ng-2026-09-01_20261021_000000.log",
-      "text": "daily ng run"
+      "text": "create-daily-report-ng"
     }
   ],
   "steps": [
@@ -32,12 +32,12 @@
     },
     {
       "action": "expectEditContains",
-      "text": "daily ok run",
+      "text": "create-daily-report-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditContains",
-      "text": "daily ng run",
+      "text": "create-daily-report-ng",
       "timeoutSec": 30
     },
     {
@@ -47,12 +47,12 @@
     },
     {
       "action": "expectEditContains",
-      "text": "daily ok run",
+      "text": "create-daily-report-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "daily ng run",
+      "text": "create-daily-report-ng",
       "timeoutSec": 30
     }
   ]

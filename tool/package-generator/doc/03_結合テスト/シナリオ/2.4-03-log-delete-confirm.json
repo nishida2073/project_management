@@ -8,8 +8,13 @@
     },
     {
       "action": "writeFile",
-      "path": "logs/test.log",
-      "text": "test log\r\n"
+      "path": "logs/generate-package-ok_20260101_000000.log",
+      "text": "generate-package-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-package-ng_20260101_000000.log",
+      "text": "generate-package-ng"
     }
   ],
   "steps": [
@@ -33,7 +38,12 @@
     },
     {
       "action": "expectFile",
-      "path": "logs/test.log",
+      "path": "logs/generate-package-ok_20260101_000000.log",
+      "exists": false
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/generate-package-ng_20260101_000000.log",
       "exists": false
     }
   ]

@@ -7,8 +7,13 @@
   "setup": [
     {
       "action": "writeFile",
-      "path": "logs/test.log",
-      "text": "test"
+      "path": "logs/download-test-results-ok_20260101_000000.log",
+      "text": "download-test-results-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-test-results-ng_20260101_000000.log",
+      "text": "download-test-results-ng"
     }
   ],
   "steps": [
@@ -32,7 +37,12 @@
     },
     {
       "action": "expectFile",
-      "path": "logs/test.log",
+      "path": "logs/download-test-results-ok_20260101_000000.log",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/download-test-results-ng_20260101_000000.log",
       "exists": true
     }
   ]
