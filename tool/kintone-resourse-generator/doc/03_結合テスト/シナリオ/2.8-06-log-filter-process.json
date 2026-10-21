@@ -8,27 +8,52 @@
     {
       "action": "writeFile",
       "path": "logs/create-space-from-template-ok-ok_20261021_000000.log",
-      "text": "LOG_CREATE_OK"
+      "text": "create-space-from-template-ok-ok"
     },
     {
       "action": "writeFile",
       "path": "logs/download-kintone-resources-ok-ok_20261021_000000.log",
-      "text": "LOG_DL_OK"
+      "text": "download-kintone-resources-ok-ok"
     },
     {
       "action": "writeFile",
       "path": "logs/generate-config-from-template-ok-ok_20261021_000000.log",
-      "text": "LOG_CONFIG_OK"
+      "text": "generate-config-from-template-ok-ok"
     },
     {
       "action": "writeFile",
       "path": "logs/apply-kintone-resources-ok-ok_20261021_000000.log",
-      "text": "LOG_UPDATE_OK"
+      "text": "apply-kintone-resources-ok-ok"
     },
     {
       "action": "writeFile",
       "path": "logs/check-kintone-resources-ok-ok_20261021_000000.log",
-      "text": "LOG_CHECK_OK"
+      "text": "check-kintone-resources-ok-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ng-ng_20261021_000000.log",
+      "text": "create-space-from-template-ng-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-kintone-resources-ng-ng_20261021_000000.log",
+      "text": "download-kintone-resources-ng-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-config-from-template-ng-ng_20261021_000000.log",
+      "text": "generate-config-from-template-ng-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/apply-kintone-resources-ng-ng_20261021_000000.log",
+      "text": "apply-kintone-resources-ng-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-kintone-resources-ng-ng_20261021_000000.log",
+      "text": "check-kintone-resources-ng-ng"
     }
   ],
   "steps": [
@@ -41,32 +66,87 @@
       "part": "メニュー/ログタブ"
     },
     {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
       "action": "clickAt",
       "part": "ログ/スペースの作成"
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_CREATE_OK",
+      "text": "create-space-from-template-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-space-from-template-ng-ng",
+      "timeoutSec": 30
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": "ok"
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-space-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_DL_OK",
+      "text": "create-space-from-template-ng-ng",
+      "timeoutSec": 30
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": "ng"
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-space-from-template-ng-ng",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CONFIG_OK",
+      "text": "create-space-from-template-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-space-from-template-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-space-from-template-ng-ng",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_UPDATE_OK",
+      "text": "download-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CHECK_OK",
+      "text": "generate-config-from-template-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "apply-kintone-resources-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "check-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
@@ -75,27 +155,32 @@
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_DL_OK",
+      "text": "download-kintone-resources-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "download-kintone-resources-ng-ng",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CREATE_OK",
+      "text": "create-space-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CONFIG_OK",
+      "text": "generate-config-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_UPDATE_OK",
+      "text": "apply-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CHECK_OK",
+      "text": "check-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
@@ -104,27 +189,32 @@
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_CONFIG_OK",
+      "text": "generate-config-from-template-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "generate-config-from-template-ng-ng",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CREATE_OK",
+      "text": "create-space-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_DL_OK",
+      "text": "download-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_UPDATE_OK",
+      "text": "apply-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CHECK_OK",
+      "text": "check-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
@@ -133,27 +223,32 @@
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_UPDATE_OK",
+      "text": "apply-kintone-resources-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "apply-kintone-resources-ng-ng",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CREATE_OK",
+      "text": "create-space-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_DL_OK",
+      "text": "download-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CONFIG_OK",
+      "text": "generate-config-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CHECK_OK",
+      "text": "check-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
@@ -162,27 +257,32 @@
     },
     {
       "action": "expectEditContains",
-      "text": "LOG_CHECK_OK",
+      "text": "check-kintone-resources-ok-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "check-kintone-resources-ng-ng",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CREATE_OK",
+      "text": "create-space-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_DL_OK",
+      "text": "download-kintone-resources-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_CONFIG_OK",
+      "text": "generate-config-from-template-ok-ok",
       "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_UPDATE_OK",
+      "text": "apply-kintone-resources-ok-ok",
       "timeoutSec": 30
     }
   ]
