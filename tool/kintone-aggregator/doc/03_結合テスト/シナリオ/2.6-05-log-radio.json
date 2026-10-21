@@ -1,10 +1,46 @@
 {
-  "name": "2.6-05 ログの処理のラジオボタンを切り替えると、選んだ処理のログだけが表示される",
+  "name": "2.6-05 ログの処理のラジオボタンを切り替えると、ラジオボタンごとに選んだ処理のログだけが表示される",
   "vars": {
     "client": "ok"
   },
-  "setup": [],
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ok-2026-09-01_20261021_000000.log",
+      "text": "a01 daily"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-pulse-survey-ok-2026-09-01_20261021_000000.log",
+      "text": "a02 pulse"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-app-data-ok-2026-09-01_20261021_000000.log",
+      "text": "a03 collect"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-alert-ok-2026-09-01_20261021_000000.log",
+      "text": "a04 alert"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/post-alert-result-ok-2026-09-01_20261021_000000.log",
+      "text": "a05 post"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/sync-kintone-to-sheet-ok-2026-09-01_20261021_000000.log",
+      "text": "a06 sync"
+    }
+  ],
   "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
     {
       "action": "clickAt",
       "x": 82,
@@ -13,11 +49,212 @@
     {
       "action": "clickAt",
       "x": 110,
+      "y": 155
+    },
+    {
+      "action": "expectEditContains",
+      "text": "a01 daily",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a02 pulse",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a03 collect",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a04 alert",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a05 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a06 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
       "y": 185
     },
     {
       "action": "expectEditContains",
-      "text": "パルスサーベイ"
+      "text": "a02 pulse",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a01 daily",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a03 collect",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a04 alert",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a05 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a06 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 215
+    },
+    {
+      "action": "expectEditContains",
+      "text": "a03 collect",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a01 daily",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a02 pulse",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a04 alert",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a05 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a06 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 245
+    },
+    {
+      "action": "expectEditContains",
+      "text": "a04 alert",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a01 daily",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a02 pulse",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a03 collect",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a05 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a06 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 275
+    },
+    {
+      "action": "expectEditContains",
+      "text": "a05 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a01 daily",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a02 pulse",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a03 collect",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a04 alert",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a06 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 305
+    },
+    {
+      "action": "expectEditContains",
+      "text": "a06 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a01 daily",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a02 pulse",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a03 collect",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a04 alert",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "a05 post",
+      "timeoutSec": 30
     }
   ]
 }

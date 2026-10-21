@@ -1,34 +1,75 @@
 {
-  "name": "2.8-06 ログの処理のラジオボタンを切り替えると、選んだ処理のログだけが表示される",
+  "name": "2.8-06 ログの処理のラジオボタンを切り替えると、ラジオボタンごとに選んだ処理のログだけが表示される",
   "vars": {
     "client": "ok"
   },
   "setup": [
     {
-      "action": "makeDir",
-      "path": "logs"
+      "action": "writeFile",
+      "path": "logs/create-space-from-template-ok-ok_20261021_000000.log",
+      "text": "LOG_CREATE_OK"
     },
     {
       "action": "writeFile",
-      "path": "logs/create-space-from-template-ok-ok_20260101_000000.log",
-      "text": "LOG_OK_OK\r\n"
+      "path": "logs/download-kintone-resources-ok-ok_20261021_000000.log",
+      "text": "LOG_DL_OK"
     },
     {
       "action": "writeFile",
-      "path": "logs/create-space-from-template-ng-ng_20260101_000000.log",
-      "text": "LOG_NG_NG\r\n"
+      "path": "logs/generate-config-from-template-ok-ok_20261021_000000.log",
+      "text": "LOG_CONFIG_OK"
     },
     {
       "action": "writeFile",
-      "path": "logs/download-kintone-resources-ok-ok_20260101_000000.log",
-      "text": "LOG_DL_OK\r\n"
+      "path": "logs/apply-kintone-resources-ok-ok_20261021_000000.log",
+      "text": "LOG_UPDATE_OK"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-kintone-resources-ok-ok_20261021_000000.log",
+      "text": "LOG_CHECK_OK"
     }
   ],
   "steps": [
     {
       "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
       "x": 82,
       "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 198
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_CREATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_DL_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CONFIG_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_UPDATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CHECK_OK",
+      "timeoutSec": 30
     },
     {
       "action": "clickAt",
@@ -38,11 +79,117 @@
     {
       "action": "expectEditContains",
       "text": "LOG_DL_OK",
-      "timeoutSec": 15
+      "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_OK_OK"
+      "text": "LOG_CREATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CONFIG_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_UPDATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CHECK_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 258
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_CONFIG_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CREATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_DL_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_UPDATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CHECK_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 288
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_UPDATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CREATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_DL_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CONFIG_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CHECK_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 318
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_CHECK_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CREATE_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_DL_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_CONFIG_OK",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "LOG_UPDATE_OK",
+      "timeoutSec": 30
     }
   ]
 }

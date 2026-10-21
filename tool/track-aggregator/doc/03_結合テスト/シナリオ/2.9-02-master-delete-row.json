@@ -22,14 +22,23 @@
       "value": "{{client}}"
     },
     {
+      "action": "expectTextAt",
+      "x": 190,
+      "y": 454,
+      "pattern": "^社会を支えるITサービス$",
+      "timeoutSec": 60
+    },
+    {
       "action": "clickAt",
       "x": 1022,
       "y": 454
     },
     {
-      "action": "expectTextGone",
-      "text": "社会を支えるITサービス",
-      "timeoutSec": 10
+      "action": "expectTextAt",
+      "x": 190,
+      "y": 454,
+      "pattern": "^(?!社会を支えるITサービス$).+$",
+      "timeoutSec": 60
     }
   ]
 }

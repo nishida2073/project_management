@@ -126,6 +126,32 @@
       "timeoutSec": 1800
     },
     {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 345,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 328,
+      "y": 394,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 434
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 1800
+    },
+    {
       "action": "wait",
       "ms": 3000
     },

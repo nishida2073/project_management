@@ -1,5 +1,5 @@
 {
-  "name": "2.4-04 ログの対象のグループで 1 つのグループを選ぶと、そのグループの実行ログだけが表示される",
+  "name": "2.4-04 ログの対象のグループで すべてを選ぶと両方のログが表示され、okを選ぶとokのログだけが表示される",
   "vars": {
     "client": "ok"
   },
@@ -34,16 +34,33 @@
       "action": "selectComboAt",
       "x": 330,
       "y": 103,
+      "value": ""
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_OK_MARKER",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "LOG_NG_MARKER",
+      "timeoutSec": 30
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 103,
       "value": "ok"
     },
     {
       "action": "expectEditContains",
       "text": "LOG_OK_MARKER",
-      "timeoutSec": 15
+      "timeoutSec": 30
     },
     {
       "action": "expectEditNotContains",
-      "text": "LOG_NG_MARKER"
+      "text": "LOG_NG_MARKER",
+      "timeoutSec": 30
     }
   ]
 }

@@ -1,16 +1,26 @@
 {
-  "name": "2.6-04 ログの対象のグループで 1 つのグループを選ぶと、そのグループの実行ログだけが表示される",
+  "name": "2.6-04 ログの対象のグループを、すべて・ok・ng と切り替えると、選んだグループの実行ログだけが表示される",
   "vars": {
     "client": "ok"
   },
   "setup": [
     {
       "action": "writeFile",
-      "path": "logs/ok_test.log",
-      "text": "ok run"
+      "path": "logs/create-daily-report-ok-2026-09-01_20261021_000000.log",
+      "text": "daily ok run"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ng-2026-09-01_20261021_000000.log",
+      "text": "daily ng run"
     }
   ],
   "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
     {
       "action": "clickAt",
       "x": 82,
@@ -20,11 +30,33 @@
       "action": "selectComboAt",
       "x": 324,
       "y": 104,
+      "value": ""
+    },
+    {
+      "action": "expectEditContains",
+      "text": "daily ok run",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "daily ng run",
+      "timeoutSec": 30
+    },
+    {
+      "action": "selectComboAt",
+      "x": 324,
+      "y": 104,
       "value": "{{client}}"
     },
     {
       "action": "expectEditContains",
-      "text": "{{client}}"
+      "text": "daily ok run",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "daily ng run",
+      "timeoutSec": 30
     }
   ]
 }

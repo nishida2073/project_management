@@ -1,10 +1,61 @@
 {
-  "name": "2.6-05 ログの処理のラジオボタンを切り替えると、選んだ処理のログだけが表示される",
+  "name": "2.6-05 ログの処理のラジオボタンを切り替えると、ラジオボタンごとに選んだ処理のログだけが表示される",
   "vars": {
     "client": "ok"
   },
-  "setup": [],
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "logs/download-test-results-ok_20261021_000000.log",
+      "text": "t01 test"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-survey-results-ok_20261021_000000.log",
+      "text": "t02 survey"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-download-status-ok_20261021_000000.log",
+      "text": "t03 status"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-combine-result-ok_20261021_000000.log",
+      "text": "t04 combine"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-test-result-ok_20261021_000000.log",
+      "text": "t05 collect test"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-survey-result-ok_20261021_000000.log",
+      "text": "t06 collect survey"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/post-collect-results-ok_20261021_000000.log",
+      "text": "t07 post"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-year-comparison-result-ok_20261021_000000.log",
+      "text": "t08 year"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/sync-kintone-to-sheet-ok_20261021_000000.log",
+      "text": "t09 sync"
+    }
+  ],
   "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
     {
       "action": "clickAt",
       "x": 82,
@@ -13,11 +64,452 @@
     {
       "action": "clickAt",
       "x": 110,
+      "y": 155
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
       "y": 185
     },
     {
       "action": "expectEditContains",
-      "text": "アンケート"
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 215
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 245
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 275
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 305
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 335
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 365
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t08 year",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "x": 110,
+      "y": 395
+    },
+    {
+      "action": "expectEditContains",
+      "text": "t09 sync",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t01 test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t02 survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t03 status",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t04 combine",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t05 collect test",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t06 collect survey",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t07 post",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "t08 year",
+      "timeoutSec": 30
     }
   ]
 }

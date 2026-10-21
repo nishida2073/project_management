@@ -1,0 +1,41 @@
+{
+  "name": "2.3-03 アプリデータ集計で、対象日を空にして実行すると、「対象日 を設定してください」と表示され、処理は実行されない",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 248,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 328,
+      "y": 143,
+      "value": ""
+    },
+    {
+      "action": "selectComboAt",
+      "x": 726,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 184
+    },
+    {
+      "action": "expectMessage",
+      "window": "実行",
+      "contains": "対象日 を設定してください"
+    }
+  ]
+}

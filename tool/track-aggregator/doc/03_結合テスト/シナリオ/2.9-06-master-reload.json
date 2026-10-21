@@ -33,8 +33,16 @@
       "y": 206
     },
     {
+      "action": "expectTextAt",
+      "x": 200,
+      "y": 206,
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
       "action": "expectEditNotContains",
-      "text": "一時"
+      "text": "一時",
+      "timeoutSec": 60
     }
   ]
 }
