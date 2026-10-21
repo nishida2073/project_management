@@ -110,6 +110,9 @@ function Export-Datas {
     foreach ($sourceDataProp in $SourseDataProps) {
         $sourceFilePath = $sourceDataProp.filePath
         $columnDefs = $sourceDataProp.columnDefs
+        if (!(Test-Path -LiteralPath $sourceFilePath)) {
+            throw "ファイルがありません: $sourceFilePath"
+        }
         $range = Read-FileToArray $sourceFilePath
         $headerRow = $range[0]
 
