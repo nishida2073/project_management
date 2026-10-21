@@ -1,0 +1,33 @@
+{
+  "name": "2.6-01 新規作成で新しい名前を入力すると、一覧に追加されて選ばれる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "click",
+      "target": "新規作成"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "TestAdd"
+    },
+    {
+      "action": "expectText",
+      "text": "TestAdd"
+    }
+  ]
+}

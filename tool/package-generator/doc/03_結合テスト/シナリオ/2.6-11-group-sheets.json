@@ -1,0 +1,80 @@
+{
+  "name": "2.6-11 パッケージ作成の対象のシートに値を入れて保存し、選び直すと値が残る",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "ok"
+    },
+    {
+      "action": "clickAt",
+      "x": 420,
+      "y": 332
+    },
+    {
+      "action": "wheelAt",
+      "x": 480,
+      "y": 400,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 603,
+      "value": "1,2"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 169
+    },
+    {
+      "action": "expectTextAt",
+      "x": 200,
+      "y": 169,
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "clients/ok.bat",
+      "contains": "GenerateSheetsInclude=1,2"
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "ng"
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "ok"
+    },
+    {
+      "action": "expectText",
+      "text": "1,2"
+    }
+  ]
+}

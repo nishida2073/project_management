@@ -1,0 +1,49 @@
+{
+  "name": "2.6-07 グループ別の設定で変えた値を再読込すると、保存されている値に戻る",
+  "kind": "正常系",
+  "setup": [
+    {
+      "action": "copyFile",
+      "from": "clients/template/client.bat",
+      "to": "clients/CopySrc.bat"
+    },
+    {
+      "action": "copyFile",
+      "from": "clients/template/client.xlsx",
+      "to": "clients/CopySrc.xlsx"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "CopySrc"
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 297,
+      "value": "changed"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 206
+    },
+    {
+      "action": "expectText",
+      "text": "univ-kyousai-{x}"
+    }
+  ]
+}

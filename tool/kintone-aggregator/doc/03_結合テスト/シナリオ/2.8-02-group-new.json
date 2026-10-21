@@ -1,5 +1,6 @@
 {
   "name": "2.8-02 環境設定（グループ別）で、新しい名前で新規作成すると、名前が一覧に追加され選ばれる",
+  "kind": "正常系",
   "vars": {
     "client": "ok"
   },
@@ -14,6 +15,12 @@
       "action": "clickAt",
       "x": 98,
       "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

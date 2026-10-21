@@ -1,0 +1,40 @@
+{
+  "name": "2.2-02 一括実行の表示／隠すを押すと、処理の選択欄が隠れたり表示されたりする",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 120,
+      "y": 79
+    },
+    {
+      "action": "clickAt",
+      "x": 58,
+      "y": 339
+    },
+    {
+      "action": "expectText",
+      "text": "隠す",
+      "timeoutSec": 5
+    },
+    {
+      "action": "clickAt",
+      "x": 58,
+      "y": 339
+    },
+    {
+      "action": "expectText",
+      "text": "表示",
+      "timeoutSec": 5
+    }
+  ]
+}

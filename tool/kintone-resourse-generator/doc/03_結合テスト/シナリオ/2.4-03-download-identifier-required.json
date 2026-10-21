@@ -1,0 +1,36 @@
+{
+  "name": "2.4-03 スペースダウンロードで、スペース識別名が空だと、メッセージが出る",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 316,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 259
+    },
+    {
+      "action": "expectMessage",
+      "window": "実行",
+      "contains": "スペース識別名 を設定してください"
+    }
+  ]
+}

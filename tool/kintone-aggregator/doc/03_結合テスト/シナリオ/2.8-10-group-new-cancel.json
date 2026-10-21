@@ -1,0 +1,41 @@
+{
+  "name": "2.8-10 環境設定（グループ別）で新規作成を押したあとキャンセルすると、一覧は変わらない",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 497,
+      "y": 131
+    },
+    {
+      "action": "closeWindow",
+      "title": "グループの新規作成",
+      "keys": "{ESC}"
+    },
+    {
+      "action": "expectTextGone",
+      "text": "AggCancel",
+      "timeoutSec": 5
+    }
+  ]
+}

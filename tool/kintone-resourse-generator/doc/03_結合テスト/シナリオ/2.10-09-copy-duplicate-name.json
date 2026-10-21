@@ -1,0 +1,41 @@
+{
+  "name": "2.10-09 コピー先に既存のグループ名を入力すると、メッセージが出てコピーされない",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 100,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 635,
+      "y": 131
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループのコピー作成",
+      "value": "{{client}}"
+    },
+    {
+      "action": "expectMessage",
+      "window": "グループの新規作成",
+      "contains": "既に存在します"
+    }
+  ]
+}

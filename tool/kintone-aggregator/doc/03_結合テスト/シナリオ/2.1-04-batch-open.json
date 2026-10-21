@@ -1,0 +1,168 @@
+{
+  "name": "2.1-04 一括実行の処理の開くを、すべての行で押すと、それぞれの出力先のフォルダ（または投稿先のスレッド）が開く",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 328,
+      "y": 143,
+      "value": "2026-09-01"
+    },
+    {
+      "action": "selectComboAt",
+      "x": 726,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 366
+    },
+    {
+      "action": "expectEditContains",
+      "text": "一括実行 完了",
+      "timeoutSec": 900
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 183,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 216,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 248,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 281,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 313,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 183
+    },
+    {
+      "action": "expectWindow",
+      "title": "01_提出状況",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "01_提出状況"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 216
+    },
+    {
+      "action": "expectWindow",
+      "title": "01_提出状況",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "01_提出状況"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 248
+    },
+    {
+      "action": "expectWindow",
+      "title": "02_アプリデータ集計",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "02_アプリデータ集計"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 281
+    },
+    {
+      "action": "expectWindow",
+      "title": "03_アラート検知結果",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "03_アラート検知結果"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 587,
+      "y": 313
+    },
+    {
+      "action": "expectWindow",
+      "title": "Google Chrome",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "Google Chrome",
+      "keys": "^w"
+    }
+  ]
+}

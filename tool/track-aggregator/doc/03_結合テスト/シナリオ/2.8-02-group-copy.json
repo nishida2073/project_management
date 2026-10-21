@@ -1,0 +1,51 @@
+{
+  "name": "2.8-02 環境設定（グループ別）で保存済みのグループをコピーすると、新しいグループが 1 つ追加され、設定ファイルと Excel ファイルがコピーされる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 635,
+      "y": 131
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループのコピー作成",
+      "value": "TrackCopy"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TrackCopy.bat",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TrackCopy.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^TrackCopy$",
+      "timeoutSec": 300
+    }
+  ]
+}

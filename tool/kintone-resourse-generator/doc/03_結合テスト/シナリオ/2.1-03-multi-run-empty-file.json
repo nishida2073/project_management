@@ -1,0 +1,30 @@
+{
+  "name": "2.1-03 複数実行で、実行一覧ファイルを選ばずに実行すると、メッセージが出る",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 221
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "実行一覧ファイルを選択してください"
+    }
+  ]
+}

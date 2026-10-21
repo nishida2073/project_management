@@ -1,0 +1,86 @@
+{
+  "name": "2.5-01 設定ファイル作成で実行すると、状態が成功になり、設定ファイルが作られる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 316,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "dlok"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 218,
+      "value": "3"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 259
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 300
+    },
+    {
+      "action": "clickAt",
+      "x": 440,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "dlok"
+    },
+    {
+      "action": "keysAt",
+      "x": 360,
+      "y": 218,
+      "keys": "{DOWN}{ENTER}"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 296
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 300
+    },
+    {
+      "action": "expectFile",
+      "path": "config/dlok_config.xlsx",
+      "exists": true
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "2.8-03 環境設定（グループ別）で入力欄の値を変えて保存を押すと、値が設定ファイルに保存され、画面の表示が更新される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 520,
+      "y": 297,
+      "value": "track-saved"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 169
+    },
+    {
+      "action": "expectTextAt",
+      "x": 200,
+      "y": 169,
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectEditContains",
+      "text": "track-saved"
+    }
+  ]
+}

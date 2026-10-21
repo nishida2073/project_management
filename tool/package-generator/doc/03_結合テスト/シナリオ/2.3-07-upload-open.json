@@ -1,0 +1,36 @@
+{
+  "name": "2.3-07 パッケージ反映の開くを押すと、対象の kintone アプリが開く",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 238,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 257,
+      "y": 483
+    },
+    {
+      "action": "expectWindow",
+      "title": "ファイル管理",
+      "timeoutSec": 30
+    },
+    {
+      "action": "closeWindow",
+      "title": "ファイル管理",
+      "keys": "^w"
+    }
+  ]
+}

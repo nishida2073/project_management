@@ -114,6 +114,9 @@ function Export-Datas {
             throw "ファイルがありません: $sourceFilePath"
         }
         $range = Read-FileToArray $sourceFilePath
+        if ($range.Count -eq 0) {
+            throw "ヘッダーがありません（空のファイル）: $sourceFilePath"
+        }
         $headerRow = $range[0]
 
         $columnIndexes = @($columnDefs | ForEach-Object {
@@ -167,7 +170,7 @@ try {
 
             New-Item -Path $CollectRootDir -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
 
-            $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*txt") -ErrorAction SilentlyContinue).Count -gt 0
+            $hasFiles = @(Get-ChildItem -Path (Join-Path $SourceRootDir "$TargetGroupName-*.txt") -ErrorAction SilentlyContinue).Count -gt 0
             if (-not $hasFiles) {
                 throw "集計対象がありません。日付=$($TargetDate)"
             }

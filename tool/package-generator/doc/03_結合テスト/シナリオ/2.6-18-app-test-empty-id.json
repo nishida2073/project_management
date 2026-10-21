@@ -1,0 +1,42 @@
+{
+  "name": "2.6-18 ファイル管理の対象アプリIDを空にしてテスト接続すると、状態が失敗になる",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 505,
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 547
+    },
+    {
+      "action": "expectText",
+      "text": "失敗",
+      "timeoutSec": 30
+    }
+  ]
+}

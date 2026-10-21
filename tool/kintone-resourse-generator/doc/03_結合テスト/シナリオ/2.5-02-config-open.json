@@ -1,0 +1,99 @@
+{
+  "name": "2.5-02 設定ファイル作成の開くを押すと、設定ファイルが開く",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 316,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "dlok"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 218,
+      "value": "3"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 259
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 300
+    },
+    {
+      "action": "clickAt",
+      "x": 440,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "dlok"
+    },
+    {
+      "action": "keysAt",
+      "x": 360,
+      "y": 218,
+      "keys": "{DOWN}{ENTER}"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 296
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 300
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "clickAt",
+      "x": 257,
+      "y": 296
+    },
+    {
+      "action": "expectWindow",
+      "title": "dlok_config",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "dlok_config"
+    }
+  ]
+}

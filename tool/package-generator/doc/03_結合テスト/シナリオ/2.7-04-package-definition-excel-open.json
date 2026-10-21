@@ -1,0 +1,48 @@
+{
+  "name": "2.7-04 パッケージ定義ファイルを Excel で開いたままにして更新すると、状態が失敗になる",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 198,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 315,
+      "y": 142,
+      "value": "ok"
+    },
+    {
+      "action": "openFile",
+      "path": "clients/ok.xlsx"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "clickAt",
+      "x": 92,
+      "y": 183
+    },
+    {
+      "action": "expectText",
+      "text": "失敗",
+      "timeoutSec": 120
+    },
+    {
+      "action": "closeWindow",
+      "title": "ok.xlsx"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "name": "2.4-01 スペースダウンロードで実行すると、状態が成功になり、ダウンロード結果の Excel が作られる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 316,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 181,
+      "value": "dlok"
+    },
+    {
+      "action": "typeAt",
+      "x": 360,
+      "y": 218,
+      "value": "3"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 259
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 300
+    },
+    {
+      "action": "expectFile",
+      "path": "download/dlok_download.xlsx",
+      "exists": true
+    }
+  ]
+}

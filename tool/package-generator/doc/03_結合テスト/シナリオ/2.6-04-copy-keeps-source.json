@@ -1,0 +1,63 @@
+{
+  "name": "2.6-04 コピーすると、新しいグループの設定ファイルと Excel ファイルが作られ、コピー元は変わらない",
+  "kind": "正常系",
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "clients/CopySrc.bat",
+      "text": "set \"GenerateOutputPath=%BASE_PATH%generatedCopySrc\"\r\nset \"KintoneSubdomain=univ-kyousai-{x}\"\r\n"
+    },
+    {
+      "action": "copyFile",
+      "from": "clients/template/client.xlsx",
+      "to": "clients/CopySrc.xlsx"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 107,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "CopySrc"
+    },
+    {
+      "action": "click",
+      "target": "コピー"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループのコピー作成",
+      "value": "TestDst"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestDst.bat",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestDst.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFileContains",
+      "path": "clients/CopySrc.bat",
+      "contains": "generatedCopySrc"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/CopySrc.xlsx",
+      "exists": true
+    }
+  ]
+}

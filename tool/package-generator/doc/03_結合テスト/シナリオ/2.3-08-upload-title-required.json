@@ -1,0 +1,27 @@
+{
+  "name": "2.3-08 パッケージ反映で、タイトルが空だと、メッセージが出る",
+  "kind": "異常系",
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 238,
+      "y": 79
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 483
+    },
+    {
+      "action": "expectMessage",
+      "window": "実行",
+      "contains": "タイトルを入力してください"
+    }
+  ]
+}

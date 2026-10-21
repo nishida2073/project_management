@@ -1,0 +1,41 @@
+{
+  "name": "2.8-07 正しい接続情報でテスト接続（認証情報）を押すと、状態が成功になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 206
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 406
+    },
+    {
+      "action": "expectTextPattern",
+      "pattern": "^成功$",
+      "timeoutSec": 120
+    }
+  ]
+}

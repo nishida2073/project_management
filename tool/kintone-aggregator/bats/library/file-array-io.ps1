@@ -31,8 +31,8 @@ function Read-FileToArray {
         [string]$ReadFilePath
     )
     if (!(Test-Path -LiteralPath $ReadFilePath)) { return ,@() }
-    $lines = Get-Content -Path $ReadFilePath
-    if ($lines.Count -lt 2) { return ,@() }
+    $lines = @(Get-Content -Path $ReadFilePath)
+    if ($lines.Count -lt 1) { return ,@() }
     $result = [System.Collections.Generic.List[object]]::new($lines.Count)
     for ($r = 0; $r -lt $lines.Count; $r++) {
         $values = $lines[$r] -split "`t"

@@ -1,0 +1,44 @@
+{
+  "name": "2.1-07 一括実行で、タイトルがあってもフォルダが空だと、メッセージが出る",
+  "kind": "異常系",
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 181,
+      "value": "TestTitle"
+    },
+    {
+      "action": "typeAt",
+      "x": 420,
+      "y": 217,
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "x": 57,
+      "y": 296
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 344
+    },
+    {
+      "action": "expectMessage",
+      "window": "一括実行",
+      "contains": "フォルダ を設定してください"
+    }
+  ]
+}

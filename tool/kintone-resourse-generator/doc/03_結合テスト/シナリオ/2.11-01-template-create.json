@@ -1,0 +1,53 @@
+{
+  "name": "2.11-01 テンプレート作成で、スペースIDとテンプレート名を入力して実行すると、テンプレートのファイルが作られ、状態が成功になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 180,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 345,
+      "y": 142,
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "x": 345,
+      "y": 179,
+      "value": "3"
+    },
+    {
+      "action": "typeAt",
+      "x": 345,
+      "y": 217,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 92,
+      "y": 258
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 120
+    },
+    {
+      "action": "expectFile",
+      "path": "template/custom/{{client}}_{{client}}.xlsx",
+      "exists": true
+    }
+  ]
+}

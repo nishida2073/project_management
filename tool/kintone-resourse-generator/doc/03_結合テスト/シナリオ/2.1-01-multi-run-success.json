@@ -1,0 +1,50 @@
+{
+  "name": "2.1-01 複数実行で、有効な行があると行ごとに一括実行され、行ごとの結果が表示される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 360,
+      "y": 142,
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "x": 360,
+      "y": 181,
+      "value": "{{root}}\\run-list\\ok.xlsx"
+    },
+    {
+      "action": "clickAt",
+      "x": 105,
+      "y": 221
+    },
+    {
+      "action": "expectEditContains",
+      "text": "終了（",
+      "timeoutSec": 900
+    },
+    {
+      "action": "expectTextAt",
+      "x": 322,
+      "y": 221,
+      "pattern": "^終了（成功-1件、警告-0件、失敗/スキップ-1件）$",
+      "tolX": 150,
+      "timeoutSec": 60
+    }
+  ]
+}

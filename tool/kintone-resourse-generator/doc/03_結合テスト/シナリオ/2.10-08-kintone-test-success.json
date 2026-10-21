@@ -1,0 +1,36 @@
+{
+  "name": "2.10-08 kintone接続のテスト接続で、正しい接続情報なら成功になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 152,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 100,
+      "y": 79
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 406
+    },
+    {
+      "action": "expectText",
+      "text": "成功",
+      "timeoutSec": 60
+    }
+  ]
+}

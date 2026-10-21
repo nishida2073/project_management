@@ -1,0 +1,46 @@
+{
+  "name": "2.8-03 環境設定（グループ別）で新規作成直後の未保存グループをコピーすると、コピー元が存在しない旨が表示され、コピーされない",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 145,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 98,
+      "y": 80
+    },
+    {
+      "action": "selectComboAt",
+      "x": 330,
+      "y": 131,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 497,
+      "y": 131
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "AggUnsaved"
+    },
+    {
+      "action": "clickAt",
+      "x": 635,
+      "y": 131
+    },
+    {
+      "action": "expectMessage",
+      "window": "コピー作成",
+      "contains": "コピー元のグループが存在しません"
+    }
+  ]
+}

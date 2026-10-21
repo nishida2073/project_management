@@ -1,0 +1,82 @@
+{
+  "name": "2.1-03 一括実行が終わると、ログ欄に実行結果が表示され、ログの出力先に実行ログが保存される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "x": 25,
+      "y": 52
+    },
+    {
+      "action": "clickAt",
+      "x": 45,
+      "y": 79
+    },
+    {
+      "action": "typeAt",
+      "x": 328,
+      "y": 143,
+      "value": "2026-09-01"
+    },
+    {
+      "action": "selectComboAt",
+      "x": 726,
+      "y": 144,
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "x": 104,
+      "y": 366
+    },
+    {
+      "action": "expectEditContains",
+      "text": "一括実行 完了",
+      "timeoutSec": 900
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 183,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 216,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 248,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 281,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "x": 535,
+      "y": 313,
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectFile",
+      "path": "logs",
+      "exists": true
+    }
+  ]
+}
