@@ -18,13 +18,11 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 82,
-      "y": 52
+      "part": "メニュー/ログタブ"
     },
     {
       "action": "clickAt",
-      "x": 593,
-      "y": 103
+      "part": "ログ/すべて削除"
     },
     {
       "action": "expectDialogText",

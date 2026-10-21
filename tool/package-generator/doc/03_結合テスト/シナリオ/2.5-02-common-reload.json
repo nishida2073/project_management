@@ -5,24 +5,20 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 152,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 35,
-      "y": 79
+      "part": "環境設定/共通タブ"
     },
     {
       "action": "typeAt",
-      "x": 420,
-      "y": 261,
+      "part": "環境設定（共通）/ログの出力先",
       "value": "tmp"
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 168
+      "part": "環境設定（共通）/再読込"
     },
     {
       "action": "expectText",

@@ -5,13 +5,11 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 152,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 107,
-      "y": 79
+      "part": "環境設定/グループ別タブ"
     },
     {
       "action": "click",
@@ -24,13 +22,11 @@
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 169
+      "part": "環境設定（グループ別）/保存"
     },
     {
       "action": "expectTextAt",
-      "x": 200,
-      "y": 169,
+      "part": "環境設定（グループ別）/保存の状態",
       "pattern": "^完了$",
       "timeoutSec": 15
     },

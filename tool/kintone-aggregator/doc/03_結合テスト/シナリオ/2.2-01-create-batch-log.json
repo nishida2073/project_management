@@ -8,30 +8,25 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 138,
-      "y": 79
+      "part": "実行/アプリデータ作成タブ"
     },
     {
       "action": "typeAt",
-      "x": 328,
-      "y": 143,
+      "part": "実行（アプリデータ作成）/対象日（業務日誌）",
       "value": "2026-09-01"
     },
     {
       "action": "selectComboAt",
-      "x": 726,
-      "y": 144,
+      "part": "実行（アプリデータ作成）/対象のグループ（業務日誌）",
       "value": "{{client}}"
     },
     {
       "action": "clickAt",
-      "x": 104,
-      "y": 184
+      "part": "実行（アプリデータ作成）/実行（業務日誌）"
     },
     {
       "action": "wait",

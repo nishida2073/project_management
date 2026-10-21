@@ -8,8 +8,7 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 145,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "wheelAt",
@@ -19,8 +18,7 @@
     },
     {
       "action": "clickAt",
-      "x": 585,
-      "y": 607
+      "part": "環境設定（共通）/アプリデータ集計の列定義の削除"
     },
     {
       "action": "expectEditNotContains",

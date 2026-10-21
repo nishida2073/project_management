@@ -19,18 +19,15 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 82,
-      "y": 52
+      "part": "メニュー/ログタブ"
     },
     {
       "action": "selectComboAt",
-      "x": 324,
-      "y": 104,
+      "part": "ログ/対象のグループ",
       "value": ""
     },
     {
@@ -45,8 +42,7 @@
     },
     {
       "action": "selectComboAt",
-      "x": 324,
-      "y": 104,
+      "part": "ログ/対象のグループ",
       "value": "{{client}}"
     },
     {

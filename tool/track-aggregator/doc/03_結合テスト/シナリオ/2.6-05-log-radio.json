@@ -54,18 +54,15 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 82,
-      "y": 52
+      "part": "メニュー/ログタブ"
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 155
+      "part": "ログ/実施結果取得-テスト"
     },
     {
       "action": "expectEditContains",
@@ -114,8 +111,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 185
+      "part": "ログ/実施結果取得-アンケート"
     },
     {
       "action": "expectEditContains",
@@ -164,8 +160,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 215
+      "part": "ログ/実施結果取得-取得状況確認"
     },
     {
       "action": "expectEditContains",
@@ -214,8 +209,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 245
+      "part": "ログ/実施状況確認-テスト・アンケート"
     },
     {
       "action": "expectEditContains",
@@ -264,8 +258,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 275
+      "part": "ログ/実施結果集計-テスト"
     },
     {
       "action": "expectEditContains",
@@ -314,8 +307,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 305
+      "part": "ログ/実施結果集計-アンケート"
     },
     {
       "action": "expectEditContains",
@@ -364,8 +356,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 335
+      "part": "ログ/実施結果集計-投稿"
     },
     {
       "action": "expectEditContains",
@@ -414,8 +405,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 365
+      "part": "ログ/経年比較-アンケート・テスト"
     },
     {
       "action": "expectEditContains",
@@ -464,8 +454,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 395
+      "part": "ログ/マスター同期"
     },
     {
       "action": "expectEditContains",

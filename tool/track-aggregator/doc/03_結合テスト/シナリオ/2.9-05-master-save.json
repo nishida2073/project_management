@@ -8,35 +8,29 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 145,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 167,
-      "y": 80
+      "part": "環境設定/マスタータブ"
     },
     {
       "action": "selectComboAt",
-      "x": 330,
-      "y": 131,
+      "part": "環境設定（マスター）/対象のグループ",
       "value": "{{client}}"
     },
     {
       "action": "pasteAt",
-      "x": 190,
-      "y": 454,
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
       "value": "テスト科目"
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 169
+      "part": "環境設定（マスター）/保存"
     },
     {
       "action": "expectTextAt",
-      "x": 200,
-      "y": 169,
+      "part": "環境設定（マスター）/保存の状態",
       "pattern": "^完了$",
       "timeoutSec": 15
     },

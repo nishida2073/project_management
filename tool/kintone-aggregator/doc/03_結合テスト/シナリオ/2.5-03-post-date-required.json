@@ -8,30 +8,25 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 350,
-      "y": 79
+      "part": "実行/アラート集計タブ"
     },
     {
       "action": "typeAt",
-      "x": 328,
-      "y": 268,
+      "part": "実行（アラート集計）/対象日（投稿）",
       "value": ""
     },
     {
       "action": "selectComboAt",
-      "x": 726,
-      "y": 269,
+      "part": "実行（アラート集計）/対象のグループ（投稿）",
       "value": "{{client}}"
     },
     {
       "action": "clickAt",
-      "x": 104,
-      "y": 309
+      "part": "実行（アラート集計）/実行（投稿）"
     },
     {
       "action": "expectMessage",

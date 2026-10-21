@@ -16,24 +16,20 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 152,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 198,
-      "y": 79
+      "part": "環境設定/パッケージ定義タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 315,
-      "y": 142,
+      "part": "環境設定（パッケージ定義）/対象のグループ",
       "value": "ok"
     },
     {
       "action": "clickAt",
-      "x": 92,
-      "y": 183
+      "part": "環境設定（パッケージ定義）/実行"
     },
     {
       "action": "expectText",

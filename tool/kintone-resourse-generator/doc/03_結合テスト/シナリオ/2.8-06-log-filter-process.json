@@ -34,18 +34,15 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 82,
-      "y": 52
+      "part": "メニュー/ログタブ"
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 198
+      "part": "ログ/スペースの作成"
     },
     {
       "action": "expectEditContains",
@@ -74,8 +71,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 228
+      "part": "ログ/スペースのダウンロード"
     },
     {
       "action": "expectEditContains",
@@ -104,8 +100,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 258
+      "part": "ログ/設定ファイルの作成"
     },
     {
       "action": "expectEditContains",
@@ -134,8 +129,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 288
+      "part": "ログ/スペースの更新"
     },
     {
       "action": "expectEditContains",
@@ -164,8 +158,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 318
+      "part": "ログ/スペースの確認"
     },
     {
       "action": "expectEditContains",

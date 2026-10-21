@@ -5,35 +5,29 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 45,
-      "y": 79
+      "part": "実行/一括実行タブ"
     },
     {
       "action": "typeAt",
-      "x": 420,
-      "y": 181,
+      "part": "実行（一括実行）/タイトル",
       "value": "TestTitle"
     },
     {
       "action": "typeAt",
-      "x": 420,
-      "y": 217,
+      "part": "実行（一括実行）/フォルダ",
       "value": ""
     },
     {
       "action": "clickAt",
-      "x": 57,
-      "y": 296
+      "part": "実行（一括実行）/パッケージのアップロード"
     },
     {
       "action": "clickAt",
-      "x": 105,
-      "y": 344
+      "part": "実行（一括実行）/実行"
     },
     {
       "action": "expectMessage",

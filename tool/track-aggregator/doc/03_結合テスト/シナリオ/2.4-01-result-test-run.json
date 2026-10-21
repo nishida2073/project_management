@@ -8,24 +8,20 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 345,
-      "y": 79
+      "part": "実行/実施結果集計タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 328,
-      "y": 144,
+      "part": "実行（実施結果集計）/対象のグループ（テスト）",
       "value": "{{client}}"
     },
     {
       "action": "clickAt",
-      "x": 104,
-      "y": 184
+      "part": "実行（実施結果集計）/実行（テスト）"
     },
     {
       "action": "expectTextPattern",

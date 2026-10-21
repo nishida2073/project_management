@@ -8,36 +8,30 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 238,
-      "y": 79
+      "part": "実行/パッケージ反映タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 330,
-      "y": 144,
+      "part": "実行（パッケージ反映）/対象のグループ",
       "value": "{{client}}"
     },
     {
       "action": "typeAt",
-      "x": 420,
-      "y": 181,
+      "part": "実行（パッケージ反映）/タイトル",
       "value": "TestTitle"
     },
     {
       "action": "pasteAt",
-      "x": 420,
-      "y": 255,
+      "part": "実行（パッケージ反映）/ファイル1",
       "value": "{{root}}\\generated\\ng\\コースA.zip"
     },
     {
       "action": "clickAt",
-      "x": 105,
-      "y": 483
+      "part": "実行（パッケージ反映）/実行"
     },
     {
       "action": "expectText",

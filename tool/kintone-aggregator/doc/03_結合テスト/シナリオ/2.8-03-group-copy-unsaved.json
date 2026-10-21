@@ -8,24 +8,20 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 145,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 80
+      "part": "環境設定/グループ別タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 330,
-      "y": 131,
+      "part": "環境設定（グループ別）/対象のグループ",
       "value": "{{client}}"
     },
     {
       "action": "clickAt",
-      "x": 497,
-      "y": 131
+      "part": "環境設定（グループ別）/新規作成"
     },
     {
       "action": "enterDialog",
@@ -34,8 +30,7 @@
     },
     {
       "action": "clickAt",
-      "x": 635,
-      "y": 131
+      "part": "環境設定（グループ別）/コピー"
     },
     {
       "action": "expectMessage",

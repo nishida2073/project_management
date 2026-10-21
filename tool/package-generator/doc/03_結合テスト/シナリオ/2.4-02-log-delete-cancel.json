@@ -15,8 +15,7 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 82,
-      "y": 52
+      "part": "メニュー/ログタブ"
     },
     {
       "action": "click",

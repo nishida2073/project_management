@@ -8,34 +8,28 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 45,
-      "y": 79
+      "part": "実行/一括実行タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 328,
-      "y": 144,
+      "part": "実行（一括実行）/対象のグループ",
       "value": "{{client}}"
     },
     {
       "action": "clickAt",
-      "x": 57,
-      "y": 351
+      "part": "実行（一括実行）/実施結果集計-投稿"
     },
     {
       "action": "clickAt",
-      "x": 57,
-      "y": 384
+      "part": "実行（一括実行）/経年比較-アンケート・テスト"
     },
     {
       "action": "clickAt",
-      "x": 104,
-      "y": 431
+      "part": "実行（一括実行）/実行"
     },
     {
       "action": "expectEditContains",
@@ -44,36 +38,31 @@
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 183,
+      "part": "実行（一括実行）/実施結果取得-テストの状態",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 216,
+      "part": "実行（一括実行）/実施結果取得-アンケートの状態",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 248,
+      "part": "実行（一括実行）/実施状況確認-テスト・アンケートの状態",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 281,
+      "part": "実行（一括実行）/実施結果集計-テストの状態",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 313,
+      "part": "実行（一括実行）/実施結果集計-アンケートの状態",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 60
     },
@@ -83,8 +72,7 @@
     },
     {
       "action": "clickAt",
-      "x": 587,
-      "y": 183
+      "part": "実行（一括実行）/実施結果取得-テストの開く"
     },
     {
       "action": "expectWindow",
@@ -101,8 +89,7 @@
     },
     {
       "action": "clickAt",
-      "x": 587,
-      "y": 216
+      "part": "実行（一括実行）/実施結果取得-アンケートの開く"
     },
     {
       "action": "expectWindow",
@@ -119,8 +106,7 @@
     },
     {
       "action": "clickAt",
-      "x": 587,
-      "y": 248
+      "part": "実行（一括実行）/実施状況確認-テスト・アンケートの開く"
     },
     {
       "action": "expectWindow",
@@ -137,8 +123,7 @@
     },
     {
       "action": "clickAt",
-      "x": 587,
-      "y": 281
+      "part": "実行（一括実行）/実施結果集計-テストの開く"
     },
     {
       "action": "expectWindow",
@@ -155,8 +140,7 @@
     },
     {
       "action": "clickAt",
-      "x": 587,
-      "y": 313
+      "part": "実行（一括実行）/実施結果集計-アンケートの開く"
     },
     {
       "action": "expectWindow",
@@ -173,8 +157,7 @@
     },
     {
       "action": "clickAt",
-      "x": 587,
-      "y": 346
+      "part": "実行（一括実行）/実施結果集計-投稿の開く"
     },
     {
       "action": "expectWindow",
@@ -192,8 +175,7 @@
     },
     {
       "action": "clickAt",
-      "x": 587,
-      "y": 378
+      "part": "実行（一括実行）/経年比較-アンケート・テストの開く"
     },
     {
       "action": "expectWindow",

@@ -8,18 +8,15 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 145,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 167,
-      "y": 80
+      "part": "環境設定/マスタータブ"
     },
     {
       "action": "selectComboAt",
-      "x": 330,
-      "y": 131,
+      "part": "環境設定（マスター）/対象のグループ",
       "value": "{{client}}"
     },
     {
@@ -34,8 +31,7 @@
     },
     {
       "action": "clickAt",
-      "x": 1022,
-      "y": 257
+      "part": "環境設定（マスター）/アンケート表の2行目の削除"
     },
     {
       "action": "expectEditNotContains",

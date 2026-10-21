@@ -8,122 +8,103 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 120,
-      "y": 79
+      "part": "実行/一括実行タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 360,
-      "y": 144,
+      "part": "実行（一括実行）/対象のグループ",
       "value": "{{client}}"
     },
     {
       "action": "typeAt",
-      "x": 360,
-      "y": 181,
+      "part": "実行（一括実行）/スペース識別名",
       "value": "batchok"
     },
     {
       "action": "typeAt",
-      "x": 360,
-      "y": 218,
+      "part": "実行（一括実行）/スペーステンプレートID",
       "value": "3"
     },
     {
       "action": "keysAt",
-      "x": 360,
-      "y": 256,
+      "part": "実行（一括実行）/設定テンプレート名（基本）",
       "keys": "{DOWN}{ENTER}"
     },
     {
       "action": "clickAt",
-      "x": 58,
-      "y": 339
+      "part": "実行（一括実行）/表示／隠す"
     },
     {
       "action": "expectCheckedAt",
-      "x": 57,
-      "y": 371,
+      "part": "実行（一括実行）/スペースの作成",
       "checked": true,
       "timeoutSec": 15
     },
     {
       "action": "expectCheckedAt",
-      "x": 57,
-      "y": 403,
+      "part": "実行（一括実行）/スペースのダウンロード",
       "checked": true,
       "timeoutSec": 15
     },
     {
       "action": "expectCheckedAt",
-      "x": 57,
-      "y": 436,
+      "part": "実行（一括実行）/設定ファイルの作成",
       "checked": true,
       "timeoutSec": 15
     },
     {
       "action": "expectCheckedAt",
-      "x": 57,
-      "y": 468,
+      "part": "実行（一括実行）/スペースの更新",
       "checked": true,
       "timeoutSec": 15
     },
     {
       "action": "expectCheckedAt",
-      "x": 57,
-      "y": 500,
+      "part": "実行（一括実行）/スペースの確認",
       "checked": true,
       "timeoutSec": 15
     },
     {
       "action": "clickAt",
-      "x": 105,
-      "y": 548
+      "part": "実行（一括実行）/実行"
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 366,
+      "part": "実行（一括実行）/スペースの作成の状態",
       "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 398,
+      "part": "実行（一括実行）/スペースのダウンロードの状態",
       "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 430,
+      "part": "実行（一括実行）/設定ファイルの作成の状態",
       "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 463,
+      "part": "実行（一括実行）/スペースの更新の状態",
       "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 535,
-      "y": 495,
+      "part": "実行（一括実行）/スペースの確認の状態",
       "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
-      "x": 190,
-      "y": 548,
+      "part": "実行（一括実行）/状態",
       "timeoutSec": 60,
       "pattern": "^成功$"
     }

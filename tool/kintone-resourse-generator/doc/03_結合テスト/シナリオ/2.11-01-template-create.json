@@ -8,36 +8,30 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 152,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 180,
-      "y": 79
+      "part": "実行/テンプレートタブ"
     },
     {
       "action": "selectComboAt",
-      "x": 345,
-      "y": 142,
+      "part": "環境設定（テンプレート）/対象のグループ",
       "value": "{{client}}"
     },
     {
       "action": "typeAt",
-      "x": 345,
-      "y": 179,
+      "part": "環境設定（テンプレート）/スペースID",
       "value": "3"
     },
     {
       "action": "typeAt",
-      "x": 345,
-      "y": 217,
+      "part": "環境設定（テンプレート）/テンプレート名",
       "value": "{{client}}"
     },
     {
       "action": "clickAt",
-      "x": 92,
-      "y": 258
+      "part": "環境設定（テンプレート）/実行"
     },
     {
       "action": "expectText",

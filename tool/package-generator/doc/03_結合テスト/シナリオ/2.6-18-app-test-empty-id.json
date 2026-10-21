@@ -8,30 +8,25 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 152,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 107,
-      "y": 79
+      "part": "環境設定/グループ別タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 330,
-      "y": 131,
+      "part": "環境設定（グループ別）/対象のグループ",
       "value": "{{client}}"
     },
     {
       "action": "typeAt",
-      "x": 420,
-      "y": 505,
+      "part": "環境設定（グループ別）/対象アプリID",
       "value": ""
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 547
+      "part": "環境設定（グループ別）/テスト接続（ファイル管理）"
     },
     {
       "action": "expectText",

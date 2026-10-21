@@ -8,18 +8,15 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 145,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 80
+      "part": "環境設定/グループ別タブ"
     },
     {
       "action": "selectComboAt",
-      "x": 330,
-      "y": 131,
+      "part": "環境設定（グループ別）/対象のグループ",
       "value": "{{client}}"
     },
     {
@@ -30,14 +27,12 @@
     },
     {
       "action": "typeAt",
-      "x": 420,
-      "y": 453,
+      "part": "環境設定（グループ別）/対象アプリID（業務日誌）",
       "value": ""
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 493
+      "part": "環境設定（グループ別）/テスト接続（業務日誌）"
     },
     {
       "action": "expectTextPattern",

@@ -39,18 +39,15 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 25,
-      "y": 52
+      "part": "メニュー/実行タブ"
     },
     {
       "action": "clickAt",
-      "x": 82,
-      "y": 52
+      "part": "メニュー/ログタブ"
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 155
+      "part": "ログ/アプリデータ作成-業務日誌（ラジオ）"
     },
     {
       "action": "expectEditContains",
@@ -84,8 +81,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 185
+      "part": "ログ/アプリデータ作成-パルスサーベイ（ラジオ）"
     },
     {
       "action": "expectEditContains",
@@ -119,8 +115,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 215
+      "part": "ログ/アプリデータ集計-業務日誌・パルスサーベイ（ラジオ）"
     },
     {
       "action": "expectEditContains",
@@ -154,8 +149,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 245
+      "part": "ログ/アラート集計-業務日誌・パルスサーベイ（ラジオ）"
     },
     {
       "action": "expectEditContains",
@@ -189,8 +183,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 275
+      "part": "ログ/アラート集計-投稿（ラジオ）"
     },
     {
       "action": "expectEditContains",
@@ -224,8 +217,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 305
+      "part": "ログ/マスター同期（ラジオ）"
     },
     {
       "action": "expectEditContains",

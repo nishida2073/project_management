@@ -19,19 +19,16 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 82,
-      "y": 52
+      "part": "メニュー/ログタブ"
     },
     {
       "action": "selectComboAt",
-      "x": 330,
-      "y": 103,
+      "part": "ログ/対象のグループ",
       "value": "ok"
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 155
+      "part": "ログ/パッケージの作成（ラジオ）"
     },
     {
       "action": "expectEditContains",
@@ -45,8 +42,7 @@
     },
     {
       "action": "clickAt",
-      "x": 110,
-      "y": 186
+      "part": "ログ/パッケージのアップロード（ラジオ）"
     },
     {
       "action": "expectEditContains",

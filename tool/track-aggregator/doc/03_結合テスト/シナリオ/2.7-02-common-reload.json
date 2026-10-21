@@ -8,29 +8,24 @@
   "steps": [
     {
       "action": "clickAt",
-      "x": 145,
-      "y": 52
+      "part": "メニュー/環境設定タブ"
     },
     {
       "action": "clickAt",
-      "x": 35,
-      "y": 80
+      "part": "環境設定/共通タブ"
     },
     {
       "action": "typeAt",
-      "x": 520,
-      "y": 539,
+      "part": "環境設定（共通）/テスト結果ファイル名の接尾語",
       "value": "tmp"
     },
     {
       "action": "clickAt",
-      "x": 98,
-      "y": 169
+      "part": "環境設定（共通）/再読込"
     },
     {
       "action": "expectTextAt",
-      "x": 200,
-      "y": 169,
+      "part": "環境設定（共通）/再読込の状態",
       "pattern": "^完了$",
       "timeoutSec": 15
     },

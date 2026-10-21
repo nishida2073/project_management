@@ -37,8 +37,27 @@ New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
 $results = @()
 $resultFile = Join-Path $evidenceDir "結果.txt"
 
+$partsFile = Join-Path (Split-Path -Parent $ScenariosDir) "部品座標.json"
+$parts = @{}
+if (Test-Path -LiteralPath $partsFile) {
+    foreach ($item in (Get-Content -LiteralPath $partsFile -Raw -Encoding UTF8 | ConvertFrom-Json)) {
+        $key = if ($item.PSObject.Properties.Name -contains "screen") { "$($item.screen)/$($item.name)" } else { $item.name }
+        if ($parts.ContainsKey($key)) { throw "部品座標のキーが重複しています: $key" }
+        $parts[$key] = $item
+    }
+}
+
 foreach ($file in $scenarioFiles) {
     $scenario = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach ($step in $scenario.steps) {
+        if ($step.PSObject.Properties.Name -contains "part") {
+            if ($step.PSObject.Properties.Name -contains "x") { throw "part と x は同時に書けません: $($file.BaseName)" }
+            $p = $parts[$step.part]
+            if (-not $p) { throw "部品座標がありません: $($step.part) ($($file.BaseName))" }
+            $step | Add-Member -NotePropertyName x -NotePropertyValue ([int]$p.X)
+            $step | Add-Member -NotePropertyName y -NotePropertyValue ([int]$p.Y)
+        }
+    }
     $name = if ($scenario.name) { $scenario.name } else { $file.BaseName }
     $temp = Join-Path $workRoot $file.BaseName
     $proc = $null
