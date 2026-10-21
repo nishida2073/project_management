@@ -26,7 +26,7 @@ if ($newerSource) {
     Write-Warning "実行ファイルより新しいスクリプトがあります。exe を作り直してから実行してください: $($newerSource[0].FullName)"
 }
 
-$scenarioFiles = @(Get-ChildItem -LiteralPath $ScenariosDir -Filter *.json | Sort-Object { if ((Get-Content -LiteralPath $_.FullName -Raw -Encoding UTF8 | ConvertFrom-Json).kind -eq '異常系') { 1 } else { 0 } }, { $p = ($_.BaseName -split '-')[0]; if ($p -match '^\d+\.\d+$') { [version]$p } else { [version]'0.0' } }, Name)
+$scenarioFiles = @(Get-ChildItem -LiteralPath $ScenariosDir -Filter *.json | Sort-Object { $p = ($_.BaseName -split '-')[0]; if ($p -match '^\d+\.\d+$') { [version]$p } else { [version]'0.0' } }, Name)
 if ($Filter) { $scenarioFiles = @($scenarioFiles | Where-Object { $_.BaseName -like "$Filter*" }) }
 if ($scenarioFiles.Count -eq 0) { throw "実行するシナリオがありません（指定: $Filter）" }
 
