@@ -61,6 +61,10 @@
       "value": "{{root}}\\generated\\ok\\コースA.zip"
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "pasteAt",
       "x": 420,
       "y": 390,
