@@ -35,7 +35,7 @@
     {
       "action": "expectMessage",
       "window": "コピー作成",
-      "contains": "コピー元のグループが存在しません"
+      "contains": "コピー元のグループが存在しません。"
     }
   ]
 }

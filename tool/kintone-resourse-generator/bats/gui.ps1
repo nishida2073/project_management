@@ -857,7 +857,7 @@ $settingsGroupTop = (New-SettingsTopPanel `
         [PSCustomObject]@{ Name = "CopyGroup"; Kind = "Button"; Text = "コピー"; Width = 100; OnClick = {
             $source = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
             if (!(Test-Path -LiteralPath (Get-GroupBatPath $source $clientsDir))) {
-                [System.Windows.Forms.MessageBox]::Show("コピー元のグループが存在しません", "コピー作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
+                [System.Windows.Forms.MessageBox]::Show("コピー元のグループが存在しません。", "コピー作成", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error) | Out-Null
                 return
             }
             $newName = Read-NewGroupName -Title "グループのコピー作成" -Prompt "コピー先のグループ名を入力してください"
