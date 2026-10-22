@@ -25,7 +25,7 @@
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（共通）/再読込の状態",
+      "part": "環境設定（共通）/状態（再読込）",
       "pattern": "^完了$",
       "timeoutSec": 15
     },

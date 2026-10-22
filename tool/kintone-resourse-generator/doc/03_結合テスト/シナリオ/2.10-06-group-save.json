@@ -30,7 +30,7 @@
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（グループ別）/状態",
+      "part": "環境設定（グループ別）/状態（保存）",
       "pattern": "^完了$",
       "timeoutSec": 15
     },

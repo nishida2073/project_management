@@ -30,7 +30,7 @@
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（マスター）/再読込の状態",
+      "part": "環境設定（マスター）/状態（再読込）",
       "pattern": "^完了$",
       "timeoutSec": 15
     },

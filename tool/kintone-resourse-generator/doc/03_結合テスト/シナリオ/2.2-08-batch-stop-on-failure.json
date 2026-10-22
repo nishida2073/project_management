@@ -74,7 +74,7 @@
     },
     {
       "action": "expectTextAt",
-      "part": "実行（一括実行）/スペースの作成の状態",
+      "part": "実行（一括実行）/状態（スペースの作成）",
       "pattern": "^失敗$",
       "timeoutSec": 60
     },

@@ -54,7 +54,8 @@
       "part": "環境設定（マスター）/同期実行"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（同期実行）",
       "pattern": "^失敗$",
       "timeoutSec": 60
     },

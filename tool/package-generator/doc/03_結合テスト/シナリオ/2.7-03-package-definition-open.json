@@ -24,8 +24,9 @@
       "part": "環境設定（パッケージ定義）/実行"
     },
     {
-      "action": "expectText",
-      "text": "成功",
+      "action": "expectTextAt",
+      "part": "環境設定（パッケージ定義）/状態",
+      "pattern": "^成功$",
       "timeoutSec": 120
     },
     {

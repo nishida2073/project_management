@@ -35,7 +35,8 @@
       "part": "環境設定（グループ別）/テスト接続（ユーザー）"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（ユーザー）",
       "pattern": "^成功$",
       "timeoutSec": 120
     }

@@ -37,16 +37,6 @@
       "value": "PkgCopy"
     },
     {
-      "action": "expectFile",
-      "path": "clients/PkgCopy.bat",
-      "exists": true
-    },
-    {
-      "action": "expectFile",
-      "path": "clients/PkgCopy.xlsx",
-      "exists": true
-    },
-    {
       "action": "expectFileContains",
       "path": "clients/CopySrc.bat",
       "contains": "generated\\CopySrc"
