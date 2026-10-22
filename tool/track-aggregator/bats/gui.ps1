@@ -693,7 +693,7 @@ $settingsGroups = [ordered]@{
                     "PassScore"                            = @{ Label = "合格点" }
                     "ComparePeriod"                        = @{ Label = "経年比較の比較年数" }
                     "YearOrder"                            = @{
-                        Label = "経年比較の年度表示順（0:昇順 1:降順）"
+                        Label = "経年比較の年度表示順"
                         Radio = @(
                             [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
                             [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
@@ -732,7 +732,7 @@ $settingsGroups = [ordered]@{
                 Vars = [ordered]@{
                     "ComparePeriod" = @{ Label = "経年比較の比較年数"; OverrideRef = @{ Group = "Common"; Key = "ComparePeriod" } }
                     "YearOrder"     = @{
-                        Label = "経年比較の年度表示順（0:昇順 1:降順）"
+                        Label = "経年比較の年度表示順"
                         Radio = @(
                             [PSCustomObject]@{ Value = "0"; Label = "昇順(0)" }
                             [PSCustomObject]@{ Value = "1"; Label = "降順(1)" }
