@@ -1,0 +1,37 @@
+{
+  "name": "2.8-15 環境設定（グループ別）で既存のグループをコピーし、既存のグループ名を入力すると、既に存在する旨が表示され、追加されない",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/コピー"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループのコピー作成",
+      "value": "{{client}}"
+    },
+    {
+      "action": "expectMessage",
+      "window": "グループの新規作成",
+      "contains": "既に存在します"
+    }
+  ]
+}
