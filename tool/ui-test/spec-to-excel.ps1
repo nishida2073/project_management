@@ -1,6 +1,15 @@
 ﻿param(
-    [string[]]$Projects = @("kintone-aggregator", "kintone-resourse-generator", "package-generator", "track-aggregator")
+    [Parameter(Mandatory)][string[]]$SpecPath,
+    [int]$Zoom = 80,
+    [string]$ColumnWidths = "通番=8,区分=10,入力値=50,操作=50,期待値=50,参照=40,実施結果=12,ケース数=10",
+    [string]$LineBreakColumns = "入力値,期待値"
 )
+
+$script:WidthMap = @{}
+foreach ($pair in ($ColumnWidths -split ",")) {
+    $kv = $pair -split "=", 2
+    if ($kv.Count -eq 2) { $script:WidthMap[$kv[0].Trim()] = [double]$kv[1] }
+}
 
 $toolRoot = Split-Path -Parent $PSScriptRoot
 
@@ -56,16 +65,8 @@ function Get-SheetName {
 
 function Get-ColumnWidth {
     param([string]$Name)
-    switch ($Name) {
-        "通番" { return 8 }
-        "区分" { return 10 }
-        "操作" { return 45 }
-        "期待結果" { return 60 }
-        "参照" { return 28 }
-        "結果" { return 10 }
-        "ケース数" { return 10 }
-        default { return 18 }
-    }
+    if ($script:WidthMap.ContainsKey($Name)) { return $script:WidthMap[$Name] }
+    return [double]18
 }
 
 function Write-SpecWorkbook {
@@ -98,7 +99,9 @@ function Write-SpecWorkbook {
             for ($r = 0; $r -lt $rowCount; $r++) {
                 $cells = $table.Rows[$r]
                 for ($c = 0; $c -lt $colCount; $c++) {
-                    if ($c -lt $cells.Count) { $data[$r, $c] = $cells[$c] } else { $data[$r, $c] = "" }
+                    $value = if ($c -lt $cells.Count) { $cells[$c] } else { "" }
+                    if ($r -gt 0 -and @($LineBreakColumns -split ",") -contains $header[$c]) { $value = $value -replace '、(?=[^、：]+：)', [string][char]10 }
+                    $data[$r, $c] = $value
                 }
             }
             $range.Value2 = $data
@@ -115,6 +118,7 @@ function Write-SpecWorkbook {
             $range.AutoFilter() | Out-Null
 
             $ws.Activate()
+            $excel.ActiveWindow.Zoom = $Zoom
             $excel.ActiveWindow.FreezePanes = $false
             $excel.ActiveWindow.SplitColumn = 0
             $excel.ActiveWindow.SplitRow = 1
@@ -134,15 +138,18 @@ function Write-SpecWorkbook {
     }
 }
 
-foreach ($project in $Projects) {
-    $dir = Join-Path $toolRoot (Join-Path $project "doc\03_結合テスト")
-    $specPath = Join-Path $dir "テスト仕様書.md"
-    $outPath = Join-Path $dir "テスト仕様書.xlsx"
-    try {
-        Write-SpecWorkbook -SpecPath $specPath -OutPath $outPath
-        Write-Output "OK  $outPath"
-    }
-    catch {
-        Write-Output "NG  $project : $($_.Exception.Message)"
+foreach ($specPath in $SpecPath) {
+    $found = @(Resolve-Path -Path $specPath -ErrorAction SilentlyContinue)
+    if ($found.Count -eq 0) { Write-Output "NG  見つかりません: $specPath"; continue }
+    foreach ($item in $found) {
+        $resolved = $item.Path
+        $outPath = [System.IO.Path]::ChangeExtension($resolved, ".xlsx")
+        try {
+            Write-SpecWorkbook -SpecPath $resolved -OutPath $outPath
+            Write-Output "OK  $outPath"
+        }
+        catch {
+            Write-Output "NG  $resolved : $($_.Exception.Message)"
+        }
     }
 }
