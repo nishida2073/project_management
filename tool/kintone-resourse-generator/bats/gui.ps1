@@ -811,7 +811,7 @@ $settingsGroups = [ordered]@{
         Label = "グループ別"
         Sections = [ordered]@{
             "KINTONE" = @{
-                Label = "kintoneの接続情報"
+                Label = "認証情報"
                 Vars = [ordered]@{
                     "KintoneSubdomain" = @{ Label = "サブドメイン" }
                     "KintoneLoginName" = @{ Label = "ログイン名" }

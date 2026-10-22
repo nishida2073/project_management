@@ -675,7 +675,7 @@ $settingsGroups = [ordered]@{
             "COMMON" = @{
                 Label = "共通"
                 Vars = [ordered]@{
-                    "ClientDataRootDir"                    = @{ Label = "受講生データのフォルダ"; Browse = "Folder" }
+                    "ClientDataRootDir"                    = @{ Label = "グループデータのフォルダ"; Browse = "Folder" }
                     "TemplateRootDir"                      = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
                     "CommonLogPath"                        = @{ Label = "ログの出力先"; Browse = "Folder" }
                     "ResultRootDir"                        = @{ Label = "実施結果の取得先（共通）"; Browse = "Folder" }
