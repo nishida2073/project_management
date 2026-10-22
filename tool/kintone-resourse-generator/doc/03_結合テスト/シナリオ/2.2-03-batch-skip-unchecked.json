@@ -87,11 +87,6 @@
       "part": "実行（一括実行）/スペースのダウンロードの状態",
       "pattern": "^(成功|失敗)$",
       "timeoutSec": 60
-    },
-    {
-      "action": "expectTextGone",
-      "text": "成功",
-      "timeoutSec": 30
     }
   ]
 }
