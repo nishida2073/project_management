@@ -44,6 +44,11 @@
       "action": "expectTextPattern",
       "pattern": "^失敗$",
       "timeoutSec": 60
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "スペースID／スレッドIDを入力してください"
     }
   ]
 }

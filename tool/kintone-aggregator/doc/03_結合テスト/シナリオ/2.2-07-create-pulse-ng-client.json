@@ -29,7 +29,8 @@
       "part": "実行（アプリデータ作成）/実行（パルスサーベイ）"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "実行（アプリデータ作成）/状態（パルスサーベイ）",
       "pattern": "^失敗$",
       "timeoutSec": 900
     }

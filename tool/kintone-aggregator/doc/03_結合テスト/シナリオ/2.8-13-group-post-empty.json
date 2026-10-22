@@ -50,12 +50,18 @@
     },
     {
       "action": "clickAt",
-      "part": "環境設定（グループ別）/テスト投稿（投稿先）"
+      "part": "環境設定（グループ別）/テスト投稿"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（テスト投稿）",
       "pattern": "^失敗$",
       "timeoutSec": 60
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "スペースID／スレッドIDを入力してください"
     }
   ]
 }

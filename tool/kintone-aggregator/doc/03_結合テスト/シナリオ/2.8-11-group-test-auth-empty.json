@@ -29,9 +29,15 @@
       "part": "環境設定（グループ別）/テスト接続（認証情報）"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（認証情報）",
       "pattern": "^失敗$",
       "timeoutSec": 60
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "サブドメイン・ログイン名・パスワードをすべて入力してください"
     }
   ]
 }

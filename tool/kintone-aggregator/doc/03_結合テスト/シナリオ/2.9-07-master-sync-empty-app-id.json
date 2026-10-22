@@ -1,0 +1,68 @@
+{
+  "name": "2.9-07 環境設定（グループ別）で対象アプリID（ユーザー）を空にして保存し、環境設定（マスター）で同期実行を押すと、メッセージが表示され、状態が失敗になる",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（グループ別）/対象アプリID（ユーザー）",
+      "value": ""
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": 3000
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/保存"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/同期実行"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（同期実行）",
+      "pattern": "^失敗$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "対象アプリIDが入力されていません"
+    }
+  ]
+}

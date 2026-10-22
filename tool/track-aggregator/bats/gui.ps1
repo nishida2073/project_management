@@ -867,7 +867,7 @@ $masterSync = Add-FieldActionButton -Panel $grpUserMasterSync -Y 30 -Text "同�
         Update-GroupSettingsFields
         $syncAppId = Get-GroupSettingsFieldValue "SyncUserMasterAppId"
         if ([string]::IsNullOrWhiteSpace($syncAppId)) {
-            throw "対象アプリIDが入力されていません"
+            throw "対象アプリIDが入力されていません。"
         }
         $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId")
         $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $scriptDir -BatArgs $batArgs

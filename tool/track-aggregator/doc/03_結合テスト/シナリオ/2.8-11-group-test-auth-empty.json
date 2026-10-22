@@ -32,6 +32,11 @@
       "action": "expectTextPattern",
       "pattern": "^失敗$",
       "timeoutSec": 60
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "サブドメイン・ログイン名・パスワードをすべて入力してください"
     }
   ]
 }

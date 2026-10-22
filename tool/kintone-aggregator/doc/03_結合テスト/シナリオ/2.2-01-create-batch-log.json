@@ -33,7 +33,8 @@
       "ms": 30000
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "実行（アプリデータ作成）/状態（業務日誌）",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 900
     },
