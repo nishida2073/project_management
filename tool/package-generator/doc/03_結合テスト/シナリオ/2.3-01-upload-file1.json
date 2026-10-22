@@ -1,5 +1,5 @@
 {
-  "name": "2.3-01 パッケージ反映で、ファイル1に zip を指定すると、レコードが作成され状態が成功になる",
+  "name": "2.3-01 パッケージ反映で、ファイル1に zip を指定すると、レコードが作成または更新され、ログに記録され状態が成功になる",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -59,6 +59,12 @@
       "action": "expectText",
       "text": "成功",
       "timeoutSec": 30
+    },
+    {
+      "action": "expectLogContains",
+      "path": "logs",
+      "filter": "upload-kintone-file*.log",
+      "contains": "レコードID"
     }
   ]
 }

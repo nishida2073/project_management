@@ -32,6 +32,11 @@
       "action": "expectEditContains",
       "text": "終了（",
       "timeoutSec": 900
+    },
+    {
+      "action": "expectEditContains",
+      "text": ": 失敗",
+      "timeoutSec": 15
     }
   ]
 }

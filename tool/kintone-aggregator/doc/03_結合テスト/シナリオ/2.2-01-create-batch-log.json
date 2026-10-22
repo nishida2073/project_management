@@ -36,6 +36,11 @@
       "action": "expectTextPattern",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 900
+    },
+    {
+      "action": "expectFile",
+      "path": "output/01_提出状況/2026-09-01/ok-業務日誌.txt",
+      "exists": true
     }
   ]
 }

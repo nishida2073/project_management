@@ -121,6 +121,11 @@
       "action": "expectTextPattern",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 900
+    },
+    {
+      "action": "expectFile",
+      "path": "output/03_アラート検知結果/ok.xlsx",
+      "exists": true
     }
   ]
 }
