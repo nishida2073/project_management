@@ -44,7 +44,8 @@
       "part": "実行/スペースダウンロードタブ"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "実行（スペースダウンロード）/スペースID",
       "pattern": "^\\d+$",
       "timeoutSec": 30
     }

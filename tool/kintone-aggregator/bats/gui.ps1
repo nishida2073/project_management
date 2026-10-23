@@ -767,9 +767,9 @@ $masterSync = Add-FieldActionButton -Panel $grpUserMasterSync -Y 30 -Text "同�
         $matchingItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $groupName } | Select-Object -First 1
         if ($matchingItem) { $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $matchingItem }
         Update-GroupSettingsFields
-        $syncAppId = Get-GroupSettingsFieldValue "SyncUserMasterAppId"
+        $syncAppId = (Get-SetEnvDefaults -Path (Get-GroupBatPath $groupName $clientsDir))["SyncUserMasterAppId"]
         if ([string]::IsNullOrWhiteSpace($syncAppId)) {
-            throw "対象アプリIDが入力されていません。"
+            throw "対象アプリIDが設定されていません。"
         }
         $batArgs = @("-TargetGroupNameFilter:$groupName", "-SyncUserMasterAppId:$syncAppId")
         $exitCode = Invoke-BatProcess -BatPath $batchPath -WorkingDirectory $scriptDir -BatArgs $batArgs

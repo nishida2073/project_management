@@ -1,44 +1,14 @@
 {
-  "name": "2.9-09 環境設定（グループ別）で対象アプリIDを空にして保存し、環境設定（マスター）で同期実行を押すと、メッセージが表示され、状態が失敗になる",
+  "name": "2.9-09 対象アプリIDが空のクライアント（ng）で同期実行を押すと、メッセージが表示され、状態が失敗になる",
   "kind": "異常系",
   "vars": {
-    "client": "ok"
+    "client": "ng"
   },
   "setup": [],
   "steps": [
     {
       "action": "clickAt",
       "part": "メニュー/環境設定タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "環境設定/グループ別タブ"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "環境設定（グループ別）/対象のグループ",
-      "value": "{{client}}"
-    },
-    {
-      "action": "wheelAt",
-      "x": 800,
-      "y": 450,
-      "delta": -1200
-    },
-    {
-      "action": "typeAt",
-      "part": "環境設定（グループ別）/対象アプリID（ユーザー）",
-      "value": ""
-    },
-    {
-      "action": "wheelAt",
-      "x": 800,
-      "y": 450,
-      "delta": 3000
-    },
-    {
-      "action": "clickAt",
-      "part": "環境設定（グループ別）/保存"
     },
     {
       "action": "clickAt",
@@ -62,7 +32,7 @@
     {
       "action": "expectMessage",
       "window": "エラー",
-      "contains": "対象アプリIDが入力されていません"
+      "contains": "対象アプリIDが設定されていません"
     }
   ]
 }

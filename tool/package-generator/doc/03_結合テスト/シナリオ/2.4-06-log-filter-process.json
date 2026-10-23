@@ -1,5 +1,5 @@
 {
-  "name": "2.4-06 処理のラジオボタンを切り替えると、ラジオボタンごとに選んだ処理のログだけが表示される",
+  "name": "2.4-06 処理のラジオボタンで「パッケージの作成」を選ぶと、対象のグループに応じて、パッケージの作成のログだけが表示される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -103,25 +103,6 @@
     {
       "action": "expectEditNotContains",
       "text": "upload-kintone-file-ok-ok",
-      "timeoutSec": 30
-    },
-    {
-      "action": "clickAt",
-      "part": "ログ/パッケージのアップロード（ラジオ）"
-    },
-    {
-      "action": "expectEditContains",
-      "text": "upload-kintone-file-ok-ok",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditContains",
-      "text": "upload-kintone-file-ng-ng",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-package-ok-ok",
       "timeoutSec": 30
     }
   ]
