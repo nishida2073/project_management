@@ -183,10 +183,13 @@ function Invoke-UiStep {
             $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
             $tolX = if ($Step.tolX) { [int]$Step.tolX } else { 60 }
             $tolY = if ($Step.tolY) { [int]$Step.tolY } else { 12 }
-            Wait-Until -TimeoutSec $timeout -Message "位置 ($($Step.x),$($Step.y)) に $($Step.pattern)" -Condition {
+            $absent = [bool]$Step.absent
+            $message = if ($absent) { "位置 ($($Step.x),$($Step.y)) に $($Step.pattern) がない" } else { "位置 ($($Step.x),$($Step.y)) に $($Step.pattern)" }
+            Wait-Until -TimeoutSec $timeout -Message $message -Condition {
                 $top = $Context.Window.Current.BoundingRectangle.Top
                 $left = $Context.Window.Current.BoundingRectangle.Left
                 $all = $Context.Window.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
+                $found = $false
                 foreach ($element in $all) {
                     $name = $element.Current.Name
                     if (-not $name -or -not ($name -match $Step.pattern)) { continue }
@@ -194,9 +197,9 @@ function Invoke-UiStep {
                     if ($rect.IsEmpty) { continue }
                     $centerX = $rect.Left + $rect.Width / 2 - $left
                     $centerY = $rect.Top + $rect.Height / 2 - $top
-                    if ([Math]::Abs($centerX - [int]$Step.x) -le $tolX -and [Math]::Abs($centerY - [int]$Step.y) -le $tolY) { return $true }
+                    if ([Math]::Abs($centerX - [int]$Step.x) -le $tolX -and [Math]::Abs($centerY - [int]$Step.y) -le $tolY) { $found = $true; break }
                 }
-                return $false
+                return ($found -ne $absent)
             } | Out-Null
         }
         "expectCheckedAt" {

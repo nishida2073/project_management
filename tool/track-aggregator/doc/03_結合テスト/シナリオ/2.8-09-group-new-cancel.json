@@ -24,9 +24,11 @@
       "keys": "{ESC}"
     },
     {
-      "action": "expectTextGone",
-      "text": "TrackCancel",
-      "timeoutSec": 5
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "pattern": "^TrackCancel$",
+      "absent": true,
+      "timeoutSec": 10
     }
   ]
 }

@@ -54,8 +54,11 @@
       "part": "実行（パッケージ反映）/クリア（ファイル2）"
     },
     {
-      "action": "expectTextGone",
-      "text": "{{root}}\\generated\\ok\\コースA.zip"
+      "action": "expectTextAt",
+      "part": "実行（パッケージ反映）/ファイル2",
+      "pattern": "generated\\\\ok\\\\コースA\\.zip$",
+      "absent": true,
+      "timeoutSec": 10
     }
   ]
 }

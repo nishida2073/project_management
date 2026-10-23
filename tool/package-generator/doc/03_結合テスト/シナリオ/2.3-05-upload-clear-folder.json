@@ -49,8 +49,11 @@
       "part": "実行（パッケージ反映）/クリア（フォルダ）"
     },
     {
-      "action": "expectTextGone",
-      "text": "{{root}}\\generated\\ok"
+      "action": "expectTextAt",
+      "part": "実行（パッケージ反映）/フォルダ",
+      "pattern": "generated\\\\ok",
+      "absent": true,
+      "timeoutSec": 10
     }
   ]
 }
