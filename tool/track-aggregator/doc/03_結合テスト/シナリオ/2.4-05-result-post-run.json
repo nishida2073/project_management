@@ -4,112 +4,27 @@
   "vars": {
     "client": "ok"
   },
-  "setup": [],
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "output/集計結果/テスト"
+    },
+    {
+      "action": "makeDir",
+      "path": "output/集計結果/アンケート"
+    },
+    {
+      "action": "copyFile",
+      "from": "template/テスト結果.xlsx",
+      "to": "output/集計結果/テスト/{{client}}-テスト結果.xlsx"
+    },
+    {
+      "action": "copyFile",
+      "from": "template/アンケート結果.xlsx",
+      "to": "output/集計結果/アンケート/{{client}}-アンケート結果.xlsx"
+    }
+  ],
   "steps": [
-    {
-      "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行/実施結果取得タブ"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（実施結果取得）/対象のグループ（テスト）",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（実施結果取得）/実行（テスト）"
-    },
-    {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
-    },
-    {
-      "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行/実施結果取得タブ"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（実施結果取得）/対象のグループ（アンケート）",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（実施結果取得）/実行（アンケート）"
-    },
-    {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
-    },
-    {
-      "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行/実施結果集計タブ"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（実施結果集計）/対象のグループ（テスト）",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（実施結果集計）/実行（テスト）"
-    },
-    {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 1800
-    },
-    {
-      "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行/実施結果集計タブ"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（実施結果集計）/対象のグループ（アンケート）",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（実施結果集計）/実行（アンケート）"
-    },
-    {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 1800
-    },
     {
       "action": "clickAt",
       "part": "メニュー/実行タブ"
@@ -128,9 +43,10 @@
       "part": "実行（実施結果集計）/実行（投稿）"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 1800
+      "timeoutSec": 1800,
+      "part": "実行（実施結果集計）/状態（投稿）"
     }
   ]
 }

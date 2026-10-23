@@ -1,0 +1,61 @@
+{
+  "name": "2.3-12 パッケージ反映で、同じ名前の zip ファイルがあると、メッセージが出る",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/パッケージ作成タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（パッケージ作成）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（パッケージ作成）/実行"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（パッケージ作成）/状態",
+      "pattern": "^成功$",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/パッケージ反映タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（パッケージ反映）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "part": "実行（パッケージ反映）/タイトル",
+      "value": "TestTitle"
+    },
+    {
+      "action": "pasteAt",
+      "part": "実行（パッケージ反映）/ファイル1",
+      "value": "{{root}}\\generated\\ok\\コースA.zip"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（パッケージ反映）/実行"
+    },
+    {
+      "action": "expectMessage",
+      "window": "実行",
+      "contains": "同じ名前のzipファイルがあります"
+    }
+  ]
+}

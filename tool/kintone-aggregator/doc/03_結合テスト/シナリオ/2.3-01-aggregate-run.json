@@ -4,72 +4,25 @@
   "vars": {
     "client": "ok"
   },
-  "setup": [],
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "output/01_提出状況/2026-09-01"
+    },
+    {
+      "action": "writeFile",
+      "path": "output/01_提出状況/2026-09-01/{{client}}-業務日誌.txt",
+      "text": "除外対象\t提出状況\t通番\t会社名\t受講生ID\t氏名\tクラス名\t日付\t本日の理解度\r\nFALSE\tTRUE\t1\tテスト会社\tS001\tテスト太郎\tok\t2026-09-01\t3",
+      "encoding": "UTF8"
+    },
+    {
+      "action": "writeFile",
+      "path": "output/01_提出状況/2026-09-01/{{client}}-パルスサーベイ.txt",
+      "text": "提出状況\t聞きたいことや困ったことがあったときに、気軽に相談できる相手（グループのメンバー、講師、事務局等）や環境はありましたか？\t心身の調子はいかがですか？\t気になること、相談したいこと等ありましたら自由に記入してください。\r\nTRUE\t3\t3\t",
+      "encoding": "UTF8"
+    }
+  ],
   "steps": [
-    {
-      "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行/アプリデータ作成タブ"
-    },
-    {
-      "action": "typeAt",
-      "part": "実行（アプリデータ作成）/対象日（業務日誌）",
-      "value": "2026-09-01"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（アプリデータ作成）/対象のグループ（業務日誌）",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（アプリデータ作成）/実行（業務日誌）"
-    },
-    {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextAt",
-      "part": "実行（アプリデータ作成）/状態（業務日誌）",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
-    },
-    {
-      "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行/アプリデータ作成タブ"
-    },
-    {
-      "action": "typeAt",
-      "part": "実行（アプリデータ作成）/対象日（パルスサーベイ）",
-      "value": "2026-09-01"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（アプリデータ作成）/対象のグループ（パルスサーベイ）",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（アプリデータ作成）/実行（パルスサーベイ）"
-    },
-    {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextAt",
-      "part": "実行（アプリデータ作成）/状態（パルスサーベイ）",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
-    },
     {
       "action": "clickAt",
       "part": "メニュー/実行タブ"

@@ -24,9 +24,10 @@
       "part": "実行（経年比較）/実行"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 1800
+      "timeoutSec": 1800,
+      "part": "実行（経年比較）/状態"
     },
     {
       "action": "wait",

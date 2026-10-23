@@ -1183,6 +1183,7 @@ function New-BatchRunTab {
         $isChecked = if ($null -ne $bd.DefaultChecked) { $bd.DefaultChecked } else { $true }
         $chk = New-CheckBox -Text (Get-BatchDisplayLabel -ButtonDef $bd) -X 20 -Y $y -Width 360 -Height 22 -Checked $isChecked -AutoEllipsis $true
         $chk.Tag = $bd
+        if ($bd.Locked) { $chk.Add_CheckedChanged({ if (-not $this.Checked) { $this.Checked = $true } }) }
         $checkBoxes += $chk
         $stepPanel.Controls.Add($chk)
 

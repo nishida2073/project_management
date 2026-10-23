@@ -1,0 +1,51 @@
+{
+  "name": "2.8-07 環境設定（グループ別）で正しい投稿先で、テスト投稿を押すと、状態が成功になり、テスト用のコメントが投稿される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": 120
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": 120
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/テスト投稿"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（テスト投稿）",
+      "pattern": "^成功$",
+      "timeoutSec": 120
+    }
+  ]
+}

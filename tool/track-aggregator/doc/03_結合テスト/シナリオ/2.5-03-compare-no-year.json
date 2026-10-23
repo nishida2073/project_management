@@ -1,0 +1,47 @@
+{
+  "name": "2.5-03 経年比較で、比較する年の元データがない状態で実行すると、成功になり、結果ファイルが作られる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/経年比較タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（経年比較）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "deleteFile",
+      "path": "clients/{{client}}-2025.xlsx"
+    },
+    {
+      "action": "typeAt",
+      "part": "実行（経年比較）/対象の会社名",
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（経年比較）/実行"
+    },
+    {
+      "action": "expectTextAt",
+      "pattern": "^成功$",
+      "timeoutSec": 1800,
+      "part": "実行（経年比較）/状態"
+    },
+    {
+      "action": "expectFile",
+      "path": "output/集計結果/経年比較/ok-2026-経年比較結果.xlsx",
+      "exists": true
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "name": "2.8-05 環境設定（グループ別）で入力欄の値を変えて保存を押すと、値が設定ファイルに保存され、画面の表示が更新される",
+  "name": "2.8-03 環境設定（グループ別）で入力欄の値を変えて保存を押すと、値が設定ファイルに保存され、画面の表示が更新される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -31,6 +31,11 @@
     {
       "action": "expectEditContains",
       "text": "saved"
+    },
+    {
+      "action": "expectFileContains",
+      "path": "clients/ok.bat",
+      "contains": "saved"
     }
   ]
 }

@@ -86,11 +86,16 @@ function Invoke-UiStep {
         "writeFile" {
             $path = Join-Path $Context.Root $Step.path
             New-Item -ItemType Directory -Path (Split-Path $path -Parent) -Force | Out-Null
-            Set-Content -LiteralPath $path -Value $Step.text -Encoding ASCII
+            $encoding = if ($Step.encoding) { $Step.encoding } else { "ASCII" }
+            Set-Content -LiteralPath $path -Value $Step.text -Encoding $encoding
         }
         "expectFileContains" {
             $path = Join-Path $Context.Root $Step.path
             Wait-Until -Message "ファイルの内容 $($Step.path)" -Condition { (Test-Path -LiteralPath $path) -and ((Get-Content -LiteralPath $path -Raw).Contains($Step.contains)) } | Out-Null
+        }
+        "expectFileNotContains" {
+            $path = Join-Path $Context.Root $Step.path
+            Wait-Until -Message "ファイルの内容に含まれない $($Step.path)" -Condition { (Test-Path -LiteralPath $path) -and (-not (Get-Content -LiteralPath $path -Raw).Contains($Step.contains)) } | Out-Null
         }
         "deleteFile" {
             Remove-Item -LiteralPath (Join-Path $Context.Root $Step.path) -Force
@@ -300,7 +305,12 @@ function Invoke-UiStep {
         "expectFile" {
             $path = Join-Path $Context.Root $Step.path
             $expected = [bool]$Step.exists
-            Wait-Until -Message "ファイルの有無 $($Step.path)" -Condition { (Test-Path -LiteralPath $path) -eq $expected } | Out-Null
+            if ($Step.filter) {
+                Wait-Until -Message "ファイルの有無 $($Step.path)\$($Step.filter)" -Condition { (@(Get-ChildItem -LiteralPath $path -Filter $Step.filter -File -ErrorAction SilentlyContinue).Count -gt 0) -eq $expected } | Out-Null
+            }
+            else {
+                Wait-Until -Message "ファイルの有無 $($Step.path)" -Condition { (Test-Path -LiteralPath $path) -eq $expected } | Out-Null
+            }
         }
         default { throw "未対応の操作: $($Step.action)" }
     }

@@ -37,6 +37,11 @@
     {
       "action": "expectEditContains",
       "text": "saved"
+    },
+    {
+      "action": "expectFileContains",
+      "path": "clients/ok.bat",
+      "contains": "saved"
     }
   ]
 }

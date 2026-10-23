@@ -4,34 +4,19 @@
   "vars": {
     "client": "ok"
   },
-  "setup": [],
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "output/実施結果/01_テスト/{{client}}/社会を支えるITサービス"
+    },
+    {
+      "action": "writeFile",
+      "path": "output/実施結果/01_テスト/{{client}}/社会を支えるITサービス/{{client}}-result.csv",
+      "text": "名前,点数\r\nテスト,80",
+      "encoding": "UTF8"
+    }
+  ],
   "steps": [
-    {
-      "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行/実施結果取得タブ"
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（実施結果取得）/対象のグループ（テスト）",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（実施結果取得）/実行（テスト）"
-    },
-    {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextPattern",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
-    },
     {
       "action": "clickAt",
       "part": "メニュー/実行タブ"
@@ -50,9 +35,10 @@
       "part": "実行（実施結果取得）/実行（取得状況確認）"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
+      "timeoutSec": 60,
+      "part": "実行（実施結果取得）/状態（取得状況確認）"
     },
     {
       "action": "wait",

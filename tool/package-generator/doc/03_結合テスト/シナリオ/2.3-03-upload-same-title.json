@@ -74,7 +74,7 @@
       "action": "expectLogContains",
       "path": "logs",
       "filter": "upload-kintone-file*.log",
-      "contains": "同じタイトルのレコードを更新しました"
+      "contains": "同じタイトルのレコードを更新しました: レコードID"
     }
   ]
 }

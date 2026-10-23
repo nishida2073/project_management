@@ -377,6 +377,7 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "スペースの作成"
+                Locked = $true
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $true }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
@@ -420,6 +421,7 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "スペースのダウンロード"
+                Locked = $true
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
@@ -446,6 +448,7 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "設定ファイルの作成"
+                Locked = $true
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }
@@ -488,6 +491,7 @@ $categoryDefs = @(
         ButtonDefs = @(
             [PSCustomObject]@{
                 Label = "スペースの更新"
+                Locked = $true
                 Inputs = @(
                     [PSCustomObject]@{ Name = "TargetGroupName"; Label = "対象のグループ"; LabelWidth = 150; InputWidth = 200; Options = $blankOptions; Require = $false }
                     [PSCustomObject]@{ Name = "ConfigName"; Label = "スペース識別名"; LabelWidth = 150; InputWidth = 200; NewRow = $true; Require = $true }

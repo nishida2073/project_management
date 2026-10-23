@@ -76,6 +76,12 @@
       "action": "expectLogFile",
       "path": "logs",
       "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態",
+      "pattern": "^成功$",
+      "timeoutSec": 900
     }
   ]
 }

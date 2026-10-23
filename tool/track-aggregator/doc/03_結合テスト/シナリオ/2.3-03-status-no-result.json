@@ -1,0 +1,33 @@
+{
+  "name": "2.3-03 実施状況確認で、取得結果がない状態で実行すると、成功になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/実施状況確認タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（実施状況確認）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（実施状況確認）/実行"
+    },
+    {
+      "action": "expectTextAt",
+      "pattern": "^成功$",
+      "timeoutSec": 1800,
+      "part": "実行（実施状況確認）/状態"
+    }
+  ]
+}

@@ -36,6 +36,11 @@
       "exists": true
     },
     {
+      "action": "expectFileContains",
+      "path": "clients/PkgNew.bat",
+      "contains": "univ-kyousai-{x}"
+    },
+    {
       "action": "expectFile",
       "path": "clients/PkgNew.xlsx",
       "exists": true
