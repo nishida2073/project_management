@@ -1,2 +1,2 @@
 @echo off
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\..\ui-test\spec-to-excel.ps1" -SpecPath "%~dp0..\*.md" -Zoom 80 -ColumnWidths "通番=8,入力値=50,操作=50,期待値=50,参照=30" -LineBreakColumns "入力値,期待値,参照"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0..\..\..\..\ui-test\spec-to-excel.ps1" -SpecPath "%~dp0..\*.md" -Zoom 70 -ColumnWidths "通番=8,区分=10,入力値=70,操作=70,期待値=70,参照=20,実施結果=12" -LineBreakColumns "入力値,期待値,参照"
