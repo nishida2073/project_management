@@ -24,10 +24,6 @@
       "value": "KrgNew"
     },
     {
-      "action": "expectText",
-      "text": "KrgNew"
-    },
-    {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
       "pattern": "^KrgNew$",

@@ -21,8 +21,10 @@
       "value": "PkgUnsaved"
     },
     {
-      "action": "expectText",
-      "text": "PkgUnsaved"
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "pattern": "^PkgUnsaved$",
+      "timeoutSec": 30
     },
     {
       "action": "click",

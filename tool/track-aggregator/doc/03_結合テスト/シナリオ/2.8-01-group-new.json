@@ -24,9 +24,10 @@
       "value": "TrackNew"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のグループ",
       "pattern": "^TrackNew$",
-      "timeoutSec": 300
+      "timeoutSec": 30
     }
   ]
 }

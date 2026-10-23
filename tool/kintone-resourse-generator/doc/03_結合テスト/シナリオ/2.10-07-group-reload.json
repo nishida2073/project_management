@@ -29,8 +29,10 @@
       "part": "環境設定（グループ別）/再読込"
     },
     {
-      "action": "expectText",
-      "text": "iiglepv0966f"
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/サブドメイン",
+      "pattern": "^iiglepv0966f$",
+      "timeoutSec": 30
     }
   ]
 }

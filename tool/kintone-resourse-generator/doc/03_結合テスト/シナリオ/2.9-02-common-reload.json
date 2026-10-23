@@ -24,8 +24,10 @@
       "part": "環境設定（共通）/再読込"
     },
     {
-      "action": "expectText",
-      "text": "%BASE_PATH%download"
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/ダウンロード先のフォルダ",
+      "pattern": "^%BASE_PATH%download$",
+      "timeoutSec": 30
     }
   ]
 }

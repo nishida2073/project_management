@@ -34,10 +34,6 @@
       "exists": true
     },
     {
-      "action": "expectText",
-      "text": "KrgCopy"
-    },
-    {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
       "pattern": "^KrgCopy$",

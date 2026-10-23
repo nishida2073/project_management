@@ -21,8 +21,10 @@
       "part": "環境設定（共通）/再読込"
     },
     {
-      "action": "expectText",
-      "text": "%BASE_PATH%logs"
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/ログの出力先",
+      "pattern": "^%BASE_PATH%logs$",
+      "timeoutSec": 30
     }
   ]
 }

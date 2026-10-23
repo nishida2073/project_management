@@ -44,8 +44,10 @@
       "value": "{{root}}\\generated\\ok\\コースA.zip"
     },
     {
-      "action": "expectText",
-      "text": "{{root}}\\generated\\ok\\コースA.zip"
+      "action": "expectTextAt",
+      "part": "実行（パッケージ反映）/ファイル2",
+      "pattern": "generated\\\\ok\\\\コースA\\.zip$",
+      "timeoutSec": 30
     },
     {
       "action": "clickAt",

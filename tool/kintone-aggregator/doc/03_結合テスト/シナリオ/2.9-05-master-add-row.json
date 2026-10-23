@@ -24,9 +24,10 @@
       "part": "環境設定（マスター）/スケジュールの追加"
     },
     {
-      "action": "expectTextPattern",
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/スケジュールの通番（2行目）",
       "pattern": "^2$",
-      "timeoutSec": 300
+      "timeoutSec": 30
     }
   ]
 }
