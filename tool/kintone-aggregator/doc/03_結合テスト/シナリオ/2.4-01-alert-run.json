@@ -1,54 +1,62 @@
 {
-    "name":  "2.4-01 アラート集計で、対象日と対象のグループを入力して実行すると、状態が成功または警告になり、アラート結果が作られる",
-    "kind":  "正常系",
-    "vars":  {
-                 "client":  "ok"
-             },
-    "setup":  [
-                  {
-                      "action":  "makeDir",
-                      "path":  "output/02_アプリデータ集計"
-                  },
-                  {
-                      "action":  "writeFile",
-                      "path":  "output/02_アプリデータ集計/{{client}}-2026-09-01.txt",
-                      "text":  "除外対象\t提出状況_業務日誌\t通番\t会社名\t受講生ID\t氏名\tクラス名\t日付\t理解度\t提出状況_パルスサーベイ\t人間関係\t体調\tパルスサーベイフリーコメント\r\nFALSE\tTRUE\t1\tテスト会社\tS001\tテスト太郎\tok\t2026-09-01\t3\tTRUE\t3\t3\t",
-                      "encoding":  "UTF8"
-                  }
-              ],
-    "steps":  [
-                  {
-                      "action":  "clickAt",
-                      "part":  "メニュー/実行タブ"
-                  },
-                  {
-                      "action":  "clickAt",
-                      "part":  "実行/アラート集計タブ"
-                  },
-                  {
-                      "action":  "typeAt",
-                      "part":  "実行（アラート集計）/対象日（業務日誌・パルスサーベイ）",
-                      "value":  "2026-09-01"
-                  },
-                  {
-                      "action":  "selectComboAt",
-                      "part":  "実行（アラート集計）/対象のグループ（業務日誌・パルスサーベイ）",
-                      "value":  "{{client}}"
-                  },
-                  {
-                      "action":  "clickAt",
-                      "part":  "実行（アラート集計）/実行（業務日誌・パルスサーベイ）"
-                  },
-                  {
-                      "action":  "expectTextAt",
-                      "part":  "実行（アラート集計）/状態（業務日誌・パルスサーベイ）",
-                      "pattern":  "^(成功|警告)$",
-                      "timeoutSec":  900
-                  },
-                  {
-                      "action":  "expectFile",
-                      "path":  "output/03_アラート検知結果/ok.xlsx",
-                      "exists":  true
-                  }
-              ]
+  "name": "2.4-01 アラート集計で、対象日と対象のグループを入力して実行すると、状態が成功または警告になり、アラート結果が作られる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "output/02_アプリデータ集計"
+    },
+    {
+      "action": "writeFile",
+      "path": "output/02_アプリデータ集計/{{client}}-2026-09-01.txt",
+      "text": "除外対象\t提出状況_業務日誌\t通番\t会社名\t受講生ID\t氏名\tクラス名\t日付\t理解度\t提出状況_パルスサーベイ\t人間関係\t体調\tパルスサーベイフリーコメント\r\nFALSE\tTRUE\t1\tテスト会社\tS001\tテスト太郎\tok\t2026-09-01\t3\tTRUE\t3\t3\t",
+      "encoding": "UTF8"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/アラート集計タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "実行（アラート集計）/対象日（業務日誌・パルスサーベイ）",
+      "value": "2026-09-01"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（アラート集計）/対象のグループ（業務日誌・パルスサーベイ）",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（アラート集計）/実行（業務日誌・パルスサーベイ）"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（アラート集計）/状態（業務日誌・パルスサーベイ）",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 900
+    },
+    {
+      "action": "expectFile",
+      "path": "output/03_アラート検知結果/ok.xlsx",
+      "exists": true
+    }
+  ]
 }

@@ -11,6 +11,10 @@
       "part": "メニュー/環境設定タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（共通）/テンプレートのフォルダ",
       "value": "saved-template"

@@ -11,6 +11,10 @@
       "part": "メニュー/環境設定タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "wheelAt",
       "x": 800,
       "y": 450,
@@ -22,6 +26,30 @@
     },
     {
       "action": "shot"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/列定義（14行目）の変更前",
+      "value": "added-col"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/保存の状態",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "bats/collect-data-defs.json",
+      "contains": "added-col"
     }
   ]
 }

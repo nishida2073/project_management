@@ -11,6 +11,10 @@
       "part": "メニュー/環境設定タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（共通）/アプリデータ集計の出力先",
       "value": "tmp-reload"
@@ -18,6 +22,12 @@
     {
       "action": "clickAt",
       "part": "環境設定（共通）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
     },
     {
       "action": "expectTextAt",

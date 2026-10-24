@@ -22,8 +22,16 @@
       "part": "メニュー/実行タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "clickAt",
       "part": "メニュー/ログタブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
     },
     {
       "action": "selectComboAt",

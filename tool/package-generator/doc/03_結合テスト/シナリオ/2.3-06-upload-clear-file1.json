@@ -11,8 +11,16 @@
       "part": "メニュー/実行タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "clickAt",
       "part": "実行/パッケージ作成タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
     },
     {
       "action": "selectComboAt",
@@ -32,6 +40,10 @@
     {
       "action": "clickAt",
       "part": "実行/パッケージ反映タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
     },
     {
       "action": "selectComboAt",

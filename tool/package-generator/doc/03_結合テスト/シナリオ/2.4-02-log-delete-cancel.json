@@ -23,6 +23,10 @@
       "part": "メニュー/ログタブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "click",
       "target": "すべて削除"
     },

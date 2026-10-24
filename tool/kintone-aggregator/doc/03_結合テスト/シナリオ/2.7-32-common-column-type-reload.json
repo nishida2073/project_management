@@ -1,0 +1,67 @@
+{
+  "name": "2.7-32 環境設定（共通）でアプリデータ集計の列定義のタイプを変えて保存してから再読込すると、保存されたタイプが表示される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（共通）/列定義（13行目）のタイプ",
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/保存の状態",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/列定義（13行目）のタイプ",
+      "pattern": "^業務日誌$",
+      "timeoutSec": 15
+    }
+  ]
+}

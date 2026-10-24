@@ -11,6 +11,10 @@
       "part": "メニュー/環境設定タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（共通）/アンケート結果の取得先",
       "value": "saved-survey-result-root"

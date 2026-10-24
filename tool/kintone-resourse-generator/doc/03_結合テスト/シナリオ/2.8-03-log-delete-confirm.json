@@ -36,6 +36,10 @@
       "part": "メニュー/ログタブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "clickAt",
       "part": "ログ/すべて削除"
     },

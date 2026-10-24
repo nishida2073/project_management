@@ -11,13 +11,37 @@
       "part": "メニュー/環境設定タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "clickAt",
       "part": "環境設定/共通タブ"
     },
-    { "action": "wheelAt", "x": 300, "y": 500, "delta": -1200 },
-    { "action": "wait", "ms": 800 },
-    { "action": "wheelAt", "x": 300, "y": 500, "delta": -1200 },
-    { "action": "wait", "ms": 800 },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
     {
       "action": "typeAt",
       "part": "環境設定（共通）/合格点",

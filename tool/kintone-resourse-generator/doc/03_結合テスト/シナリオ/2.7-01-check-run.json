@@ -11,8 +11,16 @@
       "part": "メニュー/実行タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "clickAt",
       "part": "実行/スペースダウンロードタブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
     },
     {
       "action": "selectComboAt",
@@ -44,6 +52,10 @@
       "part": "実行/設定ファイル作成タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "selectComboAt",
       "part": "実行（設定ファイル作成）/対象のグループ",
       "value": "{{client}}"
@@ -71,6 +83,10 @@
     {
       "action": "clickAt",
       "part": "実行/スペース確認タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
     },
     {
       "action": "selectComboAt",

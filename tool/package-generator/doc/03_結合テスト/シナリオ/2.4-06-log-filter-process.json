@@ -32,6 +32,10 @@
       "part": "メニュー/ログタブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "selectComboAt",
       "part": "ログ/対象のグループ",
       "value": "ok"
