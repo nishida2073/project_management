@@ -1,5 +1,5 @@
 {
-  "name": "2.8-29 環境設定（グループ別）で新規作成を押したあとキャンセルすると、ダイアログが閉じる",
+  "name": "2.8-29 グループの新規作成の入力をキャンセルすると、グループは追加されない",
   "kind": "異常系",
   "vars": {
     "client": "ok"
@@ -32,16 +32,14 @@
       "part": "環境設定（グループ別）/新規作成"
     },
     {
-      "action": "closeWindow",
-      "title": "グループの新規作成",
-      "keys": "{ESC}"
+      "action": "pressKey",
+      "window": "グループの新規作成",
+      "key": "{ESC}"
     },
     {
-      "action": "expectTextAt",
-      "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^TestCancel$",
-      "absent": true,
-      "timeoutSec": 10
+      "action": "expectFile",
+      "path": "clients/TestCancel.bat",
+      "exists": false
     }
   ]
 }

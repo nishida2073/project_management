@@ -28,8 +28,8 @@
       "value": "{{client}}"
     },
     {
-      "action": "click",
-      "target": "新規作成"
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/新規作成"
     },
     {
       "action": "pressKey",
