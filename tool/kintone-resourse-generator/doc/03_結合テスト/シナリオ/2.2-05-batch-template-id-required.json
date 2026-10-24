@@ -1,5 +1,5 @@
 {
-  "name": "2.2-05 一括実行で、スペース識別名が空だと、メッセージが出る",
+  "name": "2.2-05 一括実行で、スペーステンプレートIDが空だと、メッセージが出る",
   "kind": "異常系",
   "vars": {
     "client": "ok"
@@ -28,13 +28,18 @@
       "value": "{{client}}"
     },
     {
+      "action": "typeAt",
+      "part": "実行（一括実行）/スペース識別名",
+      "value": "TestSpace"
+    },
+    {
       "action": "clickAt",
       "part": "実行（一括実行）/実行（隠した状態）"
     },
     {
       "action": "expectMessage",
       "window": "一括実行",
-      "contains": "スペース識別名 を設定してください"
+      "contains": "スペーステンプレートID を設定してください"
     }
   ]
 }

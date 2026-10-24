@@ -53,6 +53,12 @@
     {
       "action": "closeWindow",
       "title": "{{client}}"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
     }
   ]
 }

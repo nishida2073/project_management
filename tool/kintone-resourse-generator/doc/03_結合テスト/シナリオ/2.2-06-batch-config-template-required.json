@@ -1,5 +1,5 @@
 {
-  "name": "2.1-05 一括実行で、対象日を空にして実行すると、「対象日 を設定してください」と表示される",
+  "name": "2.2-06 一括実行で、設定テンプレートを両方とも選ばないと、メッセージが出る",
   "kind": "異常系",
   "vars": {
     "client": "ok"
@@ -23,23 +23,28 @@
       "ms": 500
     },
     {
-      "action": "typeAt",
-      "part": "実行（一括実行）/対象日",
-      "value": ""
-    },
-    {
       "action": "selectComboAt",
       "part": "実行（一括実行）/対象のグループ",
       "value": "{{client}}"
     },
     {
+      "action": "typeAt",
+      "part": "実行（一括実行）/スペース識別名",
+      "value": "TestSpace"
+    },
+    {
+      "action": "typeAt",
+      "part": "実行（一括実行）/スペーステンプレートID",
+      "value": "TmplId"
+    },
+    {
       "action": "clickAt",
-      "part": "実行（一括実行）/実行"
+      "part": "実行（一括実行）/実行（隠した状態）"
     },
     {
       "action": "expectMessage",
       "window": "一括実行",
-      "contains": "対象日 を設定してください"
+      "contains": "設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください"
     }
   ]
 }

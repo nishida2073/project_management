@@ -24,6 +24,12 @@
     },
     {
       "action": "expectCheckedAt",
+      "part": "実行（一括実行）/パッケージの作成",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
       "part": "実行（一括実行）/パッケージのアップロード（チェック確認）",
       "checked": false,
       "timeoutSec": 15
@@ -47,6 +53,12 @@
       "action": "expectTextAt",
       "part": "実行（一括実行）/状態（パッケージのアップロード）",
       "pattern": "^スキップ$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態",
+      "pattern": "^(成功|警告)$",
       "timeoutSec": 60
     }
   ]

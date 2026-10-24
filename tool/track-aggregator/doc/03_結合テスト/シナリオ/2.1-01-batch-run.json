@@ -124,6 +124,12 @@
       "path": "output/実施結果/02_アンケート/ok/社会を支えるITサービス",
       "filter": "nttdata-univ-class_results*.csv",
       "exists": true
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態",
+      "pattern": "^(成功|警告)$",
+      "timeoutSec": 60
     }
   ]
 }

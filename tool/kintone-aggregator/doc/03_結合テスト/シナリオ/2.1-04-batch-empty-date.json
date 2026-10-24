@@ -1,6 +1,6 @@
 {
-  "name": "2.1-03 一括実行が終わると、実行のログがログの出力先に保存される",
-  "kind": "正常系",
+  "name": "2.1-04 一括実行で、対象日を空にして実行すると、「対象日 を設定してください」と表示される",
+  "kind": "異常系",
   "vars": {
     "client": "ok"
   },
@@ -23,6 +23,11 @@
       "ms": 500
     },
     {
+      "action": "typeAt",
+      "part": "実行（一括実行）/対象日",
+      "value": ""
+    },
+    {
       "action": "selectComboAt",
       "part": "実行（一括実行）/対象のグループ",
       "value": "{{client}}"
@@ -32,14 +37,9 @@
       "part": "実行（一括実行）/実行"
     },
     {
-      "action": "expectTextAt",
-      "part": "実行（一括実行）/状態（パッケージの作成）",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
-    },
-    {
-      "action": "expectLogFile",
-      "path": "logs"
+      "action": "expectMessage",
+      "window": "一括実行",
+      "contains": "対象日 を設定してください"
     }
   ]
 }
