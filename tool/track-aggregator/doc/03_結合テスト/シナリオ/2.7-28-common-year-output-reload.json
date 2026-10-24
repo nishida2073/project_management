@@ -52,8 +52,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/経年比較結果の出力先",
-      "pattern": "^%OutputRootDir%\\\\経年比較$",
+      "pattern": "^{{OutputYearComparisonCollectDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputYearComparisonCollectDir": "OutputYearComparisonCollectDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

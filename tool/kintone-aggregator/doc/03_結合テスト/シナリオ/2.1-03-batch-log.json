@@ -1,5 +1,5 @@
 {
-  "name": "2.1-03 一括実行が終わると、処理ごとの状態が成功または警告になり、ログの出力先が作られる",
+  "name": "2.1-03 一括実行が終わると、処理ごとの状態が成功または警告になる",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -67,9 +67,9 @@
       "timeoutSec": 60
     },
     {
-      "action": "expectFile",
+      "action": "expectLogFile",
       "path": "logs",
-      "exists": true
+      "timeoutSec": 30
     }
   ]
 }

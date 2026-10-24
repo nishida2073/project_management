@@ -52,8 +52,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/アンケート結果ファイル名の接尾語",
-      "pattern": "^アンケート結果$",
+      "pattern": "^{{OutputSurveyResultFileSuffixRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputSurveyResultFileSuffix": "OutputSurveyResultFileSuffix"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

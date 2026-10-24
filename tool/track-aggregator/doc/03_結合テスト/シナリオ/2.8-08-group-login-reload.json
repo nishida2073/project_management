@@ -48,9 +48,18 @@
     },
     {
       "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
       "part": "環境設定（グループ別）/ログイン名",
-      "pattern": "^user01$",
+      "pattern": "^{{KintoneLoginNameRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "KintoneLoginName": "KintoneLoginName"
+  }
 }

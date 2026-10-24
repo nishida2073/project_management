@@ -15,6 +15,14 @@
       "ms": 500
     },
     {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（共通）/提出状況の出力先",
       "value": "saved-report-output"

@@ -48,12 +48,16 @@
     },
     {
       "action": "expectWindow",
-      "title": "download.ahk",
+      "title": "{{AutoHotkeyScriptPathName}}",
       "timeoutSec": 30
     },
     {
       "action": "closeWindow",
-      "title": "download.ahk"
+      "title": "{{AutoHotkeyScriptPathName}}"
     }
-  ]
+  ],
+  "fixtureVars": {
+    "AutoHotkeyScriptPath": "AutoHotkeyScriptPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

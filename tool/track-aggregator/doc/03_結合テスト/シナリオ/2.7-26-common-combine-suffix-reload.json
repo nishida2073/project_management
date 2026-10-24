@@ -52,8 +52,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/統合結果ファイル名の接尾語",
-      "pattern": "^統合結果$",
+      "pattern": "^{{OutputCombineResultFileSuffixRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputCombineResultFileSuffix": "OutputCombineResultFileSuffix"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

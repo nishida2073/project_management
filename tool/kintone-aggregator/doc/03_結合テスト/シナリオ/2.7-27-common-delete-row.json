@@ -15,10 +15,22 @@
       "ms": 500
     },
     {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "wheelAt",
       "x": 800,
       "y": 450,
       "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
     },
     {
       "action": "clickAt",

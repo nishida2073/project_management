@@ -28,8 +28,8 @@
       "value": "{{client}}"
     },
     {
-      "action": "click",
-      "target": "コピー"
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/コピー"
     },
     {
       "action": "enterDialog",

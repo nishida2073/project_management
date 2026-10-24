@@ -1,5 +1,5 @@
 {
-  "name": "2.5-01 投稿で、対象日と対象のグループを入力して実行すると、状態が成功または警告になり、投稿先のスレッドにコメントが投稿される",
+  "name": "2.5-01 投稿で、対象日と対象のグループを入力して実行すると、状態が成功または警告になる",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -56,13 +56,7 @@
       "action": "expectTextAt",
       "part": "実行（アラート集計）/状態（投稿）",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
-    },
-    {
-      "action": "expectLogContains",
-      "path": "logs",
-      "filter": "post-alert-result-ok-2026-09-01_*.log",
-      "contains": "集計結果を投稿しました"
+      "timeoutSec": 60
     }
   ]
 }

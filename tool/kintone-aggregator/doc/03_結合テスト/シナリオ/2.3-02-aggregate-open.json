@@ -57,7 +57,7 @@
       "action": "expectTextAt",
       "part": "実行（アプリデータ集計）/状態",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
+      "timeoutSec": 60
     },
     {
       "action": "wait",

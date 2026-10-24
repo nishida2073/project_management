@@ -60,8 +60,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/trackログインURL",
-      "pattern": "^https://nttdata\\-univ\\.train\\.tracks\\.run/auth/login$",
+      "pattern": "^{{TrackLoginUrlRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "TrackLoginUrl": "TrackLoginUrl"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

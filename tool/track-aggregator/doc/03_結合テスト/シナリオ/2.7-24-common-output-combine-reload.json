@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/統合結果の出力先",
-      "pattern": "^%OutputRootDir%\\\\統合$",
+      "pattern": "^{{OutputCombineCollectDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputCombineCollectDir": "OutputCombineCollectDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

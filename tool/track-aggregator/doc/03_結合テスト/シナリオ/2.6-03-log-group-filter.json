@@ -12,8 +12,88 @@
     },
     {
       "action": "writeFile",
+      "path": "logs/download-survey-results-ok_20261021_000000.log",
+      "text": "download-survey-results-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-download-status-ok_20261021_000000.log",
+      "text": "check-download-status-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-combine-result-ok_20261021_000000.log",
+      "text": "collect-combine-result-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-test-result-ok_20261021_000000.log",
+      "text": "collect-test-result-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-survey-result-ok_20261021_000000.log",
+      "text": "collect-survey-result-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/post-collect-results-ok_20261021_000000.log",
+      "text": "post-collect-results-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-year-comparison-result-ok_20261021_000000.log",
+      "text": "collect-year-comparison-result-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/sync-kintone-to-sheet-ok_20261021_000000.log",
+      "text": "sync-kintone-to-sheet-ok"
+    },
+    {
+      "action": "writeFile",
       "path": "logs/download-test-results-ng_20261021_000000.log",
       "text": "download-test-results-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-survey-results-ng_20261021_000000.log",
+      "text": "download-survey-results-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-download-status-ng_20261021_000000.log",
+      "text": "check-download-status-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-combine-result-ng_20261021_000000.log",
+      "text": "collect-combine-result-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-test-result-ng_20261021_000000.log",
+      "text": "collect-test-result-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-survey-result-ng_20261021_000000.log",
+      "text": "collect-survey-result-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/post-collect-results-ng_20261021_000000.log",
+      "text": "post-collect-results-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-year-comparison-result-ng_20261021_000000.log",
+      "text": "collect-year-comparison-result-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/sync-kintone-to-sheet-ng_20261021_000000.log",
+      "text": "sync-kintone-to-sheet-ng"
     }
   ],
   "steps": [

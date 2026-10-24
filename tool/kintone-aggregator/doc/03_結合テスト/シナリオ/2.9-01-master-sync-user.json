@@ -35,7 +35,7 @@
       "action": "expectTextAt",
       "part": "環境設定（マスター）/状態（同期実行）",
       "pattern": "^成功$",
-      "timeoutSec": 300
+      "timeoutSec": 60
     }
   ]
 }

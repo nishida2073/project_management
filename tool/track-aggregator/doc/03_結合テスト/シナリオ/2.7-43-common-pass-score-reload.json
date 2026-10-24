@@ -54,7 +54,7 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/合格点",
-      "pattern": "^80$",
+      "pattern": "^{{PassScoreRe}}$",
       "timeoutSec": 15
     },
     {
@@ -63,5 +63,9 @@
       "pattern": "^完了$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "PassScore": "PassScore"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

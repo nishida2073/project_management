@@ -23,7 +23,7 @@
       "ms": 500
     },
     {
-      "action": "pasteAt",
+      "action": "typeAt",
       "part": "環境設定（共通）/基本設定",
       "value": "tmp-reload"
     },
@@ -40,8 +40,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/基本設定",
-      "pattern": "^%BASE_PATH%clients$",
+      "pattern": "^{{ClientDataRootDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "ClientDataRootDir": "ClientDataRootDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

@@ -1,5 +1,5 @@
 {
-  "name": "2.6-01 ログのファイルがある状態で、すべて削除を押し、確認で「いいえ」を選ぶと、ログのファイルは残る",
+  "name": "2.6-01 ログのファイルがある状態で、すべて削除を押すと確認ダイアログが表示され、「いいえ」を選ぶとログのファイルは残る",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -7,13 +7,63 @@
   "setup": [
     {
       "action": "writeFile",
-      "path": "logs/create-daily-report-ok_20260101_000000.log",
+      "path": "logs/create-daily-report-ok-2026-09-01_20261021_000000.log",
       "text": "create-daily-report-ok"
     },
     {
       "action": "writeFile",
-      "path": "logs/create-daily-report-ng_20260101_000000.log",
+      "path": "logs/create-pulse-survey-ok-2026-09-01_20261021_000000.log",
+      "text": "create-pulse-survey-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-app-data-ok-2026-09-01_20261021_000000.log",
+      "text": "collect-app-data-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-alert-ok-2026-09-01_20261021_000000.log",
+      "text": "check-alert-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/post-alert-result-ok-2026-09-01_20261021_000000.log",
+      "text": "post-alert-result-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/sync-kintone-to-sheet-ok-2026-09-01_20261021_000000.log",
+      "text": "sync-kintone-to-sheet-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ng-2026-09-01_20261021_000000.log",
       "text": "create-daily-report-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-pulse-survey-ng-2026-09-01_20261021_000000.log",
+      "text": "create-pulse-survey-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/collect-app-data-ng-2026-09-01_20261021_000000.log",
+      "text": "collect-app-data-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-alert-ng-2026-09-01_20261021_000000.log",
+      "text": "check-alert-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/post-alert-result-ng-2026-09-01_20261021_000000.log",
+      "text": "post-alert-result-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/sync-kintone-to-sheet-ng-2026-09-01_20261021_000000.log",
+      "text": "sync-kintone-to-sheet-ng"
     }
   ],
   "steps": [
@@ -47,7 +97,7 @@
     {
       "action": "expectTextAt",
       "part": "ログ/ログ欄",
-      "pattern": "create-daily-report-ok",
+      "pattern": "create\\-daily\\-report\\-ok",
       "tolX": 500,
       "tolY": 180,
       "timeoutSec": 15
@@ -55,7 +105,7 @@
     {
       "action": "expectTextAt",
       "part": "ログ/ログ欄",
-      "pattern": "create-daily-report-ng",
+      "pattern": "create\\-daily\\-report\\-ng",
       "tolX": 500,
       "tolY": 180,
       "timeoutSec": 15

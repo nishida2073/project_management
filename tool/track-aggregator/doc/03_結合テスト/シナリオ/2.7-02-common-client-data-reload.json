@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/グループデータのフォルダ",
-      "pattern": "^%BASE_PATH%clients$",
+      "pattern": "^{{ClientDataRootDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "ClientDataRootDir": "ClientDataRootDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

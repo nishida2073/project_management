@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/テスト結果の取得先",
-      "pattern": "^%ResultRootDir%\\\\01_テスト$",
+      "pattern": "^{{TestResultRootDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "TestResultRootDir": "TestResultRootDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

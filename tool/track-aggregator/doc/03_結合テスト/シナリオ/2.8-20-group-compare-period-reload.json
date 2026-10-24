@@ -68,6 +68,12 @@
     },
     {
       "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
       "part": "環境設定（グループ別）/経年比較の比較年数",
       "pattern": "^.+$",
       "timeoutSec": 15,

@@ -50,8 +50,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/業務日誌の受講生IDフィールドコード",
-      "pattern": "^個人ID$",
+      "pattern": "^{{TargetUserCodeFieldDailyRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "TargetUserCodeFieldDaily": "TargetUserCodeFieldDaily"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

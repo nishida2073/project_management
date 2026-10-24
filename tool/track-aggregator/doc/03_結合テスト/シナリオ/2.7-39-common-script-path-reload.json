@@ -60,8 +60,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/trackダウンロード用スクリプトのパス",
-      "pattern": "^%BASE_PATH%AutoHotkey\\\\scripts\\\\download\\.ahk$",
+      "pattern": "^{{AutoHotkeyScriptPathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "AutoHotkeyScriptPath": "AutoHotkeyScriptPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

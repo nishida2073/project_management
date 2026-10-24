@@ -54,7 +54,7 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/経年比較の比較年数",
-      "pattern": "^1$",
+      "pattern": "^{{ComparePeriodRe}}$",
       "timeoutSec": 15
     },
     {
@@ -63,5 +63,9 @@
       "pattern": "^完了$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "ComparePeriod": "ComparePeriod"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

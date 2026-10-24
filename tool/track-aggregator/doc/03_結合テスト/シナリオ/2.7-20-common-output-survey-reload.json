@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/アンケート集計結果の出力先",
-      "pattern": "^%OutputRootDir%\\\\アンケート$",
+      "pattern": "^{{OutputSurveyCollectDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputSurveyCollectDir": "OutputSurveyCollectDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

@@ -15,6 +15,14 @@
       "ms": 500
     },
     {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（共通）/アラート検知結果の出力先",
       "value": "tmp-reload"
@@ -32,8 +40,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/アラート検知結果の出力先",
-      "pattern": "^%OutputRootDir%\\\\03_アラート検知結果$",
+      "pattern": "^{{OutputAlertRootDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputAlertRootDir": "OutputAlertRootDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

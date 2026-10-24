@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/テンプレートのフォルダ",
-      "pattern": "^%BASE_PATH%template$",
+      "pattern": "^{{TemplateRootDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "TemplateRootDir": "TemplateRootDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

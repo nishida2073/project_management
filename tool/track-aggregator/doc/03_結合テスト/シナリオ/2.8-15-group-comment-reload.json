@@ -37,6 +37,12 @@
       "part": "環境設定（グループ別）/再読込"
     },
     {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
       "action": "expectEditContains",
       "text": "集計結果を更新しました。（{グループ名}）",
       "timeoutSec": 15

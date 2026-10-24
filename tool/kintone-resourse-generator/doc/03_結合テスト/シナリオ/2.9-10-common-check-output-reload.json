@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/チェック結果の出力先フォルダ",
-      "pattern": "^%BASE_PATH%checked$",
+      "pattern": "^{{CommonCheckOutputPathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "CommonCheckOutputPath": "CommonCheckOutputPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

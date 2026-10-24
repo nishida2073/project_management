@@ -15,6 +15,14 @@
       "ms": 500
     },
     {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（共通）/ログの出力先",
       "value": "tmp-reload"
@@ -32,8 +40,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/ログの出力先",
-      "pattern": "^%BASE_PATH%logs$",
+      "pattern": "^{{CommonLogPathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "CommonLogPath": "CommonLogPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

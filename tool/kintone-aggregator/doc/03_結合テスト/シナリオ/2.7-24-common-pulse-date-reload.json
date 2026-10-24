@@ -50,8 +50,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/パルスサーベイの日付フィールドコード",
-      "pattern": "^日付_0$",
+      "pattern": "^{{TargetDateCodeFieldPulseRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "TargetDateCodeFieldPulse": "TargetDateCodeFieldPulse"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

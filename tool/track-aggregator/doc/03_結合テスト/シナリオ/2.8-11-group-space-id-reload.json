@@ -48,9 +48,18 @@
     },
     {
       "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
       "part": "環境設定（グループ別）/投稿先スペースID",
-      "pattern": "^3$",
+      "pattern": "^{{SpaceIdRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "SpaceId": "SpaceId"
+  }
 }

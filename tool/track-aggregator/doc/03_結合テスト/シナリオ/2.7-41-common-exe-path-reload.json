@@ -60,8 +60,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/trackダウンロード用実行ファイルのパス",
-      "pattern": "^%BASE_PATH%AutoHotkey\\\\v2\\\\AutoHotkey\\.exe$",
+      "pattern": "^{{AutoHotkeyExePathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "AutoHotkeyExePath": "AutoHotkeyExePath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

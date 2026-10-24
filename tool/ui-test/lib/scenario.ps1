@@ -329,12 +329,37 @@ function Expand-UiStep {
     return ($json | ConvertFrom-Json)
 }
 
+function Get-UiScenarioVars {
+    param($Scenario, [string]$Root)
+    $vars = [ordered]@{}
+    if ($Scenario.vars) {
+        foreach ($name in $Scenario.vars.PSObject.Properties.Name) { $vars[$name] = $Scenario.vars.$name }
+    }
+    if ($Scenario.fixtureVars) {
+        $relative = if ($Scenario.fixtureFile) { $Scenario.fixtureFile } else { "clients\" + $vars["client"] + ".bat" }
+        $file = Join-Path $Root $relative
+        $lines = @(Get-Content -LiteralPath $file -Encoding Default)
+        foreach ($name in $Scenario.fixtureVars.PSObject.Properties.Name) {
+            $key = $Scenario.fixtureVars.$name
+            $pattern = '^\s*set\s+"?' + [regex]::Escape($key) + '=(.*?)"?\s*$'
+            $line = $lines | Where-Object { $_ -match $pattern } | Select-Object -First 1
+            if (-not $line) { throw "fixtureVars: $key が $file にありません" }
+            $value = [regex]::Match($line, $pattern).Groups[1].Value
+            $vars[$name] = $value
+            $vars[$name + "Re"] = [regex]::Escape($value)
+            $vars[$name + "Name"] = [System.IO.Path]::GetFileName($value)
+        }
+    }
+    return [pscustomobject]$vars
+}
+
 function Invoke-UiSetup {
     param($Scenario, [string]$Root)
     $index = 0
+    $vars = Get-UiScenarioVars -Scenario $Scenario -Root $Root
     foreach ($step in @($Scenario.setup)) {
         $index++
-        $step = Expand-UiStep -Step $step -Vars $Scenario.vars -Root $Root
+        $step = Expand-UiStep -Step $step -Vars $vars -Root $Root
         try { Invoke-UiStep -Step $step -Context ([pscustomobject]@{ Root = $Root }) } catch { throw "準備 $index : $($_.Exception.Message)" }
     }
 }
@@ -342,9 +367,10 @@ function Invoke-UiSetup {
 function Invoke-UiSteps {
     param($Scenario, $Context)
     $index = 0
+    $vars = Get-UiScenarioVars -Scenario $Scenario -Root $Context.Root
     foreach ($step in @($Scenario.steps)) {
         $index++
-        $step = Expand-UiStep -Step $step -Vars $Scenario.vars -Root $Context.Root
+        $step = Expand-UiStep -Step $step -Vars $vars -Root $Context.Root
         try { Invoke-UiStep -Step $step -Context $Context } catch {
             $message = $_.Exception.Message
             if ($message -like "タイムアウト*") { $message += Get-UiDiagnostics -Window $Context.Window }

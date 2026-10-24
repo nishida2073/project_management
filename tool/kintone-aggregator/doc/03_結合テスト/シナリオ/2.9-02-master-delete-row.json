@@ -1,5 +1,5 @@
 {
-  "name": "2.9-02 環境設定（マスター）のスケジュールの表で行を選んで削除を押すと、選んだ行が削除される",
+  "name": "2.9-02 環境設定（マスター）のスケジュールの1行目を削除して保存すると、Excel の1行目の科目名が消える",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -37,6 +37,23 @@
       "pattern": "^社会を支えるITサービス$",
       "absent": true,
       "timeoutSec": 10
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "スケジュール",
+      "cell": "B2",
+      "equals": ""
     }
   ]
 }

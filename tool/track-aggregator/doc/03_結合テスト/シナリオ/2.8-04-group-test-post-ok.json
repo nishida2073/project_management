@@ -34,6 +34,10 @@
       "delta": -1200
     },
     {
+      "action": "wait",
+      "ms": 800
+    },
+    {
       "action": "clickAt",
       "part": "環境設定（グループ別）/テスト投稿"
     },

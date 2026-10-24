@@ -11,6 +11,10 @@
       "part": "メニュー/環境設定タブ"
     },
     {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "clickAt",
       "part": "環境設定/グループ別タブ"
     },
@@ -44,9 +48,18 @@
     },
     {
       "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象アプリID（業務日誌）",
-      "pattern": "^180$",
+      "pattern": "^{{DailyTargetAppIdsRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "DailyTargetAppIds": "DailyTargetAppIds"
+  }
 }

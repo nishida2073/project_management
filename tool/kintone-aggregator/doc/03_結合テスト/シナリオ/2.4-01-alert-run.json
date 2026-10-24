@@ -51,7 +51,7 @@
       "action": "expectTextAt",
       "part": "実行（アラート集計）/状態（業務日誌・パルスサーベイ）",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 900
+      "timeoutSec": 60
     },
     {
       "action": "expectFile",

@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/実施結果の取得先（共通）",
-      "pattern": "^%BASE_PATH%output\\\\実施結果$",
+      "pattern": "^{{ResultRootDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "ResultRootDir": "ResultRootDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

@@ -40,8 +40,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/ログの出力先",
-      "pattern": "^%BASE_PATH%logs$",
+      "pattern": "^{{CommonLogPathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "CommonLogPath": "CommonLogPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

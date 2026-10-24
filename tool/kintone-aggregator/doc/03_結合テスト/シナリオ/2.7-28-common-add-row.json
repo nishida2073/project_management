@@ -15,17 +15,26 @@
       "ms": 500
     },
     {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "wheelAt",
       "x": 800,
       "y": 450,
       "delta": -1200
     },
     {
-      "action": "clickAt",
-      "part": "環境設定（共通）/アプリデータ集計の列定義の追加"
+      "action": "wait",
+      "ms": 800
     },
     {
-      "action": "shot"
+      "action": "clickAt",
+      "part": "環境設定（共通）/アプリデータ集計の列定義の追加"
     },
     {
       "action": "wait",
@@ -34,7 +43,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/列定義（14行目）の変更前",
-      "value": "added-col"
+      "value": "saved-col"
     },
     {
       "action": "clickAt",
@@ -49,7 +58,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/collect-data-defs.json",
-      "contains": "added-col"
+      "contains": "\"orgName\":  \"saved-col\""
     }
   ]
 }

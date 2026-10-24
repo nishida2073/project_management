@@ -59,8 +59,11 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/パッケージ定義ファイル",
-      "pattern": "^%BASE_PATH%clients\\\\ok\\.xlsx$",
+      "pattern": "^{{GenerateConfigPathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "GenerateConfigPath": "GenerateConfigPath"
+  }
 }

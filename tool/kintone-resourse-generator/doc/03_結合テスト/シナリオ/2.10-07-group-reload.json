@@ -45,8 +45,11 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/サブドメイン",
-      "pattern": "^iiglepv0966f$",
+      "pattern": "^{{KintoneSubdomainRe}}$",
       "timeoutSec": 30
     }
-  ]
+  ],
+  "fixtureVars": {
+    "KintoneSubdomain": "KintoneSubdomain"
+  }
 }

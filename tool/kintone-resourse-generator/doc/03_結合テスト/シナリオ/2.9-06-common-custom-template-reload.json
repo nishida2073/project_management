@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/設定テンプレート（カスタム）ファイルのフォルダ",
-      "pattern": "^%BASE_PATH%template\\\\custom$",
+      "pattern": "^{{CommonCustomTemplatePathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "CommonCustomTemplatePath": "CommonCustomTemplatePath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

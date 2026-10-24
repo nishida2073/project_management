@@ -1,6 +1,7 @@
 {
   "name": "2.4-05 削除対象のログがないときは、すべて削除でメッセージが出る",
   "kind": "異常系",
+  "vars": {},
   "setup": [
     {
       "action": "makeDir",
@@ -22,8 +23,8 @@
       "value": ""
     },
     {
-      "action": "click",
-      "target": "すべて削除"
+      "action": "clickAt",
+      "part": "ログ/すべて削除"
     },
     {
       "action": "expectMessage",

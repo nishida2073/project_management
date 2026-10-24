@@ -38,9 +38,18 @@
     },
     {
       "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
       "part": "環境設定（グループ別）/サブドメイン",
-      "pattern": "^iiglepv0966f$",
+      "pattern": "^{{KintoneSubdomainRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "KintoneSubdomain": "KintoneSubdomain"
+  }
 }

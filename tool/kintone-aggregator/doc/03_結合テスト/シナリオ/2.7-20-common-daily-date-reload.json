@@ -50,8 +50,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/業務日誌の日付フィールドコード",
-      "pattern": "^日付$",
+      "pattern": "^{{TargetDateCodeFieldDailyRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "TargetDateCodeFieldDaily": "TargetDateCodeFieldDaily"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

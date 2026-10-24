@@ -40,8 +40,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/ダウンロード先のフォルダ",
-      "pattern": "^%BASE_PATH%download$",
+      "pattern": "^{{CommonDownloadPathRe}}$",
       "timeoutSec": 30
     }
-  ]
+  ],
+  "fixtureVars": {
+    "CommonDownloadPath": "CommonDownloadPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

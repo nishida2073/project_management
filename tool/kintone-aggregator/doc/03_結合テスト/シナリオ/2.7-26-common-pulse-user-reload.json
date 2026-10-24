@@ -50,8 +50,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/パルスサーベイの受講生IDフィールドコード",
-      "pattern": "^個人ID$",
+      "pattern": "^{{TargetUserCodeFieldPulseRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "TargetUserCodeFieldPulse": "TargetUserCodeFieldPulse"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

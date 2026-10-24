@@ -28,8 +28,8 @@
       "value": "{{client}}"
     },
     {
-      "action": "click",
-      "target": "新規作成"
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/新規作成"
     },
     {
       "action": "enterDialog",
@@ -43,8 +43,8 @@
       "timeoutSec": 30
     },
     {
-      "action": "click",
-      "target": "コピー"
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/コピー"
     },
     {
       "action": "expectMessage",

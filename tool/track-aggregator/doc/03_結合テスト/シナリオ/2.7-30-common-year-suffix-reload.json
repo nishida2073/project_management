@@ -52,8 +52,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/経年比較結果ファイル名の接尾語",
-      "pattern": "^経年比較結果$",
+      "pattern": "^{{OutputYearComparisonResultFileSuffixRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputYearComparisonResultFileSuffix": "OutputYearComparisonResultFileSuffix"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

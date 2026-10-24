@@ -15,6 +15,14 @@
       "ms": 500
     },
     {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（共通）/アプリデータ集計の出力先",
       "value": "tmp-reload"
@@ -32,8 +40,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/アプリデータ集計の出力先",
-      "pattern": "^%OutputRootDir%\\\\02_アプリデータ集計$",
+      "pattern": "^{{OutputCollectDataRootDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputCollectDataRootDir": "OutputCollectDataRootDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

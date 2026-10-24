@@ -28,8 +28,8 @@
       "value": "{{client}}"
     },
     {
-      "action": "click",
-      "target": "コピー"
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/コピー"
     },
     {
       "action": "enterDialog",
@@ -39,12 +39,15 @@
     {
       "action": "expectFileContains",
       "path": "clients/ok.bat",
-      "contains": "generated\\ok"
+      "contains": "{{GenerateOutputPath}}"
     },
     {
       "action": "expectFile",
       "path": "clients/ok.xlsx",
       "exists": true
     }
-  ]
+  ],
+  "fixtureVars": {
+    "GenerateOutputPath": "GenerateOutputPath"
+  }
 }

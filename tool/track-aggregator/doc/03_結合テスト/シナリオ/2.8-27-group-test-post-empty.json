@@ -34,6 +34,10 @@
       "delta": 3000
     },
     {
+      "action": "wait",
+      "ms": 800
+    },
+    {
       "action": "typeAt",
       "part": "環境設定（グループ別）/投稿先スペースID",
       "value": ""
@@ -43,6 +47,10 @@
       "x": 800,
       "y": 450,
       "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
     },
     {
       "action": "clickAt",

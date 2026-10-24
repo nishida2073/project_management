@@ -28,6 +28,86 @@
       "action": "writeFile",
       "path": "logs/create-space-from-template-ng-config2_20260101_000000.log",
       "text": "create-space-from-template-ng-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-kintone-resources-ok-config1_20260101_000000.log",
+      "text": "download-kintone-resources-ok-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-kintone-resources-ok-config2_20260101_000000.log",
+      "text": "download-kintone-resources-ok-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-kintone-resources-ng-config1_20260101_000000.log",
+      "text": "download-kintone-resources-ng-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/download-kintone-resources-ng-config2_20260101_000000.log",
+      "text": "download-kintone-resources-ng-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-config-from-template-ok-config1_20260101_000000.log",
+      "text": "generate-config-from-template-ok-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-config-from-template-ok-config2_20260101_000000.log",
+      "text": "generate-config-from-template-ok-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-config-from-template-ng-config1_20260101_000000.log",
+      "text": "generate-config-from-template-ng-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/generate-config-from-template-ng-config2_20260101_000000.log",
+      "text": "generate-config-from-template-ng-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/apply-kintone-resources-ok-config1_20260101_000000.log",
+      "text": "apply-kintone-resources-ok-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/apply-kintone-resources-ok-config2_20260101_000000.log",
+      "text": "apply-kintone-resources-ok-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/apply-kintone-resources-ng-config1_20260101_000000.log",
+      "text": "apply-kintone-resources-ng-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/apply-kintone-resources-ng-config2_20260101_000000.log",
+      "text": "apply-kintone-resources-ng-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-kintone-resources-ok-config1_20260101_000000.log",
+      "text": "check-kintone-resources-ok-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-kintone-resources-ok-config2_20260101_000000.log",
+      "text": "check-kintone-resources-ok-config2"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-kintone-resources-ng-config1_20260101_000000.log",
+      "text": "check-kintone-resources-ng-config1"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/check-kintone-resources-ng-config2_20260101_000000.log",
+      "text": "check-kintone-resources-ng-config2"
     }
   ],
   "steps": [

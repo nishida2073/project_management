@@ -59,8 +59,11 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/パッケージの出力先",
-      "pattern": "^%BASE_PATH%generated\\\\ok$",
+      "pattern": "^{{GenerateOutputPathRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "GenerateOutputPath": "GenerateOutputPath"
+  }
 }

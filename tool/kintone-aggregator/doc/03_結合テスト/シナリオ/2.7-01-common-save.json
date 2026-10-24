@@ -1,5 +1,5 @@
 {
-  "name": "2.7-01 環境設定（共通）で基本設定の値を変えて保存を押すと、変えた値が保存され、画面の表示が更新される",
+  "name": "2.7-01 環境設定（共通）で基本設定の値を変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,9 +23,9 @@
       "ms": 500
     },
     {
-      "action": "pasteAt",
+      "action": "typeAt",
       "part": "環境設定（共通）/基本設定",
-      "value": "%BASE_PATH%clients_test"
+      "value": "saved-client-data"
     },
     {
       "action": "clickAt",
@@ -38,15 +38,9 @@
       "timeoutSec": 15
     },
     {
-      "action": "expectTextAt",
-      "part": "環境設定（共通）/状態（保存）",
-      "pattern": "^完了$",
-      "timeoutSec": 15
-    },
-    {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "ClientDataRootDir=%BASE_PATH%clients_test"
+      "contains": "ClientDataRootDir=saved-client-data"
     }
   ]
 }

@@ -85,6 +85,40 @@
       "part": "ログ/アプリデータ作成-業務日誌（ラジオ）"
     },
     {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-pulse\\-survey\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-pulse\\-survey\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
+    },
+    {
       "action": "clickAt",
       "part": "ログ/アプリデータ作成-パルスサーベイ（ラジオ）"
     },

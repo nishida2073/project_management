@@ -1,6 +1,7 @@
 {
   "name": "2.5-02 共通の設定で変えた値を再読込すると、保存されている値に戻る",
   "kind": "正常系",
+  "vars": {},
   "setup": [],
   "steps": [
     {
@@ -37,8 +38,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/ログの出力先",
-      "pattern": "^%BASE_PATH%logs$",
+      "pattern": "^{{CommonLogPathRe}}$",
       "timeoutSec": 30
     }
-  ]
+  ],
+  "fixtureVars": {
+    "CommonLogPath": "CommonLogPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

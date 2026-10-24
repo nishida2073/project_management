@@ -49,6 +49,24 @@
       "timeoutSec": 15
     },
     {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/アプリデータ集計-業務日誌・パルスサーベイ",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/アラート集計-業務日誌・パルスサーベイ",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/アラート集計-投稿",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
       "action": "clickAt",
       "part": "実行（一括実行）/実行"
     },

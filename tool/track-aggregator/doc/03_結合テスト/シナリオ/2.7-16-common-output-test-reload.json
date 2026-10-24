@@ -32,8 +32,12 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（共通）/テスト集計結果の出力先",
-      "pattern": "^%OutputRootDir%\\\\テスト$",
+      "pattern": "^{{OutputTestCollectDirRe}}$",
       "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "OutputTestCollectDir": "OutputTestCollectDir"
+  },
+  "fixtureFile": "bats\\common.bat"
 }
