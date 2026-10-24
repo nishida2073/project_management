@@ -1,18 +1,10 @@
 {
   "name": "2.6-10 グループ別の設定を変えて保存すると、設定ファイルに保存される",
   "kind": "正常系",
-  "setup": [
-    {
-      "action": "copyFile",
-      "from": "clients/template/client.bat",
-      "to": "clients/CopySrc.bat"
-    },
-    {
-      "action": "copyFile",
-      "from": "clients/template/client.xlsx",
-      "to": "clients/CopySrc.xlsx"
-    }
-  ],
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
   "steps": [
     {
       "action": "clickAt",
@@ -33,7 +25,7 @@
     {
       "action": "selectComboAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "value": "CopySrc"
+      "value": "{{client}}"
     },
     {
       "action": "typeAt",
@@ -52,7 +44,7 @@
     },
     {
       "action": "expectFileContains",
-      "path": "clients/CopySrc.bat",
+      "path": "clients/ok.bat",
       "contains": "saved"
     }
   ]

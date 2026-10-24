@@ -23,6 +23,11 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "clickAt",
       "part": "環境設定（グループ別）/新規作成"
     },
@@ -34,7 +39,7 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^TrackCancel$",
+      "pattern": "^TestCancel$",
       "absent": true,
       "timeoutSec": 10
     }

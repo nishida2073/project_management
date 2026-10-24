@@ -1,6 +1,9 @@
 {
   "name": "2.6-26 新規作成のグループ名入力をキャンセルすると、グループは追加されない",
   "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [],
   "steps": [
     {
@@ -20,6 +23,11 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "click",
       "target": "新規作成"
     },
@@ -30,7 +38,7 @@
     },
     {
       "action": "expectFile",
-      "path": "clients/PkgCancel.bat",
+      "path": "clients/TestCancel.bat",
       "exists": false
     }
   ]

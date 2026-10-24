@@ -1,18 +1,10 @@
 {
   "name": "2.6-05 コピーすると、パッケージの出力先の名前が新しいグループの名前になる",
   "kind": "正常系",
-  "setup": [
-    {
-      "action": "writeFile",
-      "path": "clients/CopySrc.bat",
-      "text": "set \"GenerateOutputPath=%BASE_PATH%generated\\CopySrc\"\r\nset \"KintoneSubdomain=univ-kyousai-{x}\"\r\n"
-    },
-    {
-      "action": "copyFile",
-      "from": "clients/template/client.xlsx",
-      "to": "clients/CopySrc.xlsx"
-    }
-  ],
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
   "steps": [
     {
       "action": "clickAt",
@@ -33,7 +25,7 @@
     {
       "action": "selectComboAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "value": "CopySrc"
+      "value": "{{client}}"
     },
     {
       "action": "click",
@@ -42,12 +34,12 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "PkgCopy"
+      "value": "TestCopy"
     },
     {
       "action": "expectFileContains",
-      "path": "clients/PkgCopy.bat",
-      "contains": "generated\\PkgCopy"
+      "path": "clients/TestCopy.bat",
+      "contains": "generated\\TestCopy"
     }
   ]
 }

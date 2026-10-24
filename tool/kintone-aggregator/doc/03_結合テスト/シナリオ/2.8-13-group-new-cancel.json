@@ -39,7 +39,7 @@
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^AggCancel$",
+      "pattern": "^TestCancel$",
       "absent": true,
       "timeoutSec": 10
     }

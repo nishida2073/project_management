@@ -30,7 +30,7 @@
     {
       "action": "pasteAt",
       "part": "環境設定（マスター）/スケジュールの科目名（1行目）",
-      "value": "一時"
+      "value": "tmp-reload"
     },
     {
       "action": "clickAt",

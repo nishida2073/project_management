@@ -1,18 +1,10 @@
 {
   "name": "2.6-04 コピーすると、新しいグループの設定ファイルと Excel ファイルが作られ、コピー元は変わらない",
   "kind": "正常系",
-  "setup": [
-    {
-      "action": "writeFile",
-      "path": "clients/CopySrc.bat",
-      "text": "set \"GenerateOutputPath=%BASE_PATH%generated\\CopySrc\"\r\nset \"KintoneSubdomain=univ-kyousai-{x}\"\r\n"
-    },
-    {
-      "action": "copyFile",
-      "from": "clients/template/client.xlsx",
-      "to": "clients/CopySrc.xlsx"
-    }
-  ],
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
   "steps": [
     {
       "action": "clickAt",
@@ -33,7 +25,7 @@
     {
       "action": "selectComboAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "value": "CopySrc"
+      "value": "{{client}}"
     },
     {
       "action": "click",
@@ -42,16 +34,16 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "PkgCopy"
+      "value": "TestCopy"
     },
     {
       "action": "expectFileContains",
-      "path": "clients/CopySrc.bat",
-      "contains": "generated\\CopySrc"
+      "path": "clients/ok.bat",
+      "contains": "generated\\ok"
     },
     {
       "action": "expectFile",
-      "path": "clients/CopySrc.xlsx",
+      "path": "clients/ok.xlsx",
       "exists": true
     }
   ]

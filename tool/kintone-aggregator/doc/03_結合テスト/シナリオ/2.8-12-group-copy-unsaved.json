@@ -34,7 +34,7 @@
     {
       "action": "enterDialog",
       "window": "グループの新規作成",
-      "value": "AggUnsaved"
+      "value": "TestUnsaved"
     },
     {
       "action": "clickAt",

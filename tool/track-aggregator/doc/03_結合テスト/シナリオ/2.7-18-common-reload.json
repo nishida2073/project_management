@@ -25,7 +25,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/テスト結果ファイル名の接尾語",
-      "value": "tmp"
+      "value": "tmp-reload"
     },
     {
       "action": "clickAt",

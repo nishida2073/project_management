@@ -34,22 +34,22 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "TrackCopy"
+      "value": "TestCopy"
     },
     {
       "action": "expectFile",
-      "path": "clients/TrackCopy.bat",
+      "path": "clients/TestCopy.bat",
       "exists": true
     },
     {
       "action": "expectFile",
-      "path": "clients/TrackCopy.xlsx",
+      "path": "clients/TestCopy.xlsx",
       "exists": true
     },
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^TrackCopy$",
+      "pattern": "^TestCopy$",
       "timeoutSec": 30
     }
   ]

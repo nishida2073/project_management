@@ -1,6 +1,9 @@
 {
   "name": "2.6-27 コピー元が保存されていないグループはコピーできない",
   "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [],
   "steps": [
     {
@@ -20,18 +23,23 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "click",
       "target": "新規作成"
     },
     {
       "action": "enterDialog",
       "window": "グループの新規作成",
-      "value": "PkgUnsaved"
+      "value": "TestUnsaved"
     },
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^PkgUnsaved$",
+      "pattern": "^TestUnsaved$",
       "timeoutSec": 30
     },
     {
@@ -45,7 +53,7 @@
     },
     {
       "action": "expectFile",
-      "path": "clients/PkgUnsaved.bat",
+      "path": "clients/TestUnsaved.bat",
       "exists": false
     }
   ]

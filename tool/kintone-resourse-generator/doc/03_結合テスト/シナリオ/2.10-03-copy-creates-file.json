@@ -34,17 +34,17 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "KrgCopy"
+      "value": "TestCopy"
     },
     {
       "action": "expectFile",
-      "path": "clients/KrgCopy.bat",
+      "path": "clients/TestCopy.bat",
       "exists": true
     },
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^KrgCopy$",
+      "pattern": "^TestCopy$",
       "timeoutSec": 15
     }
   ]

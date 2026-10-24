@@ -1,18 +1,10 @@
 {
   "name": "2.6-03 保存済みのグループをコピーすると、設定ファイルと Excel ファイルができる",
   "kind": "正常系",
-  "setup": [
-    {
-      "action": "copyFile",
-      "from": "clients/template/client.bat",
-      "to": "clients/CopySrc.bat"
-    },
-    {
-      "action": "copyFile",
-      "from": "clients/template/client.xlsx",
-      "to": "clients/CopySrc.xlsx"
-    }
-  ],
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
   "steps": [
     {
       "action": "clickAt",
@@ -33,7 +25,7 @@
     {
       "action": "selectComboAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "value": "CopySrc"
+      "value": "{{client}}"
     },
     {
       "action": "click",
@@ -42,22 +34,22 @@
     {
       "action": "enterDialog",
       "window": "グループのコピー作成",
-      "value": "PkgCopy"
+      "value": "TestCopy"
     },
     {
       "action": "expectFile",
-      "path": "clients/PkgCopy.bat",
+      "path": "clients/TestCopy.bat",
       "exists": true
     },
     {
       "action": "expectFile",
-      "path": "clients/PkgCopy.xlsx",
+      "path": "clients/TestCopy.xlsx",
       "exists": true
     },
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^PkgCopy$",
+      "pattern": "^TestCopy$",
       "timeoutSec": 30
     }
   ]

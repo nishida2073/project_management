@@ -22,7 +22,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/ログの出力先",
-      "value": "tmp"
+      "value": "tmp-reload"
     },
     {
       "action": "clickAt",

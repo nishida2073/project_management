@@ -23,6 +23,11 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "click",
       "target": "新規作成"
     },

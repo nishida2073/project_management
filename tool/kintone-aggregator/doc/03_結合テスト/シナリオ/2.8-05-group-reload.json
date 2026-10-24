@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（グループ別）/サブドメイン（認証情報）",
-      "value": "tmp"
+      "value": "tmp-reload"
     },
     {
       "action": "clickAt",

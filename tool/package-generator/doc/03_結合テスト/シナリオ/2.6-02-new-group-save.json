@@ -1,6 +1,9 @@
 {
   "name": "2.6-02 新規作成したグループは、保存すると設定ファイルと Excel ファイルができる",
   "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
   "setup": [],
   "steps": [
     {
@@ -20,13 +23,18 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "click",
       "target": "新規作成"
     },
     {
       "action": "enterDialog",
       "window": "グループの新規作成",
-      "value": "PkgNew"
+      "value": "TestNew"
     },
     {
       "action": "clickAt",
@@ -40,17 +48,17 @@
     },
     {
       "action": "expectFile",
-      "path": "clients/PkgNew.bat",
+      "path": "clients/TestNew.bat",
       "exists": true
     },
     {
       "action": "expectFileContains",
-      "path": "clients/PkgNew.bat",
+      "path": "clients/TestNew.bat",
       "contains": "univ-kyousai-{x}"
     },
     {
       "action": "expectFile",
-      "path": "clients/PkgNew.xlsx",
+      "path": "clients/TestNew.xlsx",
       "exists": true
     }
   ]

@@ -23,18 +23,23 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "clickAt",
       "part": "環境設定（グループ別）/新規作成"
     },
     {
       "action": "enterDialog",
       "window": "グループの新規作成",
-      "value": "TrackNew"
+      "value": "TestNew"
     },
     {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/対象のグループ",
-      "pattern": "^TrackNew$",
+      "pattern": "^TestNew$",
       "timeoutSec": 30
     }
   ]
