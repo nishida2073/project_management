@@ -434,14 +434,14 @@ $categoryDefs = @(
     [PSCustomObject]@{
         Label = "アプリデータ作成"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; BatchPath = $createDailyReportBat; OpenTarget = Get-ResolvedVar "OutputReportDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
-            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; BatchPath = $createPulseSurveyBat; OpenTarget = Get-ResolvedVar "OutputReportDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌"; BatchLabel = "アプリデータ作成-業務日誌"; IncludeInBatch = $true; Locked = $true; BatchPath = $createDailyReportBat; OpenTarget = Get-ResolvedVar "OutputReportDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "パルスサーベイ"; BatchLabel = "アプリデータ作成-パルスサーベイ"; IncludeInBatch = $true; Locked = $true; BatchPath = $createPulseSurveyBat; OpenTarget = Get-ResolvedVar "OutputReportDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
         Label = "アプリデータ集計"
         ButtonDefs = @(
-            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; BatchPath = $collectAppDataBat; OpenTarget = Get-ResolvedVar "OutputCollectDataRootDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
+            [PSCustomObject]@{ Label = "業務日誌・パルスサーベイ"; BatchLabel = "アプリデータ集計-業務日誌・パルスサーベイ"; IncludeInBatch = $true; Locked = $true; BatchPath = $collectAppDataBat; OpenTarget = Get-ResolvedVar "OutputCollectDataRootDir" $commonEnvBat; Inputs = $dateAndGroupInputs }
         )
     }
     [PSCustomObject]@{
