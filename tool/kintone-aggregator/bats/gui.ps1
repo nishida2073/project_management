@@ -555,14 +555,14 @@ $settingsGroups = [ordered]@{
                 }
             }
             "CommonDaily" = @{
-                Label = "業務日誌（共通）"
+                Label = "業務日誌"
                 Vars = [ordered]@{
                     "TargetDateCodeFieldDaily" = @{ Label = "日付フィールドコード" }
                     "TargetUserCodeFieldDaily" = @{ Label = "受講生IDフィールドコード" }
                 }
             }
             "CommonPulse" = @{
-                Label = "パルスサーベイ（共通）"
+                Label = "パルスサーベイ"
                 Vars = [ordered]@{
                     "TargetDateCodeFieldPulse" = @{ Label = "日付フィールドコード" }
                     "TargetUserCodeFieldPulse" = @{ Label = "受講生IDフィールドコード" }

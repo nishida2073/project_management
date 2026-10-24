@@ -1,0 +1,43 @@
+{
+  "name": "2.7-29 パルスサーベイの受講生IDフィールドコードを変えて再読込を押すと、保存されている値に戻る",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -240
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/パルスサーベイの受講生IDフィールドコード",
+      "value": "tmp-reload"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/パルスサーベイの受講生IDフィールドコード",
+      "pattern": "^個人ID$",
+      "timeoutSec": 15
+    }
+  ]
+}

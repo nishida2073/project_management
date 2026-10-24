@@ -1,0 +1,34 @@
+{
+  "name": "2.9-11 ログの出力先フォルダを変えて保存を押すと、変えた値が保存される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/ログの出力先フォルダ",
+      "value": "saved-log-folder"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "CommonLogPath=saved-log-folder"
+    }
+  ]
+}
