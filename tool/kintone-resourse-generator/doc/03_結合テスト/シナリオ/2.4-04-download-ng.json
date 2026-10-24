@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペースダウンロード）/スペース識別名",
-      "value": "dlng"
+      "value": "TestSpace"
     },
     {
       "action": "typeAt",

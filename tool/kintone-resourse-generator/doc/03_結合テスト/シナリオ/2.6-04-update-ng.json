@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペース更新）/スペース識別名",
-      "value": "updng"
+      "value": "TestSpace"
     },
     {
       "action": "clickAt",

@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペースダウンロード）/スペース識別名",
-      "value": "dlok"
+      "value": "TestSpace"
     },
     {
       "action": "typeAt",
@@ -63,7 +63,7 @@
     {
       "action": "typeAt",
       "part": "実行（設定ファイル作成）/スペース識別名",
-      "value": "dlok"
+      "value": "TestSpace"
     },
     {
       "action": "keysAt",
@@ -82,7 +82,7 @@
     },
     {
       "action": "expectFile",
-      "path": "config/dlok_config.xlsx",
+      "path": "config/TestSpace_config.xlsx",
       "exists": true
     }
   ]

@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペースダウンロード）/スペース識別名",
-      "value": "dlok"
+      "value": "TestSpace"
     },
     {
       "action": "typeAt",
@@ -63,7 +63,7 @@
     {
       "action": "typeAt",
       "part": "実行（設定ファイル作成）/スペース識別名",
-      "value": "dlok"
+      "value": "TestSpace"
     },
     {
       "action": "keysAt",
@@ -96,7 +96,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペース更新）/スペース識別名",
-      "value": "dlok"
+      "value": "TestSpace"
     },
     {
       "action": "clickAt",
@@ -118,12 +118,12 @@
     },
     {
       "action": "expectWindow",
-      "title": "dlok",
+      "title": "TestSpace",
       "timeoutSec": 60
     },
     {
       "action": "closeWindow",
-      "title": "dlok",
+      "title": "TestSpace",
       "keys": "^w"
     }
   ]

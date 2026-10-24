@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（一括実行）/スペース識別名",
-      "value": "ngtest"
+      "value": "TestSpace"
     },
     {
       "action": "typeAt",

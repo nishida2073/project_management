@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（設定ファイル作成）/スペース識別名",
-      "value": "TestId"
+      "value": "TestSpace"
     },
     {
       "action": "clickAt",

@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペース確認）/スペース識別名",
-      "value": "chkng"
+      "value": "TestSpace"
     },
     {
       "action": "clickAt",

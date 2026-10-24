@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペースダウンロード）/スペース識別名",
-      "value": "dlok"
+      "value": "TestSpace"
     },
     {
       "action": "typeAt",
@@ -53,12 +53,12 @@
     },
     {
       "action": "expectWindow",
-      "title": "dlok_download",
+      "title": "TestSpace_download",
       "timeoutSec": 60
     },
     {
       "action": "closeWindow",
-      "title": "dlok_download"
+      "title": "TestSpace_download"
     }
   ]
 }

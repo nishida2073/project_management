@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペース作成）/スペース識別名",
-      "value": "createok"
+      "value": "TestSpace"
     },
     {
       "action": "typeAt",

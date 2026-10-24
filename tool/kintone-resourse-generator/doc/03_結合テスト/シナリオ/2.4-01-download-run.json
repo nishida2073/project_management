@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "実行（スペースダウンロード）/スペース識別名",
-      "value": "dlok"
+      "value": "TestSpace"
     },
     {
       "action": "typeAt",
@@ -49,7 +49,7 @@
     },
     {
       "action": "expectFile",
-      "path": "download/dlok_download.xlsx",
+      "path": "download/TestSpace_download.xlsx",
       "exists": true
     }
   ]
