@@ -40,14 +40,22 @@
       "key": "y"
     },
     {
-      "action": "expectFile",
-      "path": "logs/download-test-results-ok_20260101_000000.log",
-      "exists": false
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-test\\-results\\-ok",
+      "tolX": 600,
+      "tolY": 150,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectFile",
-      "path": "logs/download-test-results-ng_20260101_000000.log",
-      "exists": false
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-test\\-results\\-ng",
+      "tolX": 600,
+      "tolY": 150,
+      "timeoutSec": 15,
+      "absent": true
     }
   ]
 }

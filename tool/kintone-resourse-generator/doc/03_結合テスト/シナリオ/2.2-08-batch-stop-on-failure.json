@@ -87,9 +87,11 @@
       "timeoutSec": 60
     },
     {
-      "action": "expectTextGone",
-      "text": "成功",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態（設定ファイルの作成）",
+      "pattern": ".+",
+      "absent": true,
+      "timeoutSec": 15
     },
     {
       "action": "expectTextAt",

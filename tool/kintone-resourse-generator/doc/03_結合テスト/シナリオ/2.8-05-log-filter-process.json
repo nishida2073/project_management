@@ -130,520 +130,368 @@
       "value": ""
     },
     {
-      "action": "expectEditContains",
-      "text": "create-space-from-template-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditContains",
-      "text": "create-space-from-template-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditContains",
-      "text": "create-space-from-template-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditContains",
-      "text": "create-space-from-template-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "clickAt",
+      "part": "ログ/スペースの作成"
     },
     {
       "action": "clickAt",
       "part": "ログ/スペースのダウンロード"
     },
     {
-      "action": "expectEditContains",
-      "text": "download-kintone-resources-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "download-kintone-resources-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "download-kintone-resources-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "download-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
       "action": "clickAt",
       "part": "ログ/設定ファイルの作成"
     },
     {
-      "action": "expectEditContains",
-      "text": "generate-config-from-template-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "generate-config-from-template-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "generate-config-from-template-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "generate-config-from-template-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "download\\-kintone\\-resources\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
       "action": "clickAt",
       "part": "ログ/スペースの更新"
     },
     {
-      "action": "expectEditContains",
-      "text": "apply-kintone-resources-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "apply-kintone-resources-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "apply-kintone-resources-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "apply-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-config\\-from\\-template\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "check-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
       "action": "clickAt",
       "part": "ログ/スペースの確認"
     },
     {
-      "action": "expectEditContains",
-      "text": "check-kintone-resources-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "check-kintone-resources-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "check-kintone-resources-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditContains",
-      "text": "check-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "apply\\-kintone\\-resources\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-space-from-template-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config1",
-      "timeoutSec": 30
+      "action": "clickAt",
+      "part": "ログ/スペースの作成"
     },
     {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "download-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-space\\-from\\-template\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ok-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ok\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config1",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ok\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditNotContains",
-      "text": "generate-config-from-template-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ng\\-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ok-config2",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config1",
-      "timeoutSec": 30
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "apply-kintone-resources-ng-config2",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "check\\-kintone\\-resources\\-ng\\-config2",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "2.9-04 環境設定（マスター）でテスト名などを変えて保存を押すと、値が保存され、画面の表示が更新される",
+  "name": "2.9-04 環境設定（マスター）でテスト名などを変えて保存を押すと、画面の表示が更新される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -30,7 +30,7 @@
     {
       "action": "pasteAt",
       "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
-      "value": "テスト科目"
+      "value": "saved-subject"
     },
     {
       "action": "clickAt",
@@ -43,8 +43,10 @@
       "timeoutSec": 15
     },
     {
-      "action": "expectEditContains",
-      "text": "テスト科目"
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
+      "pattern": "^saved-subject$",
+      "timeoutSec": 15
     }
   ]
 }

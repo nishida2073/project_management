@@ -37,8 +37,10 @@
       "part": "環境設定（グループ別）/保存"
     },
     {
-      "action": "expectEditContains",
-      "text": "saved-subdomain"
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/サブドメイン（認証情報）",
+      "pattern": "^saved-subdomain$",
+      "timeoutSec": 15
     },
     {
       "action": "expectTextAt",

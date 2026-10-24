@@ -19,14 +19,6 @@
   "steps": [
     {
       "action": "clickAt",
-      "part": "メニュー/実行タブ"
-    },
-    {
-      "action": "wait",
-      "ms": 500
-    },
-    {
-      "action": "clickAt",
       "part": "メニュー/ログタブ"
     },
     {
@@ -39,14 +31,20 @@
       "value": ""
     },
     {
-      "action": "expectEditContains",
-      "text": "create-daily-report-ok",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditContains",
-      "text": "create-daily-report-ng",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
       "action": "selectComboAt",
@@ -54,14 +52,64 @@
       "value": "{{client}}"
     },
     {
-      "action": "expectEditContains",
-      "text": "create-daily-report-ok",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "create-daily-report-ng",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": "ng"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create\\-daily\\-report\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     }
   ]
 }

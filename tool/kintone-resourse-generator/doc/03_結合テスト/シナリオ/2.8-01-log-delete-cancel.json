@@ -40,6 +40,16 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/スペース識別名（ログの絞り込み）",
+      "value": ""
+    },
+    {
       "action": "clickAt",
       "part": "ログ/すべて削除"
     },
@@ -51,27 +61,23 @@
     {
       "action": "pressKey",
       "window": "ログの削除",
-      "key": "{TAB}{ENTER}"
+      "key": "n"
     },
     {
-      "action": "expectFile",
-      "path": "logs/create-space-from-template-ok-config1_20260101_000000.log",
-      "exists": true
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create-space-from-template-ok-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectFile",
-      "path": "logs/create-space-from-template-ok-config2_20260101_000000.log",
-      "exists": true
-    },
-    {
-      "action": "expectFile",
-      "path": "logs/create-space-from-template-ng-config1_20260101_000000.log",
-      "exists": true
-    },
-    {
-      "action": "expectFile",
-      "path": "logs/create-space-from-template-ng-config2_20260101_000000.log",
-      "exists": true
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create-space-from-template-ng-config1",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     }
   ]
 }

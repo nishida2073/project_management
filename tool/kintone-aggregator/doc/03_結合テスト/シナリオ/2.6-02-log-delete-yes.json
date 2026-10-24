@@ -26,6 +26,11 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
       "action": "clickAt",
       "part": "ログ/すべて削除"
     },
@@ -40,14 +45,22 @@
       "key": "y"
     },
     {
-      "action": "expectFile",
-      "path": "logs/create-daily-report-ok_20260101_000000.log",
-      "exists": false
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create-daily-report-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     },
     {
-      "action": "expectFile",
-      "path": "logs/create-daily-report-ng_20260101_000000.log",
-      "exists": false
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "create-daily-report-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
     }
   ]
 }

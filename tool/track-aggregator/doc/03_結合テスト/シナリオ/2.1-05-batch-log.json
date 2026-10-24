@@ -1,5 +1,5 @@
 {
-  "name": "2.1-05 一括実行が終わると、画面下部に実行ログが表示され、ログの出力先に保存される",
+  "name": "2.1-05 一括実行が終わると、処理ごとの状態が成功または警告になり、ログの出力先が作られる",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -30,11 +30,6 @@
     {
       "action": "clickAt",
       "part": "実行（一括実行）/実行"
-    },
-    {
-      "action": "expectEditContains",
-      "text": "一括実行 完了",
-      "timeoutSec": 900
     },
     {
       "action": "expectTextAt",

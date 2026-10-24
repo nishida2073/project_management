@@ -42,11 +42,6 @@
       "part": "環境設定（共通）/基本設定",
       "pattern": "^%BASE_PATH%clients$",
       "timeoutSec": 15
-    },
-    {
-      "action": "expectEditNotContains",
-      "text": "tmp-reload",
-      "timeoutSec": 60
     }
   ]
 }

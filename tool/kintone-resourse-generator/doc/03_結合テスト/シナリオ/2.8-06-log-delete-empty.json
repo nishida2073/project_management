@@ -20,6 +20,16 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/スペース識別名（ログの絞り込み）",
+      "value": ""
+    },
+    {
       "action": "clickAt",
       "part": "ログ/すべて削除"
     },

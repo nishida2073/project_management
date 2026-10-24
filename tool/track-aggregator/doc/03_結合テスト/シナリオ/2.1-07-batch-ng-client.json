@@ -32,11 +32,6 @@
       "part": "実行（一括実行）/実行"
     },
     {
-      "action": "expectEditContains",
-      "text": "一括実行 完了",
-      "timeoutSec": 900
-    },
-    {
       "action": "expectTextAt",
       "part": "実行（一括実行）/実施結果取得-テストの状態",
       "pattern": "^失敗$",

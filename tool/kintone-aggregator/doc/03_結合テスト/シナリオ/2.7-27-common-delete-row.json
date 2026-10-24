@@ -25,8 +25,11 @@
       "part": "環境設定（共通）/アプリデータ集計の列定義の削除"
     },
     {
-      "action": "expectEditNotContains",
-      "text": "パルスサーベイフリーコメント"
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/列定義（13行目）の変更後",
+      "pattern": "^パルスサーベイフリーコメント$",
+      "absent": true,
+      "timeoutSec": 15
     }
   ]
 }

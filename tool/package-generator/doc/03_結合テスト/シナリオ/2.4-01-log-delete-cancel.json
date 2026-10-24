@@ -37,8 +37,13 @@
       "ms": 500
     },
     {
-      "action": "click",
-      "target": "すべて削除"
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "part": "ログ/すべて削除"
     },
     {
       "action": "expectDialogText",
@@ -48,17 +53,23 @@
     {
       "action": "pressKey",
       "window": "ログの削除",
-      "key": "{TAB}{ENTER}"
+      "key": "n"
     },
     {
-      "action": "expectFile",
-      "path": "logs/generate-package-ok_20260101_000000.log",
-      "exists": true
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate-package-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectFile",
-      "path": "logs/generate-package-ng_20260101_000000.log",
-      "exists": true
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate-package-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     }
   ]
 }

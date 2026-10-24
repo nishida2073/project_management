@@ -45,29 +45,85 @@
       "value": ""
     },
     {
-      "action": "expectEditContains",
-      "text": "generate-package-ok",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditContains",
-      "text": "generate-package-ng",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
       "action": "selectComboAt",
       "part": "ログ/対象のグループ",
-      "value": "ok"
+      "value": "{{client}}"
     },
     {
-      "action": "expectEditContains",
-      "text": "generate-package-ok",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "generate-package-ng",
-      "timeoutSec": 30
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": "ng"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15,
+      "absent": true
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ok",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "ログ/ログ欄",
+      "pattern": "generate\\-package\\-ng",
+      "tolX": 500,
+      "tolY": 180,
+      "timeoutSec": 15
     }
   ]
 }

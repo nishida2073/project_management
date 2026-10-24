@@ -30,7 +30,7 @@
     {
       "action": "pasteAt",
       "part": "環境設定（マスター）/スケジュールの科目名（1行目）",
-      "value": "テスト科目"
+      "value": "saved-subject"
     },
     {
       "action": "clickAt",
@@ -43,8 +43,10 @@
       "timeoutSec": 15
     },
     {
-      "action": "expectEditContains",
-      "text": "テスト科目"
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/スケジュールの科目名（1行目）",
+      "pattern": "^saved-subject$",
+      "timeoutSec": 15
     }
   ]
 }

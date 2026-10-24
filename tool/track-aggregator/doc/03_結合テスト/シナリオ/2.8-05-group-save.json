@@ -43,8 +43,10 @@
       "timeoutSec": 15
     },
     {
-      "action": "expectEditContains",
-      "text": "saved-subdomain"
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/サブドメイン",
+      "pattern": "^saved-subdomain$",
+      "timeoutSec": 15
     },
     {
       "action": "expectFileContains",
