@@ -43,16 +43,16 @@
       "action": "expectTextAt",
       "part": "ログ/ログ欄",
       "pattern": "download\\-test\\-results\\-ok",
-      "tolX": 600,
-      "tolY": 150,
+      "tolX": 500,
+      "tolY": 180,
       "timeoutSec": 15
     },
     {
       "action": "expectTextAt",
       "part": "ログ/ログ欄",
       "pattern": "download\\-test\\-results\\-ng",
-      "tolX": 600,
-      "tolY": 150,
+      "tolX": 500,
+      "tolY": 180,
       "timeoutSec": 15
     }
   ]
