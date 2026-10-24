@@ -689,7 +689,6 @@ $settingsGroups = [ordered]@{
                     "OutputCombineResultFileSuffix"        = @{ Label = "統合結果ファイル名の接尾語" }
                     "OutputYearComparisonCollectDir"       = @{ Label = "経年比較結果の出力先"; Browse = "Folder" }
                     "OutputYearComparisonResultFileSuffix" = @{ Label = "経年比較結果ファイル名の接尾語" }
-                    "PassScore"                            = @{ Label = "合格点" }
                     "ComparePeriod"                        = @{ Label = "経年比較の比較年数" }
                     "YearOrder"                            = @{
                         Label = "経年比較の年度表示順"
@@ -702,6 +701,7 @@ $settingsGroups = [ordered]@{
                     "TrackLoginUrl"                        = @{ Label = "trackログインURL" }
                     "AutoHotkeyScriptPath"                 = @{ Label = "trackダウンロード用スクリプトのパス"; Browse = "File"; Filter = "AutoHotkeyスクリプト (*.ahk)|*.ahk|すべてのファイル (*.*)|*.*" }
                     "AutoHotkeyExePath"                    = @{ Label = "trackダウンロード用実行ファイルのパス"; Browse = "File"; Filter = "実行ファイル (*.exe)|*.exe|すべてのファイル (*.*)|*.*"; NoOpen = $true }
+                    "PassScore"                            = @{ Label = "合格点" }
                 }
             }
         }
@@ -738,7 +738,6 @@ $settingsGroups = [ordered]@{
                         )
                         OverrideRef = @{ Group = "Common"; Key = "YearOrder" }
                     }
-                    "PassScore"     = @{ Label = "合格点"; OverrideRef = @{ Group = "Common"; Key = "PassScore" } }
                 }
             }
             "SYNC" = @{

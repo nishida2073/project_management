@@ -25,7 +25,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/ダウンロード先のフォルダ",
-      "value": "%BASE_PATH%download2"
+      "value": "saved-download-path"
     },
     {
       "action": "clickAt",
@@ -40,7 +40,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "download2"
+      "contains": "saved-download-path"
     }
   ]
 }

@@ -1,0 +1,66 @@
+{
+  "name": "2.7-42 環境設定（共通）で合格点を変えて保存を押すと、変えた値が common.bat に保存される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/合格点",
+      "value": "saved-pass-score"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "PassScore=saved-pass-score"
+    }
+  ]
+}

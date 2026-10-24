@@ -30,7 +30,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（グループ別）/サブドメイン",
-      "value": "saved"
+      "value": "saved-subdomain"
     },
     {
       "action": "clickAt",
@@ -45,7 +45,7 @@
     {
       "action": "expectFileContains",
       "path": "clients/ok.bat",
-      "contains": "saved"
+      "contains": "saved-subdomain"
     }
   ]
 }

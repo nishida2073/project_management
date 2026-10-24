@@ -45,7 +45,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/経年比較のコースグループ",
-      "value": "テスト:テスト科目"
+      "value": "saved-course-group"
     },
     {
       "action": "clickAt",
@@ -60,7 +60,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "CourseGroupDefs=テスト:テスト科目"
+      "contains": "CourseGroupDefs=saved-course-group"
     }
   ]
 }

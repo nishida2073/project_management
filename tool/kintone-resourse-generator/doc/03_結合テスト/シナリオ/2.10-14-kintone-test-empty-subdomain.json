@@ -37,6 +37,11 @@
       "part": "環境設定（グループ別）/テスト接続（認証情報）"
     },
     {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "サブドメイン・ログイン名・パスワードをすべて入力してください"
+    },
+    {
       "action": "expectTextAt",
       "part": "環境設定（グループ別）/状態（認証情報）",
       "pattern": "^失敗$",

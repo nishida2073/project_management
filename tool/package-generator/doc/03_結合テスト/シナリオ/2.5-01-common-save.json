@@ -22,7 +22,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/ログの出力先",
-      "value": "%BASE_PATH%logs2"
+      "value": "saved-log-path"
     },
     {
       "action": "clickAt",
@@ -37,7 +37,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "logs2"
+      "contains": "saved-log-path"
     }
   ]
 }

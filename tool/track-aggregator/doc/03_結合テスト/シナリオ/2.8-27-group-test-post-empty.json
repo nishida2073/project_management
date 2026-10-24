@@ -1,0 +1,63 @@
+{
+  "name": "2.8-27 環境設定（グループ別）で投稿先スペースIDを空にして、テスト投稿を押すと、状態が失敗になり、投稿は行われない",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": 3000
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（グループ別）/投稿先スペースID",
+      "value": ""
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/テスト投稿"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（テスト投稿）",
+      "pattern": "^失敗$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "スペースID／スレッドIDを入力してください"
+    }
+  ]
+}

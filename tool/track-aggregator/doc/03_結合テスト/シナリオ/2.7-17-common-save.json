@@ -1,5 +1,5 @@
 {
-  "name": "2.7-17 環境設定（共通）で値を変えて保存を押すと、変えた値が保存され、画面の表示が更新される",
+  "name": "2.7-17 環境設定（共通）でテスト結果ファイル名の接尾語を変えて保存を押すと、変えた値が common.bat に保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -25,7 +25,7 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/テスト結果ファイル名の接尾語",
-      "value": "saved"
+      "value": "saved-test-suffix"
     },
     {
       "action": "clickAt",
@@ -40,7 +40,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "saved"
+      "contains": "OutputTestResultFileSuffix=saved-test-suffix"
     }
   ]
 }

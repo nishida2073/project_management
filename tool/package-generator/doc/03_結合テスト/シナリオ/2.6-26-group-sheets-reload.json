@@ -1,0 +1,57 @@
+{
+  "name": "2.6-26 対象のシート を変えて再読込を押すと、空に戻る",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/ログイン名"
+    },
+    {
+      "action": "wheelAt",
+      "x": 480,
+      "y": 400,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（グループ別）/対象のシート",
+      "value": "tmp-reload"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のシート",
+      "pattern": "^.+$",
+      "absent": true,
+      "timeoutSec": 15
+    }
+  ]
+}
