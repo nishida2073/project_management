@@ -1,0 +1,50 @@
+{
+  "name": "2.9-04 環境設定（マスター）でテスト名などを変えて保存を押すと、値が保存され、画面の表示が更新される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
+      "value": "テスト科目"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectEditContains",
+      "text": "テスト科目"
+    }
+  ]
+}

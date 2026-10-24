@@ -1,0 +1,37 @@
+{
+  "name": "2.6-26 新規作成のグループ名入力をキャンセルすると、グループは追加されない",
+  "kind": "異常系",
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "click",
+      "target": "新規作成"
+    },
+    {
+      "action": "pressKey",
+      "window": "グループの新規作成",
+      "key": "{ESC}"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/PkgCancel.bat",
+      "exists": false
+    }
+  ]
+}

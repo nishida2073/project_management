@@ -1,0 +1,51 @@
+{
+  "name": "2.8-15 認証情報のサブドメインを空にしてテスト接続（認証情報）を押すと、状態が失敗になり、接続は行われない",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（グループ別）/サブドメイン",
+      "value": ""
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/テスト接続（認証情報）"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（認証情報）",
+      "pattern": "^失敗$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectMessage",
+      "window": "エラー",
+      "contains": "サブドメイン・ログイン名・パスワードをすべて入力してください"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "name": "2.6-03 ログの対象のグループを、すべて・ok・ng と切り替えると、選んだグループの実行ログだけが表示される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ok-2026-09-01_20261021_000000.log",
+      "text": "create-daily-report-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ng-2026-09-01_20261021_000000.log",
+      "text": "create-daily-report-ng"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "メニュー/ログタブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": ""
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-daily-report-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-daily-report-ng",
+      "timeoutSec": 30
+    },
+    {
+      "action": "selectComboAt",
+      "part": "ログ/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "expectEditContains",
+      "text": "create-daily-report-ok",
+      "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "create-daily-report-ng",
+      "timeoutSec": 30
+    }
+  ]
+}

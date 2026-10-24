@@ -1,0 +1,38 @@
+{
+  "name": "2.7-19 アンケート集計結果の出力先を変えて保存を押すと、変えた値が保存される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/アンケート集計結果の出力先",
+      "value": "saved-output-survey"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "OutputSurveyCollectDir=saved-output-survey"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "2.10-01 グループの新規作成で新しい名前を入力すると、一覧に追加されて選ばれる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/新規作成"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "KrgNew"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "pattern": "^KrgNew$",
+      "timeoutSec": 15
+    }
+  ]
+}

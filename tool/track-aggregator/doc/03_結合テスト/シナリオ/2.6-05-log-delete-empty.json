@@ -1,0 +1,32 @@
+{
+  "name": "2.6-05 ログのファイルがない状態で、すべて削除を押すと、削除対象のログファイルがないことが表示される",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "logs"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/ログタブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "ログ/すべて削除"
+    },
+    {
+      "action": "expectMessage",
+      "window": "ログの削除",
+      "contains": "削除対象のログファイルがありません"
+    }
+  ]
+}

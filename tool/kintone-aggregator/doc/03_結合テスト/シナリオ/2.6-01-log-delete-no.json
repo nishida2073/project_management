@@ -1,0 +1,53 @@
+{
+  "name": "2.6-01 ログのファイルがある状態で、すべて削除を押し、確認で「いいえ」を選ぶと、ログのファイルは残る",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ok_20260101_000000.log",
+      "text": "create-daily-report-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/create-daily-report-ng_20260101_000000.log",
+      "text": "create-daily-report-ng"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/ログタブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "ログ/すべて削除"
+    },
+    {
+      "action": "expectDialogText",
+      "window": "ログの削除",
+      "contains": "ログファイルを削除します"
+    },
+    {
+      "action": "pressKey",
+      "window": "ログの削除",
+      "key": "n"
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/create-daily-report-ok_20260101_000000.log",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "logs/create-daily-report-ng_20260101_000000.log",
+      "exists": true
+    }
+  ]
+}

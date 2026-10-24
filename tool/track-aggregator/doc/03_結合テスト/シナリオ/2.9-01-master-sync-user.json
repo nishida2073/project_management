@@ -1,0 +1,41 @@
+{
+  "name": "2.9-01 環境設定（マスター）で対象のグループを選び、同期実行を押すと、状態が成功になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/同期実行"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（同期実行）",
+      "pattern": "^成功$",
+      "timeoutSec": 300
+    }
+  ]
+}

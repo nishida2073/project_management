@@ -1,0 +1,53 @@
+{
+  "name": "2.6-28 コピー先に既存のグループ名を入力すると、メッセージが出てコピーされない",
+  "kind": "異常系",
+  "setup": [
+    {
+      "action": "copyFile",
+      "from": "clients/template/client.bat",
+      "to": "clients/CopySrc.bat"
+    },
+    {
+      "action": "copyFile",
+      "from": "clients/template/client.xlsx",
+      "to": "clients/CopySrc.xlsx"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "CopySrc"
+    },
+    {
+      "action": "click",
+      "target": "コピー"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループのコピー作成",
+      "value": "CopySrc"
+    },
+    {
+      "action": "expectMessage",
+      "window": "グループの新規作成",
+      "contains": "既に存在します"
+    }
+  ]
+}

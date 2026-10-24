@@ -1,0 +1,39 @@
+{
+  "name": "2.7-04 テンプレートのフォルダを変えて再読込を押すと、保存されている値に戻る",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/テンプレートのフォルダ",
+      "value": "tmp-reload"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/テンプレートのフォルダ",
+      "pattern": "^%BASE_PATH%template$",
+      "timeoutSec": 15
+    }
+  ]
+}

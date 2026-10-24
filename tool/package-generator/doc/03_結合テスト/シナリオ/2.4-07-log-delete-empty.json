@@ -1,0 +1,29 @@
+{
+  "name": "2.4-07 削除対象のログがないときは、すべて削除でメッセージが出る",
+  "kind": "異常系",
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "logs"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/ログタブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "click",
+      "target": "すべて削除"
+    },
+    {
+      "action": "expectMessage",
+      "window": "ログの削除",
+      "contains": "削除対象のログファイルがありません"
+    }
+  ]
+}

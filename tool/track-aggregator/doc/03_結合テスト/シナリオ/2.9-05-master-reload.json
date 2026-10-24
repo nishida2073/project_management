@@ -1,0 +1,51 @@
+{
+  "name": "2.9-05 環境設定（マスター）で値を変えたあと再読込を押すと、保存されている値で表が表示し直され、変えた内容は消える",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
+      "value": "一時"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "一時",
+      "timeoutSec": 60
+    }
+  ]
+}
