@@ -46,7 +46,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "clients_test"
+      "contains": "ClientDataRootDir=%BASE_PATH%clients_test"
     }
   ]
 }

@@ -15,6 +15,16 @@
       "action": "writeFile",
       "path": "logs/generate-package-ng_20260101_000000.log",
       "text": "generate-package-ng"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/upload-kintone-file-ok-ok_20261021_000000.log",
+      "text": "upload-kintone-file-ok-ok"
+    },
+    {
+      "action": "writeFile",
+      "path": "logs/upload-kintone-file-ng-ng_20261021_000000.log",
+      "text": "upload-kintone-file-ng-ng"
     }
   ],
   "steps": [

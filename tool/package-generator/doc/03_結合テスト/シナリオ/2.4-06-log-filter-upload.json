@@ -58,6 +58,11 @@
       "action": "expectEditNotContains",
       "text": "generate-package-ok-ok",
       "timeoutSec": 30
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "generate-package-ng-ng",
+      "timeoutSec": 30
     }
   ]
 }

@@ -2,7 +2,7 @@
   "name": "2.1-03 複数実行で、実行一覧ファイルを選ばずに実行すると、メッセージが出る",
   "kind": "異常系",
   "vars": {
-    "client": "ok"
+    "client": "ng"
   },
   "setup": [],
   "steps": [
@@ -21,6 +21,11 @@
     {
       "action": "wait",
       "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（複数実行）/対象のグループ",
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

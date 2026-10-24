@@ -40,7 +40,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "saved-download-path"
+      "contains": "CommonDownloadPath=saved-download-path"
     }
   ]
 }

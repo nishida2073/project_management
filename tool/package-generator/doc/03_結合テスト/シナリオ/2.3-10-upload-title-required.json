@@ -1,6 +1,9 @@
 {
   "name": "2.3-10 パッケージ反映で、タイトルが空だと、メッセージが出る",
   "kind": "異常系",
+  "vars": {
+    "client": "ng"
+  },
   "setup": [],
   "steps": [
     {
@@ -18,6 +21,11 @@
     {
       "action": "wait",
       "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（パッケージ反映）/対象のグループ",
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

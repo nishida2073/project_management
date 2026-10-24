@@ -43,9 +43,10 @@
       "timeoutSec": 15
     },
     {
-      "action": "expectEditNotContains",
-      "text": "一時",
-      "timeoutSec": 60
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
+      "pattern": "^社会を支えるITサービス$",
+      "timeoutSec": 15
     }
   ]
 }

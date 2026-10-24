@@ -34,8 +34,12 @@
     },
     {
       "action": "expectEditContains",
-      "text": "集計結果を更新しました",
+      "text": "集計結果を更新しました（{グループ名}）",
       "timeoutSec": 15
+    },
+    {
+      "action": "expectEditNotContains",
+      "text": "tmp-reload"
     }
   ]
 }

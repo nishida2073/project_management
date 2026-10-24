@@ -87,6 +87,12 @@
       "path": "logs",
       "filter": "upload-kintone-file*.log",
       "contains": "同じタイトルのレコードを更新しました: レコードID"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（パッケージ反映）/状態",
+      "pattern": "^成功$",
+      "timeoutSec": 30
     }
   ]
 }

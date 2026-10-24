@@ -54,7 +54,7 @@
     {
       "action": "expectFileContains",
       "path": "clients/TestNew.bat",
-      "contains": "univ-kyousai-{x}"
+      "contains": "KintoneSubdomain=univ-kyousai-{x}"
     },
     {
       "action": "expectFile",

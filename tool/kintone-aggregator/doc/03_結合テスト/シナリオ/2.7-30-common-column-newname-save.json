@@ -56,7 +56,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/collect-data-defs.json",
-      "contains": "saved-col"
+      "contains": "\"newName\":  \"saved-col\""
     }
   ]
 }

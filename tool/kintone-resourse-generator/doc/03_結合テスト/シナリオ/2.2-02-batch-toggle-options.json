@@ -23,6 +23,11 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "実行（一括実行）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "clickAt",
       "part": "実行（一括実行）/表示／隠す"
     },

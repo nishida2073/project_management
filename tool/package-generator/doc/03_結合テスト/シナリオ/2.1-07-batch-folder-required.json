@@ -1,6 +1,9 @@
 {
   "name": "2.1-07 一括実行で、タイトルがあってもフォルダが空だと、メッセージが出る",
   "kind": "異常系",
+  "vars": {
+    "client": "ng"
+  },
   "setup": [],
   "steps": [
     {
@@ -28,6 +31,11 @@
       "action": "typeAt",
       "part": "実行（一括実行）/フォルダ",
       "value": ""
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（一括実行）/対象のグループ",
+      "value": "{{client}}"
     },
     {
       "action": "clickAt",

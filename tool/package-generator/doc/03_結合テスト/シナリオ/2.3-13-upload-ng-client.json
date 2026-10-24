@@ -11,16 +11,27 @@
       "part": "メニュー/実行タブ"
     },
     {
-      "action": "wait",
-      "ms": 500
+      "action": "clickAt",
+      "part": "実行/パッケージ作成タブ"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（パッケージ作成）/対象のグループ",
+      "value": "ok"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（パッケージ作成）/実行"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（パッケージ作成）/状態",
+      "pattern": "^成功$",
+      "timeoutSec": 60
     },
     {
       "action": "clickAt",
       "part": "実行/パッケージ反映タブ"
-    },
-    {
-      "action": "wait",
-      "ms": 500
     },
     {
       "action": "selectComboAt",
@@ -35,7 +46,7 @@
     {
       "action": "pasteAt",
       "part": "実行（パッケージ反映）/ファイル1",
-      "value": "{{root}}\\generated\\ng\\コースA.zip"
+      "value": "{{root}}\\generated\\ok\\コースA.zip"
     },
     {
       "action": "clickAt",
@@ -45,7 +56,7 @@
       "action": "expectTextAt",
       "part": "実行（パッケージ反映）/状態",
       "pattern": "^失敗$",
-      "timeoutSec": 300
+      "timeoutSec": 60
     }
   ]
 }

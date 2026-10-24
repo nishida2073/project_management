@@ -42,6 +42,10 @@
       "timeoutSec": 900
     },
     {
+      "action": "expectEditContains",
+      "text": "複数実行 結果"
+    },
+    {
       "action": "expectLogFile",
       "path": "logs",
       "timeoutSec": 30

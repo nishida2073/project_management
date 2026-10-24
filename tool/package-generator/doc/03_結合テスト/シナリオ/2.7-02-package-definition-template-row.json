@@ -51,6 +51,13 @@
       "sheet": "テンプレート",
       "cell": "A2",
       "notEquals": "MARKER_ROW2"
+    },
+    {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "テンプレート",
+      "cell": "A2",
+      "notEquals": ""
     }
   ]
 }
