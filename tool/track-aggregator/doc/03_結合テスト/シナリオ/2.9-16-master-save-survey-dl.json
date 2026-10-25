@@ -59,6 +59,13 @@
       "timeoutSec": 15
     },
     {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "アンケート",
+      "cell": "D2",
+      "equals": "0"
+    },
+    {
       "action": "shot"
     }
   ]
