@@ -23,6 +23,11 @@
       "ms": 500
     },
     {
+      "action": "selectComboAt",
+      "part": "実行（一括実行）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
       "action": "typeAt",
       "part": "実行（一括実行）/タイトル",
       "value": "TestTitle"
@@ -31,11 +36,6 @@
       "action": "typeAt",
       "part": "実行（一括実行）/フォルダ",
       "value": ""
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（一括実行）/対象のグループ",
-      "value": "{{client}}"
     },
     {
       "action": "clickAt",
