@@ -4,6 +4,9 @@
   "vars": {
     "client": "ok"
   },
+  "fixtureVars": {
+    "CommentTextTemplate": "CommentTextTemplate"
+  },
   "setup": [],
   "steps": [
     {
@@ -44,7 +47,8 @@
     },
     {
       "action": "expectEditContains",
-      "text": "集計結果を更新しました。（{グループ名}）",
+      "text": "{{CommentTextTemplate}}",
+      "lines": true,
       "timeoutSec": 15
     },
     {

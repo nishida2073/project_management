@@ -4,6 +4,9 @@
   "vars": {
     "client": "ok"
   },
+  "fixtureVars": {
+    "CommentSummaryTemplate": "CommentSummaryTemplate"
+  },
   "setup": [],
   "steps": [
     {
@@ -54,7 +57,8 @@
     },
     {
       "action": "expectEditContains",
-      "text": "■ クラス名 : {クラス名}",
+      "text": "{{CommentSummaryTemplate}}",
+      "lines": true,
       "timeoutSec": 15
     },
     {
