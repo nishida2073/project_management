@@ -1,5 +1,5 @@
 {
-  "name": "2.1-04 複数実行で、設定テンプレートが両方とも空の行はスキップされる",
+  "name": "2.1-05 複数実行で、スペース識別名が空の行はスキップされる",
   "kind": "異常系",
   "vars": {
     "client": "ok"
@@ -30,7 +30,7 @@
     {
       "action": "pasteAt",
       "part": "実行（複数実行）/実行一覧ファイル",
-      "value": "{{root}}\\run-list\\skip-template.xlsx"
+      "value": "{{root}}\\run-list\\skip-identifier.xlsx"
     },
     {
       "action": "clickAt",

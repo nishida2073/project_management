@@ -1,0 +1,77 @@
+{
+  "name": "2.1-03 複数実行で、警告になる行があっても、ほかの行は実行され、ファイルが作られる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/複数実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（複数実行）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "part": "実行（複数実行）/実行一覧ファイル",
+      "value": "{{root}}\\run-list\\multiple2.xlsx"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（複数実行）/実行"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（複数実行）/状態",
+      "pattern": "^終了（成功-1件、警告-1件、失敗/スキップ-0件）$",
+      "tolX": 150,
+      "timeoutSec": 300
+    },
+    {
+      "action": "expectFile",
+      "path": "download/TestSpace1_download.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "config/TestSpace1_config.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "checked/TestSpace1_check.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "download/TestSpace2_download.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "config/TestSpace2_config.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "checked/TestSpace2_check.xlsx",
+      "exists": true
+    }
+  ]
+}
