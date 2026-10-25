@@ -57,6 +57,9 @@
       "part": "環境設定（グループ別）/ログイン名",
       "pattern": "^{{KintoneLoginNameRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

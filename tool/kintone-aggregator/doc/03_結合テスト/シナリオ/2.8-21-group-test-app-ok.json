@@ -51,6 +51,9 @@
       "part": "環境設定（グループ別）/状態（業務日誌）",
       "pattern": "^成功$",
       "timeoutSec": 120
+    },
+    {
+      "action": "shot"
     }
   ]
 }

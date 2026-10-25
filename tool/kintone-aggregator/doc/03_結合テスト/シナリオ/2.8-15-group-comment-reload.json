@@ -50,6 +50,9 @@
     {
       "action": "expectEditNotContains",
       "text": "tmp-reload"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

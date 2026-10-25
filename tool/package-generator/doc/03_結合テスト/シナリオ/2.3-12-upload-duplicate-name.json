@@ -68,6 +68,9 @@
       "action": "expectMessage",
       "window": "実行",
       "contains": "同じ名前のzipファイルがあります"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -74,6 +74,9 @@
     {
       "action": "closeWindow",
       "title": "テスト"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -78,6 +78,9 @@
       "pattern": "^.+$",
       "timeoutSec": 15,
       "absent": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

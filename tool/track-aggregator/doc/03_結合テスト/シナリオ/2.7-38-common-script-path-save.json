@@ -61,6 +61,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "AutoHotkeyScriptPath=saved-script-path"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -84,6 +84,9 @@
       "action": "expectFile",
       "path": "config/TestSpace_config.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

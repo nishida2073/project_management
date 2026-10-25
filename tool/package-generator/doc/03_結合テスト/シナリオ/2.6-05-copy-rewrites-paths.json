@@ -40,6 +40,9 @@
       "action": "expectFileContains",
       "path": "clients/TestCopy.bat",
       "contains": "generated\\TestCopy"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -42,6 +42,9 @@
       "part": "環境設定（共通）/アラート検知結果の出力先",
       "pattern": "^{{OutputAlertRootDirRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

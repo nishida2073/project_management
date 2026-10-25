@@ -45,6 +45,9 @@
       "action": "expectMessage",
       "window": "一括実行",
       "contains": "設定テンプレート名（基本）または設定テンプレート名（カスタム）のどちらかを指定してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

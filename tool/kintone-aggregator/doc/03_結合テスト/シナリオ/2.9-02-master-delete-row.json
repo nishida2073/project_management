@@ -54,6 +54,9 @@
       "sheet": "スケジュール",
       "cell": "B2",
       "equals": ""
+    },
+    {
+      "action": "shot"
     }
   ]
 }

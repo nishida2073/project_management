@@ -41,6 +41,9 @@
       "part": "実行（アプリデータ作成）/状態（業務日誌）",
       "pattern": "^失敗$",
       "timeoutSec": 60
+    },
+    {
+      "action": "shot"
     }
   ]
 }

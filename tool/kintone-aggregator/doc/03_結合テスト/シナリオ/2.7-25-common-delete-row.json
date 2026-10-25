@@ -42,6 +42,9 @@
       "pattern": "^パルスサーベイフリーコメント$",
       "absent": true,
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ]
 }

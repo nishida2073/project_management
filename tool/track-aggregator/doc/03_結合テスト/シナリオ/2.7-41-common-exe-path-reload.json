@@ -62,6 +62,9 @@
       "part": "環境設定（共通）/trackダウンロード用実行ファイルのパス",
       "pattern": "^{{AutoHotkeyExePathRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

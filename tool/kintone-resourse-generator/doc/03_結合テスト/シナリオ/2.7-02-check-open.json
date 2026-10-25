@@ -124,6 +124,9 @@
     {
       "action": "closeWindow",
       "title": "TestSpace_check"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

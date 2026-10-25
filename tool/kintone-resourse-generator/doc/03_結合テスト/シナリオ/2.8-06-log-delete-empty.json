@@ -37,6 +37,9 @@
       "action": "expectMessage",
       "window": "ログの削除",
       "contains": "削除対象のログファイルがありません"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

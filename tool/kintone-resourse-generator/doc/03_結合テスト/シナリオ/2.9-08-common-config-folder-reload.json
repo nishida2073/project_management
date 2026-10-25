@@ -34,6 +34,9 @@
       "part": "環境設定（共通）/設定ファイルのフォルダ",
       "pattern": "^{{CommonConfigPathRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

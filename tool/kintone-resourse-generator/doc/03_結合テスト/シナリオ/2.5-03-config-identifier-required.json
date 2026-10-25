@@ -35,6 +35,9 @@
       "action": "expectMessage",
       "window": "実行",
       "contains": "スペース識別名 を設定してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

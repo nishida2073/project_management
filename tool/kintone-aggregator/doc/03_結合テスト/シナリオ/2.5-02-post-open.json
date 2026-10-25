@@ -75,6 +75,9 @@
       "action": "closeWindow",
       "title": "Google Chrome",
       "keys": "^w"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

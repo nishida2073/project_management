@@ -51,6 +51,9 @@
       "part": "環境設定（グループ別）/対象のグループ",
       "pattern": "^TestCopy$",
       "timeoutSec": 30
+    },
+    {
+      "action": "shot"
     }
   ]
 }

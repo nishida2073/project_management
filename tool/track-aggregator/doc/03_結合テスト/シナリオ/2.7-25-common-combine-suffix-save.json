@@ -61,6 +61,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputCombineResultFileSuffix=saved-combine-suffix"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

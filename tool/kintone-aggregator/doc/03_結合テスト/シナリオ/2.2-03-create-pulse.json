@@ -46,6 +46,9 @@
       "action": "expectFile",
       "path": "output/01_提出状況/2026-09-01/ok-パルスサーベイ.txt",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

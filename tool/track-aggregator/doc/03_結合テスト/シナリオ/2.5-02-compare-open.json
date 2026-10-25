@@ -53,6 +53,9 @@
     {
       "action": "closeWindow",
       "title": "経年比較"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

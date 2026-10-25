@@ -62,6 +62,9 @@
       "action": "expectFile",
       "path": "output/集計結果/テスト/ok-テスト結果.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

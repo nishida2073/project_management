@@ -96,6 +96,9 @@
     {
       "action": "closeWindow",
       "title": "TestSpace_config"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

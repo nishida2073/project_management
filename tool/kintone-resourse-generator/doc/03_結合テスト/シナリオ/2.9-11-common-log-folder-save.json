@@ -33,6 +33,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "CommonLogPath=saved-log-folder"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

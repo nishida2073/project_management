@@ -36,6 +36,9 @@
       "pattern": "^失敗$",
       "timeoutSec": 300,
       "part": "実行（実施結果取得）/状態（アンケート）"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

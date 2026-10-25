@@ -50,6 +50,9 @@
       "action": "expectFileNotContains",
       "path": "bats/collect-data-defs.json",
       "contains": "パルスサーベイフリーコメント"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

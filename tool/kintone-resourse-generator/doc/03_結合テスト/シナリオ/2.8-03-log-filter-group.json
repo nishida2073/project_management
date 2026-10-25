@@ -275,6 +275,9 @@
       "tolX": 500,
       "tolY": 180,
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ]
 }

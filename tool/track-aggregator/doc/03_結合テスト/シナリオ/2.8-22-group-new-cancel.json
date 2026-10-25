@@ -42,6 +42,9 @@
       "pattern": "^TestCancel$",
       "absent": true,
       "timeoutSec": 10
+    },
+    {
+      "action": "shot"
     }
   ]
 }

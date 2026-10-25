@@ -54,6 +54,9 @@
     {
       "action": "closeWindow",
       "title": "{{AutoHotkeyScriptPathName}}"
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

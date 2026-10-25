@@ -57,6 +57,9 @@
       "part": "実行（アラート集計）/状態（投稿）",
       "pattern": "^(成功|警告)$",
       "timeoutSec": 60
+    },
+    {
+      "action": "shot"
     }
   ]
 }

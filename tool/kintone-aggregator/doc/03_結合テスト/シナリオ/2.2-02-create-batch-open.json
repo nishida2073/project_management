@@ -59,6 +59,9 @@
       "action": "closeWindow",
       "title": "01_提出状況",
       "keys": "%{F4}"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

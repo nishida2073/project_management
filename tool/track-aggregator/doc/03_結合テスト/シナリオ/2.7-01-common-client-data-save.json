@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "ClientDataRootDir=saved-client-data"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

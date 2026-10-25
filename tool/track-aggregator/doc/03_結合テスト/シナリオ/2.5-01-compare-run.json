@@ -46,6 +46,9 @@
       "action": "expectFile",
       "path": "output/集計結果/経年比較/ok-2026-経年比較結果.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

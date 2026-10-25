@@ -35,6 +35,9 @@
       "action": "expectMessage",
       "window": "テンプレート作成",
       "contains": "対象のグループ、スペースID、テンプレート名を入力してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

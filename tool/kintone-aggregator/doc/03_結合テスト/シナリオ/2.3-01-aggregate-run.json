@@ -63,6 +63,9 @@
       "action": "expectFile",
       "path": "output/02_アプリデータ集計/ok-2026-09-01.txt",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

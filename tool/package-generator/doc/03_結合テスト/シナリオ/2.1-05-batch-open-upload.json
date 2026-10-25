@@ -44,6 +44,9 @@
       "action": "closeWindow",
       "title": "ファイル管理",
       "keys": "^w"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

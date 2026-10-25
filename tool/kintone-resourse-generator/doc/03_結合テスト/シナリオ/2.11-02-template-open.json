@@ -59,6 +59,9 @@
     {
       "action": "closeWindow",
       "title": "{{client}}_{{client}}"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

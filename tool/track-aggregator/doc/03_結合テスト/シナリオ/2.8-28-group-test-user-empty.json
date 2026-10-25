@@ -56,6 +56,9 @@
       "action": "expectMessage",
       "window": "エラー",
       "contains": "対象アプリIDを入力してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

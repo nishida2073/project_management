@@ -45,6 +45,9 @@
       "action": "expectFile",
       "path": "clients/ok.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

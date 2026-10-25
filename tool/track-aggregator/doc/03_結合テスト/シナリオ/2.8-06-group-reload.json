@@ -47,6 +47,9 @@
       "part": "環境設定（グループ別）/サブドメイン",
       "pattern": "^{{KintoneSubdomainRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputCombineCollectDir=saved-output-combine"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

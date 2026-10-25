@@ -33,6 +33,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "CommonBaseTemplatePath=saved-base-template"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

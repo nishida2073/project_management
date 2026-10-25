@@ -112,6 +112,9 @@
       "action": "expectFile",
       "path": "checked/TestSpace_check.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

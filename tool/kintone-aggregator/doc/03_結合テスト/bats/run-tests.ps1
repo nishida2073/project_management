@@ -10,6 +10,7 @@ $toolRoot = Split-Path $projectRoot -Parent
     -CopyDirs @("bats") `
     -FixtureRoot (Join-Path $PSScriptRoot "..\test-data") `
     -FixtureDirs @("clients", "template") `
+    -EvidenceDirs @("clients", "logs", "output") `
     -WindowTitle "kintoneデータ集計ツール" `
     -Filter $Filter `
     -KeepTemp:$KeepTemp

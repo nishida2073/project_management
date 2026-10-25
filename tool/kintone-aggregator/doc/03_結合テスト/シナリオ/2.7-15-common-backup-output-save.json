@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputAlertBackupDir=saved-backup-output"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

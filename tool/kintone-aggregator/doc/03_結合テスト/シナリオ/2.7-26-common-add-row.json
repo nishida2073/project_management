@@ -59,6 +59,9 @@
       "action": "expectFileContains",
       "path": "bats/collect-data-defs.json",
       "contains": "\"orgName\":  \"saved-col\""
+    },
+    {
+      "action": "shot"
     }
   ]
 }

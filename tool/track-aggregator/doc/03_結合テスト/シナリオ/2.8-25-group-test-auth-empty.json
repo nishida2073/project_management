@@ -46,6 +46,9 @@
       "action": "expectMessage",
       "window": "エラー",
       "contains": "サブドメイン・ログイン名・パスワードをすべて入力してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

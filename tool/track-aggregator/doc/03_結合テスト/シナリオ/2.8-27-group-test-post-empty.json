@@ -66,6 +66,9 @@
       "action": "expectMessage",
       "window": "エラー",
       "contains": "スペースID／スレッドIDを入力してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

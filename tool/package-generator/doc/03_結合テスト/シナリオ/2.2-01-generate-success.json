@@ -47,6 +47,9 @@
       "action": "expectFile",
       "path": "generated/ok",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -76,6 +76,9 @@
       "part": "環境設定（グループ別）/対象のシート",
       "pattern": "^saved-sheets$",
       "timeoutSec": 30
+    },
+    {
+      "action": "shot"
     }
   ]
 }

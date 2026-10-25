@@ -42,6 +42,9 @@
       "part": "環境設定（共通）/アプリデータ集計の出力先",
       "pattern": "^{{OutputCollectDataRootDirRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

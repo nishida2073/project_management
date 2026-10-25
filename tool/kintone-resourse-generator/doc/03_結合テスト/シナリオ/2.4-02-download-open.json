@@ -59,6 +59,9 @@
     {
       "action": "closeWindow",
       "title": "TestSpace_download"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

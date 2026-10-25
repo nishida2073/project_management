@@ -41,6 +41,9 @@
       "part": "実行（スペース確認）/状態",
       "pattern": "^失敗$",
       "timeoutSec": 900
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -58,6 +58,9 @@
       "sheet": "テンプレート",
       "cell": "A2",
       "notEquals": ""
+    },
+    {
+      "action": "shot"
     }
   ]
 }

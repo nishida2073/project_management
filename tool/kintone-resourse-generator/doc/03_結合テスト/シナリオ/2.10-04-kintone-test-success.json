@@ -36,6 +36,9 @@
       "part": "環境設定（グループ別）/状態（認証情報）",
       "pattern": "^成功$",
       "timeoutSec": 60
+    },
+    {
+      "action": "shot"
     }
   ]
 }

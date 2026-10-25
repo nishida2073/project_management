@@ -61,6 +61,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputYearComparisonResultFileSuffix=saved-year-suffix"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

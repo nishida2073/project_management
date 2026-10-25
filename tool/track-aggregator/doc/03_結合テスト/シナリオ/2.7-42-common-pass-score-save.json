@@ -61,6 +61,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "PassScore=saved-pass-score"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

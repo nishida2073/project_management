@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputSurveyCollectDir=saved-output-survey"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -34,6 +34,9 @@
       "part": "環境設定（共通）/ログの出力先フォルダ",
       "pattern": "^{{CommonLogPathRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

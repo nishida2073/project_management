@@ -74,6 +74,9 @@
     {
       "action": "closeWindow",
       "title": "アンケート"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

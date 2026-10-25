@@ -55,6 +55,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "TargetUserCodeFieldDaily=saved-daily-user"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

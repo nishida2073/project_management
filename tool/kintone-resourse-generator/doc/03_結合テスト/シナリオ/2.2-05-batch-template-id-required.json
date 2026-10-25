@@ -40,6 +40,9 @@
       "action": "expectMessage",
       "window": "一括実行",
       "contains": "スペーステンプレートID を設定してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

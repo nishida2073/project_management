@@ -70,6 +70,9 @@
       "action": "closeWindow",
       "title": "03_アラート検知結果",
       "keys": "%{F4}"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

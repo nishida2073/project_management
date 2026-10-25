@@ -56,6 +56,9 @@
       "action": "expectFileContains",
       "path": "clients/ok.bat",
       "contains": "SyncUserMasterAppId=saved-user-app"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

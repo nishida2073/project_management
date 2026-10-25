@@ -455,6 +455,9 @@
       "tolY": 180,
       "timeoutSec": 15,
       "absent": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

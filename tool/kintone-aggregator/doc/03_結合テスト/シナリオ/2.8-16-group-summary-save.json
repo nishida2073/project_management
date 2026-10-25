@@ -56,6 +56,9 @@
       "action": "expectFileContains",
       "path": "clients/ok.bat",
       "contains": "CommentSummaryTemplate=saved-summary"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

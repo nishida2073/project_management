@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputReportDir=saved-report-output"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

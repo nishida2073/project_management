@@ -88,6 +88,9 @@
       "path": "logs",
       "filter": "upload-kintone-file*.log",
       "contains": "テスト説明"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

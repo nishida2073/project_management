@@ -61,6 +61,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputYearComparisonCollectDir=saved-year-output"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

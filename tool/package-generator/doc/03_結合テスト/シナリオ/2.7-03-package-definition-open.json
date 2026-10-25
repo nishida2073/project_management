@@ -49,6 +49,9 @@
     {
       "action": "closeWindow",
       "title": "ok.xlsx"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

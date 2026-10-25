@@ -53,6 +53,9 @@
     {
       "action": "closeWindow",
       "title": "01_テスト"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputRootDir=saved-output-root"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

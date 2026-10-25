@@ -60,6 +60,9 @@
       "action": "expectFileContains",
       "path": "clients/ok.bat",
       "contains": "GenerateSheetsExclude=saved-exclude-sheets"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

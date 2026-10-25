@@ -42,6 +42,9 @@
       "part": "環境設定（共通）/アンケート結果の取得先",
       "pattern": "^{{SurveyResultRootDirRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

@@ -70,6 +70,9 @@
       "path": "logs",
       "filter": "upload-kintone-file*.log",
       "contains": "レコードID"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

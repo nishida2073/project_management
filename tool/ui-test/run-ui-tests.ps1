@@ -6,6 +6,7 @@
     [string]$WindowTitle = "",
     [string]$FixtureRoot = "",
     [string[]]$FixtureDirs = @(),
+    [string[]]$EvidenceDirs = @("clients", "download", "generated", "logs"),
     [string]$Filter = "",
     [switch]$KeepTemp,
     [switch]$StopOnFail
@@ -93,7 +94,7 @@ foreach ($file in $scenarioFiles) {
     } finally {
         if ($proc) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }
         $outputDir = Join-Path $evidenceDir $file.BaseName
-        foreach ($out in @("clients", "download", "generated", "logs")) {
+        foreach ($out in $EvidenceDirs) {
             $source = Join-Path $temp $out
             if (Test-Path -LiteralPath $source) {
                 New-Item -ItemType Directory -Path $outputDir -Force | Out-Null

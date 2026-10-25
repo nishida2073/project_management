@@ -78,6 +78,9 @@
     {
       "action": "closeWindow",
       "title": "統合"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

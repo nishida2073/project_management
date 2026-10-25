@@ -34,6 +34,9 @@
       "part": "環境設定（共通）/設定テンプレート（基本）ファイルのフォルダ",
       "pattern": "^{{CommonBaseTemplatePathRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

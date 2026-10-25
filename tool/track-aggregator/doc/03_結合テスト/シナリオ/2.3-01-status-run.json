@@ -62,6 +62,9 @@
       "action": "expectFile",
       "path": "output/集計結果/統合/ok-統合結果.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

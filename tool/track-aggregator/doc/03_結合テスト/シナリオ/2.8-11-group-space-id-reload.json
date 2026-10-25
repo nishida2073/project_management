@@ -57,6 +57,9 @@
       "part": "環境設定（グループ別）/投稿先スペースID",
       "pattern": "^{{SpaceIdRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

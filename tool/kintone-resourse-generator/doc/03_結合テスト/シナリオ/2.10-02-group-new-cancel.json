@@ -40,6 +40,9 @@
       "action": "expectFile",
       "path": "clients/TestCancel.bat",
       "exists": false
+    },
+    {
+      "action": "shot"
     }
   ]
 }

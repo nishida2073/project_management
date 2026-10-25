@@ -49,6 +49,9 @@
       "action": "expectMessage",
       "window": "一括実行",
       "contains": "フォルダ を設定してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

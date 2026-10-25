@@ -42,6 +42,9 @@
       "path": "output/実施結果/01_テスト/ok/社会を支えるITサービス",
       "filter": "nttdata-univ-material_results*.csv",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

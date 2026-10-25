@@ -33,6 +33,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "CommonConfigPath=saved-config-folder"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

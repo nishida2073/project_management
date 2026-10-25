@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "TestResultRootDir=saved-test-result-root"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

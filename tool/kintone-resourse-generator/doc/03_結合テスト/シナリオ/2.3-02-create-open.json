@@ -64,6 +64,9 @@
       "action": "closeWindow",
       "title": "TestSpace",
       "keys": "^w"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

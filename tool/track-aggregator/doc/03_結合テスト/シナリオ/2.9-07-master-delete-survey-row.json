@@ -44,6 +44,9 @@
     {
       "action": "expectEditNotContains",
       "text": "48693-639607"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

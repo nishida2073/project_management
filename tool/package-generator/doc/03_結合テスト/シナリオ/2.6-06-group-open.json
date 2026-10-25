@@ -39,6 +39,9 @@
     {
       "action": "closeWindow",
       "title": "{{client}}.xlsx"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

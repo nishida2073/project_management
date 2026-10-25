@@ -46,6 +46,9 @@
       "part": "実行（一括実行）/表示／隠す",
       "pattern": "^表示$",
       "timeoutSec": 5
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -52,6 +52,9 @@
       "action": "expectFileContains",
       "path": "clients/ok.bat",
       "contains": "KintoneSubdomain=saved-subdomain"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

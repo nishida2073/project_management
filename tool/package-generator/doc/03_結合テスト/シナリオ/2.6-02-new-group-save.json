@@ -60,6 +60,9 @@
       "action": "expectFile",
       "path": "clients/TestNew.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

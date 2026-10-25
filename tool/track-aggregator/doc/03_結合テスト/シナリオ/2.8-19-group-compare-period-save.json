@@ -66,6 +66,9 @@
       "action": "expectFileContains",
       "path": "clients/ok.bat",
       "contains": "ComparePeriod=saved-compare-period"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

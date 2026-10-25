@@ -41,6 +41,9 @@
       "part": "環境設定（グループ別）/対象のグループ",
       "pattern": "^TestNew$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -60,6 +60,9 @@
       "action": "expectFileContains",
       "path": "clients/ok.bat",
       "contains": "GenerateSourcePath=saved-source"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

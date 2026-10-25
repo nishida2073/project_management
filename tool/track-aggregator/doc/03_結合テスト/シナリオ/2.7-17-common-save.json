@@ -41,6 +41,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "OutputTestResultFileSuffix=saved-test-suffix"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

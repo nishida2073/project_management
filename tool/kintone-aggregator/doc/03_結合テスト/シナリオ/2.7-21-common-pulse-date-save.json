@@ -55,6 +55,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "TargetDateCodeFieldPulse=saved-pulse-date"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

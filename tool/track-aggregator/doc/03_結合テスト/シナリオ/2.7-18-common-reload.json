@@ -42,6 +42,9 @@
       "part": "環境設定（共通）/テスト結果ファイル名の接尾語",
       "pattern": "^{{OutputTestResultFileSuffixRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

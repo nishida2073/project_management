@@ -76,6 +76,9 @@
       "action": "closeWindow",
       "title": "02_アプリデータ集計",
       "keys": "%{F4}"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

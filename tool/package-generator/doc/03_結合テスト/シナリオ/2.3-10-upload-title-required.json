@@ -35,6 +35,9 @@
       "action": "expectMessage",
       "window": "実行",
       "contains": "タイトルを入力してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

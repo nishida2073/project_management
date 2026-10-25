@@ -60,6 +60,9 @@
       "part": "実行（スペースダウンロード）/スペースID",
       "pattern": "^\\d+$",
       "timeoutSec": 30
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -55,6 +55,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "TargetUserCodeFieldPulse=saved-pulse-user"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

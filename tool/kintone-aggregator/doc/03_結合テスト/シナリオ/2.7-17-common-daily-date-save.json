@@ -55,6 +55,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "TargetDateCodeFieldDaily=saved-daily-date"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -57,6 +57,9 @@
       "action": "expectFile",
       "path": "output/03_アラート検知結果/ok.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

@@ -49,6 +49,9 @@
       "action": "expectFile",
       "path": "clients/TestUnsaved.bat",
       "exists": false
+    },
+    {
+      "action": "shot"
     }
   ]
 }

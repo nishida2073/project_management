@@ -61,6 +61,9 @@
       "part": "環境設定（グループ別）/圧縮元のフォルダ",
       "pattern": "^{{GenerateSourcePathRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {

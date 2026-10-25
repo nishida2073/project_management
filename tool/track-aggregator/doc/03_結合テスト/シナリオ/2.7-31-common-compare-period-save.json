@@ -61,6 +61,9 @@
       "action": "expectFileContains",
       "path": "bats/common.bat",
       "contains": "ComparePeriod=saved-compare-period"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

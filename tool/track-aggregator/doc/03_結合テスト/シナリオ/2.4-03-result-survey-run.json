@@ -62,6 +62,9 @@
       "action": "expectFile",
       "path": "output/集計結果/アンケート/ok-アンケート結果.xlsx",
       "exists": true
+    },
+    {
+      "action": "shot"
     }
   ]
 }

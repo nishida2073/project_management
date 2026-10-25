@@ -45,6 +45,9 @@
       "action": "expectMessage",
       "window": "実行",
       "contains": "zipファイルを1つ以上指定してください"
+    },
+    {
+      "action": "shot"
     }
   ]
 }

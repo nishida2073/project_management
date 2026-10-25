@@ -42,6 +42,9 @@
       "part": "環境設定（共通）/テンプレートのフォルダ",
       "pattern": "^{{TemplateRootDirRe}}$",
       "timeoutSec": 15
+    },
+    {
+      "action": "shot"
     }
   ],
   "fixtureVars": {
