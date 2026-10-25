@@ -63,7 +63,7 @@
       "path": "clients/ok.xlsx",
       "sheet": "テスト",
       "cell": "E2",
-      "equals": "1"
+      "equals": "True"
     },
     {
       "action": "shot"

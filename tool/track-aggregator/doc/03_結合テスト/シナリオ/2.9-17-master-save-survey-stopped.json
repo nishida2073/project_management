@@ -63,7 +63,7 @@
       "path": "clients/ok.xlsx",
       "sheet": "アンケート",
       "cell": "E2",
-      "equals": "1"
+      "equals": "True"
     },
     {
       "action": "shot"
