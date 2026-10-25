@@ -39,9 +39,24 @@
     {
       "action": "expectTextAt",
       "part": "実行（複数実行）/状態",
-      "pattern": "^終了（成功-1件、警告-0件、失敗/スキップ-1件）$",
+      "pattern": "^終了（成功-1件、警告-0件、失敗/スキップ-0件）$",
       "tolX": 150,
       "timeoutSec": 60
+    },
+    {
+      "action": "expectFile",
+      "path": "download/TestSpace_download.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "config/TestSpace_config.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "checked/TestSpace_check.xlsx",
+      "exists": true
     }
   ]
 }

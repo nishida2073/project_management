@@ -115,6 +115,21 @@
       "part": "実行（一括実行）/状態",
       "timeoutSec": 60,
       "pattern": "^成功$"
+    },
+    {
+      "action": "expectFile",
+      "path": "download/TestSpace_download.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "config/TestSpace_config.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "checked/TestSpace_check.xlsx",
+      "exists": true
     }
   ]
 }
