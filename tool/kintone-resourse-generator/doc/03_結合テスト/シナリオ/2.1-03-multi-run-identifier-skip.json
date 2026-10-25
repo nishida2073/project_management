@@ -1,8 +1,8 @@
 {
-  "name": "2.1-06 異常のクライアント（ng）の行がある実行一覧で実行すると、ng の行は失敗し、状態に終了が表示される",
+  "name": "2.1-03 複数実行で、スペース識別名が空の行はスキップされる",
   "kind": "異常系",
   "vars": {
-    "client": "ng"
+    "client": "ok"
   },
   "setup": [],
   "steps": [
@@ -30,7 +30,7 @@
     {
       "action": "pasteAt",
       "part": "実行（複数実行）/実行一覧ファイル",
-      "value": "{{root}}\\run-list\\ng.xlsx"
+      "value": "{{root}}\\run-list\\skip-identifier.xlsx"
     },
     {
       "action": "clickAt",
@@ -39,7 +39,7 @@
     {
       "action": "expectTextAt",
       "part": "実行（複数実行）/状態",
-      "pattern": "^終了（成功-0件、警告-0件、失敗/スキップ-[1-9][0-9]*件）$",
+      "pattern": "^終了（成功-0件、警告-0件、失敗/スキップ-1件）$",
       "tolX": 150,
       "timeoutSec": 60
     }
