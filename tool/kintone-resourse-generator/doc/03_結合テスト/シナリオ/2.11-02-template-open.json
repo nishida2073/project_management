@@ -48,6 +48,11 @@
       "timeoutSec": 120
     },
     {
+      "action": "waitDoneAt",
+      "part": "環境設定（テンプレート）/状態",
+      "timeoutSec": 900
+    },
+    {
       "action": "clickAt",
       "part": "環境設定（テンプレート）/開く"
     },

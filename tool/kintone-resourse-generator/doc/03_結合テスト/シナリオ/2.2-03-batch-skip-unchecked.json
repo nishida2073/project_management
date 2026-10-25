@@ -93,7 +93,7 @@
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/状態（スペースのダウンロード）",
-      "pattern": "^(成功|失敗)$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
