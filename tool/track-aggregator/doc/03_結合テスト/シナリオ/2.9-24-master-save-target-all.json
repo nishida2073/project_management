@@ -1,0 +1,83 @@
+{
+  "name": "2.9-24 環境設定（マスター）で保存対象を「すべて」にしてテストとアンケートの名前を変えて保存すると、テストとアンケートの両方が保存される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/保存対象",
+      "value": "すべて"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "pasteAt",
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
+      "value": "saved-test-name"
+    },
+    {
+      "action": "pasteAt",
+      "part": "環境設定（マスター）/アンケート表のアンケート名（1行目）",
+      "value": "saved-survey-name"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "テスト",
+      "cell": "B2",
+      "equals": "saved-test-name"
+    },
+    {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "アンケート",
+      "cell": "B2",
+      "equals": "saved-survey-name"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}
