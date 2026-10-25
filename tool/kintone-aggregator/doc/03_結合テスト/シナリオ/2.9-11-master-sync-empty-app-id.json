@@ -40,7 +40,7 @@
     {
       "action": "expectMessage",
       "window": "エラー",
-      "contains": "対象アプリIDが設定されていません"
+      "contains": "対象アプリIDが設定されていません。"
     },
     {
       "action": "shot"
