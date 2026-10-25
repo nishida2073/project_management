@@ -39,7 +39,7 @@
     {
       "action": "expectMessage",
       "window": "実行",
-      "contains": "対象日 を設定してください"
+      "contains": "対象日 を設定してください。"
     },
     {
       "action": "shot"
