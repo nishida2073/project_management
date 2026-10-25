@@ -287,19 +287,34 @@ function Test-KintoneConnectionFromSettings {
     return Test-KintoneConnectionWithAppId -Subdomain $kintoneSubdomain -LoginName $kintoneLoginName -Password $kintonePassword -AppIds @($targetAppId)
 }
 
+function Get-DefaultUploadFolder {
+    param([string]$Client)
+    if (!$Client) { return "" }
+    $groupBat = Get-GroupBatPath $Client $clientsDir
+    if (-not (Test-Path -LiteralPath $groupBat)) { return "" }
+    return Get-ResolvedVar "GenerateOutputPath" $groupBat
+}
+
+function Get-DefaultUploadZipFiles {
+    param([string]$Client)
+    $folder = Get-DefaultUploadFolder $Client
+    if ($folder -and (Test-Path -LiteralPath $folder -PathType Container)) {
+        return @(Get-ChildItem -LiteralPath $folder -Filter *.zip -File | ForEach-Object { $_.FullName })
+    }
+    return @()
+}
+
 function Get-UploadZipFiles {
     param($ic)
     $files = @()
-    $inputNames = @(1..$zipFileCount | ForEach-Object { "TargetFilePath$_" }) + "TargetFolderPath"
-    foreach ($name in $inputNames) {
+    foreach ($name in @(1..$zipFileCount | ForEach-Object { "TargetFilePath$_" })) {
         $value = Get-InputValue -Control $ic[$name]
         foreach ($p in @($value -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
-            if (Test-Path -LiteralPath $p -PathType Container) {
-                $files += @(Get-ChildItem -LiteralPath $p -Filter *.zip -File | ForEach-Object { $_.FullName })
-            } else {
-                $files += $p
-            }
+            $files += $p
         }
+    }
+    if ($files.Count -eq 0) {
+        $files = @(Get-DefaultUploadZipFiles (Get-InputValue -Control $ic["ClientName"]))
     }
     return @($files)
 }
@@ -309,14 +324,6 @@ function Get-ButtonDefByBatchPath {
     return $categoryDefs | ForEach-Object { $_.ButtonDefs } | Where-Object { $_.BatchPath -eq $BatchPath } | Select-Object -First 1
 }
 
-function Update-FolderFromGroup {
-    param($ic, [string]$FolderKey, [string]$TitleKey = "")
-    $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem
-    if (!$client) { return }
-    if ($TitleKey) { $ic[$TitleKey].Text = $client }
-    $groupBat = Get-GroupBatPath $client $clientsDir
-    if (Test-Path -LiteralPath $groupBat) { $ic[$FolderKey].Text = Get-ResolvedVar "GenerateOutputPath" $groupBat }
-}
 
 $blankOptions = @([PSCustomObject]@{ Text = ""; Value = "" })
 
@@ -325,10 +332,9 @@ $clientInput = [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグル�
 $zipFileCount = 3
 
 $zipFileInputs = @(1..$zipFileCount | ForEach-Object {
-    [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "ファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip"; BrowseStartFn = { param($ic) $ic["TargetFolderPath"].Text }; Clear = $true }
+    [PSCustomObject]@{ Name = "TargetFilePath$_"; Label = "ファイル$_"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "File"; Filter = "zipファイル (*.zip)|*.zip"; BrowseStartFn = { param($ic) Get-DefaultUploadFolder (Get-InputValue -Control $ic["ClientName"]) }; Clear = $true }
 })
 
-$folderInput = [PSCustomObject]@{ Name = "TargetFolderPath"; Label = "フォルダ"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "Folder"; Clear = $true }
 $categoryDefs = @(
     [PSCustomObject]@{
         Label = "パッケージ作成"
@@ -347,17 +353,12 @@ $categoryDefs = @(
                     param($bic)
                     $client = Get-InputValue -Control $bic["ClientName"]
                     $title = Get-InputValue -Control $bic["UploadTitle"]
-                    $folder = Get-InputValue -Control $bic["UploadFolderPath"]
-                    $zipFiles = @()
-                    if ($folder -and (Test-Path -LiteralPath $folder -PathType Container)) {
-                        $zipFiles = @(Get-ChildItem -LiteralPath $folder -Filter *.zip -File | ForEach-Object { $_.FullName })
-                    }
+                    $zipFiles = @(Get-DefaultUploadZipFiles $client)
                     @("-ClientName:$client", "-Title:$title", "-TargetFilePath:$($zipFiles -join ';')")
                 }
                 Inputs = @(
-                    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions; OnChange = { param($ic) Update-FolderFromGroup $ic "TargetFolderPath" } }
+                    [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
                     [PSCustomObject]@{ Name = "Title"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true }
-                    $folderInput
                     $zipFileInputs
                     [PSCustomObject]@{ Name = "Description"; Label = "説明"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Multiline = $true; Height = 60 }
                 )
@@ -367,7 +368,7 @@ $categoryDefs = @(
                     $batArgs = @()
                     foreach ($inputDef in $inputDefs) {
                         if (-not $ic.ContainsKey($inputDef.Name)) { continue }
-                        if ($inputDef.Name -like "TargetFilePath*" -or $inputDef.Name -eq "TargetFolderPath") { continue }
+                        if ($inputDef.Name -like "TargetFilePath*") { continue }
                         $value = (Get-InputValue -Control $ic[$inputDef.Name]) -replace "`r?`n", '\n'
                         $batArgs += "-$($inputDef.Name):$value"
                     }
@@ -429,10 +430,8 @@ $tabBatchAll = New-TabPage -Text "一括実行"
 $execTabControl.Controls.Add($tabBatchAll)
 
 $batchRunAllInputs = @(
-        [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150; OnChange = { param($ic) Update-FolderFromGroup $ic "UploadFolderPath" "UploadTitle" } }
-        [PSCustomObject]@{ Name = "UploadTitle"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Require = $true }
-        [PSCustomObject]@{ Name = "UploadFolderPath"; Label = "フォルダ"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Browse = "Folder"; Require = $true }
-)
+        [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150; OnChange = { param($ic) $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem; if ($client) { $ic["UploadTitle"].Text = $client } } }
+        [PSCustomObject]@{ Name = "UploadTitle"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Require = $true })
 
 $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs $batchRunAllInputs `

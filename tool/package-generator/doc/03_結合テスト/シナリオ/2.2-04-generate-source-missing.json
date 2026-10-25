@@ -1,8 +1,8 @@
 {
-  "name": "2.2-04 警告のクライアントでパッケージを作成すると、状態が警告になる",
-  "kind": "正常系",
+  "name": "2.2-04 圧縮元のフォルダが存在しない（異常のクライアント）と、状態が警告になる",
+  "kind": "異常系",
   "vars": {
-    "client": "warn"
+    "client": "ng"
   },
   "setup": [],
   "steps": [
@@ -35,7 +35,7 @@
       "action": "expectTextAt",
       "part": "実行（パッケージ作成）/状態",
       "pattern": "^警告$",
-      "timeoutSec": 60
+      "timeoutSec": 30
     },
     {
       "action": "shot"

@@ -1,5 +1,5 @@
 {
-  "name": "2.3-08 ファイル3の「クリア」を押すと、ファイル3の入力が消える",
+  "name": "2.3-07 ファイル3の「クリア」を押すと、ファイル3の入力が消える",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -15,27 +15,8 @@
       "ms": 500
     },
     {
-      "action": "clickAt",
-      "part": "実行/パッケージ作成タブ"
-    },
-    {
       "action": "wait",
       "ms": 500
-    },
-    {
-      "action": "selectComboAt",
-      "part": "実行（パッケージ作成）/対象のグループ",
-      "value": "{{client}}"
-    },
-    {
-      "action": "clickAt",
-      "part": "実行（パッケージ作成）/実行"
-    },
-    {
-      "action": "expectTextAt",
-      "part": "実行（パッケージ作成）/状態",
-      "pattern": "^成功$",
-      "timeoutSec": 30
     },
     {
       "action": "clickAt",
@@ -68,7 +49,7 @@
     {
       "action": "expectTextAt",
       "part": "実行（パッケージ反映）/ファイル3",
-      "pattern": "generated\\\\ok\\\\コースA\\.zip$",
+      "pattern": ".",
       "absent": true,
       "timeoutSec": 10
     },

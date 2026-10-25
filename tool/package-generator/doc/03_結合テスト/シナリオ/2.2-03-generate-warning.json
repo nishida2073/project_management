@@ -1,15 +1,10 @@
 {
-  "name": "2.2-06 パッケージ定義ファイルが存在しないと、状態が失敗になる",
-  "kind": "異常系",
+  "name": "2.2-03 警告のクライアントでパッケージを作成すると、状態が警告になる",
+  "kind": "正常系",
   "vars": {
-    "client": "ok"
+    "client": "warn"
   },
-  "setup": [
-    {
-      "action": "deleteFile",
-      "path": "clients/ok.xlsx"
-    }
-  ],
+  "setup": [],
   "steps": [
     {
       "action": "clickAt",
@@ -39,7 +34,7 @@
     {
       "action": "expectTextAt",
       "part": "実行（パッケージ作成）/状態",
-      "pattern": "^失敗$",
+      "pattern": "^警告$",
       "timeoutSec": 60
     },
     {

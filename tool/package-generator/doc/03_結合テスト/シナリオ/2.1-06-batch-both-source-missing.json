@@ -1,5 +1,5 @@
 {
-  "name": "2.1-09 異常のクライアント（ng）で、パッケージのアップロードだけを一括実行すると、アップロードの状態に失敗と表示される",
+  "name": "2.1-06 圧縮元のフォルダが存在しない（異常のクライアント）と、パッケージ作成は警告になっても後続のアップロードは続けて実行される",
   "kind": "異常系",
   "vars": {
     "client": "ng"
@@ -29,17 +29,7 @@
     },
     {
       "action": "clickAt",
-      "part": "実行（一括実行）/パッケージの作成"
-    },
-    {
-      "action": "clickAt",
       "part": "実行（一括実行）/パッケージのアップロード"
-    },
-    {
-      "action": "expectCheckedAt",
-      "part": "実行（一括実行）/パッケージの作成",
-      "checked": false,
-      "timeoutSec": 15
     },
     {
       "action": "expectCheckedAt",
@@ -50,6 +40,12 @@
     {
       "action": "clickAt",
       "part": "実行（一括実行）/実行"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態（パッケージの作成）",
+      "pattern": "^警告$",
+      "timeoutSec": 60
     },
     {
       "action": "expectTextAt",

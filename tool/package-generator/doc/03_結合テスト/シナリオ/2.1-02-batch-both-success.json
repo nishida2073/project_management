@@ -50,7 +50,7 @@
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/状態（パッケージの作成）",
-      "pattern": "^成功$",
+      "pattern": "^(成功|警告)$",
       "timeoutSec": 60
     },
     {

@@ -1,0 +1,60 @@
+{
+  "name": "2.3-06 ファイル2の「クリア」を押すと、ファイル2の入力が消える",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/パッケージ反映タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（パッケージ反映）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "part": "実行（パッケージ反映）/ファイル2",
+      "value": "{{root}}\\generated\\ok\\コースA.zip"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（パッケージ反映）/ファイル2",
+      "pattern": "generated\\\\ok\\\\コースA\\.zip$",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（パッケージ反映）/クリア（ファイル2）"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（パッケージ反映）/ファイル2",
+      "pattern": ".",
+      "absent": true,
+      "timeoutSec": 10
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}
