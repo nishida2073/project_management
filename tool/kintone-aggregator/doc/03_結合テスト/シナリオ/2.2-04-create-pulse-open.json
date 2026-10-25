@@ -37,14 +37,13 @@
       "part": "実行（アプリデータ作成）/実行（パルスサーベイ）"
     },
     {
-      "action": "expectTextAt",
-      "part": "実行（アプリデータ作成）/状態（パルスサーベイ）",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
-    },
-    {
       "action": "wait",
       "ms": 3000
+    },
+    {
+      "action": "waitDoneAt",
+      "part": "実行（アプリデータ作成）/状態（パルスサーベイ）",
+      "timeoutSec": 900
     },
     {
       "action": "clickAt",

@@ -69,31 +69,31 @@
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/アプリデータ作成-業務日誌の状態",
-      "pattern": "^(成功|警告)$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/アプリデータ作成-パルスサーベイの状態",
-      "pattern": "^(成功|警告)$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/アプリデータ集計-業務日誌・パルスサーベイの状態",
-      "pattern": "^(成功|警告)$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/アラート集計-業務日誌・パルスサーベイの状態",
-      "pattern": "^(成功|警告)$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/アラート集計-投稿の状態",
-      "pattern": "^(成功|警告)$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
@@ -119,7 +119,7 @@
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/状態",
-      "pattern": "^(成功|警告)$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
