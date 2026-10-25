@@ -1,0 +1,65 @@
+{
+  "name": "2.9-12 環境設定（マスター）のアンケートの表で追加（アンケート）を押すと、2行目の通番が2になり、アンケート名が空になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/追加（アンケート）"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/アンケート表の通番（2行目）",
+      "pattern": "^2$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/アンケート表のアンケート名（2行目）",
+      "pattern": ".",
+      "timeoutSec": 10,
+      "absent": true
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

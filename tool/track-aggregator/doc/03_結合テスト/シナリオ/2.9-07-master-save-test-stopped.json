@@ -1,0 +1,65 @@
+{
+  "name": "2.9-07 環境設定（マスター）のテストの停止中を切り替えて保存すると、切り替えた値が保存される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/テスト表の停止中（1行目）",
+      "value": "TRUE"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/テスト表の停止中（1行目）",
+      "pattern": "^TRUE$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

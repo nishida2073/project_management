@@ -1,0 +1,62 @@
+{
+  "name": "2.9-05 環境設定（マスター）で開始日を変えて保存すると、変えた値が保存され、Excel の開始日が更新される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "pasteAt",
+      "part": "環境設定（マスター）/スケジュールの開始日（1行目）",
+      "value": "saved-start-date"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/スケジュールの開始日（1行目）",
+      "pattern": "^saved-start-date$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "スケジュール",
+      "cell": "C2",
+      "equals": "saved-start-date"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

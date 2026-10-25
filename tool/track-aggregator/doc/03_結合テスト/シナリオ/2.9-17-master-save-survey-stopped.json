@@ -1,5 +1,5 @@
 {
-  "name": "2.9-07 環境設定（マスター）のアンケートの表で2行目の削除（アンケート）を押すと、2行目が削除される",
+  "name": "2.9-17 環境設定（マスター）のアンケートの停止中を切り替えて保存すると、切り替えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -35,15 +35,28 @@
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 800
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/アンケート表の停止中（1行目）",
+      "value": "TRUE"
     },
     {
       "action": "clickAt",
-      "part": "環境設定（マスター）/アンケート表の2行目の削除"
+      "part": "環境設定（マスター）/保存"
     },
     {
-      "action": "expectEditNotContains",
-      "text": "48693-639607"
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/アンケート表の停止中（1行目）",
+      "pattern": "^TRUE$",
+      "timeoutSec": 15
     },
     {
       "action": "shot"

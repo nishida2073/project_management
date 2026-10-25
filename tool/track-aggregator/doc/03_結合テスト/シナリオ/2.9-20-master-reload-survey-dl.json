@@ -1,5 +1,5 @@
 {
-  "name": "2.9-03 環境設定（マスター）で科目名を変えて保存すると、変えた値が保存され、Excel の科目名が更新される",
+  "name": "2.9-20 環境設定（マスター）のDLを切り替えたあと再読込を押すと、保存されている値で表示し直される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -28,32 +28,35 @@
       "value": "{{client}}"
     },
     {
-      "action": "pasteAt",
-      "part": "環境設定（マスター）/スケジュールの科目名（1行目）",
-      "value": "saved-subject"
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/アンケート表のDL（1行目）",
+      "value": "FALSE"
     },
     {
       "action": "clickAt",
-      "part": "環境設定（マスター）/保存"
+      "part": "環境設定（マスター）/再読込"
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（マスター）/状態（保存）",
+      "part": "環境設定（マスター）/状態（再読込）",
       "pattern": "^完了$",
       "timeoutSec": 15
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（マスター）/スケジュールの科目名（1行目）",
-      "pattern": "^saved-subject$",
+      "part": "環境設定（マスター）/アンケート表のDL（1行目）",
+      "pattern": "^TRUE$",
       "timeoutSec": 15
-    },
-    {
-      "action": "excelExpect",
-      "path": "clients/ok.xlsx",
-      "sheet": "スケジュール",
-      "cell": "B2",
-      "equals": "saved-subject"
     },
     {
       "action": "shot"

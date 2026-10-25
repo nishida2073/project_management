@@ -1,0 +1,72 @@
+{
+  "name": "2.9-05 環境設定（マスター）のテストのTrackIdを変えて保存すると、変えた値が保存され、Excel のTrackIdが更新される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "pasteAt",
+      "part": "環境設定（マスター）/テスト表のTrackId（1行目）",
+      "value": "saved-track-id"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/テスト表のTrackId（1行目）",
+      "pattern": "^saved-track-id$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "excelExpect",
+      "path": "clients/ok.xlsx",
+      "sheet": "テスト",
+      "cell": "C2",
+      "equals": "saved-track-id"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

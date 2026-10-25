@@ -1,5 +1,5 @@
 {
-  "name": "2.9-02 環境設定（マスター）のスケジュールの1行目を削除して保存すると、Excel の1行目の科目名が消える",
+  "name": "2.9-07 環境設定（マスター）で値を変えたあと再読込を押すと、保存されている値で表示し直され、変えた内容は消える",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -28,32 +28,25 @@
       "value": "{{client}}"
     },
     {
+      "action": "pasteAt",
+      "part": "環境設定（マスター）/スケジュールの科目名（1行目）",
+      "value": "tmp-reload"
+    },
+    {
       "action": "clickAt",
-      "part": "環境設定（マスター）/スケジュールの1行目の削除"
+      "part": "環境設定（マスター）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
     },
     {
       "action": "expectTextAt",
       "part": "環境設定（マスター）/スケジュールの科目名（1行目）",
       "pattern": "^社会を支えるITサービス$",
-      "absent": true,
-      "timeoutSec": 10
-    },
-    {
-      "action": "clickAt",
-      "part": "環境設定（マスター）/保存"
-    },
-    {
-      "action": "expectTextAt",
-      "part": "環境設定（マスター）/状態（保存）",
-      "pattern": "^完了$",
       "timeoutSec": 15
-    },
-    {
-      "action": "excelExpect",
-      "path": "clients/ok.xlsx",
-      "sheet": "スケジュール",
-      "cell": "B2",
-      "equals": ""
     },
     {
       "action": "shot"

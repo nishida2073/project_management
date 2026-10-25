@@ -1,5 +1,5 @@
 {
-  "name": "2.9-08 異常のクライアント（ng）で同期実行を押すと、状態に失敗と表示される",
+  "name": "2.9-10 異常のクライアント（ng）で同期実行を押すと、状態に失敗と表示される",
   "kind": "異常系",
   "vars": {
     "client": "ng"
@@ -35,7 +35,7 @@
       "action": "expectTextAt",
       "part": "環境設定（マスター）/状態（同期実行）",
       "pattern": "^失敗$",
-      "timeoutSec": 300
+      "timeoutSec": 60
     },
     {
       "action": "shot"

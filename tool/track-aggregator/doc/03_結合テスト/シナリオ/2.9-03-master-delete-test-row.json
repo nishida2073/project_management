@@ -1,0 +1,65 @@
+{
+  "name": "2.9-03 環境設定（マスター）のテストの表で1行目の削除（テスト）を押すと、その行が表から消える",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/マスタータブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（マスター）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
+      "pattern": "^社会を支えるITサービス$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（マスター）/削除（テストの1行目）"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/テスト表のテスト名（1行目）",
+      "pattern": "社会を支えるITサービス",
+      "timeoutSec": 10,
+      "absent": true
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

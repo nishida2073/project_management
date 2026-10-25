@@ -1,8 +1,8 @@
 {
-  "name": "2.9-06 環境設定（マスター）のアンケートの表で追加（アンケート）を押すと、表の末尾に空の行が追加される",
-  "kind": "正常系",
+  "name": "2.9-22 異常のクライアント（ng）で同期実行を押すと、状態に失敗と表示される",
+  "kind": "異常系",
   "vars": {
-    "client": "ok"
+    "client": "ng"
   },
   "setup": [],
   "steps": [
@@ -28,14 +28,14 @@
       "value": "{{client}}"
     },
     {
-      "action": "wheelAt",
-      "x": 800,
-      "y": 450,
-      "delta": -1200
+      "action": "clickAt",
+      "part": "環境設定（マスター）/同期実行"
     },
     {
-      "action": "clickAt",
-      "part": "環境設定（マスター）/追加（アンケート）"
+      "action": "expectTextAt",
+      "part": "環境設定（マスター）/状態（同期実行）",
+      "pattern": "^失敗$",
+      "timeoutSec": 300
     },
     {
       "action": "shot"
