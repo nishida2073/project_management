@@ -117,8 +117,10 @@ function Invoke-UiStep {
         }
         "expectEditContains" {
             $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
+            $parts = if ($Step.lines) { @([regex]::Split($Step.text, '\\n')) } else { @($Step.text) }
             Wait-Until -TimeoutSec $timeout -Message "欄に $($Step.text)" -Condition {
-                @(Get-UiEditValues -Window $Context.Window | Where-Object { $_.Contains($Step.text) }).Count -gt 0
+                $values = @(Get-UiEditValues -Window $Context.Window)
+                @($parts | Where-Object { $part = $_; @($values | Where-Object { $_.Contains($part) }).Count -eq 0 }).Count -eq 0
             } | Out-Null
         }
         "expectEditNotContains" {
@@ -167,6 +169,26 @@ function Invoke-UiStep {
         "keysAt" {
             Invoke-UiClickAt -Window $Context.Window -X ([int]$Step.x) -Y ([int]$Step.y)
             Send-UiKeys -Keys $Step.keys
+        }
+        "waitDoneAt" {
+            $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 900 }
+            $tolX = if ($Step.tolX) { [int]$Step.tolX } else { 60 }
+            $tolY = if ($Step.tolY) { [int]$Step.tolY } else { 12 }
+            Wait-Until -TimeoutSec $timeout -Message "処理の完了 ($($Step.x),$($Step.y))" -Condition {
+                $top = $Context.Window.Current.BoundingRectangle.Top
+                $left = $Context.Window.Current.BoundingRectangle.Left
+                $all = $Context.Window.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
+                foreach ($element in $all) {
+                    $name = $element.Current.Name
+                    if (-not $name -or $name -match '^(未実行|実行中)') { continue }
+                    $rect = $element.Current.BoundingRectangle
+                    if ($rect.IsEmpty) { continue }
+                    $centerX = $rect.Left + $rect.Width / 2 - $left
+                    $centerY = $rect.Top + $rect.Height / 2 - $top
+                    if ([Math]::Abs($centerX - [int]$Step.x) -le $tolX -and [Math]::Abs($centerY - [int]$Step.y) -le $tolY) { return $true }
+                }
+                $false
+            } | Out-Null
         }
         "expectTextPattern" {
             $timeout = if ($Step.timeoutSec) { [int]$Step.timeoutSec } else { 15 }
