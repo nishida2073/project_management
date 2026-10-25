@@ -39,7 +39,7 @@
     {
       "action": "expectMessage",
       "window": "グループの新規作成",
-      "contains": "既に存在します"
+      "contains": "既に存在します。"
     },
     {
       "action": "shot"

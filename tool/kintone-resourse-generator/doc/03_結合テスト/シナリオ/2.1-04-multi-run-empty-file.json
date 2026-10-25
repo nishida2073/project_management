@@ -34,7 +34,7 @@
     {
       "action": "expectMessage",
       "window": "エラー",
-      "contains": "実行一覧ファイルを選択してください"
+      "contains": "実行一覧ファイルを選択してください。"
     },
     {
       "action": "shot"
