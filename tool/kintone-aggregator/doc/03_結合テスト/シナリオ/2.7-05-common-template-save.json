@@ -1,5 +1,5 @@
 {
-  "name": "2.7-23 パルスサーベイの日付フィールドコードを変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-05 テンプレートのフォルダを変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,23 +23,9 @@
       "ms": 500
     },
     {
-      "action": "wheelAt",
-      "x": 300,
-      "y": 500,
-      "delta": -240
-    },
-    {
-      "action": "wait",
-      "ms": 800
-    },
-    {
       "action": "typeAt",
-      "part": "環境設定（共通）/パルスサーベイの日付フィールドコード",
-      "value": "saved-pulse-date"
-    },
-    {
-      "action": "wait",
-      "ms": 500
+      "part": "環境設定（共通）/テンプレートのフォルダ",
+      "value": "saved-template"
     },
     {
       "action": "clickAt",
@@ -54,7 +40,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "TargetDateCodeFieldPulse=saved-pulse-date"
+      "contains": "TemplateRootDir=saved-template"
     }
   ]
 }

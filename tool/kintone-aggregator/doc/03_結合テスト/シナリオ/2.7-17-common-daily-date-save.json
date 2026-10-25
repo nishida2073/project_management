@@ -1,5 +1,5 @@
 {
-  "name": "2.7-07 テンプレートのフォルダを変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-17 業務日誌の日付フィールドコードを変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,9 +23,23 @@
       "ms": 500
     },
     {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -240
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
       "action": "typeAt",
-      "part": "環境設定（共通）/テンプレートのフォルダ",
-      "value": "saved-template"
+      "part": "環境設定（共通）/業務日誌の日付フィールドコード",
+      "value": "saved-daily-date"
+    },
+    {
+      "action": "wait",
+      "ms": 500
     },
     {
       "action": "clickAt",
@@ -40,7 +54,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "TemplateRootDir=saved-template"
+      "contains": "TargetDateCodeFieldDaily=saved-daily-date"
     }
   ]
 }

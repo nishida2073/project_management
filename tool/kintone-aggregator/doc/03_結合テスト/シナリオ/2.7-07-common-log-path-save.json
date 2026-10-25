@@ -1,5 +1,5 @@
 {
-  "name": "2.7-30 環境設定（共通）でアプリデータ集計の列定義の変更後を変えて保存を押すと、変えた値が collect-data-defs.json に保存される",
+  "name": "2.7-07 ログの出力先を変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,19 +23,9 @@
       "ms": 500
     },
     {
-      "action": "wheelAt",
-      "x": 300,
-      "y": 500,
-      "delta": -1200
-    },
-    {
-      "action": "wait",
-      "ms": 800
-    },
-    {
       "action": "typeAt",
-      "part": "環境設定（共通）/列定義（13行目）の変更後",
-      "value": "saved-col"
+      "part": "環境設定（共通）/ログの出力先",
+      "value": "saved-log-path"
     },
     {
       "action": "clickAt",
@@ -49,8 +39,8 @@
     },
     {
       "action": "expectFileContains",
-      "path": "bats/collect-data-defs.json",
-      "contains": "\"newName\":  \"saved-col\""
+      "path": "bats/common.bat",
+      "contains": "CommonLogPath=saved-log-path"
     }
   ]
 }

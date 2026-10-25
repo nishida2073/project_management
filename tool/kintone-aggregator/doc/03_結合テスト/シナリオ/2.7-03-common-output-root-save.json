@@ -1,5 +1,5 @@
 {
-  "name": "2.7-29 環境設定（共通）のアプリデータ集計の列定義で行を削除して保存を押すと、削除した行が列定義ファイルに保存されない",
+  "name": "2.7-03 出力のルートフォルダを変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,18 +23,9 @@
       "ms": 500
     },
     {
-      "action": "wheelAt",
-      "x": 800,
-      "y": 450,
-      "delta": -1200
-    },
-    {
-      "action": "wait",
-      "ms": 800
-    },
-    {
-      "action": "clickAt",
-      "part": "環境設定（共通）/アプリデータ集計の列定義の削除"
+      "action": "typeAt",
+      "part": "環境設定（共通）/出力のルートフォルダ",
+      "value": "saved-output-root"
     },
     {
       "action": "clickAt",
@@ -47,9 +38,9 @@
       "timeoutSec": 15
     },
     {
-      "action": "expectFileNotContains",
-      "path": "bats/collect-data-defs.json",
-      "contains": "パルスサーベイフリーコメント"
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "OutputRootDir=saved-output-root"
     }
   ]
 }

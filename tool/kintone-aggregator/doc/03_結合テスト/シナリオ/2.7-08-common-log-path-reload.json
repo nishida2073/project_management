@@ -1,5 +1,5 @@
 {
-  "name": "2.7-09 ログの出力先を変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-08 ログの出力先を変えて再読込を押すと、保存されている値に戻る",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -25,22 +25,27 @@
     {
       "action": "typeAt",
       "part": "環境設定（共通）/ログの出力先",
-      "value": "saved-log-path"
+      "value": "tmp-reload"
     },
     {
       "action": "clickAt",
-      "part": "環境設定（共通）/保存"
+      "part": "環境設定（共通）/再読込"
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（共通）/状態（保存）",
+      "part": "環境設定（共通）/状態（再読込）",
       "pattern": "^完了$",
       "timeoutSec": 15
     },
     {
-      "action": "expectFileContains",
-      "path": "bats/common.bat",
-      "contains": "CommonLogPath=saved-log-path"
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/ログの出力先",
+      "pattern": "^{{CommonLogPathRe}}$",
+      "timeoutSec": 15
     }
-  ]
+  ],
+  "fixtureVars": {
+    "CommonLogPath": "CommonLogPath"
+  },
+  "fixtureFile": "bats\\common.bat"
 }

@@ -1,5 +1,5 @@
 {
-  "name": "2.7-16 アラート検知結果の出力先を変えて再読込を押すと、保存されている値に戻る",
+  "name": "2.7-18 業務日誌の日付フィールドコードを変えて再読込を押すと、保存されている値に戻る",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,8 +23,18 @@
       "ms": 500
     },
     {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -240
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
       "action": "typeAt",
-      "part": "環境設定（共通）/アラート検知結果の出力先",
+      "part": "環境設定（共通）/業務日誌の日付フィールドコード",
       "value": "tmp-reload"
     },
     {
@@ -39,13 +49,13 @@
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（共通）/アラート検知結果の出力先",
-      "pattern": "^{{OutputAlertRootDirRe}}$",
+      "part": "環境設定（共通）/業務日誌の日付フィールドコード",
+      "pattern": "^{{TargetDateCodeFieldDailyRe}}$",
       "timeoutSec": 15
     }
   ],
   "fixtureVars": {
-    "OutputAlertRootDir": "OutputAlertRootDir"
+    "TargetDateCodeFieldDaily": "TargetDateCodeFieldDaily"
   },
   "fixtureFile": "bats\\common.bat"
 }

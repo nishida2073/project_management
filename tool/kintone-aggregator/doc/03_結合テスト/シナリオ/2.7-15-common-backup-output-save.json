@@ -1,5 +1,5 @@
 {
-  "name": "2.7-13 アプリデータ集計の出力先を変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-15 バックアップの出力先を変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -24,8 +24,8 @@
     },
     {
       "action": "typeAt",
-      "part": "環境設定（共通）/アプリデータ集計の出力先",
-      "value": "saved-collect-output"
+      "part": "環境設定（共通）/バックアップの出力先",
+      "value": "saved-backup-output"
     },
     {
       "action": "clickAt",
@@ -40,7 +40,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "OutputCollectDataRootDir=saved-collect-output"
+      "contains": "OutputAlertBackupDir=saved-backup-output"
     }
   ]
 }

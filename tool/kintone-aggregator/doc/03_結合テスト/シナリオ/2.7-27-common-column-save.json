@@ -1,5 +1,5 @@
 {
-  "name": "2.7-27 環境設定（共通）のアプリデータ集計の列定義で、行を選んで削除を押すと、選んだ行が削除される",
+  "name": "2.7-27 環境設定（共通）のアプリデータ集計の列定義で行を削除して保存を押すと、削除した行が列定義ファイルに保存されない",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -37,11 +37,19 @@
       "part": "環境設定（共通）/アプリデータ集計の列定義の削除"
     },
     {
+      "action": "clickAt",
+      "part": "環境設定（共通）/保存"
+    },
+    {
       "action": "expectTextAt",
-      "part": "環境設定（共通）/列定義（13行目）の変更後",
-      "pattern": "^パルスサーベイフリーコメント$",
-      "absent": true,
+      "part": "環境設定（共通）/状態（保存）",
+      "pattern": "^完了$",
       "timeoutSec": 15
+    },
+    {
+      "action": "expectFileNotContains",
+      "path": "bats/collect-data-defs.json",
+      "contains": "パルスサーベイフリーコメント"
     }
   ]
 }

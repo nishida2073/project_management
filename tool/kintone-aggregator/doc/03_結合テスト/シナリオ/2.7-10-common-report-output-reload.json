@@ -1,5 +1,5 @@
 {
-  "name": "2.7-10 ログの出力先を変えて再読込を押すと、保存されている値に戻る",
+  "name": "2.7-10 提出状況の出力先を変えて再読込を押すと、保存されている値に戻る",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -24,7 +24,7 @@
     },
     {
       "action": "typeAt",
-      "part": "環境設定（共通）/ログの出力先",
+      "part": "環境設定（共通）/提出状況の出力先",
       "value": "tmp-reload"
     },
     {
@@ -39,13 +39,13 @@
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（共通）/ログの出力先",
-      "pattern": "^{{CommonLogPathRe}}$",
+      "part": "環境設定（共通）/提出状況の出力先",
+      "pattern": "^{{OutputReportDirRe}}$",
       "timeoutSec": 15
     }
   ],
   "fixtureVars": {
-    "CommonLogPath": "CommonLogPath"
+    "OutputReportDir": "OutputReportDir"
   },
   "fixtureFile": "bats\\common.bat"
 }

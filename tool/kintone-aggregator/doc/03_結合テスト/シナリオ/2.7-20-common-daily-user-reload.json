@@ -1,5 +1,5 @@
 {
-  "name": "2.7-04 グループデータのフォルダを変えて再読込を押すと、保存されている値に戻る",
+  "name": "2.7-20 業務日誌の受講生IDフィールドコードを変えて再読込を押すと、保存されている値に戻る",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,8 +23,18 @@
       "ms": 500
     },
     {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -240
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
       "action": "typeAt",
-      "part": "環境設定（共通）/グループデータのフォルダ",
+      "part": "環境設定（共通）/業務日誌の受講生IDフィールドコード",
       "value": "tmp-reload"
     },
     {
@@ -39,13 +49,13 @@
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（共通）/グループデータのフォルダ",
-      "pattern": "^{{ClientDataRootDirRe}}$",
+      "part": "環境設定（共通）/業務日誌の受講生IDフィールドコード",
+      "pattern": "^{{TargetUserCodeFieldDailyRe}}$",
       "timeoutSec": 15
     }
   ],
   "fixtureVars": {
-    "ClientDataRootDir": "ClientDataRootDir"
+    "TargetUserCodeFieldDaily": "TargetUserCodeFieldDaily"
   },
   "fixtureFile": "bats\\common.bat"
 }

@@ -1,5 +1,5 @@
 {
-  "name": "2.7-11 提出状況の出力先を変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-28 環境設定（共通）でアプリデータ集計の列定義の変更後を変えて保存を押すと、変えた値が collect-data-defs.json に保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,9 +23,19 @@
       "ms": 500
     },
     {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
       "action": "typeAt",
-      "part": "環境設定（共通）/提出状況の出力先",
-      "value": "saved-report-output"
+      "part": "環境設定（共通）/列定義（13行目）の変更後",
+      "value": "saved-col"
     },
     {
       "action": "clickAt",
@@ -39,8 +49,8 @@
     },
     {
       "action": "expectFileContains",
-      "path": "bats/common.bat",
-      "contains": "OutputReportDir=saved-report-output"
+      "path": "bats/collect-data-defs.json",
+      "contains": "\"newName\":  \"saved-col\""
     }
   ]
 }

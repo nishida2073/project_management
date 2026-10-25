@@ -1,5 +1,5 @@
 {
-  "name": "2.7-25 パルスサーベイの受講生IDフィールドコードを変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-13 アラート検知結果の出力先を変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,23 +23,9 @@
       "ms": 500
     },
     {
-      "action": "wheelAt",
-      "x": 300,
-      "y": 500,
-      "delta": -240
-    },
-    {
-      "action": "wait",
-      "ms": 800
-    },
-    {
       "action": "typeAt",
-      "part": "環境設定（共通）/パルスサーベイの受講生IDフィールドコード",
-      "value": "saved-pulse-user"
-    },
-    {
-      "action": "wait",
-      "ms": 500
+      "part": "環境設定（共通）/アラート検知結果の出力先",
+      "value": "saved-alert-output"
     },
     {
       "action": "clickAt",
@@ -54,7 +40,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "TargetUserCodeFieldPulse=saved-pulse-user"
+      "contains": "OutputAlertRootDir=saved-alert-output"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "2.7-21 業務日誌の受講生IDフィールドコードを変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-23 パルスサーベイの受講生IDフィールドコードを変えて保存を押すと、変えた値が保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -34,8 +34,8 @@
     },
     {
       "action": "typeAt",
-      "part": "環境設定（共通）/業務日誌の受講生IDフィールドコード",
-      "value": "saved-daily-user"
+      "part": "環境設定（共通）/パルスサーベイの受講生IDフィールドコード",
+      "value": "saved-pulse-user"
     },
     {
       "action": "wait",
@@ -54,7 +54,7 @@
     {
       "action": "expectFileContains",
       "path": "bats/common.bat",
-      "contains": "TargetUserCodeFieldDaily=saved-daily-user"
+      "contains": "TargetUserCodeFieldPulse=saved-pulse-user"
     }
   ]
 }

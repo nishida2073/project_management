@@ -1,5 +1,5 @@
 {
-  "name": "2.7-17 バックアップの出力先を変えて保存を押すと、変えた値が保存される",
+  "name": "2.7-26 環境設定（共通）のアプリデータ集計の列定義で追加を押すと、表の末尾に空の行が追加される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -23,9 +23,27 @@
       "ms": 500
     },
     {
+      "action": "wheelAt",
+      "x": 800,
+      "y": 450,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/アプリデータ集計の列定義の追加"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
       "action": "typeAt",
-      "part": "環境設定（共通）/バックアップの出力先",
-      "value": "saved-backup-output"
+      "part": "環境設定（共通）/列定義（14行目）の変更前",
+      "value": "saved-col"
     },
     {
       "action": "clickAt",
@@ -39,8 +57,8 @@
     },
     {
       "action": "expectFileContains",
-      "path": "bats/common.bat",
-      "contains": "OutputAlertBackupDir=saved-backup-output"
+      "path": "bats/collect-data-defs.json",
+      "contains": "\"orgName\":  \"saved-col\""
     }
   ]
 }
