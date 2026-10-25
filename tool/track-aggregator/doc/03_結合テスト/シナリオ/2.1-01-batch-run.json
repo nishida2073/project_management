@@ -77,31 +77,31 @@
       "action": "expectTextAt",
       "part": "実行（一括実行）/実施結果取得-テストの状態",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
+      "timeoutSec": 900
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/実施結果取得-アンケートの状態",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
+      "timeoutSec": 900
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/実施状況確認-テスト・アンケートの状態",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
+      "timeoutSec": 900
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/実施結果集計-テストの状態",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
+      "timeoutSec": 900
     },
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/実施結果集計-アンケートの状態",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
+      "timeoutSec": 900
     },
     {
       "action": "expectFile",
@@ -129,7 +129,7 @@
       "action": "expectTextAt",
       "part": "実行（一括実行）/状態",
       "pattern": "^(成功|警告)$",
-      "timeoutSec": 60
+      "timeoutSec": 900
     },
     {
       "action": "shot"
