@@ -486,7 +486,7 @@ $settingsGroups = [ordered]@{
         Label = "共通"
         Sections = [ordered]@{
             "COMMON" = @{
-                Label = "共通"
+                Label = "基本設定"
                 Vars = [ordered]@{
                     "CommonLogPath" = @{ Label = "ログの出力先"; Browse = "Folder" }
                 }

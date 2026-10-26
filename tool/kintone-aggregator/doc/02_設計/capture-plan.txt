@@ -1,17 +1,17 @@
-# 3.1 実行（一括実行）: 項目 1〜12
+# 3.1 実行（一括実行）
 click 34 50
 click 54 79
 shot run-batch-01.png
-# 3.2 実行（アプリデータ作成）: 業務日誌・パルスサーベイ
+# 3.2 実行（アプリデータ作成）
 click 147 79
 shot app-data-create-01.png
-# 3.3 実行（アプリデータ集計）: 業務日誌・パルスサーベイ
+# 3.3 実行（アプリデータ集計）
 click 258 79
 shot app-data-collect-01.png
-# 3.4 実行（アラート集計）: 業務日誌・パルスサーベイ、投稿
+# 3.4 実行（アラート集計）
 click 358 79
 shot alert-collect-01.png
-# 3.5 ログ: 項目 1〜12
+# 3.5 ログ
 click 83 52
 shot log-01.png
 # 3.6 環境設定（共通）：ヘッダー・基本設定
@@ -34,6 +34,6 @@ shot settings-group-02.png
 wheel 130 450 -1200
 wheel 130 450 -1200
 shot settings-group-03.png
-# 3.8 環境設定（マスター）: ヘッダー・ユーザー、スケジュール
+# 3.8 環境設定（マスター）
 click 174 79
 shot settings-master-01.png

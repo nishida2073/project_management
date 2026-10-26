@@ -672,7 +672,7 @@ $settingsGroups = [ordered]@{
         Label = "共通"
         Sections = [ordered]@{
             "COMMON" = @{
-                Label = "共通"
+                Label = "基本設定"
                 Vars = [ordered]@{
                     "ClientDataRootDir"                    = @{ Label = "グループデータのフォルダ"; Browse = "Folder" }
                     "TemplateRootDir"                      = @{ Label = "テンプレートのフォルダ"; Browse = "Folder" }
