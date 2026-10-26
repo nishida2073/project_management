@@ -1,5 +1,5 @@
 {
-  "name": "2.6-03 保存済みのグループをコピーすると、設定ファイルと Excel ファイルができる",
+  "name": "2.6-03 保存済みのグループをコピーすると、設定ファイルと 定義ファイルができる",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -44,6 +44,11 @@
     {
       "action": "expectFile",
       "path": "clients/TestCopy.xlsx",
+      "exists": true
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/ok.xlsx",
       "exists": true
     },
     {

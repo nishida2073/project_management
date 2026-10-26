@@ -1,0 +1,44 @@
+{
+  "name": "2.6-06 kintone接続のテスト接続で、正しい接続情報なら成功になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/テスト接続（認証情報）"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（認証情報）",
+      "pattern": "^成功$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

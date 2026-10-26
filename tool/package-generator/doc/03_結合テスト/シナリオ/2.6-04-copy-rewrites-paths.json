@@ -1,0 +1,48 @@
+{
+  "name": "2.6-04 コピーすると、パッケージの出力先の名前が新しいグループの名前になる",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/コピー"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループのコピー作成",
+      "value": "TestCopy"
+    },
+    {
+      "action": "expectFileContains",
+      "path": "clients/TestCopy.bat",
+      "contains": "generated\\TestCopy"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

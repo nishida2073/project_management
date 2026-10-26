@@ -1,0 +1,68 @@
+{
+  "name": "2.6-18 パッケージ定義ファイルを変えて保存を押すと、変えた値が設定ファイルに保存される",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/ログイン名"
+    },
+    {
+      "action": "wheelAt",
+      "x": 480,
+      "y": 400,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（グループ別）/パッケージ定義ファイル",
+      "value": "saved-config"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "clients/ok.bat",
+      "contains": "GenerateConfigPath=saved-config"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}
