@@ -2,24 +2,25 @@
 shot run-batch-01.png
 # 3.2 実行（パッケージ作成）: 項目 1〜6
 click 143 78
-shot run-generate-02.png
+shot run-generate-01.png
 # 3.3 実行（パッケージ反映）: 項目 1〜10
 click 246 78
-shot run-upload-03.png
+shot run-upload-01.png
 # 3.4 ログ: 項目 1〜6
 click 82 52
-shot log-04.png
+shot log-01.png
 # 3.5 環境設定（共通）: 保存・再読込、共通
 click 152 52
 click 40 79
-shot settings-common-05.png
+shot settings-common-01.png
 # 3.6 環境設定（グループ別）: 上部（対象のグループ、kintone接続、ファイル管理）
 click 107 79
-shot settings-group-06.png
+shot settings-group-01.png
 # 3.6 環境設定（グループ別）: 下部（パッケージ作成の対象、経年の続き）
 click 420 330
-wheel 480 400 -1200
-shot settings-group-07.png
+wheel 60 450 -1200
+wheel 60 450 -1200
+shot settings-group-02.png
 # 3.7 環境設定（パッケージ定義）: パッケージ定義ファイルの更新
 click 198 79
-shot settings-package-definition-08.png
+shot settings-package-definition-01.png

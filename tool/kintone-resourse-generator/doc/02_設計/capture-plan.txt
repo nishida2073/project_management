@@ -1,14 +1,14 @@
 # 3.1 実行（複数実行）: 対象のグループ〜実行（項目 1〜3）
 click 34 50
 click 54 79
-shot multi-run-06.png
+shot multi-run-01.png
 # 3.2 実行（一括実行）: 項目 1〜12
 click 34 50
 click 129 79
-shot batch-run-07.png
+shot batch-run-01.png
 # 3.2 実行（一括実行）: 表示を押して、処理の欄（項目 7〜14）
 click 58 339
-shot batch-run-07b.png
+shot batch-run-02.png
 # 3.3 実行（スペース作成）: 項目 1〜3
 click 34 50
 click 212 79
@@ -16,29 +16,29 @@ shot space-create-01.png
 # 3.4 実行（スペースダウンロード）: 項目 1〜3
 click 34 50
 click 325 79
-shot space-download-02.png
+shot space-download-01.png
 # 3.5 実行（設定ファイル作成）: 項目 1〜4
 click 34 50
 click 449 79
-shot config-file-03.png
+shot config-file-01.png
 # 3.6 実行（スペース更新）: 項目 1〜3
 click 34 50
 click 552 79
-shot space-update-04.png
+shot space-update-01.png
 # 3.7 実行（スペース確認）: 項目 1〜3
 click 34 50
 click 646 79
-shot space-check-05.png
+shot space-check-01.png
 # 3.8 ログ: 項目 1〜6
 click 83 52
-shot log-09.png
+shot log-01.png
 # 3.9 環境設定（共通）: 項目 1〜2（保存・再読込）と 基本設定 1〜6
 click 155 52
 click 45 79
-shot settings-common-10.png
+shot settings-common-01.png
 # 3.10 環境設定（グループ別）: 項目 1〜5 と kintoneの接続情報 1〜4
 click 107 79
-shot settings-group-11.png
+shot settings-group-01.png
 # 3.11 環境設定（テンプレート）: テンプレート作成
 click 188 79
-shot template-08.png
+shot template-01.png
