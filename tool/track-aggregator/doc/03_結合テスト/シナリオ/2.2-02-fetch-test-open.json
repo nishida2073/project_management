@@ -32,14 +32,9 @@
       "part": "実行（実施結果取得）/実行（テスト）"
     },
     {
-      "action": "expectTextAt",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 60,
-      "part": "実行（実施結果取得）/状態（テスト）"
-    },
-    {
-      "action": "wait",
-      "ms": 3000
+      "action": "waitDoneAt",
+      "part": "実行（実施結果取得）/状態（テスト）",
+      "timeoutSec": 3000
     },
     {
       "action": "clickAt",

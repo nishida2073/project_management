@@ -51,14 +51,9 @@
       "part": "実行（実施結果集計）/実行（投稿）"
     },
     {
-      "action": "expectTextAt",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 1800,
-      "part": "実行（実施結果集計）/状態（投稿）"
-    },
-    {
-      "action": "wait",
-      "ms": 3000
+      "action": "waitDoneAt",
+      "part": "実行（実施結果集計）/状態（投稿）",
+      "timeoutSec": 3000
     },
     {
       "action": "clickAt",

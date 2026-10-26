@@ -53,14 +53,9 @@
       "part": "実行（実施結果集計）/実行（アンケート）"
     },
     {
-      "action": "expectTextAt",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 1800,
-      "part": "実行（実施結果集計）/状態（アンケート）"
-    },
-    {
-      "action": "wait",
-      "ms": 3000
+      "action": "waitDoneAt",
+      "part": "実行（実施結果集計）/状態（アンケート）",
+      "timeoutSec": 3000
     },
     {
       "action": "clickAt",

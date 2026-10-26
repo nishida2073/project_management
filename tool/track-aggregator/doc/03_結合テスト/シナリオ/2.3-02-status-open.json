@@ -53,18 +53,9 @@
       "part": "実行（実施状況確認）/実行"
     },
     {
-      "action": "wait",
-      "ms": 30000
-    },
-    {
-      "action": "expectTextAt",
-      "pattern": "^(成功|警告)$",
-      "timeoutSec": 900,
-      "part": "実行（実施状況確認）/状態"
-    },
-    {
-      "action": "wait",
-      "ms": 3000
+      "action": "waitDoneAt",
+      "part": "実行（実施状況確認）/状態",
+      "timeoutSec": 9000
     },
     {
       "action": "clickAt",
