@@ -84,7 +84,9 @@ foreach ($file in $scenarioFiles) {
         Invoke-UiSetup -Scenario $scenario -Root $temp
         $proc = Start-Process -FilePath $exeTarget -PassThru
         $window = Get-UiWindow -ProcessId $proc.Id -Title $WindowTitle -TimeoutSec 30
-        $context = [pscustomobject]@{ ProcessId = $proc.Id; Window = $window; Root = $temp; ScenarioId = $file.BaseName; EvidenceDir = $evidenceDir }
+        $shotDir = Join-Path (Join-Path $evidenceDir $file.BaseName) "screenshots"
+        New-Item -ItemType Directory -Path $shotDir -Force | Out-Null
+        $context = [pscustomobject]@{ ProcessId = $proc.Id; Window = $window; Root = $temp; ScenarioId = $file.BaseName; EvidenceDir = $shotDir }
         Invoke-UiSteps -Scenario $scenario -Context $context
         $results += [pscustomobject]@{ Name = $name; Result = "PASS"; Message = "" }
         Write-UiLog "シナリオ結果: PASS"
