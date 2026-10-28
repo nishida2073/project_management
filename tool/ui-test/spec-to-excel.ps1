@@ -24,7 +24,7 @@ function Read-SpecTables {
     foreach ($line in $lines) {
         if (-not $title -and $line -match '^# (.+)$') { $title = $Matches[1]; continue }
         if ($line -match '^### (.+)$') { $heading = $Matches[1]; $current = $null; continue }
-        if ($line -match '^## ') { $heading = ""; $current = $null; continue }
+        if ($line -match '^## (.+)$') { $heading = ($Matches[1] -replace '^\d+\.\s*', ''); $current = $null; continue }
         if ($line -match '^\|') {
             $cells = @($line.Trim().Trim('|').Split('|') | ForEach-Object { $_.Trim() })
             if (@($cells | Where-Object { $_ -notmatch '^:?-+:?$' }).Count -eq 0) { continue }
