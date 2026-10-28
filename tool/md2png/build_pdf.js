@@ -51,6 +51,7 @@ const titlePage = flags.includes('--title-page');
 const narrowMargins = flags.includes('--narrow-margins');
 const toc = flags.includes('--toc');
 const pageNumbers = flags.includes('--page-numbers');
+const landscape = flags.includes('--landscape');
 const header = flags.includes('--header');
 const imgWidthFlag = flags.find((f) => f.startsWith('--img-width='));
 const imgWidth = imgWidthFlag ? Number(imgWidthFlag.slice('--img-width='.length)) : null;
@@ -73,7 +74,7 @@ if (extraCssFlag) {
 }
 
 if (!mdPath || !outPath) {
-  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--issue-date=text] [--issue-date-position=front|back] [--narrow-margins] [--img-width=N] [--toc] [--toc-depth=N] [--page-numbers] [--header] [--bookmark-depth=N] [--anchor-levels=2,3,5] [--extra-css=path]');
+  console.error('Usage: node build_pdf.js <input.md> <output.pdf> [--title-page] [--issue-date=text] [--issue-date-position=front|back] [--narrow-margins] [--img-width=N] [--toc] [--toc-depth=N] [--page-numbers] [--landscape] [--header] [--bookmark-depth=N] [--anchor-levels=2,3,5] [--extra-css=path]');
   process.exit(1);
 }
 
@@ -117,7 +118,7 @@ async function renderPdf(browser, htmlPage, headerText) {
   await new Promise((r) => setTimeout(r, 300));
 
   const tmpPdfPath = path.join(os.tmpdir(), `md2pdf-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.pdf`);
-  const pdfOptions = { path: tmpPdfPath, format: 'A4', printBackground: true, margin: pdfMargin };
+  const pdfOptions = { path: tmpPdfPath, format: 'A4', landscape, printBackground: true, margin: pdfMargin };
   if (headerText) {
     pdfOptions.displayHeaderFooter = true;
     pdfOptions.footerTemplate = '<div></div>';
