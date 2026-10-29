@@ -1,5 +1,5 @@
 {
-  "name": "2.6-23 パッケージの出力先を変えて再読込を押すと、保存されている値に戻る",
+  "name": "2.6-27 環境設定（グループ別）で除外のシートを変えて保存を押すと、変えた値がグループ設定ファイルに保存される",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -43,30 +43,26 @@
     },
     {
       "action": "typeAt",
-      "part": "環境設定（グループ別）/パッケージの出力先",
-      "value": "tmp-reload"
+      "part": "環境設定（グループ別）/除外のシート",
+      "value": "saved-exclude-sheets"
     },
     {
       "action": "clickAt",
-      "part": "環境設定（グループ別）/再読込"
+      "part": "環境設定（グループ別）/保存"
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（グループ別）/状態（再読込）",
+      "part": "環境設定（グループ別）/状態（保存）",
       "pattern": "^完了$",
       "timeoutSec": 15
     },
     {
-      "action": "expectTextAt",
-      "part": "環境設定（グループ別）/パッケージの出力先",
-      "pattern": "^{{GenerateOutputPathRe}}$",
-      "timeoutSec": 15
+      "action": "expectFileContains",
+      "path": "clients/ok.bat",
+      "contains": "GenerateSheetsExclude=saved-exclude-sheets"
     },
     {
       "action": "shot"
     }
-  ],
-  "fixtureVars": {
-    "GenerateOutputPath": "GenerateOutputPath"
-  }
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "2.6-20 作業用のフォルダを変えて保存を押すと、変えた値が保存される",
+  "name": "2.6-22 作業用のフォルダを変えて再読込を押すと、保存されている値に戻る",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -44,25 +44,29 @@
     {
       "action": "typeAt",
       "part": "環境設定（グループ別）/作業用のフォルダ",
-      "value": "saved-work-folder"
+      "value": "tmp-reload"
     },
     {
       "action": "clickAt",
-      "part": "環境設定（グループ別）/保存"
+      "part": "環境設定（グループ別）/再読込"
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（グループ別）/状態（保存）",
+      "part": "環境設定（グループ別）/状態（再読込）",
       "pattern": "^完了$",
       "timeoutSec": 15
     },
     {
-      "action": "expectFileContains",
-      "path": "clients/ok.bat",
-      "contains": "GenerateWorkPath=saved-work-folder"
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/作業用のフォルダ",
+      "pattern": "^{{GenerateWorkPathRe}}$",
+      "timeoutSec": 15
     },
     {
       "action": "shot"
     }
-  ]
+  ],
+  "fixtureVars": {
+    "GenerateWorkPath": "GenerateWorkPath"
+  }
 }

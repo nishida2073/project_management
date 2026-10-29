@@ -1,5 +1,5 @@
 {
-  "name": "2.6-26 環境設定（グループ別）で除外のシートを変えて保存を押すと、変えた値がグループ設定ファイルに保存される",
+  "name": "2.6-25 パッケージ作成の対象のシートに値を入れて保存すると、グループ設定ファイルに保存され、画面に残る",
   "kind": "正常系",
   "vars": {
     "client": "ok"
@@ -43,8 +43,8 @@
     },
     {
       "action": "typeAt",
-      "part": "環境設定（グループ別）/除外のシート",
-      "value": "saved-exclude-sheets"
+      "part": "環境設定（グループ別）/対象のシート",
+      "value": "saved-sheets"
     },
     {
       "action": "clickAt",
@@ -59,7 +59,13 @@
     {
       "action": "expectFileContains",
       "path": "clients/ok.bat",
-      "contains": "GenerateSheetsExclude=saved-exclude-sheets"
+      "contains": "GenerateSheetsInclude=saved-sheets"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のシート",
+      "pattern": "^saved-sheets$",
+      "timeoutSec": 30
     },
     {
       "action": "shot"
