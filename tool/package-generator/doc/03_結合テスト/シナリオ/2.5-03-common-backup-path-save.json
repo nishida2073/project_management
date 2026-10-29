@@ -1,0 +1,47 @@
+{
+  "name": "2.5-03 共通の設定でバックアップの保存先を変えて保存すると、変えた値が common.bat に保存される",
+  "kind": "正常系",
+  "vars": {},
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/バックアップの保存先",
+      "value": "saved-backup"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "bats/common.bat",
+      "contains": "CommonBackupPath=saved-backup"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

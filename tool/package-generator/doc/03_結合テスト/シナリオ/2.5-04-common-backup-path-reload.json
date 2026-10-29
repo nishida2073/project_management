@@ -1,0 +1,52 @@
+{
+  "name": "2.5-04 共通の設定で変えたバックアップの保存先を再読込すると、保存されている値に戻る",
+  "kind": "正常系",
+  "vars": {},
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（共通）/バックアップの保存先",
+      "value": "tmp-reload"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/再読込"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/状態（再読込）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（共通）/バックアップの保存先",
+      "pattern": "^{{CommonBackupPathRe}}$",
+      "timeoutSec": 30
+    },
+    {
+      "action": "shot"
+    }
+  ],
+  "fixtureVars": {
+    "CommonBackupPath": "CommonBackupPath"
+  },
+  "fixtureFile": "bats\\common.bat"
+}

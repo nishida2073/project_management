@@ -1,0 +1,45 @@
+{
+  "name": "2.5-05 環境設定（共通）のバックアップの保存先の開くを押すと、バックアップの保存先のフォルダが開く",
+  "kind": "正常系",
+  "vars": {},
+  "setup": [
+    {
+      "action": "makeDir",
+      "path": "backup"
+    }
+  ],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/共通タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（共通）/開く（バックアップの保存先）"
+    },
+    {
+      "action": "expectWindow",
+      "title": "backup",
+      "timeoutSec": 30
+    },
+    {
+      "action": "closeWindow",
+      "title": "backup"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}
