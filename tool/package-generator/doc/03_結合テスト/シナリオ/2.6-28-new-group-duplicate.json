@@ -1,0 +1,48 @@
+{
+  "name": "2.6-28 新規作成で既存のグループと同じ名前を入力すると、メッセージが出る",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/新規作成"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "{{client}}"
+    },
+    {
+      "action": "expectMessage",
+      "window": "グループの新規作成",
+      "contains": "既に存在します"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

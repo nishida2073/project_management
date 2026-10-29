@@ -593,10 +593,6 @@ $settingsGroupTop = (New-SettingsTopPanel `
             Copy-GroupSettingsFiles -SourceGroup $source -GroupName $newName
             $settingsGroupTop.Controls["GroupTarget"].SelectedItem = $settingsGroupTop.Controls["GroupTarget"].Items | Where-Object { (Get-ComboBoxValue -SelectedItem $_) -eq $newName } | Select-Object -First 1
         } }
-        [PSCustomObject]@{ Name = "OpenXlsx"; Kind = "Link"; Text = "開く"; OnClick = {
-            $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem
-            Open-TargetOrWarn -Path (Get-GroupXlsxPath $target)
-        } }
     ) `
     -OnSave {
         $target = Get-ComboBoxValue -SelectedItem $settingsGroupTop.Controls["GroupTarget"].SelectedItem

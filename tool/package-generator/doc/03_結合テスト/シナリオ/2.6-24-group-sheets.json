@@ -1,0 +1,74 @@
+{
+  "name": "2.6-24 パッケージ作成の対象のシートに値を入れて保存すると、グループ設定ファイルに保存され、画面に残る",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/ログイン名"
+    },
+    {
+      "action": "wheelAt",
+      "x": 480,
+      "y": 400,
+      "delta": -1200
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "typeAt",
+      "part": "環境設定（グループ別）/対象のシート",
+      "value": "saved-sheets"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/保存"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/状態（保存）",
+      "pattern": "^完了$",
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectFileContains",
+      "path": "clients/ok.bat",
+      "contains": "GenerateSheetsInclude=saved-sheets"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のシート",
+      "pattern": "^saved-sheets$",
+      "timeoutSec": 30
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

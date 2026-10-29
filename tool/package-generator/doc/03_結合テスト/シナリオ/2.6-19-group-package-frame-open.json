@@ -1,0 +1,57 @@
+{
+  "name": "2.6-19 グループ別のパッケージ作成の開く（パッケージ定義ファイル）を押すと、パッケージ定義ファイルが開く",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "wheelAt",
+      "x": 300,
+      "y": 500,
+      "delta": -240
+    },
+    {
+      "action": "wait",
+      "ms": 800
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/開く（パッケージ定義ファイル）"
+    },
+    {
+      "action": "expectWindow",
+      "title": "{{client}}.xlsx",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "{{client}}.xlsx"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}

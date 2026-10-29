@@ -1,0 +1,63 @@
+{
+  "name": "2.6-30 コピー元が保存されていないグループはコピーできない",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/環境設定タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定/グループ別タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/新規作成"
+    },
+    {
+      "action": "enterDialog",
+      "window": "グループの新規作成",
+      "value": "TestUnsaved"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "環境設定（グループ別）/対象のグループ",
+      "pattern": "^TestUnsaved$",
+      "timeoutSec": 30
+    },
+    {
+      "action": "clickAt",
+      "part": "環境設定（グループ別）/コピー"
+    },
+    {
+      "action": "expectMessage",
+      "window": "コピー作成",
+      "contains": "コピー元のグループが存在しません。"
+    },
+    {
+      "action": "expectFile",
+      "path": "clients/TestUnsaved.bat",
+      "exists": false
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}
