@@ -21,7 +21,7 @@
     },
     {
       "action": "clickAt",
-      "part": "実行（パッケージ反映）/開く"
+      "part": "実行（パッケージ反映）/開く（パッケージのアップロード）"
     },
     {
       "action": "expectWindow",

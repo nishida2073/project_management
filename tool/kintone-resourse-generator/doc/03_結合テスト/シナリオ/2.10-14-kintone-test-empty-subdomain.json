@@ -43,7 +43,7 @@
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（グループ別）/状態（認証情報）",
+      "part": "環境設定（グループ別）/状態（テスト接続）",
       "pattern": "^失敗$",
       "timeoutSec": 30
     },

@@ -50,16 +50,16 @@
     },
     {
       "action": "clickAt",
-      "part": "実行（実施状況確認）/実行"
+      "part": "実行（実施状況確認）/実行（テスト・アンケート）"
     },
     {
       "action": "waitDoneAt",
-      "part": "実行（実施状況確認）/状態",
+      "part": "実行（実施状況確認）/状態（テスト・アンケート）",
       "timeoutSec": 9000
     },
     {
       "action": "clickAt",
-      "part": "実行（実施状況確認）/開く"
+      "part": "実行（実施状況確認）/開く（テスト・アンケート）"
     },
     {
       "action": "expectWindow",

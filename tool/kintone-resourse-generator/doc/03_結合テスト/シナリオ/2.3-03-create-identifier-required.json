@@ -29,7 +29,7 @@
     },
     {
       "action": "clickAt",
-      "part": "実行（スペース作成）/実行"
+      "part": "実行（スペース作成）/実行（スペースの作成）"
     },
     {
       "action": "expectMessage",

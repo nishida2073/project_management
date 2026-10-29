@@ -39,22 +39,22 @@
     },
     {
       "action": "clickAt",
-      "part": "環境設定（テンプレート）/実行"
+      "part": "環境設定（テンプレート）/実行（テンプレート作成）"
     },
     {
       "action": "expectTextAt",
-      "part": "環境設定（テンプレート）/状態",
+      "part": "環境設定（テンプレート）/状態（テンプレート作成）",
       "pattern": "^成功$",
       "timeoutSec": 120
     },
     {
       "action": "waitDoneAt",
-      "part": "環境設定（テンプレート）/状態",
+      "part": "環境設定（テンプレート）/状態（テンプレート作成）",
       "timeoutSec": 900
     },
     {
       "action": "clickAt",
-      "part": "環境設定（テンプレート）/開く"
+      "part": "環境設定（テンプレート）/開く（テンプレート作成）"
     },
     {
       "action": "expectWindow",

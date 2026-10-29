@@ -34,7 +34,7 @@
     },
     {
       "action": "clickAt",
-      "part": "実行（設定ファイル作成）/実行"
+      "part": "実行（設定ファイル作成）/実行（設定ファイルの作成）"
     },
     {
       "action": "expectMessage",
