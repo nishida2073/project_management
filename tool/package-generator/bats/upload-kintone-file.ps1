@@ -12,6 +12,7 @@ param(
     [string]$KintoneLoginName,
     [string]$KintonePassword,
     [string]$ClientName,
+    [string]$BackupPath,
     [string]$LogPath,
     [string]$LogNamePrefix
 )
@@ -78,6 +79,12 @@ try {
                 $body = @{ app = $TargetAppId; id = $recordId; record = $record }
                 $resp = Invoke-RestMethod -Method Put -Uri "$KintoneBaseUrl/k/v1/record.json" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ($body | ConvertTo-Json -Depth 10)
                 Write-MessageComplete "同じタイトルのレコードを更新しました: レコードID $recordId"
+                $backupDir = Join-Path (Join-Path $BackupPath $ClientName) (Get-Date -Format "yyyyMMdd-HHmmss")
+                New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+                foreach ($file in $files) {
+                    Copy-Item -LiteralPath $file -Destination $backupDir
+                    Write-MessageComplete "バックアップファイルを作成しました: $(Join-Path $backupDir (Split-Path -Leaf $file))"
+                }
             } else {
                 $body = @{ app = $TargetAppId; record = $record }
                 $resp = Invoke-RestMethod -Method Post -Uri "$KintoneBaseUrl/k/v1/record.json" -Headers $headers -ContentType "application/json; charset=utf-8" -Body ($body | ConvertTo-Json -Depth 10)

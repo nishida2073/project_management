@@ -21,7 +21,7 @@ call "%~dp0message.bat" "Start %BATCH_NAME%"
 
 powershell.exe ^
  -ExecutionPolicy Bypass ^
- -File "%~dp0upload-kintone-file.ps1" -TargetFilePath "!TargetFilePath!" -Title "!Title!" -Description "!Description!" -TargetAppId "!TargetAppId!" -KintoneBaseUrl "!KintoneBaseUrl!" -KintoneLoginName "!KintoneLoginName!" -KintonePassword "!KintonePassword!" -ClientName "!ClientName!" -AllowUpdate "!AllowUpdate!" -LogPath "!CommonLogPath!" -LogNamePrefix "%~n0"
+ -File "%~dp0upload-kintone-file.ps1" -TargetFilePath "!TargetFilePath!" -Title "!Title!" -Description "!Description!" -TargetAppId "!TargetAppId!" -KintoneBaseUrl "!KintoneBaseUrl!" -KintoneLoginName "!KintoneLoginName!" -KintonePassword "!KintonePassword!" -ClientName "!ClientName!" -AllowUpdate "!AllowUpdate!" -BackupPath "!CommonBackupPath!" -LogPath "!CommonLogPath!" -LogNamePrefix "%~n0"
 set "EXITCODE=%ERRORLEVEL%"
 
 call "%~dp0message.bat" "Finished %BATCH_NAME%"

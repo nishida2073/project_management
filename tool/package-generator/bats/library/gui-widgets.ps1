@@ -1598,6 +1598,7 @@ function Get-SettingsRenderLists {
         FileBrowseVars   = @()
         FileBrowseFilters = @{}
         NoOpenVars       = @()
+        OpenLinkVars     = @()
         MaskedVars       = @()
         MultilineVars    = @()
         WidthVars        = @{}
@@ -1613,6 +1614,7 @@ function Get-SettingsRenderLists {
                 if ($varDef.Browse -eq "Folder") { $lists.FolderBrowseVars += $varKey }
                 if ($varDef.Browse -eq "File") { $lists.FileBrowseVars += $varKey; if ($varDef.Filter) { $lists.FileBrowseFilters[$varKey] = $varDef.Filter } }
                 if ($varDef.NoOpen) { $lists.NoOpenVars += $varKey }
+                if ($varDef.OpenLink) { $lists.OpenLinkVars += $varKey }
                 if ($varDef.Masked) { $lists.MaskedVars += $varKey }
                 if ($varDef.Multiline) { $lists.MultilineVars += $varKey }
                 if ($varDef.Width) { $lists.WidthVars[$varKey] = $varDef.Width }
@@ -1742,7 +1744,13 @@ function Set-SettingsFields {
                     if ($startPath -and (Test-Path -LiteralPath $startPath)) { $dlg.SelectedPath = $startPath }
                     if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { $targetTxt.Text = $dlg.SelectedPath }
                 }.GetNewClosure())
-                $grp.Controls.Add($btnBrowse)
+
+                $folderControls = @($btnBrowse)
+                if ($RenderLists.OpenLinkVars -contains $field.VarName) {
+                    $lnkOpen = New-OpenLink -Text "開く" -X ($btnBrowse.Right + 10) -Y ($y - 2) -Width 40 -Height 22 -Pattern 'internal' -Tag $txt -OnOpenClick $OnOpenClick
+                    $folderControls += $lnkOpen
+                }
+                $grp.Controls.AddRange($folderControls)
             }
         }
 

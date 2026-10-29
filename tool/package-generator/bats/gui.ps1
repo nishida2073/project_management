@@ -231,9 +231,12 @@ function Save-GroupSettings {
 function Update-CommonSettingsFields {
     $scrollX = -$settingsCommonBottomPanel.AutoScrollPosition.X
     $scrollY = -$settingsCommonBottomPanel.AutoScrollPosition.Y
+    $resolverValue = $commonEnvResolver
+    $rootPathValue = $rootPath
     Set-SettingsFields -Panel $settingsCommonBottomPanel -Rows (Get-CommonSettingsFieldRows) -TargetTextBoxes $settingsCommonFieldTextBoxes `
         -RenderLists $settingsRenderLists -RootPath $rootPath -EnvResolver $commonEnvResolver `
-        -LabelWidth 150 | Out-Null
+        -LabelWidth 150 `
+        -OnOpenClick ({ param($path) Resolve-BrowseStart -RawValue $path -DefaultPath $rootPathValue -Resolver $resolverValue -BasePath $rootPathValue }).GetNewClosure() | Out-Null
     $settingsCommonBottomPanel.AutoScrollPosition = New-Object System.Drawing.Point($scrollX, $scrollY)
 }
 
@@ -489,6 +492,7 @@ $settingsGroups = [ordered]@{
                 Label = "基本設定"
                 Vars = [ordered]@{
                     "CommonLogPath" = @{ Label = "ログの出力先"; Browse = "Folder" }
+                    "CommonBackupPath" = @{ Label = "バックアップの保存先"; Browse = "Folder"; OpenLink = $true }
                 }
             }
         }
