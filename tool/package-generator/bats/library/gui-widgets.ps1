@@ -1126,12 +1126,27 @@ function New-BatchRunTab {
     $inputControls = @{}
     $inputX = 15
     $currentInputRow = 0
+    $rowHeights = @{ 0 = $inputRowHeight }
+    $rowNo = 0
+    foreach ($inputDef in $Inputs) {
+        if ($inputDef.NewRow) { $rowNo++ }
+        $h = if ($inputDef.Multiline) { (Get-MultilineInputHeight -InputDef $inputDef -RowHeight $inputRowHeight) + 10 } else { $inputRowHeight }
+        if (-not $rowHeights.ContainsKey($rowNo) -or $rowHeights[$rowNo] -lt $h) { $rowHeights[$rowNo] = $h }
+    }
+    $rowTops = @{}
+    $rowTop = 15
+    for ($r = 0; $r -le $rowNo; $r++) {
+        if (-not $rowHeights.ContainsKey($r)) { $rowHeights[$r] = $inputRowHeight }
+        $rowTops[$r] = $rowTop
+        $rowTop += $rowHeights[$r]
+    }
+    $inputsBottom = $rowTop
     foreach ($inputDef in $Inputs) {
         if ($inputDef.NewRow) {
             $currentInputRow++
             $inputX = 15
         }
-        $inputRowCenterY = 15 + ($inputRowHeight * $currentInputRow) + [int]($inputRowHeight / 2)
+        $inputRowCenterY = $rowTops[$currentInputRow] + [int]($rowHeights[$currentInputRow] / 2)
 
         $labelWidth = if ($inputDef.LabelWidth) { $inputDef.LabelWidth } else { 80 }
         $inputWidth = if ($inputDef.InputWidth) { $inputDef.InputWidth } else { 90 }
@@ -1148,9 +1163,11 @@ function New-BatchRunTab {
             }
             if ($inputDef.OnChange) { $inputCtrl.Add_SelectedIndexChanged(({ & $inputDef.OnChange $inputControls }).GetNewClosure()) }
         } else {
-            $inputCtrl = New-TextBox -Width $inputWidth -Height 24 -Text "$($inputDef.Default)"
+            $inputCtrl = New-TextBox -Width $inputWidth -Height $(if ($inputDef.Multiline) { Get-MultilineInputHeight -InputDef $inputDef -RowHeight $InputRowHeight } else { 24 }) -Multiline ([bool]$inputDef.Multiline) -Text "$($inputDef.Default)"
         }
-        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, ($inputRowCenterY - $(if ($inputDef.Multiline) { 12 } else { [int]($inputCtrl.Height / 2) })))
+        $inputY = if ($inputDef.Multiline) { $rowTops[$currentInputRow] + 5 } else { $inputRowCenterY - [int]($inputCtrl.Height / 2) }
+        $inputCtrl.Location = New-Object System.Drawing.Point($inputX, $inputY)
+        if ($inputDef.Multiline) { $inputCtrl.ScrollBars = [System.Windows.Forms.ScrollBars]::Vertical }
         $topControls += $inputCtrl
         $inputControls[$inputDef.Name] = $inputCtrl
         $inputX += $inputWidth + 15
@@ -1171,7 +1188,7 @@ function New-BatchRunTab {
 
     $checkBoxes = @()
     $statusLabels = @()
-    $stepsY = if ($Inputs.Count -gt 0) { 26 + ($inputRowHeight * $currentInputRow) + 30 } else { 20 }
+    $stepsY = if ($Inputs.Count -gt 0) { $inputsBottom + 11 } else { 20 }
     $toggleY = $stepsY
     if ($EnableStepToggle) { $stepsY += 26 }
     $stepPanel = New-Panel -Dock ([System.Windows.Forms.DockStyle]::None)

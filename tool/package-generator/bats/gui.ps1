@@ -356,8 +356,9 @@ $categoryDefs = @(
                     param($bic)
                     $client = Get-InputValue -Control $bic["ClientName"]
                     $title = Get-InputValue -Control $bic["UploadTitle"]
+                    $description = (Get-InputValue -Control $bic["UploadDescription"]) -replace "`r?`n", '\n'
                     $zipFiles = @(Get-DefaultUploadZipFiles $client)
-                    @("-ClientName:$client", "-Title:$title", "-TargetFilePath:$($zipFiles -join ';')")
+                    @("-ClientName:$client", "-Title:$title", "-Description:$description", "-TargetFilePath:$($zipFiles -join ';')")
                 }
                 Inputs = @(
                     [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Default = ""; LabelWidth = 150; InputWidth = 150; Options = $blankOptions }
@@ -434,7 +435,8 @@ $execTabControl.Controls.Add($tabBatchAll)
 
 $batchRunAllInputs = @(
         [PSCustomObject]@{ Name = "ClientName"; Label = "対象のグループ"; Options = $blankOptions; LabelWidth = 150; InputWidth = 150; OnChange = { param($ic) $client = Get-ComboBoxValue -SelectedItem $ic["ClientName"].SelectedItem; if ($client) { $ic["UploadTitle"].Text = $client } } }
-        [PSCustomObject]@{ Name = "UploadTitle"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Require = $true })
+        [PSCustomObject]@{ Name = "UploadTitle"; Label = "タイトル"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Require = $true }
+        [PSCustomObject]@{ Name = "UploadDescription"; Label = "説明"; LabelWidth = 150; InputWidth = 300; NewRow = $true; Multiline = $true; Height = 60 })
 
 $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allButtonDefs `
     -Inputs $batchRunAllInputs `

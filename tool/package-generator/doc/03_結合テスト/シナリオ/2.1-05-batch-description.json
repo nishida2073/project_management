@@ -1,0 +1,70 @@
+{
+  "name": "2.1-05 一括実行で説明を入力してパッケージのアップロードすると、状態が成功になり、アップロードのログに説明が入る",
+  "kind": "正常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/一括実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（一括実行）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "part": "実行（一括実行）/タイトル",
+      "value": "TestTitle"
+    },
+    {
+      "action": "pasteAt",
+      "part": "実行（一括実行）/説明",
+      "value": "TestDescription"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/パッケージのアップロード"
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/パッケージのアップロード（チェック確認）",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/実行（一括実行）"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態（パッケージのアップロード）",
+      "pattern": "^成功$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectLogContains",
+      "path": "logs",
+      "filter": "upload-kintone-file*.log",
+      "contains": "TestDescription"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}
