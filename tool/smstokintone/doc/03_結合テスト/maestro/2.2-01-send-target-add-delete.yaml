@@ -7,6 +7,11 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "設定を追加"
 - tapOn: "設定を追加"
 - assertVisible: "設定 2"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+- inputText: "${SEND_TARGET_NAME}"
+- assertVisible: "${SEND_TARGET_NAME}"
 - takeScreenshot: 2.2-01-after-add
 - tapOn:
     text: "削除"

@@ -1,4 +1,4 @@
-﻿param([string]$Filter = "", [string]$Device = "")
+﻿param([string]$Filter = "", [string]$Device = "", [string]$Env = "")
 
 $maestro = Join-Path $env:USERPROFILE ".maestro\bin\maestro.bat"
 if (-not (Test-Path -LiteralPath $maestro)) {
@@ -23,7 +23,14 @@ foreach ($flow in $flows) {
     $flowOut = Join-Path $runDir $flow.BaseName
     $maestroArgs = @()
     if ($Device) { $maestroArgs += @("--udid", $Device) }
-    $maestroArgs += @("test", "--debug-output", $runDir, "--flatten-debug-output", "--format", "HTML", "--output", (Join-Path $flowOut "report.html"), $flow.FullName)
+    $envArgs = @()
+    $varsFile = Join-Path $PSScriptRoot "..\test-data\vars\$($flow.BaseName).json"
+    if (Test-Path -LiteralPath $varsFile) {
+        $vars = Get-Content -LiteralPath $varsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+        foreach ($p in $vars.PSObject.Properties) { $envArgs += @("-e", "$($p.Name)=$($p.Value)") }
+    }
+    foreach ($pair in ($Env -split ";")) { if ($pair) { $envArgs += @("-e", $pair) } }
+    $maestroArgs += @("test") + $envArgs + @("--debug-output", $runDir, "--flatten-debug-output", "--format", "HTML", "--output", (Join-Path $flowOut "report.html"), $flow.FullName)
     & $maestro @maestroArgs
     $code = $LASTEXITCODE
     if ($code -eq 0) { $label = "成功" } else { $label = "失敗" }
