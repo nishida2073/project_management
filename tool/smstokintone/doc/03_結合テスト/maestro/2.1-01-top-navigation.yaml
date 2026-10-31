@@ -1,8 +1,7 @@
 # 2.1 トップ: 画面の移動を確認する（テスト仕様書の 2.1 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-- launchApp:
-    clearState: true
+- launchApp
 - assertVisible: "送信先の設定"
 - takeScreenshot: 2.1-01-top
 - tapOn: "送信先の設定"
