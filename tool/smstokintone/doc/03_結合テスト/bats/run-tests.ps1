@@ -21,7 +21,6 @@ $results = @()
 foreach ($flow in $flows) {
     Write-Host "=== $($flow.Name)"
     $flowOut = Join-Path $runDir $flow.BaseName
-    New-Item -ItemType Directory -Force -Path $flowOut | Out-Null
     $maestroArgs = @()
     if ($Device) { $maestroArgs += @("--udid", $Device) }
     $maestroArgs += @("test", "--debug-output", $runDir, "--flatten-debug-output", "--format", "HTML", "--output", (Join-Path $flowOut "report.html"), $flow.FullName)
