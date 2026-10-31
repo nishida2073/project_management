@@ -1,0 +1,22 @@
+# 2.3 アプリの設定: SMSの検索の送信状況の初期値「未送信」を切り替える（テスト仕様書の 2.3 の 24 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 検索条件の初期値の送信状況は、すべてオフ（未送信・済（自動）・済（手動））。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    index: 0
+- assertVisible: # 未確認: チェックボックスの選択状態の確認
+    id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    checked: true
+- pressKey: Back
+- tapOn: "SMSの検索"
+- assertVisible: # 未確認: 検索画面の送信状況「未送信」の選択状態
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: true
+- takeScreenshot: 2.3-24-search-send-none

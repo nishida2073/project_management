@@ -1,0 +1,18 @@
+# 2.5 設定のインポート・エクスポート: 会社名の抽出が有効で、引継ぎ内容の1件目に会社名がないファイルを選ぶ（テスト仕様書の 2.5 の 12 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の抽出は有効にしておく（2.5 の前提条件、この行の入力値）。clearState は使わない。
+# 前提: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+# 未確認: launchApp が前の画面を閉じて起動し直すか
+- launchApp
+- tapOn: "設定のインポート・エクスポート"
+- tapOn: "ファイルを選択"
+# 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- tapOn: "${IMPORT_FILE}"
+- assertVisible: "インポートエラー"
+- assertVisible: "(?s).*引継ぎ内容の1件目に会社名がありません.*"   # 未確認: メッセージ文言
+- tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    enabled: false
+- takeScreenshot: 2.5-12-after-error

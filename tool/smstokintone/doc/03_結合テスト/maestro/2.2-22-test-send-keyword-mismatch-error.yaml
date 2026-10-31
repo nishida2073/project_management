@@ -1,0 +1,20 @@
+# 2.2 送信先の設定: 振り分けが合わないときテスト送信でエラーになる（テスト仕様書の 2.2 の 22 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（test-send-target-1（振り分け：test-company）が保存済み、会社名の抽出が有効）
+# 外部条件: kintone 接続と SMS 受信が必要
+# 未確認: テスト本文の「sample-company」「test-taro」を英数字の TEST_BODY で代用している（IME の制約）。その場合の送信先エラーの出方は未確認
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element: "テスト送信"
+    direction: DOWN
+- tapOn: "テスト送信"
+- assertVisible: "テスト本文"
+- inputText: "${TEST_BODY}"
+- hideKeyboard
+- tapOn: "送信"
+- assertVisible: ".*送信先エラー.*"
+- assertVisible: ".*${EXPECTED_COMPANY_NAME}.*"  # 未確認
+- takeScreenshot: 2.2-22-keyword-mismatch-error

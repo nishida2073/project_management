@@ -1,0 +1,27 @@
+# 2.3 アプリの設定: 会社名の自動変換を切り替える（テスト仕様書の 2.3 の 26 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の自動変換が有効（2.3 の 1 の状態）。会社名の抽出は有効。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    index: 0
+- assertVisible: # 未確認: スイッチの選択状態の確認
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    checked: false
+- takeScreenshot: 2.3-26-switched-off
+- pressKey: Back
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    direction: DOWN
+- assertVisible: # 未確認: 開き直した後も無効のまま保存されていること
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    checked: false
+- takeScreenshot: 2.3-26-reopened

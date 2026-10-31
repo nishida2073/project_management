@@ -1,0 +1,24 @@
+# 2.3 アプリの設定: 受信日の範囲を入力して、SMSの検索の初期値に反映する（テスト仕様書の 2.3 の 6 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 6 の入力値の状態（受信日の範囲：3、他は既定値）
+# 外部条件: SMSの読み取りの権限が許可されている必要があります（SMSの検索を開くため）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+- eraseText: 5
+- inputText: "${SEARCH_DATE_RANGE_DAYS}"
+- hideKeyboard
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+    text: "${SEARCH_DATE_RANGE_DAYS}"
+- pressKey: Back
+- tapOn: "SMSの検索"
+- assertVisible: "受信日の範囲"
+# 未確認: 受信日の範囲が今日を含む直近 3 日になることは、日付の値で確認します（スクリーンショットで確認）
+- takeScreenshot: 2.3-06-after-search-date-range

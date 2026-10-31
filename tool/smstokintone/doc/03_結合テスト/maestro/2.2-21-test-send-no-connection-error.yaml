@@ -1,0 +1,24 @@
+# 2.2 送信先の設定: 接続先が空のときテスト送信でエラーになる（テスト仕様書の 2.2 の 21 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（test-send-target-1 が保存済み）。このフローで接続先を空にする（保存しない）
+# 未確認: テスト送信が画面の未保存の入力値を使うか
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+- eraseText: 50  # 未確認
+- hideKeyboard
+- scrollUntilVisible:
+    element: "テスト送信"
+    direction: DOWN
+- tapOn: "テスト送信"
+- assertVisible: "入力エラー"
+- assertNotVisible: "テスト本文"
+# 未確認: テスト登録（kintone 側）は確認しない
+- takeScreenshot: 2.2-21-no-connection-error

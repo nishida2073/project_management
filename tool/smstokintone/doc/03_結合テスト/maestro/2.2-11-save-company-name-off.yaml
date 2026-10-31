@@ -1,0 +1,38 @@
+# 2.2 送信先の設定: 会社名の抽出を無効にして設定を保存する（テスト仕様書の 2.2 の 11 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（test-send-target-1 が保存済み、会社名の抽出が有効）。このフローで会社名の抽出を無効にする
+# 注: 2.2-12 と 2.2-13 は、このフローの後（会社名の抽出が無効のまま）に実行する。2.2-19 で有効に戻す
+# 未確認: 会社名の抽出が無効のときも会社名欄が表示される（表示されない場合は field の操作が失敗する）
+# 未確認: companyName=saved-company-name は画面に表示されないため、保存値は確認していない（内部値）
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: false
+- pressKey: Back
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etCompanyName"
+- eraseText: 50  # 未確認
+- inputText: "${COMPANY_NAME}"
+- hideKeyboard
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertVisible: "送信先の設定"
+- assertNotVisible: "設定を追加"
+- takeScreenshot: 2.2-11-company-name-off

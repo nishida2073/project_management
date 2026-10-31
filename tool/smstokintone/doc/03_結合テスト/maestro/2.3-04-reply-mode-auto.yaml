@@ -1,0 +1,21 @@
+# 2.3 アプリの設定: SMSの返信モードを自動に切り替える（テスト仕様書の 2.3 の 4 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 4 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：自動）
+# 前提: 2.3 の 3 の後で実行する場合も、送信モードは手動のままで構いません（この操作は返信モードだけを変えます）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    checked: true
+- pressKey: Back
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
+    text: "自動"
+- takeScreenshot: 2.3-04-after-reply-mode-auto

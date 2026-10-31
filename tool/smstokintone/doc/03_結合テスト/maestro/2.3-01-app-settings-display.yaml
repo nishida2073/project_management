@@ -1,0 +1,118 @@
+# 2.3 アプリの設定: 表示内容の確認（テスト仕様書の 2.3 の 1 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 1 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：手動、会社名の抽出・自動変換：あり、引継ぎ：あり、引継ぎの範囲：制限なし、ログの自動更新：あり、自動返信の間隔などは 2.3 の 1 の値）
+# 前提: 既定値と異なる設定が残っているときは、先に手動で 2.3 の 1 の状態に戻します
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+    text: "${REPLY_COOLDOWN_SECONDS}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+    text: "${SEARCH_DATE_RANGE_DAYS}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/spDefaultSendTargetFilter"
+- assertVisible: "すべて" # 未確認: 送信先のスピナーに表示される文字
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    checked: false
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSearchSentAutoOnlyEnabled"
+    checked: false
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSearchSentManualOnlyEnabled"
+    checked: false
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
+    checked: false
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    checked: true
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    checked: true
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationScopeUnlimited"
+    checked: true
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    checked: true
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogRefreshInterval"
+    text: "${LOG_REFRESH_INTERVAL}"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    text: "${LOG_MATCH_TOLERANCE_SECONDS}"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    text: "${LOG_BODY_EXCERPT_LENGTH}"
+- takeScreenshot: 2.3-01-after-display

@@ -1,0 +1,18 @@
+# 2.3 アプリの設定: 統合範囲（秒）を入力する（テスト仕様書の 2.3 の 20 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: トップ画面から開始する。統合範囲（秒）は既定値（15）。表示テーマ：ライト、SMSの送信モード：自動。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    index: 0
+- eraseText: 20 # 未確認: 既存の値（15）をカーソル位置に関係なく消せるか（4 章の注意）
+- inputText: "${LOG_MATCH_TOLERANCE_SECONDS}"
+- hideKeyboard
+- assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- takeScreenshot: 2.3-20-after-input

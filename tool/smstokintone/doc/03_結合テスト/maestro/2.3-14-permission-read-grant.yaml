@@ -1,0 +1,21 @@
+# 2.3 アプリの設定: SMSの読み取りの権限を許可する（テスト仕様書の 2.3 の 14 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 14 の前提（SMSの読み取りの権限を許可しない状態）
+# 外部条件: 権限の許可状態を端末で用意する必要あり
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnRequestReadPermission"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnRequestReadPermission"
+# 未確認: システムの許可ダイアログのボタン文言（端末の言語で変わります）
+- tapOn: "許可"
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/btnRequestReadPermission"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvReadPermissionStatus"
+    text: "許可済み"
+- takeScreenshot: 2.3-14-after-permission-read-grant

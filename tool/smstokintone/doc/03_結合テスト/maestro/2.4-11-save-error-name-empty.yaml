@@ -1,0 +1,47 @@
+# 2.4 引継ぎ内容の設定: 会社名の抽出なしで氏名が空だと保存時に入力エラーになる（テスト仕様書の 2.4 の 11 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# この flow は会社名の抽出を無効にし、最後に有効へ戻す（後続の flow の前提を保つため）。
+# 未確認: 一覧の index 0 が SENDER_A。氏名欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
+    index: 0
+- eraseText
+- hideKeyboard
+- tapOn: "設定を保存"
+# 未確認: ダイアログのメッセージ（氏名は必須です）。regex は未確認。
+- assertVisible: "(?s).*引継ぎ内容: ${SENDER_A}.*氏名は必須です.*"
+- pressKey: Back
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- takeScreenshot: 2.4-11-after-name-empty-error
+- pressKey: Back
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true

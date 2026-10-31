@@ -1,0 +1,22 @@
+# 2.2 送信先の設定: テスト送信が成功する（振り分けなし）（テスト仕様書の 2.2 の 9 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（test-send-target-2（振り分けなし）が保存済み、会社名の抽出が有効）
+# 外部条件: kintone 接続と SMS 受信が必要
+# 未確認: テスト送信の対象（test-send-target-2）の選び方（テスト送信ボタンは画面下の 1 つ）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element: "テスト送信"
+    direction: DOWN
+- tapOn: "テスト送信"
+- assertVisible: "テスト本文"
+# 未確認: テスト本文の初期表示に会社名・氏名が含まれること
+- assertVisible: ".*${EXPECTED_COMPANY_NAME_09}.*"
+- assertVisible: ".*${EXPECTED_USER_NAME}.*"
+- tapOn: "送信"
+- assertVisible: "テスト結果"
+- assertVisible: ".*SMSの登録に成功しました.*"  # 未確認
+# 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
+- takeScreenshot: 2.2-09-test-send-success-no-keyword

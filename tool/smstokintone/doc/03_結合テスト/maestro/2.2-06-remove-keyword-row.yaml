@@ -1,0 +1,13 @@
+# 2.2 送信先の設定: 振り分けの行を削除する（テスト仕様書の 2.2 の 6 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（test-send-target-1 の振り分けに「test-company」「sample-company」の 2 行が保存済み）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteKeyword"
+    index: 1
+- assertNotVisible: "${KEYWORD_SAMPLE}"
+- assertVisible: "${KEYWORD_TEST}"
+- takeScreenshot: 2.2-06-after-remove-keyword-row

@@ -1,0 +1,23 @@
+# 2.4 引継ぎ内容の設定: キーワードで一覧を絞り込む（テスト仕様書の 2.4 の 02 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A、SENDER_B）。表示順序は古い順（既定）。
+# 前提: SEARCH_KEYWORD は SENDER_B の会社名・氏名・送信元のいずれかに一致し、SENDER_A には一致しない（未確認）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- inputText: "${SEARCH_KEYWORD}"
+- hideKeyboard
+- assertVisible: "${SENDER_B}"
+# 未確認: SENDER_A が一覧から消えることは、データの内容に依存する。
+- assertNotVisible: "${SENDER_A}"
+- takeScreenshot: 2.4-02-after-search

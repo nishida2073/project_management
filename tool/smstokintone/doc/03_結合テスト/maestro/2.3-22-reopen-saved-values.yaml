@@ -1,0 +1,32 @@
+# 2.3 アプリの設定: 入力した設定値を開き直しても保持している（テスト仕様書の 2.3 の 22 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3-18 から 2.3-21 を先に実行し、値が保存されている（同じ端末・同じアプリの状態を引き継ぐ）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+    direction: DOWN
+- assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+    direction: DOWN
+- assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+    direction: DOWN
+- assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
+- assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
+- assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
+- takeScreenshot: 2.3-22-reopened

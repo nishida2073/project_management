@@ -1,0 +1,30 @@
+# 2.4 引継ぎ内容の設定: 保存時に内容が更新されていると保存に失敗する（テスト仕様書の 2.4 の 12 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 前提（手動）: 画面を開いてから保存するまでの間に、SMSの受信などで SENDER_B の内容が更新されている状態にする。この flow だけでは作れない。
+# 未確認: 一覧の index 1 が SENDER_B。会社名欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    index: 1
+- eraseText
+- inputText: "${COMPANY_NAME_3}"
+- hideKeyboard
+- tapOn: "設定を保存"
+# 未確認: ダイアログのタイトルとメッセージ。
+- assertVisible: "保存に失敗しました"
+- assertVisible: "SMSの受信などで内容が更新されたため、保存ができませんでした"
+- pressKey: Back
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- takeScreenshot: 2.4-12-after-save-conflict

@@ -1,0 +1,17 @@
+# 2.3 アプリの設定: 固定変換の「+」で行を追加する（テスト仕様書の 2.3 の 10 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 10 の入力値の状態（会社名の抽出：あり、固定変換は 1 行以上の場合も含む。行数は 2.3 の 11 で確認します）
+# 注意: 「+」は、会社名の抽出が有効のときだけ押せます
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteFixedConversion"
+# 未確認: 追加された行の数と、自動保存（再表示での確認）は、ここでは確認しません
+- takeScreenshot: 2.3-10-after-fixed-conversion-add

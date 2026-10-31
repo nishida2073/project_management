@@ -1,0 +1,18 @@
+# 2.5 設定のインポート・エクスポート: JSONとして読めないファイルを選ぶ（テスト仕様書の 2.5 の 7 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。clearState は使わない。
+# 未確認: launchApp が前の画面を閉じて起動し直すか
+- launchApp
+- tapOn: "設定のインポート・エクスポート"
+- tapOn: "ファイルを選択"
+# 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- tapOn: "${IMPORT_FILE}"
+- assertVisible: "インポートエラー"
+- assertVisible: "(?s).*ファイルの形式が正しくありません.*JSONとして読み込めません.*"   # 未確認: メッセージ文言
+- tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
+- assertVisible: "ファイルが選択されていません"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    enabled: false
+- takeScreenshot: 2.5-07-after-error

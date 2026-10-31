@@ -1,0 +1,24 @@
+# 2.3 アプリの設定: 会社名の抽出を無効にし、送信先の設定の表示を確認する（テスト仕様書の 2.3 の 8 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 8 の入力値の状態（会社名の抽出：あり、会社名の自動変換：あり）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: false
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    enabled: false
+- pressKey: Back
+- tapOn: "送信先の設定"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etCompanyName"
+- assertNotVisible: "送信先の振り分け"
+- takeScreenshot: 2.3-08-after-company-name-extraction-off

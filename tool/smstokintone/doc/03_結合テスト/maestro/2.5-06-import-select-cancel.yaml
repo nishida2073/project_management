@@ -1,0 +1,15 @@
+# 2.5 設定のインポート・エクスポート: ファイルを選ばずに選択画面を閉じる（テスト仕様書の 2.5 の 6 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の抽出は有効（2.5 の前提条件）。clearState は使わない。
+# 未確認: launchApp が前の画面を閉じて起動し直すか
+- launchApp
+- tapOn: "設定のインポート・エクスポート"
+- tapOn: "ファイルを選択"
+# 未確認: 文書選択ダイアログ（Documents UI）を戻る操作で閉じられるかは公式ドキュメントで確認できなかった
+- back
+- assertVisible: "ファイルが選択されていません"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    enabled: false
+- takeScreenshot: 2.5-06-after-select-cancel

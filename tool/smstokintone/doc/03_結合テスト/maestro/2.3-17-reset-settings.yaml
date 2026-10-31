@@ -1,0 +1,22 @@
+# 2.3 アプリの設定: 初期化を実行し、既定値に戻ることを確認する（テスト仕様書の 2.3 の 17 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 17 の入力値の状態（表示テーマ：ダーク、送信モード：手動、他は設定済みの値）
+# 注意: 送信先・ログ・引継ぎ内容が残ることは、このフローでは確認しません（未確認）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+- assertVisible: "設定を初期化しますか？"
+- tapOn: "初期化"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+    checked: true
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+    checked: true
+- takeScreenshot: 2.3-17-after-reset-settings

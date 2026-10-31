@@ -1,0 +1,69 @@
+# 2.2 送信先の設定: 設定を保存する（テスト仕様書の 2.2 の 10 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件。このフローで送信先の入力値を入れて保存する（test-send-target-1 の値は上書きされる）
+# 未確認: loginName・loginPassword は画面に表示されないため、保存値は確認していない（内部値）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_SEND_TARGET_NAME}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etKeyword"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    index: 0
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_KEYWORD}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+- eraseText: 50  # 未確認
+- inputText: "${SUBDOMAIN}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLoginName"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etLoginName"
+- eraseText: 50  # 未確認
+- inputText: "${LOGIN_NAME}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+- eraseText: 50  # 未確認
+- inputText: "${LOGIN_PASSWORD}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etAppId"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etAppId"
+- eraseText: 50  # 未確認
+- inputText: "${APP_ID}"
+- hideKeyboard
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertVisible: "送信先の設定"
+- assertNotVisible: "設定を追加"
+- takeScreenshot: 2.2-10-after-save

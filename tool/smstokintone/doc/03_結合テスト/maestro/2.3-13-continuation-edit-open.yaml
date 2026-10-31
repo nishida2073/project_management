@@ -1,0 +1,14 @@
+# 2.3 アプリの設定: 引継ぎ内容の設定を開く（テスト仕様書の 2.3 の 13 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 13 の入力値の状態（引継ぎ：あり、引継ぎの範囲：制限なし）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible: "設定を保存"
+- takeScreenshot: 2.3-13-after-continuation-edit-open

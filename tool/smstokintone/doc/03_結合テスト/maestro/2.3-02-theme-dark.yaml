@@ -1,0 +1,17 @@
+# 2.3 アプリの設定: 表示テーマをダークに切り替える（テスト仕様書の 2.3 の 2 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 2 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：手動）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    checked: true
+# 未確認: ダークテーマの色は Maestro では検証しません。切り替わりはスクリーンショットで確認します
+- takeScreenshot: 2.3-02-after-theme-dark

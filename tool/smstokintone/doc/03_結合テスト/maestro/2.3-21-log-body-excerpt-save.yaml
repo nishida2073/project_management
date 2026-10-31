@@ -1,0 +1,18 @@
+# 2.3 アプリの設定: 本文の表示文字数を入力する（テスト仕様書の 2.3 の 21 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: トップ画面から開始する。本文の最大表示文字数は既定値（100）。表示テーマ：ライト、SMSの送信モード：自動。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    index: 0
+- eraseText: 20 # 未確認: 既存の値（100）をカーソル位置に関係なく消せるか（4 章の注意）
+- inputText: "${LOG_BODY_EXCERPT_LENGTH}"
+- hideKeyboard
+- assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
+- takeScreenshot: 2.3-21-after-input

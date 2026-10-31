@@ -1,0 +1,19 @@
+# 2.3 アプリの設定: SMSの送信の許可を拒否すると案内が出る（テスト仕様書の 2.3 の 32 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: SMSの送信を許可していない（2.3 の 14 から 16 と 30 から 32 の前提）。
+# 外部条件: 権限の許可状態を端末で用意する必要あり
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+    index: 0
+- tapOn: "許可しない" # 未確認: 端末の権限ダイアログの拒否ボタンの文字（Android の版・言語で異なる）
+- assertVisible: "SMSの送信の許可がない場合、自動返信はできません" # トースト（表示時間が短いため確認が必要）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+- takeScreenshot: 2.3-32-denied

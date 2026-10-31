@@ -1,0 +1,20 @@
+# 2.3 アプリの設定: SMSの送信モードを手動に切り替える（テスト仕様書の 2.3 の 3 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 3 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：手動）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendManual"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    checked: true
+- pressKey: Back
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
+    text: "手動"
+- takeScreenshot: 2.3-03-after-send-mode-manual

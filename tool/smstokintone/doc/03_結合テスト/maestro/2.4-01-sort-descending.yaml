@@ -1,0 +1,26 @@
+# 2.4 引継ぎ内容の設定: 表示順序を新しい順に切り替える（テスト仕様書の 2.4 の 01 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 未確認: 一覧の並び順は relative selector（below）で確認する。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- assertVisible: "${SENDER_A}"
+- tapOn: "新しい順"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationSortDescending"
+    checked: true
+# 未確認: 新しい順では SENDER_B が上、SENDER_A が下になる想定。
+- assertVisible:
+    text: "${SENDER_A}"
+    below:
+      text: "${SENDER_B}"
+- takeScreenshot: 2.4-01-after-sort

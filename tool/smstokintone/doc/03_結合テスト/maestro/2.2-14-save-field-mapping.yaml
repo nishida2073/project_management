@@ -1,0 +1,76 @@
+# 2.2 送信先の設定: フィールドコードを保存する（テスト仕様書の 2.2 の 14 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件。このフローで入力欄を入れ直して保存する（test-send-target-1 の値は上書きされる）
+# 未確認: fieldType などの保存値は画面に表示されないため、保存値は確認していない（内部値）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldType"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFieldType"
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_FIELD_TYPE}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_FIELD_DATETIME}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldSender"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFieldSender"
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_FIELD_SENDER}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_FIELD_COMPANY}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_FIELD_USER}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldBody"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFieldBody"
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_FIELD_BODY}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+- eraseText: 50  # 未確認
+- inputText: "${SAVED_FIELD_HISTORY}"
+- hideKeyboard
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertVisible: "送信先の設定"
+- assertNotVisible: "設定を追加"
+- takeScreenshot: 2.2-14-after-save-fields

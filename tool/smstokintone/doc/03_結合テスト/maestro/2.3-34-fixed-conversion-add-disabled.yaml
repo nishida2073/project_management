@@ -1,0 +1,29 @@
+# 2.3 アプリの設定: 会社名の抽出がオフのとき固定変換の「+」は押せない（テスト仕様書の 2.3 の 34 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の抽出が有効（2.3 の 1 の状態）、固定変換の行はない。この flow で会社名の抽出を無効にする。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    index: 0
+- assertVisible: # 未確認: スイッチの選択状態の確認
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: false
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    direction: DOWN
+- assertVisible: # 未確認: 押せない状態（enabled が false）の確認
+    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    enabled: false
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    index: 0
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+- takeScreenshot: 2.3-34-disabled

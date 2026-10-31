@@ -1,0 +1,16 @@
+# 2.3 アプリの設定: 引継ぎの範囲を同一日のみに切り替える（テスト仕様書の 2.3 の 12 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 12 の入力値の状態（引継ぎ：あり、引継ぎの範囲：制限なし）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbContinuationScopeSameDay"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationScopeSameDay"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationScopeSameDay"
+    checked: true
+- takeScreenshot: 2.3-12-after-continuation-scope-same-day

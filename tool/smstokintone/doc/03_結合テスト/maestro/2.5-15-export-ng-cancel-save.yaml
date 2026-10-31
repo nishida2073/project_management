@@ -1,0 +1,21 @@
+# 2.5 設定のインポート・エクスポート: エクスポートで保存先を選ばずに閉じる（テスト仕様書の 2.5 の 15 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の抽出は有効（2.5 の前提条件）。clearState は使わない。
+# 未確認: launchApp が前の画面を閉じて起動し直すか
+- launchApp
+- tapOn: "設定のインポート・エクスポート"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+# 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- back   # 未確認: 保存ダイアログを戻る操作で閉じられるか
+- assertNotVisible: "設定をエクスポートしました"   # 未確認: トーストが出ないことの確認
+- assertNotVisible: "エクスポートエラー"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+- takeScreenshot: 2.5-15-after-cancel-save
+# 未確認: 何も書き出されていないことは、この操作では確認していない（端末上のファイルは見ない）

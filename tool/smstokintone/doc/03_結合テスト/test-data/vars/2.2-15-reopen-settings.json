@@ -1,0 +1,15 @@
+{
+  "APP_ID": "12345",
+  "LOGIN_NAME": "savedloginname",
+  "LOGIN_PASSWORD": "savedpass123",
+  "SAVED_FIELD_BODY": "savedfieldbody",
+  "SAVED_FIELD_COMPANY": "savedfieldcompany",
+  "SAVED_FIELD_DATETIME": "savedfielddatetime",
+  "SAVED_FIELD_HISTORY": "savedfieldhistory",
+  "SAVED_FIELD_SENDER": "savedfieldsender",
+  "SAVED_FIELD_TYPE": "savedfieldtype",
+  "SAVED_FIELD_USER": "savedfielduser",
+  "SAVED_KEYWORD": "savedkeyword",
+  "SAVED_SEND_TARGET_NAME": "savedtargetname",
+  "SUBDOMAIN": "savedsubdomain"
+}

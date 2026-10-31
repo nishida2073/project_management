@@ -1,0 +1,16 @@
+# 2.2 送信先の設定: 送信先が空の設定をコピーする（テスト仕様書の 2.2 の 3 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（送信先が 2 件保存済み）。このフローの中で空の設定を追加する
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- tapOn: "設定を追加"
+- assertVisible: "設定 3"
+# 未確認: 空の設定の位置（index 2）は、保存済みが 2 件の前提に依存する
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnCopySendTarget"
+    index: 2
+- assertVisible: "設定 4"
+- assertNotVisible: ".*のコピー"
+- takeScreenshot: 2.2-03-after-copy-empty

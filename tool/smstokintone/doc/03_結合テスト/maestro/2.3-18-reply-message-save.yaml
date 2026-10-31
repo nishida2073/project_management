@@ -1,0 +1,27 @@
+# 2.3 アプリの設定: 返信メッセージを入力する（テスト仕様書の 2.3 の 18 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: トップ画面から開始する。返信メッセージ（正常・異常）は空の状態（既定値）。SMSの返信モード：手動、表示テーマ：ライト。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+    index: 0
+- inputText: "${REPLY_SUCCESS_BODY}"
+- hideKeyboard
+- assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+    index: 0
+- inputText: "${REPLY_FAILED_BODY}"
+- hideKeyboard
+- assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- takeScreenshot: 2.3-18-after-input

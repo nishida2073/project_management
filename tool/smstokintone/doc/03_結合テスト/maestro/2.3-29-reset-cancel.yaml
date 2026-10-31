@@ -1,0 +1,16 @@
+# 2.3 アプリの設定: 初期化の確認ダイアログで「キャンセル」を押す（テスト仕様書の 2.3 の 29 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 表示テーマがダーク（2.3 の 29 の入力値）。手動で設定してから実行する。
+- launchApp
+- tapOn: "アプリの設定"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+- assertVisible: "設定を初期化しますか？"
+- assertVisible: "この操作は取り消せません" # 未確認: 確認ダイアログの本文（仕様書の期待値に従う）
+- tapOn: "キャンセル"
+- assertNotVisible: "設定を初期化しますか？"
+- assertVisible: # 未確認: ラジオボタンの選択状態の確認
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    checked: true
+- takeScreenshot: 2.3-29-reset-cancelled

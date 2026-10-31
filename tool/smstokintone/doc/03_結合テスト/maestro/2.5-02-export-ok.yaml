@@ -1,0 +1,18 @@
+# 2.5 設定のインポート・エクスポート: 保存先を選んで設定をエクスポートする（テスト仕様書の 2.5 の 2 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の抽出は有効（2.5 の前提条件）。clearState は使わない。
+# 未確認: launchApp が前の画面を閉じて起動し直すか
+- launchApp
+- tapOn: "設定のインポート・エクスポート"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+# 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- assertVisible: "(?s).*s2k_settings_\\d{8}_\\d{6}\\.json.*"   # 未確認: 提案されるファイル名の表示
+- tapOn: "保存"   # 未確認: 保存ボタンの文字
+- assertVisible: "設定をエクスポートしました"   # 未確認: トーストの表示
+- takeScreenshot: 2.5-02-after-export

@@ -1,0 +1,24 @@
+# 2.5 設定のインポート・エクスポート: 送信先の設定だけを含むファイルをインポートする（テスト仕様書の 2.5 の 4 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の抽出は有効（2.5 の前提条件）。clearState は使わない。
+# 前提: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+# 未確認: launchApp が前の画面を閉じて起動し直すか
+- launchApp
+- tapOn: "設定のインポート・エクスポート"
+- tapOn: "ファイルを選択"
+# 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- tapOn: "${IMPORT_FILE}"
+- assertVisible: "(?s).*${IMPORT_FILE}.*"   # 未確認: 正規表現と複数行の表示
+- assertVisible: "(?s).*アプリの設定: 変更なし.*"   # 未確認: 複数行の表示
+- assertVisible: "(?s).*送信先の設定: 統合（1件）.*"   # 未確認: 複数行の表示
+- assertVisible: "(?s).*引継ぎ内容: 変更なし.*"   # 未確認: 複数行の表示
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+- assertVisible: "設定をインポートしますか？"
+- tapOn:
+    id: "android:id/button1"   # 未確認: 確認ダイアログの「インポート」ボタンの id
+- assertVisible: "設定をインポートしました"   # 未確認: トーストの表示
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+- takeScreenshot: 2.5-04-after-import

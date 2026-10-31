@@ -1,0 +1,27 @@
+# 2.2 送信先の設定: ログイン名が不正なときテスト送信が失敗する（テスト仕様書の 2.2 の 23 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（test-send-target-1（振り分け：test-company）が保存済み）。このフローでログイン名を不正な値にする
+# 外部条件: kintone 接続が必要（不正なログイン名の応答を得るため）
+# 未確認: テスト送信が画面の未保存の入力値（ログイン名）を使うか
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLoginName"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etLoginName"
+- eraseText: 50  # 未確認
+- inputText: "${INVALID_LOGIN_NAME}"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "テスト送信"
+    direction: DOWN
+- tapOn: "テスト送信"
+- assertVisible: "テスト本文"
+- tapOn: "送信"
+- assertVisible: ".*送信失敗.*"  # 未確認
+# 未確認: kintone の応答内容は kintone 側の応答文に依存するため、ここでは確認しない
+- takeScreenshot: 2.2-23-invalid-login-error

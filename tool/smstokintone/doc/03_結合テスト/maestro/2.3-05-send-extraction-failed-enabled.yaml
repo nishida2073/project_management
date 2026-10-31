@@ -1,0 +1,21 @@
+# 2.3 アプリの設定: 自動送信の対象（抽出状況が異常）を有効にする（テスト仕様書の 2.3 の 5 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 5 の入力値の状態（送信モード：自動、自動送信の対象（抽出状況が異常）：なし）
+# 注意: 自動送信の対象のスイッチは、送信モードが自動のときだけ操作できます。このフローで自動に切り替えます
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+- scrollUntilVisible:
+    element: "自動送信の対象"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+    checked: true
+- takeScreenshot: 2.3-05-after-send-extraction-failed-enabled

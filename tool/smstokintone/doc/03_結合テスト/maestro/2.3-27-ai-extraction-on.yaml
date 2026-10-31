@@ -1,0 +1,28 @@
+# 2.3 アプリの設定: AIによる抽出を切り替える（テスト仕様書の 2.3 の 27 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: AIによる抽出が無効（2.3 の 1 の状態）。会社名の抽出は有効。
+# 外部条件: 端末上のAI（抽出用モデル）が利用できる状態が必要か未確認
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    index: 0
+- assertVisible: # 未確認: スイッチの選択状態の確認
+    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    checked: true
+- takeScreenshot: 2.3-27-switched-on
+- pressKey: Back
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    direction: DOWN
+- assertVisible: # 未確認: 開き直した後も有効のまま保存されていること
+    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    checked: true
+- takeScreenshot: 2.3-27-reopened

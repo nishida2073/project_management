@@ -1,0 +1,27 @@
+# 2.4 引継ぎ内容の設定: 会社名が空で保存すると入力エラーになる（テスト仕様書の 2.4 の 10 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。会社名の抽出は有効。表示順序は古い順（既定）。
+# 未確認: 一覧の index 0 が SENDER_A。会社名欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    index: 0
+- eraseText
+- hideKeyboard
+- tapOn: "設定を保存"
+# 未確認: ダイアログのメッセージ（会社名・氏名は必須です）。regex は未確認。
+- assertVisible: "(?s).*引継ぎ内容: ${SENDER_A}.*会社名・氏名は必須です.*"
+- pressKey: Back
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- takeScreenshot: 2.4-10-after-company-empty-error

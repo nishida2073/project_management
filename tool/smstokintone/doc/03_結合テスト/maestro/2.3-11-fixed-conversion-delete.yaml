@@ -1,0 +1,21 @@
+# 2.3 アプリの設定: 固定変換の 1 行目を削除する（テスト仕様書の 2.3 の 11 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 11 の入力値の状態（固定変換の 1 行目：test-company→test-company-converted、2 行目：sample-company→sample-company-converted）
+# 前提: この 2 行は、2.3 の 10 の後に手動で入力して作ります（変換前と変換後の値は vars の値に合わせます）
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnDeleteFixedConversion"
+- assertVisible: "${FIXED_FROM_1}"
+- assertVisible: "${FIXED_FROM_2}"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteFixedConversion"
+    index: 0 # 未確認: id と index の組み合わせは公式ドキュメントで確認できていない
+- assertNotVisible: "${FIXED_FROM_1}"
+- assertNotVisible: "${FIXED_TO_1}"
+- assertVisible: "${FIXED_FROM_2}"
+- assertVisible: "${FIXED_TO_2}"
+- takeScreenshot: 2.3-11-after-fixed-conversion-delete

@@ -1,0 +1,25 @@
+# 2.3 アプリの設定: 会社名の抽出を有効にすると注意ダイアログが出ることを確認する（テスト仕様書の 2.3 の 9 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 9 の前提（会社名の抽出は無効にしておき、引継ぎ内容に会社名がない件が 1 件ある状態）
+# 前提: 会社名の抽出は、このフローの前半で一度無効にしてから有効に切り替えます
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: false
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible: "注意"
+- assertVisible: "引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件あります。必要に応じて会社名を追加してください。" # 未確認: ダイアログの文言
+- tapOn: "OK" # 未確認: OK ボタンの文言（端末の言語で変わる場合あり）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- takeScreenshot: 2.3-09-after-company-name-extraction-on

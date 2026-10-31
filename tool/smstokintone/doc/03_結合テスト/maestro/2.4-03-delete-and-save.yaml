@@ -1,0 +1,26 @@
+# 2.4 引継ぎ内容の設定: 送信元を削除して設定を保存する（テスト仕様書の 2.4 の 03 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 未確認: 古い順のとき、一覧の先頭（index 0）が SENDER_A。削除ボタンに確認ダイアログは出ない想定。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- assertVisible: "${SENDER_A}"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteContinuationInfo"
+    index: 0
+- assertNotVisible: "${SENDER_A}"
+- assertVisible: "${SENDER_B}"
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- takeScreenshot: 2.4-03-after-delete-and-save

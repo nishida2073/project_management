@@ -1,0 +1,22 @@
+# 2.2 送信先の設定: 統合条件と統合範囲を開き直して確認する（テスト仕様書の 2.2 の 18 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2-17 の後の状態（統合条件: 時間、統合範囲: 6 が保存済み）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    text: "${TOLERANCE_HOURS_SAVED}"
+- takeScreenshot: 2.2-18-reopen-tolerance

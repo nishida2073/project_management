@@ -1,0 +1,28 @@
+# 2.3 アプリの設定: 引継ぎがオフのとき「引継ぎ内容の設定」は押せない（テスト仕様書の 2.3 の 33 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎが有効（2.3 の 1 の状態）。この flow で引継ぎを無効にする。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    index: 0
+- assertVisible: # 未確認: スイッチの選択状態の確認
+    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    checked: false
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- assertVisible: # 未確認: 押せない状態（enabled が false）の確認
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    enabled: false
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    index: 0
+- assertVisible: "SMSの引継ぎ" # 設定画面のまま（引継ぎ内容の設定画面に移っていないこと）
+- takeScreenshot: 2.3-33-disabled

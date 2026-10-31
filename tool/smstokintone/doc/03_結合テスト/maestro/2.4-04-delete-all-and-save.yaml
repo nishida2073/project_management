@@ -1,0 +1,25 @@
+# 2.4 引継ぎ内容の設定: すべて削除して設定を保存する（テスト仕様書の 2.4 の 04 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A、SENDER_B）。表示順序は古い順（既定）。
+# 未確認: 確認ダイアログの「削除」ボタンは android:id/button1 として扱う。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn: "すべて削除"
+- assertVisible: "すべての引継ぎ内容を削除しますか？"
+- tapOn:
+    id: "android:id/button1"
+- assertVisible: "引継ぎ内容がありません"
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- takeScreenshot: 2.4-04-after-delete-all-and-save

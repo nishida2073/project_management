@@ -1,0 +1,32 @@
+# 2.4 引継ぎ内容の設定: 削除を保存せずに画面を閉じると削除は反映されない（テスト仕様書の 2.4 の 15 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 未確認: 一覧の index 1 が SENDER_B。保存せずに Back で閉じたときに、確認ダイアログが出ない想定。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteContinuationInfo"
+    index: 1
+- assertNotVisible: "${SENDER_B}"
+- pressKey: Back
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- assertVisible: "${SENDER_B}"
+- takeScreenshot: 2.4-15-after-discard

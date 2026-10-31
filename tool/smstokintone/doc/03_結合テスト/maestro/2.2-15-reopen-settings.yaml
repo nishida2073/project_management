@@ -1,0 +1,105 @@
+# 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 15 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2-10 と 2.2-14 の後の状態（保存された入力値）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+    text: "${SAVED_SEND_TARGET_NAME}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etKeyword"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    index: 0
+    text: "${SAVED_KEYWORD}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    text: "${SUBDOMAIN}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLoginName"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLoginName"
+    text: "${LOGIN_NAME}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etAppId"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etAppId"
+    text: "${APP_ID}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldType"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldType"
+    text: "${SAVED_FIELD_TYPE}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+    text: "${SAVED_FIELD_DATETIME}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldSender"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldSender"
+    text: "${SAVED_FIELD_SENDER}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+    text: "${SAVED_FIELD_COMPANY}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+    text: "${SAVED_FIELD_USER}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldBody"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldBody"
+    text: "${SAVED_FIELD_BODY}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+    text: "${SAVED_FIELD_HISTORY}"
+# 未確認: 伏せ字のパスワードは、テキストで一致を取れない可能性がある
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+    text: "${LOGIN_PASSWORD}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    checked: true
+- takeScreenshot: 2.2-15-reopen-settings

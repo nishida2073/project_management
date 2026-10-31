@@ -1,0 +1,26 @@
+# 2.2 送信先の設定: 統合範囲の入力欄を有効にする（テスト仕様書の 2.2 の 7 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（統合条件は既定の「同一日付」、統合範囲は空）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    enabled: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+- eraseText: 50  # 未確認
+- inputText: "${TOLERANCE_HOURS_INPUT}"
+- hideKeyboard
+- takeScreenshot: 2.2-07-tolerance-enabled

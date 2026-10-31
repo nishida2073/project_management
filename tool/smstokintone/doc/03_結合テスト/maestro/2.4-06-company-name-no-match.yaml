@@ -1,0 +1,25 @@
+# 2.4 引継ぎ内容の設定: 一致しない会社名では送信先が表示されない（テスト仕様書の 2.4 の 06 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 前提: SEND_TARGET_NAME は、COMPANY_NAME_NO_MATCH には一致しない（送信先 なし）。
+# 未確認: 一覧の index 1 が SENDER_B。会社名欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    index: 1
+- eraseText
+- inputText: "${COMPANY_NAME_NO_MATCH}"
+- hideKeyboard
+# 未確認: SENDER_A に送信先が無いことを前提にしている。
+- assertNotVisible: "${SEND_TARGET_NAME}"
+- takeScreenshot: 2.4-06-after-no-match

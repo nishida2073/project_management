@@ -1,0 +1,24 @@
+# 2.4 引継ぎ内容の設定: 会社名を入力すると送信先が表示される（テスト仕様書の 2.4 の 05 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 前提: 会社名 COMPANY_NAME_MATCH に一致する送信先（SEND_TARGET_NAME）が設定にある。
+# 未確認: 一覧の index 1 が SENDER_B。会社名欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    index: 1
+- eraseText
+- inputText: "${COMPANY_NAME_MATCH}"
+- hideKeyboard
+- assertVisible: "${SEND_TARGET_NAME}"
+- takeScreenshot: 2.4-05-after-company-match

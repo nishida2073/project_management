@@ -1,0 +1,26 @@
+# 2.4 引継ぎ内容の設定: 引継ぎ内容の氏名表示をオフにすると氏名が表示されない（テスト仕様書の 2.4 の 08 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件。「引継ぎ内容の氏名表示」の初期状態はオン（あり）。この flow でオフに切り替える。
+# 未確認: 氏名の欄の hint「氏名」を、氏名が表示されない状態の目印にする。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- assertNotVisible: "氏名"
+- takeScreenshot: 2.4-08-user-name-off

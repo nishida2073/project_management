@@ -1,0 +1,15 @@
+# 2.2 送信先の設定: 会社名の保存値を開き直して確認する（テスト仕様書の 2.2 の 12 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2-11 の後の状態（会社名の抽出: 無効、会社名: COMPANY_NAME が保存済み）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    text: "${COMPANY_NAME}"
+- takeScreenshot: 2.2-12-reopen-company-name

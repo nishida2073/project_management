@@ -1,0 +1,34 @@
+# 2.4 引継ぎ内容の設定: 会社名と氏名を入力して設定を保存する（テスト仕様書の 2.4 の 07 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 未確認: 一覧の index 1 が SENDER_B。入力欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    index: 1
+- eraseText
+- inputText: "${COMPANY_NAME_2}"
+- hideKeyboard
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
+    index: 1
+- eraseText
+- inputText: "${USER_NAME_2}"
+- hideKeyboard
+- assertVisible: "${COMPANY_NAME_2}"
+- assertVisible: "${USER_NAME_2}"
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- takeScreenshot: 2.4-07-after-save

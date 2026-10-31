@@ -1,0 +1,21 @@
+# 2.3 アプリの設定: SMSの送信の権限を許可する（テスト仕様書の 2.3 の 16 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.3 の 16 の前提（SMSの送信の権限を許可しない状態）
+# 外部条件: 権限の許可状態を端末で用意する必要あり
+- launchApp
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+# 未確認: システムの許可ダイアログのボタン文言（端末の言語で変わります）
+- tapOn: "許可"
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvSendPermissionStatus"
+    text: "許可済み"
+- takeScreenshot: 2.3-16-after-permission-send-grant

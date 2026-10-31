@@ -1,0 +1,15 @@
+# 2.2 送信先の設定: 振り分けの行を追加する（テスト仕様書の 2.2 の 5 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2 の前提条件（test-send-target-1 の振り分けに「test-company」が 1 行保存済み）
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnAddKeyword"
+    index: 0
+# 未確認: 行の追加は、2 行目の入力欄（etKeyword の index 1）の表示で確認する
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    index: 1
+- takeScreenshot: 2.2-05-after-add-keyword-row

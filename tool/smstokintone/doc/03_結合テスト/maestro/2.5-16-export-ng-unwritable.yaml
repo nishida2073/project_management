@@ -1,0 +1,21 @@
+# 2.5 設定のインポート・エクスポート: 書き込みできない保存先にエクスポートする（テスト仕様書の 2.5 の 16 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 会社名の抽出は有効（2.5 の前提条件）。clearState は使わない。
+# 前提: ${UNWRITABLE_FOLDER} は書き込みできない保存先の名前（再現方法は未確認）。
+# 未確認: launchApp が前の画面を閉じて起動し直すか
+- launchApp
+- tapOn: "設定のインポート・エクスポート"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+# 未確認: 保存ダイアログ（Documents UI）の操作、および書き込みできない保存先の作り方は公式ドキュメントで確認できなかった
+- tapOn: "${UNWRITABLE_FOLDER}"   # 未確認: 保存先を選ぶ操作
+- tapOn: "保存"   # 未確認: 保存ボタンの文字
+- assertVisible: "エクスポートエラー"
+- assertVisible: "ファイルを書き出せませんでした"   # 未確認: メッセージ文言の表示
+- tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
+- takeScreenshot: 2.5-16-after-export-error
