@@ -188,7 +188,7 @@ class SettingsImportExportActivity : BaseActivity() {
         val duplicateNames = mutableSetOf<String>()
         val seenNames = mutableSetOf<String>()
         for (i in 0 until array.length()) {
-            val name = array.getJSONObject(i).optString("name", "")
+            val name = array.getJSONObject(i).optString("sendTargetName", "")
             if (!seenNames.add(name)) duplicateNames.add(name)
         }
         if (duplicateNames.isNotEmpty()) {
