@@ -10,7 +10,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 $src = (Resolve-Path -LiteralPath $Path).ProviderPath
 if (-not $Output) {
-    $Output = Join-Path (Split-Path -Parent $src) (([IO.Path]::GetFileNameWithoutExtension($src)) + '_clean.xlsx')
+    $Output = Join-Path (Split-Path -Parent $src) (([IO.Path]::GetFileNameWithoutExtension($src)) + '_clean' + [IO.Path]::GetExtension($src))
 }
 if ($Output -eq $src) {
     Write-Host "出力先が元ファイルと同じです。別のファイル名を指定してください。"
