@@ -1,0 +1,15 @@
+# 2.2 送信先の設定: 設定を追加と削除（テスト仕様書の 2.2 に対応）
+appId: com.ssfrontier.smstokintone
+---
+- launchApp:
+    clearState: true
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
+- tapOn: "設定を追加"
+- assertVisible: "設定 2"
+- takeScreenshot: 2.2-01-after-add
+- tapOn:
+    text: "削除"
+    index: 0
+- assertNotVisible: "設定 2"
+- takeScreenshot: 2.2-01-after-delete
