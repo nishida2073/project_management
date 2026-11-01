@@ -604,7 +604,7 @@ object SettingsStore {
      * @return マージされた送信先リスト
      */
     fun mergeImportSendTargets(context: Context, importedJsonArray: JSONArray): List<SendTarget> {
-        val merged = loadSendTargets(context).toMutableList()
+        val merged = (if (prefs(context).contains(KEY_SEND_TARGETS)) loadSendTargets(context) else emptyList()).toMutableList()
         for (i in 0 until importedJsonArray.length()) {
             val obj = importedJsonArray.getJSONObject(i)
             val importedName = obj.optString("sendTargetName", "")
