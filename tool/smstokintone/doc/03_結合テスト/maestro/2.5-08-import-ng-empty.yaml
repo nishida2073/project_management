@@ -18,7 +18,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-08-import-ng-empty-02
-- tapOn: "${IMPORT_FILE}"
+- runFlow:
+    file: setup/select-download-file.yaml
+    env:
+      FILE_PATTERN: ${IMPORT_FILE}
 - takeScreenshot: 2.5-08-import-ng-empty-03
 - assertVisible: "インポートエラー"
 - assertVisible: "ファイルを読み込めませんでした"

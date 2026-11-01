@@ -18,7 +18,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-05-import-cancel-02
-- tapOn: "${IMPORT_FILE}"
+- runFlow:
+    file: setup/select-download-file.yaml
+    env:
+      FILE_PATTERN: ${IMPORT_FILE}
 - takeScreenshot: 2.5-05-import-cancel-03
 - assertVisible: "(?s).*${IMPORT_FILE}.*"   # 未確認: 正規表現と複数行の表示
 - tapOn:

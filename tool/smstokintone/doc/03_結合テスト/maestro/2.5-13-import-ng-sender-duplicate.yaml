@@ -18,7 +18,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-02
-- tapOn: "${IMPORT_FILE}"
+- runFlow:
+    file: setup/select-download-file.yaml
+    env:
+      FILE_PATTERN: ${IMPORT_FILE}
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-03
 - assertVisible: "インポートエラー"
 - assertVisible: "(?s).*送信元がファイル内で重複しています.*"   # 未確認: メッセージ文言
