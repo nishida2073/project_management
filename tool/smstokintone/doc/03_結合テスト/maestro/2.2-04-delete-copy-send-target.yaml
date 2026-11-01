@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-04-delete-copy-send-target-01
 - assertVisible: "設定を追加"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
@@ -13,5 +14,6 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
     index: 0
+- takeScreenshot: 2.2-04-delete-copy-send-target-02
 - assertNotVisible: "${SEND_TARGET_NAME}"
-- takeScreenshot: 2.2-04-after-delete
+- takeScreenshot: 2.2-04-delete-copy-send-target-03

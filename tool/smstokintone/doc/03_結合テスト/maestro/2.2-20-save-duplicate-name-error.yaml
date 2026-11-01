@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提: 1 件目と 2 件目に同名の送信先（test-send-target-1）が保存済み（手動で準備）
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-20-save-duplicate-name-error-01
 - assertVisible: "設定を追加"
 # 前提確認: 1 件目と 2 件目に同じ送信先名
 - assertVisible:
@@ -20,7 +21,8 @@ appId: com.ssfrontier.smstokintone
     index: 1
     text: "${DUPLICATE_SEND_TARGET_NAME}"
 - tapOn: "設定を保存"
+- takeScreenshot: 2.2-20-save-duplicate-name-error-02
 - assertVisible: "入力エラー"
 - assertVisible: ".*送信先名が重複しています.*"  # 未確認
 - assertVisible: ".*${DUPLICATE_SEND_TARGET_NAME}.*"  # 未確認
-- takeScreenshot: 2.2-20-duplicate-name-error
+- takeScreenshot: 2.2-20-save-duplicate-name-error-03

@@ -4,19 +4,23 @@ appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.1-02-top-modes-manual-auto-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbSendManual"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbSendManual"
+- takeScreenshot: 2.1-02-top-modes-manual-auto-02
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+- takeScreenshot: 2.1-02-top-modes-manual-auto-03
 - pressKey: Back
+- takeScreenshot: 2.1-02-top-modes-manual-auto-04
 - assertVisible: "SMSの送信モード"
 - assertVisible: "SMSの返信モード"
 - assertVisible:
@@ -25,4 +29,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
     text: "自動"
-- takeScreenshot: 2.1-02-top-modes-manual-auto
+- takeScreenshot: 2.1-02-top-modes-manual-auto-05

@@ -7,6 +7,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: companyName=saved-company-name は画面に表示されないため、保存値は確認していない（内部値）
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.2-11-save-company-name-off-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -17,11 +18,14 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- takeScreenshot: 2.2-11-save-company-name-off-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - pressKey: Back
+- takeScreenshot: 2.2-11-save-company-name-off-03
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-11-save-company-name-off-04
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が保存済み
 - assertVisible:
@@ -34,11 +38,16 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.2-11-save-company-name-off-05
 - eraseText: 50  # 未確認
 - inputText: "${COMPANY_NAME}"
+- takeScreenshot: 2.2-11-save-company-name-off-06
 - hideKeyboard
 - tapOn: "設定を保存"
+- takeScreenshot: 2.2-11-save-company-name-off-07
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-11-company-name-off
+- takeScreenshot: 2.2-11-save-company-name-off-08

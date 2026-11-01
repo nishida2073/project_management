@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 # 注: このフローの中で空の設定を追加する
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-03-copy-empty-send-target-01
 - assertVisible: "設定を追加"
 # 前提確認: 保存済みの送信先が 2 件
 - assertVisible:
@@ -17,6 +18,7 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - assertVisible: "test-send-target-2"
 - tapOn: "設定を追加"
+- takeScreenshot: 2.2-03-copy-empty-send-target-02
 - assertVisible: "設定 3"
 # 未確認: 空の設定を選ぶため、「設定 3」まで送ってから見えている位置（index 0）でコピーを押す
 - scrollUntilVisible:
@@ -26,6 +28,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnCopySendTarget"
     index: 0
+- takeScreenshot: 2.2-03-copy-empty-send-target-03
 - assertVisible: "設定 4"
 - assertNotVisible: ".*のコピー"
-- takeScreenshot: 2.2-03-after-copy-empty
+- takeScreenshot: 2.2-03-copy-empty-send-target-04

@@ -4,6 +4,8 @@ appId: com.ssfrontier.smstokintone
 - launchApp
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnTopOpenSmsSearch"
+- takeScreenshot: 2.1-03-open-sms-search-01
 - assertVisible: "SMSの検索"
-- takeScreenshot: 2.1-03-open-sms-search
 - pressKey: Back
+- takeScreenshot: 2.1-03-open-sms-search-02
+- takeScreenshot: 2.1-03-open-sms-search-03

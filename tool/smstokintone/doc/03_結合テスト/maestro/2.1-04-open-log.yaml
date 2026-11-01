@@ -4,6 +4,8 @@ appId: com.ssfrontier.smstokintone
 - launchApp
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+- takeScreenshot: 2.1-04-open-log-01
 - assertVisible: "ログの一覧"
-- takeScreenshot: 2.1-04-open-log
 - pressKey: Back
+- takeScreenshot: 2.1-04-open-log-02
+- takeScreenshot: 2.1-04-open-log-03

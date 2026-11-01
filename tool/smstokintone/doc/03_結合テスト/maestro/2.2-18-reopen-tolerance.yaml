@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提: 2.2-17 の後の状態（統合条件: 時間、統合範囲: 6 が保存済み）
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-18-reopen-tolerance-01
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -19,4 +20,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
     text: "${TOLERANCE_HOURS_SAVED}"
-- takeScreenshot: 2.2-18-reopen-tolerance
+- takeScreenshot: 2.2-18-reopen-tolerance-02

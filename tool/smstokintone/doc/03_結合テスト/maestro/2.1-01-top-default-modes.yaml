@@ -11,4 +11,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
     text: "手動"
-- takeScreenshot: 2.1-01-top-default-modes
+- takeScreenshot: 2.1-01-top-default-modes-01

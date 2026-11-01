@@ -4,7 +4,9 @@ appId: com.ssfrontier.smstokintone
 - launchApp
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnTopOpenAppSettings"
+- takeScreenshot: 2.1-06-open-app-settings-01
 - assertVisible: "アプリの設定"
 - assertVisible: "初期化"
-- takeScreenshot: 2.1-06-open-app-settings
 - pressKey: Back
+- takeScreenshot: 2.1-06-open-app-settings-02
+- takeScreenshot: 2.1-06-open-app-settings-03

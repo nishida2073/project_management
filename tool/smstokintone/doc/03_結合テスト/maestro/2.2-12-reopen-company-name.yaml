@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.2-12-reopen-company-name-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -14,11 +15,14 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- takeScreenshot: 2.2-12-reopen-company-name-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - pressKey: Back
+- takeScreenshot: 2.2-12-reopen-company-name-03
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-12-reopen-company-name-04
 - assertVisible: "設定を追加"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
@@ -31,15 +35,20 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etCompanyName"
     index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.2-12-reopen-company-name-05
 - eraseText: 50
 - inputText: "${COMPANY_NAME}"
+- takeScreenshot: 2.2-12-reopen-company-name-06
 - hideKeyboard
 - scrollUntilVisible:
     element:
       text: "設定を保存"
     direction: DOWN
 - tapOn: "設定を保存"
+- takeScreenshot: 2.2-12-reopen-company-name-07
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-12-reopen-company-name-08
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -48,4 +57,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etCompanyName"
     text: "${COMPANY_NAME}"
-- takeScreenshot: 2.2-12-reopen-company-name
+- takeScreenshot: 2.2-12-reopen-company-name-09

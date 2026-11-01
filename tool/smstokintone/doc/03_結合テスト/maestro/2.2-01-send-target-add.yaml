@@ -4,8 +4,10 @@ appId: com.ssfrontier.smstokintone
 # 前提: setup の環境（test-send-target-1 と test-send-target-2 が保存済み）。追加した送信先は 3 件目
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-01-send-target-add-01
 - assertVisible: "設定を追加"
 - tapOn: "設定を追加"
+- takeScreenshot: 2.2-01-send-target-add-02
 - assertVisible: "設定 3"
 # 未確認: 追加した設定（設定 3）は、「設定 3」まで送った後に見えている 1 件として確認する（index 0）
 - scrollUntilVisible:
@@ -15,11 +17,11 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     index: 0
+- takeScreenshot: 2.2-01-send-target-add-03
 - inputText: "${SEND_TARGET_NAME}"
+- takeScreenshot: 2.2-01-send-target-add-04
 - hideKeyboard
 - assertVisible: "${SEND_TARGET_NAME}"
-- takeScreenshot: 2.2-01-after-add
-# 新規追加の初期値（送信先の設定 1 件目と同じ項目）の確認。接続先は {X} を正規表現で escape している（未確認）
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
@@ -110,3 +112,4 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
     index: 0
     text: "5"
+- takeScreenshot: 2.2-01-send-target-add-05

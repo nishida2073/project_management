@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: 追加した設定の番号（設定 N）は、保存済みの件数に依存する
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.2-19-save-empty-send-target-error-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -15,16 +16,21 @@ appId: com.ssfrontier.smstokintone
     checked: false
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- takeScreenshot: 2.2-19-save-empty-send-target-error-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - pressKey: Back
+- takeScreenshot: 2.2-19-save-empty-send-target-error-03
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-19-save-empty-send-target-error-04
 - assertVisible: "設定を追加"
 - tapOn: "設定を追加"
+- takeScreenshot: 2.2-19-save-empty-send-target-error-05
 - tapOn: "設定を保存"
+- takeScreenshot: 2.2-19-save-empty-send-target-error-06
 - assertVisible: "入力エラー"
 - assertVisible: ".*設定 [0-9]+.*"  # 未確認
 - assertVisible: ".*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"  # 未確認
 - assertNotVisible: "設定を保存しました"
-- takeScreenshot: 2.2-19-validation-error
+- takeScreenshot: 2.2-19-save-empty-send-target-error-07

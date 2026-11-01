@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-09-test-send-success-no-keyword-01
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -21,6 +22,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteKeyword"
     index: 0
+- takeScreenshot: 2.2-09-test-send-success-no-keyword-02
 - assertNotVisible: "test-company"
 - scrollUntilVisible:
     element:
@@ -29,11 +31,13 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     text: "^テスト送信$"
     index: 0
+- takeScreenshot: 2.2-09-test-send-success-no-keyword-03
 - assertVisible: "テスト本文"
 - assertVisible: '(?s).*${EXPECTED_COMPANY_NAME_09}.*'
 - assertVisible: '(?s).*${EXPECTED_USER_NAME}.*'
 - tapOn: "送信"
+- takeScreenshot: 2.2-09-test-send-success-no-keyword-04
 - assertVisible: ".*テスト結果.*"
 - assertVisible: ".*SMSの(登録|更新)に成功しました.*"
 # 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
-- takeScreenshot: 2.2-09-test-send-success-no-keyword
+- takeScreenshot: 2.2-09-test-send-success-no-keyword-05

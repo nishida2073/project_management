@@ -6,6 +6,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: テスト本文の「sample-company」「test-taro」を英数字の TEST_BODY で代用している（IME の制約）。その場合の送信先エラーの出方は未確認
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.2-22-test-send-keyword-mismatch-error-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -14,7 +15,9 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - pressKey: Back
+- takeScreenshot: 2.2-22-test-send-keyword-mismatch-error-02
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-22-test-send-keyword-mismatch-error-03
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1（振り分け：test-company）
 - assertVisible:
@@ -34,11 +37,14 @@ appId: com.ssfrontier.smstokintone
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
+- takeScreenshot: 2.2-22-test-send-keyword-mismatch-error-04
 - assertVisible: "テスト本文"
 - eraseText: 50  # 未確認: テスト本文の初期値（テンプレート）を消してから入力する
 - inputText: "${TEST_BODY}"
+- takeScreenshot: 2.2-22-test-send-keyword-mismatch-error-05
 - hideKeyboard
 - tapOn: "送信"
+- takeScreenshot: 2.2-22-test-send-keyword-mismatch-error-06
 - assertVisible: ".*送信先エラー.*"
 - assertVisible: ".*${EXPECTED_COMPANY_NAME}.*"  # 未確認
-- takeScreenshot: 2.2-22-keyword-mismatch-error
+- takeScreenshot: 2.2-22-test-send-keyword-mismatch-error-07

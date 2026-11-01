@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: 未保存の変更を確認するダイアログの有無（出る場合は後続の操作が失敗する）
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-25-unsaved-connection-discarded-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が保存済み
 - assertVisible:
@@ -22,10 +23,14 @@ appId: com.ssfrontier.smstokintone
     text: "${SUBDOMAIN}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
+- takeScreenshot: 2.2-25-unsaved-connection-discarded-02
 - inputText: "${UNSAVED_SUBDOMAIN}"
+- takeScreenshot: 2.2-25-unsaved-connection-discarded-03
 - hideKeyboard
 - pressKey: Back
+- takeScreenshot: 2.2-25-unsaved-connection-discarded-04
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-25-unsaved-connection-discarded-05
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -35,4 +40,4 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
     text: "${SUBDOMAIN}"
 - assertNotVisible: "${UNSAVED_SUBDOMAIN}"
-- takeScreenshot: 2.2-25-unsaved-discarded
+- takeScreenshot: 2.2-25-unsaved-connection-discarded-06

@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 # 注: updateToleranceMode=HOURS、updateToleranceHours=6 は画面に表示されないため、保存値は確認していない（内部値）
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-17-save-tolerance-hours-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
@@ -18,6 +19,7 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+- takeScreenshot: 2.2-17-save-tolerance-hours-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
     enabled: true
@@ -27,11 +29,16 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.2-17-save-tolerance-hours-03
 - eraseText: 50  # 未確認
 - inputText: "${TOLERANCE_HOURS_SAVED}"
+- takeScreenshot: 2.2-17-save-tolerance-hours-04
 - hideKeyboard
 - tapOn: "設定を保存"
+- takeScreenshot: 2.2-17-save-tolerance-hours-05
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-17-after-save-hours
+- takeScreenshot: 2.2-17-save-tolerance-hours-06

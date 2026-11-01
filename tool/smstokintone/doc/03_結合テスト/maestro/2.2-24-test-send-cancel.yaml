@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提: 仕様書 2.2 の前提条件（test-send-target-1（振り分け：test-company）が保存済み）
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-24-test-send-cancel-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1（振り分け：test-company）
 - assertVisible:
@@ -23,8 +24,10 @@ appId: com.ssfrontier.smstokintone
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
+- takeScreenshot: 2.2-24-test-send-cancel-02
 - assertVisible: "テスト本文"
 - tapOn: "キャンセル"
+- takeScreenshot: 2.2-24-test-send-cancel-03
 - assertNotVisible: "テスト本文"
 - assertNotVisible: "テスト結果"
-- takeScreenshot: 2.2-24-test-send-cancel
+- takeScreenshot: 2.2-24-test-send-cancel-04

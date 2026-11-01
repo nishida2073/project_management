@@ -4,7 +4,9 @@ appId: com.ssfrontier.smstokintone
 - launchApp
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnTopOpenSendTargetSettings"
+- takeScreenshot: 2.1-05-open-send-target-settings-01
 - assertVisible: "送信先の設定"
 - assertVisible: "設定を追加"
-- takeScreenshot: 2.1-05-open-send-target-settings
 - pressKey: Back
+- takeScreenshot: 2.1-05-open-send-target-settings-02
+- takeScreenshot: 2.1-05-open-send-target-settings-03

@@ -6,6 +6,7 @@ appId: com.ssfrontier.smstokintone
 - runFlow: 2.2-10-save-settings.yaml
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-15-reopen-settings-01
 - assertVisible: "設定を追加"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
@@ -104,4 +105,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
     checked: true
-- takeScreenshot: 2.2-15-reopen-settings
+- takeScreenshot: 2.2-15-reopen-settings-02

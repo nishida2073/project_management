@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: 統合範囲が空であることは確認していない（空の判定が未確認）
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-07-enable-tolerance-hours-01
 - assertVisible: "設定を追加"
 # 前提確認: 統合条件は同一日付（既定）
 - scrollUntilVisible:
@@ -22,6 +23,7 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+- takeScreenshot: 2.2-07-enable-tolerance-hours-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
     enabled: true
@@ -31,7 +33,11 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.2-07-enable-tolerance-hours-03
 - eraseText: 50  # 未確認
 - inputText: "${TOLERANCE_HOURS_INPUT}"
+- takeScreenshot: 2.2-07-enable-tolerance-hours-04
 - hideKeyboard
-- takeScreenshot: 2.2-07-tolerance-enabled
+- takeScreenshot: 2.2-07-enable-tolerance-hours-05

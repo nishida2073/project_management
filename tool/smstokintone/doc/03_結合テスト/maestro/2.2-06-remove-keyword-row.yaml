@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-06-remove-keyword-row-01
 - assertVisible: "設定を追加"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etKeyword"
@@ -17,6 +18,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnAddKeyword"
     index: 0
+- takeScreenshot: 2.2-06-remove-keyword-row-02
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etKeyword"
@@ -25,12 +27,15 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etKeyword"
     index: 1
+- takeScreenshot: 2.2-06-remove-keyword-row-03
 - inputText: "${KEYWORD_SAMPLE}"
+- takeScreenshot: 2.2-06-remove-keyword-row-04
 - hideKeyboard
 - assertVisible: "${KEYWORD_SAMPLE}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteKeyword"
     index: 1
+- takeScreenshot: 2.2-06-remove-keyword-row-05
 - assertNotVisible: "${KEYWORD_SAMPLE}"
 - assertVisible: "${KEYWORD_TEST}"
-- takeScreenshot: 2.2-06-after-remove-keyword-row
+- takeScreenshot: 2.2-06-remove-keyword-row-06

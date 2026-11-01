@@ -5,12 +5,14 @@ appId: com.ssfrontier.smstokintone
 # 前提（確認していない）: test-send-target-1 の接続先・連絡用のアプリ・振り分けは保存済み。ログイン名・パスワードは画面で確認不可
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-02-copy-send-target-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が保存済み（下の assertVisible）
 - assertVisible: "${SEND_TARGET_NAME}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnCopySendTarget"
     index: 0
+- takeScreenshot: 2.2-02-copy-send-target-02
 - assertVisible: "${COPY_SEND_TARGET_NAME}"
 # 未確認: 元の送信先の直後に並ぶ位置は判定していない（スクリーンショットで目視）
-- takeScreenshot: 2.2-02-after-copy
+- takeScreenshot: 2.2-02-copy-send-target-03

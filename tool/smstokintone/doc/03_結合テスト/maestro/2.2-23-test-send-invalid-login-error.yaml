@@ -6,6 +6,7 @@ appId: com.ssfrontier.smstokintone
 # テスト送信は画面の未保存の入力値（ログイン名）を使う
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1（振り分け：test-company）が保存済み
 - assertVisible:
@@ -28,15 +29,21 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etLoginName"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-02
 - eraseText: 50  # 未確認
 - inputText: "${INVALID_LOGIN_NAME}"
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-03
 - hideKeyboard
 - scrollUntilVisible:
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-04
 - assertVisible: "テスト本文"
 - tapOn: "送信"
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-05
 - assertVisible: ".*送信失敗.*"  # 未確認
 # 未確認: kintone の応答内容は kintone 側の応答文に依存するため、ここでは確認しない
-- takeScreenshot: 2.2-23-invalid-login-error
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-06

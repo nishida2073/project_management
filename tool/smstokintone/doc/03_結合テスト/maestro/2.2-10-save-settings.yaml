@@ -5,6 +5,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: loginName・loginPassword は画面に表示されないため、保存値は確認していない（内部値）
 - launchApp
 - tapOn: "送信先の設定"
+- takeScreenshot: 2.2-10-save-settings-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
@@ -15,76 +16,89 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     index: 0
     point: "95%, 50%"
+- takeScreenshot: 2.2-10-save-settings-02
 - eraseText: 50
 - inputText: "${SAVED_SEND_TARGET_NAME}"
+- takeScreenshot: 2.2-10-save-settings-03
 - hideKeyboard
-- takeScreenshot: 2.2-10-save-settings-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etKeyword"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etKeyword"
     index: 0
     point: "95%, 50%"
+- takeScreenshot: 2.2-10-save-settings-04
 - eraseText: 50
 - inputText: "${SAVED_KEYWORD}"
+- takeScreenshot: 2.2-10-save-settings-05
 - hideKeyboard
-- takeScreenshot: 2.2-10-save-settings-02
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
     index: 0
     point: "95%, 50%"
+- takeScreenshot: 2.2-10-save-settings-06
 - eraseText: 50
 - inputText: "${SUBDOMAIN}"
+- takeScreenshot: 2.2-10-save-settings-07
 - hideKeyboard
-- takeScreenshot: 2.2-10-save-settings-03
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginName"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etLoginName"
     index: 0
     point: "95%, 50%"
+- takeScreenshot: 2.2-10-save-settings-08
 - eraseText: 50
 - inputText: "${LOGIN_NAME}"
+- takeScreenshot: 2.2-10-save-settings-09
 - hideKeyboard
-- takeScreenshot: 2.2-10-save-settings-04
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginPassword"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etLoginPassword"
     index: 0
-    point: "95%, 50%"
+    point: "70%, 50%"
+- takeScreenshot: 2.2-10-save-settings-10
 - eraseText: 50
 - inputText: "${LOGIN_PASSWORD}"
+- takeScreenshot: 2.2-10-save-settings-11
 - hideKeyboard
-- takeScreenshot: 2.2-10-save-settings-05
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etAppId"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etAppId"
     index: 0
     point: "95%, 50%"
+- takeScreenshot: 2.2-10-save-settings-12
 - eraseText: 50
 - inputText: "${APP_ID}"
+- takeScreenshot: 2.2-10-save-settings-13
 - hideKeyboard
-- takeScreenshot: 2.2-10-save-settings-06
 - tapOn: "設定を保存"
+- takeScreenshot: 2.2-10-save-settings-14
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-10-save-settings-07
+- takeScreenshot: 2.2-10-save-settings-15
