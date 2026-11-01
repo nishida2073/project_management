@@ -18,9 +18,11 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     index: 0
-- eraseText: 50  # 未確認
+    point: "95%, 50%"
+- eraseText: 50
 - inputText: "${SAVED_SEND_TARGET_NAME}"
 - hideKeyboard
+- takeScreenshot: 2.2-10-save-settings-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etKeyword"
@@ -28,47 +30,61 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etKeyword"
     index: 0
-- eraseText: 50  # 未確認
+    point: "95%, 50%"
+- eraseText: 50
 - inputText: "${SAVED_KEYWORD}"
 - hideKeyboard
+- takeScreenshot: 2.2-10-save-settings-02
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
-- eraseText: 50  # 未確認
+    index: 0
+    point: "95%, 50%"
+- eraseText: 50
 - inputText: "${SUBDOMAIN}"
 - hideKeyboard
+- takeScreenshot: 2.2-10-save-settings-03
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginName"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etLoginName"
-- eraseText: 50  # 未確認
+    index: 0
+    point: "95%, 50%"
+- eraseText: 50
 - inputText: "${LOGIN_NAME}"
 - hideKeyboard
+- takeScreenshot: 2.2-10-save-settings-04
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginPassword"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etLoginPassword"
-- eraseText: 50  # 未確認
+    index: 0
+    point: "95%, 50%"
+- eraseText: 50
 - inputText: "${LOGIN_PASSWORD}"
 - hideKeyboard
+- takeScreenshot: 2.2-10-save-settings-05
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etAppId"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etAppId"
-- eraseText: 50  # 未確認
+    index: 0
+    point: "95%, 50%"
+- eraseText: 50
 - inputText: "${APP_ID}"
 - hideKeyboard
+- takeScreenshot: 2.2-10-save-settings-06
 - tapOn: "設定を保存"
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-10-after-save
+- takeScreenshot: 2.2-10-save-settings-07

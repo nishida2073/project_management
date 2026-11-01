@@ -1,7 +1,9 @@
 # 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 15 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2-10 と 2.2-14 の後の状態（保存された入力値）
+# 前提: JSON 読み込み後の状態。この flow の中で 2.2-10 と 2.2-14 の入力と保存を行ってから、開き直して確認する
+- runFlow: 2.2-14-save-field-mapping.yaml
+- runFlow: 2.2-10-save-settings.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"

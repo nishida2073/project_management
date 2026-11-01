@@ -1,7 +1,8 @@
 # 2.2 送信先の設定: 会社名の保存値を開き直して確認する（テスト仕様書の 2.2 の 12 に対応）
+# 前提: JSON 読み込み後の状態。この flow の中で、会社名の抽出を無効にし、会社名を入力して保存してから開き直す
+# 未確認: 会社名の抽出が無効のとき、会社名の入力欄が表示される
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2-11 の後の状態（会社名の抽出: 無効、test-send-target-1 が保存済み）
 - launchApp
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
@@ -10,15 +11,36 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - pressKey: Back
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
-# 前提確認: test-send-target-1 が保存済み
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    index: 0
+- eraseText: 50
+- inputText: "${COMPANY_NAME}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      text: "設定を保存"
+    direction: DOWN
+- tapOn: "設定を保存"
+- tapOn: "送信先の設定"
+- assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etCompanyName"

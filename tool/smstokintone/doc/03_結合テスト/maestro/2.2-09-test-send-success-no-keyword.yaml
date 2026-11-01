@@ -1,18 +1,9 @@
 # 2.2 送信先の設定: 振り分けがないときのテスト送信（テスト仕様書の 2.2 の 9 に対応）
-# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み、会社名の抽出が有効）。振り分けは画面で行を削除して空にし、保存しない
+# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み）。会社名の抽出の有効は環境の JSON で設定される。振り分けは画面で行を削除して空にし、保存しない
 # 外部条件: kintone 接続と SMS 受信が必要
 appId: com.ssfrontier.smstokintone
 ---
 - launchApp
-- tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
-- pressKey: Back
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
 - scrollUntilVisible:

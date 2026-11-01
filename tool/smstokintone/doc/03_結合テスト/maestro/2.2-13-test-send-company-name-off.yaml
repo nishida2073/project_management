@@ -1,7 +1,7 @@
 # 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 13 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2-11 の後の状態（会社名の抽出: 無効）。test-send-target-1（振り分け：test-company）が保存済み
+# 前提: JSON 読み込み後の状態（test-send-target-1 の振り分けは test-company）。この flow の中で会社名の抽出を無効にしてからテスト送信する
 # 外部条件: kintone 接続と SMS 受信が必要
 # 未確認: テスト本文に日本語（sample-company、test-taro）を入れられないため、英数字の TEST_BODY で代用している（IME の制約）
 - launchApp
@@ -10,6 +10,11 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
@@ -21,19 +26,14 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
+# 会社名の抽出が無効のとき、振り分けの欄は表示されない（確認しない）
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etKeyword"
-      index: 0
+      text: "^テスト送信$"
     direction: DOWN
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etKeyword"
+- tapOn:
+    text: "^テスト送信$"
     index: 0
-    text: "test-company"
-- scrollUntilVisible:
-    element: "テスト送信"
-    direction: DOWN
-- tapOn: "テスト送信"
 - assertVisible: "テスト本文"
 # 未確認: テスト本文ダイアログの入力欄にフォーカスがあるか（ない場合は入力が失敗する）
 - eraseText: 50  # 未確認: テスト本文の初期値（テンプレート）を消してから入力する
