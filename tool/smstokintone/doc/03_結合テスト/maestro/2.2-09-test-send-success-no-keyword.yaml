@@ -1,9 +1,8 @@
-# 2.2 送信先の設定: テスト送信が成功する（振り分けなし）（テスト仕様書の 2.2 の 9 に対応）
+# 2.2 送信先の設定: 振り分けがないときのテスト送信（テスト仕様書の 2.2 の 9 に対応）
+# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み、会社名の抽出が有効）。振り分けは画面で行を削除して空にし、保存しない
+# 外部条件: kintone 接続と SMS 受信が必要
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 仕様書 2.2 の前提条件（test-send-target-2（振り分けなし）が保存済み、会社名の抽出が有効）
-# 外部条件: kintone 接続と SMS 受信が必要
-# テスト送信は送信先ごとに 1 つあるため、2 件目（test-send-target-2）の「テスト送信」を押す
 - launchApp
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
@@ -16,30 +15,34 @@ appId: com.ssfrontier.smstokintone
 - pressKey: Back
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
-# 前提確認: test-send-target-2（振り分けなし）が 2 件目に保存済み
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-      index: 1
-    direction: DOWN
+      text: "設定 1"
+    direction: UP
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-    index: 1
-    text: "test-send-target-2"
+    index: 0
+    text: "test-send-target-1"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    index: 0
+    text: "test-company"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteKeyword"
+    index: 0
+- assertNotVisible: "test-company"
 - scrollUntilVisible:
     element:
-      text: "テスト送信"
-      index: 1
+      text: "^テスト送信$"
     direction: DOWN
 - tapOn:
-    text: "テスト送信"
-    index: 1
+    text: "^テスト送信$"
+    index: 0
 - assertVisible: "テスト本文"
-# 未確認: テスト本文の初期表示に会社名・氏名が含まれること
-- assertVisible: ".*${EXPECTED_COMPANY_NAME_09}.*"
-- assertVisible: ".*${EXPECTED_USER_NAME}.*"
+- assertVisible: '(?s).*${EXPECTED_COMPANY_NAME_09}.*'
+- assertVisible: '(?s).*${EXPECTED_USER_NAME}.*'
 - tapOn: "送信"
-- assertVisible: ".*テスト結果.*"  # 成功時はタイトルに抽出アイコンが付くため、部分一致で確認する
-- assertVisible: ".*SMSの登録に成功しました.*"  # 未確認
+- assertVisible: ".*テスト結果.*"
+- assertVisible: ".*SMSの(登録|更新)に成功しました.*"
 # 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
 - takeScreenshot: 2.2-09-test-send-success-no-keyword

@@ -35,24 +35,6 @@
       "fieldHistory": "history",
       "updateToleranceMode": "SAME_DATE",
       "updateToleranceHours": 5
-    },
-    {
-      "sendTargetName": "test-send-target-2",
-      "companyName": "",
-      "keywords": [],
-      "subdomain": "your-subdomain",
-      "loginName": "your-login-name",
-      "loginPassword": "your-password",
-      "appId": "12345",
-      "fieldType": "registration_type",
-      "fieldDatetime": "receive_datetime",
-      "fieldSender": "sender",
-      "fieldCompanyName": "company_name",
-      "fieldUserName": "user_name",
-      "fieldBody": "body",
-      "fieldHistory": "history",
-      "updateToleranceMode": "SAME_DATE",
-      "updateToleranceHours": 5
     }
   ],
   "continuationInfoConfig": [
