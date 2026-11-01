@@ -21,7 +21,6 @@
     <string name="btn_cancel">キャンセル</string>
     <string name="btn_copy">コピー</string>
     <string name="btn_delete">削除</string>
-    <string name="btn_delete_all">すべて削除</string>
     <string name="btn_send">送信</string>
     <string name="btn_search">検索</string>
     <string name="btn_select_all">全選択</string>
@@ -279,8 +278,6 @@
     <string name="dialog_message_continuation_info_settings_company_name_extraction_warning">引継ぎ内容に会社名がない件が %1$d 件あります。必要に応じて会社名を追加してください。</string>
     <string name="dialog_title_continuation_info_settings_save_conflict">保存に失敗しました</string>
     <string name="dialog_message_continuation_info_settings_save_conflict">SMSの受信などで内容が更新されたため、保存ができませんでした</string>
-    <string name="dialog_title_continuation_info_settings_confirm_delete_all">削除確認</string>
-    <string name="dialog_message_continuation_info_settings_delete_all">すべての引継ぎ内容を削除しますか？</string>
     <string name="label_continuation_info_settings_sort">表示順序</string>
     <string name="rb_continuation_info_settings_sort_ascending">古い順</string>
     <string name="rb_continuation_info_settings_sort_descending">新しい順</string>

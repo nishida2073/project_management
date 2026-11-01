@@ -26,6 +26,9 @@ import java.util.Locale
  * すべてマージされ、ファイルに含まれない属性・エントリは既存値が保持される。
  * エクスポートはインポートと互換のJSON（[buildExportJson]）を保存先に書き出す
  */
+/** インポートファイルの中身の問題（重複、入力漏れなど）を表す。JSON として読めない場合は [JSONException] */
+private class ImportValidationException(message: String) : Exception(message)
+
 class SettingsImportExportActivity : BaseActivity() {
 
     /**
@@ -147,6 +150,8 @@ class SettingsImportExportActivity : BaseActivity() {
         }
         try {
             parseImportFile(text)
+        } catch (e: ImportValidationException) {
+            showError(e.message.orEmpty())
         } catch (e: JSONException) {
             showError(getString(R.string.dialog_message_settings_import_export_import_invalid_json, e.message.orEmpty()))
         }
@@ -192,7 +197,7 @@ class SettingsImportExportActivity : BaseActivity() {
             if (!seenNames.add(name)) duplicateNames.add(name)
         }
         if (duplicateNames.isNotEmpty()) {
-            throw JSONException(
+            throw ImportValidationException(
                 getString(R.string.message_settings_import_export_import_send_target_duplicate_name, duplicateNames.sorted().joinToString("／"))
             )
         }
@@ -206,7 +211,7 @@ class SettingsImportExportActivity : BaseActivity() {
             val obj = array.getJSONObject(i)
             val senderAddress = obj.optString("senderAddress", "").trim()
             if (senderAddress.isEmpty()) {
-                throw JSONException(
+                throw ImportValidationException(
                     getString(R.string.message_settings_import_export_import_continuation_sender_address_required, i + 1)
                 )
             }
@@ -214,7 +219,7 @@ class SettingsImportExportActivity : BaseActivity() {
 
             val userName = obj.optString("userName", "").trim()
             if (userName.isEmpty()) {
-                throw JSONException(
+                throw ImportValidationException(
                     getString(R.string.message_settings_import_export_import_continuation_user_name_required, i + 1)
                 )
             }
@@ -222,14 +227,14 @@ class SettingsImportExportActivity : BaseActivity() {
             if (extractionCompanyNameEnabled) {
                 val companyName = obj.optString("companyName", "").trim()
                 if (companyName.isEmpty()) {
-                    throw JSONException(
+                    throw ImportValidationException(
                         getString(R.string.message_settings_import_export_import_continuation_company_name_required, i + 1)
                     )
                 }
             }
         }
         if (duplicateSenders.isNotEmpty()) {
-            throw JSONException(
+            throw ImportValidationException(
                 getString(R.string.message_settings_import_export_import_continuation_duplicate_sender, duplicateSenders.sorted().joinToString("／"))
             )
         }

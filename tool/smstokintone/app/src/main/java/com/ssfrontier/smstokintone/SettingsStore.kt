@@ -748,7 +748,8 @@ object SettingsStore {
         }
         if (previousEntry != null) {
             val config = load(context)
-            val convertedCompanyName = getConvertedCompanyName(config, previousEntry.companyName)
+            // 引継ぎの会社名は保存時に変換済み。ここで再変換すると二重変換になるため、そのまま使う
+            val convertedCompanyName = previousEntry.companyName
             val smsParts = SmsParts(
                 companyName = convertedCompanyName,
                 userName = previousEntry.userName,

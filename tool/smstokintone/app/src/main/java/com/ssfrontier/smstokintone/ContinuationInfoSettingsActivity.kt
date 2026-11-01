@@ -60,21 +60,6 @@ class ContinuationInfoSettingsActivity : BaseActivity() {
         val searchTextWatcher = simpleTextWatcher { applySearchFilter(it) }
         binding.etContinuationSearch.setupManaged(searchTextWatcher)
 
-        val deleteAllListener = View.OnClickListener {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_title_continuation_info_settings_confirm_delete_all)
-                .setMessage(R.string.dialog_message_continuation_info_settings_delete_all)
-                .setNegativeButton(R.string.btn_cancel, null)
-                .setPositiveButton(R.string.btn_delete) { _, _ ->
-                    binding.llContinuationContainer.removeAllViews()
-                    cards.clear()
-                    binding.tvContinuationEmpty.visibility = View.VISIBLE
-                    binding.tvContinuationNoMatch.visibility = View.GONE
-                }
-                .show().setupManaged()
-        }
-        binding.btnDeleteAllContinuationInfo.setupManaged(deleteAllListener)
-
         val sortListener = android.widget.RadioGroup.OnCheckedChangeListener { _, checkedId ->
             val isAscending = checkedId == binding.rbContinuationSortAscending.id
             reloadCards(isAscending)
