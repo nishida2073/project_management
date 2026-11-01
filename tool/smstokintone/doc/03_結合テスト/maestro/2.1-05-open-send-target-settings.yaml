@@ -1,0 +1,10 @@
+# 2.1 トップ: 送信先の設定の画面に移動できることを確認する（テスト仕様書の 2.1 の 5 に対応）
+appId: com.ssfrontier.smstokintone
+---
+- launchApp
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnTopOpenSendTargetSettings"
+- assertVisible: "送信先の設定"
+- assertVisible: "設定を追加"
+- takeScreenshot: 2.1-05-open-send-target-settings
+- pressKey: Back

@@ -1,0 +1,10 @@
+# 2.1 トップ: アプリの設定の画面に移動できることを確認する（テスト仕様書の 2.1 の 6 に対応）
+appId: com.ssfrontier.smstokintone
+---
+- launchApp
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnTopOpenAppSettings"
+- assertVisible: "アプリの設定"
+- assertVisible: "初期化"
+- takeScreenshot: 2.1-06-open-app-settings
+- pressKey: Back

@@ -9,8 +9,9 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "設定のインポート・エクスポート"
 - assertVisible: "ファイルを選択"
 - tapOn: "ファイルを選択"
-- tapOn: "${SETUP_FILE}"   # 未確認: 文書選択ダイアログでのファイルの選び方
-- assertVisible: "${SETUP_FILE}"   # 未確認: 読み込んだファイル名がプレビューに出るか
+- tapOn:
+    text: "environment.*"   # 省略された表示名に一致させる（端末で確認済み）
+- assertVisible: '(?s).*environment\.json.*'   # 「ファイル名」と改行を含む 1 つの表示に一致させる（端末で確認済み）
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnImportSettings"
 - assertVisible: "設定をインポートしますか？"

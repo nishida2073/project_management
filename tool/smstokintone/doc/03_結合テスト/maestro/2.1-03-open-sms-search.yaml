@@ -1,0 +1,9 @@
+# 2.1 トップ: SMSの検索の画面に移動できることを確認する（テスト仕様書の 2.1 の 3 に対応）
+appId: com.ssfrontier.smstokintone
+---
+- launchApp
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnTopOpenSmsSearch"
+- assertVisible: "SMSの検索"
+- takeScreenshot: 2.1-03-open-sms-search
+- pressKey: Back

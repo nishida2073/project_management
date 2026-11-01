@@ -1,0 +1,9 @@
+# 2.1 トップ: ログの確認の画面に移動できることを確認する（テスト仕様書の 2.1 の 4 に対応）
+appId: com.ssfrontier.smstokintone
+---
+- launchApp
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+- assertVisible: "ログの一覧"
+- takeScreenshot: 2.1-04-open-log
+- pressKey: Back

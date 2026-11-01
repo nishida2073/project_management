@@ -1,0 +1,10 @@
+# 2.1 トップ: 設定のインポート・エクスポートの画面に移動できることを確認する（テスト仕様書の 2.1 の 7 に対応）
+appId: com.ssfrontier.smstokintone
+---
+- launchApp
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnTopOpenSettingsImportExport"
+- assertVisible: "設定のインポート・エクスポート"
+- assertVisible: "ファイルを選択"
+- takeScreenshot: 2.1-07-open-import-export
+- pressKey: Back
