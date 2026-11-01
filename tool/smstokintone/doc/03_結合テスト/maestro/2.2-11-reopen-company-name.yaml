@@ -1,11 +1,11 @@
-# 2.2 送信先の設定: 会社名の保存値を開き直して確認する（テスト仕様書の 2.2 の 12 に対応）
+# 2.2 送信先の設定: 会社名の保存値を開き直して確認する（テスト仕様書の 2.2 の 11 に対応）
 # 前提: JSON 読み込み後の状態。この flow の中で、会社名の抽出を無効にし、会社名を入力して保存してから開き直す
 # 未確認: 会社名の抽出が無効のとき、会社名の入力欄が表示される
 appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.2-12-reopen-company-name-01
+- takeScreenshot: 2.2-11-reopen-company-name-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -15,14 +15,14 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-- takeScreenshot: 2.2-12-reopen-company-name-02
+- takeScreenshot: 2.2-11-reopen-company-name-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - pressKey: Back
-- takeScreenshot: 2.2-12-reopen-company-name-03
+- takeScreenshot: 2.2-11-reopen-company-name-03
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-12-reopen-company-name-04
+- takeScreenshot: 2.2-11-reopen-company-name-04
 - assertVisible: "設定を追加"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
@@ -42,9 +42,9 @@ appId: com.ssfrontier.smstokintone
       text: "設定を保存"
     direction: DOWN
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-12-reopen-company-name-05
+- takeScreenshot: 2.2-11-reopen-company-name-05
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-12-reopen-company-name-06
+- takeScreenshot: 2.2-11-reopen-company-name-06
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -53,4 +53,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etCompanyName"
     text: "${COMPANY_NAME}"
-- takeScreenshot: 2.2-12-reopen-company-name-07
+- takeScreenshot: 2.2-11-reopen-company-name-07

@@ -1,10 +1,10 @@
-# 2.2 送信先の設定: 振り分けの行を削除する（テスト仕様書の 2.2 の 6 に対応）
+# 2.2 送信先の設定: 振り分けの行を削除する（テスト仕様書の 2.2 の 5 に対応）
 # 前提: JSON 読み込み後の状態（test-send-target-1 の振り分けは test-company の 1 行）。この flow の中で sample-company の行を追加してから削除する
 appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-06-remove-keyword-row-01
+- takeScreenshot: 2.2-05-remove-keyword-row-01
 - assertVisible: "設定を追加"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etKeyword"
@@ -18,7 +18,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnAddKeyword"
     index: 0
-- takeScreenshot: 2.2-06-remove-keyword-row-02
+- takeScreenshot: 2.2-05-remove-keyword-row-02
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etKeyword"
@@ -27,15 +27,15 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etKeyword"
     index: 1
-- takeScreenshot: 2.2-06-remove-keyword-row-03
+- takeScreenshot: 2.2-05-remove-keyword-row-03
 - inputText: "${KEYWORD_SAMPLE}"
-- takeScreenshot: 2.2-06-remove-keyword-row-04
+- takeScreenshot: 2.2-05-remove-keyword-row-04
 - hideKeyboard
 - assertVisible: "${KEYWORD_SAMPLE}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteKeyword"
     index: 1
-- takeScreenshot: 2.2-06-remove-keyword-row-05
+- takeScreenshot: 2.2-05-remove-keyword-row-05
 - assertNotVisible: "${KEYWORD_SAMPLE}"
 - assertVisible: "${KEYWORD_TEST}"
-- takeScreenshot: 2.2-06-remove-keyword-row-06
+- takeScreenshot: 2.2-05-remove-keyword-row-06

@@ -1,11 +1,11 @@
-# 2.2 送信先の設定: 統合範囲を保存する（テスト仕様書の 2.2 の 17 に対応）
+# 2.2 送信先の設定: 統合範囲を保存する（テスト仕様書の 2.2 の 16 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み。このフローで統合条件を時間に切り替える）
 # 注: updateToleranceMode=HOURS、updateToleranceHours=6 は画面に表示されないため、保存値は確認していない（内部値）
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-17-save-tolerance-hours-01
+- takeScreenshot: 2.2-16-save-tolerance-hours-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
@@ -18,7 +18,7 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
-- takeScreenshot: 2.2-17-save-tolerance-hours-02
+- takeScreenshot: 2.2-16-save-tolerance-hours-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
     enabled: true
@@ -32,8 +32,8 @@ appId: com.ssfrontier.smstokintone
       FIELD_ID: etUpdateToleranceHours
       INPUT_VALUE: "${TOLERANCE_HOURS_SAVED}"
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-17-save-tolerance-hours-03
+- takeScreenshot: 2.2-16-save-tolerance-hours-03
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-17-save-tolerance-hours-04
+- takeScreenshot: 2.2-16-save-tolerance-hours-04

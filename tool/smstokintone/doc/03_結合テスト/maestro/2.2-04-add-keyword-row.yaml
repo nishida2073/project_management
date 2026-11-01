@@ -1,10 +1,10 @@
-# 2.2 送信先の設定: 振り分けの行を追加する（テスト仕様書の 2.2 の 5 に対応）
+# 2.2 送信先の設定: 振り分けの行を追加する（テスト仕様書の 2.2 の 4 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 仕様書 2.2 の前提条件（test-send-target-1 の振り分けに test-company が 1 行保存済み）
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-05-add-keyword-row-01
+- takeScreenshot: 2.2-04-add-keyword-row-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 の振り分けは test-company の 1 行
 - scrollUntilVisible:
@@ -25,8 +25,8 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnAddKeyword"
     index: 0
 # 未確認: 行の追加は、2 行目の入力欄（etKeyword の index 1）の表示で確認する
-- takeScreenshot: 2.2-05-add-keyword-row-02
+- takeScreenshot: 2.2-04-add-keyword-row-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etKeyword"
     index: 1
-- takeScreenshot: 2.2-05-add-keyword-row-03
+- takeScreenshot: 2.2-04-add-keyword-row-03

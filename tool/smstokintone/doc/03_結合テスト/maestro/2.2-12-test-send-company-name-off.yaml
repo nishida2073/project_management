@@ -1,4 +1,4 @@
-# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 13 に対応）
+# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 12 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: JSON 読み込み後の状態（test-send-target-1 の振り分けは test-company）。この flow の中で会社名の抽出を無効にしてからテスト送信する
@@ -6,7 +6,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: テスト本文に日本語（sample-company、test-taro）を入れられないため、英数字の TEST_BODY で代用している（IME の制約）
 - launchApp
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.2-13-test-send-company-name-off-01
+- takeScreenshot: 2.2-12-test-send-company-name-off-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -16,14 +16,14 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-- takeScreenshot: 2.2-13-test-send-company-name-off-02
+- takeScreenshot: 2.2-12-test-send-company-name-off-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - pressKey: Back
-- takeScreenshot: 2.2-13-test-send-company-name-off-03
+- takeScreenshot: 2.2-12-test-send-company-name-off-03
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-13-test-send-company-name-off-04
+- takeScreenshot: 2.2-12-test-send-company-name-off-04
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1（振り分け：test-company）が保存済み
 - assertVisible:
@@ -38,16 +38,16 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     text: "^テスト送信$"
     index: 0
-- takeScreenshot: 2.2-13-test-send-company-name-off-05
+- takeScreenshot: 2.2-12-test-send-company-name-off-05
 - assertVisible: "テスト本文"
 # 未確認: テスト本文ダイアログの入力欄にフォーカスがあるか（ない場合は入力が失敗する）
 - eraseText: 50  # 未確認: テスト本文の初期値（テンプレート）を消してから入力する
 - inputText: "${TEST_BODY}"
-- takeScreenshot: 2.2-13-test-send-company-name-off-06
+- takeScreenshot: 2.2-12-test-send-company-name-off-06
 - hideKeyboard
 - tapOn: "送信"
 # 未確認: 結果の表示を待つ確認がないため、assertNotVisible が結果表示の前に通る可能性がある
-- takeScreenshot: 2.2-13-test-send-company-name-off-07
+- takeScreenshot: 2.2-12-test-send-company-name-off-07
 - assertNotVisible: ".*送信先エラー.*"
 # 未確認: テスト登録（kintone 側）は kintone で確認する
-- takeScreenshot: 2.2-13-test-send-company-name-off-08
+- takeScreenshot: 2.2-12-test-send-company-name-off-08

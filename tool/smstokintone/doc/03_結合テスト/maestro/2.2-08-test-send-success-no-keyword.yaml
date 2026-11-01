@@ -1,11 +1,11 @@
-# 2.2 送信先の設定: 振り分けがないときのテスト送信（テスト仕様書の 2.2 の 9 に対応）
+# 2.2 送信先の設定: 振り分けがないときのテスト送信（テスト仕様書の 2.2 の 8 に対応）
 # 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み）。会社名の抽出の有効は環境の JSON で設定される。振り分けは画面で行を削除して空にし、保存しない
 # 外部条件: kintone 接続と SMS 受信が必要
 appId: com.ssfrontier.smstokintone
 ---
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-09-test-send-success-no-keyword-01
+- takeScreenshot: 2.2-08-test-send-success-no-keyword-01
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -22,7 +22,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteKeyword"
     index: 0
-- takeScreenshot: 2.2-09-test-send-success-no-keyword-02
+- takeScreenshot: 2.2-08-test-send-success-no-keyword-02
 - assertNotVisible: "test-company"
 - scrollUntilVisible:
     element:
@@ -31,13 +31,13 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     text: "^テスト送信$"
     index: 0
-- takeScreenshot: 2.2-09-test-send-success-no-keyword-03
+- takeScreenshot: 2.2-08-test-send-success-no-keyword-03
 - assertVisible: "テスト本文"
 - assertVisible: '(?s).*${EXPECTED_COMPANY_NAME_09}.*'
 - assertVisible: '(?s).*${EXPECTED_USER_NAME}.*'
 - tapOn: "送信"
-- takeScreenshot: 2.2-09-test-send-success-no-keyword-04
+- takeScreenshot: 2.2-08-test-send-success-no-keyword-04
 - assertVisible: ".*テスト結果.*"
 - assertVisible: ".*SMSの(登録|更新)に成功しました.*"
 # 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
-- takeScreenshot: 2.2-09-test-send-success-no-keyword-05
+- takeScreenshot: 2.2-08-test-send-success-no-keyword-05
