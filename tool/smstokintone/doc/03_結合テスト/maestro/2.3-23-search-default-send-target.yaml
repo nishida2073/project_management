@@ -1,26 +1,13 @@
-# 2.3 アプリの設定: SMSの検索の送信先の初期値を選ぶ（テスト仕様書の 2.3 の 23 に対応）
+# 2.3 アプリの設定: 送信先が 1 件のとき、SMSの検索の送信先の選択欄は表示されない（テスト仕様書の 2.3 の 23 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する。送信先 "${SEND_TARGET_NAME}"（JSON の sendTargetConfig の 1 件目）が存在する。検索条件の初期値の送信先は JSON に指定がなく、アプリの既定値（すべて）。このフローで送信先を選ぶ。
+# 前提: JSON（env_ok.json）の状態から開始する。送信先は JSON の 1 件（"${SEND_TARGET_NAME}"）だけ。
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-23-search-default-send-target-01
-- scrollUntilVisible:
-    element:
-      id: "com.ssfrontier.smstokintone:id/spDefaultSendTargetFilter"
-    direction: DOWN
-    visibilityPercentage: 100
-- takeScreenshot: 2.3-23-search-default-send-target-02
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/spDefaultSendTargetFilter"
-    index: 0
-- takeScreenshot: 2.3-23-search-default-send-target-03
-- tapOn: "${SEND_TARGET_NAME}" # 未確認: スピナーの一覧に表示される項目の文字
-- takeScreenshot: 2.3-23-search-default-send-target-04
-- assertVisible: "${SEND_TARGET_NAME}"
-- pressKey: Back
-- takeScreenshot: 2.3-23-search-default-send-target-05
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/llDefaultSendTargetFilter"
 - tapOn: "SMSの検索"
-- takeScreenshot: 2.3-23-search-default-send-target-06
-- assertVisible: "${SEND_TARGET_NAME}" # 未確認: 検索画面のスピナーに選択内容が表示されること
-- takeScreenshot: 2.3-23-search-default-send-target-07
+- takeScreenshot: 2.3-23-search-default-send-target-02
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/llSendTargetFilter"

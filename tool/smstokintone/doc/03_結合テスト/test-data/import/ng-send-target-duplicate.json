@@ -1,0 +1,10 @@
+{
+  "sendTargetConfig": [
+    {
+      "sendTargetName": "test-send-target-1"
+    },
+    {
+      "sendTargetName": "test-send-target-1"
+    }
+  ]
+}

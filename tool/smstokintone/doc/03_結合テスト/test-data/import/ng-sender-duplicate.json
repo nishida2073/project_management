@@ -1,0 +1,16 @@
+{
+  "continuationInfoConfig": [
+    {
+      "senderAddress": "test-sender-a",
+      "userName": "test-taro",
+      "companyName": "test-company",
+      "timestampMillis": 1767225600000
+    },
+    {
+      "senderAddress": "test-sender-a",
+      "userName": "test-taro-2",
+      "companyName": "test-company-2",
+      "timestampMillis": 1767312000000
+    }
+  ]
+}

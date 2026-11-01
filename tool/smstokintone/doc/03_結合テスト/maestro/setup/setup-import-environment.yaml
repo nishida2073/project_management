@@ -9,6 +9,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "設定のインポート・エクスポート"
 - assertVisible: "ファイルを選択"
 - tapOn: "ファイルを選択"
+- scrollUntilVisible:
+    element:
+      text: "${SETUP_FILE_PATTERN}"
+    direction: DOWN
 - tapOn:
     text: "${SETUP_FILE_PATTERN}"   # 省略された表示名に一致させる（端末で確認済み）
 - assertVisible: '(?s).*${SETUP_FILE_PATTERN}.*'   # 「ファイル名」と改行を含む 1 つの表示に一致させる（端末で確認済み）

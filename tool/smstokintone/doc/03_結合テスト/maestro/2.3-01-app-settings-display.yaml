@@ -43,10 +43,9 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
-- scrollUntilVisible:
-    element:
-      id: "com.ssfrontier.smstokintone:id/spDefaultSendTargetFilter"
-- assertVisible: "すべて" # 未確認: 送信先のスピナーに表示される文字
+# 送信先が 1 件のとき、検索の送信先の選択欄は表示されない（実装どおり）
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/llDefaultSendTargetFilter"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"

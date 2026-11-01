@@ -1,0 +1,9 @@
+{
+  "continuationInfoConfig": [
+    {
+      "senderAddress": "test-sender-a",
+      "companyName": "test-company",
+      "timestampMillis": 1767225600000
+    }
+  ]
+}
