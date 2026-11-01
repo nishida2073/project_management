@@ -1,13 +1,17 @@
-# 2.2 送信先の設定: コピーした送信先を削除する（テスト仕様書の 2.2 の 4 に対応）
+# 2.2 送信先の設定: 送信先を削除する（テスト仕様書の 2.2 の 4 に対応）
+# 前提: 仕様書 2.2 の前提条件（test-send-target-1 と test-send-target-2 が保存済み）
+# 未確認: 確認ダイアログが出ないことは、ダイアログの文言が未確認のため、画面に変化がないことで判定する
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2-02 の後の状態（テスト送信先1のコピーが保存されずに一覧に残っている。コピーは 2 件目）
-# 未確認: 確認ダイアログが出ないことは、ダイアログの文言が未確認のため、画面に変化がないことで判定する
 - launchApp
 - tapOn: "送信先の設定"
-- assertVisible: "${COPY_SEND_TARGET_NAME}"
+- assertVisible: "設定を追加"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+    text: "${SEND_TARGET_NAME}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
-    index: 1
-- assertNotVisible: "${COPY_SEND_TARGET_NAME}"
+    index: 0
+- assertNotVisible: "${SEND_TARGET_NAME}"
 - takeScreenshot: 2.2-04-after-delete

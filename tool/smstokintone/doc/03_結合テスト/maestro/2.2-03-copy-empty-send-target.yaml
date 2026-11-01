@@ -13,19 +13,19 @@ appId: com.ssfrontier.smstokintone
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-      index: 1
+      text: "test-send-target-2"
     direction: DOWN
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-    index: 1
-    text: "test-send-target-2"
+- assertVisible: "test-send-target-2"
 - tapOn: "設定を追加"
 - assertVisible: "設定 3"
-# 未確認: 空の設定の位置（index 2）は、保存済みが 2 件の前提に依存する
+# 未確認: 空の設定を選ぶため、「設定 3」まで送ってから見えている位置（index 0）でコピーを押す
+- scrollUntilVisible:
+    element:
+      text: "設定 3"
+    direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnCopySendTarget"
-    index: 2
+    index: 0
 - assertVisible: "設定 4"
 - assertNotVisible: ".*のコピー"
 - takeScreenshot: 2.2-03-after-copy-empty

@@ -1,5 +1,5 @@
 # 前提の環境を作る: 設定ファイルをインポートして、テストの前提（送信先 2 件、既定の設定、引継ぎ内容 2 件）を用意する
-# 前提（手動）: test-data\setup\environment.json を端末のダウンロードフォルダに置く（adb push など）。認証の値は実際の値に書き換えてから置く
+# 前提（手動）: test-data\setup\envi ok.json を端末のダウンロードフォルダに置く（接続用の値が入ったファイル。git には入れない）
 # 注: この flow は clearState を使い、端末のアプリの設定を消してから投入する。テストの flow より先に、1 回だけ実行する
 # 未確認: 文書選択ダイアログの操作（ダウンロードからファイルを選ぶ手順）は公式ドキュメントで確認できていない
 appId: com.ssfrontier.smstokintone
@@ -10,8 +10,8 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "ファイルを選択"
 - tapOn: "ファイルを選択"
 - tapOn:
-    text: "environment.*"   # 省略された表示名に一致させる（端末で確認済み）
-- assertVisible: '(?s).*environment\.json.*'   # 「ファイル名」と改行を含む 1 つの表示に一致させる（端末で確認済み）
+    text: "${SETUP_FILE_PATTERN}"   # 省略された表示名に一致させる（端末で確認済み）
+- assertVisible: '(?s).*${SETUP_FILE_PATTERN}.*'   # 「ファイル名」と改行を含む 1 つの表示に一致させる（端末で確認済み）
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnImportSettings"
 - assertVisible: "設定をインポートしますか？"

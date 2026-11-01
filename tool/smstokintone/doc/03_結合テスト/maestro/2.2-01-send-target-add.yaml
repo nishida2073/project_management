@@ -1,21 +1,20 @@
 # 2.2 送信先の設定: 送信先を追加する（テスト仕様書の 2.2 の 1 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: setup の環境（test-send-target-1 と test-send-target-2 が保存済み）。追加した送信先は 3 件目（index 2）
+# 前提: setup の環境（test-send-target-1 と test-send-target-2 が保存済み）。追加した送信先は 3 件目
 - launchApp
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
 - tapOn: "設定を追加"
 - assertVisible: "設定 3"
-# 未確認: 追加した設定（設定 3）は一覧の 3 件目（index 2）として確認する
+# 未確認: 追加した設定（設定 3）は、「設定 3」まで送った後に見えている 1 件として確認する（index 0）
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-      index: 2
+      text: "設定 3"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-    index: 2
+    index: 0
 - inputText: "${SEND_TARGET_NAME}"
 - hideKeyboard
 - assertVisible: "${SEND_TARGET_NAME}"
@@ -24,90 +23,90 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
-    index: 2
-    text: "univ-kyousai-\{X\}"
+    index: 0
+    text: 'univ-kyousai-\{X\}'
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldSender"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldSender"
-    index: 2
+    index: 0
     text: "sender"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
-    index: 2
+    index: 0
     text: "receive_datetime"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldType"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldType"
-    index: 2
+    index: 0
     text: "registration_type"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
-    index: 2
+    index: 0
     text: "company_name"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldUserName"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldUserName"
-    index: 2
+    index: 0
     text: "user_name"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldBody"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldBody"
-    index: 2
+    index: 0
     text: "body"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldHistory"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldHistory"
-    index: 2
+    index: 0
     text: "history"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
-    index: 2
+    index: 0
     checked: true
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
-      index: 2
+      index: 0
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
-    index: 2
+    index: 0
     text: "5"
