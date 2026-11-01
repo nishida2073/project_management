@@ -16,7 +16,6 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
     direction: DOWN
-    direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
     index: 0

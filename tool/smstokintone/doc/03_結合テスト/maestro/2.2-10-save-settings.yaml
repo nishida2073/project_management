@@ -17,88 +17,70 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etSendTargetName
+      INPUT_VALUE: "${SAVED_SEND_TARGET_NAME}"
 - takeScreenshot: 2.2-10-save-settings-02
-- eraseText: 50
-- inputText: "${SAVED_SEND_TARGET_NAME}"
-- takeScreenshot: 2.2-10-save-settings-03
-- hideKeyboard
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etKeyword"
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etKeyword"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-10-save-settings-04
-- eraseText: 50
-- inputText: "${SAVED_KEYWORD}"
-- takeScreenshot: 2.2-10-save-settings-05
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etKeyword
+      INPUT_VALUE: "${SAVED_KEYWORD}"
+- takeScreenshot: 2.2-10-save-settings-03
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etSubdomain"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-10-save-settings-06
-- eraseText: 50
-- inputText: "${SUBDOMAIN}"
-- takeScreenshot: 2.2-10-save-settings-07
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etSubdomain
+      INPUT_VALUE: "${SUBDOMAIN}"
+- takeScreenshot: 2.2-10-save-settings-04
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginName"
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etLoginName"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-10-save-settings-08
-- eraseText: 50
-- inputText: "${LOGIN_NAME}"
-- takeScreenshot: 2.2-10-save-settings-09
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLoginName
+      INPUT_VALUE: "${LOGIN_NAME}"
+- takeScreenshot: 2.2-10-save-settings-05
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginPassword"
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etLoginPassword"
-    index: 0
-    point: "70%, 50%"
-- takeScreenshot: 2.2-10-save-settings-10
-- eraseText: 50
-- inputText: "${LOGIN_PASSWORD}"
-- takeScreenshot: 2.2-10-save-settings-11
-- hideKeyboard
+- runFlow:
+    file: common/input-password-field.yaml
+    env:
+      FIELD_ID: etLoginPassword
+      INPUT_VALUE: "${LOGIN_PASSWORD}"
+- takeScreenshot: 2.2-10-save-settings-06
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etAppId"
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etAppId"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-10-save-settings-12
-- eraseText: 50
-- inputText: "${APP_ID}"
-- takeScreenshot: 2.2-10-save-settings-13
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etAppId
+      INPUT_VALUE: "${APP_ID}"
+- takeScreenshot: 2.2-10-save-settings-07
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-10-save-settings-14
+- takeScreenshot: 2.2-10-save-settings-08
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-10-save-settings-15
+- takeScreenshot: 2.2-10-save-settings-09

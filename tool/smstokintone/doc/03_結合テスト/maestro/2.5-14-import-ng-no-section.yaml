@@ -19,7 +19,7 @@ appId: com.ssfrontier.smstokintone
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-14-import-ng-no-section-02
 - runFlow:
-    file: setup/select-download-file.yaml
+    file: common/select-download-file.yaml
     env:
       FILE_PATTERN: ${IMPORT_FILE}
 - takeScreenshot: 2.5-14-import-ng-no-section-03

@@ -35,18 +35,14 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/etCompanyName"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etCompanyName"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-11-save-company-name-off-05
-- eraseText: 50  # 未確認
-- inputText: "${COMPANY_NAME}"
-- takeScreenshot: 2.2-11-save-company-name-off-06
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etCompanyName
+      INPUT_VALUE: "${COMPANY_NAME}"
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-11-save-company-name-off-07
+- takeScreenshot: 2.2-11-save-company-name-off-05
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-11-save-company-name-off-08
+- takeScreenshot: 2.2-11-save-company-name-off-06

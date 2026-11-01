@@ -16,97 +16,68 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldType"
     direction: DOWN
-    direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFieldType"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-14-save-field-mapping-02
-- eraseText: 50  # 未確認
-- inputText: "${SAVED_FIELD_TYPE}"
-- takeScreenshot: 2.2-14-save-field-mapping-03
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etFieldType
+      INPUT_VALUE: "${SAVED_FIELD_TYPE}"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-14-save-field-mapping-04
-- eraseText: 50  # 未確認
-- inputText: "${SAVED_FIELD_DATETIME}"
-- takeScreenshot: 2.2-14-save-field-mapping-05
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etFieldDatetime
+      INPUT_VALUE: "${SAVED_FIELD_DATETIME}"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldSender"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFieldSender"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-14-save-field-mapping-06
-- eraseText: 50  # 未確認
-- inputText: "${SAVED_FIELD_SENDER}"
-- takeScreenshot: 2.2-14-save-field-mapping-07
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etFieldSender
+      INPUT_VALUE: "${SAVED_FIELD_SENDER}"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-14-save-field-mapping-08
-- eraseText: 50  # 未確認
-- inputText: "${SAVED_FIELD_COMPANY}"
-- takeScreenshot: 2.2-14-save-field-mapping-09
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etFieldCompanyName
+      INPUT_VALUE: "${SAVED_FIELD_COMPANY}"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldUserName"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFieldUserName"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-14-save-field-mapping-10
-- eraseText: 50  # 未確認
-- inputText: "${SAVED_FIELD_USER}"
-- takeScreenshot: 2.2-14-save-field-mapping-11
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etFieldUserName
+      INPUT_VALUE: "${SAVED_FIELD_USER}"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldBody"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFieldBody"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-14-save-field-mapping-12
-- eraseText: 50  # 未確認
-- inputText: "${SAVED_FIELD_BODY}"
-- takeScreenshot: 2.2-14-save-field-mapping-13
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etFieldBody
+      INPUT_VALUE: "${SAVED_FIELD_BODY}"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldHistory"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFieldHistory"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-14-save-field-mapping-14
-- eraseText: 50  # 未確認
-- inputText: "${SAVED_FIELD_HISTORY}"
-- takeScreenshot: 2.2-14-save-field-mapping-15
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etFieldHistory
+      INPUT_VALUE: "${SAVED_FIELD_HISTORY}"
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-14-save-field-mapping-16
+- takeScreenshot: 2.2-14-save-field-mapping-02
 - assertVisible: "設定を保存しました"
 - assertVisible: "送信先の設定"
 - assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-14-save-field-mapping-17
+- takeScreenshot: 2.2-14-save-field-mapping-03

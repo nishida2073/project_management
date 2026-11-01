@@ -26,24 +26,19 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginName"
     direction: DOWN
-    direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etLoginName"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.2-23-test-send-invalid-login-error-02
-- eraseText: 50  # 未確認
-- inputText: "${INVALID_LOGIN_NAME}"
-- takeScreenshot: 2.2-23-test-send-invalid-login-error-03
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLoginName
+      INPUT_VALUE: "${INVALID_LOGIN_NAME}"
 - scrollUntilVisible:
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
-- takeScreenshot: 2.2-23-test-send-invalid-login-error-04
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-02
 - assertVisible: "テスト本文"
 - tapOn: "送信"
-- takeScreenshot: 2.2-23-test-send-invalid-login-error-05
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-03
 - assertVisible: ".*送信失敗.*"  # 未確認
 # 未確認: kintone の応答内容は kintone 側の応答文に依存するため、ここでは確認しない
-- takeScreenshot: 2.2-23-test-send-invalid-login-error-06
+- takeScreenshot: 2.2-23-test-send-invalid-login-error-04

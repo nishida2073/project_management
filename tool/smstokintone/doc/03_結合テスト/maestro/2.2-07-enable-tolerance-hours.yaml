@@ -31,13 +31,9 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
     direction: DOWN
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etUpdateToleranceHours
+      INPUT_VALUE: "${TOLERANCE_HOURS_INPUT}"
 - takeScreenshot: 2.2-07-enable-tolerance-hours-03
-- eraseText: 50  # 未確認
-- inputText: "${TOLERANCE_HOURS_INPUT}"
-- takeScreenshot: 2.2-07-enable-tolerance-hours-04
-- hideKeyboard
-- takeScreenshot: 2.2-07-enable-tolerance-hours-05

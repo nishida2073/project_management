@@ -10,7 +10,7 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "ファイルを選択"
 - tapOn: "ファイルを選択"
 - runFlow:
-    file: select-download-file.yaml
+    file: ../common/select-download-file.yaml
     env:
       FILE_PATTERN: ${SETUP_FILE_PATTERN}
 - assertVisible: '(?s).*${SETUP_FILE_PATTERN}.*'   # 「ファイル名」と改行を含む 1 つの表示に一致させる（端末で確認済み）

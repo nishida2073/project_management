@@ -22,22 +22,18 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
     checked: true
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.4-11-save-conflict-03
-- eraseText: 50  # 未確認
-- inputText: "${COMPANY_NAME_3}"
-- takeScreenshot: 2.4-11-save-conflict-04
-- hideKeyboard
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etContinuationCompanyName
+      INPUT_VALUE: "${COMPANY_NAME_3}"
 - tapOn: "設定を保存"
 # 未確認: ダイアログのタイトルとメッセージ。
-- takeScreenshot: 2.4-11-save-conflict-05
+- takeScreenshot: 2.4-11-save-conflict-03
 - assertVisible: "保存に失敗しました"
 - assertVisible: "SMSの受信などで内容が更新されたため、保存ができませんでした"
 - pressKey: Back
-- takeScreenshot: 2.4-11-save-conflict-06
+- takeScreenshot: 2.4-11-save-conflict-04
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
-- takeScreenshot: 2.4-11-save-conflict-07
+- takeScreenshot: 2.4-11-save-conflict-05
