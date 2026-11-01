@@ -17,23 +17,19 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etSmsSearchDateRangeDays
+      INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"
 - takeScreenshot: 2.3-06-search-date-range-02
-- eraseText: 50
-- takeScreenshot: 2.3-06-search-date-range-03
-- inputText: "${SEARCH_DATE_RANGE_DAYS}"
-- takeScreenshot: 2.3-06-search-date-range-04
-- hideKeyboard
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
 - pressKey: Back
-- takeScreenshot: 2.3-06-search-date-range-05
+- takeScreenshot: 2.3-06-search-date-range-03
 - tapOn: "SMSの検索"
-- takeScreenshot: 2.3-06-search-date-range-06
+- takeScreenshot: 2.3-06-search-date-range-04
 - assertVisible: "受信日の範囲"
 # 未確認: 受信日の範囲が今日を含む直近 3 日になることは、日付の値で確認します（スクリーンショットで確認）
-- takeScreenshot: 2.3-06-search-date-range-07
+- takeScreenshot: 2.3-06-search-date-range-05

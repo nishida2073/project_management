@@ -11,15 +11,11 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-21-log-body-excerpt-save-02
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLogBodyExcerptLength
+      INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-21-log-body-excerpt-save-03
-- eraseText: 50
-- takeScreenshot: 2.3-21-log-body-excerpt-save-04
-- inputText: "${LOG_BODY_EXCERPT_LENGTH}"
-- takeScreenshot: 2.3-21-log-body-excerpt-save-05
-- hideKeyboard
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-21-log-body-excerpt-save-06
+- takeScreenshot: 2.3-21-log-body-excerpt-save-04

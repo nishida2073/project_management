@@ -11,15 +11,11 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-19-reply-cooldown-save-02
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etReplyCooldownSeconds
+      INPUT_VALUE: "${REPLY_COOLDOWN_SECONDS}"
 - takeScreenshot: 2.3-19-reply-cooldown-save-03
-- eraseText: 50
-- takeScreenshot: 2.3-19-reply-cooldown-save-04
-- inputText: "${REPLY_COOLDOWN_SECONDS}"
-- takeScreenshot: 2.3-19-reply-cooldown-save-05
-- hideKeyboard
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-19-reply-cooldown-save-06
+- takeScreenshot: 2.3-19-reply-cooldown-save-04

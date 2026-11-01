@@ -11,15 +11,11 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-20-log-match-tolerance-save-02
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLogMatchToleranceSeconds
+      INPUT_VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
 - takeScreenshot: 2.3-20-log-match-tolerance-save-03
-- eraseText: 50
-- takeScreenshot: 2.3-20-log-match-tolerance-save-04
-- inputText: "${LOG_MATCH_TOLERANCE_SECONDS}"
-- takeScreenshot: 2.3-20-log-match-tolerance-save-05
-- hideKeyboard
 - assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-20-log-match-tolerance-save-06
+- takeScreenshot: 2.3-20-log-match-tolerance-save-04

@@ -11,32 +11,24 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-18-reply-message-save-02
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etReplySuccessBody
+      INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
 - takeScreenshot: 2.3-18-reply-message-save-03
-- eraseText: 50
-- takeScreenshot: 2.3-18-reply-message-save-04
-- inputText: "${REPLY_SUCCESS_BODY}"
-- takeScreenshot: 2.3-18-reply-message-save-05
-- hideKeyboard
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-18-reply-message-save-06
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.3-18-reply-message-save-07
-- eraseText: 50
-- takeScreenshot: 2.3-18-reply-message-save-08
-- inputText: "${REPLY_FAILED_BODY}"
-- takeScreenshot: 2.3-18-reply-message-save-09
-- hideKeyboard
+- takeScreenshot: 2.3-18-reply-message-save-04
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etReplyFailedBody
+      INPUT_VALUE: "${REPLY_FAILED_BODY}"
+- takeScreenshot: 2.3-18-reply-message-save-05
 - assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
-- takeScreenshot: 2.3-18-reply-message-save-10
+- takeScreenshot: 2.3-18-reply-message-save-06

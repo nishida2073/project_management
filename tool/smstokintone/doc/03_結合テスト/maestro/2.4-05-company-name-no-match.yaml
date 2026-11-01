@@ -28,16 +28,13 @@ appId: com.ssfrontier.smstokintone
       index: 1
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
-    index: 1
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-second-text-field.yaml
+    env:
+      FIELD_ID: etContinuationCompanyName
+      INPUT_VALUE: "${COMPANY_NAME_NO_MATCH}"
 - takeScreenshot: 2.4-05-company-name-no-match-03
-- eraseText: 50  # 未確認
-- inputText: "${COMPANY_NAME_NO_MATCH}"
-- takeScreenshot: 2.4-05-company-name-no-match-04
-- hideKeyboard
 # 未確認: SENDER_A に送信先が無いことを前提にしている。
 - assertVisible: "なし"  # 未確認
 - assertNotVisible: "${SEND_TARGET_NAME}"
-- takeScreenshot: 2.4-05-company-name-no-match-05
+- takeScreenshot: 2.4-05-company-name-no-match-04

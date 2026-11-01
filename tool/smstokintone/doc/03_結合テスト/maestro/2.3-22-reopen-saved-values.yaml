@@ -11,116 +11,96 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-22-reopen-saved-values-02
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etReplySuccessBody
+      INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
 - takeScreenshot: 2.3-22-reopen-saved-values-03
-- eraseText: 50
-- takeScreenshot: 2.3-22-reopen-saved-values-04
-- inputText: "${REPLY_SUCCESS_BODY}"
-- takeScreenshot: 2.3-22-reopen-saved-values-05
-- hideKeyboard
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-06
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.3-22-reopen-saved-values-07
-- eraseText: 50
-- takeScreenshot: 2.3-22-reopen-saved-values-08
-- inputText: "${REPLY_FAILED_BODY}"
-- takeScreenshot: 2.3-22-reopen-saved-values-09
-- hideKeyboard
+- takeScreenshot: 2.3-22-reopen-saved-values-04
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etReplyFailedBody
+      INPUT_VALUE: "${REPLY_FAILED_BODY}"
+- takeScreenshot: 2.3-22-reopen-saved-values-05
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-10
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.3-22-reopen-saved-values-11
-- eraseText: 50
-- takeScreenshot: 2.3-22-reopen-saved-values-12
-- inputText: "${REPLY_COOLDOWN_SECONDS}"
-- takeScreenshot: 2.3-22-reopen-saved-values-13
-- hideKeyboard
+- takeScreenshot: 2.3-22-reopen-saved-values-06
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etReplyCooldownSeconds
+      INPUT_VALUE: "${REPLY_COOLDOWN_SECONDS}"
+- takeScreenshot: 2.3-22-reopen-saved-values-07
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-14
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.3-22-reopen-saved-values-15
-- eraseText: 50
-- takeScreenshot: 2.3-22-reopen-saved-values-16
-- inputText: "${LOG_MATCH_TOLERANCE_SECONDS}"
-- takeScreenshot: 2.3-22-reopen-saved-values-17
-- hideKeyboard
+- takeScreenshot: 2.3-22-reopen-saved-values-08
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLogMatchToleranceSeconds
+      INPUT_VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
+- takeScreenshot: 2.3-22-reopen-saved-values-09
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-18
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
-    index: 0
-    point: "95%, 50%"
-- takeScreenshot: 2.3-22-reopen-saved-values-19
-- eraseText: 50
-- takeScreenshot: 2.3-22-reopen-saved-values-20
-- inputText: "${LOG_BODY_EXCERPT_LENGTH}"
-- takeScreenshot: 2.3-22-reopen-saved-values-21
-- hideKeyboard
+- takeScreenshot: 2.3-22-reopen-saved-values-10
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLogBodyExcerptLength
+      INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
+- takeScreenshot: 2.3-22-reopen-saved-values-11
 - pressKey: Back
-- takeScreenshot: 2.3-22-reopen-saved-values-22
+- takeScreenshot: 2.3-22-reopen-saved-values-12
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.3-22-reopen-saved-values-23
+- takeScreenshot: 2.3-22-reopen-saved-values-13
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
-- takeScreenshot: 2.3-22-reopen-saved-values-24
+- takeScreenshot: 2.3-22-reopen-saved-values-14
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
-- takeScreenshot: 2.3-22-reopen-saved-values-25
+- takeScreenshot: 2.3-22-reopen-saved-values-15
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-22-reopen-saved-values-26
+- takeScreenshot: 2.3-22-reopen-saved-values-16
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-22-reopen-saved-values-27
+- takeScreenshot: 2.3-22-reopen-saved-values-17
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-22-reopen-saved-values-28
+- takeScreenshot: 2.3-22-reopen-saved-values-18

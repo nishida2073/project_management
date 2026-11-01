@@ -29,14 +29,11 @@ appId: com.ssfrontier.smstokintone
       index: 1
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
-    index: 1
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-second-text-field.yaml
+    env:
+      FIELD_ID: etContinuationCompanyName
+      INPUT_VALUE: "${COMPANY_NAME_MATCH}"
 - takeScreenshot: 2.4-04-company-name-match-03
-- eraseText: 50  # 未確認
-- inputText: "${COMPANY_NAME_MATCH}"
-- takeScreenshot: 2.4-04-company-name-match-04
-- hideKeyboard
 - assertVisible: "${SEND_TARGET_NAME}"
-- takeScreenshot: 2.4-04-company-name-match-05
+- takeScreenshot: 2.4-04-company-name-match-04

@@ -28,35 +28,29 @@ appId: com.ssfrontier.smstokintone
       index: 1
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
-    index: 1
-    point: "95%, 50%"
+- runFlow:
+    file: common/input-second-text-field.yaml
+    env:
+      FIELD_ID: etContinuationCompanyName
+      INPUT_VALUE: "${COMPANY_NAME_2}"
 - takeScreenshot: 2.4-06-save-company-and-name-03
-- eraseText: 50  # 未確認
-- inputText: "${COMPANY_NAME_2}"
-- takeScreenshot: 2.4-06-save-company-and-name-04
-- hideKeyboard
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
       index: 1
     direction: DOWN
     visibilityPercentage: 100
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
-    index: 1
-    point: "95%, 50%"
-- takeScreenshot: 2.4-06-save-company-and-name-05
-- eraseText: 50  # 未確認
-- inputText: "${USER_NAME_2}"
-- takeScreenshot: 2.4-06-save-company-and-name-06
-- hideKeyboard
+- runFlow:
+    file: common/input-second-text-field.yaml
+    env:
+      FIELD_ID: etContinuationUserName
+      INPUT_VALUE: "${USER_NAME_2}"
+- takeScreenshot: 2.4-06-save-company-and-name-04
 - assertVisible: "${COMPANY_NAME_2}"
 - assertVisible: "${USER_NAME_2}"
 - tapOn: "設定を保存"
-- takeScreenshot: 2.4-06-save-company-and-name-07
+- takeScreenshot: 2.4-06-save-company-and-name-05
 - assertVisible: "設定を保存しました"
 - assertNotVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
-- takeScreenshot: 2.4-06-save-company-and-name-08
+- takeScreenshot: 2.4-06-save-company-and-name-06
