@@ -1,4 +1,4 @@
-# 2.4 引継ぎ内容の設定: すべて削除して設定を保存する（テスト仕様書の 2.4 の 04 に対応）
+# 2.4 引継ぎ内容の設定: すべて削除して設定を保存する（テスト仕様書の 2.4 の 4 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 引継ぎ内容が 2 件（SENDER_A、SENDER_B）。表示順序は古い順（既定）。
@@ -13,11 +13,16 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+# 要判断: 「すべて削除」ボタン（btnDeleteAllContinuationInfo）は layout で gone のままで、コードでも表示しないため、表示されない可能性がある。
+- assertVisible: "${SENDER_A}"
+- assertVisible: "${SENDER_B}"
 - tapOn: "すべて削除"
 - assertVisible: "すべての引継ぎ内容を削除しますか？"
 - tapOn:
     id: "android:id/button1"
 - assertVisible: "引継ぎ内容がありません"
+- assertNotVisible: "${SENDER_A}"
+- assertNotVisible: "${SENDER_B}"
 - tapOn: "設定を保存"
 - assertVisible: "設定を保存しました"
 - assertNotVisible:

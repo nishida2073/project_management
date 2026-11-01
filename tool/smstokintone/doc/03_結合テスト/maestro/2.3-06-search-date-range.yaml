@@ -11,6 +11,7 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+# 未確認: タップ位置はテキストの右側のため、カーソルは既存の値（1）の後ろに置かれる想定
 - eraseText: 5
 - inputText: "${SEARCH_DATE_RANGE_DAYS}"
 - hideKeyboard

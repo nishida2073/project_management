@@ -1,15 +1,15 @@
 {
   "APP_ID": "12345",
-  "LOGIN_NAME": "savedloginname",
-  "LOGIN_PASSWORD": "savedpass123",
-  "SAVED_FIELD_BODY": "savedfieldbody",
-  "SAVED_FIELD_COMPANY": "savedfieldcompany",
-  "SAVED_FIELD_DATETIME": "savedfielddatetime",
-  "SAVED_FIELD_HISTORY": "savedfieldhistory",
-  "SAVED_FIELD_SENDER": "savedfieldsender",
-  "SAVED_FIELD_TYPE": "savedfieldtype",
-  "SAVED_FIELD_USER": "savedfielduser",
-  "SAVED_KEYWORD": "savedkeyword",
-  "SAVED_SEND_TARGET_NAME": "savedtargetname",
-  "SUBDOMAIN": "savedsubdomain"
+  "LOGIN_NAME": "saved-login-name",
+  "LOGIN_PASSWORD": "saved-pass",
+  "SAVED_FIELD_BODY": "saved-field-body",
+  "SAVED_FIELD_COMPANY": "saved-field-company",
+  "SAVED_FIELD_DATETIME": "saved-field-datetime",
+  "SAVED_FIELD_HISTORY": "saved-field-history",
+  "SAVED_FIELD_SENDER": "saved-field-sender",
+  "SAVED_FIELD_TYPE": "saved-field-type",
+  "SAVED_FIELD_USER": "saved-field-user",
+  "SAVED_KEYWORD": "saved-keyword",
+  "SAVED_SEND_TARGET_NAME": "saved-send-target-name",
+  "SUBDOMAIN": "saved-subdomain"
 }

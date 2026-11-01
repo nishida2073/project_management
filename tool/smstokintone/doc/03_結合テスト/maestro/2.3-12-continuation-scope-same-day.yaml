@@ -13,4 +13,13 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbContinuationScopeSameDay"
     checked: true
+- pressKey: Back
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbContinuationScopeSameDay"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationScopeSameDay"
+    checked: true
 - takeScreenshot: 2.3-12-after-continuation-scope-same-day

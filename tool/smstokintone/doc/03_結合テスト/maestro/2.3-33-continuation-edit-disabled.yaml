@@ -24,5 +24,5 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
     index: 0
-- assertVisible: "SMSの引継ぎ" # 設定画面のまま（引継ぎ内容の設定画面に移っていないこと）
+- assertVisible: "アプリの設定" # 設定画面のまま（引継ぎ内容の設定画面に移っていないこと）
 - takeScreenshot: 2.3-33-disabled

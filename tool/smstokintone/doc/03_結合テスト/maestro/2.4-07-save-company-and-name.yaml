@@ -1,4 +1,4 @@
-# 2.4 引継ぎ内容の設定: 会社名と氏名を入力して設定を保存する（テスト仕様書の 2.4 の 07 に対応）
+# 2.4 引継ぎ内容の設定: 会社名と氏名を入力して設定を保存する（テスト仕様書の 2.4 の 7 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
@@ -16,13 +16,13 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
     index: 1
-- eraseText
+- eraseText: 50  # 未確認
 - inputText: "${COMPANY_NAME_2}"
 - hideKeyboard
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
     index: 1
-- eraseText
+- eraseText: 50  # 未確認
 - inputText: "${USER_NAME_2}"
 - hideKeyboard
 - assertVisible: "${COMPANY_NAME_2}"

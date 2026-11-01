@@ -1,0 +1,14 @@
+# 2.1 トップ: 起動直後の送信モードと返信モードの既定値を確認する（テスト仕様書の 2.1 の 1 に対応）
+# 前提: アプリの設定は既定値（SMSの送信モード：自動、SMSの返信モード：手動）。2.3 の 17 の初期化で戻す
+appId: com.ssfrontier.smstokintone
+---
+- launchApp
+- assertVisible: "SMSの送信モード"
+- assertVisible: "SMSの返信モード"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
+    text: "自動"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
+    text: "手動"
+- takeScreenshot: 2.1-01-top-default-modes

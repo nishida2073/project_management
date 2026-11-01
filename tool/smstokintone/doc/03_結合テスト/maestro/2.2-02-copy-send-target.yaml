@@ -1,7 +1,7 @@
 # 2.2 送信先の設定: 送信先をコピーする（テスト仕様書の 2.2 の 2 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2 の前提条件（test-send-target-1（1 件目）と test-send-target-2 が保存済み）
+# 前提: 2.2 の前提条件（test-send-target-1（1 件目）と test-send-target-2 が保存済み）。test-send-target-1 の接続先・ログイン名・パスワード・連絡用のアプリ・振り分けは、保存済みの値（2.2 の 2 の入力値）とする
 - launchApp
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"

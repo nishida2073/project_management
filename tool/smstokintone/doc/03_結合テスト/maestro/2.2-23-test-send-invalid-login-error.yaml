@@ -3,7 +3,7 @@ appId: com.ssfrontier.smstokintone
 ---
 # 前提: 2.2 の前提条件（test-send-target-1（振り分け：test-company）が保存済み）。このフローでログイン名を不正な値にする
 # 外部条件: kintone 接続が必要（不正なログイン名の応答を得るため）
-# 未確認: テスト送信が画面の未保存の入力値（ログイン名）を使うか
+# テスト送信は画面の未保存の入力値（ログイン名）を使う
 - launchApp
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"

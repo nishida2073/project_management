@@ -1,0 +1,14 @@
+# 2.1 トップ: 送信モードが手動、返信モードが自動のときの表示を確認する（テスト仕様書の 2.1 の 2 に対応）
+# 前提: アプリの設定で SMSの送信モードを手動、SMSの返信モードを自動にしておく（2.3 の 3、4 で設定）
+appId: com.ssfrontier.smstokintone
+---
+- launchApp
+- assertVisible: "SMSの送信モード"
+- assertVisible: "SMSの返信モード"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
+    text: "手動"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
+    text: "自動"
+- takeScreenshot: 2.1-02-top-modes-manual-auto

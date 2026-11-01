@@ -1,10 +1,19 @@
 # 2.3 アプリの設定: 会社名の抽出を無効にし、送信先の設定の表示を確認する（テスト仕様書の 2.3 の 8 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3 の 8 の入力値の状態（会社名の抽出：あり、会社名の自動変換：あり）
+# 前提: 2.3 の 8 の入力値の状態（会社名の抽出：あり、会社名の自動変換：あり、検索条件の表示：表示）
+# 注意: 検索条件の表示は、2.3 の 7 で隠す状態にしているため、このフローで表示に戻します
 - launchApp
 - tapOn: "アプリの設定"
 - assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    checked: true
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -13,6 +22,9 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
     enabled: false

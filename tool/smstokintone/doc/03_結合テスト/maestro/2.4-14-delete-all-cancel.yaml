@@ -13,6 +13,7 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+# 要判断: 「すべて削除」ボタン（btnDeleteAllContinuationInfo）は layout で gone のままで、コードでも表示しないため、表示されない可能性がある。
 - tapOn: "すべて削除"
 - assertVisible: "すべての引継ぎ内容を削除しますか？"
 - tapOn: "キャンセル"

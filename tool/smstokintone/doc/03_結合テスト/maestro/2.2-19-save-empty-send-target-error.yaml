@@ -24,6 +24,6 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "設定を保存"
 - assertVisible: "入力エラー"
 - assertVisible: ".*設定 [0-9]+.*"  # 未確認
-- assertVisible: ".*送信先名・サブドメイン・認証情報・アプリIDは必須です.*"  # 未確認
+- assertVisible: ".*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"  # 未確認
 - assertNotVisible: "設定を保存しました"
 - takeScreenshot: 2.2-19-validation-error

@@ -1,4 +1,4 @@
-# 2.4 引継ぎ内容の設定: 一致しない会社名では送信先が表示されない（テスト仕様書の 2.4 の 06 に対応）
+# 2.4 引継ぎ内容の設定: 一致しない会社名では送信先が表示されない（テスト仕様書の 2.4 の 6 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
@@ -17,9 +17,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
     index: 1
-- eraseText
+- eraseText: 50  # 未確認
 - inputText: "${COMPANY_NAME_NO_MATCH}"
 - hideKeyboard
 # 未確認: SENDER_A に送信先が無いことを前提にしている。
+- assertVisible: "なし"  # 未確認
 - assertNotVisible: "${SEND_TARGET_NAME}"
 - takeScreenshot: 2.4-06-after-no-match

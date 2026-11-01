@@ -2,20 +2,43 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 2.3 の 17 の入力値の状態（表示テーマ：ダーク、送信モード：手動、他は設定済みの値）
+# 注意: このフローで、表示テーマをダーク、送信モードを手動にしてから初期化します
 # 注意: 送信先・ログ・引継ぎ内容が残ることは、このフローでは確認しません（未確認）
 - launchApp
 - tapOn: "アプリの設定"
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendManual"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    checked: true
+- scrollUntilVisible:
+    element:
       id: "com.ssfrontier.smstokintone:id/btnResetSettings"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnResetSettings"
 - assertVisible: "設定を初期化しますか？"
-- tapOn: "初期化"
+- tapOn: "初期化" # 未確認: 画面の後ろの初期化ボタンと同じ文字のため、ダイアログのボタンが選ばれるか確認する
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeLight"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbThemeLight"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbSendAuto"
     checked: true

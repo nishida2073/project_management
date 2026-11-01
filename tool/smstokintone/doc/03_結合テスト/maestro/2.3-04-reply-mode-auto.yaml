@@ -2,10 +2,18 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 2.3 の 4 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：自動）
-# 前提: 2.3 の 3 の後で実行する場合も、送信モードは手動のままで構いません（この操作は返信モードだけを変えます）
+# 注意: 2.3 の 3 の後で実行するため、このフローで送信モードを自動に戻します
 - launchApp
 - tapOn: "アプリの設定"
 - assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+    checked: true
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"

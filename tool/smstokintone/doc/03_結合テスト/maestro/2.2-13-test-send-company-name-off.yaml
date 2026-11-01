@@ -13,6 +13,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "テスト送信"
 - assertVisible: "テスト本文"
 # 未確認: テスト本文ダイアログの入力欄にフォーカスがあるか（ない場合は入力が失敗する）
+- eraseText: 50  # 未確認: テスト本文の初期値（テンプレート）を消してから入力する
 - inputText: "${TEST_BODY}"
 - hideKeyboard
 - tapOn: "送信"

@@ -7,14 +7,118 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "設定を追加"
 - tapOn: "設定を追加"
 - assertVisible: "設定 2"
+# 未確認: 追加した設定（設定 2）は一覧の 2 件目（index 1）として確認する
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+      index: 1
+    direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-    index: 0
+    index: 1
 - inputText: "${SEND_TARGET_NAME}"
+- hideKeyboard
 - assertVisible: "${SEND_TARGET_NAME}"
 - takeScreenshot: 2.2-01-after-add
+# 新規追加の初期値（送信先の設定 1 件目と同じ項目）の確認。接続先は {X} を正規表現で escape している（未確認）
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    index: 1
+    text: "univ-kyousai-\{X\}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldSender"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldSender"
+    index: 1
+    text: "sender"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+    index: 1
+    text: "receive_datetime"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldType"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldType"
+    index: 1
+    text: "registration_type"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+    index: 1
+    text: "company_name"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+    index: 1
+    text: "user_name"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldBody"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldBody"
+    index: 1
+    text: "body"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+    index: 1
+    text: "history"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    index: 1
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    index: 1
+    text: "5"
+# 削除の前に、一覧の上へ戻して 2 件目の削除ボタンを探す
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
+      index: 1
+    direction: UP
 - tapOn:
-    text: "削除"
-    index: 0
+    id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
+    index: 1
 - assertNotVisible: "設定 2"
 - takeScreenshot: 2.2-01-after-delete

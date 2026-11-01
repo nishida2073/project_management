@@ -26,9 +26,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
     index: 0
-- eraseText
+- eraseText: 50  # 未確認
 - hideKeyboard
 - tapOn: "設定を保存"
+- assertVisible: "入力エラー"
 # 未確認: ダイアログのメッセージ（氏名は必須です）。regex は未確認。
 - assertVisible: "(?s).*引継ぎ内容: ${SENDER_A}.*氏名は必須です.*"
 - pressKey: Back
@@ -45,3 +46,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
+- takeScreenshot: 2.4-11-after-restore-company-extraction

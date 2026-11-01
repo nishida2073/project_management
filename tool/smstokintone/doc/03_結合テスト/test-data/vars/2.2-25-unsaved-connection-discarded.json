@@ -1,4 +1,4 @@
 {
-  "SUBDOMAIN": "savedsubdomain",
-  "UNSAVED_SUBDOMAIN": "unsavedsubdomain"
+  "SUBDOMAIN": "saved-subdomain",
+  "UNSAVED_SUBDOMAIN": "saved-unsaved-subdomain"
 }

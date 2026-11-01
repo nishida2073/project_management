@@ -17,7 +17,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
     index: 1
-- eraseText
+- eraseText: 50  # 未確認
 - inputText: "${COMPANY_NAME_3}"
 - hideKeyboard
 - tapOn: "設定を保存"

@@ -1,7 +1,7 @@
-# 2.3 アプリの設定: 固定変換の「+」で行を追加する（テスト仕様書の 2.3 の 10 に対応）
+# 2.3 アプリの設定: 固定変換の「+」で行を追加し、変換前と変換後を入力して保存されることを確認する（テスト仕様書の 2.3 の 10 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3 の 10 の入力値の状態（会社名の抽出：あり、固定変換は 1 行以上の場合も含む。行数は 2.3 の 11 で確認します）
+# 前提: 2.3 の 10 の入力値の状態（会社名の抽出：あり、固定変換：なし）
 # 注意: 「+」は、会社名の抽出が有効のときだけ押せます
 - launchApp
 - tapOn: "アプリの設定"
@@ -13,5 +13,24 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnDeleteFixedConversion"
-# 未確認: 追加された行の数と、自動保存（再表示での確認）は、ここでは確認しません
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+    index: 0
+- inputText: "${FIXED_FROM_1}"
+- hideKeyboard
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etFixConversionAfter"
+    index: 0
+- inputText: "${FIXED_TO_1}"
+- hideKeyboard
+- assertVisible: "${FIXED_FROM_1}"
+- assertVisible: "${FIXED_TO_1}"
+- pressKey: Back
+- tapOn: "アプリの設定"
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+- assertVisible: "${FIXED_FROM_1}"
+- assertVisible: "${FIXED_TO_1}"
 - takeScreenshot: 2.3-10-after-fixed-conversion-add
