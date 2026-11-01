@@ -1,7 +1,7 @@
 # 2.4 引継ぎ内容の設定: 送信元を削除して設定を保存する（テスト仕様書の 2.4 の 3 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）。表示順序は古い順（既定）。
+# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）、表示順序は古い順（既定）（テスト仕様書の 2.4 前提条件）。
 # 未確認: 古い順のとき、一覧の先頭（index 0）が SENDER_A。削除ボタンに確認ダイアログは出ない想定。
 - launchApp
 - tapOn: "アプリの設定"
@@ -13,6 +13,17 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+# 前提確認（表示のみ、操作しない）
+- assertVisible: "${SENDER_A}"
+# 未確認: 送信元 B は画面の下にあるとき、スクロールしてから確認する。
+- scrollUntilVisible:
+    element:
+      text: "${SENDER_B}"
+    direction: DOWN
+- assertVisible: "${SENDER_B}"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    checked: true
 - assertVisible: "${SENDER_A}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteContinuationInfo"

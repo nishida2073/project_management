@@ -1,7 +1,7 @@
 # 2.4 引継ぎ内容の設定: すべて削除の確認ダイアログをキャンセルすると一覧は変わらない（テスト仕様書の 2.4 の 14 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 引継ぎ内容が 2 件（SENDER_A、SENDER_B）。表示順序は古い順（既定）。
+# 前提: 表示順序は古い順（既定）。送信元は 2.4-03/04 の後の状態に依存し、2 件とは限らない（テスト仕様書の 2.4 前提条件）。
 # 未確認: 確認ダイアログの文言「すべての引継ぎ内容を削除しますか？」は strings.xml の値で、実機の表示は未確認。
 - launchApp
 - tapOn: "アプリの設定"
@@ -13,6 +13,10 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+# 前提確認（表示のみ、操作しない）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    checked: true
 # 要判断: 「すべて削除」ボタン（btnDeleteAllContinuationInfo）は layout で gone のままで、コードでも表示しないため、表示されない可能性がある。
 - tapOn: "すべて削除"
 - assertVisible: "すべての引継ぎ内容を削除しますか？"

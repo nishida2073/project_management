@@ -1,14 +1,20 @@
 # 2.2 送信先の設定: 統合範囲を保存する（テスト仕様書の 2.2 の 17 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2-07 と同じく、このフローで統合条件の「時間」を切り替えて統合範囲を入れる
+# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み。このフローで統合条件を時間に切り替える）
 # 注: updateToleranceMode=HOURS、updateToleranceHours=6 は画面に表示されないため、保存値は確認していない（内部値）
 - launchApp
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
+# 前提確認: test-send-target-1 が 1 件目に保存済み
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+    text: "test-send-target-1"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    direction: DOWN
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"

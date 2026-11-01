@@ -7,8 +7,18 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible: # 未確認
     element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- assertVisible: # 未確認: 前提の確認（会社名の抽出が有効）
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- scrollUntilVisible: # 未確認
+    element:
       id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
     direction: DOWN
+- assertVisible: # 未確認: 前提の確認（AIによる抽出が無効）
+    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    checked: false
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
     index: 0

@@ -1,7 +1,7 @@
 # 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 19 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2 の前提条件。2.2-11〜13 で無効にした会社名の抽出を、このフローで有効に戻す
+# 前提: 仕様書 2.2 の前提条件（2.2-11〜13 の後で会社名の抽出が無効）。このフローで有効に戻す
 # 未確認: 追加した設定の番号（設定 N）は、保存済みの件数に依存する
 - launchApp
 - tapOn: "アプリの設定"
@@ -9,6 +9,7 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
+# 前提確認: 会社名の抽出が無効（下の checked: false）
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false

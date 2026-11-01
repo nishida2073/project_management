@@ -9,6 +9,10 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
     direction: DOWN
+- assertVisible: # 未確認: 前提の確認（「許可する」が表示され、許可済みの表示がない）
+    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/tvSendPermissionStatus"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
     index: 0

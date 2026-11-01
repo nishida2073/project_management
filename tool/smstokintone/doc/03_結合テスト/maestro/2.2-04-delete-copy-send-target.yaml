@@ -1,0 +1,13 @@
+# 2.2 送信先の設定: コピーした送信先を削除する（テスト仕様書の 2.2 の 4 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提: 2.2-02 の後の状態（テスト送信先1のコピーが保存されずに一覧に残っている。コピーは 2 件目）
+# 未確認: 確認ダイアログが出ないことは、ダイアログの文言が未確認のため、画面に変化がないことで判定する
+- launchApp
+- tapOn: "送信先の設定"
+- assertVisible: "${COPY_SEND_TARGET_NAME}"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
+    index: 1
+- assertNotVisible: "${COPY_SEND_TARGET_NAME}"
+- takeScreenshot: 2.2-04-after-delete

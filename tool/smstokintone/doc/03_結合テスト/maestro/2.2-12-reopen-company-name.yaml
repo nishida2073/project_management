@@ -1,10 +1,24 @@
 # 2.2 送信先の設定: 会社名の保存値を開き直して確認する（テスト仕様書の 2.2 の 12 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2-11 の後の状態（会社名の抽出: 無効、会社名: COMPANY_NAME が保存済み）
+# 前提: 2.2-11 の後の状態（会社名の抽出: 無効、test-send-target-1 が保存済み）
 - launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: false
+- pressKey: Back
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
+# 前提確認: test-send-target-1 が保存済み
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+    text: "test-send-target-1"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etCompanyName"

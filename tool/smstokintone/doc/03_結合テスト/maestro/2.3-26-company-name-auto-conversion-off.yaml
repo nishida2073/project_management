@@ -6,8 +6,18 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible: # 未確認
     element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- assertVisible: # 未確認: 前提の確認（会社名の抽出が有効）
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- scrollUntilVisible: # 未確認
+    element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
     direction: DOWN
+- assertVisible: # 未確認: 前提の確認（会社名の自動変換が有効）
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
     index: 0

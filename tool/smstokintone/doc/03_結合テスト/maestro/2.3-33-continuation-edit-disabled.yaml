@@ -8,6 +8,9 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
     direction: DOWN
+- assertVisible: # 未確認: 前提の確認（引継ぎが有効）
+    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
     index: 0

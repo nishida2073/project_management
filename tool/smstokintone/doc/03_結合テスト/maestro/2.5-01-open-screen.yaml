@@ -1,10 +1,13 @@
 # 2.5 設定のインポート・エクスポート: 画面を開いた初期状態（テスト仕様書の 2.5 の 1 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 会社名の抽出は有効（2.5 の前提条件）。clearState は使わない（前のフローの設定を残すため）。
+# 前提: テスト仕様書の 2.5 前提条件を満たす（clearState は使わない）。
+# 前提（画面で確認不可）: 会社名の抽出は有効（2.5 前提条件）。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
+- assertVisible: "設定のインポート・エクスポート"
+- assertVisible: "ファイルを選択"
 - assertVisible: "ファイルが選択されていません"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnImportSettings"

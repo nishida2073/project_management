@@ -1,9 +1,14 @@
 # 2.3 アプリの設定: 表示内容の確認（テスト仕様書の 2.3 の 1 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3 の 1 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：手動、会社名の抽出・自動変換：あり、引継ぎ：あり、引継ぎの範囲：制限なし、ログの自動更新：あり、自動返信の間隔などは 2.3 の 1 の値）
-# 前提: 既定値と異なる設定が残っているときは、先に手動で 2.3 の 1 の状態に戻します
+# 前提: 2.3 の 1 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：手動、他は仕様書 2.3 の 1 のとおり）
 - launchApp
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
+    text: "自動"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
+    text: "手動"
 - tapOn: "アプリの設定"
 - assertVisible: "端末の許可"
 - scrollUntilVisible:

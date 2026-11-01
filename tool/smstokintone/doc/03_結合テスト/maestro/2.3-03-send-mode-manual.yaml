@@ -1,11 +1,22 @@
 # 2.3 アプリの設定: SMSの送信モードを手動に切り替える（テスト仕様書の 2.3 の 3 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3 の 2 の後は表示テーマがダークのため、このフローで表示テーマをライトに戻します（2.3 の 3 の入力値）
-# 前提: 送信モード：自動、返信モード：手動
+# 前提: 送信モード：自動、返信モード：手動（2.3 の 2 の後の状態）。表示テーマは、このフローでライトにします
 - launchApp
 - tapOn: "アプリの設定"
 - assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    checked: true
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbThemeLight"

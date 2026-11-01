@@ -1,21 +1,21 @@
-# 2.2 送信先の設定: 設定を追加と削除（テスト仕様書の 2.2 に対応）
+# 2.2 送信先の設定: 送信先を追加する（テスト仕様書の 2.2 の 1 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-- launchApp:
-    clearState: true
+# 前提: setup の環境（test-send-target-1 と test-send-target-2 が保存済み）。追加した送信先は 3 件目（index 2）
+- launchApp
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
 - tapOn: "設定を追加"
-- assertVisible: "設定 2"
-# 未確認: 追加した設定（設定 2）は一覧の 2 件目（index 1）として確認する
+- assertVisible: "設定 3"
+# 未確認: 追加した設定（設定 3）は一覧の 3 件目（index 2）として確認する
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-      index: 1
+      index: 2
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
-    index: 1
+    index: 2
 - inputText: "${SEND_TARGET_NAME}"
 - hideKeyboard
 - assertVisible: "${SEND_TARGET_NAME}"
@@ -24,101 +24,90 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
-    index: 1
+    index: 2
     text: "univ-kyousai-\{X\}"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldSender"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldSender"
-    index: 1
+    index: 2
     text: "sender"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
-    index: 1
+    index: 2
     text: "receive_datetime"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldType"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldType"
-    index: 1
+    index: 2
     text: "registration_type"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
-    index: 1
+    index: 2
     text: "company_name"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldUserName"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldUserName"
-    index: 1
+    index: 2
     text: "user_name"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldBody"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldBody"
-    index: 1
+    index: 2
     text: "body"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etFieldHistory"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldHistory"
-    index: 1
+    index: 2
     text: "history"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
-    index: 1
+    index: 2
     checked: true
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
-      index: 1
+      index: 2
     direction: DOWN
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
-    index: 1
+    index: 2
     text: "5"
-# 削除の前に、一覧の上へ戻して 2 件目の削除ボタンを探す
-- scrollUntilVisible:
-    element:
-      id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
-      index: 1
-    direction: UP
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
-    index: 1
-- assertNotVisible: "設定 2"
-- takeScreenshot: 2.2-01-after-delete

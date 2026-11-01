@@ -1,7 +1,7 @@
 # 2.1 トップ: 送信モードが手動、返信モードが自動のときの表示を確認する（テスト仕様書の 2.1 の 2 に対応）
-# 前提: アプリの設定で SMSの送信モードを手動、SMSの返信モードを自動にしておく（2.3 の 3、4 で設定）
 appId: com.ssfrontier.smstokintone
 ---
+# 前提: 仕様書 2.1 の前提条件（SMSの送信モード手動、SMSの返信モード自動。2.3 の 3、4 で設定）
 - launchApp
 - assertVisible: "SMSの送信モード"
 - assertVisible: "SMSの返信モード"

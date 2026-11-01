@@ -1,0 +1,20 @@
+# 前提の環境を作る: 設定ファイルをインポートして、テストの前提（送信先 2 件、既定の設定、引継ぎ内容 2 件）を用意する
+# 前提（手動）: test-data\setup\environment.json を端末のダウンロードフォルダに置く（adb push など）。認証の値は実際の値に書き換えてから置く
+# 注: この flow は clearState を使い、端末のアプリの設定を消してから投入する。テストの flow より先に、1 回だけ実行する
+# 未確認: 文書選択ダイアログの操作（ダウンロードからファイルを選ぶ手順）は公式ドキュメントで確認できていない
+appId: com.ssfrontier.smstokintone
+---
+- launchApp:
+    clearState: true
+- tapOn: "設定のインポート・エクスポート"
+- assertVisible: "ファイルを選択"
+- tapOn: "ファイルを選択"
+- tapOn: "${SETUP_FILE}"   # 未確認: 文書選択ダイアログでのファイルの選び方
+- assertVisible: "${SETUP_FILE}"   # 未確認: 読み込んだファイル名がプレビューに出るか
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+- assertVisible: "設定をインポートしますか？"
+- tapOn:
+    id: "android:id/button1"   # 未確認: 確認ダイアログの「インポート」ボタンの id
+- assertVisible: "設定をインポートしました"   # 未確認: トーストの表示
+- takeScreenshot: setup-import-environment

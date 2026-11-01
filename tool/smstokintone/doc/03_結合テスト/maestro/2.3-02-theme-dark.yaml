@@ -7,6 +7,24 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    checked: true
+- scrollUntilVisible:
+    element:
       id: "com.ssfrontier.smstokintone:id/rbThemeDark"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"

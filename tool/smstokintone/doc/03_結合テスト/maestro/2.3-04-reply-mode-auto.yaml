@@ -1,11 +1,16 @@
 # 2.3 アプリの設定: SMSの返信モードを自動に切り替える（テスト仕様書の 2.3 の 4 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3 の 4 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：自動）
-# 注意: 2.3 の 3 の後で実行するため、このフローで送信モードを自動に戻します
+# 前提: 表示テーマ：ライト（2.3 の 3 の後の状態）。送信モードと返信モードは、このフローで自動にします
 - launchApp
 - tapOn: "アプリの設定"
 - assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+    checked: true
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbSendAuto"

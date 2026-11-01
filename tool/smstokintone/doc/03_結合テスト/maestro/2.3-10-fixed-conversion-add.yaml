@@ -1,14 +1,20 @@
 # 2.3 アプリの設定: 固定変換の「+」で行を追加し、変換前と変換後を入力して保存されることを確認する（テスト仕様書の 2.3 の 10 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3 の 10 の入力値の状態（会社名の抽出：あり、固定変換：なし）
-# 注意: 「+」は、会社名の抽出が有効のときだけ押せます
+# 前提: 会社名の抽出：あり（2.3 の 9 の後の状態）。固定変換：なし（このフローで 1 行目を入力します）
 - launchApp
 - tapOn: "アプリの設定"
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- scrollUntilVisible:
+    element:
       id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+- assertNotVisible: "${FIXED_FROM_1}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
 - assertVisible:

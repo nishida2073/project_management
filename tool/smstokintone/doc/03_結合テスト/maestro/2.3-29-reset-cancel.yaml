@@ -4,6 +4,17 @@ appId: com.ssfrontier.smstokintone
 # 前提: 表示テーマがダーク（2.3 の 29 の入力値）。手動で設定してから実行する。
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    direction: DOWN
+- assertVisible: # 未確認: 前提の確認（表示テーマがダーク）
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    checked: true
+- scrollUntilVisible: # 未確認
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+    direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnResetSettings"
 - assertVisible: "設定を初期化しますか？"

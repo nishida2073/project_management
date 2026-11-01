@@ -5,8 +5,31 @@ appId: com.ssfrontier.smstokintone
 # 外部条件: kintone 接続と SMS 受信が必要
 # 未確認: テスト本文に日本語（sample-company、test-taro）を入れられないため、英数字の TEST_BODY で代用している（IME の制約）
 - launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: false
+- pressKey: Back
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
+# 前提確認: test-send-target-1（振り分け：test-company）が保存済み
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+    text: "test-send-target-1"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etKeyword"
+      index: 0
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    index: 0
+    text: "test-company"
 - scrollUntilVisible:
     element: "テスト送信"
     direction: DOWN

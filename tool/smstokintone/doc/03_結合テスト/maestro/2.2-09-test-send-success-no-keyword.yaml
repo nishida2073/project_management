@@ -1,12 +1,31 @@
 # 2.2 送信先の設定: テスト送信が成功する（振り分けなし）（テスト仕様書の 2.2 の 9 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2 の前提条件（test-send-target-2（振り分けなし）が保存済み、会社名の抽出が有効）
+# 前提: 仕様書 2.2 の前提条件（test-send-target-2（振り分けなし）が保存済み、会社名の抽出が有効）
 # 外部条件: kintone 接続と SMS 受信が必要
 # テスト送信は送信先ごとに 1 つあるため、2 件目（test-send-target-2）の「テスト送信」を押す
 - launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- pressKey: Back
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
+# 前提確認: test-send-target-2（振り分けなし）が 2 件目に保存済み
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+      index: 1
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 1
+    text: "test-send-target-2"
 - scrollUntilVisible:
     element:
       text: "テスト送信"

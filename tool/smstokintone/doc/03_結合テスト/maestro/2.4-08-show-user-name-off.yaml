@@ -1,7 +1,7 @@
 # 2.4 引継ぎ内容の設定: 引継ぎ内容の氏名表示をオフにすると氏名が表示されない（テスト仕様書の 2.4 の 8 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 引継ぎ内容が 2 件。「引継ぎ内容の氏名表示」の初期状態はオン（あり）。この flow でオフに切り替える。
+# 前提: 表示順序は古い順（既定）、引継ぎ内容の氏名表示はオン（この flow でオフにする）。送信元は 2.4-03/04 の後の状態に依存し、2 件とは限らない（テスト仕様書の 2.4 前提条件）。
 # 未確認: 氏名の欄の hint「氏名」を、氏名が表示されない状態の目印にする。
 # 要判断: 画面設計 3.4 の「氏名が表示されない」は、ContinuationInfoSettingsActivity が swContinuationShowUserNameEnabled を参照しておらず、氏名欄は常に表示されるため成立しない可能性がある。
 - launchApp
@@ -10,6 +10,10 @@ appId: com.ssfrontier.smstokintone
     element:
       id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
+# 前提確認（表示のみ、操作しない）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
 - assertVisible:
@@ -23,5 +27,9 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+# 前提確認（表示のみ、操作しない）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    checked: true
 - assertNotVisible: "氏名"
 - takeScreenshot: 2.4-08-user-name-off
