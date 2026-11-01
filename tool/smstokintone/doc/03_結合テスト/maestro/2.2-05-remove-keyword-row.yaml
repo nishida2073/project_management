@@ -2,6 +2,7 @@
 # 前提: JSON 読み込み後の状態（test-send-target-1 の振り分けは test-company の 1 行）。この flow の中で sample-company の行を追加してから削除する
 appId: com.ssfrontier.smstokintone
 ---
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-05-remove-keyword-row-01

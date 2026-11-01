@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、引継ぎ：あり
 # 前提（フローで設定）: 検索条件の表示が表示であることを確認してから、隠すに切り替える
 # 外部条件: SMSの読み取りの権限が許可されている必要があります（SMSの検索を開くため）
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-07-search-filters-hidden-01

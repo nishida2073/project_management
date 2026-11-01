@@ -3,6 +3,7 @@ appId: com.ssfrontier.smstokintone
 ---
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動
 # 前提（フローで設定）: 表示テーマをダークに切り替える
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-02-theme-dark-01

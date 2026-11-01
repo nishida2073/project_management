@@ -11,5 +11,6 @@
   "SAVED_FIELD_USER": "saved-field-user",
   "SAVED_KEYWORD": "saved-keyword",
   "SAVED_SEND_TARGET_NAME": "saved-send-target-name",
-  "SUBDOMAIN": "saved-subdomain"
+  "SUBDOMAIN": "saved-subdomain",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

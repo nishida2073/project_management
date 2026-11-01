@@ -3,6 +3,7 @@
 # 未確認: 確認ダイアログが出ないことは、ダイアログの文言が未確認のため、画面に変化がないことで判定する
 appId: com.ssfrontier.smstokintone
 ---
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-03-delete-copy-send-target-01

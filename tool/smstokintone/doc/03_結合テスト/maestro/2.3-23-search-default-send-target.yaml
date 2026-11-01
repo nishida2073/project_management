@@ -2,6 +2,7 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する。送信先は JSON の 1 件（"${SEND_TARGET_NAME}"）だけ。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-23-search-default-send-target-01

@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提（JSON）: 会社名の抽出：あり、SMSの返信モード：手動
 # 前提（フローで設定）: 表示テーマをダークに、SMSの送信モードを手動に切り替えてから、設定を初期化する
 # 注意: 送信先・ログ・引継ぎ内容が残ることは、このフローでは確認しません（未確認）
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-17-reset-settings-01

@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提: JSON 読み込み後の状態。この flow の中で 2.2-09 と 2.2-13 の入力と保存を行ってから、開き直して確認する
 - runFlow: 2.2-13-save-field-mapping.yaml
 - runFlow: 2.2-09-save-settings.yaml
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-14-reopen-settings-01

@@ -1,11 +1,12 @@
-# 2.2 送信先の設定: 保存していない接続先は破棄される（テスト仕様書の 2.2 の 24 に対応）
+# 2.2 送信先の設定: 保存していない接続先は破棄される（テスト仕様書の 2.2 の 23 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: 仕様書 2.2 の前提条件（test-send-target-1 の接続先が保存済み）
 # 未確認: 未保存の変更を確認するダイアログの有無（出る場合は後続の操作が失敗する）
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-24-unsaved-connection-discarded-01
+- takeScreenshot: 2.2-23-unsaved-connection-discarded-01
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が保存済み
 - assertVisible:
@@ -23,14 +24,14 @@ appId: com.ssfrontier.smstokintone
     text: "${SUBDOMAIN}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
-- takeScreenshot: 2.2-24-unsaved-connection-discarded-02
+- takeScreenshot: 2.2-23-unsaved-connection-discarded-02
 - inputText: "${UNSAVED_SUBDOMAIN}"
-- takeScreenshot: 2.2-24-unsaved-connection-discarded-03
+- takeScreenshot: 2.2-23-unsaved-connection-discarded-03
 - hideKeyboard
 - pressKey: Back
-- takeScreenshot: 2.2-24-unsaved-connection-discarded-04
+- takeScreenshot: 2.2-23-unsaved-connection-discarded-04
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-24-unsaved-connection-discarded-05
+- takeScreenshot: 2.2-23-unsaved-connection-discarded-05
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -40,4 +41,4 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/etSubdomain"
     text: "${SUBDOMAIN}"
 - assertNotVisible: "${UNSAVED_SUBDOMAIN}"
-- takeScreenshot: 2.2-24-unsaved-connection-discarded-06
+- takeScreenshot: 2.2-23-unsaved-connection-discarded-06

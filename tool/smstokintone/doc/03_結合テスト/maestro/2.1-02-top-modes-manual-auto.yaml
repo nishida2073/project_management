@@ -2,6 +2,7 @@
 # 前提: 既定値（送信：自動、返信：手動）。この flow の中で、アプリの設定を手動・自動に切り替えてから確認する
 appId: com.ssfrontier.smstokintone
 ---
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-01

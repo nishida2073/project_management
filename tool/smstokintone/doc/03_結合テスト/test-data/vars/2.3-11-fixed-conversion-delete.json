@@ -2,5 +2,6 @@
   "FIXED_FROM_1": "test-company",
   "FIXED_TO_1": "test-company-converted",
   "FIXED_FROM_2": "sample-company",
-  "FIXED_TO_2": "sample-company-converted"
+  "FIXED_TO_2": "sample-company-converted",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

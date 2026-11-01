@@ -3,6 +3,7 @@
 # 外部条件: kintone 接続と SMS 受信が必要
 appId: com.ssfrontier.smstokintone
 ---
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-01

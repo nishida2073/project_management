@@ -3,6 +3,7 @@ appId: com.ssfrontier.smstokintone
 ---
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、会社名の自動変換：あり、固定変換：なし
 # 前提（フローで設定）: 固定変換の 1 行目（FIXED_FROM_1 → FIXED_TO_1）と 2 行目（FIXED_FROM_2 → FIXED_TO_2）を入力し、1 行目を削除する
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-11-fixed-conversion-delete-01

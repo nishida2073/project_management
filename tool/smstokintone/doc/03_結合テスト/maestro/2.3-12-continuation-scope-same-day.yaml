@@ -3,6 +3,7 @@ appId: com.ssfrontier.smstokintone
 ---
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、引継ぎ：あり、引継ぎの範囲：制限なし
 # 前提（フローで設定）: 引継ぎの範囲を同一日のみに切り替える
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-12-continuation-scope-same-day-01

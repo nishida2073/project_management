@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、会社名の自動変換：あり
 # 前提（フローで設定）: 会社名の抽出をなしにしてから、このフローで有効にする
 # 外部条件: 引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件ある状態（JSON の引継ぎ内容には該当がないため、端末側で用意する）
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-01

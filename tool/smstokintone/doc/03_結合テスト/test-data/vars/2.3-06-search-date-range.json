@@ -1,3 +1,4 @@
 {
-  "SEARCH_DATE_RANGE_DAYS": "3"
+  "SEARCH_DATE_RANGE_DAYS": "3",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

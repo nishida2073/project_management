@@ -2,6 +2,7 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: setup の環境（test-send-target-1 が保存済み）。追加した送信先は 2 件目
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-01-send-target-add-01

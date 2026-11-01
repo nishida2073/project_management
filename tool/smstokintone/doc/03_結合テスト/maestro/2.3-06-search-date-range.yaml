@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動
 # 前提（フローで設定）: 受信日の範囲を ${SEARCH_DATE_RANGE_DAYS} 日に入力する
 # 外部条件: SMSの読み取りの権限が許可されている必要があります（SMSの検索を開くため）
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-06-search-date-range-01

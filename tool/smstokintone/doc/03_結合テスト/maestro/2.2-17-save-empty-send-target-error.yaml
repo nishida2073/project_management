@@ -1,11 +1,12 @@
-# 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 18 に対応）
+# 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 17 に対応）
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: JSON 読み込み後の状態（会社名の抽出は有効）
 # 未確認: 追加した設定の番号（設定 N）は、保存済みの件数に依存する
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.2-18-save-empty-send-target-error-01
+- takeScreenshot: 2.2-17-save-empty-send-target-error-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -15,16 +16,16 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - pressKey: Back
-- takeScreenshot: 2.2-18-save-empty-send-target-error-02
+- takeScreenshot: 2.2-17-save-empty-send-target-error-02
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-18-save-empty-send-target-error-03
+- takeScreenshot: 2.2-17-save-empty-send-target-error-03
 - assertVisible: "設定を追加"
 - tapOn: "設定を追加"
-- takeScreenshot: 2.2-18-save-empty-send-target-error-04
+- takeScreenshot: 2.2-17-save-empty-send-target-error-04
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-18-save-empty-send-target-error-05
+- takeScreenshot: 2.2-17-save-empty-send-target-error-05
 - assertVisible: "入力エラー"
 - assertVisible: ".*設定 [0-9]+.*"  # 未確認
 - assertVisible: ".*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"  # 未確認
 - assertNotVisible: "設定を保存しました"
-- takeScreenshot: 2.2-18-save-empty-send-target-error-06
+- takeScreenshot: 2.2-17-save-empty-send-target-error-06

@@ -2,6 +2,7 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（本文の最大表示文字数：100（JSON の logBodyExcerptLength）、表示テーマ：ライト、SMSの送信モード：自動）。このフローで本文の表示文字数を入力する。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-21-log-body-excerpt-save-01

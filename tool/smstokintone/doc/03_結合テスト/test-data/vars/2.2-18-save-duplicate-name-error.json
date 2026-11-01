@@ -1,0 +1,4 @@
+{
+  "DUPLICATE_SEND_TARGET_NAME": "test-send-target-1",
+  "SETUP_FILE_PATTERN": "env_ok.*"
+}

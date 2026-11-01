@@ -1,4 +1,5 @@
 {
   "EXPECTED_COMPANY_NAME_09": "NTT\\u30c7\\u30fc\\u30bf\\u25cb\\u25cb\\u25cb",
-  "EXPECTED_USER_NAME": "\\u30c6\\u30b9\\u30c8\\u592a\\u90ce"
+  "EXPECTED_USER_NAME": "\\u30c6\\u30b9\\u30c8\\u592a\\u90ce",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

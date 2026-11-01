@@ -1,6 +1,7 @@
 # 2.1 トップ: アプリの設定の画面に移動できることを確認する（テスト仕様書の 2.1 の 6 に対応）
 appId: com.ssfrontier.smstokintone
 ---
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnTopOpenAppSettings"

@@ -1,0 +1,5 @@
+{
+  "EXPECTED_COMPANY_NAME": "test-company",
+  "TEST_BODY": "sample-company, test-taro",
+  "SETUP_FILE_PATTERN": "env_ok.*"
+}

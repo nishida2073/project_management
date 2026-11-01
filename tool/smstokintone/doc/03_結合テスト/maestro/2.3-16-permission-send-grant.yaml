@@ -4,6 +4,7 @@ appId: com.ssfrontier.smstokintone
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、引継ぎ：あり
 # 前提（フローで設定）: SMSの送信の権限を許可する
 # 外部条件: SMSの送信の権限を許可していない状態で開始する必要があります（端末の権限設定で用意します。許可済みの場合は「許可する」ボタンが表示されません）
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-16-permission-send-grant-01

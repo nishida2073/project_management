@@ -2,6 +2,7 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する。検索条件の初期値の送信状況は JSON に指定がなく、アプリの既定値（すべてオフ）。このフローで「未送信」をオンにする。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-24-search-default-send-none-01

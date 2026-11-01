@@ -1,0 +1,5 @@
+{
+  "SUBDOMAIN": "saved-subdomain",
+  "UNSAVED_SUBDOMAIN": "saved-unsaved-subdomain",
+  "SETUP_FILE_PATTERN": "env_ok.*"
+}

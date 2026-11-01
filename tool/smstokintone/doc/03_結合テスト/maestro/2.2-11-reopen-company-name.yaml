@@ -3,6 +3,7 @@
 # 未確認: 会社名の抽出が無効のとき、会社名の入力欄が表示される
 appId: com.ssfrontier.smstokintone
 ---
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.2-11-reopen-company-name-01

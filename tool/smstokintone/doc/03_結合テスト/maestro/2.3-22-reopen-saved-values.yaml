@@ -2,6 +2,7 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライトなど）。返信メッセージ（正常・異常）、自動返信の間隔、統合範囲（秒）、本文の表示文字数は、このフローの中で 2.3 の 18 から 21 と同じ値を入力する（入力すると自動で保存される）。その後で画面を閉じて開き直し、保持を確認する。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-22-reopen-saved-values-01

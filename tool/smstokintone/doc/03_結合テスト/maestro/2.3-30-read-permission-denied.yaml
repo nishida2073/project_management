@@ -3,6 +3,7 @@ appId: com.ssfrontier.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライトなど）。SMSの読み取りの権限は、端末で未付与にしておく（2.3 の 14 から 16 と 30 から 32 と同じ前提）。
 # 外部条件: SMSの読み取りの権限の付与・未付与は端末の設定でしか切り替えられないため、このフローでは作らない（端末で未付与にしておく）
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-30-read-permission-denied-01
