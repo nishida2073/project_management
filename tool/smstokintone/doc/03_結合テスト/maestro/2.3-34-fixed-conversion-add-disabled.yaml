@@ -1,42 +1,53 @@
 # 2.3 アプリの設定: 会社名の抽出がオフのとき固定変換の「+」は押せない（テスト仕様書の 2.3 の 34 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 会社名の抽出が有効（2.3 の 1 の状態）、固定変換の行はない。この flow で会社名の抽出を無効にする。
+# 前提: JSON（env_ok.json）の状態から開始する（会社名の抽出：あり（JSON の extractionCompanyNameEnabled）、固定変換の行：なし（JSON の extractionCompanyNameFixedConversions は空））。このフローで会社名の抽出をオフにする。
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible: # 未確認
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-01
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
-- assertVisible: # 未確認: 前提の確認（会社名の抽出が有効）
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-02
+- assertVisible: # 前提の確認（会社名の抽出が有効）
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- scrollUntilVisible: # 未確認
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
     direction: DOWN
-- assertNotVisible: # 未確認: 前提の確認（固定変換の行がない）
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-03
+- assertNotVisible: # 前提の確認（固定変換の行がない）
     id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
-- scrollUntilVisible: # 未確認
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: UP
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-04
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     index: 0
-- assertVisible: # 未確認: スイッチの選択状態の確認
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-05
+- assertVisible: # スイッチの選択状態の確認
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
-- scrollUntilVisible: # 未確認
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
     direction: DOWN
-- assertVisible: # 未確認: 押せない状態（enabled が false）の確認
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-06
+- assertVisible: # 押せない状態（enabled が false）の確認
     id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
     enabled: false
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
     index: 0
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-07
 - assertNotVisible:
     id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
-- takeScreenshot: 2.3-34-disabled
+- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-08

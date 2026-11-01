@@ -1,12 +1,14 @@
 # 2.5 設定のインポート・エクスポート: 確認ダイアログでインポートをキャンセルする（テスト仕様書の 2.5 の 5 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: テスト仕様書の 2.5 前提条件を満たす（clearState は使わない）。
-# 前提（画面で確認不可）: 会社名の抽出は有効（2.5 前提条件）。
-# 前提（画面で確認不可）: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
+# 前提（画面で確認不可）: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
+- takeScreenshot: 2.5-05-import-cancel-01
 - assertVisible: "設定のインポート・エクスポート"
 - assertVisible: "ファイルを選択"
 - assertVisible: "ファイルが選択されていません"
@@ -15,14 +17,18 @@ appId: com.ssfrontier.smstokintone
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- takeScreenshot: 2.5-05-import-cancel-02
 - tapOn: "${IMPORT_FILE}"
+- takeScreenshot: 2.5-05-import-cancel-03
 - assertVisible: "(?s).*${IMPORT_FILE}.*"   # 未確認: 正規表現と複数行の表示
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+- takeScreenshot: 2.5-05-import-cancel-04
 - assertVisible: "設定をインポートしますか？"
 - tapOn: "キャンセル"
+- takeScreenshot: 2.5-05-import-cancel-05
 - assertNotVisible: "設定をインポートしますか？"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnImportSettings"
     enabled: true
-- takeScreenshot: 2.5-05-after-cancel
+- takeScreenshot: 2.5-05-import-cancel-06

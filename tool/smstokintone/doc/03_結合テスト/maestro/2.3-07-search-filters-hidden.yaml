@@ -1,10 +1,12 @@
 # 2.3 アプリの設定: 検索条件の表示を隠すにし、SMSの検索で確認する（テスト仕様書の 2.3 の 7 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 検索条件の表示：表示（2.3 の 6 の後の状態）。このフローで隠すに切り替えます
+# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、引継ぎ：あり
+# 前提（フローで設定）: 検索条件の表示が表示であることを確認してから、隠すに切り替える
 # 外部条件: SMSの読み取りの権限が許可されている必要があります（SMSの検索を開くため）
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.3-07-search-filters-hidden-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
@@ -17,12 +19,15 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+- takeScreenshot: 2.3-07-search-filters-hidden-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
     checked: true
 - pressKey: Back
+- takeScreenshot: 2.3-07-search-filters-hidden-03
 - tapOn: "SMSの検索"
+- takeScreenshot: 2.3-07-search-filters-hidden-04
 - assertVisible: "▼ 表示"
 - assertNotVisible:
     id: "com.ssfrontier.smstokintone:id/llSearchFilters"
-- takeScreenshot: 2.3-07-after-search-filters-hidden
+- takeScreenshot: 2.3-07-search-filters-hidden-05

@@ -1,23 +1,33 @@
 # 2.3 アプリの設定: 会社名の抽出を有効にすると注意ダイアログが出ることを確認する（テスト仕様書の 2.3 の 9 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 会社名の抽出：なし（2.3 の 8 の後の状態）
-# 前提（画面で確認不可）: 引継ぎ内容に会社名がない件が 1 件ある
+# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、会社名の自動変換：あり
+# 前提（フローで設定）: 会社名の抽出をなしにしてから、このフローで有効にする
+# 外部条件: 引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件ある状態（JSON の引継ぎ内容には該当がないため、端末側で用意する）
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    checked: true
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-02
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-03
 - assertVisible: "注意"
 - assertVisible: "引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件あります。必要に応じて会社名を追加してください。"
 - tapOn: "OK" # 未確認: OK ボタンの文言（端末の言語で変わる場合あり）
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-04
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- takeScreenshot: 2.3-09-after-company-name-extraction-on
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-05

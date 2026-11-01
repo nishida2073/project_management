@@ -1,3 +1,4 @@
 {
-  "IMPORT_FILE": "ng-empty-file.json"
+  "IMPORT_FILE": "ng-empty-file.json",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

@@ -1,3 +1,4 @@
 {
-  "IMPORT_FILE": "ng-unreadable.json"
+  "IMPORT_FILE": "ng-unreadable.json",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

@@ -1,18 +1,22 @@
-# 2.4 引継ぎ内容の設定: 会社名の抽出なしで氏名が空だと保存時に入力エラーになる（テスト仕様書の 2.4 の 11 に対応）
+# 2.4 引継ぎ内容の設定: 会社名の抽出なしで氏名が空だと保存時に入力エラーになる（テスト仕様書の 2.4 の 10 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 表示順序は古い順（既定）。送信元は 2.4-03/04 の後の状態に依存し、2 件とは限らない（テスト仕様書の 2.4 前提条件）。
-# 前提（画面で確認不可）: 会社名の抽出は有効（この flow で無効にしてから、後で有効に戻す）。
-# この flow は会社名の抽出を無効にし、最後に有効へ戻す（後続の flow の前提を保つため）。
+# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）と test-send-target-2、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
+# この flow は、会社名の抽出を「なし」にしてから、送信元 A の氏名を空にして保存する。最後に会社名の抽出を「あり」に戻す。
 # 未確認: 一覧の index 0 が SENDER_A。氏名欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.4-10-save-error-name-empty-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- takeScreenshot: 2.4-10-save-error-name-empty-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
@@ -22,6 +26,7 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- takeScreenshot: 2.4-10-save-error-name-empty-03
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
@@ -31,24 +36,30 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
     index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.4-10-save-error-name-empty-04
 - eraseText: 50  # 未確認
 - hideKeyboard
 - tapOn: "設定を保存"
+- takeScreenshot: 2.4-10-save-error-name-empty-05
 - assertVisible: "入力エラー"
 # 未確認: ダイアログのメッセージ（氏名は必須です）。regex は未確認。
 - assertVisible: "(?s).*引継ぎ内容: ${SENDER_A}.*氏名は必須です.*"
 - pressKey: Back
+- takeScreenshot: 2.4-10-save-error-name-empty-06
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
-- takeScreenshot: 2.4-11-after-name-empty-error
 - pressKey: Back
+- takeScreenshot: 2.4-10-save-error-name-empty-07
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
+    visibilityPercentage: 100
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+- takeScreenshot: 2.4-10-save-error-name-empty-08
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- takeScreenshot: 2.4-11-after-restore-company-extraction
+- takeScreenshot: 2.4-10-save-error-name-empty-09

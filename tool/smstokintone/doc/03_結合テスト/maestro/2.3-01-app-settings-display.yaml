@@ -1,7 +1,8 @@
 # 2.3 アプリの設定: 表示内容の確認（テスト仕様書の 2.3 の 1 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3 の 1 の入力値の状態（表示テーマ：ライト、送信モード：自動、返信モード：手動、他は仕様書 2.3 の 1 のとおり）
+# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、自動送信の対象（抽出状況が異常）：なし、会社名の抽出：あり、会社名の自動変換：あり、AIによる抽出：なし、引継ぎ：あり、引継ぎの範囲：制限なし、引継ぎ内容の氏名表示：あり、自動返信の間隔：10 秒、統合範囲（秒）：15
+# 前提（フローで設定）: なし（表示の確認だけを行う）。JSON にない項目（検索条件の表示など）は、アプリの既定値とする
 - launchApp
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
@@ -10,6 +11,7 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
     text: "手動"
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.3-01-app-settings-display-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
@@ -120,4 +122,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
     text: "${LOG_BODY_EXCERPT_LENGTH}"
-- takeScreenshot: 2.3-01-after-display
+- takeScreenshot: 2.3-01-app-settings-display-02

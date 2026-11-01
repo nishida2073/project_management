@@ -1,4 +1,5 @@
 {
   "SENDER_A": "test-sender-a",
-  "SENDER_B": "test-sender-b"
+  "SENDER_B": "test-sender-b",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

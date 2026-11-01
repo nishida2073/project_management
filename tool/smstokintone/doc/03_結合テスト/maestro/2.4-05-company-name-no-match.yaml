@@ -1,0 +1,43 @@
+# 2.4 引継ぎ内容の設定: 一致しない会社名では送信先が表示されない（テスト仕様書の 2.4 の 5 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）と test-send-target-2、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
+# 前提（この flow）: 送信元 B（test-sender-b、一覧の index 1）の会社名を、振り分けに一致しない値にする。送信先は表示されない。
+# 未確認: 会社名欄の既存値は eraseText で消す（カーソル位置に依存する）。
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- takeScreenshot: 2.4-05-company-name-no-match-01
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- takeScreenshot: 2.4-05-company-name-no-match-02
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+# 前提確認（表示のみ、操作しない）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+      index: 1
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    index: 1
+    point: "95%, 50%"
+- takeScreenshot: 2.4-05-company-name-no-match-03
+- eraseText: 50  # 未確認
+- inputText: "${COMPANY_NAME_NO_MATCH}"
+- takeScreenshot: 2.4-05-company-name-no-match-04
+- hideKeyboard
+# 未確認: SENDER_A に送信先が無いことを前提にしている。
+- assertVisible: "なし"  # 未確認
+- assertNotVisible: "${SEND_TARGET_NAME}"
+- takeScreenshot: 2.4-05-company-name-no-match-05

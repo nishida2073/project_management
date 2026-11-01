@@ -1,3 +1,4 @@
 {
-  "IMPORT_FILE": "ng-sender-duplicate.json"
+  "IMPORT_FILE": "ng-sender-duplicate.json",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

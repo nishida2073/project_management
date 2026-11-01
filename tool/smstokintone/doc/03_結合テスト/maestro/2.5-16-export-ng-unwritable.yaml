@@ -1,12 +1,14 @@
 # 2.5 設定のインポート・エクスポート: 書き込みできない保存先にエクスポートする（テスト仕様書の 2.5 の 16 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: テスト仕様書の 2.5 前提条件を満たす（clearState は使わない）。
-# 前提（画面で確認不可）: 会社名の抽出は有効（2.5 前提条件）。
-# 前提（画面で確認不可）: ${UNWRITABLE_FOLDER} は書き込みできない保存先の名前（再現方法は未確認）。
+# 外部条件: 書き込みできない保存先（${UNWRITABLE_FOLDER}）の作り方は未確認。端末に用意できない場合、この flow は実行できない。
+# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
+- takeScreenshot: 2.5-16-export-ng-unwritable-01
 - assertVisible: "設定のインポート・エクスポート"
 - scrollUntilVisible:
     element:
@@ -15,9 +17,13 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnExportSettings"
 # 未確認: 保存ダイアログ（Documents UI）の操作、および書き込みできない保存先の作り方は公式ドキュメントで確認できなかった
+- takeScreenshot: 2.5-16-export-ng-unwritable-02
 - tapOn: "${UNWRITABLE_FOLDER}"   # 未確認: 保存先を選ぶ操作
+- takeScreenshot: 2.5-16-export-ng-unwritable-03
 - tapOn: "保存"   # 未確認: 保存ボタンの文字
+- takeScreenshot: 2.5-16-export-ng-unwritable-04
 - assertVisible: "エクスポートエラー"
 - assertVisible: "ファイルを書き出せませんでした"   # 未確認: メッセージ文言の表示
 - tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
-- takeScreenshot: 2.5-16-after-export-error
+- takeScreenshot: 2.5-16-export-ng-unwritable-05
+- takeScreenshot: 2.5-16-export-ng-unwritable-06

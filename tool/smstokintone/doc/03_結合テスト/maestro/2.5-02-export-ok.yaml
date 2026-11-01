@@ -1,11 +1,13 @@
 # 2.5 設定のインポート・エクスポート: 保存先を選んで設定をエクスポートする（テスト仕様書の 2.5 の 2 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: テスト仕様書の 2.5 前提条件を満たす（clearState は使わない）。
-# 前提（画面で確認不可）: 会社名の抽出は有効（2.5 前提条件）。
+# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
+- takeScreenshot: 2.5-02-export-ok-01
 - assertVisible: "設定のインポート・エクスポート"
 - scrollUntilVisible:
     element:
@@ -14,7 +16,9 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnExportSettings"
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- takeScreenshot: 2.5-02-export-ok-02
 - assertVisible: "(?s).*s2k_settings_\\d{8}_\\d{6}\\.json.*"   # 未確認: 提案されるファイル名の表示
 - tapOn: "保存"   # 未確認: 保存ボタンの文字
+- takeScreenshot: 2.5-02-export-ok-03
 - assertVisible: "設定をエクスポートしました"   # 未確認: トーストの表示
-- takeScreenshot: 2.5-02-after-export
+- takeScreenshot: 2.5-02-export-ok-04

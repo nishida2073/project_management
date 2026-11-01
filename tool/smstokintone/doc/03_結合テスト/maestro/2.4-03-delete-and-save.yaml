@@ -1,16 +1,21 @@
 # 2.4 引継ぎ内容の設定: 送信元を削除して設定を保存する（テスト仕様書の 2.4 の 3 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）、表示順序は古い順（既定）（テスト仕様書の 2.4 前提条件）。
+# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）と test-send-target-2、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
+# この flow は送信元 A（test-sender-a）を削除して保存する。次の flow には引き継がない（次の flow は setup で投入し直す）。
 # 未確認: 古い順のとき、一覧の先頭（index 0）が SENDER_A。削除ボタンに確認ダイアログは出ない想定。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.4-03-delete-and-save-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- takeScreenshot: 2.4-03-delete-and-save-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
@@ -28,10 +33,12 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteContinuationInfo"
     index: 0
+- takeScreenshot: 2.4-03-delete-and-save-03
 - assertNotVisible: "${SENDER_A}"
 - assertVisible: "${SENDER_B}"
 - tapOn: "設定を保存"
+- takeScreenshot: 2.4-03-delete-and-save-04
 - assertVisible: "設定を保存しました"
 - assertNotVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
-- takeScreenshot: 2.4-03-after-delete-and-save
+- takeScreenshot: 2.4-03-delete-and-save-05

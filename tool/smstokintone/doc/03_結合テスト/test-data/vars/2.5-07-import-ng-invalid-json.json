@@ -1,3 +1,4 @@
 {
-  "IMPORT_FILE": "ng-invalid-json.json"
+  "IMPORT_FILE": "ng-invalid-json.json",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

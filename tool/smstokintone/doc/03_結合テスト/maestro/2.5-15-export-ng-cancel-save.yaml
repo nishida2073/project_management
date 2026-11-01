@@ -1,11 +1,13 @@
 # 2.5 設定のインポート・エクスポート: エクスポートで保存先を選ばずに閉じる（テスト仕様書の 2.5 の 15 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: テスト仕様書の 2.5 前提条件を満たす（clearState は使わない）。
-# 前提（画面で確認不可）: 会社名の抽出は有効（2.5 前提条件）。
+# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
+- takeScreenshot: 2.5-15-export-ng-cancel-save-01
 - assertVisible: "設定のインポート・エクスポート"
 - scrollUntilVisible:
     element:
@@ -14,10 +16,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnExportSettings"
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- takeScreenshot: 2.5-15-export-ng-cancel-save-02
 - back   # 未確認: 保存ダイアログを戻る操作で閉じられるか
 - assertNotVisible: "設定をエクスポートしました"   # 未確認: トーストが出ないことの確認
 - assertNotVisible: "エクスポートエラー"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnExportSettings"
-- takeScreenshot: 2.5-15-after-cancel-save
-# 未確認: 何も書き出されていないことは、この操作では確認していない（端末上のファイルは見ない）
+- takeScreenshot: 2.5-15-export-ng-cancel-save-03

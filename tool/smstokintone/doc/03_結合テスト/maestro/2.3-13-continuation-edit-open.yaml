@@ -1,9 +1,11 @@
 # 2.3 アプリの設定: 引継ぎ内容の設定を開く（テスト仕様書の 2.3 の 13 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 引継ぎ：あり（2.3 の 12 の後の状態）。引継ぎの範囲は、このフローで制限なしに戻します
+# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、引継ぎ：あり、引継ぎの範囲：制限なし
+# 前提（フローで設定）: 引継ぎの範囲を制限なしにする（既定値の確認）
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.3-13-continuation-edit-open-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
@@ -16,6 +18,7 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/rbContinuationScopeUnlimited"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbContinuationScopeUnlimited"
+- takeScreenshot: 2.3-13-continuation-edit-open-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbContinuationScopeUnlimited"
     checked: true
@@ -24,5 +27,6 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- takeScreenshot: 2.3-13-continuation-edit-open-03
 - assertVisible: "設定を保存"
-- takeScreenshot: 2.3-13-after-continuation-edit-open
+- takeScreenshot: 2.3-13-continuation-edit-open-04

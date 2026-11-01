@@ -1,13 +1,15 @@
 # 2.5 設定のインポート・エクスポート: 読み取れないファイルを選ぶ（テスト仕様書の 2.5 の 17 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: テスト仕様書の 2.5 前提条件を満たす（clearState は使わない）。
-# 前提（画面で確認不可）: 会社名の抽出は有効（2.5 前提条件）。
-# 前提（画面で確認不可）: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
-# 前提（画面で確認不可）: 読み取れないファイルの作り方は未確認（再現方法は未確認）。
+# 外部条件: 読み取れないファイル（${IMPORT_FILE}）の作り方は未確認。端末に用意できない場合、この flow は実行できない。
+# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
+# 前提（画面で確認不可）: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
+- takeScreenshot: 2.5-17-import-ng-unreadable-01
 - assertVisible: "設定のインポート・エクスポート"
 - assertVisible: "ファイルを選択"
 - assertVisible: "ファイルが選択されていません"
@@ -16,12 +18,15 @@ appId: com.ssfrontier.smstokintone
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- takeScreenshot: 2.5-17-import-ng-unreadable-02
 - tapOn: "${IMPORT_FILE}"
+- takeScreenshot: 2.5-17-import-ng-unreadable-03
 - assertVisible: "インポートエラー"
 - assertVisible: "ファイルを読み込めませんでした"
 - tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
+- takeScreenshot: 2.5-17-import-ng-unreadable-04
 - assertVisible: "ファイルが選択されていません"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnImportSettings"
     enabled: false
-- takeScreenshot: 2.5-17-after-error
+- takeScreenshot: 2.5-17-import-ng-unreadable-05

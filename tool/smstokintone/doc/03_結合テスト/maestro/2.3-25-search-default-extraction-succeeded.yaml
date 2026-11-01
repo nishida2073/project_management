@@ -1,22 +1,28 @@
 # 2.3 アプリの設定: SMSの検索の抽出状況の初期値「正常」を切り替える（テスト仕様書の 2.3 の 25 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 検索条件の初期値の抽出状況は、すべてオフ（正常・異常）。
+# 前提: JSON（env_ok.json）の状態から開始する。検索条件の初期値の抽出状況は JSON に指定がなく、アプリの既定値（すべてオフ）。このフローで「正常」をオンにする。
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible: # 未確認
+- takeScreenshot: 2.3-25-search-default-extraction-succeeded-01
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     direction: DOWN
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-25-search-default-extraction-succeeded-02
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     index: 0
+- takeScreenshot: 2.3-25-search-default-extraction-succeeded-03
 - assertVisible: # 未確認: チェックボックスの選択状態の確認
     id: "com.ssfrontier.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     checked: true
 - pressKey: Back
+- takeScreenshot: 2.3-25-search-default-extraction-succeeded-04
 - tapOn: "SMSの検索"
+- takeScreenshot: 2.3-25-search-default-extraction-succeeded-05
 - assertVisible: # 未確認: 検索画面の抽出状況「正常」の選択状態
     id: "com.ssfrontier.smstokintone:id/cbSmsSearchExtractionSucceededOnly"
     checked: true
-- takeScreenshot: 2.3-25-search-extraction-succeeded
+- takeScreenshot: 2.3-25-search-default-extraction-succeeded-06

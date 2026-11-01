@@ -1,9 +1,11 @@
 # 2.3 アプリの設定: 固定変換の「+」で行を追加し、変換前と変換後を入力して保存されることを確認する（テスト仕様書の 2.3 の 10 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 会社名の抽出：あり（2.3 の 9 の後の状態）。固定変換：なし（このフローで 1 行目を入力します）
+# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、会社名の自動変換：あり、固定変換：なし
+# 前提（フローで設定）: 固定変換の「+」で 1 行追加し、変換前と変換後を入力する
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.3-10-fixed-conversion-add-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
@@ -17,26 +19,33 @@ appId: com.ssfrontier.smstokintone
 - assertNotVisible: "${FIXED_FROM_1}"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+- takeScreenshot: 2.3-10-fixed-conversion-add-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnDeleteFixedConversion"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
     index: 0
+- takeScreenshot: 2.3-10-fixed-conversion-add-03
 - inputText: "${FIXED_FROM_1}"
+- takeScreenshot: 2.3-10-fixed-conversion-add-04
 - hideKeyboard
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etFixConversionAfter"
     index: 0
+- takeScreenshot: 2.3-10-fixed-conversion-add-05
 - inputText: "${FIXED_TO_1}"
+- takeScreenshot: 2.3-10-fixed-conversion-add-06
 - hideKeyboard
 - assertVisible: "${FIXED_FROM_1}"
 - assertVisible: "${FIXED_TO_1}"
 - pressKey: Back
+- takeScreenshot: 2.3-10-fixed-conversion-add-07
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.3-10-fixed-conversion-add-08
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
 - assertVisible: "${FIXED_FROM_1}"
 - assertVisible: "${FIXED_TO_1}"
-- takeScreenshot: 2.3-10-after-fixed-conversion-add
+- takeScreenshot: 2.3-10-fixed-conversion-add-09

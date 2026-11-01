@@ -1,0 +1,44 @@
+# 2.4 引継ぎ内容の設定: 氏名表示をオンにすると、引継ぎ内容の設定でも氏名が表示される（テスト仕様書の 2.4 の 8 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）と test-send-target-2、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
+# 前提（この flow）: 氏名表示を一度「なし」にしてから「あり」に切り替える（「なし」の状態は、この flow の中で作る）。
+# 未確認: 氏名の欄の hint「氏名」を、氏名が表示される状態の目印にする。
+# 実装: 引継ぎ内容の設定の画面は、swContinuationShowUserNameEnabled を参照せず、氏名欄を常に表示する。
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- takeScreenshot: 2.4-08-show-user-name-on-01
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+- takeScreenshot: 2.4-08-show-user-name-on-02
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    checked: false
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+- takeScreenshot: 2.4-08-show-user-name-on-03
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- takeScreenshot: 2.4-08-show-user-name-on-04
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+# 前提確認（表示のみ、操作しない）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    checked: true
+- assertVisible: "氏名"
+- takeScreenshot: 2.4-08-show-user-name-on-05

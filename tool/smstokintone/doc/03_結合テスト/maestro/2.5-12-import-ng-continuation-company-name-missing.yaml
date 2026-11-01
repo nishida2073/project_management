@@ -1,12 +1,14 @@
 # 2.5 設定のインポート・エクスポート: 会社名の抽出が有効で、引継ぎ内容の1件目に会社名がないファイルを選ぶ（テスト仕様書の 2.5 の 12 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: テスト仕様書の 2.5 前提条件を満たす（clearState は使わない）。
-# 前提（画面で確認不可）: 会社名の抽出は有効にしておく（2.5 前提条件、2.5 の 12 の入力値）。
-# 前提（画面で確認不可）: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
+# 前提（画面で確認不可）: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
+- takeScreenshot: 2.5-12-import-ng-continuation-company-name-missing-01
 - assertVisible: "設定のインポート・エクスポート"
 - assertVisible: "ファイルを選択"
 - assertVisible: "ファイルが選択されていません"
@@ -15,11 +17,14 @@ appId: com.ssfrontier.smstokintone
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
+- takeScreenshot: 2.5-12-import-ng-continuation-company-name-missing-02
 - tapOn: "${IMPORT_FILE}"
+- takeScreenshot: 2.5-12-import-ng-continuation-company-name-missing-03
 - assertVisible: "インポートエラー"
 - assertVisible: "(?s).*引継ぎ内容の1件目に会社名がありません.*"   # 未確認: メッセージ文言
 - tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
+- takeScreenshot: 2.5-12-import-ng-continuation-company-name-missing-04
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/btnImportSettings"
     enabled: false
-- takeScreenshot: 2.5-12-after-error
+- takeScreenshot: 2.5-12-import-ng-continuation-company-name-missing-05

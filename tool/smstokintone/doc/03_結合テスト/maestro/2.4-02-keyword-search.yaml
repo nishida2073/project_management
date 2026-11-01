@@ -1,16 +1,20 @@
 # 2.4 引継ぎ内容の設定: キーワードで一覧を絞り込む（テスト仕様書の 2.4 の 2 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 引継ぎ内容が 2 件（SENDER_A は古い、SENDER_B は新しい）、表示順序は古い順（既定）（テスト仕様書の 2.4 前提条件）。
-# 前提（画面で確認不可）: SEARCH_KEYWORD は SENDER_B の会社名・氏名・送信元のいずれかに一致し、SENDER_A には一致しない（入力前は確認できない）。
+# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）と test-send-target-2、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
+# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
+# 前提（JSON の値で判断）: SEARCH_KEYWORD（test-company）は送信元 B の会社名（test-company-new）に一致し、送信元 A の会社名（old-company）には一致しない。
+- runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.4-02-keyword-search-01
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+- takeScreenshot: 2.4-02-keyword-search-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
@@ -26,9 +30,11 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+- takeScreenshot: 2.4-02-keyword-search-03
 - inputText: "${SEARCH_KEYWORD}"
+- takeScreenshot: 2.4-02-keyword-search-04
 - hideKeyboard
 - assertVisible: "${SENDER_B}"
 # 未確認: SENDER_A が一覧から消えることは、データの内容に依存する。
 - assertNotVisible: "${SENDER_A}"
-- takeScreenshot: 2.4-02-after-search
+- takeScreenshot: 2.4-02-keyword-search-05

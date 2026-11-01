@@ -1,31 +1,44 @@
 # 2.3 アプリの設定: 初期化の確認ダイアログで「キャンセル」を押す（テスト仕様書の 2.3 の 29 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 表示テーマがダーク（2.3 の 29 の入力値）。手動で設定してから実行する。
+# 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライト（JSON の themeMode）、その他は JSON のまま）。このフローで表示テーマをダークに切り替え、初期化の確認ダイアログで「キャンセル」を押したあとも、ダークのまま残ることを確認する。
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible: # 未確認
+- takeScreenshot: 2.3-29-reset-cancel-01
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbThemeDark"
     direction: DOWN
-- assertVisible: # 未確認: 前提の確認（表示テーマがダーク）
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-29-reset-cancel-02
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    index: 0
+- takeScreenshot: 2.3-29-reset-cancel-03
+- assertVisible: # 表示テーマがダークになっていること
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"
     checked: true
-- scrollUntilVisible: # 未確認
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnResetSettings"
     direction: UP
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-29-reset-cancel-04
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+- takeScreenshot: 2.3-29-reset-cancel-05
 - assertVisible: "設定を初期化しますか？"
-- assertVisible: "この操作は取り消せません" # 未確認: 確認ダイアログの本文（仕様書の期待値に従う）
+- assertVisible: "この操作は取り消せません" # 確認ダイアログの本文（仕様書の期待値に従う、未確認）
 - tapOn: "キャンセル"
+- takeScreenshot: 2.3-29-reset-cancel-06
 - assertNotVisible: "設定を初期化しますか？"
-- scrollUntilVisible: # 未確認
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbThemeDark"
     direction: DOWN
-- assertVisible: # 未確認: ラジオボタンの選択状態の確認
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-29-reset-cancel-07
+- assertVisible: # ラジオボタンの選択状態の確認（ダークのまま）
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"
     checked: true
-- takeScreenshot: 2.3-29-reset-cancelled
+- takeScreenshot: 2.3-29-reset-cancel-08

@@ -1,9 +1,11 @@
-# 2.3 アプリの設定: 自動送信の対象（抽出状況が異常）を有効にする（テスト仕様書の 2.3 の 5 に対応）
+# 2.3 アプリの設定: 自動送信の対象（抽出状況が異常）を有効にし、保存されることを確認する（テスト仕様書の 2.3 の 5 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 自動送信の対象（抽出状況が異常）：なし（2.3 の 4 の後の状態）。送信モードは、このフローで自動にします
+# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、自動送信の対象（抽出状況が異常）：なし
+# 前提（フローで設定）: 自動送信の対象（抽出状況が異常）を有効にする
 - launchApp
 - tapOn: "アプリの設定"
+- takeScreenshot: 2.3-05-send-extraction-failed-enabled-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
@@ -11,27 +13,21 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
-    checked: true
-- scrollUntilVisible:
-    element:
-      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
-- scrollUntilVisible:
-    element: "自動送信の対象"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+- takeScreenshot: 2.3-05-send-extraction-failed-enabled-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
     checked: true
-- takeScreenshot: 2.3-05-after-send-extraction-failed-enabled
+- pressKey: Back
+- takeScreenshot: 2.3-05-send-extraction-failed-enabled-03
+- tapOn: "アプリの設定"
+- takeScreenshot: 2.3-05-send-extraction-failed-enabled-04
+- assertVisible: "端末の許可"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+    checked: true
+- takeScreenshot: 2.3-05-send-extraction-failed-enabled-05

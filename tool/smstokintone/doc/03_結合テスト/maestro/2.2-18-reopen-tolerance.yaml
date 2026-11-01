@@ -1,7 +1,8 @@
 # 2.2 送信先の設定: 統合条件と統合範囲を開き直して確認する（テスト仕様書の 2.2 の 18 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.2-17 の後の状態（統合条件: 時間、統合範囲: 6 が保存済み）
+# 前提: JSON 読み込み後の状態。この flow の中で 2.2-17 の保存を行ってから、開き直して確認する
+- runFlow: 2.2-17-save-tolerance-hours.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-18-reopen-tolerance-01

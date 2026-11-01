@@ -1,3 +1,4 @@
 {
-  "IMPORT_FILE": "ok-send-target-only.json"
+  "IMPORT_FILE": "ok-send-target-only.json",
+  "SETUP_FILE_PATTERN": "env_ok.*"
 }

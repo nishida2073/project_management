@@ -1,18 +1,25 @@
 # 2.3 アプリの設定: 自動返信の間隔を入力する（テスト仕様書の 2.3 の 19 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: トップ画面から開始する。自動返信の間隔は既定値（10秒）。表示テーマ：ライト、SMSの返信モード：手動。
+# 前提: JSON（env_ok.json）の状態から開始する（自動返信の間隔：10（JSON の replyCooldownSeconds）、表示テーマ：ライト、SMSの返信モード：手動）。このフローで間隔を入力する。
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible: # 未確認
+- takeScreenshot: 2.3-19-reply-cooldown-save-01
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-19-reply-cooldown-save-02
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
     index: 0
-- eraseText: 20 # 未確認: 既存の値（10）をカーソル位置に関係なく消せるか（4 章の注意）
+    point: "95%, 50%"
+- takeScreenshot: 2.3-19-reply-cooldown-save-03
+- eraseText: 50
+- takeScreenshot: 2.3-19-reply-cooldown-save-04
 - inputText: "${REPLY_COOLDOWN_SECONDS}"
+- takeScreenshot: 2.3-19-reply-cooldown-save-05
 - hideKeyboard
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-19-after-input
+- takeScreenshot: 2.3-19-reply-cooldown-save-06

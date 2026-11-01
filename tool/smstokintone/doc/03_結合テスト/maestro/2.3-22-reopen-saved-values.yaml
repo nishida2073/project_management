@@ -1,32 +1,126 @@
 # 2.3 アプリの設定: 入力した設定値を開き直しても保持している（テスト仕様書の 2.3 の 22 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: 2.3-18 から 2.3-21 を先に実行し、値が保存されている（同じ端末・同じアプリの状態を引き継ぐ）。
+# 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライトなど）。返信メッセージ（正常・異常）、自動返信の間隔、統合範囲（秒）、本文の表示文字数は、このフローの中で 2.3 の 18 から 21 と同じ値を入力する（入力すると自動で保存される）。その後で画面を閉じて開き直し、保持を確認する。
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible: # 未確認
+- takeScreenshot: 2.3-22-reopen-saved-values-01
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
     direction: DOWN
-- assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
-- scrollUntilVisible: # 未確認
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-22-reopen-saved-values-02
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.3-22-reopen-saved-values-03
+- eraseText: 50
+- takeScreenshot: 2.3-22-reopen-saved-values-04
+- inputText: "${REPLY_SUCCESS_BODY}"
+- takeScreenshot: 2.3-22-reopen-saved-values-05
+- hideKeyboard
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
     direction: DOWN
-- assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
-- scrollUntilVisible: # 未確認
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-22-reopen-saved-values-06
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.3-22-reopen-saved-values-07
+- eraseText: 50
+- takeScreenshot: 2.3-22-reopen-saved-values-08
+- inputText: "${REPLY_FAILED_BODY}"
+- takeScreenshot: 2.3-22-reopen-saved-values-09
+- hideKeyboard
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
-- assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- scrollUntilVisible: # 未確認
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-22-reopen-saved-values-10
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.3-22-reopen-saved-values-11
+- eraseText: 50
+- takeScreenshot: 2.3-22-reopen-saved-values-12
+- inputText: "${REPLY_COOLDOWN_SECONDS}"
+- takeScreenshot: 2.3-22-reopen-saved-values-13
+- hideKeyboard
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
-- assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- scrollUntilVisible: # 未確認
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-22-reopen-saved-values-14
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.3-22-reopen-saved-values-15
+- eraseText: 50
+- takeScreenshot: 2.3-22-reopen-saved-values-16
+- inputText: "${LOG_MATCH_TOLERANCE_SECONDS}"
+- takeScreenshot: 2.3-22-reopen-saved-values-17
+- hideKeyboard
+- scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
+    visibilityPercentage: 100
+- takeScreenshot: 2.3-22-reopen-saved-values-18
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    index: 0
+    point: "95%, 50%"
+- takeScreenshot: 2.3-22-reopen-saved-values-19
+- eraseText: 50
+- takeScreenshot: 2.3-22-reopen-saved-values-20
+- inputText: "${LOG_BODY_EXCERPT_LENGTH}"
+- takeScreenshot: 2.3-22-reopen-saved-values-21
+- hideKeyboard
+- pressKey: Back
+- takeScreenshot: 2.3-22-reopen-saved-values-22
+- tapOn: "アプリの設定"
+- takeScreenshot: 2.3-22-reopen-saved-values-23
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+    direction: DOWN
+    visibilityPercentage: 100
+- assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- takeScreenshot: 2.3-22-reopen-saved-values-24
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+    direction: DOWN
+    visibilityPercentage: 100
+- assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- takeScreenshot: 2.3-22-reopen-saved-values-25
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+    direction: DOWN
+    visibilityPercentage: 100
+- assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- takeScreenshot: 2.3-22-reopen-saved-values-26
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
+    visibilityPercentage: 100
+- assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- takeScreenshot: 2.3-22-reopen-saved-values-27
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
+    visibilityPercentage: 100
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-22-reopened
+- takeScreenshot: 2.3-22-reopen-saved-values-28
