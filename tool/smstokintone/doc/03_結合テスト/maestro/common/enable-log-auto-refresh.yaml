@@ -1,0 +1,17 @@
+appId: com.ssfrontier.smstokintone
+---
+# 共通: ログの自動更新を有効にして、トップに戻る（2.8 の別端末からの SMS の結果を、ログの画面で待つため）
+# 前提: launchApp の後（トップの画面）。ログの自動更新の既定値は off（未確認）
+# 2.6 の 5 と同じ操作（ログの画面を表示したまま、自動で表示される）
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    checked: true
+- pressKey: Back

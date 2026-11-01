@@ -26,6 +26,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.3-13-continuation-edit-open-03

@@ -1,0 +1,32 @@
+# 2.7 SMSの検索: 引継ぎの SMS の送信元に、氏名を表示しない設定では電話番号だけが表示される（テスト仕様書の 2.7 の 22 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。このフローで引継ぎ内容の氏名表示をオフにする
+# 外部条件: 引継ぎ内容の送信元（test-sender-a）から届いた SMS が、端末にある
+# 未確認: 仕様書は送信元を test-phone-a と書くが、引継ぎ内容（JSON）の送信元は test-sender-a。この flow は JSON の送信元（CONTINUATION_SENDER）を使う
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    index: 0
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    checked: false
+- pressKey: Back
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '(?s).*${CONTINUATION_SENDER}.*'
+- assertNotVisible: "${CONTINUATION_USER_NAME}"
+- takeScreenshot: 2.7-22-continuation-no-name-01

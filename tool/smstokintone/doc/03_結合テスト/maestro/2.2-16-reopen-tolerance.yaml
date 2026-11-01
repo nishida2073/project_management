@@ -1,12 +1,20 @@
-# 2.2 送信先の設定: 統合条件と統合範囲を開き直して確認する（テスト仕様書の 2.2 の 16 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: JSON 読み込み後の状態。この flow の中で 2.2-15 の保存を行ってから、開き直して確認する
-- runFlow: 2.2-15-save-tolerance-hours.yaml
+# 2.2 送信先の設定: 統合条件と統合範囲を開き直して確認する（テスト仕様書の 2.2 の 16 に対応）
+# 前提: JSON 読み込み後の状態。この flow の中で、統合条件を時間、統合範囲を 6 にして保存してから、開き直して確認する
+# 注: 別の flow を runFlow で呼ぶと、その中の setup（clearState）で保存値が消えるため、入力は common の手順を直接呼ぶ
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-16-reopen-tolerance-01
+- assertVisible: "設定を追加"
+- runFlow: common/fill-tolerance-hours-saved-values.yaml
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertVisible: "SMSの送信モード"
+- takeScreenshot: 2.2-16-reopen-tolerance-02
+- tapOn: "送信先の設定"
+- takeScreenshot: 2.2-16-reopen-tolerance-03
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
@@ -22,4 +30,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
     text: "${TOLERANCE_HOURS_SAVED}"
-- takeScreenshot: 2.2-16-reopen-tolerance-02
+- takeScreenshot: 2.2-16-reopen-tolerance-04

@@ -23,6 +23,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.3-03-send-mode-manual-02

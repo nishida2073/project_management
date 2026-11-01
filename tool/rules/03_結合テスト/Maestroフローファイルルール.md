@@ -30,7 +30,14 @@
 - 同じ文字の部品が複数あるときは、`id` と `index` を書きます（例: `id: "com.ssfrontier.smstokintone:id/etSendTargetName"`、`index: 0`）。`id` は `com.ssfrontier.smstokintone:id/<ビューの id>` の形で書きます。
 - 画面の下にある部品は、操作の前に `scrollUntilVisible`（`element`、`direction: DOWN`）で表示します。
 - 入力は `inputText` で行います。入力の後は、`hideKeyboard` でキーボードを閉じてから次の操作をします。キーボードが部品を隠すと、次の操作が失敗します。
-- 入力先に既存の値がある場合、`eraseText` はカーソルより前の文字しか消しません。タップした位置にカーソルが置かれるため、後ろの文字が残ります。既存の値を消すときは、この動作を確かめてから書きます。
+- 入力先に既存の値がある場合、`eraseText` はカーソルより前の文字しか消しません。タップした位置にカーソルが置かれるため、後ろの文字が残ります。既存の値は、次の方法で全部消してから入力します。
+  - 欄を表示する: `scrollUntilVisible` に `visibilityPercentage: 100` を付けて、欄の全体が画面に入るまでスクロールする。
+  - 欄の右寄りをタップする: `tapOn` に `id`、`index: 0`、`point: "95%, 50%"` を付ける。`point` は欄の中の割合です（公式ドキュメントの例）。カーソルが末尾に置かれます。
+  - 消す: `eraseText: 50` で、末尾までの全部を消す。
+  - 入力する: `inputText` のあとに `hideKeyboard` を書く。
+  - パスワードの欄は、右端に表示切り替えのアイコンがあるため、`point` を `70%, 50%` にする（95% だとアイコンを押してしまう）。
+  - 欄の中央をタップする方法（`point` なし）は、欄が画面の中ほどにあるときは使えます。ただし、欄が画面の端にあるときは、隣の欄に当たることがあります。
+- 次の方法は使えません（この Maestro で確認済み）。`pressKey` に `KEYCODE_MOVE_END` や `Select All` を書く（構文エラー）、`keyDown` と `keyUp` を書く（構文エラー）、`Remote Dpad Right` を連続で押して末尾へ移す（末尾を過ぎると欄のフォーカスが外れ、消す操作が効かない）。
 - `pressKey` は、Maestro が受け付けるキー名だけを書きます（例: `Enter`、`Backspace`、`Back`）。受け付けないキー名（例: `Select All`、`End`）は、パースの段階で失敗します。
 - `relativePoint` は使えません（この Maestro 2.12.0 では未知のプロパティになります）。
 - ラジオボタンとチェックボックスは、項目の文字（`tapOn: "文字"`）で選びます。同じ文字が複数あるときは、`id` と `index` で指定します（未確認）。

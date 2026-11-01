@@ -2,7 +2,7 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動
-# 前提（フローで設定）: 2.3 の 3 の後の状態に合わせ、SMSの送信モードを手動にする。SMSの返信モードを自動に切り替える
+# 前提（フローで設定）: SMSの返信モードを自動に切り替える（SMSの送信モードは JSON の自動のまま）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -16,25 +16,16 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSendManual"
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSendManual"
-- takeScreenshot: 2.3-04-reply-mode-auto-02
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSendManual"
-    checked: true
-- scrollUntilVisible:
-    element:
       id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
-- takeScreenshot: 2.3-04-reply-mode-auto-03
+- takeScreenshot: 2.3-04-reply-mode-auto-02
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
     checked: true
 - pressKey: Back
-- takeScreenshot: 2.3-04-reply-mode-auto-04
+- takeScreenshot: 2.3-04-reply-mode-auto-03
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
     text: "自動"
-- takeScreenshot: 2.3-04-reply-mode-auto-05
+- takeScreenshot: 2.3-04-reply-mode-auto-04

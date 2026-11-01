@@ -35,6 +35,5 @@ appId: com.ssfrontier.smstokintone
     id: "android:id/button1"   # 未確認: 確認ダイアログの「インポート」ボタンの id
 - takeScreenshot: 2.5-03-import-ok-05
 - assertVisible: "設定をインポートしました"   # 未確認: トーストの表示
-- assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+- assertNotVisible: "ファイルを選択"
 - takeScreenshot: 2.5-03-import-ok-06

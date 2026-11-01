@@ -1,9 +1,10 @@
 # 2.3 アプリの設定: 会社名の抽出を有効にすると注意ダイアログが出ることを確認する（テスト仕様書の 2.3 の 9 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、会社名の自動変換：あり
-# 前提（フローで設定）: 会社名の抽出をなしにしてから、このフローで有効にする
-# 外部条件: 引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件ある状態（JSON の引継ぎ内容には該当がないため、端末側で用意する）
+# 前提（JSON、ok-continuation-no-company.json）: 会社名の抽出：なし（インポートの検証を通すため無効にしておく）、会社名の自動変換：あり、SMSの送信モード：自動、SMSの返信モード：手動、表示テーマ：ライト
+# 前提（JSON、ok-continuation-no-company.json）: 引継ぎ内容に会社名がない件が 1 件ある（companyName が空の引継ぎ内容 1 件）
+# 前提（フロー）: setup の SETUP_FILE_PATTERN で、この JSON だけを投入する（clearState のため、送信先は作られない）
+# 外部条件: ${COMPANY_MISSING_COUNT} 件（ok-continuation-no-company.json の件数と一致させる）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -14,21 +15,15 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
-- tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-- takeScreenshot: 2.3-09-company-name-extraction-on-warning-02
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-- takeScreenshot: 2.3-09-company-name-extraction-on-warning-03
 - assertVisible: "注意"
 - assertVisible: "引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件あります。必要に応じて会社名を追加してください。"
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-02
 - tapOn: "OK" # 未確認: OK ボタンの文言（端末の言語で変わる場合あり）
-- takeScreenshot: 2.3-09-company-name-extraction-on-warning-04
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-03
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- takeScreenshot: 2.3-09-company-name-extraction-on-warning-05
+- takeScreenshot: 2.3-09-company-name-extraction-on-warning-04

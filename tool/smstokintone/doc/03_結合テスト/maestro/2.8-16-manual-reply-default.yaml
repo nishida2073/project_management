@@ -1,0 +1,18 @@
+# 2.8 自動処理: SMSの返信モードが既定（手動）のとき、抽出が異常なSMSには返信しない（テスト仕様書の 2.8 の 16 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提（JSON）: 既定値（SMSの返信モード：手動。2.8 の 1 と同じ）。デフォルトの送信先はない
+# 前提（フローで設定）: なし
+# 外部条件（事前に別端末から SMS を送る）: 送信元は既定（test-phone-a）、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- runFlow: common/enable-log-auto-refresh.yaml
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+- takeScreenshot: 2.8-16-manual-reply-default-01
+- extendedWaitUntil:
+    visible: "(?s).*SMSを受信しました.*"
+    timeout: 180000
+- assertVisible: "(?s).*SMSの送信先が存在しません.*"
+- assertNotVisible: "(?s).*抽出状況が異常なため、SMSを返信しました.*"
+- takeScreenshot: 2.8-16-manual-reply-default-02

@@ -1,0 +1,23 @@
+# 2.6 ログ: 受信完了のログを長押しすると抽出結果が表示される（テスト仕様書の 2.6 の 3 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する
+# 外部条件: 別の端末から SMS を 1 通受信する（会社名 test-company を含む本文）。下の「外部条件」の assert の待ち時間（60 秒）の間に受信させる
+# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
+# 未確認: 受信完了のログが複数あるとき、先頭（新しい順）のログが対象の SMS になるか
+# 未確認: 抽出結果の 1 行目の表記（会社名：、氏名：）
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- takeScreenshot: 2.6-03-receive-extraction-result-01
+- assertVisible:
+    text: '(?s).*\[受信完了\].*'
+    timeout: 60000
+- longPressOn:
+    text: '(?s).*\[受信完了\].*'
+    index: 0
+- assertVisible: '.*抽出結果.*'
+- assertVisible: '(?s).*${EXPECTED_RESULT_COMPANY_LINE}.*'
+- assertVisible: '(?s).*${EXPECTED_RESULT_USER_LINE}.*'
+- takeScreenshot: 2.6-03-receive-extraction-result-02

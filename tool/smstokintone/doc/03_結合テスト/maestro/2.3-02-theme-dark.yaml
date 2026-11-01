@@ -29,6 +29,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"
 - takeScreenshot: 2.3-02-theme-dark-02

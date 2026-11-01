@@ -1,0 +1,18 @@
+{
+  "appConfig": {
+    "themeMode": "LIGHT",
+    "sendEnabled": true,
+    "replyEnabled": false,
+    "extractionCompanyNameEnabled": false,
+    "extractionCompanyNameAutoConversionEnabled": true,
+    "continuationEnabled": true
+  },
+  "continuationInfoConfig": [
+    {
+      "senderAddress": "no-company-sender",
+      "companyName": "",
+      "userName": "no-company-taro",
+      "timestampMillis": 1767225600000
+    }
+  ]
+}

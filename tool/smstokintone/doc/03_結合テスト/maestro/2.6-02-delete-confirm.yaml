@@ -1,0 +1,19 @@
+# 2.6 ログ: 削除の確認で「削除」を押すと、ログがなくなる（テスト仕様書の 2.6 の 2 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。ログは in-flow で作る（SMSの検索から手動で送信する）
+# 外部条件: 端末に未送信の SMS が 1 件以上ある
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- runFlow: common/create-log-by-manual-send.yaml
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteLog"
+- assertVisible: "ログを削除しますか？"
+- assertVisible: "この操作は取り消せません"
+- takeScreenshot: 2.6-02-delete-confirm-01
+- tapOn:
+    id: "android:id/button1"
+- assertVisible: "ログがありません"
+- takeScreenshot: 2.6-02-delete-confirm-02

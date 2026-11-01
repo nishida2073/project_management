@@ -1,0 +1,52 @@
+# 2.6 ログ: 本文の表示文字数を 50 にした後に記録されたログは、50 文字以内で表示される（テスト仕様書の 2.6 の 6 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。このフローで本文の最大表示文字数を 50 にし、最後に JSON の値（100）へ戻す
+# 外部条件: 60 文字以上の本文の SMS（1 行目「test-company」、2 行目「test-taro」、3 行目以降を含む）を、別の端末から 1 通受信する（下の assert の待ち時間の間に受信させる）
+# 注: 本文抜粋は記録時の文字数で切り取られるため、既存のログは 100 文字のまま（この flow では既存のログを作らない）
+# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
+# 未確認: 50 文字の数え方は画面の文字では確認できないため、スクリーンショットで確認する
+# 未確認: 仕様書の「本文の表示文字数」は、アプリの表示名「本文の最大表示文字数」（etLogBodyExcerptLength）を指す
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
+    visibilityPercentage: 100
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLogBodyExcerptLength
+      INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    text: "${LOG_BODY_EXCERPT_LENGTH}"
+- takeScreenshot: 2.6-06-body-excerpt-50-01
+- pressKey: Back
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- assertVisible:
+    text: '(?s).*\[受信完了\].*'
+    timeout: 60000
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnRefreshLog"
+- takeScreenshot: 2.6-06-body-excerpt-50-02
+- assertVisible: '(?s).*test-company.*'
+- pressKey: Back
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
+    visibilityPercentage: 100
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLogBodyExcerptLength
+      INPUT_VALUE: "${LOG_BODY_EXCERPT_DEFAULT}"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    text: "${LOG_BODY_EXCERPT_DEFAULT}"
+- takeScreenshot: 2.6-06-body-excerpt-50-03

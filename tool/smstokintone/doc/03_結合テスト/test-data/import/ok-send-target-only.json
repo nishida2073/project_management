@@ -1,0 +1,22 @@
+{
+  "sendTargetConfig": [
+    {
+      "sendTargetName": "import-target-only",
+      "companyName": "",
+      "keywords": ["import-keyword-only"],
+      "subdomain": "dummy-subdomain",
+      "loginName": "dummy-login",
+      "loginPassword": "dummy-password",
+      "appId": "0",
+      "fieldType": "registration_type",
+      "fieldDatetime": "receive_datetime",
+      "fieldSender": "sender",
+      "fieldCompanyName": "company_name",
+      "fieldUserName": "user_name",
+      "fieldBody": "body",
+      "fieldHistory": "history",
+      "updateToleranceMode": "SAME_DATE",
+      "updateToleranceHours": 5
+    }
+  ]
+}

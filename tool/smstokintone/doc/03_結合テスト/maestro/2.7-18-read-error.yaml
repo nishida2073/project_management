@@ -1,0 +1,20 @@
+# 2.7 SMSの検索: SMSの読み取りでエラーが起きると、エラーのトーストが出て、一覧は空になる（テスト仕様書の 2.7 の 18 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。SMS の読み取りは許可しておく
+# 未確認: 読み取りの失敗を再現する方法が未確認のため、この flow は実行できない状態（端末の SMS の読み取りを失敗させる手順が必要）
+# 未確認: エラーのトーストの文言は「SMSの検索でエラーが発生しました」の後に内容が続く（strings.xml の toast_sms_search_error）
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '(?s).*SMSの検索でエラーが発生しました.*'
+- assertVisible: '.*0件見つかりました.*'
+- assertVisible: "該当するSMSがありません"
+- takeScreenshot: 2.7-18-read-error-01

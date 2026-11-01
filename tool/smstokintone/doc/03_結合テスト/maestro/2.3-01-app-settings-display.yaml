@@ -41,6 +41,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+    direction: UP
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
@@ -56,6 +57,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    direction: UP
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     checked: false

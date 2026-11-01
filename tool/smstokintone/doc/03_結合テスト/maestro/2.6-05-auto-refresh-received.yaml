@@ -1,0 +1,28 @@
+# 2.6 ログ: ログの画面を表示したまま、受信した SMS が自動で表示される（テスト仕様書の 2.6 の 5 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。自動更新は、この flow の中で有効のまま確認する（既定：有効、更新間隔：5 秒）
+# 外部条件: ログの画面を表示したまま、別の端末から SMS を 1 通受信する（下の「外部条件」の assert の待ち時間（60 秒）の間に受信させる）
+# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    checked: true
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogRefreshInterval"
+    text: "5"
+- pressKey: Back
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- takeScreenshot: 2.6-05-auto-refresh-received-01
+- assertVisible:
+    text: '(?s).*\[受信完了\].*'
+    timeout: 60000
+- takeScreenshot: 2.6-05-auto-refresh-received-02

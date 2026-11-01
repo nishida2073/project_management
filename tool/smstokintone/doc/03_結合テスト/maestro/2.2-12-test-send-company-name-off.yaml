@@ -1,9 +1,10 @@
-# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 12 に対応）
 appId: com.ssfrontier.smstokintone
 ---
+# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 12 に対応）
 # 前提: JSON 読み込み後の状態（test-send-target-1 の振り分けは test-company）。この flow の中で会社名の抽出を無効にしてからテスト送信する
 # 外部条件: kintone 接続と SMS 受信が必要
 # 未確認: テスト本文に日本語（sample-company、test-taro）を入れられないため、英数字の TEST_BODY で代用している（IME の制約）
+# 未確認: テスト本文のダイアログの入力欄にフォーカスがある前提で、既存の値を eraseText で消す（フォーカスが無い場合は入力が失敗する）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -26,12 +27,10 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-12-test-send-company-name-off-04
 - assertVisible: "設定を追加"
-# 前提確認: test-send-target-1（振り分け：test-company）が保存済み
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
-# 会社名の抽出が無効のとき、振り分けの欄は表示されない（確認しない）
 - scrollUntilVisible:
     element:
       text: "^テスト送信$"
@@ -41,14 +40,14 @@ appId: com.ssfrontier.smstokintone
     index: 0
 - takeScreenshot: 2.2-12-test-send-company-name-off-05
 - assertVisible: "テスト本文"
-# 未確認: テスト本文ダイアログの入力欄にフォーカスがあるか（ない場合は入力が失敗する）
-- eraseText: 50  # 未確認: テスト本文の初期値（テンプレート）を消してから入力する
+- eraseText: 50
 - inputText: "${TEST_BODY}"
 - takeScreenshot: 2.2-12-test-send-company-name-off-06
 - hideKeyboard
 - tapOn: "送信"
-# 未確認: 結果の表示を待つ確認がないため、assertNotVisible が結果表示の前に通る可能性がある
 - takeScreenshot: 2.2-12-test-send-company-name-off-07
+- extendedWaitUntil:
+    visible: ".*テスト結果.*"
+    timeout: 30000
 - assertNotVisible: ".*送信先エラー.*"
-# 未確認: テスト登録（kintone 側）は kintone で確認する
 - takeScreenshot: 2.2-12-test-send-company-name-off-08

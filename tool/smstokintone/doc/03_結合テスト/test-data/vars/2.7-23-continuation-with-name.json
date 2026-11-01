@@ -1,0 +1,5 @@
+{
+  "SETUP_FILE_PATTERN": "env_ok.*",
+  "CONTINUATION_SENDER": "test-sender-a",
+  "CONTINUATION_USER_NAME": "test-taro-old"
+}

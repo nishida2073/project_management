@@ -1,0 +1,56 @@
+{
+  "appConfig": {
+    "themeMode": "LIGHT",
+    "sendEnabled": true,
+    "replyEnabled": false,
+    "extractionCompanyNameEnabled": true,
+    "extractionCompanyNameAutoConversionEnabled": true,
+    "continuationEnabled": true
+  },
+  "sendTargetConfig": [
+    {
+      "sendTargetName": "import-target-a",
+      "companyName": "",
+      "keywords": ["import-keyword-a"],
+      "subdomain": "dummy-subdomain",
+      "loginName": "dummy-login",
+      "loginPassword": "dummy-password",
+      "appId": "0",
+      "fieldType": "registration_type",
+      "fieldDatetime": "receive_datetime",
+      "fieldSender": "sender",
+      "fieldCompanyName": "company_name",
+      "fieldUserName": "user_name",
+      "fieldBody": "body",
+      "fieldHistory": "history",
+      "updateToleranceMode": "SAME_DATE",
+      "updateToleranceHours": 5
+    },
+    {
+      "sendTargetName": "import-target-b",
+      "companyName": "",
+      "keywords": ["import-keyword-b"],
+      "subdomain": "dummy-subdomain",
+      "loginName": "dummy-login",
+      "loginPassword": "dummy-password",
+      "appId": "0",
+      "fieldType": "registration_type",
+      "fieldDatetime": "receive_datetime",
+      "fieldSender": "sender",
+      "fieldCompanyName": "company_name",
+      "fieldUserName": "user_name",
+      "fieldBody": "body",
+      "fieldHistory": "history",
+      "updateToleranceMode": "SAME_DATE",
+      "updateToleranceHours": 5
+    }
+  ],
+  "continuationInfoConfig": [
+    {
+      "senderAddress": "import-sender-a",
+      "companyName": "import-company",
+      "userName": "import-taro",
+      "timestampMillis": 1767225600000
+    }
+  ]
+}

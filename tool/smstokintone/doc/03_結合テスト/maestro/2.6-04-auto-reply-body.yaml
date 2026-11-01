@@ -1,0 +1,31 @@
+# 2.6 ログ: 返信完了のログを長押しすると返信内容が表示される（テスト仕様書の 2.6 の 4 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。返信モードは、この flow の中で自動に切り替える（2.3 の 4 と同じ手順）
+# 外部条件: 抽出が異常な SMS を 1 通受信し、自動返信されるまで待つ（下の「外部条件」の assert の待ち時間（60 秒）の間に受信させる）
+# 未確認: 返信完了のログが、受信の順序（2.8 の 14）と同じ条件で作られるか
+# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    checked: true
+- pressKey: Back
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- assertVisible:
+    text: '(?s).*\[返信完了\].*'
+    timeout: 60000
+- takeScreenshot: 2.6-04-auto-reply-body-01
+- longPressOn:
+    text: '(?s).*\[返信完了\].*'
+    index: 0
+- assertVisible: "返信内容"
+- assertVisible: '(?s).*${REPLY_BODY_FRAGMENT}.*'
+- takeScreenshot: 2.6-04-auto-reply-body-02

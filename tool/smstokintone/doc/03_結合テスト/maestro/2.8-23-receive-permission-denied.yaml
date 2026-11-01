@@ -1,0 +1,26 @@
+# 2.8 自動処理: SMSの受信の許可がないと、SMSの受信が配信されず、ログが残らない（テスト仕様書の 2.8 の 23 に対応）
+appId: com.ssfrontier.smstokintone
+---
+# 前提（JSON）: 既定値（2.8 の 1 と同じ）
+# 前提（フローで設定）: なし
+# 外部条件（手動）: 端末の設定で SMS の受信の許可を取り消してから、このフローを実行する。終わったら許可を戻す
+# 外部条件（事前に別端末から SMS を送る）: 送信元は既定（test-phone-a）、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil の代わりに、目視で確認する）に送る
+# 未確認: RECEIVE_SMS がないときに受信が配信されない想定。配信されない場合の確認は、ログの画面に何も出ないことを目視で判定する（待ち時間のない確認）
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/tvPermissionStatus"
+    direction: DOWN
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/tvPermissionStatus"
+    text: "許可済み"
+- takeScreenshot: 2.8-23-receive-permission-denied-01
+- pressKey: Back
+- runFlow: common/enable-log-auto-refresh.yaml
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+- takeScreenshot: 2.8-23-receive-permission-denied-02
+- assertVisible: "ログがありません"
+- takeScreenshot: 2.8-23-receive-permission-denied-03

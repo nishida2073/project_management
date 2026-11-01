@@ -1,0 +1,22 @@
+# 2.7 SMSの検索: SMSの項目を長押しすると、標準の SMS アプリで返信が開く（テスト仕様書の 2.7 の 14 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）
+# 注: 長押しする項目は、変数 SMS_ITEM_TEXT（端末の SMS の本文の一部。端末ごとに書き換える）で指定する
+# 未確認: 標準の SMS アプリの画面の表示文字（返信の文面の確認）。この flow は、表示の確認を部分一致（返信）で行う
+# 未確認: 標準の SMS アプリ側の画面は、アプリのパッケージによって表示が異なる
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '.*件見つかりました.*'
+- longPressOn: "${SMS_ITEM_TEXT}"
+- takeScreenshot: 2.7-14-long-press-reply-01
+- assertVisible: '(?s).*返信.*'
+- takeScreenshot: 2.7-14-long-press-reply-02

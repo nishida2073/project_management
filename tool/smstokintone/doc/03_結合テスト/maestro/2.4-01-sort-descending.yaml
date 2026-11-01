@@ -1,7 +1,7 @@
 # 2.4 引継ぎ内容の設定: 表示順序を新しい順に切り替える（テスト仕様書の 2.4 の 1 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）と test-send-target-2、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
+# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
 # 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
 # 前提（この flow）: 表示順序は投入後の既定（古い順）。この flow で「新しい順」に切り替える。
 # 未確認: 一覧の並び順は relative selector（below）で確認する。

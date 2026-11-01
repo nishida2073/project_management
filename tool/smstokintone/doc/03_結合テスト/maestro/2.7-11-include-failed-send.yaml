@@ -1,0 +1,34 @@
+# 2.7 SMSの検索: SMS選択の対象（抽出状況が異常）をオンにすると、抽出が異常の SMS も送信キューに追加される（テスト仕様書の 2.7 の 11 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。端末に抽出が異常の SMS がある（外部条件。SMS の読み取りを許可しておく）
+# 前提の操作: アプリの設定で「SMS選択の対象（抽出状況が異常）」をオンにする（既定はオフ）。その後、「検索」と「全選択」を順に実行する
+# 未確認: 送信キューに抽出が異常の SMS が含まれることは、トーストの件数とスクリーンショットで確認する
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    checked: true
+- pressKey: Back
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '.*件見つかりました.*'
+- tapOn: "全選択"
+- tapOn: "選択したSMSを送信"
+- assertVisible: '.*件を送信キューに追加しました.*'
+- assertVisible: '(?s).*SMSの送信が完了しました.*'
+- takeScreenshot: 2.7-11-include-failed-send-01

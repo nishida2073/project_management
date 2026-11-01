@@ -1,0 +1,26 @@
+# 2.7 SMSの検索: 選んだ SMS を送信すると、送信キューに追加されて送信が完了する（テスト仕様書の 2.7 の 9 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）。kintone の接続が有効（テスト環境）
+# 前提の操作: 「検索」と「全選択」を順に実行してから「選択したSMSを送信」を押す
+# 未確認: 送信完了のトーストの件数（成功N件 / 失敗M件）は、端末の SMS と通信の結果による
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '.*件見つかりました.*'
+- tapOn: "全選択"
+- tapOn: "選択したSMSを送信"
+- assertVisible: '.*件を送信キューに追加しました.*'
+- assertVisible: '(?s).*SMSの送信が完了しました.*'
+- takeScreenshot: 2.7-09-send-selected-01
+- assertNotVisible:
+    className: "android.widget.CheckBox"
+    checked: true
+- takeScreenshot: 2.7-09-send-selected-02

@@ -33,7 +33,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
-    direction: DOWN
+    direction: UP
     visibilityPercentage: 100
 - takeScreenshot: 2.3-22-reopen-saved-values-06
 - runFlow:
@@ -87,7 +87,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
-    direction: DOWN
+    direction: UP
     visibilityPercentage: 100
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-22-reopen-saved-values-16

@@ -1,0 +1,34 @@
+# 2.7 SMSの検索: SMS選択の対象（抽出状況が異常）をオンにすると、抽出が異常の SMS にもチェックが入る（テスト仕様書の 2.7 の 10 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。端末に抽出が異常の SMS がある（外部条件。SMS の読み取りを許可しておく）
+# 前提の操作: アプリの設定で「SMS選択の対象（抽出状況が異常）」をオンにする（既定はオフ）。その後、「検索」と「全選択」を順に押す
+# 未確認: 抽出が異常の SMS にチェックが入ったことは、className と checked の一覧で確認する（どの項目かは、スクリーンショットで確認する）
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    checked: true
+- pressKey: Back
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '.*件見つかりました.*'
+- tapOn: "全選択"
+- assertVisible:
+    className: "android.widget.CheckBox"
+    checked: true
+- takeScreenshot: 2.7-10-include-failed-select-all-01

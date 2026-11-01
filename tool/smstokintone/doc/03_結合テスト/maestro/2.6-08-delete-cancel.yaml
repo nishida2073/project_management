@@ -1,0 +1,19 @@
+# 2.6 ログ: 削除の確認で「キャンセル」を押すと、ダイアログが閉じてログが残る（テスト仕様書の 2.6 の 8 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。ログは in-flow で作る（SMSの検索から手動で送信する）
+# 外部条件: 端末に未送信の SMS が 1 件以上ある
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- runFlow: common/create-log-by-manual-send.yaml
+- tapOn: "ログの確認"
+- assertNotVisible: "ログがありません"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnDeleteLog"
+- assertVisible: "ログを削除しますか？"
+- takeScreenshot: 2.6-08-delete-cancel-01
+- tapOn:
+    id: "android:id/button2"
+- assertNotVisible: "ログを削除しますか？"
+- assertNotVisible: "ログがありません"
+- takeScreenshot: 2.6-08-delete-cancel-02

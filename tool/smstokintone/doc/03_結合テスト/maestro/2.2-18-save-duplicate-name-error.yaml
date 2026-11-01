@@ -1,7 +1,8 @@
-# 2.2 送信先の設定: 送信先名が重複するとき保存でエラーになる（テスト仕様書の 2.2 の 18 に対応）
-# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み）。このフローの中で 2 件目を追加し、同じ送信先名を入力する
 appId: com.ssfrontier.smstokintone
 ---
+# 2.2 送信先の設定: 送信先名が重複するとき保存でエラーになる（テスト仕様書の 2.2 の 18 に対応）
+# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み）。このフローの中で 2 件目を追加し、同じ送信先名と、重複の判定までに必須となる項目（アプリID・ログイン名・パスワード）を入力する
+# 未確認: 2 件目の入力欄は index 0 で指す（2.2 の 1 と同じ前提）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
@@ -25,7 +26,41 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
     index: 0
     text: "${DUPLICATE_SEND_TARGET_NAME}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etAppId"
+      index: 0
+    direction: DOWN
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etAppId
+      INPUT_VALUE: "${DUP_APP_ID}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLoginName"
+      index: 0
+    direction: DOWN
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLoginName
+      INPUT_VALUE: "${DUP_LOGIN_NAME}"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+      index: 0
+    direction: DOWN
+    visibilityPercentage: 100
+- runFlow:
+    file: common/input-password-field.yaml
+    env:
+      FIELD_ID: etLoginPassword
+      INPUT_VALUE: "${DUP_LOGIN_PASSWORD}"
+- takeScreenshot: 2.2-18-save-duplicate-name-error-01
 - tapOn: "設定を保存"
+- takeScreenshot: 2.2-18-save-duplicate-name-error-02
 - assertVisible: "入力エラー"
 - assertVisible: ".*送信先名が重複しています.*"  # 未確認
 - assertVisible: ".*${DUPLICATE_SEND_TARGET_NAME}.*"  # 未確認
+- takeScreenshot: 2.2-18-save-duplicate-name-error-03

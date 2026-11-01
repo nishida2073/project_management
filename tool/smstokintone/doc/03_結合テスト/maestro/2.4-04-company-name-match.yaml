@@ -1,7 +1,7 @@
 # 2.4 引継ぎ内容の設定: 会社名を入力すると送信先が表示される（テスト仕様書の 2.4 の 4 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）と test-send-target-2、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
+# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
 # 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
 # 前提（この flow）: 送信元 B（test-sender-b、一覧の index 1）の会社名を入力する。振り分けが一致すると送信先が表示される。
 # 前提（JSON の値）: 送信先 test-send-target-1 は振り分け test-company を持つ。

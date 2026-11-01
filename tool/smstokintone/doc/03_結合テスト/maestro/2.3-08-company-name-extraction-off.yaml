@@ -23,6 +23,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
 - takeScreenshot: 2.3-08-company-name-extraction-off-02

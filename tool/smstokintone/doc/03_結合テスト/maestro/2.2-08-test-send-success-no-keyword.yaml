@@ -39,6 +39,8 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "送信"
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-04
 - assertVisible: ".*テスト結果.*"
+- assertVisible: '(?s).*${EXPECTED_RESULT_COMPANY_LINE}.*'
+- assertVisible: '(?s).*${EXPECTED_RESULT_USER_LINE}.*'
 - assertVisible: ".*SMSの(登録|更新)に成功しました.*"
 # 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-05

@@ -1,0 +1,24 @@
+# 2.7 SMSの検索: SMSの検索を開くと、受信日の範囲に今日が入る（テスト仕様書の 2.7 の 1 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（外部条件。SMS の読み取りを許可しておく）
+# 注: 検索条件の既定は、受信日の範囲：今日、未送信のみ選択。この行の入力値（未送信：なし）に合わせて「未」を外す
+# 未確認: 日付の文字（yyyy/MM/dd）が今日の日付と一致することは、スクリーンショットで確認する
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- assertVisible: "受信日の範囲"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etDateFrom"
+    text: '\d{4}/\d{2}/\d{2}'
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etDateTo"
+    text: '\d{4}/\d{2}/\d{2}'
+- takeScreenshot: 2.7-01-open-search-default-01
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- takeScreenshot: 2.7-01-open-search-default-02

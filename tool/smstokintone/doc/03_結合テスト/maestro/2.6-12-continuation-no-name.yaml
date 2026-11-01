@@ -1,0 +1,32 @@
+# 2.6 ログ: 引継ぎの SMS の送信元に、氏名を表示しない設定では電話番号だけが表示される（テスト仕様書の 2.6 の 12 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。このフローで引継ぎ内容の氏名表示をオフにする
+# 外部条件: 引継ぎ内容の送信元（test-sender-a）から SMS を 1 通受信する（下の assert の待ち時間（60 秒）の間に受信させる）
+# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
+# 未確認: 仕様書の「2.8 の 3（引継ぎの SMS の受信完了）」は、引継ぎ内容の送信元 test-sender-a の SMS と同じとみなす（仕様書の 2.7 の 22 は test-phone-a と書かれている。要確認）
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    index: 0
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    checked: false
+- pressKey: Back
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- assertVisible:
+    text: '(?s).*${CONTINUATION_SENDER}.*'
+    timeout: 60000
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnRefreshLog"
+- assertVisible: '(?s).*${CONTINUATION_SENDER}.*'
+- assertNotVisible: "${CONTINUATION_USER_NAME}"
+- takeScreenshot: 2.6-12-continuation-no-name-01

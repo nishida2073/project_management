@@ -1,0 +1,29 @@
+# 2.7 SMSの検索: 同じ SMS を 2 回送信すると、2 回目は更新をスキップし、成功として扱われる（テスト仕様書の 2.7 の 12 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）。kintone の接続が有効（テスト環境）
+# 前提の操作: 1 回目は「検索」「全選択」「選択したSMSを送信」を順に実行する。2 回目は、「検索」「全選択」を順に実行し、「選択したSMSを送信」を押す
+# 注: 検索条件は未送信のみにすると 2 回目の対象がなくなるため、「未」を外して全件を対象にする
+# 未確認: 2 回目のトーストの成功件数（N件）は、端末の SMS の件数による。失敗は 0 件として扱う
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '.*件見つかりました.*'
+- tapOn: "全選択"
+- tapOn: "選択したSMSを送信"
+- assertVisible: '(?s).*SMSの送信が完了しました.*'
+- takeScreenshot: 2.7-12-send-twice-skip-duplicate-01
+- tapOn: "検索"
+- assertVisible: '.*件見つかりました.*'
+- tapOn: "全選択"
+- tapOn: "選択したSMSを送信"
+- assertVisible: '(?s).*SMSの送信が完了しました.*'
+- assertVisible: '(?s).*（成功[0-9]+件 / 失敗0件）.*'
+- takeScreenshot: 2.7-12-send-twice-skip-duplicate-02

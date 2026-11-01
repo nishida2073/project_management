@@ -1,0 +1,22 @@
+# 2.7 SMSの検索: 全選択で、選べる SMS のすべてにチェックが入る（テスト仕様書の 2.7 の 7 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）
+# 未確認: チェックボックスに id がないため、className と checked で確認する（この Maestro で className が使えるか）
+# 未確認: 選べない SMS（抽出が異常で、SMS選択の対象がオフのもの）にチェックが入らないことは、端末の SMS の内容による
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "検索"
+- assertVisible: '.*件見つかりました.*'
+- tapOn: "全選択"
+- assertVisible:
+    className: "android.widget.CheckBox"
+    checked: true
+- takeScreenshot: 2.7-07-select-all-01

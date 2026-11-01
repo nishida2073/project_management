@@ -1,13 +1,26 @@
-# 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 14 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 前提: JSON 読み込み後の状態。この flow の中で 2.2-09 と 2.2-13 の入力と保存を行ってから、開き直して確認する
-- runFlow: 2.2-13-save-field-mapping.yaml
-- runFlow: 2.2-09-save-settings.yaml
+# 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 14 に対応）
+# 前提: JSON 読み込み後の状態。この flow の中で保存する値を入力して「設定を保存」を押してから、開き直して確認する
+# 注: 別の flow を runFlow で呼ぶと、その中の setup（clearState）で保存値が消えるため、入力は common の手順を直接呼ぶ
+# 未確認: 伏せ字のパスワードは、テキストで一致を取れない可能性がある
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-14-reopen-settings-01
+- assertVisible: "設定を追加"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    index: 0
+    text: "test-send-target-1"
+- runFlow: common/fill-field-mapping-saved-values.yaml
+- runFlow: common/fill-send-target-saved-values.yaml
+- tapOn: "設定を保存"
+- assertVisible: "設定を保存しました"
+- assertVisible: "SMSの送信モード"
+- takeScreenshot: 2.2-14-reopen-settings-02
+- tapOn: "送信先の設定"
+- takeScreenshot: 2.2-14-reopen-settings-03
 - assertVisible: "設定を追加"
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etSendTargetName"
@@ -91,7 +104,6 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etFieldHistory"
     text: "${SAVED_FIELD_HISTORY}"
-# 未確認: 伏せ字のパスワードは、テキストで一致を取れない可能性がある
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/etLoginPassword"
@@ -106,4 +118,4 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
     checked: true
-- takeScreenshot: 2.2-14-reopen-settings-02
+- takeScreenshot: 2.2-14-reopen-settings-04

@@ -1,0 +1,26 @@
+# 2.6 ログ: 自動更新をオフにすると、受信した SMS は「更新」を押すまで表示されない（テスト仕様書の 2.6 の 10 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。このフローで自動更新をオフにする
+# 外部条件: ログの画面を表示したまま、別の端末から SMS を 1 通受信する
+# 未確認: 「表示されない」の確認は、自動更新の間隔（5 秒）より長く待つ必要があるが、この flow では待ち時間を入れていない（スクリーンショットで確認する）
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    direction: DOWN
+    visibilityPercentage: 100
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    checked: false
+- pressKey: Back
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- takeScreenshot: 2.6-10-no-auto-refresh-01
+- assertNotVisible:
+    text: '(?s).*\[受信完了\].*'
+- takeScreenshot: 2.6-10-no-auto-refresh-02

@@ -1,4 +1,4 @@
 {
   "COMPANY_MISSING_COUNT": "1",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "ok-continuation-no-company.*"
 }

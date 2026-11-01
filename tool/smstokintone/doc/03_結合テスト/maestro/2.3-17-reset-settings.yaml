@@ -24,6 +24,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"
 - takeScreenshot: 2.3-17-reset-settings-02
@@ -42,6 +43,7 @@ appId: com.ssfrontier.smstokintone
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+    direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnResetSettings"
 - takeScreenshot: 2.3-17-reset-settings-04

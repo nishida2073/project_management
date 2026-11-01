@@ -7,5 +7,7 @@ appId: com.ssfrontier.smstokintone
     id: "com.ssfrontier.smstokintone:id/btnTopOpenSmsSearch"
 - takeScreenshot: 2.1-03-open-sms-search-01
 - assertVisible: "SMSの検索"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/btnSearchSms"
 - pressKey: Back
 - takeScreenshot: 2.1-03-open-sms-search-02

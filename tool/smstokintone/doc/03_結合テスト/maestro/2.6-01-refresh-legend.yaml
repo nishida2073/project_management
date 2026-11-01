@@ -1,0 +1,17 @@
+# 2.6 ログ: 更新を押すと一覧と凡例が表示される（テスト仕様書の 2.6 の 1 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。送信ログは in-flow で作る（SMSの検索から手動で送信する）
+# 外部条件: 端末に未送信の SMS が 1 件以上ある
+# 未確認: 一覧が新しい順に並ぶことは、この flow では確認しない（受信のログが 2 件以上のときに確認する）
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- runFlow: common/create-log-by-manual-send.yaml
+- tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
+- takeScreenshot: 2.6-01-refresh-legend-01
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/btnRefreshLog"
+- assertVisible: '(?s).*抽出対象.*送信先.*'
+- assertVisible: "ログの一覧"
+- takeScreenshot: 2.6-01-refresh-legend-02

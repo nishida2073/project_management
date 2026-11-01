@@ -1,0 +1,18 @@
+# 2.7 SMSの検索: 「▲ 隠す」で検索条件が隠れ、ボタンの文字が「▼ 表示」になる（テスト仕様書の 2.7 の 13 に対応）
+# 前提: setup（clearState と JSON 投入）から開始する。検索条件は既定（表示）
+appId: com.ssfrontier.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn: "▲ 隠す"
+- assertNotVisible:
+    id: "com.ssfrontier.smstokintone:id/llSearchFilters"
+- assertVisible: "▼ 表示"
+- takeScreenshot: 2.7-13-hide-filters-01
