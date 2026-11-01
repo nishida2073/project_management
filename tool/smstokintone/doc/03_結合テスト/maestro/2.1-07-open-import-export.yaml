@@ -9,4 +9,3 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "ファイルを選択"
 - pressKey: Back
 - takeScreenshot: 2.1-07-open-import-export-02
-- takeScreenshot: 2.1-07-open-import-export-03

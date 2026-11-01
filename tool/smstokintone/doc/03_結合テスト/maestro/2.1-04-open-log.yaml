@@ -8,4 +8,3 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "ログの一覧"
 - pressKey: Back
 - takeScreenshot: 2.1-04-open-log-02
-- takeScreenshot: 2.1-04-open-log-03

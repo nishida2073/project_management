@@ -9,4 +9,3 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "初期化"
 - pressKey: Back
 - takeScreenshot: 2.1-06-open-app-settings-02
-- takeScreenshot: 2.1-06-open-app-settings-03

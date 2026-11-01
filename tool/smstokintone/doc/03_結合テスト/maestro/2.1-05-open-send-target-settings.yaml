@@ -9,4 +9,3 @@ appId: com.ssfrontier.smstokintone
 - assertVisible: "設定を追加"
 - pressKey: Back
 - takeScreenshot: 2.1-05-open-send-target-settings-02
-- takeScreenshot: 2.1-05-open-send-target-settings-03
