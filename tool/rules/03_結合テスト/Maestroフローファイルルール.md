@@ -15,7 +15,7 @@
 - 2 行目に `appId`、3 行目に `---` を書き、その後に手順を書きます。
   ```yaml
   # 2.2 送信先の設定: 設定を追加と削除（テスト仕様書の 2.2 に対応）
-  appId: com.ssfrontier.smstokintone
+  appId: jp.co.nttdata_univ.smstokintone
   ---
   - launchApp:
       clearState: true
@@ -27,7 +27,7 @@
 ## 3. 操作の書き方
 
 - 画面の文字で操作できる部品は、`tapOn: "文字"` で書きます。
-- 同じ文字の部品が複数あるときは、`id` と `index` を書きます（例: `id: "com.ssfrontier.smstokintone:id/etSendTargetName"`、`index: 0`）。`id` は `com.ssfrontier.smstokintone:id/<ビューの id>` の形で書きます。
+- 同じ文字の部品が複数あるときは、`id` と `index` を書きます（例: `id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"`、`index: 0`）。`id` は `jp.co.nttdata_univ.smstokintone:id/<ビューの id>` の形で書きます。
 - 画面の下にある部品は、操作の前に `scrollUntilVisible`（`element`、`direction: DOWN`）で表示します。
 - 入力は `inputText` で行います。入力の後は、`hideKeyboard` でキーボードを閉じてから次の操作をします。キーボードが部品を隠すと、次の操作が失敗します。
 - 入力先に既存の値がある場合、`eraseText` はカーソルより前の文字しか消しません。タップした位置にカーソルが置かれるため、後ろの文字が残ります。既存の値は、次の方法で全部消してから入力します。
@@ -91,7 +91,7 @@
 
 ```yaml
 # 2.2 送信先の設定: 設定を追加と削除（テスト仕様書の 2.2 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - launchApp:
     clearState: true
@@ -100,7 +100,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "設定を追加"
 - assertVisible: "設定 2"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
 - inputText: "${SEND_TARGET_NAME}"
 - assertVisible: "${SEND_TARGET_NAME}"
