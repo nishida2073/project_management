@@ -24,6 +24,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
+    timeout: 60000
 - takeScreenshot: 2.3-01-app-settings-display-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -156,6 +157,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
+    timeout: 60000
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
     checked: true
@@ -163,6 +165,7 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
     direction: DOWN
+    timeout: 60000
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
     text: "${LOG_REFRESH_INTERVAL}"
@@ -170,6 +173,7 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
+    timeout: 60000
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "${LOG_MATCH_TOLERANCE_SECONDS}"
@@ -177,6 +181,7 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
+    timeout: 60000
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     text: "${LOG_BODY_EXCERPT_LENGTH}"

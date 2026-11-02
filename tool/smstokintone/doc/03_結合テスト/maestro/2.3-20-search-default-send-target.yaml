@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 送信先が 1 件のとき、SMSの検索の送信先の選択欄は表示されない（テスト仕様書の 2.3 の 23 に対応）
+# 2.3 アプリの設定: 送信先が 1 件のとき、SMSの検索の送信先の選択欄は表示されない（テスト仕様書の 2.3 の 20 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -9,10 +9,11 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-23-search-default-send-target-01
+    timeout: 60000
+- takeScreenshot: 2.3-20-search-default-send-target-01
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/llDefaultSendTargetFilter"
 - tapOn: "SMSの検索"
-- takeScreenshot: 2.3-23-search-default-send-target-02
+- takeScreenshot: 2.3-20-search-default-send-target-02
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/llSendTargetFilter"

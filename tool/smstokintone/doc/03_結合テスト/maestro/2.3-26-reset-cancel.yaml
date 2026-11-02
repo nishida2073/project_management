@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 初期化の確認ダイアログで「キャンセル」を押す（テスト仕様書の 2.3 の 29 に対応）
+# 2.3 アプリの設定: 初期化の確認ダイアログで「キャンセル」を押す（テスト仕様書の 2.3 の 26 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 表示テーマをダークに切り替え、初期化の確認ダイアログで「キャンセル」を押したあとも、ダークのまま残ることを確認する
@@ -10,17 +10,22 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-29-reset-cancel-01
+    timeout: 60000
+- takeScreenshot: 2.3-26-reset-cancel-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-29-reset-cancel-02
+- takeScreenshot: 2.3-26-reset-cancel-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     index: 0
-- takeScreenshot: 2.3-29-reset-cancel-03
+- takeScreenshot: 2.3-26-reset-cancel-03
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
@@ -33,21 +38,25 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-29-reset-cancel-04
+- takeScreenshot: 2.3-26-reset-cancel-04
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
-- takeScreenshot: 2.3-29-reset-cancel-05
+- takeScreenshot: 2.3-26-reset-cancel-05
 - assertVisible: "設定を初期化しますか？"
 - assertVisible: "この操作は取り消せません" # 確認ダイアログの本文（仕様書の期待値に従う、未確認）
 - tapOn: "キャンセル"
-- takeScreenshot: 2.3-29-reset-cancel-06
+- takeScreenshot: 2.3-26-reset-cancel-06
 - assertNotVisible: "設定を初期化しますか？"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-29-reset-cancel-07
+- takeScreenshot: 2.3-26-reset-cancel-07
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
@@ -55,4 +64,4 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
-- takeScreenshot: 2.3-29-reset-cancel-08
+- takeScreenshot: 2.3-26-reset-cancel-08

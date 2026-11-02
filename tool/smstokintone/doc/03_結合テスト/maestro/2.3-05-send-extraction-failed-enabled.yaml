@@ -10,6 +10,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
+    timeout: 60000
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -18,6 +19,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-02
@@ -36,6 +41,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
+    timeout: 60000
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-04
 - assertVisible: "端末の許可"
 - scrollUntilVisible:

@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: SMSの検索の抽出状況の初期値「正常」を切り替える（テスト仕様書の 2.3 の 25 に対応）
+# 2.3 アプリの設定: SMSの検索の抽出状況の初期値「正常」を切り替える（テスト仕様書の 2.3 の 22 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 検索条件の抽出状況「正常」をオンにする（JSON に指定がなく、既定値はオフ）
@@ -10,25 +10,30 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-25-search-default-extraction-succeeded-01
+    timeout: 60000
+- takeScreenshot: 2.3-22-search-default-extraction-succeeded-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-25-search-default-extraction-succeeded-02
+- takeScreenshot: 2.3-22-search-default-extraction-succeeded-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     index: 0
-- takeScreenshot: 2.3-25-search-default-extraction-succeeded-03
+- takeScreenshot: 2.3-22-search-default-extraction-succeeded-03
 - assertVisible: # 未確認: チェックボックスの選択状態の確認
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     checked: true
 - pressKey: Back
-- takeScreenshot: 2.3-25-search-default-extraction-succeeded-04
+- takeScreenshot: 2.3-22-search-default-extraction-succeeded-04
 - tapOn: "SMSの検索"
-- takeScreenshot: 2.3-25-search-default-extraction-succeeded-05
+- takeScreenshot: 2.3-22-search-default-extraction-succeeded-05
 - assertVisible: # 未確認: 検索画面の抽出状況「正常」の選択状態
     id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionSucceededOnly"
     checked: true
-- takeScreenshot: 2.3-25-search-default-extraction-succeeded-06
+- takeScreenshot: 2.3-22-search-default-extraction-succeeded-06

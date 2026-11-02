@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: AIによる抽出を切り替える（テスト仕様書の 2.3 の 27 に対応）
+# 2.3 アプリの設定: AIによる抽出を切り替える（テスト仕様書の 2.3 の 24 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: AIによる抽出をオンにする（JSON では無効）
@@ -10,13 +10,14 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-27-ai-extraction-on-01
+    timeout: 60000
+- takeScreenshot: 2.3-24-ai-extraction-on-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-27-ai-extraction-on-02
+- takeScreenshot: 2.3-24-ai-extraction-on-02
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -29,7 +30,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-27-ai-extraction-on-03
+- takeScreenshot: 2.3-24-ai-extraction-on-03
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
@@ -37,10 +38,14 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     index: 0
-- takeScreenshot: 2.3-27-ai-extraction-on-04
+- takeScreenshot: 2.3-24-ai-extraction-on-04
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
@@ -49,21 +54,22 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: true
 - pressKey: Back
-- takeScreenshot: 2.3-27-ai-extraction-on-05
+- takeScreenshot: 2.3-24-ai-extraction-on-05
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-27-ai-extraction-on-06
+    timeout: 60000
+- takeScreenshot: 2.3-24-ai-extraction-on-06
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-27-ai-extraction-on-07
+- takeScreenshot: 2.3-24-ai-extraction-on-07
 - assertVisible: # 開き直した後も有効のまま保存されていること
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: true
-- takeScreenshot: 2.3-27-ai-extraction-on-08
+- takeScreenshot: 2.3-24-ai-extraction-on-08

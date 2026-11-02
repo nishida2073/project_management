@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 会社名の自動変換を切り替える（テスト仕様書の 2.3 の 26 に対応）
+# 2.3 アプリの設定: 会社名の自動変換を切り替える（テスト仕様書の 2.3 の 23 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 会社名の自動変換をオフにする
@@ -10,13 +10,14 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-01
+    timeout: 60000
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-02
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-02
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -29,7 +30,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-03
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-03
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
@@ -37,10 +38,14 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     index: 0
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-04
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-04
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
@@ -49,21 +54,22 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
 - pressKey: Back
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-05
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-05
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-06
+    timeout: 60000
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-06
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-07
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-07
 - assertVisible: # 開き直した後も無効のまま保存されていること
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
-- takeScreenshot: 2.3-26-company-name-auto-conversion-off-08
+- takeScreenshot: 2.3-23-company-name-auto-conversion-off-08

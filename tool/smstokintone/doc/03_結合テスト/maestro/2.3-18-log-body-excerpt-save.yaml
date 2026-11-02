@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 本文の表示文字数を入力する（テスト仕様書の 2.3 の 21 に対応）
+# 2.3 アプリの設定: 本文の表示文字数を入力する（テスト仕様書の 2.3 の 18 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -9,18 +9,25 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-21-log-body-excerpt-save-01
+    timeout: 60000
+- takeScreenshot: 2.3-18-log-body-excerpt-save-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-21-log-body-excerpt-save-02
+    timeout: 60000
+- takeScreenshot: 2.3-18-log-body-excerpt-save-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
+    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etLogBodyExcerptLength
       INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
-- takeScreenshot: 2.3-21-log-body-excerpt-save-03
+- takeScreenshot: 2.3-18-log-body-excerpt-save-03
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-21-log-body-excerpt-save-04
+- takeScreenshot: 2.3-18-log-body-excerpt-save-04

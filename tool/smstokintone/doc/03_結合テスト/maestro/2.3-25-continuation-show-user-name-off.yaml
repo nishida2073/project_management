@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 引継ぎ内容の氏名表示を切り替える（テスト仕様書の 2.3 の 28 に対応）
+# 2.3 アプリの設定: 引継ぎ内容の氏名表示を切り替える（テスト仕様書の 2.3 の 25 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 引継ぎ内容の氏名表示をオフにする（JSON では有効）
@@ -10,13 +10,14 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-01
+    timeout: 60000
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-02
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-02
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
@@ -29,7 +30,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-03
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-03
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
@@ -37,10 +38,14 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     index: 0
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-04
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-04
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
@@ -49,21 +54,22 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: false
 - pressKey: Back
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-05
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-05
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-06
+    timeout: 60000
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-06
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-07
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-07
 - assertVisible: # 開き直した後も無効のまま保存されていること
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: false
-- takeScreenshot: 2.3-28-continuation-show-user-name-off-08
+- takeScreenshot: 2.3-25-continuation-show-user-name-off-08

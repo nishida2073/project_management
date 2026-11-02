@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 自動返信の間隔を入力する（テスト仕様書の 2.3 の 19 に対応）
+# 2.3 アプリの設定: 自動返信の間隔を入力する（テスト仕様書の 2.3 の 16 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -9,18 +9,23 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-19-reply-cooldown-save-01
+    timeout: 60000
+- takeScreenshot: 2.3-16-reply-cooldown-save-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-19-reply-cooldown-save-02
+- takeScreenshot: 2.3-16-reply-cooldown-save-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
+    direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplyCooldownSeconds
       INPUT_VALUE: "${REPLY_COOLDOWN_SECONDS}"
-- takeScreenshot: 2.3-19-reply-cooldown-save-03
+- takeScreenshot: 2.3-16-reply-cooldown-save-03
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-19-reply-cooldown-save-04
+- takeScreenshot: 2.3-16-reply-cooldown-save-04

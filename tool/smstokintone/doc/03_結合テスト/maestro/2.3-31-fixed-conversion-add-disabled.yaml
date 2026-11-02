@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 会社名の抽出がオフのとき固定変換の「+」は押せない（テスト仕様書の 2.3 の 34 に対応）
+# 2.3 アプリの設定: 会社名の抽出がオフのとき固定変換の「+」は押せない（テスト仕様書の 2.3 の 31 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 会社名の抽出をオフにする（JSON では有効）
@@ -10,13 +10,14 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-01
+    timeout: 60000
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-02
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-02
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -29,7 +30,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-03
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-03
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
 - scrollUntilVisible:
@@ -37,11 +38,15 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-04
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-04
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     index: 0
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-05
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-05
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
@@ -54,7 +59,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-06
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-06
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
@@ -62,10 +67,14 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     enabled: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     index: 0
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-07
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-07
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
-- takeScreenshot: 2.3-34-fixed-conversion-add-disabled-08
+- takeScreenshot: 2.3-31-fixed-conversion-add-disabled-08

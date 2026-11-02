@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 返信メッセージを入力する（テスト仕様書の 2.3 の 18 に対応）
+# 2.3 アプリの設定: 返信メッセージを入力する（テスト仕様書の 2.3 の 15 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 返信メッセージ（正常・異常）は JSON に指定がなく、アプリの既定値のため、このフローで入力する
@@ -10,31 +10,46 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-18-reply-message-save-01
+    timeout: 60000
+- takeScreenshot: 2.3-15-reply-message-save-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
     direction: DOWN
-    visibilityPercentage: 100
-- takeScreenshot: 2.3-18-reply-message-save-02
+    visibilityPercentage: 50
+    timeout: 60000
+- takeScreenshot: 2.3-15-reply-message-save-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplySuccessBody
       INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
-- takeScreenshot: 2.3-18-reply-message-save-03
+- takeScreenshot: 2.3-15-reply-message-save-03
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
     direction: DOWN
-    visibilityPercentage: 100
-- takeScreenshot: 2.3-18-reply-message-save-04
+    visibilityPercentage: 50
+    timeout: 60000
+- takeScreenshot: 2.3-15-reply-message-save-04
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplyFailedBody
       INPUT_VALUE: "${REPLY_FAILED_BODY}"
-- takeScreenshot: 2.3-18-reply-message-save-05
+- takeScreenshot: 2.3-15-reply-message-save-05
 - assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
-- takeScreenshot: 2.3-18-reply-message-save-06
+- takeScreenshot: 2.3-15-reply-message-save-06

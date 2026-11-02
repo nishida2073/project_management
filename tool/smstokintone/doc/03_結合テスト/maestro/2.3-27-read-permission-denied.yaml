@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: SMSの読み取りの許可を拒否すると案内が出る（テスト仕様書の 2.3 の 30 に対応）
+# 2.3 アプリの設定: SMSの読み取りの許可を拒否すると案内が出る（テスト仕様書の 2.3 の 27 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 外部条件: SMSの読み取りの権限の付与・未付与は端末の設定でしか切り替えられないため、このフローでは作らない（端末で未付与にしておく）
@@ -10,13 +10,14 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-30-read-permission-denied-01
+    timeout: 60000
+- takeScreenshot: 2.3-27-read-permission-denied-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/btnRequestReadPermission"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-30-read-permission-denied-02
+- takeScreenshot: 2.3-27-read-permission-denied-02
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/btnRequestReadPermission"
@@ -25,12 +26,16 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestReadPermission"
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/tvReadPermissionStatus"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/btnRequestReadPermission"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestReadPermission"
     index: 0
-- takeScreenshot: 2.3-30-read-permission-denied-03
+- takeScreenshot: 2.3-27-read-permission-denied-03
 - tapOn: "許可しない" # 未確認: 端末の権限ダイアログの拒否ボタンの文字（Android の版・言語で異なる）
-- takeScreenshot: 2.3-30-read-permission-denied-04
+- takeScreenshot: 2.3-27-read-permission-denied-04
 - assertVisible: "SMSの読み取りの許可がない場合、SMSの検索はできません" # トースト（Toast.LENGTH_LONG で表示される）
 - scrollUntilVisible:
     element:
@@ -38,4 +43,4 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestReadPermission"
-- takeScreenshot: 2.3-30-read-permission-denied-05
+- takeScreenshot: 2.3-27-read-permission-denied-05

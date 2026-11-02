@@ -1,4 +1,5 @@
 # 既存の値がある入力欄（一覧の 2 件目）に、値を入れ直す（共通の手順）。スクロールと撮影は呼び出し元で行う
+# キーボードを閉じるため、画面の左の空いた場所（3%, 50%）を押す（数字の欄は Enter で閉じないため）
 # 入力: FIELD_ID（欄の id の末尾）、INPUT_VALUE（入力する値）。一覧の 2 件目（index 1）を押す
 appId: jp.co.nttdata_univ.smstokintone
 ---
@@ -8,4 +9,5 @@ appId: jp.co.nttdata_univ.smstokintone
     point: "95%, 50%"
 - eraseText: 50
 - inputText: "${INPUT_VALUE}"
-- hideKeyboard
+- tapOn:
+    point: "3%, 50%"

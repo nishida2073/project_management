@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 引継ぎがオフのとき「引継ぎ内容の設定」は押せない（テスト仕様書の 2.3 の 33 に対応）
+# 2.3 アプリの設定: 引継ぎがオフのとき「引継ぎ内容の設定」は押せない（テスト仕様書の 2.3 の 30 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 引継ぎをオフにする（JSON では有効）
@@ -10,13 +10,14 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-33-continuation-edit-disabled-01
+    timeout: 60000
+- takeScreenshot: 2.3-30-continuation-edit-disabled-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-33-continuation-edit-disabled-02
+- takeScreenshot: 2.3-30-continuation-edit-disabled-02
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
@@ -24,10 +25,14 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     index: 0
-- takeScreenshot: 2.3-33-continuation-edit-disabled-03
+- takeScreenshot: 2.3-30-continuation-edit-disabled-03
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
@@ -40,7 +45,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-33-continuation-edit-disabled-04
+- takeScreenshot: 2.3-30-continuation-edit-disabled-04
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
@@ -48,9 +53,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     enabled: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     index: 0
-- takeScreenshot: 2.3-33-continuation-edit-disabled-05
+- takeScreenshot: 2.3-30-continuation-edit-disabled-05
 - assertVisible: "アプリの設定" # 設定画面のまま（引継ぎ内容の設定画面に移っていないこと）
-- takeScreenshot: 2.3-33-continuation-edit-disabled-06
+- takeScreenshot: 2.3-30-continuation-edit-disabled-06

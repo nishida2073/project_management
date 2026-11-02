@@ -5,6 +5,8 @@
     "sendExtractionFailedEnabled": false,
     "replyEnabled": false,
     "replyCooldownSeconds": 10,
+    "replySuccessBody": "test-reply-su-body",
+    "replyFailedBody": "test-reply-fa-body",
     "extractionAiEnabled": false,
     "extractionCompanyNameEnabled": true,
     "extractionCompanyNameAutoConversionEnabled": true,

@@ -1,4 +1,4 @@
-# 2.3 アプリの設定: 入力した設定値を開き直しても保持している（テスト仕様書の 2.3 の 22 に対応）
+# 2.3 アプリの設定: 入力した設定値を開き直しても保持している（テスト仕様書の 2.3 の 19 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: 返信メッセージ（正常・異常）、自動返信の間隔、統合範囲（秒）、本文の最大表示文字数を、2.3 の 18 から 21 と同じ値で入力する
@@ -10,108 +10,144 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-01
+    timeout: 60000
+- takeScreenshot: 2.3-19-reopen-saved-values-01
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-02
+- takeScreenshot: 2.3-19-reopen-saved-values-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
+    direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplyCooldownSeconds
       INPUT_VALUE: "${REPLY_COOLDOWN_SECONDS}"
-- takeScreenshot: 2.3-22-reopen-saved-values-03
+- takeScreenshot: 2.3-19-reopen-saved-values-03
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
     direction: DOWN
-    visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-04
+    visibilityPercentage: 50
+    timeout: 60000
+- takeScreenshot: 2.3-19-reopen-saved-values-04
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplySuccessBody
       INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
-- takeScreenshot: 2.3-22-reopen-saved-values-05
+- takeScreenshot: 2.3-19-reopen-saved-values-05
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
     direction: DOWN
-    visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-06
+    visibilityPercentage: 50
+    timeout: 60000
+- takeScreenshot: 2.3-19-reopen-saved-values-06
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplyFailedBody
       INPUT_VALUE: "${REPLY_FAILED_BODY}"
-- takeScreenshot: 2.3-22-reopen-saved-values-07
+- takeScreenshot: 2.3-19-reopen-saved-values-07
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-08
+    timeout: 60000
+- takeScreenshot: 2.3-19-reopen-saved-values-08
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
+    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etLogMatchToleranceSeconds
       INPUT_VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
-- takeScreenshot: 2.3-22-reopen-saved-values-09
+- takeScreenshot: 2.3-19-reopen-saved-values-09
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-10
+    timeout: 60000
+- takeScreenshot: 2.3-19-reopen-saved-values-10
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
+    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etLogBodyExcerptLength
       INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
-- takeScreenshot: 2.3-22-reopen-saved-values-11
+- takeScreenshot: 2.3-19-reopen-saved-values-11
 - pressKey: Back
-- takeScreenshot: 2.3-22-reopen-saved-values-12
+- takeScreenshot: 2.3-19-reopen-saved-values-12
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     direction: UP
     visibilityPercentage: 100
-- takeScreenshot: 2.3-22-reopen-saved-values-13
+    timeout: 60000
+- takeScreenshot: 2.3-19-reopen-saved-values-13
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-22-reopen-saved-values-14
+- takeScreenshot: 2.3-19-reopen-saved-values-14
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
     direction: DOWN
-    visibilityPercentage: 100
+    visibilityPercentage: 50
+    timeout: 60000
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
-- takeScreenshot: 2.3-22-reopen-saved-values-15
+- takeScreenshot: 2.3-19-reopen-saved-values-15
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
     direction: DOWN
-    visibilityPercentage: 100
+    visibilityPercentage: 50
+    timeout: 60000
 - assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
-- takeScreenshot: 2.3-22-reopen-saved-values-16
+- takeScreenshot: 2.3-19-reopen-saved-values-16
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
+    timeout: 60000
 - assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-22-reopen-saved-values-17
+- takeScreenshot: 2.3-19-reopen-saved-values-17
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
+    timeout: 60000
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
-- takeScreenshot: 2.3-22-reopen-saved-values-18
+- takeScreenshot: 2.3-19-reopen-saved-values-18
