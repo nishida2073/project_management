@@ -5,6 +5,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -16,12 +21,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-03
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-04
 - assertVisible: "端末の許可"
 - scrollUntilVisible:

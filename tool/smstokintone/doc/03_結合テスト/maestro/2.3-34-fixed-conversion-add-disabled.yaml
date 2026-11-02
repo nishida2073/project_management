@@ -5,6 +5,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-01
 - scrollUntilVisible:
     element:
@@ -12,6 +17,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
@@ -33,6 +42,10 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     index: 0
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-05
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
@@ -42,6 +55,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-06
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     enabled: false

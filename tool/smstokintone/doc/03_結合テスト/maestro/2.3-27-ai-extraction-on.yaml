@@ -5,6 +5,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-27-ai-extraction-on-01
 - scrollUntilVisible:
     element:
@@ -12,6 +17,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-27-ai-extraction-on-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
@@ -21,6 +30,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-27-ai-extraction-on-03
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: false
@@ -28,12 +41,21 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     index: 0
 - takeScreenshot: 2.3-27-ai-extraction-on-04
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.3-27-ai-extraction-on-05
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-27-ai-extraction-on-06
 - scrollUntilVisible:
     element:

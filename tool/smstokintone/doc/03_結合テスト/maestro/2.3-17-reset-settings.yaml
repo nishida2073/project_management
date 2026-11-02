@@ -6,6 +6,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-17-reset-settings-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -27,6 +32,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
 - takeScreenshot: 2.3-17-reset-settings-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
@@ -36,6 +45,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.3-17-reset-settings-03
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     checked: true
@@ -45,6 +58,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
     checked: true
@@ -54,6 +71,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: UP
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
     checked: true
@@ -67,6 +88,10 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       FIELD_ID: etLogMatchToleranceSeconds
       INPUT_VALUE: "${LOG_MATCH_TOLERANCE_PRE}"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "${LOG_MATCH_TOLERANCE_PRE}"

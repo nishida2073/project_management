@@ -5,6 +5,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-29-reset-cancel-01
 - scrollUntilVisible:
     element:
@@ -16,6 +21,10 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     index: 0
 - takeScreenshot: 2.3-29-reset-cancel-03
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
@@ -39,6 +48,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-29-reset-cancel-07
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true

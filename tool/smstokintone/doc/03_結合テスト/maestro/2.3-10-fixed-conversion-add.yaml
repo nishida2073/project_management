@@ -5,6 +5,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-10-fixed-conversion-add-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -16,7 +21,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+    visibilityPercentage: 50
 - assertNotVisible: "${FIXED_FROM_1}"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+    direction: DOWN
+    visibilityPercentage: 50
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - takeScreenshot: 2.3-10-fixed-conversion-add-02
@@ -41,11 +52,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - takeScreenshot: 2.3-10-fixed-conversion-add-07
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-10-fixed-conversion-add-08
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+    visibilityPercentage: 50
 - assertVisible: "${FIXED_FROM_1}"
 - assertVisible: "${FIXED_TO_1}"
 - takeScreenshot: 2.3-10-fixed-conversion-add-09

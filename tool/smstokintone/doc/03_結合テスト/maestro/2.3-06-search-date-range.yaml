@@ -6,6 +6,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-06-search-date-range-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -23,6 +28,10 @@ appId: jp.co.nttdata_univ.smstokintone
       FIELD_ID: etSmsSearchDateRangeDays
       INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"
 - takeScreenshot: 2.3-06-search-date-range-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"

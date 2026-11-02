@@ -5,6 +5,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-03-send-mode-manual-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -20,6 +25,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.3-03-send-mode-manual-02
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     checked: true

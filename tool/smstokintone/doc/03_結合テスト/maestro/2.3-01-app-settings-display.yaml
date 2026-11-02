@@ -4,13 +4,26 @@ appId: jp.co.nttdata_univ.smstokintone
 # JSON にない項目（検索条件の表示など）は、アプリの既定値とする
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
     text: "自動"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
     text: "手動"
 - tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
 - takeScreenshot: 2.3-01-app-settings-display-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
@@ -36,15 +49,31 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentAutoOnlyEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentAutoOnlyEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentManualOnlyEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentManualOnlyEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
     checked: false
@@ -90,9 +119,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: false
@@ -102,9 +139,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
@@ -114,12 +159,24 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
     text: "${LOG_REFRESH_INTERVAL}"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "${LOG_MATCH_TOLERANCE_SECONDS}"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     text: "${LOG_BODY_EXCERPT_LENGTH}"
