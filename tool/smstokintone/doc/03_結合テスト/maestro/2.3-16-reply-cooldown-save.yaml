@@ -5,7 +5,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-to-top-setting.yaml
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: rbThemeLight
 - takeScreenshot: 2.3-16-reply-cooldown-save-01
 - runFlow:
     file: common/scroll-down-to-setting.yaml

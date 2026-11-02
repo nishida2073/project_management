@@ -20,7 +20,9 @@ appId: jp.co.nttdata_univ.smstokintone
     text: "手動"
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-to-top-setting.yaml
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: rbThemeLight
 - takeScreenshot: 2.3-01-app-settings-display-01
 - assertVisible: "端末の許可"
 - runFlow:
