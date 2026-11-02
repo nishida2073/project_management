@@ -9,10 +9,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.2-12-test-send-company-name-off-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true

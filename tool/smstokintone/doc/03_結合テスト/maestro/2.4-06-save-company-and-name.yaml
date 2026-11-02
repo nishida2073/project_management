@@ -6,10 +6,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-06-save-company-and-name-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnEditContinuationInfo
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-06-save-company-and-name-02
@@ -18,24 +18,20 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
-      index: 1
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etContinuationCompanyName
 - runFlow:
     file: common/input-second-text-field.yaml
     env:
       FIELD_ID: etContinuationCompanyName
       INPUT_VALUE: "${COMPANY_NAME_2}"
 - takeScreenshot: 2.4-06-save-company-and-name-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etContinuationUserName"
-      index: 1
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etContinuationUserName
 - runFlow:
     file: common/input-second-text-field.yaml
     env:

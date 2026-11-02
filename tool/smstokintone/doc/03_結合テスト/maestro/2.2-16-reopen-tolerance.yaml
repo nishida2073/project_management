@@ -8,24 +8,41 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-16-reopen-tolerance-01
 - assertVisible: "設定を追加"
-- runFlow: common/fill-tolerance-hours-saved-values.yaml
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
+    direction: DOWN
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
+    enabled: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
+    direction: DOWN
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etUpdateToleranceHours
+      INPUT_VALUE: "${TOLERANCE_HOURS_SAVED}"
 - tapOn: "設定を保存"
 - assertVisible: "SMSの送信モード"
 - takeScreenshot: 2.2-16-reopen-tolerance-02
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-16-reopen-tolerance-03
 - assertVisible: "設定を追加"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbUpdateToleranceModeHours
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etUpdateToleranceHours
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     text: "${TOLERANCE_HOURS_SAVED}"

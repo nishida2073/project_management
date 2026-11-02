@@ -7,29 +7,28 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-06-enable-tolerance-hours-01
 - assertVisible: "設定を追加"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbUpdateToleranceModeSameDate
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
     index: 0
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbUpdateToleranceModeHours
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
 - takeScreenshot: 2.2-06-enable-tolerance-hours-02
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     enabled: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etUpdateToleranceHours
 - runFlow:
     file: common/input-number-field.yaml
     env:

@@ -11,20 +11,18 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 0
     text: "${KEYWORD_TEST}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnAddKeyword"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnAddKeyword
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddKeyword"
     index: 0
 - takeScreenshot: 2.2-05-remove-keyword-row-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-      index: 1
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etKeyword
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 1

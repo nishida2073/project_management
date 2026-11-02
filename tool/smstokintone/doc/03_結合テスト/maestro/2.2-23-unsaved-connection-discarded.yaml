@@ -13,10 +13,10 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etSubdomain
 - runFlow:
     file: common/input-text-field.yaml
     env:
@@ -28,9 +28,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-23-unsaved-connection-discarded-04
 - assertVisible: "設定を追加"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etSubdomain
 - assertNotVisible: "${UNSAVED_SUBDOMAIN}"
 - takeScreenshot: 2.2-23-unsaved-connection-discarded-05

@@ -6,9 +6,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
 - assertVisible:

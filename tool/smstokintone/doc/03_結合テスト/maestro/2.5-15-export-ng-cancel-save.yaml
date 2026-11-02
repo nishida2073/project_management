@@ -7,10 +7,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-15-export-ng-cancel-save-01
 - assertVisible: "設定のインポート・エクスポート"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnExportSettings
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった

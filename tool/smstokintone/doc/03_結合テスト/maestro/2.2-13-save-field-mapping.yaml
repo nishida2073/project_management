@@ -11,64 +11,64 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldType
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etFieldType
       INPUT_VALUE: "${SAVED_FIELD_TYPE}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldDatetime
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etFieldDatetime
       INPUT_VALUE: "${SAVED_FIELD_DATETIME}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldSender
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etFieldSender
       INPUT_VALUE: "${SAVED_FIELD_SENDER}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldCompanyName
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etFieldCompanyName
       INPUT_VALUE: "${SAVED_FIELD_COMPANY}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldUserName
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etFieldUserName
       INPUT_VALUE: "${SAVED_FIELD_USER}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldBody
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etFieldBody
       INPUT_VALUE: "${SAVED_FIELD_BODY}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldHistory
 - runFlow:
     file: common/input-text-field.yaml
     env:

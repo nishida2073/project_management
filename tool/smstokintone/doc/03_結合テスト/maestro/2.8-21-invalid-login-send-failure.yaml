@@ -13,10 +13,10 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLoginName
 - runFlow:
     file: common/input-text-field.yaml
     env:

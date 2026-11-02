@@ -7,11 +7,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameAutoConversionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
@@ -20,10 +19,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnAddFixedConversion
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - tapOn:

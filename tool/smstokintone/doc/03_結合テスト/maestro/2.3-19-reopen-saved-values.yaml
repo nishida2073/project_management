@@ -5,12 +5,8 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
-    direction: UP
-    visibilityPercentage: 100
-    timeout: 60000
+- runFlow:
+    file: common/scroll-to-top-setting.yaml
 - takeScreenshot: 2.3-19-reopen-saved-values-01
 - runFlow:
     file: common/scroll-down-to-setting.yaml
@@ -79,12 +75,8 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - takeScreenshot: 2.3-19-reopen-saved-values-12
 - tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
-    direction: UP
-    visibilityPercentage: 100
-    timeout: 60000
+- runFlow:
+    file: common/scroll-to-top-setting.yaml
 - takeScreenshot: 2.3-19-reopen-saved-values-13
 - runFlow:
     file: common/scroll-down-to-setting.yaml

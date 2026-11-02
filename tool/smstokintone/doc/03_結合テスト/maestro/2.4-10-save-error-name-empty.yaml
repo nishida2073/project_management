@@ -6,21 +6,20 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-10-save-error-name-empty-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.4-10-save-error-name-empty-02
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnEditContinuationInfo
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-10-save-error-name-empty-03
@@ -47,11 +46,10 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - pressKey: Back
 - takeScreenshot: 2.4-10-save-error-name-empty-07
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: UP
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.4-10-save-error-name-empty-08

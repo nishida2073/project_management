@@ -6,12 +6,8 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
-    direction: UP
-    visibilityPercentage: 100
-    timeout: 60000
+- runFlow:
+    file: common/scroll-to-top-setting.yaml
 - takeScreenshot: 2.3-14-reset-settings-01
 - assertVisible: "端末の許可"
 - runFlow:
@@ -109,9 +105,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を初期化しますか？"
 - tapOn: "初期化" # 未確認: 画面の後ろの初期化ボタンと同じ文字のため、ダイアログのボタンが選ばれるか確認する
 - takeScreenshot: 2.3-14-reset-settings-06
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbThemeLight
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true

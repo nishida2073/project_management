@@ -6,20 +6,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-04-add-keyword-row-01
 - assertVisible: "設定を追加"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etKeyword
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 0
     text: "test-company"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnAddKeyword"
-      index: 0
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: btnAddKeyword
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddKeyword"
     index: 0

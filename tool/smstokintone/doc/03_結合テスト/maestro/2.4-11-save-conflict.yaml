@@ -7,10 +7,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-11-save-conflict-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnEditContinuationInfo
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-11-save-conflict-02
@@ -20,12 +20,10 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 # 外部条件: 送信元 B（test-sender-b）の内容は、この画面を開いた後に SMSの受信などで更新しておく（手順は未確認）。
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
-      index: 1
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etContinuationCompanyName
 - runFlow:
     file: common/input-second-text-field.yaml
     env:

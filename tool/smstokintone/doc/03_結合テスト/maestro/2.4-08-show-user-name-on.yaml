@@ -7,11 +7,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-08-show-user-name-on-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationShowUserNameEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
 - takeScreenshot: 2.4-08-show-user-name-on-02
@@ -24,10 +23,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: btnEditContinuationInfo
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-08-show-user-name-on-04

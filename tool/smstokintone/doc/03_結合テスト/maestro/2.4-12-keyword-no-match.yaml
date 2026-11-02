@@ -6,10 +6,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-12-keyword-no-match-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnEditContinuationInfo
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-12-keyword-no-match-02

@@ -7,10 +7,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendManual
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - assertVisible:

@@ -23,10 +23,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.8-01-receive-auto-process-03
 - pressKey: Back
 - tapOn: "アプリの設定"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnEditContinuationInfo
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - assertVisible:

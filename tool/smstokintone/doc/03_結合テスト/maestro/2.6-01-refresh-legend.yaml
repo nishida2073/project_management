@@ -7,7 +7,14 @@ appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- runFlow: common/create-log-by-manual-send.yaml
+- tapOn: "SMSの検索"
+- assertVisible: "検索条件"
+- tapOn: "検索"
+- tapOn: "全選択"
+- tapOn: "選択したSMSを送信"
+- assertVisible: "(?s).*件を送信キューに追加しました.*"
+- assertVisible: '(?s).*SMSの送信が完了しました.*'
+- pressKey: Back
 - tapOn: "ログの確認"
 - assertVisible: "ログの一覧"
 - takeScreenshot: 2.6-01-refresh-legend-01

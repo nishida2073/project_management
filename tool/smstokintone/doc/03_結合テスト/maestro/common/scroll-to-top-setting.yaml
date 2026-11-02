@@ -1,0 +1,9 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# アプリの設定の画面を先頭まで戻す（テーマの欄が全部見えるまで上へスクロールする）。時間の上限は 60 秒
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
+    direction: UP
+    visibilityPercentage: 100
+    timeout: 60000

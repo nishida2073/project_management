@@ -22,92 +22,82 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-01-send-target-add-04
 - hideKeyboard
 - assertVisible: "${SEND_TARGET_NAME}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etSubdomain
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     index: 0
     text: 'univ-kyousai-\{X\}'
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldType
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
     index: 0
     text: "registration_type"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldDatetime
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
     index: 0
     text: "receive_datetime"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldSender
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
     index: 0
     text: "sender"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldCompanyName
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
     index: 0
     text: "company_name"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldUserName
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
     index: 0
     text: "user_name"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldBody
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
     index: 0
     text: "body"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etFieldHistory
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
     index: 0
     text: "history"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbUpdateToleranceModeSameDate
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
     index: 0
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
-      index: 0
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etUpdateToleranceHours
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     index: 0

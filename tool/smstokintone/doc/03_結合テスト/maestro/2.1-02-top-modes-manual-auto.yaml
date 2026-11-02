@@ -6,17 +6,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendManual
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-03
