@@ -12,16 +12,11 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: cbSearchExtractionSucceededOnlyEnabled
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
-    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     index: 0

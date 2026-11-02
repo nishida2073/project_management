@@ -14,95 +14,95 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-14-reset-settings-01
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeManual
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: rbThemeDark
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
 - takeScreenshot: 2.3-14-reset-settings-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbThemeDark
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendManual
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.3-14-reset-settings-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendManual
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    direction: DOWN
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    direction: DOWN
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
-    direction: UP
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
-    direction: DOWN
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
-    checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+    checked: true
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSearchFiltersHidden
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSearchFiltersHidden
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
+    checked: true
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogMatchToleranceSeconds
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etLogMatchToleranceSeconds
       INPUT_VALUE: "${LOG_MATCH_TOLERANCE_PRE}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogMatchToleranceSeconds
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "${LOG_MATCH_TOLERANCE_PRE}"
 - takeScreenshot: 2.3-14-reset-settings-04
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: btnResetSettings
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
 - takeScreenshot: 2.3-14-reset-settings-05
@@ -115,32 +115,31 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSearchFiltersVisible
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendAuto
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeManual
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogMatchToleranceSeconds
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "15"

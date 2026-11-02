@@ -12,24 +12,19 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-28-receive-permission-denied-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnRequestPermission
 - takeScreenshot: 2.3-28-receive-permission-denied-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
-    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/tvPermissionStatus"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnRequestPermission
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
     index: 0
@@ -37,10 +32,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "許可しない" # 未確認: 端末の権限ダイアログの拒否ボタンの文字（Android の版・言語で異なる）
 - takeScreenshot: 2.3-28-receive-permission-denied-04
 - assertVisible: "SMSの受信の許可がない場合、SMSの自動送信・自動返信ができません" # トースト（Toast.LENGTH_LONG で表示される）
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnRequestPermission
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
 - takeScreenshot: 2.3-28-receive-permission-denied-05

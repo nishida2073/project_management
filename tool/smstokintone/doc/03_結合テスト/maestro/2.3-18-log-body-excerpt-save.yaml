@@ -11,20 +11,13 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-18-log-body-excerpt-save-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
-- takeScreenshot: 2.3-18-log-body-excerpt-save-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    direction: DOWN
-    timeout: 60000
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogBodyExcerptLength
+- takeScreenshot: 2.3-18-log-body-excerpt-save-02
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etLogBodyExcerptLength
       INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"

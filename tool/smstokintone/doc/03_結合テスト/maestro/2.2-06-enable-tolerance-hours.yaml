@@ -31,7 +31,7 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     direction: DOWN
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etUpdateToleranceHours
       INPUT_VALUE: "${TOLERANCE_HOURS_INPUT}"

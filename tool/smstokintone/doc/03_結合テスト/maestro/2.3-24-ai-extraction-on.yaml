@@ -12,44 +12,34 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-24-ai-extraction-on-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-24-ai-extraction-on-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swAiExtractionEnabled
 - takeScreenshot: 2.3-24-ai-extraction-on-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swAiExtractionEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     index: 0
 - takeScreenshot: 2.3-24-ai-extraction-on-04
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swAiExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: true
@@ -63,11 +53,10 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-24-ai-extraction-on-06
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swAiExtractionEnabled
 - takeScreenshot: 2.3-24-ai-extraction-on-07
 - assertVisible: # 開き直した後も有効のまま保存されていること
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"

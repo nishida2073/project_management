@@ -12,44 +12,34 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationEnabled
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
-    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationShowUserNameEnabled
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationShowUserNameEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     index: 0
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-04
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationShowUserNameEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: false
@@ -63,11 +53,10 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-06
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationShowUserNameEnabled
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-07
 - assertVisible: # 開き直した後も無効のまま保存されていること
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"

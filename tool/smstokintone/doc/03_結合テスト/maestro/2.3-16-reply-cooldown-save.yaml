@@ -11,18 +11,22 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-16-reply-cooldown-save-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
-- takeScreenshot: 2.3-16-reply-cooldown-save-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-    direction: DOWN
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+    checked: true
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplyCooldownSeconds
+- takeScreenshot: 2.3-16-reply-cooldown-save-02
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etReplyCooldownSeconds
       INPUT_VALUE: "${REPLY_COOLDOWN_SECONDS}"

@@ -12,92 +12,66 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-19-reopen-saved-values-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
-- takeScreenshot: 2.3-19-reopen-saved-values-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-    direction: DOWN
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+    checked: true
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplyCooldownSeconds
+- takeScreenshot: 2.3-19-reopen-saved-values-02
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etReplyCooldownSeconds
       INPUT_VALUE: "${REPLY_COOLDOWN_SECONDS}"
 - takeScreenshot: 2.3-19-reopen-saved-values-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplySuccessBody
 - takeScreenshot: 2.3-19-reopen-saved-values-04
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplySuccessBody
       INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
 - takeScreenshot: 2.3-19-reopen-saved-values-05
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplyFailedBody
 - takeScreenshot: 2.3-19-reopen-saved-values-06
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
       FIELD_ID: etReplyFailedBody
       INPUT_VALUE: "${REPLY_FAILED_BODY}"
 - takeScreenshot: 2.3-19-reopen-saved-values-07
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
-- takeScreenshot: 2.3-19-reopen-saved-values-08
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    timeout: 60000
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogMatchToleranceSeconds
+- takeScreenshot: 2.3-19-reopen-saved-values-08
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etLogMatchToleranceSeconds
       INPUT_VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
 - takeScreenshot: 2.3-19-reopen-saved-values-09
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
-- takeScreenshot: 2.3-19-reopen-saved-values-10
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    direction: DOWN
-    timeout: 60000
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogBodyExcerptLength
+- takeScreenshot: 2.3-19-reopen-saved-values-10
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etLogBodyExcerptLength
       INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
@@ -112,42 +86,33 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-19-reopen-saved-values-13
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplyCooldownSeconds
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-19-reopen-saved-values-14
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplySuccessBody
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - takeScreenshot: 2.3-19-reopen-saved-values-15
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplyFailedBody
 - assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - takeScreenshot: 2.3-19-reopen-saved-values-16
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogMatchToleranceSeconds
 - assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-19-reopen-saved-values-17
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogBodyExcerptLength
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-19-reopen-saved-values-18

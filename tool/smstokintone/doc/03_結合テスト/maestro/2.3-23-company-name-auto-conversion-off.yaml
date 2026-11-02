@@ -12,44 +12,34 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameAutoConversionEnabled
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameAutoConversionEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     index: 0
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-04
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameAutoConversionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
@@ -63,11 +53,10 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-06
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    direction: DOWN
-    visibilityPercentage: 100
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameAutoConversionEnabled
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-07
 - assertVisible: # 開き直した後も無効のまま保存されていること
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"

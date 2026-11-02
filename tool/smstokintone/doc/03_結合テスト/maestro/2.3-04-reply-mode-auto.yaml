@@ -19,16 +19,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
 - takeScreenshot: 2.3-04-reply-mode-auto-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeAuto
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
     checked: true

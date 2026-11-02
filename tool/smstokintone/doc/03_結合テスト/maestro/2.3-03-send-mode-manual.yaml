@@ -13,29 +13,31 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-03-send-mode-manual-01
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendAuto
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendManual
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.3-03-send-mode-manual-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendManual
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeManual
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true

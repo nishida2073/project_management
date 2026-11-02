@@ -13,50 +13,52 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-08-company-name-extraction-off-01
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameAutoConversionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSearchFiltersVisible
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
 - takeScreenshot: 2.3-08-company-name-extraction-off-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSearchFiltersVisible
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.3-08-company-name-extraction-off-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnAddFixedConversion
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     enabled: false

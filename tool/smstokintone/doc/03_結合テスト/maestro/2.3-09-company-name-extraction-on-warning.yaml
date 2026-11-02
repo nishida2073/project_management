@@ -15,16 +15,17 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-01
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible: "注意"
@@ -32,10 +33,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-02
 - tapOn: "OK" # 未確認: OK ボタンの文言（端末の言語で変わる場合あり）
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-03
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true

@@ -1,0 +1,11 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# アプリの設定の画面で、ELEMENT_ID（欄の id の末尾）が見えるまで上へスクロールする。
+# 見えている割合は 50%、時間の上限は 60 秒（画面の下の方にある欄は、100% では見つからないことがあるため）
+# 入力: ELEMENT_ID
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/${ELEMENT_ID}"
+    direction: UP
+    visibilityPercentage: 50
+    timeout: 60000

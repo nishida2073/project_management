@@ -4,17 +4,17 @@ appId: jp.co.nttdata_univ.smstokintone
 # JSON にない項目（検索条件の表示など）は、アプリの既定値とする
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: tvTopSendStatus
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
     text: "自動"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: tvTopReplyStatus
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
     text: "手動"
@@ -33,155 +33,160 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etSmsSearchDateRangeDays
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
 # 送信先が 1 件のとき、検索の送信先の選択欄は表示されない（実装どおり）
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/llDefaultSendTargetFilter"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: cbSearchSendNoneOnlyEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentAutoOnlyEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: cbSearchSentAutoOnlyEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentAutoOnlyEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentManualOnlyEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: cbSearchSentManualOnlyEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentManualOnlyEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: cbSearchExtractionSucceededOnlyEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: cbSearchExtractionFailedOnlyEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSearchFiltersVisible
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swSearchExtractionFailedEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSendAuto
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swSendExtractionFailedEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbSmsReplyModeManual
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplyCooldownSeconds
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     text: "${REPLY_COOLDOWN_SECONDS}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameAutoConversionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swAiExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbContinuationScopeUnlimited
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationShowUserNameEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swLogRefreshEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
-    direction: DOWN
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogRefreshInterval
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
     text: "${LOG_REFRESH_INTERVAL}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogMatchToleranceSeconds
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "${LOG_MATCH_TOLERANCE_SECONDS}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    direction: DOWN
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogBodyExcerptLength
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     text: "${LOG_BODY_EXCERPT_LENGTH}"

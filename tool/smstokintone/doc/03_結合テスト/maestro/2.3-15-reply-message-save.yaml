@@ -12,19 +12,11 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-15-reply-message-save-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplySuccessBody
 - takeScreenshot: 2.3-15-reply-message-save-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:
@@ -32,19 +24,11 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
 - takeScreenshot: 2.3-15-reply-message-save-03
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etReplyFailedBody
 - takeScreenshot: 2.3-15-reply-message-save-04
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
-    direction: DOWN
-    visibilityPercentage: 50
-    timeout: 60000
 - runFlow:
     file: common/input-text-field.yaml
     env:

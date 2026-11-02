@@ -20,19 +20,20 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etSmsSearchDateRangeDays
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etSmsSearchDateRangeDays
       INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"
 - takeScreenshot: 2.3-06-search-date-range-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etSmsSearchDateRangeDays
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"

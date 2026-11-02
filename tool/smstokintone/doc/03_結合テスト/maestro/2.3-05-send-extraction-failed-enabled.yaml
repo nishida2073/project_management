@@ -13,23 +13,24 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-01
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swSendExtractionFailedEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: false
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swSendExtractionFailedEnabled
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swSendExtractionFailedEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: true
@@ -44,9 +45,10 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-04
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swSendExtractionFailedEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: true

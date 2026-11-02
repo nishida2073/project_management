@@ -13,29 +13,31 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-13-continuation-edit-open-01
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swContinuationEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbContinuationScopeUnlimited
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
 - takeScreenshot: 2.3-13-continuation-edit-open-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: rbContinuationScopeUnlimited
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-    direction: UP
+- runFlow:
+    file: common/scroll-up-to-setting.yaml
+    env:
+      ELEMENT_ID: btnEditContinuationInfo
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.3-13-continuation-edit-open-03

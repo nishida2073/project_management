@@ -13,22 +13,22 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-10-fixed-conversion-add-01
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: swCompanyNameExtractionEnabled
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
-    visibilityPercentage: 50
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnAddFixedConversion
 - assertNotVisible: "${FIXED_FROM_1}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
-    direction: DOWN
-    visibilityPercentage: 50
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnAddFixedConversion
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - takeScreenshot: 2.3-10-fixed-conversion-add-02
@@ -61,10 +61,10 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 60000
 - takeScreenshot: 2.3-10-fixed-conversion-add-08
 - assertVisible: "端末の許可"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
-    visibilityPercentage: 50
+- runFlow:
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: btnAddFixedConversion
 - assertVisible: "${FIXED_FROM_1}"
 - assertVisible: "${FIXED_TO_1}"
 - takeScreenshot: 2.3-10-fixed-conversion-add-09

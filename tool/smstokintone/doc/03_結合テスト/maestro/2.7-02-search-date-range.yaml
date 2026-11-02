@@ -13,7 +13,7 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etSmsSearchDateRangeDays
       INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"

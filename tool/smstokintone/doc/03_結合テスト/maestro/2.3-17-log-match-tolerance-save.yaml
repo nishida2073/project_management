@@ -11,20 +11,13 @@ appId: jp.co.nttdata_univ.smstokintone
     visibilityPercentage: 100
     timeout: 60000
 - takeScreenshot: 2.3-17-log-match-tolerance-save-01
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    visibilityPercentage: 100
-    timeout: 60000
-- takeScreenshot: 2.3-17-log-match-tolerance-save-02
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    direction: DOWN
-    timeout: 60000
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-to-setting.yaml
+    env:
+      ELEMENT_ID: etLogMatchToleranceSeconds
+- takeScreenshot: 2.3-17-log-match-tolerance-save-02
+- runFlow:
+    file: common/input-number-field.yaml
     env:
       FIELD_ID: etLogMatchToleranceSeconds
       INPUT_VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
