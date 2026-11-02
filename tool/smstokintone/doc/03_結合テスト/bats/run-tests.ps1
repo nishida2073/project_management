@@ -22,10 +22,12 @@ $deviceLabel = "既定"
 if ($Device) { $deviceLabel = $Device }
 $summary = Join-Path $runDir "結果.txt"
 
-function Save-Summary {
-    $lines = @("実行日時: " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), "対象: $Filter", "実機: $deviceLabel", "")
-    foreach ($r in $script:results) { $lines += "$($r.Result)  $($r.Flow)  （エビデンス: $($r.Evidence)）" }
-    [IO.File]::WriteAllLines($summary, $lines, (New-Object System.Text.UTF8Encoding($true)))
+$header = @("実行日時: " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), "対象: $Filter", "実機: $deviceLabel", "")
+[IO.File]::WriteAllLines($summary, $header, (New-Object System.Text.UTF8Encoding($true)))
+
+function Save-Summary($item) {
+    $line = "$($item.Result)  $($item.Flow)  （エビデンス: $($item.Evidence)）"
+    [IO.File]::AppendAllText($summary, $line + "`r`n", (New-Object System.Text.UTF8Encoding($false)))
 }
 
 function Invoke-Flows([object[]]$flowFiles) {
@@ -49,7 +51,7 @@ function Invoke-Flows([object[]]$flowFiles) {
         $item = [pscustomobject]@{ Flow = $flow.Name; ExitCode = $code; Result = $label; Evidence = $flowOut }
         $out += $item
         $script:results += $item
-        Save-Summary
+        Save-Summary $item
     }
     return $out
 }
