@@ -17,6 +17,17 @@ $evidenceRoot = Join-Path $PSScriptRoot "..\エビデンス"
 $runDir = Join-Path $evidenceRoot (Get-Date -Format "yyyyMMdd-HHmmss")
 New-Item -ItemType Directory -Force -Path $runDir | Out-Null
 
+$script:results = @()
+$deviceLabel = "既定"
+if ($Device) { $deviceLabel = $Device }
+$summary = Join-Path $runDir "結果.txt"
+
+function Save-Summary {
+    $lines = @("実行日時: " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), "対象: $Filter", "実機: $deviceLabel", "")
+    foreach ($r in $script:results) { $lines += "$($r.Result)  $($r.Flow)  （エビデンス: $($r.Evidence)）" }
+    [IO.File]::WriteAllLines($summary, $lines, (New-Object System.Text.UTF8Encoding($true)))
+}
+
 function Invoke-Flows([object[]]$flowFiles) {
     $out = @()
     foreach ($flow in $flowFiles) {
@@ -35,12 +46,14 @@ function Invoke-Flows([object[]]$flowFiles) {
         & $maestro @maestroArgs | Out-Host
         $code = $LASTEXITCODE
         if ($code -eq 0) { $label = "成功" } else { $label = "失敗" }
-        $out += [pscustomobject]@{ Flow = $flow.Name; ExitCode = $code; Result = $label; Evidence = $flowOut }
+        $item = [pscustomobject]@{ Flow = $flow.Name; ExitCode = $code; Result = $label; Evidence = $flowOut }
+        $out += $item
+        $script:results += $item
+        Save-Summary
     }
     return $out
 }
 
-$results = @()
 $setupFailed = $false
 if ($Setup) {
     $setupFlows = @(Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot "..\maestro\setup") -Filter "*.yaml" -File | Sort-Object Name)
@@ -49,22 +62,16 @@ if ($Setup) {
         exit 1
     }
     $setupResults = Invoke-Flows $setupFlows
-    $results += $setupResults
     if ($setupResults | Where-Object { $_.ExitCode -ne 0 }) {
         $setupFailed = $true
         Write-Host "セットアップに失敗したため、テストを実行しません"
     }
 }
 if (-not $setupFailed) {
-    $results += Invoke-Flows $flows
+    Invoke-Flows $flows | Out-Null
 }
 
-$deviceLabel = "既定"
-if ($Device) { $deviceLabel = $Device }
-$lines = @("実行日時: " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss"), "対象: $Filter", "実機: $deviceLabel", "")
-foreach ($r in $results) { $lines += "$($r.Result)  $($r.Flow)  （エビデンス: $($r.Evidence)）" }
-$summary = Join-Path $runDir "結果.txt"
-[IO.File]::WriteAllLines($summary, $lines, (New-Object System.Text.UTF8Encoding($true)))
+$results = $script:results
 
 Write-Host ""
 Write-Host "結果: $summary"
