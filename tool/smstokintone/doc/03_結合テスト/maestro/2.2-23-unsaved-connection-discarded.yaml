@@ -10,12 +10,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-23-unsaved-connection-discarded-01
 - assertVisible: "設定を追加"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -30,11 +30,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     direction: DOWN
 - assertNotVisible: "${UNSAVED_SUBDOMAIN}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     text: "${SUBDOMAIN}"
 # 注: SUBDOMAIN は env_ok.json に記載の接続先サブドメインの値。vars の placeholder はローカルで実値に置き換えて使い、値はリポジトリに書かない
 - takeScreenshot: 2.2-23-unsaved-connection-discarded-05

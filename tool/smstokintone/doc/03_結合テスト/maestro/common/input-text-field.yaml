@@ -4,7 +4,7 @@ appId: jp.co.nttdata_univ.smstokintone
 # 既存の値がある入力欄に、値を入れ直す（共通の手順）。スクロールと撮影は呼び出し元で行う
 # 入力: FIELD_ID（欄の id の末尾）、INPUT_VALUE（入力する値）
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/${FIELD_ID}"
+    id: "jp.co.nttdata_univ.smstokintone:id/${FIELD_ID}"
     index: 0
     point: "95%, 50%"
 - eraseText: 50

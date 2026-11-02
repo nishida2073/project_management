@@ -18,16 +18,16 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     text: "${TOLERANCE_HOURS_SAVED}"
 - takeScreenshot: 2.2-16-reopen-tolerance-04

@@ -11,21 +11,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-11-save-conflict-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-11-save-conflict-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 # 外部条件: 送信元 B（test-sender-b）の内容は、この画面を開いた後に SMSの受信などで更新しておく（手順は未確認）。
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
       index: 1
     direction: DOWN
     visibilityPercentage: 100
@@ -43,5 +43,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - takeScreenshot: 2.4-11-save-conflict-05
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - takeScreenshot: 2.4-11-save-conflict-06

@@ -11,18 +11,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
 - takeScreenshot: 2.3-07-search-filters-hidden-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.3-07-search-filters-hidden-03
@@ -30,5 +30,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-07-search-filters-hidden-04
 - assertVisible: "▼ 表示"
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/llSearchFilters"
+    id: "jp.co.nttdata_univ.smstokintone:id/llSearchFilters"
 - takeScreenshot: 2.3-07-search-filters-hidden-05

@@ -10,23 +10,23 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/tvSendPermissionStatus"
+      id: "jp.co.nttdata_univ.smstokintone:id/tvSendPermissionStatus"
     direction: DOWN
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/tvSendPermissionStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvSendPermissionStatus"
     text: "許可済み"
 - pressKey: Back
 - runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-22-send-permission-denied-01
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"

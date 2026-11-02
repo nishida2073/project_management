@@ -11,7 +11,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-14-reopen-settings-01
 - assertVisible: "設定を追加"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - runFlow: common/fill-field-mapping-saved-values.yaml
@@ -19,12 +19,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: common/fill-tolerance-hours-saved-values.yaml
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
     checked: true
 - tapOn: "設定を保存"
 - assertVisible: "設定を保存しました"
@@ -34,106 +34,106 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-14-reopen-settings-03
 - assertVisible: "設定を追加"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "${SAVED_SEND_TARGET_NAME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etKeyword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 0
     text: "${SAVED_KEYWORD}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     text: "${SUBDOMAIN}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLoginName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
     text: "${LOGIN_NAME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etAppId"
+      id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etAppId"
+    id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
     text: "${APP_ID}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldType"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etFieldType"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
     text: "${SAVED_FIELD_TYPE}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
     text: "${SAVED_FIELD_DATETIME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldSender"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etFieldSender"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
     text: "${SAVED_FIELD_SENDER}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
     text: "${SAVED_FIELD_COMPANY}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
     text: "${SAVED_FIELD_USER}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etFieldBody"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
     text: "${SAVED_FIELD_BODY}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
     text: "${SAVED_FIELD_HISTORY}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
     text: "${LOGIN_PASSWORD}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     text: "${TOLERANCE_HOURS_SAVED}"
 - takeScreenshot: 2.2-14-reopen-settings-04

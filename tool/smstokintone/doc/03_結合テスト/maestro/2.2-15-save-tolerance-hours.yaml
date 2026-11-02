@@ -10,22 +10,22 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
 - takeScreenshot: 2.2-15-save-tolerance-hours-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     enabled: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml

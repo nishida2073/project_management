@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - assertVisible: "設定を追加"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "${DUPLICATE_SEND_TARGET_NAME}"
 - tapOn: "設定を追加"
@@ -18,17 +18,17 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "設定 2"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
 - inputText: "${DUPLICATE_SEND_TARGET_NAME}"
 - hideKeyboard
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "${DUPLICATE_SEND_TARGET_NAME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etAppId"
+      id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
       index: 0
     direction: DOWN
 - runFlow:
@@ -38,7 +38,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${DUP_APP_ID}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
       index: 0
     direction: DOWN
 - runFlow:
@@ -48,7 +48,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${DUP_LOGIN_NAME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
       index: 0
     direction: DOWN
     visibilityPercentage: 100

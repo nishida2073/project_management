@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-20-log-match-tolerance-save-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-20-log-match-tolerance-save-02

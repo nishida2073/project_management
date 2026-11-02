@@ -11,20 +11,20 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-06-save-company-and-name-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-06-save-company-and-name-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
       index: 1
     direction: DOWN
     visibilityPercentage: 100
@@ -36,7 +36,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-06-save-company-and-name-03
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etContinuationUserName"
       index: 1
     direction: DOWN
     visibilityPercentage: 100
@@ -52,5 +52,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-06-save-company-and-name-05
 - assertVisible: "設定を保存しました"
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - takeScreenshot: 2.4-06-save-company-and-name-06

@@ -11,10 +11,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定のインポート・エクスポート"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-02-export-ok-02
 - assertVisible: "(?s).*s2k_settings_\\d{8}_\\d{6}\\.json.*"   # 未確認: 提案されるファイル名の表示

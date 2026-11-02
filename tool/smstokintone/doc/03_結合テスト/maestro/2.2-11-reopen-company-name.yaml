@@ -9,16 +9,16 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-11-reopen-company-name-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.2-11-reopen-company-name-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - pressKey: Back
 - takeScreenshot: 2.2-11-reopen-company-name-03
@@ -26,12 +26,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-11-reopen-company-name-04
 - assertVisible: "設定を追加"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etCompanyName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etCompanyName"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -49,9 +49,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etCompanyName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etCompanyName"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etCompanyName"
     text: "${COMPANY_NAME}"
 - takeScreenshot: 2.2-11-reopen-company-name-07

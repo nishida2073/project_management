@@ -10,12 +10,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -26,7 +26,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-09-save-settings-02
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etKeyword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -37,7 +37,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-09-save-settings-03
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -48,7 +48,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-09-save-settings-04
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -59,7 +59,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-09-save-settings-05
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -72,7 +72,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertNotVisible: "${LOGIN_PASSWORD}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etAppId"
+      id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:

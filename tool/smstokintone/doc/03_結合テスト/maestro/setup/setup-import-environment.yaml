@@ -15,7 +15,7 @@ appId: jp.co.nttdata_univ.smstokintone
       FILE_PATTERN: ${SETUP_FILE_PATTERN}
 - assertVisible: '(?s).*${SETUP_FILE_PATTERN}.*'   # 「ファイル名」と改行を含む 1 つの表示に一致させる（端末で確認済み）
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
 - assertVisible: "設定をインポートしますか？"
 - tapOn:
     id: "android:id/button1"   # 未確認: 確認ダイアログの「インポート」ボタンの id

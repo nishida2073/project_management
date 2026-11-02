@@ -12,18 +12,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible: "注意"
 - assertVisible: "引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件あります。必要に応じて会社名を追加してください。"
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-02
 - tapOn: "OK" # 未確認: OK ボタンの文言（端末の言語で変わる場合あり）
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-03
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-04

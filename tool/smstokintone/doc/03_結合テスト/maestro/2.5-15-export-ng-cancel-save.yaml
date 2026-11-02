@@ -11,15 +11,15 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定のインポート・エクスポート"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-15-export-ng-cancel-save-02
 - back   # 未確認: 保存ダイアログを戻る操作で閉じられるか
 - assertNotVisible: "設定をエクスポートしました"   # 未確認: トーストが出ないことの確認
 - assertNotVisible: "エクスポートエラー"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnExportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
 - takeScreenshot: 2.5-15-export-ng-cancel-save-03

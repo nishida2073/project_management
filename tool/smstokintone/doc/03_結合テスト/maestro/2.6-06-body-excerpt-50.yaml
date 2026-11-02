@@ -13,7 +13,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -22,7 +22,7 @@ appId: jp.co.nttdata_univ.smstokintone
       FIELD_ID: etLogBodyExcerptLength
       INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     text: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.6-06-body-excerpt-50-01
 - pressKey: Back
@@ -32,7 +32,7 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '(?s).*\[受信完了\].*'
     timeout: 60000
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnRefreshLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
 - takeScreenshot: 2.6-06-body-excerpt-50-02
 - assertVisible: '(?s).*test-company.*'
 - assertVisible: '(?s).*${LOG_BODY_EXCERPT_LAST_CHARS}.*'
@@ -41,7 +41,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -50,6 +50,6 @@ appId: jp.co.nttdata_univ.smstokintone
       FIELD_ID: etLogBodyExcerptLength
       INPUT_VALUE: "${LOG_BODY_EXCERPT_DEFAULT}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     text: "${LOG_BODY_EXCERPT_DEFAULT}"
 - takeScreenshot: 2.6-06-body-excerpt-50-03

@@ -10,26 +10,26 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etDateFrom"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
 - tapOn: "${CURRENT_YEAR}"
 - tapOn: "${PAST_YEAR}"
 - tapOn: "1"
 - tapOn:
     id: "android:id/button1"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etDateTo"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateTo"
 - tapOn: "${CURRENT_YEAR}"
 - tapOn: "${PAST_YEAR}"
 - tapOn: "1"
 - tapOn:
     id: "android:id/button1"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etDateFrom"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
     text: '${PAST_YEAR}/.*'
 - takeScreenshot: 2.7-19-search-old-date-01
 - tapOn: "検索"

@@ -11,13 +11,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-01-sort-descending-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-01-sort-descending-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible: "${SENDER_A}"
 # 未確認: 送信元 B は画面の下にあるとき、スクロールしてから確認する。
@@ -27,7 +27,7 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
 - assertVisible: "${SENDER_B}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 # 未確認: 古い順では SENDER_A が上、SENDER_B が下になる想定（below で確認）。
 - assertVisible:
@@ -38,7 +38,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "新しい順"
 - takeScreenshot: 2.4-01-sort-descending-03
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortDescending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortDescending"
     checked: true
 # 未確認: 新しい順では SENDER_B が上、SENDER_A が下になる想定。
 - assertVisible:

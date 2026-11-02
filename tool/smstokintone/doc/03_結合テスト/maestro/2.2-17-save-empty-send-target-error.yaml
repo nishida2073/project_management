@@ -9,11 +9,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-17-save-empty-send-target-error-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
 # 前提確認: 会社名の抽出が有効
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.2-17-save-empty-send-target-error-02

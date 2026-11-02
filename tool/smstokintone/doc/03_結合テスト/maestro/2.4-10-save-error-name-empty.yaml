@@ -11,30 +11,30 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-10-save-error-name-empty-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.4-10-save-error-name-empty-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-10-save-error-name-empty-03
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationUserName"
     index: 0
     point: "95%, 50%"
 - takeScreenshot: 2.4-10-save-error-name-empty-04
@@ -48,18 +48,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - takeScreenshot: 2.4-10-save-error-name-empty-06
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - pressKey: Back
 - takeScreenshot: 2.4-10-save-error-name-empty-07
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: UP
     visibilityPercentage: 100
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.4-10-save-error-name-empty-08
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - takeScreenshot: 2.4-10-save-error-name-empty-09

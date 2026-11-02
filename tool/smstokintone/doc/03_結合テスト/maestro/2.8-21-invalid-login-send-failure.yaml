@@ -12,12 +12,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -30,7 +30,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-21-invalid-login-send-failure-02
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"

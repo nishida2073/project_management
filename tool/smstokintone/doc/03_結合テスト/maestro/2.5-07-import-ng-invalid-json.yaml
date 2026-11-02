@@ -13,7 +13,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "ファイルを選択"
 - assertVisible: "ファイルが選択されていません"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
@@ -29,6 +29,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.5-07-import-ng-invalid-json-04
 - assertVisible: "ファイルが選択されていません"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
     enabled: false
 - takeScreenshot: 2.5-07-import-ng-invalid-json-05

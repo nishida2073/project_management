@@ -10,30 +10,30 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
     index: 0
 - inputText: "${FIXED_FROM}"
 - hideKeyboard
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionAfter"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionAfter"
     index: 0
 - inputText: "${FIXED_TO}"
 - hideKeyboard
@@ -43,7 +43,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-06-fixed-conversion-receive-02
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"

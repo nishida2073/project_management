@@ -4,7 +4,7 @@ appId: jp.co.nttdata_univ.smstokintone
 # 入力（呼び出し元の env）: SAVED_SEND_TARGET_NAME、SAVED_KEYWORD、SUBDOMAIN、LOGIN_NAME、LOGIN_PASSWORD、APP_ID
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -14,7 +14,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_SEND_TARGET_NAME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etKeyword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -24,7 +24,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_KEYWORD}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -34,7 +34,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SUBDOMAIN}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -44,7 +44,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${LOGIN_NAME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLoginPassword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -54,7 +54,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${LOGIN_PASSWORD}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etAppId"
+      id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:

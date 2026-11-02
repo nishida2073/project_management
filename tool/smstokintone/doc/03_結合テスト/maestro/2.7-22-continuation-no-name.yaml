@@ -9,22 +9,22 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     index: 0
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: false
 - pressKey: Back
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - tapOn: "検索"
 - assertVisible: '(?s).*${CONTINUATION_SENDER}.*'

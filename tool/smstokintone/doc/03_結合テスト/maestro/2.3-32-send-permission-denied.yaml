@@ -9,21 +9,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-32-send-permission-denied-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-32-send-permission-denied-02
 - assertVisible: # 前提の確認（「許可する」が表示され、許可済みの表示がない）
-    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/tvSendPermissionStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvSendPermissionStatus"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
     index: 0
 - takeScreenshot: 2.3-32-send-permission-denied-03
 - tapOn: "許可しない" # 未確認: 端末の権限ダイアログの拒否ボタンの文字（Android の版・言語で異なる）
 - takeScreenshot: 2.3-32-send-permission-denied-04
 - assertVisible: "SMSの送信の許可がない場合、自動返信はできません" # トースト（表示時間が短いため確認が必要）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
 - takeScreenshot: 2.3-32-send-permission-denied-05

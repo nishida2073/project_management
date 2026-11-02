@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-22-reopen-saved-values-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-22-reopen-saved-values-02
@@ -20,7 +20,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-22-reopen-saved-values-03
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-22-reopen-saved-values-04
@@ -32,7 +32,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-22-reopen-saved-values-05
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     direction: UP
     visibilityPercentage: 100
 - takeScreenshot: 2.3-22-reopen-saved-values-06
@@ -44,7 +44,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-22-reopen-saved-values-07
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-22-reopen-saved-values-08
@@ -56,7 +56,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-22-reopen-saved-values-09
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-22-reopen-saved-values-10
@@ -72,35 +72,35 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-22-reopen-saved-values-13
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
 - takeScreenshot: 2.3-22-reopen-saved-values-14
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
 - takeScreenshot: 2.3-22-reopen-saved-values-15
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     direction: UP
     visibilityPercentage: 100
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-22-reopen-saved-values-16
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-22-reopen-saved-values-17
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある

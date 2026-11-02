@@ -11,7 +11,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-01-receive-auto-process-01
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"
@@ -21,7 +21,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "送信先の設定"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - takeScreenshot: 2.8-01-receive-auto-process-03
@@ -29,17 +29,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvSenderAddress"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvSenderAddress"
     text: "test-phone-a"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
     text: "TEST－COMPANY"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationUserName"
     text: "test-taro"
 - takeScreenshot: 2.8-01-receive-auto-process-04

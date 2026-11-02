@@ -4,16 +4,16 @@ appId: jp.co.nttdata_univ.smstokintone
 # 入力（呼び出し元の env）: TOLERANCE_HOURS_SAVED
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     enabled: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     direction: DOWN
 - runFlow:
     file: input-text-field.yaml

@@ -4,7 +4,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenSettingsImportExport"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenSettingsImportExport"
 - takeScreenshot: 2.1-07-open-import-export-01
 - assertVisible: "設定のインポート・エクスポート"
 - assertVisible: "ファイルを選択"

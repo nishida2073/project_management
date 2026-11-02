@@ -10,28 +10,28 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - assertNotVisible: "${FIXED_FROM_1}"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - takeScreenshot: 2.3-10-fixed-conversion-add-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteFixedConversion"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
     index: 0
 - takeScreenshot: 2.3-10-fixed-conversion-add-03
 - inputText: "${FIXED_FROM_1}"
 - takeScreenshot: 2.3-10-fixed-conversion-add-04
 - hideKeyboard
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionAfter"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionAfter"
     index: 0
 - takeScreenshot: 2.3-10-fixed-conversion-add-05
 - inputText: "${FIXED_TO_1}"
@@ -46,7 +46,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - assertVisible: "${FIXED_FROM_1}"
 - assertVisible: "${FIXED_TO_1}"
 - takeScreenshot: 2.3-10-fixed-conversion-add-09

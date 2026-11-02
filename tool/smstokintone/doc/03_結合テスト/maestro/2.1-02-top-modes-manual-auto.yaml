@@ -8,26 +8,26 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.1-02-top-modes-manual-auto-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSendManual"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-02
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-03
 - pressKey: Back
 - takeScreenshot: 2.1-02-top-modes-manual-auto-04
 - assertVisible: "SMSの送信モード"
 - assertVisible: "SMSの返信モード"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
     text: "手動"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
     text: "自動"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-05

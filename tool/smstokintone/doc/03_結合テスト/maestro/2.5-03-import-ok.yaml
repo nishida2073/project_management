@@ -13,7 +13,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "ファイルを選択"
 - assertVisible: "ファイルが選択されていません"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
@@ -28,7 +28,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "(?s).*送信先の設定: 統合（2件）.*"   # 未確認: 複数行の表示
 - assertVisible: "(?s).*引継ぎ内容: 統合（1件）.*"   # 未確認: 複数行の表示
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
 - takeScreenshot: 2.5-03-import-ok-04
 - assertVisible: "設定をインポートしますか？"
 - tapOn:

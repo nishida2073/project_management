@@ -8,28 +8,28 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-02
 - assertVisible: # 前提の確認（会社名の抽出が有効）
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-03
 - assertVisible: # 前提の確認（会社名の自動変換が有効）
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     index: 0
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-04
 - assertVisible: # スイッチの選択状態の確認
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
 - pressKey: Back
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-05
@@ -37,11 +37,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-06
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-07
 - assertVisible: # 開き直した後も無効のまま保存されていること
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
 - takeScreenshot: 2.3-26-company-name-auto-conversion-off-08

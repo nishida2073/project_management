@@ -11,13 +11,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
 - runFlow:
     file: common/input-text-field.yaml
     env:
@@ -25,7 +25,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"
 - takeScreenshot: 2.3-06-search-date-range-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
 - pressKey: Back
 - takeScreenshot: 2.3-06-search-date-range-03
@@ -33,10 +33,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-06-search-date-range-04
 - assertVisible: "受信日の範囲"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etDateFrom"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
     text: "${EXPECTED_DATE_FROM}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etDateTo"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateTo"
     text: "${EXPECTED_DATE_TO}"
 # 注意: EXPECTED_DATE_FROM と EXPECTED_DATE_TO は vars に固定で書いている（今日が 2026-11-02 の場合の値。表示は yyyy/MM/dd）。実行日が変わったら vars を書き換える
 - takeScreenshot: 2.3-06-search-date-range-05

@@ -10,17 +10,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSendManual"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     direction: UP
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     checked: true
 - pressKey: Back
 - runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-15-manual-send-mode-01
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"

@@ -11,16 +11,16 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
 # 未確認: システムの許可ダイアログのボタン文言（端末の言語で変わります）
 - takeScreenshot: 2.3-16-permission-send-grant-02
 - tapOn: "許可"
 - takeScreenshot: 2.3-16-permission-send-grant-03
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/btnRequestSendPermission"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvSendPermissionStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvSendPermissionStatus"
     text: "許可済み"
 - takeScreenshot: 2.3-16-permission-send-grant-04

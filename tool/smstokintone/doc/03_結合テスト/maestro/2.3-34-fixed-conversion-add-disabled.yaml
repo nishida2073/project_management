@@ -8,47 +8,47 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-02
 - assertVisible: # 前提の確認（会社名の抽出が有効）
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-03
 - assertNotVisible: # 前提の確認（固定変換の行がない）
-    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: UP
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-04
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     index: 0
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-05
 - assertVisible: # スイッチの選択状態の確認
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-06
 - assertVisible: # 押せない状態（enabled が false）の確認
-    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     enabled: false
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     index: 0
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-07
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-08

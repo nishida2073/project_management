@@ -13,15 +13,15 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "設定 1"
     direction: UP
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 0
     text: "test-company"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteKeyword"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteKeyword"
     index: 0
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-02
 - assertNotVisible: "test-company"

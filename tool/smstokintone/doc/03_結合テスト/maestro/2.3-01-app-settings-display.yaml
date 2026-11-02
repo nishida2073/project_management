@@ -6,122 +6,122 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
     text: "自動"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
     text: "手動"
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-01-app-settings-display-01
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+    id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     text: "${REPLY_COOLDOWN_SECONDS}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     direction: UP
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
 # 送信先が 1 件のとき、検索の送信先の選択欄は表示されない（実装どおり）
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/llDefaultSendTargetFilter"
+    id: "jp.co.nttdata_univ.smstokintone:id/llDefaultSendTargetFilter"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     direction: UP
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     checked: false
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSearchSentAutoOnlyEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentAutoOnlyEnabled"
     checked: false
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSearchSentManualOnlyEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentManualOnlyEnabled"
     checked: false
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
     checked: false
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
-    checked: false
-- scrollUntilVisible:
-    element:
-      id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swSendExtractionFailedEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: true
-- assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationScopeUnlimited"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
+    checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
+    checked: true
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
+    checked: true
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
     checked: true
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLogRefreshInterval"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
     text: "${LOG_REFRESH_INTERVAL}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "${LOG_MATCH_TOLERANCE_SECONDS}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     text: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-01-app-settings-display-02

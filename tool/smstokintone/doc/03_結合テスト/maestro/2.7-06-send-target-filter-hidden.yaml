@@ -7,12 +7,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/tvSendTargetFilterLabel"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvSendTargetFilterLabel"
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/llSendTargetFilter"
+    id: "jp.co.nttdata_univ.smstokintone:id/llSendTargetFilter"
 - takeScreenshot: 2.7-06-send-target-filter-hidden-01

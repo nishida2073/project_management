@@ -9,28 +9,28 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-27-ai-extraction-on-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-27-ai-extraction-on-02
 - assertVisible: # 前提の確認（会社名の抽出が有効）
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-27-ai-extraction-on-03
 - assertVisible: # 前提の確認（AIによる抽出が無効）
-    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: false
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     index: 0
 - takeScreenshot: 2.3-27-ai-extraction-on-04
 - assertVisible: # スイッチの選択状態の確認
-    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.3-27-ai-extraction-on-05
@@ -38,11 +38,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-27-ai-extraction-on-06
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-27-ai-extraction-on-07
 - assertVisible: # 開き直した後も有効のまま保存されていること
-    id: "com.ssfrontier.smstokintone:id/swAiExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: true
 - takeScreenshot: 2.3-27-ai-extraction-on-08

@@ -11,37 +11,37 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -50,70 +50,70 @@ appId: jp.co.nttdata_univ.smstokintone
       FIELD_ID: etLogMatchToleranceSeconds
       INPUT_VALUE: "${LOG_MATCH_TOLERANCE_PRE}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "${LOG_MATCH_TOLERANCE_PRE}"
 - takeScreenshot: 2.3-17-reset-settings-02
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     direction: UP
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
 - takeScreenshot: 2.3-17-reset-settings-03
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSendManual"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
 - takeScreenshot: 2.3-17-reset-settings-04
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSendManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
     direction: UP
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnResetSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
 - takeScreenshot: 2.3-17-reset-settings-05
 - assertVisible: "設定を初期化しますか？"
 - tapOn: "初期化" # 未確認: 画面の後ろの初期化ボタンと同じ文字のため、ダイアログのボタンが選ばれるか確認する
 - takeScreenshot: 2.3-17-reset-settings-06
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbThemeLight"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSendAuto"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
     text: "15"
 - takeScreenshot: 2.3-17-reset-settings-07

@@ -11,19 +11,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-09-save-error-company-empty-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-09-save-error-company-empty-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
     index: 0
     point: "95%, 50%"
 - takeScreenshot: 2.4-09-save-error-company-empty-03
@@ -37,5 +37,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - takeScreenshot: 2.4-09-save-error-company-empty-05
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - takeScreenshot: 2.4-09-save-error-company-empty-06

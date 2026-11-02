@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-16-manual-reply-default-01
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"

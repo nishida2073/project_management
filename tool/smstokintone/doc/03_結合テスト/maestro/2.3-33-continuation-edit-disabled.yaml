@@ -8,31 +8,31 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-33-continuation-edit-disabled-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-33-continuation-edit-disabled-02
 - assertVisible: # 前提の確認（引継ぎが有効）
-    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     index: 0
 - takeScreenshot: 2.3-33-continuation-edit-disabled-03
 - assertVisible: # スイッチの選択状態の確認
-    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-33-continuation-edit-disabled-04
 - assertVisible: # 押せない状態（enabled が false）の確認
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     enabled: false
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     index: 0
 - takeScreenshot: 2.3-33-continuation-edit-disabled-05
 - assertVisible: "アプリの設定" # 設定画面のまま（引継ぎ内容の設定画面に移っていないこと）

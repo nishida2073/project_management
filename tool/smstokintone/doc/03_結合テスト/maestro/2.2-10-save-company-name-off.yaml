@@ -10,17 +10,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-10-save-company-name-off-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
 # 前提確認: 会社名の抽出が有効（下の checked: true）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.2-10-save-company-name-off-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - pressKey: Back
 - takeScreenshot: 2.2-10-save-company-name-off-03
@@ -29,12 +29,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が保存済み
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etCompanyName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etCompanyName"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml

@@ -10,13 +10,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-02-keyword-search-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-02-keyword-search-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible: "${SENDER_A}"
 # 未確認: 送信元 B は画面の下にあるとき、スクロールしてから確認する。
@@ -26,10 +26,10 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
 - assertVisible: "${SENDER_B}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - takeScreenshot: 2.4-02-keyword-search-03
 - inputText: "${SEARCH_KEYWORD}"
 - takeScreenshot: 2.4-02-keyword-search-04

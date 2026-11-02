@@ -11,28 +11,28 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swSearchExtractionFailedEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
     checked: true
 - pressKey: Back
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - tapOn: "検索"
 - assertVisible: '.*件見つかりました.*'
 - assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - tapOn: "全選択"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsItemSelect"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsItemSelect"
     index: ${SMS_ABNORMAL_CHECKBOX_INDEX}
     checked: true
 - tapOn: "選択したSMSを送信"

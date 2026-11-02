@@ -10,46 +10,46 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameAutoConversionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     direction: UP
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
 - takeScreenshot: 2.3-08-company-name-extraction-off-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.3-08-company-name-extraction-off-03
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     enabled: false
 - pressKey: Back
 - takeScreenshot: 2.3-08-company-name-extraction-off-04
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.3-08-company-name-extraction-off-05
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etCompanyName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etCompanyName"
 - assertNotVisible: "送信先の振り分け"
 - takeScreenshot: 2.3-08-company-name-extraction-off-06

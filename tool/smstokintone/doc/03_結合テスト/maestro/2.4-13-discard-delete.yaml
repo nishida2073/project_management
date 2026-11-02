@@ -11,39 +11,39 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-13-discard-delete-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-13-discard-delete-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnDeleteContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteContinuationInfo"
       index: 1
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteContinuationInfo"
     index: 1
 - takeScreenshot: 2.4-13-discard-delete-03
 - assertNotVisible: "${SENDER_B}"
 - pressKey: Back
 - takeScreenshot: 2.4-13-discard-delete-04
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-13-discard-delete-05
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - assertVisible: "${SENDER_B}"
 - takeScreenshot: 2.4-13-discard-delete-06

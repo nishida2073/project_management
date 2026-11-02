@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-19-reply-cooldown-save-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplyCooldownSeconds"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-19-reply-cooldown-save-02

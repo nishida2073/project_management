@@ -8,22 +8,22 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-24-search-default-send-none-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-24-search-default-send-none-02
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     index: 0
 - takeScreenshot: 2.3-24-search-default-send-none-03
 - assertVisible: # 未確認: チェックボックスの選択状態の確認
-    id: "com.ssfrontier.smstokintone:id/cbSearchSendNoneOnlyEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.3-24-search-default-send-none-04
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-24-search-default-send-none-05
 - assertVisible: # 未確認: 検索画面の送信状況「未送信」の選択状態
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: true
 - takeScreenshot: 2.3-24-search-default-send-none-06

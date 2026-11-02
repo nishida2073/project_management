@@ -9,11 +9,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-03-delete-copy-send-target-01
 - assertVisible: "設定を追加"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "${SEND_TARGET_NAME}"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteSendTarget"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteSendTarget"
     index: 0
 - takeScreenshot: 2.2-03-delete-copy-send-target-02
 - assertNotVisible: "${SEND_TARGET_NAME}"

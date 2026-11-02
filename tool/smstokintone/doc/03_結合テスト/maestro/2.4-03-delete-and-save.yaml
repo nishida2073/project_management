@@ -11,13 +11,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-03-delete-and-save-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-03-delete-and-save-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible: "${SENDER_A}"
 # 未確認: 送信元 B は画面の下にあるとき、スクロールしてから確認する。
@@ -27,11 +27,11 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
 - assertVisible: "${SENDER_B}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 - assertVisible: "${SENDER_A}"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteContinuationInfo"
     index: 0
 - takeScreenshot: 2.4-03-delete-and-save-03
 - assertNotVisible: "${SENDER_A}"
@@ -40,5 +40,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-03-delete-and-save-04
 - assertVisible: "設定を保存しました"
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - takeScreenshot: 2.4-03-delete-and-save-05

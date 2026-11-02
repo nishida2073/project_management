@@ -9,7 +9,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     direction: DOWN
     visibilityPercentage: 100
 - runFlow:
@@ -18,18 +18,18 @@ appId: jp.co.nttdata_univ.smstokintone
       FIELD_ID: etSmsSearchDateRangeDays
       INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSmsSearchDateRangeDays"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
 - pressKey: Back
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etDateFrom"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
     text: '\d{4}/\d{2}/\d{2}'
 - takeScreenshot: 2.7-02-search-date-range-01
 - tapOn: "検索"

@@ -10,19 +10,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - takeScreenshot: 2.3-11-fixed-conversion-delete-02
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
     index: 0
 - takeScreenshot: 2.3-11-fixed-conversion-delete-03
 - inputText: "${FIXED_FROM_1}"
 - takeScreenshot: 2.3-11-fixed-conversion-delete-04
 - hideKeyboard
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionAfter"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionAfter"
     index: 0
 - takeScreenshot: 2.3-11-fixed-conversion-delete-05
 - inputText: "${FIXED_TO_1}"
@@ -30,19 +30,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - hideKeyboard
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - takeScreenshot: 2.3-11-fixed-conversion-delete-07
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionBefore"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
     index: 1
 - takeScreenshot: 2.3-11-fixed-conversion-delete-08
 - inputText: "${FIXED_FROM_2}"
 - takeScreenshot: 2.3-11-fixed-conversion-delete-09
 - hideKeyboard
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etFixConversionAfter"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionAfter"
     index: 1
 - takeScreenshot: 2.3-11-fixed-conversion-delete-10
 - inputText: "${FIXED_TO_2}"
@@ -53,7 +53,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "${FIXED_FROM_2}"
 - assertVisible: "${FIXED_TO_2}"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteFixedConversion"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteFixedConversion"
     index: 0 # 未確認: id と index の組み合わせは公式ドキュメントで確認できていない
 - takeScreenshot: 2.3-11-fixed-conversion-delete-12
 - assertNotVisible: "${FIXED_FROM_1}"
@@ -67,7 +67,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "端末の許可"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddFixedConversion"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
 - assertNotVisible: "${FIXED_FROM_1}"
 - assertVisible: "${FIXED_FROM_2}"
 - assertVisible: "${FIXED_TO_2}"

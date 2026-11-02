@@ -10,11 +10,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
 - pressKey: Back
 - tapOn: "ログの確認"
@@ -23,6 +23,6 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '(?s).*${CONTINUATION_SENDER}.*'
     timeout: 60000
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnRefreshLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
 - assertVisible: '(?s).*${CONTINUATION_USER_NAME}.*'
 - takeScreenshot: 2.6-13-continuation-with-name-01

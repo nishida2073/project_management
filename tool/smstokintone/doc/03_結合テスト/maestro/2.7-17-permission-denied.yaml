@@ -9,5 +9,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "SMSの検索"
 - assertVisible: "アプリ設定画面の「端末の許可」の「SMSの読み取り」を許可してください"
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/layoutSearchForm"
+    id: "jp.co.nttdata_univ.smstokintone:id/layoutSearchForm"
 - takeScreenshot: 2.7-17-permission-denied-01

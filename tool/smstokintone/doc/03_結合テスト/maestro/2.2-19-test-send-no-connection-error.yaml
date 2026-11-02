@@ -10,15 +10,15 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etSubdomain"
+      id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     index: 0
     point: "95%, 50%"
 - takeScreenshot: 2.2-19-test-send-no-connection-error-02

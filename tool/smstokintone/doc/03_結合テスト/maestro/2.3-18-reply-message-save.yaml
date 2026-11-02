@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-18-reply-message-save-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplySuccessBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplySuccessBody"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-18-reply-message-save-02
@@ -21,7 +21,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etReplyFailedBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-18-reply-message-save-04

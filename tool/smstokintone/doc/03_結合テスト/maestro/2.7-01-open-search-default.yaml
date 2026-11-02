@@ -10,15 +10,15 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "検索条件"
 - assertVisible: "受信日の範囲"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etDateFrom"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
     text: '\d{4}/\d{2}/\d{2}'
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etDateTo"
+    id: "jp.co.nttdata_univ.smstokintone:id/etDateTo"
     text: '\d{4}/\d{2}/\d{2}'
 - takeScreenshot: 2.7-01-open-search-default-01
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - takeScreenshot: 2.7-01-open-search-default-02

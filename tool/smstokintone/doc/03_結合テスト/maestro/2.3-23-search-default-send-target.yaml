@@ -7,8 +7,8 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.3-23-search-default-send-target-01
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/llDefaultSendTargetFilter"
+    id: "jp.co.nttdata_univ.smstokintone:id/llDefaultSendTargetFilter"
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-23-search-default-send-target-02
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/llSendTargetFilter"
+    id: "jp.co.nttdata_univ.smstokintone:id/llSendTargetFilter"

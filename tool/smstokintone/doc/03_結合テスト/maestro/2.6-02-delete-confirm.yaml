@@ -9,7 +9,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "ログの確認"
 - assertVisible: "ログの一覧"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnDeleteLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteLog"
 - assertVisible: "ログを削除しますか？"
 - assertVisible: "この操作は取り消せません"
 - takeScreenshot: 2.6-02-delete-confirm-01

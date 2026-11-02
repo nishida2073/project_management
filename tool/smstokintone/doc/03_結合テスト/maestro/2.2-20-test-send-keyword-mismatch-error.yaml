@@ -10,10 +10,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swCompanyNameExtractionEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-02
@@ -22,16 +22,16 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1（振り分け：test-company）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etKeyword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
       index: 0
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 0
     text: "test-company"
 - scrollUntilVisible:

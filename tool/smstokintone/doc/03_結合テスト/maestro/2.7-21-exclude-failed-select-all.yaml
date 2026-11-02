@@ -12,21 +12,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchExtractionFailedOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionFailedOnly"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchExtractionFailedOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionFailedOnly"
     checked: true
 - tapOn: "検索"
 - assertVisible: '.*件見つかりました.*'
 - assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - tapOn: "全選択"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsItemSelect"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsItemSelect"
     index: ${SMS_ABNORMAL_CHECKBOX_INDEX}
     checked: false
 - tapOn: "選択したSMSを送信"

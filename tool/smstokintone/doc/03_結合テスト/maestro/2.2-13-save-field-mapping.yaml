@@ -10,12 +10,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 # 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etSendTargetName"
+    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0
     text: "test-send-target-1"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldType"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -24,7 +24,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_FIELD_TYPE}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldDatetime"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -33,7 +33,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_FIELD_DATETIME}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldSender"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -42,7 +42,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_FIELD_SENDER}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldCompanyName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -51,7 +51,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_FIELD_COMPANY}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldUserName"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -60,7 +60,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_FIELD_USER}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldBody"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml
@@ -69,7 +69,7 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_FIELD_BODY}"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etFieldHistory"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml

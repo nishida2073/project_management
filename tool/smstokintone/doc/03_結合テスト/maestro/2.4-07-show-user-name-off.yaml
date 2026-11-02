@@ -12,31 +12,31 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-07-show-user-name-off-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
     visibilityPercentage: 100
 # 前提確認（表示のみ、操作しない）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
 - takeScreenshot: 2.4-07-show-user-name-off-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: false
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
     direction: UP
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
 - takeScreenshot: 2.4-07-show-user-name-off-03
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etContinuationSearch"
+    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 # 前提確認（表示のみ、操作しない）
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbContinuationSortAscending"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
 - assertVisible: "氏名"
 - assertVisible: "${CONTINUATION_USER_NAME_B}"

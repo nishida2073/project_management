@@ -9,13 +9,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/swLogRefreshEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
     checked: false
 - pressKey: Back
 - tapOn: "ログの確認"

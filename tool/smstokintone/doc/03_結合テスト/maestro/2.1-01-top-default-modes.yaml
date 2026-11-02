@@ -7,9 +7,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "SMSの送信モード"
 - assertVisible: "SMSの返信モード"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvTopSendStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
     text: "自動"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/tvTopReplyStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
     text: "手動"
 - takeScreenshot: 2.1-01-top-default-modes-01

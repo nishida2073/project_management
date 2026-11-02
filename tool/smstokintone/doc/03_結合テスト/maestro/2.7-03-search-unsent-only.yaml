@@ -10,13 +10,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSendNoneOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: true
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSentAutoOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSentAutoOnly"
     checked: false
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/cbSmsSearchSentManualOnly"
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSentManualOnly"
     checked: false
 - tapOn: "検索"
 - assertVisible: '.*件見つかりました.*'

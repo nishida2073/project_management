@@ -10,24 +10,24 @@ appId: jp.co.nttdata_univ.smstokintone
 # 前提確認: test-send-target-1 の振り分けは test-company の 1 行
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etKeyword"
+      id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
       index: 0
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 0
     text: "test-company"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/btnAddKeyword"
+      id: "jp.co.nttdata_univ.smstokintone:id/btnAddKeyword"
       index: 0
     direction: UP
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnAddKeyword"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddKeyword"
     index: 0
 # 未確認: 行の追加は、2 行目の入力欄（etKeyword の index 1）の表示で確認する
 - takeScreenshot: 2.2-04-add-keyword-row-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etKeyword"
+    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
     index: 1
 - takeScreenshot: 2.2-04-add-keyword-row-03

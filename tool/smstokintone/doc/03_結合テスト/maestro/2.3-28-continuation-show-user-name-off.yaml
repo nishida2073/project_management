@@ -8,28 +8,28 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-02
 - assertVisible: # 前提の確認（引継ぎが有効）
-    id: "com.ssfrontier.smstokintone:id/swContinuationEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-03
 - assertVisible: # 前提の確認（氏名表示が有効）
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: true
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     index: 0
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-04
 - assertVisible: # スイッチの選択状態の確認
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: false
 - pressKey: Back
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-05
@@ -37,11 +37,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-06
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+      id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-07
 - assertVisible: # 開き直した後も無効のまま保存されていること
-    id: "com.ssfrontier.smstokintone:id/swContinuationShowUserNameEnabled"
+    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
     checked: false
 - takeScreenshot: 2.3-28-continuation-show-user-name-off-08

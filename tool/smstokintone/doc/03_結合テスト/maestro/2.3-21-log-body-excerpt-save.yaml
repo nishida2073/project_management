@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-21-log-body-excerpt-save-01
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etLogBodyExcerptLength"
+      id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-21-log-body-excerpt-save-02

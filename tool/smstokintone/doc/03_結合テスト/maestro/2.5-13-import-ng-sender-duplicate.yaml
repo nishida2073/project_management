@@ -13,7 +13,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "ファイルを選択"
 - assertVisible: "ファイルが選択されていません"
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
@@ -28,6 +28,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-04
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/btnImportSettings"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
     enabled: false
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-05

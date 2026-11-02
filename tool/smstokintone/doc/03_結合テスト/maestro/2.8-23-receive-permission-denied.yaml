@@ -11,16 +11,16 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/tvPermissionStatus"
+      id: "jp.co.nttdata_univ.smstokintone:id/tvPermissionStatus"
     direction: DOWN
 - assertNotVisible:
-    id: "com.ssfrontier.smstokintone:id/tvPermissionStatus"
+    id: "jp.co.nttdata_univ.smstokintone:id/tvPermissionStatus"
     text: "許可済み"
 - takeScreenshot: 2.8-23-receive-permission-denied-01
 - pressKey: Back
 - runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/btnTopOpenLog"
+    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-23-receive-permission-denied-02
 - assertVisible: "ログがありません"
 - takeScreenshot: 2.8-23-receive-permission-denied-03

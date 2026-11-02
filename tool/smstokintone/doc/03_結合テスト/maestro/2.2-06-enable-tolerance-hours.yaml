@@ -11,26 +11,26 @@ appId: jp.co.nttdata_univ.smstokintone
 # 前提確認: 統合条件は同一日付（既定）
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
       index: 0
     direction: DOWN
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
     index: 0
     checked: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
     direction: DOWN
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
 - takeScreenshot: 2.2-06-enable-tolerance-hours-02
 - assertVisible:
-    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     enabled: true
 - scrollUntilVisible:
     element:
-      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
     direction: DOWN
 - runFlow:
     file: common/input-text-field.yaml

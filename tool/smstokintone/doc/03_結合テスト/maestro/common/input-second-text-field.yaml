@@ -3,7 +3,7 @@
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - tapOn:
-    id: "com.ssfrontier.smstokintone:id/${FIELD_ID}"
+    id: "jp.co.nttdata_univ.smstokintone:id/${FIELD_ID}"
     index: 1
     point: "95%, 50%"
 - eraseText: 50
