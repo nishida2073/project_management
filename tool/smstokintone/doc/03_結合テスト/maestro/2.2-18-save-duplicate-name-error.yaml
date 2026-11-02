@@ -28,16 +28,6 @@ appId: jp.co.nttdata_univ.smstokintone
     text: "${DUPLICATE_SEND_TARGET_NAME}"
 - scrollUntilVisible:
     element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
-      index: 0
-    direction: DOWN
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etAppId
-      INPUT_VALUE: "${DUP_APP_ID}"
-- scrollUntilVisible:
-    element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
       index: 0
     direction: DOWN
@@ -57,6 +47,16 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       FIELD_ID: etLoginPassword
       INPUT_VALUE: "${DUP_LOGIN_PASSWORD}"
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
+      index: 0
+    direction: DOWN
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etAppId
+      INPUT_VALUE: "${DUP_APP_ID}"
 - takeScreenshot: 2.2-18-save-duplicate-name-error-01
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-18-save-duplicate-name-error-02
