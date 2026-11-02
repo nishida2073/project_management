@@ -3,7 +3,7 @@
 # 注: 送信ログは setup で消えているため、端末の SMS はすべて未送信
 # 確認: 一覧の行の送信状況は、未送信の印 ⬜（strings.xml の icon_send_none。行の文字は「⬜」だけで「未送信」の文字は出ない）で確認する。凡例（helper_sms_search_status_legend）にも ⬜ があるため、行の本文（${SEARCH_UNSENT_ROW_TEXT}）と組み合わせて、行の中の ⬜ を確認する
 # 外部条件: ${SEARCH_UNSENT_ROW_TEXT} は、端末の未送信の SMS の本文に含まれる文字（vars）。実施日に端末の SMS に合わせて書き換える
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

@@ -2,7 +2,7 @@
 # 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）。kintone の接続が有効（テスト環境）
 # 前提の操作: 「検索」と「全選択」を順に実行してから「選択したSMSを送信」を押す
 # 未確認: 送信完了のトーストの件数（成功N件 / 失敗M件）は、端末の SMS と通信の結果による
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

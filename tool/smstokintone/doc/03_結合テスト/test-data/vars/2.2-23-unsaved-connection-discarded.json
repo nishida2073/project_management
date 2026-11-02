@@ -1,4 +1,5 @@
 {
+  "SUBDOMAIN": "<接続先のサブドメイン>",
   "UNSAVED_SUBDOMAIN": "saved-unsaved-subdomain",
   "SETUP_FILE_PATTERN": "env_ok.*"
 }

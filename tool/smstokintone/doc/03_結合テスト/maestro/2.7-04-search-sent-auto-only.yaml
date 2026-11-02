@@ -3,7 +3,7 @@
 # 外部条件: 自動送信が完了した SMS が 1 件以上ある状態が必要。setup の clearState で送信ログが消えるため、この flow だけでは作れない（未確認: 自動送信を完了させるための SMS の受信手順）
 # 確認: 一覧の行の送信状況は、自動送信済みの印 ✅（strings.xml の icon_send_auto。行の文字は「✅」だけで「済（自動）」の文字は出ない）で確認する。凡例にも ✅ があるため、行の本文（${SEARCH_AUTO_SENT_ROW_TEXT}）と組み合わせて、行の中の ✅ を確認する
 # 外部条件: ${SEARCH_AUTO_SENT_ROW_TEXT} は、自動送信が完了した SMS の本文に含まれる文字（vars）。実施日に端末の SMS に合わせて書き換える
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

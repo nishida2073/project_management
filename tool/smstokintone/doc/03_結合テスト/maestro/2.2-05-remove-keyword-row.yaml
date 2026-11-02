@@ -1,6 +1,6 @@
 # 2.2 送信先の設定: 振り分けの行を削除する（テスト仕様書の 2.2 の 5 に対応）
 # 前提: JSON 読み込み後の状態（test-send-target-1 の振り分けは test-company の 1 行）。この flow の中で sample-company の行を追加してから削除する
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

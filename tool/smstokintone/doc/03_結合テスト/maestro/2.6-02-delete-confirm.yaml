@@ -1,7 +1,7 @@
 # 2.6 ログ: 削除の確認で「削除」を押すと、ログがなくなる（テスト仕様書の 2.6 の 2 に対応）
 # 前提: setup（clearState と JSON 投入）から開始する。ログは in-flow で作る（SMSの検索から手動で送信する）
 # 外部条件: 端末に未送信の SMS が 1 件以上ある
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

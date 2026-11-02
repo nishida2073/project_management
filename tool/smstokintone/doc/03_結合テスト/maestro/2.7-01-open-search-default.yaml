@@ -2,7 +2,7 @@
 # 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（外部条件。SMS の読み取りを許可しておく）
 # 注: 検索条件の既定は、受信日の範囲：今日、未送信のみ選択。この行の入力値（未送信：なし）に合わせて「未」を外す
 # 未確認: 日付の文字（yyyy/MM/dd）が今日の日付と一致することは、スクリーンショットで確認する
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

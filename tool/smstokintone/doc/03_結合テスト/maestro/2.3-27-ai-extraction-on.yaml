@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: AIによる抽出を切り替える（テスト仕様書の 2.3 の 27 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（AIによる抽出：なし（JSON の extractionAiEnabled）、会社名の抽出：あり、表示テーマ：ライト）。このフローで AIによる抽出をオンにする。
 # 外部条件: 端末上のAI（抽出用モデル）が利用できる状態が必要か未確認

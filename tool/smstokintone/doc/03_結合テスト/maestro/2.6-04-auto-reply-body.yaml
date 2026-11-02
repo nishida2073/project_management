@@ -3,7 +3,7 @@
 # 外部条件: 抽出が異常な SMS を 1 通受信し、自動返信されるまで待つ（下の「外部条件」の assert の待ち時間（60 秒）の間に受信させる）
 # 未確認: 返信完了のログが、受信の順序（2.8 の 13）と同じ条件で作られるか
 # 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

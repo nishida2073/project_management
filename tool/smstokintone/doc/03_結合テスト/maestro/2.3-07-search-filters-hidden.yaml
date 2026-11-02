@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 検索条件の表示を隠すにし、SMSの検索で確認する（テスト仕様書の 2.3 の 7 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、引継ぎ：あり
 # 前提（フローで設定）: 検索条件の表示が表示であることを確認してから、隠すに切り替える

@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 会社名の抽出がオフのとき固定変換の「+」は押せない（テスト仕様書の 2.3 の 34 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（会社名の抽出：あり（JSON の extractionCompanyNameEnabled）、固定変換の行：なし（JSON の extractionCompanyNameFixedConversions は空））。このフローで会社名の抽出をオフにする。
 - runFlow: setup/setup-import-environment.yaml

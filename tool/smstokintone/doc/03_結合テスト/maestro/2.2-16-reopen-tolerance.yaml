@@ -1,5 +1,5 @@
 # 2.2 送信先の設定: 統合条件と統合範囲を開き直して確認する（テスト仕様書の 2.2 の 16 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON 読み込み後の状態。この flow の中で、統合条件を時間、統合範囲を 6 にして保存してから、開き直して確認する
 # 注: 別の flow を runFlow で呼ぶと、その中の setup（clearState）で保存値が消えるため、入力は common の手順を直接呼ぶ

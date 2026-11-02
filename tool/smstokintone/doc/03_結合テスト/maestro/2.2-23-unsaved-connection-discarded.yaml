@@ -1,5 +1,5 @@
 # 2.2 送信先の設定: 保存していない接続先は破棄される（テスト仕様書の 2.2 の 23 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON 読み込み後の状態（test-send-target-1 の接続先が保存済み）。この flow の中で接続先を未保存の値に変えてから画面を閉じる
 # 未確認: 保存前の接続先の元の値は認証情報に当たるため照合せず、未保存の値が残らないことだけ確認する
@@ -33,5 +33,8 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/etSubdomain"
     direction: DOWN
 - assertNotVisible: "${UNSAVED_SUBDOMAIN}"
-# 未確認: 保存されている接続先（SUBDOMAIN）が画面に戻ることは、この flow では確認していない（接続先は認証情報のため、この flow の vars には値を書き写していない）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etSubdomain"
+    text: "${SUBDOMAIN}"
+# 注: SUBDOMAIN は env_ok.json に記載の接続先サブドメインの値。vars の placeholder はローカルで実値に置き換えて使い、値はリポジトリに書かない
 - takeScreenshot: 2.2-23-unsaved-connection-discarded-05

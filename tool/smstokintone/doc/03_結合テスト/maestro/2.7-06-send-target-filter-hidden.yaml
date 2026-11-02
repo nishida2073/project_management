@@ -1,6 +1,6 @@
 # 2.7 SMSの検索: 送信先が 1 件のとき、送信先の選択欄は表示されない（テスト仕様書の 2.7 の 6 に対応）
 # 前提: setup（clearState と JSON 投入）から開始する。送信先は 1 件（test-send-target-1）。送信先の選択欄は、送信先が 2 件以上のときに表示される
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

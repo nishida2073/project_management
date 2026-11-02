@@ -1,5 +1,5 @@
 # 2.8 自動処理: 送信先がないとき、SMSの送信開始が失敗し、送信完了のログは残らない（テスト仕様書の 2.8 の 24 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）。送信先 test-send-target-1 を、この行の中で削除する
 # 前提（フローで設定）: 送信先の設定で test-send-target-1 を削除して、「設定を保存」を押す

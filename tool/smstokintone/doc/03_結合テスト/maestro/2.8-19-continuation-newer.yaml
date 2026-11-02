@@ -1,5 +1,5 @@
 # 2.8 自動処理: 受信日時が新しい同じ送信元の 2 通目は、kintone の本文が更新される（テスト仕様書の 2.8 の 19 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: なし

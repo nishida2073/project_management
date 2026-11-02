@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 初期化の確認ダイアログで「キャンセル」を押す（テスト仕様書の 2.3 の 29 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライト（JSON の themeMode）、その他は JSON のまま）。このフローで表示テーマをダークに切り替え、初期化の確認ダイアログで「キャンセル」を押したあとも、ダークのまま残ることを確認する。
 - runFlow: setup/setup-import-environment.yaml

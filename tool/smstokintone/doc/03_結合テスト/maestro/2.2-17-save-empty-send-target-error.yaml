@@ -1,5 +1,5 @@
 # 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 17 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON 読み込み後の状態（会社名の抽出は有効）
 # 未確認: 追加した設定の番号（設定 N）は、保存済みの件数に依存する

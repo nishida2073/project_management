@@ -3,7 +3,7 @@
 # 外部条件: 端末に未送信の SMS が 1 件以上ある
 # 確認: 新しい順は、後に記録された「送信完了」の行が、先に記録された「送信開始」の行より上に表示されることで確認する（ログは記録順に先頭へ追加される、LogActivity と SmsLogStore）
 # 未確認: 相対指定（below）で行の上下を比べる方法は、端末で未確認
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

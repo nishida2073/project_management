@@ -1,6 +1,6 @@
 # 既存の値がある入力欄（一覧の 2 件目）に、値を入れ直す（共通の手順）。スクロールと撮影は呼び出し元で行う
 # 入力: FIELD_ID（欄の id の末尾）、INPUT_VALUE（入力する値）。一覧の 2 件目（index 1）を押す
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/${FIELD_ID}"

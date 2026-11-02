@@ -2,7 +2,7 @@
 # 前提: setup（clearState と JSON 投入）から開始する。SMS の読み取りは許可しない
 # 外部条件（手動）: 端末の SMS の読み取りの許可を外してから flow を実行する（未確認: setup の clearState で許可が戻るか）
 # 注: 検索の欄（layoutSearchForm）は、許可がないとき非表示になる（SmsSearchActivity の実装）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

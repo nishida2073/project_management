@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 引継ぎ内容の氏名表示を切り替える（テスト仕様書の 2.3 の 28 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（引継ぎ：あり、引継ぎ内容の氏名表示：あり（JSON の continuationShowUserNameEnabled）、表示テーマ：ライト）。このフローで引継ぎ内容の氏名表示をオフにする。
 - runFlow: setup/setup-import-environment.yaml

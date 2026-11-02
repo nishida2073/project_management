@@ -1,5 +1,5 @@
 # 2.5 設定のインポート・エクスポート: ファイルを選ばずに選択画面を閉じる（テスト仕様書の 2.5 の 6 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 会社名の抽出: あり（JSON の値）。
 # 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。

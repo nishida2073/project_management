@@ -6,6 +6,8 @@
 # 確認: 失敗のログは 1 件だけ。送信完了のログ（[失敗]）の行が 2 件目（index 1）に出ないことを、件数の確認で見る。認証の失敗は、再試行の対象外（KintoneApi の isRetryable は 5xx と 429 だけ）のため、後から 2 件目が出ない想定
 # 未確認: 「後から 2 件目が出ないこと」は、時間を置いて確認する方法がない（固定の待ちは使わない）。ここでは、失敗の行が出た時点の件数だけを確認する
 # 注: 各行は JSON から始まるため、この行で変えたログイン名は、次の行の前に戻る
+appId: jp.co.nttdata_univ.smstokintone
+---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"

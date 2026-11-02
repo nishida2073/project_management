@@ -1,5 +1,5 @@
 # 2.8 自動処理: SMSの返信モードが既定（手動）のとき、抽出が異常なSMSには返信しない（テスト仕様書の 2.8 の 16 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（SMSの返信モード：手動。2.8 の 1 と同じ）。デフォルトの送信先はない
 # 前提（フローで設定）: なし

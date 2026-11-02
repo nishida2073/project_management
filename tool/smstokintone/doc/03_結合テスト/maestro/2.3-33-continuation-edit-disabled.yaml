@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 引継ぎがオフのとき「引継ぎ内容の設定」は押せない（テスト仕様書の 2.3 の 33 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（引継ぎ：あり（JSON の continuationEnabled））。このフローで引継ぎをオフにする。
 - runFlow: setup/setup-import-environment.yaml

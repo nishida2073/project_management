@@ -1,5 +1,5 @@
 # 2.8 自動処理: 会社名の抽出が有効で、既定の設定のとき、SMSの送信（登録）が成功する（テスト仕様書の 2.8 の 7 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: なし

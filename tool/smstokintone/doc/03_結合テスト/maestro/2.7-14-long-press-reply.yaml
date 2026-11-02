@@ -3,7 +3,7 @@
 # 注: 長押しする項目は、変数 SMS_ITEM_TEXT（端末の SMS の本文の一部。端末ごとに書き換える）で指定する
 # 未確認: 標準の SMS アプリの画面の表示文字（返信の文面の確認）。この flow は、表示の確認を部分一致（返信）で行う
 # 未確認: 標準の SMS アプリ側の画面は、アプリのパッケージによって表示が異なる
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

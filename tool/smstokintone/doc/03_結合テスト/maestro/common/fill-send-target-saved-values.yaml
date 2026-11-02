@@ -1,4 +1,4 @@
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 送信先の設定の欄に、保存する値を入力する（共通の手順。保存と撮影は呼び出し元で行う）
 # 入力（呼び出し元の env）: SAVED_SEND_TARGET_NAME、SAVED_KEYWORD、SUBDOMAIN、LOGIN_NAME、LOGIN_PASSWORD、APP_ID

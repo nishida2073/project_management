@@ -3,6 +3,8 @@
 # 前提（フローで設定）: 会社名の自動変換を無効にする。固定変換に「${FIXED_FROM}」→「${FIXED_TO}」を 1 行追加する
 # 外部条件（事前に別端末から SMS を送る）: 送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
 # 確認: 抽出結果のダイアログのタイトルに、変換の印 🔄（strings.xml の icon_company_name_converted）が出て、会社名が固定変換後の「${FIXED_TO}」であることで確認する（LogActivity の showExtractionResultDialog）
+appId: jp.co.nttdata_univ.smstokintone
+---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

@@ -1,5 +1,5 @@
 # 2.8 自動処理: 会社名の抽出が無効のとき、本文から会社名を抽出せず、送信先の会社名（空）で送信する（テスト仕様書の 2.8 の 17 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: 会社名の抽出を無効にする

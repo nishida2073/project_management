@@ -496,6 +496,7 @@ class SmsSearchActivity : BaseActivity() {
 
     private fun buildCheckbox(record: SmsRecord, isSelectable: Boolean): CheckBox {
         return CheckBox(this).apply {
+            id = R.id.cbSmsItemSelect
             tag = record.id
             isEnabled = isSelectable
             isClickable = false

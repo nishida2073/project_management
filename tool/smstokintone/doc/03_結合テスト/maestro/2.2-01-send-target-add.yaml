@@ -1,5 +1,5 @@
 # 2.2 送信先の設定: 送信先を追加する（テスト仕様書の 2.2 の 1 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: setup の環境（test-send-target-1 が保存済み）。追加した送信先は 2 件目
 - runFlow: setup/setup-import-environment.yaml

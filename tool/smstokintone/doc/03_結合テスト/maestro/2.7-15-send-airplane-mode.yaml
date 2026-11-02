@@ -3,7 +3,7 @@
 # 外部条件（手動）: 機内モードは、この flow の途中で切り替える。1 回目の送信の前に機内モードを有効にし、「送信失敗」の確認の後に解除する
 # 注: 機内モードの切り替えは Maestro で行えないため、この flow は手動で区切って実行する（未確認）
 # 未確認: 2 回目の送信の結果（kintone の登録）は、kintone 側で確認する
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

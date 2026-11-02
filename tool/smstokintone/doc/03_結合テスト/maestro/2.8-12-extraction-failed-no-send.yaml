@@ -1,5 +1,5 @@
 # 2.8 自動処理: 抽出できないSMSは、受信のログだけが残り、送信先がないため送信開始が失敗する（テスト仕様書の 2.8 の 12 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）。デフォルトの送信先はない。自動送信の対象（抽出状況が異常）：なし
 # 前提（フローで設定）: なし

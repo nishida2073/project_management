@@ -1,4 +1,4 @@
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 送信ログを作る（共通の手順）: トップ画面から SMSの検索で未送信の SMS を全選択して送信し、送信開始・送信完了のログを作る
 # 前提: 端末に未送信の SMS が 1 件以上ある（外部条件）。検索条件は既定（受信日の範囲：今日、未送信のみ）

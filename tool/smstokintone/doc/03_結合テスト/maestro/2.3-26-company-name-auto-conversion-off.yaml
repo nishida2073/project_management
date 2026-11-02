@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 会社名の自動変換を切り替える（テスト仕様書の 2.3 の 26 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（会社名の抽出：あり、会社名の自動変換：あり、表示テーマ：ライト）。このフローで会社名の自動変換をオフにする。
 - runFlow: setup/setup-import-environment.yaml

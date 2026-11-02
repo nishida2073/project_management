@@ -1,5 +1,5 @@
 # 2.1 トップ: 送信先の設定の画面に移動できることを確認する（テスト仕様書の 2.1 の 5 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

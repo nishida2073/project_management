@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 返信メッセージを入力する（テスト仕様書の 2.3 の 18 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライト、SMSの返信モード：手動、会社名の抽出：あり、引継ぎ：あり など）。返信メッセージ（正常・異常）は JSON に指定がなく、アプリの既定値のため、このフローで入力する（入力すると自動で保存される）。
 - runFlow: setup/setup-import-environment.yaml

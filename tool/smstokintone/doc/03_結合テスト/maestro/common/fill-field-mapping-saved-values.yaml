@@ -1,4 +1,4 @@
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 送信先の設定のフィールドコード欄に、保存する値を入力する（共通の手順。保存と撮影は呼び出し元で行う）
 # 入力（呼び出し元の env）: SAVED_FIELD_TYPE、SAVED_FIELD_DATETIME、SAVED_FIELD_SENDER、SAVED_FIELD_COMPANY、SAVED_FIELD_USER、SAVED_FIELD_BODY、SAVED_FIELD_HISTORY

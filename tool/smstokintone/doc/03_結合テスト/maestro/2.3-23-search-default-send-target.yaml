@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 送信先が 1 件のとき、SMSの検索の送信先の選択欄は表示されない（テスト仕様書の 2.3 の 23 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON（env_ok.json）の状態から開始する。送信先は JSON の 1 件（"${SEND_TARGET_NAME}"）だけ。
 - runFlow: setup/setup-import-environment.yaml

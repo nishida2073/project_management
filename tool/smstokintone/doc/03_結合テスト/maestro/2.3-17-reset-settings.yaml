@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 初期化を実行し、既定値に戻ることを確認する（テスト仕様書の 2.3 の 17 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 会社名の抽出：あり、SMSの返信モード：手動
 # 前提（フローで設定）: SMSの返信モードを自動、検索条件の表示を隠す、統合範囲（秒）を ${LOG_MATCH_TOLERANCE_PRE} にしてから、表示テーマをダークに、SMSの送信モードを手動に切り替え、設定を初期化する

@@ -1,5 +1,5 @@
 # 2.8 自動処理: 通信がないとき、SMSの送信が失敗し、再試行のログが残る（テスト仕様書の 2.8 の 20 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: なし

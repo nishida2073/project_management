@@ -3,7 +3,7 @@
 # 外部条件: 会社名・氏名を抽出できない SMS を 1 通受信する（下の assert の待ち時間（60 秒）の間に受信させる）
 # 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
 # 未確認: 抽出が異常のログが複数あるとき、先頭のログが対象になるか
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

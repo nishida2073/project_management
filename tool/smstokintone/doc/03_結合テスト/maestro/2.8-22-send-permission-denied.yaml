@@ -1,5 +1,5 @@
 # 2.8 自動処理: SMSの送信の許可がないと、自動返信は行われない（テスト仕様書の 2.8 の 22 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: SMSの返信モードを自動に切り替える

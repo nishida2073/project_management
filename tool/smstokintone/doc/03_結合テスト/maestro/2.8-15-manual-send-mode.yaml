@@ -1,5 +1,5 @@
 # 2.8 自動処理: SMSの送信モードが手動のとき、受信しても送信は行われない（テスト仕様書の 2.8 の 15 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: SMSの送信モードを手動に切り替える

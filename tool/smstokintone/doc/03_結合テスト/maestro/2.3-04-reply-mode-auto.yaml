@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: SMSの返信モードを自動に切り替える（テスト仕様書の 2.3 の 4 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動
 # 前提（フローで設定）: SMSの返信モードを自動に切り替える（SMSの送信モードは JSON の自動のまま）

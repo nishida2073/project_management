@@ -5,6 +5,8 @@
 # 外部条件（事前に別端末から SMS を送る）: 待ち時間（下の extendedWaitUntil）に送る
 # 確認: 抽出結果のダイアログのタイトルに、AI の印 🤖（strings.xml の icon_extraction_ai。LogActivity の showExtractionResultDialog）が出ることで、AI で抽出したことを確認する
 # 未確認: 仕様書の「抽出の方法」の文字は、アプリの表示にないため確認しない（表示は 🤖 の印だけ）
+appId: jp.co.nttdata_univ.smstokintone
+---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

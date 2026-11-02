@@ -5,7 +5,7 @@
 # 確認: 引継ぎ内容の値（送信元 test-phone-a、会社名 TEST－COMPANY、氏名 test-taro）は、引継ぎ内容の設定画面の項目で確認する（会社名は会社名の自動変換の結果）
 # 未確認: ログの一覧に送信先名（test-send-target-1）が表示されるかは未確認。kintone の登録内容は kintone 側で確認する
 # 未確認: 送信先の設定の接続先（サブドメイン）が JSON の値のまま変わらないことは、接続情報のため flow には書かない。手動で確認する。送信先名の確認は下の assertVisible で行う
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

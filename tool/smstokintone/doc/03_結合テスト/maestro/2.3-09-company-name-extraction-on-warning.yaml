@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 会社名の抽出を有効にすると注意ダイアログが出ることを確認する（テスト仕様書の 2.3 の 9 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON、ok-continuation-no-company.json）: 会社名の抽出：なし（インポートの検証を通すため無効にしておく）、会社名の自動変換：あり、SMSの送信モード：自動、SMSの返信モード：手動、表示テーマ：ライト
 # 前提（JSON、ok-continuation-no-company.json）: 引継ぎ内容に会社名がない件が 1 件ある（companyName が空の引継ぎ内容 1 件）

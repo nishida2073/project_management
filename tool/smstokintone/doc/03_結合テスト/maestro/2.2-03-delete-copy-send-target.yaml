@@ -1,7 +1,7 @@
 # 2.2 送信先の設定: 送信先を削除する（テスト仕様書の 2.2 の 3 に対応）
 # 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み）
 # 未確認: 確認ダイアログが出ないことは、ダイアログの文言が未確認のため、画面に変化がないことで判定する
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

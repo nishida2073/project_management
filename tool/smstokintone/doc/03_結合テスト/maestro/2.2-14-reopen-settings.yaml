@@ -1,5 +1,5 @@
 # 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 14 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提: JSON 読み込み後の状態。この flow の中で保存する値を入力して「設定を保存」を押してから、開き直して確認する
 # 統合範囲（時間）: 統合条件を時間にして TOLERANCE_HOURS_SAVED を入力し、同一日付に戻してから保存する（統合条件の入力値は同一日付のまま、統合範囲（時間）の保存値を確認する）

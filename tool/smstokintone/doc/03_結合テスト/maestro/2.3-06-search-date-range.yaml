@@ -1,5 +1,5 @@
 # 2.3 アプリの設定: 受信日の範囲を入力して、SMSの検索の初期値に反映する（テスト仕様書の 2.3 の 6 に対応）
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動
 # 前提（フローで設定）: 受信日の範囲を ${SEARCH_DATE_RANGE_DAYS} 日に入力する
@@ -38,5 +38,5 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/etDateTo"
     text: "${EXPECTED_DATE_TO}"
-# 注意: EXPECTED_DATE_FROM と EXPECTED_DATE_TO は実行日に依存する。実行日に合わせて vars の JSON を書き換える（今日が 2026-11-02 の場合は 2026/10/31 と 2026/11/02。表示は yyyy/MM/dd）
+# 注意: EXPECTED_DATE_FROM と EXPECTED_DATE_TO は vars に固定で書いている（今日が 2026-11-02 の場合の値。表示は yyyy/MM/dd）。実行日が変わったら vars を書き換える
 - takeScreenshot: 2.3-06-search-date-range-05

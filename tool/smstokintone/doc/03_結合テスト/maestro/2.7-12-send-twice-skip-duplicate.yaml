@@ -3,7 +3,7 @@
 # 前提の操作: 1 回目は「検索」「全選択」「選択したSMSを送信」を順に実行する。2 回目は、「検索」「全選択」を順に実行し、「選択したSMSを送信」を押す
 # 注: 検索条件は未送信のみにすると 2 回目の対象がなくなるため、「未」を外して全件を対象にする
 # 未確認: 2 回目のトーストの成功件数（N件）は、端末の SMS の件数による。失敗は 0 件として扱う
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

@@ -1,4 +1,4 @@
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 # 送信先の設定の統合条件を時間にし、統合範囲（時間）を入力する（共通の手順。保存と撮影は呼び出し元で行う）
 # 入力（呼び出し元の env）: TOLERANCE_HOURS_SAVED

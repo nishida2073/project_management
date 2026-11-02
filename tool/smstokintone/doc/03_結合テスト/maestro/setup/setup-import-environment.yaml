@@ -2,7 +2,7 @@
 # 前提（手動）: test-data\setup\env_ok.json を端末のダウンロードフォルダに置く（接続用の値が入ったファイル。git には入れない）
 # 注: この flow は clearState を使い、端末のアプリの設定を消してから投入する。テストの flow より先に、1 回だけ実行する
 # 未確認: 文書選択ダイアログの操作（ダウンロードからファイルを選ぶ手順）は公式ドキュメントで確認できていない
-appId: com.ssfrontier.smstokintone
+appId: jp.co.nttdata_univ.smstokintone
 ---
 - launchApp:
     clearState: true
