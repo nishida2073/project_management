@@ -1,7 +1,6 @@
 # 2.3 アプリの設定: 自動返信の間隔を入力する（テスト仕様書の 2.3 の 19 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する（自動返信の間隔：10（JSON の replyCooldownSeconds）、表示テーマ：ライト、SMSの返信モード：手動）。このフローで間隔を入力する。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

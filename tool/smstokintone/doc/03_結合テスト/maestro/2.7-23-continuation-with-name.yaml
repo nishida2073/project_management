@@ -1,7 +1,5 @@
 # 2.7 SMSの検索: 引継ぎの SMS の送信元に、引継いだ氏名が表示される（テスト仕様書の 2.7 の 23 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。引継ぎ内容の氏名表示は JSON の値（あり）のまま
 # 外部条件: 引継ぎ内容の送信元（test-sender-a）から届いた SMS が、端末にある
-# 注: 送信元は、引継ぎ内容（JSON）の送信元（CONTINUATION_SENDER = test-sender-a）を使う
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml

@@ -1,7 +1,7 @@
 # 2.7 SMSの検索: 済（自動）のみで検索すると、自動で登録済みの SMS だけが表示される（テスト仕様書の 2.7 の 4 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）
+# 前提（フローで設定）: 端末に SMS が 1 件以上ある
 # 外部条件: 自動送信が完了した SMS が 1 件以上ある状態が必要。setup の clearState で送信ログが消えるため、この flow だけでは作れない（未確認: 自動送信を完了させるための SMS の受信手順）
-# 確認: 一覧の行の送信状況は、自動送信済みの印 ✅（strings.xml の icon_send_auto。行の文字は「✅」だけで「済（自動）」の文字は出ない）で確認する。凡例にも ✅ があるため、行の本文（${SEARCH_AUTO_SENT_ROW_TEXT}）と組み合わせて、行の中の ✅ を確認する
+# 注: 一覧の行の送信状況は、自動送信済みの印 ✅（strings.xml の icon_send_auto。行の文字は「✅」だけで「済（自動）」の文字は出ない）で確認する。凡例にも ✅ があるため、行の本文（${SEARCH_AUTO_SENT_ROW_TEXT}）と組み合わせて、行の中の ✅ を確認する
 # 外部条件: ${SEARCH_AUTO_SENT_ROW_TEXT} は、自動送信が完了した SMS の本文に含まれる文字（vars）。実施日に端末の SMS に合わせて書き換える
 appId: jp.co.nttdata_univ.smstokintone
 ---

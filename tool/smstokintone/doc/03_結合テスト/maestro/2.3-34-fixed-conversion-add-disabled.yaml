@@ -1,7 +1,7 @@
 # 2.3 アプリの設定: 会社名の抽出がオフのとき固定変換の「+」は押せない（テスト仕様書の 2.3 の 34 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する（会社名の抽出：あり（JSON の extractionCompanyNameEnabled）、固定変換の行：なし（JSON の extractionCompanyNameFixedConversions は空））。このフローで会社名の抽出をオフにする。
+# 前提（フローで設定）: 会社名の抽出をオフにする（JSON では有効）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -12,7 +12,7 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-02
-- assertVisible: # 前提の確認（会社名の抽出が有効）
+- assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
 - scrollUntilVisible:
@@ -21,7 +21,7 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-03
-- assertNotVisible: # 前提の確認（固定変換の行がない）
+- assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
 - scrollUntilVisible:
     element:
@@ -33,7 +33,7 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     index: 0
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-05
-- assertVisible: # スイッチの選択状態の確認
+- assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: false
 - scrollUntilVisible:
@@ -42,7 +42,7 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-34-fixed-conversion-add-disabled-06
-- assertVisible: # 押せない状態（enabled が false）の確認
+- assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
     enabled: false
 - tapOn:

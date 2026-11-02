@@ -1,9 +1,8 @@
 # 2.3 アプリの設定: 会社名の抽出を有効にすると注意ダイアログが出ることを確認する（テスト仕様書の 2.3 の 9 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON、ok-continuation-no-company.json）: 会社名の抽出：なし（インポートの検証を通すため無効にしておく）、会社名の自動変換：あり、SMSの送信モード：自動、SMSの返信モード：手動、表示テーマ：ライト
-# 前提（JSON、ok-continuation-no-company.json）: 引継ぎ内容に会社名がない件が 1 件ある（companyName が空の引継ぎ内容 1 件）
-# 前提（フロー）: setup の SETUP_FILE_PATTERN で、この JSON だけを投入する（clearState のため、送信先は作られない）
+# 注: ok-continuation-no-company.json は、会社名の抽出が有効だと会社名がない引継ぎ内容があるためインポートの検証で止まる。そのため会社名の抽出を無効にした状態で投入する（JSON の値）
+# 前提（フロー）: setup の SETUP_FILE_PATTERN で、この JSON だけを投入する（setup は clearState で前の設定を消してから投入する）
 # 外部条件: ${COMPANY_MISSING_COUNT} 件（ok-continuation-no-company.json の件数と一致させる）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

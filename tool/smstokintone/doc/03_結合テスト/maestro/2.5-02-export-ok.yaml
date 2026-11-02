@@ -1,8 +1,6 @@
 # 2.5 設定のインポート・エクスポート: 保存先を選んで設定をエクスポートする（テスト仕様書の 2.5 の 2 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
-# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

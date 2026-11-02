@@ -1,7 +1,6 @@
 # 2.3 アプリの設定: 統合範囲（秒）を入力する（テスト仕様書の 2.3 の 20 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する（統合範囲（秒）：15（JSON の logMatchToleranceSeconds）、表示テーマ：ライト、SMSの送信モード：自動）。このフローで統合範囲（秒）を入力する。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

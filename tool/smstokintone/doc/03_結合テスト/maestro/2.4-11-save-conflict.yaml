@@ -1,8 +1,6 @@
 # 2.4 引継ぎ内容の設定: 保存時に内容が更新されていると保存に失敗する（テスト仕様書の 2.4 の 11 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
-# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
 # 外部条件: 画面を開いてから保存するまでの間に、SMSの受信などで送信元 B（test-sender-b）の内容が更新されている必要がある。この flow の操作だけでは作れないため、更新は手動で行う（未確認: 手順）。
 # 未確認: 一覧の index 1 が SENDER_B。会社名欄の既存値は eraseText で消す（カーソル位置に依存する）。
 - runFlow: setup/setup-import-environment.yaml
@@ -18,7 +16,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-11-save-conflict-02
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-# 前提確認（表示のみ、操作しない）
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true

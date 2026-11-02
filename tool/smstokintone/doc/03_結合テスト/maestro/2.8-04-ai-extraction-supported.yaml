@@ -1,10 +1,8 @@
 # 2.8 自動処理: AIによる抽出が有効な端末で、SMSを AI で抽出する（テスト仕様書の 2.8 の 4 に対応）
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: AIによる抽出を有効にする
-# 外部条件: Gemini Nano に対応した端末でだけ確認できる（対応機種: （未確認））。別端末から SMS を送る（本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test」、送信元 test-phone-a）
-# 外部条件（事前に別端末から SMS を送る）: 待ち時間（下の extendedWaitUntil）に送る
-# 確認: 抽出結果のダイアログのタイトルに、AI の印 🤖（strings.xml の icon_extraction_ai。LogActivity の showExtractionResultDialog）が出ることで、AI で抽出したことを確認する
-# 未確認: 仕様書の「抽出の方法」の文字は、アプリの表示にないため確認しない（表示は 🤖 の印だけ）
+# 外部条件: Gemini Nano に対応した端末でだけ確認できる（対応機種: （未確認））。待ち時間（下の extendedWaitUntil）に、別端末から SMS を送る（本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test」、送信元 test-phone-a）
+# 注: 抽出結果のダイアログのタイトルに、AI の印 🤖（strings.xml の icon_extraction_ai。LogActivity の showExtractionResultDialog）が出ることで、AI で抽出したことを確認する
+# 注: 仕様書の「抽出の方法」の文字は、アプリの表示にないため確認しない（strings.xml に該当の文字列はなく、表示は 🤖 の印だけ）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -25,7 +23,6 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
     checked: true
 - pressKey: Back
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-04-ai-extraction-supported-01

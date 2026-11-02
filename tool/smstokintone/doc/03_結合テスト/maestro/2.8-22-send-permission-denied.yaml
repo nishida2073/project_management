@@ -1,10 +1,9 @@
 # 2.8 自動処理: SMSの送信の許可がないと、自動返信は行われない（テスト仕様書の 2.8 の 22 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: SMSの返信モードを自動に切り替える
-# 外部条件（手動）: 端末の設定で SMS の送信の許可を取り消してから、このフローを実行する（許可の取り消しは Maestro で行わない）。終わったら許可を戻す
-# 外部条件（事前に別端末から SMS を送る）: 送信元 test-phone-b、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
+# 外部条件: 手動。端末の設定で SMS の送信の許可を取り消してから、このフローを実行する（許可の取り消しは Maestro で行わない）。終わったら許可を戻す
+# 外部条件: 別端末から SMS を送る。送信元 test-phone-b、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -24,7 +23,6 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/tvSendPermissionStatus"
     text: "許可済み"
 - pressKey: Back
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-22-send-permission-denied-01

@@ -1,7 +1,7 @@
 # 2.1 トップ: 送信モードが手動、返信モードが自動のときの表示を確認する（テスト仕様書の 2.1 の 2 に対応）
-# 前提: 既定値（送信：自動、返信：手動）。この flow の中で、アプリの設定を手動・自動に切り替えてから確認する
 appId: jp.co.nttdata_univ.smstokintone
 ---
+# 前提（フローで設定）: この flow の中で、アプリの設定の SMSの送信モードを手動、SMSの返信モードを自動に切り替えてから確認する
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

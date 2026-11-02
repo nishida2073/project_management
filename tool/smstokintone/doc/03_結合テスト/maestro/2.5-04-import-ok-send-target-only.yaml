@@ -1,10 +1,8 @@
 # 2.5 設定のインポート・エクスポート: 送信先の設定だけを含むファイルをインポートする（テスト仕様書の 2.5 の 4 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 会社名の抽出: あり（JSON の値）。
-# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直す。
 # 未確認: launchApp が前の画面を閉じて起動し直すか
-# 前提（画面で確認不可）: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
+# 外部条件: ${IMPORT_FILE} を端末の選択先に置く（ファイルの置き場所は未確認）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "設定のインポート・エクスポート"

@@ -1,7 +1,6 @@
 # 2.3 アプリの設定: 自動送信の対象（抽出状況が異常）を有効にし、保存されることを確認する（テスト仕様書の 2.3 の 5 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動、自動送信の対象（抽出状況が異常）：なし
 # 前提（フローで設定）: 自動送信の対象（抽出状況が異常）を有効にする
 - runFlow: setup/setup-import-environment.yaml
 - launchApp

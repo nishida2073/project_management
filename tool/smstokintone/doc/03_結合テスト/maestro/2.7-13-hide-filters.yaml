@@ -1,5 +1,4 @@
 # 2.7 SMSの検索: 「▲ 隠す」で検索条件が隠れ、ボタンの文字が「▼ 表示」になる（テスト仕様書の 2.7 の 13 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。検索条件は既定（表示）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml

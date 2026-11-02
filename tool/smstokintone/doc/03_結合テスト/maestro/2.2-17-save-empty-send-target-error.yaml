@@ -1,7 +1,6 @@
 # 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 17 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON 読み込み後の状態（会社名の抽出は有効）
 # 未確認: 追加した設定の番号（設定 N）は、保存済みの件数に依存する
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
@@ -11,7 +10,6 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     direction: DOWN
-# 前提確認: 会社名の抽出が有効
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true

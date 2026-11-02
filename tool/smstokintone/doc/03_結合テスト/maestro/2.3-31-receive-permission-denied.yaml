@@ -1,7 +1,6 @@
 # 2.3 アプリの設定: SMSの受信の許可を拒否すると案内が出る（テスト仕様書の 2.3 の 31 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライトなど）。SMSの受信の権限は、端末で未付与にしておく（2.3 の 14 から 16 と 30 から 32 と同じ前提）。
 # 外部条件: SMSの受信の権限の付与・未付与は端末の設定でしか切り替えられないため、このフローでは作らない（端末で未付与にしておく）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
@@ -13,7 +12,7 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-31-receive-permission-denied-02
-- assertVisible: # 前提の確認（「許可する」が表示され、許可済みの表示がない）
+- assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/tvPermissionStatus"
@@ -23,7 +22,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-31-receive-permission-denied-03
 - tapOn: "許可しない" # 未確認: 端末の権限ダイアログの拒否ボタンの文字（Android の版・言語で異なる）
 - takeScreenshot: 2.3-31-receive-permission-denied-04
-- assertVisible: "SMSの受信の許可がない場合、SMSの自動送信・自動返信ができません" # トースト（表示時間が短いため確認が必要）
+- assertVisible: "SMSの受信の許可がない場合、SMSの自動送信・自動返信ができません" # トースト（Toast.LENGTH_LONG で表示される）
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/btnRequestPermission"
 - takeScreenshot: 2.3-31-receive-permission-denied-05

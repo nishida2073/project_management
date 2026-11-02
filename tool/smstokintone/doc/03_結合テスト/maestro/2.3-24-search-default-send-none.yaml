@@ -1,7 +1,7 @@
 # 2.3 アプリの設定: SMSの検索の送信状況の初期値「未送信」を切り替える（テスト仕様書の 2.3 の 24 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する。検索条件の初期値の送信状況は JSON に指定がなく、アプリの既定値（すべてオフ）。このフローで「未送信」をオンにする。
+# 前提（フローで設定）: 検索条件の送信状況「未送信」をオンにする（JSON に指定がなく、既定値はオフ）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

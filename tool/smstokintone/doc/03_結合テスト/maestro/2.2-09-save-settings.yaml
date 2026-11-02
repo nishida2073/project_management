@@ -1,14 +1,11 @@
 # 2.2 送信先の設定: 設定を保存する（テスト仕様書の 2.2 の 9 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み。このフローで上書きする）
-# 未確認: パスワードは伏せ字のため、入力の有無だけを撮影で確かめる
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-09-save-settings-01
 - assertVisible: "設定を追加"
-# 前提確認: test-send-target-1 が 1 件目に保存済み
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
     index: 0

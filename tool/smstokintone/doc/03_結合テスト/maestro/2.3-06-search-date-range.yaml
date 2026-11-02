@@ -1,7 +1,6 @@
 # 2.3 アプリの設定: 受信日の範囲を入力して、SMSの検索の初期値に反映する（テスト仕様書の 2.3 の 6 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 表示テーマ：ライト、SMSの送信モード：自動、SMSの返信モード：手動
 # 前提（フローで設定）: 受信日の範囲を ${SEARCH_DATE_RANGE_DAYS} 日に入力する
 # 外部条件: SMSの読み取りの権限が許可されている必要があります（SMSの検索を開くため）
 - runFlow: setup/setup-import-environment.yaml

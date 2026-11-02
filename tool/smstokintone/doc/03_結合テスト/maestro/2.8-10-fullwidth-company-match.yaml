@@ -1,9 +1,8 @@
 # 2.8 自動処理: 全角の会社名も表記ゆれとして、キーワードに一致する（テスト仕様書の 2.8 の 10 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: 会社名の自動変換を無効にする（全角の会社名をそのまま判定する）
-# 外部条件（事前に別端末から SMS を送る）: 送信元 test-phone-a、本文は 1 行目「ＴＥＳＴ－ＣＯＭＰＡＮＹ」（全角）、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
+# 外部条件: 別端末から SMS を送る。送信元 test-phone-a、本文は 1 行目「ＴＥＳＴ－ＣＯＭＰＡＮＹ」（全角）、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
 # 注: 全角の会社名（ＴＥＳＴ－ＣＯＭＰＡＮＹ）は、表記ゆれの正規化で test-company と一致する（TextNormalization）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
@@ -19,7 +18,6 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
     checked: false
 - pressKey: Back
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-10-fullwidth-company-match-01

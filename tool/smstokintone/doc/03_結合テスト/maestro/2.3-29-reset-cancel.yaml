@@ -1,7 +1,7 @@
 # 2.3 アプリの設定: 初期化の確認ダイアログで「キャンセル」を押す（テスト仕様書の 2.3 の 29 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライト（JSON の themeMode）、その他は JSON のまま）。このフローで表示テーマをダークに切り替え、初期化の確認ダイアログで「キャンセル」を押したあとも、ダークのまま残ることを確認する。
+# 前提（フローで設定）: 表示テーマをダークに切り替え、初期化の確認ダイアログで「キャンセル」を押したあとも、ダークのまま残ることを確認する
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -16,7 +16,7 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     index: 0
 - takeScreenshot: 2.3-29-reset-cancel-03
-- assertVisible: # 表示テーマがダークになっていること
+- assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
 - scrollUntilVisible:
@@ -39,7 +39,7 @@ appId: jp.co.nttdata_univ.smstokintone
     direction: DOWN
     visibilityPercentage: 100
 - takeScreenshot: 2.3-29-reset-cancel-07
-- assertVisible: # ラジオボタンの選択状態の確認（ダークのまま）
+- assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
 - takeScreenshot: 2.3-29-reset-cancel-08

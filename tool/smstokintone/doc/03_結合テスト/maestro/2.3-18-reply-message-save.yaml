@@ -1,7 +1,7 @@
 # 2.3 アプリの設定: 返信メッセージを入力する（テスト仕様書の 2.3 の 18 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: JSON（env_ok.json）の状態から開始する（表示テーマ：ライト、SMSの返信モード：手動、会社名の抽出：あり、引継ぎ：あり など）。返信メッセージ（正常・異常）は JSON に指定がなく、アプリの既定値のため、このフローで入力する（入力すると自動で保存される）。
+# 前提（フローで設定）: 返信メッセージ（正常・異常）は JSON に指定がなく、アプリの既定値のため、このフローで入力する
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -18,7 +18,7 @@ appId: jp.co.nttdata_univ.smstokintone
       FIELD_ID: etReplySuccessBody
       INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
 - takeScreenshot: 2.3-18-reply-message-save-03
-- assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etReplyFailedBody"
@@ -31,5 +31,5 @@ appId: jp.co.nttdata_univ.smstokintone
       FIELD_ID: etReplyFailedBody
       INPUT_VALUE: "${REPLY_FAILED_BODY}"
 - takeScreenshot: 2.3-18-reply-message-save-05
-- assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力の一部を見る）
+- assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - takeScreenshot: 2.3-18-reply-message-save-06

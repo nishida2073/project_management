@@ -1,10 +1,9 @@
 # 2.8 自動処理: SMSの送信モードが手動のとき、受信しても送信は行われない（テスト仕様書の 2.8 の 15 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: SMSの送信モードを手動に切り替える
-# 外部条件（事前に別端末から SMS を送る）: 送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
-# 未確認: 送信開始・送信完了のログが残らないことは、受信の後に画面を見て判定する（待ち時間がないため、残らないことの確認は目視）
+# 外部条件: 別端末から SMS を送る。送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
+# 未確認: 送信開始・送信完了のログが残らないことは、受信の直後の assertNotVisible で確認する。待ち時間がないため、その後に残らないことは目視で確認する
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -18,7 +17,6 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     checked: true
 - pressKey: Back
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-15-manual-send-mode-01

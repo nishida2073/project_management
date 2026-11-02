@@ -1,6 +1,6 @@
 # 2.7 SMSの検索: 全選択で、選べる SMS のすべてにチェックが入る（テスト仕様書の 2.7 の 7 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）
-# 未確認: チェックボックスに id がないため、className と checked で確認する（この Maestro で className が使えるか）
+# 前提（フローで設定）: 端末に SMS が 1 件以上ある
+# 未確認: 全部のチェックボックスを className と checked で確認する（行ごとに同じ id のため、index を使わない。この Maestro で className が使えるか）
 # 未確認: 選べない SMS（抽出が異常で、SMS選択の対象がオフのもの）にチェックが入らないことは、端末の SMS の内容による
 appId: jp.co.nttdata_univ.smstokintone
 ---

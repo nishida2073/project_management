@@ -1,14 +1,12 @@
 # 2.2 送信先の設定: 送信先をコピーする（テスト仕様書の 2.2 の 2 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: 仕様書 2.2 の前提条件（test-send-target-1 が保存済み）
-# 前提（確認していない）: test-send-target-1 の接続先・連絡用のアプリ・振り分けは保存済み。ログイン名・パスワードは画面で確認不可
+# 未確認: test-send-target-1 の接続先・連絡用のアプリ・振り分けは、このフローでは画面で確認していない。ログイン名・パスワードは画面に表示されないため確認できない
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-02-copy-send-target-01
 - assertVisible: "設定を追加"
-# 前提確認: test-send-target-1 が保存済み（下の assertVisible）
 - assertVisible: "${SEND_TARGET_NAME}"
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnCopySendTarget"

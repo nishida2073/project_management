@@ -1,10 +1,9 @@
 # 2.8 自動処理: 引継ぎの会社名は、固定変換で二重に変換されない（テスト仕様書の 2.8 の 25 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: 会社名の自動変換を無効にする。固定変換に「${FIXED_FROM}」→「${FIXED_TO}」を 1 行追加する
-# 外部条件（事前に別端末から SMS を送る）: 1 通目は送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-7」。2 通目は同じ送信元、本文は 1 行だけ（会社名の記載なし）
-# 前提の操作（この行の中で行う）: 1 通目を受信してから、2 通目を受信する
+# 外部条件: 別端末から SMS を送る。1 通目は送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-7」。2 通目は同じ送信元、本文は 1 行だけ（会社名の記載なし）
+# 前提（フローで設定）: （この行の中で行う）: 1 通目を受信してから、2 通目を受信する
 # 注: 引継ぎの会社名は保存時に変換済みのため、2 通目では再変換しない（SettingsStore.resolveSendTargets）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
@@ -37,7 +36,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - hideKeyboard
 - assertVisible: "${FIXED_TO}"
 - pressKey: Back
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-25-fixed-conversion-continuation-01

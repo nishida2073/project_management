@@ -1,13 +1,10 @@
 # 2.8 自動処理: 同じ送信元の 2 通目は、1 通目の引継ぎ内容で振り分けられる（テスト仕様書の 2.8 の 2 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）
-# 前提（フローで設定）: なし
-# 外部条件（事前に別端末から SMS を送る）: 1 通目は送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-1」。2 通目は同じ送信元、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-2」
-# 前提の操作（この行の中で行う）: 1 通目を受信してから、2 通目を受信する。各受信の結果は、ログの画面で待つ
+# 外部条件: 別端末から SMS を送る。1 通目は送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-1」。2 通目は同じ送信元、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-2」
+# 前提（フローで設定）: （この行の中で行う）: 1 通目を受信してから、2 通目を受信する。各受信の結果は、ログの画面で待つ
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-02-receive-continuation-second-01

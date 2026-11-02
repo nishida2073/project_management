@@ -1,7 +1,6 @@
 # 2.2 送信先の設定: 送信先を追加する（テスト仕様書の 2.2 の 1 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提: setup の環境（test-send-target-1 が保存済み）。追加した送信先は 2 件目
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
@@ -10,7 +9,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を追加"
 - takeScreenshot: 2.2-01-send-target-add-02
 - assertVisible: "設定 2"
-# 未確認: 追加した設定（設定 2）は、「設定 2」まで送った後に見えている 1 件として確認する（index 0）
+# 注: 追加した設定（設定 2）は一覧の末尾に入る。scrollUntilVisible で「設定 2」を表示すると、その送信先名の入力欄は index 0 で指せる
 - scrollUntilVisible:
     element:
       text: "設定 2"

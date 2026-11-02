@@ -1,10 +1,6 @@
 # 2.4 引継ぎ内容の設定: 表示順序を新しい順に切り替える（テスト仕様書の 2.4 の 1 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
-# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
-# 前提（この flow）: 表示順序は投入後の既定（古い順）。この flow で「新しい順」に切り替える。
-# 未確認: 一覧の並び順は relative selector（below）で確認する。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -18,9 +14,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-01-sort-descending-02
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-# 前提確認（表示のみ、操作しない）
 - assertVisible: "${SENDER_A}"
-# 未確認: 送信元 B は画面の下にあるとき、スクロールしてから確認する。
 - scrollUntilVisible:
     element:
       text: "${SENDER_B}"
@@ -29,7 +23,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true
-# 未確認: 古い順では SENDER_A が上、SENDER_B が下になる想定（below で確認）。
 - assertVisible:
     text: "${SENDER_B}"
     below:
@@ -40,7 +33,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortDescending"
     checked: true
-# 未確認: 新しい順では SENDER_B が上、SENDER_A が下になる想定。
 - assertVisible:
     text: "${SENDER_A}"
     below:

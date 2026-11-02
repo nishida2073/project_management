@@ -1,7 +1,6 @@
 # 2.7 SMSの検索: 未送信のみで検索すると、送信ログのない SMS だけが表示される（テスト仕様書の 2.7 の 3 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。端末に未送信の SMS が 1 件以上ある（外部条件。SMS の読み取りを許可しておく）
-# 注: 送信ログは setup で消えているため、端末の SMS はすべて未送信
-# 確認: 一覧の行の送信状況は、未送信の印 ⬜（strings.xml の icon_send_none。行の文字は「⬜」だけで「未送信」の文字は出ない）で確認する。凡例（helper_sms_search_status_legend）にも ⬜ があるため、行の本文（${SEARCH_UNSENT_ROW_TEXT}）と組み合わせて、行の中の ⬜ を確認する
+# 外部条件: 端末に未送信の SMS が 1 件以上ある
+# 注: 一覧の行の送信状況は、未送信の印 ⬜（strings.xml の icon_send_none。行の文字は「⬜」だけで「未送信」の文字は出ない）で確認する。凡例（helper_sms_search_status_legend）にも ⬜ があるため、行の本文（${SEARCH_UNSENT_ROW_TEXT}）と組み合わせて、行の中の ⬜ を確認する
 # 外部条件: ${SEARCH_UNSENT_ROW_TEXT} は、端末の未送信の SMS の本文に含まれる文字（vars）。実施日に端末の SMS に合わせて書き換える
 appId: jp.co.nttdata_univ.smstokintone
 ---
@@ -9,6 +8,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "SMSの検索"
 - assertVisible: "検索条件"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
+    checked: false
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: true

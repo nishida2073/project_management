@@ -1,6 +1,6 @@
 # 2.7 SMSの検索: 送信のログがない状態で送信しても、送信は完了し、一覧が再検索される（テスト仕様書の 2.7 の 16 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。送信のログは空（setup の clearState による）。端末に SMS が 1 件以上ある（SMS の読み取りを許可しておく）
-# 未確認: 仕様書の「送信のログがない場合の条件」は、この flow の前提（ログが空）と同じとみなす
+# 前提（フローで設定）: 端末に SMS が 1 件以上ある
+# 未確認: 仕様書の「送信のログがない場合の条件」は、setup の clearState で送信のログが空の状態と同じとみなす
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml

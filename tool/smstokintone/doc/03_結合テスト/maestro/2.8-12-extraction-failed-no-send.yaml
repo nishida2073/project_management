@@ -1,12 +1,9 @@
 # 2.8 自動処理: 抽出できないSMSは、受信のログだけが残り、送信先がないため送信開始が失敗する（テスト仕様書の 2.8 の 12 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）。デフォルトの送信先はない。自動送信の対象（抽出状況が異常）：なし
-# 前提（フローで設定）: なし
-# 外部条件（事前に別端末から SMS を送る）: 送信元は既定（test-phone-a）、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
+# 外部条件: 別端末から SMS を送る。送信元は既定（test-phone-a）、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-12-extraction-failed-no-send-01

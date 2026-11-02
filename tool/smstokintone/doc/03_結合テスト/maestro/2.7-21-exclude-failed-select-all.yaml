@@ -1,8 +1,8 @@
 # 2.7 SMSの検索: SMS選択の対象（抽出状況が異常）がオフのとき、全選択しても抽出が異常の SMS にはチェックが入らない（テスト仕様書の 2.7 の 21 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。端末に抽出が異常の SMS がある（外部条件。SMS の読み取りを許可しておく）
-# 前提の操作: 「検索」を実行し、「全選択」を押す。SMS選択の対象（抽出状況が異常）は既定（オフ）のまま
+# 外部条件: 端末に抽出が異常の SMS がある
+# 前提（フローで設定）: SMS選択の対象（抽出状況が異常）は既定（オフ）のまま
 # 注: 抽出が異常の SMS は、SMS選択の対象がオフのとき選択できない（チェックボックスが無効）
-# 確認: 抽出が異常の行（${SEARCH_ABNORMAL_ROW_TEXT}）は一覧にあり、その行のチェックボックス（id cbSmsItemSelect の index ${SMS_ABNORMAL_CHECKBOX_INDEX}）は全選択の後もチェックなしであることを確認する。「選択したSMSを送信」を押すと、選択がないためのトースト（送信するSMSを選択してください）が出る
+# 注: 抽出が異常の行（${SEARCH_ABNORMAL_ROW_TEXT}）は一覧にあり、その行のチェックボックス（id cbSmsItemSelect の index ${SMS_ABNORMAL_CHECKBOX_INDEX}）は全選択の後もチェックなしであることを確認する。「選択したSMSを送信」を押すと、選択がないためのトースト（送信するSMSを選択してください）が出る
 # 外部条件: ${SEARCH_ABNORMAL_ROW_TEXT} は、抽出が異常の SMS（本文 1 行だけ）の本文に含まれる文字（vars）。${SMS_ABNORMAL_CHECKBOX_INDEX} は、一覧の上から数えた抽出が異常の行の位置（0 始まり）で、一覧の並び順（新しい順）に依存するため、実施日の端末の一覧に合わせて vars で書き換える
 # 未確認: index によるチェックボックスの指定（id と index の組み合わせ）は、この Maestro で未確認
 appId: jp.co.nttdata_univ.smstokintone

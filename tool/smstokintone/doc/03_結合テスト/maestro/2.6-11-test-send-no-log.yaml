@@ -1,7 +1,6 @@
 # 2.6 ログ: テスト送信はログに記録されない（テスト仕様書の 2.6 の 11 に対応）
-# 前提: setup（clearState と JSON 投入）から開始する。テスト送信の前のログは空（setup の clearState による）
 # 未確認: テスト結果ダイアログを閉じる操作（id android:id/button1）と、トップ画面へ戻る操作（Back 1 回）
-# 未確認: テスト送信の後にログが増えないことは、ログが空のままであることで確認する（件数の比較はスクリーンショットで行う）
+# 未確認: テスト送信の後にログが増えないことは、ログが空のままであることで確認する
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml

@@ -1,9 +1,6 @@
 # 2.4 引継ぎ内容の設定: 会社名の抽出なしで氏名が空だと保存時に入力エラーになる（テスト仕様書の 2.4 の 10 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
-# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
-# この flow は、会社名の抽出を「なし」にしてから、送信元 A の氏名を空にして保存する。最後に会社名の抽出を「あり」に戻す。
 # 未確認: 一覧の index 0 が SENDER_A。氏名欄の既存値は eraseText で消す（カーソル位置に依存する）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
@@ -29,7 +26,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-10-save-error-name-empty-03
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-# 前提確認（表示のみ、操作しない）
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true

@@ -1,8 +1,6 @@
 # 2.4 引継ぎ内容の設定: 削除を保存せずに画面を閉じると削除は反映されない（テスト仕様書の 2.4 の 13 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: test-data/setup/env_ok.json を投入した直後の状態。送信元 test-sender-a（古い）と test-sender-b（新しい）、送信先 test-send-target-1（振り分け: test-company）、会社名の抽出: あり、引継ぎ内容の氏名表示: あり。
-# 前提（この flow で設定）: 最初に setup/setup-import-environment.yaml で JSON を投入し直し、前の flow の変更（削除など）を戻す。表示順序は投入後の既定（古い順）。
 # この flow は送信元 B（一覧の index 1）を削除し、保存せずに閉じる。次の flow には引き継がない。
 # 未確認: 保存せずに Back で閉じたときに、確認ダイアログが出ない想定。
 - runFlow: setup/setup-import-environment.yaml
@@ -18,7 +16,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-13-discard-delete-02
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-# 前提確認（表示のみ、操作しない）
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
     checked: true

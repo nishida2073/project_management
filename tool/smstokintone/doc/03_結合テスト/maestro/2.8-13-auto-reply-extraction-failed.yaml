@@ -1,9 +1,8 @@
 # 2.8 自動処理: SMSの返信モードが自動のとき、抽出が異常なSMSに返信する（テスト仕様書の 2.8 の 13 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 前提（JSON）: 既定値（2.8 の 1 と同じ）。自動返信の間隔：10
 # 前提（フローで設定）: SMSの返信モードを自動に切り替える
-# 外部条件（事前に別端末から SMS を送る）: 送信元 test-phone-b、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
+# 外部条件: 別端末から SMS を送る。送信元 test-phone-b、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -16,7 +15,6 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
     checked: true
 - pressKey: Back
-- runFlow: common/enable-log-auto-refresh.yaml
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
 - takeScreenshot: 2.8-13-auto-reply-extraction-failed-01
