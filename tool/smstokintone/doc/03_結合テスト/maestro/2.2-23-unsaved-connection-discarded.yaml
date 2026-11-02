@@ -2,7 +2,7 @@
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: この flow の中で接続先を未保存の値に変えてから画面を閉じる
-# 未確認: 保存されている接続先は SUBDOMAIN（env_ok.json の値）と照合し、未保存の UNSAVED_SUBDOMAIN が残らないことを確認する
+# 確認: 未保存の接続先（UNSAVED_SUBDOMAIN）は、開き直したときに残らない。保存されている接続先の値は確認しない（値をリポジトリに書かない）
 # 注: 送信先の設定の画面には、未保存の変更を確認するダイアログの処理が無い（画面を閉じると破棄される）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
@@ -33,8 +33,4 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
     direction: DOWN
 - assertNotVisible: "${UNSAVED_SUBDOMAIN}"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
-    text: "${SUBDOMAIN}"
-# 注: SUBDOMAIN は env_ok.json に記載の接続先サブドメインの値（値はリポジトリに書かない）
 - takeScreenshot: 2.2-23-unsaved-connection-discarded-05

@@ -1,4 +1,4 @@
 {
   "SETUP_FILE_PATTERN": "env_ok.*",
-  "SMS_ITEM_TEXT": "<\u7aef\u672b\u306e SMS \u306e\u672c\u6587\u306e\u4e00\u90e8\u3092\u66f8\u304f>"
+  "SMS_ITEM_TEXT": "SET_SMS_TEXT_LOCALLY"
 }
