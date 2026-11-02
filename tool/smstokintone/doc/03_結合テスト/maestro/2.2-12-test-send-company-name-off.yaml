@@ -1,6 +1,6 @@
+# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 12 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 12 に対応）
 # 前提: JSON 読み込み後の状態（test-send-target-1 の振り分けは test-company）。この flow の中で会社名の抽出を無効にしてからテスト送信する
 # 外部条件: kintone 接続と SMS 受信が必要
 # 未確認: テスト本文に日本語（sample-company、test-taro）を入れられないため、英数字の TEST_BODY で代用している（IME の制約）

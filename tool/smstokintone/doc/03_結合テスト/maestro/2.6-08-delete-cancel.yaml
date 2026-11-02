@@ -8,6 +8,7 @@ appId: com.ssfrontier.smstokintone
 - runFlow: common/create-log-by-manual-send.yaml
 - tapOn: "ログの確認"
 - assertNotVisible: "ログがありません"
+- assertVisible: '(?s).*\[送信完了\].*'
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnDeleteLog"
 - assertVisible: "ログを削除しますか？"
@@ -16,4 +17,5 @@ appId: com.ssfrontier.smstokintone
     id: "android:id/button2"
 - assertNotVisible: "ログを削除しますか？"
 - assertNotVisible: "ログがありません"
+- assertVisible: '(?s).*\[送信完了\].*'
 - takeScreenshot: 2.6-08-delete-cancel-02

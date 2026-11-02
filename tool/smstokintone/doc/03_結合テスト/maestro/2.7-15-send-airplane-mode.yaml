@@ -20,6 +20,7 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "選択したSMSを送信"
 - assertVisible: '.*件を送信キューに追加しました.*'
 - assertVisible: '(?s).*SMSの送信が完了しました.*'
+- assertVisible: '(?s).*失敗[1-9][0-9]*件.*'
 - takeScreenshot: 2.7-15-send-airplane-mode-01
 # 外部条件（手動）: ここで機内モードを解除する
 - tapOn: "検索"

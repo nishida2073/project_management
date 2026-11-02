@@ -17,7 +17,7 @@ appId: com.ssfrontier.smstokintone
 - longPressOn:
     text: '(?s).*\[受信完了\].*'
     index: 0
-- assertVisible: '.*抽出結果.*'
+- assertVisible: '(?s).*抽出結果.*⚙.*🔄.*'
 - assertVisible: '(?s).*${EXPECTED_RESULT_COMPANY_LINE}.*'
 - assertVisible: '(?s).*${EXPECTED_RESULT_USER_LINE}.*'
 - takeScreenshot: 2.6-03-receive-extraction-result-02

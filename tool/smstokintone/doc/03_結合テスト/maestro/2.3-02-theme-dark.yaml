@@ -36,5 +36,13 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"
     checked: true
+- pressKey: Back
+- tapOn: "アプリの設定"
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbThemeDark"
+    checked: true
 # 未確認: ダークテーマの色は Maestro では検証しません。切り替わりはスクリーンショットで確認します
 - takeScreenshot: 2.3-02-theme-dark-03

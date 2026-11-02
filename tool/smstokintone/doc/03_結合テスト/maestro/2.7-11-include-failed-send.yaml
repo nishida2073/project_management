@@ -1,7 +1,9 @@
 # 2.7 SMSの検索: SMS選択の対象（抽出状況が異常）をオンにすると、抽出が異常の SMS も送信キューに追加される（テスト仕様書の 2.7 の 11 に対応）
 # 前提: setup（clearState と JSON 投入）から開始する。端末に抽出が異常の SMS がある（外部条件。SMS の読み取りを許可しておく）
 # 前提の操作: アプリの設定で「SMS選択の対象（抽出状況が異常）」をオンにする（既定はオフ）。その後、「検索」と「全選択」を順に実行する
-# 未確認: 送信キューに抽出が異常の SMS が含まれることは、トーストの件数とスクリーンショットで確認する
+# 確認: 送信キューに抽出が異常の SMS が含まれることは、キューに追加した件数（${SEND_QUEUED_COUNT}件。正常の SMS と異常の SMS の合計）と、送信完了のトースト（成功・失敗の件数）で確認する。抽出が異常の行（${SEARCH_ABNORMAL_ROW_TEXT}）が一覧にあることも確認する
+# 外部条件: 端末に、抽出が異常の SMS（本文に ${SEARCH_ABNORMAL_ROW_TEXT} を含む）と、抽出が正常の SMS が、今日の受信日の範囲にある。件数（SEND_QUEUED_COUNT、SEND_FINISHED_SUCCESS_COUNT、SEND_FINISHED_FAILURE_COUNT）は vars の値。実施日の端末の件数と kintone の結果に合わせて書き換える
+# 未確認: 異常の行のチェックボックスがオンになっていることは、チェックボックス（id がない）の状態で確認できないため、件数で確認する
 appId: com.ssfrontier.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -27,8 +29,11 @@ appId: com.ssfrontier.smstokintone
     checked: false
 - tapOn: "検索"
 - assertVisible: '.*件見つかりました.*'
+- assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
-- assertVisible: '.*件を送信キューに追加しました.*'
-- assertVisible: '(?s).*SMSの送信が完了しました.*'
+- assertVisible: '.*(?<!\d)${SEND_QUEUED_COUNT}件を送信キューに追加しました.*'
+- extendedWaitUntil:
+    visible: '(?s).*SMSの送信が完了しました.*（成功${SEND_FINISHED_SUCCESS_COUNT}件 / 失敗${SEND_FINISHED_FAILURE_COUNT}件）.*'
+    timeout: 180000
 - takeScreenshot: 2.7-11-include-failed-send-01

@@ -32,5 +32,11 @@ appId: com.ssfrontier.smstokintone
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-06-search-date-range-04
 - assertVisible: "受信日の範囲"
-# 未確認: 受信日の範囲が今日を含む直近 3 日になることは、日付の値で確認します（スクリーンショットで確認）
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etDateFrom"
+    text: "${EXPECTED_DATE_FROM}"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etDateTo"
+    text: "${EXPECTED_DATE_TO}"
+# 注意: EXPECTED_DATE_FROM と EXPECTED_DATE_TO は実行日に依存する。実行日に合わせて vars の JSON を書き換える（今日が 2026-11-02 の場合は 2026/10/31 と 2026/11/02。表示は yyyy/MM/dd）
 - takeScreenshot: 2.3-06-search-date-range-05

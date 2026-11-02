@@ -1,10 +1,12 @@
 # 2.8 自動処理: SMSを受信すると、登録のログと引継ぎ内容が残る（テスト仕様書の 2.8 の 1 に対応）
-appId: com.ssfrontier.smstokintone
----
 # 前提（JSON）: SMSの送信モード：自動、SMSの返信モード：手動、会社名の抽出：あり、会社名の自動変換：あり、AIによる抽出：なし、引継ぎ：あり（範囲：制限なし）、送信先 test-send-target-1（振り分け：test-company）
 # 前提（フローで設定）: なし（既定値のまま）
 # 外部条件（事前に別端末から SMS を送る）: 送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-1」。ログの画面で待つ間（下の extendedWaitUntil）に別端末から送る
+# 確認: 引継ぎ内容の値（送信元 test-phone-a、会社名 TEST－COMPANY、氏名 test-taro）は、引継ぎ内容の設定画面の項目で確認する（会社名は会社名の自動変換の結果）
 # 未確認: ログの一覧に送信先名（test-send-target-1）が表示されるかは未確認。kintone の登録内容は kintone 側で確認する
+# 未確認: 送信先の設定の接続先（サブドメイン）が JSON の値のまま変わらないことは、接続情報のため flow には書かない。手動で確認する。送信先名の確認は下の assertVisible で行う
+appId: com.ssfrontier.smstokintone
+---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - runFlow: common/enable-log-auto-refresh.yaml
@@ -31,5 +33,13 @@ appId: com.ssfrontier.smstokintone
     direction: DOWN
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnEditContinuationInfo"
-- assertVisible: "(?s).*test-phone-a.*"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/tvSenderAddress"
+    text: "test-phone-a"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationCompanyName"
+    text: "TEST－COMPANY"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etContinuationUserName"
+    text: "test-taro"
 - takeScreenshot: 2.8-01-receive-auto-process-04

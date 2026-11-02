@@ -1,3 +1,4 @@
 {
+  "LOG_MATCH_TOLERANCE_PRE": "30",
   "SETUP_FILE_PATTERN": "env_ok.*"
 }

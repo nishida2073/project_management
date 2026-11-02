@@ -1,3 +1,5 @@
 {
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_ok.*",
+  "SEARCH_ABNORMAL_ROW_TEXT": "abnormal-test-body",
+  "SEARCH_NORMAL_ROW_TEXT": "normal-test-body"
 }

@@ -1,9 +1,8 @@
 # 2.8 自動処理: 会社名の自動変換を無効にし、固定変換で変換したうえで振り分けられる（テスト仕様書の 2.8 の 6 に対応）
-appId: com.ssfrontier.smstokintone
----
 # 前提（JSON）: 既定値（2.8 の 1 と同じ）
 # 前提（フローで設定）: 会社名の自動変換を無効にする。固定変換に「${FIXED_FROM}」→「${FIXED_TO}」を 1 行追加する
 # 外部条件（事前に別端末から SMS を送る）: 送信元 test-phone-a、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
+# 確認: 抽出結果のダイアログのタイトルに、変換の印 🔄（strings.xml の icon_company_name_converted）が出て、会社名が固定変換後の「${FIXED_TO}」であることで確認する（LogActivity の showExtractionResultDialog）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -49,5 +48,6 @@ appId: com.ssfrontier.smstokintone
     timeout: 180000
 - assertVisible: "(?s).*SMSの登録に成功しました.*"
 - longPressOn: "(?s).*SMSを受信しました.*"
-- assertVisible: "(?s).*${FIXED_TO}.*"
+- assertVisible: "抽出結果 ⚙.*🔄.*"
+- assertVisible: "(?s).*会社名：${FIXED_TO}.*"
 - takeScreenshot: 2.8-06-fixed-conversion-receive-03

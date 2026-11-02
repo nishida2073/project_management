@@ -1,7 +1,8 @@
+# 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 14 に対応）
 appId: com.ssfrontier.smstokintone
 ---
-# 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 14 に対応）
 # 前提: JSON 読み込み後の状態。この flow の中で保存する値を入力して「設定を保存」を押してから、開き直して確認する
+# 統合範囲（時間）: 統合条件を時間にして TOLERANCE_HOURS_SAVED を入力し、同一日付に戻してから保存する（統合条件の入力値は同一日付のまま、統合範囲（時間）の保存値を確認する）
 # 注: 別の flow を runFlow で呼ぶと、その中の setup（clearState）で保存値が消えるため、入力は common の手順を直接呼ぶ
 # 未確認: 伏せ字のパスワードは、テキストで一致を取れない可能性がある
 - runFlow: setup/setup-import-environment.yaml
@@ -15,6 +16,16 @@ appId: com.ssfrontier.smstokintone
     text: "test-send-target-1"
 - runFlow: common/fill-field-mapping-saved-values.yaml
 - runFlow: common/fill-send-target-saved-values.yaml
+- runFlow: common/fill-tolerance-hours-saved-values.yaml
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
+    checked: true
 - tapOn: "設定を保存"
 - assertVisible: "設定を保存しました"
 - assertVisible: "SMSの送信モード"
@@ -118,4 +129,11 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbUpdateToleranceModeSameDate"
     checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etUpdateToleranceHours"
+    text: "${TOLERANCE_HOURS_SAVED}"
 - takeScreenshot: 2.2-14-reopen-settings-04

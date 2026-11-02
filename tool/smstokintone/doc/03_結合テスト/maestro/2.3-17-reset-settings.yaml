@@ -2,7 +2,7 @@
 appId: com.ssfrontier.smstokintone
 ---
 # 前提（JSON）: 会社名の抽出：あり、SMSの返信モード：手動
-# 前提（フローで設定）: 表示テーマをダークに、SMSの送信モードを手動に切り替えてから、設定を初期化する
+# 前提（フローで設定）: SMSの返信モードを自動、検索条件の表示を隠す、統合範囲（秒）を ${LOG_MATCH_TOLERANCE_PRE} にしてから、表示テーマをダークに、SMSの送信モードを手動に切り替え、設定を初期化する
 # 注意: 送信先・ログ・引継ぎ内容が残ることは、このフローでは確認しません（未確認）
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
@@ -23,11 +23,43 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - scrollUntilVisible:
     element:
+      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeAuto"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+    direction: DOWN
+- tapOn:
+    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersHidden"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
+    visibilityPercentage: 100
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      FIELD_ID: etLogMatchToleranceSeconds
+      INPUT_VALUE: "${LOG_MATCH_TOLERANCE_PRE}"
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    text: "${LOG_MATCH_TOLERANCE_PRE}"
+- takeScreenshot: 2.3-17-reset-settings-02
+- scrollUntilVisible:
+    element:
       id: "com.ssfrontier.smstokintone:id/rbThemeDark"
     direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"
-- takeScreenshot: 2.3-17-reset-settings-02
+- takeScreenshot: 2.3-17-reset-settings-03
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbThemeDark"
     checked: true
@@ -36,7 +68,7 @@ appId: com.ssfrontier.smstokintone
       id: "com.ssfrontier.smstokintone:id/rbSendManual"
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/rbSendManual"
-- takeScreenshot: 2.3-17-reset-settings-03
+- takeScreenshot: 2.3-17-reset-settings-04
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbSendManual"
     checked: true
@@ -46,10 +78,10 @@ appId: com.ssfrontier.smstokintone
     direction: UP
 - tapOn:
     id: "com.ssfrontier.smstokintone:id/btnResetSettings"
-- takeScreenshot: 2.3-17-reset-settings-04
+- takeScreenshot: 2.3-17-reset-settings-05
 - assertVisible: "設定を初期化しますか？"
 - tapOn: "初期化" # 未確認: 画面の後ろの初期化ボタンと同じ文字のため、ダイアログのボタンが選ばれるか確認する
-- takeScreenshot: 2.3-17-reset-settings-05
+- takeScreenshot: 2.3-17-reset-settings-06
 - scrollUntilVisible:
     element:
       id: "com.ssfrontier.smstokintone:id/rbThemeLight"
@@ -62,4 +94,26 @@ appId: com.ssfrontier.smstokintone
 - assertVisible:
     id: "com.ssfrontier.smstokintone:id/rbSendAuto"
     checked: true
-- takeScreenshot: 2.3-17-reset-settings-06
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSmsReplyModeManual"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    direction: DOWN
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/rbSearchFiltersVisible"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    direction: DOWN
+    visibilityPercentage: 100
+- assertVisible:
+    id: "com.ssfrontier.smstokintone:id/etLogMatchToleranceSeconds"
+    text: "15"
+- takeScreenshot: 2.3-17-reset-settings-07

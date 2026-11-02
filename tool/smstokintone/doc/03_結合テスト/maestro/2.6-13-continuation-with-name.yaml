@@ -2,7 +2,7 @@
 # 前提: setup（clearState と JSON 投入）から開始する。引継ぎ内容の氏名表示は JSON の値（あり）のまま確認する
 # 外部条件: 引継ぎ内容の送信元（test-sender-a）から SMS を 1 通受信する（下の assert の待ち時間（60 秒）の間に受信させる）
 # 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
-# 未確認: 仕様書の「2.8 の 3」の SMS と、引継ぎ内容の送信元の対応（2.6 の 12 と同じ注意）
+# 注: 外部条件の SMS は、引継ぎ内容の送信元（CONTINUATION_SENDER = test-sender-a）から届いたものを使う（2.6 の 12 と同じ）
 appId: com.ssfrontier.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml

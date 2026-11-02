@@ -2,7 +2,9 @@
 # 前提: setup（clearState と JSON 投入）から開始する。端末に抽出が異常の SMS がある（外部条件。SMS の読み取りを許可しておく）
 # 前提の操作: 「検索」を実行し、「全選択」を押す。SMS選択の対象（抽出状況が異常）は既定（オフ）のまま
 # 注: 抽出が異常の SMS は、SMS選択の対象がオフのとき選択できない（チェックボックスが無効）
-# 未確認: 抽出が異常の SMS のチェックが無効であることは、スクリーンショットで確認する（一覧の項目の文字は未特定）
+# 確認: 抽出が異常の行（${SEARCH_ABNORMAL_ROW_TEXT}）は一覧にあり、全選択の後に「選択したSMSを送信」を押すと、選択がないためのトースト（送信するSMSを選択してください）が出る。選ばれた行がなければ送信は始まらない
+# 未確認: 抽出が異常の行のチェックボックスが「チェックなし」であることは、チェックボックスに id がないため、Maestro の checked では確認できない（CheckBox に id を付けると確認できる）
+# 外部条件: ${SEARCH_ABNORMAL_ROW_TEXT} は、抽出が異常の SMS（本文 1 行だけ）の本文に含まれる文字（vars）。実施日に端末の SMS に合わせて書き換える
 appId: com.ssfrontier.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -21,5 +23,8 @@ appId: com.ssfrontier.smstokintone
     checked: true
 - tapOn: "検索"
 - assertVisible: '.*件見つかりました.*'
+- assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - tapOn: "全選択"
+- tapOn: "選択したSMSを送信"
+- assertVisible: "送信するSMSを選択してください"
 - takeScreenshot: 2.7-21-exclude-failed-select-all-01
