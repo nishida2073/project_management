@@ -38,7 +38,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "テスト送信"
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-04
 - assertVisible: "テスト本文"
-- eraseText: 50  # 未確認: テスト本文の初期値（テンプレート）を消してから入力する
+# 未確認: テスト本文の初期値（テンプレート）は、欄をタップして末尾にカーソルを置いてから消す
+- tapOn:
+    text: "(?s).*テスト太郎.*"
+    point: "95%, 95%"
+- eraseText: 200
 - inputText: "${TEST_BODY_LINE1}"
 - pressKey: Enter
 - inputText: "${TEST_BODY_LINE2}"
