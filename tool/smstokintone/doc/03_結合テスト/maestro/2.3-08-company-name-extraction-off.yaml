@@ -11,6 +11,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
     checked: true
@@ -33,6 +34,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+    direction: DOWN
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
 - takeScreenshot: 2.3-08-company-name-extraction-off-03

@@ -16,12 +16,6 @@ appId: jp.co.nttdata_univ.smstokintone
     checked: true
 - scrollUntilVisible:
     element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
-- scrollUntilVisible:
-    element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
     direction: UP
 - tapOn:
@@ -29,6 +23,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-03-send-mode-manual-02
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
     checked: true
 - pressKey: Back
 - takeScreenshot: 2.3-03-send-mode-manual-03

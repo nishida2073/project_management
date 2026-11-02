@@ -61,6 +61,13 @@ appId: jp.co.nttdata_univ.smstokintone
     text: "${LOGIN_NAME}"
 - scrollUntilVisible:
     element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
+    direction: DOWN
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
+    text: "${LOGIN_PASSWORD}"
+- scrollUntilVisible:
+    element:
       id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
     direction: DOWN
 - assertVisible:
@@ -115,13 +122,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
     text: "${SAVED_FIELD_HISTORY}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
-    direction: DOWN
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
-    text: "${LOGIN_PASSWORD}"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"

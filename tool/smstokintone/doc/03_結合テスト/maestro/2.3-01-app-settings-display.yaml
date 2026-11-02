@@ -22,26 +22,8 @@ appId: jp.co.nttdata_univ.smstokintone
     checked: true
 - scrollUntilVisible:
     element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
-    checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-    text: "${REPLY_COOLDOWN_SECONDS}"
-- scrollUntilVisible:
-    element:
       id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
-    direction: UP
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
     text: "${SEARCH_DATE_RANGE_DAYS}"
@@ -50,14 +32,8 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/llDefaultSendTargetFilter"
 - scrollUntilVisible:
     element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-    checked: true
-- scrollUntilVisible:
-    element:
       id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
-    direction: UP
+    direction: DOWN
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
     checked: false
@@ -75,16 +51,40 @@ appId: jp.co.nttdata_univ.smstokintone
     checked: false
 - scrollUntilVisible:
     element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
+    checked: true
+- scrollUntilVisible:
+    element:
       id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
     checked: false
 - scrollUntilVisible:
     element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
+    checked: true
+- scrollUntilVisible:
+    element:
       id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
     checked: false
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
+    checked: true
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
+    text: "${REPLY_COOLDOWN_SECONDS}"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"

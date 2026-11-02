@@ -16,6 +16,16 @@ appId: jp.co.nttdata_univ.smstokintone
     checked: true
 - scrollUntilVisible:
     element:
+      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+    direction: UP
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+- takeScreenshot: 2.3-02-theme-dark-02
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+    checked: true
+- scrollUntilVisible:
+    element:
       id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
@@ -25,16 +35,6 @@ appId: jp.co.nttdata_univ.smstokintone
       id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    direction: UP
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-- takeScreenshot: 2.3-02-theme-dark-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
     checked: true
 - pressKey: Back
 - tapOn: "アプリの設定"

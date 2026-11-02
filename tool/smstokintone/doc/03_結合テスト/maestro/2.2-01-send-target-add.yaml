@@ -34,13 +34,13 @@ appId: jp.co.nttdata_univ.smstokintone
     text: 'univ-kyousai-\{X\}'
 - scrollUntilVisible:
     element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
       index: 0
     direction: DOWN
 - assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
     index: 0
-    text: "sender"
+    text: "registration_type"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
@@ -52,13 +52,13 @@ appId: jp.co.nttdata_univ.smstokintone
     text: "receive_datetime"
 - scrollUntilVisible:
     element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
+      id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
       index: 0
     direction: DOWN
 - assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
+    id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
     index: 0
-    text: "registration_type"
+    text: "sender"
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
