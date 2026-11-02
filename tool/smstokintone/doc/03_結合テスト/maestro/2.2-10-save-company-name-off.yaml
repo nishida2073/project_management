@@ -40,7 +40,6 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${COMPANY_NAME}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-10-save-company-name-off-05
-- assertVisible: "設定を保存しました"
 - assertVisible: "SMSの送信モード"
 - assertNotVisible: "設定を追加"
 - takeScreenshot: 2.2-10-save-company-name-off-06

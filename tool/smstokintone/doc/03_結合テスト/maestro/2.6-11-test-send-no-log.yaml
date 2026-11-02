@@ -12,7 +12,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "テスト送信"
 - assertVisible: "テスト本文"
 - tapOn: "送信"
-- assertVisible: ".*テスト結果.*"
+- assertVisible: "(?s).*テスト結果.*"
 - tapOn:
     id: "android:id/button1"
 - pressKey: Back

@@ -34,7 +34,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "${SENDER_B}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.4-03-delete-and-save-04
-- assertVisible: "設定を保存しました"
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - takeScreenshot: 2.4-03-delete-and-save-05

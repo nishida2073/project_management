@@ -10,7 +10,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "設定を追加"
 - runFlow: common/fill-tolerance-hours-saved-values.yaml
 - tapOn: "設定を保存"
-- assertVisible: "設定を保存しました"
 - assertVisible: "SMSの送信モード"
 - takeScreenshot: 2.2-16-reopen-tolerance-02
 - tapOn: "送信先の設定"

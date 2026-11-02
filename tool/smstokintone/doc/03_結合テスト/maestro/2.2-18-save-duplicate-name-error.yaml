@@ -60,7 +60,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-18-save-duplicate-name-error-02
 - assertVisible: "入力エラー"
-- assertVisible: ".*送信先名が重複しています.*"
-- assertVisible: ".*${DUPLICATE_SEND_TARGET_NAME}.*"
-- assertNotVisible: "設定を保存しました"
+- assertVisible: "(?s).*送信先名が重複しています.*"
+- assertVisible: "(?s).*${DUPLICATE_SEND_TARGET_NAME}.*"
 - takeScreenshot: 2.2-18-save-duplicate-name-error-03

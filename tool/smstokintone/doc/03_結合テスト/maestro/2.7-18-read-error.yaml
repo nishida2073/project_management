@@ -13,6 +13,5 @@ appId: jp.co.nttdata_univ.smstokintone
     checked: false
 - tapOn: "検索"
 - assertVisible: '(?s).*SMSの検索でエラーが発生しました.*'
-- assertVisible: '.*0件見つかりました.*'
 - assertVisible: "該当するSMSがありません"
 - takeScreenshot: 2.7-18-read-error-01

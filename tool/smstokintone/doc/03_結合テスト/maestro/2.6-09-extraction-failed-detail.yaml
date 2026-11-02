@@ -15,6 +15,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - longPressOn:
     text: '(?s).*\[受信完了\].*'
     index: 0
-- assertVisible: '.*抽出結果.*'
+- assertVisible: '(?s).*抽出結果.*'
 - assertVisible: "会社名・氏名の抽出に失敗しています"
 - takeScreenshot: 2.6-09-extraction-failed-detail-02

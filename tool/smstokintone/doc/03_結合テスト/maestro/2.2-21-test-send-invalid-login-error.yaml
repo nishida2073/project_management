@@ -39,6 +39,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "テスト本文"
 - tapOn: "送信"
 - takeScreenshot: 2.2-21-test-send-invalid-login-error-03
-- assertVisible: ".*送信失敗.*"  # 未確認
+- assertVisible: "(?s).*送信失敗.*"  # 未確認
 # 未確認: kintone の応答内容は kintone 側の応答文に依存するため、ここでは確認しない
 - takeScreenshot: 2.2-21-test-send-invalid-login-error-04

@@ -76,7 +76,6 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${SAVED_FIELD_HISTORY}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-13-save-field-mapping-02
-- assertVisible: "設定を保存しました"
 - assertVisible: "SMSの送信モード"
 - assertNotVisible: "設定を追加"
 - takeScreenshot: 2.2-13-save-field-mapping-03

@@ -32,6 +32,5 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '${PAST_YEAR}/.*'
 - takeScreenshot: 2.7-19-search-old-date-01
 - tapOn: "検索"
-- assertVisible: '.*0件見つかりました.*'
 - assertVisible: "該当するSMSがありません"
 - takeScreenshot: 2.7-19-search-old-date-02

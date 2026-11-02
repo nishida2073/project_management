@@ -27,13 +27,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-07-test-send-success-02
 - assertVisible: "テスト本文"
 # 未確認: テスト本文の初期表示に会社名・氏名が含まれること（改行をはさむと正規表現が一致しないことがある）
-- assertVisible: ".*${EXPECTED_COMPANY_NAME}.*"
-- assertVisible: ".*${EXPECTED_USER_NAME}.*"
+- assertVisible: "(?s).*${EXPECTED_COMPANY_NAME}.*"
+- assertVisible: "(?s).*${EXPECTED_USER_NAME}.*"
 - tapOn: "送信"
 - takeScreenshot: 2.2-07-test-send-success-03
-- assertVisible: ".*テスト結果.*"  # 成功時はタイトルに抽出アイコンが付くため、部分一致で確認する
+- assertVisible: "(?s).*テスト結果.*"  # 成功時はタイトルに抽出アイコンが付くため、部分一致で確認する
 - assertVisible: '(?s).*${EXPECTED_RESULT_COMPANY_LINE}.*'
 - assertVisible: '(?s).*${EXPECTED_RESULT_USER_LINE}.*'
-- assertVisible: ".*SMSの(登録|更新)に成功しました.*"  # 未確認
+- assertVisible: "(?s).*SMSの(登録|更新)に成功しました.*"  # 未確認
 # 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
 - takeScreenshot: 2.2-07-test-send-success-04

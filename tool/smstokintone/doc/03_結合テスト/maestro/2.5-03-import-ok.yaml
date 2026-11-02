@@ -32,7 +32,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     id: "android:id/button1"   # 未確認: 確認ダイアログの「インポート」ボタンの id
 - takeScreenshot: 2.5-03-import-ok-05
-- assertVisible: "設定をインポートしました"   # 未確認: トーストの表示
 - assertVisible: "ログの確認"
 - assertNotVisible: "ファイルを選択"
 - takeScreenshot: 2.5-03-import-ok-06

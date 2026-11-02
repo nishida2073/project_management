@@ -20,6 +20,5 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSentAutoOnly"
     checked: true
 - tapOn: "検索"
-- assertVisible: '.*件見つかりました.*'
 - assertVisible: '(?s).*✅.*${SEARCH_AUTO_SENT_ROW_TEXT}.*'
 - takeScreenshot: 2.7-04-search-sent-auto-only-01

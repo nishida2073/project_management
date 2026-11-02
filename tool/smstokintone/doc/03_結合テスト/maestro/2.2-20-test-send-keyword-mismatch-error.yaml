@@ -52,6 +52,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - hideKeyboard
 - tapOn: "送信"
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-06
-- assertVisible: ".*送信先エラー.*"
-- assertVisible: ".*${EXPECTED_COMPANY_NAME}.*"  # 未確認
+- assertVisible: "(?s).*送信先エラー.*"
+- assertVisible: "(?s).*${EXPECTED_COMPANY_NAME}.*"  # 未確認
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-07

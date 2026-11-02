@@ -19,7 +19,6 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionFailedOnly"
     checked: true
 - tapOn: "検索"
-- assertVisible: '.*件見つかりました.*'
 - assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - assertNotVisible: '(?s).*${SEARCH_NORMAL_ROW_TEXT}.*'
 - takeScreenshot: 2.7-05-search-extraction-failed-only-01

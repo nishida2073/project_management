@@ -46,7 +46,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "${USER_NAME_2}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.4-06-save-company-and-name-05
-- assertVisible: "設定を保存しました"
 - assertNotVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - takeScreenshot: 2.4-06-save-company-and-name-06

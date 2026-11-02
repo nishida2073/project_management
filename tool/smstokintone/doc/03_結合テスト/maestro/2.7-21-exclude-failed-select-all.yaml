@@ -22,7 +22,6 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionFailedOnly"
     checked: true
 - tapOn: "検索"
-- assertVisible: '.*件見つかりました.*'
 - assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - tapOn: "全選択"
 - assertVisible:

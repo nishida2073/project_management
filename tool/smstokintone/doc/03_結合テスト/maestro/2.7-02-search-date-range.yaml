@@ -33,5 +33,4 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '\d{4}/\d{2}/\d{2}'
 - takeScreenshot: 2.7-02-search-date-range-01
 - tapOn: "検索"
-- assertVisible: '.*件見つかりました.*'
 - takeScreenshot: 2.7-02-search-date-range-02

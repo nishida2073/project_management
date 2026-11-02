@@ -63,9 +63,7 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
     direction: DOWN
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLoginPassword"
-    text: "${LOGIN_PASSWORD}"
+# 確認: パスワードは伏せ字で表示される（スクリーンショットで目視）。欄の値は Maestro からも読めるため、文字での確認はしない
 - scrollUntilVisible:
     element:
       id: "jp.co.nttdata_univ.smstokintone:id/etAppId"

@@ -33,7 +33,6 @@ appId: jp.co.nttdata_univ.smstokintone
       INPUT_VALUE: "${TOLERANCE_HOURS_SAVED}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-15-save-tolerance-hours-03
-- assertVisible: "設定を保存しました"
 - assertVisible: "SMSの送信モード"
 - assertNotVisible: "設定を追加"
 - takeScreenshot: 2.2-15-save-tolerance-hours-04

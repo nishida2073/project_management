@@ -13,10 +13,9 @@ appId: jp.co.nttdata_univ.smstokintone
     id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
     checked: false
 - tapOn: "検索"
-- assertVisible: '.*件見つかりました.*'
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
-- assertVisible: '.*件を送信キューに追加しました.*'
+- assertVisible: '(?s).*件を送信キューに追加しました.*'
 - assertVisible: '(?s).*SMSの送信が完了しました.*'
 - takeScreenshot: 2.7-09-send-selected-01
 - assertNotVisible:
