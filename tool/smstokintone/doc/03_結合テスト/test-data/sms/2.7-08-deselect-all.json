@@ -1,0 +1,12 @@
+[
+  {
+    "address": "0312345707",
+    "body": "test-company\ntest-taro\nselect-a",
+    "receive": true
+  },
+  {
+    "address": "0312345708",
+    "body": "test-company\ntest-taro\nselect-b",
+    "receive": true
+  }
+]

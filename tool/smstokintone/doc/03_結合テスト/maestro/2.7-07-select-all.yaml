@@ -23,7 +23,15 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
 - tapOn: "検索"
 - tapOn: "全選択"
-- assertVisible:
-    className: "android.widget.CheckBox"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: cbSmsItemSelect
+      INDEX: 0
+- tapOn: "▲ 隠す"
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: cbSmsItemSelect
+      INDEX: 1
 - takeScreenshot: 2.7-07-select-all-01
