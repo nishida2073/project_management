@@ -15,7 +15,7 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/assert-id-checked.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
