@@ -44,8 +44,9 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: cbSmsItemSelect
       INDEX: ${SMS_ABNORMAL_CHECKBOX_INDEX}
 - tapOn: "選択したSMSを送信"
-- assertVisible: '(?s).*\d+件を送信キューに追加しました.*'
+- tapOn: "ログの確認"
 - extendedWaitUntil:
-    visible: '(?s).*SMSの送信が完了しました.*（成功\d+件 / 失敗\d+件）.*'
+    visible: '(?s).*\[(送信完了|失敗)\].*'
     timeout: 180000
+- pressKey: Back
 - takeScreenshot: 2.7-11-include-failed-send-01

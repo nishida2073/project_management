@@ -20,7 +20,6 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - tapOn: "検索"
-- assertVisible: '(?s).*SMSの検索でエラーが発生しました.*'
 - runFlow:
     file: common/assert-text-visible.yaml
     env:

@@ -87,7 +87,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     text: "後で"
     optional: true
-# 確認: 保存後にトップ画面に戻る（「設定を保存しました」のトーストは短時間で消えるため、確認しない）
+# 確認: 保存後にトップ画面に戻る（保存の完了は、トーストでは確認しない）
 - runFlow:
     file: common/assert-text-visible.yaml
     env:

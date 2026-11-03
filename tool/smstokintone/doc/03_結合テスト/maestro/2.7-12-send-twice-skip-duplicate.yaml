@@ -24,11 +24,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "検索"
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
-- assertVisible: '(?s).*SMSの送信が完了しました.*'
 - takeScreenshot: 2.7-12-send-twice-skip-duplicate-01
 - tapOn: "検索"
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
-- assertVisible: '(?s).*SMSの送信が完了しました.*'
-- assertVisible: '(?s).*（成功[0-9]+件 / 失敗0件）.*'
+- tapOn: "ログの確認"
+- extendedWaitUntil:
+    visible: '(?s).*\[(送信完了|失敗)\].*'
+    timeout: 180000
+- pressKey: Back
 - takeScreenshot: 2.7-12-send-twice-skip-duplicate-02

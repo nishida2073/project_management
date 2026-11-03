@@ -13,13 +13,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "検索"
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
-- runFlow:
-    file: common/assert-text-visible.yaml
-    env:
-      TEXT: "(?s).*件を送信キューに追加しました.*"
-- assertVisible: '(?s).*SMSの送信が完了しました.*'
 - pressKey: Back
 - tapOn: "ログの確認"
+- extendedWaitUntil:
+    visible: '(?s).*\[(送信完了|失敗)\].*'
+    timeout: 180000
 - assertNotVisible: "ログがありません"
 - assertVisible: '(?s).*\[送信完了\].*'
 - runFlow:

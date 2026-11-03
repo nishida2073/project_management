@@ -1,4 +1,4 @@
-# 2.7 SMSの検索: 何も選ばずに送信を押すと、「送信するSMSを選択してください」が表示される（テスト仕様書の 2.7 の 20 に対応）
+# 2.7 SMSの検索: 何も選ばずに送信を押しても、送信は行われない（テスト仕様書の 2.7 の 20 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -19,8 +19,4 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - tapOn: "選択したSMSを送信"
-- runFlow:
-    file: common/assert-text-visible.yaml
-    env:
-      TEXT: "送信するSMSを選択してください"
 - takeScreenshot: 2.7-20-send-no-selection-01

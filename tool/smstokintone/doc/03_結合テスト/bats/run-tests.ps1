@@ -47,8 +47,10 @@ function Invoke-Flows([object[]]$flowFiles) {
         $maestroArgs += @("test") + $envArgs + @("--debug-output", $runDir, "--flatten-debug-output", "--format", "HTML", "--output", (Join-Path $flowOut "report.html"), $flow.FullName)
         if ($Device -like "emulator-*") { & (Join-Path $PSScriptRoot "..\test-data\sms\clear-inbox.ps1") -Device $Device }
         $smsJson = if ($Sms) { $Sms } else { Join-Path $PSScriptRoot ("..\test-data\sms\" + $flow.BaseName + ".json") }
-        if ($Device -like "emulator-*" -and (Test-Path -LiteralPath $smsJson)) { & (Join-Path $PSScriptRoot "..\test-data\sms\load-inbox.ps1") -Device $Device -Json $smsJson }
+        $smsJob = $null
+        if ($Device -like "emulator-*" -and (Test-Path -LiteralPath $smsJson)) { $smsJob = Start-Job -ArgumentList (Join-Path $PSScriptRoot "..\test-data\sms\load-inbox.ps1"), $Device, $smsJson -ScriptBlock { param($p, $d, $j) Start-Sleep -Seconds 45; & $p -Device $d -Json $j } }
         & $maestro @maestroArgs | Out-Host
+        if ($smsJob) { Wait-Job $smsJob | Out-Null; Receive-Job $smsJob | Out-Host; Remove-Job $smsJob }
         $code = $LASTEXITCODE
         if ($code -eq 0) { $label = "成功" } else { $label = "失敗" }
         $item = [pscustomobject]@{ Flow = $flow.Name; ExitCode = $code; Result = $label; Evidence = $flowOut }
