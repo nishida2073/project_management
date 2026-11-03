@@ -1,4 +1,4 @@
-# 2.7 SMSの検索: SMS選択の対象（抽出状況が異常）がオフのとき、全選択しても抽出が異常の SMS にはチェックが入らない（テスト仕様書の 2.7 の 21 に対応）
+# 2.7 SMSの検索: SMS選択の対象（抽出状況が異常）がオフのとき、全選択しても抽出が異常の SMS にはチェックが入らない（テスト仕様書の 2.7 の 18 に対応）
 # 外部条件: 端末に抽出が異常の SMS がある
 # 前提（フローで設定）: SMS選択の対象（抽出状況が異常）は既定（オフ）のまま
 # 注: 抽出が異常の SMS は、SMS選択の対象がオフのとき選択できない（チェックボックスが無効）
@@ -43,4 +43,4 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: cbSmsItemSelect
       INDEX: ${SMS_ABNORMAL_CHECKBOX_INDEX}
 - tapOn: "選択したSMSを送信"
-- takeScreenshot: 2.7-21-exclude-failed-select-all-01
+- takeScreenshot: 2.7-18-exclude-failed-select-all-01

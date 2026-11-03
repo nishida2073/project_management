@@ -1,4 +1,4 @@
-# 2.7 SMSの検索: SMSの読み取りが許可されていないと、検索の欄は表示されず、許可を促す文が表示される（テスト仕様書の 2.7 の 17 に対応）
+# 2.7 SMSの検索: SMSの読み取りが許可されていないと、検索の欄は表示されず、許可を促す文が表示される（テスト仕様書の 2.7 の 15 に対応）
 # 前提（フローで設定）: SMS の読み取りは許可しない
 # 外部条件: 手動。端末の SMS の読み取りの許可を外してから flow を実行する（未確認: setup の clearState で許可が戻るか）
 # 注: 検索の欄（layoutSearchForm）は、許可がないとき非表示になる（SmsSearchActivity の実装）
@@ -16,4 +16,4 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: layoutSearchForm
       INDEX: 0
-- takeScreenshot: 2.7-17-permission-denied-01
+- takeScreenshot: 2.7-15-permission-denied-01

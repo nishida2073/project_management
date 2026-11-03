@@ -1,4 +1,4 @@
-# 2.7 SMSの検索: 1 年以上前の日付で検索すると、0 件になり「該当するSMSがありません」が表示される（テスト仕様書の 2.7 の 19 に対応）
+# 2.7 SMSの検索: 1 年以上前の日付で検索すると、0 件になり「該当するSMSがありません」が表示される（テスト仕様書の 2.7 の 16 に対応）
 # 注: 日付は日付ピッカーで選ぶ（開始日・終了日とも、CURRENT_YEAR の年から PAST_YEAR の年の 1 日を選ぶ）
 appId: jp.co.nttdata_univ.smstokintone
 ---
@@ -49,10 +49,10 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: etDateFrom
       INDEX: 0
       TEXT: '${PAST_YEAR}/.*'
-- takeScreenshot: 2.7-19-search-old-date-01
+- takeScreenshot: 2.7-16-search-old-date-01
 - tapOn: "検索"
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
       TEXT: "該当するSMSがありません"
-- takeScreenshot: 2.7-19-search-old-date-02
+- takeScreenshot: 2.7-16-search-old-date-02
