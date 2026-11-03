@@ -1,7 +1,7 @@
 # 2.2 送信先の設定: 統合範囲の入力欄を有効にする（テスト仕様書の 2.2 の 6 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 未確認: 統合範囲が空であることは確認していない（空の判定が未確認）
+# 注: 統合範囲（時間）の初期値は 5（SettingsStore.kt:275, AppDefaults.kt:79）。空欄のまま保存すると 5 になるため、空の判定は行わない。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"

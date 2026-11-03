@@ -1,4 +1,4 @@
 {
   "TEST_BODY": "sample-company, test-taro",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

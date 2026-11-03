@@ -37,8 +37,11 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "インポートエラー"
-- assertVisible: "(?s).*引継ぎ内容の1件目に氏名がありません.*"   # 未確認: メッセージ文言
-- tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
+- assertVisible: "(?s).*引継ぎ内容の1件目に氏名がありません.*"
+- runFlow:
+    file: common/tap-android-id.yaml
+    env:
+      ID: button1
 - takeScreenshot: 2.5-11-import-ng-continuation-user-name-missing-04
 - runFlow:
     file: common/assert-id-visible.yaml

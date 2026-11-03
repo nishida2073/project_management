@@ -3,5 +3,5 @@
   "TEST_BODY_LINE1": "sample-company",
   "TEST_BODY_LINE2": "test-taro",
   "TEST_BODY_LINE3": "test-body",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

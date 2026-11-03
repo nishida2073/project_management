@@ -21,5 +21,10 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
       VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-18-log-body-excerpt-save-03
-- assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      TEXT: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-18-log-body-excerpt-save-04

@@ -1,5 +1,5 @@
 {
-  "SETUP_FILE_PATTERN": "env_ok.*",
+  "SETUP_FILE_PATTERN": "env_base.*",
   "EXPECTED_RESULT_COMPANY_LINE": "\u4f1a\u793e\u540d\uff1aTEST\uff0dCOMPANY",
   "EXPECTED_RESULT_USER_LINE": "\u6c0f\u540d\uff1atest-taro"
 }

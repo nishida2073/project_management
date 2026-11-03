@@ -1,5 +1,5 @@
 {
   "KEYWORD_SAMPLE": "sample-company",
   "KEYWORD_TEST": "test-company",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

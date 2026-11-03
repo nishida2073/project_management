@@ -1,7 +1,5 @@
 # 2.6 ログ: 抽出が異常の SMS の受信完了のログを長押しすると、抽出の失敗が表示される（テスト仕様書の 2.6 の 9 に対応）
 # 外部条件: 会社名・氏名を抽出できない SMS を 1 通受信する（下の assert の待ち時間（60 秒）の間に受信させる）
-# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
-# 未確認: 抽出が異常のログが複数あるとき、先頭のログが対象になるか
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -11,8 +9,8 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "ログの一覧"
-- assertVisible:
-    text: '(?s).*\[受信完了\].*'
+- extendedWaitUntil:
+    visible: '(?s).*\[受信完了\].*'
     timeout: 60000
 - takeScreenshot: 2.6-09-extraction-failed-detail-01
 - longPressOn:

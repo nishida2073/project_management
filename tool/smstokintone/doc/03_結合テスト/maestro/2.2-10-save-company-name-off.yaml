@@ -1,8 +1,8 @@
 # 2.2 送信先の設定: 会社名の抽出を無効にして設定を保存する（テスト仕様書の 2.2 の 10 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 未確認: 会社名の抽出が無効のときも会社名欄が表示される（表示されない場合は field の操作が失敗する）
-# 未確認: companyName=saved-company-name は画面に表示されないため、保存値は確認していない（内部値）
+# 注: 会社名の抽出が無効のときは会社名欄が表示される（SendTargetSettingsActivity.kt:76-78）。切替は即時保存される。
+# 注: 保存値の画面での確認は 2.2-11 で行う（SendTargetSettingsActivity.kt:75）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

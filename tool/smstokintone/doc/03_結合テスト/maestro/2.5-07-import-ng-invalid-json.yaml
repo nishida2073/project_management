@@ -37,8 +37,11 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "インポートエラー"
-- assertVisible: "(?s).*ファイルの形式が正しくありません.*JSONとして読み込めません.*"   # 未確認: メッセージ文言
-- tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
+- assertVisible: "(?s).*ファイルの形式が正しくありません.*JSONとして読み込めません.*"
+- runFlow:
+    file: common/tap-android-id.yaml
+    env:
+      ID: button1
 - takeScreenshot: 2.5-07-import-ng-invalid-json-04
 - runFlow:
     file: common/assert-text-visible.yaml

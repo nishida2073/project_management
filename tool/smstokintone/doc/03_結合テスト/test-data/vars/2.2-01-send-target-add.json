@@ -1,4 +1,4 @@
 {
   "SEND_TARGET_NAME": "test-target-a",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

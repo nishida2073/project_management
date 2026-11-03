@@ -30,7 +30,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnRequestSendPermission
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.3-29-send-permission-denied-03
 - tapOn: "許可しない" # 未確認: 端末の権限ダイアログの拒否ボタンの文字（Android の版・言語で異なる）
 - takeScreenshot: 2.3-29-send-permission-denied-04

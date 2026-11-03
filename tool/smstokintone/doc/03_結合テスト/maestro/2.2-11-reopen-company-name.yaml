@@ -2,7 +2,7 @@
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: この flow の中で、会社名の抽出を無効にし、会社名を入力して保存してから開き直す
-# 未確認: 会社名の抽出が無効のとき、会社名の入力欄が表示される
+# 注: 会社名の抽出が無効のとき、会社名欄（llCompanyNameSection）が表示される（SendTargetSettingsActivity.kt:76-78）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

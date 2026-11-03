@@ -25,7 +25,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: swContinuationEnabled
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.3-30-continuation-edit-disabled-03
 - runFlow:
     file: common/scroll-down-to-id.yaml
@@ -52,7 +51,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnEditContinuationInfo
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.3-30-continuation-edit-disabled-05
 - assertVisible: "アプリの設定" # 設定画面のまま（引継ぎ内容の設定画面に移っていないこと）
 - takeScreenshot: 2.3-30-continuation-edit-disabled-06

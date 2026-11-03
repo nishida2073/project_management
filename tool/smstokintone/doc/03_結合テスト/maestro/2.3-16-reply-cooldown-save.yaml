@@ -31,5 +31,10 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
       VALUE: "${REPLY_COOLDOWN_SECONDS}"
 - takeScreenshot: 2.3-16-reply-cooldown-save-03
-- assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etReplyCooldownSeconds
+      INDEX: 0
+      TEXT: "${REPLY_COOLDOWN_SECONDS}"
 - takeScreenshot: 2.3-16-reply-cooldown-save-04

@@ -31,7 +31,7 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "テスト本文"
-# 未確認: テスト本文の初期表示に会社名・氏名が含まれること（改行をはさむと正規表現が一致しないことがある）
+# 注: テスト本文の初期値は keywords と「テスト太郎」を含む（SendTargetSettingsActivity.kt:220-226, strings.xml:97）。改行をまたぐため (?s) を付けて一致させる。
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -45,6 +45,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "(?s).*テスト結果.*"  # 成功時はタイトルに抽出アイコンが付くため、部分一致で確認する
 - assertVisible: '(?s).*${EXPECTED_RESULT_COMPANY_LINE}.*'
 - assertVisible: '(?s).*${EXPECTED_RESULT_USER_LINE}.*'
-- assertVisible: "(?s).*SMSの(登録|更新)に成功しました.*"  # 未確認
-# 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
+- assertVisible: "(?s).*SMSの(登録|更新)に成功しました.*"
+# 未確認: テスト登録が kintone に入ったかは kintone 側の画面で確認が必要（送信内容は KintoneApi.kt:247-283 で決まる）
 - takeScreenshot: 2.2-07-test-send-success-04

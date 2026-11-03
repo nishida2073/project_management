@@ -38,5 +38,5 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "入力エラー"
 - assertNotVisible: "テスト本文"
-# 未確認: テスト登録（kintone 側）は確認しない
+# 注: 入力エラーで中断するため、kintone への送信は行われない（SendTargetSettingsActivity.kt:216-218）。
 - takeScreenshot: 2.2-19-test-send-no-connection-error-04

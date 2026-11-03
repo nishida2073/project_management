@@ -2,5 +2,5 @@
   "SENDER_A": "test-sender-a",
   "SENDER_B": "test-sender-b",
   "SEARCH_KEYWORD": "test-company",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

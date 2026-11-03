@@ -2,7 +2,6 @@
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 外部条件: 画面を開いてから保存するまでの間に、SMSの受信などで送信元 B（test-sender-b）の内容が更新されている必要がある。この flow の操作だけでは作れないため、更新は手動で行う（未確認: 手順）。
-# 未確認: 一覧の index 1 が SENDER_B。会社名欄の既存値は eraseText で消す（カーソル位置に依存する）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -36,7 +35,6 @@ appId: jp.co.nttdata_univ.smstokintone
       VALUE: "${COMPANY_NAME_3}"
 - takeScreenshot: 2.4-11-save-conflict-03
 - tapOn: "設定を保存"
-# 未確認: ダイアログのタイトルとメッセージ。
 - takeScreenshot: 2.4-11-save-conflict-04
 - runFlow:
     file: common/assert-text-visible.yaml

@@ -62,5 +62,5 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "(?s).*SMSの(登録|更新)に成功しました.*"
-# 未確認: テスト登録（会社名・氏名・テスト登録）は kintone 側で確認する
+# 未確認: テスト登録が kintone に入ったかは kintone 側の画面で確認が必要（送信内容は KintoneApi.kt:247-283 で決まる）
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-05

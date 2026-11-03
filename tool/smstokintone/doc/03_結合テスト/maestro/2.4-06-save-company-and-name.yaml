@@ -1,7 +1,6 @@
 # 2.4 引継ぎ内容の設定: 会社名と氏名を入力して設定を保存する（テスト仕様書の 2.4 の 6 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 未確認: 入力欄の既存値は eraseText で消す（カーソル位置に依存する）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

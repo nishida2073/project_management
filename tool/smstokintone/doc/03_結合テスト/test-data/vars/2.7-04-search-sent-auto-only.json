@@ -1,4 +1,4 @@
 {
-  "SETUP_FILE_PATTERN": "env_ok.*",
+  "SETUP_FILE_PATTERN": "env_base.*",
   "SEARCH_AUTO_SENT_ROW_TEXT": "auto-sent-test-body"
 }

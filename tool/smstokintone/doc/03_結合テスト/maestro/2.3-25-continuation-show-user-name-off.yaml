@@ -35,7 +35,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: swContinuationShowUserNameEnabled
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-04
 - runFlow:
     file: common/scroll-down-to-id.yaml

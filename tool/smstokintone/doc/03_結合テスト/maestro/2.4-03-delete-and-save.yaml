@@ -2,7 +2,6 @@
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # この flow は送信元 A（test-sender-a）を削除して保存する。次の flow には引き継がない（次の flow は setup で投入し直す）。
-# 未確認: 古い順のとき、一覧の先頭（index 0）が SENDER_A。削除ボタンに確認ダイアログは出ない想定。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

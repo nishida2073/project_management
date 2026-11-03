@@ -35,7 +35,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: swAiExtractionEnabled
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.3-24-ai-extraction-on-04
 - runFlow:
     file: common/scroll-down-to-id.yaml

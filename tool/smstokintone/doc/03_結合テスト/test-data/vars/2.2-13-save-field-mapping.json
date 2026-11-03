@@ -6,5 +6,5 @@
   "SAVED_FIELD_SENDER": "saved-field-sender",
   "SAVED_FIELD_TYPE": "saved-field-type",
   "SAVED_FIELD_USER": "saved-field-user",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

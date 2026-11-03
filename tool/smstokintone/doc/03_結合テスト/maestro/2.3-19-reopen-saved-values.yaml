@@ -92,29 +92,54 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/scroll-down-to-id.yaml
     env:
       ID: etReplyCooldownSeconds
-- assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etReplyCooldownSeconds
+      INDEX: 0
+      TEXT: "${REPLY_COOLDOWN_SECONDS}"
 - takeScreenshot: 2.3-19-reopen-saved-values-14
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
       ID: etReplySuccessBody
-- assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etReplySuccessBody
+      INDEX: 0
+      TEXT: "${REPLY_SUCCESS_BODY}"
 - takeScreenshot: 2.3-19-reopen-saved-values-15
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
       ID: etReplyFailedBody
-- assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etReplyFailedBody
+      INDEX: 0
+      TEXT: "${REPLY_FAILED_BODY}"
 - takeScreenshot: 2.3-19-reopen-saved-values-16
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
       ID: etLogMatchToleranceSeconds
-- assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogMatchToleranceSeconds
+      INDEX: 0
+      TEXT: "${LOG_MATCH_TOLERANCE_SECONDS}"
 - takeScreenshot: 2.3-19-reopen-saved-values-17
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
       ID: etLogBodyExcerptLength
-- assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      TEXT: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-19-reopen-saved-values-18

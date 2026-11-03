@@ -21,5 +21,10 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
       VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
 - takeScreenshot: 2.3-17-log-match-tolerance-save-03
-- assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogMatchToleranceSeconds
+      INDEX: 0
+      TEXT: "${LOG_MATCH_TOLERANCE_SECONDS}"
 - takeScreenshot: 2.3-17-log-match-tolerance-save-04

@@ -1,6 +1,6 @@
 # 2.7 SMSの検索: SMSの検索を開くと、受信日の範囲に今日が入る（テスト仕様書の 2.7 の 1 に対応）
 # 外部条件: 端末に SMS が 1 件以上ある
-# 注: 未送信の既定はオフ（SettingsStore の DEFAULT_CONFIG。env_ok.json には設定がない）。この flow は既定がオフであることを確認する
+# 注: 未送信の既定はオフ（SettingsStore の DEFAULT_CONFIG。env_base.json には設定がない）。この flow は既定がオフであることを確認する
 # 未確認: 日付の文字（yyyy/MM/dd）が今日の日付と一致することは、スクリーンショットで確認する
 appId: jp.co.nttdata_univ.smstokintone
 ---

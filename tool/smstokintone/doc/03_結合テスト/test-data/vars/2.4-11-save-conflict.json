@@ -1,4 +1,4 @@
 {
   "COMPANY_NAME_3": "test-company-3",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

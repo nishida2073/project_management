@@ -3,5 +3,5 @@
   "EXPECTED_RESULT_COMPANY_LINE": "\u4f1a\u793e\u540d\uff1aTEST\uff0dCOMPANY",
   "EXPECTED_RESULT_USER_LINE": "\u6c0f\u540d\uff1a\u30c6\u30b9\u30c8\u592a\u90ce",
   "EXPECTED_USER_NAME": "\u30c6\u30b9\u30c8\u592a\u90ce",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

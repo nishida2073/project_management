@@ -24,7 +24,7 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnAddKeyword
       INDEX: 0
-# 未確認: 行の追加は、2 行目の入力欄（etKeyword の index 1）の表示で確認する
+# 注: 「+」は追加した行を末尾に入れる（SendTargetSettingsActivity.kt:137-143）。2 行目の etKeyword（INDEX 1）の表示で確認する
 - takeScreenshot: 2.2-04-add-keyword-row-02
 - runFlow:
     file: common/assert-id-visible.yaml

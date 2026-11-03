@@ -1,7 +1,7 @@
 # 2.2 送信先の設定: フィールドコードを保存する（テスト仕様書の 2.2 の 13 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 未確認: fieldType などの保存値は画面に表示されないため、保存値は確認していない（内部値）
+# 注: フィールドコードの保存値は 2.2-14 で開き直して確認する（SendTargetSettingsActivity.kt:88-94, SettingsStore.kt:513-549）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"

@@ -20,5 +20,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "(?s).*s2k_settings_\\d{8}_\\d{6}\\.json.*"   # 未確認: 提案されるファイル名の表示
 - tapOn: "保存"   # 未確認: 保存ボタンの文字
 - takeScreenshot: 2.5-02-export-ok-03
-- assertVisible: "設定をエクスポートしました"   # 未確認: トーストの表示
+- assertVisible: "設定をエクスポートしました"
 - takeScreenshot: 2.5-02-export-ok-04

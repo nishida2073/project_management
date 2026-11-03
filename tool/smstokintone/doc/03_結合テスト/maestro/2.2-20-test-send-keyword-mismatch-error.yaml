@@ -45,7 +45,7 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "テスト本文"
-# 未確認: テスト本文の初期値（テンプレート）は、欄をタップして末尾にカーソルを置いてから消す
+# 注: テスト本文の初期値（テンプレート）は、欄をタップして末尾にカーソルがある状態で eraseText で消す（SendTargetSettingsActivity.kt:230）。
 - runFlow:
     file: common/tap-text-at-point.yaml
     env:
@@ -65,5 +65,6 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "(?s).*送信先エラー.*"
-- assertVisible: "(?s).*${EXPECTED_COMPANY_NAME}.*"  # 未確認
+# 注: 振り分けエラーには登録済みの振り分けキーワードが表示される（SendTargetSettingsActivity.kt:268-270）。抽出された会社名は表示されない。
+- assertVisible: "(?s).*${EXPECTED_COMPANY_NAME}.*"
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-07

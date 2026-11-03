@@ -1,4 +1,4 @@
 {
   "INVALID_LOGIN_NAME": "saved-invalid-login-name",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

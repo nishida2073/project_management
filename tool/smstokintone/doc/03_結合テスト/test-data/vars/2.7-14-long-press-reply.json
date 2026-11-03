@@ -1,4 +1,4 @@
 {
-  "SETUP_FILE_PATTERN": "env_ok.*",
+  "SETUP_FILE_PATTERN": "env_base.*",
   "SMS_ITEM_TEXT": "SET_SMS_TEXT_LOCALLY"
 }

@@ -18,7 +18,7 @@ appId: jp.co.nttdata_univ.smstokintone
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-15-export-ng-cancel-save-02
 - back   # 未確認: 保存ダイアログを戻る操作で閉じられるか
-- assertNotVisible: "設定をエクスポートしました"   # 未確認: トーストが出ないことの確認
+- assertNotVisible: "設定をエクスポートしました"
 - assertNotVisible: "エクスポートエラー"
 - runFlow:
     file: common/assert-id-visible.yaml

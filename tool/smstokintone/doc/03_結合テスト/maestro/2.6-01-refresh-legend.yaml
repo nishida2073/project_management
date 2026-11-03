@@ -2,7 +2,7 @@
 # 前提（フローで設定）: 送信ログは in-flow で作る（SMSの検索から手動で送信する）。送信開始（先）と送信完了（後）の 2 件が、この順に記録される
 # 外部条件: 端末に未送信の SMS が 1 件以上ある
 # 注: 新しい順は、後に記録された「送信完了」の行が、先に記録された「送信開始」の行より上に表示されることで確認する（ログは記録順に先頭へ追加される、LogActivity と SmsLogStore）
-# 未確認: 相対指定（below）で行の上下を比べる方法は、端末で未確認
+# 注: 送信の 2 件だけがログにある前提。一覧は新しい順なので、先頭（index 0）が送信完了、次（index 1）が送信開始
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -35,10 +35,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: '(?s).*抽出対象.*抽出状況.*送信状況.*返信状況.*送信先.*'
 - assertVisible:
     text: '\[送信完了\].*'
+    index: 0
 - assertVisible:
     text: '\[送信開始\].*'
-    below:
-      text: '\[送信完了\].*'
+    index: 1
 - runFlow:
     file: common/assert-text-visible.yaml
     env:

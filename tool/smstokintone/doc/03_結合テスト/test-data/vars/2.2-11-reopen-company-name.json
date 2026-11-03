@@ -1,4 +1,4 @@
 {
   "COMPANY_NAME": "saved-company-name",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

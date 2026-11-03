@@ -40,7 +40,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-05
 - runFlow:
     file: common/scroll-down-to-id.yaml
@@ -67,7 +66,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnAddFixedConversion
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-07
 - runFlow:
     file: common/assert-id-not-visible.yaml

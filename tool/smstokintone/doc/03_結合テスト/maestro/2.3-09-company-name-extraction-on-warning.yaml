@@ -39,7 +39,10 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件あります。必要に応じて会社名を追加してください。"
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-02
-- tapOn: "OK" # 未確認: OK ボタンの文言（端末の言語で変わる場合あり）
+- runFlow:
+    file: common/tap-android-id.yaml
+    env:
+      ID: button1
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-03
 - runFlow:
     file: common/scroll-down-to-id.yaml

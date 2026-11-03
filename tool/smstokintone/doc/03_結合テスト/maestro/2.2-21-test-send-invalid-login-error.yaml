@@ -45,6 +45,6 @@ appId: jp.co.nttdata_univ.smstokintone
       TEXT: "テスト本文"
 - tapOn: "送信"
 - takeScreenshot: 2.2-21-test-send-invalid-login-error-03
-- assertVisible: "(?s).*送信失敗.*"  # 未確認
-# 未確認: kintone の応答内容は kintone 側の応答文に依存するため、ここでは確認しない
+- assertVisible: "(?s).*送信失敗.*"
+# 未確認: 応答本文の中身は kintone 側の応答に依存するため、ここでは文字で確認しない（表示の有無は確認する）
 - takeScreenshot: 2.2-21-test-send-invalid-login-error-04

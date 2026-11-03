@@ -3,8 +3,8 @@ appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: この flow の中で会社名の抽出を無効にしてからテスト送信する
 # 外部条件: kintone 接続と SMS 受信が必要
-# 未確認: テスト本文に日本語（sample-company、test-taro）を入れられないため、英数字の TEST_BODY で代用している（IME の制約）
-# 未確認: テスト本文のダイアログの入力欄にフォーカスがある前提で、既存の値を eraseText で消す（フォーカスが無い場合は入力が失敗する）
+# 未確認: 日本語の入力は Maestro の IME の制約で行えないため、英数字の TEST_BODY で代用している。
+# 注: テスト本文の入力欄は、直前のタップでフォーカスされてから eraseText で消す（SendTargetSettingsActivity.kt:228-235）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"

@@ -1,4 +1,4 @@
 {
   "TOLERANCE_HOURS_SAVED": "6",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

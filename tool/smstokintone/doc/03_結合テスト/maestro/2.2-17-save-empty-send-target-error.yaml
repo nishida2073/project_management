@@ -1,7 +1,7 @@
 # 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 17 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 未確認: 追加した設定の番号（設定 N）は、保存済みの件数に依存する
+# 注: 追加した設定の番号は、保存済みの 1 件の次なので「設定 2」（SendTargetSettingsActivity.kt:195, 216）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
@@ -31,6 +31,6 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "入力エラー"
-- assertVisible: "(?s).*設定 [0-9]+.*"  # 未確認
-- assertVisible: "(?s).*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"  # 未確認
+- assertVisible: "(?s).*設定 2.*"
+- assertVisible: "(?s).*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"
 - takeScreenshot: 2.2-17-save-empty-send-target-error-06

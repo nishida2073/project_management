@@ -33,7 +33,7 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: ${IMPORT_FILE}
 - takeScreenshot: 2.5-05-import-cancel-03
-- assertVisible: "(?s).*${IMPORT_FILE}.*"   # 未確認: 正規表現と複数行の表示
+- assertVisible: "(?s).*${IMPORT_FILE}.*"
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml
     env:

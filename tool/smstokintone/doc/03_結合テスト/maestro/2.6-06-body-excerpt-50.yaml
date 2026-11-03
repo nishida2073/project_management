@@ -3,7 +3,6 @@
 # 外部条件: 別の端末から、次の本文の SMS を 1 通受信する（下の assert の待ち時間の間に受信させる）。本文は、1 行目「test-company」、2 行目「test-taro」（LF の改行、各 1 文字）、3 行目に「${LOG_BODY_EXCERPT_LAST_CHARS}」、続けて「TAILMARK-AFTER-50」（合計 67 文字。50 文字目は「${LOG_BODY_EXCERPT_LAST_CHARS}」の末尾の Q）
 # 注: 本文抜粋は SmsLogStore.add で記録時の文字数（logBodyExcerptLength）に切り取られるため（body.take）、既存のログは 100 文字のまま（この flow では既存のログを作らない）。受信の前に、この flow で文字数を 50 にしておく必要がある
 # 注: vars の LOG_BODY_EXCERPT_LAST_CHARS は、送る本文と合わせる。TAILMARK-AFTER-50 は固定の文字列で、vars には置かない。実施日に送る本文を変えたら、vars も書き換える
-# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
 # 未確認: 端末が改行を CRLF で送る場合は文字数が 1 つずれるため、その場合は本文を組み直す
 appId: jp.co.nttdata_univ.smstokintone
 ---
@@ -33,8 +32,8 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "ログの一覧"
-- assertVisible:
-    text: '(?s).*\[受信完了\].*'
+- extendedWaitUntil:
+    visible: '(?s).*\[受信完了\].*'
     timeout: 60000
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml

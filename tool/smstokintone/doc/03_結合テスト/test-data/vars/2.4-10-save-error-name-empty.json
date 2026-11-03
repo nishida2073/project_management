@@ -1,4 +1,4 @@
 {
   "SENDER_A": "test-sender-a",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

@@ -21,14 +21,12 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnAddKeyword
       INDEX: 0
-    index: 0
 - takeScreenshot: 2.2-05-remove-keyword-row-02
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml
     env:
       ID: etKeyword
       INDEX: 0
-    index: 1
 - takeScreenshot: 2.2-05-remove-keyword-row-03
 - inputText: "${KEYWORD_SAMPLE}"
 - takeScreenshot: 2.2-05-remove-keyword-row-04

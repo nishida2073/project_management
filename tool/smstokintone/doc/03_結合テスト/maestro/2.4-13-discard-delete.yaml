@@ -27,8 +27,7 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/scroll-down-and-tap-id.yaml
     env:
       ID: btnDeleteContinuationInfo
-      INDEX: 0
-    index: 1
+      INDEX: 1
 - takeScreenshot: 2.4-13-discard-delete-03
 - assertNotVisible: "${SENDER_B}"
 - pressKey: Back

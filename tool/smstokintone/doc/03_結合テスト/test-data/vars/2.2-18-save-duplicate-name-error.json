@@ -3,5 +3,5 @@
   "DUP_APP_ID": "99999",
   "DUP_LOGIN_NAME": "dup-login-name",
   "DUP_LOGIN_PASSWORD": "dup-pass",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

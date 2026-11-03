@@ -1,5 +1,5 @@
 {
   "REPLY_SUCCESS_BODY": "saved-reply-success",
   "REPLY_FAILED_BODY": "saved-reply-failed",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }

@@ -1,4 +1,4 @@
 {
   "IMPORT_FILE": "ng-continuation-company-missing.json",
-  "SETUP_FILE_PATTERN": "env_ok.*"
+  "SETUP_FILE_PATTERN": "env_base.*"
 }
