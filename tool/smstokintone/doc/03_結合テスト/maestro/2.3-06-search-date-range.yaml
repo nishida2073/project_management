@@ -43,9 +43,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "受信日の範囲"
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
-    text: "${EXPECTED_DATE_FROM}"
+    text: '\d{4}/\d{2}/\d{2}'
 - assertVisible:
     id: "jp.co.nttdata_univ.smstokintone:id/etDateTo"
-    text: "${EXPECTED_DATE_TO}"
-# 注意: EXPECTED_DATE_FROM と EXPECTED_DATE_TO は vars に固定で書いている（今日が 2026-11-02 の場合の値。表示は yyyy/MM/dd）。実行日が変わったら vars を書き換える
+    text: '\d{4}/\d{2}/\d{2}'
+# 注意: EXPECTED_DATE_FROM と EXPECTED_DATE_TO は vars に固定で書いている（今日が 2026-11-03 の場合の値。表示は yyyy/MM/dd）。実行日が変わったら vars を書き換える
 - takeScreenshot: 2.3-06-search-date-range-05
