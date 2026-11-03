@@ -1,0 +1,13 @@
+[
+  {
+    "address": "0312345701",
+    "body": "sample-company\nsample-taro\nbody-sample",
+    "receive": true
+  },
+  {
+    "address": "0312345702",
+    "body": "sample dated",
+    "date": "2027-01-01T00:00:00+09:00",
+    "receive": false
+  }
+]

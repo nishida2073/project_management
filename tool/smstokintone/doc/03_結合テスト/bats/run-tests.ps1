@@ -1,4 +1,4 @@
-﻿param([string]$Filter = "", [string]$Device = "", [string]$Env = "", [switch]$Setup)
+﻿param([string]$Filter = "", [string]$Device = "", [string]$Env = "", [switch]$Setup, [string]$Sms = "")
 
 $maestro = Join-Path $env:USERPROFILE ".maestro\bin\maestro.bat"
 if (-not (Test-Path -LiteralPath $maestro)) {
@@ -45,6 +45,9 @@ function Invoke-Flows([object[]]$flowFiles) {
         }
         foreach ($pair in ($Env -split ";")) { if ($pair) { $envArgs += @("-e", $pair) } }
         $maestroArgs += @("test") + $envArgs + @("--debug-output", $runDir, "--flatten-debug-output", "--format", "HTML", "--output", (Join-Path $flowOut "report.html"), $flow.FullName)
+        if ($Device -like "emulator-*") { & (Join-Path $PSScriptRoot "..\test-data\sms\clear-inbox.ps1") -Device $Device }
+        $smsJson = if ($Sms) { $Sms } else { Join-Path $PSScriptRoot ("..\test-data\sms\" + $flow.BaseName + ".json") }
+        if ($Device -like "emulator-*" -and (Test-Path -LiteralPath $smsJson)) { & (Join-Path $PSScriptRoot "..\test-data\sms\load-inbox.ps1") -Device $Device -Json $smsJson }
         & $maestro @maestroArgs | Out-Host
         $code = $LASTEXITCODE
         if ($code -eq 0) { $label = "成功" } else { $label = "失敗" }

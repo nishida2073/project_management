@@ -1,0 +1,33 @@
+[
+  {
+    "address": "0312345601",
+    "body": "dummy one line",
+    "receive": true
+  },
+  {
+    "address": "0312345602",
+    "body": "test-company\ntest-taro\nbody-test",
+    "receive": true
+  },
+  {
+    "address": "0312345603",
+    "body": "sample-company\nsample-taro\nbody-b",
+    "receive": true
+  },
+  {
+    "address": "0312345604",
+    "body": "dummy text without company",
+    "receive": true
+  },
+  {
+    "address": "0312345605",
+    "body": "test-company\ntest-taro\nbody-c",
+    "receive": true
+  },
+  {
+    "address": "0312345620",
+    "body": "dated test",
+    "date": "2027-01-01T00:00:00+09:00",
+    "receive": false
+  }
+]
