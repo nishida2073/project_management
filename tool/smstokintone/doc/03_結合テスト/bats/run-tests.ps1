@@ -48,7 +48,7 @@ function Invoke-Flows([object[]]$flowFiles) {
         if ($Device -like "emulator-*") { & (Join-Path $PSScriptRoot "..\test-data\sms\clear-inbox.ps1") -Device $Device }
         $smsJson = if ($Sms) { $Sms } else { Join-Path $PSScriptRoot ("..\test-data\sms\" + $flow.BaseName + ".json") }
         $smsJob = $null
-        if ($Device -like "emulator-*" -and (Test-Path -LiteralPath $smsJson)) { $smsJob = Start-Job -ArgumentList (Join-Path $PSScriptRoot "..\test-data\sms\load-inbox.ps1"), $Device, $smsJson -ScriptBlock { param($p, $d, $j) Start-Sleep -Seconds 45; & $p -Device $d -Json $j } }
+        if ($Device -like "emulator-*" -and (Test-Path -LiteralPath $smsJson)) { $smsJob = Start-Job -ArgumentList (Join-Path $PSScriptRoot "..\test-data\sms\load-inbox.ps1"), $Device, $smsJson -ScriptBlock { param($p, $d, $j) & $p -Device $d -Json $j -DelaySeconds 90 } }
         & $maestro @maestroArgs | Out-Host
         if ($smsJob) { Wait-Job $smsJob | Out-Null; Receive-Job $smsJob | Out-Host; Remove-Job $smsJob }
         $code = $LASTEXITCODE

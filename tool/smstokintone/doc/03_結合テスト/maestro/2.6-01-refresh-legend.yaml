@@ -36,7 +36,7 @@ appId: jp.co.nttdata_univ.smstokintone
     index: 0
 - assertVisible:
     text: '\[送信開始\].*'
-    index: 1
+    index: 0
 - runFlow:
     file: common/assert-text-visible.yaml
     env:

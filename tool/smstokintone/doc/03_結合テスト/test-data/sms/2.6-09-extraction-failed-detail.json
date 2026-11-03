@@ -2,6 +2,7 @@
   {
     "address": "0312345609",
     "body": "dummy text without company",
-    "receive": true
+    "receive": true,
+    "delayed": true
   }
 ]

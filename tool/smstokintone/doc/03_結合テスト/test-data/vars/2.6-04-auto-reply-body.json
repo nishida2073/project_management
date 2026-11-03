@@ -1,4 +1,4 @@
 {
   "SETUP_FILE_PATTERN": "env_base.*",
-  "REPLY_BODY_FRAGMENT": "\u904b\u55b6\u4e8b\u52d9\u5c40\u3067\u3059"
+  "REPLY_BODY_FRAGMENT": "test-reply-fa-body"
 }
