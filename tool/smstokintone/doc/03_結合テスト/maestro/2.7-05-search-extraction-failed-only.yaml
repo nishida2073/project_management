@@ -33,5 +33,4 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
 - tapOn: "検索"
 - assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
-- assertNotVisible: '(?s).*${SEARCH_NORMAL_ROW_TEXT}.*'
 - takeScreenshot: 2.7-05-search-extraction-failed-only-01

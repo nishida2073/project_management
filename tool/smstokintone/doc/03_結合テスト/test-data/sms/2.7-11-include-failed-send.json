@@ -1,12 +1,7 @@
 [
   {
-    "address": "0312345601",
-    "body": "test-company\ntest-taro\nbody-test",
-    "receive": true
-  },
-  {
-    "address": "0312345604",
-    "body": "dummy text without company",
+    "address": "0312345711",
+    "body": "abnormal-test-body",
     "receive": true
   }
 ]

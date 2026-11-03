@@ -5,7 +5,7 @@ $sql = New-Object System.Collections.Generic.List[string]
 foreach ($m in $items) {
     if (-not $m.receive) {
         $body = [string]$m.body
-        $ms = [DateTimeOffset]::Parse($m.date).ToUnixTimeMilliseconds()
+        if ($m.date -eq "now") { $ms = [DateTimeOffset]::Now.ToUnixTimeMilliseconds() } else { $ms = [DateTimeOffset]::Parse($m.date).ToUnixTimeMilliseconds() }
         $esc = $body.Replace("'", "''")
         $sql.Add("INSERT INTO sms (address, date, date_sent, read, seen, type, body) VALUES ('" + $m.address + "', " + $ms + ", " + $ms + ", 1, 1, 1, '" + $esc + "');")
     }

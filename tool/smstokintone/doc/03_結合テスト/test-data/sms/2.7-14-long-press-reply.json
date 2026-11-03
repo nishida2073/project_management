@@ -1,0 +1,7 @@
+[
+  {
+    "address": "0312345714",
+    "body": "SET_SMS_TEXT_LOCALLY",
+    "receive": true
+  }
+]

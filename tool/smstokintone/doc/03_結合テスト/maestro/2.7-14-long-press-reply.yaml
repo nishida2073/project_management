@@ -23,7 +23,10 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - tapOn: "検索"
-- longPressOn: "${SMS_ITEM_TEXT}"
+- extendedWaitUntil:
+    visible: "(?s).*${SMS_ITEM_TEXT}.*"
+    timeout: 60000
+- longPressOn: "(?s).*${SMS_ITEM_TEXT}.*"
 - takeScreenshot: 2.7-14-long-press-reply-01
-- assertVisible: '(?s).*返信.*'
+- assertVisible: '(?s).*${REPLY_BODY_FRAGMENT}.*'
 - takeScreenshot: 2.7-14-long-press-reply-02

@@ -30,9 +30,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "検索"
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
+- pressKey: Back
 - tapOn: "ログの確認"
 - extendedWaitUntil:
     visible: '(?s).*\[(送信完了|失敗)\].*'
     timeout: 180000
 - pressKey: Back
+- tapOn: "SMSの検索"
 - takeScreenshot: 2.7-15-send-airplane-mode-02

@@ -7,6 +7,11 @@ appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
+- tapOn: "ログの確認"
+- extendedWaitUntil:
+    visible: '(?s).*\[送信完了\].*'
+    timeout: 180000
+- pressKey: Back
 - tapOn: "SMSの検索"
 - runFlow:
     file: common/assert-text-visible.yaml

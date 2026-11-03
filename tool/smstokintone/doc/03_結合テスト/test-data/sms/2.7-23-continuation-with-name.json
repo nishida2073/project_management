@@ -1,0 +1,8 @@
+[
+  {
+    "address": "test-sender-a",
+    "body": "test-company\ntest-taro\ncont-body",
+    "receive": false,
+    "date": "now"
+  }
+]
