@@ -6,27 +6,33 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-21-search-default-send-none-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: cbSearchSendNoneOnlyEnabled
+      ID: cbSearchSendNoneOnlyEnabled
 - takeScreenshot: 2.3-21-search-default-send-none-02
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: cbSearchSendNoneOnlyEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-21-search-default-send-none-03
-- assertVisible: # 未確認: チェックボックスの選択状態の確認
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: cbSearchSendNoneOnlyEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.3-21-search-default-send-none-04
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-21-search-default-send-none-05
-- assertVisible: # 未確認: 検索画面の送信状況「未送信」の選択状態
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
 - takeScreenshot: 2.3-21-search-default-send-none-06

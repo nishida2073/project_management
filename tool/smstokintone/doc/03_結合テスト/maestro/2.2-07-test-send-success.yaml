@@ -6,28 +6,40 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-07-test-send-success-01
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etKeyword
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-    index: 0
-    text: "test-company"
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etKeyword
+      INDEX: 0
+      TEXT: "test-company"
 - scrollUntilVisible:
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
 - takeScreenshot: 2.2-07-test-send-success-02
-- assertVisible: "テスト本文"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "テスト本文"
 # 未確認: テスト本文の初期表示に会社名・氏名が含まれること（改行をはさむと正規表現が一致しないことがある）
-- assertVisible: "(?s).*${EXPECTED_COMPANY_NAME}.*"
-- assertVisible: "(?s).*${EXPECTED_USER_NAME}.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*${EXPECTED_COMPANY_NAME}.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*${EXPECTED_USER_NAME}.*"
 - tapOn: "送信"
 - takeScreenshot: 2.2-07-test-send-success-03
 - assertVisible: "(?s).*テスト結果.*"  # 成功時はタイトルに抽出アイコンが付くため、部分一致で確認する

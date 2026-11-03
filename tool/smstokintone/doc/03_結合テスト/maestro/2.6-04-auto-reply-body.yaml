@@ -9,17 +9,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeAuto
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    checked: true
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
 - pressKey: Back
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - assertVisible:
     text: '(?s).*\[返信完了\].*'
     timeout: 60000
@@ -27,6 +31,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - longPressOn:
     text: '(?s).*\[返信完了\].*'
     index: 0
-- assertVisible: "返信内容"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "返信内容"
 - assertVisible: '(?s).*${REPLY_BODY_FRAGMENT}.*'
 - takeScreenshot: 2.6-04-auto-reply-body-02

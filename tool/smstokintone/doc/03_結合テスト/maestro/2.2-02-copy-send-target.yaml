@@ -6,16 +6,29 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-02-copy-send-target-01
-- assertVisible: "設定を追加"
-- assertVisible: "${SEND_TARGET_NAME}"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "${SEND_TARGET_NAME}"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnCopySendTarget"
-    index: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${SEND_TARGET_NAME}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "${SEND_TARGET_NAME}"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnCopySendTarget
+      INDEX: 0
 - takeScreenshot: 2.2-02-copy-send-target-02
-- assertVisible: "${COPY_SEND_TARGET_NAME}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${COPY_SEND_TARGET_NAME}"
 # 未確認: コピーの位置（元の直後）は、文字の確認では見ていない。画面で目視する
 - takeScreenshot: 2.2-02-copy-send-target-03

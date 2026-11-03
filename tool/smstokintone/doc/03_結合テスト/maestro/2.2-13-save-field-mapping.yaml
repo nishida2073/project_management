@@ -6,76 +6,91 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-13-save-field-mapping-01
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etFieldType
+      TEXT: "設定を追加"
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      FIELD_ID: etFieldType
-      INPUT_VALUE: "${SAVED_FIELD_TYPE}"
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etFieldDatetime
+      ID: etFieldType
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldDatetime
-      INPUT_VALUE: "${SAVED_FIELD_DATETIME}"
+      ID: etFieldType
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_TYPE}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etFieldSender
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etFieldSender
-      INPUT_VALUE: "${SAVED_FIELD_SENDER}"
-- runFlow:
-    file: common/scroll-down-to-setting.yaml
-    env:
-      ELEMENT_ID: etFieldCompanyName
+      ID: etFieldDatetime
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldCompanyName
-      INPUT_VALUE: "${SAVED_FIELD_COMPANY}"
+      ID: etFieldDatetime
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_DATETIME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etFieldUserName
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etFieldUserName
-      INPUT_VALUE: "${SAVED_FIELD_USER}"
-- runFlow:
-    file: common/scroll-down-to-setting.yaml
-    env:
-      ELEMENT_ID: etFieldBody
+      ID: etFieldSender
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldBody
-      INPUT_VALUE: "${SAVED_FIELD_BODY}"
+      ID: etFieldSender
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_SENDER}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etFieldHistory
+      ID: etFieldCompanyName
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldHistory
-      INPUT_VALUE: "${SAVED_FIELD_HISTORY}"
+      ID: etFieldCompanyName
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_COMPANY}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etFieldUserName
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etFieldUserName
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_USER}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etFieldBody
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etFieldBody
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_BODY}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etFieldHistory
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etFieldHistory
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_HISTORY}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-13-save-field-mapping-02
-- assertVisible: "SMSの送信モード"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの送信モード"
 - assertNotVisible: "設定を追加"
 - takeScreenshot: 2.2-13-save-field-mapping-03

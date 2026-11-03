@@ -8,16 +8,25 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: tvPermissionStatus
-- assertNotVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvPermissionStatus"
-    text: "許可済み"
+      ID: tvPermissionStatus
+- runFlow:
+    file: common/assert-field-text-not-visible.yaml
+    env:
+      ID: tvPermissionStatus
+      INDEX: 0
+      TEXT: "許可済み"
 - takeScreenshot: 2.8-23-receive-permission-denied-01
 - pressKey: Back
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-23-receive-permission-denied-02
-- assertVisible: "ログがありません"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログがありません"
 - takeScreenshot: 2.8-23-receive-permission-denied-03

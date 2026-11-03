@@ -5,20 +5,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-18-log-body-excerpt-save-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLogBodyExcerptLength
+      ID: etLogBodyExcerptLength
 - takeScreenshot: 2.3-18-log-body-excerpt-save-02
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLogBodyExcerptLength
-      INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-18-log-body-excerpt-save-03
 - assertVisible: "${LOG_BODY_EXCERPT_LENGTH}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-18-log-body-excerpt-save-04

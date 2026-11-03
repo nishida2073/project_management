@@ -1,0 +1,13 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: ID（欄の id の末尾）が見えるまで下へスクロールしてから、その部品をタップする。INDEX は何番目の部品か（1 つだけなら 0）
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+      index: ${INDEX}
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
+- tapOn:
+    id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+    index: ${INDEX}

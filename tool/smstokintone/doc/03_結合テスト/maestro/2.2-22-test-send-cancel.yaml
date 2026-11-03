@@ -5,25 +5,31 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-22-test-send-cancel-01
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etKeyword
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-    index: 0
-    text: "test-company"
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etKeyword
+      INDEX: 0
+      TEXT: "test-company"
 - scrollUntilVisible:
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
 - takeScreenshot: 2.2-22-test-send-cancel-02
-- assertVisible: "テスト本文"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "テスト本文"
 - tapOn: "キャンセル"
 - takeScreenshot: 2.2-22-test-send-cancel-03
 - assertNotVisible: "テスト本文"

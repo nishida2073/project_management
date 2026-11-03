@@ -6,55 +6,62 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swContinuationEnabled
+      ID: swContinuationEnabled
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
+      ID: swContinuationEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-03
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
     index: 0
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-04
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: false
+      ID: swContinuationShowUserNameEnabled
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-05
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-06
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
+      ID: swContinuationShowUserNameEnabled
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-07
-- assertVisible: # 開き直した後も無効のまま保存されていること
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-25-continuation-show-user-name-off-08

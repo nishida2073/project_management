@@ -6,55 +6,62 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
+      ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: swCompanyNameAutoConversionEnabled
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-03
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: swCompanyNameAutoConversionEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
     index: 0
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-04
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameAutoConversionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: false
+      ID: swCompanyNameAutoConversionEnabled
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-05
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-06
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameAutoConversionEnabled
+      ID: swCompanyNameAutoConversionEnabled
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-07
-- assertVisible: # 開き直した後も無効のまま保存されていること
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-23-company-name-auto-conversion-off-08

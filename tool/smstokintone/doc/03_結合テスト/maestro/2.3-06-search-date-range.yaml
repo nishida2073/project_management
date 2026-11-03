@@ -7,45 +7,59 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-06-search-date-range-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: rbThemeLight
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
-    checked: true
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etSmsSearchDateRangeDays
+      ID: rbThemeLight
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/assert-id-checked.yaml
     env:
-      FIELD_ID: etSmsSearchDateRangeDays
-      INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"
+      ID: rbThemeLight
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etSmsSearchDateRangeDays
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etSmsSearchDateRangeDays
+      INDEX: 0
+      VALUE: "${SEARCH_DATE_RANGE_DAYS}"
 - takeScreenshot: 2.3-06-search-date-range-02
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etSmsSearchDateRangeDays
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
-    text: "${SEARCH_DATE_RANGE_DAYS}"
+      ID: etSmsSearchDateRangeDays
+      INDEX: 0
+      TEXT: "${SEARCH_DATE_RANGE_DAYS}"
 - pressKey: Back
 - takeScreenshot: 2.3-06-search-date-range-03
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-06-search-date-range-04
-- assertVisible: "受信日の範囲"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
-    text: '\d{4}/\d{2}/\d{2}'
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etDateTo"
-    text: '\d{4}/\d{2}/\d{2}'
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "受信日の範囲"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etDateFrom
+      INDEX: 0
+      TEXT: '\d{4}/\d{2}/\d{2}'
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etDateTo
+      INDEX: 0
+      TEXT: '\d{4}/\d{2}/\d{2}'
 # 注意: EXPECTED_DATE_FROM と EXPECTED_DATE_TO は vars に固定で書いている（今日が 2026-11-03 の場合の値。表示は yyyy/MM/dd）。実行日が変わったら vars を書き換える
 - takeScreenshot: 2.3-06-search-date-range-05

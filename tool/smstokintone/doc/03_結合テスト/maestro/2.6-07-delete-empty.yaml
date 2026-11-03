@@ -4,13 +4,30 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteLog"
-- assertVisible: "ログを削除しますか？"
-- tapOn:
-    id: "android:id/button1"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
-- assertVisible: "ログがありません"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnDeleteLog
+      INDEX: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログを削除しますか？"
+- runFlow:
+    file: common/tap-android-id.yaml
+    env:
+      ID: button1
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnRefreshLog
+      INDEX: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログがありません"
 - takeScreenshot: 2.6-07-delete-empty-01

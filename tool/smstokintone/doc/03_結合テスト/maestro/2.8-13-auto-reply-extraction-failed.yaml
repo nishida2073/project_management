@@ -7,17 +7,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeAuto
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    checked: true
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
 - pressKey: Back
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-13-auto-reply-extraction-failed-01
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"
@@ -27,5 +31,8 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 180000
 - takeScreenshot: 2.8-13-auto-reply-extraction-failed-02
 - longPressOn: "(?s).*抽出状況が異常なため.*"
-- assertVisible: "返信内容"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "返信内容"
 - takeScreenshot: 2.8-13-auto-reply-extraction-failed-03

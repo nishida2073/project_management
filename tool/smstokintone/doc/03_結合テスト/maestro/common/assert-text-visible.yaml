@@ -1,0 +1,4 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: TEXT（画面の文字。正規表現可）が表示されていることを確かめる
+- assertVisible: "${TEXT}"

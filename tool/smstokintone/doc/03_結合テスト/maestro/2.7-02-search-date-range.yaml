@@ -8,28 +8,43 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etSmsSearchDateRangeDays
+      ID: etSmsSearchDateRangeDays
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etSmsSearchDateRangeDays
-      INPUT_VALUE: "${SEARCH_DATE_RANGE_DAYS}"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
-    text: "${SEARCH_DATE_RANGE_DAYS}"
+      ID: etSmsSearchDateRangeDays
+      INDEX: 0
+      VALUE: "${SEARCH_DATE_RANGE_DAYS}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSmsSearchDateRangeDays
+      INDEX: 0
+      TEXT: "${SEARCH_DATE_RANGE_DAYS}"
 - pressKey: Back
 - tapOn: "SMSの検索"
-- assertVisible: "検索条件"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-    checked: false
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
-    text: '\d{4}/\d{2}/\d{2}'
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "検索条件"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etDateFrom
+      INDEX: 0
+      TEXT: '\d{4}/\d{2}/\d{2}'
 - takeScreenshot: 2.7-02-search-date-range-01
 - tapOn: "検索"
 - takeScreenshot: 2.7-02-search-date-range-02

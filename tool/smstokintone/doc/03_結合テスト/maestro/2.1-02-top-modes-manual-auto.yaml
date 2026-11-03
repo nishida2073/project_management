@@ -7,27 +7,37 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: rbSendManual
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
+      ID: rbSendManual
+      INDEX: 0
 - takeScreenshot: 2.1-02-top-modes-manual-auto-02
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeAuto
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
 - takeScreenshot: 2.1-02-top-modes-manual-auto-03
 - pressKey: Back
 - takeScreenshot: 2.1-02-top-modes-manual-auto-04
-- assertVisible: "SMSの送信モード"
-- assertVisible: "SMSの返信モード"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
-    text: "手動"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
-    text: "自動"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの送信モード"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの返信モード"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: tvTopSendStatus
+      INDEX: 0
+      TEXT: "手動"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: tvTopReplyStatus
+      INDEX: 0
+      TEXT: "自動"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-05

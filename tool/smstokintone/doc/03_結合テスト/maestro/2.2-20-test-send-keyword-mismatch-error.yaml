@@ -8,39 +8,49 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-02
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-03
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etKeyword
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-    index: 0
-    text: "test-company"
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etKeyword
+      INDEX: 0
+      TEXT: "test-company"
 - scrollUntilVisible:
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-04
-- assertVisible: "テスト本文"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "テスト本文"
 # 未確認: テスト本文の初期値（テンプレート）は、欄をタップして末尾にカーソルを置いてから消す
-- tapOn:
-    text: "(?s).*テスト太郎.*"
-    point: "95%, 95%"
+- runFlow:
+    file: common/tap-text-at-point.yaml
+    env:
+      TEXT: "(?s).*テスト太郎.*"
+      POINT: "95%, 95%"
 - eraseText: 200
 - inputText: "${TEST_BODY_LINE1}"
 - pressKey: Enter
@@ -51,6 +61,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - hideKeyboard
 - tapOn: "送信"
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-06
-- assertVisible: "(?s).*送信先エラー.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*送信先エラー.*"
 - assertVisible: "(?s).*${EXPECTED_COMPANY_NAME}.*"  # 未確認
 - takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-07

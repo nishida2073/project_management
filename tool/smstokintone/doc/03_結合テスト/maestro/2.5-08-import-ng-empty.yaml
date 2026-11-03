@@ -7,11 +7,23 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-08-import-ng-empty-01
-- assertVisible: "設定のインポート・エクスポート"
-- assertVisible: "ファイルを選択"
-- assertVisible: "ファイルが選択されていません"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定のインポート・エクスポート"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ファイルを選択"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ファイルが選択されていません"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnImportSettings
+      INDEX: 0
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
@@ -19,13 +31,22 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow:
     file: common/select-download-file.yaml
     env:
-      FILE_PATTERN: ${IMPORT_FILE}
+      TEXT: ${IMPORT_FILE}
 - takeScreenshot: 2.5-08-import-ng-empty-03
-- assertVisible: "インポートエラー"
-- assertVisible: "ファイルを読み込めませんでした"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "インポートエラー"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ファイルを読み込めませんでした"
 - tapOn: "OK"   # 未確認: エラーダイアログの OK ボタンの文字
 - takeScreenshot: 2.5-08-import-ng-empty-04
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnImportSettings
+      INDEX: 0
     enabled: false
 - takeScreenshot: 2.5-08-import-ng-empty-05

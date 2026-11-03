@@ -6,13 +6,15 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-02-export-ok-01
-- assertVisible: "設定のインポート・エクスポート"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: btnExportSettings
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
+      TEXT: "設定のインポート・エクスポート"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnExportSettings
+      INDEX: 0
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-02-export-ok-02
 - assertVisible: "(?s).*s2k_settings_\\d{8}_\\d{6}\\.json.*"   # 未確認: 提案されるファイル名の表示

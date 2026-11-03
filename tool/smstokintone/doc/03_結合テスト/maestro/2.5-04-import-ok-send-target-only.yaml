@@ -7,11 +7,23 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-04-import-ok-send-target-only-01
-- assertVisible: "設定のインポート・エクスポート"
-- assertVisible: "ファイルを選択"
-- assertVisible: "ファイルが選択されていません"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定のインポート・エクスポート"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ファイルを選択"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ファイルが選択されていません"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnImportSettings
+      INDEX: 0
     enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
@@ -19,18 +31,26 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow:
     file: common/select-download-file.yaml
     env:
-      FILE_PATTERN: ${IMPORT_FILE}
+      TEXT: ${IMPORT_FILE}
 - takeScreenshot: 2.5-04-import-ok-send-target-only-03
 - assertVisible: "(?s).*${IMPORT_FILE}.*"   # 未確認: 正規表現と複数行の表示
 - assertVisible: "(?s).*アプリの設定: 変更なし.*"   # 未確認: 複数行の表示
 - assertVisible: "(?s).*送信先の設定: 統合（1件）.*"   # 未確認: 複数行の表示
 - assertVisible: "(?s).*引継ぎ内容: 変更なし.*"   # 未確認: 複数行の表示
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnImportSettings
+      INDEX: 0
 - takeScreenshot: 2.5-04-import-ok-send-target-only-04
-- assertVisible: "設定をインポートしますか？"
-- tapOn:
-    id: "android:id/button1"   # 未確認: 確認ダイアログの「インポート」ボタンの id
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定をインポートしますか？"
+- runFlow:
+    file: common/tap-android-id.yaml
+    env:
+      ID: button1
 - takeScreenshot: 2.5-04-import-ok-send-target-only-05
 - assertNotVisible: "ファイルを選択"
 - takeScreenshot: 2.5-04-import-ok-send-target-only-06

@@ -1,0 +1,6 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: TEXT（画面の文字。正規表現可）の部品を、欄の中の POINT（割合。例: "95%, 95%"）でタップする
+- tapOn:
+    text: "${TEXT}"
+    point: "${POINT}"

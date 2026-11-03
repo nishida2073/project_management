@@ -1,10 +1,10 @@
 # ダウンロードのファイル選択画面で、指定した名前のファイルを探して選ぶ（共通の手順。撮影は呼び出し元で行う）
-# 入力: FILE_PATTERN（ファイル名。正規表現で一致させる）。一覧の下にあるファイルは、スクロールして探す
+# 入力: TEXT（ファイル名。正規表現で一致させる）。一覧の下にあるファイルは、スクロールして探す
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - scrollUntilVisible:
     element:
-      text: "${FILE_PATTERN}"
+      text: "${TEXT}"
     direction: DOWN
 - tapOn:
-    text: "${FILE_PATTERN}"
+    text: "${TEXT}"

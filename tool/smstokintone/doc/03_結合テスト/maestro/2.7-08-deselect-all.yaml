@@ -6,12 +6,20 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "SMSの検索"
-- assertVisible: "検索条件"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-    checked: false
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "検索条件"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
 - tapOn: "検索"
 - tapOn: "全選択"
 - assertVisible:

@@ -6,36 +6,52 @@ appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-01-receive-auto-process-01
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"
     timeout: 180000
-- assertVisible: "(?s).*SMSの登録に成功しました.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*SMSの登録に成功しました.*"
 - takeScreenshot: 2.8-01-receive-auto-process-02
 - pressKey: Back
 - tapOn: "送信先の設定"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
 - takeScreenshot: 2.8-01-receive-auto-process-03
 - pressKey: Back
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvSenderAddress"
-    text: "test-phone-a"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
-    text: "TEST－COMPANY"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationUserName"
-    text: "test-taro"
+      ID: btnEditContinuationInfo
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: tvSenderAddress
+      INDEX: 0
+      TEXT: "test-phone-a"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etContinuationCompanyName
+      INDEX: 0
+      TEXT: "TEST－COMPANY"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etContinuationUserName
+      INDEX: 0
+      TEXT: "test-taro"
 - takeScreenshot: 2.8-01-receive-auto-process-04

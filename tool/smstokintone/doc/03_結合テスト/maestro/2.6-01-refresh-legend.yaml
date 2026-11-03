@@ -8,18 +8,30 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "SMSの検索"
-- assertVisible: "検索条件"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "検索条件"
 - tapOn: "検索"
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
-- assertVisible: "(?s).*件を送信キューに追加しました.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*件を送信キューに追加しました.*"
 - assertVisible: '(?s).*SMSの送信が完了しました.*'
 - pressKey: Back
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - takeScreenshot: 2.6-01-refresh-legend-01
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnRefreshLog
+      INDEX: 0
 - assertVisible: '(?s).*抽出対象.*抽出状況.*送信状況.*返信状況.*送信先.*'
 - assertVisible:
     text: '\[送信完了\].*'
@@ -27,5 +39,8 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '\[送信開始\].*'
     below:
       text: '\[送信完了\].*'
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - takeScreenshot: 2.6-01-refresh-legend-02

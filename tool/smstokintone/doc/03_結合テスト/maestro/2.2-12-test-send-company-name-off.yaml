@@ -10,39 +10,58 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.2-12-test-send-company-name-off-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - takeScreenshot: 2.2-12-test-send-company-name-off-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.2-12-test-send-company-name-off-03
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-12-test-send-company-name-off-04
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
 - scrollUntilVisible:
     element:
       text: "^テスト送信$"
     direction: DOWN
-- tapOn:
-    text: "^テスト送信$"
-    index: 0
+- runFlow:
+    file: common/tap-text.yaml
+    env:
+      TEXT: "^テスト送信$"
+      INDEX: 0
 - takeScreenshot: 2.2-12-test-send-company-name-off-05
-- assertVisible: "テスト本文"
-- tapOn:
-    text: "(?s).*テスト太郎.*"
-    point: "95%, 95%"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "テスト本文"
+- runFlow:
+    file: common/tap-text-at-point.yaml
+    env:
+      TEXT: "(?s).*テスト太郎.*"
+      POINT: "95%, 95%"
 - eraseText: 200
 - inputText: "${TEST_BODY}"
 - takeScreenshot: 2.2-12-test-send-company-name-off-06

@@ -9,261 +9,283 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-14-reopen-settings-01
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etSendTargetName
+      TEXT: "設定を追加"
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      FIELD_ID: etSendTargetName
-      INPUT_VALUE: "${SAVED_SEND_TARGET_NAME}"
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etKeyword
+      ID: etSendTargetName
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etKeyword
-      INPUT_VALUE: "${SAVED_KEYWORD}"
+      ID: etSendTargetName
+      INDEX: 0
+      VALUE: "${SAVED_SEND_TARGET_NAME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etSubdomain
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etSubdomain
-      INPUT_VALUE: "${SUBDOMAIN}"
-- runFlow:
-    file: common/scroll-down-to-setting.yaml
-    env:
-      ELEMENT_ID: etLoginName
+      ID: etKeyword
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLoginName
-      INPUT_VALUE: "${LOGIN_NAME}"
+      ID: etKeyword
+      INDEX: 0
+      VALUE: "${SAVED_KEYWORD}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLoginPassword
+      ID: etSubdomain
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etSubdomain
+      INDEX: 0
+      VALUE: "${SUBDOMAIN}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etLoginName
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etLoginName
+      INDEX: 0
+      VALUE: "${LOGIN_NAME}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etLoginPassword
 - runFlow:
     file: common/input-password-field.yaml
     env:
-      FIELD_ID: etLoginPassword
-      INPUT_VALUE: "${LOGIN_PASSWORD}"
+      ID: etLoginPassword
+      VALUE: "${LOGIN_PASSWORD}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etAppId
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etAppId
-      INPUT_VALUE: "${APP_ID}"
-- runFlow:
-    file: common/scroll-down-to-setting.yaml
-    env:
-      ELEMENT_ID: etFieldType
+      ID: etAppId
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldType
-      INPUT_VALUE: "${SAVED_FIELD_TYPE}"
+      ID: etAppId
+      INDEX: 0
+      VALUE: "${APP_ID}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etFieldDatetime
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etFieldDatetime
-      INPUT_VALUE: "${SAVED_FIELD_DATETIME}"
-- runFlow:
-    file: common/scroll-down-to-setting.yaml
-    env:
-      ELEMENT_ID: etFieldSender
+      ID: etFieldType
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldSender
-      INPUT_VALUE: "${SAVED_FIELD_SENDER}"
+      ID: etFieldType
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_TYPE}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etFieldCompanyName
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etFieldCompanyName
-      INPUT_VALUE: "${SAVED_FIELD_COMPANY}"
-- runFlow:
-    file: common/scroll-down-to-setting.yaml
-    env:
-      ELEMENT_ID: etFieldUserName
+      ID: etFieldDatetime
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldUserName
-      INPUT_VALUE: "${SAVED_FIELD_USER}"
+      ID: etFieldDatetime
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_DATETIME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etFieldBody
-- runFlow:
-    file: common/input-text-field.yaml
-    env:
-      FIELD_ID: etFieldBody
-      INPUT_VALUE: "${SAVED_FIELD_BODY}"
-- runFlow:
-    file: common/scroll-down-to-setting.yaml
-    env:
-      ELEMENT_ID: etFieldHistory
+      ID: etFieldSender
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etFieldHistory
-      INPUT_VALUE: "${SAVED_FIELD_HISTORY}"
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
-    direction: DOWN
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
+      ID: etFieldSender
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_SENDER}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etFieldCompanyName
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etFieldCompanyName
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_COMPANY}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etFieldUserName
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etFieldUserName
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_USER}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etFieldBody
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etFieldBody
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_BODY}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etFieldHistory
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etFieldHistory
+      INDEX: 0
+      VALUE: "${SAVED_FIELD_HISTORY}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: rbUpdateToleranceModeHours
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbUpdateToleranceModeHours
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etUpdateToleranceHours
+      INDEX: 0
     enabled: true
-- scrollUntilVisible:
-    element:
-      id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
-    direction: DOWN
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etUpdateToleranceHours
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etUpdateToleranceHours
-      INPUT_VALUE: "${TOLERANCE_HOURS_SAVED}"
+      ID: etUpdateToleranceHours
+      INDEX: 0
+      VALUE: "${TOLERANCE_HOURS_SAVED}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: rbUpdateToleranceModeSameDate
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
-    checked: true
+      ID: rbUpdateToleranceModeSameDate
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbUpdateToleranceModeSameDate
+      INDEX: 0
 - tapOn: "設定を保存"
 # 確認: 保存後にトップ画面に戻る（トーストは短時間で消えるため、確認しない）
-- assertVisible: "SMSの送信モード"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの送信モード"
 - takeScreenshot: 2.2-14-reopen-settings-02
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-14-reopen-settings-03
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "${SAVED_SEND_TARGET_NAME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etKeyword
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-    index: 0
-    text: "${SAVED_KEYWORD}"
+      TEXT: "設定を追加"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etSubdomain
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
-    text: "${SUBDOMAIN}"
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "${SAVED_SEND_TARGET_NAME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etLoginName
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLoginName"
-    text: "${LOGIN_NAME}"
+      ID: etKeyword
+      INDEX: 0
+      TEXT: "${SAVED_KEYWORD}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etLoginPassword
+      ID: etSubdomain
+      INDEX: 0
+      TEXT: "${SUBDOMAIN}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLoginName
+      INDEX: 0
+      TEXT: "${LOGIN_NAME}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etLoginPassword
 # 確認: パスワードは伏せ字で表示される（スクリーンショットで目視）。欄の値は Maestro からも読めるため、文字での確認はしない
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etAppId
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etAppId"
-    text: "${APP_ID}"
+      ID: etAppId
+      INDEX: 0
+      TEXT: "${APP_ID}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldType
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
-    text: "${SAVED_FIELD_TYPE}"
+      ID: etFieldType
+      INDEX: 0
+      TEXT: "${SAVED_FIELD_TYPE}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldDatetime
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
-    text: "${SAVED_FIELD_DATETIME}"
+      ID: etFieldDatetime
+      INDEX: 0
+      TEXT: "${SAVED_FIELD_DATETIME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldSender
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
-    text: "${SAVED_FIELD_SENDER}"
+      ID: etFieldSender
+      INDEX: 0
+      TEXT: "${SAVED_FIELD_SENDER}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldCompanyName
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
-    text: "${SAVED_FIELD_COMPANY}"
+      ID: etFieldCompanyName
+      INDEX: 0
+      TEXT: "${SAVED_FIELD_COMPANY}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldUserName
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
-    text: "${SAVED_FIELD_USER}"
+      ID: etFieldUserName
+      INDEX: 0
+      TEXT: "${SAVED_FIELD_USER}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldBody
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
-    text: "${SAVED_FIELD_BODY}"
+      ID: etFieldBody
+      INDEX: 0
+      TEXT: "${SAVED_FIELD_BODY}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldHistory
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
-    text: "${SAVED_FIELD_HISTORY}"
+      ID: etFieldHistory
+      INDEX: 0
+      TEXT: "${SAVED_FIELD_HISTORY}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbUpdateToleranceModeSameDate
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
-    checked: true
+      ID: rbUpdateToleranceModeSameDate
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: etUpdateToleranceHours
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
-    text: "${TOLERANCE_HOURS_SAVED}"
+      ID: rbUpdateToleranceModeSameDate
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etUpdateToleranceHours
+      INDEX: 0
+      TEXT: "${TOLERANCE_HOURS_SAVED}"
 - takeScreenshot: 2.2-14-reopen-settings-04

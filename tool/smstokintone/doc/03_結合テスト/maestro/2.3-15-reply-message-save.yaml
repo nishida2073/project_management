@@ -6,32 +6,34 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-15-reply-message-save-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etReplySuccessBody
+      ID: etReplySuccessBody
 - takeScreenshot: 2.3-15-reply-message-save-02
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etReplySuccessBody
-      INPUT_VALUE: "${REPLY_SUCCESS_BODY}"
+      ID: etReplySuccessBody
+      INDEX: 0
+      VALUE: "${REPLY_SUCCESS_BODY}"
 - takeScreenshot: 2.3-15-reply-message-save-03
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etReplyFailedBody
+      ID: etReplyFailedBody
 - takeScreenshot: 2.3-15-reply-message-save-04
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etReplyFailedBody
-      INPUT_VALUE: "${REPLY_FAILED_BODY}"
+      ID: etReplyFailedBody
+      INDEX: 0
+      VALUE: "${REPLY_FAILED_BODY}"
 - takeScreenshot: 2.3-15-reply-message-save-05
 - assertVisible: "${REPLY_FAILED_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - takeScreenshot: 2.3-15-reply-message-save-06

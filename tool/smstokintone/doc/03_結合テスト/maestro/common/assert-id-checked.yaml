@@ -1,0 +1,7 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: ID（欄の id の末尾）の部品が、チェックされている（選ばれている）ことを確かめる。INDEX は何番目の部品か（1 つだけなら 0）
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+    index: ${INDEX}
+    checked: true

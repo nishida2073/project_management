@@ -5,101 +5,95 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-01-send-target-add-01
-- assertVisible: "設定を追加"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定を追加"
 - tapOn: "設定を追加"
 - takeScreenshot: 2.2-01-send-target-add-02
-- assertVisible: "設定 2"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定 2"
 # 注: 追加した設定（設定 2）は一覧の末尾に入る。scrollUntilVisible で「設定 2」を表示すると、その送信先名の入力欄は index 0 で指せる
-- scrollUntilVisible:
-    element:
-      text: "設定 2"
-    direction: DOWN
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
+- runFlow:
+    file: common/scroll-down-to-text.yaml
+    env:
+      TEXT: "設定 2"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
 - takeScreenshot: 2.2-01-send-target-add-03
 - inputText: "${SEND_TARGET_NAME}"
 - takeScreenshot: 2.2-01-send-target-add-04
 - hideKeyboard
-- assertVisible: "${SEND_TARGET_NAME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etSubdomain
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSubdomain"
-    index: 0
-    text: 'univ-kyousai-\{X\}'
+      TEXT: "${SEND_TARGET_NAME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldType
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldType"
-    index: 0
-    text: "registration_type"
+      ID: etSubdomain
+      INDEX: 0
+      TEXT: 'univ-kyousai-\{X\}'
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldDatetime
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldDatetime"
-    index: 0
-    text: "receive_datetime"
+      ID: etFieldType
+      INDEX: 0
+      TEXT: "registration_type"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldSender
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldSender"
-    index: 0
-    text: "sender"
+      ID: etFieldDatetime
+      INDEX: 0
+      TEXT: "receive_datetime"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldCompanyName
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldCompanyName"
-    index: 0
-    text: "company_name"
+      ID: etFieldSender
+      INDEX: 0
+      TEXT: "sender"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldUserName
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldUserName"
-    index: 0
-    text: "user_name"
+      ID: etFieldCompanyName
+      INDEX: 0
+      TEXT: "company_name"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldBody
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldBody"
-    index: 0
-    text: "body"
+      ID: etFieldUserName
+      INDEX: 0
+      TEXT: "user_name"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etFieldHistory
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFieldHistory"
-    index: 0
-    text: "history"
+      ID: etFieldBody
+      INDEX: 0
+      TEXT: "body"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: rbUpdateToleranceModeSameDate
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
-    index: 0
-    checked: true
+      ID: etFieldHistory
+      INDEX: 0
+      TEXT: "history"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etUpdateToleranceHours
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
-    index: 0
-    text: "5"
+      ID: rbUpdateToleranceModeSameDate
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbUpdateToleranceModeSameDate
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etUpdateToleranceHours
+      INDEX: 0
+      TEXT: "5"
 - takeScreenshot: 2.2-01-send-target-add-05

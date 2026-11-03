@@ -6,22 +6,36 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "SMSの検索"
-- assertVisible: "検索条件"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "検索条件"
 - tapOn: "検索"
 - tapOn: "全選択"
 - tapOn: "選択したSMSを送信"
-- assertVisible: "(?s).*件を送信キューに追加しました.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*件を送信キューに追加しました.*"
 - assertVisible: '(?s).*SMSの送信が完了しました.*'
 - pressKey: Back
 - tapOn: "ログの確認"
 - assertNotVisible: "ログがありません"
 - assertVisible: '(?s).*\[送信完了\].*'
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteLog"
-- assertVisible: "ログを削除しますか？"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnDeleteLog
+      INDEX: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログを削除しますか？"
 - takeScreenshot: 2.6-08-delete-cancel-01
-- tapOn:
-    id: "android:id/button2"
+- runFlow:
+    file: common/tap-android-id.yaml
+    env:
+      ID: button2
 - assertNotVisible: "ログを削除しますか？"
 - assertNotVisible: "ログがありません"
 - assertVisible: '(?s).*\[送信完了\].*'

@@ -6,18 +6,23 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-15-export-ng-cancel-save-01
-- assertVisible: "設定のインポート・エクスポート"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: btnExportSettings
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
+      TEXT: "設定のインポート・エクスポート"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnExportSettings
+      INDEX: 0
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-15-export-ng-cancel-save-02
 - back   # 未確認: 保存ダイアログを戻る操作で閉じられるか
 - assertNotVisible: "設定をエクスポートしました"   # 未確認: トーストが出ないことの確認
 - assertNotVisible: "エクスポートエラー"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnExportSettings"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnExportSettings
+      INDEX: 0
 - takeScreenshot: 2.5-15-export-ng-cancel-save-03

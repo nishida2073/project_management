@@ -8,17 +8,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: swLogRefreshEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
-    checked: false
+      ID: swLogRefreshEnabled
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swLogRefreshEnabled
+      INDEX: 0
 - pressKey: Back
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - takeScreenshot: 2.6-10-no-auto-refresh-01
 - assertNotVisible:
     text: '(?s).*\[受信完了\].*'

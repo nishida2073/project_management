@@ -8,45 +8,73 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameAutoConversionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: true
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: false
+      ID: swCompanyNameAutoConversionEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
-    index: 0
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnAddFixedConversion
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etFixConversionBefore
+      INDEX: 0
 - inputText: "${FIXED_FROM}"
 - hideKeyboard
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionAfter"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etFixConversionAfter
+      INDEX: 0
 - inputText: "${FIXED_TO}"
 - hideKeyboard
-- assertVisible: "${FIXED_FROM}"
-- assertVisible: "${FIXED_TO}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${FIXED_FROM}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${FIXED_TO}"
 - takeScreenshot: 2.8-06-fixed-conversion-receive-01
 - pressKey: Back
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-06-fixed-conversion-receive-02
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"
     timeout: 180000
-- assertVisible: "(?s).*SMSの登録に成功しました.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*SMSの登録に成功しました.*"
 - longPressOn: "(?s).*SMSを受信しました.*"
-- assertVisible: "抽出結果 ⚙.*🔄.*"
-- assertVisible: "(?s).*会社名：${FIXED_TO}.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "抽出結果 ⚙.*🔄.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*会社名：${FIXED_TO}.*"
 - takeScreenshot: 2.8-06-fixed-conversion-receive-03

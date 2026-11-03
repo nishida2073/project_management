@@ -5,8 +5,11 @@ appId: jp.co.nttdata_univ.smstokintone
 # 前提（フローで設定）: （この行の中で行う）: 1 通目を受信してから、2 通目を受信する。各受信の結果は、ログの画面で待つ
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-02-receive-continuation-second-01
 - extendedWaitUntil:
     visible: "(?s).*SMSの登録に成功しました.*"
@@ -15,5 +18,8 @@ appId: jp.co.nttdata_univ.smstokintone
 - extendedWaitUntil:
     visible: "(?s).*SMSの更新に成功しました.*"
     timeout: 180000
-- assertVisible: "(?s).*SMSの更新に成功しました.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*SMSの更新に成功しました.*"
 - takeScreenshot: 2.8-02-receive-continuation-second-03

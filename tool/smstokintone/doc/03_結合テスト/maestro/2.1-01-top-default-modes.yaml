@@ -3,12 +3,24 @@ appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- assertVisible: "SMSの送信モード"
-- assertVisible: "SMSの返信モード"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
-    text: "自動"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
-    text: "手動"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの送信モード"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの返信モード"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: tvTopSendStatus
+      INDEX: 0
+      TEXT: "自動"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: tvTopReplyStatus
+      INDEX: 0
+      TEXT: "手動"
 - takeScreenshot: 2.1-01-top-default-modes-01

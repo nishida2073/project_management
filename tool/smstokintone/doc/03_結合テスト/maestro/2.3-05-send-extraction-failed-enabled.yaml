@@ -6,46 +6,57 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: swSendExtractionFailedEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
-    checked: false
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swSendExtractionFailedEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
+      ID: swSendExtractionFailedEnabled
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swSendExtractionFailedEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swSendExtractionFailedEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-02
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swSendExtractionFailedEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
-    checked: true
+      ID: swSendExtractionFailedEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swSendExtractionFailedEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-03
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-04
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: swSendExtractionFailedEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
-    checked: true
+      TEXT: "端末の許可"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swSendExtractionFailedEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swSendExtractionFailedEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-05-send-extraction-failed-enabled-05

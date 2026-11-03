@@ -8,17 +8,25 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbSendManual
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-    checked: true
+      ID: rbSendManual
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbSendManual
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSendManual
+      INDEX: 0
 - pressKey: Back
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-15-manual-send-mode-01
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"

@@ -7,53 +7,72 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-10-save-error-name-empty-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - takeScreenshot: 2.4-10-save-error-name-empty-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: false
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-10-save-error-name-empty-03
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
-    checked: true
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationUserName"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbContinuationSortAscending
+      INDEX: 0
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etContinuationUserName
+      INDEX: 0
+      VALUE: ""
 - takeScreenshot: 2.4-10-save-error-name-empty-04
-- eraseText: 50  # 未確認
-- hideKeyboard
 - tapOn: "設定を保存"
 - takeScreenshot: 2.4-10-save-error-name-empty-05
-- assertVisible: "入力エラー"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "入力エラー"
 # 未確認: ダイアログのメッセージ（氏名は必須です）。regex は未確認。
-- assertVisible: "(?s).*引継ぎ内容: ${SENDER_A}.*氏名は必須です.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*引継ぎ内容: ${SENDER_A}.*氏名は必須です.*"
 - pressKey: Back
 - takeScreenshot: 2.4-10-save-error-name-empty-06
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.4-10-save-error-name-empty-07
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - takeScreenshot: 2.4-10-save-error-name-empty-08
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - takeScreenshot: 2.4-10-save-error-name-empty-09

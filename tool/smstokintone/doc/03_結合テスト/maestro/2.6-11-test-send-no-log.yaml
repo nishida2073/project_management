@@ -10,15 +10,32 @@ appId: jp.co.nttdata_univ.smstokintone
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
-- assertVisible: "テスト本文"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "テスト本文"
 - tapOn: "送信"
-- assertVisible: "(?s).*テスト結果.*"
-- tapOn:
-    id: "android:id/button1"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*テスト結果.*"
+- runFlow:
+    file: common/tap-android-id.yaml
+    env:
+      ID: button1
 - pressKey: Back
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
-- assertVisible: "ログがありません"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnRefreshLog
+      INDEX: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログがありません"
 - takeScreenshot: 2.6-11-test-send-no-log-01

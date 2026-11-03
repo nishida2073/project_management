@@ -7,23 +7,32 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
     index: 0
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
 - pressKey: Back
 - tapOn: "SMSの検索"
-- assertVisible: "検索条件"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-    checked: false
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "検索条件"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
 - tapOn: "検索"
 - assertVisible: '(?s).*${CONTINUATION_SENDER}.*'
 - assertNotVisible: "${CONTINUATION_USER_NAME}"

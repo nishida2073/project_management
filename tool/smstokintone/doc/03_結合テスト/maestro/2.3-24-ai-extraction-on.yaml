@@ -6,55 +6,62 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-24-ai-extraction-on-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
+      ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-24-ai-extraction-on-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: swAiExtractionEnabled
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swAiExtractionEnabled
 - takeScreenshot: 2.3-24-ai-extraction-on-03
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    checked: false
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: swAiExtractionEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
+      ID: swAiExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swAiExtractionEnabled
+      INDEX: 0
     index: 0
 - takeScreenshot: 2.3-24-ai-extraction-on-04
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swAiExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    checked: true
+      ID: swAiExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swAiExtractionEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.3-24-ai-extraction-on-05
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-24-ai-extraction-on-06
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swAiExtractionEnabled
+      ID: swAiExtractionEnabled
 - takeScreenshot: 2.3-24-ai-extraction-on-07
-- assertVisible: # 開き直した後も有効のまま保存されていること
-    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swAiExtractionEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-24-ai-extraction-on-08

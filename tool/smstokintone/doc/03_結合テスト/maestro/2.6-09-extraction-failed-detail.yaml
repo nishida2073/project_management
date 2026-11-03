@@ -7,7 +7,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - assertVisible:
     text: '(?s).*\[受信完了\].*'
     timeout: 60000
@@ -16,5 +19,8 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '(?s).*\[受信完了\].*'
     index: 0
 - assertVisible: '(?s).*抽出結果.*'
-- assertVisible: "会社名・氏名の抽出に失敗しています"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "会社名・氏名の抽出に失敗しています"
 - takeScreenshot: 2.6-09-extraction-failed-detail-02

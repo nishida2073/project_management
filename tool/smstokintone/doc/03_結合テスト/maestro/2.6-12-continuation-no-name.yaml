@@ -8,23 +8,30 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
     index: 0
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
 - pressKey: Back
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - assertVisible:
     text: '(?s).*${CONTINUATION_SENDER}.*'
     timeout: 60000
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnRefreshLog
+      INDEX: 0
 - assertVisible: '(?s).*${CONTINUATION_SENDER}.*'
 - assertNotVisible: "${CONTINUATION_USER_NAME}"
 - takeScreenshot: 2.6-12-continuation-no-name-01

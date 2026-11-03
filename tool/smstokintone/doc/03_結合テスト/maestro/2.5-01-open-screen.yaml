@@ -6,10 +6,22 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-01-open-screen-01
-- assertVisible: "設定のインポート・エクスポート"
-- assertVisible: "ファイルを選択"
-- assertVisible: "ファイルが選択されていません"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnImportSettings"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定のインポート・エクスポート"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ファイルを選択"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ファイルが選択されていません"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnImportSettings
+      INDEX: 0
     enabled: false
 - takeScreenshot: 2.5-01-open-screen-02

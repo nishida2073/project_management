@@ -8,38 +8,49 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-13-discard-delete-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-13-discard-delete-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-visible.yaml
     env:
-      ELEMENT_ID: btnDeleteContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteContinuationInfo"
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbContinuationSortAscending
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnDeleteContinuationInfo
+      INDEX: 0
     index: 1
 - takeScreenshot: 2.4-13-discard-delete-03
 - assertNotVisible: "${SENDER_B}"
 - pressKey: Back
 - takeScreenshot: 2.4-13-discard-delete-04
-- assertNotVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-not-visible.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-13-discard-delete-05
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible: "${SENDER_B}"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${SENDER_B}"
 - takeScreenshot: 2.4-13-discard-delete-06

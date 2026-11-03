@@ -8,35 +8,49 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-11-save-conflict-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-11-save-conflict-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
-    checked: true
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbContinuationSortAscending
+      INDEX: 0
 # 外部条件: 送信元 B（test-sender-b）の内容は、この画面を開いた後に SMSの受信などで更新しておく（手順は未確認）。
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etContinuationCompanyName
+      ID: etContinuationCompanyName
 - runFlow:
-    file: common/input-second-text-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etContinuationCompanyName
-      INPUT_VALUE: "${COMPANY_NAME_3}"
+      ID: etContinuationCompanyName
+      INDEX: 1
+      VALUE: "${COMPANY_NAME_3}"
 - takeScreenshot: 2.4-11-save-conflict-03
 - tapOn: "設定を保存"
 # 未確認: ダイアログのタイトルとメッセージ。
 - takeScreenshot: 2.4-11-save-conflict-04
-- assertVisible: "保存に失敗しました"
-- assertVisible: "SMSの受信などで内容が更新されたため、保存ができませんでした"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "保存に失敗しました"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの受信などで内容が更新されたため、保存ができませんでした"
 - pressKey: Back
 - takeScreenshot: 2.4-11-save-conflict-05
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
 - takeScreenshot: 2.4-11-save-conflict-06

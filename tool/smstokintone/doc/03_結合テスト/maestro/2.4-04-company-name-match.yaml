@@ -7,26 +7,34 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-04-company-name-match-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-04-company-name-match-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-visible.yaml
     env:
-      ELEMENT_ID: etContinuationCompanyName
+      ID: etContinuationSearch
+      INDEX: 0
 - runFlow:
-    file: common/input-second-text-field.yaml
+    file: common/assert-id-checked.yaml
     env:
-      FIELD_ID: etContinuationCompanyName
-      INPUT_VALUE: "${COMPANY_NAME_MATCH}"
+      ID: rbContinuationSortAscending
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etContinuationCompanyName
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etContinuationCompanyName
+      INDEX: 1
+      VALUE: "${COMPANY_NAME_MATCH}"
 - takeScreenshot: 2.4-04-company-name-match-03
-- assertVisible: "${SEND_TARGET_NAME}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${SEND_TARGET_NAME}"
 - takeScreenshot: 2.4-04-company-name-match-04

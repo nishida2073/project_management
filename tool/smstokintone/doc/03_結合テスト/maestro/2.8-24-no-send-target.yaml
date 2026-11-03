@@ -6,23 +6,33 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteSendTarget"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnDeleteSendTarget
+      INDEX: 0
 - assertNotVisible: "test-send-target-1"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.8-24-no-send-target-01
 - pressKey: Back
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-24-no-send-target-02
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"
     timeout: 180000
-- assertVisible: "(?s).*SMSの送信先が存在しません.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*SMSの送信先が存在しません.*"
 - assertNotVisible: "(?s).*SMSの登録に成功しました.*"
 - takeScreenshot: 2.8-24-no-send-target-03

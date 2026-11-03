@@ -7,32 +7,43 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-15-save-tolerance-hours-01
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: rbUpdateToleranceModeHours
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbUpdateToleranceModeHours
+      INDEX: 0
 - takeScreenshot: 2.2-15-save-tolerance-hours-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etUpdateToleranceHours
+      INDEX: 0
     enabled: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etUpdateToleranceHours
+      ID: etUpdateToleranceHours
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etUpdateToleranceHours
-      INPUT_VALUE: "${TOLERANCE_HOURS_SAVED}"
+      ID: etUpdateToleranceHours
+      INDEX: 0
+      VALUE: "${TOLERANCE_HOURS_SAVED}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-15-save-tolerance-hours-03
-- assertVisible: "SMSの送信モード"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの送信モード"
 - assertNotVisible: "設定を追加"
 - takeScreenshot: 2.2-15-save-tolerance-hours-04

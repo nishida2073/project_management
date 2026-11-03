@@ -6,49 +6,57 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-26-reset-cancel-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeDark
+      ID: rbThemeDark
 - takeScreenshot: 2.3-26-reset-cancel-02
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbThemeDark
+      INDEX: 0
 - takeScreenshot: 2.3-26-reset-cancel-03
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeDark
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    checked: true
+      ID: rbThemeDark
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: btnResetSettings
+      ID: rbThemeDark
+      INDEX: 0
+- runFlow:
+    file: common/scroll-up-to-id.yaml
+    env:
+      ID: btnResetSettings
 - takeScreenshot: 2.3-26-reset-cancel-04
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnResetSettings
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
+      ID: btnResetSettings
+      INDEX: 0
 - takeScreenshot: 2.3-26-reset-cancel-05
-- assertVisible: "設定を初期化しますか？"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定を初期化しますか？"
 - assertVisible: "この操作は取り消せません" # 確認ダイアログの本文（仕様書の期待値に従う、未確認）
 - tapOn: "キャンセル"
 - takeScreenshot: 2.3-26-reset-cancel-06
 - assertNotVisible: "設定を初期化しますか？"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeDark
+      ID: rbThemeDark
 - takeScreenshot: 2.3-26-reset-cancel-07
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbThemeDark
+      INDEX: 0
 - takeScreenshot: 2.3-26-reset-cancel-08

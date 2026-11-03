@@ -7,24 +7,34 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-12-keyword-no-match-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-12-keyword-no-match-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
-    checked: true
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbContinuationSortAscending
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
 - takeScreenshot: 2.4-12-keyword-no-match-03
 - inputText: "${SEARCH_NO_MATCH}"
 - takeScreenshot: 2.4-12-keyword-no-match-04
 - hideKeyboard
-- assertVisible: "一致する引継ぎ内容がありません"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "一致する引継ぎ内容がありません"
 - assertNotVisible: "${SENDER_A}"
 - assertNotVisible: "${SENDER_B}"
 - takeScreenshot: 2.4-12-keyword-no-match-05

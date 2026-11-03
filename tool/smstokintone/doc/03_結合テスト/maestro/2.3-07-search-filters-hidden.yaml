@@ -7,37 +7,49 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-07-search-filters-hidden-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: rbSearchFiltersVisible
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-    checked: true
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSearchFiltersHidden
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
+      ID: rbSearchFiltersVisible
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSearchFiltersVisible
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbSearchFiltersHidden
+      INDEX: 0
 - takeScreenshot: 2.3-07-search-filters-hidden-02
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSearchFiltersHidden
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
-    checked: true
+      ID: rbSearchFiltersHidden
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSearchFiltersHidden
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.3-07-search-filters-hidden-03
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-07-search-filters-hidden-04
-- assertVisible: "▼ 表示"
-- assertNotVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/llSearchFilters"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "▼ 表示"
+- runFlow:
+    file: common/assert-id-not-visible.yaml
+    env:
+      ID: llSearchFilters
+      INDEX: 0
 - takeScreenshot: 2.3-07-search-filters-hidden-05

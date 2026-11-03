@@ -1,27 +1,35 @@
 # 2.6 ログ: ログの画面を表示したまま、受信した SMS が自動で表示される（テスト仕様書の 2.6 の 5 に対応）
 # 前提（フローで設定）: 自動更新は、この flow の中で有効のまま確認する（既定：有効、更新間隔：5 秒）
 # 外部条件: ログの画面を表示したまま、別の端末から SMS を 1 通受信する（下の「外部条件」の assert の待ち時間（60 秒）の間に受信させる）
-# 未確認: 「外部条件」の assert の timeout の指定が、この Maestro で使えるか
+# 未確認: 「外部条件」の待ちは extendedWaitUntil（timeout 60 秒）で書いた。この Maestro で動くかは未確認
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swLogRefreshEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
-    checked: true
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
-    text: "5"
+      ID: swLogRefreshEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swLogRefreshEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogRefreshInterval
+      INDEX: 0
+      TEXT: "5"
 - pressKey: Back
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - takeScreenshot: 2.6-05-auto-refresh-received-01
-- assertVisible:
-    text: '(?s).*\[受信完了\].*'
+- extendedWaitUntil:
+    visible: '(?s).*\[受信完了\].*'
     timeout: 60000
 - takeScreenshot: 2.6-05-auto-refresh-received-02

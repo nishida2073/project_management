@@ -9,34 +9,44 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameAutoConversionEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: false
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
-    index: 0
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnAddFixedConversion
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etFixConversionBefore
+      INDEX: 0
 - inputText: "${FIXED_FROM}"
 - hideKeyboard
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionAfter"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etFixConversionAfter
+      INDEX: 0
 - inputText: "${FIXED_TO}"
 - hideKeyboard
-- assertVisible: "${FIXED_TO}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${FIXED_TO}"
 - pressKey: Back
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-25-fixed-conversion-continuation-01
 - extendedWaitUntil:
     visible: "(?s).*SMSの登録に成功しました.*"
@@ -45,6 +55,9 @@ appId: jp.co.nttdata_univ.smstokintone
     visible: "(?s).*SMSの更新に成功しました.*"
     timeout: 180000
 - longPressOn: "(?s).*SMSの更新に成功しました.*"
-- assertVisible: "(?s).*test-company-converted.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*test-company-converted.*"
 - assertNotVisible: "(?s).*test-company-converted-converted.*"
 - takeScreenshot: 2.8-25-fixed-conversion-continuation-02

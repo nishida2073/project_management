@@ -1,12 +1,12 @@
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 押す位置は欄の右寄り（95%）。目のアイコンのないテキスト欄に使う
-# 既存の値がある入力欄に、値を入れ直す（共通の手順）。スクロールと撮影は呼び出し元で行う
-# 入力: FIELD_ID（欄の id の末尾）、INPUT_VALUE（入力する値）
+# 注: 欄の右寄り（95%）を押す。目のアイコンのないテキスト欄用（パスワード欄は input-password-field.yaml）
+# 注: 既存の値は eraseText で末尾まで消してから入力する。欄までのスクロールと撮影は呼び出し元で行う
+# 注: 引数は ID（欄の id の末尾）、INDEX（何番目の欄か。1 つだけなら 0）、VALUE（入力する値）
 - tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/${FIELD_ID}"
-    index: 0
+    id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+    index: ${INDEX}
     point: "95%, 50%"
 - eraseText: 50
-- inputText: "${INPUT_VALUE}"
+- inputText: "${VALUE}"
 - hideKeyboard

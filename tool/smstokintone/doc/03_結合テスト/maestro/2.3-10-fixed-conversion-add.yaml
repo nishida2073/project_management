@@ -6,61 +6,87 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-10-fixed-conversion-add-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: btnAddFixedConversion
 - assertNotVisible: "${FIXED_FROM_1}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+      ID: btnAddFixedConversion
+      INDEX: 0
 - takeScreenshot: 2.3-10-fixed-conversion-add-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnDeleteFixedConversion"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
-    index: 0
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnDeleteFixedConversion
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etFixConversionBefore
+      INDEX: 0
 - takeScreenshot: 2.3-10-fixed-conversion-add-03
 - inputText: "${FIXED_FROM_1}"
 - takeScreenshot: 2.3-10-fixed-conversion-add-04
 - hideKeyboard
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionAfter"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etFixConversionAfter
+      INDEX: 0
 - takeScreenshot: 2.3-10-fixed-conversion-add-05
 - inputText: "${FIXED_TO_1}"
 - takeScreenshot: 2.3-10-fixed-conversion-add-06
 - hideKeyboard
-- assertVisible: "${FIXED_FROM_1}"
-- assertVisible: "${FIXED_TO_1}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${FIXED_FROM_1}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${FIXED_TO_1}"
 - pressKey: Back
 - takeScreenshot: 2.3-10-fixed-conversion-add-07
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-10-fixed-conversion-add-08
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
-- assertVisible: "${FIXED_FROM_1}"
-- assertVisible: "${FIXED_TO_1}"
+      TEXT: "端末の許可"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: btnAddFixedConversion
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${FIXED_FROM_1}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${FIXED_TO_1}"
 - takeScreenshot: 2.3-10-fixed-conversion-add-09

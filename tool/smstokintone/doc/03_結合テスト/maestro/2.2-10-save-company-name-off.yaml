@@ -8,38 +8,54 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.2-10-save-company-name-off-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - takeScreenshot: 2.2-10-save-company-name-off-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.2-10-save-company-name-off-03
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-10-save-company-name-off-04
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etCompanyName
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etCompanyName
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etCompanyName
-      INPUT_VALUE: "${COMPANY_NAME}"
+      ID: etCompanyName
+      INDEX: 0
+      VALUE: "${COMPANY_NAME}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-10-save-company-name-off-05
-- assertVisible: "SMSの送信モード"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの送信モード"
 - assertNotVisible: "設定を追加"
 - takeScreenshot: 2.2-10-save-company-name-off-06

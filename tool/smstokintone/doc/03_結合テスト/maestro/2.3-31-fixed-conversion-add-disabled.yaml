@@ -6,61 +6,72 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
+      ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: btnAddFixedConversion
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-03
-- assertNotVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/assert-id-not-visible.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
+      ID: etFixConversionBefore
+      INDEX: 0
+- runFlow:
+    file: common/scroll-up-to-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-04
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
     index: 0
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-05
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: false
+      ID: swCompanyNameExtractionEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: btnAddFixedConversion
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-06
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnAddFixedConversion
+      INDEX: 0
     enabled: false
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnAddFixedConversion
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+      ID: btnAddFixedConversion
+      INDEX: 0
     index: 0
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-07
-- assertNotVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etFixConversionBefore"
+- runFlow:
+    file: common/assert-id-not-visible.yaml
+    env:
+      ID: etFixConversionBefore
+      INDEX: 0
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-08

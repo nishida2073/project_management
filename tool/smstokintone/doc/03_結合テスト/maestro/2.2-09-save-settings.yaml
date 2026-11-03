@@ -5,71 +5,81 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-09-save-settings-01
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etSendTargetName
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etSendTargetName
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etSendTargetName
-      INPUT_VALUE: "${SAVED_SEND_TARGET_NAME}"
+      ID: etSendTargetName
+      INDEX: 0
+      VALUE: "${SAVED_SEND_TARGET_NAME}"
 - takeScreenshot: 2.2-09-save-settings-02
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etKeyword
+      ID: etKeyword
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etKeyword
-      INPUT_VALUE: "${SAVED_KEYWORD}"
+      ID: etKeyword
+      INDEX: 0
+      VALUE: "${SAVED_KEYWORD}"
 - takeScreenshot: 2.2-09-save-settings-03
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etSubdomain
+      ID: etSubdomain
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etSubdomain
-      INPUT_VALUE: "${SUBDOMAIN}"
+      ID: etSubdomain
+      INDEX: 0
+      VALUE: "${SUBDOMAIN}"
 - takeScreenshot: 2.2-09-save-settings-04
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLoginName
+      ID: etLoginName
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLoginName
-      INPUT_VALUE: "${LOGIN_NAME}"
+      ID: etLoginName
+      INDEX: 0
+      VALUE: "${LOGIN_NAME}"
 - takeScreenshot: 2.2-09-save-settings-05
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLoginPassword
+      ID: etLoginPassword
 - runFlow:
     file: common/input-password-field.yaml
     env:
-      FIELD_ID: etLoginPassword
-      INPUT_VALUE: "${LOGIN_PASSWORD}"
+      ID: etLoginPassword
+      VALUE: "${LOGIN_PASSWORD}"
 - takeScreenshot: 2.2-09-save-settings-06
 # 確認: パスワードは伏せ字で表示される（スクリーンショット 06 で目視）。欄の値は Maestro からも読めるため、文字での否定の確認はしない
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etAppId
+      ID: etAppId
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etAppId
-      INPUT_VALUE: "${APP_ID}"
+      ID: etAppId
+      INDEX: 0
+      VALUE: "${APP_ID}"
 - takeScreenshot: 2.2-09-save-settings-07
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-09-save-settings-08
@@ -78,6 +88,9 @@ appId: jp.co.nttdata_univ.smstokintone
     text: "後で"
     optional: true
 # 確認: 保存後にトップ画面に戻る（「設定を保存しました」のトーストは短時間で消えるため、確認しない）
-- assertVisible: "SMSの送信モード"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "SMSの送信モード"
 - assertNotVisible: "設定を追加"
 - takeScreenshot: 2.2-09-save-settings-09

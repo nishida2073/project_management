@@ -6,8 +6,11 @@ appId: jp.co.nttdata_univ.smstokintone
 # 未確認: kintone の本文が更新されたかは kintone 側で確認する
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-19-continuation-newer-01
 - extendedWaitUntil:
     visible: "(?s).*SMSの登録に成功しました.*"
@@ -15,5 +18,8 @@ appId: jp.co.nttdata_univ.smstokintone
 - extendedWaitUntil:
     visible: "(?s).*SMSの更新に成功しました.*"
     timeout: 180000
-- assertVisible: "(?s).*SMSの更新に成功しました.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*SMSの更新に成功しました.*"
 - takeScreenshot: 2.8-19-continuation-newer-02

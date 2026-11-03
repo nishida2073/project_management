@@ -10,24 +10,41 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "SMSの検索"
-- assertVisible: "検索条件"
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-    checked: false
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionFailedOnly"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionFailedOnly"
-    checked: true
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "検索条件"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: cbSmsSearchExtractionFailedOnly
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: cbSmsSearchExtractionFailedOnly
+      INDEX: 0
 - tapOn: "検索"
 - assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - tapOn: "全選択"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsItemSelect"
-    index: ${SMS_ABNORMAL_CHECKBOX_INDEX}
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsItemSelect
+      INDEX: ${SMS_ABNORMAL_CHECKBOX_INDEX}
 - tapOn: "選択したSMSを送信"
-- assertVisible: "送信するSMSを選択してください"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "送信するSMSを選択してください"
 - takeScreenshot: 2.7-21-exclude-failed-select-all-01

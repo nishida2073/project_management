@@ -7,16 +7,30 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "SMSの検索"
-- assertVisible: "検索条件"
-- assertVisible: "受信日の範囲"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etDateFrom"
-    text: '\d{4}/\d{2}/\d{2}'
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etDateTo"
-    text: '\d{4}/\d{2}/\d{2}'
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "検索条件"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "受信日の範囲"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etDateFrom
+      INDEX: 0
+      TEXT: '\d{4}/\d{2}/\d{2}'
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etDateTo
+      INDEX: 0
+      TEXT: '\d{4}/\d{2}/\d{2}'
 - takeScreenshot: 2.7-01-open-search-default-01
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchSendNoneOnly"
-    checked: false
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsSearchSendNoneOnly
+      INDEX: 0
 - takeScreenshot: 2.7-01-open-search-default-02

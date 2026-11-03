@@ -3,10 +3,19 @@ appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenAppSettings"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenAppSettings
+      INDEX: 0
 - takeScreenshot: 2.1-06-open-app-settings-01
-- assertVisible: "アプリの設定"
-- assertVisible: "初期化"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "アプリの設定"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "初期化"
 - pressKey: Back
 - takeScreenshot: 2.1-06-open-app-settings-02

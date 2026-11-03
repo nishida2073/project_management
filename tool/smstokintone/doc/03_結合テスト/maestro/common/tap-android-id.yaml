@@ -1,0 +1,5 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: OS のダイアログのボタンを、android:id/ の末尾（ID）でタップする
+- tapOn:
+    id: "android:id/${ID}"

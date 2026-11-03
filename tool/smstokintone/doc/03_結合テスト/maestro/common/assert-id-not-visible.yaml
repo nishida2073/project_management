@@ -1,0 +1,6 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: ID（欄の id の末尾）の部品が表示されていないことを確かめる。INDEX は何番目の部品か（1 つだけなら 0）
+- assertNotVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+    index: ${INDEX}

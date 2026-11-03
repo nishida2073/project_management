@@ -7,31 +7,44 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-09-save-error-company-empty-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-09-save-error-company-empty-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
-    checked: true
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationCompanyName"
-    index: 0
-    point: "95%, 50%"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbContinuationSortAscending
+      INDEX: 0
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etContinuationCompanyName
+      INDEX: 0
+      VALUE: ""
 - takeScreenshot: 2.4-09-save-error-company-empty-03
-- eraseText: 50  # 未確認
-- hideKeyboard
 - tapOn: "設定を保存"
 - takeScreenshot: 2.4-09-save-error-company-empty-04
-- assertVisible: "入力エラー"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "入力エラー"
 # 未確認: ダイアログのメッセージ（会社名・氏名は必須です）。regex は未確認。
-- assertVisible: "(?s).*引継ぎ内容: ${SENDER_A}.*会社名・氏名は必須です.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*引継ぎ内容: ${SENDER_A}.*会社名・氏名は必須です.*"
 - pressKey: Back
 - takeScreenshot: 2.4-09-save-error-company-empty-05
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
 - takeScreenshot: 2.4-09-save-error-company-empty-06

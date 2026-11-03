@@ -6,58 +6,74 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-02-theme-dark-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: rbThemeLight
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
-    checked: true
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeDark
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+      ID: rbThemeLight
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbThemeLight
+      INDEX: 0
+- runFlow:
+    file: common/scroll-up-to-id.yaml
+    env:
+      ID: rbThemeDark
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbThemeDark
+      INDEX: 0
 - takeScreenshot: 2.3-02-theme-dark-02
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeDark
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    checked: true
+      ID: rbThemeDark
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: rbSendAuto
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
-    checked: true
+      ID: rbThemeDark
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeManual
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
+      ID: rbSendAuto
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSendAuto
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: rbSmsReplyModeManual
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSmsReplyModeManual
+      INDEX: 0
 - pressKey: Back
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeDark
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    checked: true
+      ID: rbThemeDark
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbThemeDark
+      INDEX: 0
 # 未確認: ダークテーマの色は Maestro では検証しません。切り替わりはスクリーンショットで確認します
 - takeScreenshot: 2.3-02-theme-dark-03

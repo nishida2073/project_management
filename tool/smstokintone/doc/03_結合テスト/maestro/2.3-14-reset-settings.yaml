@@ -7,139 +7,171 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-14-reset-settings-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeManual
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
+      ID: rbSmsReplyModeManual
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: rbThemeDark
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
+      ID: rbSmsReplyModeManual
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-up-to-id.yaml
+    env:
+      ID: rbThemeDark
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbThemeDark
+      INDEX: 0
 - takeScreenshot: 2.3-14-reset-settings-02
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeDark
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeDark"
-    checked: true
+      ID: rbThemeDark
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: rbSendManual
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
+      ID: rbThemeDark
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbSendManual
+      INDEX: 0
 - takeScreenshot: 2.3-14-reset-settings-03
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSendManual
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendManual"
-    checked: true
+      ID: rbSendManual
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeAuto
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
+      ID: rbSendManual
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeAuto
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    checked: true
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSearchFiltersHidden
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
+      ID: rbSmsReplyModeAuto
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: rbSearchFiltersHidden
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersHidden"
-    checked: true
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: etLogMatchToleranceSeconds
+      ID: rbSearchFiltersHidden
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      FIELD_ID: etLogMatchToleranceSeconds
-      INPUT_VALUE: "${LOG_MATCH_TOLERANCE_PRE}"
+      ID: rbSearchFiltersHidden
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLogMatchToleranceSeconds
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    text: "${LOG_MATCH_TOLERANCE_PRE}"
+      ID: rbSearchFiltersHidden
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSearchFiltersHidden
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etLogMatchToleranceSeconds
+- runFlow:
+    file: common/input-text-field.yaml
+    env:
+      ID: etLogMatchToleranceSeconds
+      INDEX: 0
+      VALUE: "${LOG_MATCH_TOLERANCE_PRE}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogMatchToleranceSeconds
+      INDEX: 0
+      TEXT: "${LOG_MATCH_TOLERANCE_PRE}"
 - takeScreenshot: 2.3-14-reset-settings-04
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: btnResetSettings
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnResetSettings"
+      ID: btnResetSettings
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnResetSettings
+      INDEX: 0
 - takeScreenshot: 2.3-14-reset-settings-05
-- assertVisible: "設定を初期化しますか？"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定を初期化しますか？"
 - tapOn: "初期化" # 未確認: 画面の後ろの初期化ボタンと同じ文字のため、ダイアログのボタンが選ばれるか確認する
 - takeScreenshot: 2.3-14-reset-settings-06
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
-    checked: true
+      ID: rbThemeLight
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: rbSearchFiltersVisible
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-    checked: true
+      ID: rbThemeLight
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSendAuto
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
-    checked: true
+      ID: rbSearchFiltersVisible
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeManual
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
+      ID: rbSearchFiltersVisible
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLogMatchToleranceSeconds
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    text: "15"
+      ID: rbSendAuto
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSendAuto
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: rbSmsReplyModeManual
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbSmsReplyModeManual
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogMatchToleranceSeconds
+      INDEX: 0
+      TEXT: "15"
 - takeScreenshot: 2.3-14-reset-settings-07

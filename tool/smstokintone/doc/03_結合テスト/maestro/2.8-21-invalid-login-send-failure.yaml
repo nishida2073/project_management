@@ -9,25 +9,34 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etLoginName
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "test-send-target-1"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etLoginName
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLoginName
-      INPUT_VALUE: "${INVALID_LOGIN_NAME}"
-- assertVisible: "${INVALID_LOGIN_NAME}"
+      ID: etLoginName
+      INDEX: 0
+      VALUE: "${INVALID_LOGIN_NAME}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${INVALID_LOGIN_NAME}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.8-21-invalid-login-send-failure-01
 - pressKey: Back
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnTopOpenLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnTopOpenLog
+      INDEX: 0
 - takeScreenshot: 2.8-21-invalid-login-send-failure-02
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"

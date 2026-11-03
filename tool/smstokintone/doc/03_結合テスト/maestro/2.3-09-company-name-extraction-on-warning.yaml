@@ -8,34 +8,46 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: false
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-- assertVisible: "注意"
-- assertVisible: "引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件あります。必要に応じて会社名を追加してください。"
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "注意"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "引継ぎ内容に会社名がない件が ${COMPANY_MISSING_COUNT} 件あります。必要に応じて会社名を追加してください。"
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-02
 - tapOn: "OK" # 未確認: OK ボタンの文言（端末の言語で変わる場合あり）
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-03
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-09-company-name-extraction-on-warning-04

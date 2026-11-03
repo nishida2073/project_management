@@ -1,0 +1,10 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: TEXT（画面の文字。正規表現可）が見えるまで下へスクロールする。見えている割合は 50%、時間の上限は 60 秒
+# 注: 引数は TEXT
+- scrollUntilVisible:
+    element:
+      text: "${TEXT}"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000

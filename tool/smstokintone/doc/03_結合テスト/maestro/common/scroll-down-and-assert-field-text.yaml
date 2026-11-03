@@ -1,0 +1,14 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: 欄までスクロールしてから、欄の文字（期待値）を確かめる。引数は ID（欄の id の末尾）、INDEX（何番目の欄か。1 つだけなら 0）、TEXT（期待する文字。正規表現可）
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+      index: ${INDEX}
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+    index: ${INDEX}
+    text: "${TEXT}"

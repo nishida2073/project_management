@@ -5,25 +5,30 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-04-add-keyword-row-01
-- assertVisible: "設定を追加"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: etKeyword
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-    index: 0
-    text: "test-company"
+      TEXT: "設定を追加"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: btnAddKeyword
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnAddKeyword"
-    index: 0
+      ID: etKeyword
+      INDEX: 0
+      TEXT: "test-company"
+- runFlow:
+    file: common/scroll-up-to-id.yaml
+    env:
+      ID: btnAddKeyword
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnAddKeyword
+      INDEX: 0
 # 未確認: 行の追加は、2 行目の入力欄（etKeyword の index 1）の表示で確認する
 - takeScreenshot: 2.2-04-add-keyword-row-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etKeyword"
-    index: 1
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etKeyword
+      INDEX: 1
 - takeScreenshot: 2.2-04-add-keyword-row-03

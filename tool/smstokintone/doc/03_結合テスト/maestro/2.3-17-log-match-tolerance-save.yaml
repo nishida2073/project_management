@@ -5,20 +5,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-17-log-match-tolerance-save-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLogMatchToleranceSeconds
+      ID: etLogMatchToleranceSeconds
 - takeScreenshot: 2.3-17-log-match-tolerance-save-02
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLogMatchToleranceSeconds
-      INPUT_VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
+      ID: etLogMatchToleranceSeconds
+      INDEX: 0
+      VALUE: "${LOG_MATCH_TOLERANCE_SECONDS}"
 - takeScreenshot: 2.3-17-log-match-tolerance-save-03
 - assertVisible: "${LOG_MATCH_TOLERANCE_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-17-log-match-tolerance-save-04

@@ -8,33 +8,53 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-08-show-user-name-on-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
 - takeScreenshot: 2.4-08-show-user-name-on-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: false
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-- takeScreenshot: 2.4-08-show-user-name-on-03
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: true
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: btnEditContinuationInfo
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
+- takeScreenshot: 2.4-08-show-user-name-on-03
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-up-to-id.yaml
+    env:
+      ID: btnEditContinuationInfo
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnEditContinuationInfo
+      INDEX: 0
 - takeScreenshot: 2.4-08-show-user-name-on-04
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etContinuationSearch"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationSortAscending"
-    checked: true
-- assertVisible: "氏名"
-- assertVisible: "${CONTINUATION_USER_NAME_B}"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etContinuationSearch
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbContinuationSortAscending
+      INDEX: 0
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "氏名"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "${CONTINUATION_USER_NAME_B}"
 - takeScreenshot: 2.4-08-show-user-name-on-05

@@ -6,27 +6,33 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: cbSearchExtractionSucceededOnlyEnabled
+      ID: cbSearchExtractionSucceededOnlyEnabled
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-02
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: cbSearchExtractionSucceededOnlyEnabled
+      INDEX: 0
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-03
-- assertVisible: # 未確認: チェックボックスの選択状態の確認
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: cbSearchExtractionSucceededOnlyEnabled
+      INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-04
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-05
-- assertVisible: # 未確認: 検索画面の抽出状況「正常」の選択状態
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSmsSearchExtractionSucceededOnly"
-    checked: true
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: cbSmsSearchExtractionSucceededOnly
+      INDEX: 0
 - takeScreenshot: 2.3-22-search-default-extraction-succeeded-06

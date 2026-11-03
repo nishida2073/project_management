@@ -6,32 +6,39 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-06-enable-tolerance-hours-01
-- assertVisible: "設定を追加"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: rbUpdateToleranceModeSameDate
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeSameDate"
-    index: 0
-    checked: true
+      TEXT: "設定を追加"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbUpdateToleranceModeHours
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbUpdateToleranceModeHours"
+      ID: rbUpdateToleranceModeSameDate
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbUpdateToleranceModeSameDate
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: rbUpdateToleranceModeHours
+      INDEX: 0
 - takeScreenshot: 2.2-06-enable-tolerance-hours-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: etUpdateToleranceHours
+      INDEX: 0
     enabled: true
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etUpdateToleranceHours
+      ID: etUpdateToleranceHours
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etUpdateToleranceHours
-      INPUT_VALUE: "${TOLERANCE_HOURS_INPUT}"
+      ID: etUpdateToleranceHours
+      INDEX: 0
+      VALUE: "${TOLERANCE_HOURS_INPUT}"
 - takeScreenshot: 2.2-06-enable-tolerance-hours-03

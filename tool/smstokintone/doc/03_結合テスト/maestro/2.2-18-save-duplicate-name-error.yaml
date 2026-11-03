@@ -5,57 +5,80 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
-- assertVisible: "設定を追加"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "${DUPLICATE_SEND_TARGET_NAME}"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "${DUPLICATE_SEND_TARGET_NAME}"
 - tapOn: "設定を追加"
-- assertVisible: "設定 2"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "設定 2"
 - scrollUntilVisible:
     element:
       text: "設定 2"
     direction: DOWN
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: etSendTargetName
+      INDEX: 0
 - inputText: "${DUPLICATE_SEND_TARGET_NAME}"
 - hideKeyboard
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSendTargetName"
-    index: 0
-    text: "${DUPLICATE_SEND_TARGET_NAME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: etLoginName
+      ID: etSendTargetName
+      INDEX: 0
+      TEXT: "${DUPLICATE_SEND_TARGET_NAME}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etLoginName
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLoginName
-      INPUT_VALUE: "${DUP_LOGIN_NAME}"
+      ID: etLoginName
+      INDEX: 0
+      VALUE: "${DUP_LOGIN_NAME}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLoginPassword
+      ID: etLoginPassword
 - runFlow:
     file: common/input-password-field.yaml
     env:
-      FIELD_ID: etLoginPassword
-      INPUT_VALUE: "${DUP_LOGIN_PASSWORD}"
+      ID: etLoginPassword
+      VALUE: "${DUP_LOGIN_PASSWORD}"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etAppId
+      ID: etAppId
 - runFlow:
     file: common/input-text-field.yaml
     env:
-      FIELD_ID: etAppId
-      INPUT_VALUE: "${DUP_APP_ID}"
+      ID: etAppId
+      INDEX: 0
+      VALUE: "${DUP_APP_ID}"
 - takeScreenshot: 2.2-18-save-duplicate-name-error-01
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-18-save-duplicate-name-error-02
-- assertVisible: "入力エラー"
-- assertVisible: "(?s).*送信先名が重複しています.*"
-- assertVisible: "(?s).*${DUPLICATE_SEND_TARGET_NAME}.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "入力エラー"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*送信先名が重複しています.*"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "(?s).*${DUPLICATE_SEND_TARGET_NAME}.*"
 - takeScreenshot: 2.2-18-save-duplicate-name-error-03

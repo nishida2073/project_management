@@ -11,26 +11,36 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLogBodyExcerptLength
+      ID: etLogBodyExcerptLength
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLogBodyExcerptLength
-      INPUT_VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    text: "${LOG_BODY_EXCERPT_LENGTH}"
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      TEXT: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.6-06-body-excerpt-50-01
 - pressKey: Back
 - tapOn: "ログの確認"
-- assertVisible: "ログの一覧"
+- runFlow:
+    file: common/assert-text-visible.yaml
+    env:
+      TEXT: "ログの一覧"
 - assertVisible:
     text: '(?s).*\[受信完了\].*'
     timeout: 60000
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnRefreshLog
+      INDEX: 0
 - takeScreenshot: 2.6-06-body-excerpt-50-02
 - assertVisible: '(?s).*test-company.*'
 - assertVisible: '(?s).*${LOG_BODY_EXCERPT_LAST_CHARS}.*'
@@ -38,15 +48,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLogBodyExcerptLength
+      ID: etLogBodyExcerptLength
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etLogBodyExcerptLength
-      INPUT_VALUE: "${LOG_BODY_EXCERPT_DEFAULT}"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    text: "${LOG_BODY_EXCERPT_DEFAULT}"
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      VALUE: "${LOG_BODY_EXCERPT_DEFAULT}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      TEXT: "${LOG_BODY_EXCERPT_DEFAULT}"
 - takeScreenshot: 2.6-06-body-excerpt-50-03

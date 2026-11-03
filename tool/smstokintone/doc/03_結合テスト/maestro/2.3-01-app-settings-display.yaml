@@ -5,188 +5,223 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: tvTopSendStatus
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvTopSendStatus"
-    text: "自動"
+      ID: tvTopSendStatus
+      INDEX: 0
+      TEXT: "自動"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
-      ELEMENT_ID: tvTopReplyStatus
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvTopReplyStatus"
-    text: "手動"
+      ID: tvTopReplyStatus
+      INDEX: 0
+      TEXT: "手動"
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-01-app-settings-display-01
-- assertVisible: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-text-visible.yaml
     env:
-      ELEMENT_ID: rbThemeLight
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbThemeLight"
-    checked: true
+      TEXT: "端末の許可"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etSmsSearchDateRangeDays
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etSmsSearchDateRangeDays"
-    text: "${SEARCH_DATE_RANGE_DAYS}"
+      ID: rbThemeLight
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbThemeLight
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSmsSearchDateRangeDays
+      INDEX: 0
+      TEXT: "${SEARCH_DATE_RANGE_DAYS}"
 # 送信先が 1 件のとき、検索の送信先の選択欄は表示されない（実装どおり）
-- assertNotVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/llDefaultSendTargetFilter"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-not-visible.yaml
     env:
-      ELEMENT_ID: cbSearchSendNoneOnlyEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSendNoneOnlyEnabled"
-    checked: false
+      ID: llDefaultSendTargetFilter
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: cbSearchSentAutoOnlyEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentAutoOnlyEnabled"
-    checked: false
+      ID: cbSearchSendNoneOnlyEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: cbSearchSentManualOnlyEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchSentManualOnlyEnabled"
-    checked: false
+      ID: cbSearchSendNoneOnlyEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: cbSearchExtractionSucceededOnlyEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionSucceededOnlyEnabled"
-    checked: false
+      ID: cbSearchSentAutoOnlyEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: cbSearchExtractionFailedOnlyEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/cbSearchExtractionFailedOnlyEnabled"
-    checked: false
+      ID: cbSearchSentAutoOnlyEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSearchFiltersVisible
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSearchFiltersVisible"
-    checked: true
+      ID: cbSearchSentManualOnlyEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: swSearchExtractionFailedEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swSearchExtractionFailedEnabled"
-    checked: false
+      ID: cbSearchSentManualOnlyEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSendAuto
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSendAuto"
-    checked: true
+      ID: cbSearchExtractionSucceededOnlyEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: swSendExtractionFailedEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swSendExtractionFailedEnabled"
-    checked: false
+      ID: cbSearchExtractionSucceededOnlyEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeManual
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeManual"
-    checked: true
+      ID: cbSearchExtractionFailedOnlyEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: etReplyCooldownSeconds
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etReplyCooldownSeconds"
-    text: "${REPLY_COOLDOWN_SECONDS}"
+      ID: cbSearchExtractionFailedOnlyEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swCompanyNameExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameExtractionEnabled"
-    checked: true
+      ID: rbSearchFiltersVisible
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: swCompanyNameAutoConversionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swCompanyNameAutoConversionEnabled"
-    checked: true
+      ID: rbSearchFiltersVisible
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swAiExtractionEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swAiExtractionEnabled"
-    checked: false
+      ID: swSearchExtractionFailedEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: swContinuationEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationEnabled"
-    checked: true
+      ID: swSearchExtractionFailedEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: rbContinuationScopeUnlimited
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbContinuationScopeUnlimited"
-    checked: true
+      ID: rbSendAuto
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: swContinuationShowUserNameEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swContinuationShowUserNameEnabled"
-    checked: true
+      ID: rbSendAuto
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: swLogRefreshEnabled
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/swLogRefreshEnabled"
-    checked: true
+      ID: swSendExtractionFailedEnabled
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-unchecked.yaml
     env:
-      ELEMENT_ID: etLogRefreshInterval
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogRefreshInterval"
-    text: "${LOG_REFRESH_INTERVAL}"
+      ID: swSendExtractionFailedEnabled
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: etLogMatchToleranceSeconds
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogMatchToleranceSeconds"
-    text: "${LOG_MATCH_TOLERANCE_SECONDS}"
+      ID: rbSmsReplyModeManual
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: etLogBodyExcerptLength
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/etLogBodyExcerptLength"
-    text: "${LOG_BODY_EXCERPT_LENGTH}"
+      ID: rbSmsReplyModeManual
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etReplyCooldownSeconds
+      INDEX: 0
+      TEXT: "${REPLY_COOLDOWN_SECONDS}"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swAiExtractionEnabled
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: swAiExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swContinuationEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swContinuationEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: rbContinuationScopeUnlimited
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbContinuationScopeUnlimited
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swContinuationShowUserNameEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: swLogRefreshEnabled
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: swLogRefreshEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogRefreshInterval
+      INDEX: 0
+      TEXT: "${LOG_REFRESH_INTERVAL}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogMatchToleranceSeconds
+      INDEX: 0
+      TEXT: "${LOG_MATCH_TOLERANCE_SECONDS}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLogBodyExcerptLength
+      INDEX: 0
+      TEXT: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-01-app-settings-display-02

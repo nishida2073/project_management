@@ -6,34 +6,42 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-29-send-permission-denied-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: btnRequestSendPermission
+      ID: btnRequestSendPermission
 - takeScreenshot: 2.3-29-send-permission-denied-02
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
-- assertNotVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/tvSendPermissionStatus"
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-visible.yaml
     env:
-      ELEMENT_ID: btnRequestSendPermission
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
+      ID: btnRequestSendPermission
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-not-visible.yaml
+    env:
+      ID: tvSendPermissionStatus
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnRequestSendPermission
+      INDEX: 0
     index: 0
 - takeScreenshot: 2.3-29-send-permission-denied-03
 - tapOn: "許可しない" # 未確認: 端末の権限ダイアログの拒否ボタンの文字（Android の版・言語で異なる）
 - takeScreenshot: 2.3-29-send-permission-denied-04
 - assertVisible: "SMSの送信の許可がない場合、自動返信はできません" # トースト（Toast.LENGTH_LONG で表示される）
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-to-id.yaml
     env:
-      ELEMENT_ID: btnRequestSendPermission
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/btnRequestSendPermission"
+      ID: btnRequestSendPermission
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnRequestSendPermission
+      INDEX: 0
 - takeScreenshot: 2.3-29-send-permission-denied-05

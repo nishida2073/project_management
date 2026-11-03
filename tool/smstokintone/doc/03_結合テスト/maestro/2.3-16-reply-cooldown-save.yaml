@@ -5,29 +5,31 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-setting.yaml
+    file: common/scroll-up-to-id.yaml
     env:
-      ELEMENT_ID: rbThemeLight
+      ID: rbThemeLight
 - takeScreenshot: 2.3-16-reply-cooldown-save-01
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/scroll-down-and-tap-id.yaml
     env:
-      ELEMENT_ID: rbSmsReplyModeAuto
-- tapOn:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-- assertVisible:
-    id: "jp.co.nttdata_univ.smstokintone:id/rbSmsReplyModeAuto"
-    checked: true
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-setting.yaml
+    file: common/assert-id-checked.yaml
     env:
-      ELEMENT_ID: etReplyCooldownSeconds
+      ID: rbSmsReplyModeAuto
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: etReplyCooldownSeconds
 - takeScreenshot: 2.3-16-reply-cooldown-save-02
 - runFlow:
-    file: common/input-number-field.yaml
+    file: common/input-text-field.yaml
     env:
-      FIELD_ID: etReplyCooldownSeconds
-      INPUT_VALUE: "${REPLY_COOLDOWN_SECONDS}"
+      ID: etReplyCooldownSeconds
+      INDEX: 0
+      VALUE: "${REPLY_COOLDOWN_SECONDS}"
 - takeScreenshot: 2.3-16-reply-cooldown-save-03
 - assertVisible: "${REPLY_COOLDOWN_SECONDS}" # 未確認: 数字は他の表示と一致する可能性がある
 - takeScreenshot: 2.3-16-reply-cooldown-save-04

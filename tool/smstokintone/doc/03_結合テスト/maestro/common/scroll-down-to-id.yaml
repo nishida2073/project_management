@@ -1,0 +1,10 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: ID（欄の id の末尾）が見えるまで下へスクロールする。見えている割合は 50%、時間の上限は 60 秒（100% だと、画面の下の方の部品が見つからないことがあるため）
+# 注: 引数は ID
+- scrollUntilVisible:
+    element:
+      id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
+    direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
