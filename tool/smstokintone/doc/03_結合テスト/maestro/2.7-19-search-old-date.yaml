@@ -1,7 +1,5 @@
 # 2.7 SMSの検索: 1 年以上前の日付で検索すると、0 件になり「該当するSMSがありません」が表示される（テスト仕様書の 2.7 の 19 に対応）
 # 注: 日付は日付ピッカーで選ぶ（開始日・終了日とも、CURRENT_YEAR の年から PAST_YEAR の年の 1 日を選ぶ）
-# 未確認: 日付ピッカーの操作（年の表示のタップ、年の選択、日「1」の選択、OK ボタン（android:id/button1））は、この Maestro で確認していない
-# 未確認: CURRENT_YEAR は実行日の年に合わせる（vars の値を書き換える）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml

@@ -1,3 +1,4 @@
 {
-  "SETUP_FILE_PATTERN": "env_base.*"
+  "SETUP_FILE_PATTERN": "env_base.*",
+  "EXPECTED_DATE": "now"
 }

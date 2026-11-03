@@ -41,7 +41,7 @@ function Invoke-Flows([object[]]$flowFiles) {
         $varsFile = Join-Path $PSScriptRoot "..\test-data\vars\$($flow.BaseName).json"
         if (Test-Path -LiteralPath $varsFile) {
             $vars = Get-Content -LiteralPath $varsFile -Raw -Encoding UTF8 | ConvertFrom-Json
-            foreach ($p in $vars.PSObject.Properties) { $envArgs += @("-e", "$($p.Name)=$($p.Value)") }
+            foreach ($p in $vars.PSObject.Properties) { $envArgs += @("-e", "$($p.Name)=$(if ($p.Value -eq "now") { Get-Date -Format "yyyy/MM/dd" } else { $p.Value })") }
         }
         foreach ($pair in ($Env -split ";")) { if ($pair) { $envArgs += @("-e", $pair) } }
         $maestroArgs += @("test") + $envArgs + @("--debug-output", $runDir, "--flatten-debug-output", "--format", "HTML", "--output", (Join-Path $flowOut "report.html"), $flow.FullName)

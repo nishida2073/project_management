@@ -26,12 +26,26 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "ログの確認"
 - extendedWaitUntil:
-    visible: '(?s).*\[(送信完了|失敗)\].*'
+    visible: '\[成功\].*'
     timeout: 180000
+- assertVisible:
+    text: '\[成功\].*'
+    index: 0
+- assertVisible:
+    text: '\[成功\].*'
+    index: 1
 - pressKey: Back
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.7-09-send-selected-01
-- assertNotVisible:
-    className: "android.widget.CheckBox"
-    checked: true
+- tapOn: "▲ 隠す"
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsItemSelect
+      INDEX: 0
+- runFlow:
+    file: common/assert-id-unchecked.yaml
+    env:
+      ID: cbSmsItemSelect
+      INDEX: 1
 - takeScreenshot: 2.7-09-send-selected-02
