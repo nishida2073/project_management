@@ -1,0 +1,9 @@
+[
+  {
+    "address": "0312345611",
+    "body": "cont-body",
+    "receive": true,
+    "delayed": true,
+    "delaySeconds": 75
+  }
+]

@@ -40,11 +40,9 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnEditContinuationInfo
 - takeScreenshot: 2.3-30-continuation-edit-disabled-04
-- runFlow:
-    file: common/assert-id-visible.yaml
-    env:
-      ID: btnEditContinuationInfo
-      INDEX: 0
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/btnEditContinuationInfo"
+    index: 0
     enabled: false
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml

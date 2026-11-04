@@ -55,11 +55,9 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnAddFixedConversion
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-06
-- runFlow:
-    file: common/assert-id-visible.yaml
-    env:
-      ID: btnAddFixedConversion
-      INDEX: 0
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+    index: 0
     enabled: false
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml

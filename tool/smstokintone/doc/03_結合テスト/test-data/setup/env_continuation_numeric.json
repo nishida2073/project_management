@@ -1,0 +1,56 @@
+{
+  "appConfig": {
+    "themeMode": "LIGHT",
+    "sendEnabled": true,
+    "sendExtractionFailedEnabled": false,
+    "replyEnabled": false,
+    "replyCooldownSeconds": 10,
+    "replySuccessBody": "test-reply-su-body",
+    "replyFailedBody": "test-reply-fa-body",
+    "extractionAiEnabled": false,
+    "extractionCompanyNameEnabled": true,
+    "extractionCompanyNameAutoConversionEnabled": true,
+    "extractionCompanyNameFixedConversions": [],
+    "continuationEnabled": true,
+    "continuationScope": "UNLIMITED",
+    "continuationShowUserNameEnabled": true,
+    "logMatchToleranceSeconds": 15,
+    "logBodyExcerptLength": 100
+  },
+  "sendTargetConfig": [
+    {
+      "sendTargetName": "test-send-target-1",
+      "companyName": "",
+      "keywords": [
+        "test-company"
+      ],
+      "subdomain": "dyrskx8ex42r",
+      "loginName": "user01",
+      "loginPassword": "abcd1234",
+      "appId": "11",
+      "fieldType": "registration_type",
+      "fieldDatetime": "receive_datetime",
+      "fieldSender": "sender",
+      "fieldCompanyName": "company_name",
+      "fieldUserName": "user_name",
+      "fieldBody": "body",
+      "fieldHistory": "history",
+      "updateToleranceMode": "SAME_DATE",
+      "updateToleranceHours": 5
+    }
+  ],
+  "continuationInfoConfig": [
+    {
+      "senderAddress": "0312345611",
+      "companyName": "old-company",
+      "userName": "test-taro-old",
+      "timestampMillis": 1767225600000
+    },
+    {
+      "senderAddress": "test-sender-b",
+      "companyName": "test-company-new",
+      "userName": "test-taro-new",
+      "timestampMillis": 1767312000000
+    }
+  ]
+}

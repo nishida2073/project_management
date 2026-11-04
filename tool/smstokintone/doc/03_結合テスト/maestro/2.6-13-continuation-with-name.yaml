@@ -21,7 +21,7 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "ログの一覧"
 - extendedWaitUntil:
-    visible: '(?s).*${CONTINUATION_SENDER}.*'
+    visible: '(?s).*${CONTINUATION_USER_NAME}.*'
     timeout: 60000
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml

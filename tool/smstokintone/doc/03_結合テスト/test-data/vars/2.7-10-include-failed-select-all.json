@@ -1,3 +1,5 @@
 {
-  "SETUP_FILE_PATTERN": "env_default.*"
+  "SETUP_FILE_PATTERN": "env_default.*",
+  "SMS_ABNORMAL_CHECKBOX_INDEX": "0",
+  "SEARCH_ABNORMAL_ROW_TEXT": "abnormal-test-body"
 }

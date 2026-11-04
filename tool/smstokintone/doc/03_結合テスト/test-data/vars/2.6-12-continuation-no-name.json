@@ -1,5 +1,5 @@
 {
-  "SETUP_FILE_PATTERN": "env_base.*",
-  "CONTINUATION_SENDER": "test-sender-a",
+  "SETUP_FILE_PATTERN": "env_continuation_numeric.*",
+  "CONTINUATION_SENDER": "0312345611",
   "CONTINUATION_USER_NAME": "test-taro-old"
 }

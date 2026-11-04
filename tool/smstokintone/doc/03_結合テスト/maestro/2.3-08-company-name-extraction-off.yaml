@@ -70,11 +70,9 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/scroll-down-to-id.yaml
     env:
       ID: btnAddFixedConversion
-- runFlow:
-    file: common/assert-id-visible.yaml
-    env:
-      ID: btnAddFixedConversion
-      INDEX: 0
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/btnAddFixedConversion"
+    index: 0
     enabled: false
 - pressKey: Back
 - takeScreenshot: 2.3-08-company-name-extraction-off-04

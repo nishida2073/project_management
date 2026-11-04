@@ -10,7 +10,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: btnEditContinuationInfo
       INDEX: 0
-      INDEX: 0
 - tapOn: "設定を保存"
 - runFlow:
     file: common/assert-text-visible.yaml

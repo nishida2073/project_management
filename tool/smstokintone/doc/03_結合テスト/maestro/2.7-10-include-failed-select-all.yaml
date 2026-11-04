@@ -1,7 +1,7 @@
 # 2.7 SMSの検索: SMS選択の対象（抽出状況が異常）をオンにすると、抽出が異常の SMS にもチェックが入る（テスト仕様書の 2.7 の 10 に対応）
 # 外部条件: 端末に抽出が異常の SMS がある
 # 前提（フローで設定）: アプリの設定で「SMS選択の対象（抽出状況が異常）」をオンにする（既定はオフ）
-# 未確認: 抽出が異常の SMS にチェックが入ったことは、className と checked の一覧で確認する（どの項目かは、スクリーンショットで確認する）
+# 未確認: 抽出が異常の SMS にチェックが入ったことは、cbSmsItemSelect の index ${SMS_ABNORMAL_CHECKBOX_INDEX} のチェックで確認する（どの項目かは、スクリーンショットで確認する）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -23,19 +23,11 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "検索条件"
-- runFlow:
-    file: common/scroll-down-and-tap-id.yaml
-    env:
-      ID: cbSmsSearchSendNoneOnly
-      INDEX: 0
+- tapOn: "検索"
+- tapOn: "全選択"
 - runFlow:
     file: common/assert-id-checked.yaml
     env:
-      ID: cbSmsSearchSendNoneOnly
-      INDEX: 0
-- tapOn: "検索"
-- tapOn: "全選択"
-- assertVisible:
-    className: "android.widget.CheckBox"
-    checked: true
+      ID: cbSmsItemSelect
+      INDEX: ${SMS_ABNORMAL_CHECKBOX_INDEX}
 - takeScreenshot: 2.7-10-include-failed-select-all-01
