@@ -31,7 +31,6 @@ appId: jp.co.nttdata_univ.smstokintone
       TEXT: "${INVALID_LOGIN_NAME}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.8-20-invalid-login-send-failure-01
-- pressKey: Back
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml
     env:
