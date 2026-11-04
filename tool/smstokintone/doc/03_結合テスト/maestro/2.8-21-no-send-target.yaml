@@ -20,7 +20,6 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertNotVisible: "test-send-target-1"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.8-21-no-send-target-01
-- pressKey: Back
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml
     env:
