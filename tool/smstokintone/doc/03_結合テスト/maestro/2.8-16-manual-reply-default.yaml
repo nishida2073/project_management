@@ -1,7 +1,7 @@
 # 2.8 自動処理: SMSの返信モードが既定（手動）のとき、抽出が異常なSMSには返信しない（テスト仕様書の 2.8 の 16 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 外部条件: 別端末から SMS を送る。送信元は既定（test-phone-a）、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
+# 外部条件: 別端末から SMS を送る。送信元は既定（0312345801）、本文は 1 行だけの抽出できない本文。待ち時間（下の extendedWaitUntil）に送る
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - runFlow:

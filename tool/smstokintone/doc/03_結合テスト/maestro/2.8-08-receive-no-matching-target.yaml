@@ -1,7 +1,7 @@
 # 2.8 自動処理: 振り分けに一致する送信先がないSMSは、送信先が存在しないエラーになり、登録されない（テスト仕様書の 2.8 の 8 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 外部条件: 別端末から SMS を送る。送信元は既定（test-phone-a）、本文は 1 行目「other-company」、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
+# 外部条件: 別端末から SMS を送る。送信元は既定（0312345801）、本文は 1 行目「other-company」、2 行目「test-taro」、3 行目「body-test」。待ち時間（下の extendedWaitUntil）に送る
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - runFlow:
@@ -17,5 +17,5 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "(?s).*SMSの送信先が存在しません.*"
-- assertNotVisible: "(?s).*SMSの登録に成功しました.*"
+- assertNotVisible: "(?s).*SMSの(登録|更新)に成功しました.*"
 - takeScreenshot: 2.8-08-receive-no-matching-target-02

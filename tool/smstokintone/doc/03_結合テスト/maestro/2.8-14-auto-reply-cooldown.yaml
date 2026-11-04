@@ -1,24 +1,11 @@
 # 2.8 自動処理: 返信の間隔の中の 2 通目は、自動返信されない（テスト仕様書の 2.8 の 14 に対応）
-# 前提（フローで設定）: SMSの返信モードを自動に切り替える
-# 外部条件: 別端末から SMS を送る。送信元 test-phone-b、本文は 1 行だけの抽出できない本文。1 通目を受信して返信の完了を確認した後、同じ送信元から 2 通目（抽出できない本文）を 10 秒以内に送る（下の extendedWaitUntil で、2 通目の受信のログを待つ）
+# 外部条件: 別端末から SMS を送る。送信元 0312345802、本文は 1 行だけの抽出できない本文。1 通目を受信して返信の完了を確認した後、同じ送信元から 2 通目（抽出できない本文）を 10 秒以内に送る（下の extendedWaitUntil で、2 通目の受信のログを待つ）
 # 前提（フローで設定）: （この行の中で行う）: 1 通目（2.8 の 13 と同じ）を受信し、返信の完了を確認する
 # 未確認: 2 通目の返信は、2 通目の受信のログと同じ処理で決まるため、2 通目の受信のログが出た時点で返信完了のログも出ているはず（間隔の確認は、このタイミングで行う。端末で未確認）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
-- tapOn: "アプリの設定"
-- runFlow:
-    file: common/scroll-down-and-tap-id.yaml
-    env:
-      ID: rbSmsReplyModeAuto
-      INDEX: 0
-- runFlow:
-    file: common/assert-id-checked.yaml
-    env:
-      ID: rbSmsReplyModeAuto
-      INDEX: 0
-- pressKey: Back
 - runFlow:
     file: common/scroll-down-and-tap-id.yaml
     env:

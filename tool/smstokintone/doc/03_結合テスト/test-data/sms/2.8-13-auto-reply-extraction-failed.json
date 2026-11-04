@@ -1,0 +1,8 @@
+[
+  {
+    "address": "0312345802",
+    "body": "body-only-failed",
+    "receive": true,
+    "delayed": true
+  }
+]

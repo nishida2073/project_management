@@ -1,4 +1,5 @@
 {
+  "SETUP_FILE_PATTERN": "env_base.*",
   "FIXED_FROM": "test-company",
   "FIXED_TO": "test-company-converted"
 }

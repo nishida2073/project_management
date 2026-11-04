@@ -1,0 +1,8 @@
+[
+  {
+    "address": "0312345801",
+    "body": "test-company\ntest-taro\nbody-test",
+    "receive": true,
+    "delayed": true
+  }
+]
