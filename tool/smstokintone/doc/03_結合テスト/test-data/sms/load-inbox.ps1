@@ -24,7 +24,9 @@ foreach ($m in $items) {
     }
 }
 if (@($items | Where-Object { $_.receive -and $_.delayed }).Count -gt 0) {
-    Start-Sleep -Seconds $DelaySeconds
+    $wait = $DelaySeconds
+    foreach ($m in $items) { if ($m.delaySeconds) { $wait = [int]$m.delaySeconds } }
+    Start-Sleep -Seconds $wait
     foreach ($m in $items) {
         if ($m.receive -and $m.delayed) {
             $arg = ([string]$m.body) -replace "`r?`n", '\n'
