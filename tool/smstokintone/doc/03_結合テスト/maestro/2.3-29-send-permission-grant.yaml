@@ -1,0 +1,33 @@
+# 2.3 アプリの設定: SMSの送信の「許可する（SMSの送信）」を押すと、SMSの送信が許可済みになる（テスト仕様書の 2.3 の 29 に対応）
+# 前提（フローで設定）: 起動時にSMSの送信を許可しない（この flow だけ、launchApp の permissions で拒否する）
+# 外部条件: エミュレーターでは、「許可する（SMSの送信）」を押すと、ダイアログを出さずに許可される。実機でダイアログが出る場合は、許可ボタンを押す手順が必要（未確認）
+appId: jp.co.nttdata_univ.smstokintone
+---
+- runFlow: setup/setup-import-environment.yaml
+- launchApp:
+    permissions:
+      all: allow
+      android.permission.SEND_SMS: deny
+- tapOn: "アプリの設定"
+- runFlow:
+    file: common/scroll-down-to-id.yaml
+    env:
+      ID: btnRequestSendPermission
+- runFlow:
+    file: common/assert-id-visible.yaml
+    env:
+      ID: btnRequestSendPermission
+      INDEX: 0
+- takeScreenshot: 2.3-29-send-permission-grant-01
+- runFlow:
+    file: common/scroll-down-and-tap-id.yaml
+    env:
+      ID: btnRequestSendPermission
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: tvSendPermissionStatus
+      INDEX: 0
+      TEXT: "許可済み"
+- takeScreenshot: 2.3-29-send-permission-grant-02
