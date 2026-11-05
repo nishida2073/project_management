@@ -23,12 +23,29 @@ foreach ($m in $items) {
         & adb -s $Device emu sms send $m.address $arg | Out-Host
     }
 }
-if (@($items | Where-Object { $_.receive -and $_.delayed }).Count -gt 0) {
+$triggered = @($items | Where-Object { $_.receive -and $_.delayed -and $_.triggerActivity })
+$seenOther = $false
+foreach ($m in $triggered) {
+    $deadline = (Get-Date).AddSeconds(300)
+    while ((Get-Date) -lt $deadline) {
+        $dump = (& adb -s $Device shell "dumpsys activity activities" 2>$null) -join "`n"
+        if ($dump -match ("topResumedActivity[^`n]*" + [regex]::Escape($m.triggerActivity))) {
+            if ($seenOther) { break }
+        } else {
+            $seenOther = $true
+        }
+        Start-Sleep -Seconds 1
+    }
+    Start-Sleep -Seconds ([int]$m.delaySeconds)
+    $arg = ([string]$m.body) -replace "`r?`n", '\n'
+    & adb -s $Device emu sms send $m.address $arg | Out-Host
+}
+if (@($items | Where-Object { $_.receive -and $_.delayed -and -not $_.triggerActivity }).Count -gt 0) {
     $wait = $DelaySeconds
     foreach ($m in $items) { if ($m.delaySeconds) { $wait = [int]$m.delaySeconds } }
     Start-Sleep -Seconds $wait
     foreach ($m in $items) {
-        if ($m.receive -and $m.delayed) {
+        if ($m.receive -and $m.delayed -and -not $m.triggerActivity) {
             $arg = ([string]$m.body) -replace "`r?`n", '\n'
             & adb -s $Device emu sms send $m.address $arg | Out-Host
         }

@@ -32,9 +32,10 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
-- extendedWaitUntil:
-    visible: '(?s).*\[受信完了\].*'
-    timeout: 60000
+- runFlow:
+    file: common/refresh-log-until-visible.yaml
+    env:
+      TEXT: '(?s).*\[受信完了\].*'
 - runFlow:
     file: common/scroll-down-and-tap-by-id.yaml
     env:

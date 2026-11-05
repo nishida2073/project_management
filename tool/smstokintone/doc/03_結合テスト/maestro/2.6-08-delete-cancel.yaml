@@ -15,9 +15,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "選択したSMSを送信"
 - pressKey: Back
 - tapOn: "ログの確認"
-- extendedWaitUntil:
-    visible: '(?s).*\[(送信完了|失敗)\].*'
-    timeout: 180000
+- runFlow:
+    file: common/refresh-log-until-visible.yaml
+    env:
+      TEXT: '(?s).*\[(送信完了|失敗)\].*'
 - assertNotVisible: "ログがありません"
 - assertVisible: '(?s).*\[送信完了\].*'
 - runFlow:

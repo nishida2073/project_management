@@ -1,0 +1,7 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: WAIT_SECONDS（秒）の間、何もせず待つ。SMS の受信を保存より前に処理させるため
+- runScript:
+    file: wait-seconds.js
+    env:
+      WAIT_SECONDS: ${WAIT_SECONDS}

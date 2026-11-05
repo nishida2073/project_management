@@ -34,12 +34,14 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: btnTopOpenLog
       INDEX: 0
 - takeScreenshot: 2.8-04-ai-extraction-supported-01
-- extendedWaitUntil:
-    visible: "(?s).*SMSを受信しました.*"
-    timeout: 180000
-- extendedWaitUntil:
-    visible: "(?s).*SMSの(登録|更新)に成功しました.*"
-    timeout: 180000
+- runFlow:
+    file: common/refresh-log-until-visible.yaml
+    env:
+      TEXT: "(?s).*SMSを受信しました.*"
+- runFlow:
+    file: common/refresh-log-until-visible.yaml
+    env:
+      TEXT: "(?s).*SMSの(登録|更新)に成功しました.*"
 - longPressOn: "(?s).*SMSを受信しました.*"
 - runFlow:
     file: common/assert-visible-by-text.yaml

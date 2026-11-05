@@ -1,0 +1,14 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: ログの一覧で「更新」を押して読み直し、TEXT（正規表現可）が表示されるまで繰り返す（最大 40 回）。SMS の受信や送信の結果は、更新するまで一覧に出ないため
+# 注: 引数は TEXT
+- repeat:
+    times: 40
+    while:
+      notVisible: "${TEXT}"
+    commands:
+      - tapOn:
+          id: "jp.co.nttdata_univ.smstokintone:id/btnRefreshLog"
+          index: 0
+      - waitForAnimationToEnd:
+          timeout: 5000

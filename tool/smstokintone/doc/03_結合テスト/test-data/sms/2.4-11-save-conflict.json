@@ -4,6 +4,6 @@
     "body": "test-company-3\ntest-taro\nbody-update",
     "receive": true,
     "delayed": true,
-    "delaySeconds": 65
+    "triggerActivity": "ContinuationInfoSettingsActivity", "delaySeconds": 0
   }
 ]
