@@ -7,13 +7,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.1-02-top-modes-manual-auto-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: rbSendManual
       INDEX: 0
 - takeScreenshot: 2.1-02-top-modes-manual-auto-02
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: rbSmsReplyModeAuto
       INDEX: 0
@@ -21,21 +21,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - takeScreenshot: 2.1-02-top-modes-manual-auto-04
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "SMSの送信モード"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "SMSの返信モード"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: tvTopSendStatus
       INDEX: 0
       TEXT: "手動"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: tvTopReplyStatus
       INDEX: 0

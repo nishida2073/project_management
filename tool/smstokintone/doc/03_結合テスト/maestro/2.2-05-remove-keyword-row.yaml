@@ -7,23 +7,23 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-05-remove-keyword-row-01
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定を追加"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etKeyword
       INDEX: 0
       TEXT: "${KEYWORD_TEST}"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnAddKeyword
       INDEX: 0
 - takeScreenshot: 2.2-05-remove-keyword-row-02
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etKeyword
       INDEX: 1
@@ -32,18 +32,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.2-05-remove-keyword-row-04
 - hideKeyboard
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${KEYWORD_SAMPLE}"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnDeleteKeyword
       INDEX: 1
 - takeScreenshot: 2.2-05-remove-keyword-row-05
 - assertNotVisible: "${KEYWORD_SAMPLE}"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${KEYWORD_TEST}"
 - takeScreenshot: 2.2-05-remove-keyword-row-06

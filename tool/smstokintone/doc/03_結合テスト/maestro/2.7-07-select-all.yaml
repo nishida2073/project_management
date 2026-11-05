@@ -8,29 +8,29 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "SMSの検索"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "検索条件"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - tapOn: "検索"
 - tapOn: "全選択"
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSmsItemSelect
       INDEX: 0
 - tapOn: "▲ 隠す"
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSmsItemSelect
       INDEX: 1

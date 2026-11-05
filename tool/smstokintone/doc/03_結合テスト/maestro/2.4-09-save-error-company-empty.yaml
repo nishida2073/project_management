@@ -6,23 +6,23 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-09-save-error-company-empty-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnEditContinuationInfo
       INDEX: 0
 - takeScreenshot: 2.4-09-save-error-company-empty-02
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: rbContinuationSortAscending
       INDEX: 0
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etContinuationCompanyName
       INDEX: 0
@@ -31,17 +31,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を保存"
 - takeScreenshot: 2.4-09-save-error-company-empty-04
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "入力エラー"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*引継ぎ内容: ${SENDER_A}.*会社名・氏名は必須です.*"
 - pressKey: Back
 - takeScreenshot: 2.4-09-save-error-company-empty-05
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0

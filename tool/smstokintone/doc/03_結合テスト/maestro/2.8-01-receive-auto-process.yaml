@@ -7,7 +7,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnTopOpenLog
       INDEX: 0
@@ -22,7 +22,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "送信先の設定"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etSendTargetName
       INDEX: 0
@@ -31,20 +31,20 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnEditContinuationInfo
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-text.yaml
+    file: common/scroll-down-by-text.yaml
     env:
       TEXT: "0312345801"
 - runFlow:
-    file: common/scroll-down-to-text.yaml
+    file: common/scroll-down-by-text.yaml
     env:
       TEXT: "TEST－COMPANY"
 - runFlow:
-    file: common/scroll-down-to-text.yaml
+    file: common/scroll-down-by-text.yaml
     env:
       TEXT: "test-taro"
 - takeScreenshot: 2.8-01-receive-auto-process-04

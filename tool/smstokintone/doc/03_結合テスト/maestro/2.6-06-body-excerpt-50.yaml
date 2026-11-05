@@ -10,17 +10,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
       INDEX: 0
       VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
       INDEX: 0
@@ -29,14 +29,14 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "ログの確認"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - extendedWaitUntil:
     visible: '(?s).*\[受信完了\].*'
     timeout: 60000
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnRefreshLog
       INDEX: 0
@@ -47,17 +47,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
       INDEX: 0
       VALUE: "${LOG_BODY_EXCERPT_DEFAULT}"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
       INDEX: 0

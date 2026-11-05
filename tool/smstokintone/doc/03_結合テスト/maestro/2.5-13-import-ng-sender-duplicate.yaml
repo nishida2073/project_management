@@ -8,19 +8,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-01
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定のインポート・エクスポート"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ファイルを選択"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ファイルが選択されていません"
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0
@@ -29,22 +29,22 @@ appId: jp.co.nttdata_univ.smstokintone
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-02
 - runFlow:
-    file: common/select-download-file.yaml
+    file: common/select-download-file-by-text.yaml
     env:
       TEXT: ${IMPORT_FILE}
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-03
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "インポートエラー"
 - assertVisible: "(?s).*送信元がファイル内で重複しています.*"
 - runFlow:
-    file: common/tap-android-id.yaml
+    file: common/tap-android-by-id.yaml
     env:
       ID: button1
 - takeScreenshot: 2.5-13-import-ng-sender-duplicate-04
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0

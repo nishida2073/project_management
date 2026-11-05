@@ -6,55 +6,55 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-06-save-company-and-name-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnEditContinuationInfo
       INDEX: 0
 - takeScreenshot: 2.4-06-save-company-and-name-02
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: rbContinuationSortAscending
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etContinuationCompanyName
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etContinuationCompanyName
       INDEX: 1
       VALUE: "${COMPANY_NAME_2}"
 - takeScreenshot: 2.4-06-save-company-and-name-03
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etContinuationUserName
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etContinuationUserName
       INDEX: 1
       VALUE: "${USER_NAME_2}"
 - takeScreenshot: 2.4-06-save-company-and-name-04
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${COMPANY_NAME_2}"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${USER_NAME_2}"
 - tapOn: "設定を保存"
 - takeScreenshot: 2.4-06-save-company-and-name-05
 - runFlow:
-    file: common/assert-id-not-visible.yaml
+    file: common/assert-not-visible-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0

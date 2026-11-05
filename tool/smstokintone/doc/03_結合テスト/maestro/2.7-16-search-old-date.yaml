@@ -6,21 +6,21 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "SMSの検索"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "検索条件"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etDateFrom
       INDEX: 0
@@ -28,11 +28,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "${PAST_YEAR}"
 - tapOn: "1"
 - runFlow:
-    file: common/tap-android-id.yaml
+    file: common/tap-android-by-id.yaml
     env:
       ID: button1
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etDateTo
       INDEX: 0
@@ -40,11 +40,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "${PAST_YEAR}"
 - tapOn: "1"
 - runFlow:
-    file: common/tap-android-id.yaml
+    file: common/tap-android-by-id.yaml
     env:
       ID: button1
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etDateFrom
       INDEX: 0
@@ -52,7 +52,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.7-16-search-old-date-01
 - tapOn: "検索"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "該当するSMSがありません"
 - takeScreenshot: 2.7-16-search-old-date-02

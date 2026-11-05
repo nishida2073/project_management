@@ -11,7 +11,7 @@ appId: jp.co.nttdata_univ.smstokintone
       android.permission.READ_SMS: deny
 - tapOn: "SMSの検索"
 - runFlow:
-    file: common/assert-id-not-visible.yaml
+    file: common/assert-not-visible-by-id.yaml
     env:
       ID: layoutSearchForm
       INDEX: 0

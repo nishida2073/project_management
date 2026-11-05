@@ -9,41 +9,41 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: swCompanyNameAutoConversionEnabled
       INDEX: 0
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/assert-unchecked-by-id.yaml
     env:
       ID: swCompanyNameAutoConversionEnabled
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnAddFixedConversion
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etFixConversionBefore
       INDEX: 0
 - inputText: "${FIXED_FROM}"
 - hideKeyboard
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etFixConversionAfter
       INDEX: 0
 - inputText: "${FIXED_TO}"
 - hideKeyboard
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${FIXED_TO}"
 - pressKey: Back
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnTopOpenLog
       INDEX: 0
@@ -56,7 +56,7 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 180000
 - longPressOn: "(?s).*SMSの更新に成功しました.*"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*test-company-converted.*"
 - assertNotVisible: "(?s).*test-company-converted-converted.*"

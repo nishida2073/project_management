@@ -6,7 +6,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "ログの確認"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - takeScreenshot: 2.6-03-receive-extraction-result-01

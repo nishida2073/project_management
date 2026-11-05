@@ -10,22 +10,22 @@ appId: jp.co.nttdata_univ.smstokintone
       android.permission.READ_SMS: deny
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: btnRequestReadPermission
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: btnRequestReadPermission
       INDEX: 0
 - takeScreenshot: 2.3-27-read-permission-grant-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnRequestReadPermission
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: tvReadPermissionStatus
       INDEX: 0

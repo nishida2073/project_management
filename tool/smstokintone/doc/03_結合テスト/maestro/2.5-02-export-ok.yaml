@@ -7,11 +7,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-02-export-ok-01
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定のインポート・エクスポート"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnExportSettings
       INDEX: 0

@@ -8,19 +8,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-05-import-cancel-01
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定のインポート・エクスポート"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ファイルを選択"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ファイルが選択されていません"
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0
@@ -29,26 +29,26 @@ appId: jp.co.nttdata_univ.smstokintone
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-05-import-cancel-02
 - runFlow:
-    file: common/select-download-file.yaml
+    file: common/select-download-file-by-text.yaml
     env:
       TEXT: ${IMPORT_FILE}
 - takeScreenshot: 2.5-05-import-cancel-03
 - assertVisible: "(?s).*${IMPORT_FILE}.*"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0
 - takeScreenshot: 2.5-05-import-cancel-04
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定をインポートしますか？"
 - tapOn: "キャンセル"
 - takeScreenshot: 2.5-05-import-cancel-05
 - assertNotVisible: "設定をインポートしますか？"
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0

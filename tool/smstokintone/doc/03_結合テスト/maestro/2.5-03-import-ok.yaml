@@ -8,19 +8,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定のインポート・エクスポート"
 - takeScreenshot: 2.5-03-import-ok-01
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定のインポート・エクスポート"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ファイルを選択"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ファイルが選択されていません"
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0
@@ -29,7 +29,7 @@ appId: jp.co.nttdata_univ.smstokintone
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-03-import-ok-02
 - runFlow:
-    file: common/select-download-file.yaml
+    file: common/select-download-file-by-text.yaml
     env:
       TEXT: ${IMPORT_FILE}
 - takeScreenshot: 2.5-03-import-ok-03
@@ -38,22 +38,22 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "(?s).*送信先の設定: 統合（2件）.*"
 - assertVisible: "(?s).*引継ぎ内容: 統合（1件）.*"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0
 - takeScreenshot: 2.5-03-import-ok-04
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定をインポートしますか？"
 - runFlow:
-    file: common/tap-android-id.yaml
+    file: common/tap-android-by-id.yaml
     env:
       ID: button1
 - takeScreenshot: 2.5-03-import-ok-05
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの確認"
 - assertNotVisible: "ファイルを選択"

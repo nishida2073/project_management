@@ -8,19 +8,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: swLogRefreshEnabled
       INDEX: 0
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/assert-unchecked-by-id.yaml
     env:
       ID: swLogRefreshEnabled
       INDEX: 0
 - pressKey: Back
 - tapOn: "ログの確認"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - takeScreenshot: 2.6-10-no-auto-refresh-01

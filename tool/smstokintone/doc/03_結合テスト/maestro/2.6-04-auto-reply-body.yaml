@@ -7,19 +7,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: rbSmsReplyModeAuto
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: rbSmsReplyModeAuto
       INDEX: 0
 - pressKey: Back
 - tapOn: "ログの確認"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - extendedWaitUntil:
@@ -30,7 +30,7 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '(?s).*\[返信完了\].*'
     index: 0
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "返信内容"
 - assertVisible: '(?s).*${REPLY_BODY_FRAGMENT}.*'

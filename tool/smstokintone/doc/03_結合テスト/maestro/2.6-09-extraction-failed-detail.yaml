@@ -6,7 +6,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "ログの確認"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - extendedWaitUntil:
@@ -18,7 +18,7 @@ appId: jp.co.nttdata_univ.smstokintone
     index: 0
 - assertVisible: '(?s).*抽出結果.*'
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "会社名・氏名の抽出に失敗しています"
 - takeScreenshot: 2.6-09-extraction-failed-detail-02

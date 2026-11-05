@@ -5,19 +5,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: rbThemeLight
 - takeScreenshot: 2.3-20-search-default-send-target-01
 - runFlow:
-    file: common/assert-id-not-visible.yaml
+    file: common/assert-not-visible-by-id.yaml
     env:
       ID: llDefaultSendTargetFilter
       INDEX: 0
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-20-search-default-send-target-02
 - runFlow:
-    file: common/assert-id-not-visible.yaml
+    file: common/assert-not-visible-by-id.yaml
     env:
       ID: llSendTargetFilter
       INDEX: 0

@@ -6,18 +6,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定を追加"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etSendTargetName
       INDEX: 0
       TEXT: "${DUPLICATE_SEND_TARGET_NAME}"
 - tapOn: "設定を追加"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定 2"
 - scrollUntilVisible:
@@ -25,43 +25,43 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "設定 2"
     direction: DOWN
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etSendTargetName
       INDEX: 0
 - inputText: "${DUPLICATE_SEND_TARGET_NAME}"
 - hideKeyboard
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etSendTargetName
       INDEX: 0
       TEXT: "${DUPLICATE_SEND_TARGET_NAME}"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etLoginName
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etLoginName
       INDEX: 0
       VALUE: "${DUP_LOGIN_NAME}"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etLoginPassword
 - runFlow:
-    file: common/input-password-field.yaml
+    file: common/input-password-by-id.yaml
     env:
       ID: etLoginPassword
       VALUE: "${DUP_LOGIN_PASSWORD}"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etAppId
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etAppId
       INDEX: 0
@@ -70,15 +70,15 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-14-save-duplicate-name-error-02
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "入力エラー"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*送信先名が重複しています.*"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*${DUPLICATE_SEND_TARGET_NAME}.*"
 - takeScreenshot: 2.2-14-save-duplicate-name-error-03

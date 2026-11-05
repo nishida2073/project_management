@@ -11,26 +11,26 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "SMSの検索"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "検索条件"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: cbSmsSearchExtractionFailedOnly
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSmsSearchExtractionFailedOnly
       INDEX: 0
@@ -38,7 +38,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: '(?s).*🆖.*${SEARCH_ABNORMAL_ROW_TEXT}.*'
 - tapOn: "全選択"
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/assert-unchecked-by-id.yaml
     env:
       ID: cbSmsItemSelect
       INDEX: ${SMS_ABNORMAL_CHECKBOX_INDEX}

@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-01
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定を追加"
 - scrollUntilVisible:
@@ -16,19 +16,19 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "設定 1"
     direction: UP
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etSendTargetName
       INDEX: 0
       TEXT: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etKeyword
       INDEX: 0
       TEXT: "test-company"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnDeleteKeyword
       INDEX: 0
@@ -39,13 +39,13 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "^テスト送信$"
     direction: DOWN
 - runFlow:
-    file: common/tap-text.yaml
+    file: common/tap-by-text.yaml
     env:
       TEXT: "^テスト送信$"
       INDEX: 0
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-03
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "テスト本文"
 - assertVisible: '(?s).*${EXPECTED_COMPANY_NAME_09}.*'
@@ -53,13 +53,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信"
 - takeScreenshot: 2.2-08-test-send-success-no-keyword-04
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*テスト結果.*"
 - assertVisible: '(?s).*${EXPECTED_RESULT_COMPANY_LINE}.*'
 - assertVisible: '(?s).*${EXPECTED_RESULT_USER_LINE}.*'
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*SMSの(登録|更新)に成功しました.*"
 # 未確認: テスト登録が kintone に入ったかは kintone 側の画面で確認が必要（送信内容は KintoneApi.kt:247-283 で決まる）

@@ -7,26 +7,26 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: swContinuationShowUserNameEnabled
       INDEX: 0
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/assert-unchecked-by-id.yaml
     env:
       ID: swContinuationShowUserNameEnabled
       INDEX: 0
 - pressKey: Back
 - tapOn: "ログの確認"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - extendedWaitUntil:
     visible: '(?s).*${CONTINUATION_SENDER}.*'
     timeout: 60000
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnRefreshLog
       INDEX: 0

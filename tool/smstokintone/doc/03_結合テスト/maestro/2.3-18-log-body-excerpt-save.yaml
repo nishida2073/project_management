@@ -5,24 +5,24 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: rbThemeLight
 - takeScreenshot: 2.3-18-log-body-excerpt-save-01
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
 - takeScreenshot: 2.3-18-log-body-excerpt-save-02
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
       INDEX: 0
       VALUE: "${LOG_BODY_EXCERPT_LENGTH}"
 - takeScreenshot: 2.3-18-log-body-excerpt-save-03
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etLogBodyExcerptLength
       INDEX: 0

@@ -6,52 +6,52 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: rbThemeLight
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-01
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-02
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: btnAddFixedConversion
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-03
 - runFlow:
-    file: common/assert-id-not-visible.yaml
+    file: common/assert-not-visible-by-id.yaml
     env:
       ID: etFixConversionBefore
       INDEX: 0
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-04
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-05
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/assert-unchecked-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: btnAddFixedConversion
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-06
@@ -60,13 +60,13 @@ appId: jp.co.nttdata_univ.smstokintone
     index: 0
     enabled: false
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnAddFixedConversion
       INDEX: 0
 - takeScreenshot: 2.3-31-fixed-conversion-add-disabled-07
 - runFlow:
-    file: common/assert-id-not-visible.yaml
+    file: common/assert-not-visible-by-id.yaml
     env:
       ID: etFixConversionBefore
       INDEX: 0

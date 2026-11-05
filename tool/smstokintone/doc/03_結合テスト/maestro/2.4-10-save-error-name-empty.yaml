@@ -6,34 +6,34 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-10-save-error-name-empty-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - takeScreenshot: 2.4-10-save-error-name-empty-02
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/assert-unchecked-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnEditContinuationInfo
       INDEX: 0
 - takeScreenshot: 2.4-10-save-error-name-empty-03
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: rbContinuationSortAscending
       INDEX: 0
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etContinuationUserName
       INDEX: 0
@@ -42,34 +42,34 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を保存"
 - takeScreenshot: 2.4-10-save-error-name-empty-05
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "入力エラー"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*引継ぎ内容: ${SENDER_A}.*氏名は必須です.*"
 - pressKey: Back
 - takeScreenshot: 2.4-10-save-error-name-empty-06
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0
 - pressKey: Back
 - takeScreenshot: 2.4-10-save-error-name-empty-07
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - takeScreenshot: 2.4-10-save-error-name-empty-08
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0

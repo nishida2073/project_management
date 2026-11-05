@@ -7,18 +7,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.4-02-keyword-search-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnEditContinuationInfo
       INDEX: 0
 - takeScreenshot: 2.4-02-keyword-search-02
 - runFlow:
-    file: common/assert-id-visible.yaml
+    file: common/assert-visible-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${SENDER_A}"
 - scrollUntilVisible:
@@ -26,16 +26,16 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "${SENDER_B}"
     direction: DOWN
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${SENDER_B}"
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: rbContinuationSortAscending
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etContinuationSearch
       INDEX: 0
@@ -44,7 +44,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.4-02-keyword-search-04
 - hideKeyboard
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${SENDER_B}"
 - assertNotVisible: "${SENDER_A}"

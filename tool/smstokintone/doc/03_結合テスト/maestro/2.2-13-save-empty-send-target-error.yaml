@@ -7,11 +7,11 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "アプリの設定"
 - takeScreenshot: 2.2-13-save-empty-send-target-error-01
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
@@ -20,7 +20,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-13-save-empty-send-target-error-03
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定を追加"
 - tapOn: "設定を追加"
@@ -28,7 +28,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を保存"
 - takeScreenshot: 2.2-13-save-empty-send-target-error-05
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "入力エラー"
 - assertVisible: "(?s).*設定 2.*"

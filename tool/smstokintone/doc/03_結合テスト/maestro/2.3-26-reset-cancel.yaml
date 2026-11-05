@@ -6,43 +6,43 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: rbThemeLight
 - takeScreenshot: 2.3-26-reset-cancel-01
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: rbThemeDark
 - takeScreenshot: 2.3-26-reset-cancel-02
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: rbThemeDark
       INDEX: 0
 - takeScreenshot: 2.3-26-reset-cancel-03
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: rbThemeDark
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: rbThemeDark
       INDEX: 0
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: btnResetSettings
 - takeScreenshot: 2.3-26-reset-cancel-04
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnResetSettings
       INDEX: 0
 - takeScreenshot: 2.3-26-reset-cancel-05
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定を初期化しますか？"
 - assertVisible: "この操作は取り消せません" # 確認ダイアログの本文（仕様書の期待値に従う、未確認）
@@ -50,12 +50,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-26-reset-cancel-06
 - assertNotVisible: "設定を初期化しますか？"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: rbThemeDark
 - takeScreenshot: 2.3-26-reset-cancel-07
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: rbThemeDark
       INDEX: 0

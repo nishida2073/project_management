@@ -7,13 +7,13 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "送信先の設定"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etSendTargetName
       INDEX: 0
       TEXT: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnDeleteSendTarget
       INDEX: 0
@@ -21,7 +21,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を保存"
 - takeScreenshot: 2.8-21-no-send-target-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnTopOpenLog
       INDEX: 0
@@ -30,7 +30,7 @@ appId: jp.co.nttdata_univ.smstokintone
     visible: "(?s).*SMSを受信しました.*"
     timeout: 180000
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*SMSの送信先が存在しません.*"
 - assertNotVisible: "(?s).*SMSの(登録|更新)に成功しました.*"

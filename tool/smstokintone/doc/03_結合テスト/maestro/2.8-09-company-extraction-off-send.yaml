@@ -8,27 +8,27 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
 - runFlow:
-    file: common/assert-id-checked.yaml
-    env:
-      ID: swCompanyNameExtractionEnabled
-      INDEX: 0
-- runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
+    env:
+      ID: swCompanyNameExtractionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/assert-unchecked-by-id.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - pressKey: Back
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnTopOpenLog
       INDEX: 0

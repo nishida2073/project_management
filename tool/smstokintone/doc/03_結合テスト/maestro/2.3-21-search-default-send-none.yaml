@@ -6,23 +6,23 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: rbThemeLight
 - takeScreenshot: 2.3-21-search-default-send-none-01
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: cbSearchSendNoneOnlyEnabled
 - takeScreenshot: 2.3-21-search-default-send-none-02
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: cbSearchSendNoneOnlyEnabled
       INDEX: 0
 - takeScreenshot: 2.3-21-search-default-send-none-03
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSearchSendNoneOnlyEnabled
       INDEX: 0
@@ -31,7 +31,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "SMSの検索"
 - takeScreenshot: 2.3-21-search-default-send-none-05
 - runFlow:
-    file: common/assert-id-checked.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: cbSmsSearchSendNoneOnly
       INDEX: 0

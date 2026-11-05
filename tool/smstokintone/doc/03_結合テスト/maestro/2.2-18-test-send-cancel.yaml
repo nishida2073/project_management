@@ -6,17 +6,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "送信先の設定"
 - takeScreenshot: 2.2-18-test-send-cancel-01
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "設定を追加"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etSendTargetName
       INDEX: 0
       TEXT: "test-send-target-1"
 - runFlow:
-    file: common/scroll-down-and-assert-field-text.yaml
+    file: common/scroll-down-and-assert-text-by-id.yaml
     env:
       ID: etKeyword
       INDEX: 0
@@ -27,7 +27,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "テスト送信"
 - takeScreenshot: 2.2-18-test-send-cancel-02
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "テスト本文"
 - tapOn: "キャンセル"

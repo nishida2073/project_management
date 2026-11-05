@@ -9,7 +9,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "SMSの検索"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "検索条件"
 - tapOn: "検索"
@@ -18,12 +18,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - pressKey: Back
 - tapOn: "ログの確認"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - takeScreenshot: 2.6-01-refresh-legend-01
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnRefreshLog
       INDEX: 0
@@ -38,7 +38,7 @@ appId: jp.co.nttdata_univ.smstokintone
     text: '\[送信開始\].*'
     index: 0
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "ログの一覧"
 - takeScreenshot: 2.6-01-refresh-legend-02

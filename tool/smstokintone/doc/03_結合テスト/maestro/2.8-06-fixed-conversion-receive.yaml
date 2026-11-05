@@ -8,55 +8,55 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: swCompanyNameAutoConversionEnabled
 - runFlow:
-    file: common/assert-id-checked.yaml
-    env:
-      ID: swCompanyNameAutoConversionEnabled
-      INDEX: 0
-- runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/assert-checked-by-id.yaml
     env:
       ID: swCompanyNameAutoConversionEnabled
       INDEX: 0
 - runFlow:
-    file: common/assert-id-unchecked.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: swCompanyNameAutoConversionEnabled
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/assert-unchecked-by-id.yaml
+    env:
+      ID: swCompanyNameAutoConversionEnabled
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnAddFixedConversion
       INDEX: 0
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etFixConversionBefore
       INDEX: 0
 - inputText: "${FIXED_FROM}"
 - hideKeyboard
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: etFixConversionAfter
       INDEX: 0
 - inputText: "${FIXED_TO}"
 - hideKeyboard
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${FIXED_FROM}"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "${FIXED_TO}"
 - takeScreenshot: 2.8-06-fixed-conversion-receive-01
 - pressKey: Back
 - runFlow:
-    file: common/scroll-down-and-tap-id.yaml
+    file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: btnTopOpenLog
       INDEX: 0
@@ -69,11 +69,11 @@ appId: jp.co.nttdata_univ.smstokintone
     timeout: 180000
 - longPressOn: "(?s).*SMSを受信しました.*"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "抽出結果 ⚙.*🔄.*"
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*会社名：${FIXED_TO}.*"
 - takeScreenshot: 2.8-06-fixed-conversion-receive-03

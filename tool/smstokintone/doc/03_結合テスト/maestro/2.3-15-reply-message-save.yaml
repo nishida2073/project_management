@@ -6,17 +6,17 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - runFlow:
-    file: common/scroll-up-to-id.yaml
+    file: common/scroll-up-by-id.yaml
     env:
       ID: rbThemeLight
 - takeScreenshot: 2.3-15-reply-message-save-01
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etReplySuccessBody
 - takeScreenshot: 2.3-15-reply-message-save-02
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etReplySuccessBody
       INDEX: 0
@@ -24,12 +24,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: 2.3-15-reply-message-save-03
 - assertVisible: "${REPLY_SUCCESS_BODY}" # 未確認: 複数行欄の表示確認（入力した文字列の全体を見る）
 - runFlow:
-    file: common/scroll-down-to-id.yaml
+    file: common/scroll-down-by-id.yaml
     env:
       ID: etReplyFailedBody
 - takeScreenshot: 2.3-15-reply-message-save-04
 - runFlow:
-    file: common/input-text-field.yaml
+    file: common/input-text-by-id.yaml
     env:
       ID: etReplyFailedBody
       INDEX: 0
