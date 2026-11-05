@@ -18,6 +18,6 @@ appId: jp.co.nttdata_univ.smstokintone
 # 未確認: 保存ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-02-export-ok-02
 - assertVisible: "(?s).*s2k_settings_\\d{8}_\\d{6}\\.json.*"   # 未確認: 提案されるファイル名の表示
-- tapOn: "保存"   # 未確認: 保存ボタンの文字
+- tapOn: "保存|Save"   # 未確認: 保存ボタンの文字
 - takeScreenshot: 2.5-02-export-ok-03
 - takeScreenshot: 2.5-02-export-ok-04

@@ -20,11 +20,10 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "ファイルが選択されていません"
 - runFlow:
-    file: common/assert-visible-by-id.yaml
+    file: common/assert-disabled-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0
-    enabled: false
 - tapOn: "ファイルを選択"
 # 未確認: 文書選択ダイアログ（Documents UI）の操作は公式ドキュメントで確認できなかった
 - takeScreenshot: 2.5-11-import-ng-continuation-user-name-missing-02
@@ -44,9 +43,8 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: button1
 - takeScreenshot: 2.5-11-import-ng-continuation-user-name-missing-04
 - runFlow:
-    file: common/assert-visible-by-id.yaml
+    file: common/assert-disabled-by-id.yaml
     env:
       ID: btnImportSettings
       INDEX: 0
-    enabled: false
 - takeScreenshot: 2.5-11-import-ng-continuation-user-name-missing-05

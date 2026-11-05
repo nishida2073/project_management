@@ -1,10 +1,23 @@
-# ダウンロードのファイル選択画面で、指定した名前のファイルを探して選ぶ（共通の手順。撮影は呼び出し元で行う）
-# 入力: TEXT（ファイル名。正規表現で一致させる）。一覧の下にあるファイルは、スクロールして探す
 appId: jp.co.nttdata_univ.smstokintone
 ---
+# ダウンロードのファイル選択画面で、左上のメニュー（Show roots）から Downloads を開き、指定した名前のファイルを探して選ぶ（共通の手順。撮影は呼び出し元で行う）
+# 注: ファイル選択画面の表示は英語（Show roots、Downloads）。「最近」の一覧では名前が揃わないことがあるため、毎回 Downloads を開く
+# 入力: TEXT（ファイル名。正規表現で一致させる）。一覧の下にあるファイルは、スクロールして探す
+- tapOn:
+    text: "ルートを表示|Show roots"
+- extendedWaitUntil:
+    visible: "ダウンロード|Downloads"
+    timeout: 5000
+- tapOn:
+    id: "android:id/title"
+    text: "ダウンロード|Downloads"
+- takeScreenshot: select-download-open
+- assertVisible: "Downloads|ダウンロード"
 - scrollUntilVisible:
     element:
       text: "${TEXT}"
     direction: DOWN
+    visibilityPercentage: 50
+    timeout: 60000
 - tapOn:
     text: "${TEXT}"
