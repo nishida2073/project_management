@@ -1,6 +1,6 @@
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 注: 欄の右寄り（95%）を押す。目のアイコンのないテキスト欄用（パスワード欄は input-password-field.yaml）
+# 注: 欄の右寄り（95%）を押す。目のアイコンのないテキスト欄用（パスワード欄は input-password-by-id.yaml）
 # 注: 既存の値は eraseText で末尾まで消してから入力する。欄までのスクロールと撮影は呼び出し元で行う
 # 注: 引数は ID（欄の id の末尾）、INDEX（何番目の欄か。1 つだけなら 0）、VALUE（入力する値）
 - tapOn:
