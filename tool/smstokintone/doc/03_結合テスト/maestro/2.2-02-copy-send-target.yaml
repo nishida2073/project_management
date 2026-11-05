@@ -27,8 +27,86 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
 - takeScreenshot: 2.2-02-copy-send-target-02
 - runFlow:
-    file: common/assert-text-visible.yaml
+    file: common/scroll-down-and-assert-field-text.yaml
     env:
+      ID: etSendTargetName
+      INDEX: 0
       TEXT: "${COPY_SEND_TARGET_NAME}"
-# 注: コピーは元の直後に挿入される（SendTargetSettingsActivity.kt:110, 125-131）。位置は目視で確認する。
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etKeyword
+      INDEX: 0
+      TEXT: "${COPY_KEYWORD}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etSubdomain
+      INDEX: 0
+      TEXT: "${COPY_SUBDOMAIN}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etLoginName
+      INDEX: 0
+      TEXT: "${COPY_LOGIN_NAME}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etAppId
+      INDEX: 0
+      TEXT: "${COPY_APP_ID}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etFieldType
+      INDEX: 0
+      TEXT: "${COPY_FIELD_TYPE}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etFieldDatetime
+      INDEX: 0
+      TEXT: "${COPY_FIELD_DATETIME}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etFieldSender
+      INDEX: 0
+      TEXT: "${COPY_FIELD_SENDER}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etFieldCompanyName
+      INDEX: 0
+      TEXT: "${COPY_FIELD_COMPANY_NAME}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etFieldUserName
+      INDEX: 0
+      TEXT: "${COPY_FIELD_USER_NAME}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etFieldBody
+      INDEX: 0
+      TEXT: "${COPY_FIELD_BODY}"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etFieldHistory
+      INDEX: 0
+      TEXT: "${COPY_FIELD_HISTORY}"
+- runFlow:
+    file: common/assert-id-checked.yaml
+    env:
+      ID: rbUpdateToleranceModeSameDate
+      INDEX: 0
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etUpdateToleranceHours
+      INDEX: 0
+      TEXT: "${COPY_TOLERANCE_HOURS}"
 - takeScreenshot: 2.2-02-copy-send-target-03

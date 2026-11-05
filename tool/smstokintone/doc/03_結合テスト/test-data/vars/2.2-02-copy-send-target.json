@@ -1,5 +1,17 @@
 {
-  "COPY_SEND_TARGET_NAME": "test-send-target-1\\u306e\\u30b3\\u30d4\\u30fc",
+  "SETUP_FILE_PATTERN": "env_base.*",
   "SEND_TARGET_NAME": "test-send-target-1",
-  "SETUP_FILE_PATTERN": "env_base.*"
+  "COPY_SEND_TARGET_NAME": "test-send-target-1\\u306e\\u30b3\\u30d4\\u30fc",
+  "COPY_KEYWORD": "test-company",
+  "COPY_SUBDOMAIN": "dyrskx8ex42r",
+  "COPY_LOGIN_NAME": "user01",
+  "COPY_APP_ID": "11",
+  "COPY_FIELD_TYPE": "registration_type",
+  "COPY_FIELD_DATETIME": "receive_datetime",
+  "COPY_FIELD_SENDER": "sender",
+  "COPY_FIELD_COMPANY_NAME": "company_name",
+  "COPY_FIELD_USER_NAME": "user_name",
+  "COPY_FIELD_BODY": "body",
+  "COPY_FIELD_HISTORY": "history",
+  "COPY_TOLERANCE_HOURS": "5"
 }
