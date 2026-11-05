@@ -47,12 +47,11 @@ appId: jp.co.nttdata_univ.smstokintone
       TEXT: "テスト本文"
 # 注: テスト本文の初期値（テンプレート）は、欄をタップして末尾にカーソルがある状態で eraseText で消す（SendTargetSettingsActivity.kt:230）。
 - runFlow:
-    file: common/tap-text-at-point.yaml
+    file: common/input-text-by-text.yaml
     env:
       TEXT: "(?s).*テスト太郎.*"
-      POINT: "95%, 95%"
-- eraseText: 200
-- inputText: "${TEST_BODY_LINE1}"
+      INDEX: 0
+      VALUE: "${TEST_BODY_LINE1}"
 - pressKey: Enter
 - inputText: "${TEST_BODY_LINE2}"
 - pressKey: Enter

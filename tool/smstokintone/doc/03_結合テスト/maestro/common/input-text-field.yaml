@@ -6,7 +6,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     id: "jp.co.nttdata_univ.smstokintone:id/${ID}"
     index: ${INDEX}
-    point: "95%, 50%"
+    point: "95%, 95%"
 - eraseText: 50
 - inputText: "${VALUE}"
 - hideKeyboard

@@ -1,0 +1,10 @@
+appId: jp.co.nttdata_univ.smstokintone
+---
+# 注: TEXT（画面の文字。正規表現可）の部品の右下（95%, 95%）をタップし、既存の値を eraseText で消してから VALUE を入力する。位置は変数で渡せないため、右下に固定する
+# 注: 引数は TEXT（欄の文字）、INDEX（何番目の欄か。1 つだけなら 0）、VALUE（入力する値）
+- tapOn:
+    text: "${TEXT}"
+    index: ${INDEX}
+    point: "95%, 95%"
+- eraseText: 200
+- inputText: "${VALUE}"

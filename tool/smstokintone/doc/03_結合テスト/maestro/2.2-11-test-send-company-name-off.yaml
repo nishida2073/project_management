@@ -58,12 +58,11 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "テスト本文"
 - runFlow:
-    file: common/tap-text-at-point.yaml
+    file: common/input-text-by-text.yaml
     env:
       TEXT: "(?s).*テスト太郎.*"
-      POINT: "95%, 95%"
-- eraseText: 200
-- inputText: "${TEST_BODY}"
+      INDEX: 0
+      VALUE: "${TEST_BODY}"
 - takeScreenshot: 2.2-11-test-send-company-name-off-06
 - hideKeyboard
 - tapOn: "送信"
