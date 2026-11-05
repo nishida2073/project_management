@@ -1,4 +1,4 @@
-# 2.2 送信先の設定: ログイン名が不正なときテスト送信が失敗する（テスト仕様書の 2.2 の 21 に対応）
+# 2.2 送信先の設定: ログイン名が不正なときテスト送信が失敗する（テスト仕様書の 2.2 の 17 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: このフローでログイン名を不正な値にする
@@ -7,7 +7,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-21-test-send-invalid-login-error-01
+- takeScreenshot: 2.2-17-test-send-invalid-login-error-01
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -38,13 +38,13 @@ appId: jp.co.nttdata_univ.smstokintone
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
-- takeScreenshot: 2.2-21-test-send-invalid-login-error-02
+- takeScreenshot: 2.2-17-test-send-invalid-login-error-02
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
       TEXT: "テスト本文"
 - tapOn: "送信"
-- takeScreenshot: 2.2-21-test-send-invalid-login-error-03
+- takeScreenshot: 2.2-17-test-send-invalid-login-error-03
 - assertVisible: "(?s).*送信失敗.*"
 # 未確認: 応答本文の中身は kintone 側の応答に依存するため、ここでは文字で確認しない（表示の有無は確認する）
-- takeScreenshot: 2.2-21-test-send-invalid-login-error-04
+- takeScreenshot: 2.2-17-test-send-invalid-login-error-04

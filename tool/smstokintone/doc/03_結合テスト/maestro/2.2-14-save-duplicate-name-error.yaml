@@ -1,4 +1,4 @@
-# 2.2 送信先の設定: 送信先名が重複するとき保存でエラーになる（テスト仕様書の 2.2 の 18 に対応）
+# 2.2 送信先の設定: 送信先名が重複するとき保存でエラーになる（テスト仕様書の 2.2 の 14 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: このフローの中で 2 件目を追加し、同じ送信先名と、重複の判定までに必須となる項目（アプリID・ログイン名・パスワード）を入力する
@@ -66,9 +66,9 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: etAppId
       INDEX: 0
       VALUE: "${DUP_APP_ID}"
-- takeScreenshot: 2.2-18-save-duplicate-name-error-01
+- takeScreenshot: 2.2-14-save-duplicate-name-error-01
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-18-save-duplicate-name-error-02
+- takeScreenshot: 2.2-14-save-duplicate-name-error-02
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -81,4 +81,4 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "(?s).*${DUPLICATE_SEND_TARGET_NAME}.*"
-- takeScreenshot: 2.2-18-save-duplicate-name-error-03
+- takeScreenshot: 2.2-14-save-duplicate-name-error-03

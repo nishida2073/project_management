@@ -1,12 +1,12 @@
-# 2.2 送信先の設定: 会社名の抽出を無効にして設定を保存する（テスト仕様書の 2.2 の 10 に対応）
+# 2.2 送信先の設定: 会社名の保存値を開き直して確認する（テスト仕様書の 2.2 の 10 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
-# 注: 会社名の抽出が無効のときは会社名欄が表示される（SendTargetSettingsActivity.kt:76-78）。切替は即時保存される。
-# 注: 保存値の画面での確認は 2.2-11 で行う（SendTargetSettingsActivity.kt:75）。
+# 前提（フローで設定）: この flow の中で、会社名の抽出を無効にし、会社名を入力して保存してから開き直す
+# 注: 会社名の抽出が無効のとき、会社名欄（llCompanyNameSection）が表示される（SendTargetSettingsActivity.kt:76-78）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.2-10-save-company-name-off-01
+- takeScreenshot: 2.2-10-reopen-company-name-01
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
@@ -21,16 +21,16 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
-- takeScreenshot: 2.2-10-save-company-name-off-02
+- takeScreenshot: 2.2-10-reopen-company-name-02
 - runFlow:
     file: common/assert-id-unchecked.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - pressKey: Back
-- takeScreenshot: 2.2-10-save-company-name-off-03
+- takeScreenshot: 2.2-10-reopen-company-name-03
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-10-save-company-name-off-04
+- takeScreenshot: 2.2-10-reopen-company-name-04
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -51,11 +51,22 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: etCompanyName
       INDEX: 0
       VALUE: "${COMPANY_NAME}"
+- scrollUntilVisible:
+    element:
+      text: "設定を保存"
+    direction: DOWN
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-10-save-company-name-off-05
+- takeScreenshot: 2.2-10-reopen-company-name-05
+- tapOn: "送信先の設定"
+- takeScreenshot: 2.2-10-reopen-company-name-06
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
-      TEXT: "SMSの送信モード"
-- assertNotVisible: "設定を追加"
-- takeScreenshot: 2.2-10-save-company-name-off-06
+      TEXT: "設定を追加"
+- runFlow:
+    file: common/scroll-down-and-assert-field-text.yaml
+    env:
+      ID: etCompanyName
+      INDEX: 0
+      TEXT: "${COMPANY_NAME}"
+- takeScreenshot: 2.2-10-reopen-company-name-07

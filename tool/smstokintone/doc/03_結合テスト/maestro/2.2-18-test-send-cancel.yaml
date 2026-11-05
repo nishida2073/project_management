@@ -1,10 +1,10 @@
-# 2.2 送信先の設定: テスト送信をキャンセルする（テスト仕様書の 2.2 の 22 に対応）
+# 2.2 送信先の設定: テスト送信をキャンセルする（テスト仕様書の 2.2 の 18 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-22-test-send-cancel-01
+- takeScreenshot: 2.2-18-test-send-cancel-01
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -25,13 +25,13 @@ appId: jp.co.nttdata_univ.smstokintone
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
-- takeScreenshot: 2.2-22-test-send-cancel-02
+- takeScreenshot: 2.2-18-test-send-cancel-02
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
       TEXT: "テスト本文"
 - tapOn: "キャンセル"
-- takeScreenshot: 2.2-22-test-send-cancel-03
+- takeScreenshot: 2.2-18-test-send-cancel-03
 - assertNotVisible: "テスト本文"
 - assertNotVisible: "テスト結果"
-- takeScreenshot: 2.2-22-test-send-cancel-04
+- takeScreenshot: 2.2-18-test-send-cancel-04

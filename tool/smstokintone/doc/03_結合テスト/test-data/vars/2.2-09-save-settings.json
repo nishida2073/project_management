@@ -1,9 +1,0 @@
-{
-  "APP_ID": "12345",
-  "LOGIN_NAME": "saved-login-name",
-  "LOGIN_PASSWORD": "saved-pass",
-  "SAVED_KEYWORD": "saved-keyword",
-  "SAVED_SEND_TARGET_NAME": "saved-send-target-name",
-  "SUBDOMAIN": "saved-subdomain",
-  "SETUP_FILE_PATTERN": "env_base.*"
-}

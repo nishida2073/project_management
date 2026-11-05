@@ -1,4 +1,4 @@
-# 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 14 に対応）
+# 2.2 送信先の設定: 保存した設定を開き直して確認する（テスト仕様書の 2.2 の 12 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: この flow の中で保存する値を入力して「設定を保存」を押してから、開き直して確認する
@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-14-reopen-settings-01
+- takeScreenshot: 2.2-12-reopen-settings-01
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -162,7 +162,6 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: etUpdateToleranceHours
       INDEX: 0
-    enabled: true
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
@@ -189,9 +188,9 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-text-visible.yaml
     env:
       TEXT: "SMSの送信モード"
-- takeScreenshot: 2.2-14-reopen-settings-02
+- takeScreenshot: 2.2-12-reopen-settings-02
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-14-reopen-settings-03
+- takeScreenshot: 2.2-12-reopen-settings-03
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -288,4 +287,4 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: etUpdateToleranceHours
       INDEX: 0
       TEXT: "${TOLERANCE_HOURS_SAVED}"
-- takeScreenshot: 2.2-14-reopen-settings-04
+- takeScreenshot: 2.2-12-reopen-settings-04

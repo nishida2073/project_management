@@ -1,11 +1,11 @@
-# 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 17 に対応）
+# 2.2 送信先の設定: 必須項目が空のとき保存でエラーになる（テスト仕様書の 2.2 の 13 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 注: 追加した設定の番号は、保存済みの 1 件の次なので「設定 2」（SendTargetSettingsActivity.kt:195, 216）。
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.2-17-save-empty-send-target-error-01
+- takeScreenshot: 2.2-13-save-empty-send-target-error-01
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
@@ -16,21 +16,21 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - pressKey: Back
-- takeScreenshot: 2.2-17-save-empty-send-target-error-02
+- takeScreenshot: 2.2-13-save-empty-send-target-error-02
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-17-save-empty-send-target-error-03
+- takeScreenshot: 2.2-13-save-empty-send-target-error-03
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
       TEXT: "設定を追加"
 - tapOn: "設定を追加"
-- takeScreenshot: 2.2-17-save-empty-send-target-error-04
+- takeScreenshot: 2.2-13-save-empty-send-target-error-04
 - tapOn: "設定を保存"
-- takeScreenshot: 2.2-17-save-empty-send-target-error-05
+- takeScreenshot: 2.2-13-save-empty-send-target-error-05
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
       TEXT: "入力エラー"
 - assertVisible: "(?s).*設定 2.*"
 - assertVisible: "(?s).*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"
-- takeScreenshot: 2.2-17-save-empty-send-target-error-06
+- takeScreenshot: 2.2-13-save-empty-send-target-error-06

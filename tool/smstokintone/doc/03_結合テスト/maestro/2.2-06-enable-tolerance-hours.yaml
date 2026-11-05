@@ -25,11 +25,9 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: rbUpdateToleranceModeHours
       INDEX: 0
 - takeScreenshot: 2.2-06-enable-tolerance-hours-02
-- runFlow:
-    file: common/assert-id-visible.yaml
-    env:
-      ID: etUpdateToleranceHours
-      INDEX: 0
+- assertVisible:
+    id: "jp.co.nttdata_univ.smstokintone:id/etUpdateToleranceHours"
+    index: 0
     enabled: true
 - runFlow:
     file: common/scroll-down-to-id.yaml

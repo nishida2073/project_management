@@ -1,4 +1,4 @@
-# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 12 に対応）
+# 2.2 送信先の設定: 会社名の抽出が無効のときテスト送信する（テスト仕様書の 2.2 の 11 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 前提（フローで設定）: この flow の中で会社名の抽出を無効にしてからテスト送信する
@@ -8,7 +8,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.2-12-test-send-company-name-off-01
+- takeScreenshot: 2.2-11-test-send-company-name-off-01
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
@@ -23,16 +23,16 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
-- takeScreenshot: 2.2-12-test-send-company-name-off-02
+- takeScreenshot: 2.2-11-test-send-company-name-off-02
 - runFlow:
     file: common/assert-id-unchecked.yaml
     env:
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - pressKey: Back
-- takeScreenshot: 2.2-12-test-send-company-name-off-03
+- takeScreenshot: 2.2-11-test-send-company-name-off-03
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-12-test-send-company-name-off-04
+- takeScreenshot: 2.2-11-test-send-company-name-off-04
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -52,7 +52,7 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "^テスト送信$"
       INDEX: 0
-- takeScreenshot: 2.2-12-test-send-company-name-off-05
+- takeScreenshot: 2.2-11-test-send-company-name-off-05
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -64,12 +64,12 @@ appId: jp.co.nttdata_univ.smstokintone
       POINT: "95%, 95%"
 - eraseText: 200
 - inputText: "${TEST_BODY}"
-- takeScreenshot: 2.2-12-test-send-company-name-off-06
+- takeScreenshot: 2.2-11-test-send-company-name-off-06
 - hideKeyboard
 - tapOn: "送信"
-- takeScreenshot: 2.2-12-test-send-company-name-off-07
+- takeScreenshot: 2.2-11-test-send-company-name-off-07
 - extendedWaitUntil:
     visible: ".*テスト結果.*"
     timeout: 30000
 - assertNotVisible: ".*送信先エラー.*"
-- takeScreenshot: 2.2-12-test-send-company-name-off-08
+- takeScreenshot: 2.2-11-test-send-company-name-off-08

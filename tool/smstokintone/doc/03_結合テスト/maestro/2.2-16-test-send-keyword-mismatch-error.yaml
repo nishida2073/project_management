@@ -1,4 +1,4 @@
-# 2.2 送信先の設定: 振り分けが合わないときテスト送信でエラーになる（テスト仕様書の 2.2 の 20 に対応）
+# 2.2 送信先の設定: 振り分けが合わないときテスト送信でエラーになる（テスト仕様書の 2.2 の 16 に対応）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 # 外部条件: kintone 接続と SMS 受信が必要
@@ -6,7 +6,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: setup/setup-import-environment.yaml
 - launchApp
 - tapOn: "アプリの設定"
-- takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-01
+- takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-01
 - runFlow:
     file: common/scroll-down-to-id.yaml
     env:
@@ -17,9 +17,9 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: swCompanyNameExtractionEnabled
       INDEX: 0
 - pressKey: Back
-- takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-02
+- takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-02
 - tapOn: "送信先の設定"
-- takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-03
+- takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-03
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -40,7 +40,7 @@ appId: jp.co.nttdata_univ.smstokintone
     element: "テスト送信"
     direction: DOWN
 - tapOn: "テスト送信"
-- takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-04
+- takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-04
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
@@ -57,14 +57,14 @@ appId: jp.co.nttdata_univ.smstokintone
 - inputText: "${TEST_BODY_LINE2}"
 - pressKey: Enter
 - inputText: "${TEST_BODY_LINE3}"
-- takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-05
+- takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-05
 - hideKeyboard
 - tapOn: "送信"
-- takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-06
+- takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-06
 - runFlow:
     file: common/assert-text-visible.yaml
     env:
       TEXT: "(?s).*送信先エラー.*"
 # 注: 振り分けエラーには登録済みの振り分けキーワードが表示される（SendTargetSettingsActivity.kt:268-270）。抽出された会社名は表示されない。
 - assertVisible: "(?s).*${EXPECTED_COMPANY_NAME}.*"
-- takeScreenshot: 2.2-20-test-send-keyword-mismatch-error-07
+- takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-07
