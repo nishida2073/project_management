@@ -33,6 +33,10 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: swCompanyNameAutoConversionEnabled
       INDEX: 0
 - runFlow:
+    file: common/scroll-up-by-id.yaml
+    env:
+      ID: rbSearchFiltersVisible
+- runFlow:
     file: common/scroll-down-and-tap-by-id.yaml
     env:
       ID: rbSearchFiltersVisible
