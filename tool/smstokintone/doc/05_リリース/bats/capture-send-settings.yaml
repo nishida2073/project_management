@@ -1,4 +1,5 @@
 # 3.1 送信先の設定の画像を撮る（05_リリース/screenshots に出力する名前）
+# 注: テスト送信は 1 つ目の送信先（index 0）で行う。コピーと削除より前に行う
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
@@ -28,6 +29,21 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "統合条件"
     direction: DOWN
 - takeScreenshot: send_settings_integration_conditions_select_01
+- repeat:
+    times: 10
+    commands:
+      - swipe:
+          direction: DOWN
+- scrollUntilVisible:
+    element:
+      text: "テスト送信"
+      index: 0
+    direction: DOWN
+- tapOn:
+    text: "テスト送信"
+    index: 0
+- takeScreenshot: send_settings_test_send_tap_01
+- pressKey: Back
 - scrollUntilVisible:
     element:
       text: "コピー"
@@ -40,13 +56,4 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     text: "削除"
     index: 0
-- scrollUntilVisible:
-    element:
-      text: "テスト送信"
-    direction: DOWN
-- tapOn:
-    text: "テスト送信"
-    index: 0
-- takeScreenshot: send_settings_test_send_tap_01
-- pressKey: Back
 - takeScreenshot: send_settings_save_tap_01
