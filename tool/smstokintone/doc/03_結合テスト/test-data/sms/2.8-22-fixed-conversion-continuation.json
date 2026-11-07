@@ -4,13 +4,14 @@
     "body": "test-company\ntest-taro\nbody-test-7",
     "receive": true,
     "delayed": true,
-    "triggerActivity": "LogActivity", "delaySeconds": 3
+    "triggerActivity": "LogActivity",
+    "delaySeconds": 3
   },
   {
     "address": "0312345801",
     "body": "single-line-no-company",
     "receive": true,
     "delayed": true,
-    "triggerActivity": "LogActivity", "delaySeconds": 3
+    "delaySeconds": 60
   }
 ]
