@@ -16,5 +16,9 @@ appId: jp.co.nttdata_univ.smstokintone
 - extendedWaitUntil:
     visible: "(?s).*SMSの(登録|更新)に成功しました.*"
     timeout: 180000
+- runFlow:
+    file: common/wait-seconds.yaml
+    env:
+      WAIT_SECONDS: 15
 - assertNotVisible: "(?s).*抽出状況が異常なため、SMSを返信しました.*"
 - takeScreenshot: 2.8-18-auto-reply-extraction-success-02

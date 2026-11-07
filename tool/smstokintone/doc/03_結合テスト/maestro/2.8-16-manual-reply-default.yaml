@@ -17,5 +17,9 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-visible-by-text.yaml
     env:
       TEXT: "(?s).*SMSの送信先が存在しません.*"
+- runFlow:
+    file: common/wait-seconds.yaml
+    env:
+      WAIT_SECONDS: 15
 - assertNotVisible: "(?s).*抽出状況が異常なため、SMSを返信しました.*"
 - takeScreenshot: 2.8-16-manual-reply-default-02

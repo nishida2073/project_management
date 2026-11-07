@@ -1,6 +1,6 @@
 # 2.8 自動処理: SMSを受信すると、登録のログと引継ぎ内容が残る（テスト仕様書の 2.8 の 1 に対応）
 # 外部条件: 別端末から SMS を送る。送信元 0312345801、本文は 1 行目「test-company」、2 行目「test-taro」、3 行目「body-test-1」。ログの画面で待つ間（下の extendedWaitUntil）に別端末から送る
-# 未確認: ログの一覧に送信先名（test-send-target-1）が表示されるかは未確認。kintone の登録内容は kintone 側で確認する
+# 注: ログの一覧に送信先名（test-send-target-1）が表示されることは確認する。成功の文言との対応（同じ送信完了の行か）は、表示が別の要素のため確認しない。kintone の登録内容は kintone 側で確認する
 # 未確認: 送信先の設定の接続先（サブドメイン）が JSON の値のまま変わらないことは、接続情報のため flow には書かない。手動で確認する。送信先名の確認は下の assertVisible で行う
 appId: jp.co.nttdata_univ.smstokintone
 ---
@@ -18,6 +18,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - extendedWaitUntil:
     visible: "(?s).*SMSの(登録|更新)に成功しました.*"
     timeout: 180000
+- assertVisible: "(?s).*test-send-target-1.*"
 - takeScreenshot: 2.8-01-receive-auto-process-02
 - pressKey: Back
 - tapOn: "送信先の設定"

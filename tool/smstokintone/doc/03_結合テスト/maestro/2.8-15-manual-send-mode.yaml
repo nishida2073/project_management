@@ -27,6 +27,10 @@ appId: jp.co.nttdata_univ.smstokintone
 - extendedWaitUntil:
     visible: "(?s).*SMSを受信しました.*"
     timeout: 180000
+- runFlow:
+    file: common/wait-seconds.yaml
+    env:
+      WAIT_SECONDS: 15
 - assertNotVisible: "(?s).*SMSの送信を開始しました.*"
 - assertNotVisible: "(?s).*SMSの(登録|更新)に成功しました.*"
 - takeScreenshot: 2.8-15-manual-send-mode-02

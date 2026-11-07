@@ -3,12 +3,14 @@
     "address": "0312345802",
     "body": "body-only-failed",
     "receive": true,
-    "delayed": true
+    "delayed": true,
+    "delaySeconds": 90
   },
   {
     "address": "0312345802",
     "body": "body-only-failed-2",
     "receive": true,
-    "delayed": true
+    "delayed": true,
+    "delaySeconds": 100
   }
 ]

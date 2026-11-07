@@ -3,12 +3,14 @@
     "address": "0312345801",
     "body": "test-company\ntest-taro\nbody-test-1",
     "receive": true,
-    "delayed": true
+    "delayed": true,
+    "delaySeconds": 90
   },
   {
     "address": "0312345801",
     "body": "body-test-3",
     "receive": true,
-    "delayed": true
+    "delayed": true,
+    "delaySeconds": 180
   }
 ]

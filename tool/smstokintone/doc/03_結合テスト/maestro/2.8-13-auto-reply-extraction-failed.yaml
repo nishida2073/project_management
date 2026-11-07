@@ -22,4 +22,5 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-visible-by-text.yaml
     env:
       TEXT: "返信内容"
+- assertVisible: "(?s).*test-reply-fa-body.*"
 - takeScreenshot: 2.8-13-auto-reply-extraction-failed-03

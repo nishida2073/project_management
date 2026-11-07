@@ -40,14 +40,13 @@ foreach ($m in $triggered) {
     $arg = ([string]$m.body) -replace "`r?`n", '\n'
     & adb -s $Device emu sms send $m.address $arg | Out-Host
 }
-if (@($items | Where-Object { $_.receive -and $_.delayed -and -not $_.triggerActivity }).Count -gt 0) {
-    $wait = $DelaySeconds
-    foreach ($m in $items) { if ($m.delaySeconds) { $wait = [int]$m.delaySeconds } }
-    Start-Sleep -Seconds $wait
-    foreach ($m in $items) {
-        if ($m.receive -and $m.delayed -and -not $m.triggerActivity) {
-            $arg = ([string]$m.body) -replace "`r?`n", '\n'
-            & adb -s $Device emu sms send $m.address $arg | Out-Host
-        }
+$delayed = @($items | Where-Object { $_.receive -and $_.delayed -and -not $_.triggerActivity })
+if ($delayed.Count -gt 0) {
+    $elapsed = 0
+    $schedule = foreach ($m in $delayed) { [pscustomobject]@{ At = $(if ($m.delaySeconds) { [int]$m.delaySeconds } else { $DelaySeconds }); Item = $m } }
+    foreach ($s in ($schedule | Sort-Object At)) {
+        if ($s.At -gt $elapsed) { Start-Sleep -Seconds ($s.At - $elapsed); $elapsed = $s.At }
+        $arg = ([string]$s.Item.body) -replace "`r?`n", '\n'
+        & adb -s $Device emu sms send $s.Item.address $arg | Out-Host
     }
 }

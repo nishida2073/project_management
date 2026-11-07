@@ -69,6 +69,7 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/refresh-log-until-visible.yaml
     env:
       TEXT: "(?s).*SMSの(登録|更新)に成功しました.*"
+- assertVisible: "(?s).*test-send-target-1.*"
 - longPressOn: "(?s).*SMSを受信しました.*"
 - runFlow:
     file: common/assert-visible-by-text.yaml

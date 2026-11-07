@@ -16,4 +16,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - extendedWaitUntil:
     visible: "(?s).*SMSの(登録|更新)に成功しました.*"
     timeout: 180000
+- assertVisible: "(?s).*test-send-target-1.*"
 - takeScreenshot: 2.8-11-partial-match-send-02
