@@ -1,4 +1,5 @@
 # 4.2 SMSの検索の画像を撮る（05_リリース/screenshots に出力する名前）
+# 注: 受信用の SMS（log-sms.json）は run-capture.bat が sms-search のときに送る
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
@@ -7,10 +8,18 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "送信先の設定"
 - takeScreenshot: sms_search_top_tap_01
 - tapOn: "SMSの検索"
+- assertVisible: "検索条件"
 - takeScreenshot: sms_search_screen_open_01
+- extendedWaitUntil:
+    visible: '(?s).*body-manual.*'
+    timeout: 120000
 - takeScreenshot: sms_search_list_view_01
 - takeScreenshot: sms_search_conditions_input_01
+- tapOn: "検索"
 - takeScreenshot: sms_search_search_tap_01
+- tapOn:
+    text: '(?s).*body-manual.*'
+    index: 0
 - takeScreenshot: sms_search_list_select_01
 - takeScreenshot: sms_search_send_tap_01
 - takeScreenshot: sms_search_queue_count_check_01

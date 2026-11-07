@@ -1,4 +1,5 @@
 # 5.1 ログの一覧の画像を撮る（05_リリース/screenshots に出力する名前）
+# 注: 受信用の SMS（log-sms.json）は run-capture.bat が log のときに送る
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
@@ -7,7 +8,12 @@ appId: jp.co.nttdata_univ.smstokintone
 - assertVisible: "送信先の設定"
 - takeScreenshot: log_top_tap_01
 - tapOn: "ログの確認"
+- assertVisible: "ログの一覧"
 - takeScreenshot: log_screen_open_01
+- runFlow:
+    file: ../../03_結合テスト/maestro/common/refresh-log-until-visible.yaml
+    env:
+      TEXT: '\[受信完了\].*'
 - takeScreenshot: log_list_check_01
 - takeScreenshot: log_refresh_tap_01
 - takeScreenshot: log_delete_tap_01
