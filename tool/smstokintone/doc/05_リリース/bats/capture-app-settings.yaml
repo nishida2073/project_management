@@ -113,8 +113,8 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "自動送信の対象"
     direction: UP
 - swipe:
-    start: "50%, 35%"
-    end: "50%, 65%"
+    start: "50%, 30%"
+    end: "50%, 63%"
 - takeScreenshot: app_settings_send_mode_select_01
 - repeat:
     times: 10
@@ -125,9 +125,6 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       text: "SMSの返信"
     direction: UP
-- swipe:
-    start: "50%, 35%"
-    end: "50%, 65%"
 - takeScreenshot: app_settings_reply_mode_select_01
 - repeat:
     times: 10
@@ -139,8 +136,8 @@ appId: jp.co.nttdata_univ.smstokintone
       text: "SMSの情報抽出"
     direction: UP
 - swipe:
-    start: "50%, 35%"
-    end: "50%, 65%"
+    start: "50%, 25%"
+    end: "50%, 49%"
 - takeScreenshot: app_settings_extraction_select_01
 - repeat:
     times: 10
@@ -151,9 +148,6 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       text: "SMSの引継ぎ"
     direction: UP
-- swipe:
-    start: "50%, 35%"
-    end: "50%, 65%"
 - takeScreenshot: app_settings_continuation_select_01
 - repeat:
     times: 10
@@ -164,7 +158,4 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       text: "ログ"
     direction: UP
-- swipe:
-    start: "50%, 35%"
-    end: "50%, 65%"
 - takeScreenshot: app_settings_log_select_01

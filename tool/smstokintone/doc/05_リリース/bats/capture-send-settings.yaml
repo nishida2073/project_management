@@ -18,16 +18,25 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       text: "接続先"
     direction: DOWN
+- swipe:
+    start: "50%, 60%"
+    end: "50%, 46%"
 - takeScreenshot: send_settings_kintone_input_01
 - scrollUntilVisible:
     element:
       text: "フィールドコード"
     direction: DOWN
+- swipe:
+    start: "50%, 55%"
+    end: "50%, 50%"
 - takeScreenshot: send_settings_field_code_input_01
 - scrollUntilVisible:
     element:
       text: "統合条件"
     direction: DOWN
+- swipe:
+    start: "50%, 58%"
+    end: "50%, 49%"
 - takeScreenshot: send_settings_integration_conditions_select_01
 - repeat:
     times: 10
