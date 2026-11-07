@@ -1,0 +1,17 @@
+# 3.2 アプリの設定の画像を撮る（05_リリース/screenshots に出力する名前）
+appId: jp.co.nttdata_univ.smstokintone
+---
+- runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
+- stopApp
+- launchApp
+- takeScreenshot: top_app_settings_tap_01
+- tapOn: "アプリの設定"
+- takeScreenshot: app_settings_screen_open_01
+- takeScreenshot: app_settings_read_permission_allow_01
+- takeScreenshot: app_settings_receive_permission_allow_01
+- takeScreenshot: app_settings_send_permission_allow_01
+- takeScreenshot: app_settings_send_mode_select_01
+- takeScreenshot: app_settings_reply_mode_select_01
+- takeScreenshot: app_settings_extraction_select_01
+- takeScreenshot: app_settings_continuation_select_01
+- takeScreenshot: app_settings_log_select_01

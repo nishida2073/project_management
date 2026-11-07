@@ -1,0 +1,14 @@
+# 5.1 ログの一覧の画像を撮る（05_リリース/screenshots に出力する名前）
+appId: jp.co.nttdata_univ.smstokintone
+---
+- runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
+- stopApp
+- launchApp
+- takeScreenshot: log_top_tap_01
+- tapOn: "ログの確認"
+- takeScreenshot: log_screen_open_01
+- takeScreenshot: log_list_check_01
+- takeScreenshot: log_refresh_tap_01
+- takeScreenshot: log_delete_tap_01
+- takeScreenshot: log_delete_confirm_tap_01
+- takeScreenshot: log_extraction_result_check_01

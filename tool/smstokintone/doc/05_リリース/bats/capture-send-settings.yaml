@@ -1,0 +1,46 @@
+# 3.1 送信先の設定の画像を撮る（05_リリース/screenshots に出力する名前）
+appId: jp.co.nttdata_univ.smstokintone
+---
+- runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
+- stopApp
+- launchApp
+- takeScreenshot: top_send_settings_tap_01
+- tapOn: "送信先の設定"
+- assertVisible: "設定 1"
+- takeScreenshot: send_settings_screen_open_01
+- takeScreenshot: send_settings_add_tap_01
+- tapOn: "設定を追加"
+- assertVisible: "設定 2"
+- takeScreenshot: send_settings_send_target_name_input_01
+- scrollUntilVisible:
+    element:
+      text: "接続先"
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      text: "フィールドコード"
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      text: "統合条件"
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      text: "コピー"
+    direction: UP
+- tapOn:
+    text: "コピー"
+    index: 0
+- takeScreenshot: send_settings_delete_tap_01
+- tapOn:
+    text: "削除"
+    index: 0
+- scrollUntilVisible:
+    element:
+      text: "テスト送信"
+    direction: DOWN
+- tapOn:
+    text: "テスト送信"
+    index: 0
+- pressKey: Back
+- takeScreenshot: send_settings_save_tap_01

@@ -1,0 +1,14 @@
+# 3.4 設定のインポート・エクスポートの画像を撮る（05_リリース/screenshots に出力する名前）
+appId: jp.co.nttdata_univ.smstokintone
+---
+- runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
+- stopApp
+- launchApp
+- takeScreenshot: top_settings_import_export_tap_01
+- tapOn: "設定のインポート・エクスポート"
+- takeScreenshot: settings_import_export_screen_open_01
+- takeScreenshot: settings_import_export_export_tap_01
+- takeScreenshot: settings_import_export_file_select_tap_01
+- takeScreenshot: settings_import_export_content_check_01
+- takeScreenshot: settings_import_export_import_tap_01
+- takeScreenshot: settings_import_export_confirm_dialog_tap_01
