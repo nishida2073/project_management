@@ -76,9 +76,5 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow:
     file: common/assert-visible-by-text.yaml
     env:
-      TEXT: "(?s).*送信先名が重複しています.*"
-- runFlow:
-    file: common/assert-visible-by-text.yaml
-    env:
-      TEXT: "(?s).*${DUPLICATE_SEND_TARGET_NAME}.*"
+      TEXT: "(?s).*送信先名が重複しています\n${DUPLICATE_SEND_TARGET_NAME}.*"
 - takeScreenshot: 2.2-14-save-duplicate-name-error-03

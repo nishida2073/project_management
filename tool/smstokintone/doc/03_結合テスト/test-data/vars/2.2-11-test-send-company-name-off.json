@@ -1,4 +1,5 @@
 {
-  "TEST_BODY": "sample-company, test-taro",
+  "TEST_BODY_LINE1": "sample-company",
+  "TEST_BODY_LINE2": "test-taro",
   "SETUP_FILE_PATTERN": "env_base.*"
 }
