@@ -30,4 +30,9 @@ appId: jp.co.nttdata_univ.smstokintone
       ID: tvPermissionStatus
       INDEX: 0
       TEXT: "許可済み"
+- runFlow:
+    file: common/assert-not-visible-by-id.yaml
+    env:
+      ID: btnRequestPermission
+      INDEX: 0
 - takeScreenshot: 2.3-28-receive-permission-grant-02

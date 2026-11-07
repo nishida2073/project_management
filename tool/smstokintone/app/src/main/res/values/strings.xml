@@ -92,7 +92,7 @@
     <string name="dialog_title_send_target_settings_test_send_result">テスト結果</string>
     <string name="dialog_message_send_target_settings_test_send_result_failure">送信失敗\n\n%1$s</string>
     <string name="dialog_message_send_target_settings_test_send_result_network_error">通信エラー\n\n%1$s</string>
-    <string name="dialog_message_send_target_settings_test_send_routing_unmatched">送信先エラー\n\n振り分け設定（会社名）:%1$s</string>
+    <string name="dialog_message_send_target_settings_test_send_routing_unmatched">送信先エラー\n\n振り分け設定（会社名）：%1$s</string>
     <string name="label_send_target_settings_test_send_body_template_no_keywords">NTTデータ○○○\nテスト太郎\n\nこれはアプリからのテスト送信です</string>
     <string name="label_send_target_settings_test_send_body_template_exists_keywords">%1$s\nテスト太郎\n\nこれはアプリからのテスト送信です</string>
     <string name="label_send_target_settings_test_send_body_template_company_name_extraction_disabled">テスト太郎\n\nこれはアプリからのテスト送信です</string>

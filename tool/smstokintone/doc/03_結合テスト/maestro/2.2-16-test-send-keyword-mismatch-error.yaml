@@ -65,5 +65,5 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "(?s).*送信先エラー.*"
 # 注: 振り分けエラーには登録済みの振り分けキーワードが表示される（SendTargetSettingsActivity.kt:268-270）。抽出された会社名は表示されない。
-- assertVisible: "(?s).*送信先エラー.*振り分け設定（会社名）:${EXPECTED_COMPANY_NAME}.*"
+- assertVisible: "(?s).*送信先エラー.*振り分け設定（会社名）：${EXPECTED_COMPANY_NAME}.*"
 - takeScreenshot: 2.2-16-test-send-keyword-mismatch-error-07
