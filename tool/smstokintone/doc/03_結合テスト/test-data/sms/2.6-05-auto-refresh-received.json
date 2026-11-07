@@ -3,6 +3,8 @@
     "address": "0312345605",
     "body": "test-company\ntest-taro\nbody-c",
     "receive": true,
-    "delayed": true
+    "delayed": true,
+    "triggerActivity": "LogActivity",
+    "delaySeconds": 3
   }
 ]

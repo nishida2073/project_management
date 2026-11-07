@@ -1,6 +1,6 @@
 # 2.7 SMSの検索: 抽出状況の異常だけで検索すると、抽出が異常の SMS だけが表示される（テスト仕様書の 2.7 の 5 に対応）
 # 外部条件: 端末に抽出が異常の SMS と、正常の SMS がある
-# 注: 一覧の行の抽出状況は、異常の印 🆖（strings.xml の icon_extraction_failed）で確認する。凡例にも 🆖 があるため、行の本文（${SEARCH_ABNORMAL_ROW_TEXT}）と組み合わせて確認する。正常の印 🆗 の行の本文（${SEARCH_NORMAL_ROW_TEXT}）は表示されないことを確認する
+# 注: 一覧の行の抽出状況は、異常の印 🆖（strings.xml の icon_extraction_failed）で確認する。凡例にも 🆖 があるため、行の本文（${SEARCH_ABNORMAL_ROW_TEXT}）と組み合わせて確認する。正常の SMS（${SEARCH_NORMAL_ROW_TEXT}）が表示されないことは未確認
 # 外部条件: ${SEARCH_ABNORMAL_ROW_TEXT} は抽出が異常の SMS（本文 1 行だけ）の本文に含まれる文字、${SEARCH_NORMAL_ROW_TEXT} は抽出が正常の SMS の本文に含まれる文字（vars）。実施日に端末の SMS に合わせて書き換える
 appId: jp.co.nttdata_univ.smstokintone
 ---

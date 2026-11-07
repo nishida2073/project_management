@@ -1,6 +1,6 @@
 # 2.6 ログ: 引継ぎの SMS の送信元に、氏名を表示しない設定では電話番号だけが表示される（テスト仕様書の 2.6 の 12 に対応）
 # 前提（フローで設定）: このフローで引継ぎ内容の氏名表示をオフにする
-# 外部条件: 引継ぎ内容の送信元（test-sender-a）から SMS を 1 通受信する（下の assert の待ち時間（60 秒）の間に受信させる）
+# 外部条件: 引継ぎ内容の送信元（0312345611）から SMS を 1 通受信する（下の assert の待ち時間（60 秒）の間に受信させる）
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml

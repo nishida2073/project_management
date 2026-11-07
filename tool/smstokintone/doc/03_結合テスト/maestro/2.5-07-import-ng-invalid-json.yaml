@@ -36,7 +36,7 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-visible-by-text.yaml
     env:
       TEXT: "インポートエラー"
-- assertVisible: "(?s).*ファイルの形式が正しくありません.*JSONとして読み込めません.*"
+- assertVisible: "(?s).*ファイルの形式が正しくありません（JSONとして読み込めません）。.*"
 - runFlow:
     file: common/tap-android-by-id.yaml
     env:

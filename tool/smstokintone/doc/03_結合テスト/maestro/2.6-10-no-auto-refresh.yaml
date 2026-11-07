@@ -1,7 +1,7 @@
 # 2.6 ログ: 自動更新をオフにすると、受信した SMS は「更新」を押すまで表示されない（テスト仕様書の 2.6 の 10 に対応）
 # 前提（フローで設定）: このフローで自動更新をオフにする
 # 外部条件: ログの画面を表示したまま、テストデータの SMS を 1 通受信する
-# 未確認: 「表示されない」の確認は、受信から待たずに判定する。自動更新の間隔（5 秒）を過ぎても表示されないことは、確認していない
+# 注: 受信後に 20 秒待ってから「表示されない」を確認する（自動更新の間隔は 5 秒）。最後に「更新」で表示されることを確かめ、SMS が届いていたことを示す
 appId: jp.co.nttdata_univ.smstokintone
 ---
 - runFlow: setup/setup-import-environment.yaml
@@ -24,6 +24,17 @@ appId: jp.co.nttdata_univ.smstokintone
     env:
       TEXT: "ログの一覧"
 - takeScreenshot: 2.6-10-no-auto-refresh-01
+- runFlow:
+    file: common/wait-seconds.yaml
+    env:
+      WAIT_SECONDS: 20
 - assertNotVisible:
     text: '(?s).*\[受信完了\].*'
 - takeScreenshot: 2.6-10-no-auto-refresh-02
+- runFlow:
+    file: common/scroll-down-and-tap-by-id.yaml
+    env:
+      ID: btnRefreshLog
+      INDEX: 0
+- assertVisible:
+    text: '(?s).*\[受信完了\].*'

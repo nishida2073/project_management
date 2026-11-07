@@ -1,0 +1,10 @@
+[
+  {
+    "address": "0312345610",
+    "body": "test-company\ntest-taro\nbody-off",
+    "receive": true,
+    "delayed": true,
+    "triggerActivity": "LogActivity",
+    "delaySeconds": 3
+  }
+]

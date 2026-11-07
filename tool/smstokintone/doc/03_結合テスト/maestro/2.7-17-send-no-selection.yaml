@@ -20,3 +20,16 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
 - tapOn: "選択したSMSを送信"
 - takeScreenshot: 2.7-17-send-no-selection-01
+- assertVisible: "検索条件"
+- pressKey: Back
+- tapOn: "ログの確認"
+- runFlow:
+    file: common/assert-visible-by-text.yaml
+    env:
+      TEXT: "ログの一覧"
+- runFlow:
+    file: common/scroll-down-and-tap-by-id.yaml
+    env:
+      ID: btnRefreshLog
+      INDEX: 0
+- assertNotVisible: '(?s).*\[送信開始\].*'
