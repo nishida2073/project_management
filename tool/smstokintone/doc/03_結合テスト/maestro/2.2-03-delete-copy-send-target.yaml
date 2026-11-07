@@ -23,4 +23,5 @@ appId: jp.co.nttdata_univ.smstokintone
       INDEX: 0
 - takeScreenshot: 2.2-03-delete-copy-send-target-02
 - assertNotVisible: "${SEND_TARGET_NAME}"
+- assertNotVisible: "設定 1"
 - takeScreenshot: 2.2-03-delete-copy-send-target-03

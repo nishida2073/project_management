@@ -35,11 +35,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow:
     file: common/assert-visible-by-text.yaml
     env:
-      TEXT: "(?s).*${EXPECTED_COMPANY_NAME}.*"
-- runFlow:
-    file: common/assert-visible-by-text.yaml
-    env:
-      TEXT: "(?s).*${EXPECTED_USER_NAME}.*"
+      TEXT: "(?s).*(?=.*${EXPECTED_COMPANY_NAME})(?=.*${EXPECTED_USER_NAME}).*"
 - tapOn: "送信"
 - takeScreenshot: 2.2-07-test-send-success-03
 - assertVisible: "(?s).*テスト結果.*"  # 成功時はタイトルに抽出アイコンが付くため、部分一致で確認する

@@ -31,6 +31,5 @@ appId: jp.co.nttdata_univ.smstokintone
     file: common/assert-visible-by-text.yaml
     env:
       TEXT: "入力エラー"
-- assertVisible: "(?s).*設定 2.*"
-- assertVisible: "(?s).*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"
+- assertVisible: "(?s).*設定 2.*送信先名・サブドメイン・認証情報・アプリID・フィールドコードは必須です.*"
 - takeScreenshot: 2.2-13-save-empty-send-target-error-06
