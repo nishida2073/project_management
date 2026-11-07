@@ -103,28 +103,68 @@ appId: jp.co.nttdata_univ.smstokintone
 - launchApp
 - tapOn: "アプリの設定"
 - assertVisible: "アプリの設定"
+- repeat:
+    times: 10
+    commands:
+      - swipe:
+          direction: UP
 - scrollUntilVisible:
     element:
-      text: "SMSの送信"
-    direction: DOWN
+      text: "自動送信の対象"
+    direction: UP
+- swipe:
+    start: "50%, 35%"
+    end: "50%, 65%"
 - takeScreenshot: app_settings_send_mode_select_01
+- repeat:
+    times: 10
+    commands:
+      - swipe:
+          direction: UP
 - scrollUntilVisible:
     element:
       text: "SMSの返信"
-    direction: DOWN
+    direction: UP
+- swipe:
+    start: "50%, 35%"
+    end: "50%, 65%"
 - takeScreenshot: app_settings_reply_mode_select_01
+- repeat:
+    times: 10
+    commands:
+      - swipe:
+          direction: UP
 - scrollUntilVisible:
     element:
       text: "SMSの情報抽出"
-    direction: DOWN
+    direction: UP
+- swipe:
+    start: "50%, 35%"
+    end: "50%, 65%"
 - takeScreenshot: app_settings_extraction_select_01
+- repeat:
+    times: 10
+    commands:
+      - swipe:
+          direction: UP
 - scrollUntilVisible:
     element:
       text: "SMSの引継ぎ"
-    direction: DOWN
+    direction: UP
+- swipe:
+    start: "50%, 35%"
+    end: "50%, 65%"
 - takeScreenshot: app_settings_continuation_select_01
+- repeat:
+    times: 10
+    commands:
+      - swipe:
+          direction: UP
 - scrollUntilVisible:
     element:
       text: "ログ"
-    direction: DOWN
+    direction: UP
+- swipe:
+    start: "50%, 35%"
+    end: "50%, 65%"
 - takeScreenshot: app_settings_log_select_01
