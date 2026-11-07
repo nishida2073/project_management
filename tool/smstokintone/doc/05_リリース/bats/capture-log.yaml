@@ -16,6 +16,17 @@ appId: jp.co.nttdata_univ.smstokintone
       TEXT: '\[受信完了\].*'
 - takeScreenshot: log_list_check_01
 - takeScreenshot: log_refresh_tap_01
-- takeScreenshot: log_delete_tap_01
-- takeScreenshot: log_delete_confirm_tap_01
+- tapOn:
+    text: "更新"
+    index: 0
+- longPressOn:
+    text: '(?s).*\[受信完了\].*'
+    index: 0
 - takeScreenshot: log_extraction_result_check_01
+- pressKey: Back
+- takeScreenshot: log_delete_tap_01
+- tapOn:
+    text: "削除"
+    index: 0
+- takeScreenshot: log_delete_confirm_tap_01
+- pressKey: Back

@@ -23,5 +23,8 @@ appId: jp.co.nttdata_univ.smstokintone
 - takeScreenshot: continuation_info_settings_screen_open_01
 - takeScreenshot: continuation_info_settings_keyword_input_01
 - takeScreenshot: continuation_info_settings_name_edit_01
+- tapOn:
+    text: "削除"
+    index: 0
 - takeScreenshot: continuation_info_settings_delete_tap_01
 - takeScreenshot: continuation_info_settings_save_tap_01

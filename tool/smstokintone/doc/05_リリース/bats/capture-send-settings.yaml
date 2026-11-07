@@ -44,9 +44,9 @@ appId: jp.co.nttdata_univ.smstokintone
     element:
       text: "テスト送信"
     direction: DOWN
-- takeScreenshot: send_settings_test_send_tap_01
 - tapOn:
     text: "テスト送信"
     index: 0
+- takeScreenshot: send_settings_test_send_tap_01
 - pressKey: Back
 - takeScreenshot: send_settings_save_tap_01
