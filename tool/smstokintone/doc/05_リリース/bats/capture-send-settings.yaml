@@ -4,6 +4,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
 - stopApp
 - launchApp
+- assertVisible: "送信先の設定"
 - takeScreenshot: top_send_settings_tap_01
 - tapOn: "送信先の設定"
 - assertVisible: "設定 1"
@@ -12,22 +13,53 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn: "設定を追加"
 - assertVisible: "設定 2"
 - takeScreenshot: send_settings_send_target_name_input_01
-- scrollUntilVisible:
-    element:
-      text: "接続先"
-    direction: DOWN
-- scrollUntilVisible:
-    element:
-      text: "フィールドコード"
-    direction: DOWN
-- scrollUntilVisible:
-    element:
-      text: "統合条件"
-    direction: DOWN
-- scrollUntilVisible:
-    element:
-      text: "コピー"
-    direction: UP
+- runFlow:
+    when:
+      notVisible: "接続先"
+    commands:
+      - repeat:
+          times: 10
+          commands:
+            - swipe:
+                direction: UP
+      - scrollUntilVisible:
+          element:
+            text: "接続先"
+          direction: UP
+- runFlow:
+    when:
+      notVisible: "フィールドコード"
+    commands:
+      - repeat:
+          times: 10
+          commands:
+            - swipe:
+                direction: UP
+      - scrollUntilVisible:
+          element:
+            text: "フィールドコード"
+          direction: UP
+- runFlow:
+    when:
+      notVisible: "統合条件"
+    commands:
+      - repeat:
+          times: 10
+          commands:
+            - swipe:
+                direction: UP
+      - scrollUntilVisible:
+          element:
+            text: "統合条件"
+          direction: UP
+- runFlow:
+    when:
+      notVisible: "コピー"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "コピー"
+          direction: UP
 - tapOn:
     text: "コピー"
     index: 0
@@ -35,10 +67,19 @@ appId: jp.co.nttdata_univ.smstokintone
 - tapOn:
     text: "削除"
     index: 0
-- scrollUntilVisible:
-    element:
-      text: "テスト送信"
-    direction: DOWN
+- runFlow:
+    when:
+      notVisible: "テスト送信"
+    commands:
+      - repeat:
+          times: 10
+          commands:
+            - swipe:
+                direction: UP
+      - scrollUntilVisible:
+          element:
+            text: "テスト送信"
+          direction: UP
 - tapOn:
     text: "テスト送信"
     index: 0

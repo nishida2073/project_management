@@ -4,6 +4,7 @@ appId: jp.co.nttdata_univ.smstokintone
 - runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
 - stopApp
 - launchApp
+- assertVisible: "送信先の設定"
 - takeScreenshot: log_top_tap_01
 - tapOn: "ログの確認"
 - takeScreenshot: log_screen_open_01
