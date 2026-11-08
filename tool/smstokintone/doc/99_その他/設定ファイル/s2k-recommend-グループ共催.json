@@ -1,0 +1,35 @@
+{
+  "appConfig": {
+    "extractionCompanyNameEnabled": true,
+    "extractionCompanyNameFixedConversions": [
+      {"from": "data", "to": "データ"}
+    ]
+  },
+  "sendTargetConfig": [
+    {
+      "sendTargetName": "地域",
+      "keywords": [
+        "NTTデータ北海道",
+        "北海道",
+        "NTTデータ東北",
+        "東北",
+        "NTTデータ信越",
+        "信越",
+        "NTTデータ東海",
+        "東海",
+        "NTTデータ北陸",
+        "北陸",
+        "NTTデータ関西",
+        "関西",
+        "NTTデータ中国",
+        "中国",
+        "NTTデータ四国",
+        "四国",
+        "NTTデータ九州",
+        "九州",
+        "NTTデータMCS",
+        "MCS"
+      ]
+    }
+  ]
+}
