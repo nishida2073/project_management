@@ -4,7 +4,7 @@
     [switch]$Force
 )
 if (!$ZipFile) {
-    $ZipFile = Join-Path $PSScriptRoot "..\..\avd-export\$Avd.zip"
+    $ZipFile = Join-Path $PSScriptRoot "$Avd.zip"
 }
 if (!(Test-Path -LiteralPath $ZipFile)) {
     Write-Host "ZIP が見つかりません: $ZipFile"
