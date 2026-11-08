@@ -4,6 +4,6 @@
     "body": "test-company\ntest-taro\nbody-search",
     "receive": true,
     "delayed": true,
-    "delaySeconds": 90
+    "delaySeconds": 1
   }
 ]

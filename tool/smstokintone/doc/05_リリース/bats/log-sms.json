@@ -1,9 +1,0 @@
-[
-  {
-    "address": "0312345601",
-    "body": "test-company\ntest-taro\nbody-manual",
-    "receive": true,
-    "delayed": true,
-    "delaySeconds": 90
-  }
-]
