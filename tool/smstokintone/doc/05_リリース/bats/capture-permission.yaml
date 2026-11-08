@@ -1,0 +1,17 @@
+# 3.2 端末の許可の全体の画像を撮る（05_リリース/screenshots に出力する名前）
+# _01: すべて許可しない状態、_02: すべて許可した状態。launchApp の permissions で許可を切り替えて起動する
+appId: jp.co.nttdata_univ.smstokintone
+---
+- runFlow: ../../03_結合テスト/maestro/setup/setup-import-environment.yaml
+- stopApp
+- launchApp:
+    permissions:
+      all: deny
+- tapOn: "アプリの設定"
+- takeScreenshot: app_settings_permission_allow_01
+- stopApp
+- launchApp:
+    permissions:
+      all: allow
+- tapOn: "アプリの設定"
+- takeScreenshot: app_settings_permission_allow_02
