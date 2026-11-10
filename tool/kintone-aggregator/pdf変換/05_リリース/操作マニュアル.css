@@ -1,0 +1,6 @@
+h5 { color: #000000; }
+h5::before { content: "■ "; }
+
+table {
+  font-size: 0.75em;
+}
