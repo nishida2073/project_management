@@ -54,7 +54,7 @@ const pageNumbers = flags.includes('--page-numbers');
 const landscape = flags.includes('--landscape');
 const header = flags.includes('--header');
 const imgWidthFlag = flags.find((f) => f.startsWith('--img-width='));
-const imgWidth = imgWidthFlag ? Number(imgWidthFlag.slice('--img-width='.length)) : null;
+const imgWidth = imgWidthFlag ? imgWidthFlag.slice('--img-width='.length) : null;
 const tocDepthFlag = flags.find((f) => f.startsWith('--toc-depth='));
 const tocDepth = tocDepthFlag ? Number(tocDepthFlag.slice('--toc-depth='.length)) : 3;
 const bookmarkDepthFlag = flags.find((f) => f.startsWith('--bookmark-depth='));
