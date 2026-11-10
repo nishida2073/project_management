@@ -1,8 +1,6 @@
 h5 { color: #000000; }
 h5::before { content: "■ "; }
 
-img { width:30%; }
-
 table {
   font-size: 0.75em;
 }
