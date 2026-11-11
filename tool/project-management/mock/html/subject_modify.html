@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/subject_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=subject" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>科目編集</h2>
+          <div class="sub">SBJ-001　システム開発入門の情報を編集します</div>
+        </div>
+        <a class="close-x" href="subject_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>科目コード</label>
+          <div class="form-control readonly">SBJ-001</div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>科目区分</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="subjectType" value="新CDPB"><span class="radio-dot"></span><span class="tag blue">新CDPB</span></label>
+            <label class="radio-option"><input type="radio" name="subjectType" value="旧CDPB"><span class="radio-dot"></span><span class="tag gray">旧CDPB</span></label>
+            <label class="radio-option"><input type="radio" name="subjectType" value="新入社員研修" checked><span class="radio-dot"></span><span class="tag orange">新入社員研修</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>科目名<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="システム開発入門">
+        </div>
+        <div class="form-field full">
+          <div class="sub-grid sub-row-header"><span>版</span><span>URL</span></div>
+          <div class="sub-list version-list" data-version-options="1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0">
+            <div class="sub-grid sub-row">
+              <div class="form-control number-select" data-options="1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0">
+                <input type="text" inputmode="decimal" value="1.0">
+                <span class="caret">▾</span>
+              </div>
+              <input type="text" class="form-control" value="https://example.com/docs/v1.0">
+              <div class="sub-remove">✕</div>
+            </div>
+            <div class="sub-grid sub-row">
+              <div class="form-control number-select" data-options="1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0">
+                <input type="text" inputmode="decimal" value="1.1">
+                <span class="caret">▾</span>
+              </div>
+              <input type="text" class="form-control" value="https://example.com/docs/v1.1">
+              <div class="sub-remove">✕</div>
+            </div>
+          </div>
+          <div class="link-btn add-row add-version-row">＋ 版を追加</div>
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="subject_list.html">キャンセル</a>
+        <a class="btn primary" href="subject_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/number-select.js" defer></script>
+<script src="js/version-rows.js" defer></script>
+<script src="js/toggle.js" defer></script>
+</body>
+</html>

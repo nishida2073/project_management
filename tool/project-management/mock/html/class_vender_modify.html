@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/class_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=assign" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>登壇管理一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>登壇管理編集</h2>
+          <div class="sub">001　受託_システム開発入門の登壇管理を編集します</div>
+        </div>
+        <a class="close-x" href="class_vender_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-section">メイン講師</div>
+        <div class="form-field">
+          <label>講師ベンダー名</label>
+          <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">株式会社NEUトレーニング<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>講師名</label>
+          <input type="text" class="form-control" value="田中 誠">
+        </div>
+        <div class="form-section">サブ講師</div>
+        <div class="form-field full">
+          <div class="sub-grid sub-row-header"><span>講師ベンダー名</span><span>講師名</span></div>
+          <div class="sub-list" data-vendor-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">
+            <div class="sub-grid sub-row">
+              <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">NDUパートナーズ<span class="caret">▾</span></div>
+              <input type="text" class="form-control" value="鈴木 花子">
+              <div class="sub-remove">✕</div>
+            </div>
+          </div>
+          <div class="link-btn add-row">＋ サブ講師を追加</div>
+        </div>
+        <div class="form-section">聴講</div>
+        <div class="form-field">
+          <label>聴講ベンダー名</label>
+          <div class="form-control js-select" data-options="株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>聴講者名</label>
+          <input type="text" class="form-control" placeholder="例）〇〇 〇〇">
+        </div>
+        <div class="form-section">動機付け</div>
+        <div class="form-field">
+          <label>動機付け会社名</label>
+          <input type="text" class="form-control" placeholder="例）株式会社NEUトレーニング">
+        </div>
+        <div class="form-field">
+          <label>動機付け担当者名</label>
+          <input type="text" class="form-control" placeholder="例）〇〇 〇〇">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="class_vender_list.html">キャンセル</a>
+        <a class="btn primary" href="class_vender_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+<script src="js/sub-rows.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/vendor_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=vendor" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>講師ベンダー編集</h2>
+          <div class="sub">VND-001　株式会社NEUトレーニングの情報を編集します</div>
+        </div>
+        <a class="close-x" href="vendor_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>講師ベンダーコード</label>
+          <div class="form-control readonly">VND-001</div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>講師ベンダー名<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="株式会社NEUトレーニング">
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>契約区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="contractType" value="業務委託" checked><span class="radio-dot"></span><span class="tag blue">業務委託</span></label>
+            <label class="radio-option"><input type="radio" name="contractType" value="業務提携"><span class="radio-dot"></span><span class="tag gray">業務提携</span></label>
+          </div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>契約年度（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box js-chip-select" data-options="2024年度,2025年度,2026年度,2027年度" data-chip-map='{"2024年度":"y2024","2025年度":"y2025","2026年度":"y2026","2027年度":"y2027"}'>
+            <span class="chip y2025">2025年度 <x>✕</x></span>
+            <span class="chip y2026">2026年度 <x>✕</x></span>
+            <span class="chip-add">＋ 年度を追加</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>電話番号</label>
+          <input type="tel" class="form-control" value="03-1234-5678">
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>住所</label>
+          <input type="text" class="form-control" value="東京都千代田区〇〇1-2-3">
+        </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea">ビジネス基礎研修を主に担当</textarea>
+        </div>
+        <div class="form-section">担当窓口</div>
+        <div class="form-field">
+          <label>担当者名</label>
+          <input type="text" class="form-control" value="佐々木　小次郎">
+        </div>
+        <div class="form-field">
+          <label>メールアドレス</label>
+          <input type="email" class="form-control" value="sasaki@neu-training.co.jp">
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row"><div class="toggle"><div class="knob"></div></div><span>稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn" href="vendor_list.html">キャンセル</a>
+        <a class="btn primary" href="vendor_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/chip-select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+</body>
+</html>

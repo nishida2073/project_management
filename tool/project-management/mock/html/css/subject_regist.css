@@ -1,0 +1,18 @@
+/* subject_regist.html 固有のスタイル */
+.app { position: relative; }
+.main { filter: blur(1.5px) brightness(0.94); }
+.content { padding: 24px 28px; }
+.table-card { height: 700px; margin-top: 16px; }
+
+.modal { width: 640px; }
+.modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 20px; }
+.btn { padding: 10px 20px; }
+
+.sub-list { display: flex; flex-direction: column; gap: 10px; }
+.sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.sub-row-header { margin-bottom: 6px; }
+.sub-row-header span { font-size: 12px; color: #5a6376; font-weight: 700; }
+.sub-row { position: relative; }
+.sub-remove { position: absolute; top: 50%; right: -24px; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 11px; border: 1px solid #e6eaf1; cursor: pointer; }
+.sub-remove:hover { background: #eef4ff; color: #2f6fed; border-color: #2f6fed; }
+.add-row { margin-top: 10px; width: fit-content; }
