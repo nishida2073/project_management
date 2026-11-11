@@ -1,0 +1,1 @@
+StaffEditor.init({ mode: 'edit' });

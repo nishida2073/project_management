@@ -1,0 +1,1 @@
+CustomerEditor.init({ mode: 'edit' });

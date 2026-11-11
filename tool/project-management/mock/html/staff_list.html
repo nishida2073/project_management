@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/staff_list.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=staff" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb-block">
+        <div class="crumb">マスタ管理<span>／</span>担当者</div>
+        <p class="crumb-sub">担当者情報を管理します</p>
+      </div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+
+    <div class="body-area">
+      <div class="content">
+        <div class="toolbar">
+          <div class="left">
+            <h1>担当者一覧</h1>
+          </div>
+          <div class="btn-group">
+            <a class="search-btn" href="staff_regist.html">新規登録</a>
+          </div>
+        </div>
+
+        <div class="filter-panel">
+          <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="担当者コード・担当者名で検索"></div>
+          <div class="field"><label>所属区分</label><div class="control small js-select" data-options="すべて,社内,パートナー">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>担当区分</label><div class="control js-select" data-options="すべて,案件,クラス">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>業務区分</label><div class="control js-select" data-options="すべて,営業,管理,実施">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>役職</label><div class="control js-select" data-options="すべて,PM,PL">すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>稼働状況</label><div class="control js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
+          <div class="search-btn">検索</div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-meta"><div class="count">全 <b id="staffCount">0</b> 件</div></div>
+          <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>担当者コード</th>
+                <th>所属区分</th>
+                <th>所属会社</th>
+                <th>担当者名</th>
+                <th>メールアドレス</th>
+                <th>担当区分</th>
+                <th>業務区分</th>
+                <th>役職</th>
+                <th>稼働状況</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="staffBody"></tbody>
+          </table>
+          </div>
+          <div class="pagination">
+            <div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">2</div><div class="page-btn">3</div><div class="page-btn">…</div><div class="page-btn">6</div><div class="page-btn">›</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+<script src="js/column-resize.js" defer></script>
+<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/staff-role/store/staff-role-store.js"></script>
+<script src="js/storage/job-type/store/job-type-store.js"></script>
+<script src="js/storage/position/store/position-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/staff/screens/staff-list.js"></script>
+</body>
+</html>

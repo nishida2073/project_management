@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/location_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=customer" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>顧客編集</h2>
+          <div class="sub" id="subLine">顧客の情報を編集します</div>
+        </div>
+        <a class="close-x" href="customer_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>顧客ID</label>
+          <div class="form-control readonly" id="customerId"></div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>顧客名<span class="req">必須</span></label>
+          <input type="text" class="form-control" id="customerName">
+        </div>
+        <div class="form-field full">
+          <label>担当者</label>
+          <input type="text" class="form-control" id="staff">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" href="customer_list.html">キャンセル</a>
+        <div id="saveBtn" class="btn primary">保存する</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/customer/store/customer-store.js"></script>
+<script src="js/storage/customer/screens/customer-editor.js"></script>
+<script src="js/storage/customer/entry/customer-modify.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+</body>
+</html>

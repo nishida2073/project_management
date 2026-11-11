@@ -36,7 +36,7 @@
       </div>
 
       <div class="table-card">
-        <div class="table-meta"><div class="count">全 <b>5</b> 件</div></div>
+        <div class="table-meta"><div class="count">全 <b id="userCount">0</b> 件</div></div>
         <div class="table-scroll">
         <table>
           <thead>
@@ -49,22 +49,16 @@
               <th>操作</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td>USR-001</td><td>山田 太郎</td><td>yamada@company.co.jp</td><td><span class="tag blue">管理者</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="user_modify.html">編集</a></td></tr>
-            <tr><td>USR-002</td><td>佐藤 一郎</td><td>sato@company.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="user_modify.html">編集</a></td></tr>
-            <tr><td>USR-003</td><td>荒牧 麻衣</td><td>aramaki@company.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="user_modify.html">編集</a></td></tr>
-            <tr><td>USR-004</td><td>中村 桂</td><td>nakamura@company.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state off"><span class="dot"></span>停止中</span></td><td><a class="search-btn" href="user_modify.html">編集</a></td></tr>
-            <tr><td>USR-005</td><td>藤井 誠</td><td>fujii@neu-training.co.jp</td><td><span class="tag gray">一般ユーザー</span></td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="user_modify.html">編集</a></td></tr>
-          </tbody>
+          <tbody id="userBody"></tbody>
         </table>
-        </div>
-        <div class="pagination">
-          <div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">›</div>
         </div>
       </div>
     </div>
   </div>
 </div>
+<script src="js/storage/authority/store/authority-store.js"></script>
+<script src="js/storage/user/store/user-store.js"></script>
+<script src="js/storage/user/screens/user-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>

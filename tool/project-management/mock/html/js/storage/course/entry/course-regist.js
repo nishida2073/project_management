@@ -1,0 +1,1 @@
+CourseEditor.init({ mode: 'new' });

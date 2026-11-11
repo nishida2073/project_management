@@ -1,0 +1,1 @@
+VendorEditor.init({ mode: 'new' });

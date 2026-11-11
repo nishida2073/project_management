@@ -12,7 +12,7 @@
   <div class="main">
     <div class="topbar">
       <div class="crumb-block">
-        <div class="crumb">クラス管理<span>／</span>クラス運営進捗</div>
+        <div class="crumb">クラス管理<span>／</span>進捗管理</div>
         <p class="crumb-sub">クラスの運営進捗を管理します</p>
       </div>
       <div class="user">
@@ -46,7 +46,7 @@
 
       <div class="table-card">
         <div class="table-meta">
-          <div class="count">全 <b>128</b> 件（うち遅延 <b style="color:#d43c40">6</b> 件）</div>
+          <div class="count">全 <b id="progressCount">0</b> 件（うち遅延 <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
         </div>
         <div class="scroll-outer" id="scrollArea">
           <table>
@@ -85,64 +85,15 @@
   </div>
 </div>
 
-<script>
-var PERSON_STEP_INDEXES = [0, 2, 4, 6, 10];
-function chip(status, plan, actual, owner){
-  var delayed = /-delay$/.test(status);
-  var baseStatus = status.replace('-delay', '');
-  var cls = {wait:'wait', progress:'progress', done:'done'}[baseStatus];
-  var label = {wait:'実施前', progress:'実施中', done:'完了'}[baseStatus];
-  var delayMark = delayed ? '<span class="badge delay">⚠ 遅延</span>' : '';
-  var actualText = actual ? actual : '-';
-  return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge '+cls+'">'+label+'</span>'+delayMark+'</div><div class="dates-col"><div class="dates"><span>予定日 '+plan+'</span></div><div class="dates"><span>実施日 '+actualText+' '+owner+'</span></div></div></div>';
-}
-function overall(status){
-  var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
-  var label = {wait:'実施前', progress:'実施中', done:'完了', delay:'遅延あり'}[status];
-  return '<span class="overall '+cls+'">'+label+'</span>';
-}
-var rows = [
- {year:'2026年度', course:'受託_システム開発入門', code:'BC02B', cls:'001', related:'002, 003', start:'2026/09/02', end:'2026/09/04', overall:'progress', person:'佐藤 一郎',
-  steps:['done','done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'公募_基盤技術基礎', code:'GC01A', cls:'001', related:'-', start:'2026/09/08', end:'2026/09/09', overall:'done', person:'鈴木 花子',
-  steps:['done','done','done','done','done','done','done','done','done','done','done','wait']},
- {year:'2026年度', course:'受託_AP要件定義基礎', code:'ND02B', cls:'001', related:'-', start:'2026/09/10', end:'2026/09/12', overall:'delay', person:'高橋 健',
-  steps:['done','wait-delay','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'受託_システム開発入門', code:'BC02B', cls:'002', related:'001', start:'2026/09/15', end:'2026/09/17', overall:'progress', person:'佐藤 一郎',
-  steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'公募_基盤技術基礎', code:'GC01A', cls:'002', related:'001', start:'2026/09/18', end:'2026/09/18', overall:'wait', person:'伊藤 美咲',
-  steps:['done','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait','wait']},
- {year:'2026年度', course:'受託_AP要件定義基礎', code:'ND02B', cls:'002', related:'-', start:'2026/09/24', end:'2026/09/26', overall:'done', person:'高橋 健',
-  steps:['done','done','done','done','done','done','done','done','done','done','done','progress']},
- {year:'2026年度', course:'受託_AP設計・製造基礎', code:'CE01B', cls:'001', related:'-', start:'2026/09/28', end:'2026/09/29', overall:'progress', person:'渡辺 直樹',
-  steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait']}
-];
-var dates = ['2026/08/20','2026/08/25','2026/08/27','2026/08/29','2026/09/01','2026/09/03','2026/09/05','2026/09/08','2026/09/10','2026/09/12','2026/09/14','2026/09/16'];
-var tbody = document.getElementById('tbody');
-rows.forEach(function(r){
-  var tr = document.createElement('tr');
-  var html = '';
-  html += '<td class="sticky" style="left:0;">'+r.year+'</td>';
-  html += '<td class="sticky" style="left:90px;"><div style="font-weight:700;">'+r.course+'</div><div style="font-size:11px;color:#9aa4b5;">'+r.code+'</div></td>';
-  html += '<td class="sticky" style="left:280px;"><div style="font-weight:700;">'+r.cls+'</div><div style="font-size:11px;color:#9aa4b5;">'+r.related+'</div></td>';
-  html += '<td class="sticky" style="left:410px;">'+r.start+'</td>';
-  html += '<td class="sticky" style="left:530px;">'+r.end+'</td>';
-  html += '<td class="sticky" style="left:650px;">'+r.person+'</td>';
-  html += '<td class="sticky shadow" style="left:760px;">'+overall(r.overall)+'</td>';
-  r.steps.forEach(function(s, i){
-    var actual = (s==='done') ? dates[i] : (s==='progress' ? '' : '');
-    var owner = (PERSON_STEP_INDEXES.indexOf(i) !== -1) ? r.person : '運営チーム';
-    html += '<td>'+chip(s, dates[i], actual, owner)+'</td>';
-  });
-  html += '<td><a class="search-btn" href="class_progress_modify.html">編集</a></td>';
-  tr.innerHTML = html;
-  tbody.appendChild(tr);
-});
-
-if (location.search.indexOf('scrolled=1') !== -1) {
-  document.getElementById('scrollArea').scrollLeft = 1316;
-}
-</script>
+<script src="js/storage/project/store/project-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/course/store/course-store.js"></script>
+<script src="js/storage/location/store/location-store.js"></script>
+<script src="js/storage/class/store/class-store.js"></script>
+<script src="js/storage/task/store/task-store.js"></script>
+<script src="js/storage/class-progress/store/progress-store.js"></script>
+<script src="js/storage/class-progress/screens/class-progress-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>

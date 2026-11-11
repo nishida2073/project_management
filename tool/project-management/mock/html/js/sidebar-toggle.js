@@ -7,3 +7,10 @@
     }
   });
 })();
+
+window.addEventListener('message', function (e) {
+  if (e.data && e.data.type === 'reset-storage') {
+    try { localStorage.clear(); } catch (err) {}
+    location.reload();
+  }
+});

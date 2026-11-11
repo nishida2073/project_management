@@ -1,0 +1,1 @@
+ProjectEditor.init({ mode: 'edit' });

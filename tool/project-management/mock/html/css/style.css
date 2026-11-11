@@ -8,7 +8,7 @@
 html, body { font-family: "Yu Gothic UI", "Meiryo", "Segoe UI", sans-serif; background: #eef1f5; color: #22262b; }
 
 /* App shell */
-.app { display: flex; width: 100%; min-height: 100vh; }
+.app { display: flex; width: 100%; height: 100vh; }
 .app > iframe { height: auto; align-self: stretch; }
 .app > iframe { transition: width .2s ease; }
 .app.sidebar-closed > iframe { width: 44px; }
@@ -34,14 +34,14 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: #4f8cff; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
 
 /* Master category sub-nav */
-.body-area { flex: 1; display: flex; min-width: 0; }
+.body-area { flex: 1; display: flex; min-width: 0; min-height: 0; }
 .subnav { width: 210px; background: #ffffff; border-right: 1px solid #e2e7ef; flex-shrink: 0; padding: 18px 0; overflow-y: auto; }
 .subnav .group-title { font-size: 11px; color: #9aa4b5; font-weight: 700; padding: 10px 20px 6px; letter-spacing: 0.5px; }
 .subnav .m-item { padding: 8px 20px; font-size: 12.5px; color: #4a5164; border-left: 3px solid transparent; cursor: default; }
 .subnav .m-item.active { background: #eef4ff; color: #2f6fed; font-weight: 700; border-left: 3px solid #2f6fed; }
 
 /* Content area */
-.content { flex: 1; padding: 24px 28px 40px; min-width: 0; }
+.content { flex: 1; padding: 24px 28px 40px; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .toolbar h1 { font-size: 20px; font-weight: 700; }
 .toolbar .left h1 { font-size: 20px; font-weight: 700; }
@@ -100,17 +100,11 @@ th.grp-none { background: #f6f8fb !important; }
 .tag.blue { background: #e7f0ff; color: #2f6fed; }
 .tag.orange { background: #fff2e2; color: #d97c1e; }
 .tag.gray { background: #eef0f4; color: #7c8598; }
-.tag.pm { background: #e7f0ff; color: #2f6fed; }
-.tag.pl { background: #fff2e2; color: #d97c1e; }
-.tag.sales { background: #f0e9ff; color: #7c4de0; }
-.tag.ops { background: #e5f6ec; color: #279158; }
-.tag.mgmt { background: #eef0ff; color: #4c51bf; }
-.tag.exec { background: #e3f6f5; color: #0e8a86; }
-.tag.anken { background: #eaf7ec; color: #238a4e; }
-.tag.class { background: #f5eaf7; color: #8a3f96; }
-.tag.onsite { background: #e7f0ff; color: #2f6fed; }
-.tag.online { background: #e3f6f5; color: #0e8a86; }
-.tag.hybrid { background: #f0e9ff; color: #7c4de0; }
+.tag.red { background: #fdeaea; color: #d43c40; }
+.tag.violet { background: #f0e9ff; color: #7c4de0; }
+.tag.indigo { background: #eef0ff; color: #4c51bf; }
+.tag.teal { background: #e3f6f5; color: #0e8a86; }
+.tag.purple { background: #f5eaf7; color: #8a3f96; }
 .tag.green { background: #e5f6ec; color: #279158; }
 
 /* 稼働状況・有効無効（社員／ベンダーマスタ） */
@@ -145,17 +139,17 @@ a.link-btn { cursor: pointer; }
 .page-btn.active { background: #1c2b45; color: white; border-color: #1c2b45; font-weight: 700; }
 
 /* 列数が多い一覧表を横スクロール可能にする（sticky列は使わない通常の一覧向け） */
-.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll { max-width: 100%; }
 .table-scroll table { width: max-content; min-width: 100%; }
 
 /* 横スクロール進捗表（社内／運営進捗一覧） */
-.scroll-outer { overflow-x: auto; max-width: 100%; }
+.scroll-outer { max-width: 100%; }
 table.scroll-table, .scroll-outer table { border-collapse: separate; border-spacing: 0; width: max-content; }
 .sticky { position: sticky; background: #ffffff; z-index: 2; }
 thead th.sticky { background: #f6f8fb; z-index: 3; }
 .sticky.shadow { box-shadow: 3px 0 6px -3px rgba(20,30,50,0.15); }
 /* 表ヘッダー固定（スクロール表の共通設定） */
-.table-scroll, .scroll-outer { max-height: calc(100vh - 320px); min-height: 200px; overflow: auto; }
+.table-scroll, .scroll-outer { overflow: visible; }
 .table-scroll thead th, .scroll-outer thead th { position: sticky; top: 0; z-index: 2; }
 .table-scroll thead th.sticky, .scroll-outer thead th.sticky { z-index: 3; }
 .col-resize { position: absolute; top: 0; right: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 5; }
@@ -168,22 +162,22 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .status-chip .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; width: fit-content; }
 .status-chip .dates { display: flex; gap: 12px; font-size: 10.5px; color: #98a1b3; }
 .status-chip .owner { font-size: 10.5px; color: #6c7688; }
-.badge.wait { background: #eef0f4; color: #8992a3; }
-.badge.progress { background: #e7f0ff; color: #2f6fed; }
-.badge.done { background: #e5f6ec; color: #279158; }
-.badge.delay { background: #fdeaea; color: #d43c40; }
+.badge.gray { background: #eef0f4; color: #8992a3; }
+.badge.blue { background: #e7f0ff; color: #2f6fed; }
+.badge.green { background: #e5f6ec; color: #279158; }
+.badge.red { background: #fdeaea; color: #d43c40; }
 .badge.na { background: #f6f7f9; color: #b7bfcc; border: 1px dashed #dde1e9; }
 
 .overall { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
 .overall .dot { width: 8px; height: 8px; border-radius: 50%; }
-.overall.progress .dot { background: #2f6fed; }
-.overall.progress { color: #2f6fed; }
-.overall.done .dot { background: #33b070; }
-.overall.done { color: #279158; }
-.overall.delay .dot { background: #e5484d; }
-.overall.delay { color: #d43c40; }
-.overall.wait .dot { background: #b7bfcc; }
-.overall.wait { color: #6c7688; }
+.overall.blue .dot { background: #2f6fed; }
+.overall.blue { color: #2f6fed; }
+.overall.green .dot { background: #33b070; }
+.overall.green { color: #279158; }
+.overall.red .dot { background: #e5484d; }
+.overall.red { color: #d43c40; }
+.overall.gray .dot { background: #b7bfcc; }
+.overall.gray { color: #6c7688; }
 
 /* ダイアログ共通（オーバーレイ・モーダル枠） */
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
@@ -209,11 +203,10 @@ a.close-x { cursor: pointer; }
 .mini-control .caret { margin-left: auto; color: #9aa4b5; font-size: 9px; }
 .mini-control.wide { min-width: 150px; }
 .status-select { height: 30px; border-radius: 5px; padding: 0 10px; font-size: 11.5px; font-weight: 700; display: flex; align-items: center; gap: 6px; min-width: 100px; }
-.status-select.done { background: #e5f6ec; color: #279158; }
-.status-select.progress { background: #e7f0ff; color: #2f6fed; }
-.status-select.wait { background: #eef0f4; color: #8992a3; }
-.status-select.delay { background: #fdeaea; color: #d43c40; }
-.status-select.na { background: #f6f7f9; color: #b7bfcc; }
+.status-select.green { background: #e5f6ec; color: #279158; }
+.status-select.blue { background: #e7f0ff; color: #2f6fed; }
+.status-select.gray { background: #eef0f4; color: #8992a3; }
+.status-select.red { background: #fdeaea; color: #d43c40; }
 .status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
 .memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
 
@@ -259,6 +252,10 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .select-menu li { padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333c4d; cursor: pointer; }
 .select-menu li:hover { background: #eef4ff; color: #2f6fed; }
 .select-menu li.selected { background: #eef4ff; color: #2f6fed; font-weight: 700; }
+.select-menu li.select-search { padding: 6px; background: #ffffff; position: sticky; top: 0; z-index: 1; }
+.select-menu li.select-search:hover { background: #ffffff; color: inherit; }
+.select-menu li.select-search input { width: 100%; box-sizing: border-box; height: 28px; border: 1px solid #d3d9e3; border-radius: 5px; padding: 0 8px; font-size: 12.5px; outline: none; }
+.select-menu li.select-search input:focus { border-color: #2f6fed; }
 
 .form-control.number-select { position: relative; padding-right: 8px; }
 .form-control.number-select input { border: none; background: transparent; font: inherit; color: inherit; width: 100%; outline: none; padding: 0; }
@@ -291,17 +288,16 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .chip-box { min-height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .chip-box.js-chip-select { position: relative; }
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
-.chip.pm { background: #e7f0ff; color: #2f6fed; }
-.chip.pl { background: #fff2e2; color: #d97c1e; }
 .chip.year { background: #fff2e2; color: #d97c1e; }
 .chip.y2024 { background: #eef0f4; color: #5a6376; }
 .chip.y2025 { background: #e3f6f5; color: #0e8a86; }
 .chip.y2026 { background: #e7f0ff; color: #2f6fed; }
 .chip.y2027 { background: #fff2e2; color: #d97c1e; }
-.chip.anken { background: #eaf7ec; color: #238a4e; }
-.chip.class { background: #f5eaf7; color: #8a3f96; }
-.chip.sales { background: #f0e9ff; color: #7c4de0; }
-.chip.ops { background: #e5f6ec; color: #279158; }
+.chip.blue { background: #e7f0ff; color: #2f6fed; }
+.chip.orange { background: #fff2e2; color: #d97c1e; }
+.chip.green { background: #eaf7ec; color: #238a4e; }
+.chip.purple { background: #f5eaf7; color: #8a3f96; }
+.chip.violet { background: #f0e9ff; color: #7c4de0; }
 .chip x { font-size: 10px; opacity: .6; cursor: pointer; }
 .chip x:hover { opacity: 1; }
 .chip-add { font-size: 12px; color: #9aa4b5; padding: 4px 6px; cursor: pointer; border-radius: 5px; }
@@ -338,3 +334,7 @@ td .search-btn { width: 64px; justify-content: center; }
 .status-chip-h .badge-row { flex-direction: column; align-items: flex-start; }
 .status-chip-h .dates-col { display: flex; flex-direction: column; }
 .mini-control.readonly { background: #f3f5f8; color: #6c7688; cursor: default; }
+/* 一覧：件数・ページ切り替えは固定し、表だけがスクロール */
+.content > .table-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.content > .table-card > .table-meta, .content > .table-card > .pagination { flex: 0 0 auto; }
+.content > .table-card > .table-scroll, .content > .table-card > .scroll-outer { flex: 1 1 auto; min-height: 0; overflow: auto; }

@@ -1,0 +1,1 @@
+TaskEditor.init({ mode: 'new' });

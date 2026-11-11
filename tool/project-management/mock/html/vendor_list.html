@@ -38,7 +38,7 @@
         </div>
 
         <div class="table-card">
-          <div class="table-meta"><div class="count">全 <b>18</b> 件</div></div>
+          <div class="table-meta"><div class="count">全 <b id="vendorCount">0</b> 件</div></div>
           <div class="table-scroll">
           <table>
             <thead>
@@ -54,13 +54,7 @@
                 <th>操作</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td>VND-001</td><td>株式会社NEUトレーニング</td><td><span class="tag blue">業務委託</span></td><td><div class="chip-group"><span class="chip y2025">2025年度</span><span class="chip y2026">2026年度</span></div></td><td>03-1234-5678</td><td>ビジネス基礎研修を主に担当</td><td>営業部 佐々木XXX</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="vendor_modify.html">編集</a></td></tr>
-              <tr><td>VND-002</td><td>NDUパートナーズ</td><td><span class="tag blue">業務委託</span></td><td><div class="chip-group"><span class="chip y2026">2026年度</span></div></td><td>03-2345-6789</td><td>公募コース全般</td><td>企画部 木下様</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="vendor_modify.html">編集</a></td></tr>
-              <tr><td>VND-003</td><td>ユニバ研修サービス</td><td><span class="tag blue">業務委託</span></td><td><div class="chip-group"><span class="chip y2025">2025年度</span></div></td><td>06-3456-7890</td><td>大阪拠点対応可</td><td>運営部 江口様</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="vendor_modify.html">編集</a></td></tr>
-              <tr><td>VND-004</td><td>CECトラスト</td><td><span class="tag gray">業務提携</span></td><td><div class="chip-group"><span class="chip y2025">2025年度</span></div></td><td>03-4567-8901</td><td>マネジメント研修専門</td><td>管理部 森様</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="vendor_modify.html">編集</a></td></tr>
-              <tr><td>VND-005</td><td>アムネット株式会社</td><td><span class="tag blue">業務委託</span></td><td><div class="chip-group"><span class="chip y2024">2024年度</span></div></td><td>03-5678-9012</td><td>教材発注のみ</td><td>教材部 川口様</td><td><span class="state off"><span class="dot"></span>停止中</span></td><td><a class="search-btn" href="vendor_modify.html">編集</a></td></tr>
-            </tbody>
+            <tbody id="vendorBody"></tbody>
           </table>
           </div>
           <div class="pagination">
@@ -74,5 +68,8 @@
 <script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
+<script src="js/storage/contract-type/store/contract-type-store.js"></script>
+<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/vendor/screens/vendor-list.js"></script>
 </body>
 </html>

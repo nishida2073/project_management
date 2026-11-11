@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/staff_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=staff" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>担当者登録</h2>
+          <div class="sub" id="subLine">新しい担当者情報を登録します</div>
+        </div>
+        <a class="close-x" href="staff_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>担当者コード</label>
+          <div class="form-control readonly" id="staffCode"></div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>所属区分<span class="req">必須</span></label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="affiliation" value="社内"><span class="radio-dot"></span><span class="tag blue">社内</span></label>
+            <label class="radio-option"><input type="radio" name="affiliation" value="パートナー"><span class="radio-dot"></span><span class="tag orange">パートナー</span></label>
+          </div>
+        </div>
+        <div class="form-field" id="companyField" style="visibility: hidden;">
+          <label>所属会社<span class="req">必須</span></label>
+          <div class="form-control js-select" id="company" data-options=""><span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>担当者名<span class="req">必須</span></label>
+          <input type="text" class="form-control" id="tName">
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>メールアドレス</label>
+          <input type="email" class="form-control" id="email">
+        </div>
+        <div class="form-field full">
+          <label>担当区分（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box js-chip-select" id="roleBox" data-options="案件,クラス" data-chip-map='{"案件":"green","クラス":"purple"}'>
+            <span class="chip-add">担当区分を追加</span>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>業務区分<span class="req">必須</span></label>
+          <div class="radio-group" id="jobGroup">
+            <label class="radio-option"><input type="radio" name="jobType" value="営業"><span class="radio-dot"></span><span class="tag orange">営業</span></label>
+            <label class="radio-option"><input type="radio" name="jobType" value="管理"><span class="radio-dot"></span><span class="tag indigo">管理</span></label>
+            <label class="radio-option"><input type="radio" name="jobType" value="実施"><span class="radio-dot"></span><span class="tag teal">実施</span></label>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>役職（複数選択可）</label>
+          <div class="chip-box js-chip-select" id="positionBox" data-options="PM,PL" data-chip-map='{"PM":"blue","PL":"orange"}'>
+            <span class="chip-add">役職を追加</span>
+          </div>
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row" id="statusRow"><div class="toggle" id="statusToggle"><div class="knob"></div></div><span id="statusLabel">稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" href="staff_list.html">キャンセル</a>
+        <div id="saveBtn" class="btn primary">登録する</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/staff-role/store/staff-role-store.js"></script>
+<script src="js/storage/job-type/store/job-type-store.js"></script>
+<script src="js/storage/position/store/position-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/staff/screens/staff-editor.js"></script>
+<script src="js/storage/staff/entry/staff-regist.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/chip-select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+</body>
+</html>

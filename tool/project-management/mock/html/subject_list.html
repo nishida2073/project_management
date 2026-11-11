@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/subject_list.css">
 </head>
 <body>
 <div class="app">
@@ -30,13 +29,13 @@
 
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="科目コード・科目名で検索"></div>
-        <div class="field"><label>科目区分</label><div class="control small js-select" data-options="すべて,新CDPB,旧CDPB,新入社員研修">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>科目区分</label><div class="control small js-select" data-options="すべて,新入社員研修,新CDPB,旧CDPB">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
       </div>
 
       <div class="table-card">
-        <div class="table-meta"><div class="count">全 <b>12</b> 件</div></div>
+        <div class="table-meta"><div class="count">全 <b id="subjectCount">0</b> 件</div></div>
         <div class="table-scroll">
         <table>
           <thead>
@@ -48,20 +47,7 @@
               <th>操作</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td>SBJ-001</td><td><span class="tag orange">新入社員研修</span></td><td>システム開発入門</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-002</td><td><span class="tag orange">新入社員研修</span></td><td>基盤技術基礎</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-003</td><td><span class="tag blue">新CDPB</span></td><td>AP要件定義基礎</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-004</td><td><span class="tag blue">新CDPB</span></td><td>AP設計・製造基礎</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-005</td><td><span class="tag blue">新CDPB</span></td><td>AP試験基礎</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-006</td><td><span class="tag blue">新CDPB</span></td><td>データモデル設計基礎</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-007</td><td><span class="tag gray">旧CDPB</span></td><td>基盤構築プロセス基礎</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-008</td><td><span class="tag gray">旧CDPB</span></td><td>営業基本Ⅰ</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-009</td><td><span class="tag gray">旧CDPB</span></td><td>営業リスクマネジメントⅠ</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-010</td><td><span class="tag blue">新CDPB</span></td><td>IT-PM入門</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-011</td><td><span class="tag blue">新CDPB</span></td><td>品質管理入門</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-            <tr><td>SBJ-012</td><td><span class="tag orange">新入社員研修</span></td><td>システム基盤実践</td><td><span class="state on"><span class="dot"></span>稼働中</span></td><td><a class="search-btn" href="subject_modify.html">編集</a></td></tr>
-          </tbody>
+          <tbody id="subjectBody"></tbody>
         </table>
         </div>
         <div class="pagination">
@@ -74,5 +60,8 @@
 <script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
+<script src="js/storage/subject-type/store/subject-type-store.js"></script>
+<script src="js/storage/subject/store/subject-store.js"></script>
+<script src="js/storage/subject/screens/subject-list.js"></script>
 </body>
 </html>

@@ -1,0 +1,1 @@
+ProjectProgressEditor.init({ mode: 'edit' });

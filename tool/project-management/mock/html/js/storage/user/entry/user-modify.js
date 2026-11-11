@@ -1,0 +1,1 @@
+UserEditor.init({ mode: 'edit' });

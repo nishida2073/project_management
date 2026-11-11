@@ -18,49 +18,52 @@
       <div class="modal-header">
         <div>
           <h2>タスク編集</h2>
-          <div class="sub">TSK-001　クラス登録の情報を編集します</div>
+          <div class="sub" id="subLine">タスク情報を編集します</div>
         </div>
         <a class="close-x" href="task_list.html">✕</a>
       </div>
       <div class="modal-body">
         <div class="form-field">
           <label>タスクID</label>
-          <input type="text" class="form-control" value="TSK-001">
+          <input type="text" id="taskId" class="form-control" readonly>
         </div>
         <div class="form-field full">
           <label>タスク名<span class="req">必須</span></label>
-          <input type="text" class="form-control" value="クラス登録">
+          <input type="text" id="taskName" class="form-control">
         </div>
         <div class="form-field full">
           <label>作業区分（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box js-chip-select" data-options="データ,グループ" data-chip-map='{"データ":"pm","グループ":"pl"}'>
-            <span class="chip pm">データ <x>✕</x></span>
-            <span class="chip pl">グループ <x>✕</x></span>
+          <div id="kindBox" class="chip-box js-chip-select" data-options="データ,グループ" data-chip-map='{"データ":"blue","グループ":"orange"}'>
             <span class="chip-add">作業区分を追加</span>
           </div>
         </div>
         <div class="form-field">
           <label>作業順<span class="req">必須</span></label>
-          <input type="number" class="form-control" min="1" value="1">
+          <input type="number" id="order" class="form-control" min="1">
         </div>
         <div class="form-field full">
           <label>担当会社名<span class="req">必須</span></label>
-          <div class="form-control js-select" data-options="社内,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">社内<span class="caret">▾</span></div>
+          <div id="company" class="form-control js-select" data-options="社内,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト"><span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>日数<span class="req">必須</span></label>
-          <input type="number" class="form-control" min="0" value="2">
+          <input type="number" id="days" class="form-control">
         </div>
       </div>
       <div class="modal-footer">
         <a class="search-btn" href="task_list.html">キャンセル</a>
-        <a class="btn primary" href="task_list.html">保存する</a>
+        <div id="saveBtn" class="btn primary">保存する</div>
       </div>
     </div>
   </div>
 </div>
+<script src="js/storage/task-kind/store/task-kind-store.js"></script>
+<script src="js/storage/task/store/task-store.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/chip-select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
+<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/task/screens/task-editor.js"></script>
+<script src="js/storage/task/entry/task-modify.js"></script>
 </body>
 </html>

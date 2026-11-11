@@ -1,0 +1,1 @@
+ClassEditor.init({ mode: 'new' });

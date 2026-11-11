@@ -1,0 +1,1 @@
+SubjectEditor.init({ mode: 'edit' });

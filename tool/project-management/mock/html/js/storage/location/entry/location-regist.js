@@ -1,0 +1,1 @@
+LocationEditor.init({ mode: 'new' });

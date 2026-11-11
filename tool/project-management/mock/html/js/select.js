@@ -19,8 +19,29 @@
     var menu = document.createElement('ul');
     menu.className = 'select-menu';
     var current = el.getAttribute('data-value') || '';
+    var search = document.createElement('li');
+    search.className = 'select-search';
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = '入力して検索';
+    input.addEventListener('click', function (e) { e.stopPropagation(); });
+    input.addEventListener('input', function () {
+      var q = input.value.trim().toLowerCase();
+      menu.querySelectorAll('li[data-opt]').forEach(function (li) {
+        li.style.display = (!q || li.getAttribute('data-opt').toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+      });
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var first = Array.prototype.filter.call(menu.querySelectorAll('li[data-opt]'), function (li) { return li.style.display !== 'none'; })[0];
+      if (first) first.click();
+    });
+    search.appendChild(input);
+    menu.appendChild(search);
     options.forEach(function (opt) {
       var li = document.createElement('li');
+      li.setAttribute('data-opt', opt);
       li.textContent = opt;
       if (opt === current) li.classList.add('selected');
       li.addEventListener('click', function (e) {
@@ -185,6 +206,8 @@
       var box = el.closest('.modal-body');
       var limit = box ? box.getBoundingClientRect().bottom : window.innerHeight;
       if (menu && menu.getBoundingClientRect().bottom > limit) menu.classList.add('up');
+      var searchInput = menu ? menu.querySelector('.select-search input') : null;
+      if (searchInput) searchInput.focus();
     });
   }
   window.bindJsSelect = bindSelect;

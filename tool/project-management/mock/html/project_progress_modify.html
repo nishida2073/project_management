@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/project_progress_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=project-progress" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>案件進捗一覧</h1></div><div class="table-card"></div></div>
+  </div>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>案件進捗の更新</h2>
+          <div class="sub" id="subLine"></div>
+        </div>
+        <a class="close-x" href="project_progress_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="table-scroll" style="overflow: visible; max-height: none;">
+        <table class="step-table">
+          <thead>
+            <tr>
+              <th style="width:260px;">工程名</th>
+              <th style="width:130px;">予定日</th>
+              <th style="width:130px;">実績日</th>
+              <th style="width:120px;">状態</th>
+              <th style="width:90px;">実施対象</th>
+              <th>備考</th>
+            </tr>
+          </thead>
+          <tbody id="stepBody"></tbody>
+        </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" href="project_progress_list.html">キャンセル</a>
+        <div id="saveBtn" class="btn primary">保存する</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/customer/store/customer-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/project/store/project-store.js"></script>
+<script src="js/storage/project-progress/store/project-progress-store.js"></script>
+<script src="js/storage/project-progress/screens/project-progress-editor.js"></script>
+<script src="js/storage/project-progress/entry/project-progress-modify.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+</body>
+</html>

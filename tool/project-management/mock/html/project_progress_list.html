@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/project_progress_list.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=project-progress" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb-block">
+        <div class="crumb">案件管理<span>／</span>進捗管理</div>
+        <p class="crumb-sub">案件の進捗を管理します</p>
+      </div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>案件進捗一覧</h1>
+        </div>
+        <div class="btn-group">
+          <div class="btn primary">Excel取込</div>
+          <div class="btn primary">Excel出力</div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-meta"><div class="count">全 <b id="projectCount">0</b> 件</div></div>
+        <div class="table-scroll" id="scrollArea">
+        <table>
+          <thead>
+            <tr id="headRow">
+              <th class="sticky" style="left:0;">年度</th>
+              <th class="sticky" style="left:90px;">案件コード</th>
+              <th class="sticky" style="left:240px;">案件名</th>
+              <th class="sticky" style="left:460px;">顧客名</th>
+              <th class="sticky" style="left:570px;">管理担当者</th>
+              <th class="sticky" style="left:770px;">実施開始月</th>
+              <th class="sticky shadow" style="left:870px;">全体進捗</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/customer/store/customer-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/project/store/project-store.js"></script>
+<script src="js/storage/project-progress/store/project-progress-store.js"></script>
+<script src="js/storage/project-progress/screens/project-progress-list.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+<script src="js/column-resize.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+(function () {
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  var body = document.getElementById('userBody');
+  var list = UserStore.load();
+
+  list.forEach(function (u) {
+    var on = u.status !== '停止中';
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + esc(u.code) + '</td>' +
+      '<td>' + esc(u.name) + '</td>' +
+      '<td>' + esc(u.email) + '</td>' +
+      '<td><span class="tag ' + (AuthorityStore.colorOf(u.authority) || '') + '">' + esc(AuthorityStore.nameOf(u.authority)) + '</span></td>' +
+      '<td><span class="state ' + (on ? 'on' : 'off') + '"><span class="dot"></span>' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td><a class="search-btn" href="user_modify.html?id=' + encodeURIComponent(u.code) + '">編集</a></td>';
+    body.appendChild(tr);
+  });
+
+  document.getElementById('userCount').textContent = list.length;
+})();
