@@ -6,10 +6,15 @@
 <style>
   html, body { width: auto; height: 100%; margin: 0; }
   .sidebar { min-height: 100%; }
+  html, body { overflow-x: hidden; }
+  .sidebar-toggle { position: fixed; top: 14px; right: 8px; width: 28px; height: 28px; border: 1px solid #3a4a68; border-radius: 6px; background: transparent; color: #cdd7ea; font-size: 14px; cursor: pointer; z-index: 1; }
+  body.collapsed .sidebar > *:not(.sidebar-toggle) { display: none; }
+  body.collapsed .sidebar-toggle { right: auto; left: 8px; }
 </style>
 </head>
 <body>
 <div class="sidebar">
+  <button type="button" class="sidebar-toggle" aria-label="サイドバーの開閉">☰</button>
   <div class="logo">研修管理システム<span>Training Product Suite（構想中）</span></div>
 <div class="nav-group-title">案件管理</div>
   <a class="nav-item" data-key="anken" href="anken_list.html" target="_parent">案件</a>
@@ -43,6 +48,13 @@
   document.querySelectorAll('.nav-item[data-sub]').forEach(function (el) {
     el.classList.add(el.getAttribute('data-sub') === subKey ? 'active' : 'disabled');
   });
+  (function () {
+    var btn = document.querySelector('.sidebar-toggle');
+    function apply() { document.body.classList.toggle('collapsed', window.innerWidth < 100); }
+    btn.addEventListener('click', function () { window.parent.postMessage({ type: 'sidebar-toggle' }, '*'); });
+    window.addEventListener('resize', apply);
+    apply();
+  })();
 </script>
 </body>
 </html>

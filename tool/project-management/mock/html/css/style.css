@@ -5,10 +5,13 @@
 
 /* Reset & base */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 1680px; font-family: "Yu Gothic UI", "Meiryo", "Segoe UI", sans-serif; background: #eef1f5; color: #22262b; }
+html, body { font-family: "Yu Gothic UI", "Meiryo", "Segoe UI", sans-serif; background: #eef1f5; color: #22262b; }
 
 /* App shell */
-.app { display: flex; width: 1680px; min-height: 1040px; }
+.app { display: flex; width: 100%; min-height: 100vh; }
+.app > iframe { height: auto; align-self: stretch; }
+.app > iframe { transition: width .2s ease; }
+.app.sidebar-closed > iframe { width: 44px; }
 
 /* Sidebar */
 .sidebar { width: 220px; background: #1c2b45; color: #cdd7ea; padding: 0 0 20px 0; flex-shrink: 0; }
@@ -19,6 +22,7 @@ html, body { width: 1680px; font-family: "Yu Gothic UI", "Meiryo", "Segoe UI", s
 a.nav-item { cursor: pointer; }
 .nav-item.active { background: #26385a; color: #ffffff; border-left: 3px solid #4f8cff; font-weight: 700; }
 .nav-item.disabled { color: #5c6c8a; }
+a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #4f8cff; }
 
 /* Main column */
 .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -151,6 +155,10 @@ table.scroll-table, .scroll-outer table { border-collapse: separate; border-spac
 .sticky { position: sticky; background: #ffffff; z-index: 2; }
 thead th.sticky { background: #f6f8fb; z-index: 3; }
 .sticky.shadow { box-shadow: 3px 0 6px -3px rgba(20,30,50,0.15); }
+/* 表ヘッダー固定（スクロール表の共通設定） */
+.table-scroll, .scroll-outer { max-height: calc(100vh - 320px); min-height: 200px; overflow: auto; }
+.table-scroll thead th, .scroll-outer thead th { position: sticky; top: 0; z-index: 2; }
+.table-scroll thead th.sticky, .scroll-outer thead th.sticky { z-index: 3; }
 
 .status-chip { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
 .status-chip .badge-row { display: flex; align-items: center; gap: 6px; }
@@ -176,7 +184,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 
 /* ダイアログ共通（オーバーレイ・モーダル枠） */
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
-.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; height: 80vh; display: flex; flex-direction: column; }
+.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 80%; height: 60vh; display: flex; flex-direction: column; }
 .modal-body { flex: 1; overflow-y: auto; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-header h2 { font-size: 18px; font-weight: 700; }

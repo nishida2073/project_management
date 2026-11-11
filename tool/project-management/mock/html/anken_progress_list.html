@@ -33,7 +33,7 @@
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="案件名・顧客名で検索"></div>
         <div class="field"><label>管理担当者</label><div class="control js-select" data-options="すべて,山口 直人,細野 恵美,田中 誠,木村 隆,高橋 健,中島 拓海,伊藤 美咲,小林 由美,渡辺 直樹,松本 健二,市村 拓也,佐藤 一郎,岡田 沙織">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>総合進捗</label><div class="control js-select" data-options="すべて,実施前,実施中,完了,遅延あり">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>全体進捗</label><div class="control js-select" data-options="すべて,実施前,実施中,完了,遅延あり">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>実施開始月</label><div class="control small js-month">2026/09<span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
         <div class="field"><label> </label><div class="control small js-month">2027/03<span class="caret">▾</span></div></div>
@@ -55,7 +55,7 @@
                 <th class="sticky" style="left:460px; min-width:110px;">顧客名</th>
                 <th class="sticky" style="left:570px; min-width:200px;">管理担当者</th>
                 <th class="sticky" style="left:770px; min-width:100px;">実施開始月</th>
-                <th class="sticky shadow" style="left:870px; min-width:120px;">総合進捗</th>
+                <th class="sticky shadow" style="left:870px; min-width:120px;">全体進捗</th>
                 <th style="min-width:120px;">①開発会議</th>
                 <th style="min-width:120px;">②見積承認</th>
                 <th style="min-width:120px;">③経営会議<br>(見積承認)</th>
@@ -142,5 +142,6 @@ if (location.search.indexOf('scrolled=1') !== -1) {
 </script>
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
 </body>
 </html>
