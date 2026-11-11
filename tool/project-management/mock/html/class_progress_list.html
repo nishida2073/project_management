@@ -4,12 +4,6 @@
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/class_progress_list.css">
-<style>
-  #scrollArea thead th.sticky, #scrollArea tbody td.sticky { overflow: hidden; white-space: nowrap; }
-  #scrollArea thead th.sticky { position: sticky; }
-  #scrollArea thead th, #scrollArea tbody td { overflow: hidden; white-space: nowrap; }
-  .col-resize { position: absolute; top: 0; right: -3px; width: 6px; height: 100%; cursor: col-resize; z-index: 5; }
-</style>
 </head>
 <body>
 <div class="app">
@@ -33,8 +27,8 @@
           <h1>クラス運営進捗一覧</h1>
         </div>
         <div class="btn-group">
-          <div class="btn">⇧ Excel取込</div>
-          <div class="btn">⇩ Excel出力</div>
+          <div class="btn primary">Excel取込</div>
+          <div class="btn primary">Excel出力</div>
         </div>
       </div>
 
@@ -65,18 +59,18 @@
                 <th class="sticky" style="left:530px; min-width:120px;">終了日</th>
                 <th class="sticky" style="left:650px; min-width:110px;">管理担当者</th>
                 <th class="sticky shadow" style="left:760px; min-width:120px;">全体進捗</th>
-                <th style="min-width:130px;">①クラス登録</th>
-                <th style="min-width:130px;">②名簿受領督促</th>
-                <th style="min-width:130px;">③講師契約</th>
-                <th style="min-width:130px;">④受講者登録(OliveOne)</th>
-                <th style="min-width:130px;">⑤受講詳細案内発出</th>
-                <th style="min-width:130px;">⑥電子教材送付</th>
-                <th style="min-width:130px;">⑦出欠確認・報告</th>
-                <th style="min-width:130px;">⑧アンケート実施案内</th>
-                <th style="min-width:130px;">⑨テスト結果集計</th>
-                <th style="min-width:130px;">⑩アンケート集計・格納</th>
-                <th style="min-width:130px;">⑪報告書作成</th>
-                <th style="min-width:130px;">⑫再テストリマインド</th>
+                <th style="min-width:130px;">①クラス登録<div class="col-company">社内</div></th>
+                <th style="min-width:130px;">②名簿受領督促<div class="col-company">社内</div></th>
+                <th style="min-width:130px;">③講師契約<div class="col-company">株式会社NEUトレーニング</div></th>
+                <th style="min-width:130px;">④受講者登録(OliveOne)<div class="col-company">社内</div></th>
+                <th style="min-width:130px;">⑤受講詳細案内発出<div class="col-company">社内</div></th>
+                <th style="min-width:130px;">⑥電子教材送付<div class="col-company">NDUパートナーズ</div></th>
+                <th style="min-width:130px;">⑦出欠確認・報告<div class="col-company">ユニバ研修サービス</div></th>
+                <th style="min-width:130px;">⑧アンケート実施案内<div class="col-company">-</div></th>
+                <th style="min-width:130px;">⑨テスト結果集計<div class="col-company">-</div></th>
+                <th style="min-width:130px;">⑩アンケート集計・格納<div class="col-company">-</div></th>
+                <th style="min-width:130px;">⑪報告書作成<div class="col-company">社内</div></th>
+                <th style="min-width:130px;">⑫再テストリマインド<div class="col-company">-</div></th>
                 <th style="min-width:90px;">操作</th>
               </tr>
             </thead>
@@ -98,9 +92,9 @@ function chip(status, plan, actual, owner){
   var baseStatus = status.replace('-delay', '');
   var cls = {wait:'wait', progress:'progress', done:'done'}[baseStatus];
   var label = {wait:'実施前', progress:'実施中', done:'完了'}[baseStatus];
-  var dateLine = actual ? ('<span>予定 '+plan+'</span><span>実施 '+actual+'</span>') : ('<span>予定 '+plan+'</span>');
   var delayMark = delayed ? '<span class="badge delay">⚠ 遅延</span>' : '';
-  return '<div class="status-chip"><div class="badge-row"><span class="badge '+cls+'">'+label+'</span>'+delayMark+'<span class="owner">'+owner+'</span></div><div class="dates">'+dateLine+'</div></div>';
+  var actualText = actual ? actual : '-';
+  return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge '+cls+'">'+label+'</span>'+delayMark+'</div><div class="dates-col"><div class="dates"><span>予定日 '+plan+'</span></div><div class="dates"><span>実施日 '+actualText+' '+owner+'</span></div></div></div>';
 }
 function overall(status){
   var cls = {wait:'wait', progress:'progress', done:'done', delay:'delay'}[status];
@@ -123,7 +117,7 @@ var rows = [
  {year:'2026年度', course:'受託_AP設計・製造基礎', code:'CE01B', cls:'001', related:'-', start:'2026/09/28', end:'2026/09/29', overall:'progress', person:'渡辺 直樹',
   steps:['done','done','progress','wait','wait','wait','wait','wait','wait','wait','wait','wait']}
 ];
-var dates = ['08/20','08/25','08/27','08/29','09/01','09/03','09/05','09/08','09/10','09/12','09/14','09/16'];
+var dates = ['2026/08/20','2026/08/25','2026/08/27','2026/08/29','2026/09/01','2026/09/03','2026/09/05','2026/09/08','2026/09/10','2026/09/12','2026/09/14','2026/09/16'];
 var tbody = document.getElementById('tbody');
 rows.forEach(function(r){
   var tr = document.createElement('tr');
@@ -140,7 +134,7 @@ rows.forEach(function(r){
     var owner = (PERSON_STEP_INDEXES.indexOf(i) !== -1) ? r.person : '運営チーム';
     html += '<td>'+chip(s, dates[i], actual, owner)+'</td>';
   });
-  html += '<td><a class="link-btn" href="class_progress_modify.html">編集</a></td>';
+  html += '<td><a class="search-btn" href="class_progress_modify.html">編集</a></td>';
   tr.innerHTML = html;
   tbody.appendChild(tr);
 });
@@ -152,82 +146,6 @@ if (location.search.indexOf('scrolled=1') !== -1) {
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
-<script>
-(function () {
-  var table = document.querySelector('#scrollArea table');
-  var thead = table.querySelector('thead');
-  var tbody = table.querySelector('tbody');
-  var allHeads = Array.prototype.slice.call(thead.querySelectorAll('tr th'));
-  var heads = Array.prototype.slice.call(thead.querySelectorAll('tr th.sticky'));
-  var MIN = 5;
-  var fixed = false;
-  function updateTableWidth() {
-    var sum = allHeads.reduce(function (a, th) { return a + th.getBoundingClientRect().width; }, 0);
-    table.style.width = sum + 'px';
-  }
-  function fixLayout() {
-    if (fixed || !tbody.querySelector('tr')) return;
-    fixed = true;
-    allHeads.forEach(function (th) { th.style.width = th.getBoundingClientRect().width + 'px'; });
-    table.style.tableLayout = 'fixed';
-    updateTableWidth();
-  }
-  function layout() {
-    fixLayout();
-    var lefts = [];
-    var acc = 0;
-    heads.forEach(function (th, i) {
-      lefts[i] = acc;
-      th.style.left = acc + 'px';
-      acc += th.getBoundingClientRect().width;
-    });
-    tbody.querySelectorAll('tr').forEach(function (tr) {
-      for (var i = 0; i < heads.length; i++) {
-        var td = tr.children[i];
-        if (td) td.style.left = lefts[i] + 'px';
-      }
-    });
-    updateTableWidth();
-  }
-  heads.forEach(function (th, idx) {
-    th.style.position = 'sticky';
-    var h = document.createElement('div');
-    h.className = 'col-resize';
-    th.appendChild(h);
-    h.addEventListener('mousedown', function (e) {
-      e.preventDefault();
-      var startX = e.clientX;
-      var group = e.shiftKey ? heads.slice(0, idx + 1) : [th];
-      var startWs = group.map(function (g) { return g.getBoundingClientRect().width; });
-      var startTotal = startWs.reduce(function (a, b) { return a + b; }, 0);
-      var startTable = allHeads.reduce(function (a, th) { return a + th.getBoundingClientRect().width; }, 0);
-      function move(ev) {
-        var minStart = Math.min.apply(null, startWs);
-        var target = Math.max(startTotal * MIN / minStart, startTotal + ev.clientX - startX);
-        var f = target / startTotal;
-        group.forEach(function (g, j) {
-          var w = (startWs[j] * f) + 'px';
-          g.style.width = g.style.minWidth = g.style.maxWidth = w;
-        });
-        var nonSticky = allHeads.filter(function (th) { return !th.classList.contains('sticky'); });
-        if (nonSticky.length) {
-          var lastTh = nonSticky[nonSticky.length - 1];
-          var sumNow = allHeads.reduce(function (a, th) { return a + th.getBoundingClientRect().width; }, 0);
-          lastTh.style.width = (lastTh.getBoundingClientRect().width + startTable - sumNow) + 'px';
-        }
-        layout();
-      }
-      function up() {
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-      }
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', up);
-    });
-  });
-  new MutationObserver(layout).observe(tbody, { childList: true });
-  layout();
-})();
-</script>
+<script src="js/column-resize.js" defer></script>
 </body>
 </html>

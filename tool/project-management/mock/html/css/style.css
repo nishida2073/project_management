@@ -47,9 +47,10 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 .toolbar .left h1 { font-size: 20px; font-weight: 700; }
 .toolbar .left p { font-size: 12.5px; color: #7c8598; margin-top: 4px; }
 .btn-group { display: flex; gap: 10px; align-items: center; }
-.btn { padding: 9px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 1px solid #d3d9e3; background: #ffffff; color: #40485a; display: flex; align-items: center; gap: 6px; white-space: nowrap; cursor: default; text-decoration: none; }
-.btn.primary { background: #2f6fed; border-color: #2f6fed; color: #ffffff; }
+.btn.primary { background: #1c2b45; border-color: #1c2b45; color: #ffffff; }
 a.btn { cursor: pointer; }
+.btn, .search-btn, .link-btn, .page-btn, .close-x, .add-row, .sidebar-toggle { cursor: pointer; }
+.search-btn, a.search-btn { text-decoration: none; }
 .btn.icon { font-size: 14px; }
 
 /* 遅延のみ表示トグル（コンテナ部分。丸スイッチ本体はページ固有CSS） */
@@ -149,9 +150,7 @@ a.link-btn { cursor: pointer; }
 
 /* 横スクロール進捗表（社内／運営進捗一覧） */
 .scroll-outer { overflow-x: auto; max-width: 100%; }
-table.scroll-table, .scroll-outer table { border-collapse: separate; border-spacing: 0; font-size: 12px; width: max-content; }
-.scroll-outer thead th { padding: 9px 12px; border-right: 1px solid #eef1f6; }
-.scroll-outer tbody td { padding: 8px 12px; border-right: 1px solid #f2f4f8; vertical-align: middle; }
+table.scroll-table, .scroll-outer table { border-collapse: separate; border-spacing: 0; width: max-content; }
 .sticky { position: sticky; background: #ffffff; z-index: 2; }
 thead th.sticky { background: #f6f8fb; z-index: 3; }
 .sticky.shadow { box-shadow: 3px 0 6px -3px rgba(20,30,50,0.15); }
@@ -159,6 +158,10 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .table-scroll, .scroll-outer { max-height: calc(100vh - 320px); min-height: 200px; overflow: auto; }
 .table-scroll thead th, .scroll-outer thead th { position: sticky; top: 0; z-index: 2; }
 .table-scroll thead th.sticky, .scroll-outer thead th.sticky { z-index: 3; }
+.col-resize { position: absolute; top: 0; right: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 5; }
+.col-resize::after { content: ''; position: absolute; top: 0; bottom: 0; right: 2px; width: 1px; background: #d7deea; }
+.col-resize:hover::after, .col-resize:active::after { width: 2px; background: #4f8cff; }
+.table-scroll thead th, .table-scroll tbody td, .scroll-outer thead th, .scroll-outer tbody td { overflow: hidden; white-space: nowrap; }
 
 .status-chip { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
 .status-chip .badge-row { display: flex; align-items: center; gap: 6px; }
@@ -184,7 +187,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 
 /* ダイアログ共通（オーバーレイ・モーダル枠） */
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
-.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 80%; height: 60vh; display: flex; flex-direction: column; }
+.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 80%; height: 80vh; display: flex; flex-direction: column; }
 .modal-body { flex: 1; overflow-y: auto; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-header h2 { font-size: 18px; font-weight: 700; }
@@ -200,10 +203,7 @@ a.close-x { cursor: pointer; }
 .tab .count { display: inline-block; margin-left: 6px; font-size: 10.5px; background: #e7f0ff; color: #2f6fed; padding: 1px 6px; border-radius: 8px; }
 .tab.warn .count { background: #fdeaea; color: #d43c40; }
 
-.step-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.step-table th { text-align: left; color: #7c8598; font-weight: 700; font-size: 11.5px; padding: 8px 10px; border-bottom: 1px solid #eef1f6; background: #f9fafc; position: sticky; top: 0; z-index: 1; }
-.step-table td { padding: 9px 10px; border-bottom: 1px solid #f1f3f8; vertical-align: middle; }
-.step-name { font-weight: 700; color: #333c4d; display: flex; align-items: center; gap: 8px; }
+.step-name { font-weight: 700; color: #333c4d; }
 .step-no { width: 20px; height: 20px; border-radius: 50%; background: #eef1f6; color: #7c8598; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .mini-control { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #333c4d; display: flex; align-items: center; min-width: 100px; }
 .mini-control .caret { margin-left: auto; color: #9aa4b5; font-size: 9px; }
@@ -268,7 +268,11 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .js-date, .js-month { cursor: pointer; position: relative; user-select: none; }
 .js-date .caret, .js-month .caret { transition: transform .15s; }
 .js-date.open .caret, .js-month.open .caret { transform: rotate(180deg); }
+.js-date.open, .js-month.open { z-index: 100; }
+.table-scroll tbody td:has(.open), .scroll-outer tbody td:has(.open) { overflow: visible; }
 .date-picker { position: absolute; top: calc(100% + 4px); left: 0; background: #ffffff; border: 1px solid #d3d9e3; border-radius: 8px; box-shadow: 0 8px 20px rgba(10,16,30,0.15); z-index: 60; padding: 10px; width: 230px; cursor: default; }
+.date-picker.up { top: auto; bottom: calc(100% + 4px); }
+.select-menu.up { top: auto; bottom: calc(100% + 4px); }
 .date-picker .dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #333c4d; }
 .date-picker .dp-nav { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #7c8598; }
 .date-picker .dp-nav:hover { background: #eef4ff; color: #2f6fed; }
@@ -315,3 +319,22 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .toggle.off { background: #c7ccd4; }
 .toggle.off .knob { left: 2px; }
 .toggle-row span { font-size: 13px; color: #333c4d; font-weight: 700; }
+/* ボタンの共通の大きさ（確定系・導線系） */
+.btn, .search-btn { height: 34px; padding: 0 18px; border: 1px solid #d3d9e3; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; }
+.search-btn { background: #6b84ad; border-color: #6b84ad; color: #ffffff; }
+/* ボタンのマウスオーバー表示 */
+.btn.primary:hover { background: #2f4f80; border-color: #2f4f80; box-shadow: 0 0 0 3px rgba(28,43,69,0.3); }
+.search-btn:hover { background: #7f97bb; border-color: #7f97bb; box-shadow: 0 0 0 3px rgba(107,132,173,0.3); }
+/* 導線系・ページ切り替えのマウスオーバー（大きさを変える） */
+.search-btn, .page-btn { transition: transform 0.15s ease; }
+.search-btn:hover, .page-btn:hover { transform: scale(1.06); }
+.page-btn:hover { border-color: #6b84ad; }
+/* 一覧の操作列の編集ボタン（幅を固定） */
+td .search-btn { width: 64px; justify-content: center; }
+/* 工程列の見出しに担当会社を表示 */
+.col-company { font-size: 11px; font-weight: 400; color: #9aa4b5; margin-top: 2px; }
+.status-chip { white-space: normal; }
+.status-chip.status-chip-h { flex-direction: row; align-items: center; gap: 8px; }
+.status-chip-h .badge-row { flex-direction: column; align-items: flex-start; }
+.status-chip-h .dates-col { display: flex; flex-direction: column; }
+.mini-control.readonly { background: #f3f5f8; color: #6c7688; cursor: default; }

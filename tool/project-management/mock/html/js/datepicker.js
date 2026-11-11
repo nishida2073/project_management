@@ -182,6 +182,10 @@
         if (isOpen) return;
         el.appendChild(builder(el));
         el.classList.add('open');
+        var picker = el.querySelector('.date-picker');
+        var box = el.closest('.modal-body');
+        var limit = box ? box.getBoundingClientRect().bottom : window.innerHeight;
+        if (picker && picker.getBoundingClientRect().bottom > limit) picker.classList.add('up');
       });
     });
   }

@@ -4,12 +4,6 @@
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/anken_progress_list.css">
-<style>
-  #scrollArea thead th.sticky, #scrollArea tbody td.sticky { overflow: hidden; white-space: nowrap; }
-  #scrollArea thead th.sticky { position: sticky; }
-  #scrollArea thead th, #scrollArea tbody td { overflow: hidden; white-space: nowrap; }
-  .col-resize { position: absolute; top: 0; right: -3px; width: 6px; height: 100%; cursor: col-resize; z-index: 5; }
-</style>
 </head>
 <body>
 <div class="app">
@@ -30,8 +24,8 @@
           <h1>案件進捗一覧</h1>
         </div>
         <div class="btn-group">
-          <div class="btn">⇧ Excel取込</div>
-          <div class="btn">⇩ Excel出力</div>
+          <div class="btn primary">Excel取込</div>
+          <div class="btn primary">Excel出力</div>
         </div>
       </div>
 
@@ -136,7 +130,7 @@ rows.forEach(function(r){
     var actual = (s==='done') ? dates[i] : '';
     html += '<td>'+chip(s, dates[i], actual)+'</td>';
   });
-  html += '<td class="row-actions"><a class="link-btn" href="anken_progress_modify.html">編集</a></td>';
+  html += '<td class="row-actions"><a class="search-btn" href="anken_progress_modify.html">編集</a></td>';
   tr.innerHTML = html;
   tbody.appendChild(tr);
 });
@@ -148,82 +142,6 @@ if (location.search.indexOf('scrolled=1') !== -1) {
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
-<script>
-(function () {
-  var table = document.querySelector('#scrollArea table');
-  var thead = table.querySelector('thead');
-  var tbody = table.querySelector('tbody');
-  var allHeads = Array.prototype.slice.call(thead.querySelectorAll('tr th'));
-  var heads = Array.prototype.slice.call(thead.querySelectorAll('tr th.sticky'));
-  var MIN = 5;
-  var fixed = false;
-  function updateTableWidth() {
-    var sum = allHeads.reduce(function (a, th) { return a + th.getBoundingClientRect().width; }, 0);
-    table.style.width = sum + 'px';
-  }
-  function fixLayout() {
-    if (fixed || !tbody.querySelector('tr')) return;
-    fixed = true;
-    allHeads.forEach(function (th) { th.style.width = th.getBoundingClientRect().width + 'px'; });
-    table.style.tableLayout = 'fixed';
-    updateTableWidth();
-  }
-  function layout() {
-    fixLayout();
-    var lefts = [];
-    var acc = 0;
-    heads.forEach(function (th, i) {
-      lefts[i] = acc;
-      th.style.left = acc + 'px';
-      acc += th.getBoundingClientRect().width;
-    });
-    tbody.querySelectorAll('tr').forEach(function (tr) {
-      for (var i = 0; i < heads.length; i++) {
-        var td = tr.children[i];
-        if (td) td.style.left = lefts[i] + 'px';
-      }
-    });
-    updateTableWidth();
-  }
-  heads.forEach(function (th, idx) {
-    th.style.position = 'sticky';
-    var h = document.createElement('div');
-    h.className = 'col-resize';
-    th.appendChild(h);
-    h.addEventListener('mousedown', function (e) {
-      e.preventDefault();
-      var startX = e.clientX;
-      var group = e.shiftKey ? heads.slice(0, idx + 1) : [th];
-      var startWs = group.map(function (g) { return g.getBoundingClientRect().width; });
-      var startTotal = startWs.reduce(function (a, b) { return a + b; }, 0);
-      var startTable = allHeads.reduce(function (a, th) { return a + th.getBoundingClientRect().width; }, 0);
-      function move(ev) {
-        var minStart = Math.min.apply(null, startWs);
-        var target = Math.max(startTotal * MIN / minStart, startTotal + ev.clientX - startX);
-        var f = target / startTotal;
-        group.forEach(function (g, j) {
-          var w = (startWs[j] * f) + 'px';
-          g.style.width = g.style.minWidth = g.style.maxWidth = w;
-        });
-        var nonSticky = allHeads.filter(function (th) { return !th.classList.contains('sticky'); });
-        if (nonSticky.length) {
-          var lastTh = nonSticky[nonSticky.length - 1];
-          var sumNow = allHeads.reduce(function (a, th) { return a + th.getBoundingClientRect().width; }, 0);
-          lastTh.style.width = (lastTh.getBoundingClientRect().width + startTable - sumNow) + 'px';
-        }
-        layout();
-      }
-      function up() {
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-      }
-      document.addEventListener('mousemove', move);
-      document.addEventListener('mouseup', up);
-    });
-  });
-  new MutationObserver(layout).observe(tbody, { childList: true });
-  layout();
-})();
-</script>
+<script src="js/column-resize.js" defer></script>
 </body>
 </html>

@@ -181,6 +181,10 @@
       if (isOpen) return;
       el.appendChild(buildMenu(el));
       el.classList.add('open');
+      var menu = el.querySelector('.select-menu');
+      var box = el.closest('.modal-body');
+      var limit = box ? box.getBoundingClientRect().bottom : window.innerHeight;
+      if (menu && menu.getBoundingClientRect().bottom > limit) menu.classList.add('up');
     });
   }
   window.bindJsSelect = bindSelect;

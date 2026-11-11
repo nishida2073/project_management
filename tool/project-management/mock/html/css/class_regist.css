@@ -6,7 +6,6 @@
 
 .modal { width: 760px; }
 .modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 20px; }
-.btn { padding: 10px 20px; }
 
 .sub-list { display: flex; flex-direction: column; gap: 10px; }
 .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }

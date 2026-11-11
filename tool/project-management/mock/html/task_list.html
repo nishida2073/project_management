@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=task" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb-block">
+        <div class="crumb">マスタ管理<span>／</span>タスク</div>
+        <p class="crumb-sub">タスク情報を管理します</p>
+      </div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>タスク一覧</h1>
+        </div>
+        <div class="btn-group">
+          <a class="search-btn" href="task_regist.html">新規登録</a>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-meta"><div class="count">全 <b>8</b> 件</div></div>
+        <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>タスクID</th>
+              <th>タスク名</th>
+              <th>作業区分</th>
+              <th>作業順</th>
+              <th>担当会社名</th>
+              <th>日数</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>TSK-001</td><td>クラス登録</td><td><span class="tag blue">データ</span><span class="tag orange">グループ</span></td><td>1</td><td>社内</td><td>2</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+            <tr><td>TSK-002</td><td>名簿受領督促</td><td><span class="tag orange">グループ</span></td><td>2</td><td>社内</td><td>5</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+            <tr><td>TSK-003</td><td>講師契約</td><td><span class="tag orange">グループ</span></td><td>3</td><td>株式会社NEUトレーニング</td><td>7</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+            <tr><td>TSK-004</td><td>受講者登録(OliveOne)</td><td><span class="tag blue">データ</span></td><td>4</td><td>社内</td><td>3</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+            <tr><td>TSK-005</td><td>受講詳細案内発出</td><td><span class="tag orange">グループ</span></td><td>5</td><td>社内</td><td>2</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+            <tr><td>TSK-006</td><td>電子教材送付</td><td><span class="tag blue">データ</span><span class="tag orange">グループ</span></td><td>6</td><td>NDUパートナーズ</td><td>1</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+            <tr><td>TSK-007</td><td>出欠確認・報告</td><td><span class="tag orange">グループ</span></td><td>7</td><td>ユニバ研修サービス</td><td>3</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+            <tr><td>TSK-008</td><td>報告書作成</td><td><span class="tag blue">データ</span></td><td>8</td><td>社内</td><td>5</td><td><a class="search-btn" href="task_modify.html">編集</a></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="pagination">
+          <div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">›</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/sidebar-toggle.js" defer></script>
+<script src="js/column-resize.js" defer></script>
+</body>
+</html>

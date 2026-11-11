@@ -35,7 +35,10 @@
             <label class="radio-option"><input type="radio" name="affiliation" value="パートナー"><span class="radio-dot"></span><span class="tag orange">パートナー</span></label>
           </div>
         </div>
-        <div class="form-field"></div>
+        <div class="form-field" id="companyField" style="visibility: hidden;">
+          <label>所属会社<span class="req">必須</span></label>
+          <input type="text" class="form-control" placeholder="例）株式会社NEUトレーニング">
+        </div>
         <div class="form-field">
           <label>担当者名<span class="req">必須</span></label>
           <input type="text" class="form-control" placeholder="例）山田 太郎">
@@ -48,7 +51,7 @@
         <div class="form-field full">
           <label>担当区分（複数選択可）<span class="req">必須</span></label>
           <div class="chip-box js-chip-select" data-options="案件,クラス" data-chip-map='{"案件":"anken","クラス":"class"}'>
-            <span class="chip-add">＋ 担当区分を追加</span>
+            <span class="chip-add">担当区分を追加</span>
           </div>
         </div>
         <div class="form-field full">
@@ -64,7 +67,7 @@
           <div class="chip-box js-chip-select" id="roleChipBox" data-options="PM,PL" data-chip-map='{"PM":"pm","PL":"pl"}'>
             <span class="chip pm">PM <x>✕</x></span>
             <span class="chip pl">PL <x>✕</x></span>
-            <span class="chip-add">＋ 役職を追加</span>
+            <span class="chip-add">役職を追加</span>
           </div>
         </div>
         <div class="form-field toggle-field">
@@ -73,7 +76,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <a class="btn" href="tantousya_list.html">キャンセル</a>
+        <a class="search-btn" href="tantousya_list.html">キャンセル</a>
         <a class="btn primary" href="tantousya_list.html">登録する</a>
       </div>
     </div>
@@ -83,5 +86,16 @@
 <script src="js/chip-select.js" defer></script>
 <script src="js/toggle.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
+<script>
+  (function () {
+    var field = document.getElementById('companyField');
+    function apply() {
+      var checked = document.querySelector('input[name="affiliation"]:checked');
+      field.style.visibility = checked && checked.value === 'パートナー' ? 'visible' : 'hidden';
+    }
+    document.querySelectorAll('input[name="affiliation"]').forEach(function (r) { r.addEventListener('change', apply); });
+    apply();
+  })();
+</script>
 </body>
 </html>

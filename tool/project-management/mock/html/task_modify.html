@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/class_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=task" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>タスク一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>タスク編集</h2>
+          <div class="sub">TSK-001　クラス登録の情報を編集します</div>
+        </div>
+        <a class="close-x" href="task_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div class="form-field">
+          <label>タスクID</label>
+          <input type="text" class="form-control" value="TSK-001">
+        </div>
+        <div class="form-field full">
+          <label>タスク名<span class="req">必須</span></label>
+          <input type="text" class="form-control" value="クラス登録">
+        </div>
+        <div class="form-field full">
+          <label>作業区分（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box js-chip-select" data-options="データ,グループ" data-chip-map='{"データ":"pm","グループ":"pl"}'>
+            <span class="chip pm">データ <x>✕</x></span>
+            <span class="chip pl">グループ <x>✕</x></span>
+            <span class="chip-add">作業区分を追加</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>作業順<span class="req">必須</span></label>
+          <input type="number" class="form-control" min="1" value="1">
+        </div>
+        <div class="form-field full">
+          <label>担当会社名<span class="req">必須</span></label>
+          <div class="form-control js-select" data-options="社内,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">社内<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>日数<span class="req">必須</span></label>
+          <input type="number" class="form-control" min="0" value="2">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" href="task_list.html">キャンセル</a>
+        <a class="btn primary" href="task_list.html">保存する</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/select.js" defer></script>
+<script src="js/chip-select.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+</body>
+</html>

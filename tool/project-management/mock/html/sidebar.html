@@ -6,10 +6,15 @@
 <style>
   html, body { width: auto; height: 100%; margin: 0; }
   .sidebar { min-height: 100%; }
-  html, body { overflow-x: hidden; }
+  html, body { overflow-x: hidden; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; }
+  html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
   .sidebar-toggle { position: fixed; top: 14px; right: 8px; width: 28px; height: 28px; border: 1px solid #3a4a68; border-radius: 6px; background: transparent; color: #cdd7ea; font-size: 14px; cursor: pointer; z-index: 1; }
   body.collapsed .sidebar > *:not(.sidebar-toggle) { display: none; }
   body.collapsed .sidebar-toggle { right: auto; left: 8px; }
+  .nav-group-title { cursor: pointer; user-select: none; position: relative; padding-right: 28px; }
+  .nav-group-title::after { content: '▾'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #8fa2c4; }
+  .nav-group-title.collapsed::after { content: '▸'; }
+  .nav-item.acc-hidden { display: none; }
 </style>
 </head>
 <body>
@@ -32,7 +37,7 @@
   <div class="nav-item disabled">顧客</div>
   <a class="nav-item" data-sub="vendor" href="vendor_list.html" target="_parent">講師ベンダー</a>
   <a class="nav-item" data-sub="tantousya" href="tantousya_list.html" target="_parent">担当者</a>
-  <div class="nav-item disabled">作業工程</div>
+  <a class="nav-item" data-sub="task" href="task_list.html" target="_parent">タスク</a>
   <div class="nav-group-title">システム管理</div>
   <a class="nav-item" data-sub="user" href="user_list.html" target="_parent">ユーザー</a>
 </div>
@@ -55,6 +60,37 @@
     window.addEventListener('resize', apply);
     apply();
   })();
+  (function () {
+    var KEY = 'sidebarCollapsedGroups';
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; }
+    }
+    function save(list) {
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
+    }
+    function setGroup(title, collapsed) {
+      title.classList.toggle('collapsed', collapsed);
+      var el = title.nextElementSibling;
+      while (el && !el.classList.contains('nav-group-title')) {
+        el.classList.toggle('acc-hidden', collapsed);
+        el = el.nextElementSibling;
+      }
+    }
+    function collapsedNames() {
+      return Array.prototype.slice.call(document.querySelectorAll('.nav-group-title.collapsed'))
+        .map(function (t) { return t.textContent.trim(); });
+    }
+    var saved = load();
+    document.querySelectorAll('.nav-group-title').forEach(function (title) {
+      var name = title.textContent.trim();
+      setGroup(title, !Array.isArray(saved) || saved.indexOf(name) >= 0);
+      title.addEventListener('click', function () {
+        setGroup(title, !title.classList.contains('collapsed'));
+        save(collapsedNames());
+      });
+    });
+  })();
+
 </script>
 </body>
 </html>
