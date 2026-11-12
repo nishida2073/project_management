@@ -25,6 +25,7 @@
     var fits = a.mains.length >= (parseInt(r.mainTeachers, 10) || 0) && a.subs.length >= (parseInt(r.subTeachers, 10) || 0);
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
     tr.innerHTML =
+      '<td><input type="checkbox" class="row-check" checked></td>' +
       '<td>' + esc(r.year) + '</td>' +
       '<td><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
@@ -56,6 +57,14 @@
   }
   document.querySelector('.filter-panel .search-btn').addEventListener('click', applyFilter);
 
+  $('checkAll').addEventListener('change', function () {
+    var on = this.checked;
+    body.querySelectorAll('tr').forEach(function (tr) {
+      if (tr.style.display === 'none') return;
+      tr.querySelector('.row-check').checked = on;
+    });
+  });
+
   $('printBtn').addEventListener('click', function () {
     var vendor = clean(ownText($('requestVendor')));
     if (!vendor) {
@@ -65,6 +74,7 @@
     var items = [];
     body.querySelectorAll('tr').forEach(function (tr) {
       if (tr.style.display === 'none') return;
+      if (!tr.querySelector('.row-check').checked) return;
       var id = tr.getAttribute('data-id');
       var row = rows.filter(function (x) { return x.cls.id === id; })[0];
       if (!row) return;

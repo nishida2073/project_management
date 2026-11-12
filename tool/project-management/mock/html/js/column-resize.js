@@ -14,6 +14,7 @@
     if (!allHeads.length) return;
     var heads = Array.prototype.slice.call(thead.querySelectorAll('tr th.sticky'));
     var fixed = false;
+    table.style.minWidth = '100%';
 
     function updateTableWidth() {
       table.style.width = sumWidths(allHeads) + 'px';
