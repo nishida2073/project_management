@@ -15,7 +15,7 @@
       '<td>' + esc(u.email) + '</td>' +
       '<td><span class="tag ' + (UserRoleStore.colorOf(u.authority) || '') + '">' + esc(UserRoleStore.nameOf(u.authority)) + '</span></td>' +
       '<td><span class="state ' + (on ? 'on' : 'off') + '"><span class="dot"></span>' + (on ? '稼働中' : '停止中') + '</span></td>' +
-      '<td><a class="search-btn" href="user_modify.html?id=' + encodeURIComponent(u.code) + '">編集</a></td>';
+      '<td class="row-actions"><a class="search-btn" href="user_modify.html?id=' + encodeURIComponent(u.code) + '">編集</a></td>';
     body.appendChild(tr);
   });
 

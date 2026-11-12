@@ -18,7 +18,7 @@
       '<td>' + esc(l.tel) + '</td>' +
       '<td>' + esc(l.address) + '</td>' +
       '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
-      '<td><a class="search-btn" href="location_modify.html?id=' + encodeURIComponent(l.code) + '">編集</a></td>';
+      '<td class="row-actions"><a class="search-btn" href="location_modify.html?id=' + encodeURIComponent(l.code) + '">編集</a></td>';
     body.appendChild(tr);
   });
 
