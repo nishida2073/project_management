@@ -96,6 +96,11 @@
         var cell = document.createElement('div');
         cell.className = 'dp-day';
         cell.textContent = d;
+        var dow = new Date(viewY, viewM - 1, d).getDay();
+        var ds = viewY + '/' + pad(viewM) + '/' + pad(d);
+        if (dow === 0) cell.classList.add('sun');
+        else if (dow === 6) cell.classList.add('sat');
+        if (window.HolidayStore && HolidayStore.isHoliday(ds)) cell.classList.add('holiday');
         if (current.y === viewY && current.m === viewM && current.d === d) cell.classList.add('selected');
         (function (dd) {
           cell.addEventListener('click', function (e) {

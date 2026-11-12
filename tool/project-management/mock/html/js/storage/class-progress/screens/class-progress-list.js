@@ -77,7 +77,7 @@
     th.style.minWidth = '230px';
     th.setAttribute('data-step', i);
     th.setAttribute('data-kinds', t.kinds.join(','));
-    th.innerHTML = '<div><span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
+    th.innerHTML = '<div class="kind-line"><span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
       '<div>' + esc(DISPLAY_NO[i] + '：' + t.name) + '</div>' +
       '<div>' + esc(StaffVenderStore.nameOf(t.company)) + '</div>';
     headRow.appendChild(th);
@@ -138,6 +138,7 @@
       var kinds = (el.getAttribute('data-kinds') || '').split(',');
       el.style.display = (!code || kinds.indexOf(code) !== -1) ? '' : 'none';
     });
+    document.querySelector('#scrollArea table').classList.toggle('hide-kind', !!code);
     if (listTable.style.tableLayout !== 'fixed') return;
     var total = 0;
     listTable.querySelectorAll('thead th').forEach(function (th) { if (th.style.display !== 'none') total += parseFloat(th.style.width) || th.getBoundingClientRect().width; });

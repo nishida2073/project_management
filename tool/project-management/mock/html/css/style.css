@@ -296,6 +296,9 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .date-picker .dp-day { font-size: 12px; text-align: center; padding: 6px 0; border-radius: 5px; cursor: pointer; color: #333c4d; }
 .date-picker .dp-day:hover { background: #eef4ff; color: #2f6fed; }
 .date-picker .dp-day.muted { color: #c3c9d4; }
+.date-picker .dp-day.sat { color: #2f6fed; }
+.date-picker .dp-day.sun { color: #d43c40; }
+.date-picker .dp-day.holiday { color: #d43c40; }
 .date-picker .dp-day.selected { background: #2f6fed; color: #fff; font-weight: 700; }
 .date-picker.month-picker .dp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .date-picker .dp-month { font-size: 12px; text-align: center; padding: 10px 0; border-radius: 5px; cursor: pointer; color: #333c4d; }
@@ -363,6 +366,7 @@ td .search-btn { width: 64px; justify-content: center; }
 .content > .table-card > .table-scroll, .content > .table-card > .scroll-outer { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .na-text { font-size: 12px; color: #9aa4b5; }
 .status-chip-h .badge-row, .status-chip-h .badge { flex-shrink: 0; white-space: nowrap; }
+.hide-kind .kind-line { display: none; }
 
 .target-seg { display: inline-flex; align-items: center; gap: 1px; padding: 2px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }
 .target-opt { position: relative; cursor: pointer; user-select: none; }
