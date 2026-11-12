@@ -23,15 +23,16 @@
     <div class="content">
       
       <div class="filter-panel">
+        <div class="field"><label>実施状況</label><div class="control small js-select" data-options="すべて,実施前,実施中,実施後" data-match-col="0">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
         <div class="field"><label>開始日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
         <div class="field"><label>終了日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
-        <div class="field"><label>管理担当者</label><div class="control js-select" data-options="すべて,佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>管理担当者</label><div class="control js-select" id="managerFilter" data-options="すべて">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>全体進捗</label><div class="control small js-select" data-options="すべて,実施前,実施中,完了,遅延">すべて<span class="caret">▾</span></div></div>
         <div class="field" style="display:none;"><label>タスク区分</label><div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>実施担当者</label><div class="control js-select" data-options="すべて,佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実施担当者</label><div class="control js-select" data-match-attr="data-owners" data-options="すべて">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
       </div>
 
@@ -48,11 +49,13 @@
           <table>
             <thead>
               <tr>
+                <th class="sticky">実施状況</th>
                 <th class="sticky">年度</th>
                 <th class="sticky">コース</th>
                 <th class="sticky">レッスンNo</th>
                 <th class="sticky">開始日</th>
                 <th class="sticky">終了日</th>
+                <th class="sticky">実施担当者</th>
                 <th class="sticky">管理担当者</th>
                 <th class="sticky">タスク区分</th>
                 <th class="sticky">全体進捗</th>
@@ -80,6 +83,8 @@
 <script src="js/storage/task/store/task-store.js"></script>
 <script src="js/storage/class-progress/store/progress-store.js"></script>
 <script src="js/storage/task-type/store/task-type-store.js"></script>
+<script src="js/storage/job-type/store/job-type-store.js"></script>
+<script src="js/storage/staff-role/store/staff-role-store.js"></script>
 <script src="js/storage/class-progress/screens/class-progress-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/storage/holiday/store/holiday-store.js"></script>

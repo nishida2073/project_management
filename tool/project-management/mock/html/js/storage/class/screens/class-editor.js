@@ -40,7 +40,9 @@
     cc.setAttribute('data-class-map2', JSON.stringify(colorMap(ParticipationTypeStore.load())));
     cc.setAttribute('data-class-map3', JSON.stringify(colorMap(DeliveryTypeStore.load())));
 
-    document.getElementById('manager').setAttribute('data-options', StaffStore.activeNames().join(','));
+    document.getElementById('manager').setAttribute('data-options', StaffStore.candidates({
+      roles: ['クラス'], jobTypes: ['管理']
+    }).join(','));
     var locGroup = document.querySelector('.radio-group[data-target="#locationName"]');
     var byType = LocationStore.namesByType();
     locGroup.setAttribute('data-options-map', JSON.stringify(byType));

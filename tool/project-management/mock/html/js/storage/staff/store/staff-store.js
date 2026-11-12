@@ -2,9 +2,9 @@
   var KEY = 'staffList';
 
   var SEED = [
-    { code: 'STF-014', affiliation: '社内', company: '', name: '山口 直人', email: 'yamaguchi@company.co.jp', roles: ['SR-01'], jobType: 'JT-02', positions: ['PS-01'], status: '稼働中' },
-    { code: 'STF-021', affiliation: '社内', company: '', name: '細野 恵美', email: 'hosono@company.co.jp', roles: ['SR-01'], jobType: 'JT-02', positions: ['PS-02'], status: '稼働中' },
-    { code: 'STF-022', affiliation: '社内', company: '', name: '市村 拓也', email: 'ichimura@company.co.jp', roles: ['SR-01'], jobType: 'JT-02', positions: ['PS-02'], status: '稼働中' },
+    { code: 'STF-014', affiliation: '社内', company: '', name: '山口 直人', email: 'yamaguchi@company.co.jp', roles: ['SR-01'], jobType: 'JT-01', positions: ['PS-01'], status: '稼働中' },
+    { code: 'STF-021', affiliation: '社内', company: '', name: '細野 恵美', email: 'hosono@company.co.jp', roles: ['SR-01'], jobType: 'JT-01', positions: ['PS-02'], status: '稼働中' },
+    { code: 'STF-022', affiliation: '社内', company: '', name: '市村 拓也', email: 'ichimura@company.co.jp', roles: ['SR-01'], jobType: 'JT-01', positions: ['PS-02'], status: '稼働中' },
     { code: 'STF-033', affiliation: '社内', company: '', name: '荒牧 麻衣', email: 'aramaki@company.co.jp', roles: ['SR-01'], jobType: 'JT-01', positions: [], status: '稼働中' },
     { code: 'STF-045', affiliation: '社内', company: '', name: '佐藤 一郎', email: 'sato@company.co.jp', roles: ['SR-02'], jobType: 'JT-03', positions: [], status: '稼働中' },
     { code: 'STF-052', affiliation: '社内', company: '', name: '中村 桂', email: 'nakamura@company.co.jp', roles: ['SR-02'], jobType: 'JT-02', positions: ['PS-01'], status: '停止中' },
@@ -61,5 +61,18 @@
     return found ? found.code : '';
   }
 
-  window.StaffStore = { load: load, save: save, nextCode: nextCode, activeNames: activeNames, nameOf: nameOf, codeOf: codeOf };
+  function matches(s, cond) {
+    if (!cond.includeStopped && s.status === '停止中') return false;
+    if (cond.affiliations && cond.affiliations.indexOf(s.affiliation) === -1) return false;
+    if (cond.roles && !(s.roles || []).some(function (c) { return cond.roles.indexOf(StaffRoleStore.nameOf(c)) !== -1; })) return false;
+    if (cond.jobTypes && cond.jobTypes.indexOf(JobTypeStore.nameOf(s.jobType)) === -1) return false;
+    if (cond.positions && !(s.positions || []).some(function (c) { return cond.positions.indexOf(PositionStore.nameOf(c)) !== -1; })) return false;
+    return true;
+  }
+
+  function candidates(cond) {
+    return load().filter(function (s) { return matches(s, cond); }).map(function (s) { return s.name; });
+  }
+
+  window.StaffStore = { load: load, save: save, nextCode: nextCode, activeNames: activeNames, nameOf: nameOf, codeOf: codeOf, candidates: candidates };
 })();

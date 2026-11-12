@@ -23,10 +23,11 @@
     function fixLayout() {
       if (fixed || !tbody.querySelector('tr')) return;
       fixed = true;
-      var isYear = allHeads[0].textContent.trim() === '年度';
+      var yearIdx = -1;
+      allHeads.forEach(function (th, i) { if (yearIdx < 0 && th.textContent.trim() === '年度') yearIdx = i; });
       allHeads.forEach(function (th, i) {
         var w = th.getBoundingClientRect().width;
-        if (i === 0 && isYear) w = Math.max(w, YEAR_MIN);
+        if (i === yearIdx) w = Math.max(w, YEAR_MIN);
         th.style.width = w + 'px';
       });
       table.style.tableLayout = 'fixed';

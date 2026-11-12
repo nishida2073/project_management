@@ -70,7 +70,7 @@
   tasks.forEach(function (t) { byName[t.name] = t; });
 
   var headRow = document.querySelector('#scrollArea thead tr');
-  while (headRow.children.length > 8) headRow.removeChild(headRow.lastElementChild);
+  while (headRow.children.length > 10) headRow.removeChild(headRow.lastElementChild);
   SORTED.forEach(function (t, i) {
     if (t.status === '停止中') return;
     var th = document.createElement('th');
@@ -109,22 +109,38 @@
     var course = ClassStore.COURSES[c.courseCode];
     var related = c.related && c.related.length ? c.related.join(', ') : '-';
 
+    var owners = steps.filter(function (s, i) { return isActive(i) && !s.na && s.owner; })
+      .map(function (s) { return StaffStore.nameOf(s.owner); })
+      .filter(function (n, i, a) { return n && a.indexOf(n) === i; });
     var tr = document.createElement('tr');
     var html = '';
-    html += '<td class="sticky" style="left:0;">' + esc(c.year) + '</td>';
+    var ps = ClassStore.practiceStatus(c);
+    html += '<td class="sticky" style="left:0;">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
+    html += '<td class="sticky" style="left:100px;">' + esc(c.year) + '</td>';
     html += '<td class="sticky" style="left:90px;"><div>' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
     html += '<td class="sticky" style="left:280px;"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
     html += '<td class="sticky" style="left:410px;">' + esc(c.start) + '</td>';
     html += '<td class="sticky" style="left:530px;">' + esc(c.end) + '</td>';
+    html += '<td class="sticky" style="left:650px;">' + owners.map(esc).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:650px;">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky" style="left:870px;">' + overall(activeSteps) + '</td>';
     steps.forEach(function (s, i) { if (!isActive(i)) return; html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '">' + chip(s) + '</td>'; });
     html += '<td><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">編集</a></td>';
     tr.innerHTML = html;
+    tr.setAttribute('data-owners', owners.join('|'));
     body.appendChild(tr);
   });
 
+  function staffOptionsOf(affiliations, jobType) {
+    return ['すべて'].concat(StaffStore.candidates({
+      includeStopped: true, affiliations: affiliations, roles: ['クラス'], jobTypes: [jobType]
+    })).join(',');
+  }
+  var ownerSelect = document.querySelector('.filter-panel .js-select[data-match-attr="data-owners"]');
+  if (ownerSelect) ownerSelect.setAttribute('data-options', staffOptionsOf(['社内', 'パートナー'], '実施'));
+  var managerSelect = document.getElementById('managerFilter');
+  if (managerSelect) managerSelect.setAttribute('data-options', staffOptionsOf(null, '管理'));
   document.getElementById('progressCount').textContent = classes.length;
   document.getElementById('delayCount').textContent = delayClasses;
 

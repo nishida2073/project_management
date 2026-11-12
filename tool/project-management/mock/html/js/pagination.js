@@ -1,5 +1,5 @@
 (function () {
-  var PER = 5;
+  var PER = 100;
   var state = { page: 1 };
 
   function init() {

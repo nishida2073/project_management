@@ -39,7 +39,7 @@
         </div>
         <div class="field">
           <label>管理担当者</label>
-          <div class="control js-select" data-options="すべて,山口 直人,細野 恵美,田中 誠,木村 隆,高橋 健,中島 拓海,伊藤 美咲,小林 由美,渡辺 直樹,松本 健二,市村 拓也,佐藤 一郎,岡田 沙織">すべて<span class="caret">▾</span></div>
+          <div class="control js-select" id="managerFilter" data-options="すべて">すべて<span class="caret">▾</span></div>
         </div>
         <div class="field">
           <label>実施開始月</label>
@@ -101,6 +101,9 @@
 ${tags%
 }
 <script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/staff-role/store/staff-role-store.js"></script>
+<script src="js/storage/job-type/store/job-type-store.js"></script>
+<script src="js/storage/position/store/position-store.js"></script>
 <script src="js/storage/participation-type/store/participation-type-store.js"></script>
 <script src="js/storage/sales-type/store/sales-type-store.js"></script>
 <script src="js/storage/customer/store/customer-store.js"></script>

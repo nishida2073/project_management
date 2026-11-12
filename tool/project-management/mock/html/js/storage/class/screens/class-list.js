@@ -10,13 +10,17 @@
   var body = document.getElementById('classBody');
   var list = ClassStore.load();
 
+  var PRACTICE_CLASS = ClassStore.PRACTICE_CLASS;
+
   list.forEach(function (r) {
     var p = P[r.projectCode] || { name: '', sales: '', part: '' };
     var c = C[r.courseCode] || { name: '', part: '', delivery: '', schedule: '' };
     var relatedText = r.related && r.related.length ? r.related.join(', ') : '-';
+    var ps = ClassStore.practiceStatus(r);
 
     var tr = document.createElement('tr');
     tr.innerHTML =
+      '<td>' + (ps ? '<span class="tag ' + PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td>' + esc(r.year) + '</td>' +
       '<td><div>' + esc(p.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.projectCode) + '</div></td>' +
       '<td>' + (p.sales ? '<span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +

@@ -26,8 +26,10 @@
     var planMain = parseInt(r.mainTeachers, 10) || 0;
     var planSub = parseInt(r.subTeachers, 10) || 0;
     var zan = a.mains.length < planMain || a.subs.length < planSub;
+    var ps = ClassStore.practiceStatus(r);
     var tr = document.createElement('tr');
     tr.innerHTML =
+      '<td>' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td>' + esc(r.year) + '</td>' +
       '<td><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
@@ -44,4 +46,8 @@
 
   document.getElementById('vendorFilter').setAttribute('data-options', ['すべて'].concat(TeacherVenderStore.activeNames()).join(','));
   document.getElementById('venderCount').textContent = list.length;
+  window.addEventListener('load', function () {
+    var btn = document.querySelector('.filter-panel .search-btn');
+    if (btn) btn.click();
+  });
 })();

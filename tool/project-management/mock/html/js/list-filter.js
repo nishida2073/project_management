@@ -32,7 +32,9 @@
 
     function apply() {
       var keywords = texts.map(function (i) { return norm(i.value); }).filter(Boolean);
-      var chosen = selects.map(selValue).filter(function (v) { return v && v !== 'すべて' && v !== '選択してください'; });
+      var chosen = selects.map(function (el) {
+        return { v: selValue(el), col: el.getAttribute('data-match-col'), attr: el.getAttribute('data-match-attr') };
+      }).filter(function (c) { return c.v && c.v !== 'すべて' && c.v !== '選択してください'; });
       var from = dates[0] ? parseDate(ownText(dates[0])) : null;
       var to = dates[1] ? parseDate(ownText(dates[1])) : null;
       var shown = 0;
@@ -40,7 +42,16 @@
       rows.forEach(function (tr) {
         var text = norm(tr.textContent);
         var ok = keywords.every(function (k) { return text.indexOf(k) !== -1; }) &&
-          chosen.every(function (v) { return text.indexOf(norm(v)) !== -1; });
+          chosen.every(function (c) {
+            if (c.col !== null) {
+              var cell = tr.children[Number(c.col)];
+              return !!cell && norm(cell.textContent) === norm(c.v);
+            }
+            if (c.attr) {
+              return String(tr.getAttribute(c.attr) || '').split('|').indexOf(c.v) !== -1;
+            }
+            return text.indexOf(norm(c.v)) !== -1;
+          });
         if (ok && (from !== null || to !== null)) {
           var times = Array.prototype.map.call(tr.querySelectorAll('td'), function (td) {
             return parseDate(td.textContent);

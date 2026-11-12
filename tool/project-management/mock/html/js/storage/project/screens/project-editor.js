@@ -74,9 +74,9 @@
     var editing = opts.mode === 'edit';
     renderGroup('salesType', SalesTypeStore.load());
     renderGroup('participationType', ParticipationTypeStore.load());
-    var names = StaffStore.activeNames().join(',');
-    document.getElementById('pm').setAttribute('data-options', names);
-    document.getElementById('plBox').setAttribute('data-options', names);
+    var projectStaff = { affiliations: ['社内'], roles: ['案件'], jobTypes: ['営業'] };
+    document.getElementById('pm').setAttribute('data-options', StaffStore.candidates(Object.assign({ positions: ['PM'] }, projectStaff)).join(','));
+    document.getElementById('plBox').setAttribute('data-options', StaffStore.candidates(Object.assign({ positions: ['PL'] }, projectStaff)).join(','));
     document.getElementById('customer').setAttribute('data-options', CustomerStore.load().filter(function (c) { return c.status !== '停止中'; }).map(function (c) { return c.name; }).join(','));
     var list = ProjectStore.load();
     var id = new URLSearchParams(location.search).get('id');

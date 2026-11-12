@@ -72,6 +72,23 @@
     return String(max + 1).padStart(3, '0');
   }
 
+  function toDate(s) {
+    if (!s) return null;
+    var d = new Date(String(s).replace(/\//g, '-'));
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function practiceStatus(r) {
+    var start = toDate(r.start);
+    var end = toDate(r.end);
+    if (!start || !end) return '';
+    var now = new Date();
+    now.setHours(0, 0, 0, 0);
+    if (now < start) return '実施前';
+    if (now > end) return '実施後';
+    return '実施中';
+  }
+
   window.ClassStore = {
     PROJECTS: ProjectStore.map(),
     COURSES: CourseStore.map(),
@@ -79,6 +96,8 @@
     load: load,
     save: save,
     nextId: nextId,
-    nextLessonNo: nextLessonNo
+    nextLessonNo: nextLessonNo,
+    practiceStatus: practiceStatus,
+    PRACTICE_CLASS: { '実施前': 'blue', '実施中': 'orange', '実施後': 'gray' }
   };
 })();
