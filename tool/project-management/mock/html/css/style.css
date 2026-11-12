@@ -195,6 +195,8 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 a.close-x { cursor: pointer; }
 .modal-footer { padding: 16px 28px; border-top: 1px solid #eef1f6; display: flex; justify-content: flex-end; gap: 10px; background: #fafbfd; }
 .modal-footer > :first-child { margin-right: auto; }
+.modal-footer > .search-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
+.modal-footer > .search-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
 
 /* タブ付きダイアログ（社内／運営進捗の更新） */
 .tabs { display: flex; gap: 4px; padding: 0 28px; border-bottom: 1px solid #eef1f6; background: #fafbfd; }
