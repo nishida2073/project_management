@@ -11,9 +11,21 @@
   list.forEach(function (r) {
     var c = C[r.courseCode] || { name: r.courseCode };
     var a = VenderAssignStore.find(r.id);
-    var subVendors = a.subs.map(function (s) { return TeacherVenderStore.nameOf(s.vendor); }).filter(Boolean).join('、');
-    var subStaffs = a.subs.map(function (s) { return StaffStore.nameOf(s.staff); }).filter(Boolean).join('、');
+    function lines(items) {
+      return items.length ? items.map(function (x) {
+        return '<div>' + esc(x.vendor) + '：' + esc(x.staff) + '</div>';
+      }).join('') : '-';
+    }
+    var mainLines = lines(a.mains.map(function (m) {
+      return { vendor: TeacherVenderStore.nameOf(m.vendor) || '-', staff: m.staff || '-' };
+    }));
+    var subLines = lines(a.subs.map(function (s) {
+      return { vendor: TeacherVenderStore.nameOf(s.vendor) || '-', staff: s.staff || '-' };
+    }));
     var related = r.related && r.related.length ? r.related.join(', ') : '-';
+    var planMain = parseInt(r.mainTeachers, 10) || 0;
+    var planSub = parseInt(r.subTeachers, 10) || 0;
+    var zan = a.mains.length < planMain || a.subs.length < planSub;
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td>' + esc(r.year) + '</td>' +
@@ -21,10 +33,11 @@
       '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
-      '<td>' + dash(TeacherVenderStore.nameOf(a.mainVendor)) + '</td>' +
-      '<td>' + dash(StaffStore.nameOf(a.mainStaff)) + '</td>' +
-      '<td>' + dash(subVendors) + '</td>' +
-      '<td>' + dash(subStaffs) + '</td>' +
+      '<td>' + esc(r.mainTeachers || '-') + '</td>' +
+      '<td>' + esc(r.subTeachers || '-') + '</td>' +
+      '<td>' + (zan ? '<span class="tag orange">あり</span>' : '<span class="tag green">なし</span>') + '</td>' +
+      '<td>' + mainLines + '</td>' +
+      '<td>' + subLines + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="class_vender_modify.html?id=' + encodeURIComponent(r.id) + '">編集</a></td>';
     body.appendChild(tr);
   });

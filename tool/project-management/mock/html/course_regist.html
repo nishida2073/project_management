@@ -31,20 +31,22 @@
           </div>
         </div>
         <div class="form-section">コース</div>
-        <div class="form-field full">
+        <div class="form-field">
           <label>年度<span class="req">必須</span></label>
           <div class="form-control js-select" id="courseYear" data-options="2024年度,2025年度,2026年度,2027年度"><span class="caret">▾</span></div>
         </div>
-        <div class="form-field full">
-          <label>コースコード<span class="req">必須</span></label>
-          <input type="text" class="form-control" id="courseCode">
-        </div>
+        <div class="form-field form-spacer" aria-hidden="true"></div>
         <div class="form-field">
           <label>参加区分<span class="req">必須</span></label>
           <div class="radio-group">
             <label class="radio-option"><input type="radio" name="participationType" value="公募"><span class="radio-dot"></span><span class="tag orange">公募</span></label>
             <label class="radio-option"><input type="radio" name="participationType" value="受託"><span class="radio-dot"></span><span class="tag blue">受託</span></label>
           </div>
+        </div>
+        <div class="form-field form-spacer" aria-hidden="true"></div>
+        <div class="form-field">
+          <label>コースコード<span class="req">必須</span></label>
+          <input type="text" class="form-control" id="courseCode">
         </div>
         <div class="form-field full">
           <label>コース名<span class="req">必須</span></label>
@@ -59,14 +61,14 @@
             <label class="radio-option"><input type="radio" name="deliveryType" value="ハイブリッド"><span class="radio-dot"></span><span class="tag violet">ハイブリッド</span></label>
           </div>
         </div>
-        <div class="form-field full">
+        <div class="form-field">
           <label>日数<span class="req">必須</span></label>
           <div class="form-control number-select" id="days" data-options="1,2,3,4,5">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>
           </div>
         </div>
-        <div class="form-field">
+        <div class="form-field" style="grid-column: 1;">
           <label>最小人数（推奨）</label>
           <div class="form-control number-select" id="minPeople" data-options="10,15,20,24,30,35,40,50">
             <input type="text" inputmode="numeric" value="">
@@ -109,7 +111,7 @@
       </div>
       <div class="modal-footer">
         <a class="search-btn" href="course_list.html">キャンセル</a>
-        <div id="saveBtn" class="btn primary">登録する</div>
+        <div id="saveBtn" class="btn primary">保存</div>
       </div>
     </div>
   </div>

@@ -25,8 +25,8 @@
         </div>
         <div class="btn-group">
           <a class="btn primary" href="class_vender_print.html">登壇依頼書出力</a>
-          <div class="btn primary">Excel取込</div>
-          <div class="btn primary">Excel出力</div>
+          <div class="btn primary" id="importBtn">登壇依頼書取り込み</div>
+          <input type="file" id="importFile" accept=".xlsx" style="display:none;">
         </div>
       </div>
       <div class="filter-panel">
@@ -51,10 +51,11 @@
               <th>レッスンNo / 関連</th>
               <th>開始日</th>
               <th>終了日</th>
-              <th>講師ベンダー名（メイン）</th>
-              <th>講師名（メイン）</th>
-              <th>講師ベンダー名（サブ）</th>
-              <th>講師名（サブ）</th>
+              <th>予定講師数（メイン）</th>
+              <th>予定講師数（サブ）</th>
+              <th>依頼残</th>
+              <th>講師（メイン）</th>
+              <th>講師（サブ）</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -73,12 +74,15 @@
 <script src="js/storage/project/store/project-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
 <script src="js/storage/vender-assign/store/vender-assign-store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="js/storage/vender-assign/screens/vender-assign-list.js"></script>
+<script src="js/storage/vender-assign/screens/vender-assign-import.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/list-filter.js"></script>
 <script src="js/pagination.js"></script>
+<script src="js/filter-collapse.js"></script>
 </body>
 </html>

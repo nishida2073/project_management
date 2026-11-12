@@ -27,16 +27,9 @@
           <h1>クラス運営進捗一覧</h1>
         </div>
         <div class="btn-group">
-          <div class="btn primary">Excel取込</div>
-          <div class="btn primary">Excel出力</div>
         </div>
       </div>
 
-      <div class="tab-row" id="taskTypeTabs" style="display:flex; gap:8px; margin-bottom:14px;">
-        <span class="year-tab active" data-tt="">すべて</span>
-        <span class="year-tab" data-tt="データ">データ</span>
-        <span class="year-tab" data-tt="グループ">グループ</span>
-      </div>
       <div class="filter-panel">
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
@@ -51,8 +44,13 @@
       </div>
 
       <div class="table-card">
+        <div class="tab-row" id="taskTypeTabs" style="display:flex; gap:8px; padding:12px 20px 0;">
+          <span class="year-tab active" data-tt="">すべて</span>
+          <span class="year-tab" data-tt="データ">データ</span>
+          <span class="year-tab" data-tt="グループ">グループ</span>
+        </div>
         <div class="table-meta">
-          <div class="count">全 <b id="progressCount">0</b> 件（うち遅延 <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
+          <div class="count">全 <b id="progressCount">0</b> 件（遅延 <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
         </div>
         <div class="scroll-outer" id="scrollArea">
           <table>
@@ -129,5 +127,6 @@ document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (tab) {
   });
 });
 </script>
+<script src="js/filter-collapse.js"></script>
 </body>
 </html>

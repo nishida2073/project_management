@@ -18,26 +18,26 @@
   function vendorOptions() { return TeacherVenderStore.activeNames(); }
   function staffOptions() { return StaffStore.activeNames(); }
 
-  function makeSubRow(sub) {
+  function makeRow(listId, data) {
     var row = document.createElement('div');
     row.className = 'sub-grid sub-row';
     row.innerHTML =
-      '<div class="form-control js-select" data-options="' + esc(vendorOptions().join(',')) + '">' + esc(TeacherVenderStore.nameOf(sub.vendor) || '選択してください') + '<span class="caret">▾</span></div>' +
-      '<div class="form-control js-select" data-options="' + esc(staffOptions().join(',')) + '">' + esc(StaffStore.nameOf(sub.staff) || '選択してください') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-select" data-options="' + esc(vendorOptions().join(',')) + '">' + esc(TeacherVenderStore.nameOf(data.vendor) || '選択してください') + '<span class="caret">▾</span></div>' +
+      '<input type="text" class="form-control" placeholder="講師名" value="' + esc(data.staff || '') + '">' +
       '<div class="sub-remove">✕</div>';
     row.querySelector('.sub-remove').addEventListener('click', function () { row.remove(); });
-    $('subList').appendChild(row);
+    $(listId).appendChild(row);
     Array.prototype.forEach.call(row.querySelectorAll('.js-select'), function (el) { window.bindJsSelect(el); });
   }
 
-  function readSubs() {
-    return Array.prototype.map.call($('subList').querySelectorAll('.sub-row'), function (row) {
+  function readRows(listId) {
+    return Array.prototype.map.call($(listId).querySelectorAll('.sub-row'), function (row) {
       var sel = row.querySelectorAll('.js-select');
       return {
         vendor: TeacherVenderStore.codeOf(clean(ownText(sel[0]))),
-        staff: StaffStore.codeOf(clean(ownText(sel[1])))
+        staff: (row.querySelector('input[type="text"]') || { value: '' }).value.trim()
       };
-    }).filter(function (s) { return s.vendor || s.staff; });
+    }).filter(function (r) { return r.vendor || r.staff; });
   }
 
   function init(opts) {
@@ -50,36 +50,45 @@
       return;
     }
     var c = ClassStore.COURSES[cls.courseCode];
-    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + 'の登壇管理を編集します';
+    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + 'の登壇管理を編集します　予定講師数：メイン' + (cls.mainTeachers || '-') + '名・サブ' + (cls.subTeachers || '-') + '名';
 
     var a = VenderAssignStore.find(classId);
-    setSelect($('mainVendor'), TeacherVenderStore.nameOf(a.mainVendor), vendorOptions());
-    setSelect($('mainStaff'), StaffStore.nameOf(a.mainStaff), staffOptions());
-    a.subs.forEach(makeSubRow);
+    var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0);
+    var zanTag = document.createElement('span');
+    zanTag.className = 'tag ' + (zanNow ? 'orange' : 'green');
+    zanTag.textContent = zanNow ? 'あり' : 'なし';
+    $('subLine').appendChild(document.createTextNode('　依頼残：'));
+    $('subLine').appendChild(zanTag);
+    var planMain = parseInt(cls.mainTeachers, 10) || 0;
+    var planSub = parseInt(cls.subTeachers, 10) || 0;
+    var mainRows = a.mains.slice();
+    while (mainRows.length < planMain) mainRows.push({ vendor: '', staff: '' });
+    var subRows = a.subs.slice();
+    while (subRows.length < planSub) subRows.push({ vendor: '', staff: '' });
+    mainRows.forEach(function (m) { makeRow('mainList', m); });
+    subRows.forEach(function (s) { makeRow('subList', s); });
     setSelect($('attendeeVendor'), TeacherVenderStore.nameOf(a.attendeeVendor), vendorOptions());
     setSelect($('attendee'), StaffStore.nameOf(a.attendee), staffOptions());
     setSelect($('motivationVendor'), TeacherVenderStore.nameOf(a.motivationVendor), vendorOptions());
     setSelect($('motivationStaff'), StaffStore.nameOf(a.motivationStaff), staffOptions());
 
-    $('addSub').addEventListener('click', function () { makeSubRow({ vendor: '', staff: '' }); });
+    $('addMain').addEventListener('click', function () { makeRow('mainList', { vendor: '', staff: '' }); });
+    $('addSub').addEventListener('click', function () { makeRow('subList', { vendor: '', staff: '' }); });
 
     $('saveBtn').addEventListener('click', function () {
+      var mains = readRows('mainList');
+      var subs = readRows('subList');
       var record = {
         classId: classId,
         mainCount: a.mainCount,
         subCount: a.subCount,
-        mainVendor: TeacherVenderStore.codeOf(clean(ownText($('mainVendor')))),
-        mainStaff: StaffStore.codeOf(clean(ownText($('mainStaff')))),
-        subs: readSubs(),
+        mains: mains,
+        subs: subs,
         attendeeVendor: TeacherVenderStore.codeOf(clean(ownText($('attendeeVendor')))),
         attendee: StaffStore.codeOf(clean(ownText($('attendee')))),
         motivationVendor: TeacherVenderStore.codeOf(clean(ownText($('motivationVendor')))),
         motivationStaff: StaffStore.codeOf(clean(ownText($('motivationStaff'))))
       };
-      if (!record.mainVendor || !record.mainStaff) {
-        alert('メイン講師のベンダーと講師名を入力してください');
-        return;
-      }
       VenderAssignStore.upsert(record);
       location.href = 'class_vender_list.html';
     });

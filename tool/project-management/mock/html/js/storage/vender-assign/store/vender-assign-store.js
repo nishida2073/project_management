@@ -4,8 +4,16 @@
   var SEED = [
     {
       classId: 'CLS-001', mainCount: 1, subCount: 1,
-      mainVendor: 'TCV-001', mainStaff: 'STF-064',
+      mains: [{ vendor: 'TCV-001', staff: 'STF-064' }],
       subs: [{ vendor: 'TCV-002', staff: 'STF-068' }],
+      attendeeVendor: '', attendee: '',
+      motivationVendor: '', motivationStaff: ''
+    }
+    ,
+    {
+      classId: 'CLS-005', mainCount: 1, subCount: 2,
+      mains: [{ vendor: 'TCV-003', staff: 'STF-066' }],
+      subs: [{ vendor: 'TCV-004', staff: 'STF-067' }, { vendor: 'TCV-005', staff: 'STF-073' }],
       attendeeVendor: '', attendee: '',
       motivationVendor: '', motivationStaff: ''
     }
@@ -15,12 +23,29 @@
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
   }
 
+  function staffText(v) {
+    if (typeof v === 'string' && /^STF-/.test(v) && window.StaffStore) return StaffStore.nameOf(v) || v;
+    return v || '';
+  }
+
+  function normalize(a) {
+    if (!a.mains) {
+      a.mains = (a.mainVendor || a.mainStaff) ? [{ vendor: a.mainVendor || '', staff: a.mainStaff || '' }] : [];
+    }
+    delete a.mainVendor;
+    delete a.mainStaff;
+    a.subs = a.subs || [];
+    a.mains = a.mains.map(function (m) { return { vendor: m.vendor, staff: staffText(m.staff) }; });
+    a.subs = a.subs.map(function (s) { return { vendor: s.vendor, staff: staffText(s.staff) }; });
+    return a;
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) return JSON.parse(raw).map(normalize);
     } catch (e) {}
-    var seed = JSON.parse(JSON.stringify(SEED));
+    var seed = JSON.parse(JSON.stringify(SEED)).map(normalize);
     save(seed);
     return seed;
   }
@@ -28,7 +53,7 @@
   function blank(classId) {
     return {
       classId: classId, mainCount: 1, subCount: 0,
-      mainVendor: '', mainStaff: '', subs: [],
+      mains: [], subs: [],
       attendeeVendor: '', attendee: '',
       motivationVendor: '', motivationStaff: ''
     };

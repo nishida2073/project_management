@@ -102,7 +102,7 @@ function setDisabledRow(tr, off) {
       tr.innerHTML =
         '<td class="sticky" style="text-align: center; font-weight: 700;">' + s.no + '</td>' +
         '<td class="step-name sticky">' + esc(name) + '</td>' +
-        '<td><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + s.no + '" value="あり"' + (na ? '' : ' checked') + '><span>あり</span></label>' +
+        '<td class="sticky shadow"><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + s.no + '" value="あり"' + (na ? '' : ' checked') + '><span>あり</span></label>' +
           '<label class="target-opt off"><input type="radio" name="target' + s.no + '" value="なし"' + (na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
         '<td style="white-space: nowrap; font-weight: 700;">' + esc(company) + '</td>' +
         '<td>' + planCell + '</td>' +

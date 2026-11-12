@@ -22,20 +22,17 @@
         <a class="close-x" href="class_vender_list.html">✕</a>
       </div>
       <div class="modal-body">
-        <div class="form-section">メイン講師</div>
-        <div class="form-field">
-          <label>講師ベンダー名<span class="req">必須</span></label>
-          <div class="form-control js-select" id="mainVendor">選択してください<span class="caret">▾</span></div>
+        <div class="form-section">講師（メイン）</div>
+        <div class="form-field full">
+          <div class="sub-grid sub-row-header"><span>講師ベンダー名</span><span>講師名</span></div>
+          <div class="sub-list" id="mainList"></div>
+          <div class="search-btn add-row" id="addMain">講師（メイン）を追加</div>
         </div>
-        <div class="form-field">
-          <label>講師名<span class="req">必須</span></label>
-          <div class="form-control js-select" id="mainStaff">選択してください<span class="caret">▾</span></div>
-        </div>
-        <div class="form-section">サブ講師</div>
+        <div class="form-section">講師（サブ）</div>
         <div class="form-field full">
           <div class="sub-grid sub-row-header"><span>講師ベンダー名</span><span>講師名</span></div>
           <div class="sub-list" id="subList"></div>
-          <div class="search-btn add-row" id="addSub">サブ講師を追加</div>
+          <div class="search-btn add-row" id="addSub">講師（サブ）を追加</div>
         </div>
         <div class="form-section">聴講</div>
         <div class="form-field">
@@ -58,7 +55,7 @@
       </div>
       <div class="modal-footer">
         <a class="search-btn" href="class_vender_list.html">キャンセル</a>
-        <div id="saveBtn" class="btn primary">保存する</div>
+        <div id="saveBtn" class="btn primary">保存</div>
       </div>
     </div>
   </div>

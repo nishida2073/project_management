@@ -100,10 +100,45 @@
       };
     }
 
+    var fromId = editing ? null : new URLSearchParams(location.search).get('from');
+    if (fromId) {
+      list.forEach(function (r) {
+        if (r.id === fromId) rec = Object.assign({}, r, { id: '', lessonNo: '', locationName: '', related: [r.lessonNo].concat(r.related || []).filter(Boolean) });
+      });
+    }
+    if (editing) {
+      var copyBtn = document.getElementById('copyBtn');
+      if (copyBtn) copyBtn.addEventListener('click', function () {
+        location.href = 'class_regist.html?from=' + encodeURIComponent(rec.id);
+      });
+    }
+
     ClassForm.fill(rec);
     setupVersionOptions();
 
-    if (!editing) {
+    function relatedOptions() {
+      var code = document.getElementById('courseCode').getAttribute('data-value') || '';
+      var selfId = editing ? rec.id : '';
+      return ClassStore.load().filter(function (c) {
+        return c.courseCode === code && c.id !== selfId && c.lessonNo;
+      }).map(function (c) { return c.lessonNo; });
+    }
+    function refreshRelatedOptions(removeInvalid) {
+      var box = document.getElementById('relatedClasses');
+      if (!box) return;
+      var opts = relatedOptions();
+      box.setAttribute('data-options', opts.join(','));
+      if (!removeInvalid) return;
+      box.querySelectorAll('.chip').forEach(function (chip) {
+        var v = (chip.childNodes[0].textContent || '').trim();
+        if (opts.indexOf(v) === -1) chip.remove();
+      });
+    }
+    refreshRelatedOptions(false);
+    new MutationObserver(function () { refreshRelatedOptions(true); })
+      .observe(document.getElementById('courseCode'), { attributes: true, attributeFilter: ['data-value'] });
+
+    {
       var startEl = document.getElementById('start');
       var endEl = document.getElementById('end');
       var courseEl = document.getElementById('courseCode');
@@ -135,7 +170,7 @@
       endEl.addEventListener('click', function () { endTouched = true; }, true);
       new MutationObserver(setDefaultEnd).observe(startEl, { childList: true, characterData: true, subtree: true });
       new MutationObserver(setDefaultEnd).observe(courseEl, { attributes: true, attributeFilter: ['data-value'] });
-      setDefaultEnd();
+      if (!editing) setDefaultEnd();
     }
 
     document.getElementById('saveBtn').addEventListener('click', function () {
@@ -144,7 +179,7 @@
       v.projectCode = clean(v.projectCode);
       v.courseCode = clean(v.courseCode);
       v.manager = clean(v.manager);
-      if (!v.projectCode || !v.courseCode || !v.version || !v.taskType || !v.start || !v.end || !v.delivery || !v.locationType) {
+      if (!v.projectCode || !v.courseCode || !v.version || !v.taskType || !v.start || !v.end || !v.delivery || !v.locationType || v.mainTeachers === '' || v.subTeachers === '') {
         alert('必須項目を入力してください');
         return;
       }

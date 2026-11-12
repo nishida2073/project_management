@@ -50,26 +50,32 @@
     $('courseSchedule').textContent = c ? c.schedule : '';
   }
 
+  function relatedBox() {
+    return document.getElementById('relatedClasses');
+  }
+
+  function addRelatedChip(value) {
+    var box = relatedBox();
+    var chip = document.createElement('span');
+    chip.className = 'chip blue';
+    chip.appendChild(document.createTextNode(value + ' '));
+    var x = document.createElement('x');
+    x.textContent = '✕';
+    x.addEventListener('click', function (e) { e.stopPropagation(); chip.remove(); });
+    chip.appendChild(x);
+    box.insertBefore(chip, box.querySelector('.chip-add'));
+  }
+
   function fillRelated(codes) {
-    var list = document.querySelector('.related-class-list');
-    Array.prototype.slice.call(list.querySelectorAll('.sub-row')).forEach(function (row) { row.remove(); });
-    var items = codes && codes.length ? codes : [''];
-    items.forEach(function (code) {
-      var row = document.createElement('div');
-      row.className = 'sub-row';
-      row.innerHTML =
-        '<div class="form-control number-select" data-options="002,003,004,005">' +
-        '<input type="text" placeholder="例）002" value="' + esc(code) + '">' +
-        '<span class="caret">▾</span></div>' +
-        '<div class="sub-remove">✕</div>';
-      list.appendChild(row);
-    });
+    var box = relatedBox();
+    box.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
+    (codes || []).forEach(function (code) { addRelatedChip(code); });
   }
 
   function readRelated() {
-    return Array.prototype.map.call(document.querySelectorAll('.related-class-list .sub-row input'), function (i) {
-      return i.value.trim();
-    }).filter(Boolean);
+    return Array.prototype.map.call(relatedBox().querySelectorAll('.chip'), function (c) {
+      return (c.childNodes[0].textContent || '').trim();
+    });
   }
 
   function fill(r) {
@@ -84,6 +90,8 @@
     setDate($('end'), r.end);
     checkRadio('deliveryType', r.delivery);
     $('people').querySelector('input').value = r.people || '';
+    $('mainTeachers').querySelector('input').value = r.mainTeachers || '';
+    $('subTeachers').querySelector('input').value = r.subTeachers || '';
     setSelect($('manager'), StaffStore.nameOf(r.manager));
     checkRadio('locationType', r.locationType);
     setSelect($('locationName'), LocationStore.nameOf(r.locationName));
@@ -104,6 +112,8 @@
       end: getDate($('end')),
       delivery: getRadio('deliveryType'),
       people: $('people').querySelector('input').value.trim(),
+      mainTeachers: $('mainTeachers').querySelector('input').value.trim(),
+      subTeachers: $('subTeachers').querySelector('input').value.trim(),
       manager: StaffStore.codeOf(getSelect($('manager'))),
       locationType: getRadio('locationType'),
       locationName: LocationStore.codeOf(getSelect($('locationName'))),

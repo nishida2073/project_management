@@ -60,6 +60,8 @@ a.btn { cursor: pointer; }
 .filter-panel { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 16px 20px; margin-bottom: 18px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 18px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 11.5px; color: #6c7688; font-weight: 700; }
+.field .control.is-green { background: #e5f6ec; color: #279158; border-color: #bfe6cf; font-weight: 700; }
+.field .control.is-orange { background: #fff2e2; color: #d97c1e; border-color: #f3d2a6; font-weight: 700; }
 .field .control { height: 34px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 10px; font-size: 13px; color: #333c4d; display: flex; align-items: center; min-width: 130px; }
 .field .control.wide { min-width: 220px; }
 .field .control.small { min-width: 100px; }
@@ -183,7 +185,8 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 
 /* ダイアログ共通（オーバーレイ・モーダル枠） */
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
-.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 80%; height: 80vh; display: flex; flex-direction: column; }
+.modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 720px; max-width: calc(100vw - 32px); height: 80vh; display: flex; flex-direction: column; }
+.modal.modal-wide { width: 1200px; }
 .modal-body { flex: 1; overflow-y: auto; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-header h2 { font-size: 18px; font-weight: 700; }
@@ -191,6 +194,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .close-x { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 16px; border: 1px solid #e6eaf1; text-decoration: none; cursor: default; }
 a.close-x { cursor: pointer; }
 .modal-footer { padding: 16px 28px; border-top: 1px solid #eef1f6; display: flex; justify-content: flex-end; gap: 10px; background: #fafbfd; }
+.modal-footer > :first-child { margin-right: auto; }
 
 /* タブ付きダイアログ（社内／運営進捗の更新） */
 .tabs { display: flex; gap: 4px; padding: 0 28px; border-bottom: 1px solid #eef1f6; background: #fafbfd; }
@@ -216,6 +220,7 @@ input.memo-input { color: #333c4d; background: #ffffff; }
 /* フォームダイアログ（社員／ベンダーマスタ登録） */
 .form-field { display: flex; flex-direction: column; gap: 6px; }
 .form-field.full { grid-column: 1 / span 2; }
+.form-field.form-spacer { visibility: hidden; min-height: 0; }
 .form-section { grid-column: 1 / span 2; font-size: 13px; font-weight: 700; color: #40485a; border-top: 1px solid #e6eaf1; padding-top: 12px; margin-top: 4px; }
 .form-field label { font-size: 12px; color: #5a6376; font-weight: 700; }
 .form-field label .req { color: #e5484d; margin-left: 3px; }
@@ -323,6 +328,10 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .search-btn { background: #6b84ad; border-color: #6b84ad; color: #ffffff; }
 /* ボタンのマウスオーバー表示 */
 .btn.primary:hover { background: #2f4f80; border-color: #2f4f80; box-shadow: 0 0 0 3px rgba(28,43,69,0.3); }
+.btn.outline { background: #ffffff; border-color: #2f6fed; color: #2f6fed; cursor: pointer; user-select: none; transition: background .15s, box-shadow .15s; }
+.btn.outline:hover { background: #eef4ff; box-shadow: 0 0 0 3px rgba(47,111,237,0.18); }
+.btn.outline:active { background: #dfeaff; }
+.btn.outline:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 2px; }
 .search-btn:hover { background: #7f97bb; border-color: #7f97bb; box-shadow: 0 0 0 3px rgba(107,132,173,0.3); }
 /* 導線系・ページ切り替えのマウスオーバー（大きさを変える） */
 .search-btn, .page-btn { transition: transform 0.15s ease; }
@@ -345,11 +354,20 @@ td .search-btn { width: 64px; justify-content: center; }
 .na-text { font-size: 12px; color: #9aa4b5; }
 .status-chip-h .badge-row, .status-chip-h .badge { flex-shrink: 0; white-space: nowrap; }
 
-.target-seg { display: inline-flex; align-items: center; gap: 2px; padding: 3px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }
+.target-seg { display: inline-flex; align-items: center; gap: 1px; padding: 2px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }
 .target-opt { position: relative; cursor: pointer; user-select: none; }
 .target-opt input[type="radio"] { position: absolute; width: 0; height: 0; opacity: 0; margin: 0; }
-.target-opt span { display: block; padding: 4px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #6b7385; transition: background .15s, color .15s; }
+.target-opt span { display: block; padding: 2px 9px; border-radius: 999px; font-size: 11px; line-height: 1.5; font-weight: 700; color: #6b7385; transition: background .15s, color .15s; }
 .target-opt:hover span { color: #2f6fed; }
 .target-opt input[type="radio"]:checked + span { background: #2f6fed; color: #ffffff; box-shadow: 0 1px 2px rgba(47,111,237,0.35); }
 .target-opt.off input[type="radio"]:checked + span { background: #7b8496; box-shadow: none; }
 .target-opt input[type="radio"]:focus-visible + span { outline: 2px solid #9bb8f5; outline-offset: 1px; }
+
+.filter-toggle-wrap { display: flex; align-items: center; gap: 10px; }
+.filter-toggle-label { font-size: 12px; font-weight: 700; color: #40485a; }
+.seg { display: inline-flex; align-items: center; gap: 1px; padding: 2px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }
+.seg-opt { font-family: inherit; font-size: 11px; font-weight: 700; line-height: 1.5; color: #6b7385; background: transparent; border: none; border-radius: 999px; padding: 2px 9px; cursor: pointer; transition: background .15s, color .15s; }
+.seg-opt:hover { color: #2f6fed; }
+.seg-opt.is-active { background: #2f6fed; color: #ffffff; box-shadow: 0 1px 2px rgba(47,111,237,0.35); }
+.seg-opt:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 1px; }
+.filter-panel.is-collapsed { display: none; }

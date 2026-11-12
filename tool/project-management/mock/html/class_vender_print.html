@@ -24,7 +24,7 @@
     <div class="content"><div class="toolbar"><h1>登壇管理一覧</h1></div><div class="table-card"></div></div>
   </div>
   <div class="overlay">
-    <div class="modal">
+    <div class="modal modal-wide">
       <div class="modal-header">
         <div>
           <h2>登壇依頼書出力</h2>
@@ -33,17 +33,18 @@
         <a class="close-x" href="class_vender_list.html">✕</a>
       </div>
       <div class="modal-body">
-        <div class="form-section">クラス一覧</div>
-        <div class="form-field">
-          <div class="form-control" style="display:flex; gap:12px; align-items:center;">
-            <span>メイン講師人数（一括）</span><input type="number" class="form-control" id="bulkMain" min="0" value="1" style="width:72px;">
-            <span>サブ講師人数（一括）</span><input type="number" class="form-control" id="bulkSub" min="0" value="0" style="width:72px;">
-            <div class="search-btn" id="bulkApply">一括変更</div>
-          </div>
+        <div class="filter-panel" style="margin-bottom: 16px;">
+          <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
+          <div class="field"><label>依頼残</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-class-map='{"なし":"is-green","あり":"is-orange"}'>すべて<span class="caret">▾</span></div></div>
+          <div class="search-btn">検索</div>
         </div>
-        <div class="table-card">
+        <div class="form-field" style="width: 260px;">
+          <label>講師ベンダー<span class="req">必須</span></label>
+          <div class="form-control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
           <div class="table-meta"><div class="count">全 <b id="printCount">0</b> 件</div></div>
-          <div class="table-scroll">
+          <div class="scroll-outer" id="scrollArea" style="overflow: auto; flex: 1 1 auto; min-height: 0;">
           <table>
             <thead>
               <tr>
@@ -52,8 +53,11 @@
                 <th>レッスンNo / 関連</th>
                 <th>開始日</th>
                 <th>終了日</th>
-                <th>メイン講師人数</th>
-                <th>サブ講師人数</th>
+                <th>予定講師数（メイン）</th>
+                <th>予定講師数（サブ）</th>
+                <th>依頼講師数（メイン）</th>
+                <th>依頼講師数（サブ）</th>
+                <th>依頼残</th>
               </tr>
             </thead>
             <tbody id="printBody"></tbody>
@@ -76,8 +80,11 @@
 <script src="js/storage/project/store/project-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
 <script src="js/storage/vender-assign/store/vender-assign-store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="js/storage/vender-assign/screens/vender-assign-print.js"></script>
+<script src="js/filter-collapse.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
+<script src="js/column-resize.js" defer></script>
 </body>
 </html>

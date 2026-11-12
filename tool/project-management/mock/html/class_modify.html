@@ -85,13 +85,6 @@
             <label class="radio-option"><input type="radio" name="deliveryType" value="ハイブリッド"><span class="radio-dot"></span><span class="tag violet">ハイブリッド</span></label>
           </div>
         </div>
-        <div class="form-field full">
-          <label>受講人数</label>
-          <div class="form-control number-select" id="people" data-options="10,15,20,24,30,35,40,50">
-            <input type="text" inputmode="numeric" value="">
-            <span class="caret">▾</span>
-          </div>
-        </div>
         <div class="form-field">
           <label>管理担当者</label>
           <div class="form-control js-select" id="manager" data-options="佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">選択してください<span class="caret">▾</span></div>
@@ -109,33 +102,48 @@
           <label>ロケーション名</label>
           <div class="form-control js-select" id="locationName" data-options=""><span class="caret">▾</span></div>
         </div>
-        <div class="form-field full">
-          <label>備考</label>
-          <textarea id="memo" class="form-control textarea" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
+        <div class="form-section">受講生</div>
+        <div class="form-field">
+          <label>受講人数</label>
+          <div class="form-control number-select" id="people" data-options="10,15,20,24,30,35,40,50">
+            <input type="text" inputmode="numeric" value="">
+            <span class="caret">▾</span>
+          </div>
+        </div>
+        <div class="form-section">講師</div>
+        <div class="form-field">
+          <label>予定講師数（メイン）<span class="req">必須</span></label>
+          <div class="form-control number-select" id="mainTeachers" data-options="0,1,2,3,4,5">
+            <input type="text" inputmode="numeric" value="">
+            <span class="caret">▾</span>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>予定講師数（サブ）<span class="req">必須</span></label>
+          <div class="form-control number-select" id="subTeachers" data-options="0,1,2,3,4,5">
+            <input type="text" inputmode="numeric" value="">
+            <span class="caret">▾</span>
+          </div>
         </div>
         <div class="form-section">クラス構成</div>
         <div class="form-field full">
           <label>関連クラス</label>
-          <div class="sub-list related-class-list" data-related-class-options="002,003,004,005">
-            <div class="sub-row">
-              <div class="form-control number-select" data-options="002,003,004,005">
-                <input type="text" placeholder="例）002">
-                <span class="caret">▾</span>
-              </div>
-              <div class="sub-remove">✕</div>
-            </div>
-          </div>
-          <div class="search-btn add-related-class-row">関連クラスを追加</div>
+          <div class="chip-box js-chip-select" id="relatedClasses" data-options="" data-chip-class="blue"><span class="chip-add">関連クラスを追加</span></div>
         </div>
         <div class="form-section">タスク</div>
         <div class="form-field">
           <label>タスク区分<span class="req">必須</span></label>
           <div class="radio-group" id="taskTypeGroup"></div>
         </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea id="memo" class="form-control textarea" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
+        </div>
       </div>
       <div class="modal-footer">
         <a class="search-btn" href="class_list.html">キャンセル</a>
-        <div id="saveBtn" class="btn primary">保存する</div>
+        <div id="copyBtn" class="btn outline">複製</div>
+        <div id="saveBtn" class="btn primary">保存</div>
       </div>
     </div>
   </div>
@@ -161,7 +169,7 @@ ${tags%
 <script src="js/datepicker.js" defer></script>
 <script src="js/number-select.js" defer></script>
 <script src="js/sub-rows.js" defer></script>
-<script src="js/related-class-rows.js" defer></script>
+<script src="js/chip-select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 </body>
 </html>

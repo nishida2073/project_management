@@ -24,6 +24,14 @@
   SEED.forEach(function (r) {
     if (['CLS-002', 'CLS-004', 'CLS-006', 'CLS-008'].indexOf(r.id) !== -1) r.taskType = 'TK-01';
   });
+  var TEACHER_COUNTS = {
+    'CLS-001': ['1', '1'], 'CLS-002': ['1', '0'], 'CLS-003': ['1', '1'], 'CLS-004': ['2', '0'], 'CLS-005': ['1', '2'],
+    'CLS-006': ['1', '0'], 'CLS-007': ['2', '1'], 'CLS-008': ['1', '0'], 'CLS-009': ['1', '1'], 'CLS-010': ['1', '0']
+  };
+  SEED.forEach(function (r) {
+    var t = TEACHER_COUNTS[r.id];
+    if (t) { r.mainTeachers = t[0]; r.subTeachers = t[1]; }
+  });
 
   function save(list) {
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
