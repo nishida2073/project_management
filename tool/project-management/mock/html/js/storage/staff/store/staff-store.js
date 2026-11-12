@@ -21,7 +21,22 @@
     { code: 'STF-070', affiliation: '社内', company: '', name: '小林 由美', email: '', roles: ['SR-01'], jobType: 'JT-02', positions: [], status: '稼働中' },
     { code: 'STF-071', affiliation: '社内', company: '', name: '松本 健二', email: '', roles: ['SR-01'], jobType: 'JT-02', positions: [], status: '稼働中' },
     { code: 'STF-072', affiliation: '社内', company: '', name: '岡田 沙織', email: '', roles: ['SR-01'], jobType: 'JT-02', positions: [], status: '稼働中' },
-    { code: 'STF-073', affiliation: '社内', company: '', name: '中島 拓海', email: '', roles: ['SR-01'], jobType: 'JT-02', positions: [], status: '稼働中' }
+    { code: 'STF-073', affiliation: '社内', company: '', name: '中島 拓海', email: '', roles: ['SR-01'], jobType: 'JT-02', positions: [], status: '稼働中' },
+    { code: 'STF-074', affiliation: '社内', company: '', name: '佐々木 陽介', email: 'sasaki@company.co.jp', roles: ['SR-01'], jobType: 'JT-01', positions: ['PS-01'], status: '稼働中' },
+    { code: 'STF-075', affiliation: '社内', company: '', name: '吉田 真理', email: 'yoshida@company.co.jp', roles: ['SR-01'], jobType: 'JT-01', positions: ['PS-02'], status: '稼働中' },
+    { code: 'STF-076', affiliation: '社内', company: '', name: '石井 翔太', email: '', roles: ['SR-01'], jobType: 'JT-01', positions: [], status: '停止中' },
+    { code: 'STF-077', affiliation: '社内', company: '', name: '清水 理恵', email: '', roles: ['SR-02'], jobType: 'JT-03', positions: [], status: '稼働中' },
+    { code: 'STF-078', affiliation: '社内', company: '', name: '林 大輔', email: '', roles: ['SR-02'], jobType: 'JT-02', positions: [], status: '稼働中' },
+    { code: 'STF-079', affiliation: '社内', company: '', name: '松田 結衣', email: '', roles: ['SR-01', 'SR-02'], jobType: 'JT-03', positions: [], status: '稼働中' },
+    { code: 'STF-080', affiliation: '社内', company: '', name: '上田 悠斗', email: '', roles: ['SR-02'], jobType: 'JT-03', positions: [], status: '停止中' },
+    { code: 'STF-081', affiliation: '社内', company: '', name: '池田 彩', email: '', roles: ['SR-02'], jobType: 'JT-02', positions: [], status: '稼働中' },
+    { code: 'STF-082', affiliation: 'パートナー', company: 'STV-001', name: '中野 亮', email: 'nakano@neu-training.co.jp', roles: ['SR-02'], jobType: 'JT-03', positions: [], status: '稼働中' },
+    { code: 'STF-083', affiliation: 'パートナー', company: 'STV-002', name: '西村 美穂', email: 'nishimura@ndu-partners.co.jp', roles: ['SR-02'], jobType: 'JT-02', positions: [], status: '稼働中' },
+    { code: 'STF-084', affiliation: 'パートナー', company: 'STV-003', name: '大村 光', email: 'omura@univa-service.co.jp', roles: ['SR-02'], jobType: 'JT-03', positions: [], status: '停止中' },
+    { code: 'STF-085', affiliation: 'パートナー', company: 'STV-004', name: '小川 健太', email: 'ogawa@cec-trust.co.jp', roles: ['SR-02'], jobType: 'JT-03', positions: [], status: '稼働中' },
+    { code: 'STF-086', affiliation: 'パートナー', company: 'STV-004', name: '原 百合', email: 'hara@cec-trust.co.jp', roles: ['SR-01'], jobType: 'JT-01', positions: ['PS-01'], status: '稼働中' },
+    { code: 'STF-087', affiliation: '社内', company: '', name: '菅原 拓', email: 'sugawara@company.co.jp', roles: ['SR-01'], jobType: 'JT-02', positions: ['PS-01'], status: '稼働中' },
+    { code: 'STF-088', affiliation: '社内', company: '', name: '木下 恭子', email: 'kinoshita@company.co.jp', roles: ['SR-01', 'SR-02'], jobType: 'JT-01', positions: ['PS-02'], status: '稼働中' }
   ];
 
   function save(list) {

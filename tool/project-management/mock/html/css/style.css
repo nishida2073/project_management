@@ -93,6 +93,12 @@ input.field-control-input:focus { border-color: #2f6fed; }
 .table-meta .hint { color: #9aa4b5; }
 table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 thead th { background: #f6f8fb; color: #5a6376; text-align: center; padding: 8px 10px; font-weight: 700; border-bottom: 1px solid #e6eaf1; white-space: nowrap; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: #1c2b45; }
+th.sortable::after { content: '▲\A▼'; white-space: pre; display: inline-block; margin-left: 6px; font-size: 7px; line-height: 7px; color: #9aa4b5; vertical-align: middle; }
+th.sort-asc::after, th.sort-desc::after { white-space: normal; font-size: 10px; line-height: 1; color: #2f6fed; }
+th.sort-asc::after { content: '▲'; }
+th.sort-desc::after { content: '▼'; }
 tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f6; color: #333c4d; white-space: nowrap; }
 tbody tr:hover { background: #f8faff; }
 th.grp-basic { background: #eef4ff !important; color: #2f6fed !important; text-align: center; border-bottom: 1px solid #d7e3fb !important; }
