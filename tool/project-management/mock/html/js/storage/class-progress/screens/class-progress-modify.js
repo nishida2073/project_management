@@ -79,7 +79,7 @@ function setDisabledRow(tr, off) {
       var names = StaffStore.load().filter(function (s) {
         if (s.status === '停止中') return false;
         if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
-        if (JobTypeStore.nameOf(s.jobType) !== '実施') return false;
+        if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
         if (company === StaffVenderStore.INTERNAL) return s.affiliation === '社内';
         return s.affiliation === 'パートナー' && s.company === company;
       }).map(function (s) { return s.name; });

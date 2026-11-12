@@ -56,7 +56,7 @@
 
   function fill(rec) {
     $('staffCode').textContent = rec.code || '自動採番';
-    checkRadio('affiliation', rec.affiliation || '社内');
+    checkRadio('affiliation', rec.affiliation || '');
     var company = $('company');
     company.setAttribute('data-value', StaffVenderStore.nameOf(rec.company));
     company.innerHTML = (rec.company ? esc(StaffVenderStore.nameOf(rec.company)) : '選択してください') + '<span class="caret">▾</span>';
@@ -65,7 +65,8 @@
     var roleList = StaffRoleStore.load();
     var posList = PositionStore.load();
     fillChips($('roleBox'), (rec.roles || []).map(function (c) { return nameFromCode(roleList, c); }), function (v) { return colorFromName(roleList, v); });
-    checkRadio('jobType', rec.jobType || 'JT-02');
+    var jobList = JobTypeStore.load();
+    fillChips($('jobBox'), (rec.jobTypes || []).map(function (c) { return nameFromCode(jobList, c); }), function (v) { return colorFromName(jobList, v); });
     fillChips($('positionBox'), (rec.positions || []).map(function (c) { return nameFromCode(posList, c); }), function (v) { return colorFromName(posList, v); });
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
@@ -74,12 +75,6 @@
     $('statusToggle').classList.toggle('off', off);
     $('statusLabel').textContent = off ? '停止中' : '稼働中';
     refreshCompany();
-  }
-
-  function renderRadios(group, name, items) {
-    group.innerHTML = items.map(function (it) {
-      return '<label class="radio-option"><input type="radio" name="' + name + '" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + it.color + '">' + it.name + '</span></label>';
-    }).join('');
   }
 
   function init(opts) {
@@ -99,10 +94,12 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', affiliation: '社内', company: '', name: '', email: '', roles: [], jobType: 'JT-02', positions: [], status: '稼働中' };
+      rec = { code: '', affiliation: '', company: '', name: '', email: '', roles: [], jobTypes: [], positions: [], status: '稼働中' };
     }
-    renderRadios(document.getElementById('jobGroup'), 'jobType', JobTypeStore.load());
     fill(rec);
+    var jobs = JobTypeStore.load();
+    $('jobBox').setAttribute('data-options', jobs.map(function (j) { return j.name; }).join(','));
+    $('jobBox').setAttribute('data-chip-map', JSON.stringify(jobs.reduce(function (m, j) { m[j.name] = j.color; return m; }, {})));
     var roles = StaffRoleStore.load();
     $('roleBox').setAttribute('data-options', roles.map(function (r) { return r.name; }).join(','));
     $('roleBox').setAttribute('data-chip-map', JSON.stringify(roles.reduce(function (m, r) { m[r.name] = r.color; return m; }, {})));
@@ -121,7 +118,7 @@
         name: $('tName').value.trim(),
         email: $('email').value.trim(),
         roles: chipValues($('roleBox')).map(function (n) { return codeFromName(StaffRoleStore.load(), n); }),
-        jobType: getRadio('jobType'),
+        jobTypes: chipValues($('jobBox')).map(function (n) { return codeFromName(JobTypeStore.load(), n); }),
         positions: chipValues($('positionBox')).map(function (n) { return codeFromName(PositionStore.load(), n); }),
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
@@ -129,7 +126,7 @@
         if (!v.name) missing.push('実施担当者名');
         if (!v.affiliation) missing.push('所属区分');
         if (!v.roles.length) missing.push('担当区分');
-        if (!v.jobType) missing.push('業務区分');
+        if (!v.jobTypes.length) missing.push('業務区分');
       if (missing.length) {
         MessageDialog.required(missing);
         return;

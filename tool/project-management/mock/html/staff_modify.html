@@ -46,21 +46,19 @@
         <div class="form-field full">
           <label>担当区分（複数選択可）<span class="req">必須</span></label>
           <div class="chip-box js-chip-select" id="roleBox" data-options="案件,クラス" data-chip-map='{"案件":"green","クラス":"purple"}'>
-            <span class="chip-add">担当区分を追加</span>
+            <span class="chip-add">追加</span>
           </div>
         </div>
         <div class="form-field full">
-          <label>業務区分<span class="req">必須</span></label>
-          <div class="radio-group" id="jobGroup">
-            <label class="radio-option"><input type="radio" name="jobType" value="営業"><span class="radio-dot"></span><span class="tag orange">営業</span></label>
-            <label class="radio-option"><input type="radio" name="jobType" value="管理"><span class="radio-dot"></span><span class="tag indigo">管理</span></label>
-            <label class="radio-option"><input type="radio" name="jobType" value="実施"><span class="radio-dot"></span><span class="tag teal">実施</span></label>
+          <label>業務区分（複数選択可）<span class="req">必須</span></label>
+          <div class="chip-box js-chip-select" id="jobBox" data-options="営業,管理,実施" data-chip-map='{"営業":"orange","管理":"indigo","実施":"teal"}'>
+            <span class="chip-add">追加</span>
           </div>
         </div>
         <div class="form-field full">
           <label>役職（複数選択可）</label>
           <div class="chip-box js-chip-select" id="positionBox" data-options="PM,PL" data-chip-map='{"PM":"blue","PL":"orange"}'>
-            <span class="chip-add">役職を追加</span>
+            <span class="chip-add">追加</span>
           </div>
         </div>
         <div class="form-field toggle-field">

@@ -348,6 +348,8 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .chip.green { background: #eaf7ec; color: #238a4e; }
 .chip.purple { background: #f5eaf7; color: #8a3f96; }
 .chip.violet { background: #f0e9ff; color: #7c4de0; }
+.chip.indigo { background: #eef0ff; color: #4c51bf; }
+.chip.teal { background: #e3f6f5; color: #0e8a86; }
 .chip x { font-size: 10px; opacity: .6; cursor: pointer; }
 .chip x:hover { opacity: 1; }
 .chip-add { font-size: 12px; font-weight: 700; color: #5a6376; padding: 3px 9px; background: #f6f8fb; border: 1px solid #c5ccd9; border-radius: 4px; cursor: pointer; }
