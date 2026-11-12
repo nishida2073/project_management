@@ -124,5 +124,9 @@
       var kinds = (el.getAttribute('data-kinds') || '').split(',');
       el.style.display = (!code || kinds.indexOf(code) !== -1) ? '' : 'none';
     });
+    if (listTable.style.tableLayout !== 'fixed') return;
+    var total = 0;
+    listTable.querySelectorAll('thead th').forEach(function (th) { if (th.style.display !== 'none') total += parseFloat(th.style.width) || th.getBoundingClientRect().width; });
+    listTable.style.width = total + 'px';
   };
 })();
