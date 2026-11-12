@@ -52,8 +52,8 @@
   function fill(rec) {
     setSelect($('projectYear'), rec.year);
     $('projectCode').textContent = rec.code || '自動採番';
-    checkRadio('salesType', rec.sales || 'SL-01');
-    checkRadio('participationType', rec.part || 'PT-01');
+    checkRadio('salesType', rec.sales || '');
+    checkRadio('participationType', rec.part || '');
     $('projectName').value = rec.name || '';
     setSelect($('customer'), CustomerStore.nameOf(rec.customer));
     setMonth($('startMonth'), rec.startMonth);
@@ -88,7 +88,7 @@
       rec = list[idx];
       $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
-      rec = { year: '2026年度', code: '', sales: 'SL-01', part: 'PT-01', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '' };
+      rec = { year: '2026年度', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '' };
     }
     fill(rec);
 
