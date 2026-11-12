@@ -15,7 +15,7 @@
 
   function chip(s) {
     if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
-    var delay = isDelayed(s) ? '<span class="badge red">⚠ 遅延</span>' : '';
+    var delay = isDelayed(s) ? '<span class="badge red">遅延</span>' : '';
     var actual = s.actual ? s.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span>' + delay + '</div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + esc(s.plan || '-') + '</span></div>' +
@@ -33,9 +33,9 @@
 
   function overall(key) {
     if (key === 'na') return '<span class="na-text">対象外</span>';
-    var label = { done: '完了', progress: '実施中', wait: '実施前', delay: '遅延あり' }[key];
+    var label = { done: '完了', progress: '実施中', wait: '実施前', delay: '遅延' }[key];
     var color = { done: 'green', progress: 'blue', wait: 'gray', delay: 'red' }[key];
-    return '<span class="overall ' + color + '">' + label + '</span>';
+    return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
 
   var headRow = document.getElementById('headRow');
@@ -47,7 +47,7 @@
   });
 
   var body = document.getElementById('tbody');
-  var projects = ProjectStore.load();
+  var projects = ProjectStore.load().filter(function (p) { return p.status !== '停止中'; });
   var rows = [];
 
   projects.forEach(function (p) {
@@ -61,7 +61,7 @@
     html += '<td class="sticky" style="left:90px;">' + esc(p.code) + '</td>';
     html += '<td class="sticky" style="left:240px;">' + esc(p.name) + '</td>';
     html += '<td class="sticky" style="left:460px;">' + esc(customerName) + '</td>';
-    html += '<td class="sticky" style="left:660px;">' + esc(managers.join(' / ')) + '</td>';
+    html += '<td class="sticky" style="left:660px;">' + managers.map(function (m) { return esc(m); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:860px;">' + esc(p.startMonth) + '</td>';
     html += '<td class="sticky" style="left:960px;">' + overall(key) + '</td>';
     rec.steps.forEach(function (s) { html += '<td>' + chip(s) + '</td>'; });
@@ -91,7 +91,7 @@
   setOptions('fCustomer', customers);
   setOptions('fManager', managerNames);
 
-  var OVERALL_KEY = { '実施前': 'wait', '実施中': 'progress', '完了': 'done', '遅延あり': 'delay' };
+  var OVERALL_KEY = { '実施前': 'wait', '実施中': 'progress', '完了': 'done', '遅延': 'delay' };
 
   function val(id) {
     var el = document.getElementById(id);

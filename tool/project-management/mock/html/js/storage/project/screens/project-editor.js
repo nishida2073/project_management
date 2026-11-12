@@ -54,6 +54,11 @@
     $('projectCode').textContent = rec.code || '自動採番';
     checkRadio('salesType', rec.sales || '');
     checkRadio('participationType', rec.part || '');
+    var statusOff = rec.status === '停止中';
+    $('statusRow').setAttribute('data-on', '稼働中');
+    $('statusRow').setAttribute('data-off', '停止中');
+    $('statusToggle').classList.toggle('off', statusOff);
+    $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     $('projectName').value = rec.name || '';
     setSelect($('customer'), CustomerStore.nameOf(rec.customer));
     setMonth($('startMonth'), rec.startMonth);
@@ -72,7 +77,7 @@
     var names = StaffStore.activeNames().join(',');
     document.getElementById('pm').setAttribute('data-options', names);
     document.getElementById('plBox').setAttribute('data-options', names);
-    document.getElementById('customer').setAttribute('data-options', CustomerStore.names().join(','));
+    document.getElementById('customer').setAttribute('data-options', CustomerStore.load().filter(function (c) { return c.status !== '停止中'; }).map(function (c) { return c.name; }).join(','));
     var list = ProjectStore.load();
     var id = new URLSearchParams(location.search).get('id');
     var idx = -1;
@@ -88,7 +93,7 @@
       rec = list[idx];
       $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
-      rec = { year: '2026年度', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '' };
+      rec = { year: '2026年度', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '', status: '稼働中' };
     }
     fill(rec);
 
@@ -102,7 +107,8 @@
         startMonth: getMonth($('startMonth')),
         pm: StaffStore.codeOf(getSelect($('pm'))),
         pl: plValues($('plBox')).map(function (n) { return StaffStore.codeOf(n); }),
-        memo: $('memo').value
+        memo: $('memo').value,
+        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       if (!v.year || !v.sales || !v.part || !v.name || !v.startMonth || !v.pm) {
         alert('必須項目を入力してください');

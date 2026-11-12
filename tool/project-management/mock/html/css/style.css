@@ -171,6 +171,8 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .badge.green { background: #e5f6ec; color: #279158; }
 .badge.red { background: #fdeaea; color: #d43c40; }
 .badge.na { background: #f6f7f9; color: #b7bfcc; border: 1px dashed #dde1e9; }
+.overall-badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.chip.tag-like { font-size: 11px; padding: 3px 9px; border-radius: 4px; }
 
 .overall { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
 .overall .dot { width: 8px; height: 8px; border-radius: 50%; }
@@ -184,6 +186,11 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .overall.gray { color: #6c7688; }
 
 /* ダイアログ共通（オーバーレイ・モーダル枠） */
+.input-dialog { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); width: 360px; max-width: calc(100vw - 32px); padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; }
+.input-dialog-title { font-size: 16px; font-weight: 700; color: #1c2b45; }
+.input-dialog-label { font-size: 12px; color: #5a6376; font-weight: 700; }
+.input-dialog-error { font-size: 12px; color: #d43c40; min-height: 16px; }
+.input-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
 .modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 720px; max-width: calc(100vw - 32px); height: 80vh; display: flex; flex-direction: column; }
 .modal.modal-wide { width: 1200px; }
@@ -311,8 +318,8 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .chip.violet { background: #f0e9ff; color: #7c4de0; }
 .chip x { font-size: 10px; opacity: .6; cursor: pointer; }
 .chip x:hover { opacity: 1; }
-.chip-add { font-size: 12px; color: #9aa4b5; padding: 4px 6px; cursor: pointer; border-radius: 5px; }
-.chip-add:hover { background: #eef4ff; color: #2f6fed; }
+.chip-add { font-size: 12px; font-weight: 700; color: #5a6376; padding: 3px 9px; background: #f6f8fb; border: 1px solid #c5ccd9; border-radius: 4px; cursor: pointer; }
+.chip-add:hover { background: #eef4ff; color: #2f6fed; border-color: #2f6fed; }
 .chip-group { display: inline-flex; gap: 4px; flex-wrap: wrap; align-items: center; }
 
 /* 年度別セクション（ベンダーマスタ登録） */

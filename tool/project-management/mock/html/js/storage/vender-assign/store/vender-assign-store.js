@@ -25,6 +25,7 @@
 
   function staffText(v) {
     if (typeof v === 'string' && /^STF-/.test(v) && window.StaffStore) return StaffStore.nameOf(v) || v;
+    if (typeof v === 'string' && /^TCV-/.test(v) && window.TeacherVenderStore) return TeacherVenderStore.nameOf(v) || v;
     return v || '';
   }
 
@@ -35,6 +36,7 @@
     delete a.mainVendor;
     delete a.mainStaff;
     a.subs = a.subs || [];
+    ['attendeeVendor', 'attendee', 'motivationVendor', 'motivationStaff'].forEach(function (k) { a[k] = staffText(a[k]); });
     a.mains = a.mains.map(function (m) { return { vendor: m.vendor, staff: staffText(m.staff) }; });
     a.subs = a.subs.map(function (s) { return { vendor: s.vendor, staff: staffText(s.staff) }; });
     return a;

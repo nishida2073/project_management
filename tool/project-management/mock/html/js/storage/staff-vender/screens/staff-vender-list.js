@@ -14,7 +14,7 @@
       '<td>' + esc(c.tel) + '</td>' +
       '<td>' + esc(c.address) + '</td>' +
       '<td>' + esc(c.contactName) + '</td>' +
-      '<td><span class="state ' + (on ? 'on' : 'off') + '"><span class="dot"></span>' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
       '<td><a class="search-btn" href="staff_vender_modify.html?id=' + encodeURIComponent(c.code) + '">編集</a></td>';
     body.appendChild(tr);
   });

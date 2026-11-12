@@ -17,6 +17,7 @@
         '<td><span class="tag ' + (t.company === StaffVenderStore.INTERNAL ? 'blue' : 'orange') + '">' + (t.company === StaffVenderStore.INTERNAL ? '社内' : 'パートナー') + '</span></td>' +
         '<td>' + (t.company === StaffVenderStore.INTERNAL ? '' : esc(StaffVenderStore.nameOf(t.company))) + '</td>' +
         '<td>' + esc(t.days) + '</td>' +
+        '<td><span class="badge overall-badge ' + (t.status === '停止中' ? 'gray' : 'green') + '">' + (t.status === '停止中' ? '停止中' : '稼働中') + '</span></td>' +
         '<td><a class="search-btn" href="task_modify.html?id=' + encodeURIComponent(t.id) + '">編集</a></td>';
       body.appendChild(tr);
     });

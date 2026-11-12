@@ -10,6 +10,17 @@
     return a.order - b.order;
   });
   var STEP_NAMES = SORTED.map(function (t) { return t.name; });
+  function isActive(i) { return SORTED[i].status !== '停止中'; }
+  var DISPLAY_NO = [];
+  (function () {
+    var counts = {};
+    SORTED.forEach(function (t, i) {
+      if (t.status === '停止中') return;
+      var k = t.kinds[0] || '';
+      counts[k] = (counts[k] || 0) + 1;
+      DISPLAY_NO[i] = counts[k];
+    });
+  })();
   var STATUS_LABEL = { done: '完了', progress: '実施中', wait: '実施前' };
   var STATUS_CLASS = { done: 'green', progress: 'blue', wait: 'gray' };
 
@@ -34,7 +45,7 @@
     var label = STATUS_LABEL[step.status] || '実施前';
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
-    var delayMark = isDelayed(step) ? '<span class="badge red">⚠ 遅延</span>' : '';
+    var delayMark = isDelayed(step) ? '<span class="badge red">遅延</span>' : '';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span>' + delayMark + '</div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + esc(step.plan || '-') + '</span></div>' +
       '<div class="dates"><span>実：' + esc(actual) + ' ' + esc(StaffStore.nameOf(step.owner || '')) + '</span></div></div></div>';
@@ -47,12 +58,12 @@
     var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'done'; });
     var any = applicable.some(function (s) { return s.status === 'done' || s.status === 'progress'; });
     var key = late ? 'delay' : (all ? 'done' : (any ? 'progress' : 'wait'));
-    var label = { done: '完了', progress: '実施中', wait: '実施前', delay: '遅延あり' }[key];
+    var label = { done: '完了', progress: '実施中', wait: '実施前', delay: '遅延' }[key];
     var color = { done: 'green', progress: 'blue', wait: 'gray', delay: 'red' }[key];
-    return '<span class="overall ' + color + '">' + label + '</span>';
+    return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
 
-  var classes = ClassStore.load();
+  var classes = ClassStore.load().filter(function (c) { return c.status !== '停止中'; });
   var progressAll = ProgressStore.load();
   var tasks = TaskStore.load();
   var byName = {};
@@ -61,12 +72,14 @@
   var headRow = document.querySelector('#scrollArea thead tr');
   while (headRow.children.length > 8) headRow.removeChild(headRow.lastElementChild);
   SORTED.forEach(function (t, i) {
+    if (t.status === '停止中') return;
     var th = document.createElement('th');
     th.style.minWidth = '230px';
     th.setAttribute('data-step', i);
     th.setAttribute('data-kinds', t.kinds.join(','));
-    th.innerHTML = '<span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span> ' +
-      esc(t.order + ' ' + t.name) + '<div class="col-company">' + esc(StaffVenderStore.nameOf(t.company)) + '</div>';
+    th.innerHTML = '<div><span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
+      '<div>' + esc(DISPLAY_NO[i] + '：' + t.name) + '</div>' +
+      '<div>' + esc(StaffVenderStore.nameOf(t.company)) + '</div>';
     headRow.appendChild(th);
   });
   var operationTh = document.createElement('th');
@@ -91,7 +104,8 @@
         na: (task && task.kinds.indexOf(c.taskType) === -1) || (sv.na !== undefined ? sv.na : false)
       };
     });
-    if (steps.some(isDelayed)) delayClasses++;
+    var activeSteps = steps.filter(function (s, i) { return isActive(i); });
+    if (activeSteps.some(isDelayed)) delayClasses++;
     var course = ClassStore.COURSES[c.courseCode];
     var related = c.related && c.related.length ? c.related.join(', ') : '-';
 
@@ -102,10 +116,10 @@
     html += '<td class="sticky" style="left:280px;"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
     html += '<td class="sticky" style="left:410px;">' + esc(c.start) + '</td>';
     html += '<td class="sticky" style="left:530px;">' + esc(c.end) + '</td>';
-    html += '<td class="sticky" style="left:650px;">' + esc(StaffStore.nameOf(c.manager)) + '</td>';
+    html += '<td class="sticky" style="left:650px;">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
-    html += '<td class="sticky" style="left:870px;">' + overall(steps) + '</td>';
-    steps.forEach(function (s, i) { html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '">' + chip(s) + '</td>'; });
+    html += '<td class="sticky" style="left:870px;">' + overall(activeSteps) + '</td>';
+    steps.forEach(function (s, i) { if (!isActive(i)) return; html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '">' + chip(s) + '</td>'; });
     html += '<td><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">編集</a></td>';
     tr.innerHTML = html;
     body.appendChild(tr);

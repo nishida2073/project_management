@@ -67,10 +67,10 @@
     while (subRows.length < planSub) subRows.push({ vendor: '', staff: '' });
     mainRows.forEach(function (m) { makeRow('mainList', m); });
     subRows.forEach(function (s) { makeRow('subList', s); });
-    setSelect($('attendeeVendor'), TeacherVenderStore.nameOf(a.attendeeVendor), vendorOptions());
-    setSelect($('attendee'), StaffStore.nameOf(a.attendee), staffOptions());
-    setSelect($('motivationVendor'), TeacherVenderStore.nameOf(a.motivationVendor), vendorOptions());
-    setSelect($('motivationStaff'), StaffStore.nameOf(a.motivationStaff), staffOptions());
+    $('attendeeVendor').value = a.attendeeVendor || '';
+    $('attendee').value = a.attendee || '';
+    $('motivationVendor').value = a.motivationVendor || '';
+    $('motivationStaff').value = a.motivationStaff || '';
 
     $('addMain').addEventListener('click', function () { makeRow('mainList', { vendor: '', staff: '' }); });
     $('addSub').addEventListener('click', function () { makeRow('subList', { vendor: '', staff: '' }); });
@@ -84,10 +84,10 @@
         subCount: a.subCount,
         mains: mains,
         subs: subs,
-        attendeeVendor: TeacherVenderStore.codeOf(clean(ownText($('attendeeVendor')))),
-        attendee: StaffStore.codeOf(clean(ownText($('attendee')))),
-        motivationVendor: TeacherVenderStore.codeOf(clean(ownText($('motivationVendor')))),
-        motivationStaff: StaffStore.codeOf(clean(ownText($('motivationStaff'))))
+        attendeeVendor: $('attendeeVendor').value.trim(),
+        attendee: $('attendee').value.trim(),
+        motivationVendor: $('motivationVendor').value.trim(),
+        motivationStaff: $('motivationStaff').value.trim()
       };
       VenderAssignStore.upsert(record);
       location.href = 'class_vender_list.html';

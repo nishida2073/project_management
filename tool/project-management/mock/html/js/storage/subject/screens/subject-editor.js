@@ -12,7 +12,7 @@
   function addVersionChip(value) {
     var box = $('subjectVersions');
     var chip = document.createElement('span');
-    chip.className = 'chip blue';
+    chip.className = 'chip tag-like blue';
     chip.appendChild(document.createTextNode(value + ' '));
     var x = document.createElement('x');
     x.textContent = '✕';
@@ -84,10 +84,18 @@
     fill(rec);
 
     $('subjectVersions').querySelector('.chip-add').addEventListener('click', function () {
-      var value = (prompt('版を入力してください（例：1.2）') || '').trim();
-      if (!value) return;
-      if (versionValues().indexOf(value) !== -1) { alert('同じ版が既に登録されています'); return; }
-      addVersionChip(value);
+      InputDialog.open({
+        title: '版を追加',
+        label: '版',
+        placeholder: '例）1.2',
+        validate: function (value) {
+          if (!value) return '版を入力してください';
+          if (versionValues().indexOf(value) !== -1) return '同じ版が既に登録されています';
+          return '';
+        }
+      }).then(function (value) {
+        if (value) addVersionChip(value);
+      });
     });
 
     $('saveBtn').addEventListener('click', function () {

@@ -37,12 +37,18 @@
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
   }
 
+  function normalize(r) {
+    if (!r.managers) r.managers = r.manager ? [r.manager] : [];
+    delete r.manager;
+    return r;
+  }
+
   function load() {
     try {
       var raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) return JSON.parse(raw).map(normalize);
     } catch (e) {}
-    var seed = JSON.parse(JSON.stringify(SEED));
+    var seed = JSON.parse(JSON.stringify(SEED)).map(normalize);
     save(seed);
     return seed;
   }

@@ -49,6 +49,11 @@
     $('taskName').value = rec.name || '';
     $('order').value = rec.order === undefined ? '' : rec.order;
     $('days').value = rec.days === undefined ? '' : rec.days;
+    var statusOff = rec.status === '停止中';
+    $('statusRow').setAttribute('data-on', '稼働中');
+    $('statusRow').setAttribute('data-off', '停止中');
+    $('statusToggle').classList.toggle('off', statusOff);
+    $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     checkRadio('taskKind', (rec.kinds || [])[0] || '');
     var internal = rec.company === StaffVenderStore.INTERNAL;
     checkRadio('affiliation', internal ? '社内' : 'パートナー');
@@ -74,7 +79,7 @@
       rec = list[idx];
       $('subLine').textContent = rec.id + '　' + rec.name + 'の情報を編集します';
     } else {
-      rec = { id: TaskStore.nextId(list), name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '' };
+      rec = { id: TaskStore.nextId(list), name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', status: '稼働中' };
     }
     fill(rec);
 
@@ -102,7 +107,8 @@
         kinds: kinds,
         order: parseInt(orderV, 10),
         company: affiliation === '社内' ? StaffVenderStore.INTERNAL : StaffVenderStore.codeOf(companyText),
-        days: parseInt(daysV, 10)
+        days: parseInt(daysV, 10),
+        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       if (editing) {
         list[idx] = Object.assign({ id: rec.id }, item);

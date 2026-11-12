@@ -6,7 +6,7 @@
 
   var C = ClassStore.COURSES;
   var body = document.getElementById('venderBody');
-  var list = ClassStore.load();
+  var list = ClassStore.load().filter(function (r) { return r.status !== '停止中'; });
 
   list.forEach(function (r) {
     var c = C[r.courseCode] || { name: r.courseCode };

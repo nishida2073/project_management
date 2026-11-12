@@ -86,8 +86,8 @@
           </div>
         </div>
         <div class="form-field">
-          <label>管理担当者</label>
-          <div class="form-control js-select" id="manager" data-options="佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">選択してください<span class="caret">▾</span></div>
+          <label>管理担当者（複数選択可）</label>
+          <div class="chip-box js-chip-select" id="manager" data-options="" data-chip-class="tag-like blue"><span class="chip-add">追加</span></div>
         </div>
         <div class="form-section">ロケーション</div>
         <div class="form-field full">
@@ -127,8 +127,8 @@
         </div>
         <div class="form-section">クラス構成</div>
         <div class="form-field full">
-          <label>関連クラス</label>
-          <div class="chip-box js-chip-select" id="relatedClasses" data-options="" data-chip-class="blue"><span class="chip-add">関連クラスを追加</span></div>
+          <label>関連クラス（複数選択可）</label>
+          <div class="chip-box js-chip-select" id="relatedClasses" data-options="" data-chip-class="tag-like blue"><span class="chip-add">追加</span></div>
         </div>
         <div class="form-section">タスク</div>
         <div class="form-field">
@@ -138,6 +138,10 @@
         <div class="form-field full">
           <label>備考</label>
           <textarea id="memo" class="form-control textarea" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row" id="statusRow"><div class="toggle" id="statusToggle"><div class="knob"></div></div><span id="statusLabel">稼働中</span></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -171,5 +175,6 @@ ${tags%
 <script src="js/sub-rows.js" defer></script>
 <script src="js/chip-select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
+<script src="js/toggle.js" defer></script>
 </body>
 </html>

@@ -53,13 +53,21 @@ function setDisabledRow(tr, off) {
     var classStart = new Date(cls.start);
     var courseInfo = ClassStore.COURSES[cls.courseCode];
     var projectInfo = ClassStore.PROJECTS[cls.projectCode];
-    document.getElementById('subLine').textContent = cls.lessonNo + '　' + (courseInfo ? courseInfo.name : cls.courseCode) + '　' + cls.start + '〜' + cls.end + '　管理担当者：' + StaffStore.nameOf(cls.manager);
+    document.getElementById('subLine').textContent = cls.lessonNo + '　' + (courseInfo ? courseInfo.name : cls.courseCode) + '　' + cls.start + '〜' + cls.end + '　管理担当者：' + (cls.managers || []).map(function (m) { return StaffStore.nameOf(m); }).join('、');
     var tasks = TaskStore.load();
     var sortedTasks = tasks.slice().sort(function (a, b) {
       var ka = a.kinds[0] || '';
       var kb = b.kinds[0] || '';
       if (ka !== kb) return ka < kb ? -1 : 1;
       return a.order - b.order;
+    });
+    var displayNo = [];
+    var kindCount = {};
+    sortedTasks.forEach(function (t, i) {
+      if (t.status === '停止中') return;
+      var k = t.kinds[0] || '';
+      kindCount[k] = (kindCount[k] || 0) + 1;
+      displayNo[i] = kindCount[k];
     });
     var stepsList = sortedTasks.map(function (t, i) {
       return STEPS[i] || { no: i + 1, name: t.name, actual: '', owner: '', status: 'wait', memo: '' };
@@ -79,7 +87,7 @@ function setDisabledRow(tr, off) {
 
     stepsList.forEach(function (s, i) {
       var task = sortedTasks[i];
-      if (task && task.kinds.indexOf(cls.taskType) === -1) return;
+      if (task && (task.status === '停止中' || task.kinds.indexOf(cls.taskType) === -1)) return;
       var name = task ? task.name : s.name;
       var sv = saved[s.no] || {};
       var plan = sv.plan !== undefined ? sv.plan : (task ? addDays(task.days) : '');
@@ -100,7 +108,7 @@ function setDisabledRow(tr, off) {
       var tr = document.createElement('tr');
       tr.setAttribute('data-no', s.no);
       tr.innerHTML =
-        '<td class="sticky" style="text-align: center; font-weight: 700;">' + s.no + '</td>' +
+        '<td class="sticky" style="text-align: center; font-weight: 700;">' + displayNo[i] + '</td>' +
         '<td class="step-name sticky">' + esc(name) + '</td>' +
         '<td class="sticky"><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + s.no + '" value="あり"' + (na ? '' : ' checked') + '><span>あり</span></label>' +
           '<label class="target-opt off"><input type="radio" name="target' + s.no + '" value="なし"' + (na ? ' checked' : '') + '><span>なし</span></label></div></td>' +

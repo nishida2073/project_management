@@ -34,17 +34,23 @@
       rec = list[idx];
       $('subLine').textContent = rec.id + '　' + rec.name + 'の情報を編集します';
     } else {
-      rec = { id: '', name: '', staff: '' };
+      rec = { id: '', name: '', staff: '', status: '稼働中' };
     }
 
     $('customerId').textContent = rec.id || '自動採番';
     $('customerName').value = rec.name || '';
     $('staff').value = rec.staff || '';
+    var statusOff = rec.status === '停止中';
+    $('statusRow').setAttribute('data-on', '稼働中');
+    $('statusRow').setAttribute('data-off', '停止中');
+    $('statusToggle').classList.toggle('off', statusOff);
+    $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
 
     $('saveBtn').addEventListener('click', function () {
       var v = {
         name: $('customerName').value.trim(),
-        staff: $('staff').value.trim()
+        staff: $('staff').value.trim(),
+        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       if (!v.name) {
         alert('必須項目を入力してください');

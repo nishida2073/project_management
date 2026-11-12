@@ -30,9 +30,10 @@
       '<td>' + esc(r.people) + '</td>' +
       '<td>' + esc(r.mainTeachers || '-') + '</td>' +
       '<td>' + esc(r.subTeachers || '-') + '</td>' +
-      '<td>' + esc(StaffStore.nameOf(r.manager)) + '</td>' +
+      '<td>' + (r.managers || []).map(function (c) { return esc(StaffStore.nameOf(c)); }).join('<br>') + '</td>' +
       '<td>' + (r.locationType ? '<span class="tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +
+      '<td><span class="badge overall-badge ' + (r.status === '停止中' ? 'gray' : 'green') + '">' + (r.status === '停止中' ? '停止中' : '稼働中') + '</span></td>' +
       '<td class="row-actions"><a class="search-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">編集</a></td>';
     body.appendChild(tr);
   });

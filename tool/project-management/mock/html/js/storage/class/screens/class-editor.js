@@ -8,7 +8,7 @@
   }
 
   function applyOptions() {
-    var projects = ProjectStore.load();
+    var projects = ProjectStore.load().filter(function (x) { return x.status !== '停止中'; });
     var pc = document.getElementById('projectCode');
     var pName = {}, pSales = {}, pPart = {};
     projects.forEach(function (p) {
@@ -23,7 +23,7 @@
     pc.setAttribute('data-class-map2', JSON.stringify(colorMap(SalesTypeStore.load())));
     pc.setAttribute('data-class-map3', JSON.stringify(colorMap(ParticipationTypeStore.load())));
 
-    var courses = CourseStore.load();
+    var courses = CourseStore.load().filter(function (x) { return x.status !== '停止中'; });
     var cc = document.getElementById('courseCode');
     var cName = {}, cPart = {}, cDelivery = {}, cSchedule = {};
     courses.forEach(function (c) {
@@ -95,7 +95,7 @@
     } else {
       rec = {
         year: '2026年度', courseYear: '2026年度', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
-        related: [], start: '', end: '', delivery: 'DL-01', people: '', manager: '',
+        related: [], start: '', end: '', delivery: 'DL-01', people: '', managers: [],
         locationType: 'LT-01', locationName: '', memo: ''
       };
     }
@@ -103,7 +103,7 @@
     var fromId = editing ? null : new URLSearchParams(location.search).get('from');
     if (fromId) {
       list.forEach(function (r) {
-        if (r.id === fromId) rec = Object.assign({}, r, { id: '', lessonNo: '', locationName: '', related: [r.lessonNo].concat(r.related || []).filter(Boolean) });
+        if (r.id === fromId) rec = Object.assign({}, r, { id: '', lessonNo: '', locationName: '', status: '稼働中', related: [r.lessonNo].concat(r.related || []).filter(Boolean) });
       });
     }
     if (editing) {
@@ -178,7 +178,6 @@
       v.year = clean(v.year);
       v.projectCode = clean(v.projectCode);
       v.courseCode = clean(v.courseCode);
-      v.manager = clean(v.manager);
       if (!v.projectCode || !v.courseCode || !v.version || !v.taskType || !v.start || !v.end || !v.delivery || !v.locationType || v.mainTeachers === '' || v.subTeachers === '') {
         alert('必須項目を入力してください');
         return;

@@ -29,7 +29,7 @@
       '<td>' + esc(c.min) + '名</td>' +
       '<td>' + esc(c.max) + '名</td>' +
       '<td>' + esc(actual) + '/' + planned + 'クラス</td>' +
-      '<td><span class="state ' + (on ? 'on' : 'off') + '"><span class="dot"></span>' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
       '<td><a class="search-btn" href="course_modify.html?id=' + encodeURIComponent(c.code) + '">編集</a></td>';
     body.appendChild(tr);
   });

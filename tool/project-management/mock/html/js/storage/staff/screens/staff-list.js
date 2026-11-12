@@ -24,7 +24,7 @@
       '<td>' + (t.roles || []).map(function (r) { return '<span class="tag ' + (ROLE_CLASS[r] || '') + '">' + esc(StaffRoleStore.nameOf(r)) + '</span>'; }).join(' ') + '</td>' +
       '<td><span class="tag ' + (JOB_CLASS[t.jobType] || '') + '">' + esc(JobTypeStore.nameOf(t.jobType)) + '</span></td>' +
       '<td>' + ((t.positions || []).length ? (t.positions || []).map(function (p) { return '<span class="tag ' + (POS_CLASS[p] || '') + '">' + esc(PositionStore.nameOf(p)) + '</span>'; }).join(' ') : '-') + '</td>' +
-      '<td><span class="state ' + (on ? 'on' : 'off') + '"><span class="dot"></span>' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
       '<td><a class="search-btn" href="staff_modify.html?id=' + encodeURIComponent(t.code) + '">編集</a></td>';
     body.appendChild(tr);
   });

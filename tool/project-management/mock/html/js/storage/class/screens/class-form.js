@@ -57,8 +57,19 @@
   function addRelatedChip(value) {
     var box = relatedBox();
     var chip = document.createElement('span');
-    chip.className = 'chip blue';
+    chip.className = 'chip tag-like blue';
     chip.appendChild(document.createTextNode(value + ' '));
+    var x = document.createElement('x');
+    x.textContent = '✕';
+    x.addEventListener('click', function (e) { e.stopPropagation(); chip.remove(); });
+    chip.appendChild(x);
+    box.insertBefore(chip, box.querySelector('.chip-add'));
+  }
+
+  function addManagerChip(box, name) {
+    var chip = document.createElement('span');
+    chip.className = 'chip tag-like blue';
+    chip.appendChild(document.createTextNode(name + ' '));
     var x = document.createElement('x');
     x.textContent = '✕';
     x.addEventListener('click', function (e) { e.stopPropagation(); chip.remove(); });
@@ -85,6 +96,11 @@
     setSelect($('courseCode'), r.courseCode);
     setSelect($('version'), r.version || '1.0');
     checkRadio('taskType', r.taskType || '');
+    var statusOff = r.status === '停止中';
+    $('statusRow').setAttribute('data-on', '稼働中');
+    $('statusRow').setAttribute('data-off', '停止中');
+    $('statusToggle').classList.toggle('off', statusOff);
+    $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     $('lessonNo').textContent = r.lessonNo || '自動採番';
     setDate($('start'), r.start);
     setDate($('end'), r.end);
@@ -92,7 +108,10 @@
     $('people').querySelector('input').value = r.people || '';
     $('mainTeachers').querySelector('input').value = r.mainTeachers || '';
     $('subTeachers').querySelector('input').value = r.subTeachers || '';
-    setSelect($('manager'), StaffStore.nameOf(r.manager));
+    var mbox = $('manager');
+    var madd = mbox.querySelector('.chip-add');
+    mbox.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
+    (r.managers || []).forEach(function (code) { addManagerChip(mbox, StaffStore.nameOf(code)); });
     checkRadio('locationType', r.locationType);
     setSelect($('locationName'), LocationStore.nameOf(r.locationName));
     $('memo').value = r.memo || '';
@@ -114,10 +133,11 @@
       people: $('people').querySelector('input').value.trim(),
       mainTeachers: $('mainTeachers').querySelector('input').value.trim(),
       subTeachers: $('subTeachers').querySelector('input').value.trim(),
-      manager: StaffStore.codeOf(getSelect($('manager'))),
+      managers: Array.prototype.map.call($('manager').querySelectorAll('.chip'), function (c) { return StaffStore.codeOf((c.childNodes[0].textContent || '').trim()); }).filter(Boolean),
       locationType: getRadio('locationType'),
       locationName: LocationStore.codeOf(getSelect($('locationName'))),
       memo: $('memo').value,
+      status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中',
       related: readRelated()
     };
   }
