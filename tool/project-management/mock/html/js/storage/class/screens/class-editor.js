@@ -178,7 +178,7 @@
       v.year = clean(v.year);
       v.projectCode = clean(v.projectCode);
       v.courseCode = clean(v.courseCode);
-      if (!v.projectCode || !v.courseCode || !v.version || !v.taskType || !v.start || !v.end || !v.delivery || !v.locationType || v.mainTeachers === '' || v.subTeachers === '') {
+      if (!v.courseCode || !v.version || !v.taskType || !v.start || !v.end || !v.delivery || !v.locationType || v.mainTeachers === '' || v.subTeachers === '') {
         alert('必須項目を入力してください');
         return;
       }
