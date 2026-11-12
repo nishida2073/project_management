@@ -344,3 +344,12 @@ td .search-btn { width: 64px; justify-content: center; }
 .content > .table-card > .table-scroll, .content > .table-card > .scroll-outer { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .na-text { font-size: 12px; color: #9aa4b5; }
 .status-chip-h .badge-row, .status-chip-h .badge { flex-shrink: 0; white-space: nowrap; }
+
+.target-seg { display: inline-flex; align-items: center; gap: 2px; padding: 3px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }
+.target-opt { position: relative; cursor: pointer; user-select: none; }
+.target-opt input[type="radio"] { position: absolute; width: 0; height: 0; opacity: 0; margin: 0; }
+.target-opt span { display: block; padding: 4px 14px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #6b7385; transition: background .15s, color .15s; }
+.target-opt:hover span { color: #2f6fed; }
+.target-opt input[type="radio"]:checked + span { background: #2f6fed; color: #ffffff; box-shadow: 0 1px 2px rgba(47,111,237,0.35); }
+.target-opt.off input[type="radio"]:checked + span { background: #7b8496; box-shadow: none; }
+.target-opt input[type="radio"]:focus-visible + span { outline: 2px solid #9bb8f5; outline-offset: 1px; }

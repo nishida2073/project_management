@@ -39,8 +39,8 @@ function setDisabledRow(tr, off) {
       tr.innerHTML =
         '<td class="sticky" style="text-align: center; font-weight: 700;">' + (i + 1) + '</td>' +
         '<td class="step-name sticky">' + esc(name) + '</td>' +
-        '<td><label class="radio-option"><input type="radio" name="target' + i + '" value="あり"' + (s.na ? '' : ' checked') + '><span class="radio-dot"></span><span>あり</span></label>' +
-          '<label class="radio-option"><input type="radio" name="target' + i + '" value="なし"' + (s.na ? ' checked' : '') + '><span class="radio-dot"></span><span>なし</span></label></td>' +
+        '<td><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + i + '" value="あり"' + (s.na ? '' : ' checked') + '><span>あり</span></label>' +
+          '<label class="target-opt off"><input type="radio" name="target' + i + '" value="なし"' + (s.na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
         '<td><div class="mini-control js-date plan-input">' + esc(s.plan || '') + '<span class="caret">▾</span></div></td>' +
         '<td><div class="mini-control js-date actual-input">' + esc(s.actual || '') + '<span class="caret">▾</span></div></td>' +
         '<td><div class="na-text"' + (s.na ? '' : ' style="display:none;"') + '>対象外</div>' +
