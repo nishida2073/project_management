@@ -134,13 +134,14 @@ th.grp-none { background: #f6f8fb !important; }
 /* リンクボタン・操作列 */
 td.row-actions { white-space: nowrap; text-align: center; }
 td.row-actions > .search-btn { display: inline-flex; }
+.table-scroll thead th:last-child, .scroll-outer thead th:last-child { position: sticky; right: 0; top: 0; z-index: 4; box-shadow: -1px 0 0 #e6eaf1; }
+.table-scroll tbody td.row-actions, .scroll-outer tbody td.row-actions { position: sticky; right: 0; z-index: 1; background: #ffffff; box-shadow: -1px 0 0 #eef1f6; }
 .link-btn { font-size: 12px; color: #2f6fed; font-weight: 700; padding: 4px 8px; border: 1px solid #d7e3fb; border-radius: 5px; background: #f4f8ff; text-decoration: none; cursor: default; display: inline-block; }
 .link-btn.secondary { color: #6c7688; border-color: #dfe4ec; background: #fafbfd; }
 a.link-btn { cursor: pointer; }
 
 /* ページネーション */
-.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 10px 16px; font-size: 12.5px; color: #6c7688; }
-.page-btn { width: 28px; height: 28px; border: 1px solid #dde3ec; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: #fff; }
+.pagination { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 10px 16px; font-size: 12.5px; color: #6c7688; }.page-btn { width: 28px; height: 28px; border: 1px solid #dde3ec; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: #fff; }
 .pg-hidden { display: none !important; }
 .page-btn.disabled { opacity: 0.4; cursor: default; transform: none; }
 .page-btn.active { background: #1c2b45; color: white; border-color: #1c2b45; font-weight: 700; }
