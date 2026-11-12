@@ -37,9 +37,9 @@
           <div class="field"><label>依頼残</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-class-map='{"なし":"is-green","あり":"is-orange"}'>すべて<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
         </div>
-        <div class="form-field" style="width: 260px;">
-          <label>講師ベンダー<span class="req">必須</span></label>
-          <div class="form-control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
+        <div class="field narrow">
+          <label>依頼先講師ベンダー<span class="req">必須</span></label>
+          <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
           <div class="table-meta"><div class="count">全 <b id="printCount">0</b> 件</div></div>
@@ -47,9 +47,9 @@
           <table>
             <thead>
               <tr>
-                <th style="width:44px;"><input type="checkbox" id="checkAll" checked></th>
+                <th><div id="selToggle" class="toggle" style="cursor:pointer;"><span class="knob"></span></div></th>
                 <th>年度</th>
-                <th>コース名 / コースコード</th>
+                <th>コース</th>
                 <th>レッスンNo</th>
                 <th>開始日</th>
                 <th>終了日</th>

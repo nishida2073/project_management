@@ -25,7 +25,7 @@
     var fits = a.mains.length >= (parseInt(r.mainTeachers, 10) || 0) && a.subs.length >= (parseInt(r.subTeachers, 10) || 0);
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
     tr.innerHTML =
-      '<td><input type="checkbox" class="row-check" checked></td>' +
+      '<td style="text-align: center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
       '<td>' + esc(r.year) + '</td>' +
       '<td><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
@@ -57,18 +57,27 @@
   }
   document.querySelector('.filter-panel .search-btn').addEventListener('click', applyFilter);
 
-  $('checkAll').addEventListener('change', function () {
-    var on = this.checked;
-    body.querySelectorAll('tr').forEach(function (tr) {
-      if (tr.style.display === 'none') return;
-      tr.querySelector('.row-check').checked = on;
-    });
+  function visibleRows() {
+    return Array.prototype.filter.call(body.querySelectorAll('tr'), function (tr) { return tr.style.display !== 'none'; });
+  }
+  function syncSelToggle() {
+    var rows = visibleRows();
+    var allOn = rows.length > 0 && rows.every(function (tr) { return tr.querySelector('.row-check').checked; });
+    $('selToggle').classList.toggle('off', !allOn);
+  }
+  $('selToggle').addEventListener('click', function () {
+    var on = $('selToggle').classList.contains('off');
+    visibleRows().forEach(function (tr) { tr.querySelector('.row-check').checked = on; });
+    syncSelToggle();
+  });
+  body.addEventListener('change', function (e) {
+    if (e.target.classList.contains('row-check')) syncSelToggle();
   });
 
   $('printBtn').addEventListener('click', function () {
     var vendor = clean(ownText($('requestVendor')));
     if (!vendor) {
-      MessageDialog.required(['講師ベンダー']);
+      MessageDialog.required(['依頼先講師ベンダー']);
       return;
     }
     var items = [];

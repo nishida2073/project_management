@@ -231,6 +231,8 @@ input.memo-input { color: #333c4d; background: #ffffff; }
 /* フォームダイアログ（社員／ベンダーマスタ登録） */
 .form-field { display: flex; flex-direction: column; gap: 6px; }
 .form-field.full { grid-column: 1 / span 2; }
+.field.narrow { width: 260px; }
+.field label .req { color: #e5484d; margin-left: 3px; }
 .form-field.form-spacer { visibility: hidden; min-height: 0; }
 .form-section { grid-column: 1 / span 2; font-size: 13px; font-weight: 700; color: #40485a; border-top: 1px solid #e6eaf1; padding-top: 12px; margin-top: 4px; }
 .form-field label { font-size: 12px; color: #5a6376; font-weight: 700; }
@@ -271,6 +273,18 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .select-menu li { padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333c4d; cursor: pointer; }
 .select-menu li:hover { background: #eef4ff; color: #2f6fed; }
 .select-menu li.selected { background: #eef4ff; color: #2f6fed; font-weight: 700; }
+#selToggle { width: 40px; height: 22px; border-radius: 12px; background: #2f6fed; border: 1px solid #2f6fed; box-sizing: border-box; cursor: pointer; user-select: none; transition: background .15s, border-color .15s; }
+#selToggle.off { background: #fbfcfe; border-color: #d3d9e3; }
+#selToggle.off:hover { border-color: #2f6fed; }
+#selToggle.off .knob { background: #9aa4b5; }
+#selToggle:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 2px; }
+.check-box { position: relative; display: inline-flex; cursor: pointer; }
+.check-box input { position: absolute; width: 0; height: 0; opacity: 0; margin: 0; }
+.check-box .check-mark { position: relative; display: inline-block; width: 18px; height: 18px; border-radius: 5px; border: 2px solid #c5ccd9; background: #fbfcfe; transition: background .15s, border-color .15s; }
+.check-box:hover .check-mark { border-color: #2f6fed; }
+.check-box input:checked + .check-mark { background: #2f6fed; border-color: #2f6fed; }
+.check-box input:checked + .check-mark::after { content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px; border: solid #ffffff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.check-box input:focus-visible + .check-mark { outline: 2px solid #9bb8f5; outline-offset: 2px; }
 .select-menu li.select-clear { margin-top: 4px; padding: 6px 10px; border-top: 1px solid #eef1f6; font-size: 12px; color: #5a6376; cursor: pointer; }
 .select-menu li.select-clear:hover { background: #eef4ff; color: #2f6fed; }
 .select-menu li.select-search { padding: 6px; background: #ffffff; position: sticky; top: 0; z-index: 1; }

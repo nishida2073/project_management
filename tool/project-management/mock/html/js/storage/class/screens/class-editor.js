@@ -92,8 +92,8 @@
     } else {
       rec = {
         year: '2026年度', courseYear: '2026年度', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
-        related: [], start: '', end: '', delivery: 'DL-01', people: '', managers: [],
-        locationType: 'LT-01', locationName: '', memo: ''
+        related: [], start: '', end: '', delivery: '', people: '', managers: [],
+        locationType: '', locationName: '', memo: '', status: '停止中'
       };
     }
 
