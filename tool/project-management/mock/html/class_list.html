@@ -11,8 +11,7 @@
   <div class="main">
     <div class="topbar">
       <div class="crumb-block">
-        <div class="crumb">クラス管理<span>／</span>クラス</div>
-        <p class="crumb-sub">クラス情報を管理します</p>
+        <div class="crumb">クラス一覧</div>
       </div>
       <div class="user">
         <span>山田 太郎（BD事業部）</span>
@@ -21,23 +20,11 @@
     </div>
 
     <div class="content">
-      <div class="toolbar">
-        <div class="left">
-          <h1>クラス一覧</h1>
-        </div>
-        <div class="btn-group">
-          <a class="search-btn" href="class_regist.html">新規登録</a>
-        </div>
-      </div>
-
+      
       <div class="filter-panel">
         <div class="field">
           <label>年度</label>
           <div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div>
-        </div>
-        <div class="field">
-          <label>キーワード検索（案件）</label>
-          <input type="text" class="field-control-input" placeholder="案件コード・案件名で検索">
         </div>
         <div class="field">
           <label>キーワード検索（コース）</label>
@@ -65,6 +52,10 @@
           <div class="control small js-select" data-options="すべて,駒場,成城,外部会場">すべて<span class="caret">▾</span></div>
         </div>
         <div class="search-btn">検索</div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <a class="search-btn" href="class_regist.html">新規登録</a>
       </div>
 
       <div class="table-card">

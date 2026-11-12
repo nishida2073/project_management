@@ -31,6 +31,21 @@
     window.__ddClosers.forEach(function (fn) { fn(); });
   }
 
+  function addClear(wrap, el) {
+    var foot = document.createElement('div');
+    foot.className = 'dp-foot';
+    var clear = document.createElement('div');
+    clear.className = 'dp-clear';
+    clear.textContent = 'クリア';
+    clear.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setValue(el, '');
+      el.classList.remove('open');
+    });
+    foot.appendChild(clear);
+    wrap.appendChild(foot);
+  }
+
   function setValue(el, text) {
     el.setAttribute('data-value', text);
     var caret = el.querySelector('.caret');
@@ -120,6 +135,7 @@
         grid.appendChild(muted2);
       }
       wrap.appendChild(grid);
+      addClear(wrap, el);
     }
     render();
     return wrap;
@@ -168,6 +184,7 @@
         grid.appendChild(cell);
       }
       wrap.appendChild(grid);
+      addClear(wrap, el);
     }
     render();
     return wrap;

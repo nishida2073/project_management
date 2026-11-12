@@ -11,26 +11,21 @@
   <div class="main">
     <div class="topbar">
       <div class="crumb-block">
-        <div class="crumb">マスタ管理<span>／</span>顧客</div>
-        <p class="crumb-sub">顧客情報を管理します</p>
+        <div class="crumb">顧客一覧</div>
       </div>
       <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
     </div>
 
     <div class="content">
-      <div class="toolbar">
-        <div class="left">
-          <h1>顧客一覧</h1>
-        </div>
-        <div class="btn-group">
-          <a class="search-btn" href="customer_regist.html">新規登録</a>
-        </div>
-      </div>
-
+      
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="顧客コード・顧客名で検索"></div>
         <div class="search-btn">検索</div>
       </div>
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <a class="search-btn" href="customer_regist.html">新規登録</a>
+      </div>
+
       <div class="table-card">
         <div class="table-meta"><div class="count">全 <b id="customerCount">0</b> 件</div></div>
         <div class="table-scroll">

@@ -10,8 +10,7 @@
   <div class="main">
     <div class="topbar">
       <div class="crumb-block">
-        <div class="crumb">クラス管理<span>／</span>登壇管理</div>
-        <p class="crumb-sub">登壇管理情報を管理します</p>
+        <div class="crumb">登壇管理一覧</div>
       </div>
       <div class="user">
         <span>山田 太郎（BD事業部）</span>
@@ -19,17 +18,7 @@
       </div>
     </div>
     <div class="content">
-      <div class="toolbar">
-        <div class="left">
-          <h1>登壇管理一覧</h1>
-        </div>
-        <div class="btn-group">
-          <a class="btn primary" href="class_vender_print.html">登壇依頼書の出力</a>
-          <div class="btn primary" id="importBtn">登壇依頼書の取り込み</div>
-          <input type="file" id="importFile" accept=".xlsx" style="display:none;">
-        </div>
-      </div>
-      <div class="filter-panel">
+            <div class="filter-panel">
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
         <div class="field"><label>開始日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
@@ -38,6 +27,12 @@
         <div class="field"><label>講師ベンダー名</label><div class="control wide js-select" id="vendorFilter" data-options="すべて">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
       </div>
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <a class="btn primary" href="class_vender_print.html">登壇依頼書の出力</a>
+          <div class="btn primary" id="importBtn">登壇依頼書の取り込み</div>
+          <input type="file" id="importFile" accept=".xlsx" style="display:none;">
+      </div>
+
       <div class="table-card">
         <div class="table-meta">
           <div class="count">全 <b id="venderCount">0</b> 件</div>

@@ -50,6 +50,16 @@
       });
       menu.appendChild(li);
     });
+    var clear = document.createElement('li');
+    clear.className = 'select-clear';
+    clear.textContent = 'クリア';
+    clear.addEventListener('click', function (e) {
+      e.stopPropagation();
+      selectValue(el, options.indexOf('すべて') >= 0 ? 'すべて' : '選択してください');
+      el.setAttribute('data-value', '');
+      el.classList.remove('open');
+    });
+    menu.appendChild(clear);
     return menu;
   }
 
