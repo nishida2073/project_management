@@ -50,10 +50,12 @@
           });
         }
         tr.style.display = ok ? '' : 'none';
+        tr.setAttribute('data-match', ok ? '1' : '0');
         if (ok) shown++;
       });
 
       if (countEl) countEl.textContent = shown;
+      if (window.listPaginate) window.listPaginate(true);
     }
 
     var button = panel.querySelector('.search-btn');

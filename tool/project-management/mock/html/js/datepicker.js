@@ -169,7 +169,7 @@
   }
 
   function bind(selector, builder) {
-    document.querySelectorAll(selector).forEach(function (el) {
+    (typeof selector === 'string' ? Array.prototype.slice.call(document.querySelectorAll(selector)) : [selector]).forEach(function (el) {
       if (!el.hasAttribute('data-value')) {
         var firstNode = el.childNodes[0];
         var text = (firstNode && firstNode.nodeType === 3 ? firstNode.textContent : '').trim();
@@ -192,6 +192,7 @@
 
   bind('.js-date', buildDatePicker);
   bind('.js-month', buildMonthPicker);
+  window.bindDatePicker = function (el) { bind(el, buildDatePicker); };
 
   document.addEventListener('click', function () {
     closeOthers();

@@ -40,7 +40,7 @@
           <input type="text" class="form-control" id="courseCode">
         </div>
         <div class="form-field">
-          <label>参加区分</label>
+          <label>参加区分<span class="req">必須</span></label>
           <div class="radio-group">
             <label class="radio-option"><input type="radio" name="participationType" value="公募"><span class="radio-dot"></span><span class="tag orange">公募</span></label>
             <label class="radio-option"><input type="radio" name="participationType" value="受託"><span class="radio-dot"></span><span class="tag blue">受託</span></label>
@@ -52,7 +52,7 @@
         </div>
         <div class="form-section">推奨設定</div>
         <div class="form-field full">
-          <label>実施形態</label>
+          <label>実施形態<span class="req">必須</span></label>
           <div class="radio-group">
             <label class="radio-option"><input type="radio" name="deliveryType" value="集合"><span class="radio-dot"></span><span class="tag blue">集合</span></label>
             <label class="radio-option"><input type="radio" name="deliveryType" value="オンライン"><span class="radio-dot"></span><span class="tag teal">オンライン</span></label>
@@ -60,21 +60,21 @@
           </div>
         </div>
         <div class="form-field full">
-          <label>日数</label>
+          <label>日数<span class="req">必須</span></label>
           <div class="form-control number-select" id="days" data-options="1,2,3,4,5">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>
           </div>
         </div>
         <div class="form-field">
-          <label>最小人数</label>
+          <label>最小人数（推奨）</label>
           <div class="form-control number-select" id="minPeople" data-options="10,15,20,24,30,35,40,50">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>
           </div>
         </div>
         <div class="form-field">
-          <label>最大人数</label>
+          <label>最大人数（推奨）</label>
           <div class="form-control number-select" id="maxPeople" data-options="10,15,20,24,30,35,40,50">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>

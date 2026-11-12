@@ -23,7 +23,6 @@
     search.className = 'select-search';
     var input = document.createElement('input');
     input.type = 'text';
-    input.placeholder = '入力して検索';
     input.addEventListener('click', function (e) { e.stopPropagation(); });
     input.addEventListener('input', function () {
       var q = input.value.trim().toLowerCase();

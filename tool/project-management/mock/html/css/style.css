@@ -136,6 +136,8 @@ a.link-btn { cursor: pointer; }
 /* ページネーション */
 .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 14px 20px; font-size: 12.5px; color: #6c7688; }
 .page-btn { width: 28px; height: 28px; border: 1px solid #dde3ec; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: #fff; }
+.pg-hidden { display: none !important; }
+.page-btn.disabled { opacity: 0.4; cursor: default; transform: none; }
 .page-btn.active { background: #1c2b45; color: white; border-color: #1c2b45; font-weight: 700; }
 
 /* 列数が多い一覧表を横スクロール可能にする（sticky列は使わない通常の一覧向け） */
@@ -160,7 +162,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .status-chip { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
 .status-chip .badge-row { display: flex; align-items: center; gap: 6px; }
 .status-chip .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; width: fit-content; }
-.status-chip .dates { display: flex; gap: 12px; font-size: 10.5px; color: #98a1b3; }
+.status-chip .dates { display: flex; gap: 12px; font-size: 12.5px; color: #333c4d; }
 .status-chip .owner { font-size: 10.5px; color: #6c7688; }
 .badge.gray { background: #eef0f4; color: #8992a3; }
 .badge.blue { background: #e7f0ff; color: #2f6fed; }
@@ -325,6 +327,7 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 /* 導線系・ページ切り替えのマウスオーバー（大きさを変える） */
 .search-btn, .page-btn { transition: transform 0.15s ease; }
 .search-btn:hover, .page-btn:hover { transform: scale(1.06); }
+table .search-btn { height: 26px; padding: 0 12px; font-size: 12px; }
 .page-btn:hover { border-color: #6b84ad; }
 /* 一覧の操作列の編集ボタン（幅を固定） */
 td .search-btn { width: 64px; justify-content: center; }
@@ -339,3 +342,4 @@ td .search-btn { width: 64px; justify-content: center; }
 .content > .table-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .content > .table-card > .table-meta, .content > .table-card > .pagination { flex: 0 0 auto; }
 .content > .table-card > .table-scroll, .content > .table-card > .scroll-outer { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.na-text { font-size: 12px; color: #9aa4b5; }

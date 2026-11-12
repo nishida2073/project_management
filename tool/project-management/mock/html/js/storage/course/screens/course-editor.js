@@ -69,9 +69,9 @@
     $('courseCode').value = rec.code || '';
     $('courseCode').disabled = true;
     $('courseCode').classList.add('readonly');
-    checkRadio('participationType', rec.part || 'PT-01');
+    checkRadio('participationType', rec.part || '');
     $('courseName').value = rec.name || '';
-    checkRadio('deliveryType', rec.delivery || 'DL-01');
+    checkRadio('deliveryType', rec.delivery || '');
     $('days').querySelector('input').value = rec.days === undefined ? '' : rec.days;
     $('minPeople').querySelector('input').value = rec.min === undefined ? '' : rec.min;
     $('maxPeople').querySelector('input').value = rec.max === undefined ? '' : rec.max;
@@ -129,7 +129,7 @@
       rec = list[idx];
       $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
-      rec = { year: '2026年度', subject: '', part: 'PT-01', name: '', delivery: 'DL-01', days: '', min: '', max: '', monthly: [], status: '稼働中', code: '' };
+      rec = { year: '2026年度', subject: '', part: '', name: '', delivery: '', days: '', min: '', max: '', monthly: [], status: '稼働中', code: '' };
     }
 
     fill(rec, editing);
@@ -142,7 +142,7 @@
 
     $('saveBtn').addEventListener('click', function () {
       var v = read();
-      if (!v.code || !v.year || !v.subject || !v.name || !v.delivery || v.days === '' || v.min === '' || v.max === '') {
+      if (!v.code || !v.year || !v.subject || !v.part || !v.name || !v.delivery || v.days === '') {
         alert('必須項目を入力してください');
         return;
       }
@@ -151,9 +151,9 @@
         return;
       }
       var item = {
-        code: v.code, year: v.year, subject: v.subject, part: v.part || 'PT-01',
-        name: v.name, delivery: v.delivery, days: parseInt(v.days, 10), min: parseInt(v.min, 10),
-        max: parseInt(v.max, 10), status: v.status, monthly: v.monthly,
+        code: v.code, year: v.year, subject: v.subject, part: v.part,
+        name: v.name, delivery: v.delivery, days: parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
+        max: v.max === '' ? '' : parseInt(v.max, 10), status: v.status, monthly: v.monthly,
         actual: editing ? list[idx].actual : 0
       };
       if (editing) {

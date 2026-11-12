@@ -4,6 +4,13 @@
     var STATUS_LABEL = { done: '完了', progress: '実施中', wait: '実施前' };
     var LABEL_STATUS = { '完了': 'done', '実施中': 'progress', '実施前': 'wait' };
     var STATUS_COLOR = { done: 'green', progress: 'blue', wait: 'gray' };
+
+function setDisabledRow(tr, off) {
+  Array.prototype.forEach.call(tr.querySelectorAll('.js-date, .wide.js-select'), function (el) {
+    el.style.pointerEvents = off ? 'none' : '';
+    el.style.opacity = off ? '0.4' : '';
+  });
+}
     var STEPS = [
       { no: 1, name: 'クラス登録', actual: '2026/08/20', owner: 'STF-045', status: 'done', memo: '' },
       { no: 2, name: '名簿受領督促', actual: '2026/08/25', owner: '', status: 'done', memo: '' },
@@ -71,6 +78,7 @@
       var owner = sv.owner !== undefined ? sv.owner : s.owner;
       var status = sv.status !== undefined ? sv.status : s.status;
       var memo = sv.memo !== undefined ? sv.memo : s.memo;
+      var na = sv.na !== undefined ? sv.na : false;
       var company = task ? StaffVenderStore.nameOf(task.company) : '-';
 
       var planCell = plan
@@ -85,13 +93,24 @@
       tr.innerHTML =
         '<td class="sticky" style="text-align: center; font-weight: 700;">' + s.no + '</td>' +
         '<td class="step-name sticky">' + esc(name) + '</td>' +
+        '<td><label class="radio-option"><input type="radio" name="target' + s.no + '" value="あり"' + (na ? '' : ' checked') + '><span class="radio-dot"></span><span>あり</span></label>' +
+          '<label class="radio-option"><input type="radio" name="target' + s.no + '" value="なし"' + (na ? ' checked' : '') + '><span class="radio-dot"></span><span>なし</span></label></td>' +
         '<td style="white-space: nowrap; font-weight: 700;">' + esc(company) + '</td>' +
         '<td>' + planCell + '</td>' +
         '<td>' + actualCell + '</td>' +
         '<td><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="status-select ' + STATUS_COLOR[status] + ' js-select" data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="na-text"' + (na ? '' : ' style="display:none;"') + '>対象外</div><div class="status-select ' + STATUS_COLOR[status] + ' js-select"' + (na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><input type="text" class="memo-input" value="' + esc(memo) + '"></td>';
       body.appendChild(tr);
+      setDisabledRow(tr, na);
+      Array.prototype.forEach.call(tr.querySelectorAll('input[type="radio"]'), function (r) {
+        r.addEventListener('change', function () {
+          var off = r.value === 'なし';
+          setDisabledRow(tr, off);
+          tr.querySelector('.na-text').style.display = off ? '' : 'none';
+          tr.querySelector('.status-select').style.display = off ? 'none' : '';
+        });
+      });
     });
 
     document.getElementById('saveBtn').addEventListener('click', function () {
@@ -101,11 +120,12 @@
         var no = tr.getAttribute('data-no');
         var tds = tr.children;
         out[no] = {
-          plan: ownText(tds[3].querySelector('.js-date')),
-          actual: ownText(tds[4].querySelector('.js-date')),
-          owner: StaffStore.codeOf(ownText(tds[5].querySelector('.js-select'))),
-          status: LABEL_STATUS[ownText(tds[6].querySelector('.js-select'))] || 'wait',
-          memo: tds[7].querySelector('input').value
+          na: tr.querySelector('input[type="radio"]:checked').value === 'なし',
+          plan: ownText(tds[4].querySelector('.js-date')),
+          actual: ownText(tds[5].querySelector('.js-date')),
+          owner: StaffStore.codeOf(ownText(tds[6].querySelector('.js-select'))),
+          status: LABEL_STATUS[ownText(tds[7].querySelector('.js-select'))] || 'wait',
+          memo: tds[8].querySelector('input').value
         };
       });
       all[CLASS_KEY] = out;

@@ -17,12 +17,14 @@
   }
 
   function isDelayed(step) {
+    if (step.na) return false;
     if (step.status === 'done' || !step.plan) return false;
     var plan = new Date(String(step.plan).replace(/\//g, '-'));
     return !isNaN(plan.getTime()) && plan < today;
   }
 
   function chip(step) {
+    if (step.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
     var label = STATUS_LABEL[step.status] || '実施前';
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
@@ -33,9 +35,11 @@
   }
 
   function overall(steps) {
-    var late = steps.some(isDelayed);
-    var all = steps.every(function (s) { return s.status === 'done'; });
-    var any = steps.some(function (s) { return s.status === 'done' || s.status === 'progress'; });
+    var applicable = steps.filter(function (s) { return !s.na; });
+    if (applicable.length === 0) return '<span class="na-text">対象外</span>';
+    var late = applicable.some(isDelayed);
+    var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'done'; });
+    var any = applicable.some(function (s) { return s.status === 'done' || s.status === 'progress'; });
     var key = late ? 'delay' : (all ? 'done' : (any ? 'progress' : 'wait'));
     var label = { done: '完了', progress: '実施中', wait: '実施前', delay: '遅延あり' }[key];
     var color = { done: 'green', progress: 'blue', wait: 'gray', delay: 'red' }[key];
@@ -72,7 +76,8 @@
         plan: sv.plan !== undefined ? sv.plan : (task ? addDays(start, task.days) : ''),
         actual: sv.actual !== undefined ? sv.actual : '',
         owner: sv.owner !== undefined ? sv.owner : '',
-        status: sv.status !== undefined ? sv.status : 'wait'
+        status: sv.status !== undefined ? sv.status : 'wait',
+        na: sv.na !== undefined ? sv.na : false
       };
     });
     if (steps.some(isDelayed)) delayClasses++;
@@ -82,8 +87,8 @@
     var tr = document.createElement('tr');
     var html = '';
     html += '<td class="sticky" style="left:0;">' + esc(c.year) + '</td>';
-    html += '<td class="sticky" style="left:90px;"><div style="font-weight:700;">' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
-    html += '<td class="sticky" style="left:280px;"><div style="font-weight:700;">' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
+    html += '<td class="sticky" style="left:90px;"><div>' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
+    html += '<td class="sticky" style="left:280px;"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
     html += '<td class="sticky" style="left:410px;">' + esc(c.start) + '</td>';
     html += '<td class="sticky" style="left:530px;">' + esc(c.end) + '</td>';
     html += '<td class="sticky" style="left:650px;">' + esc(StaffStore.nameOf(c.manager)) + '</td>';

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/project_progress_modify.css">
+<link rel="stylesheet" href="css/class_progress_modify.css">
 </head>
 <body>
 <div class="app">
@@ -26,11 +26,12 @@
         <table class="step-table">
           <thead>
             <tr>
-              <th style="width:260px;">工程名</th>
+              <th class="sticky" style="width:70px;">作業順</th>
+              <th class="sticky" style="width:200px;">工程名</th>
+              <th style="width:150px;">実施対象</th>
               <th style="width:130px;">予定日</th>
-              <th style="width:130px;">実績日</th>
-              <th style="width:120px;">状態</th>
-              <th style="width:90px;">実施対象</th>
+              <th style="width:130px;">実施日</th>
+              <th style="width:130px;">状態</th>
               <th>備考</th>
             </tr>
           </thead>
@@ -50,8 +51,8 @@
 <script src="js/storage/project/store/project-store.js"></script>
 <script src="js/storage/project-progress/store/project-progress-store.js"></script>
 <script src="js/storage/project-progress/screens/project-progress-editor.js"></script>
-<script src="js/storage/project-progress/entry/project-progress-modify.js"></script>
 <script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 </body>
 </html>

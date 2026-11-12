@@ -7,6 +7,6 @@
 .modal { width: 1180px; }
 .modal-body { padding: 18px 28px; }
 
-.mini-control.wide { min-width: 160px; }
+.mini-control.wide { min-width: 120px; }
 .status-select { min-width: 96px; }
-.memo-input { min-width: 180px; }
+.memo-input { min-width: 120px; }
