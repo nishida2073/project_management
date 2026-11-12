@@ -27,12 +27,10 @@
     if (editing) {
       list.forEach(function (c, i) { if (c.id === id) idx = i; });
       if (idx < 0) {
-        alert('対象の顧客が見つかりません');
-        location.href = 'customer_list.html';
+        MessageDialog.show('対象の顧客が見つかりません', function () { location.href = 'customer_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.id + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { id: '', name: '', staff: '', status: '稼働中' };
     }
@@ -52,12 +50,14 @@
         staff: $('staff').value.trim(),
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
-      if (!v.name) {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.name) missing.push('顧客名');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (!editing && list.some(function (c) { return c.name === v.name; })) {
-        alert('同じ顧客名が既に登録されています');
+        MessageDialog.show('同じ顧客名が既に登録されています');
         return;
       }
       if (editing) {

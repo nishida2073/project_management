@@ -46,8 +46,7 @@ function setDisabledRow(tr, off) {
     var cls = null;
     classList.forEach(function (r) { if (r.id === CLASS_ID) cls = r; });
     if (!cls) {
-      alert('対象のクラスが見つかりません');
-      location.href = 'class_progress_list.html';
+      MessageDialog.show('対象のクラスが見つかりません', function () { location.href = 'class_progress_list.html'; });
       return;
     }
     var classStart = new Date(cls.start);

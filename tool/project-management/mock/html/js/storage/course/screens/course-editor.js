@@ -122,12 +122,10 @@
     if (editing) {
       list.forEach(function (c, i) { if (c.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象のコースが見つかりません');
-        location.href = 'course_list.html';
+        MessageDialog.show('対象のコースが見つかりません', function () { location.href = 'course_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { year: '2026年度', subject: '', part: '', name: '', delivery: '', days: '', min: '', max: '', monthly: [], status: '稼働中', code: '' };
     }
@@ -142,12 +140,20 @@
 
     $('saveBtn').addEventListener('click', function () {
       var v = read();
-      if (!v.code || !v.year || !v.subject || !v.part || !v.name || !v.delivery || v.days === '') {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.code) missing.push('コースコード');
+        if (!v.year) missing.push('年度');
+        if (!v.subject) missing.push('科目名');
+        if (!v.part) missing.push('参加区分');
+        if (!v.name) missing.push('コース名');
+        if (!v.delivery) missing.push('実施形態');
+        if (v.days === '') missing.push('日数');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (!editing && list.some(function (c) { return c.code === v.code; })) {
-        alert('同じコースコードが既に登録されています');
+        MessageDialog.show('同じコースコードが既に登録されています');
         return;
       }
       var item = {

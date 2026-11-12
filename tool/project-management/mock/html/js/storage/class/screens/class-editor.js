@@ -85,13 +85,10 @@
     if (editing) {
       list.forEach(function (r) { if (r.id === id) rec = r; });
       if (!rec) {
-        alert('対象のクラスが見つかりません');
-        location.href = 'class_list.html';
+        MessageDialog.show('対象のクラスが見つかりません', function () { location.href = 'class_list.html'; });
         return;
       }
       var c = ClassStore.COURSES[rec.courseCode];
-      document.getElementById('subLine').textContent =
-        rec.lessonNo + '　' + (c ? c.name : rec.courseCode) + 'の情報を編集します';
     } else {
       rec = {
         year: '2026年度', courseYear: '2026年度', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
@@ -178,8 +175,21 @@
       v.year = clean(v.year);
       v.projectCode = clean(v.projectCode);
       v.courseCode = clean(v.courseCode);
-      if (!v.courseCode || !v.version || !v.taskType || !v.start || !v.end || !v.delivery || !v.locationType || v.mainTeachers === '' || v.subTeachers === '') {
-        alert('必須項目を入力してください');
+      v.version = clean(v.version);
+      v.courseYear = clean(v.courseYear);
+      var missing = [];
+        if (!v.courseYear) missing.push('年度');
+        if (!v.courseCode) missing.push('コースコード');
+        if (!v.version) missing.push('版');
+        if (!v.taskType) missing.push('タスク区分');
+        if (!v.start) missing.push('開始日');
+        if (!v.end) missing.push('終了日');
+        if (!v.delivery) missing.push('実施形態');
+        if (!v.locationType) missing.push('ロケーション区分');
+        if (v.mainTeachers === '') missing.push('予定講師数（メイン）');
+        if (v.subTeachers === '') missing.push('予定講師数（サブ）');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (editing) {

@@ -190,6 +190,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .input-dialog-title { font-size: 16px; font-weight: 700; color: #1c2b45; }
 .input-dialog-label { font-size: 12px; color: #5a6376; font-weight: 700; }
 .input-dialog-error { font-size: 12px; color: #d43c40; min-height: 16px; }
+.message-dialog-text { font-size: 13px; color: #333c4d; line-height: 1.6; white-space: pre-wrap; max-height: 50vh; overflow-y: auto; }
 .input-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
 .modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 720px; max-width: calc(100vw - 32px); height: 80vh; display: flex; flex-direction: column; }

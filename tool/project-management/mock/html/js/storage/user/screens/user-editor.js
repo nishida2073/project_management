@@ -41,12 +41,10 @@
     if (editing) {
       list.forEach(function (u, i) { if (u.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象のユーザーが見つかりません');
-        location.href = 'user_list.html';
+        MessageDialog.show('対象のユーザーが見つかりません', function () { location.href = 'user_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
       $('passwordField').style.display = '';
     } else {
       rec = { code: '', name: '', email: '', authority: 'AU-02', status: '稼働中' };
@@ -63,12 +61,17 @@
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       var password = $('userPassword').value;
-      if (!v.name || !v.email || !v.authority || (!editing && !password)) {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.name) missing.push('ユーザー名');
+        if (!v.email) missing.push('メールアドレス（ログインID）');
+        if (!v.authority) missing.push('権限');
+        if (!editing && !password) missing.push('初期パスワード');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (!editing && list.some(function (u) { return u.email === v.email; })) {
-        alert('同じメールアドレスのユーザーが既に登録されています');
+        MessageDialog.show('同じメールアドレスのユーザーが既に登録されています');
         return;
       }
       if (password) v.password = password;

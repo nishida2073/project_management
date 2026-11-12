@@ -59,7 +59,7 @@
   $('printBtn').addEventListener('click', function () {
     var vendor = clean(ownText($('requestVendor')));
     if (!vendor) {
-      alert('講師ベンダーを選択してください');
+      MessageDialog.required(['講師ベンダー']);
       return;
     }
     var items = [];
@@ -79,7 +79,7 @@
       mainMax = Math.max(mainMax, it.assign.mainCount);
       subMax = Math.max(subMax, it.assign.subCount);
     });
-    var header = ['年度', 'コース名 / コースコード', 'レッスンNo', '開始日', '終了日'];
+    var header = ['年度', 'コース名', 'コースコード', 'レッスンNo', '開始日', '終了日'];
     var i;
     function zen(n) { return String.fromCharCode(0xFF10 + n); }
     for (i = 1; i <= mainMax; i++) header.push('講師（メイン' + zen(i) + '）');
@@ -89,7 +89,8 @@
       var c = C[it.cls.courseCode] || { name: it.cls.courseCode };
       var line = [
         it.cls.year,
-        c.name + ' / ' + it.cls.courseCode,
+        c.name,
+        it.cls.courseCode,
         it.cls.lessonNo,
         it.cls.start,
         it.cls.end
@@ -104,7 +105,7 @@
       for (var k = 0; k < mainMax + subMax; k++) {
         var used = k < mainMax ? k < it.assign.mainCount : (k - mainMax) < it.assign.subCount;
         if (used) continue;
-        var addr = XLSX.utils.encode_cell({ r: ri + 3, c: 5 + k });
+        var addr = XLSX.utils.encode_cell({ r: ri + 3, c: 6 + k });
         if (!ws[addr]) ws[addr] = { t: 's', v: '' };
         ws[addr].s = GRAY;
       }
@@ -119,7 +120,7 @@
     ws['B1'].s = { border: HEAD.border, alignment: { vertical: 'center' } };
     ws['!cols'] = header.map(function (name, ci) {
       if (ci === 1) return { wch: 32 };
-      if (ci < 5) return { wch: 14 };
+      if (ci < 6) return { wch: 14 };
       return { wch: 28 };
     });
     ws['!rows'] = [{ hpt: 18 }, {}, { hpt: 18 }];

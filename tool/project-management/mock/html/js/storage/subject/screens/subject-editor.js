@@ -69,12 +69,10 @@
     if (editing) {
       list.forEach(function (s, i) { if (s.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象の科目が見つかりません');
-        location.href = 'subject_list.html';
+        MessageDialog.show('対象の科目が見つかりません', function () { location.href = 'subject_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { code: '', type: '', name: '', versions: ['1.0'], status: '稼働中' };
     }
@@ -100,8 +98,12 @@
 
     $('saveBtn').addEventListener('click', function () {
       var v = read();
-      if (!v.type || !v.name || !v.versions.length) {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.type) missing.push('科目区分');
+        if (!v.name) missing.push('科目名');
+        if (!v.versions.length) missing.push('版');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (editing) {
@@ -109,11 +111,11 @@
       } else {
         var code = $('subjectCode').value.trim().toUpperCase();
         if (!SubjectStore.isValidCode(code)) {
-          alert('科目コードは英字2文字＋数字2桁で入力してください（例：BC02）');
+          MessageDialog.show('科目コードは英字2文字＋数字2桁で入力してください（例：BC02）');
           return;
         }
         if (list.some(function (s) { return s.code === code; })) {
-          alert('同じ科目コードが既に登録されています');
+          MessageDialog.show('同じ科目コードが既に登録されています');
           return;
         }
         list.push(Object.assign({ code: code }, v));

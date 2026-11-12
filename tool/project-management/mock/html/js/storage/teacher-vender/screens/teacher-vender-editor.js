@@ -46,12 +46,10 @@
     if (editing) {
       list.forEach(function (v, i) { if (v.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象の講師ベンダーが見つかりません');
-        location.href = 'teacher_vender_list.html';
+        MessageDialog.show('対象の講師ベンダーが見つかりません', function () { location.href = 'teacher_vender_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { code: '', name: '', tel: '', address: '', memo: '', contactName: '', contactEmail: '', status: '稼働中' };
     }
@@ -68,8 +66,10 @@
         contactEmail: $('contactEmail').value.trim(),
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
-      if (!v.name) {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.name) missing.push('講師ベンダー名');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (editing) {

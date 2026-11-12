@@ -72,12 +72,10 @@
       var id = new URLSearchParams(location.search).get('id');
       list.forEach(function (t, i) { if (t.id === id) idx = i; });
       if (idx < 0) {
-        alert('対象のタスクが見つかりません');
-        location.href = 'task_list.html';
+        MessageDialog.show('対象のタスクが見つかりません', function () { location.href = 'task_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.id + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { id: TaskStore.nextId(list), name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', status: '稼働中' };
     }
@@ -94,12 +92,18 @@
       var affiliation = getRadio('affiliation');
       var companyText = selectedOf($('company'));
       var daysV = $('days').value;
-      if (!name || !kinds.length || !affiliation || orderV === '' || daysV === '') {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!name) missing.push('タスク名');
+        if (!kinds.length) missing.push('タスク区分');
+        if (!affiliation) missing.push('所属区分');
+        if (orderV === '') missing.push('作業順');
+        if (daysV === '') missing.push('日数');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (affiliation === 'パートナー' && (!companyText || companyText === '選択してください')) {
-        alert('実施担当ベンダー名を選択してください');
+        MessageDialog.required(['実施担当ベンダー']);
         return;
       }
       var item = {

@@ -94,12 +94,10 @@
     if (editing) {
       list.forEach(function (t, i) { if (t.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象の実施担当者が見つかりません');
-        location.href = 'staff_list.html';
+        MessageDialog.show('対象の実施担当者が見つかりません', function () { location.href = 'staff_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { code: '', affiliation: '社内', company: '', name: '', email: '', roles: [], jobType: 'JT-02', positions: [], status: '稼働中' };
     }
@@ -127,12 +125,17 @@
         positions: chipValues($('positionBox')).map(function (n) { return codeFromName(PositionStore.load(), n); }),
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
-      if (!v.name || !v.affiliation || !v.roles.length || !v.jobType) {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.name) missing.push('実施担当者名');
+        if (!v.affiliation) missing.push('所属区分');
+        if (!v.roles.length) missing.push('担当区分');
+        if (!v.jobType) missing.push('業務区分');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (v.affiliation === 'パートナー' && !v.company) {
-        alert('実施担当ベンダーを選択してください');
+        MessageDialog.required(['実施担当ベンダー']);
         return;
       }
       if (editing) {

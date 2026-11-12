@@ -45,12 +45,11 @@
     var cls = null;
     ClassStore.load().forEach(function (r) { if (r.id === classId) cls = r; });
     if (!cls) {
-      alert('対象のクラスが見つかりません');
-      location.href = 'class_vender_list.html';
+      MessageDialog.show('対象のクラスが見つかりません', function () { location.href = 'class_vender_list.html'; });
       return;
     }
     var c = ClassStore.COURSES[cls.courseCode];
-    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + 'の登壇管理を編集します　予定講師数：メイン' + (cls.mainTeachers || '-') + '名・サブ' + (cls.subTeachers || '-') + '名';
+    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + '　予定講師数：メイン' + (cls.mainTeachers || '-') + '名・サブ' + (cls.subTeachers || '-') + '名';
 
     var a = VenderAssignStore.find(classId);
     var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0);

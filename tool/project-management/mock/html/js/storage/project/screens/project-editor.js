@@ -86,12 +86,10 @@
     if (editing) {
       list.forEach(function (p, i) { if (p.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象の案件が見つかりません');
-        location.href = 'project_list.html';
+        MessageDialog.show('対象の案件が見つかりません', function () { location.href = 'project_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { year: '2026年度', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '', status: '稼働中' };
     }
@@ -110,8 +108,15 @@
         memo: $('memo').value,
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
-      if (!v.year || !v.sales || !v.part || !v.name || !v.startMonth || !v.pm) {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.year) missing.push('年度');
+        if (!v.sales) missing.push('販売区分');
+        if (!v.part) missing.push('参加区分');
+        if (!v.name) missing.push('案件名');
+        if (!v.startMonth) missing.push('実施開始月');
+        if (!v.pm) missing.push('PM');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (editing) {

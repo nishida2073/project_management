@@ -22,9 +22,8 @@ function setDisabledRow(tr, off) {
   var project = null;
   ProjectStore.load().forEach(function (p) { if (p.code === PROJECT_CODE) project = p; });
   if (!project) {
-    alert('対象の案件が見つかりません');
-    location.href = 'project_progress_list.html';
-  } else {
+    MessageDialog.show('対象の案件が見つかりません', function () { location.href = 'project_progress_list.html'; });
+      } else {
     $('subLine').textContent = project.code + '　' + project.name + '　実施開始月：' + project.startMonth +
       '　管理担当者　' + StaffStore.nameOf(project.pm) + (project.pl && project.pl.length ? '／' + project.pl.map(function (c) { return StaffStore.nameOf(c); }).join('／') : '');
 

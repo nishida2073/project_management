@@ -49,12 +49,10 @@
     if (editing) {
       list.forEach(function (l, i) { if (l.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象のロケーションが見つかりません');
-        location.href = 'location_list.html';
+        MessageDialog.show('対象のロケーションが見つかりません', function () { location.href = 'location_list.html'; });
         return;
       }
       rec = list[idx];
-      $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
       rec = { code: '', type: 'LT-01', name: '', tel: '', address: '', status: '稼働中' };
     }
@@ -65,8 +63,11 @@
 
     $('saveBtn').addEventListener('click', function () {
       var v = read();
-      if (!v.type || !v.name) {
-        alert('必須項目を入力してください');
+      var missing = [];
+        if (!v.type) missing.push('ロケーション区分');
+        if (!v.name) missing.push('ロケーション名');
+      if (missing.length) {
+        MessageDialog.required(missing);
         return;
       }
       if (editing) {
