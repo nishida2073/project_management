@@ -52,7 +52,7 @@ function setDisabledRow(tr, off) {
     var classStart = new Date(cls.start);
     var courseInfo = ClassStore.COURSES[cls.courseCode];
     var projectInfo = ClassStore.PROJECTS[cls.projectCode];
-    document.getElementById('subLine').textContent = cls.lessonNo + '　' + (courseInfo ? courseInfo.name : cls.courseCode) + '　' + cls.start + '〜' + cls.end + '　管理担当者：' + (cls.managers || []).map(function (m) { return StaffStore.nameOf(m); }).join('、');
+    document.getElementById('subLine').textContent = cls.lessonNo + '　' + (courseInfo ? courseInfo.name : cls.courseCode) + '　' + cls.start + '〜' + cls.end;
     var tasks = TaskStore.load();
     var sortedTasks = tasks.slice().sort(function (a, b) {
       var ka = a.kinds[0] || '';
