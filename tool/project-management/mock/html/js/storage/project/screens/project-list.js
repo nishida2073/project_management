@@ -28,7 +28,7 @@
   var managerSelect = document.getElementById('managerFilter');
   if (managerSelect) {
     managerSelect.setAttribute('data-options', ['すべて'].concat(StaffStore.candidates({
-      includeStopped: true, affiliations: ['社内'], roles: ['案件'], jobTypes: ['営業'], positions: ['PM', 'PL']
+      includeStopped: true, affiliations: ['社内'], roles: ['案件'], jobTypes: ['販売'], positions: ['PM', 'PL']
     })).join(','));
   }
 })();

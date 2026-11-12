@@ -40,9 +40,10 @@
 
   var headRow = document.getElementById('headRow');
   var lastTh = headRow.lastElementChild;
-  ProjectProgressStore.STEP_NAMES.forEach(function (name) {
+  ProjectProgressStore.STEP_NAMES.forEach(function (name, i) {
     var th = document.createElement('th');
-    th.textContent = name;
+    th.textContent = (i + 1) + '：' + name;
+    th.classList.add('no-sort');
     headRow.insertBefore(th, lastTh);
   });
 

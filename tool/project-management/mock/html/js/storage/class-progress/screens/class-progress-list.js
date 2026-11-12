@@ -76,6 +76,7 @@
     var th = document.createElement('th');
     th.style.minWidth = '230px';
     th.setAttribute('data-step', i);
+    th.classList.add('no-sort');
     th.setAttribute('data-kinds', t.kinds.join(','));
     th.innerHTML = '<div class="kind-line"><span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
       '<div>' + esc(DISPLAY_NO[i] + '：' + t.name) + '</div>' +

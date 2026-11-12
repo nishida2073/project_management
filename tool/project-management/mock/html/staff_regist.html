@@ -44,21 +44,15 @@
         </div>
         <div class="form-field full">
           <label>担当区分（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box js-chip-select" id="roleBox" data-options="案件,クラス" data-chip-map='{"案件":"green","クラス":"purple"}'>
-            <span class="chip-add">追加</span>
-          </div>
+          <div class="multi-group" id="roleGroup"></div>
         </div>
         <div class="form-field full">
           <label>業務区分（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box js-chip-select" id="jobBox" data-options="営業,管理,実施" data-chip-map='{"営業":"orange","管理":"indigo","実施":"teal"}'>
-            <span class="chip-add">追加</span>
-          </div>
+          <div class="multi-group" id="jobGroup"></div>
         </div>
         <div class="form-field full">
           <label>役職（複数選択可）</label>
-          <div class="chip-box js-chip-select" id="positionBox" data-options="PM,PL" data-chip-map='{"PM":"blue","PL":"orange"}'>
-            <span class="chip-add">追加</span>
-          </div>
+          <div class="multi-group" id="positionGroup"></div>
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>

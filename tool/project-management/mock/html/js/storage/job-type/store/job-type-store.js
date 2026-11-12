@@ -3,7 +3,7 @@
   var PREFIX = 'JT-';
 
   var SEED = [
-    { code: 'JT-01', name: '営業', color: 'orange' },
+    { code: 'JT-01', name: '販売', color: 'orange' },
     { code: 'JT-02', name: '管理', color: 'indigo' },
     { code: 'JT-03', name: '実施', color: 'teal' }
   ];

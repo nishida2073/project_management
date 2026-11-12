@@ -15,38 +15,18 @@
     var r = document.querySelector('input[name="' + name + '"]:checked');
     return r ? r.value : '';
   }
-  function makeChip(value, cls) {
-    var chip = document.createElement('span');
-    chip.className = 'chip ' + cls;
-    chip.appendChild(document.createTextNode(value + ' '));
-    var x = document.createElement('x');
-    x.textContent = '✕';
-    x.addEventListener('click', function (e) { e.stopPropagation(); chip.remove(); });
-    chip.appendChild(x);
-    return chip;
+  function renderChecks(group, name, items) {
+    group.innerHTML = items.map(function (it) {
+      return '<label class="multi-opt" data-tone="' + esc(it.color || '') + '"><input type="checkbox" name="' + name + '" value="' + esc(it.code) + '"><span>' + esc(it.name) + '</span></label>';
+    }).join('');
   }
-  function chipValues(box) {
-    return Array.prototype.map.call(box.querySelectorAll('.chip'), function (c) {
-      return c.textContent.replace('✕', '').trim();
+  function setChecks(name, values) {
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function (c) {
+      c.checked = (values || []).indexOf(c.value) !== -1;
     });
   }
-  function fillChips(box, values, classOf) {
-    var addBtn = box.querySelector('.chip-add');
-    box.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
-    values.forEach(function (v) { box.insertBefore(makeChip(v, classOf(v)), addBtn); });
-  }
-
-  function nameFromCode(list, code) {
-    var f = list.filter(function (t) { return t.code === code; })[0];
-    return f ? f.name : code;
-  }
-  function codeFromName(list, name) {
-    var f = list.filter(function (t) { return t.name === name; })[0];
-    return f ? f.code : name;
-  }
-  function colorFromName(list, name) {
-    var f = list.filter(function (t) { return t.name === name; })[0];
-    return f ? f.color : '';
+  function getChecks(name) {
+    return Array.prototype.map.call(document.querySelectorAll('input[name="' + name + '"]:checked'), function (c) { return c.value; });
   }
 
   function refreshCompany() {
@@ -62,12 +42,9 @@
     company.innerHTML = (rec.company ? esc(StaffVenderStore.nameOf(rec.company)) : '選択してください') + '<span class="caret">▾</span>';
     $('tName').value = rec.name || '';
     $('email').value = rec.email || '';
-    var roleList = StaffRoleStore.load();
-    var posList = PositionStore.load();
-    fillChips($('roleBox'), (rec.roles || []).map(function (c) { return nameFromCode(roleList, c); }), function (v) { return colorFromName(roleList, v); });
-    var jobList = JobTypeStore.load();
-    fillChips($('jobBox'), (rec.jobTypes || []).map(function (c) { return nameFromCode(jobList, c); }), function (v) { return colorFromName(jobList, v); });
-    fillChips($('positionBox'), (rec.positions || []).map(function (c) { return nameFromCode(posList, c); }), function (v) { return colorFromName(posList, v); });
+    setChecks('roles', rec.roles);
+    setChecks('jobTypes', rec.jobTypes);
+    setChecks('positions', rec.positions);
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
     row.setAttribute('data-off', '停止中');
@@ -85,6 +62,9 @@
     var rec;
 
     $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
+    renderChecks($('roleGroup'), 'roles', StaffRoleStore.load());
+    renderChecks($('jobGroup'), 'jobTypes', JobTypeStore.load());
+    renderChecks($('positionGroup'), 'positions', PositionStore.load());
 
     if (editing) {
       list.forEach(function (t, i) { if (t.code === id) idx = i; });
@@ -97,15 +77,6 @@
       rec = { code: '', affiliation: '', company: '', name: '', email: '', roles: [], jobTypes: [], positions: [], status: '稼働中' };
     }
     fill(rec);
-    var jobs = JobTypeStore.load();
-    $('jobBox').setAttribute('data-options', jobs.map(function (j) { return j.name; }).join(','));
-    $('jobBox').setAttribute('data-chip-map', JSON.stringify(jobs.reduce(function (m, j) { m[j.name] = j.color; return m; }, {})));
-    var roles = StaffRoleStore.load();
-    $('roleBox').setAttribute('data-options', roles.map(function (r) { return r.name; }).join(','));
-    $('roleBox').setAttribute('data-chip-map', JSON.stringify(roles.reduce(function (m, r) { m[r.name] = r.color; return m; }, {})));
-    var positions = PositionStore.load();
-    $('positionBox').setAttribute('data-options', positions.map(function (p) { return p.name; }).join(','));
-    $('positionBox').setAttribute('data-chip-map', JSON.stringify(positions.reduce(function (m, p) { m[p.name] = p.color; return m; }, {})));
     document.querySelectorAll('input[name="affiliation"]').forEach(function (r) { r.addEventListener('change', refreshCompany); });
 
     $('saveBtn').addEventListener('click', function () {
@@ -117,9 +88,9 @@
         company: company,
         name: $('tName').value.trim(),
         email: $('email').value.trim(),
-        roles: chipValues($('roleBox')).map(function (n) { return codeFromName(StaffRoleStore.load(), n); }),
-        jobTypes: chipValues($('jobBox')).map(function (n) { return codeFromName(JobTypeStore.load(), n); }),
-        positions: chipValues($('positionBox')).map(function (n) { return codeFromName(PositionStore.load(), n); }),
+        roles: getChecks('roles'),
+        jobTypes: getChecks('jobTypes'),
+        positions: getChecks('positions'),
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       var missing = [];

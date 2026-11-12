@@ -1,10 +1,22 @@
 (function () {
   var KEY = 'projectProgressList';
-
-  var STEP_NAMES = [
+  var STEP_KEY = 'projectProgressStepList';
+  var STEP_SEED = [
     '案件受付', '見積作成', '見積提出', '受注確定', '社内承認', '教材準備', '講師手配',
     '顧客契約締結', '開発実施準備', '研修実施', 'アンケート集計', '検収', '請求・完了報告'
   ];
+
+  function loadSteps() {
+    try {
+      var raw = localStorage.getItem(STEP_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    var seed = STEP_SEED.slice();
+    try { localStorage.setItem(STEP_KEY, JSON.stringify(seed)); } catch (e) {}
+    return seed;
+  }
+
+  var STEP_NAMES = loadSteps();
 
   var DATES = ['08/10', '08/20', '08/25', '08/29', '09/03', '09/08', '09/10', '09/17', '09/24', '10/05', '10/20', '11/10', '11/25'];
 
