@@ -36,8 +36,8 @@
     var actual = step.actual ? step.actual : '-';
     var delayMark = isDelayed(step) ? '<span class="badge red">⚠ 遅延</span>' : '';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span>' + delayMark + '</div>' +
-      '<div class="dates-col"><div class="dates"><span>予定日 ' + esc(step.plan || '-') + '</span></div>' +
-      '<div class="dates"><span>実施日 ' + esc(actual) + ' ' + esc(StaffStore.nameOf(step.owner || '')) + '</span></div></div></div>';
+      '<div class="dates-col"><div class="dates"><span>予：' + esc(step.plan || '-') + '</span></div>' +
+      '<div class="dates"><span>実：' + esc(actual) + ' ' + esc(StaffStore.nameOf(step.owner || '')) + '</span></div></div></div>';
   }
 
   function overall(steps) {
@@ -62,7 +62,7 @@
   while (headRow.children.length > 8) headRow.removeChild(headRow.lastElementChild);
   SORTED.forEach(function (t, i) {
     var th = document.createElement('th');
-    th.style.minWidth = '170px';
+    th.style.minWidth = '230px';
     th.setAttribute('data-step', i);
     th.setAttribute('data-kinds', t.kinds.join(','));
     th.innerHTML = '<span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span> ' +
@@ -104,7 +104,7 @@
     html += '<td class="sticky" style="left:530px;">' + esc(c.end) + '</td>';
     html += '<td class="sticky" style="left:650px;">' + esc(StaffStore.nameOf(c.manager)) + '</td>';
     html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
-    html += '<td class="sticky shadow" style="left:870px;">' + overall(steps) + '</td>';
+    html += '<td class="sticky" style="left:870px;">' + overall(steps) + '</td>';
     steps.forEach(function (s, i) { html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '">' + chip(s) + '</td>'; });
     html += '<td><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">編集</a></td>';
     tr.innerHTML = html;

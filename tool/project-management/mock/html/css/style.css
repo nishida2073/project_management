@@ -47,6 +47,7 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 .toolbar .left h1 { font-size: 20px; font-weight: 700; }
 .toolbar .left p { font-size: 12.5px; color: #7c8598; margin-top: 4px; }
 .btn-group { display: flex; gap: 10px; align-items: center; }
+.toolbar { min-height: 34px; }
 .btn.primary { background: #1c2b45; border-color: #1c2b45; color: #ffffff; }
 a.btn { cursor: pointer; }
 .btn, .search-btn, .link-btn, .page-btn, .close-x, .add-row, .sidebar-toggle { cursor: pointer; }
@@ -151,7 +152,6 @@ a.link-btn { cursor: pointer; }
 table.scroll-table, .scroll-outer table { border-collapse: separate; border-spacing: 0; width: max-content; }
 .sticky { position: sticky; background: #ffffff; z-index: 2; }
 thead th.sticky { background: #f6f8fb; z-index: 3; }
-.sticky.shadow { box-shadow: 3px 0 6px -3px rgba(20,30,50,0.15); }
 /* 表ヘッダー固定（スクロール表の共通設定） */
 .table-scroll, .scroll-outer { overflow: visible; }
 .table-scroll thead th, .scroll-outer thead th { position: sticky; top: 0; z-index: 2; }
@@ -188,6 +188,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 720px; max-width: calc(100vw - 32px); height: 80vh; display: flex; flex-direction: column; }
 .modal.modal-wide { width: 1200px; }
 .modal-body { flex: 1; overflow-y: auto; }
+.modal-body.modal-body-plain { display: block; padding: 0 28px 18px; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-header h2 { font-size: 18px; font-weight: 700; }
 .modal-header .sub { font-size: 12.5px; color: #7c8598; margin-top: 6px; }
@@ -373,3 +374,13 @@ td .search-btn { width: 64px; justify-content: center; }
 .seg-opt.is-active { background: #2f6fed; color: #ffffff; box-shadow: 0 1px 2px rgba(47,111,237,0.35); }
 .seg-opt:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 1px; }
 .filter-panel.is-collapsed { display: none; }
+
+.sub-list { display: flex; flex-direction: column; gap: 10px; }
+.sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.sub-row-header { margin-bottom: 6px; }
+.sub-row-header span { font-size: 12px; color: #5a6376; font-weight: 700; }
+.sub-row { position: relative; }
+.sub-remove { position: absolute; top: 50%; right: -24px; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 11px; border: 1px solid #e6eaf1; cursor: pointer; }
+.sub-remove:hover { background: #eef4ff; color: #2f6fed; border-color: #2f6fed; }
+.add-row { margin-top: 10px; width: fit-content; }
+.add-related-class-row { margin-top: 10px; width: fit-content; }
