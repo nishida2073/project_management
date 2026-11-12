@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'authorityList';
+  var KEY = 'userRoleList';
   var PREFIX = 'AU-';
 
   var SEED = [
@@ -60,5 +60,5 @@
     save(load().filter(function (t) { return t.code !== code; }));
   }
 
-  window.AuthorityStore = { load: load, save: save, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, add: add, remove: remove };
+  window.UserRoleStore = { load: load, save: save, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, add: add, remove: remove };
 })();

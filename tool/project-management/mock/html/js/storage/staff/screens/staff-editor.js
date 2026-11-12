@@ -58,8 +58,8 @@
     $('staffCode').textContent = rec.code || '自動採番';
     checkRadio('affiliation', rec.affiliation || '社内');
     var company = $('company');
-    company.setAttribute('data-value', VendorStore.nameOf(rec.company));
-    company.innerHTML = (rec.company ? esc(VendorStore.nameOf(rec.company)) : '選択してください') + '<span class="caret">▾</span>';
+    company.setAttribute('data-value', StaffVenderStore.nameOf(rec.company));
+    company.innerHTML = (rec.company ? esc(StaffVenderStore.nameOf(rec.company)) : '選択してください') + '<span class="caret">▾</span>';
     $('tName').value = rec.name || '';
     $('email').value = rec.email || '';
     var roleList = StaffRoleStore.load();
@@ -89,12 +89,12 @@
     var idx = -1;
     var rec;
 
-    $('company').setAttribute('data-options', VendorStore.activeNames().join(','));
+    $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
 
     if (editing) {
       list.forEach(function (t, i) { if (t.code === id) idx = i; });
       if (idx < 0) {
-        alert('対象の担当者が見つかりません');
+        alert('対象の実施担当者が見つかりません');
         location.href = 'staff_list.html';
         return;
       }
@@ -115,7 +115,7 @@
 
     $('saveBtn').addEventListener('click', function () {
       var affiliation = getRadio('affiliation');
-      var company = affiliation === '社内' ? '' : VendorStore.codeOf(ownText($('company')));
+      var company = affiliation === '社内' ? '' : StaffVenderStore.codeOf(ownText($('company')));
       if (company === '選択してください') company = '';
       var v = {
         affiliation: affiliation,
@@ -132,7 +132,7 @@
         return;
       }
       if (v.affiliation === 'パートナー' && !v.company) {
-        alert('所属会社を選択してください');
+        alert('実施担当ベンダーを選択してください');
         return;
       }
       if (editing) {

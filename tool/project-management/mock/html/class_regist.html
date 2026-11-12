@@ -49,6 +49,10 @@
           <label>コースコード<span class="req">必須</span></label>
           <div class="form-control js-select" id="courseCode" data-options="BC02B,BC07A,BC12B,BC17B,BC22B,BC27A,BC32B,DP08B,DP16A,GC01B,GC06B,BE10A,ND02B,CE01B" data-target="#courseName" data-map='{"BC02B":"受託_システム開発入門","BC07A":"公募_基盤技術基礎","BC12B":"受託_AP要件定義基礎","BC17B":"受託_AP設計・製造基礎","BC22B":"受託_AP試験基礎","BC27A":"公募_データモデル設計基礎","BC32B":"受託_基盤構築プロセス基礎","DP08B":"受託_営業基本Ⅰ","DP16A":"公募_営業リスクマネジメントⅠ","GC01B":"受託_IT-PM入門","GC06B":"受託_品質管理入門","BE10A":"公募_システム基盤実践","ND02B":"受託_AP要件定義基礎","CE01B":"受託_AP設計・製造基礎"}' data-target2="#courseParticipationType" data-map2='{"BC02B":"受託","BC07A":"公募","BC12B":"受託","BC17B":"受託","BC22B":"受託","BC27A":"公募","BC32B":"受託","DP08B":"受託","DP16A":"公募","GC01B":"受託","GC06B":"受託","BE10A":"公募","ND02B":"受託","CE01B":"受託"}' data-class-map2='{"公募":"orange","受託":"blue"}' data-target3="#courseDeliveryType" data-map3='{"BC02B":"集合","BC07A":"オンライン","BC12B":"集合","BC17B":"集合","BC22B":"集合","BC27A":"オンライン","BC32B":"集合","DP08B":"集合","DP16A":"オンライン","GC01B":"集合","GC06B":"オンライン","BE10A":"集合","ND02B":"集合","CE01B":"集合"}' data-class-map3='{"集合":"blue","オンライン":"teal","ハイブリッド":"violet"}' data-target4="#courseSchedule" data-map4='{"BC02B":"3日・20〜24名","BC07A":"1日・30〜40名","BC12B":"3日・20〜30名","BC17B":"2日・15〜20名","BC22B":"2日・20〜24名","BC27A":"1日・20〜30名","BC32B":"3日・15〜20名","DP08B":"2日・20〜30名","DP16A":"1日・25〜35名","GC01B":"2日・20〜24名","GC06B":"1日・20〜30名","BE10A":"3日・15〜20名","ND02B":"","CE01B":""}'><span class="caret">▾</span></div>
         </div>
+        <div class="form-field">
+          <label>版<span class="req">必須</span></label>
+          <div class="form-control js-select" id="version" data-options="1.0,1.1">1.0<span class="caret">▾</span></div>
+        </div>
         <div class="form-field full">
           <label>コース情報</label>
           <div class="form-value">
@@ -142,6 +146,7 @@ ${tags%
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/holiday/store/holiday-store.js"></script>
 <script src="js/storage/location-type/store/location-type-store.js"></script>
+<script src="js/storage/subject/store/subject-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
 <script src="js/storage/class/screens/class-form.js"></script>
 <script src="js/storage/class/screens/class-editor.js"></script>

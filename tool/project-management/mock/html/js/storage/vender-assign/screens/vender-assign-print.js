@@ -38,10 +38,10 @@
   function requestHtml(r, a, mainCount, subCount) {
     var c = C[r.courseCode] || { name: r.courseCode };
     var subs = a.subs.map(function (s) {
-      return VendorStore.nameOf(s.vendor) + ' ' + StaffStore.nameOf(s.staff);
+      return TeacherVenderStore.nameOf(s.vendor) + ' ' + StaffStore.nameOf(s.staff);
     }).join('、') || '-';
-    var main = (VendorStore.nameOf(a.mainVendor) || '-') + ' ' + (StaffStore.nameOf(a.mainStaff) || '');
-    var attendee = (VendorStore.nameOf(a.attendeeVendor) || '-') + ' ' + (StaffStore.nameOf(a.attendee) || '');
+    var main = (TeacherVenderStore.nameOf(a.mainVendor) || '-') + ' ' + (StaffStore.nameOf(a.mainStaff) || '');
+    var attendee = (TeacherVenderStore.nameOf(a.attendeeVendor) || '-') + ' ' + (StaffStore.nameOf(a.attendee) || '');
     return '<tr>' +
       '<td>' + esc(c.name) + '<br>' + esc(r.courseCode) + '</td>' +
       '<td>' + esc(r.lessonNo) + '</td>' +

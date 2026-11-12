@@ -12,8 +12,8 @@
   <div class="main">
     <div class="topbar">
       <div class="crumb-block">
-        <div class="crumb">マスタ管理<span>／</span>担当者</div>
-        <p class="crumb-sub">担当者情報を管理します</p>
+        <div class="crumb">マスタ管理<span>／</span>実施担当者</div>
+        <p class="crumb-sub">実施担当者情報を管理します</p>
       </div>
       <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
     </div>
@@ -22,7 +22,7 @@
       <div class="content">
         <div class="toolbar">
           <div class="left">
-            <h1>担当者一覧</h1>
+            <h1>実施担当者一覧</h1>
           </div>
           <div class="btn-group">
             <a class="search-btn" href="staff_regist.html">新規登録</a>
@@ -30,7 +30,7 @@
         </div>
 
         <div class="filter-panel">
-          <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="担当者コード・担当者名で検索"></div>
+          <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="実施担当者コード・実施担当者名で検索"></div>
           <div class="field"><label>所属区分</label><div class="control small js-select" data-options="すべて,社内,パートナー">すべて<span class="caret">▾</span></div></div>
           <div class="field"><label>担当区分</label><div class="control js-select" data-options="すべて,案件,クラス">すべて<span class="caret">▾</span></div></div>
           <div class="field"><label>業務区分</label><div class="control js-select" data-options="すべて,営業,管理,実施">すべて<span class="caret">▾</span></div></div>
@@ -45,10 +45,10 @@
           <table>
             <thead>
               <tr>
-                <th>担当者コード</th>
+                <th>実施担当者コード</th>
                 <th>所属区分</th>
-                <th>所属会社</th>
-                <th>担当者名</th>
+                <th>実施担当ベンダー</th>
+                <th>実施担当者名</th>
                 <th>メールアドレス</th>
                 <th>担当区分</th>
                 <th>業務区分</th>
@@ -71,11 +71,12 @@
 <script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
-<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
 <script src="js/storage/staff-role/store/staff-role-store.js"></script>
 <script src="js/storage/job-type/store/job-type-store.js"></script>
 <script src="js/storage/position/store/position-store.js"></script>
+<script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/staff/screens/staff-list.js"></script>
-</body>
+<script src="js/list-filter.js"></script></body>
 </html>

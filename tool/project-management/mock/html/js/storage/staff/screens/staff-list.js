@@ -18,7 +18,7 @@
     tr.innerHTML =
       '<td>' + esc(t.code) + '</td>' +
       '<td><span class="tag ' + (t.affiliation === 'パートナー' ? 'orange' : 'blue') + '">' + esc(t.affiliation) + '</span></td>' +
-      '<td>' + (t.company ? esc(VendorStore.nameOf(t.company)) : '-') + '</td>' +
+      '<td>' + (t.company ? esc(StaffVenderStore.nameOf(t.company)) : '-') + '</td>' +
       '<td>' + esc(t.name) + '</td>' +
       '<td>' + esc(t.email) + '</td>' +
       '<td>' + (t.roles || []).map(function (r) { return '<span class="tag ' + (ROLE_CLASS[r] || '') + '">' + esc(StaffRoleStore.nameOf(r)) + '</span>'; }).join(' ') + '</td>' +

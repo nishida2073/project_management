@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/vendor_list.css">
+<link rel="stylesheet" href="css/teacher_vender_list.css">
 </head>
 <body>
 <div class="app">
@@ -26,13 +26,11 @@
             <h1>講師ベンダー一覧</h1>
           </div>
           <div class="btn-group">
-            <a class="search-btn" href="vendor_regist.html">新規登録</a>
+            <a class="search-btn" href="teacher_vender_regist.html">新規登録</a>
           </div>
         </div>
         <div class="filter-panel">
           <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="講師ベンダーコード・講師ベンダー名で検索"></div>
-          <div class="field"><label>契約年度</label><div class="control small js-select" data-options="すべて,2026年度,2025年度,2024年度">すべて<span class="caret">▾</span></div></div>
-          <div class="field"><label>契約区分</label><div class="control js-select" data-options="すべて,業務委託,業務提携">すべて<span class="caret">▾</span></div></div>
           <div class="field"><label>稼働状況</label><div class="control js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
         </div>
@@ -45,11 +43,9 @@
               <tr>
                 <th>講師ベンダーコード</th>
                 <th>講師ベンダー名</th>
-                <th>契約区分</th>
-                <th>契約年度</th>
                 <th>連絡先</th>
                 <th>備考</th>
-                <th>担当窓口</th>
+                <th>窓口担当者</th>
                 <th>稼働状況</th>
                 <th>操作</th>
               </tr>
@@ -69,7 +65,7 @@
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/storage/contract-type/store/contract-type-store.js"></script>
-<script src="js/storage/vendor/store/vendor-store.js"></script>
-<script src="js/storage/vendor/screens/vendor-list.js"></script>
-</body>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
+<script src="js/storage/teacher-vender/screens/teacher-vender-list.js"></script>
+<script src="js/list-filter.js"></script></body>
 </html>

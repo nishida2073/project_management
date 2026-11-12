@@ -3,7 +3,7 @@
 
   function rec(id, year, projectCode, courseCode, lessonNo, related, start, end, delivery, people, manager, locationType, locationName) {
     return {
-      id: id, year: year, projectCode: projectCode, courseYear: '2026年度', courseCode: courseCode,
+      id: id, year: year, version: '1.0', projectCode: projectCode, courseYear: '2026年度', courseCode: courseCode,
       lessonNo: lessonNo, related: related, start: start, end: end, delivery: delivery,
       people: people, manager: manager, locationType: locationType, locationName: locationName, memo: ''
     };

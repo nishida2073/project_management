@@ -52,7 +52,7 @@
   STEP_NAMES.forEach(function (name, i) {
     var th = headRow.children[7 + i];
     var label = th && th.querySelector('.col-company');
-    if (label) label.textContent = byName[name] ? VendorStore.nameOf(byName[name].company) : '-';
+    if (label) label.textContent = byName[name] ? StaffVenderStore.nameOf(byName[name].company) : '-';
     var title = th && th.firstChild;
     if (title && title.nodeType === 3) {
       title.textContent = (byName[name] ? byName[name].order : i + 1) + ' ' + name;

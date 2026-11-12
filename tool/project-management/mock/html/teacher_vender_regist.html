@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/vendor_modify.css">
+<link rel="stylesheet" href="css/teacher_vender_modify.css">
 </head>
 <body>
 <div class="app">
@@ -15,7 +15,7 @@
           <h2>講師ベンダー登録</h2>
           <div class="sub" id="subLine">新しい講師ベンダー情報を登録します</div>
         </div>
-        <a class="close-x" href="vendor_list.html">✕</a>
+        <a class="close-x" href="teacher_vender_list.html">✕</a>
       </div>
       <div class="modal-body">
         <div class="form-field">
@@ -29,20 +29,6 @@
         </div>
         <div class="form-field"></div>
         <div class="form-field">
-          <label>契約区分<span class="req">必須</span></label>
-          <div class="radio-group" id="contractGroup">
-            <label class="radio-option"><input type="radio" name="contractType" value="業務委託"><span class="radio-dot"></span><span class="tag blue">業務委託</span></label>
-            <label class="radio-option"><input type="radio" name="contractType" value="業務提携"><span class="radio-dot"></span><span class="tag gray">業務提携</span></label>
-          </div>
-        </div>
-        <div class="form-field"></div>
-        <div class="form-field full">
-          <label>契約年度（複数選択可）<span class="req">必須</span></label>
-          <div class="chip-box js-chip-select" id="yearBox" data-options="2024年度,2025年度,2026年度,2027年度" data-chip-map='{"2024年度":"y2024","2025年度":"y2025","2026年度":"y2026","2027年度":"y2027"}'>
-            <span class="chip-add">年度を追加</span>
-          </div>
-        </div>
-        <div class="form-field">
           <label>電話番号</label>
           <input type="tel" class="form-control" id="tel">
         </div>
@@ -51,18 +37,18 @@
           <label>住所</label>
           <input type="text" class="form-control" id="address">
         </div>
-        <div class="form-field full">
-          <label>備考</label>
-          <textarea class="form-control textarea" id="memo"></textarea>
-        </div>
-        <div class="form-section">担当窓口</div>
+        <div class="form-section">問い合わせ窓口</div>
         <div class="form-field">
-          <label>担当者名</label>
+          <label>窓口担当者名</label>
           <input type="text" class="form-control" id="contactName">
         </div>
         <div class="form-field">
           <label>メールアドレス</label>
           <input type="email" class="form-control" id="contactEmail">
+        </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea" id="memo"></textarea>
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
@@ -70,16 +56,16 @@
         </div>
       </div>
       <div class="modal-footer">
-        <a class="search-btn" href="vendor_list.html">キャンセル</a>
+        <a class="search-btn" href="teacher_vender_list.html">キャンセル</a>
         <div id="saveBtn" class="btn primary">登録する</div>
       </div>
     </div>
   </div>
 </div>
 <script src="js/storage/contract-type/store/contract-type-store.js"></script>
-<script src="js/storage/vendor/store/vendor-store.js"></script>
-<script src="js/storage/vendor/screens/vendor-editor.js"></script>
-<script src="js/storage/vendor/entry/vendor-regist.js"></script>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
+<script src="js/storage/teacher-vender/screens/teacher-vender-editor.js"></script>
+<script src="js/storage/teacher-vender/entry/teacher-vender-regist.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/chip-select.js" defer></script>
 <script src="js/toggle.js" defer></script>

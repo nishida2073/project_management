@@ -1,0 +1,1 @@
+StaffVenderEditor.init({ mode: 'edit' });

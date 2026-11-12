@@ -53,6 +53,25 @@
     }).join('');
   }
 
+  function setupVersionOptions() {
+    var courseEl = document.getElementById('courseCode');
+    var versionEl = document.getElementById('version');
+    function refresh() {
+      var code = courseEl.getAttribute('data-value') || '';
+      var course = CourseStore.load().filter(function (c) { return c.code === code; })[0];
+      var subject = course ? SubjectStore.find(course.subject) : null;
+      var versions = subject && subject.versions ? subject.versions : [];
+      versionEl.setAttribute('data-options', versions.join(','));
+      var current = versionEl.getAttribute('data-value') || '';
+      if (current && versions.indexOf(current) === -1) {
+        versionEl.setAttribute('data-value', '');
+        versionEl.innerHTML = '選択してください<span class="caret">▾</span>';
+      }
+    }
+    new MutationObserver(refresh).observe(courseEl, { attributes: true, attributeFilter: ['data-value'] });
+    refresh();
+  }
+
   function init(opts) {
     var editing = opts.mode === 'edit';
     renderRadios(document.querySelector('.radio-group[data-target="#locationName"]'), 'locationType', LocationTypeStore.load());
@@ -74,13 +93,14 @@
         rec.lessonNo + '　' + (c ? c.name : rec.courseCode) + 'の情報を編集します';
     } else {
       rec = {
-        year: '2026年度', courseYear: '2026年度', projectCode: '', courseCode: '', lessonNo: '',
+        year: '2026年度', courseYear: '2026年度', version: '1.0', projectCode: '', courseCode: '', lessonNo: '',
         related: [], start: '', end: '', delivery: 'DL-01', people: '', manager: '',
         locationType: 'LT-01', locationName: '', memo: ''
       };
     }
 
     ClassForm.fill(rec);
+    setupVersionOptions();
 
     if (!editing) {
       var startEl = document.getElementById('start');
@@ -123,7 +143,7 @@
       v.projectCode = clean(v.projectCode);
       v.courseCode = clean(v.courseCode);
       v.manager = clean(v.manager);
-      if (!v.projectCode || !v.courseCode || !v.start || !v.end || !v.delivery || !v.locationType) {
+      if (!v.projectCode || !v.courseCode || !v.version || !v.start || !v.end || !v.delivery || !v.locationType) {
         alert('必須項目を入力してください');
         return;
       }

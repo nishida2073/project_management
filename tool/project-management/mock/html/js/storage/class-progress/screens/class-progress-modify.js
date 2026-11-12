@@ -1,23 +1,22 @@
   (function () {
     var CLASS_ID = new URLSearchParams(location.search).get('id') || 'CLS-001';
     var CLASS_KEY = CLASS_ID;
-    var OWNERS = StaffStore.optionNames();
     var STATUS_LABEL = { done: '完了', progress: '実施中', wait: '実施前' };
     var LABEL_STATUS = { '完了': 'done', '実施中': 'progress', '実施前': 'wait' };
     var STATUS_COLOR = { done: 'green', progress: 'blue', wait: 'gray' };
     var STEPS = [
       { no: 1, name: 'クラス登録', actual: '2026/08/20', owner: 'STF-045', status: 'done', memo: '' },
-      { no: 2, name: '名簿受領督促', actual: '2026/08/25', owner: 'OPS', status: 'done', memo: '' },
+      { no: 2, name: '名簿受領督促', actual: '2026/08/25', owner: '', status: 'done', memo: '' },
       { no: 3, name: '講師契約', actual: '2026/08/27', owner: 'STF-045', status: 'done', memo: '' },
-      { no: 4, name: '受講者登録(OliveOne)', actual: '', owner: 'OPS', status: 'progress', memo: '' },
+      { no: 4, name: '受講者登録(OliveOne)', actual: '', owner: '', status: 'progress', memo: '' },
       { no: 5, name: '受講詳細案内発出', actual: '2026/08/31', owner: 'STF-045', status: 'done', memo: '' },
-      { no: 6, name: '電子教材送付', actual: '', owner: 'OPS', status: 'progress', memo: '2名分の宛先要再確認' },
+      { no: 6, name: '電子教材送付', actual: '', owner: '', status: 'progress', memo: '2名分の宛先要再確認' },
       { no: 7, name: '出欠確認・報告', actual: '', owner: 'STF-045', status: 'wait', memo: '11時までに送信' },
-      { no: 8, name: 'アンケート実施案内', actual: '', owner: 'OPS', status: 'wait', memo: '' },
-      { no: 9, name: 'テスト結果集計', actual: '', owner: 'OPS', status: 'wait', memo: '' },
-      { no: 10, name: 'アンケート集計・格納', actual: '', owner: 'OPS', status: 'wait', memo: '' },
+      { no: 8, name: 'アンケート実施案内', actual: '', owner: '', status: 'wait', memo: '' },
+      { no: 9, name: 'テスト結果集計', actual: '', owner: '', status: 'wait', memo: '' },
+      { no: 10, name: 'アンケート集計・格納', actual: '', owner: '', status: 'wait', memo: '' },
       { no: 11, name: '報告書作成', actual: '', owner: 'STF-045', status: 'wait', memo: '' },
-      { no: 12, name: '再テストリマインド', actual: '', owner: 'OPS', status: 'wait', memo: '' }
+      { no: 12, name: '再テストリマインド', actual: '', owner: '', status: 'wait', memo: '' }
     ];
 
     function esc(s) {
@@ -53,6 +52,16 @@
     var saved = (loadProgress()[CLASS_KEY]) || {};
     var body = document.getElementById('stepBody');
 
+    function ownerOptions(task) {
+      var company = task ? task.company : StaffVenderStore.INTERNAL;
+      var names = StaffStore.load().filter(function (s) {
+        if (s.status === '停止中') return false;
+        if (company === StaffVenderStore.INTERNAL) return s.affiliation === '社内';
+        return s.affiliation === 'パートナー' && s.company === company;
+      }).map(function (s) { return s.name; });
+      return names;
+    }
+
     STEPS.forEach(function (s, i) {
       var task = sortedTasks[i];
       var name = task ? task.name : s.name;
@@ -62,7 +71,7 @@
       var owner = sv.owner !== undefined ? sv.owner : s.owner;
       var status = sv.status !== undefined ? sv.status : s.status;
       var memo = sv.memo !== undefined ? sv.memo : s.memo;
-      var company = task ? VendorStore.nameOf(task.company) : '-';
+      var company = task ? StaffVenderStore.nameOf(task.company) : '-';
 
       var planCell = plan
         ? '<div class="mini-control js-date">' + esc(plan) + '<span class="caret">▾</span></div>'
@@ -79,7 +88,7 @@
         '<td style="white-space: nowrap; font-weight: 700;">' + esc(company) + '</td>' +
         '<td>' + planCell + '</td>' +
         '<td>' + actualCell + '</td>' +
-        '<td><div class="mini-control wide js-select" data-options="' + OWNERS.join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
         '<td><div class="status-select ' + STATUS_COLOR[status] + ' js-select" data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><input type="text" class="memo-input" value="' + esc(memo) + '"></td>';
       body.appendChild(tr);

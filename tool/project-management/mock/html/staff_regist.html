@@ -12,14 +12,14 @@
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>担当者登録</h2>
-          <div class="sub" id="subLine">新しい担当者情報を登録します</div>
+          <h2>実施担当者登録</h2>
+          <div class="sub" id="subLine">新しい実施担当者情報を登録します</div>
         </div>
         <a class="close-x" href="staff_list.html">✕</a>
       </div>
       <div class="modal-body">
         <div class="form-field">
-          <label>担当者コード</label>
+          <label>実施担当者コード</label>
           <div class="form-control readonly" id="staffCode"></div>
         </div>
         <div class="form-field"></div>
@@ -31,11 +31,11 @@
           </div>
         </div>
         <div class="form-field" id="companyField" style="visibility: hidden;">
-          <label>所属会社<span class="req">必須</span></label>
+          <label>実施担当ベンダー<span class="req">必須</span></label>
           <div class="form-control js-select" id="company" data-options=""><span class="caret">▾</span></div>
         </div>
         <div class="form-field">
-          <label>担当者名<span class="req">必須</span></label>
+          <label>実施担当者名<span class="req">必須</span></label>
           <input type="text" class="form-control" id="tName">
         </div>
         <div class="form-field"></div>
@@ -75,10 +75,11 @@
     </div>
   </div>
 </div>
-<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
 <script src="js/storage/staff-role/store/staff-role-store.js"></script>
 <script src="js/storage/job-type/store/job-type-store.js"></script>
 <script src="js/storage/position/store/position-store.js"></script>
+<script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/staff/screens/staff-editor.js"></script>
 <script src="js/storage/staff/entry/staff-regist.js"></script>

@@ -6,7 +6,7 @@
     var list = TaskStore.load();
     list.forEach(function (t) {
       var kinds = t.kinds.map(function (k) {
-        return '<span class="tag ' + (TaskKindStore.colorOf(k) || '') + '">' + esc(TaskKindStore.nameOf(k)) + '</span>';
+        return '<span class="tag ' + (TaskTypeStore.colorOf(k) || '') + '">' + esc(TaskTypeStore.nameOf(k)) + '</span>';
       }).join('');
       var tr = document.createElement('tr');
       tr.innerHTML =
@@ -14,7 +14,8 @@
         '<td>' + esc(t.name) + '</td>' +
         '<td>' + kinds + '</td>' +
         '<td>' + esc(t.order) + '</td>' +
-        '<td>' + esc(VendorStore.nameOf(t.company)) + '</td>' +
+        '<td><span class="tag ' + (t.company === StaffVenderStore.INTERNAL ? 'blue' : 'orange') + '">' + (t.company === StaffVenderStore.INTERNAL ? '社内' : 'パートナー') + '</span></td>' +
+        '<td>' + (t.company === StaffVenderStore.INTERNAL ? '' : esc(StaffVenderStore.nameOf(t.company))) + '</td>' +
         '<td>' + esc(t.days) + '</td>' +
         '<td><a class="search-btn" href="task_modify.html?id=' + encodeURIComponent(t.id) + '">編集</a></td>';
       body.appendChild(tr);

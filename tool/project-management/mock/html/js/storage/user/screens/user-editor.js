@@ -36,7 +36,7 @@
     var idx = -1;
     var rec;
 
-    renderRadios(document.getElementById('authorityGroup'), 'authority', AuthorityStore.load());
+    renderRadios(document.getElementById('authorityGroup'), 'authority', UserRoleStore.load());
 
     if (editing) {
       list.forEach(function (u, i) { if (u.code === id) idx = i; });

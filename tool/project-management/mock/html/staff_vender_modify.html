@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/teacher_vender_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=staffVender" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h2>実施担当ベンダー編集</h2>
+          <div class="sub" id="subLine">実施担当ベンダーの情報を編集します</div>
+        </div>
+        <a class="close-x" href="staff_vender_list.html">✕</a>
+      </div>
+            <div class="modal-body">
+        <div class="form-field">
+          <label>実施担当ベンダーコード</label>
+          <div class="form-control readonly" id="staffVenderCode"></div>
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>会社名<span class="req">必須</span></label>
+          <input type="text" class="form-control" id="staffVenderName">
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field">
+          <label>電話番号</label>
+          <input type="tel" class="form-control" id="tel">
+        </div>
+        <div class="form-field"></div>
+        <div class="form-field full">
+          <label>住所</label>
+          <input type="text" class="form-control" id="address">
+        </div>
+        <div class="form-section">問い合わせ窓口</div>
+        <div class="form-field">
+          <label>窓口担当者名</label>
+          <input type="text" class="form-control" id="contactName">
+        </div>
+        <div class="form-field">
+          <label>メールアドレス</label>
+          <input type="email" class="form-control" id="contactEmail">
+        </div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea" id="memo"></textarea>
+        </div>
+        <div class="form-field toggle-field">
+          <label>稼働状況</label>
+          <div class="toggle-row" id="statusRow"><div class="toggle" id="statusToggle"><div class="knob"></div></div><span id="statusLabel">稼働中</span></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" href="staff_vender_list.html">キャンセル</a>
+        <div id="saveBtn" class="btn primary">保存する</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
+<script src="js/storage/staff-vender/screens/staff-vender-editor.js"></script>
+<script src="js/storage/staff-vender/entry/staff-vender-modify.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/toggle.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+</body>
+</html>

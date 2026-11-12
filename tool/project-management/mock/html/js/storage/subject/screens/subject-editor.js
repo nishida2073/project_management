@@ -9,11 +9,32 @@
     if (r) r.checked = true;
   }
 
+  function addVersionChip(value) {
+    var box = $('subjectVersions');
+    var chip = document.createElement('span');
+    chip.className = 'chip blue';
+    chip.appendChild(document.createTextNode(value + ' '));
+    var x = document.createElement('x');
+    x.textContent = '✕';
+    x.addEventListener('click', function (e) { e.stopPropagation(); chip.remove(); });
+    chip.appendChild(x);
+    box.insertBefore(chip, box.querySelector('.chip-add'));
+  }
+
+  function versionValues() {
+    return Array.prototype.map.call($('subjectVersions').querySelectorAll('.chip'), function (c) {
+      return c.textContent.replace('✕', '').trim();
+    });
+  }
+
   function fill(rec) {
     var codeEl = $('subjectCode');
     if (codeEl.tagName === 'INPUT') codeEl.value = rec.code || '';
     else codeEl.textContent = rec.code;
-    checkRadio('subjectType', rec.type || 'ST-02');
+    checkRadio('subjectType', rec.type || '');
+    var box = $('subjectVersions');
+    box.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
+    (rec.versions || []).forEach(function (v) { addVersionChip(v); });
     $('subjectName').value = rec.name || '';
     var off = rec.status === '停止中';
     var row = $('statusRow');
@@ -27,6 +48,7 @@
     return {
       type: getRadio('subjectType'),
       name: $('subjectName').value.trim(),
+      versions: versionValues(),
       status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
     };
   }
@@ -54,16 +76,23 @@
       rec = list[idx];
       $('subLine').textContent = rec.code + '　' + rec.name + 'の情報を編集します';
     } else {
-      rec = { code: '', type: 'ST-02', name: '', status: '稼働中' };
+      rec = { code: '', type: '', name: '', versions: ['1.0'], status: '稼働中' };
     }
 
     renderRadios(document.getElementById('subjectTypeGroup'), 'subjectType', SubjectTypeStore.load());
 
     fill(rec);
 
+    $('subjectVersions').querySelector('.chip-add').addEventListener('click', function () {
+      var value = (prompt('版を入力してください（例：1.2）') || '').trim();
+      if (!value) return;
+      if (versionValues().indexOf(value) !== -1) { alert('同じ版が既に登録されています'); return; }
+      addVersionChip(value);
+    });
+
     $('saveBtn').addEventListener('click', function () {
       var v = read();
-      if (!v.type || !v.name) {
+      if (!v.type || !v.name || !v.versions.length) {
         alert('必須項目を入力してください');
         return;
       }

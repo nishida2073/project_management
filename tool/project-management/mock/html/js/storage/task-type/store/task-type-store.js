@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'taskKindList';
+  var KEY = 'taskTypeList';
   var PREFIX = 'TK-';
 
   var SEED = [
@@ -60,5 +60,5 @@
     save(load().filter(function (t) { return t.code !== code; }));
   }
 
-  window.TaskKindStore = { load: load, save: save, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, add: add, remove: remove };
+  window.TaskTypeStore = { load: load, save: save, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, add: add, remove: remove };
 })();

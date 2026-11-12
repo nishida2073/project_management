@@ -27,6 +27,10 @@
         </div>
       </div>
 
+      <div class="filter-panel">
+        <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="顧客ID・顧客名で検索"></div>
+        <div class="search-btn">検索</div>
+      </div>
       <div class="table-card">
         <div class="table-meta"><div class="count">全 <b id="customerCount">0</b> 件</div></div>
         <div class="table-scroll">
@@ -42,6 +46,7 @@
           <tbody id="customerBody"></tbody>
         </table>
         </div>
+        <div class="pagination"><div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">›</div></div>
       </div>
     </div>
   </div>
@@ -51,5 +56,6 @@
 <script src="js/storage/customer/screens/customer-list.js"></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
+<script src="js/list-filter.js"></script>
 </body>
 </html>

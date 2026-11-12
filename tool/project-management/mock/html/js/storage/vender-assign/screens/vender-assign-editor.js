@@ -15,14 +15,14 @@
     el.innerHTML = (name ? esc(name) : '選択してください') + '<span class="caret">▾</span>';
   }
 
-  function vendorOptions() { return VendorStore.activeNames(); }
-  function staffOptions() { return StaffStore.optionNames(); }
+  function vendorOptions() { return TeacherVenderStore.activeNames(); }
+  function staffOptions() { return StaffStore.activeNames(); }
 
   function makeSubRow(sub) {
     var row = document.createElement('div');
     row.className = 'sub-grid sub-row';
     row.innerHTML =
-      '<div class="form-control js-select" data-options="' + esc(vendorOptions().join(',')) + '">' + esc(VendorStore.nameOf(sub.vendor) || '選択してください') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-select" data-options="' + esc(vendorOptions().join(',')) + '">' + esc(TeacherVenderStore.nameOf(sub.vendor) || '選択してください') + '<span class="caret">▾</span></div>' +
       '<div class="form-control js-select" data-options="' + esc(staffOptions().join(',')) + '">' + esc(StaffStore.nameOf(sub.staff) || '選択してください') + '<span class="caret">▾</span></div>' +
       '<div class="sub-remove">✕</div>';
     row.querySelector('.sub-remove').addEventListener('click', function () { row.remove(); });
@@ -34,7 +34,7 @@
     return Array.prototype.map.call($('subList').querySelectorAll('.sub-row'), function (row) {
       var sel = row.querySelectorAll('.js-select');
       return {
-        vendor: VendorStore.codeOf(clean(ownText(sel[0]))),
+        vendor: TeacherVenderStore.codeOf(clean(ownText(sel[0]))),
         staff: StaffStore.codeOf(clean(ownText(sel[1])))
       };
     }).filter(function (s) { return s.vendor || s.staff; });
@@ -53,12 +53,12 @@
     $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + 'の登壇管理を編集します';
 
     var a = VenderAssignStore.find(classId);
-    setSelect($('mainVendor'), VendorStore.nameOf(a.mainVendor), vendorOptions());
+    setSelect($('mainVendor'), TeacherVenderStore.nameOf(a.mainVendor), vendorOptions());
     setSelect($('mainStaff'), StaffStore.nameOf(a.mainStaff), staffOptions());
     a.subs.forEach(makeSubRow);
-    setSelect($('attendeeVendor'), VendorStore.nameOf(a.attendeeVendor), vendorOptions());
+    setSelect($('attendeeVendor'), TeacherVenderStore.nameOf(a.attendeeVendor), vendorOptions());
     setSelect($('attendee'), StaffStore.nameOf(a.attendee), staffOptions());
-    setSelect($('motivationVendor'), VendorStore.nameOf(a.motivationVendor), vendorOptions());
+    setSelect($('motivationVendor'), TeacherVenderStore.nameOf(a.motivationVendor), vendorOptions());
     setSelect($('motivationStaff'), StaffStore.nameOf(a.motivationStaff), staffOptions());
 
     $('addSub').addEventListener('click', function () { makeSubRow({ vendor: '', staff: '' }); });
@@ -68,12 +68,12 @@
         classId: classId,
         mainCount: a.mainCount,
         subCount: a.subCount,
-        mainVendor: VendorStore.codeOf(clean(ownText($('mainVendor')))),
+        mainVendor: TeacherVenderStore.codeOf(clean(ownText($('mainVendor')))),
         mainStaff: StaffStore.codeOf(clean(ownText($('mainStaff')))),
         subs: readSubs(),
-        attendeeVendor: VendorStore.codeOf(clean(ownText($('attendeeVendor')))),
+        attendeeVendor: TeacherVenderStore.codeOf(clean(ownText($('attendeeVendor')))),
         attendee: StaffStore.codeOf(clean(ownText($('attendee')))),
-        motivationVendor: VendorStore.codeOf(clean(ownText($('motivationVendor')))),
+        motivationVendor: TeacherVenderStore.codeOf(clean(ownText($('motivationVendor')))),
         motivationStaff: StaffStore.codeOf(clean(ownText($('motivationStaff'))))
       };
       if (!record.mainVendor || !record.mainStaff) {

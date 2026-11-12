@@ -208,6 +208,7 @@ a.close-x { cursor: pointer; }
 .status-select.gray { background: #eef0f4; color: #8992a3; }
 .status-select.red { background: #fdeaea; color: #d43c40; }
 .status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
+input.memo-input { color: #333c4d; background: #ffffff; }
 .memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
 
 /* フォームダイアログ（社員／ベンダーマスタ登録） */

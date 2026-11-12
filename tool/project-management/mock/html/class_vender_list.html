@@ -29,6 +29,15 @@
           <div class="btn primary">Excel出力</div>
         </div>
       </div>
+      <div class="filter-panel">
+        <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
+        <div class="field"><label>開始日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
+        <div class="tilde">〜</div>
+        <div class="field"><label>終了日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
+        <div class="field"><label>講師ベンダー名</label><div class="control wide js-select" id="vendorFilter" data-options="すべて">すべて<span class="caret">▾</span></div></div>
+        <div class="search-btn">検索</div>
+      </div>
       <div class="table-card">
         <div class="table-meta">
           <div class="count">全 <b id="venderCount">0</b> 件</div>
@@ -47,21 +56,20 @@
               <th>講師名（メイン）</th>
               <th>講師ベンダー名（サブ）</th>
               <th>講師名（サブ）</th>
-              <th>聴講ベンダー名</th>
-              <th>聴講者名</th>
               <th>操作</th>
             </tr>
           </thead>
           <tbody id="venderBody"></tbody>
         </table>
         </div>
+        <div class="pagination"><div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">›</div></div>
       </div>
     </div>
   </div>
 </div>
 <script src="js/storage/location/store/location-store.js"></script>
 <script src="js/storage/staff/store/staff-store.js"></script>
-<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
 <script src="js/storage/course/store/course-store.js"></script>
 <script src="js/storage/project/store/project-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
@@ -71,5 +79,6 @@
 <script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
+<script src="js/list-filter.js"></script>
 </body>
 </html>

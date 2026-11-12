@@ -4,8 +4,8 @@
   var SEED = [
     {
       classId: 'CLS-001', mainCount: 1, subCount: 1,
-      mainVendor: 'VND-001', mainStaff: 'STF-064',
-      subs: [{ vendor: 'VND-002', staff: 'STF-068' }],
+      mainVendor: 'TCV-001', mainStaff: 'STF-064',
+      subs: [{ vendor: 'TCV-002', staff: 'STF-068' }],
       attendeeVendor: '', attendee: '',
       motivationVendor: '', motivationStaff: ''
     }

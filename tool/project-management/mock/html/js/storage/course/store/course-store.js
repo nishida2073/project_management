@@ -9,7 +9,7 @@
 
   function course(code, part, name, delivery, days, min, max, status, subject, actual, monthly) {
     return {
-      code: code, year: '2026年度', subject: subject, version: '1.0', part: part, name: name,
+      code: code, year: '2026年度', subject: subject, part: part, name: name,
       delivery: delivery, days: days, min: min, max: max, status: status, actual: actual, monthly: monthly
     };
   }

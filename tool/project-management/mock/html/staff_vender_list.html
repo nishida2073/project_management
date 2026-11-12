@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/teacher_vender_list.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=master&sub=staffVender" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb-block">
+        <div class="crumb">マスタ管理<span>／</span>実施担当ベンダー</div>
+        <p class="crumb-sub">実施担当ベンダー情報を管理します</p>
+      </div>
+      <div class="user"><span>山田 太郎（BD事業部）</span><div class="avatar">山田</div></div>
+    </div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="left">
+          <h1>実施担当ベンダー一覧</h1>
+        </div>
+        <div class="btn-group">
+          <a class="search-btn" href="staff_vender_regist.html">新規登録</a>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="実施担当ベンダーコード・会社名で検索"></div>
+        <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
+        <div class="search-btn">検索</div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-meta"><div class="count">全 <b id="staffVenderCount">0</b> 件</div></div>
+        <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>実施担当ベンダーコード</th>
+              <th>会社名</th>
+              <th>電話番号</th>
+              <th>住所</th>
+              <th>窓口担当者</th>
+              <th>稼働状況</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="staffVenderBody"></tbody>
+        </table>
+        </div>
+        <div class="pagination"><div class="page-btn">‹</div><div class="page-btn active">1</div><div class="page-btn">›</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
+<script src="js/storage/staff-vender/screens/staff-vender-list.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+<script src="js/column-resize.js" defer></script>
+<script src="js/list-filter.js"></script>
+</body>
+</html>

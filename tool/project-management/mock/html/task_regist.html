@@ -38,13 +38,21 @@
           </div>
         </div>
         <div class="form-field">
+          <label>所属区分<span class="req">必須</span></label>
+          <div class="radio-group" id="affiliationGroup">
+            <label class="radio-option"><input type="radio" name="affiliation" value="社内"><span class="radio-dot"></span><span class="tag blue">社内</span></label>
+            <label class="radio-option"><input type="radio" name="affiliation" value="パートナー"><span class="radio-dot"></span><span class="tag orange">パートナー</span></label>
+          </div>
+        </div>
+        <div class="form-field" id="companyField" style="visibility: hidden;">
+          <label>実施担当ベンダー<span class="req">必須</span></label>
+          <div id="company" class="form-control js-select" data-options="社内,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
           <label>作業順<span class="req">必須</span></label>
           <input type="number" id="order" class="form-control" min="1" placeholder="例）1">
         </div>
-        <div class="form-field full">
-          <label>担当会社名<span class="req">必須</span></label>
-          <div id="company" class="form-control js-select" data-options="社内,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">選択してください<span class="caret">▾</span></div>
-        </div>
+        <div class="form-field"></div>
         <div class="form-field">
           <label>日数<span class="req">必須</span></label>
           <input type="number" id="days" class="form-control" placeholder="例）-10">
@@ -57,12 +65,13 @@
     </div>
   </div>
 </div>
-<script src="js/storage/task-kind/store/task-kind-store.js"></script>
+<script src="js/storage/task-type/store/task-type-store.js"></script>
+<script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
 <script src="js/storage/task/store/task-store.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/chip-select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
-<script src="js/storage/vendor/store/vendor-store.js"></script>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
 <script src="js/storage/task/screens/task-editor.js"></script>
 <script src="js/storage/task/entry/task-regist.js"></script>
 </body>

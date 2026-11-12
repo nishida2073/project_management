@@ -77,6 +77,7 @@
     setSelect($('projectCode'), r.projectCode);
     setSelect($('courseYear'), r.courseYear);
     setSelect($('courseCode'), r.courseCode);
+    setSelect($('version'), r.version || '1.0');
     $('lessonNo').textContent = r.lessonNo || '自動採番';
     setDate($('start'), r.start);
     setDate($('end'), r.end);
@@ -96,6 +97,7 @@
       projectCode: getSelect($('projectCode')),
       courseYear: getSelect($('courseYear')),
       courseCode: getSelect($('courseCode')),
+      version: getSelect($('version')),
       start: getDate($('start')),
       end: getDate($('end')),
       delivery: getRadio('deliveryType'),
