@@ -343,3 +343,4 @@ td .search-btn { width: 64px; justify-content: center; }
 .content > .table-card > .table-meta, .content > .table-card > .pagination { flex: 0 0 auto; }
 .content > .table-card > .table-scroll, .content > .table-card > .scroll-outer { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .na-text { font-size: 12px; color: #9aa4b5; }
+.status-chip-h .badge-row, .status-chip-h .badge { flex-shrink: 0; white-space: nowrap; }

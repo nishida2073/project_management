@@ -3,7 +3,13 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  var STEP_NAMES = TaskStore.load().slice().sort(function (a, b) { return a.order - b.order; }).map(function (t) { return t.name; });
+  var SORTED = TaskStore.load().slice().sort(function (a, b) {
+    var ka = a.kinds[0] || '';
+    var kb = b.kinds[0] || '';
+    if (ka !== kb) return ka < kb ? -1 : 1;
+    return a.order - b.order;
+  });
+  var STEP_NAMES = SORTED.map(function (t) { return t.name; });
   var STATUS_LABEL = { done: '完了', progress: '実施中', wait: '実施前' };
   var STATUS_CLASS = { done: 'green', progress: 'blue', wait: 'gray' };
 
@@ -53,15 +59,20 @@
   tasks.forEach(function (t) { byName[t.name] = t; });
 
   var headRow = document.querySelector('#scrollArea thead tr');
-  STEP_NAMES.forEach(function (name, i) {
-    var th = headRow.children[7 + i];
-    var label = th && th.querySelector('.col-company');
-    if (label) label.textContent = byName[name] ? StaffVenderStore.nameOf(byName[name].company) : '-';
-    var title = th && th.firstChild;
-    if (title && title.nodeType === 3) {
-      title.textContent = (byName[name] ? byName[name].order : i + 1) + ' ' + name;
-    }
+  while (headRow.children.length > 8) headRow.removeChild(headRow.lastElementChild);
+  SORTED.forEach(function (t, i) {
+    var th = document.createElement('th');
+    th.style.minWidth = '170px';
+    th.setAttribute('data-step', i);
+    th.setAttribute('data-kinds', t.kinds.join(','));
+    th.innerHTML = '<span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span> ' +
+      esc(t.order + ' ' + t.name) + '<div class="col-company">' + esc(StaffVenderStore.nameOf(t.company)) + '</div>';
+    headRow.appendChild(th);
   });
+  var operationTh = document.createElement('th');
+  operationTh.textContent = '操作';
+  headRow.appendChild(operationTh);
+  var kindsList = STEP_NAMES.map(function (name) { return byName[name] ? byName[name].kinds.join(',') : ''; });
   var body = document.getElementById('tbody');
   var delayClasses = 0;
 
@@ -77,7 +88,7 @@
         actual: sv.actual !== undefined ? sv.actual : '',
         owner: sv.owner !== undefined ? sv.owner : '',
         status: sv.status !== undefined ? sv.status : 'wait',
-        na: sv.na !== undefined ? sv.na : false
+        na: (task && task.kinds.indexOf(c.taskType) === -1) || (sv.na !== undefined ? sv.na : false)
       };
     });
     if (steps.some(isDelayed)) delayClasses++;
@@ -92,8 +103,9 @@
     html += '<td class="sticky" style="left:410px;">' + esc(c.start) + '</td>';
     html += '<td class="sticky" style="left:530px;">' + esc(c.end) + '</td>';
     html += '<td class="sticky" style="left:650px;">' + esc(StaffStore.nameOf(c.manager)) + '</td>';
-    html += '<td class="sticky shadow" style="left:760px;">' + overall(steps) + '</td>';
-    steps.forEach(function (s) { html += '<td>' + chip(s) + '</td>'; });
+    html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
+    html += '<td class="sticky shadow" style="left:870px;">' + overall(steps) + '</td>';
+    steps.forEach(function (s, i) { html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '">' + chip(s) + '</td>'; });
     html += '<td><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">編集</a></td>';
     tr.innerHTML = html;
     body.appendChild(tr);
@@ -105,4 +117,12 @@
   if (location.search.indexOf('scrolled=1') !== -1) {
     document.getElementById('scrollArea').scrollLeft = 1316;
   }
+  var listTable = document.querySelector('#scrollArea table');
+  listTable.style.width = 'auto';
+  window.applyStepColumns = function (code) {
+    document.querySelectorAll('#scrollArea [data-step]').forEach(function (el) {
+      var kinds = (el.getAttribute('data-kinds') || '').split(',');
+      el.style.display = (!code || kinds.indexOf(code) !== -1) ? '' : 'none';
+    });
+  };
 })();

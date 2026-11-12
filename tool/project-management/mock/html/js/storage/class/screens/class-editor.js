@@ -76,6 +76,7 @@
     var editing = opts.mode === 'edit';
     renderRadios(document.querySelector('.radio-group[data-target="#locationName"]'), 'locationType', LocationTypeStore.load());
     renderRadios(document.querySelector('input[name="deliveryType"]').closest('.radio-group'), 'deliveryType', DeliveryTypeStore.load());
+    renderRadios(document.getElementById('taskTypeGroup'), 'taskType', TaskTypeStore.load());
     applyOptions();
     var list = ClassStore.load();
     var rec;
@@ -93,7 +94,7 @@
         rec.lessonNo + '　' + (c ? c.name : rec.courseCode) + 'の情報を編集します';
     } else {
       rec = {
-        year: '2026年度', courseYear: '2026年度', version: '1.0', projectCode: '', courseCode: '', lessonNo: '',
+        year: '2026年度', courseYear: '2026年度', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
         related: [], start: '', end: '', delivery: 'DL-01', people: '', manager: '',
         locationType: 'LT-01', locationName: '', memo: ''
       };
@@ -143,7 +144,7 @@
       v.projectCode = clean(v.projectCode);
       v.courseCode = clean(v.courseCode);
       v.manager = clean(v.manager);
-      if (!v.projectCode || !v.courseCode || !v.version || !v.start || !v.end || !v.delivery || !v.locationType) {
+      if (!v.projectCode || !v.courseCode || !v.version || !v.taskType || !v.start || !v.end || !v.delivery || !v.locationType) {
         alert('必須項目を入力してください');
         return;
       }

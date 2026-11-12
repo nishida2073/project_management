@@ -23,6 +23,7 @@
       '<td>' + (p.part ? '<span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
       '<td><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(relatedText) + '</div></td>' +
+      '<td>' + (r.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + (r.delivery ? '<span class="tag ' + DeliveryTypeStore.colorOf(r.delivery) + '">' + esc(DeliveryTypeStore.nameOf(r.delivery)) + '</span>' : '') + '</td>' +

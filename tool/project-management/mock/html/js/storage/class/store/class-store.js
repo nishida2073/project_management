@@ -3,7 +3,7 @@
 
   function rec(id, year, projectCode, courseCode, lessonNo, related, start, end, delivery, people, manager, locationType, locationName) {
     return {
-      id: id, year: year, version: '1.0', projectCode: projectCode, courseYear: '2026年度', courseCode: courseCode,
+      id: id, year: year, version: '1.0', taskType: 'TK-02', projectCode: projectCode, courseYear: '2026年度', courseCode: courseCode,
       lessonNo: lessonNo, related: related, start: start, end: end, delivery: delivery,
       people: people, manager: manager, locationType: locationType, locationName: locationName, memo: ''
     };
@@ -21,6 +21,9 @@
     rec('CLS-009', '2026年度', 'PJ-2603', 'ND02B', '003', ['001', '002'], '2026/09/30', '2026/10/02', 'DL-01', '25', 'STF-065', 'LT-01', ''),
     rec('CLS-010', '2026年度', 'PJ-2605', 'CE01B', '002', [], '2026/10/05', '2026/10/07', 'DL-01', '18', 'STF-067', 'LT-02', 'LOC-003')
   ];
+  SEED.forEach(function (r) {
+    if (['CLS-002', 'CLS-004', 'CLS-006', 'CLS-008'].indexOf(r.id) !== -1) r.taskType = 'TK-01';
+  });
 
   function save(list) {
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}

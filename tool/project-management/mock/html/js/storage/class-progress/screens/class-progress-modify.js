@@ -55,7 +55,15 @@ function setDisabledRow(tr, off) {
     var projectInfo = ClassStore.PROJECTS[cls.projectCode];
     document.getElementById('subLine').textContent = cls.lessonNo + '　' + (courseInfo ? courseInfo.name : cls.courseCode) + '　' + cls.start + '〜' + cls.end + '　管理担当者：' + StaffStore.nameOf(cls.manager);
     var tasks = TaskStore.load();
-    var sortedTasks = tasks.slice().sort(function (a, b) { return a.order - b.order; });
+    var sortedTasks = tasks.slice().sort(function (a, b) {
+      var ka = a.kinds[0] || '';
+      var kb = b.kinds[0] || '';
+      if (ka !== kb) return ka < kb ? -1 : 1;
+      return a.order - b.order;
+    });
+    var stepsList = sortedTasks.map(function (t, i) {
+      return STEPS[i] || { no: i + 1, name: t.name, actual: '', owner: '', status: 'wait', memo: '' };
+    });
     var saved = (loadProgress()[CLASS_KEY]) || {};
     var body = document.getElementById('stepBody');
 
@@ -69,8 +77,9 @@ function setDisabledRow(tr, off) {
       return names;
     }
 
-    STEPS.forEach(function (s, i) {
+    stepsList.forEach(function (s, i) {
       var task = sortedTasks[i];
+      if (task && task.kinds.indexOf(cls.taskType) === -1) return;
       var name = task ? task.name : s.name;
       var sv = saved[s.no] || {};
       var plan = sv.plan !== undefined ? sv.plan : (task ? addDays(task.days) : '');
@@ -128,7 +137,7 @@ function setDisabledRow(tr, off) {
           memo: tds[8].querySelector('input').value
         };
       });
-      all[CLASS_KEY] = out;
+      all[CLASS_KEY] = Object.assign({}, all[CLASS_KEY] || {}, out);
       saveProgress(all);
       location.href = 'class_progress_list.html';
     });

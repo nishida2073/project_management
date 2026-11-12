@@ -32,11 +32,17 @@
         </div>
       </div>
 
+      <div class="tab-row" id="taskTypeTabs" style="display:flex; gap:8px; margin-bottom:14px;">
+        <span class="year-tab active" data-tt="">すべて</span>
+        <span class="year-tab" data-tt="データ">データ</span>
+        <span class="year-tab" data-tt="グループ">グループ</span>
+      </div>
       <div class="filter-panel">
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
         <div class="field"><label>管理担当者</label><div class="control js-select" data-options="すべて,佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>全体進捗</label><div class="control js-select" data-options="すべて,実施前,実施中,完了,遅延あり">すべて<span class="caret">▾</span></div></div>
+        <div class="field" style="display:none;"><label>タスク区分</label><div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>実施担当者</label><div class="control js-select" data-options="すべて,佐藤 一郎,鈴木 花子,高橋 健,伊藤 美咲,渡辺 直樹">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>開始日</label><div class="control small js-date">2026/09/01<span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
@@ -58,7 +64,8 @@
                 <th class="sticky" style="left:410px; min-width:120px;">開始日</th>
                 <th class="sticky" style="left:530px; min-width:120px;">終了日</th>
                 <th class="sticky" style="left:650px; min-width:110px;">管理担当者</th>
-                <th class="sticky shadow" style="left:760px; min-width:120px;">全体進捗</th>
+                <th class="sticky" style="left:760px; min-width:110px;">タスク区分</th>
+                <th class="sticky shadow" style="left:870px; min-width:120px;">全体進捗</th>
                 <th style="min-width:130px;">①クラス登録<div class="col-company">社内</div></th>
                 <th style="min-width:130px;">②名簿受領督促<div class="col-company">社内</div></th>
                 <th style="min-width:130px;">③講師契約<div class="col-company">株式会社NEUトレーニング</div></th>
@@ -94,11 +101,33 @@
 <script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
 <script src="js/storage/task/store/task-store.js"></script>
 <script src="js/storage/class-progress/store/progress-store.js"></script>
+<script src="js/storage/task-type/store/task-type-store.js"></script>
 <script src="js/storage/class-progress/screens/class-progress-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/list-filter.js"></script><script src="js/pagination.js"></script>
+<script>
+document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (x) { x.classList.remove('active'); });
+    tab.classList.add('active');
+    var value = tab.getAttribute('data-tt') || 'すべて';
+    var kindRow = TaskTypeStore.load().filter(function (t) { return t.name === value; })[0];
+    if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
+    var field = Array.prototype.filter.call(document.querySelectorAll('.filter-panel .field'), function (f) {
+      var l = f.querySelector('label');
+      return l && l.textContent === 'タスク区分';
+    })[0];
+    var ctl = field && field.querySelector('.js-select');
+    if (ctl) {
+      ctl.setAttribute('data-value', value);
+      ctl.innerHTML = value + '<span class="caret">▾</span>';
+    }
+    document.querySelector('.filter-panel .search-btn').click();
+  });
+});
+</script>
 </body>
 </html>

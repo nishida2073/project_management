@@ -78,6 +78,7 @@
     setSelect($('courseYear'), r.courseYear);
     setSelect($('courseCode'), r.courseCode);
     setSelect($('version'), r.version || '1.0');
+    checkRadio('taskType', r.taskType || '');
     $('lessonNo').textContent = r.lessonNo || '自動採番';
     setDate($('start'), r.start);
     setDate($('end'), r.end);
@@ -98,6 +99,7 @@
       courseYear: getSelect($('courseYear')),
       courseCode: getSelect($('courseCode')),
       version: getSelect($('version')),
+      taskType: getRadio('taskType'),
       start: getDate($('start')),
       end: getDate($('end')),
       delivery: getRadio('deliveryType'),

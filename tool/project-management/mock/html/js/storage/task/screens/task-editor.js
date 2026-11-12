@@ -3,12 +3,14 @@
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function $(id) { return document.getElementById(id); }
-  function kindsOf(box) {
-    return Array.prototype.map.call(box.querySelectorAll('.chip'), function (c) {
-      var name = c.textContent.replace('✕', '').trim();
-      var found = TaskTypeStore.load().filter(function (t) { return t.name === name; })[0];
-      return found ? found.code : name;
-    });
+  function kindOf() {
+    var v = getRadio('taskKind');
+    return v ? [v] : [];
+  }
+  function renderKindRadios() {
+    $('kindGroup').innerHTML = TaskTypeStore.load().map(function (it) {
+      return '<label class="radio-option"><input type="radio" name="taskKind" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + it.color + '">' + it.name + '</span></label>';
+    }).join('');
   }
   function selectedOf(el) {
     return el.textContent.replace('▾', '').trim();
@@ -47,12 +49,7 @@
     $('taskName').value = rec.name || '';
     $('order').value = rec.order === undefined ? '' : rec.order;
     $('days').value = rec.days === undefined ? '' : rec.days;
-    var box = $('kindBox');
-    var addBtn = box.querySelector('.chip-add');
-    box.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
-    (rec.kinds || []).forEach(function (k) {
-      box.insertBefore(makeChip(TaskTypeStore.nameOf(k), TaskTypeStore.colorOf(k)), addBtn);
-    });
+    checkRadio('taskKind', (rec.kinds || [])[0] || '');
     var internal = rec.company === StaffVenderStore.INTERNAL;
     checkRadio('affiliation', internal ? '社内' : 'パートナー');
     setCompany(internal ? '' : StaffVenderStore.nameOf(rec.company));
@@ -62,10 +59,7 @@
   function init(opts) {
     var editing = opts.mode === 'edit';
     $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
-    var kinds = TaskTypeStore.load();
-    var kindBox = $('kindBox');
-    kindBox.setAttribute('data-options', kinds.map(function (k) { return k.name; }).join(','));
-    kindBox.setAttribute('data-chip-map', JSON.stringify(kinds.reduce(function (m, k) { m[k.name] = k.color; return m; }, {})));
+    renderKindRadios();
     var list = TaskStore.load();
     var idx = -1;
     var rec;
@@ -90,7 +84,7 @@
 
     $('saveBtn').addEventListener('click', function () {
       var name = $('taskName').value.trim();
-      var kinds = kindsOf($('kindBox'));
+      var kinds = kindOf();
       var orderV = $('order').value;
       var affiliation = getRadio('affiliation');
       var companyText = selectedOf($('company'));
