@@ -64,7 +64,13 @@
     html += '<td class="sticky" style="left:660px;">' + managers.map(function (m) { return esc(m); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:860px;">' + esc(p.startMonth) + '</td>';
     html += '<td class="sticky" style="left:960px;">' + overall(key) + '</td>';
-    rec.steps.forEach(function (s) { html += '<td' + (isDelayed(s) ? ' class="is-delay"' : '') + '>' + chip(s) + '</td>'; });
+    rec.steps.forEach(function (s) {
+      var classes = [];
+      if (isDelayed(s)) classes.push('is-delay');
+      if (s.memo) classes.push('has-memo');
+      var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' title="' + esc(s.memo) + '"' : '');
+      html += '<td' + attrs + '>' + chip(s) + '</td>';
+    });
     html += '<td class="row-actions"><a class="search-btn" href="project_progress_modify.html?id=' + encodeURIComponent(p.code) + '">編集</a></td>';
     tr.innerHTML = html;
     body.appendChild(tr);

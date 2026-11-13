@@ -149,6 +149,8 @@ a.link-btn { cursor: pointer; }
 
 /* ページネーション */
 td.is-delay { background: #fde4e4; }
+td.has-memo { position: relative; }
+td.has-memo::after { content: ''; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 9px 9px 0; border-color: transparent #2f6fed transparent transparent; }
 thead th[data-tone="blue"] { background: #e7f0ff; }
 thead th[data-tone="green"] { background: #e5f6ec; }
 thead th[data-tone="red"] { background: #fdeaea; }
@@ -213,6 +215,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 10; }
 .modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 60%; max-width: calc(100vw - 32px); height: 80vh; display: flex; flex-direction: column; }
 .modal.modal-wide { width: 90%; }
+.modal.modal-medium { width: 70%; }
 .modal-body { flex: 1; overflow-y: auto; }
 .modal-body.modal-body-plain { display: block; padding: 0 28px 18px; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
@@ -244,6 +247,8 @@ a.close-x { cursor: pointer; }
 .status-select.red { background: #fdeaea; color: #d43c40; }
 .status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
 input.memo-input { color: #333c4d; background: #ffffff; }
+table.step-table { min-width: 0 !important; }
+textarea.form-control.textarea.memo-area { width: 360px; height: 30px; min-height: 30px; padding: 4px 8px; resize: vertical; padding: 6px 8px; font-size: 12px; color: #333c4d; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; font-family: inherit; }
 .memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
 
 /* フォームダイアログ（社員／ベンダーマスタ登録） */

@@ -111,7 +111,7 @@ function setDisabledRow(tr, off) {
         '<td>' + actualCell + '</td>' +
         '<td><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
         '<td><div class="na-text"' + (na ? '' : ' style="display:none;"') + '>対象外</div><div class="status-select ' + STATUS_COLOR[status] + ' js-select"' + (na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
-        '<td><input type="text" class="memo-input" value="' + esc(memo) + '"></td>';
+        '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);
       syncOwner(tr);
@@ -138,7 +138,7 @@ function setDisabledRow(tr, off) {
           actual: ownText(tds[5].querySelector('.js-date')),
           owner: ownText(tds[5].querySelector('.js-date')) ? StaffStore.codeOf(ownText(tds[6].querySelector('.js-select'))) : '',
           status: LABEL_STATUS[ownText(tds[7].querySelector('.js-select'))] || 'wait',
-          memo: tds[8].querySelector('input').value
+          memo: tds[8].querySelector('textarea').value
         };
       });
       all[CLASS_KEY] = Object.assign({}, all[CLASS_KEY] || {}, out);

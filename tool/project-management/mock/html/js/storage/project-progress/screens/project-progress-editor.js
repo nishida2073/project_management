@@ -44,7 +44,7 @@ function setDisabledRow(tr, off) {
         '<td><div class="mini-control js-date actual-input">' + esc(s.actual || '') + '<span class="caret">▾</span></div></td>' +
         '<td><div class="na-text"' + (s.na ? '' : ' style="display:none;"') + '>対象外</div>' +
           '<div class="status-select ' + STATUS_COLOR[s.status] + ' js-select status-input"' + (s.na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[s.status] + '<span class="caret">▾</span></div></td>' +
-        '<td><input type="text" class="memo-input" value="' + esc(s.memo) + '"></td>';
+        '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(s.memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, s.na);
       Array.prototype.forEach.call(tr.querySelectorAll('input[type="radio"]'), function (r) {
@@ -66,7 +66,7 @@ function setDisabledRow(tr, off) {
           plan: ownText(tds[3].querySelector('.js-date')),
           actual: ownText(tds[4].querySelector('.js-date')),
           status: LABEL_STATUS[ownText(tds[5].querySelector('.js-select'))] || 'wait',
-          memo: tds[6].querySelector('input').value
+          memo: tds[6].querySelector('textarea').value
         });
       });
       ProjectProgressStore.upsert({ projectCode: project.code, steps: out });

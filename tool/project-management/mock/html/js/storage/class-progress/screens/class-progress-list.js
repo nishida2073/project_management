@@ -102,6 +102,7 @@
         actual: sv.actual !== undefined ? sv.actual : '',
         owner: sv.owner !== undefined ? sv.owner : '',
         status: sv.status !== undefined ? sv.status : 'wait',
+        memo: sv.memo !== undefined ? sv.memo : '',
         na: (task && task.kinds.indexOf(c.taskType) === -1) || (sv.na !== undefined ? sv.na : false)
       };
     });
@@ -125,7 +126,14 @@
     html += '<td class="sticky" style="left:650px;">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky" style="left:870px;">' + overall(activeSteps) + '</td>';
-    steps.forEach(function (s, i) { if (!isActive(i)) return; html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + (isDelayed(s) ? ' class="is-delay"' : '') + '>' + chip(s) + '</td>'; });
+    steps.forEach(function (s, i) {
+      if (!isActive(i)) return;
+      var classes = [];
+      if (isDelayed(s)) classes.push('is-delay');
+      if (s.memo) classes.push('has-memo');
+      var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' title="' + esc(s.memo) + '"' : '');
+      html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + attrs + '>' + chip(s) + '</td>';
+    });
     html += '<td class="row-actions"><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">編集</a></td>';
     tr.innerHTML = html;
     tr.setAttribute('data-owners', owners.join('|'));
