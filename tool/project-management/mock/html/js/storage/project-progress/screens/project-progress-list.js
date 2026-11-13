@@ -57,13 +57,13 @@
     var managers = [p.pm].concat(p.pl || []).map(function (c) { return StaffStore.nameOf(c); }).filter(Boolean);
     var tr = document.createElement('tr');
     var html = '';
-    html += '<td class="sticky" style="left:0;">' + esc(p.year) + '</td>';
-    html += '<td class="sticky" style="left:90px;">' + esc(p.code) + '</td>';
-    html += '<td class="sticky" style="left:240px;">' + esc(p.name) + '</td>';
-    html += '<td class="sticky" style="left:460px;">' + esc(customerName) + '</td>';
-    html += '<td class="sticky" style="left:660px;">' + managers.map(function (m) { return esc(m); }).join('<br>') + '</td>';
-    html += '<td class="sticky" style="left:860px;">' + esc(p.startMonth) + '</td>';
-    html += '<td class="sticky" style="left:960px;">' + overall(key) + '</td>';
+    html += '<td class="sticky">' + esc(p.year) + '</td>';
+    html += '<td class="sticky">' + esc(p.code) + '</td>';
+    html += '<td class="sticky">' + esc(p.name) + '</td>';
+    html += '<td class="sticky">' + esc(customerName) + '</td>';
+    html += '<td class="sticky">' + managers.map(function (m) { return esc(m); }).join('<br>') + '</td>';
+    html += '<td class="sticky">' + esc(p.startMonth) + '</td>';
+    html += '<td class="sticky">' + overall(key) + '</td>';
     rec.steps.forEach(function (s) {
       var classes = [];
       if (isDelayed(s)) classes.push('is-delay');

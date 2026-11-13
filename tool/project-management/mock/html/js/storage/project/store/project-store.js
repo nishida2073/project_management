@@ -37,7 +37,7 @@
   function map() {
     var out = {};
     load().forEach(function (p) {
-      out[p.code] = { name: p.name, sales: p.sales, part: p.part };
+      out[p.code] = { name: p.name, sales: p.sales, part: p.part, customer: p.customer };
     });
     return out;
   }

@@ -69,7 +69,9 @@
   tasks.forEach(function (t) { byName[t.name] = t; });
 
   var headRow = document.querySelector('#scrollArea thead tr');
-  while (headRow.children.length > 9) headRow.removeChild(headRow.lastElementChild);
+  var stickyHeads = headRow.querySelectorAll('th.sticky');
+  var lastSticky = stickyHeads[stickyHeads.length - 1];
+  while (lastSticky.nextElementSibling) headRow.removeChild(lastSticky.nextElementSibling);
   SORTED.forEach(function (t, i) {
     if (t.status === '停止中') return;
     var th = document.createElement('th');
@@ -117,15 +119,17 @@
     var tr = document.createElement('tr');
     var html = '';
     var ps = ClassStore.practiceStatus(c);
-    html += '<td class="sticky" style="left:0;">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
-    html += '<td class="sticky" style="left:100px;">' + esc(c.year) + '</td>';
-    html += '<td class="sticky" style="left:90px;"><div>' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
-    html += '<td class="sticky" style="left:280px;"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
-    html += '<td class="sticky" style="left:410px;">' + esc(c.start) + '</td>';
-    html += '<td class="sticky" style="left:530px;">' + esc(c.end) + '</td>';
-    html += '<td class="sticky" style="left:650px;">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
-    html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
-    html += '<td class="sticky" style="left:870px;">' + overall(activeSteps) + '</td>';
+    html += '<td class="sticky">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
+    var pj = ProjectStore.map()[c.projectCode] || {};
+    html += '<td class="sticky">' + esc(pj.customer ? CustomerStore.nameOf(pj.customer) : '-') + '</td>';
+    html += '<td class="sticky">' + esc(c.year) + '</td>';
+    html += '<td class="sticky"><div>' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
+    html += '<td class="sticky"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
+    html += '<td class="sticky">' + esc(c.start) + '</td>';
+    html += '<td class="sticky">' + esc(c.end) + '</td>';
+    html += '<td class="sticky">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
+    html += '<td class="sticky">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
+    html += '<td class="sticky">' + overall(activeSteps) + '</td>';
     steps.forEach(function (s, i) {
       if (!isActive(i)) return;
       var classes = [];
@@ -149,6 +153,8 @@
   if (ownerSelect) ownerSelect.setAttribute('data-options', staffOptionsOf(['社内', 'パートナー'], '実施'));
   var managerSelect = document.getElementById('managerFilter');
   if (managerSelect) managerSelect.setAttribute('data-options', staffOptionsOf(null, '管理'));
+  var customerSelect = document.getElementById('customerFilter');
+  if (customerSelect) customerSelect.setAttribute('data-options', ['すべて'].concat(CustomerStore.names()).join(','));
   document.getElementById('progressCount').textContent = classes.length;
   document.getElementById('delayCount').textContent = delayClasses;
 

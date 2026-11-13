@@ -61,7 +61,7 @@
     var practiceVal = clean(ownText($('practiceFilter'))) || 'すべて';
     var visible = 0;
     body.querySelectorAll('tr').forEach(function (tr) {
-      var course = tr.children[1].textContent.toLowerCase();
+      var course = tr.children[2].textContent.toLowerCase();
       var canRequest = parseInt(tr.querySelector('.main-count').max, 10) > 0 || parseInt(tr.querySelector('.sub-count').max, 10) > 0;
       var fitOk = fitVal === 'すべて' || (fitVal === 'あり') === canRequest;
       var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
