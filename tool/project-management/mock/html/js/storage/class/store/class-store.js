@@ -1,25 +1,53 @@
 (function () {
   var KEY = 'classList';
 
-  function rec(id, year, projectCode, courseCode, lessonNo, related, start, end, delivery, people, manager, locationType, locationName) {
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function fmt(d) {
+    return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate());
+  }
+
+  function daysFromToday(n) {
+    var d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+
+  function span(phase, dur, k) {
+    var start, end;
+    if (phase === 'before') {
+      start = daysFromToday(7 + k * 4);
+      end = daysFromToday(7 + k * 4 + dur - 1);
+    } else if (phase === 'during') {
+      start = daysFromToday(-1);
+      end = daysFromToday(Math.max(0, dur - 2));
+    } else {
+      end = daysFromToday(-(7 + k * 4));
+      start = daysFromToday(-(7 + k * 4) - (dur - 1));
+    }
+    return [fmt(start), fmt(end)];
+  }
+
+  function rec(id, year, projectCode, courseCode, lessonNo, related, sp, delivery, people, manager, locationType, locationName) {
     return {
       id: id, year: year, version: '1.0', taskType: 'TK-02', projectCode: projectCode, courseYear: '2026年度', courseCode: courseCode,
-      lessonNo: lessonNo, related: related, start: start, end: end, delivery: delivery,
+      lessonNo: lessonNo, related: related, start: sp[0], end: sp[1], delivery: delivery,
       people: people, manager: manager, locationType: locationType, locationName: locationName, memo: ''
     };
   }
 
   var SEED = [
-    rec('CLS-001', '2026年度', 'PJ-2602', 'BC02B', '001', ['002', '003'], '2026/09/02', '2026/09/04', 'DL-01', '24', 'STF-045', 'LT-01', 'LOC-001'),
-    rec('CLS-002', '2026年度', 'PJ-2602', 'BC02B', '002', ['001', '003'], '2026/09/02', '2026/09/04', 'DL-02', '20', 'STF-068', 'LT-01', 'LOC-002'),
-    rec('CLS-003', '2026年度', 'PJ-2604', 'BC07A', '001', ['002'], '2026/09/08', '2026/09/09', 'DL-02', '18', 'STF-068', 'LT-01', 'LOC-002'),
-    rec('CLS-004', '2026年度', 'PJ-2603', 'ND02B', '001', [], '2026/09/10', '2026/09/12', 'DL-01', '30', 'STF-065', 'LT-02', 'LOC-003'),
-    rec('CLS-005', '2026年度', 'PJ-2602', 'BC02B', '003', ['001', '002'], '2026/09/15', '2026/09/17', 'DL-03', '22', 'STF-045', 'LT-01', 'LOC-001'),
-    rec('CLS-006', '2026年度', 'PJ-2604', 'BC07A', '002', ['001'], '2026/09/18', '2026/09/18', 'DL-02', '40', 'STF-066', 'LT-03', 'LOC-004'),
-    rec('CLS-007', '2026年度', 'PJ-2603', 'ND02B', '002', ['001', '003'], '2026/09/24', '2026/09/26', 'DL-01', '28', 'STF-065', 'LT-02', 'LOC-003'),
-    rec('CLS-008', '2026年度', 'PJ-2605', 'CE01B', '001', [], '2026/09/28', '2026/09/29', 'DL-01', '20', 'STF-067', 'LT-01', 'LOC-002'),
-    rec('CLS-009', '2026年度', 'PJ-2603', 'ND02B', '003', ['001', '002'], '2026/09/30', '2026/10/02', 'DL-01', '25', 'STF-065', 'LT-01', ''),
-    rec('CLS-010', '2026年度', 'PJ-2605', 'CE01B', '002', [], '2026/10/05', '2026/10/07', 'DL-01', '18', 'STF-067', 'LT-02', 'LOC-003')
+    rec('CLS-001', '2026年度', 'PJ-2602', 'BC02B', '001', ['002', '003'], span('before', 3, 0), 'DL-01', '24', 'STF-045', 'LT-01', 'LOC-001'),
+    rec('CLS-002', '2026年度', 'PJ-2602', 'BC02B', '002', ['001', '003'], span('during', 3, 0), 'DL-02', '20', 'STF-068', 'LT-01', 'LOC-002'),
+    rec('CLS-003', '2026年度', 'PJ-2604', 'BC07A', '001', ['002'], span('after', 2, 0), 'DL-02', '18', 'STF-068', 'LT-01', 'LOC-002'),
+    rec('CLS-004', '2026年度', 'PJ-2603', 'ND02B', '001', [], span('before', 3, 1), 'DL-01', '30', 'STF-065', 'LT-02', 'LOC-003'),
+    rec('CLS-005', '2026年度', 'PJ-2602', 'BC02B', '003', ['001', '002'], span('after', 3, 1), 'DL-03', '22', 'STF-045', 'LT-01', 'LOC-001'),
+    rec('CLS-006', '2026年度', 'PJ-2604', 'BC07A', '002', ['001'], span('during', 1, 0), 'DL-02', '40', 'STF-066', 'LT-03', 'LOC-004'),
+    rec('CLS-007', '2026年度', 'PJ-2603', 'ND02B', '002', ['001', '003'], span('before', 3, 2), 'DL-01', '28', 'STF-065', 'LT-02', 'LOC-003'),
+    rec('CLS-008', '2026年度', 'PJ-2605', 'CE01B', '001', [], span('after', 2, 2), 'DL-01', '20', 'STF-067', 'LT-01', 'LOC-002'),
+    rec('CLS-009', '2026年度', 'PJ-2603', 'ND02B', '003', ['001', '002'], span('during', 3, 0), 'DL-01', '25', 'STF-065', 'LT-01', ''),
+    rec('CLS-010', '2026年度', 'PJ-2605', 'CE01B', '002', [], span('before', 3, 3), 'DL-01', '18', 'STF-067', 'LT-02', 'LOC-003')
   ];
   SEED.forEach(function (r) {
     if (['CLS-002', 'CLS-004', 'CLS-006', 'CLS-008'].indexOf(r.id) !== -1) r.taskType = 'TK-01';

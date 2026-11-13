@@ -11,20 +11,6 @@ function setDisabledRow(tr, off) {
     el.style.opacity = off ? '0.4' : '';
   });
 }
-    var STEPS = [
-      { no: 1, name: 'クラス登録', actual: '2026/08/20', owner: 'STF-045', status: 'done', memo: '' },
-      { no: 2, name: '名簿受領督促', actual: '2026/08/25', owner: '', status: 'done', memo: '' },
-      { no: 3, name: '講師契約', actual: '2026/08/27', owner: 'STF-045', status: 'done', memo: '' },
-      { no: 4, name: '受講者登録(OliveOne)', actual: '', owner: '', status: 'progress', memo: '' },
-      { no: 5, name: '受講詳細案内発出', actual: '2026/08/31', owner: 'STF-045', status: 'done', memo: '' },
-      { no: 6, name: '電子教材送付', actual: '', owner: '', status: 'progress', memo: '2名分の宛先要再確認' },
-      { no: 7, name: '出欠確認・報告', actual: '', owner: 'STF-045', status: 'wait', memo: '11時までに送信' },
-      { no: 8, name: 'アンケート実施案内', actual: '', owner: '', status: 'wait', memo: '' },
-      { no: 9, name: 'テスト結果集計', actual: '', owner: '', status: 'wait', memo: '' },
-      { no: 10, name: 'アンケート集計・格納', actual: '', owner: '', status: 'wait', memo: '' },
-      { no: 11, name: '報告書作成', actual: '', owner: 'STF-045', status: 'wait', memo: '' },
-      { no: 12, name: '再テストリマインド', actual: '', owner: '', status: 'wait', memo: '' }
-    ];
 
     function esc(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -69,7 +55,7 @@ function setDisabledRow(tr, off) {
       displayNo[i] = kindCount[k];
     });
     var stepsList = sortedTasks.map(function (t, i) {
-      return STEPS[i] || { no: i + 1, name: t.name, actual: '', owner: '', status: 'wait', memo: '' };
+      return { no: i + 1, name: t.name, actual: '', owner: '', status: 'wait', memo: '' };
     });
     var saved = (loadProgress()[CLASS_KEY]) || {};
     var body = document.getElementById('stepBody');
@@ -84,6 +70,13 @@ function setDisabledRow(tr, off) {
         return s.affiliation === 'パートナー' && s.company === company;
       }).map(function (s) { return s.name; });
       return names;
+    }
+
+    function syncOwner(tr) {
+      var on = !!ownText(tr.children[5].querySelector('.js-date'));
+      var sel = tr.children[6].querySelector('.js-select');
+      sel.style.opacity = on ? '' : '0.45';
+      sel.style.pointerEvents = on ? '' : 'none';
     }
 
     stepsList.forEach(function (s, i) {
@@ -121,6 +114,8 @@ function setDisabledRow(tr, off) {
         '<td><input type="text" class="memo-input" value="' + esc(memo) + '"></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);
+      syncOwner(tr);
+      new MutationObserver(function () { syncOwner(tr); }).observe(tr.children[5], { childList: true, subtree: true, characterData: true });
       Array.prototype.forEach.call(tr.querySelectorAll('input[type="radio"]'), function (r) {
         r.addEventListener('change', function () {
           var off = r.value === 'なし';
@@ -141,7 +136,7 @@ function setDisabledRow(tr, off) {
           na: tr.querySelector('input[type="radio"]:checked').value === 'なし',
           plan: ownText(tds[4].querySelector('.js-date')),
           actual: ownText(tds[5].querySelector('.js-date')),
-          owner: StaffStore.codeOf(ownText(tds[6].querySelector('.js-select'))),
+          owner: ownText(tds[5].querySelector('.js-date')) ? StaffStore.codeOf(ownText(tds[6].querySelector('.js-select'))) : '',
           status: LABEL_STATUS[ownText(tds[7].querySelector('.js-select'))] || 'wait',
           memo: tds[8].querySelector('input').value
         };

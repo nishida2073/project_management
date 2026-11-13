@@ -69,7 +69,7 @@
   tasks.forEach(function (t) { byName[t.name] = t; });
 
   var headRow = document.querySelector('#scrollArea thead tr');
-  while (headRow.children.length > 10) headRow.removeChild(headRow.lastElementChild);
+  while (headRow.children.length > 9) headRow.removeChild(headRow.lastElementChild);
   SORTED.forEach(function (t, i) {
     if (t.status === '停止中') return;
     var th = document.createElement('th');
@@ -121,7 +121,6 @@
     html += '<td class="sticky" style="left:280px;"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
     html += '<td class="sticky" style="left:410px;">' + esc(c.start) + '</td>';
     html += '<td class="sticky" style="left:530px;">' + esc(c.end) + '</td>';
-    html += '<td class="sticky" style="left:650px;">' + owners.map(esc).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:650px;">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky" style="left:870px;">' + overall(activeSteps) + '</td>';
