@@ -15,9 +15,8 @@
 
   function chip(s) {
     if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
-    var delay = isDelayed(s) ? '<span class="badge red">遅延</span>' : '';
     var actual = s.actual ? s.actual : '-';
-    return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span>' + delay + '</div>' +
+    return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span></div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + esc(s.plan || '-') + '</span></div>' +
       '<div class="dates"><span>実：' + esc(actual) + '</span></div></div></div>';
   }
@@ -65,7 +64,7 @@
     html += '<td class="sticky" style="left:660px;">' + managers.map(function (m) { return esc(m); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:860px;">' + esc(p.startMonth) + '</td>';
     html += '<td class="sticky" style="left:960px;">' + overall(key) + '</td>';
-    rec.steps.forEach(function (s) { html += '<td>' + chip(s) + '</td>'; });
+    rec.steps.forEach(function (s) { html += '<td' + (isDelayed(s) ? ' class="is-delay"' : '') + '>' + chip(s) + '</td>'; });
     html += '<td class="row-actions"><a class="search-btn" href="project_progress_modify.html?id=' + encodeURIComponent(p.code) + '">編集</a></td>';
     tr.innerHTML = html;
     body.appendChild(tr);

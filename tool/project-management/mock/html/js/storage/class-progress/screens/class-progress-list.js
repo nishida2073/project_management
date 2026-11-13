@@ -45,8 +45,7 @@
     var label = STATUS_LABEL[step.status] || '実施前';
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
-    var delayMark = isDelayed(step) ? '<span class="badge red">遅延</span>' : '';
-    return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span>' + delayMark + '</div>' +
+    return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span></div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + esc(step.plan || '-') + '</span></div>' +
       '<div class="dates"><span>実：' + esc(actual) + ' ' + esc(StaffStore.nameOf(step.owner || '')) + '</span></div></div></div>';
   }
@@ -126,7 +125,7 @@
     html += '<td class="sticky" style="left:650px;">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
     html += '<td class="sticky" style="left:760px;">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky" style="left:870px;">' + overall(activeSteps) + '</td>';
-    steps.forEach(function (s, i) { if (!isActive(i)) return; html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '">' + chip(s) + '</td>'; });
+    steps.forEach(function (s, i) { if (!isActive(i)) return; html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + (isDelayed(s) ? ' class="is-delay"' : '') + '>' + chip(s) + '</td>'; });
     html += '<td class="row-actions"><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">編集</a></td>';
     tr.innerHTML = html;
     tr.setAttribute('data-owners', owners.join('|'));
