@@ -309,6 +309,8 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .check-box:hover .check-mark { border-color: #2f6fed; }
 .check-box input:checked + .check-mark { background: #2f6fed; border-color: #2f6fed; }
 .check-box input:checked + .check-mark::after { content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 10px; border: solid #ffffff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.check-box.check-sm .check-mark { width: 13px; height: 13px; border-width: 1.5px; border-radius: 4px; }
+.check-box.check-sm input:checked + .check-mark::after { left: 3px; top: 0; width: 4px; height: 8px; border-width: 0 1.5px 1.5px 0; }
 .check-box input:focus-visible + .check-mark { outline: 2px solid #9bb8f5; outline-offset: 2px; }
 .select-menu li.select-clear { margin-top: 4px; padding: 6px 10px; border-top: 1px solid #eef1f6; font-size: 12px; color: #5a6376; cursor: pointer; }
 .select-menu li.select-clear:hover { background: #eef4ff; color: #2f6fed; }
@@ -457,5 +459,6 @@ td .search-btn { width: 64px; justify-content: center; }
 .sub-row { position: relative; }
 .sub-remove { position: absolute; top: 50%; right: -24px; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 11px; border: 1px solid #e6eaf1; cursor: pointer; }
 .sub-remove:hover { background: #eef4ff; color: #2f6fed; border-color: #2f6fed; }
+.sub-row .sub-status { position: absolute; top: -9px; left: 10px; margin: 0; }
 .add-row { margin-top: 10px; width: fit-content; }
 .add-related-class-row { margin-top: 10px; width: fit-content; }

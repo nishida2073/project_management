@@ -10,7 +10,7 @@
   function clean(s) { return s === '選択してください' ? '' : s; }
 
   var C = ClassStore.COURSES;
-  var list = ClassStore.load();
+  var list = ClassStore.load().filter(function (r) { return r.status !== '停止中' && ClassStore.practiceStatus(r) !== '実施後'; });
   var body = $('printBody');
   var rows = [];
 
@@ -20,10 +20,20 @@
     var c = C[r.courseCode] || { name: r.courseCode };
     var remainMain = Math.max(0, (parseInt(r.mainTeachers, 10) || 0) - a.mains.length);
     var remainSub = Math.max(0, (parseInt(r.subTeachers, 10) || 0) - a.subs.length);
+    var reqTot = VenderAssignStore.totalRequest(a);
+    var pendMain = reqTot.main;
+    var pendSub = reqTot.sub;
+    var befMain = a.mains.filter(function (p) { return p.vendor && !p.staff; }).length;
+    var befSub = a.subs.filter(function (p) { return p.vendor && !p.staff; }).length;
+    var reqMain = Math.max(0, remainMain - pendMain);
+    var reqSub = Math.max(0, remainSub - pendSub);
     var tr = document.createElement('tr');
     tr.setAttribute('data-id', r.id);
-    var fits = a.mains.length >= (parseInt(r.mainTeachers, 10) || 0) && a.subs.length >= (parseInt(r.subTeachers, 10) || 0);
+    tr.setAttribute('data-practice', ClassStore.practiceStatus(r));
+    var fits = reqMain === 0 && reqSub === 0;
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
+    tr.setAttribute('data-base-main', reqMain);
+    tr.setAttribute('data-base-sub', reqSub);
     tr.innerHTML =
       '<td style="text-align: center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
       '<td>' + esc(r.year) + '</td>' +
@@ -33,8 +43,8 @@
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
       '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
-      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control main-count" min="0" max="' + remainMain + '" value="' + remainMain + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + remainMain + '</span></div></td>' +
-      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control sub-count" min="0" max="' + remainSub + '" value="' + remainSub + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + remainSub + '</span></div></td>' +
+      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control main-count" min="0" max="' + reqMain + '" value="' + reqMain + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + reqMain + '</span><span style="color:#2f6fed;font-size:11px;">' + VenderAssignStore.STATUS.REQUESTING.label + ' ' + pendMain + '</span><span style="color:#d97c1e;font-size:11px;">' + VenderAssignStore.STATUS.BEFORE.label + ' ' + befMain + '</span></div></td>' +
+      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control sub-count" min="0" max="' + reqSub + '" value="' + reqSub + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + reqSub + '</span><span style="color:#2f6fed;font-size:11px;">' + VenderAssignStore.STATUS.REQUESTING.label + ' ' + pendSub + '</span><span style="color:#d97c1e;font-size:11px;">' + VenderAssignStore.STATUS.BEFORE.label + ' ' + befSub + '</span></div></td>' +
       '<td>' + (fits ? '<span class="tag green">なし</span>' : '<span class="tag orange">あり</span>') + '</td>';
     body.appendChild(tr);
   });
@@ -45,11 +55,13 @@
   function applyFilter() {
     var kw = $('keyword').value.trim().toLowerCase();
     var fitVal = clean(ownText($('fitFilter'))) || 'すべて';
+    var practiceVal = clean(ownText($('practiceFilter'))) || 'すべて';
     var visible = 0;
     body.querySelectorAll('tr').forEach(function (tr) {
       var course = tr.children[1].textContent.toLowerCase();
       var fitOk = fitVal === 'すべて' || (fitVal === 'なし') === (tr.getAttribute('data-fit') === 'in');
-      var ok = (!kw || course.indexOf(kw) !== -1) && fitOk;
+      var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
+      var ok = (!kw || course.indexOf(kw) !== -1) && fitOk && practiceOk;
       tr.style.display = ok ? '' : 'none';
       if (ok) visible++;
     });
@@ -57,6 +69,34 @@
   }
   document.querySelector('.filter-panel .search-btn').addEventListener('click', applyFilter);
   applyFilter();
+
+  var appliedVendor = null;
+  function applyVendor() {
+    var code = TeacherVenderStore.codeOf(clean(ownText($('requestVendor'))));
+    body.querySelectorAll('tr').forEach(function (tr) {
+      var id = tr.getAttribute('data-id');
+      var row = rows.filter(function (x) { return x.cls.id === id; })[0];
+      if (!row) return;
+      var befMain = code ? row.assign.mains.filter(function (p) { return p.vendor === code && !p.staff; }).length : 0;
+      var befSub = code ? row.assign.subs.filter(function (p) { return p.vendor === code && !p.staff; }).length : 0;
+      var mainVal = (parseInt(tr.getAttribute('data-base-main'), 10) || 0) + befMain;
+      var subVal = (parseInt(tr.getAttribute('data-base-sub'), 10) || 0) + befSub;
+      var mi = tr.querySelector('.main-count');
+      var si = tr.querySelector('.sub-count');
+      mi.max = mainVal;
+      mi.value = mainVal;
+      si.max = subVal;
+      si.value = subVal;
+    });
+  }
+  function syncVendor() {
+    var v = clean(ownText($('requestVendor')));
+    if (v === appliedVendor) return;
+    appliedVendor = v;
+    applyVendor();
+  }
+  syncVendor();
+  document.addEventListener('click', function () { setTimeout(syncVendor, 0); }, true);
 
   function visibleRows() {
     return Array.prototype.filter.call(body.querySelectorAll('tr'), function (tr) { return tr.style.display !== 'none'; });
@@ -84,11 +124,13 @@
 
   $('printBtn').addEventListener('click', function () {
     var vendor = clean(ownText($('requestVendor')));
+    var vendorCode = TeacherVenderStore.codeOf(vendor);
     if (!vendor) {
-      MessageDialog.required(['依頼先講師ベンダー']);
+      MessageDialog.required(['講師ベンダー']);
       return;
     }
     var items = [];
+    var exportedIds = [];
     body.querySelectorAll('tr').forEach(function (tr) {
       if (tr.style.display === 'none') return;
       if (!tr.querySelector('.row-check').checked) return;
@@ -97,6 +139,7 @@
       if (!row) return;
       var mainCount = parseInt(tr.querySelector('.main-count').value, 10) || 0;
       var subCount = parseInt(tr.querySelector('.sub-count').value, 10) || 0;
+      exportedIds.push({ id: id, main: mainCount, sub: subCount });
       var a = Object.assign({}, row.assign, { mainCount: mainCount, subCount: subCount });
       VenderAssignStore.upsert(a);
       if (mainCount || subCount) items.push({ cls: row.cls, assign: a });
@@ -160,5 +203,20 @@
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '登壇依頼');
     XLSX.writeFile(wb, '登壇依頼-' + vendor + '.xlsx');
+    exportedIds.forEach(function (x) {
+      var rec = VenderAssignStore.find(x.id);
+      var reqs = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; });
+      if (x.main || x.sub) reqs.push({ vendor: vendorCode, main: x.main, sub: x.sub });
+      var notYet = function (p) { return !(p.vendor === vendorCode && !p.staff); };
+      rec.mains = (rec.mains || []).filter(notYet);
+      rec.subs = (rec.subs || []).filter(notYet);
+      rec.requests = reqs;
+      delete rec.requested;
+      delete rec.requestMain;
+      delete rec.requestSub;
+      delete rec.requestVendor;
+      VenderAssignStore.upsert(rec);
+    });
+    location.href = 'vender_assign_list.html';
   });
 })();

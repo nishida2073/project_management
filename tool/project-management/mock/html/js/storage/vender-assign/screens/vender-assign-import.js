@@ -25,10 +25,8 @@
         MessageDialog.show(['取り込む内容がありません'].concat(plan.errors).join('\n'));
         return;
       }
-      var lines = plan.updates.map(function (u) { return '・' + u.label; });
-      MessageDialog.confirm(['以下を取り込みます。よろしいですか？'].concat(lines).join('\n')).then(function (ok) {
-        if (ok) apply(plan);
-      });
+      sessionStorage.setItem('venderImportPlan', JSON.stringify(serializePlan(plan)));
+      location.href = 'vender_assign_import.html';
     };
     reader.readAsArrayBuffer(file);
   });
@@ -56,6 +54,15 @@
       if (!dup) list.push(p);
     });
     return list;
+  }
+
+  function uniqueByStaff(list) {
+    var seen = {};
+    return list.filter(function (p) {
+      if (seen[p.staff]) return false;
+      seen[p.staff] = true;
+      return true;
+    });
   }
 
   function buildPlan(aoa, ws) {
@@ -102,6 +109,10 @@
       }
       collect(mainCols, mains);
       collect(subCols, subs);
+      mains = uniqueByStaff(mains);
+      subs = uniqueByStaff(subs).filter(function (p) {
+        return !mains.some(function (q) { return q.staff === p.staff; });
+      });
 
       if (!mains.length && !subs.length) {
         plan.skipped++;
@@ -114,18 +125,26 @@
     return plan;
   }
 
-  function apply(plan) {
-    plan.updates.forEach(function (u) {
-      var a = VenderAssignStore.find(u.cls.id);
-      a.mains = mergeUnique(a.mains, u.mains);
-      a.subs = mergeUnique(a.subs, u.subs);
-      VenderAssignStore.upsert(a);
-    });
-    var msg = '取り込みが完了しました\n更新: ' + plan.updates.length + '件\n変更なし・スキップ: ' + plan.skipped + '件';
-    if (plan.errors.length) {
-      msg += '\n\n取り込めなかった内容:\n' + plan.errors.slice(0, 10).join('\n');
-      if (plan.errors.length > 10) msg += '\nほか' + (plan.errors.length - 10) + '件';
-    }
-    MessageDialog.show(msg, function () { location.reload(); });
+  function serializePlan(plan) {
+    return {
+      vendorCode: plan.vendorCode,
+      vendorName: TeacherVenderStore.nameOf(plan.vendorCode),
+      updates: plan.updates.map(function (u) {
+        return {
+          classId: u.cls.id,
+          year: u.cls.year,
+          label: u.label,
+          courseCode: u.cls.courseCode,
+          courseName: (ClassStore.COURSES[u.cls.courseCode] || {}).name || u.cls.courseCode,
+          lessonNo: u.cls.lessonNo,
+          start: u.cls.start,
+          end: u.cls.end,
+          mains: u.mains,
+          subs: u.subs
+        };
+      }),
+      skipped: plan.skipped,
+      errors: plan.errors
+    };
   }
 })();

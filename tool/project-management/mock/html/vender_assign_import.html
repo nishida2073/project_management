@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=assign" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>登壇依頼一覧</h1></div><div class="table-card"></div></div>
+  </div>
+  <div class="overlay">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <div>
+          <h2>登壇依頼インポート</h2>
+          <div class="sub" id="vendorLine"></div>
+        </div>
+        <a class="close-x" href="vender_assign_list.html">✕</a>
+      </div>
+      <div class="modal-body" style="padding: 20px 28px;">
+        <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
+          <div class="table-meta"><div class="count"><b id="importCount">0</b> 人を取り込みます</div></div>
+          <div class="scroll-outer" id="scrollArea" style="overflow: auto; flex: 1 1 auto; min-height: 0;">
+          <table>
+            <thead>
+              <tr>
+                <th>年度</th>
+                <th class="fill">コース</th>
+                <th>レッスンNo</th>
+                <th>開始日</th>
+                <th>終了日</th>
+                <th>講師（メイン）</th>
+                <th>講師（サブ）</th>
+              </tr>
+            </thead>
+            <tbody id="importBody"></tbody>
+          </table>
+          </div>
+        </div>
+        <div id="errorBox" style="margin-top: 12px; font-size: 12.5px; color: #d43c40; white-space: pre-line;"></div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" href="vender_assign_list.html">キャンセル</a>
+        <div class="btn primary" id="importApply">インポート</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/location/store/location-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
+<script src="js/storage/course/store/course-store.js"></script>
+<script src="js/storage/project/store/project-store.js"></script>
+<script src="js/storage/class/store/class-store.js"></script>
+<script src="js/storage/vender-assign/store/vender-assign-store.js"></script>
+<script src="js/message-dialog.js"></script>
+<script src="js/storage/vender-assign/screens/vender-assign-import-preview.js"></script>
+<script src="js/sidebar-toggle.js" defer></script>
+<script src="js/column-resize.js" defer></script>
+</body>
+</html>

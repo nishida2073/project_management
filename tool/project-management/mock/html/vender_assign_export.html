@@ -33,12 +33,13 @@
       </div>
       <div class="modal-body">
         <div class="filter-panel" style="margin-bottom: 16px;">
+          <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-options="すべて,実施前,実施中" data-value="実施前">実施前<span class="caret">▾</span></div></div>
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
-          <div class="field"><label>依頼残</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-value="あり">あり<span class="caret">▾</span></div></div>
+          <div class="field"><label>残講師</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-value="あり">あり<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
         </div>
         <div class="field narrow">
-          <label>依頼先講師ベンダー<span class="req">必須</span></label>
+          <label>講師ベンダー<span class="req">必須</span></label>
           <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
@@ -57,7 +58,7 @@
                 <th>予定講師数<br>（サブ）</th>
                 <th>依頼講師数<br>（メイン）</th>
                 <th>依頼講師数<br>（サブ）</th>
-                <th>依頼残</th>
+                <th>残講師</th>
               </tr>
             </thead>
             <tbody id="printBody"></tbody>
