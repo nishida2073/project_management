@@ -73,6 +73,7 @@
           var f = target / startTotal;
           group.forEach(function (g, j) {
             var w = (startWs[j] * f) + 'px';
+            g.style.whiteSpace = 'normal';
             g.style.width = g.style.minWidth = g.style.maxWidth = w;
           });
           if (touchesSticky) {
