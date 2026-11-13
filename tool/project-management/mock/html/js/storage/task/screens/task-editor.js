@@ -7,6 +7,11 @@
     var v = getRadio('taskKind');
     return v ? [v] : [];
   }
+  function renderWorkRadios() {
+    $('workGroup').innerHTML = WorkTypeStore.load().map(function (it) {
+      return '<label class="radio-option"><input type="radio" name="workType" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + it.color + '">' + it.name + '</span></label>';
+    }).join('');
+  }
   function renderKindRadios() {
     $('kindGroup').innerHTML = TaskTypeStore.load().map(function (it) {
       return '<label class="radio-option"><input type="radio" name="taskKind" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + it.color + '">' + it.name + '</span></label>';
@@ -55,6 +60,7 @@
     $('statusToggle').classList.toggle('off', statusOff);
     $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     checkRadio('taskKind', (rec.kinds || [])[0] || '');
+    checkRadio('workType', rec.workType || '');
     var internal = rec.company === StaffVenderStore.INTERNAL;
     checkRadio('affiliation', internal ? '社内' : 'パートナー');
     setCompany(internal ? '' : StaffVenderStore.nameOf(rec.company));
@@ -65,6 +71,7 @@
     var editing = opts.mode === 'edit';
     $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
     renderKindRadios();
+    renderWorkRadios();
     var list = TaskStore.load();
     var idx = -1;
     var rec;
@@ -77,7 +84,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { id: TaskStore.nextId(list), name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', status: '稼働中' };
+      rec = { id: TaskStore.nextId(list), name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', workType: '', status: '稼働中' };
     }
     fill(rec);
 
@@ -88,6 +95,7 @@
     $('saveBtn').addEventListener('click', function () {
       var name = $('taskName').value.trim();
       var kinds = kindOf();
+      var workType = getRadio('workType');
       var orderV = $('order').value;
       var affiliation = getRadio('affiliation');
       var companyText = selectedOf($('company'));
@@ -95,7 +103,8 @@
       var missing = [];
         if (!name) missing.push('タスク名');
         if (!kinds.length) missing.push('タスク区分');
-        if (!affiliation) missing.push('所属区分');
+        if (!workType) missing.push('作業区分');
+        if (!affiliation) missing.push('実務担当区分');
         if (orderV === '') missing.push('作業順');
         if (daysV === '') missing.push('日数');
       if (missing.length) {
@@ -112,6 +121,7 @@
         order: parseInt(orderV, 10),
         company: affiliation === '社内' ? StaffVenderStore.INTERNAL : StaffVenderStore.codeOf(companyText),
         days: parseInt(daysV, 10),
+        workType: workType,
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       if (editing) {

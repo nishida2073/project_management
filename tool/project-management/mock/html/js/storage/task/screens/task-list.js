@@ -13,6 +13,7 @@
         '<td>' + esc(t.id) + '</td>' +
         '<td>' + esc(t.name) + '</td>' +
         '<td>' + kinds + '</td>' +
+        '<td>' + (t.workType ? '<span class="tag ' + WorkTypeStore.colorOf(t.workType) + '">' + esc(WorkTypeStore.nameOf(t.workType)) + '</span>' : '') + '</td>' +
         '<td>' + esc(t.order) + '</td>' +
         '<td><span class="tag ' + (t.company === StaffVenderStore.INTERNAL ? 'blue' : 'orange') + '">' + (t.company === StaffVenderStore.INTERNAL ? '社内' : 'パートナー') + '</span></td>' +
         '<td>' + (t.company === StaffVenderStore.INTERNAL ? '' : esc(StaffVenderStore.nameOf(t.company))) + '</td>' +
