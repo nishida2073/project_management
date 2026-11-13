@@ -30,7 +30,7 @@
     var tr = document.createElement('tr');
     tr.setAttribute('data-id', r.id);
     tr.setAttribute('data-practice', ClassStore.practiceStatus(r));
-    var fits = reqMain === 0 && reqSub === 0;
+    var fits = a.mains.length >= (parseInt(r.mainTeachers, 10) || 0) && a.subs.length >= (parseInt(r.subTeachers, 10) || 0);
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
     tr.setAttribute('data-base-main', reqMain);
     tr.setAttribute('data-base-sub', reqSub);
