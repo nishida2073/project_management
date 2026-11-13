@@ -24,11 +24,15 @@
       <div class="filter-panel">
         <div class="field">
           <label>実施状況</label>
-          <div class="control small js-select" data-options="すべて,実施前,実施中,実施後" data-match-col="0">すべて<span class="caret">▾</span></div>
+          <div class="control small js-select" data-options="すべて,実施前,実施中,実施後" data-match-class="col-practice">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field narrow">
+          <label>顧客</label>
+          <div class="control js-select" id="customerFilter" data-options="すべて" data-match-class="col-customer">すべて<span class="caret">▾</span></div>
         </div>
         <div class="field">
           <label>年度</label>
-          <div class="control small js-select" data-options="すべて,2024年度,2025年度,2026年度,2027年度">すべて<span class="caret">▾</span></div>
+          <div class="control small js-select" data-options="すべて,2024,2025,2026,2027">すべて<span class="caret">▾</span></div>
         </div>
         <div class="field">
           <label>キーワード検索（コース）</label>
@@ -36,24 +40,16 @@
         </div>
         <div class="field">
           <label>開始日</label>
-          <div class="control small js-date">2026/04/01<span class="caret">▾</span></div>
+          <div class="control small js-date"><span class="caret">▾</span></div>
         </div>
         <div class="tilde">〜</div>
         <div class="field">
           <label>終了日</label>
-          <div class="control small js-date">2026/09/30<span class="caret">▾</span></div>
+          <div class="control small js-date"><span class="caret">▾</span></div>
         </div>
         <div class="field">
           <label>タスク区分</label>
           <div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div>
-        </div>
-        <div class="field">
-          <label>実施形態</label>
-          <div class="control small js-select" data-options="すべて,集合,オンライン,ハイブリッド">すべて<span class="caret">▾</span></div>
-        </div>
-        <div class="field">
-          <label>ロケーション区分</label>
-          <div class="control small js-select" data-options="すべて,駒場,成城,外部会場">すべて<span class="caret">▾</span></div>
         </div>
         <div class="search-btn">検索</div>
       </div>
@@ -71,11 +67,11 @@
           <thead>
             <tr>
               <th>実施状況</th>
+              <th>顧客</th>
               <th>年度</th>
               <th>案件</th>
               <th>販売区分</th>
               <th>参加区分</th>
-              <th>顧客</th>
               <th>コース</th>
               <th>レッスンNo</th>
               <th>タスク区分</th>

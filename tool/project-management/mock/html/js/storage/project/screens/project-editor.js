@@ -91,7 +91,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { year: '2026年度', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '', status: '稼働中' };
+      rec = { year: '2026', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '', status: '稼働中' };
     }
     fill(rec);
 

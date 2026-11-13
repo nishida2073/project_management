@@ -38,8 +38,8 @@
     tr.setAttribute('data-remain-sub', remainSub);
     tr.innerHTML =
       '<td style="text-align: center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
-      '<td>' + esc(r.year) + '</td>' +
-      '<td><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
+      '<td>' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
+      '<td class="col-course"><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
@@ -61,7 +61,7 @@
     var practiceVal = clean(ownText($('practiceFilter'))) || 'すべて';
     var visible = 0;
     body.querySelectorAll('tr').forEach(function (tr) {
-      var course = tr.children[2].textContent.toLowerCase();
+      var course = tr.querySelector('.col-course').textContent.toLowerCase();
       var canRequest = parseInt(tr.querySelector('.main-count').max, 10) > 0 || parseInt(tr.querySelector('.sub-count').max, 10) > 0;
       var fitOk = fitVal === 'すべて' || (fitVal === 'あり') === canRequest;
       var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
@@ -170,7 +170,7 @@
     items.forEach(function (it) {
       var c = C[it.cls.courseCode] || { name: it.cls.courseCode };
       var line = [
-        it.cls.year,
+        (String(it.cls.year).replace('年度', '') + '年度'),
         c.name,
         it.cls.courseCode,
         it.cls.lessonNo,

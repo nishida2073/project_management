@@ -62,7 +62,7 @@
     var ex = existingOf(u);
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td>' + esc(u.year) + '</td>' +
+      '<td>' + esc(String(u.year).replace('年度', '') + '年度') + '</td>' +
       '<td><div>' + esc(u.courseName) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(u.courseCode) + '</div></td>' +
       '<td>' + esc(u.lessonNo) + '</td>' +
       '<td>' + esc(u.start) + '</td>' +

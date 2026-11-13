@@ -20,7 +20,7 @@
     var on = c.status !== '停止中';
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td>' + esc(c.year) + '</td>' +
+      '<td>' + esc(String(c.year).replace('年度', '') + '年度') + '</td>' +
       '<td>' + esc(c.code) + '</td>' +
       '<td><span class="tag ' + ParticipationTypeStore.colorOf(c.part) + '">' + esc(ParticipationTypeStore.nameOf(c.part)) + '</span></td>' +
       '<td>' + esc(c.name) + '</td>' +

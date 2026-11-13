@@ -33,7 +33,7 @@
     function apply() {
       var keywords = texts.map(function (i) { return norm(i.value); }).filter(Boolean);
       var chosen = selects.map(function (el) {
-        return { v: selValue(el), col: el.getAttribute('data-match-col'), attr: el.getAttribute('data-match-attr') };
+        return { v: selValue(el), cls: el.getAttribute('data-match-class'), col: el.getAttribute('data-match-col'), attr: el.getAttribute('data-match-attr') };
       }).filter(function (c) { return c.v && c.v !== 'すべて' && c.v !== '選択してください'; });
       var from = dates[0] ? parseDate(ownText(dates[0])) : null;
       var to = dates[1] ? parseDate(ownText(dates[1])) : null;
@@ -43,6 +43,10 @@
         var text = norm(tr.textContent);
         var ok = keywords.every(function (k) { return text.indexOf(k) !== -1; }) &&
           chosen.every(function (c) {
+            if (c.cls) {
+              var byClass = tr.querySelector('.' + c.cls);
+              return !!byClass && norm(byClass.textContent) === norm(c.v);
+            }
             if (c.col !== null) {
               var cell = tr.children[Number(c.col)];
               return !!cell && norm(cell.textContent) === norm(c.v);

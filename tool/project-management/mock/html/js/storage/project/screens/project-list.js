@@ -16,7 +16,7 @@
     var tr = document.createElement('tr');
     var managerList = [managerTag('PS-01', p.pm)].concat((p.pl || []).map(function (c) { return managerTag('PS-02', c); })).filter(Boolean);
     tr.innerHTML =
-      '<td>' + esc(p.year) + '</td>' +
+      '<td>' + esc(String(p.year).replace('年度', '') + '年度') + '</td>' +
       '<td>' + esc(p.code) + '</td>' +
       '<td><span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span></td>' +
       '<td><span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span></td>' +

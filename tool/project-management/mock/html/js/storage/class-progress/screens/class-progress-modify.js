@@ -73,8 +73,8 @@ function setDisabledRow(tr, off) {
     }
 
     function syncOwner(tr) {
-      var on = !!ownText(tr.children[5].querySelector('.js-date'));
-      var sel = tr.children[6].querySelector('.js-select');
+      var on = !!ownText(tr.querySelector('.col-actual').querySelector('.js-date'));
+      var sel = tr.querySelector('.col-owner').querySelector('.js-select');
       sel.style.opacity = on ? '' : '0.45';
       sel.style.pointerEvents = on ? '' : 'none';
     }
@@ -108,14 +108,14 @@ function setDisabledRow(tr, off) {
           '<label class="target-opt off"><input type="radio" name="target' + s.no + '" value="なし"' + (na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
         '<td style="white-space: nowrap; font-weight: 700;">' + esc(company) + '</td>' +
         '<td>' + planCell + '</td>' +
-        '<td>' + actualCell + '</td>' +
-        '<td><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
+        '<td class="col-actual">' + actualCell + '</td>' +
+        '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
         '<td><div class="na-text"' + (na ? '' : ' style="display:none;"') + '>対象外</div><div class="status-select ' + STATUS_COLOR[status] + ' js-select"' + (na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);
       syncOwner(tr);
-      new MutationObserver(function () { syncOwner(tr); }).observe(tr.children[5], { childList: true, subtree: true, characterData: true });
+      new MutationObserver(function () { syncOwner(tr); }).observe(tr.querySelector('.col-actual'), { childList: true, subtree: true, characterData: true });
       Array.prototype.forEach.call(tr.querySelectorAll('input[type="radio"]'), function (r) {
         r.addEventListener('change', function () {
           var off = r.value === 'なし';

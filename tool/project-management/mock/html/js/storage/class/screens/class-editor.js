@@ -93,7 +93,7 @@
       var c = ClassStore.COURSES[rec.courseCode];
     } else {
       rec = {
-        year: '2026年度', courseYear: '2026年度', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
+        year: '2026', courseYear: '2026', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
         related: [], start: '', end: '', delivery: '', people: '', managers: [],
         locationType: '', locationName: '', memo: '', status: '停止中'
       };

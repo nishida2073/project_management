@@ -129,7 +129,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { year: '2026年度', subject: '', part: '', name: '', delivery: '', days: '', min: '', max: '', monthly: [], status: '稼働中', code: '' };
+      rec = { year: '2026', subject: '', part: '', name: '', delivery: '', days: '', min: '', max: '', monthly: [], status: '稼働中', code: '' };
     }
 
     fill(rec, editing);

@@ -40,8 +40,8 @@
     var ps = ClassStore.practiceStatus(r);
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td>' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
-      '<td>' + esc(r.year) + '</td>' +
+      '<td class="col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
+      '<td>' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
       '<td><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
       '<td>' + esc(r.start) + '</td>' +

@@ -57,7 +57,7 @@
     var managers = [p.pm].concat(p.pl || []).map(function (c) { return StaffStore.nameOf(c); }).filter(Boolean);
     var tr = document.createElement('tr');
     var html = '';
-    html += '<td class="sticky">' + esc(p.year) + '</td>';
+    html += '<td class="sticky">' + esc(String(p.year).replace('年度', '') + '年度') + '</td>';
     html += '<td class="sticky">' + esc(p.code) + '</td>';
     html += '<td class="sticky">' + esc(p.name) + '</td>';
     html += '<td class="sticky">' + esc(customerName) + '</td>';
@@ -117,7 +117,7 @@
     rows.forEach(function (r) {
       var text = (r.code + ' ' + r.name + ' ' + r.customer + ' ' + r.managers.join(' ')).toLowerCase();
       var ok = (!kw || text.indexOf(kw) !== -1) &&
-        (!year || r.year === year) &&
+        (!year || String(r.year).indexOf(year) !== -1) &&
         (!customer || r.customer === customer) &&
         (!manager || r.managers.indexOf(manager) !== -1) &&
         (!overallLabel || r.overall === OVERALL_KEY[overallLabel]);

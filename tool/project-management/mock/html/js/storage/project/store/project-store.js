@@ -2,13 +2,13 @@
   var KEY = 'projectList';
 
   var SEED = [
-    { code: 'PJ-2601', year: '2026年度', sales: 'SL-01', part: 'PT-01', name: 'G新人研修（NTTデータ金融共催）', customer: 'CUS-001', startMonth: '2026/09', pm: 'STF-014', pl: ['STF-021'], memo: '' },
-    { code: 'PJ-2602', year: '2026年度', sales: 'SL-02', part: 'PT-01', name: 'ビジネス基礎研修 定期開催', customer: 'CUS-002', startMonth: '2026/09', pm: 'STF-064', pl: ['STF-069'], memo: '' },
-    { code: 'PJ-2603', year: '2026年度', sales: 'SL-01', part: 'PT-01', name: '次世代リーダー育成プログラム', customer: 'CUS-003', startMonth: '2026/10', pm: 'STF-065', pl: ['STF-070', 'STF-073'], memo: '' },
-    { code: 'PJ-2604', year: '2026年度', sales: 'SL-01', part: 'PT-02', name: 'グローバル基礎コース 公募', customer: '', startMonth: '2026/09', pm: 'STF-066', pl: ['STF-070'], memo: '' },
-    { code: 'PJ-2605', year: '2026年度', sales: 'SL-01', part: 'PT-01', name: 'マネジメント基礎研修', customer: 'CUS-004', startMonth: '2026/10', pm: 'STF-067', pl: ['STF-071'], memo: '' },
-    { code: 'PJ-2606', year: '2026年度', sales: 'SL-01', part: 'PT-01', name: 'システム基盤実践研修', customer: 'CUS-005', startMonth: '2026/09', pm: 'STF-014', pl: ['STF-022'], memo: '' },
-    { code: 'PJ-2607', year: '2026年度', sales: 'SL-02', part: 'PT-01', name: '新人フォローアップ研修', customer: 'CUS-006', startMonth: '2026/11', pm: 'STF-045', pl: ['STF-072'], memo: '' }
+    { code: 'PJ-2601', year: '2026', sales: 'SL-01', part: 'PT-01', name: 'G新人研修（NTTデータ金融共催）', customer: 'CUS-001', startMonth: '2026/09', pm: 'STF-014', pl: ['STF-021'], memo: '' },
+    { code: 'PJ-2602', year: '2026', sales: 'SL-02', part: 'PT-01', name: 'ビジネス基礎研修 定期開催', customer: 'CUS-002', startMonth: '2026/09', pm: 'STF-064', pl: ['STF-069'], memo: '' },
+    { code: 'PJ-2603', year: '2026', sales: 'SL-01', part: 'PT-01', name: '次世代リーダー育成プログラム', customer: 'CUS-003', startMonth: '2026/10', pm: 'STF-065', pl: ['STF-070', 'STF-073'], memo: '' },
+    { code: 'PJ-2604', year: '2026', sales: 'SL-01', part: 'PT-02', name: 'グローバル基礎コース 公募', customer: '', startMonth: '2026/09', pm: 'STF-066', pl: ['STF-070'], memo: '' },
+    { code: 'PJ-2605', year: '2026', sales: 'SL-01', part: 'PT-01', name: 'マネジメント基礎研修', customer: 'CUS-004', startMonth: '2026/10', pm: 'STF-067', pl: ['STF-071'], memo: '' },
+    { code: 'PJ-2606', year: '2026', sales: 'SL-01', part: 'PT-01', name: 'システム基盤実践研修', customer: 'CUS-005', startMonth: '2026/09', pm: 'STF-014', pl: ['STF-022'], memo: '' },
+    { code: 'PJ-2607', year: '2026', sales: 'SL-02', part: 'PT-01', name: '新人フォローアップ研修', customer: 'CUS-006', startMonth: '2026/11', pm: 'STF-045', pl: ['STF-072'], memo: '' }
   ];
 
   function save(list) {
