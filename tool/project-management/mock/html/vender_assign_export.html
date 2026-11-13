@@ -21,20 +21,20 @@
   <iframe src="sidebar.html?active=assign" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
   <div class="main">
     <div class="topbar"></div>
-    <div class="content"><div class="toolbar"><h1>登壇管理一覧</h1></div><div class="table-card"></div></div>
+    <div class="content"><div class="toolbar"><h1>登壇依頼一覧</h1></div><div class="table-card"></div></div>
   </div>
   <div class="overlay">
     <div class="modal modal-wide">
       <div class="modal-header">
         <div>
-          <h2>登壇依頼書出力</h2>
+          <h2>登壇依頼出力</h2>
         </div>
-        <a class="close-x" href="class_vender_list.html">✕</a>
+        <a class="close-x" href="vender_assign_list.html">✕</a>
       </div>
       <div class="modal-body">
         <div class="filter-panel" style="margin-bottom: 16px;">
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
-          <div class="field"><label>依頼残</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-class-map='{"なし":"is-green","あり":"is-orange"}'>すべて<span class="caret">▾</span></div></div>
+          <div class="field"><label>依頼残</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-value="あり">あり<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
         </div>
         <div class="field narrow">
@@ -49,7 +49,7 @@
               <tr>
                 <th><div id="selToggle" class="toggle" style="cursor:pointer;"><span class="knob"></span></div></th>
                 <th>年度</th>
-                <th>コース</th>
+                <th class="fill">コース</th>
                 <th>レッスンNo</th>
                 <th>開始日</th>
                 <th>終了日</th>
@@ -66,8 +66,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <a class="search-btn" href="class_vender_list.html">キャンセル</a>
-        <div class="btn primary" id="printBtn">登壇依頼書を出力</div>
+        <a class="search-btn" href="vender_assign_list.html">キャンセル</a>
+        <div class="btn primary" id="printBtn">エクスポート</div>
       </div>
     </div>
   </div>
@@ -81,7 +81,7 @@
 <script src="js/storage/class/store/class-store.js"></script>
 <script src="js/storage/vender-assign/store/vender-assign-store.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-<script src="js/storage/vender-assign/screens/vender-assign-print.js"></script>
+<script src="js/storage/vender-assign/screens/vender-assign-export.js"></script>
 <script src="js/filter-collapse.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>

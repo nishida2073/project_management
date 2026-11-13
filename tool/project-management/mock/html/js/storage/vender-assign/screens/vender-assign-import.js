@@ -68,7 +68,7 @@
     var courseCol = header.indexOf('コースコード');
     var lessonCol = header.indexOf('レッスンNo');
     if (courseCol < 0 || lessonCol < 0) {
-      return { error: '登壇依頼書の形式ではありません（コースコード、レッスンNo の列が必要です）' };
+      return { error: '登壇依頼の形式ではありません（コースコード、レッスンNo の列が必要です）' };
     }
     var mainCols = [], subCols = [];
     header.forEach(function (h, ci) {

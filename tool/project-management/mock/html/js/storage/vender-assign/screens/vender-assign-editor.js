@@ -45,7 +45,7 @@
     var cls = null;
     ClassStore.load().forEach(function (r) { if (r.id === classId) cls = r; });
     if (!cls) {
-      MessageDialog.show('対象のクラスが見つかりません', function () { location.href = 'class_vender_list.html'; });
+      MessageDialog.show('対象のクラスが見つかりません', function () { location.href = 'vender_assign_list.html'; });
       return;
     }
     var c = ClassStore.COURSES[cls.courseCode];
@@ -91,7 +91,7 @@
         memo: $('memo').value
       };
       VenderAssignStore.upsert(record);
-      location.href = 'class_vender_list.html';
+      location.href = 'vender_assign_list.html';
     });
   }
 

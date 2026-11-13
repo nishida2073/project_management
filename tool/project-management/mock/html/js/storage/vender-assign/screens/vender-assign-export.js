@@ -33,8 +33,8 @@
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
       '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
-      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control main-count" min="0" value="' + remainMain + '" style="width:72px;height:28px;"><span>名</span></div></td>' +
-      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control sub-count" min="0" value="' + remainSub + '" style="width:72px;height:28px;"><span>名</span></div></td>' +
+      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control main-count" min="0" max="' + remainMain + '" value="' + remainMain + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + remainMain + '</span></div></td>' +
+      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control sub-count" min="0" max="' + remainSub + '" value="' + remainSub + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + remainSub + '</span></div></td>' +
       '<td>' + (fits ? '<span class="tag green">なし</span>' : '<span class="tag orange">あり</span>') + '</td>';
     body.appendChild(tr);
   });
@@ -56,6 +56,7 @@
     $('printCount').textContent = visible;
   }
   document.querySelector('.filter-panel .search-btn').addEventListener('click', applyFilter);
+  applyFilter();
 
   function visibleRows() {
     return Array.prototype.filter.call(body.querySelectorAll('tr'), function (tr) { return tr.style.display !== 'none'; });
@@ -69,6 +70,13 @@
     var on = $('selToggle').classList.contains('off');
     visibleRows().forEach(function (tr) { tr.querySelector('.row-check').checked = on; });
     syncSelToggle();
+  });
+  body.addEventListener('input', function (e) {
+    if (!e.target.matches('.main-count, .sub-count')) return;
+    var max = parseInt(e.target.getAttribute('max'), 10) || 0;
+    var v = parseInt(e.target.value, 10);
+    if (isNaN(v) || v < 0) { e.target.value = v < 0 ? 0 : e.target.value; return; }
+    if (v > max) e.target.value = max;
   });
   body.addEventListener('change', function (e) {
     if (e.target.classList.contains('row-check')) syncSelToggle();
@@ -150,7 +158,7 @@
       cell.s = Object.assign({}, st, { alignment: Object.assign({}, st.alignment || {}, { vertical: 'center' }) });
     });
     var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '登壇依頼書');
-    XLSX.writeFile(wb, '登壇依頼書-' + vendor + '.xlsx');
+    XLSX.utils.book_append_sheet(wb, ws, '登壇依頼');
+    XLSX.writeFile(wb, '登壇依頼-' + vendor + '.xlsx');
   });
 })();

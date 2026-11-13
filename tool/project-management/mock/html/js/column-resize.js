@@ -16,7 +16,14 @@
     var fixed = false;
 
     function updateTableWidth() {
-      table.style.width = sumWidths(allHeads) + 'px';
+      var box = table.parentNode.clientWidth - 1;
+      var total = Math.floor(sumWidths(allHeads));
+      var fill = allHeads.filter(function (t) { return t.classList.contains('fill'); })[0];
+      if (fill && box > total) {
+        fill.style.width = (Math.floor(fill.getBoundingClientRect().width) + box - total) + 'px';
+        total = Math.floor(sumWidths(allHeads));
+      }
+      table.style.width = total + 'px';
     }
 
     function fixLayout() {
