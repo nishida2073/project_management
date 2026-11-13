@@ -62,7 +62,8 @@
     var visible = 0;
     body.querySelectorAll('tr').forEach(function (tr) {
       var course = tr.children[1].textContent.toLowerCase();
-      var fitOk = fitVal === 'すべて' || (fitVal === 'なし') === (tr.getAttribute('data-fit') === 'in');
+      var canRequest = parseInt(tr.querySelector('.main-count').max, 10) > 0 || parseInt(tr.querySelector('.sub-count').max, 10) > 0;
+      var fitOk = fitVal === 'すべて' || (fitVal === 'あり') === canRequest;
       var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
       var ok = (!kw || course.indexOf(kw) !== -1) && fitOk && practiceOk;
       tr.style.display = ok ? '' : 'none';
@@ -90,7 +91,7 @@
         var pendSel = reqs.filter(function (q) { return !isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
         var remain = parseInt(tr.getAttribute('data-remain-' + role), 10) || 0;
         var input = tr.querySelector('.' + role + '-count');
-        var val = Math.max(0, remain - pendOthers - befOthers);
+        var val = Math.max(0, remain - pendOthers - pendSel - befOthers);
         input.max = val;
         input.value = val;
         var doneVal = list.filter(function (p) { return p.staff && (!code || p.vendor === code); }).length;
@@ -216,8 +217,11 @@
     XLSX.writeFile(wb, '登壇依頼-' + vendor + '.xlsx');
     exportedIds.forEach(function (x) {
       var rec = VenderAssignStore.find(x.id);
+      var existing = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor === vendorCode; });
+      var exMain = existing.reduce(function (t, r) { return t + (r.main || 0); }, 0);
+      var exSub = existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0);
       var reqs = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; });
-      if (x.main || x.sub) reqs.push({ vendor: vendorCode, main: x.main, sub: x.sub });
+      if (x.main || x.sub || exMain || exSub) reqs.push({ vendor: vendorCode, main: exMain + x.main, sub: exSub + x.sub });
       var notYet = function (p) { return !(p.vendor === vendorCode && !p.staff); };
       rec.mains = (rec.mains || []).filter(notYet);
       rec.subs = (rec.subs || []).filter(notYet);
