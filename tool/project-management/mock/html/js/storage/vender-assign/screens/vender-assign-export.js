@@ -18,22 +18,24 @@
     var a = VenderAssignStore.find(r.id);
     rows.push({ cls: r, assign: a });
     var c = C[r.courseCode] || { name: r.courseCode };
-    var remainMain = Math.max(0, (parseInt(r.mainTeachers, 10) || 0) - a.mains.length);
-    var remainSub = Math.max(0, (parseInt(r.subTeachers, 10) || 0) - a.subs.length);
+    var namedMain = a.mains.filter(function (p) { return p.staff; }).length;
+    var namedSub = a.subs.filter(function (p) { return p.staff; }).length;
+    var remainMain = Math.max(0, (parseInt(r.mainTeachers, 10) || 0) - namedMain);
+    var remainSub = Math.max(0, (parseInt(r.subTeachers, 10) || 0) - namedSub);
     var reqTot = VenderAssignStore.totalRequest(a);
     var pendMain = reqTot.main;
     var pendSub = reqTot.sub;
     var befMain = a.mains.filter(function (p) { return p.vendor && !p.staff; }).length;
     var befSub = a.subs.filter(function (p) { return p.vendor && !p.staff; }).length;
-    var reqMain = Math.max(0, remainMain - pendMain);
-    var reqSub = Math.max(0, remainSub - pendSub);
+    var reqMain = Math.max(0, remainMain - pendMain - befMain);
+    var reqSub = Math.max(0, remainSub - pendSub - befSub);
     var tr = document.createElement('tr');
     tr.setAttribute('data-id', r.id);
     tr.setAttribute('data-practice', ClassStore.practiceStatus(r));
-    var fits = a.mains.length >= (parseInt(r.mainTeachers, 10) || 0) && a.subs.length >= (parseInt(r.subTeachers, 10) || 0);
+    var fits = remainMain === 0 && remainSub === 0;
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
-    tr.setAttribute('data-base-main', reqMain);
-    tr.setAttribute('data-base-sub', reqSub);
+    tr.setAttribute('data-remain-main', remainMain);
+    tr.setAttribute('data-remain-sub', remainSub);
     tr.innerHTML =
       '<td style="text-align: center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
       '<td>' + esc(r.year) + '</td>' +
@@ -42,10 +44,11 @@
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;"><span class="cnt-bef-main" style="color:#d97c1e;font-size:12.5px;">' + befMain + '人</span><span class="cnt-pend-main" style="color:#2f6fed;font-size:12.5px;">' + pendMain + '人</span><span class="cnt-done-main" style="color:#279158;font-size:12.5px;">' + namedMain + '人</span></div></td>' +
+      '<td><input type="number" class="form-control main-count" min="0" max="' + reqMain + '" value="' + reqMain + '" style="width:72px;height:28px;"></td>' +
       '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
-      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control main-count" min="0" max="' + reqMain + '" value="' + reqMain + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + reqMain + '</span><span style="color:#2f6fed;font-size:11px;">' + VenderAssignStore.STATUS.REQUESTING.label + ' ' + pendMain + '</span><span style="color:#d97c1e;font-size:11px;">' + VenderAssignStore.STATUS.BEFORE.label + ' ' + befMain + '</span></div></td>' +
-      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control sub-count" min="0" max="' + reqSub + '" value="' + reqSub + '" style="width:72px;height:28px;"><span>名</span><span style="color:#9aa4b5;font-size:11px;">残 ' + reqSub + '</span><span style="color:#2f6fed;font-size:11px;">' + VenderAssignStore.STATUS.REQUESTING.label + ' ' + pendSub + '</span><span style="color:#d97c1e;font-size:11px;">' + VenderAssignStore.STATUS.BEFORE.label + ' ' + befSub + '</span></div></td>' +
-      '<td>' + (fits ? '<span class="tag green">なし</span>' : '<span class="tag orange">あり</span>') + '</td>';
+      '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;"><span class="cnt-bef-sub" style="color:#d97c1e;font-size:12.5px;">' + befSub + '人</span><span class="cnt-pend-sub" style="color:#2f6fed;font-size:12.5px;">' + pendSub + '人</span><span class="cnt-done-sub" style="color:#279158;font-size:12.5px;">' + namedSub + '人</span></div></td>' +
+      '<td><input type="number" class="form-control sub-count" min="0" max="' + reqSub + '" value="' + reqSub + '" style="width:72px;height:28px;"></td>';
     body.appendChild(tr);
   });
 
@@ -77,16 +80,24 @@
       var id = tr.getAttribute('data-id');
       var row = rows.filter(function (x) { return x.cls.id === id; })[0];
       if (!row) return;
-      var befMain = code ? row.assign.mains.filter(function (p) { return p.vendor === code && !p.staff; }).length : 0;
-      var befSub = code ? row.assign.subs.filter(function (p) { return p.vendor === code && !p.staff; }).length : 0;
-      var mainVal = (parseInt(tr.getAttribute('data-base-main'), 10) || 0) + befMain;
-      var subVal = (parseInt(tr.getAttribute('data-base-sub'), 10) || 0) + befSub;
-      var mi = tr.querySelector('.main-count');
-      var si = tr.querySelector('.sub-count');
-      mi.max = mainVal;
-      mi.value = mainVal;
-      si.max = subVal;
-      si.value = subVal;
+      var reqs = VenderAssignStore.requestsOf(row.assign);
+      ['main', 'sub'].forEach(function (role) {
+        var list = role === 'main' ? row.assign.mains : row.assign.subs;
+        var isOther = function (v) { return !code || v !== code; };
+        var befOthers = list.filter(function (p) { return p.vendor && !p.staff && isOther(p.vendor); }).length;
+        var befSel = list.filter(function (p) { return p.vendor && !p.staff && !isOther(p.vendor); }).length;
+        var pendOthers = reqs.filter(function (q) { return isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
+        var pendSel = reqs.filter(function (q) { return !isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
+        var remain = parseInt(tr.getAttribute('data-remain-' + role), 10) || 0;
+        var input = tr.querySelector('.' + role + '-count');
+        var val = Math.max(0, remain - pendOthers - befOthers);
+        input.max = val;
+        input.value = val;
+        var doneVal = list.filter(function (p) { return p.staff && (!code || p.vendor === code); }).length;
+        tr.querySelector('.cnt-bef-' + role).textContent = code ? befSel + '人' : '-';
+        tr.querySelector('.cnt-pend-' + role).textContent = code ? pendSel + '人' : '-';
+        tr.querySelector('.cnt-done-' + role).textContent = code ? doneVal + '人' : '-';
+      });
     });
   }
   function syncVendor() {
