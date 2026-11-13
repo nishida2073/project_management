@@ -14,7 +14,6 @@
     if (!allHeads.length) return;
     var heads = Array.prototype.slice.call(thead.querySelectorAll('tr th.sticky'));
     var fixed = false;
-    table.style.minWidth = '100%';
 
     function updateTableWidth() {
       table.style.width = sumWidths(allHeads) + 'px';
@@ -29,6 +28,7 @@
         var w = th.getBoundingClientRect().width;
         if (i === yearIdx) w = Math.max(w, YEAR_MIN);
         th.style.width = w + 'px';
+        if (th.textContent.trim() === '操作' || th.classList.contains('no-resize')) th.style.minWidth = th.style.maxWidth = w + 'px';
       });
       table.style.tableLayout = 'fixed';
       updateTableWidth();
@@ -55,6 +55,7 @@
     }
 
     allHeads.forEach(function (th, idx) {
+      if (th.textContent.trim() === '操作' || th.classList.contains('no-resize')) return;
       var h = document.createElement('div');
       h.className = 'col-resize';
       th.appendChild(h);
@@ -78,7 +79,7 @@
           });
           if (touchesSticky) {
             var others = allHeads.filter(function (t) {
-              return !t.classList.contains('sticky') && group.indexOf(t) < 0;
+              return !t.classList.contains('sticky') && group.indexOf(t) < 0 && t.textContent.trim() !== '操作' && !t.classList.contains('no-resize');
             });
             if (others.length) {
               var lastTh = others[others.length - 1];
