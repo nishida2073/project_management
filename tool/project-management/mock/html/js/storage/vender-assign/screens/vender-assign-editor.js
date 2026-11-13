@@ -70,6 +70,7 @@
     $('attendee').value = a.attendee || '';
     $('motivationVendor').value = a.motivationVendor || '';
     $('motivationStaff').value = a.motivationStaff || '';
+    $('memo').value = a.memo || '';
 
     $('addMain').addEventListener('click', function () { makeRow('mainList', { vendor: '', staff: '' }); });
     $('addSub').addEventListener('click', function () { makeRow('subList', { vendor: '', staff: '' }); });
@@ -86,7 +87,8 @@
         attendeeVendor: $('attendeeVendor').value.trim(),
         attendee: $('attendee').value.trim(),
         motivationVendor: $('motivationVendor').value.trim(),
-        motivationStaff: $('motivationStaff').value.trim()
+        motivationStaff: $('motivationStaff').value.trim(),
+        memo: $('memo').value
       };
       VenderAssignStore.upsert(record);
       location.href = 'class_vender_list.html';

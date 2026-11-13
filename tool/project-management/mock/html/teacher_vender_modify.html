@@ -12,7 +12,7 @@
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>講師ベンダー編集</h2>
+          <h2>講師ベンダー更新</h2>
           <div class="sub" id="subLine"></div>
         </div>
         <a class="close-x" href="teacher_vender_list.html">✕</a>
@@ -46,9 +46,10 @@
           <label>メールアドレス</label>
           <input type="email" class="form-control" id="contactEmail">
         </div>
+        <div class="form-section">その他</div>
         <div class="form-field full">
           <label>備考</label>
-          <textarea class="form-control textarea" id="memo"></textarea>
+          <textarea class="form-control textarea auto-grow" data-min="68" id="memo"></textarea>
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
@@ -71,5 +72,6 @@
 <script src="js/toggle.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
+<script src="js/memo-area.js" defer></script>
 </body>
 </html>

@@ -32,11 +32,16 @@
         </div>
         <div class="form-field full" id="passwordField">
           <label>初期パスワード<span class="req">必須</span></label>
-          <input type="password" class="form-control" id="userPassword" placeholder="編集時は空欄のまま変更しません">
+          <input type="password" class="form-control" id="userPassword" placeholder="更新時は空欄のまま変更しません">
         </div>
         <div class="form-field">
           <label>権限<span class="req">必須</span></label>
           <div class="radio-group" id="authorityGroup"></div>
+        </div>
+        <div class="form-section">その他</div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea auto-grow" data-min="68" id="memo"></textarea>
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
@@ -58,5 +63,6 @@
 <script src="js/toggle.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
+<script src="js/memo-area.js" defer></script>
 </body>
 </html>

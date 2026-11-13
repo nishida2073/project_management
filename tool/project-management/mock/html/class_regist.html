@@ -134,9 +134,10 @@
           <label>タスク区分<span class="req">必須</span></label>
           <div class="radio-group" id="taskTypeGroup"></div>
         </div>
+        <div class="form-section">その他</div>
         <div class="form-field full">
           <label>備考</label>
-          <textarea id="memo" class="form-control textarea" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
+          <textarea class="form-control textarea auto-grow" data-min="68" id="memo" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
@@ -177,5 +178,6 @@ ${tags%
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
+<script src="js/memo-area.js" defer></script>
 </body>
 </html>

@@ -40,7 +40,7 @@
       '<td>' + (zan ? '<span class="tag orange">あり</span>' : '<span class="tag green">なし</span>') + '</td>' +
       '<td>' + mainLines + '</td>' +
       '<td>' + subLines + '</td>' +
-      '<td class="row-actions"><a class="search-btn" href="class_vender_modify.html?id=' + encodeURIComponent(r.id) + '">編集</a></td>';
+      '<td class="row-actions"><a class="search-btn" href="class_vender_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);
   });
 

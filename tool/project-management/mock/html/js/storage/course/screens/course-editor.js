@@ -77,6 +77,7 @@
     $('maxPeople').querySelector('input').value = rec.max === undefined ? '' : rec.max;
     var inputs = monthInputs();
     inputs.forEach(function (i, idx) { i.value = (rec.monthly && rec.monthly[idx]) || 0; });
+    $('memo').value = rec.memo || '';
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
     row.setAttribute('data-off', '停止中');
@@ -100,6 +101,7 @@
       min: $('minPeople').querySelector('input').value.trim(),
       max: $('maxPeople').querySelector('input').value.trim(),
       monthly: monthInputs().map(function (i) { return parseInt(i.value, 10) || 0; }),
+      memo: $('memo').value,
       status: off ? '停止中' : '稼働中'
     };
   }
@@ -160,7 +162,8 @@
         code: v.code, year: v.year, subject: v.subject, part: v.part,
         name: v.name, delivery: v.delivery, days: parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
         max: v.max === '' ? '' : parseInt(v.max, 10), status: v.status, monthly: v.monthly,
-        actual: editing ? list[idx].actual : 0
+        actual: editing ? list[idx].actual : 0,
+        memo: v.memo
       };
       if (editing) {
         list[idx] = item;

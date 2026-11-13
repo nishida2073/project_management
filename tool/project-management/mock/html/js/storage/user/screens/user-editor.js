@@ -15,6 +15,7 @@
     $('userEmail').value = rec.email || '';
     $('userPassword').value = '';
     checkRadio('authority', rec.authority || 'AU-02');
+    $('memo').value = rec.memo || '';
     var off = rec.status === '停止中';
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
@@ -58,6 +59,7 @@
         name: $('userName').value.trim(),
         email: $('userEmail').value.trim(),
         authority: getRadio('authority'),
+        memo: $('memo').value,
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       var password = $('userPassword').value;

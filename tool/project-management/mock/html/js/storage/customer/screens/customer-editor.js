@@ -38,6 +38,8 @@
     $('customerId').textContent = rec.id || '自動採番';
     $('customerName').value = rec.name || '';
     $('staff').value = rec.staff || '';
+    $('email').value = rec.email || '';
+    $('memo').value = rec.memo || '';
     var statusOff = rec.status === '停止中';
     $('statusRow').setAttribute('data-on', '稼働中');
     $('statusRow').setAttribute('data-off', '停止中');
@@ -48,6 +50,8 @@
       var v = {
         name: $('customerName').value.trim(),
         staff: $('staff').value.trim(),
+        email: $('email').value.trim(),
+        memo: $('memo').value,
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       var missing = [];

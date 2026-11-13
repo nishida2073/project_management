@@ -23,7 +23,7 @@
         </div>
         <div class="form-field"></div>
         <div class="form-field">
-          <label>会社名<span class="req">必須</span></label>
+          <label>実施担当ベンダー名<span class="req">必須</span></label>
           <input type="text" class="form-control" id="staffVenderName">
         </div>
         <div class="form-field"></div>
@@ -45,9 +45,10 @@
           <label>メールアドレス</label>
           <input type="email" class="form-control" id="contactEmail">
         </div>
+        <div class="form-section">その他</div>
         <div class="form-field full">
           <label>備考</label>
-          <textarea class="form-control textarea" id="memo"></textarea>
+          <textarea class="form-control textarea auto-grow" data-min="68" id="memo"></textarea>
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
@@ -68,5 +69,6 @@
 <script src="js/toggle.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
+<script src="js/memo-area.js" defer></script>
 </body>
 </html>

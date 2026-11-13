@@ -3,8 +3,8 @@
   var PREFIX = 'AU-';
 
   var SEED = [
-    { code: 'AU-01', name: '管理者', color: 'blue' },
-    { code: 'AU-02', name: '一般ユーザー', color: 'gray' }
+    { code: 'AU-01', name: '管理者', color: 'purple' },
+    { code: 'AU-02', name: '一般', color: 'teal' }
   ];
 
   function save(list) {

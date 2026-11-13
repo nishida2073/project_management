@@ -12,7 +12,7 @@
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>顧客編集</h2>
+          <h2>顧客更新</h2>
           <div class="sub" id="subLine"></div>
         </div>
         <a class="close-x" href="customer_list.html">✕</a>
@@ -27,9 +27,19 @@
           <label>顧客名<span class="req">必須</span></label>
           <input type="text" class="form-control" id="customerName">
         </div>
-        <div class="form-field full">
-          <label>担当者</label>
+        <div class="form-section">問い合わせ窓口</div>
+        <div class="form-field">
+          <label>窓口担当者名</label>
           <input type="text" class="form-control" id="staff">
+        </div>
+        <div class="form-field">
+          <label>メールアドレス</label>
+          <input type="email" class="form-control" id="email">
+        </div>
+        <div class="form-section">その他</div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea auto-grow" data-min="68" id="memo"></textarea>
         </div>
         <div class="form-field toggle-field">
           <label>稼働状況</label>
@@ -50,5 +60,6 @@
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
+<script src="js/memo-area.js" defer></script>
 </body>
 </html>

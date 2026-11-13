@@ -16,7 +16,7 @@
     <div class="modal">
       <div class="modal-header">
         <div>
-          <h2>登壇管理編集</h2>
+          <h2>登壇管理更新</h2>
           <div class="sub" id="subLine"></div>
         </div>
         <a class="close-x" href="class_vender_list.html">✕</a>
@@ -52,6 +52,11 @@
           <label>動機付け担当者名</label>
           <input type="text" class="form-control" id="motivationStaff" placeholder="例）山田 太郎">
         </div>
+        <div class="form-section">その他</div>
+        <div class="form-field full">
+          <label>備考</label>
+          <textarea class="form-control textarea auto-grow" data-min="68" id="memo" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea>
+        </div>
       </div>
       <div class="modal-footer">
         <a class="search-btn" href="class_vender_list.html">キャンセル</a>
@@ -72,5 +77,6 @@
 <script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
+<script src="js/memo-area.js" defer></script>
 </body>
 </html>

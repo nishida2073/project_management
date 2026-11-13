@@ -38,7 +38,7 @@
       '<td>' + (r.locationType ? '<span class="tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +
       '<td><span class="badge overall-badge ' + (r.status === '停止中' ? 'gray' : 'green') + '">' + (r.status === '停止中' ? '停止中' : '稼働中') + '</span></td>' +
-      '<td class="row-actions"><a class="search-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">編集</a></td>';
+      '<td class="row-actions"><a class="search-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);
   });
 

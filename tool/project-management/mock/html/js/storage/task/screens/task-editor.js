@@ -50,7 +50,7 @@
   }
 
   function fill(rec) {
-    $('taskId').value = rec.id || '';
+    $('taskId').textContent = rec.id || '自動採番';
     $('taskName').value = rec.name || '';
     $('order').value = rec.order === undefined ? '' : rec.order;
     $('days').value = rec.days === undefined ? '' : rec.days;
@@ -61,6 +61,7 @@
     $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     checkRadio('taskKind', (rec.kinds || [])[0] || '');
     checkRadio('workType', rec.workType || '');
+    $('memo').value = rec.memo || '';
     var internal = rec.company === StaffVenderStore.INTERNAL;
     checkRadio('affiliation', internal ? '社内' : 'パートナー');
     setCompany(internal ? '' : StaffVenderStore.nameOf(rec.company));
@@ -84,7 +85,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { id: TaskStore.nextId(list), name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', workType: '', status: '稼働中' };
+      rec = { id: '', name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', workType: '', status: '稼働中' };
     }
     fill(rec);
 
@@ -122,6 +123,7 @@
         company: affiliation === '社内' ? StaffVenderStore.INTERNAL : StaffVenderStore.codeOf(companyText),
         days: parseInt(daysV, 10),
         workType: workType,
+        memo: $('memo').value,
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       if (editing) {

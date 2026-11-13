@@ -1,17 +1,18 @@
 (function () {
-  var MIN = 30;
+  var SELECTOR = 'textarea.memo-area, textarea.auto-grow';
 
   function fit(t) {
+    var min = parseInt(t.getAttribute('data-min'), 10) || 30;
     t.style.height = 'auto';
-    t.style.height = Math.max(MIN, t.scrollHeight + 2) + 'px';
+    t.style.height = Math.max(min, t.scrollHeight + 2) + 'px';
   }
 
   function fitAll() {
-    Array.prototype.forEach.call(document.querySelectorAll('textarea.memo-area'), fit);
+    Array.prototype.forEach.call(document.querySelectorAll(SELECTOR), fit);
   }
 
   document.addEventListener('input', function (e) {
-    if (e.target && e.target.matches && e.target.matches('textarea.memo-area')) fit(e.target);
+    if (e.target && e.target.matches && e.target.matches(SELECTOR)) fit(e.target);
   });
 
   fitAll();

@@ -51,7 +51,7 @@
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       var missing = [];
-        if (!v.name) missing.push('会社名');
+        if (!v.name) missing.push('実施担当ベンダー名');
       if (missing.length) {
         MessageDialog.required(missing);
         return;

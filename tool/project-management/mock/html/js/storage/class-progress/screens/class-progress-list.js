@@ -134,7 +134,7 @@
       var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' title="' + esc(s.memo) + '"' : '');
       html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + attrs + '>' + chip(s) + '</td>';
     });
-    html += '<td class="row-actions"><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">編集</a></td>';
+    html += '<td class="row-actions"><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">更新</a></td>';
     tr.innerHTML = html;
     tr.setAttribute('data-owners', owners.join('|'));
     body.appendChild(tr);

@@ -15,6 +15,7 @@
     $('locationName').value = rec.name || '';
     $('tel').value = rec.tel || '';
     $('address').value = rec.address || '';
+    $('memo').value = rec.memo || '';
     var off = rec.status === '停止中';
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
@@ -29,6 +30,7 @@
       name: $('locationName').value.trim(),
       tel: $('tel').value.trim(),
       address: $('address').value.trim(),
+      memo: $('memo').value,
       status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
     };
   }

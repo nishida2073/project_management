@@ -71,7 +71,7 @@
       var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' title="' + esc(s.memo) + '"' : '');
       html += '<td' + attrs + '>' + chip(s) + '</td>';
     });
-    html += '<td class="row-actions"><a class="search-btn" href="project_progress_modify.html?id=' + encodeURIComponent(p.code) + '">編集</a></td>';
+    html += '<td class="row-actions"><a class="search-btn" href="project_progress_modify.html?id=' + encodeURIComponent(p.code) + '">更新</a></td>';
     tr.innerHTML = html;
     body.appendChild(tr);
     rows.push({

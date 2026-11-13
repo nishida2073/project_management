@@ -36,6 +36,7 @@
     box.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
     (rec.versions || []).forEach(function (v) { addVersionChip(v); });
     $('subjectName').value = rec.name || '';
+    $('memo').value = rec.memo || '';
     var off = rec.status === '停止中';
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
@@ -49,6 +50,7 @@
       type: getRadio('subjectType'),
       name: $('subjectName').value.trim(),
       versions: versionValues(),
+      memo: $('memo').value,
       status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
     };
   }

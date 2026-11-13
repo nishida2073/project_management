@@ -141,6 +141,7 @@ th.grp-none { background: #f6f8fb !important; }
 /* リンクボタン・操作列 */
 td.row-actions { white-space: nowrap; text-align: center; }
 td.row-actions > .search-btn { display: inline-flex; }
+td.row-actions > .search-btn { height: 22px; padding: 0 10px; font-size: 11px; }
 .table-scroll thead th:last-child, .scroll-outer thead th:last-child { position: sticky; right: 0; top: 0; z-index: 4; box-shadow: -1px 0 0 #e6eaf1; }
 .table-scroll tbody td.row-actions, .scroll-outer tbody td.row-actions { position: sticky; right: 0; z-index: 1; background: #ffffff; box-shadow: -1px 0 0 #eef1f6; }
 .link-btn { font-size: 12px; color: #2f6fed; font-weight: 700; padding: 4px 8px; border: 1px solid #d7e3fb; border-radius: 5px; background: #f4f8ff; text-decoration: none; cursor: default; display: inline-block; }
@@ -248,6 +249,7 @@ a.close-x { cursor: pointer; }
 .status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
 input.memo-input { color: #333c4d; background: #ffffff; }
 table.step-table { min-width: 0 !important; }
+textarea.form-control.textarea.auto-grow { padding: 8px 12px; }
 textarea.form-control.textarea.memo-area { width: 360px; height: 30px; min-height: 30px; padding: 4px 8px; resize: vertical; padding: 6px 8px; font-size: 12px; color: #333c4d; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; font-family: inherit; }
 .memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
 
@@ -390,6 +392,7 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 
 /* 稼働状況トグル */
 .form-field.toggle-field { margin-top: 28px; }
+.form-field.full + .form-field.toggle-field { margin-top: 12px; }
 .toggle-row { display: flex; align-items: center; gap: 10px; height: 36px; user-select: none; }
 .toggle-row .toggle { cursor: pointer; }
 .toggle { width: 38px; height: 20px; border-radius: 12px; background: #33b070; position: relative; transition: background .15s; }

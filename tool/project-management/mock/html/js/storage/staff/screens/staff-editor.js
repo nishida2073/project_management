@@ -45,6 +45,7 @@
     setChecks('roles', rec.roles);
     setChecks('jobTypes', rec.jobTypes);
     setChecks('positions', rec.positions);
+    $('memo').value = rec.memo || '';
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
     row.setAttribute('data-off', '停止中');
@@ -91,6 +92,7 @@
         roles: getChecks('roles'),
         jobTypes: getChecks('jobTypes'),
         positions: getChecks('positions'),
+        memo: $('memo').value,
         status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
       };
       var missing = [];
