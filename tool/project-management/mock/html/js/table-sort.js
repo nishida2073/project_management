@@ -3,7 +3,10 @@
   var NUM_RE = /^-?\d+(\.\d+)?/;
 
   function textOf(td) {
-    return td ? td.textContent.replace(/\s+/g, ' ').trim() : '';
+    if (!td) return '';
+    var input = td.querySelector('input:not([type="checkbox"])');
+    if (input) return String(input.value).trim();
+    return td.textContent.replace(/\s+/g, ' ').trim();
   }
 
   function keyOf(text) {

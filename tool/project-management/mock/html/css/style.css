@@ -95,7 +95,8 @@ table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 thead th { background: #f6f8fb; color: #5a6376; text-align: center; padding: 8px 10px; font-weight: 700; border-bottom: 1px solid #e6eaf1; white-space: nowrap; }
 th.sortable { cursor: pointer; user-select: none; }
 th.sortable:hover { color: #1c2b45; }
-th.sortable::after { content: '▲\A▼'; white-space: pre; display: inline-block; width: 10px; text-align: center; margin-left: 6px; font-size: 7px; line-height: 7px; color: #9aa4b5; vertical-align: middle; }
+th.sortable { padding-right: 24px; }
+th.sortable::after { content: '▲\A▼'; white-space: pre; position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 10px; text-align: center; font-size: 7px; line-height: 7px; color: #9aa4b5; }
 th.sort-asc::after, th.sort-desc::after { white-space: normal; font-size: 10px; line-height: 1; color: #2f6fed; }
 th.sort-asc::after { content: '▲'; }
 th.sort-desc::after { content: '▼'; }

@@ -31,10 +31,10 @@
       '<td><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
-      '<td>' + esc(r.mainTeachers || '-') + '</td>' +
-      '<td>' + esc(r.subTeachers || '-') + '</td>' +
-      '<td><input type="number" class="form-control main-count" min="0" value="' + remainMain + '" style="width:72px;"></td>' +
-      '<td><input type="number" class="form-control sub-count" min="0" value="' + remainSub + '" style="width:72px;"></td>' +
+      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
+      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
+      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control main-count" min="0" value="' + remainMain + '" style="width:72px;height:28px;"><span>名</span></div></td>' +
+      '<td><div style="display:flex;align-items:center;gap:4px;"><input type="number" class="form-control sub-count" min="0" value="' + remainSub + '" style="width:72px;height:28px;"><span>名</span></div></td>' +
       '<td>' + (fits ? '<span class="tag green">なし</span>' : '<span class="tag orange">あり</span>') + '</td>';
     body.appendChild(tr);
   });

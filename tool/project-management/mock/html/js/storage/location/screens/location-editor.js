@@ -11,7 +11,7 @@
 
   function fill(rec) {
     $('locationCode').textContent = rec.code || '自動採番';
-    checkRadio('locationType', rec.type || 'LT-01');
+    checkRadio('locationType', rec.type || '');
     $('locationName').value = rec.name || '';
     $('tel').value = rec.tel || '';
     $('address').value = rec.address || '';
@@ -54,7 +54,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', type: 'LT-01', name: '', tel: '', address: '', status: '稼働中' };
+      rec = { code: '', type: '', name: '', tel: '', address: '', status: '稼働中' };
     }
 
     renderRadios(document.getElementById('locationTypeGroup'), 'locationType', LocationTypeStore.load());

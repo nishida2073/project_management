@@ -31,9 +31,9 @@
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + (r.delivery ? '<span class="tag ' + DeliveryTypeStore.colorOf(r.delivery) + '">' + esc(DeliveryTypeStore.nameOf(r.delivery)) + '</span>' : '') + '</td>' +
-      '<td>' + esc(r.people) + '</td>' +
-      '<td>' + esc(r.mainTeachers || '-') + '</td>' +
-      '<td>' + esc(r.subTeachers || '-') + '</td>' +
+      '<td>' + (r.people ? esc(r.people) + '名' : '') + '</td>' +
+      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
+      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
       '<td>' + (r.managers || []).map(function (c) { return esc(StaffStore.nameOf(c)); }).join('<br>') + '</td>' +
       '<td>' + (r.locationType ? '<span class="tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +

@@ -35,8 +35,8 @@
       '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
-      '<td>' + esc(r.mainTeachers || '-') + '</td>' +
-      '<td>' + esc(r.subTeachers || '-') + '</td>' +
+      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
+      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
       '<td>' + (zan ? '<span class="tag orange">あり</span>' : '<span class="tag green">なし</span>') + '</td>' +
       '<td>' + mainLines + '</td>' +
       '<td>' + subLines + '</td>' +
