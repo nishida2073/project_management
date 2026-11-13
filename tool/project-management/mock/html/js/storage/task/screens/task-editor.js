@@ -106,7 +106,7 @@
         if (!workType) missing.push('作業区分');
         if (!affiliation) missing.push('実務担当区分');
         if (orderV === '') missing.push('作業順');
-        if (daysV === '') missing.push('日数');
+        if (daysV === '') missing.push('予定開始日数');
       if (missing.length) {
         MessageDialog.required(missing);
         return;
