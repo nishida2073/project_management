@@ -41,13 +41,13 @@
     var tr = document.createElement('tr');
     var custCode = (ClassStore.PROJECTS[r.projectCode] || {}).customer;
     tr.innerHTML =
-      '<td class="col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
-      '<td>' + esc(custCode ? CustomerStore.nameOf(custCode) : '-') + '</td>' +
-      '<td>' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
-      '<td><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
-      '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
-      '<td>' + esc(r.start) + '</td>' +
-      '<td>' + esc(r.end) + '</td>' +
+      '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
+      '<td class="sticky">' + esc(custCode ? CustomerStore.nameOf(custCode) : '-') + '</td>' +
+      '<td class="sticky">' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
+      '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
+      '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
+      '<td class="sticky">' + esc(r.start) + '</td>' +
+      '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '人' : '-') + '</td>' +
       '<td>' + mainLines + '</td>' +
       '<td>' + (r.subTeachers ? esc(r.subTeachers) + '人' : '-') + '</td>' +
