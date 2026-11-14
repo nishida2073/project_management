@@ -21,7 +21,7 @@
         <div class="field"><label>キーワード検索</label><input type="text" id="fKeyword" class="field-control-input" placeholder="案件コード・案件名で検索"></div>
         <div class="field"><label>顧客名</label><div class="control wide js-select" id="fCustomer" data-hide-class="col-customer" data-options="すべて">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>管理担当者</label><div class="control js-select" id="fManager" data-hide-class="col-manager" data-options="すべて">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>全体進捗</label><div class="control small js-select" id="fOverall" data-hide-class="col-overall" data-options="すべて,実施前,実施中,完了,遅延">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>タスク進捗</label><div class="control small js-select" id="fOverall" data-hide-class="col-overall" data-options="すべて,未着手,進行中,完了,遅延">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn" id="fSearch">検索</div>
       </div>
       <div class="table-card">
@@ -36,7 +36,7 @@
               <th class="sticky col-customer">顧客名</th>
               <th class="sticky col-manager">管理担当者</th>
               <th class="sticky">実施開始月</th>
-              <th class="sticky col-overall">全体進捗</th>
+              <th class="sticky col-overall">タスク進捗</th>
               <th>操作</th>
             </tr>
           </thead>

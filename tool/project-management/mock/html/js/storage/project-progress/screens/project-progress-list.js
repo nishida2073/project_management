@@ -32,7 +32,7 @@
 
   function overall(key) {
     if (key === 'na') return '<span class="na-text">対象外</span>';
-    var label = { done: '完了', progress: '実施中', wait: '実施前', delay: '遅延' }[key];
+    var label = { done: '完了', progress: '進行中', wait: '未着手', delay: '遅延' }[key];
     var color = { done: 'green', progress: 'blue', wait: 'gray', delay: 'red' }[key];
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
@@ -97,7 +97,7 @@
   setOptions('fCustomer', customers);
   setOptions('fManager', managerNames);
 
-  var OVERALL_KEY = { '実施前': 'wait', '実施中': 'progress', '完了': 'done', '遅延': 'delay' };
+  var OVERALL_KEY = { '未着手': 'wait', '進行中': 'progress', '完了': 'done', '遅延': 'delay' };
 
   function val(id) {
     var el = document.getElementById(id);

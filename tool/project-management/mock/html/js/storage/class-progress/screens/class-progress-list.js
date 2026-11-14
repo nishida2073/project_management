@@ -57,7 +57,7 @@
     var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'done'; });
     var any = applicable.some(function (s) { return s.status === 'done' || s.status === 'progress'; });
     var key = late ? 'delay' : (all ? 'done' : (any ? 'progress' : 'wait'));
-    var label = { done: '完了', progress: '実施中', wait: '実施前', delay: '遅延' }[key];
+    var label = { done: '完了', progress: '進行中', wait: '未着手', delay: '遅延' }[key];
     var color = { done: 'green', progress: 'blue', wait: 'gray', delay: 'red' }[key];
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
