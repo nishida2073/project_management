@@ -94,6 +94,9 @@
         var val = Math.max(0, remain - pendOthers - pendSel - befOthers);
         input.max = val;
         input.value = val;
+        var willReplace = !!code && befSel > 0;
+        input.classList.toggle('replace-mark', willReplace);
+        input.title = willReplace ? '予定講師数を超過しているため' + val + '人に変更しています。' : '';
         var doneVal = list.filter(function (p) { return p.staff && (!code || p.vendor === code); }).length;
         tr.querySelector('.cnt-bef-' + role).textContent = code ? befSel + '人' : '-';
         tr.querySelector('.cnt-pend-' + role).textContent = code ? pendSel + '人' : '-';
@@ -222,9 +225,15 @@
       var exSub = existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0);
       var reqs = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; });
       if (x.main || x.sub || exMain || exSub) reqs.push({ vendor: vendorCode, main: exMain + x.main, sub: exSub + x.sub });
-      var notYet = function (p) { return !(p.vendor === vendorCode && !p.staff); };
-      rec.mains = (rec.mains || []).filter(notYet);
-      rec.subs = (rec.subs || []).filter(notYet);
+      var dropBefore = function (list, n) {
+        var left = n;
+        return (list || []).filter(function (p) {
+          if (left > 0 && p.vendor === vendorCode && !p.staff) { left--; return false; }
+          return true;
+        });
+      };
+      rec.mains = dropBefore(rec.mains, x.main);
+      rec.subs = dropBefore(rec.subs, x.sub);
       rec.requests = reqs;
       delete rec.requested;
       delete rec.requestMain;

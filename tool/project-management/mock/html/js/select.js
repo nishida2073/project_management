@@ -214,7 +214,19 @@
       var menu = el.querySelector('.select-menu');
       var box = el.closest('.modal-body');
       var limit = box ? box.getBoundingClientRect().bottom : window.innerHeight;
-      if (menu && menu.getBoundingClientRect().bottom > limit) menu.classList.add('up');
+      if (menu) {
+        var top = box ? box.getBoundingClientRect().top : 0;
+        var rect = el.getBoundingClientRect();
+        var below = limit - rect.bottom - 8;
+        var above = rect.top - top - 8;
+        var height = menu.getBoundingClientRect().height;
+        if (height > below && above > below) menu.classList.add('up');
+        var avail = menu.classList.contains('up') ? above : below;
+        if (height > avail) {
+          menu.style.maxHeight = Math.max(120, avail) + 'px';
+          menu.style.overflowY = 'auto';
+        }
+      }
       var searchInput = menu ? menu.querySelector('.select-search input') : null;
       if (searchInput) searchInput.focus();
     });

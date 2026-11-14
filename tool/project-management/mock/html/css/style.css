@@ -462,3 +462,7 @@ td .search-btn { width: 64px; justify-content: center; }
 .sub-row .sub-status { position: absolute; top: -9px; left: 10px; margin: 0; }
 .add-row { margin-top: 10px; width: fit-content; }
 .add-related-class-row { margin-top: 10px; width: fit-content; }
+input.form-control.replace-mark { border-color: #d97c1e; background: #fff2e2; }
+.input-dialog-actions > .search-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
+.input-dialog-actions > .search-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
+.input-dialog-actions > :first-child { margin-right: auto; }
