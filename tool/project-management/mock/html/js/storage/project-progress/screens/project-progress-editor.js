@@ -36,14 +36,14 @@ function setDisabledRow(tr, off) {
       var tr = document.createElement('tr');
       tr.setAttribute('data-no', i + 1);
       tr.innerHTML =
-        '<td class="sticky" style="text-align: center; font-weight: 700;">' + (i + 1) + '</td>' +
+        '<td class="sticky" style="text-align: center;">' + (i + 1) + '</td>' +
         '<td class="step-name sticky">' + esc(name) + '</td>' +
         '<td><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + i + '" value="あり"' + (s.na ? '' : ' checked') + '><span>あり</span></label>' +
           '<label class="target-opt off"><input type="radio" name="target' + i + '" value="なし"' + (s.na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
         '<td><div class="mini-control js-date plan-input">' + esc(s.plan || '') + '<span class="caret">▾</span></div></td>' +
         '<td><div class="mini-control js-date actual-input">' + esc(s.actual || '') + '<span class="caret">▾</span></div></td>' +
         '<td><div class="na-text"' + (s.na ? '' : ' style="display:none;"') + '>対象外</div>' +
-          '<div class="status-select ' + STATUS_COLOR[s.status] + ' js-select status-input"' + (s.na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[s.status] + '<span class="caret">▾</span></div></td>' +
+          '<div class="status-select status-combo ' + STATUS_COLOR[s.status] + ' js-select status-input"' + (s.na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[s.status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(s.memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, s.na);

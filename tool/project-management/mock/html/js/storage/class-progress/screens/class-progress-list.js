@@ -117,6 +117,7 @@
       .map(function (s) { return StaffStore.nameOf(s.owner); })
       .filter(function (n, i, a) { return n && a.indexOf(n) === i; });
     var tr = document.createElement('tr');
+    tr.setAttribute('data-id', c.id);
     var html = '';
     var ps = ClassStore.practiceStatus(c);
     html += '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
@@ -175,4 +176,79 @@
     listTable.style.width = total + 'px';
   };
   window.applyColumnFilters();
+  var STATUS_OF_LABEL = { '実施前': 'wait', '実施中': 'progress', '完了': 'done' };
+  var LABEL_OF_STATUS = { wait: '実施前', progress: '実施中', done: '完了' };
+  var STATUS_COLOR_OF = { done: 'green', progress: 'blue', wait: 'gray' };
+  function stepOwnerNames(task) {
+    var company = task ? task.company : StaffVenderStore.INTERNAL;
+    return StaffStore.load().filter(function (s) {
+      if (s.status === '停止中') return false;
+      if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
+      if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
+      if (company === StaffVenderStore.INTERNAL) return s.affiliation === '社内';
+      return s.affiliation === 'パートナー' && s.company === company;
+    }).map(function (s) { return s.name; });
+  }
+  function ownTextOf(el) {
+    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').trim();
+  }
+  function valueOf(el) {
+    var v = el.getAttribute('data-value');
+    if (v === null || v === '') v = ownTextOf(el);
+    v = String(v || '').trim();
+    return v === '選択してください' ? '' : v;
+  }
+  function openStepDialog(classId, i) {
+    var all = ProgressStore.load();
+    var sv = (all[classId] || {})[i + 1] || {};
+    var cls = ClassStore.load().filter(function (c) { return c.id === classId; })[0] || {};
+    var course = ClassStore.COURSES[cls.courseCode] || {};
+    var classInfo = (course.name || cls.courseCode || '') + '　' + (cls.lessonNo || '') + '　' + (cls.start || '') + '〜' + (cls.end || '');
+    var task = SORTED[i];
+    var ownerName = StaffStore.nameOf(sv.owner || '');
+    var owners = stepOwnerNames(task);
+    if (ownerName && owners.indexOf(ownerName) === -1) owners.unshift(ownerName);
+    var overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = '<div class="input-dialog">' +
+      '<div class="input-dialog-title">' + esc(DISPLAY_NO[i] + '：' + task.name) + '</div>' +
+      '<div style="font-size:12px;color:#6c7688;margin-bottom:8px;">' + esc(classInfo) + '</div>' +
+      '<label class="input-dialog-label">予定日</label>' +
+      '<div class="form-control js-date" id="sdPlan">' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
+      '<label class="input-dialog-label">実施日</label>' +
+      '<div class="form-control js-date" id="sdActual">' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
+      '<label class="input-dialog-label">実施担当者</label>' +
+      '<div class="form-control js-select" id="sdOwner" data-options="' + esc(owners.join(',')) + '">' + esc(ownerName || '選択してください') + '<span class="caret">▾</span></div>' +
+      '<label class="input-dialog-label">状態</label>' +
+      '<div class="status-select status-combo ' + STATUS_COLOR_OF[sv.status || 'wait'] + ' js-select" id="sdStatus" data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\' data-value="' + esc(LABEL_OF_STATUS[sv.status || 'wait']) + '">' + esc(LABEL_OF_STATUS[sv.status || 'wait']) + '<span class="caret">▾</span></div>' +
+      '<label class="input-dialog-label">備考</label>' +
+      '<textarea class="form-control textarea" id="sdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
+      '<div class="input-dialog-actions"><div class="search-btn sd-cancel">キャンセル</div><div class="btn primary sd-ok">保存</div></div></div>';
+    document.body.appendChild(overlay);
+    overlay.querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
+    overlay.querySelectorAll('.js-date').forEach(function (el) { window.bindDatePicker(el); });
+    function close() { overlay.remove(); }
+    overlay.querySelector('.sd-cancel').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    overlay.querySelector('.sd-ok').addEventListener('click', function () {
+      var s = ProgressStore.load();
+      var cur = s[classId] || {};
+      var picked = valueOf(overlay.querySelector('#sdOwner'));
+      cur[i + 1] = Object.assign({}, cur[i + 1] || {}, {
+        status: STATUS_OF_LABEL[valueOf(overlay.querySelector('#sdStatus'))] || 'wait',
+        plan: ownTextOf(overlay.querySelector('#sdPlan')),
+        actual: ownTextOf(overlay.querySelector('#sdActual')),
+        owner: picked ? StaffStore.codeOf(picked) : '',
+        memo: overlay.querySelector('#sdMemo').value
+      });
+      s[classId] = cur;
+      ProgressStore.save(s);
+      location.reload();
+    });
+  }
+  body.addEventListener('click', function (e) {
+    var td = e.target.closest('td[data-step]');
+    if (!td || td.textContent.indexOf('対象外') !== -1) return;
+    openStepDialog(td.parentNode.getAttribute('data-id'), Number(td.getAttribute('data-step')));
+  });
 })();

@@ -38,7 +38,7 @@ function setDisabledRow(tr, off) {
     var classStart = new Date(cls.start);
     var courseInfo = ClassStore.COURSES[cls.courseCode];
     var projectInfo = ClassStore.PROJECTS[cls.projectCode];
-    document.getElementById('subLine').textContent = cls.lessonNo + '　' + (courseInfo ? courseInfo.name : cls.courseCode) + '　' + cls.start + '〜' + cls.end;
+    document.getElementById('subLine').textContent = (courseInfo ? courseInfo.name : cls.courseCode) + '　' + cls.lessonNo + '　' + cls.start + '〜' + cls.end;
     var tasks = TaskStore.load();
     var sortedTasks = tasks.slice().sort(function (a, b) {
       var ka = a.kinds[0] || '';
@@ -102,15 +102,15 @@ function setDisabledRow(tr, off) {
       var tr = document.createElement('tr');
       tr.setAttribute('data-no', s.no);
       tr.innerHTML =
-        '<td class="sticky" style="text-align: center; font-weight: 700;">' + displayNo[i] + '</td>' +
+        '<td class="sticky" style="text-align: center;">' + displayNo[i] + '</td>' +
         '<td class="step-name sticky">' + esc(name) + '</td>' +
         '<td class="sticky"><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + s.no + '" value="あり"' + (na ? '' : ' checked') + '><span>あり</span></label>' +
           '<label class="target-opt off"><input type="radio" name="target' + s.no + '" value="なし"' + (na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
-        '<td style="white-space: nowrap; font-weight: 700;">' + esc(company) + '</td>' +
+        '<td style="white-space: nowrap;">' + esc(company) + '</td>' +
         '<td>' + planCell + '</td>' +
         '<td class="col-actual">' + actualCell + '</td>' +
         '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="na-text"' + (na ? '' : ' style="display:none;"') + '>対象外</div><div class="status-select ' + STATUS_COLOR[status] + ' js-select"' + (na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="na-text"' + (na ? '' : ' style="display:none;"') + '>対象外</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + (na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);

@@ -1,3 +1,5 @@
 .mini-control.wide { min-width: 120px; }
 .status-select { min-width: 96px; }
 .memo-input { min-width: 120px; }
+
+.status-combo { font-size: 13px; font-weight: 400; height: 36px; }
