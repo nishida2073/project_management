@@ -33,8 +33,8 @@
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + (r.delivery ? '<span class="tag ' + DeliveryTypeStore.colorOf(r.delivery) + '">' + esc(DeliveryTypeStore.nameOf(r.delivery)) + '</span>' : '') + '</td>' +
       '<td>' + (r.people ? esc(r.people) + '人' : '') + '</td>' +
-      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '人' : '-') + '</td>' +
-      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '人' : '-') + '</td>' +
+      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '人' + ' <span style="font-size:11px;color:#9aa4b5;">（' + esc(r.registMainTeachers !== undefined ? r.registMainTeachers : r.mainTeachers) + '人）</span>' : '-') + '</td>' +
+      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '人' + ' <span style="font-size:11px;color:#9aa4b5;">（' + esc(r.registSubTeachers !== undefined ? r.registSubTeachers : r.subTeachers) + '人）</span>' : '-') + '</td>' +
       '<td>' + (r.managers || []).map(function (c) { return esc(StaffStore.nameOf(c)); }).join('<br>') + '</td>' +
       '<td>' + (r.locationType ? '<span class="tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +

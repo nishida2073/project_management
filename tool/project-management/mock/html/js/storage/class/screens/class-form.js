@@ -106,8 +106,10 @@
     setDate($('end'), r.end);
     checkRadio('deliveryType', r.delivery);
     $('people').querySelector('input').value = r.people || '';
-    $('mainTeachers').querySelector('input').value = r.mainTeachers || '';
-    $('subTeachers').querySelector('input').value = r.subTeachers || '';
+    $('mainTeachers').querySelector('input').value = r.registMainTeachers !== undefined ? r.registMainTeachers : (r.mainTeachers || '');
+    $('subTeachers').querySelector('input').value = r.registSubTeachers !== undefined ? r.registSubTeachers : (r.subTeachers || '');
+    if ($('mainAdjusted')) $('mainAdjusted').textContent = '依頼後：' + (r.mainTeachers || '-') + '人';
+    if ($('subAdjusted')) $('subAdjusted').textContent = '依頼後：' + (r.subTeachers || '-') + '人';
     var mbox = $('manager');
     var madd = mbox.querySelector('.chip-add');
     mbox.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
@@ -132,7 +134,9 @@
       delivery: getRadio('deliveryType'),
       people: $('people').querySelector('input').value.trim(),
       mainTeachers: $('mainTeachers').querySelector('input').value.trim(),
+      registMainTeachers: $('mainTeachers').querySelector('input').value.trim(),
       subTeachers: $('subTeachers').querySelector('input').value.trim(),
+      registSubTeachers: $('subTeachers').querySelector('input').value.trim(),
       managers: Array.prototype.map.call($('manager').querySelectorAll('.chip'), function (c) { return StaffStore.codeOf((c.childNodes[0].textContent || '').trim()); }).filter(Boolean),
       locationType: getRadio('locationType'),
       locationName: LocationStore.codeOf(getSelect($('locationName'))),

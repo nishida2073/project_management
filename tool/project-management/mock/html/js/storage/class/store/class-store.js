@@ -58,7 +58,7 @@
   };
   SEED.forEach(function (r) {
     var t = TEACHER_COUNTS[r.id];
-    if (t) { r.mainTeachers = t[0]; r.subTeachers = t[1]; }
+    if (t) { r.mainTeachers = t[0]; r.subTeachers = t[1]; r.registMainTeachers = t[0]; r.registSubTeachers = t[1]; }
   });
 
   function save(list) {
