@@ -39,8 +39,10 @@
     for (var fs = 0; fs < freeSub; fs++) subLines = (subLines === '-' ? '' : subLines) + '<div>' + VenderAssignStore.tag(S.OPEN) + '</div>';
     var ps = ClassStore.practiceStatus(r);
     var tr = document.createElement('tr');
+    var custCode = (ClassStore.PROJECTS[r.projectCode] || {}).customer;
     tr.innerHTML =
       '<td class="col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
+      '<td>' + esc(custCode ? CustomerStore.nameOf(custCode) : '-') + '</td>' +
       '<td>' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
       '<td><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
@@ -50,6 +52,8 @@
       '<td>' + mainLines + '</td>' +
       '<td>' + (r.subTeachers ? esc(r.subTeachers) + '人' : '-') + '</td>' +
       '<td>' + subLines + '</td>' +
+      '<td>' + (a.attendeeVendor || a.attendee ? '<div>' + esc(a.attendeeVendor || '-') + '：' + esc(a.attendee || '-') + '</div>' : '-') + '</td>' +
+      '<td>' + (a.motivationVendor || a.motivationStaff ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + esc(a.motivationStaff || '-') + '</div>' : '-') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);
   });

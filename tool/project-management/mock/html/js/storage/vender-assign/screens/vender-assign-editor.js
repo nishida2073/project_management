@@ -170,7 +170,10 @@
     subRows.forEach(function (s) { makeRow('subList', s); });
     $('attendeeVendor').value = a.attendeeVendor || '';
     $('attendee').value = a.attendee || '';
-    $('motivationVendor').value = a.motivationVendor || '';
+    $('motivationVendor').innerHTML = MotivationCompanyTypeStore.load().map(function (t) {
+      return '<label class="radio-option"><input type="radio" name="motivationVendor" value="' + esc(t.code) + '"><span class="radio-dot"></span><span class="tag ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
+    }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="motivationVendor"]'), function (r) { r.checked = r.value === (a.motivationVendor || ''); });
     $('motivationStaff').value = a.motivationStaff || '';
     $('memo').value = a.memo || '';
 
@@ -206,7 +209,7 @@
         subs: subs,
         attendeeVendor: $('attendeeVendor').value.trim(),
         attendee: $('attendee').value.trim(),
-        motivationVendor: $('motivationVendor').value.trim(),
+        motivationVendor: (document.querySelector('input[name="motivationVendor"]:checked') || { value: '' }).value,
         motivationStaff: $('motivationStaff').value.trim(),
         memo: $('memo').value
       };

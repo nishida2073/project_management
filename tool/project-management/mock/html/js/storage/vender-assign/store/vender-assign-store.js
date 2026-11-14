@@ -6,16 +6,51 @@
       classId: 'CLS-001', mainCount: 1, subCount: 1,
       mains: [{ vendor: 'TCV-001', staff: 'STF-064' }],
       subs: [{ vendor: 'TCV-002', staff: 'STF-068' }],
+      attendeeVendor: 'TCV-004', attendee: 'STF-067',
+      motivationVendor: 'MC-01', motivationStaff: 'STF-070'
+    },
+    {
+      classId: 'CLS-002', mainCount: 1, subCount: 0,
+      mains: [{ vendor: 'TCV-003', staff: '' }],
+      subs: [],
       attendeeVendor: '', attendee: '',
+      motivationVendor: 'MC-02', motivationStaff: 'STF-071'
+    },
+    {
+      classId: 'CLS-004', mainCount: 2, subCount: 0,
+      mains: [{ vendor: 'TCV-001', staff: 'STF-066' }, { vendor: 'TCV-002', staff: 'STF-069' }],
+      subs: [],
+      attendeeVendor: 'TCV-005', attendee: 'STF-072',
       motivationVendor: '', motivationStaff: ''
-    }
-    ,
+    },
     {
       classId: 'CLS-005', mainCount: 1, subCount: 2,
       mains: [{ vendor: 'TCV-003', staff: 'STF-066' }],
       subs: [{ vendor: 'TCV-004', staff: 'STF-067' }, { vendor: 'TCV-005', staff: 'STF-073' }],
       attendeeVendor: '', attendee: '',
       motivationVendor: '', motivationStaff: ''
+    },
+    {
+      classId: 'CLS-007', mainCount: 1, subCount: 1,
+      mains: [{ vendor: 'TCV-005', staff: 'STF-073' }],
+      subs: [{ vendor: 'TCV-004', staff: 'STF-070' }],
+      attendeeVendor: 'TCV-003', attendee: 'STF-065',
+      motivationVendor: 'MC-01', motivationStaff: 'STF-064'
+    },
+    {
+      classId: 'CLS-008', mainCount: 1, subCount: 0,
+      mains: [],
+      subs: [],
+      requests: [{ vendor: 'TCV-003', main: 1, sub: 0 }],
+      attendeeVendor: '', attendee: '',
+      motivationVendor: '', motivationStaff: ''
+    },
+    {
+      classId: 'CLS-009', mainCount: 1, subCount: 1,
+      mains: [{ vendor: 'TCV-002', staff: 'STF-071' }],
+      subs: [{ vendor: 'TCV-001', staff: '' }],
+      attendeeVendor: '', attendee: '',
+      motivationVendor: 'MC-02', motivationStaff: 'STF-068'
     }
   ];
 
