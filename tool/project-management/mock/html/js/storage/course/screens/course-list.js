@@ -30,7 +30,7 @@
       '<td>' + esc(c.max) + '人</td>' +
       '<td>' + esc(actual) + '/' + planned + 'クラス</td>' +
       '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
-      '<td' + (c.memo ? ' title="' + esc(c.memo) + '"' : '') + '>' + (c.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
+      '<td class="memo-cell"' + (c.memo ? ' title="' + esc(c.memo) + '"' : '') + '>' + (c.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="course_modify.html?id=' + encodeURIComponent(c.code) + '">更新</a></td>';
     body.appendChild(tr);
   });

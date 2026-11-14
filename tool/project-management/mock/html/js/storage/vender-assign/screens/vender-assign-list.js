@@ -54,7 +54,7 @@
       '<td>' + subLines + '</td>' +
       '<td>' + (a.attendeeVendor || a.attendee ? '<div>' + esc(a.attendeeVendor || '-') + '：' + esc(a.attendee || '-') + '</div>' : '-') + '</td>' +
       '<td>' + (a.motivationVendor || a.motivationStaff ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + esc(a.motivationStaff || '-') + '</div>' : '-') + '</td>' +
-      '<td' + (a.memo ? ' title="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:#fbd29b;color:#9a4a00;font-weight:700;font-size:12px;">!</span>' : '') + '</td>' +
+      '<td class="memo-cell"' + (a.memo ? ' title="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:#fbd29b;color:#9a4a00;font-weight:700;font-size:12px;">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);
   });

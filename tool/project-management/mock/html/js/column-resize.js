@@ -1,6 +1,7 @@
 (function () {
   var MIN = 5;
   var YEAR_MIN = 90;
+  var ACTIONS_W = 100;
 
   function sumWidths(list) {
     return list.reduce(function (a, th) { return a + th.getBoundingClientRect().width; }, 0);
@@ -39,6 +40,7 @@
           var td = tr.children[i];
           if (td) w = Math.max(w, td.getBoundingClientRect().width);
         });
+        if (th.textContent.trim() === '操作') w = ACTIONS_W;
         if (i === yearIdx) w = Math.max(w, YEAR_MIN);
         th.style.width = w + 'px';
         if (th.textContent.trim() === '操作' || th.classList.contains('no-resize')) th.style.minWidth = th.style.maxWidth = w + 'px';
