@@ -46,9 +46,9 @@
       '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
-      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
+      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '人' : '-') + '</td>' +
       '<td>' + mainLines + '</td>' +
-      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
+      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '人' : '-') + '</td>' +
       '<td>' + subLines + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);

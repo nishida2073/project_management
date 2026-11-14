@@ -87,7 +87,7 @@
         name: c.name,
         part: c.part,
         delivery: c.delivery,
-        schedule: c.days + '日・' + c.min + '〜' + c.max + '名'
+        schedule: c.days + '日・' + c.min + '〜' + c.max + '人'
       };
     });
     return out;

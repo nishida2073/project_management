@@ -30,7 +30,7 @@
       cName[c.code] = c.name;
       cPart[c.code] = ParticipationTypeStore.nameOf(c.part);
       cDelivery[c.code] = DeliveryTypeStore.nameOf(c.delivery);
-      cSchedule[c.code] = c.days + '日・' + c.min + '〜' + c.max + '名';
+      cSchedule[c.code] = c.days + '日・' + c.min + '〜' + c.max + '人';
     });
     cc.setAttribute('data-options', courses.map(function (c) { return c.code; }).join(','));
     cc.setAttribute('data-map', JSON.stringify(cName));

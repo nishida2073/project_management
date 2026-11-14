@@ -43,10 +43,12 @@
       '<td><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
-      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '名' : '-') + '</td>' +
+      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '人' : '-') + '</td>' +
+      '<td>' + namedMain + '人</td>' +
       '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;"><span class="cnt-bef-main" style="color:#d97c1e;font-size:12.5px;">' + befMain + '人</span><span class="cnt-pend-main" style="color:#2f6fed;font-size:12.5px;">' + pendMain + '人</span><span class="cnt-done-main" style="color:#279158;font-size:12.5px;">' + namedMain + '人</span></div></td>' +
       '<td><input type="number" class="form-control main-count" min="0" max="' + reqMain + '" value="' + reqMain + '" style="width:72px;height:28px;"></td>' +
-      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '名' : '-') + '</td>' +
+      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '人' : '-') + '</td>' +
+      '<td>' + namedSub + '人</td>' +
       '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;"><span class="cnt-bef-sub" style="color:#d97c1e;font-size:12.5px;">' + befSub + '人</span><span class="cnt-pend-sub" style="color:#2f6fed;font-size:12.5px;">' + pendSub + '人</span><span class="cnt-done-sub" style="color:#279158;font-size:12.5px;">' + namedSub + '人</span></div></td>' +
       '<td><input type="number" class="form-control sub-count" min="0" max="' + reqSub + '" value="' + reqSub + '" style="width:72px;height:28px;"></td>';
     body.appendChild(tr);

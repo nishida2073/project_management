@@ -26,8 +26,8 @@
       '<td>' + esc(c.name) + '</td>' +
       '<td><span class="tag ' + DeliveryTypeStore.colorOf(c.delivery) + '">' + esc(DeliveryTypeStore.nameOf(c.delivery)) + '</span></td>' +
       '<td>' + esc(c.days) + '日</td>' +
-      '<td>' + esc(c.min) + '名</td>' +
-      '<td>' + esc(c.max) + '名</td>' +
+      '<td>' + esc(c.min) + '人</td>' +
+      '<td>' + esc(c.max) + '人</td>' +
       '<td>' + esc(actual) + '/' + planned + 'クラス</td>' +
       '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
       '<td class="row-actions"><a class="search-btn" href="course_modify.html?id=' + encodeURIComponent(c.code) + '">更新</a></td>';

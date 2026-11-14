@@ -121,7 +121,7 @@
       return;
     }
     var c = ClassStore.COURSES[cls.courseCode];
-    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + '　予定講師数：メイン' + (cls.mainTeachers || '-') + '名・サブ' + (cls.subTeachers || '-') + '名';
+    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + '　予定講師数：メイン' + (cls.mainTeachers || '-') + '人・サブ' + (cls.subTeachers || '-') + '人';
 
     var a = VenderAssignStore.find(classId);
     var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0);
@@ -180,7 +180,7 @@
         add();
         return;
       }
-      MessageDialog.confirm('予定講師数（' + label + plan + '名）を超えます。追加しますか？').then(function (ok) {
+      MessageDialog.confirm('予定講師数（' + label + plan + '人）を超えます。追加しますか？').then(function (ok) {
         if (ok) add();
       });
     }
