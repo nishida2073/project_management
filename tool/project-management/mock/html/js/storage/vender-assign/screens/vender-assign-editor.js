@@ -174,18 +174,11 @@
     $('motivationStaff').value = a.motivationStaff || '';
     $('memo').value = a.memo || '';
 
-    function addRow(listId, plan, label) {
-      var add = function () { makeRow(listId, { vendor: '', staff: '' }); };
-      if ($(listId).querySelectorAll('.sub-row').length < plan) {
-        add();
-        return;
-      }
-      MessageDialog.confirm('予定講師数（' + label + '）：' + plan + '人を超えます。追加しますか？').then(function (ok) {
-        if (ok) add();
-      });
+    function addRow(listId) {
+      makeRow(listId, { vendor: '', staff: '' });
     }
-    $('addMain').addEventListener('click', function () { addRow('mainList', planMain, 'メイン'); });
-    $('addSub').addEventListener('click', function () { addRow('subList', planSub, 'サブ'); });
+    $('addMain').addEventListener('click', function () { addRow('mainList'); });
+    $('addSub').addEventListener('click', function () { addRow('subList'); });
     refreshStatuses();
     document.addEventListener('input', refreshStatuses);
     document.addEventListener('click', function () { setTimeout(refreshStatuses, 0); }, true);
