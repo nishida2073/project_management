@@ -23,15 +23,15 @@
     <div class="content">
       
       <div class="filter-panel">
-        <div class="field"><label>実施状況</label><div class="control small js-select" data-options="すべて,実施前,実施中,実施後" data-match-class="col-practice">すべて<span class="caret">▾</span></div></div>
-        <div class="field narrow"><label>顧客</label><div class="control js-select" id="customerFilter" data-options="すべて" data-match-class="col-customer">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実施状況</label><div class="control small js-select" data-options="すべて,実施前,実施中,実施後" data-match-class="col-practice" data-hide-class="col-practice">すべて<span class="caret">▾</span></div></div>
+        <div class="field narrow"><label>顧客</label><div class="control js-select" id="customerFilter" data-hide-class="col-customer" data-options="すべて" data-match-class="col-customer">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027" data-hide-class="col-year">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
         <div class="field"><label>開始日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
         <div class="field"><label>終了日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
-        <div class="field"><label>管理担当者</label><div class="control js-select" id="managerFilter" data-options="すべて">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>全体進捗</label><div class="control small js-select" data-options="すべて,実施前,実施中,完了,遅延">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>管理担当者</label><div class="control js-select" id="managerFilter" data-hide-class="col-manager" data-options="すべて">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>全体進捗</label><div class="control small js-select" data-options="すべて,実施前,実施中,完了,遅延" data-hide-class="col-overall">すべて<span class="caret">▾</span></div></div>
         <div class="field" style="display:none;"><label>タスク区分</label><div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div></div>
         <!-- <div class="field"><label>実施担当者</label><div class="control js-select" data-match-attr="data-owners" data-options="すべて">すべて<span class="caret">▾</span></div></div> -->
         <div class="search-btn">検索</div>
@@ -50,16 +50,16 @@
           <table>
             <thead>
               <tr>
-                <th class="sticky">実施状況</th>
-                <th class="sticky">顧客</th>
-                <th class="sticky">年度</th>
+                <th class="sticky col-practice">実施状況</th>
+                <th class="sticky col-customer">顧客</th>
+                <th class="sticky col-year">年度</th>
                 <th class="sticky">コース</th>
                 <th class="sticky">レッスンNo</th>
                 <th class="sticky">開始日</th>
                 <th class="sticky">終了日</th>
-                <th class="sticky">管理担当者</th>
+                <th class="sticky col-manager">管理担当者</th>
                 <th class="sticky">タスク区分</th>
-                <th class="sticky">全体進捗</th>
+                <th class="sticky col-overall">全体進捗</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -86,6 +86,7 @@
 <script src="js/storage/work-type/store/work-type-store.js"></script>
 <script src="js/storage/staff-role/store/staff-role-store.js"></script>
 <script src="js/storage/customer/store/customer-store.js"></script>
+<script src="js/list-filter-auto.js"></script>
 <script src="js/storage/class-progress/screens/class-progress-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/storage/holiday/store/holiday-store.js"></script>

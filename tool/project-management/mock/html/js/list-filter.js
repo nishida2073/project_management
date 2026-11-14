@@ -11,6 +11,11 @@
     return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime() : null;
   }
 
+  function parseMonth(s) {
+    var m = /^(\d{4})\/(\d{1,2})$/.exec(String(s || '').trim());
+    return m ? Number(m[1]) * 100 + Number(m[2]) : null;
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var panel = document.querySelector('.filter-panel');
     var table = document.querySelector('.table-card table');
@@ -37,6 +42,9 @@
       }).filter(function (c) { return c.v && c.v !== 'すべて' && c.v !== '選択してください'; });
       var from = dates[0] ? parseDate(ownText(dates[0])) : null;
       var to = dates[1] ? parseDate(ownText(dates[1])) : null;
+      var months = Array.prototype.slice.call(panel.querySelectorAll('.js-month'));
+      var mFrom = months[0] ? parseMonth(ownText(months[0])) : null;
+      var mTo = months[1] ? parseMonth(ownText(months[1])) : null;
       var shown = 0;
 
       rows.forEach(function (tr) {
@@ -62,6 +70,14 @@
           }).filter(function (t) { return t !== null; });
           ok = times.some(function (t) {
             return (from === null || t >= from) && (to === null || t <= to);
+          });
+        }
+        if (ok && (mFrom !== null || mTo !== null)) {
+          var mons = Array.prototype.map.call(tr.querySelectorAll('td'), function (td) {
+            return parseMonth(td.textContent);
+          }).filter(function (m) { return m !== null; });
+          ok = mons.some(function (m) {
+            return (mFrom === null || m >= mFrom) && (mTo === null || m <= mTo);
           });
         }
         tr.style.display = ok ? '' : 'none';

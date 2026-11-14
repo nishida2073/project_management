@@ -17,6 +17,15 @@
     </div>
 
     <div class="content">
+      <div class="filter-panel">
+        <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="タスクコード・タスク名で検索"></div>
+        <div class="field"><label>タスク区分</label><div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>作業区分</label><div class="control small js-select" data-options="すべて,事前準備,事後対応,特別対応">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実務担当区分</label><div class="control small js-select" data-options="すべて,社内,パートナー">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
+        <div class="search-btn">検索</div>
+      </div>
+
       
       <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px;">
         <a class="search-btn" href="task_regist.html">新規登録</a>
@@ -57,6 +66,9 @@
 <script src="js/table-sort.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/storage/task/screens/task-list.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/list-filter-auto.js"></script>
+<script src="js/list-filter.js"></script>
 <script src="js/pagination.js"></script>
 </body>
 </html>

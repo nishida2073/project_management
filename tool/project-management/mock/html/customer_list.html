@@ -20,6 +20,7 @@
       
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="顧客コード・顧客名で検索"></div>
+        <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
       </div>
       <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px;">
@@ -50,9 +51,11 @@
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/customer/store/customer-store.js"></script>
 <script src="js/storage/customer/screens/customer-list.js"></script>
+<script src="js/select.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/table-sort.js" defer></script>
 <script src="js/column-resize.js" defer></script>
+<script src="js/list-filter-auto.js"></script>
 <script src="js/list-filter.js"></script>
 <script src="js/pagination.js"></script>
 <script src="js/filter-collapse.js"></script>

@@ -57,13 +57,13 @@
     var managers = [p.pm].concat(p.pl || []).map(function (c) { return StaffStore.nameOf(c); }).filter(Boolean);
     var tr = document.createElement('tr');
     var html = '';
-    html += '<td class="sticky">' + esc(String(p.year).replace('年度', '') + '年度') + '</td>';
+    html += '<td class="sticky col-year">' + esc(String(p.year).replace('年度', '') + '年度') + '</td>';
     html += '<td class="sticky">' + esc(p.code) + '</td>';
     html += '<td class="sticky">' + esc(p.name) + '</td>';
-    html += '<td class="sticky">' + esc(customerName) + '</td>';
-    html += '<td class="sticky">' + managers.map(function (m) { return esc(m); }).join('<br>') + '</td>';
+    html += '<td class="sticky col-customer">' + esc(customerName) + '</td>';
+    html += '<td class="sticky col-manager">' + managers.map(function (m) { return esc(m); }).join('<br>') + '</td>';
     html += '<td class="sticky">' + esc(p.startMonth) + '</td>';
-    html += '<td class="sticky">' + overall(key) + '</td>';
+    html += '<td class="sticky col-overall">' + overall(key) + '</td>';
     rec.steps.forEach(function (s) {
       var classes = [];
       if (isDelayed(s)) classes.push('is-delay');

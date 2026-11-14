@@ -122,14 +122,14 @@
     html += '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
     var pj = ProjectStore.map()[c.projectCode] || {};
     html += '<td class="sticky col-customer">' + esc(pj.customer ? CustomerStore.nameOf(pj.customer) : '-') + '</td>';
-    html += '<td class="sticky">' + esc(String(c.year).replace('年度', '') + '年度') + '</td>';
+    html += '<td class="sticky col-year">' + esc(String(c.year).replace('年度', '') + '年度') + '</td>';
     html += '<td class="sticky"><div>' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
     html += '<td class="sticky"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
     html += '<td class="sticky">' + esc(c.start) + '</td>';
     html += '<td class="sticky">' + esc(c.end) + '</td>';
-    html += '<td class="sticky">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
+    html += '<td class="sticky col-manager">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
     html += '<td class="sticky">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
-    html += '<td class="sticky">' + overall(activeSteps) + '</td>';
+    html += '<td class="sticky col-overall">' + overall(activeSteps) + '</td>';
     steps.forEach(function (s, i) {
       if (!isActive(i)) return;
       var classes = [];
@@ -174,4 +174,5 @@
     listTable.querySelectorAll('thead th').forEach(function (th) { if (th.style.display !== 'none') total += parseFloat(th.style.width) || th.getBoundingClientRect().width; });
     listTable.style.width = total + 'px';
   };
+  window.applyColumnFilters();
 })();
