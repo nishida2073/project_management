@@ -38,13 +38,19 @@
   }
 
   var headRow = document.getElementById('headRow');
-  var lastTh = headRow.lastElementChild;
+  var overallTh = headRow.querySelector('th.col-overall');
+  while (overallTh.nextElementSibling) headRow.removeChild(overallTh.nextElementSibling);
   ProjectProgressStore.STEP_NAMES.forEach(function (name, i) {
     var th = document.createElement('th');
-    th.textContent = (i + 1) + '：' + name;
+    th.style.minWidth = '230px';
     th.classList.add('no-sort');
-    headRow.insertBefore(th, lastTh);
+    th.textContent = (i + 1) + '：' + name;
+    headRow.appendChild(th);
   });
+  var operationTh = document.createElement('th');
+  operationTh.textContent = '操作';
+  operationTh.className = 'col-actions';
+  headRow.appendChild(operationTh);
 
   var body = document.getElementById('tbody');
   var projects = ProjectStore.load().filter(function (p) { return p.status !== '停止中'; });

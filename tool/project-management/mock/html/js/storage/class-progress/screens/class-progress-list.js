@@ -87,6 +87,7 @@
   });
   var operationTh = document.createElement('th');
   operationTh.textContent = '操作';
+  operationTh.className = 'col-actions';
   headRow.appendChild(operationTh);
   var kindsList = STEP_NAMES.map(function (name) { return byName[name] ? byName[name].kinds.join(',') : ''; });
   var body = document.getElementById('tbody');
