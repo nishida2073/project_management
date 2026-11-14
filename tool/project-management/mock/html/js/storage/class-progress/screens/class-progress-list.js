@@ -214,6 +214,11 @@
     overlay.innerHTML = '<div class="input-dialog">' +
       '<div class="input-dialog-title">' + esc(DISPLAY_NO[i] + '：' + task.name) + '</div>' +
       '<div style="font-size:12px;color:#6c7688;margin-bottom:8px;">' + esc(classInfo) + '</div>' +
+      '<label class="input-dialog-label">実施</label>' +
+      '<div class="radio-group" id="sdTarget">' +
+        '<label class="radio-option"><input type="radio" name="sdTargetRadio" value="あり"' + (sv.na ? '' : ' checked') + '><span class="radio-dot"></span><span class="tag blue">あり</span></label>' +
+        '<label class="radio-option"><input type="radio" name="sdTargetRadio" value="なし"' + (sv.na ? ' checked' : '') + '><span class="radio-dot"></span><span class="tag gray">なし</span></label>' +
+      '</div>' +
       '<label class="input-dialog-label">予定日</label>' +
       '<div class="form-control js-date" id="sdPlan">' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施日</label>' +
@@ -226,6 +231,17 @@
       '<textarea class="form-control textarea" id="sdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
       '<div class="input-dialog-actions"><div class="search-btn sd-cancel">キャンセル</div><div class="btn primary sd-ok">保存</div></div></div>';
     document.body.appendChild(overlay);
+    function applyNa(off) {
+      ['#sdPlan', '#sdActual', '#sdOwner', '#sdStatus'].forEach(function (sel) {
+        var el = overlay.querySelector(sel);
+        el.style.pointerEvents = off ? 'none' : '';
+        el.style.opacity = off ? '0.4' : '';
+      });
+    }
+    applyNa(!!sv.na);
+    Array.prototype.forEach.call(overlay.querySelectorAll('input[name="sdTargetRadio"]'), function (r) {
+      r.addEventListener('change', function () { applyNa(r.value === 'なし'); });
+    });
     overlay.querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
     overlay.querySelectorAll('.js-date').forEach(function (el) { window.bindDatePicker(el); });
     function close() { overlay.remove(); }
@@ -240,7 +256,8 @@
         plan: ownTextOf(overlay.querySelector('#sdPlan')),
         actual: ownTextOf(overlay.querySelector('#sdActual')),
         owner: picked ? StaffStore.codeOf(picked) : '',
-        memo: overlay.querySelector('#sdMemo').value
+        memo: overlay.querySelector('#sdMemo').value,
+        na: (overlay.querySelector('input[name="sdTargetRadio"]:checked') || { value: 'あり' }).value === 'なし'
       });
       s[classId] = cur;
       ProgressStore.save(s);
@@ -249,7 +266,7 @@
   }
   body.addEventListener('click', function (e) {
     var td = e.target.closest('td[data-step]');
-    if (!td || td.textContent.indexOf('対象外') !== -1) return;
+    if (!td) return;
     openStepDialog(td.parentNode.getAttribute('data-id'), Number(td.getAttribute('data-step')));
   });
 })();

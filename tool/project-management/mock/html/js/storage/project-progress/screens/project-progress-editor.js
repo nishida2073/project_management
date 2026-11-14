@@ -12,7 +12,7 @@
   var STATUS_COLOR = { done: 'green', progress: 'blue', wait: 'gray' };
 
 function setDisabledRow(tr, off) {
-  Array.prototype.forEach.call(tr.querySelectorAll('.js-date'), function (el) {
+  Array.prototype.forEach.call(tr.querySelectorAll('.js-date, .status-input'), function (el) {
     el.style.pointerEvents = off ? 'none' : '';
     el.style.opacity = off ? '0.4' : '';
   });
@@ -42,8 +42,8 @@ function setDisabledRow(tr, off) {
           '<label class="target-opt off"><input type="radio" name="target' + i + '" value="なし"' + (s.na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
         '<td><div class="mini-control js-date plan-input">' + esc(s.plan || '') + '<span class="caret">▾</span></div></td>' +
         '<td><div class="mini-control js-date actual-input">' + esc(s.actual || '') + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="na-text"' + (s.na ? '' : ' style="display:none;"') + '>対象外</div>' +
-          '<div class="status-select status-combo ' + STATUS_COLOR[s.status] + ' js-select status-input"' + (s.na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[s.status] + '<span class="caret">▾</span></div></td>' +
+        '<td>' +
+          '<div class="status-select status-combo ' + STATUS_COLOR[s.status] + ' js-select status-input"' + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[s.status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(s.memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, s.na);
@@ -51,8 +51,6 @@ function setDisabledRow(tr, off) {
         r.addEventListener('change', function () {
           var na = r.value === 'なし';
           setDisabledRow(tr, na);
-          tr.querySelector('.na-text').style.display = na ? '' : 'none';
-          tr.querySelector('.status-input').style.display = na ? 'none' : '';
         });
       });
     });

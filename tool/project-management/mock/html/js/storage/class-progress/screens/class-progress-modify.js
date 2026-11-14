@@ -6,7 +6,7 @@
     var STATUS_COLOR = { done: 'green', progress: 'blue', wait: 'gray' };
 
 function setDisabledRow(tr, off) {
-  Array.prototype.forEach.call(tr.querySelectorAll('.js-date, .wide.js-select'), function (el) {
+  Array.prototype.forEach.call(tr.querySelectorAll('.js-date, .wide.js-select, .status-select'), function (el) {
     el.style.pointerEvents = off ? 'none' : '';
     el.style.opacity = off ? '0.4' : '';
   });
@@ -110,7 +110,7 @@ function setDisabledRow(tr, off) {
         '<td>' + planCell + '</td>' +
         '<td class="col-actual">' + actualCell + '</td>' +
         '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="na-text"' + (na ? '' : ' style="display:none;"') + '>対象外</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + (na ? ' style="display:none;"' : '') + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="na-text"' + ' style="display:none;"' + '>対象外</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);
@@ -120,8 +120,6 @@ function setDisabledRow(tr, off) {
         r.addEventListener('change', function () {
           var off = r.value === 'なし';
           setDisabledRow(tr, off);
-          tr.querySelector('.na-text').style.display = off ? '' : 'none';
-          tr.querySelector('.status-select').style.display = off ? 'none' : '';
         });
       });
     });
