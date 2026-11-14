@@ -180,7 +180,7 @@
         add();
         return;
       }
-      MessageDialog.confirm('予定講師数（' + label + plan + '人）を超えます。追加しますか？').then(function (ok) {
+      MessageDialog.confirm('予定講師数（' + label + '）：' + plan + '人を超えます。追加しますか？').then(function (ok) {
         if (ok) add();
       });
     }
@@ -217,8 +217,29 @@
         motivationStaff: $('motivationStaff').value.trim(),
         memo: $('memo').value
       };
-      VenderAssignStore.upsert(Object.assign({}, a, record));
-      location.href = 'vender_assign_list.html';
+      var newMain = Math.max(document.querySelectorAll('#mainList .sub-row').length, mains.length + VenderAssignStore.totalRequest(a).main);
+      var newSub = Math.max(document.querySelectorAll('#subList .sub-row').length, subs.length + VenderAssignStore.totalRequest(a).sub);
+      var over = newMain > planMain || newSub > planSub;
+      function finish() {
+        VenderAssignStore.upsert(Object.assign({}, a, record));
+        location.href = 'vender_assign_list.html';
+      }
+      if (!over) { finish(); return; }
+      var lines = ['予定講師数を超えています。', '以下に変更してよろしいですか？'];
+      if (newMain !== planMain) lines.push('予定講師数（メイン）：' + planMain + ' → ' + newMain);
+      if (newSub !== planSub) lines.push('予定講師数（サブ）：' + planSub + ' → ' + newSub);
+      MessageDialog.confirm(lines.join('\n')).then(function (ok) {
+        if (!ok) return;
+        var list = ClassStore.load();
+        list.forEach(function (r) {
+          if (r.id === classId) {
+            r.mainTeachers = String(newMain);
+            r.subTeachers = String(newSub);
+          }
+        });
+        ClassStore.save(list);
+        finish();
+      });
     });
   }
 
