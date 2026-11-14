@@ -9,6 +9,8 @@
     document.querySelectorAll('.filter-panel .js-select').forEach(function (el, i) {
       items.push({ key: 'sel' + i, el: el, value: norm(ownText(el)), select: true });
     });
+    var vendor = document.getElementById('requestVendor');
+    if (vendor) items.push({ key: 'vendor', el: vendor, value: norm(ownText(vendor)), select: true });
     document.querySelectorAll('.filter-panel .js-date').forEach(function (el, i) {
       items.push({ key: 'date' + i, el: el, value: ownText(el) });
     });
@@ -44,7 +46,7 @@
     }
     if (!searchNeeded) return;
     var search = document.querySelector('.filter-panel .search-btn');
-    if (search) search.click();
+    if (search) setTimeout(function () { search.click(); }, 0);
   }
   snapshot();
   window.applyColumnFilters = apply;

@@ -32,15 +32,15 @@
         <a class="close-x" href="vender_assign_list.html">✕</a>
       </div>
       <div class="modal-body">
+        <div class="field narrow">
+          <label>講師ベンダー<span class="req">必須</span></label>
+          <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
+        </div>
         <div class="filter-panel" style="margin-bottom: 16px;">
           <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-options="すべて,実施前,実施中" data-value="実施前">実施前<span class="caret">▾</span></div></div>
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
           <div class="field"><label>依頼枠</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-value="あり">あり<span class="caret">▾</span></div></div>
           <div class="search-btn">検索</div>
-        </div>
-        <div class="field narrow">
-          <label>講師ベンダー<span class="req">必須</span></label>
-          <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
           <div class="table-meta"><div class="count"><b id="printCount">0</b> 件</div></div>
