@@ -109,6 +109,7 @@
       });
     });
 
+    allHeads.forEach(function (th, i) { th.style.zIndex = String(i === allHeads.length - 1 ? allHeads.length + 1 : allHeads.length - i); });
     new MutationObserver(layout).observe(tbody, { childList: true });
     layout();
   }

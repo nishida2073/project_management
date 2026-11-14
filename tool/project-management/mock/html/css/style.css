@@ -250,7 +250,7 @@ a.close-x { cursor: pointer; }
 input.memo-input { color: #333c4d; background: #ffffff; }
 table.step-table { min-width: 0 !important; }
 textarea.form-control.textarea.auto-grow { padding: 8px 12px; }
-textarea.form-control.textarea.memo-area { width: 360px; height: 30px; min-height: 30px; padding: 4px 8px; resize: vertical; padding: 6px 8px; font-size: 12px; color: #333c4d; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; font-family: inherit; }
+textarea.form-control.textarea.memo-area { width: 100%; min-width: 360px; height: 30px; min-height: 30px; padding: 4px 8px; resize: vertical; padding: 6px 8px; font-size: 12px; color: #333c4d; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; font-family: inherit; }
 .memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
 
 /* フォームダイアログ（社員／ベンダーマスタ登録） */

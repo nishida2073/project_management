@@ -5,3 +5,4 @@
 
 .modal-body { padding: 22px 28px; display: grid; grid-template-columns: 1fr 1fr; align-content: start; gap: 16px 20px; }
 
+.step-table thead th:last-child { right: auto; box-shadow: none; }
