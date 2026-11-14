@@ -37,12 +37,12 @@
     tr.setAttribute('data-remain-main', remainMain);
     tr.setAttribute('data-remain-sub', remainSub);
     tr.innerHTML =
-      '<td style="text-align: center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
-      '<td>' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
-      '<td class="col-course"><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
-      '<td><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
-      '<td>' + esc(r.start) + '</td>' +
-      '<td>' + esc(r.end) + '</td>' +
+      '<td class="sticky" style="text-align: center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
+      '<td class="sticky">' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
+      '<td class="sticky col-course"><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
+      '<td class="sticky"><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
+      '<td class="sticky">' + esc(r.start) + '</td>' +
+      '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '人' : '-') + '</td>' +
       '<td>' + namedMain + '人</td>' +
       '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;"><span class="cnt-bef-main" style="color:#d97c1e;font-size:12.5px;">' + befMain + '人</span><span class="cnt-pend-main" style="color:#2f6fed;font-size:12.5px;">' + pendMain + '人</span><span class="cnt-done-main" style="color:#279158;font-size:12.5px;">' + namedMain + '人</span></div></td>' +
@@ -96,7 +96,8 @@
         var val = Math.max(0, remain - pendOthers - pendSel - befOthers);
         input.max = val;
         input.value = val;
-        var willReplace = !!code && befSel > 0;
+        var overPlan = remain < pendOthers + pendSel + befOthers + befSel;
+        var willReplace = !!code && befSel > 0 && overPlan;
         input.classList.toggle('replace-mark', willReplace);
         input.title = willReplace ? '予定講師数を超過しているため' + val + '人に変更しています。' : '';
         var doneVal = list.filter(function (p) { return p.staff && (!code || p.vendor === code); }).length;
