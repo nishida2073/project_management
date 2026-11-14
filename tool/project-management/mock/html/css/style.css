@@ -215,7 +215,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .input-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 60%; max-width: calc(100vw - 32px); height: 80vh; display: flex; flex-direction: column; }
-.modal.modal-wide { width: 90%; }
+.modal.modal-wide { width: 95%; height: 90vh; }
 .modal.modal-medium { width: 70%; }
 .modal-body { flex: 1; overflow-y: auto; }
 .modal-body.modal-body-plain { display: block; padding: 0 28px 18px; }
