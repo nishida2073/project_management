@@ -18,6 +18,7 @@
       '<td>' + esc(l.tel) + '</td>' +
       '<td>' + esc(l.address) + '</td>' +
       '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td' + (l.memo ? ' title="' + esc(l.memo) + '"' : '') + '>' + (l.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="location_modify.html?id=' + encodeURIComponent(l.code) + '">更新</a></td>';
     body.appendChild(tr);
   });

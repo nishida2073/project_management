@@ -120,7 +120,7 @@
     new MutationObserver(layout).observe(tbody, { childList: true });
     function refit() {
       if (touched) return;
-      allHeads.forEach(function (th) { th.style.width = th.style.minWidth = th.style.maxWidth = ''; });
+      allHeads.forEach(function (th) { th.style.width = ''; });
       table.style.tableLayout = '';
       table.style.width = '';
       fixed = false;

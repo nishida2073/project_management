@@ -14,6 +14,7 @@
       '<td>' + esc(v.tel) + '</td>' +
       '<td>' + esc(v.contactName) + '</td>' +
       '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td' + (v.memo ? ' title="' + esc(v.memo) + '"' : '') + '>' + (v.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="teacher_vender_modify.html?id=' + encodeURIComponent(v.code) + '">更新</a></td>';
     body.appendChild(tr);
   });

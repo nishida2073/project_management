@@ -466,3 +466,4 @@ input.form-control.replace-mark { border-color: #d97c1e; background: #fff2e2; }
 .input-dialog-actions > .search-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
 .input-dialog-actions > .search-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
 .input-dialog-actions > :first-child { margin-right: auto; }
+.memo-mark { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #fbd29b; color: #9a4a00; font-weight: 700; font-size: 12px; }

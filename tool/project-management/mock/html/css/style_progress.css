@@ -3,3 +3,4 @@
 .memo-input { min-width: 120px; }
 
 .status-combo { font-size: 13px; font-weight: 400; height: 36px; }
+td.has-memo::after { content: "!"; top: 2px; right: 2px; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #fbd29b; color: #9a4a00; font-weight: 700; font-size: 12px; border: none; }

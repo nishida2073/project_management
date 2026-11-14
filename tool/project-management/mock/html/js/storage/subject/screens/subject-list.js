@@ -14,6 +14,7 @@
       '<td><span class="tag ' + (SubjectTypeStore.colorOf(s.type) || '') + '">' + esc(SubjectTypeStore.nameOf(s.type)) + '</span></td>' +
       '<td>' + esc(s.name) + '</td>' +
       '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td' + (s.memo ? ' title="' + esc(s.memo) + '"' : '') + '>' + (s.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="subject_modify.html?id=' + encodeURIComponent(s.code) + '">更新</a></td>';
     body.appendChild(tr);
   });
