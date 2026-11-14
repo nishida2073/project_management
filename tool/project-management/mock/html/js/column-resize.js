@@ -69,7 +69,9 @@
       h.addEventListener('mousedown', function (e) {
         e.preventDefault();
         var startX = e.clientX;
-        var group = e.shiftKey ? allHeads.slice(0, idx + 1) : [th];
+        var leftHeads = allHeads.slice(0, idx + 1);
+        var onlySticky = leftHeads.every(function (t) { return t.classList.contains('sticky'); });
+        var group = e.shiftKey || onlySticky ? leftHeads : [th];
         var startWs = group.map(function (g) { return g.getBoundingClientRect().width; });
         var startTotal = startWs.reduce(function (a, b) { return a + b; }, 0);
         var startTable = sumWidths(allHeads);

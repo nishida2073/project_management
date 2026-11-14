@@ -106,7 +106,7 @@ function setDisabledRow(tr, off) {
         '<td class="step-name sticky">' + esc(name) + '</td>' +
         '<td class="sticky"><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + s.no + '" value="あり"' + (na ? '' : ' checked') + '><span>あり</span></label>' +
           '<label class="target-opt off"><input type="radio" name="target' + s.no + '" value="なし"' + (na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
-        '<td style="white-space: nowrap;">' + esc(company) + '</td>' +
+        '<td class="sticky" style="white-space: nowrap;">' + esc(company) + '</td>' +
         '<td>' + planCell + '</td>' +
         '<td class="col-actual">' + actualCell + '</td>' +
         '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +

@@ -20,15 +20,15 @@
 
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="col-practice">' + (ps ? '<span class="tag ' + PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
-      '<td class="col-customer">' + esc(p.customer ? CustomerStore.nameOf(p.customer) : '-') + '</td>' +
-      '<td>' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
-      '<td><div>' + esc(p.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.projectCode) + '</div></td>' +
-      '<td>' + (p.sales ? '<span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +
-      '<td>' + (p.part ? '<span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
-      '<td><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
-      '<td><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(relatedText) + '</div></td>' +
-      '<td>' + (r.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
+      '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
+      '<td class="sticky col-customer">' + esc(p.customer ? CustomerStore.nameOf(p.customer) : '-') + '</td>' +
+      '<td class="sticky">' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
+      '<td class="sticky"><div>' + esc(p.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.projectCode) + '</div></td>' +
+      '<td class="sticky">' + (p.sales ? '<span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +
+      '<td class="sticky">' + (p.part ? '<span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
+      '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
+      '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(relatedText) + '</div></td>' +
+      '<td class="sticky">' + (r.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + (r.delivery ? '<span class="tag ' + DeliveryTypeStore.colorOf(r.delivery) + '">' + esc(DeliveryTypeStore.nameOf(r.delivery)) + '</span>' : '') + '</td>' +
