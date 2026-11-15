@@ -1,20 +1,7 @@
 (function () {
-  function setSelect(el, value) {
-    var v = value || '';
-    el.setAttribute('data-value', v);
-    el.innerHTML = (v ? esc(v) : '選択してください') + '<span class="caret">▾</span>';
-  }
   function getSelect(el) {
     var v = ownText(el);
     return v === '選択してください' ? '' : v;
-  }
-  function checkRadio(name, value) {
-    var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (r) r.checked = true;
-  }
-  function getRadio(name) {
-    var r = document.querySelector('input[name="' + name + '"]:checked');
-    return r ? r.value : '';
   }
   function monthInputs() {
     return Array.prototype.slice.call(document.querySelectorAll('.month-grid input'));
@@ -144,8 +131,6 @@
         if (!v.subject) missing.push('科目名');
         if (!v.part) missing.push('参加区分');
         if (!v.name) missing.push('コース名');
-        if (!v.delivery) missing.push('実施形態');
-        if (v.days === '') missing.push('日数');
       if (missing.length) {
         MessageDialog.required(missing);
         return;
@@ -156,7 +141,7 @@
       }
       var item = {
         code: v.code, year: v.year, subject: v.subject, part: v.part,
-        name: v.name, delivery: v.delivery, days: parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
+        name: v.name, delivery: v.delivery, days: v.days === '' ? '' : parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
         max: v.max === '' ? '' : parseInt(v.max, 10), status: v.status, monthly: v.monthly,
         mainTeachers: v.mainTeachers === '' ? '' : parseInt(v.mainTeachers, 10),
         subTeachers: v.subTeachers === '' ? '' : parseInt(v.subTeachers, 10),

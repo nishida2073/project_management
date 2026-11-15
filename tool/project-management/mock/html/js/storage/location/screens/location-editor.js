@@ -1,12 +1,4 @@
 (function () {
-  function getRadio(name) {
-    var r = document.querySelector('input[name="' + name + '"]:checked');
-    return r ? r.value : '';
-  }
-  function checkRadio(name, value) {
-    var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (r) r.checked = true;
-  }
 
   function fill(rec) {
     $('locationCode').textContent = rec.code || '自動採番';

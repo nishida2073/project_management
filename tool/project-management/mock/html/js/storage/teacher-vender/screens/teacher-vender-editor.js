@@ -1,12 +1,4 @@
 (function () {
-  function checkRadio(name, value) {
-    var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (r) r.checked = true;
-  }
-  function getRadio(name) {
-    var r = document.querySelector('input[name="' + name + '"]:checked');
-    return r ? r.value : '';
-  }
   function setToggle(off) {
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');

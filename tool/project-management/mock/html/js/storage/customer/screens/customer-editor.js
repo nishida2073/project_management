@@ -1,9 +1,4 @@
 (function () {
-  function setSelect(el, value) {
-    var v = value || '';
-    el.setAttribute('data-value', v);
-    el.innerHTML = (v ? esc(v) : '選択してください') + '<span class="caret">▾</span>';
-  }
   function getSelect(el) {
     var v = ownText(el);
     return v === '選択してください' ? '' : v;

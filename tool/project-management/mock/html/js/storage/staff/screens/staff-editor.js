@@ -1,12 +1,4 @@
 (function () {
-  function checkRadio(name, value) {
-    var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (r) r.checked = true;
-  }
-  function getRadio(name) {
-    var r = document.querySelector('input[name="' + name + '"]:checked');
-    return r ? r.value : '';
-  }
   function renderChecks(group, name, items) {
     group.innerHTML = items.map(function (it) {
       return '<label class="multi-opt" data-tone="' + esc(it.color || '') + '"><input type="checkbox" name="' + name + '" value="' + esc(it.code) + '"><span>' + esc(it.name) + '</span></label>';

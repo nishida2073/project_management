@@ -1,12 +1,4 @@
 (function () {
-  function getRadio(name) {
-    var r = document.querySelector('input[name="' + name + '"]:checked');
-    return r ? r.value : '';
-  }
-  function checkRadio(name, value) {
-    var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (r) r.checked = true;
-  }
 
   function addVersionChip(value) {
     var box = $('subjectVersions');

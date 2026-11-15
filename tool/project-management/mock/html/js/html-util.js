@@ -8,6 +8,30 @@
     return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
       .map(function (n) { return n.textContent; }).join('').trim();
   };
+  window.dashOr = function (v, suffix) {
+    return v === undefined || v === null || v === '' ? '-' : window.esc(v) + (suffix || '');
+  };
+  window.pad2 = function (n) { return String(n).padStart(2, '0'); };
+  window.yearLabel = function (v) { return String(v).replace('年度', '') + '年度'; };
+  window.placeholderToEmpty = function (s) {
+    return s === '選択してください' ? '' : s;
+  };
+  window.getRadio = function (name) {
+    var r = document.querySelector('input[name="' + name + '"]:checked');
+    return r ? r.value : '';
+  };
+  window.checkRadio = function (name, value) {
+    var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
+    if (r) r.checked = true;
+  };
+  window.getSelect = function (el) {
+    return window.ownText(el);
+  };
+  window.setSelect = function (el, value) {
+    var v = value || '';
+    el.setAttribute('data-value', v);
+    el.innerHTML = (v ? window.esc(v) : '選択してください') + '<span class="caret">▾</span>';
+  };
   window.setStatusOff = function (off) {
     var el = window.$('statusToggle');
     if (el) el.classList.toggle('off', !!off);

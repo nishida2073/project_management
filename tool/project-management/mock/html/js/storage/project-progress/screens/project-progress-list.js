@@ -14,7 +14,7 @@
     if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
     var actual = s.actual ? s.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span></div>' +
-      '<div class="dates-col"><div class="dates"><span>予：' + esc(s.plan || '-') + '</span></div>' +
+      '<div class="dates-col"><div class="dates"><span>予：' + dashOr(s.plan) + '</span></div>' +
       '<div class="dates"><span>実：' + esc(actual) + '</span></div></div></div>';
   }
 
@@ -61,7 +61,7 @@
     var tr = document.createElement('tr');
     tr.setAttribute('data-id', p.code);
     var html = '';
-    html += '<td class="sticky col-year">' + esc(String(p.year).replace('年度', '') + '年度') + '</td>';
+    html += '<td class="sticky col-year">' + esc(yearLabel(p.year)) + '</td>';
     html += '<td class="sticky">' + esc(p.code) + '</td>';
     html += '<td class="sticky">' + esc(p.name) + '</td>';
     html += '<td class="sticky col-customer">' + esc(customerName) + '</td>';

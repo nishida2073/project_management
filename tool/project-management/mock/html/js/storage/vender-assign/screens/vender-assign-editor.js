@@ -1,5 +1,4 @@
 (function () {
-  function clean(s) { return s === '選択してください' ? '' : s; }
 
   function setSelect(el, name, options) {
     el.setAttribute('data-options', options.join(','));
@@ -50,7 +49,6 @@
   }
 
   function vendorOptions() { return TeacherVenderStore.activeNames(); }
-  function staffOptions() { return StaffStore.activeNames(); }
 
   function makeRow(listId, data) {
     var row = document.createElement('div');
@@ -75,7 +73,7 @@
     if (staff) return S.REQUESTED;
     if (row.querySelector('.vendor-fixed')) return S.REQUESTING;
     var sel = row.querySelector('.js-select');
-    if (sel && clean(ownText(sel))) return S.BEFORE;
+    if (sel && placeholderToEmpty(ownText(sel))) return S.BEFORE;
     return null;
   }
 
@@ -93,7 +91,7 @@
       var sel = row.querySelectorAll('.js-select');
       var fixed = row.querySelector('.vendor-fixed');
       return {
-        vendor: fixed ? fixed.getAttribute('data-code') : TeacherVenderStore.codeOf(clean(ownText(sel[0]))),
+        vendor: fixed ? fixed.getAttribute('data-code') : TeacherVenderStore.codeOf(placeholderToEmpty(ownText(sel[0]))),
         staff: (row.querySelector('input[type="text"]') || { value: '' }).value.trim(),
         fixed: !!fixed
       };

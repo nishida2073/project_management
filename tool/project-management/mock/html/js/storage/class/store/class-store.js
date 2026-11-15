@@ -1,10 +1,9 @@
 (function () {
   var KEY = 'classList';
 
-  function pad(n) { return String(n).padStart(2, '0'); }
 
   function fmt(d) {
-    return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate());
+    return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
   }
 
   function daysFromToday(n) {

@@ -12,11 +12,10 @@ function setDisabledRow(tr, off) {
   });
 }
 
-    function pad(n) { return (n < 10 ? '0' : '') + n; }
     function addDays(days) {
       var d = new Date(classStart);
       d.setDate(d.getDate() + days);
-      return d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate());
+      return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
     }
     function loadProgress() { return ProgressStore.load(); }
     function saveProgress(all) { ProgressStore.save(all); }

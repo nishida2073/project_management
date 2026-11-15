@@ -57,10 +57,31 @@
       e.stopPropagation();
       selectValue(el, options.indexOf('すべて') >= 0 ? 'すべて' : '選択してください');
       el.setAttribute('data-value', '');
+      resetTargets(el);
       el.classList.remove('open');
     });
     menu.appendChild(clear);
     return menu;
+  }
+
+  function resetTargets(el) {
+    var t1 = el.getAttribute('data-target');
+    if (t1 && el.getAttribute('data-map')) {
+      var target1 = document.querySelector(t1);
+      if (target1) target1.textContent = '選択すると自動入力されます';
+    }
+    ['2', '3', '4'].forEach(function (n) {
+      var sel = el.getAttribute('data-target' + n);
+      if (!sel || !el.getAttribute('data-map' + n)) return;
+      var t = document.querySelector(sel);
+      if (!t) return;
+      t.textContent = '';
+      var cm = el.getAttribute('data-class-map' + n);
+      if (cm) {
+        var m = JSON.parse(cm);
+        Object.keys(m).forEach(function (k) { t.classList.remove(m[k]); });
+      }
+    });
   }
 
   function selectValue(el, value) {

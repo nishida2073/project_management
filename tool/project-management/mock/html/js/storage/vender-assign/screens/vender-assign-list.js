@@ -1,5 +1,4 @@
 (function () {
-  function dash(s) { return s ? esc(s) : '-'; }
 
   var C = ClassStore.COURSES;
   var body = document.getElementById('venderBody');
@@ -40,17 +39,17 @@
     tr.innerHTML =
       '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td class="sticky">' + esc(custCode ? CustomerStore.nameOf(custCode) : '-') + '</td>' +
-      '<td class="sticky">' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
+      '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
       '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
-      '<td>' + (r.mainTeachers ? esc(r.mainTeachers) + '人' : '-') + '</td>' +
+      '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
       '<td>' + mainLines + '</td>' +
-      '<td>' + (r.subTeachers ? esc(r.subTeachers) + '人' : '-') + '</td>' +
+      '<td>' + dashOr(r.subTeachers, '人') + '</td>' +
       '<td>' + subLines + '</td>' +
-      '<td>' + (a.attendeeVendor || a.attendee ? '<div>' + esc(a.attendeeVendor || '-') + '：' + esc(a.attendee || '-') + '</div>' : '-') + '</td>' +
-      '<td>' + (a.motivationVendor || a.motivationStaff ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + esc(a.motivationStaff || '-') + '</div>' : '-') + '</td>' +
+      '<td>' + (a.attendeeVendor || a.attendee ? '<div>' + dashOr(a.attendeeVendor) + '：' + dashOr(a.attendee) + '</div>' : '-') + '</td>' +
+      '<td>' + (a.motivationVendor || a.motivationStaff ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + dashOr(a.motivationStaff) + '</div>' : '-') + '</td>' +
       '<td class="memo-cell"' + (a.memo ? ' title="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:#fbd29b;color:#9a4a00;font-weight:700;font-size:12px;">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);

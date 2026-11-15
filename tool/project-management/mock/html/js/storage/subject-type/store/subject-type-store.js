@@ -46,7 +46,7 @@
       var n = parseInt(String(t.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return PREFIX + String(max + 1).padStart(2, '0');
+    return PREFIX + pad2(max + 1);
   }
 
   function add(name, color) {

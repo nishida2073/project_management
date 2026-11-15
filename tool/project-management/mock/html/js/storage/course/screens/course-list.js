@@ -17,16 +17,16 @@
     var on = c.status !== '停止中';
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="sticky">' + esc(String(c.year).replace('年度', '') + '年度') + '</td>' +
+      '<td class="sticky">' + esc(yearLabel(c.year)) + '</td>' +
       '<td class="sticky">' + esc(c.code) + '</td>' +
       '<td class="sticky"><span class="tag ' + ParticipationTypeStore.colorOf(c.part) + '">' + esc(ParticipationTypeStore.nameOf(c.part)) + '</span></td>' +
       '<td class="sticky">' + esc(c.name) + '</td>' +
-      '<td><span class="tag ' + DeliveryTypeStore.colorOf(c.delivery) + '">' + esc(DeliveryTypeStore.nameOf(c.delivery)) + '</span></td>' +
-      '<td>' + esc(c.days) + '日</td>' +
-      '<td>' + esc(c.min) + '人</td>' +
-      '<td>' + esc(c.max) + '人</td>' +
-      '<td>' + (c.mainTeachers === undefined || c.mainTeachers === '' ? '-' : esc(c.mainTeachers) + '人') + '</td>' +
-      '<td>' + (c.subTeachers === undefined || c.subTeachers === '' ? '-' : esc(c.subTeachers) + '人') + '</td>' +
+      (c.delivery ? '<td><span class="tag ' + DeliveryTypeStore.colorOf(c.delivery) + '">' + esc(DeliveryTypeStore.nameOf(c.delivery)) + '</span></td>' : '<td>-</td>') +
+      '<td>' + dashOr(c.days, '日') + '</td>' +
+      '<td>' + dashOr(c.min, '人') + '</td>' +
+      '<td>' + dashOr(c.max, '人') + '</td>' +
+      '<td>' + dashOr(c.mainTeachers, '人') + '</td>' +
+      '<td>' + dashOr(c.subTeachers, '人') + '</td>' +
       '<td>' + esc(actual) + '/' + planned + 'クラス</td>' +
       '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
       '<td class="memo-cell"' + (c.memo ? ' title="' + esc(c.memo) + '"' : '') + '>' + (c.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +

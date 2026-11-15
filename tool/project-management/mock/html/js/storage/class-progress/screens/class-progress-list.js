@@ -27,7 +27,7 @@
   function addDays(base, days) {
     var d = new Date(base);
     d.setDate(d.getDate() + days);
-    return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
   }
 
   function isDelayed(step) {
@@ -43,7 +43,7 @@
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span></div>' +
-      '<div class="dates-col"><div class="dates"><span>予：' + esc(step.plan || '-') + '</span></div>' +
+      '<div class="dates-col"><div class="dates"><span>予：' + dashOr(step.plan) + '</span></div>' +
       '<div class="dates"><span>実：' + esc(actual) + ' ' + esc(StaffStore.nameOf(step.owner || '')) + '</span></div></div></div>';
   }
 
@@ -103,6 +103,7 @@
         owner: sv.owner !== undefined ? sv.owner : '',
         status: sv.status !== undefined ? sv.status : 'wait',
         memo: sv.memo !== undefined ? sv.memo : '',
+        kindNa: !!(task && task.kinds.indexOf(c.taskType) === -1),
         na: (task && task.kinds.indexOf(c.taskType) === -1) || (sv.na !== undefined ? sv.na : false)
       };
     });
@@ -121,7 +122,7 @@
     html += '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
     var pj = ProjectStore.map()[c.projectCode] || {};
     html += '<td class="sticky col-customer">' + esc(pj.customer ? CustomerStore.nameOf(pj.customer) : '-') + '</td>';
-    html += '<td class="sticky col-year">' + esc(String(c.year).replace('年度', '') + '年度') + '</td>';
+    html += '<td class="sticky col-year">' + esc(yearLabel(c.year)) + '</td>';
     html += '<td class="sticky"><div>' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
     html += '<td class="sticky"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
     html += '<td class="sticky">' + esc(c.start) + '</td>';
@@ -132,10 +133,11 @@
     steps.forEach(function (s, i) {
       if (!isActive(i)) return;
       var classes = [];
+      if (s.kindNa) classes.push('is-kind-na');
       if (isDelayed(s)) classes.push('is-delay');
       if (s.memo) classes.push('has-memo');
       var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' title="' + esc(s.memo) + '"' : '');
-      html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + attrs + '>' + chip(s) + '</td>';
+      html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + (s.kindNa ? ' data-na="1"' : '') + attrs + '>' + chip(s) + '</td>';
     });
     html += '<td class="row-actions"><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">更新</a></td>';
     tr.innerHTML = html;
@@ -260,6 +262,10 @@
   body.addEventListener('click', function (e) {
     var td = e.target.closest('td[data-step]');
     if (!td) return;
+    if (td.getAttribute('data-na')) return;
     openStepDialog(td.parentNode.getAttribute('data-id'), Number(td.getAttribute('data-step')));
+  });
+  window.addEventListener('storage', function (e) {
+    if (e.key === 'classProgress') location.reload();
   });
 })();

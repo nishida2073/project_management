@@ -1,7 +1,4 @@
 (function () {
-  function clean(s) {
-    return s === '選択してください' ? '' : s;
-  }
 
   function colorMap(items) {
     return items.reduce(function (m, it) { m[it.name] = it.color; return m; }, {});
@@ -163,11 +160,11 @@
 
     document.getElementById('saveBtn').addEventListener('click', function () {
       var v = ClassForm.read();
-      v.year = clean(v.year);
-      v.projectCode = clean(v.projectCode);
-      v.courseCode = clean(v.courseCode);
-      v.version = clean(v.version);
-      v.courseYear = clean(v.courseYear);
+      v.year = placeholderToEmpty(v.year);
+      v.projectCode = placeholderToEmpty(v.projectCode);
+      v.courseCode = placeholderToEmpty(v.courseCode);
+      v.version = placeholderToEmpty(v.version);
+      v.courseYear = placeholderToEmpty(v.courseYear);
       var missing = [];
         if (!v.courseYear) missing.push('年度');
         if (!v.courseCode) missing.push('コースコード');

@@ -1,23 +1,9 @@
 (function () {
-  function clean(s) { return s === '選択してください' ? '' : s; }
-  function setSelect(el, value) {
-    var v = value || '';
-    el.setAttribute('data-value', v);
-    el.innerHTML = (v ? esc(v) : '選択してください') + '<span class="caret">▾</span>';
-  }
-  function getSelect(el) { return clean(ownText(el)); }
+  function getSelect(el) { return placeholderToEmpty(ownText(el)); }
   function setMonth(el, value) {
     el.innerHTML = (value ? esc(value) : '') + '<span class="caret">▾</span>';
   }
   function getMonth(el) { return ownText(el); }
-  function checkRadio(name, value) {
-    var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
-    if (r) r.checked = true;
-  }
-  function getRadio(name) {
-    var r = document.querySelector('input[name="' + name + '"]:checked');
-    return r ? r.value : '';
-  }
   function makeChip(value) {
     var chip = document.createElement('span');
     chip.className = 'chip orange';
@@ -106,6 +92,7 @@
         if (!v.part) missing.push('参加区分');
         if (!v.name) missing.push('案件名');
         if (!v.startMonth) missing.push('実施開始月');
+        if (!v.customer) missing.push('顧客名');
         if (!v.pm) missing.push('PM');
       if (missing.length) {
         MessageDialog.required(missing);

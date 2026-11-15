@@ -2,18 +2,10 @@
 
   function sec(t) { return '<div class="form-section">' + esc(t) + '</div>'; }
   function empty() { return '<div class="form-field"></div>'; }
-  function ro(label, text, full) {
-    return '<div class="form-field' + (full ? ' full' : '') + '"><label>' + esc(label) + '</label>' +
-      '<div class="form-value">' + esc(text || '-') + '</div></div>';
-  }
-  function roRaw(label, html, full) {
-    return '<div class="form-field' + (full ? ' full' : '') + '"><label>' + esc(label) + '</label>' +
-      '<div class="form-value">' + (html || '-') + '</div></div>';
-  }
   function tagOf(text, color) {
     return '<span class="tag ' + esc(color || '') + '">' + esc(text) + '</span>';
   }
-  function yearText(v) { return v ? String(v).replace('年度', '') + '年度' : '-'; }
+  function yearText(v) { return v ? yearLabel(v) : '-'; }
 
   var id = new URLSearchParams(location.search).get('id');
   var list = ClassStore.load();
@@ -28,15 +20,8 @@
   $('subLine').textContent = (c.name || src.courseCode || '') + '　' + src.lessonNo + '　' + src.start + '〜' + src.end;
   $('cancelLink').href = 'class_modify.html?id=' + encodeURIComponent(src.id);
 
-  function storeName(store, code) { return code && store ? (store.nameOf(code) || code) : ''; }
-  function courseLabel(code) { return code ? (c.name ? c.name + '（' + code + '）' : code) : ''; }
 
   function sourceHtml() {
-    var mgr = (src.managers || []).map(function (m) { return tagOf(StaffStore.nameOf(m), 'blue'); }).join(' ');
-    var related = (src.related || []).map(function (r) { return tagOf(r, 'blue'); }).join(' ');
-    var deliveryTag = src.delivery ? tagOf(DeliveryTypeStore.nameOf(src.delivery), DeliveryTypeStore.colorOf(src.delivery)) : '';
-    var locTypeTag = src.locationType ? tagOf(LocationTypeStore.nameOf(src.locationType), LocationTypeStore.colorOf(src.locationType)) : '';
-    var taskTag = src.taskType ? tagOf(TaskTypeStore.nameOf(src.taskType), TaskTypeStore.colorOf(src.taskType)) : '';
     var projectPart = [
       sec('案件'),
       '<div class="form-field full"><div class="form-value">' + [
