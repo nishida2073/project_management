@@ -172,10 +172,14 @@
       return;
     }
     var checkedCount = Array.prototype.filter.call(body.querySelectorAll('tr'), function (tr) {
-      return tr.style.display !== 'none' && tr.querySelector('.row-check') && tr.querySelector('.row-check').checked;
+      if (tr.style.display === 'none') return false;
+      if (!tr.querySelector('.row-check') || !tr.querySelector('.row-check').checked) return false;
+      var mc = parseInt(tr.querySelector('.main-count').value, 10) || 0;
+      var sc = parseInt(tr.querySelector('.sub-count').value, 10) || 0;
+      return mc > 0 || sc > 0;
     }).length;
     if (!checkedCount) {
-      MessageDialog.show('出力するクラスを選択してください');
+      MessageDialog.show('出力するクラスと人数を入力してください');
       return;
     }
     var items = [];
