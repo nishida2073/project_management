@@ -27,7 +27,7 @@
     <div class="modal modal-wide">
       <div class="modal-header">
         <div>
-          <h2>登壇依頼出力</h2>
+          <h2>登壇依頼</h2>
         </div>
         <a class="close-x" href="vender_assign_list.html">✕</a>
       </div>
@@ -39,6 +39,8 @@
         <div class="filter-panel" style="margin-bottom: 16px;">
           <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-options="すべて,実施前,実施中" data-value="実施前">実施前<span class="caret">▾</span></div></div>
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
+          <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
+          <div class="field"><label>終了日</label><div class="control js-date" id="dateTo"><span class="caret">▾</span></div></div>
           <div class="field"><label>依頼枠</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-value="あり">あり<span class="caret">▾</span></div></div>
           <div class="field"><label>今回依頼数に依頼中を含める</label><div class="seg" id="pendSelSeg"><button type="button" class="seg-opt is-active" data-v="in">含める</button><button type="button" class="seg-opt" data-v="out">含めない</button></div></div>
           <div class="search-btn">検索</div>
@@ -72,7 +74,7 @@
       </div>
       <div class="modal-footer">
         <a class="search-btn" href="vender_assign_list.html">キャンセル</a>
-        <div class="btn primary" id="printBtn">出力</div>
+        <div class="btn primary" id="printBtn">依頼</div>
       </div>
     </div>
   </div>
@@ -80,7 +82,6 @@
 </div>
 <script src="js/html-util.js"></script>
 <script src="js/storage/location/store/location-store.js"></script>
-<script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
 <script src="js/storage/course/store/course-store.js"></script>
 <script src="js/storage/project/store/project-store.js"></script>
@@ -91,6 +92,7 @@
 <script src="js/storage/vender-assign/screens/vender-assign-export.js"></script>
 <script src="js/filter-collapse.js"></script>
 <script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/message-dialog.js"></script>

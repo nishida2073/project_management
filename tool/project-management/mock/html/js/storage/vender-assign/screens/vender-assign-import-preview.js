@@ -3,7 +3,7 @@
   var raw = sessionStorage.getItem('venderImportPlan');
   var plan = raw ? JSON.parse(raw) : null;
   if (!plan || !plan.updates || !plan.updates.length) {
-    MessageDialog.show('取り込む内容がありません', function () { location.href = 'vender_assign_list.html'; });
+    MessageDialog.show('反映する内容がありません', function () { location.href = 'vender_assign_list.html'; });
     return;
   }
 
@@ -13,12 +13,8 @@
     return TeacherVenderStore.nameOf(v) || v;
   }
 
-  function staffName(v) {
-    return /^STF-/.test(String(v)) ? (StaffStore.nameOf(v) || v) : v;
-  }
-
-  function sameStaff(p, q) {
-    return q.vendor === p.vendor && staffName(q.staff) === staffName(p.staff);
+  function sameTeacher(p, q) {
+    return vendorText(q.vendor) === vendorText(p.vendor) && String(q.teacherName || '').trim() === String(p.teacherName || '').trim();
   }
 
   function stateOf(u, role) {
@@ -39,21 +35,32 @@
   function cellHtml(u, idx, role, existing, add) {
     var state = stateOf(u, role);
     var rows = existing.map(function (m) {
-      return esc(vendorText(m.vendor)) + '：' + esc(staffName(m.staff));
+      return esc(vendorText(m.vendor)) + '：' + esc(m.teacherName);
     });
     add.forEach(function (p, i) {
-      var dup = existing.some(function (q) { return sameStaff(p, q); });
+      var dup = existing.some(function (q) { return sameTeacher(p, q); });
       if (dup) return;
       var on = state === 'same';
       var tag = on
         ? ' <span class="tag green" style="font-size:10px;">追加</span>'
         : ' ' + VenderAssignStore.tag(VenderAssignStore.STATUS.NONE, 'font-size:10px;');
       rows.push('<label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
-        esc(vendorText(p.vendor)) + '：' + esc(staffName(p.staff)) + tag);
+        esc(vendorText(p.vendor)) + '：' + esc(p.teacherName) + tag);
     });
     return rows.length ? rows.join('<br>') : '-';
   }
 
+  var newTotal = 0;
+  plan.updates.forEach(function (u) {
+    var ex = existingOf(u);
+    (u.mains || []).forEach(function (p) { if (!ex.mains.some(function (q) { return sameTeacher(p, q); })) newTotal++; });
+    (u.subs || []).forEach(function (p) { if (!ex.subs.some(function (q) { return sameTeacher(p, q); })) newTotal++; });
+  });
+  if (!newTotal) {
+    sessionStorage.removeItem('venderImportPlan');
+    MessageDialog.show('反映する内容がありません（すべて反映済みです）', function () { location.href = 'vender_assign_list.html'; });
+    return;
+  }
   plan.updates.forEach(function (u, idx) {
     var ex = existingOf(u);
     var tr = document.createElement('tr');
@@ -69,7 +76,7 @@
   });
 
   if (plan.errors && plan.errors.length) {
-    var msg = '取り込めない内容（' + plan.errors.length + '件）:\n' + plan.errors.slice(0, 10).join('\n');
+    var msg = '反映できない内容（' + plan.errors.length + '件）:\n' + plan.errors.slice(0, 10).join('\n');
     if (plan.errors.length > 10) msg += '\nほか' + (plan.errors.length - 10) + '件';
     $('errorBox').textContent = msg;
   }
@@ -89,7 +96,7 @@
 
   function mergeUnique(list, add) {
     add.forEach(function (p) {
-      var dup = list.some(function (q) { return sameStaff(p, q); });
+      var dup = list.some(function (q) { return sameTeacher(p, q); });
       if (!dup) list.push(p);
     });
     return list;
@@ -137,7 +144,7 @@
       people += picked[key].mains.length + picked[key].subs.length;
     });
     sessionStorage.removeItem('venderImportPlan');
-    var msg = '取り込みが完了しました\n取り込み: ' + people + '人（' + Object.keys(picked).length + 'クラス）';
+    var msg = '反映が完了しました\n反映: ' + people + '人（' + Object.keys(picked).length + 'クラス）';
     MessageDialog.show(msg, function () { location.href = 'vender_assign_list.html'; });
   });
 })();

@@ -58,7 +58,7 @@
       : '<div class="form-control js-select" data-options="' + esc(vendorOptions().join(',')) + '">' + esc(TeacherVenderStore.nameOf(data.vendor) || '選択してください') + '<span class="caret">▾</span></div>';
     row.innerHTML =
       vendorCell +
-      '<input type="text" class="form-control" placeholder="講師名" value="' + esc(data.staff || '') + '">' +
+      '<input type="text" class="form-control" placeholder="講師名" value="' + esc(data.teacherName || '') + '">' +
       (data.locked ? '' : '<div class="sub-remove">✕</div>') +
       '<span class="tag sub-status"></span>';
     if (!data.locked) row.querySelector('.sub-remove').addEventListener('click', function () { row.remove(); });
@@ -69,8 +69,8 @@
   var S = VenderAssignStore.STATUS;
 
   function statusOfRow(row) {
-    var staff = (row.querySelector('input[type="text"]') || { value: '' }).value.trim();
-    if (staff) return S.REQUESTED;
+    var teacher = (row.querySelector('input[type="text"]') || { value: '' }).value.trim();
+    if (teacher) return S.REQUESTED;
     if (row.querySelector('.vendor-fixed')) return S.REQUESTING;
     var sel = row.querySelector('.js-select');
     if (sel && placeholderToEmpty(ownText(sel))) return S.BEFORE;
@@ -92,13 +92,13 @@
       var fixed = row.querySelector('.vendor-fixed');
       return {
         vendor: fixed ? fixed.getAttribute('data-code') : TeacherVenderStore.codeOf(placeholderToEmpty(ownText(sel[0]))),
-        staff: (row.querySelector('input[type="text"]') || { value: '' }).value.trim(),
+        teacherName: (row.querySelector('input[type="text"]') || { value: '' }).value.trim(),
         fixed: !!fixed
       };
     }).filter(function (r) {
-      return r.staff || (r.vendor && !r.fixed);
+      return r.teacherName || (r.vendor && !r.fixed);
     }).map(function (r) {
-      return { vendor: r.vendor, staff: r.staff };
+      return { vendor: r.vendor, teacherName: r.teacherName };
     });
   }
 
@@ -142,14 +142,14 @@
       });
     });
     reqs.forEach(function (rq) {
-      for (var mq = 0; mq < (rq.main || 0); mq++) mainRows.push({ vendor: rq.vendor, staff: '', locked: !!rq.vendor });
+      for (var mq = 0; mq < (rq.main || 0); mq++) mainRows.push({ vendor: rq.vendor, teacherName: '', locked: !!rq.vendor });
     });
-    while (mainRows.length < planMain) mainRows.push({ vendor: '', staff: '' });
+    while (mainRows.length < planMain) mainRows.push({ vendor: '', teacherName: '' });
     var subRows = a.subs.slice();
     reqs.forEach(function (rq) {
-      for (var sq = 0; sq < (rq.sub || 0); sq++) subRows.push({ vendor: rq.vendor, staff: '', locked: !!rq.vendor });
+      for (var sq = 0; sq < (rq.sub || 0); sq++) subRows.push({ vendor: rq.vendor, teacherName: '', locked: !!rq.vendor });
     });
-    while (subRows.length < planSub) subRows.push({ vendor: '', staff: '' });
+    while (subRows.length < planSub) subRows.push({ vendor: '', teacherName: '' });
     mainRows.forEach(function (m) { makeRow('mainList', m); });
     subRows.forEach(function (s) { makeRow('subList', s); });
     $('attendeeVendor').value = a.attendeeVendor || '';
@@ -158,11 +158,11 @@
       return '<label class="radio-option"><input type="radio" name="motivationVendor" value="' + esc(t.code) + '"><span class="radio-dot"></span><span class="tag ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
     }).join('');
     Array.prototype.forEach.call(document.querySelectorAll('input[name="motivationVendor"]'), function (r) { r.checked = r.value === (a.motivationVendor || ''); });
-    $('motivationStaff').value = a.motivationStaff || '';
+    $('motivationName').value = a.motivationName || '';
     $('memo').value = a.memo || '';
 
     function addRow(listId) {
-      makeRow(listId, { vendor: '', staff: '' });
+      makeRow(listId, { vendor: '', teacherName: '' });
     }
     $('addMain').addEventListener('click', function () { addRow('mainList'); });
     $('addSub').addEventListener('click', function () { addRow('subList'); });
@@ -175,8 +175,8 @@
       var subs = readRows('subList');
       if (reqs.length) {
         var noVendor = Array.prototype.some.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row'), function (row) {
-          var staffInput = row.querySelector('input[type="text"]');
-          if (!staffInput || !staffInput.value.trim()) return false;
+          var teacherInput = row.querySelector('input[type="text"]');
+          if (!teacherInput || !teacherInput.value.trim()) return false;
           var sel = row.querySelector('.js-select');
           return !!sel && sel.textContent.replace('▾', '').trim() === '選択してください';
         });
@@ -194,7 +194,7 @@
         attendeeVendor: $('attendeeVendor').value.trim(),
         attendee: $('attendee').value.trim(),
         motivationVendor: (document.querySelector('input[name="motivationVendor"]:checked') || { value: '' }).value,
-        motivationStaff: $('motivationStaff').value.trim(),
+        motivationName: $('motivationName').value.trim(),
         memo: $('memo').value
       };
       var newMain = Math.max(document.querySelectorAll('#mainList .sub-row').length, mains.length + VenderAssignStore.totalRequest(a).main);

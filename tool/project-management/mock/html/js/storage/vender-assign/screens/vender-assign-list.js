@@ -10,14 +10,14 @@
     var S = VenderAssignStore.STATUS;
     function lines(items) {
       return items.length ? items.map(function (x) {
-        return '<div>' + esc(x.vendor) + '：' + esc(x.staff) + (x.status ? ' ' + VenderAssignStore.tag(x.status) : '') + '</div>';
+        return '<div>' + esc(x.vendor) + '：' + esc(x.teacherName) + (x.status ? ' ' + VenderAssignStore.tag(x.status) : '') + '</div>';
       }).join('') : '-';
     }
     var mainLines = lines(a.mains.map(function (m) {
-      return { vendor: TeacherVenderStore.nameOf(m.vendor) || '-', staff: m.staff || '', status: m.staff ? null : S.BEFORE };
+      return { vendor: TeacherVenderStore.nameOf(m.vendor) || '-', teacherName: m.teacherName || '', status: m.teacherName ? null : S.BEFORE };
     }));
     var subLines = lines(a.subs.map(function (s) {
-      return { vendor: TeacherVenderStore.nameOf(s.vendor) || '-', staff: s.staff || '', status: s.staff ? null : S.BEFORE };
+      return { vendor: TeacherVenderStore.nameOf(s.vendor) || '-', teacherName: s.teacherName || '', status: s.teacherName ? null : S.BEFORE };
     }));
     var reqs = VenderAssignStore.requestsOf(a);
     var tot = VenderAssignStore.totalRequest(a);
@@ -49,7 +49,7 @@
       '<td>' + dashOr(r.subTeachers, '人') + '</td>' +
       '<td>' + subLines + '</td>' +
       '<td>' + (a.attendeeVendor || a.attendee ? '<div>' + dashOr(a.attendeeVendor) + '：' + dashOr(a.attendee) + '</div>' : '-') + '</td>' +
-      '<td>' + (a.motivationVendor || a.motivationStaff ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + dashOr(a.motivationStaff) + '</div>' : '-') + '</td>' +
+      '<td>' + (a.motivationVendor || a.motivationName ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + dashOr(a.motivationName) + '</div>' : '-') + '</td>' +
       '<td class="memo-cell"' + (a.memo ? ' title="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:#fbd29b;color:#9a4a00;font-weight:700;font-size:12px;">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);

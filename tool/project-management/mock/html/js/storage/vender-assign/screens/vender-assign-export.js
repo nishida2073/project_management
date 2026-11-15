@@ -9,20 +9,22 @@
     var a = VenderAssignStore.find(r.id);
     rows.push({ cls: r, assign: a });
     var c = C[r.courseCode] || { name: r.courseCode };
-    var namedMain = a.mains.filter(function (p) { return p.staff; }).length;
-    var namedSub = a.subs.filter(function (p) { return p.staff; }).length;
+    var namedMain = a.mains.filter(function (p) { return p.teacherName; }).length;
+    var namedSub = a.subs.filter(function (p) { return p.teacherName; }).length;
     var remainMain = Math.max(0, (parseInt(r.mainTeachers, 10) || 0) - namedMain);
     var remainSub = Math.max(0, (parseInt(r.subTeachers, 10) || 0) - namedSub);
     var reqTot = VenderAssignStore.totalRequest(a);
     var pendMain = reqTot.main;
     var pendSub = reqTot.sub;
-    var befMain = a.mains.filter(function (p) { return p.vendor && !p.staff; }).length;
-    var befSub = a.subs.filter(function (p) { return p.vendor && !p.staff; }).length;
+    var befMain = a.mains.filter(function (p) { return p.vendor && !p.teacherName; }).length;
+    var befSub = a.subs.filter(function (p) { return p.vendor && !p.teacherName; }).length;
     var reqMain = Math.max(0, remainMain - pendMain - befMain);
     var reqSub = Math.max(0, remainSub - pendSub - befSub);
     var tr = document.createElement('tr');
     tr.setAttribute('data-id', r.id);
     tr.setAttribute('data-practice', ClassStore.practiceStatus(r));
+    tr.setAttribute('data-start', r.start || '');
+    tr.setAttribute('data-end', r.end || '');
     var fits = remainMain === 0 && remainSub === 0;
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
     tr.setAttribute('data-remain-main', remainMain);
@@ -52,13 +54,17 @@
     var kw = $('keyword').value.trim().toLowerCase();
     var fitVal = placeholderToEmpty(ownText($('fitFilter'))) || 'すべて';
     var practiceVal = placeholderToEmpty(ownText($('practiceFilter'))) || 'すべて';
+    var df = placeholderToEmpty(ownText($('dateFrom'))), dt = placeholderToEmpty(ownText($('dateTo')));
+    var inRange = function (v, from, to) { if (from && (!v || v < from)) return false; if (to && (!v || v > to)) return false; return true; };
+    var dateMatch = function (start, end) { if (!df && !dt) return true; return inRange(start, df, dt) || inRange(end, df, dt); };
     var visible = 0;
     body.querySelectorAll('tr').forEach(function (tr) {
       var course = tr.querySelector('.col-course').textContent.toLowerCase();
       var canRequest = parseInt(tr.querySelector('.main-count').max, 10) > 0 || parseInt(tr.querySelector('.sub-count').max, 10) > 0;
       var fitOk = fitVal === 'すべて' || (fitVal === 'あり') === canRequest;
       var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
-      var ok = (!kw || course.indexOf(kw) !== -1) && fitOk && practiceOk;
+      var dateOk = dateMatch(tr.getAttribute('data-start'), tr.getAttribute('data-end'));
+      var ok = (!kw || course.indexOf(kw) !== -1) && fitOk && practiceOk && dateOk;
       tr.style.display = ok ? '' : 'none';
       if (ok) visible++;
     });
@@ -79,8 +85,8 @@
       ['main', 'sub'].forEach(function (role) {
         var list = role === 'main' ? row.assign.mains : row.assign.subs;
         var isOther = function (v) { return !code || v !== code; };
-        var befOthers = list.filter(function (p) { return p.vendor && !p.staff && isOther(p.vendor); }).length;
-        var befSel = list.filter(function (p) { return p.vendor && !p.staff && !isOther(p.vendor); }).length;
+        var befOthers = list.filter(function (p) { return p.vendor && !p.teacherName && isOther(p.vendor); }).length;
+        var befSel = list.filter(function (p) { return p.vendor && !p.teacherName && !isOther(p.vendor); }).length;
         var pendOthers = reqs.filter(function (q) { return isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
         var pendSelAll = reqs.filter(function (q) { return !isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
         var pendSel = includePendSel ? pendSelAll : 0;
@@ -95,7 +101,7 @@
         var willReplace = !!code && befSel > 0 && overPlan;
         input.classList.toggle('replace-mark', willReplace);
         input.title = willReplace ? '予定講師数を超過しているため' + val + '人に変更しています。' : '';
-        var doneVal = list.filter(function (p) { return p.staff && (!code || p.vendor === code); }).length;
+        var doneVal = list.filter(function (p) { return p.teacherName && (!code || p.vendor === code); }).length;
         tr.querySelector('.cnt-bef-' + role).textContent = code ? befSel + '人' : '-';
         tr.querySelector('.cnt-pend-' + role).textContent = code ? pendSelAll + '人' : '-';
         tr.querySelector('.cnt-done-' + role).textContent = code ? doneVal + '人' : '-';
@@ -179,7 +185,7 @@
       return mc > 0 || sc > 0;
     }).length;
     if (!checkedCount) {
-      MessageDialog.show('出力するクラスと人数を入力してください');
+      MessageDialog.show('依頼するクラスと人数を入力してください');
       return;
     }
     var items = [];
@@ -266,7 +272,7 @@
       var dropBefore = function (list, n) {
         var left = n;
         return (list || []).filter(function (p) {
-          if (left > 0 && p.vendor === vendorCode && !p.staff) { left--; return false; }
+          if (left > 0 && p.vendor === vendorCode && !p.teacherName) { left--; return false; }
           return true;
         });
       };
@@ -274,11 +280,11 @@
       var convertCount = function (role, list, n) {
         if (!includePendSel || !rowInfo) return n;
         var plan = parseInt(role === 'main' ? rowInfo.cls.mainTeachers : rowInfo.cls.subTeachers, 10) || 0;
-        var named = list.filter(function (p) { return p.staff; }).length;
+        var named = list.filter(function (p) { return p.teacherName; }).length;
         var remain = Math.max(0, plan - named);
         var pendOthers = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; }).reduce(function (t, r) { return t + (r[role] || 0); }, 0);
-        var befOthers = list.filter(function (p) { return p.vendor && !p.staff && p.vendor !== vendorCode; }).length;
-        var befSel = list.filter(function (p) { return p.vendor === vendorCode && !p.staff; }).length;
+        var befOthers = list.filter(function (p) { return p.vendor && !p.teacherName && p.vendor !== vendorCode; }).length;
+        var befSel = list.filter(function (p) { return p.vendor === vendorCode && !p.teacherName; }).length;
         var keep = Math.min(befSel, Math.max(0, remain - pendOthers - befOthers - n));
         return befSel - keep;
       };

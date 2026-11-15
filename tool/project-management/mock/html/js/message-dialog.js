@@ -35,7 +35,7 @@
       var overlay = document.createElement('div');
       overlay.className = 'overlay';
       overlay.innerHTML =
-        '<div class="input-dialog">' +
+        '<div class="input-dialog message-dialog-wide">' +
           '<div class="message-dialog-text">' + esc(message) + '</div>' +
           '<div class="input-dialog-actions">' +
             '<div class="search-btn message-dialog-cancel">キャンセル</div>' +

@@ -22,7 +22,7 @@
         return;
       }
       if (!plan.updates.length) {
-        MessageDialog.show(['取り込む内容がありません'].concat(plan.errors).join('\n'));
+        MessageDialog.show(['反映する内容がありません'].concat(plan.errors).join('\n'));
         return;
       }
       sessionStorage.setItem('venderImportPlan', JSON.stringify(serializePlan(plan)));
@@ -50,17 +50,17 @@
 
   function mergeUnique(list, add) {
     add.forEach(function (p) {
-      var dup = list.some(function (q) { return q.vendor === p.vendor && q.staff === p.staff; });
+      var dup = list.some(function (q) { return q.vendor === p.vendor && q.teacherName === p.teacherName; });
       if (!dup) list.push(p);
     });
     return list;
   }
 
-  function uniqueByStaff(list) {
+  function uniqueByTeacher(list) {
     var seen = {};
     return list.filter(function (p) {
-      if (seen[p.staff]) return false;
-      seen[p.staff] = true;
+      if (seen[p.teacherName]) return false;
+      seen[p.teacherName] = true;
       return true;
     });
   }
@@ -104,14 +104,14 @@
           if (isColored(ws[XLSX.utils.encode_cell({ r: idx + 3, c: ci })])) return;
           var name = text(row[ci]);
           if (!name) return;
-          target.push({ vendor: vendorCode, staff: name });
+          target.push({ vendor: vendorCode, teacherName: name });
         });
       }
       collect(mainCols, mains);
       collect(subCols, subs);
-      mains = uniqueByStaff(mains);
-      subs = uniqueByStaff(subs).filter(function (p) {
-        return !mains.some(function (q) { return q.staff === p.staff; });
+      mains = uniqueByTeacher(mains);
+      subs = uniqueByTeacher(subs).filter(function (p) {
+        return !mains.some(function (q) { return q.teacherName === p.teacherName; });
       });
 
       if (!mains.length && !subs.length) {

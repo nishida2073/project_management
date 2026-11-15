@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style_modify.css">
+<style>
+  .modal-body { display: flex; flex-direction: column; gap: 16px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=assign" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>登壇依頼一覧</h1></div><div class="table-card"></div></div>
+  </div>
+  <div class="overlay">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <div>
+          <h2>依頼枠更新</h2>
+        </div>
+        <a class="close-x" href="vender_assign_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;align-items:flex-end;gap:20px;flex-wrap:nowrap;">
+          <div class="field narrow">
+            <label>講師ベンダー<span class="req">必須</span></label>
+            <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
+          </div>
+            <div class="field">
+              <label>変更後の状態<span class="req">必須</span></label>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="control js-select" id="bulkState" data-options="依頼枠,依頼前" style="min-width:140px;">選択してください<span class="caret">▾</span></div>
+              </div>
+            </div>
+        </div>
+        <div class="filter-panel" style="margin-bottom: 16px;">
+          <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-options="すべて,実施前,実施中" data-value="実施前">実施前<span class="caret">▾</span></div></div>
+          <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
+          <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
+          <div class="field"><label>終了日</label><div class="control js-date" id="dateTo"><span class="caret">▾</span></div></div>
+          <div class="search-btn">検索</div>
+        </div>
+        <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
+          <div class="table-meta"><div class="count"><b id="withdrawCount">0</b> 件</div></div>
+          <div class="scroll-outer" id="scrollArea" style="overflow: auto; flex: 1 1 auto; min-height: 0;">
+          <table>
+                        <thead>
+              <tr>
+                <th class="sticky"><div id="selToggle" class="toggle" style="cursor:pointer;"><span class="knob"></span></div></th>
+                <th class="sticky">年度</th>
+                <th class="sticky fill">コース</th>
+                <th class="sticky">レッスンNo</th>
+                <th class="sticky">開始日</th>
+                <th class="sticky">終了日</th>
+                <th>予定講師数<br>（メイン）</th>
+                <th>依頼済講師数<br>（メイン）</th>
+                <th>現依頼数：前・中・済<br>（メイン）</th>
+                <th>予定講師数<br>（サブ）</th>
+                <th>依頼済講師数<br>（サブ）</th>
+                <th>現依頼数：前・中・済<br>（サブ）</th>
+              </tr>
+            </thead>
+            <tbody id="withdrawBody"></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" href="vender_assign_list.html">キャンセル</a>
+        <div class="btn primary" id="saveBtn">保存</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/html-util.js"></script>
+<script src="js/storage/location/store/location-store.js"></script>
+<script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
+<script src="js/storage/course/store/course-store.js"></script>
+<script src="js/storage/project/store/project-store.js"></script>
+<script src="js/storage/class/store/class-store.js"></script>
+<script src="js/storage/vender-assign/store/vender-assign-store.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/datepicker.js" defer></script>
+<script src="js/filter-collapse.js"></script>
+<script src="js/storage/vender-assign/screens/vender-assign-request-modify.js" defer></script>
+<script src="js/sidebar-toggle.js" defer></script>
+<script src="js/column-resize.js" defer></script>
+<script src="js/message-dialog.js"></script>
+</body>
+</html>
