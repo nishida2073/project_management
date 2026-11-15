@@ -86,7 +86,9 @@
         var pendSel = includePendSel ? pendSelAll : 0;
         var remain = parseInt(tr.getAttribute('data-remain-' + role), 10) || 0;
         var input = tr.querySelector('.' + role + '-count');
-        var val = Math.max(0, remain - pendOthers - pendSel - befOthers);
+        var minVal = includePendSel ? pendSelAll : 0;
+        var val = Math.max(minVal, Math.max(0, remain - pendOthers - befOthers - (includePendSel ? 0 : pendSelAll)));
+        input.min = minVal;
         input.max = val;
         input.value = val;
         var overPlan = remain < pendOthers + pendSelAll + befOthers + befSel;
@@ -131,14 +133,34 @@
     visibleRows().forEach(function (tr) { tr.querySelector('.row-check').checked = on; });
     syncSelToggle();
   });
+  function minFor(el) {
+    if (!includePendSel) return 0;
+    var role = el.classList.contains('main-count') ? 'main' : 'sub';
+    var tr = el.closest('tr');
+    var row = tr ? rows.filter(function (x) { return x.cls.id === tr.getAttribute('data-id'); })[0] : null;
+    var code = TeacherVenderStore.codeOf(placeholderToEmpty(ownText($('requestVendor'))));
+    if (!row || !code) return 0;
+    return VenderAssignStore.requestsOf(row.assign).filter(function (q) { return q.vendor === code; }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
+  }
+  body.addEventListener('focusin', function (e) {
+    if (!e.target.matches('.main-count, .sub-count')) return;
+    e.target.setAttribute('min', String(minFor(e.target)));
+  });
   body.addEventListener('input', function (e) {
     if (!e.target.matches('.main-count, .sub-count')) return;
     var max = parseInt(e.target.getAttribute('max'), 10) || 0;
     var v = parseInt(e.target.value, 10);
     if (isNaN(v) || v < 0) { e.target.value = v < 0 ? 0 : e.target.value; return; }
+    var minNow = minFor(e.target);
+    if (v < minNow) { e.target.value = minNow; return; }
     if (v > max) e.target.value = max;
   });
   body.addEventListener('change', function (e) {
+    if (e.target.matches('.main-count, .sub-count')) {
+      var mn = minFor(e.target);
+      var cv = parseInt(e.target.value, 10);
+      if (isNaN(cv) || cv < mn) e.target.value = mn;
+    }
     if (e.target.classList.contains('row-check')) syncSelToggle();
   });
 
