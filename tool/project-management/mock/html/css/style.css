@@ -101,7 +101,6 @@ th.sort-asc::after, th.sort-desc::after { white-space: normal; font-size: 10px; 
 th.sort-asc::after { content: '▲'; }
 th.sort-desc::after { content: '▼'; }
 tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f6; color: #333c4d; white-space: nowrap; }
-tbody tr:hover { background: #f8faff; }
 th.grp-basic { background: #eef4ff !important; color: #2f6fed !important; text-align: center; border-bottom: 1px solid #d7e3fb !important; }
 th.grp-year { background: #fff6e9 !important; color: #b3791a !important; text-align: center; border-bottom: 1px solid #f3e3c0 !important; }
 th.grp-none { background: #f6f8fb !important; }
