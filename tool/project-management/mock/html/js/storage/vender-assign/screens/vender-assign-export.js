@@ -68,6 +68,7 @@
   applyFilter();
 
   var appliedVendor = null;
+  var includePendSel = true;
   function applyVendor() {
     var code = TeacherVenderStore.codeOf(placeholderToEmpty(ownText($('requestVendor'))));
     body.querySelectorAll('tr').forEach(function (tr) {
@@ -81,19 +82,20 @@
         var befOthers = list.filter(function (p) { return p.vendor && !p.staff && isOther(p.vendor); }).length;
         var befSel = list.filter(function (p) { return p.vendor && !p.staff && !isOther(p.vendor); }).length;
         var pendOthers = reqs.filter(function (q) { return isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
-        var pendSel = reqs.filter(function (q) { return !isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
+        var pendSelAll = reqs.filter(function (q) { return !isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
+        var pendSel = includePendSel ? pendSelAll : 0;
         var remain = parseInt(tr.getAttribute('data-remain-' + role), 10) || 0;
         var input = tr.querySelector('.' + role + '-count');
         var val = Math.max(0, remain - pendOthers - pendSel - befOthers);
         input.max = val;
         input.value = val;
-        var overPlan = remain < pendOthers + pendSel + befOthers + befSel;
+        var overPlan = remain < pendOthers + pendSelAll + befOthers + befSel;
         var willReplace = !!code && befSel > 0 && overPlan;
         input.classList.toggle('replace-mark', willReplace);
         input.title = willReplace ? '予定講師数を超過しているため' + val + '人に変更しています。' : '';
         var doneVal = list.filter(function (p) { return p.staff && (!code || p.vendor === code); }).length;
         tr.querySelector('.cnt-bef-' + role).textContent = code ? befSel + '人' : '-';
-        tr.querySelector('.cnt-pend-' + role).textContent = code ? pendSel + '人' : '-';
+        tr.querySelector('.cnt-pend-' + role).textContent = code ? pendSelAll + '人' : '-';
         tr.querySelector('.cnt-done-' + role).textContent = code ? doneVal + '人' : '-';
       });
     });
@@ -105,6 +107,15 @@
     applyVendor();
   }
   syncVendor();
+  Array.prototype.forEach.call(document.querySelectorAll('#pendSelSeg .seg-opt'), function (btn) {
+    btn.addEventListener('click', function () {
+      includePendSel = btn.getAttribute('data-v') === 'in';
+      Array.prototype.forEach.call(document.querySelectorAll('#pendSelSeg .seg-opt'), function (b2) { b2.classList.toggle('is-active', b2 === btn); });
+      appliedVendor = null;
+      syncVendor();
+      setTimeout(function () { var search = document.querySelector('.filter-panel .search-btn'); if (search) search.click(); }, 0);
+    });
+  });
   document.addEventListener('click', function () { setTimeout(syncVendor, 0); }, true);
 
   function visibleRows() {
@@ -131,7 +142,7 @@
     if (e.target.classList.contains('row-check')) syncSelToggle();
   });
 
-  $('printBtn').addEventListener('click', function () {
+  function runExport() {
     var vendor = placeholderToEmpty(ownText($('requestVendor')));
     var vendorCode = TeacherVenderStore.codeOf(vendor);
     if (!vendor) {
@@ -215,8 +226,8 @@
     exportedIds.forEach(function (x) {
       var rec = VenderAssignStore.find(x.id);
       var existing = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor === vendorCode; });
-      var exMain = existing.reduce(function (t, r) { return t + (r.main || 0); }, 0);
-      var exSub = existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0);
+      var exMain = includePendSel ? existing.reduce(function (t, r) { return t + (r.main || 0); }, 0) : 0;
+      var exSub = includePendSel ? existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0) : 0;
       var reqs = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; });
       if (x.main || x.sub || exMain || exSub) reqs.push({ vendor: vendorCode, main: exMain + x.main, sub: exSub + x.sub });
       var dropBefore = function (list, n) {
@@ -226,8 +237,20 @@
           return true;
         });
       };
-      rec.mains = dropBefore(rec.mains, x.main);
-      rec.subs = dropBefore(rec.subs, x.sub);
+      var rowInfo = rows.filter(function (q) { return q.cls.id === x.id; })[0];
+      var convertCount = function (role, list, n) {
+        if (includePendSel || !rowInfo) return n;
+        var plan = parseInt(role === 'main' ? rowInfo.cls.mainTeachers : rowInfo.cls.subTeachers, 10) || 0;
+        var named = list.filter(function (p) { return p.staff; }).length;
+        var remain = Math.max(0, plan - named);
+        var pendOthers = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; }).reduce(function (t, r) { return t + (r[role] || 0); }, 0);
+        var befOthers = list.filter(function (p) { return p.vendor && !p.staff && p.vendor !== vendorCode; }).length;
+        var befSel = list.filter(function (p) { return p.vendor === vendorCode && !p.staff; }).length;
+        var keep = Math.min(befSel, Math.max(0, remain - pendOthers - befOthers - n));
+        return befSel - keep;
+      };
+      rec.mains = dropBefore(rec.mains, convertCount('main', rec.mains || [], x.main));
+      rec.subs = dropBefore(rec.subs, convertCount('sub', rec.subs || [], x.sub));
       rec.requests = reqs;
       delete rec.requested;
       delete rec.requestMain;
@@ -236,5 +259,6 @@
       VenderAssignStore.upsert(rec);
     });
     location.href = 'vender_assign_list.html';
-  });
+  }
+  $('printBtn').addEventListener('click', runExport);
 })();

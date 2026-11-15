@@ -141,21 +141,15 @@
         location.href = 'vender_assign_list.html';
       });
     });
-    if (reqs.length) {
-      reqs.forEach(function (rq) {
-        for (var mq = 0; mq < (rq.main || 0); mq++) mainRows.push({ vendor: rq.vendor, staff: '', locked: !!rq.vendor });
-      });
-    } else {
-      while (mainRows.length < planMain) mainRows.push({ vendor: '', staff: '' });
-    }
+    reqs.forEach(function (rq) {
+      for (var mq = 0; mq < (rq.main || 0); mq++) mainRows.push({ vendor: rq.vendor, staff: '', locked: !!rq.vendor });
+    });
+    while (mainRows.length < planMain) mainRows.push({ vendor: '', staff: '' });
     var subRows = a.subs.slice();
-    if (reqs.length) {
-      reqs.forEach(function (rq) {
-        for (var sq = 0; sq < (rq.sub || 0); sq++) subRows.push({ vendor: rq.vendor, staff: '', locked: !!rq.vendor });
-      });
-    } else {
-      while (subRows.length < planSub) subRows.push({ vendor: '', staff: '' });
-    }
+    reqs.forEach(function (rq) {
+      for (var sq = 0; sq < (rq.sub || 0); sq++) subRows.push({ vendor: rq.vendor, staff: '', locked: !!rq.vendor });
+    });
+    while (subRows.length < planSub) subRows.push({ vendor: '', staff: '' });
     mainRows.forEach(function (m) { makeRow('mainList', m); });
     subRows.forEach(function (s) { makeRow('subList', s); });
     $('attendeeVendor').value = a.attendeeVendor || '';

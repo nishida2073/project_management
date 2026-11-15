@@ -32,9 +32,15 @@
         <a class="close-x" href="vender_assign_list.html">✕</a>
       </div>
       <div class="modal-body">
-        <div class="field narrow">
-          <label>講師ベンダー<span class="req">必須</span></label>
-          <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
+        <div class="field-row">
+          <div class="field narrow">
+            <label>講師ベンダー<span class="req">必須</span></label>
+            <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
+          </div>
+          <div class="field">
+            <label>今回依頼数に依頼中を含める</label>
+            <div class="seg" id="pendSelSeg"><button type="button" class="seg-opt" data-v="out">含める</button><button type="button" class="seg-opt is-active" data-v="in">含めない</button></div>
+          </div>
         </div>
         <div class="filter-panel" style="margin-bottom: 16px;">
           <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-options="すべて,実施前,実施中" data-value="実施前">実施前<span class="caret">▾</span></div></div>
