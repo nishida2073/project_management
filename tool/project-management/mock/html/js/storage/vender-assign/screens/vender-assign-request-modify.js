@@ -160,7 +160,7 @@
       if (from !== to) changes.push({ tr: tr, from: from, to: to });
     });
     if (!changes.length) {
-      MessageDialog.show('状態を変更してください');
+      MessageDialog.show('状態を変更する依頼がありません');
       return;
     }
     var lines = changes.map(function (ch) {
@@ -168,7 +168,7 @@
       var cc = C[x.cls.courseCode] || { name: x.cls.courseCode };
       return '・' + x.cls.courseCode + '　' + cc.name + '　' + x.cls.lessonNo + String.fromCharCode(10) + '　' + LABEL[ch.from] + ' → ' + LABEL[ch.to];
     });
-    MessageDialog.confirm(['依頼枠の状態を変更します。', '以下に変更してよろしいですか？'].concat(lines).join(String.fromCharCode(10))).then(function (ok) {
+    MessageDialog.confirm(['以下に変更してよろしいですか？'].concat(lines).join(String.fromCharCode(10))).then(function (ok) {
       if (!ok) return;
       changes.forEach(function (ch) {
         var x = findRow(ch.tr);
