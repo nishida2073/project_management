@@ -171,6 +171,13 @@
       MessageDialog.required(['講師ベンダー']);
       return;
     }
+    var checkedCount = Array.prototype.filter.call(body.querySelectorAll('tr'), function (tr) {
+      return tr.style.display !== 'none' && tr.querySelector('.row-check') && tr.querySelector('.row-check').checked;
+    }).length;
+    if (!checkedCount) {
+      MessageDialog.show('出力するクラスを選択してください');
+      return;
+    }
     var items = [];
     var exportedIds = [];
     body.querySelectorAll('tr').forEach(function (tr) {
