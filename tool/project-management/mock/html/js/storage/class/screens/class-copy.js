@@ -41,7 +41,7 @@
     var deliveryTag = src.delivery ? tagOf(DeliveryTypeStore.nameOf(src.delivery), DeliveryTypeStore.colorOf(src.delivery)) : '';
     var locTypeTag = src.locationType ? tagOf(LocationTypeStore.nameOf(src.locationType), LocationTypeStore.colorOf(src.locationType)) : '';
     var taskTag = src.taskType ? tagOf(TaskTypeStore.nameOf(src.taskType), TaskTypeStore.colorOf(src.taskType)) : '';
-    return [
+    var projectPart = [
       sec('案件'),
       '<div class="form-field full"><div class="form-value">' + [
         '<span>' + esc(yearText(src.year)) + '</span>',
@@ -50,6 +50,8 @@
         p.sales ? tagOf(SalesTypeStore.nameOf(p.sales), SalesTypeStore.colorOf(p.sales)) : '',
         p.part ? tagOf(ParticipationTypeStore.nameOf(p.part), ParticipationTypeStore.colorOf(p.part)) : ''
       ].filter(Boolean).join('') + '</div></div>',
+    ].join('');
+    var coursePart = [
       sec('コース'),
       '<div class="form-field full"><div class="form-value">' + [
         '<span>' + esc(src.courseCode || '') + '</span>',
@@ -59,12 +61,41 @@
         c.delivery ? '<span class="form-value-note">推奨：<span class="tag ' + esc(DeliveryTypeStore.colorOf(c.delivery)) + '">' + esc(DeliveryTypeStore.nameOf(c.delivery)) + '</span> ' + esc(c.schedule || '') + ' 講師 メイン' + (c.mainTeachers === undefined ? '-' : c.mainTeachers) + '人・サブ' + (c.subTeachers === undefined ? '-' : c.subTeachers) + '人</span>' : ''
       ].filter(Boolean).join('') + '</div></div>',
     ].join('');
+    return '<div id="projectPart" class="contents">' + projectPart + '</div><div id="coursePart" class="contents">' + coursePart + '</div>';
   }
   $('copyItems').innerHTML = sourceHtml();
+  $('projectPart').style.display = 'none';
 
   function textOf(el) {
     return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
       .map(function (n) { return n.textContent; }).join('').trim();
+  }
+
+  function fmtDate(d) {
+    return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function bindEndCalc(k) {
+    var startEl = document.querySelector('[data-k="' + k + '"][data-f="start"]');
+    var endEl = document.querySelector('[data-k="' + k + '"][data-f="end"]');
+    if (!startEl || !endEl) return;
+    var endTouched = false;
+    endEl.addEventListener('click', function () { endTouched = true; }, true);
+    function calc() {
+      if (endTouched) return;
+      var s = textOf(startEl);
+      var course = CourseStore.load().filter(function (x) { return x.code === src.courseCode; })[0];
+      if (!/^\d{4}\/\d{2}\/\d{2}$/.test(s) || !course || !course.days) return;
+      var d = new Date(s.replace(/\//g, '-'));
+      var remaining = Number(course.days) - 1;
+      while (remaining > 0) {
+        d.setDate(d.getDate() + 1);
+        var dow = d.getDay();
+        if (dow !== 0 && dow !== 6 && !HolidayStore.isHoliday(fmtDate(d))) remaining--;
+      }
+      endEl.innerHTML = fmtDate(d) + '<span class="caret">▾</span>';
+    }
+    new MutationObserver(calc).observe(startEl, { childList: true, characterData: true, subtree: true });
   }
 
   function numberSelect(k, f, options, value, required) {
@@ -85,7 +116,7 @@
       }).join('');
       var initName = '';
       var initOptions = (byType[src.locationType] || []).join(',');
-      html += sec('複製 ' + k) +
+      html += '<div class="form-section copy-section">複製 ' + k + '</div>' +
         '<div class="form-field"><label>開始日<span class="req">必須</span></label><div class="form-control js-date" data-k="' + k + '" data-f="start">' + esc(src.start) + '<span class="caret">▾</span></div></div>' +
         '<div class="form-field"><label>終了日<span class="req">必須</span></label><div class="form-control js-date" data-k="' + k + '" data-f="end">' + esc(src.end) + '<span class="caret">▾</span></div></div>' +
         numberSelect(k, { key: 'people', label: '受講人数' }, '10,15,20,24,30,35,40,50', '', false) + empty() +
@@ -98,6 +129,7 @@
     $('perCopy').querySelectorAll('.js-date').forEach(function (el) { window.bindDatePicker(el); });
     $('perCopy').querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
     $('perCopy').querySelectorAll('.number-select').forEach(function (el) { window.bindNumberSelect(el); });
+    for (var e = 1; e <= count; e++) bindEndCalc(e);
     for (var j = 1; j <= count; j++) {
       (function (kk) {
         document.querySelectorAll('input[name="locationType-' + kk + '"]').forEach(function (radio) {
@@ -110,6 +142,17 @@
       })(j);
     }
   }
+  (function () {
+    var seg = $('infoSeg');
+    var opts = seg.querySelectorAll('.seg-opt');
+    Array.prototype.forEach.call(opts, function (btn) {
+      btn.addEventListener('click', function () {
+        var show = btn.getAttribute('data-v') === 'show';
+        Array.prototype.forEach.call(opts, function (b) { b.classList.toggle('is-active', b === btn); });
+        $('projectPart').style.display = show ? '' : 'none';
+      });
+    });
+  })();
   (function () {
     var sw = $('relateToSource');
     var label = sw.parentNode.querySelector('span');

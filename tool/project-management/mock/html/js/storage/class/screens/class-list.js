@@ -28,9 +28,9 @@
       '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td class="sticky col-customer">' + esc(p.customer ? CustomerStore.nameOf(p.customer) : '-') + '</td>' +
       '<td class="sticky">' + esc(String(r.year).replace('年度', '') + '年度') + '</td>' +
-      '<td class="sticky"><div>' + esc(p.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.projectCode) + '</div></td>' +
-      '<td class="sticky">' + (p.sales ? '<span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +
-      '<td class="sticky">' + (p.part ? '<span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
+      '<td class="sticky col-project"><div>' + esc(p.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.projectCode) + '</div></td>' +
+      '<td class="sticky col-project">' + (p.sales ? '<span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +
+      '<td class="sticky col-project">' + (p.part ? '<span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
       '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + ' 版' + esc(r.version || '-') + '</div></td>' +
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(relatedText) + '</div></td>' +
       '<td class="sticky">' + (r.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +

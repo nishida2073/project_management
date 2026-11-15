@@ -78,7 +78,7 @@
         touched = true;
         e.preventDefault();
         var startX = e.clientX;
-        var leftHeads = allHeads.slice(0, idx + 1);
+        var leftHeads = allHeads.slice(0, idx + 1).filter(function (t) { return t.getClientRects().length > 0; });
         var onlySticky = leftHeads.every(function (t) { return t.classList.contains('sticky'); });
         var group = e.shiftKey || onlySticky ? leftHeads : [th];
         var startWs = group.map(function (g) { return g.getBoundingClientRect().width; });
@@ -87,7 +87,7 @@
         var touchesSticky = group.some(function (g) { return g.classList.contains('sticky'); });
 
         function move(ev) {
-          var minStart = Math.min.apply(null, startWs);
+          var minStart = Math.min.apply(null, startWs.filter(function (w) { return w > 0; }));
           var target = Math.max(startTotal * MIN / minStart, startTotal + ev.clientX - startX);
           var f = target / startTotal;
           group.forEach(function (g, j) {
@@ -132,6 +132,7 @@
       if (ms.some(function (m) { return m.target.tagName === 'TR'; })) refit();
     }).observe(tbody, { attributes: true, attributeFilter: ['style'], subtree: true });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
+    table.__relayout = function () { touched = false; refit(); };
     layout();
   }
 

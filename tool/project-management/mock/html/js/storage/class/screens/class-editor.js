@@ -92,7 +92,13 @@
       }
       var c = ClassStore.COURSES[rec.courseCode];
     } else {
-      rec = {
+      var fromId = new URLSearchParams(location.search).get('from');
+      var fromRec = fromId ? list.filter(function (r) { return r.id === fromId; })[0] : null;
+      if (fromRec) {
+        var cancelEl = document.getElementById('cancelLink');
+        if (cancelEl) cancelEl.href = 'class_modify.html?id=' + encodeURIComponent(fromRec.id);
+      }
+      rec = fromRec ? Object.assign(JSON.parse(JSON.stringify(fromRec)), { id: '', lessonNo: '', memo: '', status: '稼働中' }) : {
         year: '2026', courseYear: '2026', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
         related: [], start: '', end: '', delivery: '', people: '', managers: [],
         locationType: '', locationName: '', memo: '', status: '停止中'
@@ -103,6 +109,10 @@
       var copyBtn = document.getElementById('copyBtn');
       if (copyBtn) copyBtn.addEventListener('click', function () {
         location.href = 'class_copy.html?id=' + encodeURIComponent(rec.id);
+      });
+      var simpleCopyBtn = document.getElementById('simpleCopyBtn');
+      if (simpleCopyBtn) simpleCopyBtn.addEventListener('click', function () {
+        location.href = 'class_regist.html?from=' + encodeURIComponent(rec.id);
       });
     }
 

@@ -23,7 +23,13 @@
         <a class="close-x" href="class_list.html">✕</a>
       </div>
       <div class="modal-body">
-        <div id="copyItems" class="sticky-head"></div>
+        <div class="sticky-head">
+        <div class="form-field full">
+          <label>案件</label>
+          <div class="seg" id="infoSeg"><button type="button" class="seg-opt" data-v="show">表示</button><button type="button" class="seg-opt is-active" data-v="hide">非表示</button></div>
+        </div>
+        <div id="copyItems" class="sticky-body"></div>
+        </div>
         <div class="form-section">複製するクラス数</div>
         <div class="form-field">
           <label>クラス数<span class="req">必須</span></label>
@@ -50,6 +56,7 @@
 <script src="js/storage/task-type/store/task-type-store.js"></script>
 <script src="js/storage/project/store/project-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
+<script src="js/storage/holiday/store/holiday-store.js"></script>
 <script src="js/storage/location-type/store/location-type-store.js"></script>
 <script src="js/storage/sales-type/store/sales-type-store.js"></script>
 <script src="js/storage/participation-type/store/participation-type-store.js"></script>

@@ -60,7 +60,10 @@
 
       <div class="table-card">
         <div class="table-meta">
-          <div class="count"><b id="classCount">0</b> 件</div>
+          <div class="meta-left">
+            <div class="count"><b id="classCount">0</b> 件</div>
+            <div class="filter-toggle-wrap"><span class="filter-toggle-label">案件</span><div class="seg" data-hide-class="col-project"><button type="button" class="seg-opt" data-v="show">表示</button><button type="button" class="seg-opt is-active" data-v="hide">非表示</button></div></div>
+          </div>
         </div>
         <div class="table-scroll">
         <table>
@@ -69,9 +72,9 @@
               <th class="sticky">実施状況</th>
               <th class="sticky">顧客</th>
               <th class="sticky">年度</th>
-              <th class="sticky">案件</th>
-              <th class="sticky">販売区分</th>
-              <th class="sticky">参加区分</th>
+              <th class="sticky col-project">案件</th>
+              <th class="sticky col-project">販売区分</th>
+              <th class="sticky col-project">参加区分</th>
               <th class="sticky">コース</th>
               <th class="sticky">レッスンNo</th>
               <th class="sticky">タスク区分</th>
@@ -120,5 +123,6 @@ ${tags%
 <script src="js/list-filter-auto.js"></script>
 <script src="js/list-filter.js"></script><script src="js/pagination.js"></script>
 <script src="js/filter-collapse.js"></script>
+<script src="js/seg-column-toggle.js"></script>
 </body>
 </html>
