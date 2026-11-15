@@ -216,6 +216,10 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .overlay { position: fixed; inset: 0; background: rgba(20,28,45,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); overflow: hidden; width: 60%; max-width: calc(100vw - 32px); height: 80vh; display: flex; flex-direction: column; }
 .modal.modal-wide { width: 95%; height: 90vh; }
+.modal.modal-tall { height: 90vh; }
+.modal-body .sticky-head { grid-column: 1 / span 2; position: sticky; top: -22px; z-index: 3; background: #fff; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; margin: -22px 0 0; padding: 22px 0 10px; border-bottom: 1px solid #e6eaf1; }
+.form-value-note { font-size: 12px; color: #9aa4b5; font-weight: 400; }
+.contents { display: contents; }
 .modal.modal-medium { width: 70%; }
 .modal-body { flex: 1; overflow-y: auto; }
 .modal-body.modal-body-plain { display: block; padding: 0 28px 18px; }

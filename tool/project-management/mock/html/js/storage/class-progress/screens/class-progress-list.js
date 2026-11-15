@@ -112,7 +112,7 @@
     var activeSteps = steps.filter(function (s, i) { return isActive(i); });
     if (activeSteps.some(isDelayed)) delayClasses++;
     var course = ClassStore.COURSES[c.courseCode];
-    var related = c.related && c.related.length ? c.related.join(', ') : '-';
+    var related = c.related && c.related.length ? c.related.slice().sort(function (a, b) { return String(a).localeCompare(String(b), 'ja', { numeric: true }); }).join(', ') : '-';
 
     var owners = steps.filter(function (s, i) { return isActive(i) && !s.na && s.owner; })
       .map(function (s) { return StaffStore.nameOf(s.owner); })

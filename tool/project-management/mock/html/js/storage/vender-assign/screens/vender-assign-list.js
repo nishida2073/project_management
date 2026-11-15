@@ -30,7 +30,7 @@
       for (var mi = 0; mi < (rq.main || 0); mi++) mainLines = (mainLines === '-' ? '' : mainLines) + '<div>' + reqText + '</div>';
       for (var si = 0; si < (rq.sub || 0); si++) subLines = (subLines === '-' ? '' : subLines) + '<div>' + reqText + '</div>';
     });
-    var related = r.related && r.related.length ? r.related.join(', ') : '-';
+    var related = r.related && r.related.length ? r.related.slice().sort(function (a, b) { return String(a).localeCompare(String(b), 'ja', { numeric: true }); }).join(', ') : '-';
     var planMain = parseInt(r.mainTeachers, 10) || 0;
     var planSub = parseInt(r.subTeachers, 10) || 0;
     var freeMain = Math.max(0, planMain - a.mains.length - tot.main);

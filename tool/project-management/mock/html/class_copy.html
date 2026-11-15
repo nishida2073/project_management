@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style_modify.css">
+</head>
+<body>
+<div class="app">
+  <iframe src="sidebar.html?active=class" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div class="main">
+    <div class="topbar"></div>
+    <div class="content"><div class="toolbar"><h1>クラス一覧</h1></div><div class="table-card"></div></div>
+  </div>
+
+  <div class="overlay">
+    <div class="modal modal-tall">
+      <div class="modal-header">
+        <div>
+          <h2>クラス複製</h2>
+          <div class="sub" id="subLine"></div>
+        </div>
+        <a class="close-x" href="class_list.html">✕</a>
+      </div>
+      <div class="modal-body">
+        <div id="copyItems" class="sticky-head"></div>
+        <div class="form-section">複製するクラス数</div>
+        <div class="form-field">
+          <label>クラス数<span class="req">必須</span></label>
+          <input type="number" class="form-control" id="copyCount" min="1" max="10" value="1">
+        </div>
+        <div class="form-field">
+          <label>関連</label>
+          <div class="toggle-row"><div class="toggle" id="relateToSource"><div class="knob"></div></div><span>する</span></div>
+        </div>
+        <div id="perCopy" class="contents"></div>
+        <div class="input-dialog-error" id="copyError"></div>
+      </div>
+      <div class="modal-footer">
+        <a class="search-btn" id="cancelLink" href="class_list.html">キャンセル</a>
+        <div id="copyBtn" class="btn primary">複製</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/delivery-type/store/delivery-type-store.js"></script>
+<script src="js/storage/course/store/course-store.js"></script>
+<script src="js/storage/location/store/location-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/storage/task-type/store/task-type-store.js"></script>
+<script src="js/storage/project/store/project-store.js"></script>
+<script src="js/storage/class/store/class-store.js"></script>
+<script src="js/storage/location-type/store/location-type-store.js"></script>
+<script src="js/storage/sales-type/store/sales-type-store.js"></script>
+<script src="js/storage/participation-type/store/participation-type-store.js"></script>
+<script src="js/select.js"></script>
+<script src="js/datepicker.js"></script>
+<script src="js/number-select.js"></script>
+<script src="js/storage/class/screens/class-copy.js"></script>
+<script src="js/sidebar-toggle.js" defer></script>
+<script src="js/message-dialog.js"></script>
+</body>
+</html>

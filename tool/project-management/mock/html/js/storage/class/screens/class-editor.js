@@ -99,16 +99,10 @@
       };
     }
 
-    var fromId = editing ? null : new URLSearchParams(location.search).get('from');
-    if (fromId) {
-      list.forEach(function (r) {
-        if (r.id === fromId) rec = Object.assign({}, r, { id: '', lessonNo: '', locationName: '', status: '稼働中', related: [r.lessonNo].concat(r.related || []).filter(Boolean) });
-      });
-    }
     if (editing) {
       var copyBtn = document.getElementById('copyBtn');
       if (copyBtn) copyBtn.addEventListener('click', function () {
-        location.href = 'class_regist.html?from=' + encodeURIComponent(rec.id);
+        location.href = 'class_copy.html?id=' + encodeURIComponent(rec.id);
       });
     }
 

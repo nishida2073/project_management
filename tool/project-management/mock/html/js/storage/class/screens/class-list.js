@@ -20,7 +20,7 @@
   list.forEach(function (r) {
     var p = P[r.projectCode] || { name: '', sales: '', part: '' };
     var c = C[r.courseCode] || { name: '', part: '', delivery: '', schedule: '' };
-    var relatedText = r.related && r.related.length ? r.related.join(', ') : '-';
+    var relatedText = r.related && r.related.length ? r.related.slice().sort(function (a, b) { return String(a).localeCompare(String(b), 'ja', { numeric: true }); }).join(', ') : '-';
     var ps = ClassStore.practiceStatus(r);
 
     var tr = document.createElement('tr');
@@ -31,7 +31,7 @@
       '<td class="sticky"><div>' + esc(p.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.projectCode) + '</div></td>' +
       '<td class="sticky">' + (p.sales ? '<span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +
       '<td class="sticky">' + (p.part ? '<span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
-      '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
+      '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + ' 版' + esc(r.version || '-') + '</div></td>' +
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(relatedText) + '</div></td>' +
       '<td class="sticky">' + (r.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(r.start) + '</td>' +

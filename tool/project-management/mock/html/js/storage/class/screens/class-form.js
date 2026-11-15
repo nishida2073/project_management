@@ -94,13 +94,17 @@
   function fillRelated(codes) {
     var box = relatedBox();
     box.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
-    (codes || []).forEach(function (code) { addRelatedChip(code); });
+    sortCodes(codes || []).forEach(function (code) { addRelatedChip(code); });
+  }
+
+  function sortCodes(list) {
+    return list.slice().sort(function (a, b) { return String(a).localeCompare(String(b), 'ja', { numeric: true }); });
   }
 
   function readRelated() {
-    return Array.prototype.map.call(relatedBox().querySelectorAll('.chip'), function (c) {
+    return sortCodes(Array.prototype.map.call(relatedBox().querySelectorAll('.chip'), function (c) {
       return (c.childNodes[0].textContent || '').trim();
-    });
+    }));
   }
 
   function fill(r) {
