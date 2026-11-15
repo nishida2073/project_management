@@ -3,11 +3,12 @@
   var raw = sessionStorage.getItem('venderImportPlan');
   var plan = raw ? JSON.parse(raw) : null;
   if (!plan || !plan.updates || !plan.updates.length) {
-    MessageDialog.show('反映する内容がありません', function () { location.href = 'vender_assign_list.html'; });
+    var card = document.querySelector('.table-card');
+    if (card) card.style.display = 'none';
     return;
   }
 
-  $('vendorLine').textContent = '講師ベンダー：' + (plan.vendorName || plan.vendorCode);
+  $('vendorLine').textContent = plan.vendorName || plan.vendorCode;
 
   function vendorText(v) {
     return TeacherVenderStore.nameOf(v) || v;
@@ -58,7 +59,7 @@
   });
   if (!newTotal) {
     sessionStorage.removeItem('venderImportPlan');
-    MessageDialog.show('反映する内容がありません（すべて反映済みです）', function () { location.href = 'vender_assign_list.html'; });
+    MessageDialog.show('反映する内容がありません（すべて反映済みです）');
     return;
   }
   plan.updates.forEach(function (u, idx) {
@@ -75,6 +76,8 @@
     $('importBody').appendChild(tr);
   });
 
+  updateCount();
+
   if (plan.errors && plan.errors.length) {
     var msg = '反映できない内容（' + plan.errors.length + '件）:\n' + plan.errors.slice(0, 10).join('\n');
     if (plan.errors.length > 10) msg += '\nほか' + (plan.errors.length - 10) + '件';
@@ -86,7 +89,7 @@
   }
 
   function updateCount() {
-    $('importCount').textContent = checkedBoxes().length;
+    $('importTotal').textContent = checkedBoxes().length;
   }
 
   $('importBody').addEventListener('change', function (e) {
@@ -103,6 +106,10 @@
   }
 
   $('importApply').addEventListener('click', function () {
+    if (!checkedBoxes().length) {
+      MessageDialog.show('反映する項目を選択してください');
+      return;
+    }
     var picked = {};
     checkedBoxes().forEach(function (cb) {
       var idx = Number(cb.getAttribute('data-idx'));
@@ -114,35 +121,40 @@
       picked[idx][role === 'sub' ? 'subs' : 'mains'].push(src[i]);
     });
     var people = 0;
-    Object.keys(picked).forEach(function (key) {
-      var u = plan.updates[Number(key)];
-      var a = VenderAssignStore.find(u.classId);
-      var beforeM = a.mains.length;
-      var beforeS = a.subs.length;
-      a.mains = mergeUnique(a.mains, picked[key].mains);
-      a.subs = mergeUnique(a.subs, picked[key].subs);
-      var addM = a.mains.length - beforeM;
-      var addS = a.subs.length - beforeS;
-      var reqs = VenderAssignStore.requestsOf(a).map(function (r) {
-        return { vendor: r.vendor, main: r.main || 0, sub: r.sub || 0 };
+    try {
+      Object.keys(picked).forEach(function (key) {
+        var u = plan.updates[Number(key)];
+        var a = VenderAssignStore.find(u.classId);
+        var beforeM = a.mains.length;
+        var beforeS = a.subs.length;
+        a.mains = mergeUnique(a.mains, picked[key].mains);
+        a.subs = mergeUnique(a.subs, picked[key].subs);
+        var addM = a.mains.length - beforeM;
+        var addS = a.subs.length - beforeS;
+        var reqs = VenderAssignStore.requestsOf(a).map(function (r) {
+          return { vendor: r.vendor, main: r.main || 0, sub: r.sub || 0 };
+        });
+        reqs.forEach(function (r) {
+          if (r.vendor !== plan.vendorCode) return;
+          var t = Math.min(r.main, addM);
+          r.main -= t;
+          addM -= t;
+          t = Math.min(r.sub, addS);
+          r.sub -= t;
+          addS -= t;
+        });
+        a.requests = reqs.filter(function (r) { return r.main > 0 || r.sub > 0; });
+        delete a.requested;
+        delete a.requestMain;
+        delete a.requestSub;
+        delete a.requestVendor;
+        VenderAssignStore.upsert(a);
+        people += picked[key].mains.length + picked[key].subs.length;
       });
-      reqs.forEach(function (r) {
-        if (r.vendor !== plan.vendorCode) return;
-        var t = Math.min(r.main, addM);
-        r.main -= t;
-        addM -= t;
-        t = Math.min(r.sub, addS);
-        r.sub -= t;
-        addS -= t;
-      });
-      a.requests = reqs.filter(function (r) { return r.main > 0 || r.sub > 0; });
-      delete a.requested;
-      delete a.requestMain;
-      delete a.requestSub;
-      delete a.requestVendor;
-      VenderAssignStore.upsert(a);
-      people += picked[key].mains.length + picked[key].subs.length;
-    });
+    } catch (e) {
+      MessageDialog.show('反映に失敗しました（' + e.message + '）');
+      return;
+    }
     sessionStorage.removeItem('venderImportPlan');
     var msg = '反映が完了しました\n反映: ' + people + '人（' + Object.keys(picked).length + 'クラス）';
     MessageDialog.show(msg, function () { location.href = 'vender_assign_list.html'; });

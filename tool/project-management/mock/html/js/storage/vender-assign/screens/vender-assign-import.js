@@ -1,13 +1,11 @@
 (function () {
-  var btn = document.getElementById('importBtn');
   var input = document.getElementById('importFile');
-  if (!btn || !input) return;
+  if (!input) return;
 
-  btn.addEventListener('click', function () {
+  document.getElementById('importLoad').addEventListener('click', function () {
     input.value = '';
     input.click();
   });
-
   input.addEventListener('change', function () {
     var file = input.files && input.files[0];
     if (!file) return;

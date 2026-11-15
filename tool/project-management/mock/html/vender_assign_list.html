@@ -31,8 +31,7 @@
       <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px;">
         <a class="search-btn" href="vender_assign_request_modify.html">依頼枠更新</a>
         <a class="search-btn" href="vender_assign_export.html">依頼</a>
-          <div class="search-btn" id="importBtn">反映</div>
-          <input type="file" id="importFile" accept=".xlsx" style="display:none;">
+          <a class="search-btn" href="vender_assign_import.html" onclick="sessionStorage.removeItem('venderImportPlan');">反映</a>
       </div>
       <div class="table-card">
         <div class="table-meta">
@@ -79,7 +78,6 @@
 <script src="js/storage/customer/store/customer-store.js"></script>
 <script src="js/storage/motivation-company-type/store/motivation-company-type-store.js"></script>
 <script src="js/storage/vender-assign/screens/vender-assign-list.js"></script>
-<script src="js/storage/vender-assign/screens/vender-assign-import.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/storage/holiday/store/holiday-store.js"></script>
 <script src="js/datepicker.js" defer></script>
