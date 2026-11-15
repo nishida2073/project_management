@@ -30,6 +30,18 @@
     return r ? r.value : '';
   }
 
+  var lastCourse = '';
+  function fillPlanFromCourse() {
+    var cc = getSelect($('courseCode'));
+    if (cc === lastCourse) return;
+    lastCourse = cc;
+    refreshDerived();
+    if (!cc) return;
+    var c = (CourseStore.map()[cc]) || {};
+    $('mainTeachers').querySelector('input').value = c.mainTeachers === undefined ? '' : c.mainTeachers;
+    $('subTeachers').querySelector('input').value = c.subTeachers === undefined ? '' : c.subTeachers;
+  }
+  document.addEventListener('click', function () { setTimeout(fillPlanFromCourse, 0); }, true);
   function refreshDerived() {
     var P = ClassStore.PROJECTS, C = ClassStore.COURSES;
     var pc = getSelect($('projectCode'));
@@ -48,6 +60,8 @@
     $('courseDeliveryType').textContent = c ? DeliveryTypeStore.nameOf(c.delivery) : '';
     $('courseDeliveryType').className = c ? 'tag ' + DeliveryTypeStore.colorOf(c.delivery) : '';
     $('courseSchedule').textContent = c ? c.schedule : '';
+    if ($('courseTeachers')) $('courseTeachers').textContent = c ? '講師 メイン' + (c.mainTeachers === undefined ? '-' : c.mainTeachers) + '人・サブ' + (c.subTeachers === undefined ? '-' : c.subTeachers) + '人' : '';
+    if ($('courseRecommend')) $('courseRecommend').style.display = c ? '' : 'none';
   }
 
   function relatedBox() {
@@ -110,6 +124,7 @@
     $('subTeachers').querySelector('input').value = r.registSubTeachers !== undefined ? r.registSubTeachers : (r.subTeachers || '');
     if ($('mainAdjusted')) $('mainAdjusted').textContent = '依頼後：' + (r.mainTeachers || '-') + '人';
     if ($('subAdjusted')) $('subAdjusted').textContent = '依頼後：' + (r.subTeachers || '-') + '人';
+    lastCourse = getSelect($('courseCode'));
     var mbox = $('manager');
     var madd = mbox.querySelector('.chip-add');
     mbox.querySelectorAll('.chip').forEach(function (c) { c.remove(); });

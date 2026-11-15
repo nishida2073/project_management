@@ -153,7 +153,7 @@
       function setDefaultEnd() {
         if (endTouched) return;
         var s = textOf(startEl);
-        var code = textOf(courseEl);
+        var code = courseEl.getAttribute('data-value') || '';
         var course = CourseStore.load().filter(function (c) { return c.code === code; })[0];
         if (!/^\d{4}\/\d{2}\/\d{2}$/.test(s) || !course || !course.days) return;
         var d = new Date(s.replace(/\//g, '-'));

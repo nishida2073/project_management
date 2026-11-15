@@ -87,7 +87,9 @@
         name: c.name,
         part: c.part,
         delivery: c.delivery,
-        schedule: c.days + '日・' + c.min + '〜' + c.max + '人'
+        schedule: c.days + '日・' + c.min + '〜' + c.max + '人',
+        mainTeachers: c.mainTeachers,
+        subTeachers: c.subTeachers
       };
     });
     return out;
