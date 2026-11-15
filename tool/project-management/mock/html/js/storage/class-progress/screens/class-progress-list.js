@@ -38,6 +38,7 @@
   }
 
   function chip(step) {
+    if (step.kindNa) return '';
     if (step.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
     var label = STATUS_LABEL[step.status] || '実施前';
     var cls = STATUS_CLASS[step.status] || 'gray';
