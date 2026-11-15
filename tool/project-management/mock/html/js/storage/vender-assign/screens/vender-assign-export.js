@@ -248,8 +248,8 @@
     exportedIds.forEach(function (x) {
       var rec = VenderAssignStore.find(x.id);
       var existing = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor === vendorCode; });
-      var exMain = includePendSel ? existing.reduce(function (t, r) { return t + (r.main || 0); }, 0) : 0;
-      var exSub = includePendSel ? existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0) : 0;
+      var exMain = includePendSel ? 0 : existing.reduce(function (t, r) { return t + (r.main || 0); }, 0);
+      var exSub = includePendSel ? 0 : existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0);
       var reqs = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; });
       if (x.main || x.sub || exMain || exSub) reqs.push({ vendor: vendorCode, main: exMain + x.main, sub: exSub + x.sub });
       var dropBefore = function (list, n) {
@@ -261,7 +261,7 @@
       };
       var rowInfo = rows.filter(function (q) { return q.cls.id === x.id; })[0];
       var convertCount = function (role, list, n) {
-        if (includePendSel || !rowInfo) return n;
+        if (!includePendSel || !rowInfo) return n;
         var plan = parseInt(role === 'main' ? rowInfo.cls.mainTeachers : rowInfo.cls.subTeachers, 10) || 0;
         var named = list.filter(function (p) { return p.staff; }).length;
         var remain = Math.max(0, plan - named);
