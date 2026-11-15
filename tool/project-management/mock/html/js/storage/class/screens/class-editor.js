@@ -147,27 +147,12 @@
       var courseEl = document.getElementById('courseCode');
       var endTouched = false;
 
-      function textOf(el) {
-        return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-          .map(function (n) { return n.textContent; }).join('').trim();
-      }
-      function fmt(d) {
-        return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
-      }
       function setDefaultEnd() {
         if (endTouched) return;
-        var s = textOf(startEl);
         var code = courseEl.getAttribute('data-value') || '';
         var course = CourseStore.load().filter(function (c) { return c.code === code; })[0];
-        if (!/^\d{4}\/\d{2}\/\d{2}$/.test(s) || !course || !course.days) return;
-        var d = new Date(s.replace(/\//g, '-'));
-        var remaining = Number(course.days) - 1;
-        while (remaining > 0) {
-          d.setDate(d.getDate() + 1);
-          var dow = d.getDay();
-          if (dow !== 0 && dow !== 6 && !HolidayStore.isHoliday(fmt(d))) remaining--;
-        }
-        endEl.innerHTML = fmt(d) + '<span class="caret">▾</span>';
+        var out = calcEndDate(ownText(startEl), course ? course.days : null);
+        if (out) endEl.innerHTML = out + '<span class="caret">▾</span>';
       }
 
       endEl.addEventListener('click', function () { endTouched = true; }, true);

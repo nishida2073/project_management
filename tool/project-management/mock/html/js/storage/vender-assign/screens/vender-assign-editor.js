@@ -1,12 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
   function clean(s) { return s === '選択してください' ? '' : s; }
 
   function setSelect(el, name, options) {

@@ -1,7 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
   var TYPE_CLASS = {};
   LocationTypeStore.load().forEach(function (t) { TYPE_CLASS[t.code] = t.color; });
 

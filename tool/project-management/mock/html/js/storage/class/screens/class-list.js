@@ -1,7 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
   var P = ClassStore.PROJECTS;
   var C = ClassStore.COURSES;
   var LOCATION_CLASS = {};

@@ -1,8 +1,5 @@
 (function () {
   var last = {};
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').trim();
-  }
   function norm(v) { return v === 'すべて' || v === '選択してください' ? '' : v; }
   function collect() {
     var items = [];

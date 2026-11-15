@@ -1,7 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
   var LABEL = { wait: '実施前', progress: '実施中', done: '完了' };
   var COLOR = { wait: 'gray', progress: 'blue', done: 'green' };
   var today = new Date();
@@ -192,8 +189,7 @@
     Array.prototype.forEach.call(overlay.querySelectorAll('input[name="pdTargetRadio"]'), function (r) {
       r.addEventListener('change', function () { applyNa(r.value === 'なし'); });
     });
-    overlay.querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
-    overlay.querySelectorAll('.js-date').forEach(function (el) { window.bindDatePicker(el); });
+    bindFormControls(overlay);
     function close() { overlay.remove(); }
     overlay.querySelector('.pd-cancel').addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });

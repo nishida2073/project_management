@@ -1,8 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
   function checkRadio(name, value) {
     var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
     if (r) r.checked = true;
@@ -15,7 +11,7 @@
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
     row.setAttribute('data-off', '停止中');
-    $('statusToggle').classList.toggle('off', off);
+    setStatusOff(off);
     $('statusLabel').textContent = off ? '停止中' : '稼働中';
   }
 
@@ -64,7 +60,7 @@
         memo: $('memo').value,
         contactName: $('contactName').value.trim(),
         contactEmail: $('contactEmail').value.trim(),
-        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
+        status: readStatus()
       };
       var missing = [];
         if (!v.name) missing.push('講師ベンダー名');

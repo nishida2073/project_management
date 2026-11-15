@@ -1,8 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
   function kindOf() {
     var v = getRadio('taskKind');
     return v ? [v] : [];
@@ -57,7 +53,7 @@
     var statusOff = rec.status === '停止中';
     $('statusRow').setAttribute('data-on', '稼働中');
     $('statusRow').setAttribute('data-off', '停止中');
-    $('statusToggle').classList.toggle('off', statusOff);
+    setStatusOff(statusOff);
     $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     checkRadio('taskKind', (rec.kinds || [])[0] || '');
     checkRadio('workType', rec.workType || '');
@@ -124,7 +120,7 @@
         days: parseInt(daysV, 10),
         workType: workType,
         memo: $('memo').value,
-        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
+        status: readStatus()
       };
       if (editing) {
         list[idx] = Object.assign({ id: rec.id }, item);

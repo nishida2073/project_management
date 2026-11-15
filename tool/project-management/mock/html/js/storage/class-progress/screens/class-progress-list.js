@@ -1,7 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
 
   var SORTED = TaskStore.load().slice().sort(function (a, b) {
     var ka = a.kinds[0] || '';
@@ -190,12 +187,9 @@
       return s.affiliation === 'パートナー' && s.company === company;
     }).map(function (s) { return s.name; });
   }
-  function ownTextOf(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').trim();
-  }
   function valueOf(el) {
     var v = el.getAttribute('data-value');
-    if (v === null || v === '') v = ownTextOf(el);
+    if (v === null || v === '') v = ownText(el);
     v = String(v || '').trim();
     return v === '選択してください' ? '' : v;
   }
@@ -242,8 +236,7 @@
     Array.prototype.forEach.call(overlay.querySelectorAll('input[name="sdTargetRadio"]'), function (r) {
       r.addEventListener('change', function () { applyNa(r.value === 'なし'); });
     });
-    overlay.querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
-    overlay.querySelectorAll('.js-date').forEach(function (el) { window.bindDatePicker(el); });
+    bindFormControls(overlay);
     function close() { overlay.remove(); }
     overlay.querySelector('.sd-cancel').addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
@@ -253,8 +246,8 @@
       var picked = valueOf(overlay.querySelector('#sdOwner'));
       cur[i + 1] = Object.assign({}, cur[i + 1] || {}, {
         status: STATUS_OF_LABEL[valueOf(overlay.querySelector('#sdStatus'))] || 'wait',
-        plan: ownTextOf(overlay.querySelector('#sdPlan')),
-        actual: ownTextOf(overlay.querySelector('#sdActual')),
+        plan: ownText(overlay.querySelector('#sdPlan')),
+        actual: ownText(overlay.querySelector('#sdActual')),
         owner: picked ? StaffStore.codeOf(picked) : '',
         memo: overlay.querySelector('#sdMemo').value,
         na: (overlay.querySelector('input[name="sdTargetRadio"]:checked') || { value: 'あり' }).value === 'なし'

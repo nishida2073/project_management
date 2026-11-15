@@ -1,5 +1,4 @@
 (function () {
-  function $(id) { return document.getElementById(id); }
   function getRadio(name) {
     var r = document.querySelector('input[name="' + name + '"]:checked');
     return r ? r.value : '';
@@ -20,7 +19,7 @@
     var row = $('statusRow');
     row.setAttribute('data-on', '稼働中');
     row.setAttribute('data-off', '停止中');
-    $('statusToggle').classList.toggle('off', off);
+    setStatusOff(off);
     $('statusLabel').textContent = off ? '停止中' : '稼働中';
   }
 
@@ -60,7 +59,7 @@
         email: $('userEmail').value.trim(),
         authority: getRadio('authority'),
         memo: $('memo').value,
-        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
+        status: readStatus()
       };
       var password = $('userPassword').value;
       var missing = [];

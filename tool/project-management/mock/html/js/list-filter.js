@@ -2,10 +2,6 @@
   function norm(s) {
     return String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
   }
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
   function parseDate(s) {
     var m = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(String(s || '').trim());
     return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime() : null;

@@ -1,12 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
   function clean(s) { return s === '選択してください' ? '' : s; }
   function setSelect(el, value) {
     var v = value || '';
@@ -57,7 +49,7 @@
     var statusOff = rec.status === '停止中';
     $('statusRow').setAttribute('data-on', '稼働中');
     $('statusRow').setAttribute('data-off', '停止中');
-    $('statusToggle').classList.toggle('off', statusOff);
+    setStatusOff(statusOff);
     $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     $('projectName').value = rec.name || '';
     setSelect($('customer'), CustomerStore.nameOf(rec.customer));
@@ -106,7 +98,7 @@
         pm: StaffStore.codeOf(getSelect($('pm'))),
         pl: plValues($('plBox')).map(function (n) { return StaffStore.codeOf(n); }),
         memo: $('memo').value,
-        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
+        status: readStatus()
       };
       var missing = [];
         if (!v.year) missing.push('年度');

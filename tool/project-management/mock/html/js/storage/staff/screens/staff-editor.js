@@ -1,12 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
   function checkRadio(name, value) {
     var r = document.querySelector('input[name="' + name + '"][value="' + value + '"]');
     if (r) r.checked = true;
@@ -50,7 +42,7 @@
     row.setAttribute('data-on', '稼働中');
     row.setAttribute('data-off', '停止中');
     var off = rec.status === '停止中';
-    $('statusToggle').classList.toggle('off', off);
+    setStatusOff(off);
     $('statusLabel').textContent = off ? '停止中' : '稼働中';
     refreshCompany();
   }
@@ -93,7 +85,7 @@
         jobTypes: getChecks('jobTypes'),
         positions: getChecks('positions'),
         memo: $('memo').value,
-        status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中'
+        status: readStatus()
       };
       var missing = [];
         if (!v.name) missing.push('実施担当者名');

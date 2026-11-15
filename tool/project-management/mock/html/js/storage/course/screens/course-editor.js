@@ -1,12 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
   function setSelect(el, value) {
     var v = value || '';
     el.setAttribute('data-value', v);
@@ -84,14 +76,14 @@
     row.setAttribute('data-on', '稼働中');
     row.setAttribute('data-off', '停止中');
     var off = rec.status === '停止中';
-    $('statusToggle').classList.toggle('off', off);
+    setStatusOff(off);
     $('statusLabel').textContent = off ? '停止中' : '稼働中';
     refreshSubject();
     refreshAnnual();
   }
 
   function read() {
-    var off = $('statusToggle').classList.contains('off');
+    var off = (readStatus() === '停止中');
     return {
       year: getSelect($('courseYear')),
       code: $('courseCode').value.trim(),

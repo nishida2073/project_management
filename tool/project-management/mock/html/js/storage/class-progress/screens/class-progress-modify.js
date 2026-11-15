@@ -12,9 +12,6 @@ function setDisabledRow(tr, off) {
   });
 }
 
-    function esc(s) {
-      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
     function pad(n) { return (n < 10 ? '0' : '') + n; }
     function addDays(days) {
       var d = new Date(classStart);
@@ -23,10 +20,6 @@ function setDisabledRow(tr, off) {
     }
     function loadProgress() { return ProgressStore.load(); }
     function saveProgress(all) { ProgressStore.save(all); }
-    function ownText(el) {
-      return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-        .map(function (n) { return n.textContent; }).join('').trim();
-    }
 
     var classList = ClassStore.load();
     var cls = null;

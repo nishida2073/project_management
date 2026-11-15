@@ -1,12 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
   var STATUS_LABEL = { done: '完了', progress: '実施中', wait: '実施前' };
   var LABEL_STATUS = { '完了': 'done', '実施中': 'progress', '実施前': 'wait' };
   var STATUS_COLOR = { done: 'green', progress: 'blue', wait: 'gray' };

@@ -1,8 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
 
   var raw = sessionStorage.getItem('venderImportPlan');
   var plan = raw ? JSON.parse(raw) : null;

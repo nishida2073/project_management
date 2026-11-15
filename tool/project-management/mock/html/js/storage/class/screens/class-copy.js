@@ -1,8 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
 
   function sec(t) { return '<div class="form-section">' + esc(t) + '</div>'; }
   function empty() { return '<div class="form-field"></div>'; }
@@ -66,14 +62,7 @@
   $('copyItems').innerHTML = sourceHtml();
   $('projectPart').style.display = 'none';
 
-  function textOf(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
 
-  function fmtDate(d) {
-    return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
-  }
 
   function bindEndCalc(k) {
     var startEl = document.querySelector('[data-k="' + k + '"][data-f="start"]');
@@ -83,17 +72,9 @@
     endEl.addEventListener('click', function () { endTouched = true; }, true);
     function calc() {
       if (endTouched) return;
-      var s = textOf(startEl);
       var course = CourseStore.load().filter(function (x) { return x.code === src.courseCode; })[0];
-      if (!/^\d{4}\/\d{2}\/\d{2}$/.test(s) || !course || !course.days) return;
-      var d = new Date(s.replace(/\//g, '-'));
-      var remaining = Number(course.days) - 1;
-      while (remaining > 0) {
-        d.setDate(d.getDate() + 1);
-        var dow = d.getDay();
-        if (dow !== 0 && dow !== 6 && !HolidayStore.isHoliday(fmtDate(d))) remaining--;
-      }
-      endEl.innerHTML = fmtDate(d) + '<span class="caret">▾</span>';
+      var out = calcEndDate(ownText(startEl), course ? course.days : null);
+      if (out) endEl.innerHTML = out + '<span class="caret">▾</span>';
     }
     new MutationObserver(calc).observe(startEl, { childList: true, characterData: true, subtree: true });
   }
@@ -126,9 +107,7 @@
         '<div class="form-field"><label>ロケーション名</label><div class="form-control js-select" data-k="' + k + '" data-f="locationName" data-value="' + esc(initName) + '" data-options="' + esc(initOptions) + '">' + esc(initName || '選択してください') + '<span class="caret">▾</span></div></div>';
     }
     $('perCopy').innerHTML = html;
-    $('perCopy').querySelectorAll('.js-date').forEach(function (el) { window.bindDatePicker(el); });
-    $('perCopy').querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
-    $('perCopy').querySelectorAll('.number-select').forEach(function (el) { window.bindNumberSelect(el); });
+    bindFormControls($('perCopy'));
     for (var e = 1; e <= count; e++) bindEndCalc(e);
     for (var j = 1; j <= count; j++) {
       (function (kk) {
@@ -165,7 +144,7 @@
   renderPerCopy();
 
   function fieldEl(k, f) { return document.querySelector('[data-k="' + k + '"][data-f="' + f + '"]'); }
-  function dateVal(k, f) { var el = fieldEl(k, f); return el ? textOf(el) : ''; }
+  function dateVal(k, f) { var el = fieldEl(k, f); return el ? ownText(el) : ''; }
   function numVal(k, f) { var el = fieldEl(k, f); return el ? el.querySelector('input').value.trim() : ''; }
   function typeCode(k) {
     var r = document.querySelector('input[name="locationType-' + k + '"]:checked');

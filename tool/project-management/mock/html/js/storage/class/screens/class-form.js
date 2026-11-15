@@ -1,12 +1,4 @@
 (function () {
-  function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-  function $(id) { return document.getElementById(id); }
-  function ownText(el) {
-    return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; })
-      .map(function (n) { return n.textContent; }).join('').trim();
-  }
   function setSelect(el, value) {
     var v = value || '';
     el.setAttribute('data-value', v);
@@ -117,7 +109,7 @@
     var statusOff = r.status === '停止中';
     $('statusRow').setAttribute('data-on', '稼働中');
     $('statusRow').setAttribute('data-off', '停止中');
-    $('statusToggle').classList.toggle('off', statusOff);
+    setStatusOff(statusOff);
     $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
     $('lessonNo').textContent = r.lessonNo || '自動採番';
     setDate($('start'), r.start);
@@ -160,7 +152,7 @@
       locationType: getRadio('locationType'),
       locationName: LocationStore.codeOf(getSelect($('locationName'))),
       memo: $('memo').value,
-      status: $('statusToggle').classList.contains('off') ? '停止中' : '稼働中',
+      status: readStatus(),
       related: readRelated()
     };
   }
