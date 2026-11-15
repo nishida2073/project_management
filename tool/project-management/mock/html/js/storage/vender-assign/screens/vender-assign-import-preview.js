@@ -2,10 +2,11 @@
 
   var raw = sessionStorage.getItem('venderImportPlan');
   var plan = raw ? JSON.parse(raw) : null;
-  if (!plan || !plan.updates || !plan.updates.length) {
-    var card = document.querySelector('.table-card');
+  var noPlan = !plan || !plan.updates || !plan.updates.length;
+  if (noPlan) {
+    plan = { updates: [], errors: [], vendorName: '', vendorCode: '' };
+    var card = document.querySelector('.modal-body .table-card');
     if (card) card.style.display = 'none';
-    return;
   }
 
   $('vendorLine').textContent = plan.vendorName || plan.vendorCode;
@@ -57,12 +58,13 @@
     (u.mains || []).forEach(function (p) { if (!ex.mains.some(function (q) { return sameTeacher(p, q); })) newTotal++; });
     (u.subs || []).forEach(function (p) { if (!ex.subs.some(function (q) { return sameTeacher(p, q); })) newTotal++; });
   });
-  if (!newTotal) {
+  if (!newTotal && !noPlan) {
     sessionStorage.removeItem('venderImportPlan');
-    MessageDialog.show('反映する内容がありません（すべて反映済みです）');
-    return;
+    var tableCard = document.querySelector('.modal-body .table-card');
+    if (tableCard) tableCard.style.display = 'none';
+    MessageDialog.show('反映する内容がありません');
   }
-  plan.updates.forEach(function (u, idx) {
+  if (newTotal) plan.updates.forEach(function (u, idx) {
     var ex = existingOf(u);
     var tr = document.createElement('tr');
     tr.innerHTML =
@@ -107,7 +109,7 @@
 
   $('importApply').addEventListener('click', function () {
     if (!checkedBoxes().length) {
-      MessageDialog.show('反映する項目を選択してください');
+      MessageDialog.show('反映する内容がありません');
       return;
     }
     var picked = {};

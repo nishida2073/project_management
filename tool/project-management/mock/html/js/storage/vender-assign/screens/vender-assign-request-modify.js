@@ -3,7 +3,6 @@
   var body = $('withdrawBody');
   var rows = [];
   var LABEL = { requesting: '依頼中', before: '依頼前', open: '依頼枠' };
-  var TAG = { requesting: 'blue', before: 'orange', open: 'gray' };
 
   $('requestVendor').setAttribute('data-options', TeacherVenderStore.activeNames().join(','));
 

@@ -1,10 +1,5 @@
 (function () {
 
-  function setSelect(el, name, options) {
-    el.setAttribute('data-options', options.join(','));
-    el.setAttribute('data-value', name || '');
-    el.innerHTML = (name ? esc(name) : '選択してください') + '<span class="caret">▾</span>';
-  }
 
   function chooseWithdraw(names) {
     return new Promise(function (resolve) {
@@ -218,7 +213,7 @@
         ClassStore.save(list);
       }
       if (!over && reduceLines.length) {
-        MessageDialog.confirm(['枠が予定より少なくなっています。', '予定講師数を減らしますか？'].concat(reduceLines).join(String.fromCharCode(10))).then(function (ok) {
+        MessageDialog.confirm(['枠が予定より少なくなっています', '予定講師数を減らしますか？', ''].concat(reduceLines).join(String.fromCharCode(10))).then(function (ok) {
           if (!ok) return;
           setClassPlan(newMain, newSub);
           finish();
@@ -226,7 +221,7 @@
         return;
       }
       if (!over) { finish(); return; }
-      var lines = ['予定講師数を超えています。', '以下に変更してよろしいですか？'];
+      var lines = ['予定講師数を超えています', '', '以下に変更してよろしいですか？'];
       if (newMain !== planMain) lines.push('予定講師数（メイン）：' + planMain + ' → ' + newMain);
       if (newSub !== planSub) lines.push('予定講師数（サブ）：' + planSub + ' → ' + newSub);
       MessageDialog.confirm(lines.join('\n')).then(function (ok) {

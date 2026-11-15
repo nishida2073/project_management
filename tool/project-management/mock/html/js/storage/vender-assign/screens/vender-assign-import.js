@@ -46,13 +46,6 @@
     return String(fg.rgb).toUpperCase().slice(-6) !== 'FFFFFF';
   }
 
-  function mergeUnique(list, add) {
-    add.forEach(function (p) {
-      var dup = list.some(function (q) { return q.vendor === p.vendor && q.teacherName === p.teacherName; });
-      if (!dup) list.push(p);
-    });
-    return list;
-  }
 
   function uniqueByTeacher(list) {
     var seen = {};
