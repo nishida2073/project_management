@@ -3,7 +3,7 @@
     { key: 'REQUESTED', label: '依頼済', color: 'green' },
     { key: 'REQUESTING', label: '依頼中', color: 'blue' },
     { key: 'BEFORE', label: '依頼前', color: 'orange' },
-    { key: 'OPEN', label: '依頼枠', color: 'gray' },
+    { key: 'OPEN', label: '空き枠', color: 'gray' },
     { key: 'OUT_OF_PLAN', label: '予定外', color: 'red' }
   ];
 

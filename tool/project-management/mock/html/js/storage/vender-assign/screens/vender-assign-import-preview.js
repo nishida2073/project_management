@@ -17,7 +17,7 @@
 
   var STATE_TAG = (function () {
     var ST = VenderAssignStore.STATUS;
-    return { done: ST.REQUESTED, requesting: ST.REQUESTING, before: ST.BEFORE, none: ST.OUT_OF_PLAN };
+    return { done: ST.REQUESTED, requesting: ST.REQUESTING, before: ST.BEFORE, none: ST.OUT_OF_PLAN, open: ST.OPEN };
   })();
 
   function tagOf(key) {
@@ -47,6 +47,10 @@
       .reduce(function (t, r) { return t + (role === 'sub' ? (r.sub || 0) : (r.main || 0)); }, 0);
     var slotLeft = existing.filter(function (p) { return p.state === 'before' && !p.teacherName && p.vendor === plan.vendorCode; }).length;
     var matched = function (p) { return existing.filter(function (q) { return sameTeacher(p, q); })[0]; };
+    var clsRec = ClassStore.load().filter(function (r) { return String(r.id) === String(u.classId); })[0] || {};
+    var planN = parseInt(role === 'sub' ? clsRec.subTeachers : clsRec.mainTeachers, 10) || 0;
+    var reqAll = VenderAssignStore.requestsOf(rec).reduce(function (t, r) { return t + (role === 'sub' ? (r.sub || 0) : (r.main || 0)); }, 0);
+    var freeLeft = Math.max(0, planN - existing.length - reqAll);
     var freeCount = add.filter(function (p) { return !matched(p); }).length;
     var slotHide = Math.min(freeCount, slotLeft);
     var SPACER = '<span class="check-box check-sm" style="visibility:hidden;vertical-align:middle;"><input type="checkbox" style="visibility:hidden;"><span class="check-mark"></span></span> ';
@@ -71,6 +75,10 @@
       } else if (reqLeft > 0) {
         reqLeft--;
         from = 'requesting';
+        on = true;
+      } else if (freeLeft > 0) {
+        freeLeft--;
+        from = 'open';
         on = true;
       } else {
         from = 'none';

@@ -2,7 +2,8 @@
   var C = ClassStore.COURSES;
   var body = $('withdrawBody');
   var rows = [];
-  var LABEL = { requesting: '依頼中', before: '依頼前', open: '依頼枠' };
+  var KEY = { requesting: 'REQUESTING', before: 'BEFORE', open: 'OPEN' };
+  function labelOf(state) { return SlotStatusStore.labelOf(KEY[state]); }
 
   $('requestVendor').setAttribute('data-options', TeacherVenderStore.activeNames().join(','));
 
@@ -156,7 +157,7 @@
       var from = tr.getAttribute('data-state');
       var cb = tr.querySelector('.row-check');
       var bulkLabel = placeholderToEmpty(ownText($('bulkState')));
-      var bulkTo = bulkLabel ? (bulkLabel === '依頼枠' ? 'open' : 'before') : '';
+      var bulkTo = bulkLabel ? (bulkLabel === '空き枠' ? 'open' : 'before') : '';
       var to = cb && cb.checked && bulkTo ? bulkTo : from;
       if (from !== to) changes.push({ tr: tr, from: from, to: to });
     });
@@ -167,7 +168,7 @@
     var lines = changes.map(function (ch) {
       var x = findRow(ch.tr);
       var cc = C[x.cls.courseCode] || { name: x.cls.courseCode };
-      return '・' + x.cls.courseCode + '　' + cc.name + '　' + x.cls.lessonNo + String.fromCharCode(10) + '　' + LABEL[ch.from] + ' → ' + LABEL[ch.to];
+      return '・' + x.cls.courseCode + '　' + cc.name + '　' + x.cls.lessonNo + String.fromCharCode(10) + '　' + labelOf(ch.from) + ' → ' + labelOf(ch.to);
     });
     MessageDialog.confirm(['以下に変更してよろしいですか？'].concat(lines).join(String.fromCharCode(10))).then(function (ok) {
       if (!ok) return;
