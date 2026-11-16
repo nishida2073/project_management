@@ -19,6 +19,12 @@
   var p = ClassStore.PROJECTS[src.projectCode] || {};
   $('subLine').textContent = (c.name || src.courseCode || '') + '　' + src.lessonNo + '　' + src.start + '〜' + src.end;
   $('cancelLink').href = 'class_modify.html?id=' + encodeURIComponent(src.id);
+  (function () {
+    var off = src.status === '停止中';
+    var t = $('statusAllToggle');
+    t.classList.toggle('off', off);
+    t.parentNode.querySelector('span').textContent = off ? '停止中' : '稼働中';
+  })();
 
 
   function sourceHtml() {
@@ -83,13 +89,19 @@
       var initName = '';
       var initOptions = (byType[src.locationType] || []).join(',');
       html += '<div class="form-section copy-section">複製 ' + k + '</div>' +
+        '<div class="form-section">クラス</div>' +
         '<div class="form-field"><label>開始日<span class="req">必須</span></label><div class="form-control js-date" data-k="' + k + '" data-f="start">' + esc(src.start) + '<span class="caret">▾</span></div></div>' +
         '<div class="form-field"><label>終了日<span class="req">必須</span></label><div class="form-control js-date" data-k="' + k + '" data-f="end">' + esc(src.end) + '<span class="caret">▾</span></div></div>' +
+        '<div class="form-section">受講生</div>' +
         numberSelect(k, { key: 'people', label: '受講人数' }, '10,15,20,24,30,35,40,50', '', false) + empty() +
+        '<div class="form-section">講師</div>' +
         numberSelect(k, { key: 'mainTeachers', label: '予定講師数（メイン）' }, '0,1,2,3,4,5', src.mainTeachers == null ? '' : src.mainTeachers, true) +
         numberSelect(k, { key: 'subTeachers', label: '予定講師数（サブ）' }, '0,1,2,3,4,5', src.subTeachers == null ? '' : src.subTeachers, true) +
+        '<div class="form-section">ロケーション</div>' +
         '<div class="form-field full"><label>ロケーション区分<span class="req">必須</span></label><div class="radio-group" data-k="' + k + '">' + typeRadios + '</div></div>' +
-        '<div class="form-field"><label>ロケーション名</label><div class="form-control js-select" data-k="' + k + '" data-f="locationName" data-value="' + esc(initName) + '" data-options="' + esc(initOptions) + '">' + esc(initName || '選択してください') + '<span class="caret">▾</span></div></div>';
+        '<div class="form-field"><label>ロケーション名</label><div class="form-control js-select" data-k="' + k + '" data-f="locationName" data-value="' + esc(initName) + '" data-options="' + esc(initOptions) + '">' + esc(initName || '選択してください') + '<span class="caret">▾</span></div></div>' +
+        '<div class="form-section">その他</div>' +
+        '<div class="form-field full"><label>備考</label><textarea class="form-control textarea auto-grow" data-min="68" data-k="' + k + '" data-f="memo" placeholder="例）欠席者ありのため人数変更の可能性あり"></textarea></div>';
     }
     $('perCopy').innerHTML = html;
     bindFormControls($('perCopy'));
@@ -129,11 +141,16 @@
   renderPerCopy();
 
   function fieldEl(k, f) { return document.querySelector('[data-k="' + k + '"][data-f="' + f + '"]'); }
+  function memoVal(k) { var el = fieldEl(k, 'memo'); return el ? el.value.trim() : ''; }
   function dateVal(k, f) { var el = fieldEl(k, f); return el ? ownText(el) : ''; }
   function numVal(k, f) { var el = fieldEl(k, f); return el ? el.querySelector('input').value.trim() : ''; }
   function typeCode(k) {
     var r = document.querySelector('input[name="locationType-' + k + '"]:checked');
     return r ? r.value : '';
+  }
+  function statusOf() {
+    var el = $('statusAllToggle');
+    return el && el.classList.contains('off') ? '停止中' : '稼働中';
   }
   function locNameVal(k) {
     var el = fieldEl(k, 'locationName');
@@ -179,8 +196,8 @@
           if (copy.lessonNo && srcInAll.related.indexOf(copy.lessonNo) === -1) srcInAll.related.push(copy.lessonNo);
         }
       }
-      copy.status = '稼働中';
-      copy.memo = '';
+      copy.status = statusOf();
+      copy.memo = memoVal(n);
       copy.start = dateVal(n, 'start');
       copy.end = dateVal(n, 'end');
       copy.people = numVal(n, 'people');

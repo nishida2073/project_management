@@ -30,7 +30,7 @@
         </div>
         <div id="copyItems" class="sticky-body"></div>
         </div>
-        <div class="form-section">複製するクラス数</div>
+        <div class="form-section">複製するクラス</div>
         <div class="form-field">
           <label>クラス数<span class="req">必須</span></label>
           <input type="number" class="form-control" id="copyCount" min="1" max="10" value="1">
@@ -38,6 +38,11 @@
         <div class="form-field">
           <label>関連</label>
           <div class="toggle-row"><div class="toggle" id="relateToSource"><div class="knob"></div></div><span>する</span></div>
+        </div>
+        <div class="form-section">その他</div>
+        <div class="form-field">
+          <label>稼働状況</label>
+          <div class="toggle-row" data-on="稼働中" data-off="停止中"><div class="toggle" id="statusAllToggle"><div class="knob"></div></div><span>稼働中</span></div>
         </div>
         <div id="perCopy" class="contents"></div>
         <div class="input-dialog-error" id="copyError"></div>
@@ -65,6 +70,7 @@
 <script src="js/datepicker.js"></script>
 <script src="js/number-select.js"></script>
 <script src="js/storage/class/screens/class-copy.js"></script>
+<script src="js/memo-area.js" defer></script>
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
 </body>

@@ -102,8 +102,8 @@
     $('people').querySelector('input').value = r.people || '';
     $('mainTeachers').querySelector('input').value = r.registMainTeachers !== undefined ? r.registMainTeachers : (r.mainTeachers || '');
     $('subTeachers').querySelector('input').value = r.registSubTeachers !== undefined ? r.registSubTeachers : (r.subTeachers || '');
-    if ($('mainAdjusted')) $('mainAdjusted').textContent = '依頼後：' + (r.mainTeachers || '-') + '人';
-    if ($('subAdjusted')) $('subAdjusted').textContent = '依頼後：' + (r.subTeachers || '-') + '人';
+    if ($('mainAdjusted')) $('mainAdjusted').textContent = '依頼済：' + (r.mainTeachers || '-') + '人';
+    if ($('subAdjusted')) $('subAdjusted').textContent = '依頼済：' + (r.subTeachers || '-') + '人';
     lastCourse = getSelect($('courseCode'));
     var mbox = $('manager');
     var madd = mbox.querySelector('.chip-add');
