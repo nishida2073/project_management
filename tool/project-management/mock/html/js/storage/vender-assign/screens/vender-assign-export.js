@@ -281,17 +281,10 @@
           return true;
         });
       };
-      var rowInfo = rows.filter(function (q) { return q.cls.id === x.id; })[0];
       var convertCount = function (role, list, n) {
-        if (!includePendSel || !rowInfo) return n;
-        var plan = parseInt(role === 'main' ? rowInfo.cls.mainTeachers : rowInfo.cls.subTeachers, 10) || 0;
-        var named = list.filter(function (p) { return p.state === 'done'; }).length;
-        var remain = Math.max(0, plan - named);
-        var pendOthers = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; }).reduce(function (t, r) { return t + (r[role] || 0); }, 0);
-        var befOthers = list.filter(function (p) { return p.state === 'before' && p.vendor !== vendorCode; }).length;
-        var befSel = list.filter(function (p) { return p.state === 'before' && p.vendor === vendorCode; }).length;
-        var keep = Math.min(befSel, Math.max(0, remain - pendOthers - befOthers - n));
-        return befSel - keep;
+        if (!includePendSel) return n;
+        var exRole = existing.reduce(function (t, r) { return t + (r[role] || 0); }, 0);
+        return Math.max(0, n - exRole);
       };
       var convertEntries = function (list, n) {
         var left = n, named = 0, out = [];
