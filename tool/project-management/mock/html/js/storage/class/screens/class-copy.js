@@ -134,7 +134,7 @@
     var label = sw.parentNode.querySelector('span');
     sw.addEventListener('click', function () {
       var off = sw.classList.toggle('off');
-      label.textContent = off ? 'しない' : 'する';
+      label.textContent = off ? 'なし' : 'あり';
     });
   })();
   $('copyCount').addEventListener('input', renderPerCopy);
