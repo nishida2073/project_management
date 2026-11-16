@@ -23,7 +23,13 @@
     var off = src.status === '停止中';
     var t = $('statusAllToggle');
     t.classList.toggle('off', off);
-    t.parentNode.querySelector('span').textContent = off ? '停止中' : '稼働中';
+    var label = t.parentNode.querySelector('span');
+    label.textContent = off ? '停止中' : '稼働中';
+    t.addEventListener('click', function () {
+      var isOn = !t.classList.contains('off');
+      t.classList.toggle('off', isOn);
+      label.textContent = isOn ? '停止中' : '稼働中';
+    });
   })();
 
 
