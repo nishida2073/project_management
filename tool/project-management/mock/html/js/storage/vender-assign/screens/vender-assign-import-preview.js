@@ -17,7 +17,7 @@
 
   var STATE_TAG = (function () {
     var ST = VenderAssignStore.STATUS;
-    return { done: ST.REQUESTED, requesting: ST.REQUESTING, before: ST.BEFORE, none: { label: '追加', tag: 'violet' } };
+    return { done: ST.REQUESTED, requesting: ST.REQUESTING, before: ST.BEFORE, none: ST.OUT_OF_PLAN };
   })();
 
   function tagOf(key) {
@@ -180,19 +180,39 @@
     return { m: a.mains.length + sumReq(a, 'main'), s: a.subs.length + sumReq(a, 'sub') };
   }
 
-  function overLines(u, before, after) {
+  function overInfo(u, before, after) {
     var cls = ClassStore.load().filter(function (r) { return String(r.id) === String(u.classId); })[0];
-    if (!cls) return [];
+    if (!cls) return null;
     var planM = parseInt(cls.mainTeachers, 10);
     var planS = parseInt(cls.subTeachers, 10);
-    var lines = [];
-    if (!isNaN(planM) && after.m > planM && after.m > before.m) lines.push('　メイン：予定 ' + planM + '人 → ' + after.m + '人');
-    if (!isNaN(planS) && after.s > planS && after.s > before.s) lines.push('　サブ：予定 ' + planS + '人 → ' + after.s + '人');
-    if (!lines.length) return [];
-    return ['・' + u.courseCode + '　' + u.courseName + '　' + u.lessonNo].concat(lines);
+    var info = { classId: u.classId, lines: [], mainTeachers: null, subTeachers: null };
+    if (!isNaN(planM) && after.m > planM && after.m > before.m) {
+      info.lines.push('　メイン：予定 ' + planM + '人 → ' + after.m + '人');
+      info.mainTeachers = String(after.m);
+    }
+    if (!isNaN(planS) && after.s > planS && after.s > before.s) {
+      info.lines.push('　サブ：予定 ' + planS + '人 → ' + after.s + '人');
+      info.subTeachers = String(after.s);
+    }
+    if (!info.lines.length) return null;
+    info.lines.unshift('・' + u.courseCode + '　' + u.courseName + '　' + u.lessonNo);
+    return info;
   }
 
-  function commit(picked) {
+  function applyPlan(infos) {
+    if (!infos.length) return;
+    var classes = ClassStore.load();
+    classes.forEach(function (r) {
+      infos.forEach(function (i) {
+        if (String(i.classId) !== String(r.id)) return;
+        if (i.mainTeachers !== null) r.mainTeachers = i.mainTeachers;
+        if (i.subTeachers !== null) r.subTeachers = i.subTeachers;
+      });
+    });
+    ClassStore.save(classes);
+  }
+
+  function commit(picked, infos) {
     var people = 0;
     try {
       Object.keys(picked).forEach(function (key) {
@@ -201,6 +221,7 @@
         VenderAssignStore.upsert(a);
         people += picked[key].mains.length + picked[key].subs.length;
       });
+      applyPlan(infos);
     } catch (e) {
       MessageDialog.show('反映に失敗しました（' + e.message + '）');
       return;
@@ -225,24 +246,25 @@
       var src = role === 'sub' ? u.subs : u.mains;
       picked[idx][role === 'sub' ? 'subs' : 'mains'].push(src[i]);
     });
-    var over = [];
+    var infos = [];
     try {
       Object.keys(picked).forEach(function (key) {
         var u = plan.updates[Number(key)];
         var a = VenderAssignStore.find(u.classId);
-        var after = totals(transform(JSON.parse(JSON.stringify(a)), picked[key]));
-        over = over.concat(overLines(u, totals(a), after));
+        var info = overInfo(u, totals(a), totals(transform(JSON.parse(JSON.stringify(a)), picked[key])));
+        if (info) infos.push(info);
       });
     } catch (e) {
       MessageDialog.show('反映に失敗しました（' + e.message + '）');
       return;
     }
-    if (over.length) {
-      MessageDialog.confirm(['予定講師数を超えています', '', '以下に反映してよろしいですか？'].concat(over).join('\n')).then(function (ok) {
-        if (ok) commit(picked);
+    if (infos.length) {
+      var lines = [].concat.apply([], infos.map(function (i) { return i.lines; }));
+      MessageDialog.confirm(['予定講師数を超えています', '', '以下に反映してよろしいですか？'].concat(lines).join('\n')).then(function (ok) {
+        if (ok) commit(picked, infos);
       });
       return;
     }
-    commit(picked);
+    commit(picked, []);
   });
 })();

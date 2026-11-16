@@ -106,17 +106,8 @@
     return t;
   }
 
-  var STATUS = {
-    REQUESTED: { label: '依頼済', tag: 'green' },
-    REQUESTING: { label: '依頼中', tag: 'blue' },
-    BEFORE: { label: '依頼前', tag: 'orange' },
-    NONE: { label: '依頼無', tag: 'violet' },
-    OPEN: { label: '依頼枠', tag: 'gray' }
-  };
-
-  function tag(s, style) {
-    return '<span class="tag ' + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
-  }
+  var STATUS = SlotStatusStore.STATUS;
+  var tag = SlotStatusStore.tag;
 
   window.VenderAssignStore = { load: load, save: save, find: find, upsert: upsert, blank: blank, requestsOf: requestsOf, totalRequest: totalRequest, STATUS: STATUS, tag: tag };
 })();
