@@ -71,6 +71,9 @@
     $('printCount').textContent = visible;
   }
   document.querySelector('.filter-panel .search-btn').addEventListener('click', applyFilter);
+  $('keyword').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.querySelector('.filter-panel .search-btn').click();
+  });
   applyFilter();
 
   var appliedVendor = null;

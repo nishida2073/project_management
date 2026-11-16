@@ -44,6 +44,7 @@
           <div class="field"><label>空き枠</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-value="あり">あり<span class="caret">▾</span></div></div>
           <div class="field"><label>今回依頼数に再依頼を含む</label><div class="seg" id="pendSelSeg"><button type="button" class="seg-opt is-active" data-v="in">含める</button><button type="button" class="seg-opt" data-v="out">含めない</button></div></div>
           <div class="search-btn">検索</div>
+          <div class="search-btn" id="resetFilter">リセット</div>
         </div>
         <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
           <div class="table-meta"><div class="count"><b id="printCount">0</b> 件</div></div>
@@ -97,5 +98,6 @@
 <script src="js/sidebar-toggle.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/message-dialog.js"></script>
+<script src="js/filter-memory.js"></script>
 </body>
 </html>

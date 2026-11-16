@@ -140,6 +140,9 @@
   }, true);
   $('requestVendor').addEventListener('click', function () { setTimeout(render, 0); }, true);
   document.querySelector('.filter-panel .search-btn').addEventListener('click', render);
+  $('keyword').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') document.querySelector('.filter-panel .search-btn').click();
+  });
 
   $('saveBtn').addEventListener('click', function () {
     var code = vendorCode();
