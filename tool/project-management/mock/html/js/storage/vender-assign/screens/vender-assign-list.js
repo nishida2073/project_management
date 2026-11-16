@@ -13,11 +13,17 @@
         return '<div>' + esc(x.vendor) + '：' + esc(x.teacherName) + (x.status ? ' ' + VenderAssignStore.tag(x.status) : '') + '</div>';
       }).join('') : '-';
     }
+    function statusOf(p) {
+      if (p.state === 'done') return S.REQUESTED;
+      if (p.state === 'requesting') return S.REQUESTING;
+      if (p.state === 'before') return S.BEFORE;
+      return null;
+    }
     var mainLines = lines(a.mains.map(function (m) {
-      return { vendor: TeacherVenderStore.nameOf(m.vendor) || '-', teacherName: m.teacherName || '', status: m.teacherName ? null : S.BEFORE };
+      return { vendor: TeacherVenderStore.nameOf(m.vendor) || '-', teacherName: m.teacherName || '', status: statusOf(m) };
     }));
     var subLines = lines(a.subs.map(function (s) {
-      return { vendor: TeacherVenderStore.nameOf(s.vendor) || '-', teacherName: s.teacherName || '', status: s.teacherName ? null : S.BEFORE };
+      return { vendor: TeacherVenderStore.nameOf(s.vendor) || '-', teacherName: s.teacherName || '', status: statusOf(s) };
     }));
     var reqs = VenderAssignStore.requestsOf(a);
     var tot = VenderAssignStore.totalRequest(a);
@@ -29,8 +35,9 @@
     var related = r.related && r.related.length ? r.related.slice().sort(function (a, b) { return String(a).localeCompare(String(b), 'ja', { numeric: true }); }).join(', ') : '-';
     var planMain = parseInt(r.mainTeachers, 10) || 0;
     var planSub = parseInt(r.subTeachers, 10) || 0;
-    var freeMain = Math.max(0, planMain - a.mains.length - tot.main);
-    var freeSub = Math.max(0, planSub - a.subs.length - tot.sub);
+    var reqOnly = VenderAssignStore.requestsOf(a).reduce(function (t, q) { t.main += q.main || 0; t.sub += q.sub || 0; return t; }, { main: 0, sub: 0 });
+    var freeMain = Math.max(0, planMain - a.mains.length - reqOnly.main);
+    var freeSub = Math.max(0, planSub - a.subs.length - reqOnly.sub);
     for (var fm = 0; fm < freeMain; fm++) mainLines = (mainLines === '-' ? '' : mainLines) + '<div>' + VenderAssignStore.tag(S.OPEN) + '</div>';
     for (var fs = 0; fs < freeSub; fs++) subLines = (subLines === '-' ? '' : subLines) + '<div>' + VenderAssignStore.tag(S.OPEN) + '</div>';
     var ps = ClassStore.practiceStatus(r);

@@ -11,14 +11,16 @@
   }
 
   function requestsFor(a, code, role) {
-    return VenderAssignStore.requestsOf(a).filter(function (q) { return code && q.vendor === code; })
+    var fromRequests = VenderAssignStore.requestsOf(a).filter(function (q) { return code && q.vendor === code; })
       .reduce(function (t, q) { return t + (q[role] || 0); }, 0);
+    var named = (role === 'sub' ? (a.subs || []) : (a.mains || [])).filter(function (p) { return code && p.vendor === code && p.state === 'requesting'; }).length;
+    return fromRequests + named;
   }
 
   function stateOf(a, code) {
     if (!code) return 'open';
     if (requestsFor(a, code, 'main') + requestsFor(a, code, 'sub') > 0) return 'requesting';
-    var has = (a.mains || []).concat(a.subs || []).some(function (p) { return p.vendor === code && !p.teacherName; });
+    var has = (a.mains || []).concat(a.subs || []).some(function (p) { return p.state === 'before' && p.vendor === code; });
     return has ? 'before' : 'open';
   }
 
@@ -46,8 +48,8 @@
       if (!dateMatch(x.cls.start, x.cls.end)) return false;
       var planM = parseInt(x.cls.mainTeachers, 10) || 0;
       var planS = parseInt(x.cls.subTeachers, 10) || 0;
-      var doneM = x.assign.mains.filter(function (p) { return p.teacherName; }).length;
-      var doneS = x.assign.subs.filter(function (p) { return p.teacherName; }).length;
+      var doneM = x.assign.mains.filter(function (p) { return p.state === 'done'; }).length;
+      var doneS = x.assign.subs.filter(function (p) { return p.state === 'done'; }).length;
       if (planM === doneM && planS === doneS) return false;
       if (!kw) return true;
       var c = C[x.cls.courseCode] || { name: '' };
@@ -58,14 +60,14 @@
       var tr = document.createElement('tr');
       tr.setAttribute('data-id', x.cls.id);
       tr.setAttribute('data-state', cur);
-      var namedMain = x.assign.mains.filter(function (p) { return p.teacherName; }).length;
-      var befSel = code ? x.assign.mains.filter(function (p) { return p.vendor === code && !p.teacherName; }).length : 0;
+      var namedMain = x.assign.mains.filter(function (p) { return p.state === 'done'; }).length;
+      var befSel = code ? x.assign.mains.filter(function (p) { return p.state === 'before' && p.vendor === code; }).length : 0;
       var midN = code ? requestsFor(x.assign, code, 'main') : 0;
-      var doneSel = code ? x.assign.mains.filter(function (p) { return p.teacherName && p.vendor === code; }).length : 0;
-      var namedSub = x.assign.subs.filter(function (p) { return p.teacherName; }).length;
-      var befSubSel = code ? x.assign.subs.filter(function (p) { return p.vendor === code && !p.teacherName; }).length : 0;
+      var doneSel = code ? x.assign.mains.filter(function (p) { return p.state === 'done' && p.vendor === code; }).length : 0;
+      var namedSub = x.assign.subs.filter(function (p) { return p.state === 'done'; }).length;
+      var befSubSel = code ? x.assign.subs.filter(function (p) { return p.state === 'before' && p.vendor === code; }).length : 0;
       var midSubN = code ? requestsFor(x.assign, code, 'sub') : 0;
-      var doneSubSel = code ? x.assign.subs.filter(function (p) { return p.teacherName && p.vendor === code; }).length : 0;
+      var doneSubSel = code ? x.assign.subs.filter(function (p) { return p.state === 'done' && p.vendor === code; }).length : 0;
       tr.innerHTML =
         '<td style="text-align:center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
         '<td>' + esc(yearLabel(x.cls.year)) + '</td>' +
@@ -96,17 +98,17 @@
   function apply(a, code, from, to) {
     if (to === 'open') {
       a.requests = VenderAssignStore.requestsOf(a).filter(function (q) { return q.vendor !== code; });
-      a.mains = (a.mains || []).filter(function (p) { return !(p.vendor === code && !p.teacherName); });
-      a.subs = (a.subs || []).filter(function (p) { return !(p.vendor === code && !p.teacherName); });
+      a.mains = (a.mains || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
+      a.subs = (a.subs || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
     } else if (to === 'before') {
       if (from === 'requesting') {
         var mainN = requestsFor(a, code, 'main');
         var subN = requestsFor(a, code, 'sub');
-        for (var i = 0; i < mainN; i++) a.mains.push({ vendor: code, teacherName: '' });
-        for (var j = 0; j < subN; j++) a.subs.push({ vendor: code, teacherName: '' });
+        for (var i = 0; i < mainN; i++) a.mains.push({ vendor: code, teacherName: '', state: 'before' });
+        for (var j = 0; j < subN; j++) a.subs.push({ vendor: code, teacherName: '', state: 'before' });
         a.requests = VenderAssignStore.requestsOf(a).filter(function (q) { return q.vendor !== code; });
       } else if (from === 'open') {
-        a.mains = (a.mains || []).concat([{ vendor: code, teacherName: '' }]);
+        a.mains = (a.mains || []).concat([{ vendor: code, teacherName: '', state: 'before' }]);
       }
     }
     delete a.requested;

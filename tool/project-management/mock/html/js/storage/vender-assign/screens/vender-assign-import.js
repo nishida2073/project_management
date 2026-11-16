@@ -95,7 +95,7 @@
           if (isColored(ws[XLSX.utils.encode_cell({ r: idx + 3, c: ci })])) return;
           var name = text(row[ci]);
           if (!name) return;
-          target.push({ vendor: vendorCode, teacherName: name });
+          target.push({ vendor: vendorCode, teacherName: name, state: 'done' });
         });
       }
       collect(mainCols, mains);

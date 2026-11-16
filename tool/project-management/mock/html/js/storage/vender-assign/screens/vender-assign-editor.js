@@ -48,15 +48,30 @@
   function makeRow(listId, data) {
     var row = document.createElement('div');
     row.className = 'sub-grid sub-row';
-    var vendorCell = data.locked
-      ? '<div class="form-control readonly vendor-fixed" data-code="' + esc(data.vendor) + '">' + esc(TeacherVenderStore.nameOf(data.vendor) || '-') + '</div>'
-      : '<div class="form-control js-select" data-options="' + esc(vendorOptions().join(',')) + '">' + esc(TeacherVenderStore.nameOf(data.vendor) || '選択してください') + '<span class="caret">▾</span></div>';
+    row.setAttribute('data-state', data.locked ? 'requesting' : (data.state || ''));
+    var reference = data.state === 'done' || data.state === 'requesting' || !!data.locked;
+    var vendorName = TeacherVenderStore.nameOf(data.vendor) || '-';
+    var vendorCell;
+    if (data.locked || data.state === 'requesting') {
+      vendorCell = '<div class="form-control readonly vendor-fixed" data-code="' + esc(data.vendor) + '">' + esc(vendorName) + '</div>';
+    } else if (reference) {
+      vendorCell = '<div class="form-control readonly vendor-before" data-code="' + esc(data.vendor) + '">' + esc(vendorName) + '</div>';
+    } else {
+      vendorCell = '<div class="form-control js-select" data-options="' + esc(vendorOptions().join(',')) + '">' + esc(TeacherVenderStore.nameOf(data.vendor) || '選択してください') + '<span class="caret">▾</span></div>';
+    }
     row.innerHTML =
       vendorCell +
-      '<input type="text" class="form-control" placeholder="講師名" value="' + esc(data.teacherName || '') + '">' +
-      (data.locked ? '' : '<div class="sub-remove">✕</div>') +
+      '<input type="text" class="form-control' + (reference ? ' readonly' : '') + '" placeholder="講師名"' + (reference ? ' disabled' : '') + ' value="' + esc(data.teacherName || '') + '">' +
+      '<div class="sub-remove">✕</div>' +
       '<span class="tag sub-status"></span>';
-    if (!data.locked) row.querySelector('.sub-remove').addEventListener('click', function () { row.remove(); });
+    row.querySelector('.sub-remove').addEventListener('click', function () {
+      var st = row.getAttribute('data-state');
+      if (st !== 'done' && st !== 'requesting') { row.remove(); return; }
+      var head = st === 'done' ? '依頼済の担当者を削除します' : '依頼中を削除します';
+      MessageDialog.confirm([head, '', '削除してよろしいですか？'].join(String.fromCharCode(10))).then(function (ok) {
+        if (ok) row.remove();
+      });
+    });
     $(listId).appendChild(row);
     Array.prototype.forEach.call(row.querySelectorAll('.js-select'), function (el) { window.bindJsSelect(el); });
   }
@@ -64,14 +79,17 @@
   var S = VenderAssignStore.STATUS;
 
   function statusOfRow(row) {
-    var teacher = (row.querySelector('input[type="text"]') || { value: '' }).value.trim();
-    if (teacher) return S.REQUESTED;
+    if (isDoneRow(row)) return S.REQUESTED;
     if (row.querySelector('.vendor-fixed')) return S.REQUESTING;
+    if (row.querySelector('.vendor-before')) return S.BEFORE;
     var sel = row.querySelector('.js-select');
     if (sel && placeholderToEmpty(ownText(sel))) return S.BEFORE;
-    return null;
+    return S.OPEN;
   }
 
+  function isDoneRow(row) {
+    return row.getAttribute('data-state') === 'done';
+  }
   function refreshStatuses() {
     Array.prototype.forEach.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row'), function (row) {
       var st = statusOfRow(row);
@@ -82,19 +100,19 @@
   }
 
   function readRows(listId) {
-    return Array.prototype.map.call($(listId).querySelectorAll('.sub-row'), function (row) {
+    var out = [];
+    Array.prototype.forEach.call($(listId).querySelectorAll('.sub-row'), function (row) {
       var sel = row.querySelectorAll('.js-select');
-      var fixed = row.querySelector('.vendor-fixed');
-      return {
-        vendor: fixed ? fixed.getAttribute('data-code') : TeacherVenderStore.codeOf(placeholderToEmpty(ownText(sel[0]))),
-        teacherName: (row.querySelector('input[type="text"]') || { value: '' }).value.trim(),
-        fixed: !!fixed
-      };
-    }).filter(function (r) {
-      return r.teacherName || (r.vendor && !r.fixed);
-    }).map(function (r) {
-      return { vendor: r.vendor, teacherName: r.teacherName };
+      var fixed = !!row.querySelector('.vendor-fixed');
+      var refEl = row.querySelector('[data-code]');
+      var vendor = refEl ? refEl.getAttribute('data-code') : TeacherVenderStore.codeOf(placeholderToEmpty(ownText(sel[0])));
+      var name = (row.querySelector('input[type="text"]') || { value: '' }).value.trim();
+      if (isDoneRow(row)) { out.push({ vendor: vendor, teacherName: name, state: 'done' }); return; }
+      if (fixed) { if (name) out.push({ vendor: vendor, teacherName: name, state: 'requesting' }); return; }
+      if (!vendor) return;
+      out.push({ vendor: vendor, teacherName: name, state: 'before' });
     });
+    return out;
   }
 
   function init(opts) {
@@ -192,16 +210,38 @@
         motivationName: $('motivationName').value.trim(),
         memo: $('memo').value
       };
-      var newMain = Math.max(document.querySelectorAll('#mainList .sub-row').length, mains.length + VenderAssignStore.totalRequest(a).main);
-      var newSub = Math.max(document.querySelectorAll('#subList .sub-row').length, subs.length + VenderAssignStore.totalRequest(a).sub);
+      var countPresent = function (listId) {
+        var m = {};
+        document.querySelectorAll('#' + listId + ' .sub-row').forEach(function (row) {
+          var fx = row.querySelector('.vendor-fixed');
+          if (!fx) return;
+          if (row.getAttribute('data-state') !== 'requesting') return;
+          if ((row.querySelector('input[type="text"]') || { value: '' }).value.trim()) return;
+          var code = fx.getAttribute('data-code');
+          m[code] = (m[code] || 0) + 1;
+        });
+        return m;
+      };
+      var presentM = countPresent('mainList');
+      var presentS = countPresent('subList');
+      var adjReqs = VenderAssignStore.requestsOf(a).map(function (r) {
+        return { vendor: r.vendor, main: Math.min(r.main || 0, presentM[r.vendor] || 0), sub: Math.min(r.sub || 0, presentS[r.vendor] || 0) };
+      }).filter(function (r) { return r.main > 0 || r.sub > 0; });
+      record.requests = adjReqs;
+      var reqMainTotal = adjReqs.reduce(function (t, r) { return t + r.main; }, 0);
+      var reqSubTotal = adjReqs.reduce(function (t, r) { return t + r.sub; }, 0);
+      var newMain = document.querySelectorAll('#mainList .sub-row').length;
+      var newSub = document.querySelectorAll('#subList .sub-row').length;
       var over = newMain > planMain || newSub > planSub;
       function finish() {
         VenderAssignStore.upsert(Object.assign({}, a, record));
         location.href = 'vender_assign_list.html';
       }
+      var planMainNext = Math.max(document.querySelectorAll('#mainList .sub-row').length, newMain);
+      var planSubNext = Math.max(document.querySelectorAll('#subList .sub-row').length, newSub);
       var reduceLines = [];
-      if (newMain < planMain) reduceLines.push('予定講師数（メイン）：' + planMain + ' → ' + newMain);
-      if (newSub < planSub) reduceLines.push('予定講師数（サブ）：' + planSub + ' → ' + newSub);
+      if (planMainNext < planMain) reduceLines.push('予定講師数（メイン）：' + planMain + ' → ' + planMainNext);
+      if (planSubNext < planSub) reduceLines.push('予定講師数（サブ）：' + planSub + ' → ' + planSubNext);
       function setClassPlan(m, sb) {
         var list = ClassStore.load();
         list.forEach(function (r) {
@@ -215,7 +255,7 @@
       if (!over && reduceLines.length) {
         MessageDialog.confirm(['枠が予定より少なくなっています', '予定講師数を減らしますか？', ''].concat(reduceLines).join(String.fromCharCode(10))).then(function (ok) {
           if (!ok) return;
-          setClassPlan(newMain, newSub);
+          setClassPlan(planMainNext, planSubNext);
           finish();
         });
         return;

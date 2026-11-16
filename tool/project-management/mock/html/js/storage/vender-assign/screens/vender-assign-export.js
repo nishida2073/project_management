@@ -9,15 +9,15 @@
     var a = VenderAssignStore.find(r.id);
     rows.push({ cls: r, assign: a });
     var c = C[r.courseCode] || { name: r.courseCode };
-    var namedMain = a.mains.filter(function (p) { return p.teacherName; }).length;
-    var namedSub = a.subs.filter(function (p) { return p.teacherName; }).length;
+    var namedMain = a.mains.filter(function (p) { return p.state === 'done'; }).length;
+    var namedSub = a.subs.filter(function (p) { return p.state === 'done'; }).length;
     var remainMain = Math.max(0, (parseInt(r.mainTeachers, 10) || 0) - namedMain);
     var remainSub = Math.max(0, (parseInt(r.subTeachers, 10) || 0) - namedSub);
     var reqTot = VenderAssignStore.totalRequest(a);
     var pendMain = reqTot.main;
     var pendSub = reqTot.sub;
-    var befMain = a.mains.filter(function (p) { return p.vendor && !p.teacherName; }).length;
-    var befSub = a.subs.filter(function (p) { return p.vendor && !p.teacherName; }).length;
+    var befMain = a.mains.filter(function (p) { return p.state === 'before'; }).length;
+    var befSub = a.subs.filter(function (p) { return p.state === 'before'; }).length;
     var reqMain = Math.max(0, remainMain - pendMain - befMain);
     var reqSub = Math.max(0, remainSub - pendSub - befSub);
     var tr = document.createElement('tr');
@@ -85,8 +85,8 @@
       ['main', 'sub'].forEach(function (role) {
         var list = role === 'main' ? row.assign.mains : row.assign.subs;
         var isOther = function (v) { return !code || v !== code; };
-        var befOthers = list.filter(function (p) { return p.vendor && !p.teacherName && isOther(p.vendor); }).length;
-        var befSel = list.filter(function (p) { return p.vendor && !p.teacherName && !isOther(p.vendor); }).length;
+        var befOthers = list.filter(function (p) { return p.state === 'before' && isOther(p.vendor); }).length;
+        var befSel = list.filter(function (p) { return p.state === 'before' && !isOther(p.vendor); }).length;
         var pendOthers = reqs.filter(function (q) { return isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
         var pendSelAll = reqs.filter(function (q) { return !isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
         var pendSel = includePendSel ? pendSelAll : 0;
@@ -101,7 +101,7 @@
         var willReplace = !!code && befSel > 0 && overPlan;
         input.classList.toggle('replace-mark', willReplace);
         input.title = willReplace ? '予定講師数を超過しているため' + val + '人に変更しています。' : '';
-        var doneVal = list.filter(function (p) { return p.teacherName && (!code || p.vendor === code); }).length;
+        var doneVal = list.filter(function (p) { return p.state === 'done' && (!code || p.vendor === code); }).length;
         tr.querySelector('.cnt-bef-' + role).textContent = code ? befSel + '人' : '-';
         tr.querySelector('.cnt-pend-' + role).textContent = code ? pendSelAll + '人' : '-';
         tr.querySelector('.cnt-done-' + role).textContent = code ? doneVal + '人' : '-';
@@ -224,8 +224,14 @@
         it.cls.start,
         it.cls.end
       ];
+      var namesOf = function (list) {
+        return (list || []).filter(function (p) { return p.state === 'before' && p.vendor === vendorCode && p.teacherName; }).map(function (p) { return p.teacherName; });
+      };
+      var mainNames = namesOf(it.assign.mains);
+      var subNames = namesOf(it.assign.subs);
       var people = [];
-      for (i = 0; i < mainMax + subMax; i++) people.push('');
+      for (i = 0; i < mainMax; i++) people.push(mainNames[i] || '');
+      for (i = 0; i < subMax; i++) people.push(subNames[i] || '');
       aoa.push(line.concat(people));
     });
     var ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -268,11 +274,10 @@
       var exMain = includePendSel ? 0 : existing.reduce(function (t, r) { return t + (r.main || 0); }, 0);
       var exSub = includePendSel ? 0 : existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0);
       var reqs = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; });
-      if (x.main || x.sub || exMain || exSub) reqs.push({ vendor: vendorCode, main: exMain + x.main, sub: exSub + x.sub });
       var dropBefore = function (list, n) {
         var left = n;
         return (list || []).filter(function (p) {
-          if (left > 0 && p.vendor === vendorCode && !p.teacherName) { left--; return false; }
+          if (left > 0 && p.state === 'before' && p.vendor === vendorCode) { left--; return false; }
           return true;
         });
       };
@@ -280,16 +285,33 @@
       var convertCount = function (role, list, n) {
         if (!includePendSel || !rowInfo) return n;
         var plan = parseInt(role === 'main' ? rowInfo.cls.mainTeachers : rowInfo.cls.subTeachers, 10) || 0;
-        var named = list.filter(function (p) { return p.teacherName; }).length;
+        var named = list.filter(function (p) { return p.state === 'done'; }).length;
         var remain = Math.max(0, plan - named);
         var pendOthers = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; }).reduce(function (t, r) { return t + (r[role] || 0); }, 0);
-        var befOthers = list.filter(function (p) { return p.vendor && !p.teacherName && p.vendor !== vendorCode; }).length;
-        var befSel = list.filter(function (p) { return p.vendor === vendorCode && !p.teacherName; }).length;
+        var befOthers = list.filter(function (p) { return p.state === 'before' && p.vendor !== vendorCode; }).length;
+        var befSel = list.filter(function (p) { return p.state === 'before' && p.vendor === vendorCode; }).length;
         var keep = Math.min(befSel, Math.max(0, remain - pendOthers - befOthers - n));
         return befSel - keep;
       };
-      rec.mains = dropBefore(rec.mains, convertCount('main', rec.mains || [], x.main));
-      rec.subs = dropBefore(rec.subs, convertCount('sub', rec.subs || [], x.sub));
+      var convertEntries = function (list, n) {
+        var left = n, named = 0, out = [];
+        (list || []).forEach(function (p) {
+          if (left > 0 && p.state === 'before' && p.vendor === vendorCode) {
+            left--;
+            if (p.teacherName) { out.push({ vendor: p.vendor, teacherName: p.teacherName, state: 'requesting' }); named++; }
+            return;
+          }
+          out.push(p);
+        });
+        return { list: out, named: named };
+      };
+      var cm = convertEntries(rec.mains, convertCount('main', rec.mains || [], x.main));
+      var cs = convertEntries(rec.subs, convertCount('sub', rec.subs || [], x.sub));
+      rec.mains = cm.list;
+      rec.subs = cs.list;
+      var addM = Math.max(0, exMain + x.main - cm.named);
+      var addS = Math.max(0, exSub + x.sub - cs.named);
+      if (addM || addS || exMain || exSub) reqs.push({ vendor: vendorCode, main: addM, sub: addS });
       rec.requests = reqs;
       delete rec.requested;
       delete rec.requestMain;
