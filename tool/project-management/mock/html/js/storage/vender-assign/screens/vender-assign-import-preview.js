@@ -52,6 +52,7 @@
     var SPACER = '<span class="check-box check-sm" style="visibility:hidden;vertical-align:middle;"><input type="checkbox" style="visibility:hidden;"><span class="check-mark"></span></span> ';
     var rows = [];
     existing.forEach(function (m) {
+      if (m.vendor !== plan.vendorCode) return;
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
@@ -75,9 +76,13 @@
         from = 'none';
         on = false;
       }
+      var replaceOpts = existing.map(function (m, k) { return { m: m, k: k }; }).filter(function (o) {
+        return o.m.state !== 'done' && o.m.vendor === plan.vendorCode && String(o.m.teacherName || '').trim();
+      });
+      var sel = (from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">置き換える人<span class="caret">▾</span></span></span>' : '';
       rows.push('<div class="import-line" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from) + '</span> ' +
-        esc(vendorText(p.vendor)) + '：' + esc(p.teacherName) + '</div>');
+        esc(vendorText(p.vendor)) + '：' + esc(p.teacherName) + sel + '</div>');
     });
     return rows.length ? rows.join('') : '-';
   }
@@ -107,6 +112,7 @@
       '<td>' + cellHtml(u, idx, 'sub', ex.subs, u.subs) + '</td>';
     $('importBody').appendChild(tr);
   });
+  document.querySelectorAll('#importBody .js-select').forEach(function (el) { window.bindJsSelect(el); });
 
   updateCount();
 
@@ -130,6 +136,19 @@
     if (line) line.querySelector('.js-after').innerHTML = afterHtml(e.target.checked, line.getAttribute('data-from'));
     updateCount();
   });
+
+  function syncReplace() {
+    Array.prototype.forEach.call($('importBody').querySelectorAll('.import-line'), function (line) {
+      var r = line.querySelector('.import-replace');
+      if (!r) return;
+      var cb = line.querySelector('.import-check');
+      if (r.getAttribute('data-value') && !cb.checked) cb.checked = true;
+      line.querySelector('.js-after').innerHTML = afterHtml(cb.checked, line.getAttribute('data-from'));
+    });
+    updateCount();
+  }
+
+  document.addEventListener('click', function () { setTimeout(syncReplace, 0); }, true);
   updateCount();
 
   function mergeUnique(list, add) {
@@ -146,6 +165,8 @@
   }
 
   function transform(a, pick) {
+    (pick.dropMains || []).filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return y - x; }).forEach(function (k) { a.mains.splice(k, 1); });
+    (pick.dropSubs || []).filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return y - x; }).forEach(function (k) { a.subs.splice(k, 1); });
     var beforeM = a.mains.length;
     var beforeS = a.subs.length;
     a.mains = mergeUnique(a.mains, pick.mains);
@@ -242,9 +263,17 @@
       var role = cb.getAttribute('data-role');
       var i = Number(cb.getAttribute('data-i'));
       var u = plan.updates[idx];
-      picked[idx] = picked[idx] || { mains: [], subs: [] };
+      picked[idx] = picked[idx] || { mains: [], subs: [], dropMains: [], dropSubs: [] };
       var src = role === 'sub' ? u.subs : u.mains;
       picked[idx][role === 'sub' ? 'subs' : 'mains'].push(src[i]);
+      var sel = cb.closest('.import-line').querySelector('.import-replace');
+      var chosen = sel ? sel.getAttribute('data-value') : '';
+      if (chosen) {
+        var rec = VenderAssignStore.find(u.classId);
+        var list = role === 'sub' ? rec.subs : rec.mains;
+        var k = list.findIndex(function (m) { return m.state !== 'done' && String(m.teacherName || '').trim() === chosen; });
+        if (k >= 0) picked[idx][role === 'sub' ? 'dropSubs' : 'dropMains'].push(k);
+      }
     });
     var infos = [];
     try {
