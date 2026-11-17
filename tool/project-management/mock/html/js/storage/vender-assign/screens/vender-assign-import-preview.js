@@ -46,6 +46,7 @@
 
   var chk = {};
   var rep = {};
+  var asg = {};
 
   function nextSlot(p) {
     if (p.slot > 0) { p.slot--; return 'before'; }
@@ -53,6 +54,13 @@
     if (p.free > 0) { p.free--; return 'open'; }
     return 'none';
   }
+
+  function consumeSlot(p, t) {
+    if (t === 'before') p.slot--;
+    else if (t === 'requesting') p.req--;
+    else if (t === 'open') p.free--;
+  }
+
 
   function cellHtml(u, idx, role, existing, add) {
     var rec = VenderAssignStore.find(u.classId) || {};
@@ -77,6 +85,18 @@
     });
     var pool = { slot: slotInit, req: reqInit, free: freeInit };
     add.forEach(function (p, i) {
+      var k = idx + '|' + role + '|' + i;
+      if (alreadyDone(p, existing) || matched(p)) return;
+      if (chk[k] === true && asg[k] && asg[k] !== 'none') consumeSlot(pool, asg[k]);
+    });
+    add.forEach(function (p, i) {
+      var k = idx + '|' + role + '|' + i;
+      if (alreadyDone(p, existing) || matched(p)) return;
+      if (chk[k] === undefined) chk[k] = pool.slot + pool.req + pool.free > 0;
+      if (chk[k] && (asg[k] === undefined || asg[k] === 'none')) asg[k] = nextSlot(pool);
+    });
+    var peek = { slot: pool.slot, req: pool.req, free: pool.free };
+    add.forEach(function (p, i) {
       if (alreadyDone(p, existing)) return;
       var k = idx + '|' + role + '|' + i;
       var same = matched(p);
@@ -86,16 +106,15 @@
         if (chk[k] === undefined) chk[k] = same.state !== 'done';
         on = chk[k];
       } else {
-        if (chk[k] === undefined) chk[k] = pool.slot + pool.req + pool.free > 0;
         on = chk[k];
-        from = on ? nextSlot(pool) : 'none';
+        from = on ? asg[k] : nextSlot(peek);
       }
       var replaceOpts = existing.map(function (m, k) { return { m: m, k: k }; }).filter(function (o) {
         return o.m.state !== 'done' && o.m.vendor === plan.vendorCode && String(o.m.teacherName || '').trim()
           && !add.some(function (p) { return sameTeacher(p, o.m); });
       });
       var rv = rep[k] || '';
-      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="' + esc(rv) + '" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">' + (rv ? esc(rv) : '選択してください') + '<span class="caret">▾</span></span></span>' : '';
+      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" title="置き換える人を選ぶ">⇄</span>' + (rv ? '<span style="margin-left:4px;font-size:11px;color:#5a6376;">' + esc(rv) + '</span>' : '') : '';
       rows.push('<div class="import-line" data-key="' + k + '" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from, !same) + '</span> ' +
         esc(p.teacherName) + sel + '</div>');
@@ -152,17 +171,49 @@
     td.querySelectorAll('.import-line').forEach(function (line) {
       var k = line.getAttribute('data-key');
       chk[k] = line.querySelector('.import-check').checked;
-      var r = line.querySelector('.import-replace');
-      if (r) {
-        var v = r.getAttribute('data-value') || '';
-        if (v !== (rep[k] || '')) {
-          rep[k] = v;
-          if (v) chk[k] = true;
-          changed = true;
-        }
-      }
     });
     return changed;
+  }
+
+  function chooseReplace(names) {
+    return new Promise(function (resolve) {
+      var overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.innerHTML =
+        '<div class="input-dialog">' +
+          '<div class="input-dialog-title">置き換える人</div>' +
+          '<label class="input-dialog-label">置き換える講師</label>' +
+          '<div class="form-control js-select" data-options="' + esc(names.join(',')) + '" data-value="">選択してください<span class="caret">▾</span></div>' +
+          '<div class="input-dialog-error"></div>' +
+          '<div class="input-dialog-actions">' +
+            '<div class="search-btn rp-cancel">キャンセル</div>' +
+            '<div class="btn primary rp-ok">置き換える</div>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(overlay);
+      var sel = overlay.querySelector('.js-select');
+      var errorEl = overlay.querySelector('.input-dialog-error');
+      window.bindJsSelect(sel);
+
+      function close(value) {
+        document.removeEventListener('keydown', onKey);
+        overlay.remove();
+        resolve(value);
+      }
+      function onKey(e) { if (e.key === 'Escape') close(null); }
+
+      overlay.querySelector('.rp-ok').addEventListener('click', function () {
+        var name = sel.getAttribute('data-value') || '';
+        if (!name || names.indexOf(name) === -1) {
+          errorEl.textContent = '置き換える講師を選択してください';
+          return;
+        }
+        close(name);
+      });
+      overlay.querySelector('.rp-cancel').addEventListener('click', function () { close(null); });
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) close(null); });
+      document.addEventListener('keydown', onKey);
+    });
   }
 
   function rerender(td) {
@@ -177,20 +228,27 @@
   $('importBody').addEventListener('change', function (e) {
     if (!e.target.classList.contains('import-check')) return;
     var td = e.target.closest('td');
+    delete asg[e.target.closest('.import-line').getAttribute('data-key')];
     captureTd(td);
     rerender(td);
     updateCount();
   });
 
-  document.addEventListener('click', function () {
-    setTimeout(function () {
-      Array.prototype.forEach.call($('importBody').querySelectorAll('td[data-role]'), function (td) {
-        if (!td.querySelector('.import-replace')) return;
-        if (captureTd(td)) rerender(td);
-      });
+  $('importBody').addEventListener('click', function (e) {
+    var mark = e.target.closest('.import-replace-mark');
+    if (!mark) return;
+    var k = mark.getAttribute('data-key');
+    var names = (mark.getAttribute('data-options') || '').split(',');
+    chooseReplace(names).then(function (name) {
+      if (!name) return;
+      var td = mark.closest('td');
+      captureTd(td);
+      rep[k] = name;
+      chk[k] = true;
+      rerender(td);
       updateCount();
-    }, 0);
-  }, true);
+    });
+  });
   updateCount();
 
   function mergeUnique(list, add) {
@@ -310,8 +368,7 @@
       picked[idx] = picked[idx] || { mains: [], subs: [], dropMains: [], dropSubs: [] };
       var src = role === 'sub' ? u.subs : u.mains;
       picked[idx][role === 'sub' ? 'subs' : 'mains'].push(src[i]);
-      var sel = cb.closest('.import-line').querySelector('.import-replace');
-      var chosen = sel ? sel.getAttribute('data-value') : '';
+      var chosen = rep[cb.closest('.import-line').getAttribute('data-key')] || '';
       if (chosen) {
         var tkey = idx + '|' + role + '|' + chosen;
         if (usedTargets[tkey]) dupName = dupName || chosen;
