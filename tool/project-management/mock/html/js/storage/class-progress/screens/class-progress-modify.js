@@ -1,9 +1,9 @@
   (function () {
     var CLASS_ID = new URLSearchParams(location.search).get('id') || 'CLS-001';
     var CLASS_KEY = CLASS_ID;
-    var STATUS_LABEL = { done: '完了', progress: '実施中', wait: '実施前' };
-    var LABEL_STATUS = { '完了': 'done', '実施中': 'progress', '実施前': 'wait' };
-    var STATUS_COLOR = { done: 'green', progress: 'blue', wait: 'gray' };
+    var STATUS_LABEL = StepStatusStore.labelByKey();
+    var LABEL_STATUS = StepStatusStore.byLabel();
+    var STATUS_COLOR = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
 
 function setDisabledRow(tr, off) {
   Array.prototype.forEach.call(tr.querySelectorAll('.js-date, .wide.js-select, .status-select'), function (el) {
@@ -47,7 +47,7 @@ function setDisabledRow(tr, off) {
       displayNo[i] = kindCount[k];
     });
     var stepsList = sortedTasks.map(function (t, i) {
-      return { no: i + 1, name: t.name, actual: '', owner: '', status: 'wait', memo: '' };
+      return { no: i + 1, name: t.name, actual: '', owner: '', status: 'WAIT', memo: '' };
     });
     var saved = (loadProgress()[CLASS_KEY]) || {};
     var body = document.getElementById('stepBody');
@@ -102,7 +102,7 @@ function setDisabledRow(tr, off) {
         '<td>' + planCell + '</td>' +
         '<td class="col-actual">' + actualCell + '</td>' +
         '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="na-text"' + ' style="display:none;"' + '>対象外</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="na-text"' + ' style="display:none;"' + '>対象外</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);
@@ -127,7 +127,7 @@ function setDisabledRow(tr, off) {
           plan: ownText(tds[4].querySelector('.js-date')),
           actual: ownText(tds[5].querySelector('.js-date')),
           owner: ownText(tds[5].querySelector('.js-date')) ? StaffStore.codeOf(ownText(tds[6].querySelector('.js-select'))) : '',
-          status: LABEL_STATUS[ownText(tds[7].querySelector('.js-select'))] || 'wait',
+          status: LABEL_STATUS[ownText(tds[7].querySelector('.js-select'))] || 'WAIT',
           memo: tds[8].querySelector('textarea').value
         };
       });

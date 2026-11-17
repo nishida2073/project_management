@@ -26,26 +26,26 @@
 
   function build(codes) {
     return codes.map(function (s, i) {
-      var na = s === 'na';
-      var status = (s === 'na') ? 'wait' : (s === 'wait-delay' ? 'wait' : s);
+      var na = s === 'NA';
+      var status = (s === 'NA') ? 'WAIT' : (s === 'WAIT_DELAY' ? 'WAIT' : s);
       var plan = '2026/' + DATES[i];
-      var actual = status === 'done' ? plan : '';
+      var actual = status === 'DONE' ? plan : '';
       return step(status, na, plan, actual, '');
     });
   }
 
   var SEED_STEPS = {
-    'PJ-2601': build(['done', 'na', 'na', 'done', 'na', 'done', 'done', 'progress', 'wait', 'wait', 'wait', 'wait', 'wait']),
-    'PJ-2602': build(['done', 'wait-delay', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait']),
-    'PJ-2603': build(['done', 'done', 'progress', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait']),
-    'PJ-2604': build(['done', 'done', 'done', 'na', 'na', 'done', 'na', 'done', 'done', 'done', 'done', 'progress', 'wait']),
-    'PJ-2605': build(['wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait']),
-    'PJ-2606': build(['done', 'done', 'done', 'done', 'wait-delay', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait']),
-    'PJ-2607': build(['done', 'progress', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait', 'wait'])
+    'PJ-2601': build(['DONE', 'NA', 'NA', 'DONE', 'NA', 'DONE', 'DONE', 'PROGRESS', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT']),
+    'PJ-2602': build(['DONE', 'WAIT_DELAY', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT']),
+    'PJ-2603': build(['DONE', 'DONE', 'PROGRESS', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT']),
+    'PJ-2604': build(['DONE', 'DONE', 'DONE', 'NA', 'NA', 'DONE', 'NA', 'DONE', 'DONE', 'DONE', 'DONE', 'PROGRESS', 'WAIT']),
+    'PJ-2605': build(['WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT']),
+    'PJ-2606': build(['DONE', 'DONE', 'DONE', 'DONE', 'WAIT_DELAY', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT']),
+    'PJ-2607': build(['DONE', 'PROGRESS', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'])
   };
 
-  SEED_STEPS['PJ-2601'][7] = step('progress', false, '2026/03/11', '', '契約書ドラフト送付済み、押印待ち');
-  SEED_STEPS['PJ-2601'][8] = step('wait', false, '2026/03/20', '', '契約締結後に着手予定');
+  SEED_STEPS['PJ-2601'][7] = step('PROGRESS', false, '2026/03/11', '', '契約書ドラフト送付済み、押印待ち');
+  SEED_STEPS['PJ-2601'][8] = step('WAIT', false, '2026/03/20', '', '契約締結後に着手予定');
 
   var SEED = Object.keys(SEED_STEPS).map(function (code) {
     return { projectCode: code, steps: SEED_STEPS[code] };
@@ -68,7 +68,7 @@
   function blank(projectCode) {
     return {
       projectCode: projectCode,
-      steps: STEP_NAMES.map(function () { return step('wait', false, '', '', ''); })
+      steps: STEP_NAMES.map(function () { return step('WAIT', false, '', '', ''); })
     };
   }
 

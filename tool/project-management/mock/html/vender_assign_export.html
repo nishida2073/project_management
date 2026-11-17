@@ -38,7 +38,7 @@
           <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="filter-panel" style="margin-bottom: 16px;">
-          <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-options="すべて,実施前,実施中" data-value="実施前">実施前<span class="caret">▾</span></div></div>
+          <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-practice-options-active data-practice-default="BEFORE"><span class="caret">▾</span></div></div>
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
           <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
           <div class="field"><label>終了日</label><div class="control js-date" id="dateTo"><span class="caret">▾</span></div></div>
@@ -82,6 +82,7 @@
   </div>
   <div class="print-area" id="printArea"></div>
 </div>
+<script src="js/storage/practice-status/store/practice-status-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/location/store/location-store.js"></script>

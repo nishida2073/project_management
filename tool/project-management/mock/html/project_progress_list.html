@@ -22,7 +22,7 @@
         <div class="field"><label>キーワード検索</label><input type="text" id="fKeyword" class="field-control-input" placeholder="案件コード・案件名で検索"></div>
         <div class="field"><label>顧客名</label><div class="control wide js-select" id="fCustomer" data-hide-class="col-customer" data-options="すべて">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>管理担当者</label><div class="control js-select" id="fManager" data-hide-class="col-manager" data-options="すべて">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>タスク進捗</label><div class="control small js-select" id="fOverall" data-hide-class="col-overall" data-options="すべて,未着手,進行中,完了,遅延">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>タスク進捗</label><div class="control small js-select" id="fOverall" data-hide-class="col-overall" data-task-progress-options>すべて<span class="caret">▾</span></div></div>
         <div class="search-btn" id="fSearch">検索</div>
         <div class="search-btn" id="resetFilter">リセット</div>
       </div>
@@ -50,6 +50,8 @@
     </div>
   </div>
 </div>
+<script src="js/storage/step-status/store/step-status-store.js"></script>
+<script src="js/storage/task-progress/store/task-progress-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/customer/store/customer-store.js"></script>

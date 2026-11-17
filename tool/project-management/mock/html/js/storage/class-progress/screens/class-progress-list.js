@@ -18,8 +18,8 @@
       DISPLAY_NO[i] = counts[k];
     });
   })();
-  var STATUS_LABEL = { done: '完了', progress: '実施中', wait: '実施前' };
-  var STATUS_CLASS = { done: 'green', progress: 'blue', wait: 'gray' };
+  var STATUS_LABEL = StepStatusStore.labelByKey();
+  var STATUS_CLASS = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
 
   var today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -32,7 +32,7 @@
 
   function isDelayed(step) {
     if (step.na) return false;
-    if (step.status === 'done' || !step.plan) return false;
+    if (step.status === 'DONE' || !step.plan) return false;
     var plan = new Date(String(step.plan).replace(/\//g, '-'));
     return !isNaN(plan.getTime()) && plan < today;
   }
@@ -40,7 +40,7 @@
   function chip(step) {
     if (step.kindNa) return '';
     if (step.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
-    var label = STATUS_LABEL[step.status] || '実施前';
+    var label = STATUS_LABEL[step.status] || StepStatusStore.labelOf('WAIT');
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span></div>' +
@@ -52,11 +52,11 @@
     var applicable = steps.filter(function (s) { return !s.na; });
     if (applicable.length === 0) return '<span class="na-text">対象外</span>';
     var late = applicable.some(isDelayed);
-    var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'done'; });
-    var any = applicable.some(function (s) { return s.status === 'done' || s.status === 'progress'; });
-    var key = late ? 'delay' : (all ? 'done' : (any ? 'progress' : 'wait'));
-    var label = { done: '完了', progress: '進行中', wait: '未着手', delay: '遅延' }[key];
-    var color = { done: 'green', progress: 'blue', wait: 'gray', delay: 'red' }[key];
+    var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'DONE'; });
+    var any = applicable.some(function (s) { return s.status === 'DONE' || s.status === 'PROGRESS'; });
+    var key = late ? 'DELAY' : (all ? 'DONE' : (any ? 'PROGRESS' : 'WAIT'));
+    var label = TaskProgressStore.labelOf(key);
+    var color = TaskProgressStore.colorOf(key);
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
 
@@ -102,7 +102,7 @@
         plan: sv.plan !== undefined ? sv.plan : (task ? addDays(start, task.days) : ''),
         actual: sv.actual !== undefined ? sv.actual : '',
         owner: sv.owner !== undefined ? sv.owner : '',
-        status: sv.status !== undefined ? sv.status : 'wait',
+        status: sv.status !== undefined ? sv.status : 'WAIT',
         memo: sv.memo !== undefined ? sv.memo : '',
         kindNa: !!(task && task.kinds.indexOf(c.taskType) === -1),
         na: (task && task.kinds.indexOf(c.taskType) === -1) || (sv.na !== undefined ? sv.na : false)
@@ -177,9 +177,9 @@
     listTable.style.width = total + 'px';
   };
   window.applyColumnFilters();
-  var STATUS_OF_LABEL = { '実施前': 'wait', '実施中': 'progress', '完了': 'done' };
-  var LABEL_OF_STATUS = { wait: '実施前', progress: '実施中', done: '完了' };
-  var STATUS_COLOR_OF = { done: 'green', progress: 'blue', wait: 'gray' };
+  var STATUS_OF_LABEL = StepStatusStore.byLabel();
+  var LABEL_OF_STATUS = StepStatusStore.labelByKey();
+  var STATUS_COLOR_OF = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
   function stepOwnerNames(task) {
     var company = task ? task.company : StaffVenderStore.INTERNAL;
     return StaffStore.load().filter(function (s) {
@@ -223,7 +223,7 @@
       '<label class="input-dialog-label">実施担当者</label>' +
       '<div class="form-control js-select" id="sdOwner" data-options="' + esc(owners.join(',')) + '">' + esc(ownerName || '選択してください') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">状態</label>' +
-      '<div class="status-select status-combo ' + STATUS_COLOR_OF[sv.status || 'wait'] + ' js-select" id="sdStatus" data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\' data-value="' + esc(LABEL_OF_STATUS[sv.status || 'wait']) + '">' + esc(LABEL_OF_STATUS[sv.status || 'wait']) + '<span class="caret">▾</span></div>' +
+      '<div class="status-select status-combo ' + STATUS_COLOR_OF[sv.status || 'WAIT'] + ' js-select" id="sdStatus" data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\' data-value="' + esc(LABEL_OF_STATUS[sv.status || 'WAIT']) + '">' + esc(LABEL_OF_STATUS[sv.status || 'WAIT']) + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">備考</label>' +
       '<textarea class="form-control textarea" id="sdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
       '<div class="input-dialog-actions"><div class="search-btn sd-cancel">キャンセル</div><div class="btn primary sd-ok">保存</div></div></div>';
@@ -248,7 +248,7 @@
       var cur = s[classId] || {};
       var picked = valueOf(overlay.querySelector('#sdOwner'));
       cur[i + 1] = Object.assign({}, cur[i + 1] || {}, {
-        status: STATUS_OF_LABEL[valueOf(overlay.querySelector('#sdStatus'))] || 'wait',
+        status: STATUS_OF_LABEL[valueOf(overlay.querySelector('#sdStatus'))] || 'WAIT',
         plan: ownText(overlay.querySelector('#sdPlan')),
         actual: ownText(overlay.querySelector('#sdActual')),
         owner: picked ? StaffStore.codeOf(picked) : '',

@@ -19,7 +19,7 @@
     </div>
     <div class="content">
             <div class="filter-panel">
-        <div class="field"><label>実施状況</label><div class="control small js-select" data-options="すべて,実施前,実施中,実施後" data-match-class="col-practice" data-value="実施前">実施前<span class="caret">▾</span></div></div>
+        <div class="field"><label>実施状況</label><div class="control small js-select" data-practice-options data-match-class="col-practice" data-practice-default="BEFORE"><span class="caret">▾</span></div></div>
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
         <div class="field"><label>開始日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
@@ -67,6 +67,7 @@
     </div>
   </div>
 </div>
+<script src="js/storage/practice-status/store/practice-status-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/location/store/location-store.js"></script>

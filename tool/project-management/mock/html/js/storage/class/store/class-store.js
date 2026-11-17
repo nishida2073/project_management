@@ -111,9 +111,9 @@
     if (!start || !end) return '';
     var now = new Date();
     now.setHours(0, 0, 0, 0);
-    if (now < start) return '実施前';
-    if (now > end) return '実施後';
-    return '実施中';
+    if (now < start) return PracticeStatusStore.labelOf('BEFORE');
+    if (now > end) return PracticeStatusStore.labelOf('AFTER');
+    return PracticeStatusStore.labelOf('DURING');
   }
 
   window.ClassStore = {
@@ -125,6 +125,6 @@
     nextId: nextId,
     nextLessonNo: nextLessonNo,
     practiceStatus: practiceStatus,
-    PRACTICE_CLASS: { '実施前': 'blue', '実施中': 'orange', '実施後': 'gray' }
+    PRACTICE_CLASS: PracticeStatusStore.colorMap()
   };
 })();

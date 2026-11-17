@@ -57,22 +57,22 @@
         if (t.kinds.indexOf(c.taskType) === -1) { saved[no] = { na: true }; return; }
         var plan = addDays(start, t.days);
         var sv = {};
-        if (phase === '実施後') {
-          sv.status = 'done';
+        if (phase === PracticeStatusStore.labelOf('AFTER')) {
+          sv.status = 'DONE';
           sv.actual = fmtDate(plan > today ? today : plan);
           sv.owner = pickOwner(t);
-        } else if (phase === '実施中') {
+        } else if (phase === PracticeStatusStore.labelOf('DURING')) {
           if (plan < today && j % 2 === 0) {
-            sv.status = 'done';
+            sv.status = 'DONE';
             sv.actual = fmtDate(plan);
             sv.owner = pickOwner(t);
           } else if (plan < today) {
-            sv.status = 'progress';
+            sv.status = 'PROGRESS';
           } else {
-            sv.status = 'wait';
+            sv.status = 'WAIT';
           }
         } else {
-          sv.status = 'wait';
+          sv.status = 'WAIT';
         }
         j++;
         saved[no] = sv;

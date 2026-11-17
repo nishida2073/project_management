@@ -1,11 +1,11 @@
 (function () {
-  var LABEL = { wait: '実施前', progress: '実施中', done: '完了' };
-  var COLOR = { wait: 'gray', progress: 'blue', done: 'green' };
+  var LABEL = StepStatusStore.labelByKey();
+  var COLOR = { WAIT: 'gray', PROGRESS: 'blue', DONE: 'green' };
   var today = new Date();
   today.setHours(0, 0, 0, 0);
 
   function isDelayed(s) {
-    if (s.na || s.status === 'done' || !s.plan) return false;
+    if (s.na || s.status === 'DONE' || !s.plan) return false;
     var plan = new Date(String(s.plan).replace(/\//g, '-'));
     return !isNaN(plan.getTime()) && plan < today;
   }
@@ -20,17 +20,17 @@
 
   function overallKey(steps) {
     var applicable = steps.filter(function (s) { return !s.na; });
-    if (applicable.length === 0) return 'na';
+    if (applicable.length === 0) return 'NA';
     var late = applicable.some(isDelayed);
-    var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'done'; });
-    var any = applicable.some(function (s) { return s.status === 'done' || s.status === 'progress'; });
-    return late ? 'delay' : (all ? 'done' : (any ? 'progress' : 'wait'));
+    var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'DONE'; });
+    var any = applicable.some(function (s) { return s.status === 'DONE' || s.status === 'PROGRESS'; });
+    return late ? 'DELAY' : (all ? 'DONE' : (any ? 'PROGRESS' : 'WAIT'));
   }
 
   function overall(key) {
-    if (key === 'na') return '<span class="na-text">対象外</span>';
-    var label = { done: '完了', progress: '進行中', wait: '未着手', delay: '遅延' }[key];
-    var color = { done: 'green', progress: 'blue', wait: 'gray', delay: 'red' }[key];
+    if (key === 'NA') return '<span class="na-text">対象外</span>';
+    var label = TaskProgressStore.labelOf(key);
+    var color = TaskProgressStore.colorOf(key);
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
 
@@ -101,7 +101,7 @@
   setOptions('fCustomer', customers);
   setOptions('fManager', managerNames);
 
-  var OVERALL_KEY = { '未着手': 'wait', '進行中': 'progress', '完了': 'done', '遅延': 'delay' };
+  var OVERALL_KEY = TaskProgressStore.byLabel();
 
   function val(id) {
     var el = document.getElementById(id);
@@ -140,9 +140,9 @@
   });
 
   document.getElementById('projectCount').textContent = projects.length;
-  var P_STATUS_OF_LABEL = { '実施前': 'wait', '実施中': 'progress', '完了': 'done' };
-  var P_LABEL_OF_STATUS = { wait: '実施前', progress: '実施中', done: '完了' };
-  var P_STATUS_COLOR_OF = { done: 'green', progress: 'blue', wait: 'gray' };
+  var P_STATUS_OF_LABEL = StepStatusStore.byLabel();
+  var P_LABEL_OF_STATUS = StepStatusStore.labelByKey();
+  var P_STATUS_COLOR_OF = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
   function pOwnText(el) {
     return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').trim();
   }
@@ -173,7 +173,7 @@
       '<label class="input-dialog-label">実施日</label>' +
       '<div class="form-control js-date" id="pdActual">' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">状態</label>' +
-      '<div class="status-select status-combo ' + P_STATUS_COLOR_OF[sv.status || 'wait'] + ' js-select" id="pdStatus" data-options="実施前,実施中,完了" data-class-map=\'{"実施前":"gray","実施中":"blue","完了":"green"}\' data-value="' + esc(P_LABEL_OF_STATUS[sv.status || 'wait']) + '">' + esc(P_LABEL_OF_STATUS[sv.status || 'wait']) + '<span class="caret">▾</span></div>' +
+      '<div class="status-select status-combo ' + P_STATUS_COLOR_OF[sv.status || 'WAIT'] + ' js-select" id="pdStatus" data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\' data-value="' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '">' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">備考</label>' +
       '<textarea class="form-control textarea" id="pdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
       '<div class="input-dialog-actions"><div class="search-btn pd-cancel">キャンセル</div><div class="btn primary pd-ok">保存</div></div></div>';
@@ -196,7 +196,7 @@
     overlay.querySelector('.pd-ok').addEventListener('click', function () {
       var steps = ProjectProgressStore.find(projectCode).steps.slice();
       steps[i] = Object.assign({}, steps[i] || {}, {
-        status: P_STATUS_OF_LABEL[pValueOf(overlay.querySelector('#pdStatus'))] || 'wait',
+        status: P_STATUS_OF_LABEL[pValueOf(overlay.querySelector('#pdStatus'))] || 'WAIT',
         plan: pOwnText(overlay.querySelector('#pdPlan')),
         actual: pOwnText(overlay.querySelector('#pdActual')),
         memo: overlay.querySelector('#pdMemo').value,

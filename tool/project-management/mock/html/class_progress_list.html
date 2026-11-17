@@ -25,7 +25,7 @@
       
       <div class="filter-panel">
         <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
-        <div class="field"><label>実施状況</label><div class="control small js-select" data-options="すべて,実施前,実施中,実施後" data-match-class="col-practice" data-hide-class="col-practice">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実施状況</label><div class="control small js-select" data-practice-options data-match-class="col-practice" data-hide-class="col-practice">すべて<span class="caret">▾</span></div></div>
         <div class="field narrow"><label>顧客</label><div class="control js-select" id="customerFilter" data-hide-class="col-customer" data-options="すべて" data-match-class="col-customer">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027" data-hide-class="col-year">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
@@ -35,7 +35,7 @@
         </div>
         <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:12px;">
         <div class="field"><label>管理担当者</label><div class="control js-select" id="managerFilter" data-hide-class="col-manager" data-options="すべて">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>タスク進捗</label><div class="control small js-select" data-options="すべて,未着手,進行中,完了,遅延" data-hide-class="col-overall">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>タスク進捗</label><div class="control small js-select" data-task-progress-options data-hide-class="col-overall">すべて<span class="caret">▾</span></div></div>
         <div class="field" style="display:none;"><label>タスク区分</label><div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div></div>
         <!-- <div class="field"><label>実施担当者</label><div class="control js-select" data-match-attr="data-owners" data-options="すべて">すべて<span class="caret">▾</span></div></div> -->
         <div class="search-btn">検索</div>
@@ -50,7 +50,7 @@
           <span class="year-tab" data-tt="グループ">グループ</span>
         </div>
         <div class="table-meta">
-          <div class="count"><b id="progressCount">0</b> 件（遅延 <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
+          <div class="count"><b id="progressCount">0</b> 件（<span data-task-progress-label="DELAY"></span> <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
         </div>
         <div class="scroll-outer" id="scrollArea">
           <table>
@@ -78,6 +78,9 @@
   </div>
 </div>
 
+<script src="js/storage/step-status/store/step-status-store.js"></script>
+<script src="js/storage/task-progress/store/task-progress-store.js"></script>
+<script src="js/storage/practice-status/store/practice-status-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/project/store/project-store.js"></script>

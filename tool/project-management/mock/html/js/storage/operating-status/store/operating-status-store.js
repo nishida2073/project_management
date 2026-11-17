@@ -38,8 +38,8 @@
     });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fillDom);
-  else fillDom();
+  fillDom();
+  document.addEventListener('DOMContentLoaded', fillDom);
 
   window.OperatingStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, tag: tag };
 })();

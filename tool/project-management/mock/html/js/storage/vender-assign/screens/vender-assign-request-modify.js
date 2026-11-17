@@ -27,7 +27,7 @@
 
 
   ClassStore.load().filter(function (r) {
-    return r.status !== OperatingStatusStore.labelOf('STOPPED') && ClassStore.practiceStatus(r) !== '実施後';
+    return r.status !== OperatingStatusStore.labelOf('STOPPED') && ClassStore.practiceStatus(r) !== PracticeStatusStore.labelOf('AFTER');
   }).forEach(function (r) {
     rows.push({ cls: r, assign: VenderAssignStore.find(r.id) });
   });
