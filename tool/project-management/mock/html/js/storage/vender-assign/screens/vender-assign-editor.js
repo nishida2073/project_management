@@ -33,7 +33,7 @@
     row.querySelector('.sub-remove').addEventListener('click', function () {
       var st = row.getAttribute('data-state');
       if (st !== 'done' && st !== 'requesting') { row.remove(); return; }
-      var head = st === 'done' ? '依頼済の担当者を削除します' : '依頼中を削除します';
+      var head = st === 'done' ? SlotStatusStore.labelOf('REQUESTED') + 'の担当者を削除します' : SlotStatusStore.labelOf('REQUESTING') + 'を削除します';
       MessageDialog.confirm([head, '', '削除してよろしいですか？'].join(String.fromCharCode(10))).then(function (ok) {
         if (ok) row.remove();
       });
@@ -164,7 +164,7 @@
           return !!sel && sel.textContent.replace('▾', '').trim() === '選択してください';
         });
         if (noVendor) {
-          MessageDialog.required(['依頼中の会社名']);
+          MessageDialog.required([SlotStatusStore.labelOf('REQUESTING') + 'の会社名']);
           return;
         }
       }

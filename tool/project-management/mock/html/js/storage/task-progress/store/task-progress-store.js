@@ -22,7 +22,7 @@
   }
 
   function options() {
-    return ['すべて'].concat(LIST.map(function (s) { return s.label; })).join(',');
+    return LIST.map(function (s) { return s.label; }).join(',');
   }
 
   function byLabel() {
@@ -48,7 +48,7 @@
       if (!el.textContent) el.textContent = labelOf(el.getAttribute('data-task-progress-label'));
     });
     document.querySelectorAll('[data-task-progress-options]').forEach(function (el) {
-      el.setAttribute('data-options', options());
+      el.setAttribute('data-options', 'すべて,' + options());
     });
   }
 

@@ -20,7 +20,7 @@
       
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="科目コード・科目名で検索"></div>
-        <div class="field"><label>科目区分</label><div class="control js-select" data-options="すべて,新入社員研修,新CDPB,旧CDPB">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>科目区分</label><div class="control js-select" data-master-options="SubjectTypeStore">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>稼働状況</label><div class="control small js-select" data-status-options="all">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
         <div class="search-btn" id="resetFilter">リセット</div>
@@ -52,6 +52,7 @@
     </div>
   </div>
 </div>
+<script src="js/master-options.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/select.js" defer></script>

@@ -160,7 +160,7 @@
       var from = tr.getAttribute('data-state');
       var cb = tr.querySelector('.row-check');
       var bulkLabel = placeholderToEmpty(ownText($('bulkState')));
-      var bulkTo = bulkLabel ? (bulkLabel === '空き枠' ? 'open' : 'before') : '';
+      var bulkTo = bulkLabel ? (bulkLabel === SlotStatusStore.labelOf('OPEN') ? 'open' : 'before') : '';
       var to = cb && cb.checked && bulkTo ? bulkTo : from;
       if (from !== to) changes.push({ tr: tr, from: from, to: to });
     });

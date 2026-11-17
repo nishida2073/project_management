@@ -79,9 +79,8 @@
         <div class="form-field full">
           <label>実施形態<span class="req">必須</span></label>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="deliveryType" value="集合"><span class="radio-dot"></span><span class="tag blue">集合</span></label>
-            <label class="radio-option"><input type="radio" name="deliveryType" value="オンライン"><span class="radio-dot"></span><span class="tag teal">オンライン</span></label>
-            <label class="radio-option"><input type="radio" name="deliveryType" value="ハイブリッド"><span class="radio-dot"></span><span class="tag violet">ハイブリッド</span></label>
+<div class="master-radio" data-master-radio="DeliveryTypeStore" data-radio-name="deliveryType"></div>
+<script src="js/master-options.js"></script>
           </div>
         </div>
         <div class="form-field">
@@ -92,9 +91,8 @@
         <div class="form-field full">
           <label>ロケーション区分<span class="req">必須</span></label>
           <div class="radio-group" data-target="#locationName">
-            <label class="radio-option"><input type="radio" name="locationType" value="駒場"><span class="radio-dot"></span><span class="tag blue">駒場</span></label>
-            <label class="radio-option"><input type="radio" name="locationType" value="成城"><span class="radio-dot"></span><span class="tag orange">成城</span></label>
-            <label class="radio-option"><input type="radio" name="locationType" value="外部会場"><span class="radio-dot"></span><span class="tag gray">外部会場</span></label>
+<div class="master-radio" data-master-radio="LocationTypeStore" data-radio-name="locationType"></div>
+<script src="js/master-options.js"></script>
           </div>
         </div>
         <div class="form-field">
@@ -153,6 +151,7 @@
 </div>
 ${tags%
 }
+<script src="js/storage/slot-status/store/slot-status-store.js"></script>
 <script src="js/storage/practice-status/store/practice-status-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>

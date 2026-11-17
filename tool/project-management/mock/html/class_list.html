@@ -49,7 +49,7 @@
         </div>
         <div class="field">
           <label>タスク区分</label>
-          <div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div>
+          <div class="control small js-select" data-master-options="TaskTypeStore">すべて<span class="caret">▾</span></div>
         </div>
         <div class="search-btn">検索</div>
         <div class="search-btn" id="resetFilter">リセット</div>
@@ -103,6 +103,9 @@
 </div>
 ${tags%
 }
+<script src="js/storage/job-type/store/job-type-store.js"></script>
+<script src="js/storage/staff-role/store/staff-role-store.js"></script>
+<script src="js/master-options.js"></script>
 <script src="js/storage/practice-status/store/practice-status-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>

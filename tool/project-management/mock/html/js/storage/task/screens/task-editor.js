@@ -32,7 +32,7 @@
     company.innerHTML = (text ? esc(text) : '選択してください') + '<span class="caret">▾</span>';
   }
   function refreshAffiliation() {
-    var internal = getRadio('affiliation') === '社内';
+    var internal = getRadio('affiliation') === AffiliationStore.nameOf('INTERNAL');
     $('companyField').style.visibility = internal ? 'hidden' : 'visible';
     if (internal) setCompany('');
   }
@@ -51,7 +51,7 @@
     checkRadio('workType', rec.workType || '');
     $('memo').value = rec.memo || '';
     var internal = rec.company === StaffVenderStore.INTERNAL;
-    checkRadio('affiliation', internal ? '社内' : 'パートナー');
+    checkRadio('affiliation', internal ? AffiliationStore.nameOf('INTERNAL') : AffiliationStore.nameOf('PARTNER'));
     setCompany(internal ? '' : StaffVenderStore.nameOf(rec.company));
     refreshAffiliation();
   }
@@ -100,7 +100,7 @@
         MessageDialog.required(missing);
         return;
       }
-      if (affiliation === 'パートナー' && (!companyText || companyText === '選択してください')) {
+      if (affiliation === AffiliationStore.nameOf('PARTNER') && (!companyText || companyText === '選択してください')) {
         MessageDialog.required(['実施担当ベンダー']);
         return;
       }
@@ -108,7 +108,7 @@
         name: name,
         kinds: kinds,
         order: parseInt(orderV, 10),
-        company: affiliation === '社内' ? StaffVenderStore.INTERNAL : StaffVenderStore.codeOf(companyText),
+        company: affiliation === AffiliationStore.nameOf('INTERNAL') ? StaffVenderStore.INTERNAL : StaffVenderStore.codeOf(companyText),
         days: parseInt(daysV, 10),
         workType: workType,
         memo: $('memo').value,

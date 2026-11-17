@@ -32,7 +32,7 @@
   var managerSelect = document.getElementById('managerFilter');
   if (managerSelect) {
     managerSelect.setAttribute('data-options', ['すべて'].concat(StaffStore.candidates({
-      includeStopped: true, affiliations: ['社内'], roles: ['案件'], jobTypes: ['販売']
+      includeStopped: true, affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-01')]
     })).join(','));
   }
 })();

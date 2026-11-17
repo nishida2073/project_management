@@ -32,12 +32,17 @@
     return '<span class="tag ' + (cls ? cls + ' ' : '') + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
   }
 
+  function options(keys) {
+    var list = keys ? keys.map(labelOf) : LIST.map(function (s) { return s.label; });
+    return list.join(',');
+  }
+
   function fillDom() {
     document.querySelectorAll('[data-practice-options]').forEach(function (el) {
-      el.setAttribute('data-options', ['すべて'].concat(LIST.map(function (s) { return s.label; })).join(','));
+      el.setAttribute('data-options', 'すべて,' + options());
     });
     document.querySelectorAll('[data-practice-options-active]').forEach(function (el) {
-      el.setAttribute('data-options', ['すべて', labelOf('BEFORE'), labelOf('DURING')].join(','));
+      el.setAttribute('data-options', 'すべて,' + options(['BEFORE', 'DURING']));
     });
     document.querySelectorAll('[data-practice-default]').forEach(function (el) {
       var text = labelOf(el.getAttribute('data-practice-default'));
@@ -54,5 +59,5 @@
   fillDom();
   document.addEventListener('DOMContentLoaded', fillDom);
 
-  window.PracticeStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, colorMap: colorMap, tag: tag };
+  window.PracticeStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, colorMap: colorMap, options: options, tag: tag };
 })();

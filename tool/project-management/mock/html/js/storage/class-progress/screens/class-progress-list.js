@@ -39,7 +39,7 @@
 
   function chip(step) {
     if (step.kindNa) return '';
-    if (step.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
+    if (step.na) return '<div class="status-chip status-chip-h"><span class="na-text">' + StepStatusStore.labelOf('NA') + '</span></div>';
     var label = STATUS_LABEL[step.status] || StepStatusStore.labelOf('WAIT');
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
@@ -50,7 +50,7 @@
 
   function overall(steps) {
     var applicable = steps.filter(function (s) { return !s.na; });
-    if (applicable.length === 0) return '<span class="na-text">対象外</span>';
+    if (applicable.length === 0) return '<span class="na-text">' + StepStatusStore.labelOf('NA') + '</span>';
     var late = applicable.some(isDelayed);
     var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'DONE'; });
     var any = applicable.some(function (s) { return s.status === 'DONE' || s.status === 'PROGRESS'; });
@@ -152,7 +152,7 @@
     })).join(',');
   }
   var ownerSelect = document.querySelector('.filter-panel .js-select[data-match-attr="data-owners"]');
-  if (ownerSelect) ownerSelect.setAttribute('data-options', staffOptionsOf(['社内', 'パートナー'], '実施'));
+  if (ownerSelect) ownerSelect.setAttribute('data-options', staffOptionsOf([AffiliationStore.nameOf('INTERNAL'), AffiliationStore.nameOf('PARTNER')], '実施'));
   var managerSelect = document.getElementById('managerFilter');
   if (managerSelect) managerSelect.setAttribute('data-options', staffOptionsOf(null, '管理'));
   var customerSelect = document.getElementById('customerFilter');
@@ -186,8 +186,8 @@
       if (s.status === OperatingStatusStore.labelOf('STOPPED')) return false;
       if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
       if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
-      if (company === StaffVenderStore.INTERNAL) return s.affiliation === '社内';
-      return s.affiliation === 'パートナー' && s.company === company;
+      if (company === StaffVenderStore.INTERNAL) return s.affiliation === AffiliationStore.nameOf('INTERNAL');
+      return s.affiliation === AffiliationStore.nameOf('PARTNER') && s.company === company;
     }).map(function (s) { return s.name; });
   }
   function valueOf(el) {

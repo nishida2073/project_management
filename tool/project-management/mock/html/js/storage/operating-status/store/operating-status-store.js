@@ -25,12 +25,16 @@
     return '<span class="tag ' + (cls ? cls + ' ' : '') + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
   }
 
+  function options() {
+    return LIST.map(function (s) { return s.label; }).join(',');
+  }
+
   function fillDom() {
     document.querySelectorAll('[data-status]').forEach(function (el) {
       if (!el.textContent) el.textContent = labelOf(el.getAttribute('data-status'));
     });
     document.querySelectorAll('[data-status-options]').forEach(function (el) {
-      el.setAttribute('data-options', ['すべて'].concat(LIST.map(function (s) { return s.label; })).join(','));
+      el.setAttribute('data-options', 'すべて,' + options());
     });
     document.querySelectorAll('[data-status-toggle]').forEach(function (el) {
       el.setAttribute('data-on', labelOf('ACTIVE'));
@@ -41,5 +45,5 @@
   fillDom();
   document.addEventListener('DOMContentLoaded', fillDom);
 
-  window.OperatingStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, tag: tag };
+  window.OperatingStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, options: options, tag: tag };
 })();

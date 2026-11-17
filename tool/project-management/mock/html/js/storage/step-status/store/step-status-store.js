@@ -2,7 +2,8 @@
   var LIST = [
     { key: 'WAIT', label: '実施前', color: 'gray' },
     { key: 'PROGRESS', label: '実施中', color: 'blue' },
-    { key: 'DONE', label: '完了', color: 'green' }
+    { key: 'DONE', label: '完了', color: 'green' },
+    { key: 'NA', label: '対象外', color: 'gray', selectable: false }
   ];
 
   function byKey(key) {
@@ -26,7 +27,7 @@
   }
 
   function options() {
-    return LIST.map(function (s) { return s.label; }).join(',');
+    return LIST.filter(function (s) { return s.selectable !== false; }).map(function (s) { return s.label; }).join(',');
   }
 
   function byLabel() {

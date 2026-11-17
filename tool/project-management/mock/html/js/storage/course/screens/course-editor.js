@@ -35,7 +35,7 @@
     var subject = getSelect($('subjectSelect'));
     if (!isEditing) {
       var subjectCode = SubjectStore.codeOf(subject);
-      var suffix = part === '受託' ? 'B' : (part === '公募' ? 'A' : '');
+      var suffix = part === ParticipationTypeStore.nameOf('PT-01') ? 'B' : (part === ParticipationTypeStore.nameOf('PT-02') ? 'A' : '');
       $('courseCode').value = (subjectCode && suffix) ? (subjectCode + suffix) : '';
     }
     if (nameEdited) return;

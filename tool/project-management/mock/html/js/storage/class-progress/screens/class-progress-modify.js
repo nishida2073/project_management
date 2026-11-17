@@ -58,8 +58,8 @@ function setDisabledRow(tr, off) {
         if (s.status === OperatingStatusStore.labelOf('STOPPED')) return false;
         if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
         if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
-        if (company === StaffVenderStore.INTERNAL) return s.affiliation === '社内';
-        return s.affiliation === 'パートナー' && s.company === company;
+        if (company === StaffVenderStore.INTERNAL) return s.affiliation === AffiliationStore.nameOf('INTERNAL');
+        return s.affiliation === AffiliationStore.nameOf('PARTNER') && s.company === company;
       }).map(function (s) { return s.name; });
       return names;
     }
@@ -102,7 +102,7 @@ function setDisabledRow(tr, off) {
         '<td>' + planCell + '</td>' +
         '<td class="col-actual">' + actualCell + '</td>' +
         '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="na-text"' + ' style="display:none;"' + '>対象外</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="na-text"' + ' style="display:none;"' + '>' + StepStatusStore.labelOf('NA') + '</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);

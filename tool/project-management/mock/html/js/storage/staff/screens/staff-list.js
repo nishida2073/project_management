@@ -14,7 +14,7 @@
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td>' + esc(t.code) + '</td>' +
-      '<td><span class="tag ' + (t.affiliation === 'パートナー' ? 'orange' : 'blue') + '">' + esc(t.affiliation) + '</span></td>' +
+      '<td><span class="tag ' + (t.affiliation === AffiliationStore.nameOf('PARTNER') ? 'orange' : 'blue') + '">' + esc(t.affiliation) + '</span></td>' +
       '<td>' + (t.company ? esc(StaffVenderStore.nameOf(t.company)) : '-') + '</td>' +
       '<td>' + esc(t.name) + '</td>' +
       '<td>' + esc(t.email) + '</td>' +

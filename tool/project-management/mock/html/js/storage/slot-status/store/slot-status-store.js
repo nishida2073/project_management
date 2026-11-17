@@ -28,5 +28,18 @@
     return '<span class="tag ' + (cls ? cls + ' ' : '') + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
   }
 
-  window.SlotStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, tag: tag };
+  function options(keys) {
+    return keys.map(labelOf).join(',');
+  }
+
+  function fillDom() {
+    document.querySelectorAll('[data-slot-options]').forEach(function (el) {
+      el.setAttribute('data-options', options(el.getAttribute('data-slot-options').split(',')));
+    });
+  }
+
+  fillDom();
+  document.addEventListener('DOMContentLoaded', fillDom);
+
+  window.SlotStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, options: options, tag: tag };
 })();

@@ -14,7 +14,7 @@
   }
 
   function refreshCompany() {
-    var partner = getRadio('affiliation') === 'パートナー';
+    var partner = getRadio('affiliation') === AffiliationStore.nameOf('PARTNER');
     $('companyField').style.visibility = partner ? 'visible' : 'hidden';
   }
 
@@ -66,7 +66,7 @@
 
     $('saveBtn').addEventListener('click', function () {
       var affiliation = getRadio('affiliation');
-      var company = affiliation === '社内' ? '' : StaffVenderStore.codeOf(ownText($('company')));
+      var company = affiliation === AffiliationStore.nameOf('INTERNAL') ? '' : StaffVenderStore.codeOf(ownText($('company')));
       if (company === '選択してください') company = '';
       var v = {
         affiliation: affiliation,
@@ -88,7 +88,7 @@
         MessageDialog.required(missing);
         return;
       }
-      if (v.affiliation === 'パートナー' && !v.company) {
+      if (v.affiliation === AffiliationStore.nameOf('PARTNER') && !v.company) {
         MessageDialog.required(['実施担当ベンダー']);
         return;
       }

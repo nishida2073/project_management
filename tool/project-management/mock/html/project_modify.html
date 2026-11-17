@@ -32,16 +32,17 @@
         <div class="form-field">
           <label>販売区分<span class="req">必須</span></label>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="salesType" value="外販"><span class="radio-dot"></span><span class="tag teal">外販</span></label>
-            <label class="radio-option"><input type="radio" name="salesType" value="内販"><span class="radio-dot"></span><span class="tag violet">内販</span></label>
+<div class="master-radio" data-master-radio="SalesTypeStore" data-radio-name="salesType"></div>
+<script src="js/storage/affiliation/store/affiliation-store.js"></script>
+<script src="js/master-options.js"></script>
           </div>
         </div>
         <div class="form-field"></div>
         <div class="form-field">
           <label>参加区分<span class="req">必須</span></label>
           <div class="radio-group">
-            <label class="radio-option"><input type="radio" name="participationType" value="受託"><span class="radio-dot"></span><span class="tag blue">受託</span></label>
-            <label class="radio-option"><input type="radio" name="participationType" value="公募"><span class="radio-dot"></span><span class="tag orange">公募</span></label>
+<div class="master-radio" data-master-radio="ParticipationTypeStore" data-radio-name="participationType"></div>
+<script src="js/master-options.js"></script>
           </div>
         </div>
         <div class="form-field full">
@@ -88,6 +89,7 @@
 </div>
 ${tags%
 }
+<script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/staff/store/staff-store.js"></script>

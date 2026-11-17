@@ -11,7 +11,7 @@
   }
 
   function chip(s) {
-    if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">対象外</span></div>';
+    if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">' + StepStatusStore.labelOf('NA') + '</span></div>';
     var actual = s.actual ? s.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span></div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + dashOr(s.plan) + '</span></div>' +
@@ -28,7 +28,7 @@
   }
 
   function overall(key) {
-    if (key === 'NA') return '<span class="na-text">対象外</span>';
+    if (key === 'NA') return '<span class="na-text">' + StepStatusStore.labelOf('NA') + '</span>';
     var label = TaskProgressStore.labelOf(key);
     var color = TaskProgressStore.colorOf(key);
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';

@@ -22,7 +22,7 @@
       <div class="filter-panel">
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
-        <div class="field"><label>参加区分</label><div class="control small js-select" data-options="すべて,公募,受託">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>参加区分</label><div class="control small js-select" data-master-options="ParticipationTypeStore">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>稼働状況</label><div class="control small js-select" data-status-options="all">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
         <div class="search-btn" id="resetFilter">リセット</div>
@@ -62,6 +62,9 @@
     </div>
   </div>
 </div>
+<script src="js/storage/job-type/store/job-type-store.js"></script>
+<script src="js/storage/staff-role/store/staff-role-store.js"></script>
+<script src="js/master-options.js"></script>
 <script src="js/storage/practice-status/store/practice-status-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>

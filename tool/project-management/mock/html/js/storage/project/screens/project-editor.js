@@ -52,7 +52,7 @@
     var editing = opts.mode === 'edit';
     renderGroup('salesType', SalesTypeStore.load());
     renderGroup('participationType', ParticipationTypeStore.load());
-    var projectStaff = StaffStore.candidates({ affiliations: ['社内'], roles: ['案件'], jobTypes: ['販売'] }).join(',');
+    var projectStaff = StaffStore.candidates({ affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-01')] }).join(',');
     document.getElementById('pm').setAttribute('data-options', projectStaff);
     document.getElementById('plBox').setAttribute('data-options', projectStaff);
     document.getElementById('customer').setAttribute('data-options', CustomerStore.load().filter(function (c) { return c.status !== OperatingStatusStore.labelOf('STOPPED'); }).map(function (c) { return c.name; }).join(','));

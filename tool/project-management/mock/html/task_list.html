@@ -19,9 +19,9 @@
     <div class="content">
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="タスクコード・タスク名で検索"></div>
-        <div class="field"><label>タスク区分</label><div class="control small js-select" data-options="すべて,データ,グループ">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>作業区分</label><div class="control small js-select" data-options="すべて,事前準備,事後対応,特別対応">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>実務担当区分</label><div class="control small js-select" data-options="すべて,社内,パートナー">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>タスク区分</label><div class="control small js-select" data-master-options="TaskTypeStore">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>作業区分</label><div class="control small js-select" data-master-options="WorkTypeStore">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>実務担当区分</label><div class="control small js-select" data-master-options="AffiliationStore">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>稼働状況</label><div class="control small js-select" data-status-options="all">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
         <div class="search-btn" id="resetFilter">リセット</div>
@@ -59,6 +59,8 @@
     </div>
   </div>
 </div>
+<script src="js/storage/affiliation/store/affiliation-store.js"></script>
+<script src="js/master-options.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/task-type/store/task-type-store.js"></script>
