@@ -127,7 +127,7 @@ th.grp-none { background: #f6f8fb !important; }
 .tag.purple { background: #f5eaf7; color: #8a3f96; }
 .tag.green { background: #e5f6ec; color: #279158; }
 
-/* 稼働状況・有効無効（社員／ベンダーマスタ） */
+/* 稼働状態・有効無効（社員／ベンダーマスタ） */
 .state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
 .state .dot { width: 8px; height: 8px; border-radius: 50%; }
 .state.on .dot { background: #33b070; }
@@ -414,7 +414,7 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 /* 年度別セクション（ベンダーマスタ登録） */
 .year-pill { display: inline-flex; align-items: center; gap: 6px; background: #eef4ff; color: #2f6fed; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; width: fit-content; }
 
-/* 稼働状況トグル */
+/* 稼働状態トグル */
 .form-field.toggle-field { margin-top: 28px; }
 .form-field.full + .form-field.toggle-field { margin-top: 12px; }
 .toggle-row { display: flex; align-items: center; gap: 10px; height: 36px; user-select: none; }

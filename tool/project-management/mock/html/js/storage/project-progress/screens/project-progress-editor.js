@@ -1,6 +1,6 @@
 (function () {
-  var STATUS_LABEL = StepStatusStore.labelByKey();
-  var LABEL_STATUS = StepStatusStore.byLabel();
+  var STATUS_LABEL = StepStatusStore.nameByCode();
+  var LABEL_STATUS = StepStatusStore.byName();
   var STATUS_COLOR = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
 
 function setDisabledRow(tr, off) {

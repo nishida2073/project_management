@@ -111,9 +111,9 @@
     if (!start || !end) return '';
     var now = new Date();
     now.setHours(0, 0, 0, 0);
-    if (now < start) return PracticeStatusStore.labelOf('BEFORE');
-    if (now > end) return PracticeStatusStore.labelOf('AFTER');
-    return PracticeStatusStore.labelOf('DURING');
+    if (now < start) return PracticeStatusStore.nameOf('BEFORE');
+    if (now > end) return PracticeStatusStore.nameOf('AFTER');
+    return PracticeStatusStore.nameOf('DURING');
   }
 
   window.ClassStore = {

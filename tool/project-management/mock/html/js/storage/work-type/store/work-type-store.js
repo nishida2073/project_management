@@ -1,5 +1,7 @@
 (function () {
   var KEY = 'workTypeList';
+  var PREFIX = 'WT-';
+
   var SEED = [
     { code: 'WT-01', name: '事前準備', color: 'blue' },
     { code: 'WT-02', name: '事後対応', color: 'green' },
@@ -34,5 +36,30 @@
     return found ? found.color : '';
   }
 
-  window.WorkTypeStore = { load: load, save: save, find: find, nameOf: nameOf, colorOf: colorOf };
+  function codes() {
+    return load().map(function (t) { return t.code; });
+  }
+
+  function nextCode(list) {
+    var max = 0;
+    list.forEach(function (t) {
+      var n = parseInt(String(t.code).replace(PREFIX, ''), 10);
+      if (!isNaN(n) && n > max) max = n;
+    });
+    return PREFIX + pad2(max + 1);
+  }
+
+  function add(name, color) {
+    var list = load();
+    if (!name || list.some(function (t) { return t.name === name; })) return false;
+    list.push({ code: nextCode(list), name: name, color: color || '' });
+    save(list);
+    return true;
+  }
+
+  function remove(code) {
+    save(load().filter(function (t) { return t.code !== code; }));
+  }
+
+  window.WorkTypeStore = { load: load, save: save, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, add: add, remove: remove };
 })();

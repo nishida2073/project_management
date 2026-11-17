@@ -20,15 +20,15 @@
   $('subLine').textContent = (c.name || src.courseCode || '') + '　' + src.lessonNo + '　' + src.start + '〜' + src.end;
   $('cancelLink').href = 'class_modify.html?id=' + encodeURIComponent(src.id);
   (function () {
-    var off = src.status === OperatingStatusStore.labelOf('STOPPED');
+    var off = src.status === OperatingStatusStore.nameOf('STOPPED');
     var t = $('statusAllToggle');
     t.classList.toggle('off', off);
     var label = t.parentNode.querySelector('span');
-    label.textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    label.textContent = off ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
     t.addEventListener('click', function () {
       var isOn = !t.classList.contains('off');
       t.classList.toggle('off', isOn);
-      label.textContent = isOn ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+      label.textContent = isOn ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
     });
   })();
 
@@ -156,7 +156,7 @@
   }
   function statusOf() {
     var el = $('statusAllToggle');
-    return el && el.classList.contains('off') ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    return el && el.classList.contains('off') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
   }
   function locNameVal(k) {
     var el = fieldEl(k, 'locationName');

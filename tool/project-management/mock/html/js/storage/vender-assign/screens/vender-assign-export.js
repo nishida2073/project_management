@@ -1,7 +1,7 @@
 (function () {
 
   var C = ClassStore.COURSES;
-  var list = ClassStore.load().filter(function (r) { return r.status !== OperatingStatusStore.labelOf('STOPPED') && ClassStore.practiceStatus(r) !== PracticeStatusStore.labelOf('AFTER'); });
+  var list = ClassStore.load().filter(function (r) { return r.status !== OperatingStatusStore.nameOf('STOPPED') && ClassStore.practiceStatus(r) !== PracticeStatusStore.nameOf('AFTER'); });
   var body = $('printBody');
   var rows = [];
 

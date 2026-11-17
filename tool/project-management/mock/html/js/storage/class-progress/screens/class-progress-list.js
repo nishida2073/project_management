@@ -7,18 +7,18 @@
     return a.order - b.order;
   });
   var STEP_NAMES = SORTED.map(function (t) { return t.name; });
-  function isActive(i) { return SORTED[i].status !== OperatingStatusStore.labelOf('STOPPED'); }
+  function isActive(i) { return SORTED[i].status !== OperatingStatusStore.nameOf('STOPPED'); }
   var DISPLAY_NO = [];
   (function () {
     var counts = {};
     SORTED.forEach(function (t, i) {
-      if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
+      if (t.status === OperatingStatusStore.nameOf('STOPPED')) return;
       var k = t.kinds[0] || '';
       counts[k] = (counts[k] || 0) + 1;
       DISPLAY_NO[i] = counts[k];
     });
   })();
-  var STATUS_LABEL = StepStatusStore.labelByKey();
+  var STATUS_LABEL = StepStatusStore.nameByCode();
   var STATUS_CLASS = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
 
   var today = new Date();
@@ -39,8 +39,8 @@
 
   function chip(step) {
     if (step.kindNa) return '';
-    if (step.na) return '<div class="status-chip status-chip-h"><span class="na-text">' + StepStatusStore.labelOf('NA') + '</span></div>';
-    var label = STATUS_LABEL[step.status] || StepStatusStore.labelOf('WAIT');
+    if (step.na) return '<div class="status-chip status-chip-h"><span class="na-text">' + StepStatusStore.nameOf('NA') + '</span></div>';
+    var label = STATUS_LABEL[step.status] || StepStatusStore.nameOf('WAIT');
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span></div>' +
@@ -50,7 +50,7 @@
 
   function overall(steps) {
     var applicable = steps.filter(function (s) { return !s.na; });
-    if (applicable.length === 0) return '<span class="na-text">' + StepStatusStore.labelOf('NA') + '</span>';
+    if (applicable.length === 0) return '<span class="na-text">' + StepStatusStore.nameOf('NA') + '</span>';
     var late = applicable.some(isDelayed);
     var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'DONE'; });
     var any = applicable.some(function (s) { return s.status === 'DONE' || s.status === 'PROGRESS'; });
@@ -60,7 +60,7 @@
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
 
-  var classes = ClassStore.load().filter(function (c) { return c.status !== OperatingStatusStore.labelOf('STOPPED'); });
+  var classes = ClassStore.load().filter(function (c) { return c.status !== OperatingStatusStore.nameOf('STOPPED'); });
   var progressAll = ProgressStore.load();
   var tasks = TaskStore.load();
   var byName = {};
@@ -71,7 +71,7 @@
   var lastSticky = stickyHeads[stickyHeads.length - 1];
   while (lastSticky.nextElementSibling) headRow.removeChild(lastSticky.nextElementSibling);
   SORTED.forEach(function (t, i) {
-    if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
+    if (t.status === OperatingStatusStore.nameOf('STOPPED')) return;
     var th = document.createElement('th');
     th.style.minWidth = '230px';
     th.setAttribute('data-step', i);
@@ -177,13 +177,13 @@
     listTable.style.width = total + 'px';
   };
   window.applyColumnFilters();
-  var STATUS_OF_LABEL = StepStatusStore.byLabel();
-  var LABEL_OF_STATUS = StepStatusStore.labelByKey();
+  var STATUS_OF_LABEL = StepStatusStore.byName();
+  var LABEL_OF_STATUS = StepStatusStore.nameByCode();
   var STATUS_COLOR_OF = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
   function stepOwnerNames(task) {
     var company = task ? task.company : StaffVenderStore.INTERNAL;
     return StaffStore.load().filter(function (s) {
-      if (s.status === OperatingStatusStore.labelOf('STOPPED')) return false;
+      if (s.status === OperatingStatusStore.nameOf('STOPPED')) return false;
       if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
       if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
       if (company === StaffVenderStore.INTERNAL) return s.affiliation === AffiliationStore.nameOf('INTERNAL');

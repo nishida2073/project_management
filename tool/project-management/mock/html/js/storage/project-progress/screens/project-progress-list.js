@@ -1,5 +1,5 @@
 (function () {
-  var LABEL = StepStatusStore.labelByKey();
+  var LABEL = StepStatusStore.nameByCode();
   var COLOR = { WAIT: 'gray', PROGRESS: 'blue', DONE: 'green' };
   var today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -11,7 +11,7 @@
   }
 
   function chip(s) {
-    if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">' + StepStatusStore.labelOf('NA') + '</span></div>';
+    if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">' + StepStatusStore.nameOf('NA') + '</span></div>';
     var actual = s.actual ? s.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span></div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + dashOr(s.plan) + '</span></div>' +
@@ -28,7 +28,7 @@
   }
 
   function overall(key) {
-    if (key === 'NA') return '<span class="na-text">' + StepStatusStore.labelOf('NA') + '</span>';
+    if (key === 'NA') return '<span class="na-text">' + StepStatusStore.nameOf('NA') + '</span>';
     var label = TaskProgressStore.labelOf(key);
     var color = TaskProgressStore.colorOf(key);
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
@@ -50,7 +50,7 @@
   headRow.appendChild(operationTh);
 
   var body = document.getElementById('tbody');
-  var projects = ProjectStore.load().filter(function (p) { return p.status !== OperatingStatusStore.labelOf('STOPPED'); });
+  var projects = ProjectStore.load().filter(function (p) { return p.status !== OperatingStatusStore.nameOf('STOPPED'); });
   var rows = [];
 
   projects.forEach(function (p) {
@@ -140,8 +140,8 @@
   });
 
   document.getElementById('projectCount').textContent = projects.length;
-  var P_STATUS_OF_LABEL = StepStatusStore.byLabel();
-  var P_LABEL_OF_STATUS = StepStatusStore.labelByKey();
+  var P_STATUS_OF_LABEL = StepStatusStore.byName();
+  var P_LABEL_OF_STATUS = StepStatusStore.nameByCode();
   var P_STATUS_COLOR_OF = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
   function pOwnText(el) {
     return Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').trim();

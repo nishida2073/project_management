@@ -28,7 +28,7 @@
     });
 
     var pool = StaffStore.load().filter(function (s) {
-      return s.status !== OperatingStatusStore.labelOf('STOPPED')
+      return s.status !== OperatingStatusStore.nameOf('STOPPED')
         && (s.roles || []).some(function (c) { return StaffRoleStore.nameOf(c) === 'クラス'; })
         && (s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; });
     });
@@ -46,22 +46,22 @@
 
     var out = {};
     ClassStore.load().forEach(function (c) {
-      if (c.status === OperatingStatusStore.labelOf('STOPPED')) return;
+      if (c.status === OperatingStatusStore.nameOf('STOPPED')) return;
       var phase = ClassStore.practiceStatus(c);
       var start = parseDate(c.start);
       var saved = {};
       var j = 0;
       tasks.forEach(function (t, i) {
-        if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
+        if (t.status === OperatingStatusStore.nameOf('STOPPED')) return;
         var no = i + 1;
         if (t.kinds.indexOf(c.taskType) === -1) { saved[no] = { na: true }; return; }
         var plan = addDays(start, t.days);
         var sv = {};
-        if (phase === PracticeStatusStore.labelOf('AFTER')) {
+        if (phase === PracticeStatusStore.nameOf('AFTER')) {
           sv.status = 'DONE';
           sv.actual = fmtDate(plan > today ? today : plan);
           sv.owner = pickOwner(t);
-        } else if (phase === PracticeStatusStore.labelOf('DURING')) {
+        } else if (phase === PracticeStatusStore.nameOf('DURING')) {
           if (plan < today && j % 2 === 0) {
             sv.status = 'DONE';
             sv.actual = fmtDate(plan);

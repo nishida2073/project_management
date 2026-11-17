@@ -4,8 +4,8 @@
     var label = row.querySelector('span');
     if (!toggle || !label) return;
 
-    var onText = row.getAttribute('data-on') || OperatingStatusStore.labelOf('ACTIVE');
-    var offText = row.getAttribute('data-off') || OperatingStatusStore.labelOf('STOPPED');
+    var onText = row.getAttribute('data-on') || OperatingStatusStore.nameOf('ACTIVE');
+    var offText = row.getAttribute('data-off') || OperatingStatusStore.nameOf('STOPPED');
 
     toggle.addEventListener('click', function () {
       var isOn = !toggle.classList.contains('off');

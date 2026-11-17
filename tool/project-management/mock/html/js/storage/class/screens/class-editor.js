@@ -5,7 +5,7 @@
   }
 
   function applyOptions() {
-    var projects = ProjectStore.load().filter(function (x) { return x.status !== OperatingStatusStore.labelOf('STOPPED'); });
+    var projects = ProjectStore.load().filter(function (x) { return x.status !== OperatingStatusStore.nameOf('STOPPED'); });
     var pc = document.getElementById('projectCode');
     var pName = {}, pSales = {}, pPart = {};
     projects.forEach(function (p) {
@@ -20,7 +20,7 @@
     pc.setAttribute('data-class-map2', JSON.stringify(colorMap(SalesTypeStore.load())));
     pc.setAttribute('data-class-map3', JSON.stringify(colorMap(ParticipationTypeStore.load())));
 
-    var courses = CourseStore.load().filter(function (x) { return x.status !== OperatingStatusStore.labelOf('STOPPED'); });
+    var courses = CourseStore.load().filter(function (x) { return x.status !== OperatingStatusStore.nameOf('STOPPED'); });
     var cc = document.getElementById('courseCode');
     var cName = {}, cPart = {}, cDelivery = {}, cSchedule = {};
     courses.forEach(function (c) {
@@ -95,10 +95,10 @@
         var cancelEl = document.getElementById('cancelLink');
         if (cancelEl) cancelEl.href = 'class_modify.html?id=' + encodeURIComponent(fromRec.id);
       }
-      rec = fromRec ? Object.assign(JSON.parse(JSON.stringify(fromRec)), { id: '', lessonNo: '', memo: '', status: OperatingStatusStore.labelOf('ACTIVE') }) : {
+      rec = fromRec ? Object.assign(JSON.parse(JSON.stringify(fromRec)), { id: '', lessonNo: '', memo: '', status: OperatingStatusStore.nameOf('ACTIVE') }) : {
         year: '2026', courseYear: '2026', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
         related: [], start: '', end: '', delivery: '', people: '', managers: [],
-        locationType: '', locationName: '', memo: '', status: OperatingStatusStore.labelOf('STOPPED')
+        locationType: '', locationName: '', memo: '', status: OperatingStatusStore.nameOf('STOPPED')
       };
     }
 

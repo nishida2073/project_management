@@ -19,7 +19,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { id: '', name: '', staff: '', status: OperatingStatusStore.labelOf('ACTIVE') };
+      rec = { id: '', name: '', staff: '', status: OperatingStatusStore.nameOf('ACTIVE') };
     }
 
     $('customerId').textContent = rec.id || '自動採番';
@@ -27,11 +27,11 @@
     $('staff').value = rec.staff || '';
     $('email').value = rec.email || '';
     $('memo').value = rec.memo || '';
-    var statusOff = rec.status === OperatingStatusStore.labelOf('STOPPED');
-    $('statusRow').setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    $('statusRow').setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    var statusOff = rec.status === OperatingStatusStore.nameOf('STOPPED');
+    $('statusRow').setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    $('statusRow').setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
     setStatusOff(statusOff);
-    $('statusLabel').textContent = statusOff ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = statusOff ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
 
     $('saveBtn').addEventListener('click', function () {
       var v = {

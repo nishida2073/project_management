@@ -38,7 +38,7 @@
   };
   window.readStatus = function () {
     var el = window.$('statusToggle');
-    return el && el.classList.contains('off') ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    return el && el.classList.contains('off') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
   };
   window.bindFormControls = function (root) {
     if (!root) return;

@@ -28,12 +28,12 @@
     (rec.versions || []).forEach(function (v) { addVersionChip(v); });
     $('subjectName').value = rec.name || '';
     $('memo').value = rec.memo || '';
-    var off = rec.status === OperatingStatusStore.labelOf('STOPPED');
+    var off = rec.status === OperatingStatusStore.nameOf('STOPPED');
     var row = $('statusRow');
-    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    row.setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
     setStatusOff(off);
-    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = off ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
   }
 
   function read() {
@@ -67,7 +67,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', type: '', name: '', versions: ['1.0'], status: OperatingStatusStore.labelOf('ACTIVE') };
+      rec = { code: '', type: '', name: '', versions: ['1.0'], status: OperatingStatusStore.nameOf('ACTIVE') };
     }
 
     renderRadios(document.getElementById('subjectTypeGroup'), 'subjectType', SubjectTypeStore.load());

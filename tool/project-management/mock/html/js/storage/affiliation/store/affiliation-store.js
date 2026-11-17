@@ -1,16 +1,21 @@
 (function () {
-  var LIST = [
+  var SEED = [
     { code: 'INTERNAL', name: '社内', color: 'blue' },
     { code: 'PARTNER', name: 'パートナー', color: 'orange' }
   ];
 
+  var list = JSON.parse(JSON.stringify(SEED));
+
+  function save(next) {
+    list = JSON.parse(JSON.stringify(next));
+  }
+
   function load() {
-    return LIST.map(function (s) { return { code: s.code, name: s.name, color: s.color }; });
+    return JSON.parse(JSON.stringify(list));
   }
 
   function find(code) {
-    for (var i = 0; i < LIST.length; i++) if (LIST[i].code === code) return LIST[i];
-    return null;
+    return load().filter(function (t) { return t.code === code; })[0];
   }
 
   function nameOf(code) {
@@ -19,8 +24,8 @@
   }
 
   function codeOf(name) {
-    for (var i = 0; i < LIST.length; i++) if (LIST[i].name === name) return LIST[i].code;
-    return '';
+    var found = load().filter(function (t) { return t.name === name; })[0];
+    return found ? found.code : '';
   }
 
   function colorOf(code) {
@@ -28,5 +33,9 @@
     return found ? found.color : '';
   }
 
-  window.AffiliationStore = { load: load, find: find, nameOf: nameOf, codeOf: codeOf, colorOf: colorOf };
+  function codes() {
+    return load().map(function (t) { return t.code; });
+  }
+
+  window.AffiliationStore = { load: load, save: save, find: find, nameOf: nameOf, codeOf: codeOf, colorOf: colorOf, codes: codes };
 })();

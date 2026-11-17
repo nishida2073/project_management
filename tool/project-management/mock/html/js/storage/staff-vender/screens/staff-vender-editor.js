@@ -2,10 +2,10 @@
 
   function setToggle(off) {
     var row = $('statusRow');
-    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    row.setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
     setStatusOff(off);
-    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = off ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
   }
 
   function fill(rec) {
@@ -16,7 +16,7 @@
     $('memo').value = rec.memo || '';
     $('contactName').value = rec.contactName || '';
     $('contactEmail').value = rec.contactEmail || '';
-    setToggle(rec.status === OperatingStatusStore.labelOf('STOPPED'));
+    setToggle(rec.status === OperatingStatusStore.nameOf('STOPPED'));
   }
 
   function init(opts) {
@@ -34,7 +34,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', name: '', tel: '', address: '', memo: '', contactName: '', contactEmail: '', status: OperatingStatusStore.labelOf('ACTIVE') };
+      rec = { code: '', name: '', tel: '', address: '', memo: '', contactName: '', contactEmail: '', status: OperatingStatusStore.nameOf('ACTIVE') };
     }
 
     fill(rec);

@@ -32,11 +32,11 @@
     $('projectCode').textContent = rec.code || '自動採番';
     checkRadio('salesType', rec.sales || '');
     checkRadio('participationType', rec.part || '');
-    var statusOff = rec.status === OperatingStatusStore.labelOf('STOPPED');
-    $('statusRow').setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    $('statusRow').setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    var statusOff = rec.status === OperatingStatusStore.nameOf('STOPPED');
+    $('statusRow').setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    $('statusRow').setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
     setStatusOff(statusOff);
-    $('statusLabel').textContent = statusOff ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = statusOff ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
     $('projectName').value = rec.name || '';
     setSelect($('customer'), CustomerStore.nameOf(rec.customer));
     setMonth($('startMonth'), rec.startMonth);
@@ -55,7 +55,7 @@
     var projectStaff = StaffStore.candidates({ affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-01')] }).join(',');
     document.getElementById('pm').setAttribute('data-options', projectStaff);
     document.getElementById('plBox').setAttribute('data-options', projectStaff);
-    document.getElementById('customer').setAttribute('data-options', CustomerStore.load().filter(function (c) { return c.status !== OperatingStatusStore.labelOf('STOPPED'); }).map(function (c) { return c.name; }).join(','));
+    document.getElementById('customer').setAttribute('data-options', CustomerStore.load().filter(function (c) { return c.status !== OperatingStatusStore.nameOf('STOPPED'); }).map(function (c) { return c.name; }).join(','));
     var list = ProjectStore.load();
     var id = new URLSearchParams(location.search).get('id');
     var idx = -1;
@@ -69,7 +69,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { year: '2026', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '', status: OperatingStatusStore.labelOf('ACTIVE') };
+      rec = { year: '2026', code: '', sales: '', part: '', name: '', customer: '', startMonth: '', pm: '', pl: [], memo: '', status: OperatingStatusStore.nameOf('ACTIVE') };
     }
     fill(rec);
 

@@ -1,35 +1,43 @@
 (function () {
   var LIST = [
-    { key: 'REQUESTED', label: '依頼済', color: 'green' },
-    { key: 'REQUESTING', label: '依頼中', color: 'blue' },
-    { key: 'BEFORE', label: '依頼前', color: 'orange' },
-    { key: 'OPEN', label: '空き枠', color: 'gray' },
-    { key: 'OUT_OF_PLAN', label: '予定外', color: 'red' }
+    { code: 'REQUESTED', name: '依頼済', color: 'green' },
+    { code: 'REQUESTING', name: '依頼中', color: 'blue' },
+    { code: 'BEFORE', name: '依頼前', color: 'orange' },
+    { code: 'OPEN', name: '空き枠', color: 'gray' },
+    { code: 'OUT_OF_PLAN', name: '予定外', color: 'red' }
   ];
 
   var STATUS = {};
-  LIST.forEach(function (s) { STATUS[s.key] = { label: s.label, tag: s.color }; });
+  LIST.forEach(function (s) { STATUS[s.code] = { code: s.code, name: s.name, color: s.color }; });
 
-  function find(key) {
-    return STATUS[key];
+  function load() {
+    return LIST.map(function (s) { return { code: s.code, name: s.name, color: s.color }; });
   }
 
-  function labelOf(key) {
-    var found = find(key);
-    return found ? found.label : '';
+  function find(code) {
+    return STATUS[code];
   }
 
-  function colorOf(key) {
-    var found = find(key);
-    return found ? found.tag : '';
+  function nameOf(code) {
+    var found = find(code);
+    return found ? found.name : '';
+  }
+
+  function colorOf(code) {
+    var found = find(code);
+    return found ? found.color : '';
+  }
+
+  function codes() {
+    return LIST.map(function (s) { return s.code; });
   }
 
   function tag(s, style, cls) {
-    return '<span class="tag ' + (cls ? cls + ' ' : '') + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
+    return '<span class="tag ' + (cls ? cls + ' ' : '') + s.color + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.name + '</span>';
   }
 
   function options(keys) {
-    return keys.map(labelOf).join(',');
+    return keys.map(nameOf).join(',');
   }
 
   function fillDom() {
@@ -41,5 +49,5 @@
   fillDom();
   document.addEventListener('DOMContentLoaded', fillDom);
 
-  window.SlotStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, options: options, tag: tag };
+  window.SlotStatusStore = { load: load, STATUS: STATUS, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, options: options, tag: tag };
 })();

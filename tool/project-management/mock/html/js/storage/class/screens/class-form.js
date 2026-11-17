@@ -90,11 +90,11 @@
     setSelect($('courseCode'), r.courseCode);
     setSelect($('version'), r.version || '1.0');
     checkRadio('taskType', r.taskType || '');
-    var statusOff = r.status === OperatingStatusStore.labelOf('STOPPED');
-    $('statusRow').setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    $('statusRow').setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    var statusOff = r.status === OperatingStatusStore.nameOf('STOPPED');
+    $('statusRow').setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    $('statusRow').setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
     setStatusOff(statusOff);
-    $('statusLabel').textContent = statusOff ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = statusOff ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
     $('lessonNo').textContent = r.lessonNo || '自動採番';
     setDate($('start'), r.start);
     setDate($('end'), r.end);
@@ -102,8 +102,8 @@
     $('people').querySelector('input').value = r.people || '';
     $('mainTeachers').querySelector('input').value = r.registMainTeachers !== undefined ? r.registMainTeachers : (r.mainTeachers || '');
     $('subTeachers').querySelector('input').value = r.registSubTeachers !== undefined ? r.registSubTeachers : (r.subTeachers || '');
-    if ($('mainAdjusted')) $('mainAdjusted').textContent = SlotStatusStore.labelOf('REQUESTED') + '：' + (r.mainTeachers || '-') + '人';
-    if ($('subAdjusted')) $('subAdjusted').textContent = SlotStatusStore.labelOf('REQUESTED') + '：' + (r.subTeachers || '-') + '人';
+    if ($('mainAdjusted')) $('mainAdjusted').textContent = SlotStatusStore.nameOf('REQUESTED') + '：' + (r.mainTeachers || '-') + '人';
+    if ($('subAdjusted')) $('subAdjusted').textContent = SlotStatusStore.nameOf('REQUESTED') + '：' + (r.subTeachers || '-') + '人';
     lastCourse = getSelect($('courseCode'));
     var mbox = $('manager');
     var madd = mbox.querySelector('.chip-add');

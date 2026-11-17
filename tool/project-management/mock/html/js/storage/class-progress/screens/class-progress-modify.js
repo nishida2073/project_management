@@ -1,8 +1,8 @@
   (function () {
     var CLASS_ID = new URLSearchParams(location.search).get('id') || 'CLS-001';
     var CLASS_KEY = CLASS_ID;
-    var STATUS_LABEL = StepStatusStore.labelByKey();
-    var LABEL_STATUS = StepStatusStore.byLabel();
+    var STATUS_LABEL = StepStatusStore.nameByCode();
+    var LABEL_STATUS = StepStatusStore.byName();
     var STATUS_COLOR = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
 
 function setDisabledRow(tr, off) {
@@ -41,7 +41,7 @@ function setDisabledRow(tr, off) {
     var displayNo = [];
     var kindCount = {};
     sortedTasks.forEach(function (t, i) {
-      if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
+      if (t.status === OperatingStatusStore.nameOf('STOPPED')) return;
       var k = t.kinds[0] || '';
       kindCount[k] = (kindCount[k] || 0) + 1;
       displayNo[i] = kindCount[k];
@@ -55,7 +55,7 @@ function setDisabledRow(tr, off) {
     function ownerOptions(task) {
       var company = task ? task.company : StaffVenderStore.INTERNAL;
       var names = StaffStore.load().filter(function (s) {
-        if (s.status === OperatingStatusStore.labelOf('STOPPED')) return false;
+        if (s.status === OperatingStatusStore.nameOf('STOPPED')) return false;
         if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
         if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
         if (company === StaffVenderStore.INTERNAL) return s.affiliation === AffiliationStore.nameOf('INTERNAL');
@@ -73,7 +73,7 @@ function setDisabledRow(tr, off) {
 
     stepsList.forEach(function (s, i) {
       var task = sortedTasks[i];
-      if (task && (task.status === OperatingStatusStore.labelOf('STOPPED') || task.kinds.indexOf(cls.taskType) === -1)) return;
+      if (task && (task.status === OperatingStatusStore.nameOf('STOPPED') || task.kinds.indexOf(cls.taskType) === -1)) return;
       var name = task ? task.name : s.name;
       var sv = saved[s.no] || {};
       var plan = sv.plan !== undefined ? sv.plan : (task ? addDays(task.days) : '');
@@ -102,7 +102,7 @@ function setDisabledRow(tr, off) {
         '<td>' + planCell + '</td>' +
         '<td class="col-actual">' + actualCell + '</td>' +
         '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="na-text"' + ' style="display:none;"' + '>' + StepStatusStore.labelOf('NA') + '</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="na-text"' + ' style="display:none;"' + '>' + StepStatusStore.nameOf('NA') + '</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
       body.appendChild(tr);
       setDisabledRow(tr, na);

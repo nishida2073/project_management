@@ -1,39 +1,47 @@
 (function () {
   var LIST = [
-    { key: 'BEFORE', label: '実施前', color: 'blue' },
-    { key: 'DURING', label: '実施中', color: 'orange' },
-    { key: 'AFTER', label: '実施後', color: 'gray' }
+    { code: 'BEFORE', name: '実施前', color: 'blue' },
+    { code: 'DURING', name: '実施中', color: 'orange' },
+    { code: 'AFTER', name: '実施後', color: 'gray' }
   ];
 
   var STATUS = {};
-  LIST.forEach(function (s) { STATUS[s.key] = { label: s.label, tag: s.color }; });
+  LIST.forEach(function (s) { STATUS[s.code] = { code: s.code, name: s.name, color: s.color }; });
 
-  function find(key) {
-    return STATUS[key];
+  function load() {
+    return LIST.map(function (s) { return { code: s.code, name: s.name, color: s.color }; });
   }
 
-  function labelOf(key) {
-    var found = find(key);
-    return found ? found.label : '';
+  function find(code) {
+    return STATUS[code];
   }
 
-  function colorOf(key) {
-    var found = find(key);
-    return found ? found.tag : '';
+  function nameOf(code) {
+    var found = find(code);
+    return found ? found.name : '';
+  }
+
+  function colorOf(code) {
+    var found = find(code);
+    return found ? found.color : '';
+  }
+
+  function codes() {
+    return LIST.map(function (s) { return s.code; });
   }
 
   function colorMap() {
     var map = {};
-    LIST.forEach(function (s) { map[s.label] = s.color; });
+    LIST.forEach(function (s) { map[s.name] = s.color; });
     return map;
   }
 
   function tag(s, style, cls) {
-    return '<span class="tag ' + (cls ? cls + ' ' : '') + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
+    return '<span class="tag ' + (cls ? cls + ' ' : '') + s.color + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.name + '</span>';
   }
 
   function options(keys) {
-    var list = keys ? keys.map(labelOf) : LIST.map(function (s) { return s.label; });
+    var list = keys ? keys.map(nameOf) : LIST.map(function (s) { return s.name; });
     return list.join(',');
   }
 
@@ -45,7 +53,7 @@
       el.setAttribute('data-options', 'すべて,' + options(['BEFORE', 'DURING']));
     });
     document.querySelectorAll('[data-practice-default]').forEach(function (el) {
-      var text = labelOf(el.getAttribute('data-practice-default'));
+      var text = nameOf(el.getAttribute('data-practice-default'));
       el.setAttribute('data-value', text);
       var first = el.firstChild;
       if (first && first.nodeType === 3) {
@@ -59,5 +67,5 @@
   fillDom();
   document.addEventListener('DOMContentLoaded', fillDom);
 
-  window.PracticeStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, colorMap: colorMap, options: options, tag: tag };
+  window.PracticeStatusStore = { load: load, STATUS: STATUS, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, colorMap: colorMap, options: options, tag: tag };
 })();

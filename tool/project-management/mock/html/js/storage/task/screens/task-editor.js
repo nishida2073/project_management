@@ -42,11 +42,11 @@
     $('taskName').value = rec.name || '';
     $('order').value = rec.order === undefined ? '' : rec.order;
     $('days').value = rec.days === undefined ? '' : rec.days;
-    var statusOff = rec.status === OperatingStatusStore.labelOf('STOPPED');
-    $('statusRow').setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    $('statusRow').setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    var statusOff = rec.status === OperatingStatusStore.nameOf('STOPPED');
+    $('statusRow').setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    $('statusRow').setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
     setStatusOff(statusOff);
-    $('statusLabel').textContent = statusOff ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = statusOff ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
     checkRadio('taskKind', (rec.kinds || [])[0] || '');
     checkRadio('workType', rec.workType || '');
     $('memo').value = rec.memo || '';
@@ -73,7 +73,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { id: '', name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', workType: '', status: OperatingStatusStore.labelOf('ACTIVE') };
+      rec = { id: '', name: '', kinds: [], order: '', company: StaffVenderStore.INTERNAL, days: '', workType: '', status: OperatingStatusStore.nameOf('ACTIVE') };
     }
     fill(rec);
 

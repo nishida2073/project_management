@@ -33,7 +33,7 @@
     row.querySelector('.sub-remove').addEventListener('click', function () {
       var st = row.getAttribute('data-state');
       if (st !== 'done' && st !== 'requesting') { row.remove(); return; }
-      var head = st === 'done' ? SlotStatusStore.labelOf('REQUESTED') + 'の担当者を削除します' : SlotStatusStore.labelOf('REQUESTING') + 'を削除します';
+      var head = st === 'done' ? SlotStatusStore.nameOf('REQUESTED') + 'の担当者を削除します' : SlotStatusStore.nameOf('REQUESTING') + 'を削除します';
       MessageDialog.confirm([head, '', '削除してよろしいですか？'].join(String.fromCharCode(10))).then(function (ok) {
         if (ok) row.remove();
       });
@@ -60,8 +60,8 @@
     Array.prototype.forEach.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row'), function (row) {
       var st = statusOfRow(row);
       var tag = row.querySelector('.sub-status');
-      tag.className = 'tag fixed sub-status' + (st ? ' ' + st.tag : '');
-      tag.textContent = st ? st.label : '';
+      tag.className = 'tag fixed sub-status' + (st ? ' ' + st.color : '');
+      tag.textContent = st ? st.name : '';
     });
   }
 
@@ -164,7 +164,7 @@
           return !!sel && sel.textContent.replace('▾', '').trim() === '選択してください';
         });
         if (noVendor) {
-          MessageDialog.required([SlotStatusStore.labelOf('REQUESTING') + 'の会社名']);
+          MessageDialog.required([SlotStatusStore.nameOf('REQUESTING') + 'の会社名']);
           return;
         }
       }

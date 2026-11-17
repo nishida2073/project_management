@@ -1,55 +1,63 @@
 (function () {
   var LIST = [
-    { key: 'WAIT', label: '実施前', color: 'gray' },
-    { key: 'PROGRESS', label: '実施中', color: 'blue' },
-    { key: 'DONE', label: '完了', color: 'green' },
-    { key: 'NA', label: '対象外', color: 'gray', selectable: false }
+    { code: 'WAIT', name: '実施前', color: 'gray' },
+    { code: 'PROGRESS', name: '実施中', color: 'blue' },
+    { code: 'DONE', name: '完了', color: 'green' },
+    { code: 'NA', name: '対象外', color: 'gray', selectable: false }
   ];
 
-  function byKey(key) {
-    for (var i = 0; i < LIST.length; i++) if (LIST[i].key === key) return LIST[i];
+  function load() {
+    return LIST.map(function (s) { return { code: s.code, name: s.name, color: s.color, selectable: s.selectable }; });
+  }
+
+  function find(code) {
+    for (var i = 0; i < LIST.length; i++) if (LIST[i].code === code) return LIST[i];
     return null;
   }
 
-  function labelOf(key) {
-    var s = byKey(key);
-    return s ? s.label : '';
+  function nameOf(code) {
+    var s = find(code);
+    return s ? s.name : '';
   }
 
-  function colorOf(key) {
-    var s = byKey(key);
+  function colorOf(code) {
+    var s = find(code);
     return s ? s.color : '';
   }
 
-  function keyOfLabel(label) {
-    for (var i = 0; i < LIST.length; i++) if (LIST[i].label === label) return LIST[i].key;
+  function codeOf(name) {
+    for (var i = 0; i < LIST.length; i++) if (LIST[i].name === name) return LIST[i].code;
     return '';
   }
 
-  function options() {
-    return LIST.filter(function (s) { return s.selectable !== false; }).map(function (s) { return s.label; }).join(',');
+  function codes() {
+    return LIST.map(function (s) { return s.code; });
   }
 
-  function byLabel() {
+  function options() {
+    return LIST.filter(function (s) { return s.selectable !== false; }).map(function (s) { return s.name; }).join(',');
+  }
+
+  function byName() {
     var map = {};
-    LIST.forEach(function (s) { map[s.label] = s.key; });
+    LIST.forEach(function (s) { map[s.name] = s.code; });
     return map;
   }
 
-  function labelByKey() {
+  function nameByCode() {
     var map = {};
-    LIST.forEach(function (s) { map[s.key] = s.label; });
+    LIST.forEach(function (s) { map[s.code] = s.name; });
     return map;
   }
 
   function classMapJson() {
     var map = {};
-    LIST.forEach(function (s) { map[s.label] = s.color; });
+    LIST.forEach(function (s) { map[s.name] = s.color; });
     return JSON.stringify(map);
   }
 
   window.StepStatusStore = {
-    LIST: LIST, labelOf: labelOf, colorOf: colorOf, keyOfLabel: keyOfLabel,
-    options: options, byLabel: byLabel, labelByKey: labelByKey, classMapJson: classMapJson
+    load: load, find: find, nameOf: nameOf, colorOf: colorOf, codeOf: codeOf, codes: codes,
+    options: options, byName: byName, nameByCode: nameByCode, classMapJson: classMapJson
   };
 })();

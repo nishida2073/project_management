@@ -7,12 +7,12 @@
     $('userPassword').value = '';
     checkRadio('authority', rec.authority || 'AU-02');
     $('memo').value = rec.memo || '';
-    var off = rec.status === OperatingStatusStore.labelOf('STOPPED');
+    var off = rec.status === OperatingStatusStore.nameOf('STOPPED');
     var row = $('statusRow');
-    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    row.setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
     setStatusOff(off);
-    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = off ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
   }
 
   function renderRadios(group, name, items) {
@@ -39,7 +39,7 @@
       rec = list[idx];
       $('passwordField').style.display = '';
     } else {
-      rec = { code: '', name: '', email: '', authority: 'AU-02', status: OperatingStatusStore.labelOf('ACTIVE') };
+      rec = { code: '', name: '', email: '', authority: 'AU-02', status: OperatingStatusStore.nameOf('ACTIVE') };
       $('passwordField').style.display = '';
     }
 

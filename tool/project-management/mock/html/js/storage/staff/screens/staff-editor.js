@@ -31,11 +31,11 @@
     setChecks('positions', rec.positions);
     $('memo').value = rec.memo || '';
     var row = $('statusRow');
-    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
-    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
-    var off = rec.status === OperatingStatusStore.labelOf('STOPPED');
+    row.setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.nameOf('STOPPED'));
+    var off = rec.status === OperatingStatusStore.nameOf('STOPPED');
     setStatusOff(off);
-    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
+    $('statusLabel').textContent = off ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
     refreshCompany();
   }
 
@@ -59,7 +59,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', affiliation: '', company: '', name: '', email: '', roles: [], jobTypes: [], positions: [], status: OperatingStatusStore.labelOf('ACTIVE') };
+      rec = { code: '', affiliation: '', company: '', name: '', email: '', roles: [], jobTypes: [], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') };
     }
     fill(rec);
     document.querySelectorAll('input[name="affiliation"]').forEach(function (r) { r.addEventListener('change', refreshCompany); });

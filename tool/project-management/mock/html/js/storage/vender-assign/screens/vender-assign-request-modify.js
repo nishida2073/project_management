@@ -3,7 +3,7 @@
   var body = $('withdrawBody');
   var rows = [];
   var KEY = { requesting: 'REQUESTING', before: 'BEFORE', open: 'OPEN' };
-  function labelOf(state) { return SlotStatusStore.labelOf(KEY[state]); }
+  function labelOf(state) { return SlotStatusStore.nameOf(KEY[state]); }
 
   $('requestVendor').setAttribute('data-options', TeacherVenderStore.activeNames().join(','));
 
@@ -27,7 +27,7 @@
 
 
   ClassStore.load().filter(function (r) {
-    return r.status !== OperatingStatusStore.labelOf('STOPPED') && ClassStore.practiceStatus(r) !== PracticeStatusStore.labelOf('AFTER');
+    return r.status !== OperatingStatusStore.nameOf('STOPPED') && ClassStore.practiceStatus(r) !== PracticeStatusStore.nameOf('AFTER');
   }).forEach(function (r) {
     rows.push({ cls: r, assign: VenderAssignStore.find(r.id) });
   });
@@ -160,7 +160,7 @@
       var from = tr.getAttribute('data-state');
       var cb = tr.querySelector('.row-check');
       var bulkLabel = placeholderToEmpty(ownText($('bulkState')));
-      var bulkTo = bulkLabel ? (bulkLabel === SlotStatusStore.labelOf('OPEN') ? 'open' : 'before') : '';
+      var bulkTo = bulkLabel ? (bulkLabel === SlotStatusStore.nameOf('OPEN') ? 'open' : 'before') : '';
       var to = cb && cb.checked && bulkTo ? bulkTo : from;
       if (from !== to) changes.push({ tr: tr, from: from, to: to });
     });
