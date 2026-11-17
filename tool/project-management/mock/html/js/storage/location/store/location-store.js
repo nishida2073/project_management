@@ -2,10 +2,10 @@
   var KEY = 'locationList';
 
   var SEED = [
-    { code: 'LOC-001', type: 'LT-01', name: '501教室', tel: '03-1111-2222', address: '東京都目黒区駒場4-6-1', status: '稼働中' },
-    { code: 'LOC-002', type: 'LT-01', name: '601教室', tel: '03-1111-2222', address: '東京都目黒区駒場4-6-1', status: '稼働中' },
-    { code: 'LOC-003', type: 'LT-02', name: '302教室', tel: '03-2222-3333', address: '東京都世田谷区成城6-1-1', status: '稼働中' },
-    { code: 'LOC-004', type: 'LT-03', name: '外部貸会議室A', tel: '03-3333-4444', address: '東京都千代田区大手町1-1-1', status: '停止中' }
+    { code: 'LOC-001', type: 'LT-01', name: '501教室', tel: '03-1111-2222', address: '東京都目黒区駒場4-6-1', status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'LOC-002', type: 'LT-01', name: '601教室', tel: '03-1111-2222', address: '東京都目黒区駒場4-6-1', status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'LOC-003', type: 'LT-02', name: '302教室', tel: '03-2222-3333', address: '東京都世田谷区成城6-1-1', status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'LOC-004', type: 'LT-03', name: '外部貸会議室A', tel: '03-3333-4444', address: '東京都千代田区大手町1-1-1', status: OperatingStatusStore.labelOf('STOPPED') }
   ];
 
   function save(list) {
@@ -34,7 +34,7 @@
   function namesByType() {
     var out = {};
     load().forEach(function (l) {
-      if (l.status !== '稼働中') return;
+      if (l.status !== OperatingStatusStore.labelOf('ACTIVE')) return;
       if (!out[l.type]) out[l.type] = [];
       out[l.type].push(l.name);
     });

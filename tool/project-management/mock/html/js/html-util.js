@@ -38,7 +38,7 @@
   };
   window.readStatus = function () {
     var el = window.$('statusToggle');
-    return el && el.classList.contains('off') ? '停止中' : '稼働中';
+    return el && el.classList.contains('off') ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
   };
   window.bindFormControls = function (root) {
     if (!root) return;

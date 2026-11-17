@@ -19,7 +19,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { id: '', name: '', staff: '', status: '稼働中' };
+      rec = { id: '', name: '', staff: '', status: OperatingStatusStore.labelOf('ACTIVE') };
     }
 
     $('customerId').textContent = rec.id || '自動採番';
@@ -27,11 +27,11 @@
     $('staff').value = rec.staff || '';
     $('email').value = rec.email || '';
     $('memo').value = rec.memo || '';
-    var statusOff = rec.status === '停止中';
-    $('statusRow').setAttribute('data-on', '稼働中');
-    $('statusRow').setAttribute('data-off', '停止中');
+    var statusOff = rec.status === OperatingStatusStore.labelOf('STOPPED');
+    $('statusRow').setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
+    $('statusRow').setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
     setStatusOff(statusOff);
-    $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
+    $('statusLabel').textContent = statusOff ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
 
     $('saveBtn').addEventListener('click', function () {
       var v = {

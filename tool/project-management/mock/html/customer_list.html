@@ -20,7 +20,7 @@
       
       <div class="filter-panel">
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="顧客コード・顧客名で検索"></div>
-        <div class="field"><label>稼働状況</label><div class="control small js-select" data-options="すべて,稼働中,停止中">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>稼働状況</label><div class="control small js-select" data-status-options="all">すべて<span class="caret">▾</span></div></div>
         <div class="search-btn">検索</div>
         <div class="search-btn" id="resetFilter">リセット</div>
       </div>
@@ -50,6 +50,7 @@
     </div>
   </div>
 </div>
+<script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/customer/store/customer-store.js"></script>

@@ -20,15 +20,15 @@
   $('subLine').textContent = (c.name || src.courseCode || '') + '　' + src.lessonNo + '　' + src.start + '〜' + src.end;
   $('cancelLink').href = 'class_modify.html?id=' + encodeURIComponent(src.id);
   (function () {
-    var off = src.status === '停止中';
+    var off = src.status === OperatingStatusStore.labelOf('STOPPED');
     var t = $('statusAllToggle');
     t.classList.toggle('off', off);
     var label = t.parentNode.querySelector('span');
-    label.textContent = off ? '停止中' : '稼働中';
+    label.textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
     t.addEventListener('click', function () {
       var isOn = !t.classList.contains('off');
       t.classList.toggle('off', isOn);
-      label.textContent = isOn ? '停止中' : '稼働中';
+      label.textContent = isOn ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
     });
   })();
 
@@ -156,7 +156,7 @@
   }
   function statusOf() {
     var el = $('statusAllToggle');
-    return el && el.classList.contains('off') ? '停止中' : '稼働中';
+    return el && el.classList.contains('off') ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
   }
   function locNameVal(k) {
     var el = fieldEl(k, 'locationName');

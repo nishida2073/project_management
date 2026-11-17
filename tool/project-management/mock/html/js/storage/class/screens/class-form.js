@@ -90,11 +90,11 @@
     setSelect($('courseCode'), r.courseCode);
     setSelect($('version'), r.version || '1.0');
     checkRadio('taskType', r.taskType || '');
-    var statusOff = r.status === '停止中';
-    $('statusRow').setAttribute('data-on', '稼働中');
-    $('statusRow').setAttribute('data-off', '停止中');
+    var statusOff = r.status === OperatingStatusStore.labelOf('STOPPED');
+    $('statusRow').setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
+    $('statusRow').setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
     setStatusOff(statusOff);
-    $('statusLabel').textContent = statusOff ? '停止中' : '稼働中';
+    $('statusLabel').textContent = statusOff ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
     $('lessonNo').textContent = r.lessonNo || '自動採番';
     setDate($('start'), r.start);
     setDate($('end'), r.end);

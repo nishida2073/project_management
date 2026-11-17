@@ -15,7 +15,7 @@
         '<td><span class="tag ' + (t.company === StaffVenderStore.INTERNAL ? 'blue' : 'orange') + '">' + (t.company === StaffVenderStore.INTERNAL ? '社内' : 'パートナー') + '</span></td>' +
         '<td>' + (t.company === StaffVenderStore.INTERNAL ? '' : esc(StaffVenderStore.nameOf(t.company))) + '</td>' +
         '<td>' + (t.days === '' || t.days === undefined ? '' : esc(t.days) + '日') + '</td>' +
-        '<td><span class="badge overall-badge ' + (t.status === '停止中' ? 'gray' : 'green') + '">' + (t.status === '停止中' ? '停止中' : '稼働中') + '</span></td>' +
+        '<td><span class="badge overall-badge ' + (t.status === OperatingStatusStore.labelOf('STOPPED') ? 'gray' : 'green') + '">' + (t.status === OperatingStatusStore.labelOf('STOPPED') ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (t.memo ? ' title="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
         '<td class="row-actions"><a class="search-btn" href="task_modify.html?id=' + encodeURIComponent(t.id) + '">更新</a></td>';
       body.appendChild(tr);

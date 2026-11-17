@@ -60,17 +60,17 @@
     inputs.forEach(function (i, idx) { i.value = (rec.monthly && rec.monthly[idx]) || 0; });
     $('memo').value = rec.memo || '';
     var row = $('statusRow');
-    row.setAttribute('data-on', '稼働中');
-    row.setAttribute('data-off', '停止中');
-    var off = rec.status === '停止中';
+    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    var off = rec.status === OperatingStatusStore.labelOf('STOPPED');
     setStatusOff(off);
-    $('statusLabel').textContent = off ? '停止中' : '稼働中';
+    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
     refreshSubject();
     refreshAnnual();
   }
 
   function read() {
-    var off = (readStatus() === '停止中');
+    var off = (readStatus() === OperatingStatusStore.labelOf('STOPPED'));
     return {
       year: getSelect($('courseYear')),
       code: $('courseCode').value.trim(),
@@ -85,7 +85,7 @@
       subTeachers: $('subTeachers').querySelector('input').value.trim(),
       monthly: monthInputs().map(function (i) { return parseInt(i.value, 10) || 0; }),
       memo: $('memo').value,
-      status: off ? '停止中' : '稼働中'
+      status: off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE')
     };
   }
 
@@ -112,7 +112,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { year: '2026', subject: '', part: '', name: '', delivery: '', days: '', min: '', max: '', monthly: [], status: '稼働中', code: '' };
+      rec = { year: '2026', subject: '', part: '', name: '', delivery: '', days: '', min: '', max: '', monthly: [], status: OperatingStatusStore.labelOf('ACTIVE'), code: '' };
     }
 
     fill(rec, editing);

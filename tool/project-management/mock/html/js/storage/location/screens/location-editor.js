@@ -7,12 +7,12 @@
     $('tel').value = rec.tel || '';
     $('address').value = rec.address || '';
     $('memo').value = rec.memo || '';
-    var off = rec.status === '停止中';
+    var off = rec.status === OperatingStatusStore.labelOf('STOPPED');
     var row = $('statusRow');
-    row.setAttribute('data-on', '稼働中');
-    row.setAttribute('data-off', '停止中');
+    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
     setStatusOff(off);
-    $('statusLabel').textContent = off ? '停止中' : '稼働中';
+    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
   }
 
   function read() {
@@ -47,7 +47,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', type: '', name: '', tel: '', address: '', status: '稼働中' };
+      rec = { code: '', type: '', name: '', tel: '', address: '', status: OperatingStatusStore.labelOf('ACTIVE') };
     }
 
     renderRadios(document.getElementById('locationTypeGroup'), 'locationType', LocationTypeStore.load());

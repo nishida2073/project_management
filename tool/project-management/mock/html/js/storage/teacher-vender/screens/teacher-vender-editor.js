@@ -1,10 +1,10 @@
 (function () {
   function setToggle(off) {
     var row = $('statusRow');
-    row.setAttribute('data-on', '稼働中');
-    row.setAttribute('data-off', '停止中');
+    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
     setStatusOff(off);
-    $('statusLabel').textContent = off ? '停止中' : '稼働中';
+    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
   }
 
   function fill(rec) {
@@ -15,7 +15,7 @@
     $('memo').value = rec.memo || '';
     $('contactName').value = rec.contactName || '';
     $('contactEmail').value = rec.contactEmail || '';
-    setToggle(rec.status === '停止中');
+    setToggle(rec.status === OperatingStatusStore.labelOf('STOPPED'));
   }
 
   function renderRadios(group, name, items) {
@@ -39,7 +39,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', name: '', tel: '', address: '', memo: '', contactName: '', contactEmail: '', status: '稼働中' };
+      rec = { code: '', name: '', tel: '', address: '', memo: '', contactName: '', contactEmail: '', status: OperatingStatusStore.labelOf('ACTIVE') };
     }
 
     fill(rec);

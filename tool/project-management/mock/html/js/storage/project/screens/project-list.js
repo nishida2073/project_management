@@ -21,7 +21,7 @@
       '<td>' + esc(CustomerStore.nameOf(p.customer)) + '</td>' +
       '<td>' + managerList.join('<br>') + '</td>' +
       '<td>' + esc(p.startMonth) + '</td>' +
-      '<td><span class="badge overall-badge ' + (p.status === '停止中' ? 'gray' : 'green') + '">' + (p.status === '停止中' ? '停止中' : '稼働中') + '</span></td>' +
+      '<td><span class="badge overall-badge ' + (p.status === OperatingStatusStore.labelOf('STOPPED') ? 'gray' : 'green') + '">' + (p.status === OperatingStatusStore.labelOf('STOPPED') ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (p.memo ? ' title="' + esc(p.memo) + '"' : '') + '>' + (p.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="project_modify.html?id=' + encodeURIComponent(p.code) + '">更新</a></td>';
     body.appendChild(tr);

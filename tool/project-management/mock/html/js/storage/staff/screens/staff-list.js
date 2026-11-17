@@ -10,7 +10,7 @@
   var list = StaffStore.load();
 
   list.forEach(function (t) {
-    var on = t.status !== '停止中';
+    var on = t.status !== OperatingStatusStore.labelOf('STOPPED');
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td>' + esc(t.code) + '</td>' +
@@ -21,7 +21,7 @@
       '<td>' + (t.roles || []).map(function (r) { return '<span class="tag ' + (ROLE_CLASS[r] || '') + '">' + esc(StaffRoleStore.nameOf(r)) + '</span>'; }).join(' ') + '</td>' +
       '<td>' + (t.jobTypes || []).map(function (j) { return '<span class="tag ' + (JOB_CLASS[j] || '') + '">' + esc(JobTypeStore.nameOf(j)) + '</span>'; }).join(' ') + '</td>' +
       '<td>' + ((t.positions || []).length ? (t.positions || []).map(function (p) { return '<span class="tag ' + (POS_CLASS[p] || '') + '">' + esc(PositionStore.nameOf(p)) + '</span>'; }).join(' ') : '-') + '</td>' +
-      '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.labelOf('ACTIVE') : OperatingStatusStore.labelOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (t.memo ? ' title="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="staff_modify.html?id=' + encodeURIComponent(t.code) + '">更新</a></td>';
     body.appendChild(tr);

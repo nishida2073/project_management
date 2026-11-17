@@ -31,11 +31,11 @@
     setChecks('positions', rec.positions);
     $('memo').value = rec.memo || '';
     var row = $('statusRow');
-    row.setAttribute('data-on', '稼働中');
-    row.setAttribute('data-off', '停止中');
-    var off = rec.status === '停止中';
+    row.setAttribute('data-on', OperatingStatusStore.labelOf('ACTIVE'));
+    row.setAttribute('data-off', OperatingStatusStore.labelOf('STOPPED'));
+    var off = rec.status === OperatingStatusStore.labelOf('STOPPED');
     setStatusOff(off);
-    $('statusLabel').textContent = off ? '停止中' : '稼働中';
+    $('statusLabel').textContent = off ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE');
     refreshCompany();
   }
 
@@ -59,7 +59,7 @@
       }
       rec = list[idx];
     } else {
-      rec = { code: '', affiliation: '', company: '', name: '', email: '', roles: [], jobTypes: [], positions: [], status: '稼働中' };
+      rec = { code: '', affiliation: '', company: '', name: '', email: '', roles: [], jobTypes: [], positions: [], status: OperatingStatusStore.labelOf('ACTIVE') };
     }
     fill(rec);
     document.querySelectorAll('input[name="affiliation"]').forEach(function (r) { r.addEventListener('change', refreshCompany); });

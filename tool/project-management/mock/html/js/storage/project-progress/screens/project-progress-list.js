@@ -50,7 +50,7 @@
   headRow.appendChild(operationTh);
 
   var body = document.getElementById('tbody');
-  var projects = ProjectStore.load().filter(function (p) { return p.status !== '停止中'; });
+  var projects = ProjectStore.load().filter(function (p) { return p.status !== OperatingStatusStore.labelOf('STOPPED'); });
   var rows = [];
 
   projects.forEach(function (p) {

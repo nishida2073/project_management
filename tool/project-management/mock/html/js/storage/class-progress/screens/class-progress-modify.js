@@ -41,7 +41,7 @@ function setDisabledRow(tr, off) {
     var displayNo = [];
     var kindCount = {};
     sortedTasks.forEach(function (t, i) {
-      if (t.status === '停止中') return;
+      if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
       var k = t.kinds[0] || '';
       kindCount[k] = (kindCount[k] || 0) + 1;
       displayNo[i] = kindCount[k];
@@ -55,7 +55,7 @@ function setDisabledRow(tr, off) {
     function ownerOptions(task) {
       var company = task ? task.company : StaffVenderStore.INTERNAL;
       var names = StaffStore.load().filter(function (s) {
-        if (s.status === '停止中') return false;
+        if (s.status === OperatingStatusStore.labelOf('STOPPED')) return false;
         if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
         if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
         if (company === StaffVenderStore.INTERNAL) return s.affiliation === '社内';
@@ -73,7 +73,7 @@ function setDisabledRow(tr, off) {
 
     stepsList.forEach(function (s, i) {
       var task = sortedTasks[i];
-      if (task && (task.status === '停止中' || task.kinds.indexOf(cls.taskType) === -1)) return;
+      if (task && (task.status === OperatingStatusStore.labelOf('STOPPED') || task.kinds.indexOf(cls.taskType) === -1)) return;
       var name = task ? task.name : s.name;
       var sv = saved[s.no] || {};
       var plan = sv.plan !== undefined ? sv.plan : (task ? addDays(task.days) : '');

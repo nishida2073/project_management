@@ -7,12 +7,12 @@
     return a.order - b.order;
   });
   var STEP_NAMES = SORTED.map(function (t) { return t.name; });
-  function isActive(i) { return SORTED[i].status !== '停止中'; }
+  function isActive(i) { return SORTED[i].status !== OperatingStatusStore.labelOf('STOPPED'); }
   var DISPLAY_NO = [];
   (function () {
     var counts = {};
     SORTED.forEach(function (t, i) {
-      if (t.status === '停止中') return;
+      if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
       var k = t.kinds[0] || '';
       counts[k] = (counts[k] || 0) + 1;
       DISPLAY_NO[i] = counts[k];
@@ -60,7 +60,7 @@
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
 
-  var classes = ClassStore.load().filter(function (c) { return c.status !== '停止中'; });
+  var classes = ClassStore.load().filter(function (c) { return c.status !== OperatingStatusStore.labelOf('STOPPED'); });
   var progressAll = ProgressStore.load();
   var tasks = TaskStore.load();
   var byName = {};
@@ -71,7 +71,7 @@
   var lastSticky = stickyHeads[stickyHeads.length - 1];
   while (lastSticky.nextElementSibling) headRow.removeChild(lastSticky.nextElementSibling);
   SORTED.forEach(function (t, i) {
-    if (t.status === '停止中') return;
+    if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
     var th = document.createElement('th');
     th.style.minWidth = '230px';
     th.setAttribute('data-step', i);
@@ -183,7 +183,7 @@
   function stepOwnerNames(task) {
     var company = task ? task.company : StaffVenderStore.INTERNAL;
     return StaffStore.load().filter(function (s) {
-      if (s.status === '停止中') return false;
+      if (s.status === OperatingStatusStore.labelOf('STOPPED')) return false;
       if (!(s.roles || []).some(function (code) { return StaffRoleStore.nameOf(code) === 'クラス'; })) return false;
       if (!(s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; })) return false;
       if (company === StaffVenderStore.INTERNAL) return s.affiliation === '社内';

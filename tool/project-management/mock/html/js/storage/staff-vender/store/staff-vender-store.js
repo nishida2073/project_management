@@ -2,10 +2,10 @@
   var KEY = 'staffVenderList';
 
   var SEED = [
-    { code: 'STV-001', name: '株式会社あおぞら研修', tel: '03-1000-0001', address: '東京都千代田区丸の内1-1-1', memo: '新人研修を中心に担当', contactName: '青木 大輔', contactEmail: 'aoki@aozora-training.example.jp', status: '稼働中' },
-    { code: 'STV-002', name: '合同会社さくら人材', tel: '03-1000-0002', address: '東京都港区六本木2-2-2', memo: 'キャリア研修の講師派遣', contactName: '桜井 美咲', contactEmail: 'sakurai@sakura-jinzai.example.jp', status: '稼働中' },
-    { code: 'STV-003', name: '株式会社ひまわりキャリア', tel: '06-1000-0003', address: '大阪府大阪市北区梅田3-3-3', memo: '大阪拠点の対応可', contactName: '向井 健太', contactEmail: 'mukai@himawari-career.example.jp', status: '稼働中' },
-    { code: 'STV-004', name: '株式会社みらい教育', tel: '03-1000-0004', address: '東京都渋谷区道玄坂4-4-4', memo: 'マネジメント研修専門', contactName: '緑川 恵', contactEmail: 'midorikawa@mirai-kyoiku.example.jp', status: '稼働中' }
+    { code: 'STV-001', name: '株式会社あおぞら研修', tel: '03-1000-0001', address: '東京都千代田区丸の内1-1-1', memo: '新人研修を中心に担当', contactName: '青木 大輔', contactEmail: 'aoki@aozora-training.example.jp', status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'STV-002', name: '合同会社さくら人材', tel: '03-1000-0002', address: '東京都港区六本木2-2-2', memo: 'キャリア研修の講師派遣', contactName: '桜井 美咲', contactEmail: 'sakurai@sakura-jinzai.example.jp', status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'STV-003', name: '株式会社ひまわりキャリア', tel: '06-1000-0003', address: '大阪府大阪市北区梅田3-3-3', memo: '大阪拠点の対応可', contactName: '向井 健太', contactEmail: 'mukai@himawari-career.example.jp', status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'STV-004', name: '株式会社みらい教育', tel: '03-1000-0004', address: '東京都渋谷区道玄坂4-4-4', memo: 'マネジメント研修専門', contactName: '緑川 恵', contactEmail: 'midorikawa@mirai-kyoiku.example.jp', status: OperatingStatusStore.labelOf('ACTIVE') }
   ];
 
   var INTERNAL = 'INTERNAL';
@@ -41,7 +41,7 @@
   }
 
   function activeNames() {
-    return load().filter(function (c) { return c.status !== '停止中'; }).map(function (c) { return c.name; });
+    return load().filter(function (c) { return c.status !== OperatingStatusStore.labelOf('STOPPED'); }).map(function (c) { return c.name; });
   }
 
   function nextCode(list) {

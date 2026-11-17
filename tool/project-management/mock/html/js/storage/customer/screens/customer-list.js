@@ -9,7 +9,7 @@
       '<td>' + esc(c.id) + '</td>' +
       '<td>' + esc(c.name) + '</td>' +
       '<td>' + dashOr(c.staff) + '</td>' +
-      '<td><span class="badge overall-badge ' + (c.status === '停止中' ? 'gray' : 'green') + '">' + (c.status === '停止中' ? '停止中' : '稼働中') + '</span></td>' +
+      '<td><span class="badge overall-badge ' + (c.status === OperatingStatusStore.labelOf('STOPPED') ? 'gray' : 'green') + '">' + (c.status === OperatingStatusStore.labelOf('STOPPED') ? OperatingStatusStore.labelOf('STOPPED') : OperatingStatusStore.labelOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (c.memo ? ' title="' + esc(c.memo) + '"' : '') + '>' + (c.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="customer_modify.html?id=' + encodeURIComponent(c.id) + '">更新</a></td>';
     body.appendChild(tr);

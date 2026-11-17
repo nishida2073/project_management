@@ -28,7 +28,7 @@
     });
 
     var pool = StaffStore.load().filter(function (s) {
-      return s.status !== '停止中'
+      return s.status !== OperatingStatusStore.labelOf('STOPPED')
         && (s.roles || []).some(function (c) { return StaffRoleStore.nameOf(c) === 'クラス'; })
         && (s.jobTypes || []).some(function (c) { return JobTypeStore.nameOf(c) === '実施'; });
     });
@@ -46,13 +46,13 @@
 
     var out = {};
     ClassStore.load().forEach(function (c) {
-      if (c.status === '停止中') return;
+      if (c.status === OperatingStatusStore.labelOf('STOPPED')) return;
       var phase = ClassStore.practiceStatus(c);
       var start = parseDate(c.start);
       var saved = {};
       var j = 0;
       tasks.forEach(function (t, i) {
-        if (t.status === '停止中') return;
+        if (t.status === OperatingStatusStore.labelOf('STOPPED')) return;
         var no = i + 1;
         if (t.kinds.indexOf(c.taskType) === -1) { saved[no] = { na: true }; return; }
         var plan = addDays(start, t.days);

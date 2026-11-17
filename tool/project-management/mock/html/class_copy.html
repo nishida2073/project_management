@@ -44,7 +44,7 @@
         <div class="form-section">その他</div>
         <div class="form-field">
           <label>稼働状況</label>
-          <div class="toggle-row" data-on="稼働中" data-off="停止中"><div class="toggle" id="statusAllToggle"><div class="knob"></div></div><span>稼働中</span></div>
+          <div class="toggle-row" data-status-toggle><div class="toggle" id="statusAllToggle"><div class="knob"></div></div><span data-status="ACTIVE"></span></div>
         </div>
         <div id="perCopy" class="contents"></div>
         <div class="input-dialog-error" id="copyError"></div>
@@ -56,6 +56,7 @@
     </div>
   </div>
 </div>
+<script src="js/storage/operating-status/store/operating-status-store.js"></script>
 <script src="js/html-util.js"></script>
 <script src="js/storage/delivery-type/store/delivery-type-store.js"></script>
 <script src="js/storage/course/store/course-store.js"></script>

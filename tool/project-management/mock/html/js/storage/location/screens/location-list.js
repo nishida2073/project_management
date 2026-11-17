@@ -6,7 +6,7 @@
   var list = LocationStore.load();
 
   list.forEach(function (l) {
-    var on = l.status !== '停止中';
+    var on = l.status !== OperatingStatusStore.labelOf('STOPPED');
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td>' + esc(l.code) + '</td>' +
@@ -14,7 +14,7 @@
       '<td>' + esc(l.name) + '</td>' +
       '<td>' + esc(l.tel) + '</td>' +
       '<td>' + esc(l.address) + '</td>' +
-      '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? '稼働中' : '停止中') + '</span></td>' +
+      '<td><span class="badge overall-badge ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.labelOf('ACTIVE') : OperatingStatusStore.labelOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (l.memo ? ' title="' + esc(l.memo) + '"' : '') + '>' + (l.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="location_modify.html?id=' + encodeURIComponent(l.code) + '">更新</a></td>';
     body.appendChild(tr);

@@ -2,27 +2,27 @@
   var KEY = 'subjectList';
 
   var SEED = [
-    { code: 'BC02', name: 'システム開発入門', type: 'ST-01', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BC07', name: '基盤技術基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BC12', name: 'AP要件定義基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BC17', name: 'AP設計・製造基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BC22', name: 'AP試験基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BC27', name: 'データモデル設計基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BC32', name: '基盤構築プロセス基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'DP08', name: '営業基本Ⅰ', type: 'ST-03', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'DP16', name: '営業リスクマネジメントⅠ', type: 'ST-03', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'GC01', name: 'IT-PM入門', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'GC06', name: '品質管理入門', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BE10', name: 'システム基盤実践', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'AA60', name: 'フォローアップ研修', type: 'ST-01', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD11', name: 'システム開発基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD12', name: '基盤技術基礎（外販）', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD13', name: '要件定義基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD14', name: 'ソフトウェア設計基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD15', name: 'データモデル設計基礎（外販）', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD16', name: 'ソフトウェア試験基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD17', name: '品質管理基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' },
-    { code: 'BD18', name: 'プロジェクトマネジメント基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: '稼働中' }
+    { code: 'BC02', name: 'システム開発入門', type: 'ST-01', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BC07', name: '基盤技術基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BC12', name: 'AP要件定義基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BC17', name: 'AP設計・製造基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BC22', name: 'AP試験基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BC27', name: 'データモデル設計基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BC32', name: '基盤構築プロセス基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'DP08', name: '営業基本Ⅰ', type: 'ST-03', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'DP16', name: '営業リスクマネジメントⅠ', type: 'ST-03', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'GC01', name: 'IT-PM入門', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'GC06', name: '品質管理入門', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BE10', name: 'システム基盤実践', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'AA60', name: 'フォローアップ研修', type: 'ST-01', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD11', name: 'システム開発基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD12', name: '基盤技術基礎（外販）', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD13', name: '要件定義基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD14', name: 'ソフトウェア設計基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD15', name: 'データモデル設計基礎（外販）', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD16', name: 'ソフトウェア試験基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD17', name: '品質管理基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') },
+    { code: 'BD18', name: 'プロジェクトマネジメント基礎', type: 'ST-02', versions: ['1.0', '1.1'], status: OperatingStatusStore.labelOf('ACTIVE') }
   ];
 
   function save(list) {
@@ -54,7 +54,7 @@
   }
 
   function activeNames() {
-    return load().filter(function (s) { return s.status !== '停止中'; }).map(function (s) { return s.name; });
+    return load().filter(function (s) { return s.status !== OperatingStatusStore.labelOf('STOPPED'); }).map(function (s) { return s.name; });
   }
 
   function isValidCode(code) {
