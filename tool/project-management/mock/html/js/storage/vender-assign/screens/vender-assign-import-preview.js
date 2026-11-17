@@ -26,8 +26,9 @@
     return VenderAssignStore.tag(STATE_TAG[key], TAG_STYLE, 'fixed');
   }
 
-  function afterHtml(on, from) {
-    return tagOf(on ? 'done' : from);
+  function afterHtml(on, from, isNew) {
+    if (!isNew) return tagOf(on ? 'done' : from);
+    return tagOf('done');
   }
 
   function sameTeacher(p, q) {
@@ -43,18 +44,28 @@
     return { mains: a.mains || [], subs: a.subs || [] };
   }
 
+  var chk = {};
+  var rep = {};
+
+  function nextSlot(p) {
+    if (p.slot > 0) { p.slot--; return 'before'; }
+    if (p.req > 0) { p.req--; return 'requesting'; }
+    if (p.free > 0) { p.free--; return 'open'; }
+    return 'none';
+  }
+
   function cellHtml(u, idx, role, existing, add) {
     var rec = VenderAssignStore.find(u.classId) || {};
-    var reqLeft = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor === plan.vendorCode; })
+    var reqInit = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor === plan.vendorCode; })
       .reduce(function (t, r) { return t + (role === 'sub' ? (r.sub || 0) : (r.main || 0)); }, 0);
-    var slotLeft = existing.filter(function (p) { return p.state === 'before' && !p.teacherName && p.vendor === plan.vendorCode; }).length;
+    var slotInit = existing.filter(function (p) { return p.state === 'before' && !p.teacherName && p.vendor === plan.vendorCode; }).length;
     var matched = function (p) { return existing.filter(function (q) { return sameTeacher(p, q); })[0]; };
     var clsRec = ClassStore.load().filter(function (r) { return String(r.id) === String(u.classId); })[0] || {};
     var planN = parseInt(role === 'sub' ? clsRec.subTeachers : clsRec.mainTeachers, 10) || 0;
     var reqAll = VenderAssignStore.requestsOf(rec).reduce(function (t, r) { return t + (role === 'sub' ? (r.sub || 0) : (r.main || 0)); }, 0);
-    var freeLeft = Math.max(0, planN - existing.length - reqAll);
+    var freeInit = Math.max(0, planN - existing.length - reqAll);
     var freeCount = add.filter(function (p) { return !matched(p); }).length;
-    var slotHide = Math.min(freeCount, slotLeft);
+    var slotHide = Math.min(freeCount, slotInit);
     var SPACER = '<span class="check-box check-sm" style="visibility:hidden;vertical-align:middle;"><input type="checkbox" style="visibility:hidden;"><span class="check-mark"></span></span> ';
     var rows = [];
     existing.forEach(function (m) {
@@ -64,36 +75,29 @@
       var t = STATE_TAG[m.state];
       rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, TAG_STYLE, 'fixed') + ' ' : '') + esc(m.teacherName) + '</div>');
     });
+    var pool = { slot: slotInit, req: reqInit, free: freeInit };
     add.forEach(function (p, i) {
       if (alreadyDone(p, existing)) return;
+      var k = idx + '|' + role + '|' + i;
       var same = matched(p);
       var from, on;
       if (same) {
         from = same.state;
-        on = same.state !== 'done';
-      } else if (slotLeft > 0) {
-        slotLeft--;
-        from = 'before';
-        on = true;
-      } else if (reqLeft > 0) {
-        reqLeft--;
-        from = 'requesting';
-        on = true;
-      } else if (freeLeft > 0) {
-        freeLeft--;
-        from = 'open';
-        on = true;
+        if (chk[k] === undefined) chk[k] = same.state !== 'done';
+        on = chk[k];
       } else {
-        from = 'none';
-        on = false;
+        if (chk[k] === undefined) chk[k] = pool.slot + pool.req + pool.free > 0;
+        on = chk[k];
+        from = on ? nextSlot(pool) : 'none';
       }
       var replaceOpts = existing.map(function (m, k) { return { m: m, k: k }; }).filter(function (o) {
         return o.m.state !== 'done' && o.m.vendor === plan.vendorCode && String(o.m.teacherName || '').trim()
           && !add.some(function (p) { return sameTeacher(p, o.m); });
       });
-      var sel = (from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">選択してください<span class="caret">▾</span></span></span>' : '';
-      rows.push('<div class="import-line" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
-        tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from) + '</span> ' +
+      var rv = rep[k] || '';
+      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="' + esc(rv) + '" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">' + (rv ? esc(rv) : '選択してください') + '<span class="caret">▾</span></span></span>' : '';
+      rows.push('<div class="import-line" data-key="' + k + '" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
+        tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from, !same) + '</span> ' +
         esc(p.teacherName) + sel + '</div>');
     });
     return rows.length ? rows.join('') : '-';
@@ -114,14 +118,15 @@
   if (newTotal) plan.updates.forEach(function (u, idx) {
     var ex = existingOf(u);
     var tr = document.createElement('tr');
+    tr.setAttribute('data-idx', idx);
     tr.innerHTML =
       '<td>' + esc(yearLabel(u.year)) + '</td>' +
       '<td><div>' + esc(u.courseName) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(u.courseCode) + '</div></td>' +
       '<td>' + esc(u.lessonNo) + '</td>' +
       '<td>' + esc(u.start) + '</td>' +
       '<td>' + esc(u.end) + '</td>' +
-      '<td>' + cellHtml(u, idx, 'main', ex.mains, u.mains) + '</td>' +
-      '<td>' + cellHtml(u, idx, 'sub', ex.subs, u.subs) + '</td>';
+      '<td data-role="main">' + cellHtml(u, idx, 'main', ex.mains, u.mains) + '</td>' +
+      '<td data-role="sub">' + cellHtml(u, idx, 'sub', ex.subs, u.subs) + '</td>';
     $('importBody').appendChild(tr);
   });
   document.querySelectorAll('#importBody .js-select').forEach(function (el) { window.bindJsSelect(el); });
@@ -142,29 +147,50 @@
     $('importTotal').textContent = checkedBoxes().length;
   }
 
+  function captureTd(td) {
+    var changed = false;
+    td.querySelectorAll('.import-line').forEach(function (line) {
+      var k = line.getAttribute('data-key');
+      chk[k] = line.querySelector('.import-check').checked;
+      var r = line.querySelector('.import-replace');
+      if (r) {
+        var v = r.getAttribute('data-value') || '';
+        if (v !== (rep[k] || '')) {
+          rep[k] = v;
+          if (v) chk[k] = true;
+          changed = true;
+        }
+      }
+    });
+    return changed;
+  }
+
+  function rerender(td) {
+    var idx = Number(td.parentNode.getAttribute('data-idx'));
+    var role = td.getAttribute('data-role');
+    var u = plan.updates[idx];
+    var ex = existingOf(u);
+    td.innerHTML = role === 'sub' ? cellHtml(u, idx, 'sub', ex.subs, u.subs) : cellHtml(u, idx, 'main', ex.mains, u.mains);
+    td.querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
+  }
+
   $('importBody').addEventListener('change', function (e) {
     if (!e.target.classList.contains('import-check')) return;
-    var line = e.target.closest('.import-line');
-    if (line) line.querySelector('.js-after').innerHTML = afterHtml(e.target.checked, line.getAttribute('data-from'));
+    var td = e.target.closest('td');
+    captureTd(td);
+    rerender(td);
     updateCount();
   });
 
-  function syncReplace() {
-    Array.prototype.forEach.call($('importBody').querySelectorAll('.import-line'), function (line) {
-      var r = line.querySelector('.import-replace');
-      if (!r) return;
-      var cb = line.querySelector('.import-check');
-      var cur = r.getAttribute('data-value') || '';
-      if (cur !== (line.getAttribute('data-applied') || '')) {
-        line.setAttribute('data-applied', cur);
-        if (cur) cb.checked = true;
-      }
-      line.querySelector('.js-after').innerHTML = afterHtml(cb.checked, line.getAttribute('data-from'));
-    });
-    updateCount();
-  }
-
-  document.addEventListener('click', function () { setTimeout(syncReplace, 0); }, true);
+  document.addEventListener('click', function () {
+    setTimeout(function () {
+      Array.prototype.forEach.call($('importBody').querySelectorAll('td[data-role]'), function (td) {
+        if (!td.querySelector('.import-replace')) return;
+        if (captureTd(td)) rerender(td);
+      });
+      updateCount();
+    }, 0);
+  }, true);
   updateCount();
 
   function mergeUnique(list, add) {
