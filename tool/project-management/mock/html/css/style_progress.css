@@ -5,7 +5,11 @@
 .status-combo { font-size: 13px; font-weight: 400; height: 36px; }
 #scrollArea td[data-step] { user-select: none; }
 #scrollArea tbody tr:hover { background: transparent; }
-#scrollArea td[data-step]:hover { background: #eef4ff; }
+#scrollArea td[data-step]:not([data-na]):hover { background: #eef4ff; }
 td.is-kind-na { background: #e4e8ef; }
 td.is-kind-na .status-chip { opacity: 0.6; }
 td.has-memo::after { content: "!"; top: 2px; right: 2px; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #fbd29b; color: #9a4a00; font-weight: 700; font-size: 12px; border: none; }
+.step-dialog-row { display: flex; gap: 12px; }
+.step-dialog-cell { flex: 1; }
+.step-dialog-value { padding-top: 6px; font-size: 13px; }
+.step-dialog > .js-select { margin-left: 0; }

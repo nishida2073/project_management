@@ -20,7 +20,7 @@
     if (!tbody) return;
 
     var texts = Array.prototype.slice.call(panel.querySelectorAll('input.field-control-input, input.form-control'));
-    var selects = Array.prototype.slice.call(panel.querySelectorAll('.js-select'));
+    var selects = Array.prototype.slice.call(panel.querySelectorAll('.js-select:not([data-column-only])'));
     var dates = Array.prototype.slice.call(panel.querySelectorAll('.js-date'));
     var countEl = document.querySelector('.table-meta .count b');
     var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));

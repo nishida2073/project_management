@@ -78,6 +78,7 @@
     th.setAttribute('data-tone', WorkTypeStore.colorOf(t.workType) || '');
     th.classList.add('no-sort');
     th.setAttribute('data-kinds', t.kinds.join(','));
+    th.setAttribute('data-company', t.company || '');
     th.innerHTML = '<div class="kind-line"><span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
       '<div>' + esc(DISPLAY_NO[i] + '：' + t.name) + '</div>' +
       '<div>' + esc(StaffVenderStore.nameOf(t.company)) + '</div>';
@@ -165,17 +166,41 @@
   }
   var listTable = document.querySelector('#scrollArea table');
   listTable.style.width = 'auto';
-  window.applyStepColumns = function (code) {
-    document.querySelectorAll('#scrollArea [data-step]').forEach(function (el) {
-      var kinds = (el.getAttribute('data-kinds') || '').split(',');
-      el.style.display = (!code || kinds.indexOf(code) !== -1) ? '' : 'none';
+  var stepKindCode = '';
+  var stepCompanyCode = '';
+  function refreshStepColumns() {
+    var hiddenSteps = {};
+    document.querySelectorAll('#scrollArea thead th[data-step]').forEach(function (th) {
+      var kinds = (th.getAttribute('data-kinds') || '').split(',');
+      var kindOk = !stepKindCode || kinds.indexOf(stepKindCode) !== -1;
+      var companyOk = !stepCompanyCode || th.getAttribute('data-company') === stepCompanyCode;
+      hiddenSteps[th.getAttribute('data-step')] = !(kindOk && companyOk);
     });
-    document.querySelector('#scrollArea table').classList.toggle('hide-kind', !!code);
+    document.querySelectorAll('#scrollArea [data-step]').forEach(function (el) {
+      el.style.display = hiddenSteps[el.getAttribute('data-step')] ? 'none' : '';
+    });
+    document.querySelector('#scrollArea table').classList.toggle('hide-kind', !!stepKindCode);
     if (listTable.style.tableLayout !== 'fixed') return;
     var total = 0;
     listTable.querySelectorAll('thead th').forEach(function (th) { if (th.style.display !== 'none') total += parseFloat(th.style.width) || th.getBoundingClientRect().width; });
     listTable.style.width = total + 'px';
+  }
+  window.applyStepColumns = function (code) {
+    stepKindCode = code || '';
+    refreshStepColumns();
   };
+  function applyCompanyFilter() {
+    var el = document.getElementById('companyFilter');
+    var name = el ? ownText(el) : '';
+    stepCompanyCode = (!name || name === 'すべて') ? '' : StaffVenderStore.codeOf(name);
+    refreshStepColumns();
+  }
+  var companyFilter = document.getElementById('companyFilter');
+  if (companyFilter) {
+    companyFilter.setAttribute('data-options', ['すべて', StaffVenderStore.nameOf(StaffVenderStore.INTERNAL)].concat(StaffVenderStore.load().map(function (v) { return v.name; })).join(','));
+  }
+  document.addEventListener('click', function () { setTimeout(applyCompanyFilter, 0); }, true);
+  applyCompanyFilter();
   window.applyColumnFilters();
   var STATUS_OF_LABEL = StepStatusStore.byName();
   var LABEL_OF_STATUS = StepStatusStore.nameByCode();
@@ -205,11 +230,18 @@
     var task = SORTED[i];
     var ownerName = StaffStore.nameOf(sv.owner || '');
     var owners = stepOwnerNames(task);
+    var companyName = task ? StaffVenderStore.nameOf(task.company) : '';
+    var kindTags = task ? task.kinds.map(function (k) { return '<span class="tag ' + TaskTypeStore.colorOf(k) + '">' + esc(TaskTypeStore.nameOf(k)) + '</span>'; }).join('') : '';
     if (ownerName && owners.indexOf(ownerName) === -1) owners.unshift(ownerName);
     var overlay = document.createElement('div');
     overlay.className = 'overlay';
-    overlay.innerHTML = '<div class="input-dialog">' +
+    overlay.innerHTML = '<div class="input-dialog step-dialog">' +
       '<div class="input-dialog-title">' + esc(DISPLAY_NO[i] + '：' + task.name) + '</div>' +
+      '<div class="step-dialog-row">' +
+        '<div class="step-dialog-cell"><label class="input-dialog-label">タスク区分</label><div class="step-dialog-value">' + kindTags + '</div></div>' +
+        '<div class="step-dialog-cell"><label class="input-dialog-label">実施担当会社</label><div class="step-dialog-value">' + esc(companyName) + '</div></div>' +
+      '</div>' +
+      '<label class="input-dialog-label">クラス情報</label>' +
       '<div style="font-size:12px;color:#6c7688;margin-bottom:8px;">' + esc(classInfo) + '</div>' +
       '<label class="input-dialog-label">実施</label>' +
       '<div class="radio-group" id="sdTarget">' +
@@ -222,7 +254,7 @@
       '<div class="form-control js-date" id="sdActual">' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施担当者</label>' +
       '<div class="form-control js-select" id="sdOwner" data-options="' + esc(owners.join(',')) + '">' + esc(ownerName || '選択してください') + '<span class="caret">▾</span></div>' +
-      '<label class="input-dialog-label">状態</label>' +
+      '<label class="input-dialog-label">進捗</label>' +
       '<div class="status-select status-combo ' + STATUS_COLOR_OF[sv.status || 'WAIT'] + ' js-select" id="sdStatus" data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\' data-value="' + esc(LABEL_OF_STATUS[sv.status || 'WAIT']) + '">' + esc(LABEL_OF_STATUS[sv.status || 'WAIT']) + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">備考</label>' +
       '<textarea class="form-control textarea" id="sdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
