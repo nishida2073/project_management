@@ -63,6 +63,7 @@
       rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, 'font-size:10px;') + ' ' : '') + esc(m.teacherName) + '</div>');
     });
     add.forEach(function (p, i) {
+      if (alreadyDone(p, existing)) return;
       var same = matched(p);
       var from, on;
       if (same) {
@@ -87,7 +88,7 @@
       var replaceOpts = existing.map(function (m, k) { return { m: m, k: k }; }).filter(function (o) {
         return o.m.state !== 'done' && o.m.vendor === plan.vendorCode && String(o.m.teacherName || '').trim();
       });
-      var sel = (from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">置き換える人<span class="caret">▾</span></span></span>' : '';
+      var sel = (from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">選択してください<span class="caret">▾</span></span></span>' : '';
       rows.push('<div class="import-line" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from) + '</span> ' +
         esc(p.teacherName) + sel + '</div>');
@@ -150,7 +151,11 @@
       var r = line.querySelector('.import-replace');
       if (!r) return;
       var cb = line.querySelector('.import-check');
-      if (r.getAttribute('data-value') && !cb.checked) cb.checked = true;
+      var cur = r.getAttribute('data-value') || '';
+      if (cur !== (line.getAttribute('data-applied') || '')) {
+        line.setAttribute('data-applied', cur);
+        if (cur) cb.checked = true;
+      }
       line.querySelector('.js-after').innerHTML = afterHtml(cb.checked, line.getAttribute('data-from'));
     });
     updateCount();
@@ -266,6 +271,8 @@
       return;
     }
     var picked = {};
+    var usedTargets = {};
+    var dupName = '';
     checkedBoxes().forEach(function (cb) {
       var idx = Number(cb.getAttribute('data-idx'));
       var role = cb.getAttribute('data-role');
@@ -277,12 +284,19 @@
       var sel = cb.closest('.import-line').querySelector('.import-replace');
       var chosen = sel ? sel.getAttribute('data-value') : '';
       if (chosen) {
+        var tkey = idx + '|' + role + '|' + chosen;
+        if (usedTargets[tkey]) dupName = dupName || chosen;
+        usedTargets[tkey] = true;
         var rec = VenderAssignStore.find(u.classId);
         var list = role === 'sub' ? rec.subs : rec.mains;
         var k = list.findIndex(function (m) { return m.state !== 'done' && String(m.teacherName || '').trim() === chosen; });
         if (k >= 0) picked[idx][role === 'sub' ? 'dropSubs' : 'dropMains'].push(k);
       }
     });
+    if (dupName) {
+      MessageDialog.show('同じ講師「' + dupName + '」を複数の講師と置き換えることはできません');
+      return;
+    }
     var infos = [];
     try {
       Object.keys(picked).forEach(function (key) {
