@@ -199,46 +199,15 @@
     return changed;
   }
 
-  function chooseReplace(names, newName) {
-    return new Promise(function (resolve) {
-      var overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      overlay.innerHTML =
-        '<div class="input-dialog">' +
-          '<div class="input-dialog-title">講師の入れ替え</div>' +
-          '<label class="input-dialog-label">入れ替え前</label>' +
-          '<div class="form-control js-select" data-options="' + esc(names.join(',')) + '" data-value="">選択<span class="caret">▾</span></div>' +
-          '<label class="input-dialog-label">入れ替え後</label>' +
-          '<div class="input-dialog-name">' + esc(newName) + '</div>' +
-          '<div class="input-dialog-error"></div>' +
-          '<div class="input-dialog-actions">' +
-            '<div class="search-btn rp-cancel">キャンセル</div>' +
-            '<div class="btn primary rp-ok">入れ替え</div>' +
-          '</div>' +
-        '</div>';
-      document.body.appendChild(overlay);
-      var sel = overlay.querySelector('.js-select');
-      var errorEl = overlay.querySelector('.input-dialog-error');
-      window.bindJsSelect(sel);
-
-      function close(value) {
-        document.removeEventListener('keydown', onKey);
-        overlay.remove();
-        resolve(value);
-      }
-      function onKey(e) { if (e.key === 'Escape') close(null); }
-
-      overlay.querySelector('.rp-ok').addEventListener('click', function () {
-        var name = sel.getAttribute('data-value') || '';
-        if (!name || names.indexOf(name) === -1) {
-          errorEl.textContent = '入れ替える講師を選択してください';
-          return;
-        }
-        close(name);
-      });
-      overlay.querySelector('.rp-cancel').addEventListener('click', function () { close(null); });
-      overlay.addEventListener('click', function (e) { if (e.target === overlay) close(null); });
-      document.addEventListener('keydown', onKey);
+  function chooseReplace(names, newName, current) {
+    return SelectDialog.open({
+      title: '講師の入れ替え',
+      fields: [
+        { label: '入れ替え前', select: { options: names, value: current || '' } },
+        { label: '入れ替え後', text: newName }
+      ],
+      okLabel: '入れ替え',
+      allowEmpty: true
     });
   }
 
@@ -269,12 +238,11 @@
     var parts = k.split('|');
     var src = parts[1] === 'sub' ? plan.updates[Number(parts[0])].subs : plan.updates[Number(parts[0])].mains;
     var newName = src[Number(parts[2])].teacherName;
-    chooseReplace(names, newName).then(function (name) {
-      if (!name) return;
+    chooseReplace(names, newName, rep[k] || '').then(function (name) {
+      if (name === null) return;
       var td = mark.closest('td');
       captureTd(td);
       rep[k] = name;
-      chk[k] = true;
       rerender(td);
       updateCount();
     });

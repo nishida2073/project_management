@@ -2,44 +2,10 @@
 
 
   function chooseWithdraw(names) {
-    return new Promise(function (resolve) {
-      var overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      overlay.innerHTML =
-        '<div class="input-dialog">' +
-          '<div class="input-dialog-title">依頼を取り下げる</div>' +
-          '<label class="input-dialog-label">講師ベンダー名</label>' +
-          '<div class="form-control js-select" data-options="' + esc(names.join(',')) + '" data-value="' + esc(names.length === 1 ? names[0] : '') + '">' +
-            esc(names.length === 1 ? names[0] : '選択してください') + '<span class="caret">▾</span></div>' +
-          '<div class="input-dialog-error"></div>' +
-          '<div class="input-dialog-actions">' +
-            '<div class="search-btn wd-cancel">キャンセル</div>' +
-            '<div class="btn primary wd-ok">取り下げる</div>' +
-          '</div>' +
-        '</div>';
-      document.body.appendChild(overlay);
-      var sel = overlay.querySelector('.js-select');
-      var errorEl = overlay.querySelector('.input-dialog-error');
-      window.bindJsSelect(sel);
-
-      function close(value) {
-        document.removeEventListener('keydown', onKey);
-        overlay.remove();
-        resolve(value);
-      }
-      function onKey(e) { if (e.key === 'Escape') close(null); }
-
-      overlay.querySelector('.wd-ok').addEventListener('click', function () {
-        var name = sel.getAttribute('data-value') || '';
-        if (!name || names.indexOf(name) === -1) {
-          errorEl.textContent = '講師ベンダー名を選択してください';
-          return;
-        }
-        close(name);
-      });
-      overlay.querySelector('.wd-cancel').addEventListener('click', function () { close(null); });
-      overlay.addEventListener('click', function (e) { if (e.target === overlay) close(null); });
-      document.addEventListener('keydown', onKey);
+    return SelectDialog.open({
+      title: '依頼の取り下げ',
+      fields: [{ label: '講師ベンダー名', select: { options: names, value: names.length === 1 ? names[0] : '' } }],
+      okLabel: '取り下げる'
     });
   }
 
@@ -139,13 +105,17 @@
     var reqs = VenderAssignStore.requestsOf(a);
     var reqNames = {};
     reqs.forEach(function (rq) { reqNames[TeacherVenderStore.nameOf(rq.vendor) || rq.vendor] = rq.vendor; });
-    if (reqs.length) $('withdrawBtn').style.display = '';
+    var requesting = a.mains.concat(a.subs).filter(function (m) { return m.state === 'requesting' && m.vendor; });
+    requesting.forEach(function (m) { reqNames[TeacherVenderStore.nameOf(m.vendor) || m.vendor] = m.vendor; });
+    if (reqs.length || requesting.length) $('withdrawBtn').style.display = '';
     $('withdrawBtn').addEventListener('click', function () {
       chooseWithdraw(Object.keys(reqNames)).then(function (name) {
         if (!name) return;
         var code = reqNames[name];
         var rec = VenderAssignStore.find(classId);
         rec.requests = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== code; });
+        rec.mains = (rec.mains || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
+        rec.subs = (rec.subs || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
         delete rec.requested;
         delete rec.requestMain;
         delete rec.requestSub;
