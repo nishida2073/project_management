@@ -92,7 +92,7 @@
     add.forEach(function (p, i) {
       var k = idx + '|' + role + '|' + i;
       if (alreadyDone(p, existing) || matched(p)) return;
-      if (chk[k] === undefined) chk[k] = pool.slot + pool.req + pool.free > 0;
+      if (chk[k] === undefined) chk[k] = pool.slot > 0 || pool.req > 0;
       if (chk[k] && (asg[k] === undefined || asg[k] === 'none')) asg[k] = nextSlot(pool);
     });
     var peek = { slot: pool.slot, req: pool.req, free: pool.free };
