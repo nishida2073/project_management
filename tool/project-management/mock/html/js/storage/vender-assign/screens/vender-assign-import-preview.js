@@ -60,7 +60,7 @@
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
-      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, 'font-size:10px;') + ' ' : '') + esc(vendorText(m.vendor)) + '：' + esc(m.teacherName) + '</div>');
+      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, 'font-size:10px;') + ' ' : '') + esc(m.teacherName) + '</div>');
     });
     add.forEach(function (p, i) {
       var same = matched(p);
@@ -90,7 +90,7 @@
       var sel = (from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">置き換える人<span class="caret">▾</span></span></span>' : '';
       rows.push('<div class="import-line" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from) + '</span> ' +
-        esc(vendorText(p.vendor)) + '：' + esc(p.teacherName) + sel + '</div>');
+        esc(p.teacherName) + sel + '</div>');
     });
     return rows.length ? rows.join('') : '-';
   }
