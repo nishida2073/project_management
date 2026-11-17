@@ -81,7 +81,7 @@
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
-      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, TAG_STYLE, 'fixed') + ' ' : '') + esc(m.teacherName) + '</div>');
+      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, TAG_STYLE, 'fixed') + ' ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span></div>');
     });
     var pool = { slot: slotInit, req: reqInit, free: freeInit };
     add.forEach(function (p, i) {
@@ -114,7 +114,7 @@
           && !add.some(function (p) { return sameTeacher(p, o.m); });
       });
       var rv = rep[k] || '';
-      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" title="置き換える人を選ぶ">⇄</span>' + (rv ? '<span style="margin-left:4px;font-size:11px;color:#5a6376;">' + esc(rv) + '</span>' : '') : '';
+      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" title="講師の入れ替え">⇄</span>' + (rv ? '<span style="margin-left:4px;font-size:11px;color:#5a6376;">' + esc(rv) + '</span>' : '') : '';
       rows.push('<div class="import-line" data-key="' + k + '" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from, !same) + '</span> ' +
         esc(p.teacherName) + sel + '</div>');
@@ -150,6 +150,30 @@
   });
   document.querySelectorAll('#importBody .js-select').forEach(function (el) { window.bindJsSelect(el); });
 
+  function fitColumns() {
+    var table = $('importBody').closest('table');
+    var ths = table.querySelectorAll('thead th');
+    [5, 6].forEach(function (c) {
+      var th = ths[c];
+      var need = 0;
+      Array.prototype.forEach.call($('importBody').querySelectorAll('tr'), function (tr) {
+        var td = tr.children[c];
+        if (!td) return;
+        td.style.whiteSpace = 'nowrap';
+        need = Math.max(need, td.scrollWidth + td.offsetWidth - td.clientWidth);
+        td.style.whiteSpace = '';
+      });
+      var cur = th.offsetWidth;
+      if (need > cur) {
+        var diff = need - cur;
+        th.style.width = need + 'px';
+        th.style.minWidth = need + 'px';
+        table.style.width = (table.offsetWidth + diff) + 'px';
+      }
+    });
+  }
+  fitColumns();
+
   updateCount();
 
   if (plan.errors && plan.errors.length) {
@@ -175,19 +199,21 @@
     return changed;
   }
 
-  function chooseReplace(names) {
+  function chooseReplace(names, newName) {
     return new Promise(function (resolve) {
       var overlay = document.createElement('div');
       overlay.className = 'overlay';
       overlay.innerHTML =
         '<div class="input-dialog">' +
-          '<div class="input-dialog-title">置き換える人</div>' +
-          '<label class="input-dialog-label">置き換える講師</label>' +
-          '<div class="form-control js-select" data-options="' + esc(names.join(',')) + '" data-value="">選択してください<span class="caret">▾</span></div>' +
+          '<div class="input-dialog-title">講師の入れ替え</div>' +
+          '<label class="input-dialog-label">入れ替え前</label>' +
+          '<div class="form-control js-select" data-options="' + esc(names.join(',')) + '" data-value="">選択<span class="caret">▾</span></div>' +
+          '<label class="input-dialog-label">入れ替え後</label>' +
+          '<div class="input-dialog-name">' + esc(newName) + '</div>' +
           '<div class="input-dialog-error"></div>' +
           '<div class="input-dialog-actions">' +
             '<div class="search-btn rp-cancel">キャンセル</div>' +
-            '<div class="btn primary rp-ok">置き換える</div>' +
+            '<div class="btn primary rp-ok">入れ替え</div>' +
           '</div>' +
         '</div>';
       document.body.appendChild(overlay);
@@ -205,7 +231,7 @@
       overlay.querySelector('.rp-ok').addEventListener('click', function () {
         var name = sel.getAttribute('data-value') || '';
         if (!name || names.indexOf(name) === -1) {
-          errorEl.textContent = '置き換える講師を選択してください';
+          errorEl.textContent = '入れ替える講師を選択してください';
           return;
         }
         close(name);
@@ -223,6 +249,7 @@
     var ex = existingOf(u);
     td.innerHTML = role === 'sub' ? cellHtml(u, idx, 'sub', ex.subs, u.subs) : cellHtml(u, idx, 'main', ex.mains, u.mains);
     td.querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
+    fitColumns();
   }
 
   $('importBody').addEventListener('change', function (e) {
@@ -239,7 +266,10 @@
     if (!mark) return;
     var k = mark.getAttribute('data-key');
     var names = (mark.getAttribute('data-options') || '').split(',');
-    chooseReplace(names).then(function (name) {
+    var parts = k.split('|');
+    var src = parts[1] === 'sub' ? plan.updates[Number(parts[0])].subs : plan.updates[Number(parts[0])].mains;
+    var newName = src[Number(parts[2])].teacherName;
+    chooseReplace(names, newName).then(function (name) {
       if (!name) return;
       var td = mark.closest('td');
       captureTd(td);
