@@ -24,8 +24,8 @@
     return found ? found.tag : '';
   }
 
-  function tag(s, style) {
-    return '<span class="tag ' + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
+  function tag(s, style, cls) {
+    return '<span class="tag ' + (cls ? cls + ' ' : '') + s.tag + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.label + '</span>';
   }
 
   window.SlotStatusStore = { STATUS: STATUS, find: find, labelOf: labelOf, colorOf: colorOf, tag: tag };

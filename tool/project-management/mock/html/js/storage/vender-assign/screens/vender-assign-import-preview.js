@@ -20,8 +20,10 @@
     return { done: ST.REQUESTED, requesting: ST.REQUESTING, before: ST.BEFORE, none: ST.OUT_OF_PLAN, open: ST.OPEN };
   })();
 
+  var TAG_STYLE = 'font-size:10px;';
+
   function tagOf(key) {
-    return VenderAssignStore.tag(STATE_TAG[key], 'font-size:10px;');
+    return VenderAssignStore.tag(STATE_TAG[key], TAG_STYLE, 'fixed');
   }
 
   function afterHtml(on, from) {
@@ -60,7 +62,7 @@
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
-      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, 'font-size:10px;') + ' ' : '') + esc(m.teacherName) + '</div>');
+      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, TAG_STYLE, 'fixed') + ' ' : '') + esc(m.teacherName) + '</div>');
     });
     add.forEach(function (p, i) {
       if (alreadyDone(p, existing)) return;
@@ -86,7 +88,8 @@
         on = false;
       }
       var replaceOpts = existing.map(function (m, k) { return { m: m, k: k }; }).filter(function (o) {
-        return o.m.state !== 'done' && o.m.vendor === plan.vendorCode && String(o.m.teacherName || '').trim();
+        return o.m.state !== 'done' && o.m.vendor === plan.vendorCode && String(o.m.teacherName || '').trim()
+          && !add.some(function (p) { return sameTeacher(p, o.m); });
       });
       var sel = (from === 'none' && replaceOpts.length) ? '<span class="field" style="display:inline-flex;vertical-align:middle;margin-left:10px;"><span class="control js-select import-replace" data-options="' + replaceOpts.map(function (o) { return esc(o.m.teacherName); }).join(',') + '" data-value="" style="height:22px;line-height:20px;font-size:12px;padding:0 8px;">選択してください<span class="caret">▾</span></span></span>' : '';
       rows.push('<div class="import-line" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +

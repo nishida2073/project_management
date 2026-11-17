@@ -28,7 +28,7 @@
     var reqs = VenderAssignStore.requestsOf(a);
     var tot = VenderAssignStore.totalRequest(a);
     reqs.forEach(function (rq) {
-      var reqText = esc(TeacherVenderStore.nameOf(rq.vendor) || '-') + '： ' + VenderAssignStore.tag(S.REQUESTING);
+      var reqText = esc(TeacherVenderStore.nameOf(rq.vendor) || '-') + '： ' + VenderAssignStore.tag(S.REQUESTING, '', 'fixed');
       for (var mi = 0; mi < (rq.main || 0); mi++) mainLines = (mainLines === '-' ? '' : mainLines) + '<div data-vendor="' + esc(rq.vendor) + '">' + reqText + '</div>';
       for (var si = 0; si < (rq.sub || 0); si++) subLines = (subLines === '-' ? '' : subLines) + '<div data-vendor="' + esc(rq.vendor) + '">' + reqText + '</div>';
     });
@@ -38,13 +38,13 @@
     var reqOnly = VenderAssignStore.requestsOf(a).reduce(function (t, q) { t.main += q.main || 0; t.sub += q.sub || 0; return t; }, { main: 0, sub: 0 });
     var freeMain = Math.max(0, planMain - a.mains.length - reqOnly.main);
     var freeSub = Math.max(0, planSub - a.subs.length - reqOnly.sub);
-    for (var fm = 0; fm < freeMain; fm++) mainLines = (mainLines === '-' ? '' : mainLines) + '<div data-vendor="">' + VenderAssignStore.tag(S.OPEN) + '</div>';
-    for (var fs = 0; fs < freeSub; fs++) subLines = (subLines === '-' ? '' : subLines) + '<div data-vendor="">' + VenderAssignStore.tag(S.OPEN) + '</div>';
+    for (var fm = 0; fm < freeMain; fm++) mainLines = (mainLines === '-' ? '' : mainLines) + '<div data-vendor="">' + VenderAssignStore.tag(S.OPEN, '', 'fixed') + '</div>';
+    for (var fs = 0; fs < freeSub; fs++) subLines = (subLines === '-' ? '' : subLines) + '<div data-vendor="">' + VenderAssignStore.tag(S.OPEN, '', 'fixed') + '</div>';
     var ps = ClassStore.practiceStatus(r);
     var tr = document.createElement('tr');
     var custCode = (ClassStore.PROJECTS[r.projectCode] || {}).customer;
     tr.innerHTML =
-      '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
+      '<td class="sticky col-practice">' + (ps ? '<span class="tag fixed ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td class="sticky">' + esc(custCode ? CustomerStore.nameOf(custCode) : '-') + '</td>' +
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
       '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +

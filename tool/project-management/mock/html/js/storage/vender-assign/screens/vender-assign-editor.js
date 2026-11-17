@@ -63,7 +63,7 @@
       vendorCell +
       '<input type="text" class="form-control' + (reference ? ' readonly' : '') + '" placeholder="講師名"' + (reference ? ' disabled' : '') + ' value="' + esc(data.teacherName || '') + '">' +
       '<div class="sub-remove">✕</div>' +
-      '<span class="tag sub-status"></span>';
+      '<span class="tag fixed sub-status"></span>';
     row.querySelector('.sub-remove').addEventListener('click', function () {
       var st = row.getAttribute('data-state');
       if (st !== 'done' && st !== 'requesting') { row.remove(); return; }
@@ -94,7 +94,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row'), function (row) {
       var st = statusOfRow(row);
       var tag = row.querySelector('.sub-status');
-      tag.className = 'tag sub-status' + (st ? ' ' + st.tag : '');
+      tag.className = 'tag fixed sub-status' + (st ? ' ' + st.tag : '');
       tag.textContent = st ? st.label : '';
     });
   }
@@ -129,7 +129,7 @@
     var a = VenderAssignStore.find(classId);
     var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0);
     var zanTag = document.createElement('span');
-    zanTag.className = 'tag ' + (zanNow ? 'orange' : 'green');
+    zanTag.className = 'tag fixed ' + (zanNow ? 'orange' : 'green');
     zanTag.textContent = zanNow ? 'あり' : 'なし';
     $('subLine').appendChild(document.createTextNode('　残講師：'));
     $('subLine').appendChild(zanTag);
