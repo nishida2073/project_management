@@ -20,10 +20,8 @@
     return { done: ST.REQUESTED, requesting: ST.REQUESTING, before: ST.BEFORE, none: ST.OUT_OF_PLAN, open: ST.OPEN };
   })();
 
-  var TAG_STYLE = 'font-size:10px;';
-
   function stateLabel(s) {
-    return '<span class="status-label state-tag ' + s.color + '" style="' + TAG_STYLE + '">' + esc(s.name) + '</span>';
+    return '<span class="status-label state-tag vender-assign-import-state-tag ' + s.color + '">' + esc(s.name) + '</span>';
   }
 
   function tagOf(key) {
@@ -78,14 +76,14 @@
     var freeInit = Math.max(0, planN - existing.length - reqAll);
     var freeCount = add.filter(function (p) { return !matched(p); }).length;
     var slotHide = Math.min(freeCount, slotInit);
-    var SPACER = '<span class="check-box check-sm" style="visibility:hidden;vertical-align:middle;"><input type="checkbox" style="visibility:hidden;"><span class="check-mark"></span></span> ';
+    var SPACER = '<span class="check-box check-sm vender-assign-import-spacer"><input type="checkbox"><span class="check-mark"></span></span> ';
     var rows = [];
     existing.forEach(function (m) {
       if (m.vendor !== plan.vendorCode) return;
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
-      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? stateLabel(t) + ' ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span></div>');
+      rows.push('<div class="vender-assign-import-row-gap">' + SPACER + (t ? stateLabel(t) + ' ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span></div>');
     });
     var pool = { slot: slotInit, req: reqInit, free: freeInit };
     add.forEach(function (p, i) {
@@ -118,10 +116,10 @@
           && !add.some(function (p) { return sameTeacher(p, o.m); });
       });
       var rv = rep[k] || '';
-      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" title="講師の入れ替え">⇄</span>' + (rv ? '<span style="margin-left:4px;font-size:11px;color:#5a6376;">' + esc(rv) + '</span>' : '') : '';
-      rows.push('<div class="import-line" data-key="' + k + '" data-from="' + from + '" style="margin:2px 0;"><label class="check-box check-sm" style="vertical-align:middle;"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
+      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" title="講師の入れ替え">⇄</span>' + (rv ? '<span class="vender-assign-import-replace-note">' + esc(rv) + '</span>' : '') : '';
+      rows.push('<div class="vender-assign-import-line" data-key="' + k + '" data-from="' + from + '"><label class="check-box check-sm vender-assign-import-check-label"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from, !same) + '</span> ' +
-        esc(p.teacherName) + sel + '</div>');
+        esc(p.teacherName) + sel + ((on && from === 'none' && !replaceOpts.length) ? '<span class="debug-replace" style="color:#d43c40;font-size:11px;">[DEBUG 候補0 plan=' + esc(String(plan.vendorCode)) + ' ' + esc(existing.map(function (m) { return m.state + '/' + m.vendor + '/' + m.teacherName + '/' + (add.some(function (q) { return sameTeacher(q, m); }) ? 'inAdd' : 'notAdd'); }).join(' | ')) + ']</span>' : '') + '</div>');
     });
     return rows.length ? rows.join('') : '-';
   }
@@ -144,7 +142,7 @@
     tr.setAttribute('data-idx', idx);
     tr.innerHTML =
       '<td>' + esc(yearLabel(u.year)) + '</td>' +
-      '<td><div>' + esc(u.courseName) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(u.courseCode) + '</div></td>' +
+      '<td><div>' + esc(u.courseName) + '</div><div class="vender-assign-sub">' + esc(u.courseCode) + '</div></td>' +
       '<td>' + esc(u.lessonNo) + '</td>' +
       '<td>' + esc(u.start) + '</td>' +
       '<td>' + esc(u.end) + '</td>' +
@@ -196,9 +194,10 @@
 
   function captureTd(td) {
     var changed = false;
-    td.querySelectorAll('.import-line').forEach(function (line) {
+    td.querySelectorAll('.vender-assign-import-line').forEach(function (line) {
       var k = line.getAttribute('data-key');
-      chk[k] = line.querySelector('.import-check').checked;
+      var cb = line.querySelector('.import-check');
+      if (k && cb) chk[k] = cb.checked;
     });
     return changed;
   }
@@ -228,7 +227,7 @@
   $('importBody').addEventListener('change', function (e) {
     if (!e.target.classList.contains('import-check')) return;
     var td = e.target.closest('td');
-    delete asg[e.target.closest('.import-line').getAttribute('data-key')];
+    delete asg[e.target.closest('.vender-assign-import-line').getAttribute('data-key')];
     captureTd(td);
     rerender(td);
     updateCount();
@@ -370,7 +369,7 @@
       picked[idx] = picked[idx] || { mains: [], subs: [], dropMains: [], dropSubs: [] };
       var src = role === 'sub' ? u.subs : u.mains;
       picked[idx][role === 'sub' ? 'subs' : 'mains'].push(src[i]);
-      var chosen = rep[cb.closest('.import-line').getAttribute('data-key')] || '';
+      var chosen = rep[cb.closest('.vender-assign-import-line').getAttribute('data-key')] || '';
       if (chosen) {
         var tkey = idx + '|' + role + '|' + chosen;
         if (usedTargets[tkey]) dupName = dupName || chosen;

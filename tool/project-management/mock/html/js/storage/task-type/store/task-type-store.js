@@ -3,8 +3,8 @@
   var PREFIX = 'TK-';
 
   var SEED = [
-    { code: 'TK-01', name: 'データ', color: 'blue' },
-    { code: 'TK-02', name: 'グループ', color: 'orange' }
+    { code: 'TK-01', name: 'データ用', color: 'blue' },
+    { code: 'TK-02', name: 'グループ用', color: 'orange' }
   ];
 
   function save(list) {

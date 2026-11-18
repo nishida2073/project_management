@@ -30,20 +30,20 @@
     tr.setAttribute('data-remain-main', remainMain);
     tr.setAttribute('data-remain-sub', remainSub);
     tr.innerHTML =
-      '<td class="sticky" style="text-align: center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
+      '<td class="sticky vender-assign-center"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
-      '<td class="sticky col-course"><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
-      '<td class="sticky"><div style="font-weight:700;">' + esc(r.lessonNo) + '</div></td>' +
+      '<td class="sticky col-course"><div>' + esc(c.name) + '</div><div class="vender-assign-sub">' + esc(r.courseCode) + '</div></td>' +
+      '<td class="sticky"><div>' + esc(r.lessonNo) + '</div></td>' +
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
       '<td>' + namedMain + '人</td>' +
-      '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;"><span class="cnt-bef-main" style="color:#d97c1e;font-size:12.5px;">' + befMain + '人</span><span class="cnt-pend-main" style="color:#2f6fed;font-size:12.5px;">' + pendMain + '人</span><span class="cnt-done-main" style="color:#279158;font-size:12.5px;">' + namedMain + '人</span></div></td>' +
-      '<td><input type="number" class="form-control main-count" min="0" max="' + reqMain + '" value="' + reqMain + '" style="width:72px;height:28px;"></td>' +
+      '<td><div class="vender-assign-count-cell"><span class="cnt-bef-main vender-assign-count-before">' + befMain + '人</span><span class="cnt-pend-main vender-assign-count-requesting">' + pendMain + '人</span><span class="cnt-done-main vender-assign-count-done">' + namedMain + '人</span></div></td>' +
+      '<td><input type="number" class="form-control main-count vender-assign-count-input" min="0" max="' + reqMain + '" value="' + reqMain + '"></td>' +
       '<td>' + dashOr(r.subTeachers, '人') + '</td>' +
       '<td>' + namedSub + '人</td>' +
-      '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;"><span class="cnt-bef-sub" style="color:#d97c1e;font-size:12.5px;">' + befSub + '人</span><span class="cnt-pend-sub" style="color:#2f6fed;font-size:12.5px;">' + pendSub + '人</span><span class="cnt-done-sub" style="color:#279158;font-size:12.5px;">' + namedSub + '人</span></div></td>' +
-      '<td><input type="number" class="form-control sub-count" min="0" max="' + reqSub + '" value="' + reqSub + '" style="width:72px;height:28px;"></td>';
+      '<td><div class="vender-assign-count-cell"><span class="cnt-bef-sub vender-assign-count-before">' + befSub + '人</span><span class="cnt-pend-sub vender-assign-count-requesting">' + pendSub + '人</span><span class="cnt-done-sub vender-assign-count-done">' + namedSub + '人</span></div></td>' +
+      '<td><input type="number" class="form-control sub-count vender-assign-count-input" min="0" max="' + reqSub + '" value="' + reqSub + '"></td>';
     body.appendChild(tr);
   });
 

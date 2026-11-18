@@ -73,25 +73,25 @@
       var midSubN = code ? requestsFor(x.assign, code, 'sub') : 0;
       var doneSubSel = code ? x.assign.subs.filter(function (p) { return p.state === 'done' && p.vendor === code; }).length : 0;
       tr.innerHTML =
-        '<td style="text-align:center;"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
+        '<td class="vender-assign-center"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
         '<td>' + esc(yearLabel(x.cls.year)) + '</td>' +
-        '<td><div style="font-weight:700;">' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(x.cls.courseCode) + '</div></td>' +
-        '<td><div style="font-weight:700;">' + esc(x.cls.lessonNo) + '</div></td>' +
+        '<td><div>' + esc(c.name) + '</div><div class="vender-assign-sub">' + esc(x.cls.courseCode) + '</div></td>' +
+        '<td><div>' + esc(x.cls.lessonNo) + '</div></td>' +
         '<td>' + esc(x.cls.start) + '</td>' +
         '<td>' + esc(x.cls.end) + '</td>' +
         '<td>' + dashOr(x.cls.mainTeachers, '人') + '</td>' +
         '<td>' + namedMain + '人</td>' +
-        '<td><div class="count-cell">' +
-          '<span class="count-before">' + (code ? befSel + '人' : '-') + '</span>' +
-          '<span class="count-requesting">' + (code ? midN + '人' : '-') + '</span>' +
-          '<span class="count-done">' + (code ? doneSel + '人' : '-') + '</span>' +
+        '<td><div class="vender-assign-count-cell">' +
+          '<span class="vender-assign-count-before">' + (code ? befSel + '人' : '-') + '</span>' +
+          '<span class="vender-assign-count-requesting">' + (code ? midN + '人' : '-') + '</span>' +
+          '<span class="vender-assign-count-done">' + (code ? doneSel + '人' : '-') + '</span>' +
         '</div></td>' +
         '<td>' + dashOr(x.cls.subTeachers, '人') + '</td>' +
         '<td>' + namedSub + '人</td>' +
-        '<td><div class="count-cell">' +
-          '<span class="count-before">' + (code ? befSubSel + '人' : '-') + '</span>' +
-          '<span class="count-requesting">' + (code ? midSubN + '人' : '-') + '</span>' +
-          '<span class="count-done">' + (code ? doneSubSel + '人' : '-') + '</span>' +
+        '<td><div class="vender-assign-count-cell">' +
+          '<span class="vender-assign-count-before">' + (code ? befSubSel + '人' : '-') + '</span>' +
+          '<span class="vender-assign-count-requesting">' + (code ? midSubN + '人' : '-') + '</span>' +
+          '<span class="vender-assign-count-done">' + (code ? doneSubSel + '人' : '-') + '</span>' +
         '</div></td>';
       body.appendChild(tr);
     });

@@ -26,16 +26,11 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 .topbar { min-height: 64px; background: #ffffff; border-bottom: 1px solid #dde3ec; display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; }
 .topbar .crumb { font-size: 20px; font-weight: 700; color: #40485a; }
 .topbar .crumb span { color: #9aa4b5; font-weight: 400; margin: 0 6px; }
-.topbar .crumb-sub { font-size: 12.5px; color: #7c8598; margin-top: 4px; }
 .topbar .user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4a5164; margin-left: auto; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: #4f8cff; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
 
-/* Master category sub-nav */
+/* Body area (sidebar + main) */
 .body-area { flex: 1; display: flex; min-width: 0; min-height: 0; }
-.subnav { width: 210px; background: #ffffff; border-right: 1px solid #e2e7ef; flex-shrink: 0; padding: 18px 0; overflow-y: auto; }
-.subnav .group-title { font-size: 11px; color: #9aa4b5; font-weight: 700; padding: 10px 20px 6px; letter-spacing: 0.5px; }
-.subnav .m-item { padding: 8px 20px; font-size: 12.5px; color: #4a5164; border-left: 3px solid transparent; cursor: default; }
-.subnav .m-item.active { background: #eef4ff; color: #2f6fed; font-weight: 700; border-left: 3px solid #2f6fed; }
 
 /* Content area */
 .content { flex: 1; padding: 24px 28px 40px; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
@@ -44,23 +39,17 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 .toolbar h1 { font-size: 20px; font-weight: 700; }
 .toolbar .left h1 { font-size: 20px; font-weight: 700; }
 .toolbar .left p { font-size: 12.5px; color: #7c8598; margin-top: 4px; }
-.btn-group { display: flex; gap: 10px; align-items: center; }
 .toolbar { min-height: 34px; }
 .btn.primary { background: #1c2b45; border-color: #1c2b45; color: #ffffff; }
 a.btn { cursor: pointer; }
-.btn, .search-btn, .link-btn, .page-btn, .close-x, .add-row, .sidebar-toggle { cursor: pointer; }
+.btn, .search-btn, .page-btn, .close-x, .add-row, .sidebar-toggle { cursor: pointer; }
 .search-btn, a.search-btn { text-decoration: none; }
-.btn.icon { font-size: 14px; }
 
-/* 遅延のみ表示トグル（コンテナ部分。丸スイッチ本体はページ固有CSS） */
-.toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #40485a; font-weight: 700; background: #fff; border: 1px solid #d3d9e3; border-radius: 6px; padding: 7px 12px; }
 
 /* Filter panel */
 .filter-panel { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 11.5px; color: #6c7688; font-weight: 700; }
-.field .control.is-green { background: #e5f6ec; color: #279158; border-color: #bfe6cf; font-weight: 700; }
-.field .control.is-orange { background: #fff2e2; color: #d97c1e; border-color: #f3d2a6; font-weight: 700; }
 .field .control { height: 34px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 10px; font-size: 13px; color: #333c4d; display: flex; align-items: center; min-width: 130px; }
 .field .control.wide { min-width: 220px; }
 .field .control.small { min-width: 100px; }
@@ -71,23 +60,15 @@ input.field-control-input:focus { border-color: #2f6fed; }
 .search-btn { height: 34px; padding: 0 22px; background: #1c2b45; color: white; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
 .tilde { align-self: flex-end; height: 34px; display: flex; align-items: center; color: #9aa4b5; }
 
-/* 年度バー・年度コピー注記（ベンダーマスタ系） */
-.year-bar { display: flex; align-items: center; gap: 10px; background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 10px 16px; margin-bottom: 18px; }
-.year-bar .label { font-size: 12px; color: #7c8598; font-weight: 700; margin-right: 4px; }
+/* 年度タブ */
 .year-tab { padding: 7px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 700; color: #7c8598; background: #f2f4f8; }
 .year-tab.active { background: #1c2b45; color: #ffffff; }
 .year-tab.add { color: #2f6fed; background: #eef4ff; }
-.year-bar .note { margin-left: auto; font-size: 11.5px; color: #9aa4b5; }
-.copy-hint { display: flex; align-items: center; gap: 8px; background: #fff9ec; border: 1px solid #f3e3b8; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; font-size: 12px; color: #8a6d1f; }
-.copy-hint b { color: #6b5314; }
-.info-note { display: flex; align-items: center; gap: 8px; background: #f6f8fb; border: 1px solid #e6eaf1; border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; font-size: 12px; color: #7c8598; }
-.info-note b { color: #4a5164; }
 
 /* Table card */
 .table-card { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; overflow: hidden; }
 .table-meta { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #eef1f6; font-size: 12.5px; color: #6c7688; }
 .table-meta .count b { color: #1c2b45; font-size: 14px; }
-.table-meta .hint { color: #9aa4b5; }
 table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 thead th { background: #f6f8fb; color: #5a6376; text-align: center; padding: 8px 10px; font-weight: 700; border-bottom: 1px solid #e6eaf1; white-space: nowrap; }
 th.sortable { cursor: pointer; user-select: none; }
@@ -98,9 +79,6 @@ th.sort-asc::after, th.sort-desc::after { white-space: normal; font-size: 10px; 
 th.sort-asc::after { content: '▲'; }
 th.sort-desc::after { content: '▼'; }
 tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f6; color: #333c4d; white-space: nowrap; }
-th.grp-basic { background: #eef4ff !important; color: #2f6fed !important; text-align: center; border-bottom: 1px solid #d7e3fb !important; }
-th.grp-year { background: #fff6e9 !important; color: #b3791a !important; text-align: center; border-bottom: 1px solid #f3e3c0 !important; }
-th.grp-none { background: #f6f8fb !important; }
 
 /* タグ・区分バッジ */
 .tag { display: inline-block; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 4px; }
@@ -123,37 +101,16 @@ th.grp-none { background: #f6f8fb !important; }
 .tag.purple { background: #f5eaf7; color: #8a3f96; }
 .tag.green { background: #e5f6ec; color: #279158; }
 
-/* 稼働状態・有効無効（社員／ベンダーマスタ） */
-.state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
-.state .dot { width: 8px; height: 8px; border-radius: 50%; }
-.state.on .dot { background: #33b070; }
-.state.on { color: #279158; }
-.state.off .dot { background: #b7bfcc; }
-.state.off { color: #8992a3; }
 
-/* 進捗ステータス（研修一覧） */
-.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
-.status .dot { width: 8px; height: 8px; border-radius: 50%; }
-.status.prep .dot { background: #b7bfcc; }
-.status.prep { color: #6c7688; }
-.status.progress .dot { background: #2f6fed; }
-.status.progress { color: #2f6fed; }
-.status.done .dot { background: #33b070; }
-.status.done { color: #279158; }
-.status.delay .dot { background: #e5484d; }
-.status.delay { color: #d43c40; }
 
-/* リンクボタン・操作列 */
+/* 操作列のボタン */
 td.row-actions { white-space: nowrap; text-align: center; }
 td.row-actions > .search-btn { display: inline-flex; }
 td.row-actions > .search-btn { height: 22px; padding: 0 10px; font-size: 11px; }
 .table-scroll thead th.col-actions, .scroll-outer thead th.col-actions { position: sticky; right: 0; top: 0; z-index: 4; box-shadow: -1px 0 0 #e6eaf1; }
 .table-scroll tbody td.row-actions, .scroll-outer tbody td.row-actions { position: sticky; right: 0; z-index: 1; background: #ffffff; box-shadow: -1px 0 0 #eef1f6; }
-.link-btn { font-size: 12px; color: #2f6fed; font-weight: 700; padding: 4px 8px; border: 1px solid #d7e3fb; border-radius: 5px; background: #f4f8ff; text-decoration: none; cursor: default; display: inline-block; }
-.link-btn.secondary { color: #6c7688; border-color: #dfe4ec; background: #fafbfd; }
-a.link-btn { cursor: pointer; }
 
-/* ページネーション */
+/* 行・見出しの印（遅延・メモ・作業区分の色） */
 td.is-delay { background: #fde4e4; }
 td.has-memo { position: relative; }
 td.has-memo::after { content: ''; position: absolute; top: 0; right: 0; border-style: solid; border-width: 0 9px 9px 0; border-color: transparent #2f6fed transparent transparent; }
@@ -173,9 +130,9 @@ thead th[data-tone="teal"] { background: #e3f6f5; }
 .table-scroll { max-width: 100%; }
 .table-scroll table { width: max-content; min-width: 100%; }
 
-/* 横スクロール進捗表（社内／運営進捗一覧） */
+/* 横スクロール表（固定列つき） */
 .scroll-outer { max-width: 100%; }
-table.scroll-table, .scroll-outer table { border-collapse: separate; border-spacing: 0; width: max-content; }
+.scroll-outer table { border-collapse: separate; border-spacing: 0; width: max-content; }
 .sticky { position: sticky; background: #ffffff; z-index: 2; }
 thead th.sticky { background: #f6f8fb; z-index: 3; }
 /* 表ヘッダー固定（スクロール表の共通設定） */
@@ -187,30 +144,20 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .col-resize:hover::after, .col-resize:active::after { width: 2px; background: #4f8cff; }
 .table-scroll thead th, .table-scroll tbody td, .scroll-outer thead th, .scroll-outer tbody td { overflow: hidden; white-space: nowrap; }
 
+/* 工程の状態表示（進捗一覧の工程セル）：状態バッジと予定・実施日 */
 .status-chip { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
 .status-chip .status-row { display: flex; align-items: center; gap: 6px; }
-.status-chip .status-label { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.status-chip .status-label { gap: 5px; }
 .status-chip .dates { display: flex; gap: 12px; font-size: 12.5px; color: #333c4d; }
-.status-chip .owner { font-size: 10.5px; color: #6c7688; }
 .status-label.gray { background: #eef0f4; color: #8992a3; }
 .status-label.blue { background: #e7f0ff; color: #2f6fed; }
 .status-label.green { background: #e5f6ec; color: #279158; }
 .status-label.red { background: #fdeaea; color: #d43c40; }
 .status-label.orange { background: #fff2e2; color: #d97c1e; }
-.status-label.na { background: #f6f7f9; color: #b7bfcc; border: 1px dashed #dde1e9; }
+/* 角丸の状態バッジ（基本の形と色：gray・blue・green・red・orange） */
 .status-label { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
 .chip.tag-like { font-size: 11px; padding: 3px 9px; border-radius: 4px; }
 
-.overall { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
-.overall .dot { width: 8px; height: 8px; border-radius: 50%; }
-.overall.blue .dot { background: #2f6fed; }
-.overall.blue { color: #2f6fed; }
-.overall.green .dot { background: #33b070; }
-.overall.green { color: #279158; }
-.overall.red .dot { background: #e5484d; }
-.overall.red { color: #d43c40; }
-.overall.gray .dot { background: #b7bfcc; }
-.overall.gray { color: #6c7688; }
 
 /* ダイアログ共通（オーバーレイ・モーダル枠） */
 .input-dialog { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); width: 360px; max-width: calc(100vw - 32px); padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; }
@@ -237,6 +184,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .modal-body .form-section.copy-section { margin-top: 24px; padding-top: 16px; border-top: 2px solid #9aa4b5; }
 .modal.modal-medium { width: 70%; }
 .modal-body { flex: 1; overflow-y: auto; }
+.modal-body { padding: 22px 28px; display: flex; flex-direction: column; gap: 16px; }
 .modal-body.modal-body-plain { display: block; padding: 0 28px 18px; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-header h2 { font-size: 18px; font-weight: 700; }
@@ -249,14 +197,11 @@ a.close-x { cursor: pointer; }
 .modal-footer > .search-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
 
 /* タブ付きダイアログ（社内／運営進捗の更新） */
-.tabs { display: flex; gap: 4px; padding: 0 28px; border-bottom: 1px solid #eef1f6; background: #fafbfd; }
 .tab { padding: 12px 18px; font-size: 13px; font-weight: 700; color: #7c8598; border-bottom: 2px solid transparent; }
 .tab.active { color: #2f6fed; border-bottom: 2px solid #2f6fed; }
 .tab .count { display: inline-block; margin-left: 6px; font-size: 10.5px; background: #e7f0ff; color: #2f6fed; padding: 1px 6px; border-radius: 8px; }
-.tab.warn .count { background: #fdeaea; color: #d43c40; }
 
 .step-name { font-weight: 400; color: #333c4d; }
-.step-no { width: 20px; height: 20px; border-radius: 50%; background: #eef1f6; color: #7c8598; font-size: 10.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .mini-control { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #333c4d; display: flex; align-items: center; min-width: 100px; }
 .mini-control .caret { margin-left: auto; color: #9aa4b5; font-size: 9px; }
 .mini-control.wide { min-width: 150px; }
@@ -266,13 +211,11 @@ a.close-x { cursor: pointer; }
 .status-select.gray { background: #eef0f4; color: #8992a3; }
 .status-select.red { background: #fdeaea; color: #d43c40; }
 .status-select .caret { margin-left: auto; font-size: 9px; opacity: .7; }
-input.memo-input { color: #333c4d; background: #ffffff; }
 table.step-table { min-width: 0 !important; }
 textarea.form-control.textarea.auto-grow { padding: 8px 12px; }
 textarea.form-control.textarea.memo-area { width: 100%; min-width: 360px; height: 30px; min-height: 30px; padding: 4px 8px; resize: vertical; padding: 6px 8px; font-size: 12px; color: #333c4d; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; font-family: inherit; }
-.memo-input { height: 30px; border: 1px solid #d3d9e3; border-radius: 5px; background: #fbfcfe; padding: 0 8px; font-size: 12px; color: #9aa4b5; display: flex; align-items: center; min-width: 160px; }
 
-/* フォームダイアログ（社員／ベンダーマスタ登録） */
+/* フォームの項目（入力欄の並び） */
 .form-field { display: flex; flex-direction: column; gap: 6px; }
 .form-field.full { grid-column: 1 / span 2; }
 .field.narrow { width: 260px; }
@@ -281,7 +224,6 @@ textarea.form-control.textarea.memo-area { width: 100%; min-width: 360px; height
 .form-section { grid-column: 1 / span 2; font-size: 13px; font-weight: 700; color: #40485a; border-top: 1px solid #e6eaf1; padding-top: 12px; margin-top: 4px; }
 .form-field label { font-size: 12px; color: #5a6376; font-weight: 700; }
 .form-field label .req { color: #e5484d; margin-left: 3px; }
-.form-field label .current-count { color: #9aa4b5; font-weight: 400; margin-left: 6px; }
 
 /* 月別数値入力（予定クラス数など） */
 .month-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 12px; }
@@ -302,6 +244,7 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .form-value { min-height: 36px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: #1c2b45; padding-left: 12px; }
 
 /* ラジオボタン選択（販売区分など二択項目） */
+/* ラジオボタン（.radio-group） */
 .radio-group { display: flex; align-items: center; gap: 24px; height: 36px; }
 .radio-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #333c4d; cursor: pointer; user-select: none; }
 .radio-option input[type="radio"] { position: absolute; width: 0; height: 0; opacity: 0; }
@@ -310,6 +253,7 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .radio-option input[type="radio"]:checked + .radio-dot { border-color: #2f6fed; }
 .radio-option input[type="radio"]:checked + .radio-dot::after { opacity: 1; }
 
+/* 選択メニュー（.js-select） */
 .js-select { cursor: pointer; position: relative; user-select: none; }
 .js-select .caret { transition: transform .15s; }
 .js-select.open .caret { transform: rotate(180deg); }
@@ -317,11 +261,13 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .select-menu li { padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333c4d; cursor: pointer; }
 .select-menu li:hover { background: #eef4ff; color: #2f6fed; }
 .select-menu li.selected { background: #eef4ff; color: #2f6fed; font-weight: 700; }
+/* 表示切り替えスイッチ（#selToggle） */
 #selToggle { width: 40px; height: 22px; border-radius: 12px; background: #2f6fed; border: 1px solid #2f6fed; box-sizing: border-box; cursor: pointer; user-select: none; transition: background .15s, border-color .15s; }
 #selToggle.off { background: #fbfcfe; border-color: #d3d9e3; }
 #selToggle.off:hover { border-color: #2f6fed; }
 #selToggle.off .knob { background: #9aa4b5; }
 #selToggle:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 2px; }
+/* チェックボックス（.check-box） */
 .check-box { position: relative; display: inline-flex; cursor: pointer; }
 .check-box input { position: absolute; width: 0; height: 0; opacity: 0; margin: 0; }
 .check-box .check-mark { position: relative; display: inline-block; width: 18px; height: 18px; border-radius: 5px; border: 2px solid #c5ccd9; background: #fbfcfe; transition: background .15s, border-color .15s; }
@@ -331,6 +277,7 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .check-box.check-sm .check-mark { width: 13px; height: 13px; border-width: 1.5px; border-radius: 4px; }
 .check-box.check-sm input:checked + .check-mark::after { left: 3px; top: 0; width: 4px; height: 8px; border-width: 0 1.5px 1.5px 0; }
 .check-box input:focus-visible + .check-mark { outline: 2px solid #9bb8f5; outline-offset: 2px; }
+/* 選択メニュー内の選択肢（クリア・検索） */
 .select-menu li.select-clear { margin-top: 4px; padding: 6px 10px; border-top: 1px solid #eef1f6; font-size: 12px; color: #5a6376; cursor: pointer; }
 .select-menu li.select-clear:hover { background: #eef4ff; color: #2f6fed; }
 .select-menu li.select-search { padding: 6px; background: #ffffff; position: sticky; top: 0; z-index: 1; }
@@ -338,16 +285,19 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .select-menu li.select-search input { width: 100%; box-sizing: border-box; height: 28px; border: 1px solid #d3d9e3; border-radius: 5px; padding: 0 8px; font-size: 12.5px; outline: none; }
 .select-menu li.select-search input:focus { border-color: #2f6fed; }
 
+/* 数値の選択（.number-select） */
 .form-control.number-select { position: relative; padding-right: 8px; }
 .form-control.number-select input { border: none; background: transparent; font: inherit; color: inherit; width: 100%; outline: none; padding: 0; }
 .form-control.number-select .caret { cursor: pointer; padding: 4px; margin-left: auto; transition: transform .15s; }
 .form-control.number-select.open .caret { transform: rotate(180deg); }
 
+/* 日付・年月の入力欄（.js-date / .js-month） */
 .js-date, .js-month { cursor: pointer; position: relative; user-select: none; }
 .js-date .caret, .js-month .caret { transition: transform .15s; }
 .js-date.open .caret, .js-month.open .caret { transform: rotate(180deg); }
 .js-date.open, .js-month.open { z-index: 100; }
 .table-scroll tbody td:has(.open), .scroll-outer tbody td:has(.open) { overflow: visible; }
+/* 日付ピッカー（.date-picker） */
 .date-picker { position: absolute; top: calc(100% + 4px); left: 0; background: #ffffff; border: 1px solid #d3d9e3; border-radius: 8px; box-shadow: 0 8px 20px rgba(10,16,30,0.15); z-index: 60; padding: 10px; width: 230px; cursor: default; }
 .date-picker.up { top: auto; bottom: calc(100% + 4px); }
 .select-menu.up { top: auto; bottom: calc(100% + 4px); }
@@ -371,22 +321,12 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .date-picker .dp-month:hover { background: #eef4ff; color: #2f6fed; }
 .date-picker .dp-month.selected { background: #2f6fed; color: #fff; font-weight: 700; }
 
-/* 役職チップ選択（社員マスタ登録） */
+/* チップ入力欄（担当者・関連クラスなど）と複数選択（職員の役割・職種・役職） */
 .chip-box { min-height: 36px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .chip-box.js-chip-select { position: relative; }
 .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 12px; }
-.chip.year { background: #fff2e2; color: #d97c1e; }
-.chip.y2024 { background: #eef0f4; color: #5a6376; }
-.chip.y2025 { background: #e3f6f5; color: #0e8a86; }
-.chip.y2026 { background: #e7f0ff; color: #2f6fed; }
-.chip.y2027 { background: #fff2e2; color: #d97c1e; }
 .chip.blue { background: #e7f0ff; color: #2f6fed; }
 .chip.orange { background: #fff2e2; color: #d97c1e; }
-.chip.green { background: #eaf7ec; color: #238a4e; }
-.chip.purple { background: #f5eaf7; color: #8a3f96; }
-.chip.violet { background: #f0e9ff; color: #7c4de0; }
-.chip.indigo { background: #eef0ff; color: #4c51bf; }
-.chip.teal { background: #e3f6f5; color: #0e8a86; }
 .multi-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .multi-opt { position: relative; cursor: pointer; user-select: none; }
 .multi-opt input { position: absolute; width: 0; height: 0; opacity: 0; margin: 0; }
@@ -406,17 +346,13 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .chip x:hover { opacity: 1; }
 .chip-add { font-size: 12px; font-weight: 700; color: #5a6376; padding: 3px 9px; background: #f6f8fb; border: 1px solid #c5ccd9; border-radius: 4px; cursor: pointer; }
 .chip-add:hover { background: #eef4ff; color: #2f6fed; border-color: #2f6fed; }
-.chip-group { display: inline-flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-
-/* 年度別セクション（ベンダーマスタ登録） */
-.year-pill { display: inline-flex; align-items: center; gap: 6px; background: #eef4ff; color: #2f6fed; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; width: fit-content; }
 
 /* 稼働状態トグル */
 .form-field.toggle-field { margin-top: 28px; }
 .form-field.full + .form-field.toggle-field { margin-top: 12px; }
 .toggle-row { display: flex; align-items: center; gap: 10px; height: 36px; user-select: none; }
 .toggle-row .toggle { cursor: pointer; }
-.toggle { width: 38px; height: 20px; border-radius: 12px; background: #33b070; position: relative; transition: background .15s; }
+.toggle { cursor: pointer; width: 38px; height: 20px; border-radius: 12px; background: #33b070; position: relative; transition: background .15s; }
 .toggle .knob { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left .15s; }
 .toggle.off { background: #c7ccd4; }
 .toggle.off .knob { left: 2px; }
@@ -438,21 +374,23 @@ table .search-btn { height: 26px; padding: 0 12px; font-size: 12px; }
 .page-btn:hover { border-color: #6b84ad; }
 /* 一覧の操作列の編集ボタン（幅を固定） */
 td .search-btn { width: 64px; justify-content: center; }
-/* 工程列の見出しに担当会社を表示 */
-.col-company { font-size: 11px; font-weight: 400; color: #9aa4b5; margin-top: 2px; }
+/* 工程の状態チップ（一覧の工程セル） */
 .status-chip { white-space: normal; }
 .status-chip.status-chip-h { flex-direction: row; align-items: center; gap: 8px; }
 .status-chip-h .status-row { flex-direction: column; align-items: flex-start; }
 .status-chip-h .dates-col { display: flex; flex-direction: column; }
 .mini-control.readonly { background: #f3f5f8; color: #6c7688; cursor: default; }
 /* 一覧：件数・ページ切り替えは固定し、表だけがスクロール */
+/* 一覧の枠・件数・ページ送り（表だけがスクロール） */
 .content > .table-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .content > .table-card > .table-meta, .content > .table-card > .pagination { flex: 0 0 auto; }
 .content > .table-card > .table-scroll, .content > .table-card > .scroll-outer { flex: 1 1 auto; min-height: 0; overflow: auto; }
+/* 工程の表示（対象外の文字・区分行の非表示） */
 .na-text { font-size: 12px; color: #9aa4b5; }
 .status-chip-h .status-row, .status-chip-h .status-label { flex-shrink: 0; white-space: nowrap; }
 .hide-kind .kind-line { display: none; }
 
+/* 実施の切り替え（.target-seg / .target-opt） */
 .target-seg { display: inline-flex; align-items: center; gap: 1px; padding: 2px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }
 .target-opt { position: relative; cursor: pointer; user-select: none; }
 .target-opt input[type="radio"] { position: absolute; width: 0; height: 0; opacity: 0; margin: 0; }
@@ -462,12 +400,14 @@ td .search-btn { width: 64px; justify-content: center; }
 .target-opt.off input[type="radio"]:checked + span { background: #7b8496; box-shadow: none; }
 .target-opt input[type="radio"]:focus-visible + span { outline: 2px solid #9bb8f5; outline-offset: 1px; }
 
+/* 絞り込みの切り替え（.seg / .filter-toggle-wrap） */
 .filter-toggle-wrap { display: flex; align-items: center; gap: 10px; }
 .filter-toggle-label { font-size: 13px; font-weight: 700; color: #6c7688; }
 .seg { display: inline-flex; align-items: center; gap: 1px; padding: 2px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }
 .form-field > .seg, .field > .seg { align-self: flex-start; }
 .filter-panel .seg { height: 34px; box-sizing: border-box; border-radius: 999px; align-items: center; background: #eef2f8; border: 1px solid #d3d9e3; padding: 2px; }
 .filter-panel .seg .seg-opt { font-size: 13px; border-radius: 999px; padding: 4px 10px; }
+/* ダイアログ本文（.sticky-body） */
 .modal-body .sticky-body { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
 .seg-opt { font-family: inherit; font-size: 11px; font-weight: 700; line-height: 1.5; color: #6b7385; background: transparent; border: none; border-radius: 999px; padding: 2px 9px; cursor: pointer; transition: background .15s, color .15s; }
 .seg-opt:hover { color: #2f6fed; }
@@ -475,6 +415,7 @@ td .search-btn { width: 64px; justify-content: center; }
 .seg-opt:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 1px; }
 .filter-panel.is-collapsed { display: none; }
 
+/* 登壇依頼の子行（.sub-row：講師の追加・削除） */
 .sub-list { display: flex; flex-direction: column; gap: 10px; }
 .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .sub-row-header { margin-bottom: 6px; }
@@ -483,22 +424,34 @@ td .search-btn { width: 64px; justify-content: center; }
 .sub-remove { position: absolute; top: 50%; right: -24px; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 11px; border: 1px solid #e6eaf1; cursor: pointer; }
 .sub-remove:hover { background: #eef4ff; color: #2f6fed; border-color: #2f6fed; }
 .sub-row .sub-status { position: absolute; top: -9px; left: 10px; margin: 0; }
+/* 行の追加ボタン（.add-row） */
 .add-row { margin-top: 10px; width: fit-content; }
-.add-related-class-row { margin-top: 10px; width: fit-content; }
+/* 差し替え表示（.replace-mark） */
 input.form-control.replace-mark { border-color: #d97c1e; background: #fff2e2; }
+/* ダイアログ下部のボタン（.input-dialog-actions） */
 .input-dialog-actions > .search-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
 .input-dialog-actions > .search-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
 .input-dialog-actions > :first-child:not(:last-child) { margin-right: auto; }
+/* メモの印・メモ欄（.memo-mark / .memo-cell） */
 .memo-mark { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #fbd29b; color: #9a4a00; font-weight: 700; font-size: 12px; }
 td.memo-cell { text-align: center; }
+/* 委託会社の行（data-vendor） */
 td div[data-vendor] { margin: 3px 0; }
+/* サイドバー（.app > .sidebar） */
 .app > .sidebar { position: relative; align-self: stretch; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; transition: width .2s ease; }
 .app > .sidebar::-webkit-scrollbar { display: none; }
 .app.sidebar-closed > .sidebar { width: 44px; }
 .app.sidebar-closed > .sidebar > *:not(.sidebar-toggle) { display: none; }
 .app > .sidebar > .sidebar-toggle { position: absolute; top: 14px; right: 8px; width: 28px; height: 28px; border: 1px solid #3a4a68; border-radius: 6px; background: transparent; color: #cdd7ea; font-size: 14px; cursor: pointer; z-index: 1; }
 .app.sidebar-closed > .sidebar > .sidebar-toggle { right: auto; left: 8px; }
+/* サイドバーのグループ見出し・項目 */
 .nav-group-title { cursor: pointer; user-select: none; position: relative; padding-right: 28px; }
 .nav-group-title::after { content: '▾'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #8fa2c4; }
 .nav-group-title.collapsed::after { content: '▸'; }
 .nav-item.acc-hidden { display: none; }
+/* ダイアログを開いているとき、本体（.main）をぼかして暗くする */
+.app:has(> .overlay) > .main { filter: blur(1.5px) brightness(0.94); }
+/* 画面を埋める表の枠とスクロール領域（ダイアログ内）、非表示 */
+.modal-fill-card { height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.modal-scroll-area { overflow: auto; flex: 1 1 auto; min-height: 0; }
+.is-hidden { display: none; }

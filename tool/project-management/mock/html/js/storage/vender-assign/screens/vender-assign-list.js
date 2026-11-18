@@ -51,8 +51,8 @@
       '<td class="sticky col-practice">' + (ps ? '<span class="tag practice-status-tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td class="sticky">' + esc(custCode ? CustomerStore.nameOf(custCode) : '-') + '</td>' +
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
-      '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +
-      '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>' +
+      '<td class="sticky"><div>' + esc(c.name) + '</div><div class="vender-assign-sub">' + esc(r.courseCode) + '</div></td>' +
+      '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div class="vender-assign-sub">' + esc(related) + '</div></td>' +
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
@@ -61,7 +61,7 @@
       '<td>' + subLines + '</td>' +
       '<td>' + (a.attendeeVendor || a.attendee ? '<div>' + dashOr(a.attendeeVendor) + '：' + dashOr(a.attendee) + '</div>' : '-') + '</td>' +
       '<td>' + (a.motivationVendor || a.motivationName ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + dashOr(a.motivationName) + '</div>' : '-') + '</td>' +
-      '<td class="memo-cell"' + (a.memo ? ' title="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:#fbd29b;color:#9a4a00;font-weight:700;font-size:12px;">!</span>' : '') + '</td>' +
+      '<td class="memo-cell"' + (a.memo ? ' title="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     var names = a.mains.concat(a.subs, reqs).map(function (x) { return TeacherVenderStore.nameOf(x.vendor) || ''; }).filter(function (n, k, arr) { return n && arr.indexOf(n) === k; });
     tr.setAttribute('data-vendors', names.join('|'));

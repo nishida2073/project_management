@@ -1,0 +1,29 @@
+/* 登壇依頼の共通（複数の画面で使う） */
+.vender-assign-center { text-align: center; }
+.vender-assign-count-before { color: #d97c1e; font-size: 12.5px; }
+.vender-assign-count-cell { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.vender-assign-count-done { color: #2f8a5b; font-size: 12.5px; }
+.vender-assign-count-input { width: 72px; height: 28px; }
+.vender-assign-count-requesting { color: #2f6fed; font-size: 12.5px; }
+.vender-assign-filter { margin-bottom: 16px; }
+.vender-assign-sub { font-size: 11px; color: #9aa4b5; }
+
+/* 依頼一覧 */
+.vender-assign-list-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px; }
+
+/* 依頼枠更新 */
+.vender-assign-request-bulk-select { min-width: 140px; }
+.vender-assign-request-inline { display: flex; align-items: center; gap: 8px; }
+.vender-assign-request-row { display: flex; align-items: flex-end; gap: 20px; flex-wrap: nowrap; }
+
+/* 反映（取り込み） */
+.vender-assign-import-check-label { vertical-align: middle; }
+.vender-assign-import-col-wide { min-width: 300px; }
+.vender-assign-import-error { margin-top: 12px; font-size: 12.5px; color: #d43c40; white-space: pre-line; }
+.vender-assign-import-line { margin: 2px 0; }
+.vender-assign-import-replace-note { margin-left: 4px; font-size: 11px; color: #5a6376; }
+.vender-assign-import-spacer { visibility: hidden; vertical-align: middle; }
+.vender-assign-import-state-tag { font-size: 10px; }
+.vender-assign-import-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.vender-assign-import-vendor-line { min-height: 20px; }
+.vender-assign-import-row-gap { margin: 2px 0; }

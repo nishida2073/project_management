@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/style_tag.css">
-<link rel="stylesheet" href="css/style_vender.css">
+<link rel="stylesheet" href="css/style_vender_assign.css">
 <link rel="stylesheet" href="css/style_modify.css">
 <style>
   .modal-body { display: flex; flex-direction: column; gap: 16px; }
@@ -28,19 +28,19 @@
         <a class="close-x" href="vender_assign_list.html">✕</a>
       </div>
       <div class="modal-body">
-        <div style="display:flex;align-items:flex-end;gap:20px;flex-wrap:nowrap;">
+        <div class="vender-assign-request-row">
           <div class="field narrow">
             <label>講師ベンダー<span class="req">必須</span></label>
             <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
           </div>
             <div class="field">
               <label>変更後の状態<span class="req">必須</span></label>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div class="control js-select" id="bulkState" data-slot-options="OPEN,BEFORE" style="min-width:140px;">選択してください<span class="caret">▾</span></div>
+              <div class="vender-assign-request-inline">
+                <div class="control js-select vender-assign-request-bulk-select" id="bulkState" data-slot-options="OPEN,BEFORE">選択してください<span class="caret">▾</span></div>
               </div>
             </div>
         </div>
-        <div class="filter-panel" style="margin-bottom: 16px;">
+        <div class="filter-panel vender-assign-filter">
           <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-practice-options-active data-practice-default="BEFORE"><span class="caret">▾</span></div></div>
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
           <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
@@ -48,13 +48,13 @@
           <div class="search-btn">検索</div>
           <div class="search-btn" id="resetFilter">リセット</div>
         </div>
-        <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
+        <div class="table-card modal-fill-card">
           <div class="table-meta"><div class="count"><b id="withdrawCount">0</b> 件</div></div>
-          <div class="scroll-outer" id="scrollArea" style="overflow: auto; flex: 1 1 auto; min-height: 0;">
+          <div class="scroll-outer modal-scroll-area" id="scrollArea">
           <table>
                         <thead>
               <tr>
-                <th class="sticky"><div id="selToggle" class="toggle" style="cursor:pointer;"><span class="knob"></span></div></th>
+                <th class="sticky"><div id="selToggle" class="toggle"><span class="knob"></span></div></th>
                 <th class="sticky">年度</th>
                 <th class="sticky fill">コース</th>
                 <th class="sticky">レッスンNo</th>

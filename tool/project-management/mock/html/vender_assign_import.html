@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/style_tag.css">
+<link rel="stylesheet" href="css/style_vender_assign.css">
 </head>
 <body>
 <div class="app">
@@ -22,13 +23,13 @@
         </div>
         <a class="close-x" href="vender_assign_list.html">✕</a>
       </div>
-      <div class="modal-body" style="padding: 20px 28px; display: flex; flex-direction: column; gap: 16px;">
-        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;"><div class="search-btn" id="importLoad">取り込み</div><input type="file" id="importFile" accept=".xlsx" style="display:none;"></div>
-        <div class="sub" id="vendorLine" style="min-height: 20px;"></div>
-        <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
+      <div class="modal-body">
+        <div class="vender-assign-import-toolbar"><div class="search-btn" id="importLoad">取り込み</div><input type="file" id="importFile" class="is-hidden" accept=".xlsx"></div>
+        <div class="sub vender-assign-import-vendor-line" id="vendorLine"></div>
+        <div class="table-card modal-fill-card">
           
           <div class="table-meta"><div class="count"><b id="importTotal">0</b> 人</div></div>
-          <div class="scroll-outer" id="scrollArea" style="overflow: auto; flex: 1 1 auto; min-height: 0;">
+          <div class="scroll-outer modal-scroll-area" id="scrollArea">
           <table>
             <thead>
               <tr>
@@ -37,15 +38,15 @@
                 <th>レッスンNo</th>
                 <th>開始日</th>
                 <th>終了日</th>
-                <th style="min-width: 300px;">講師（メイン）</th>
-                <th style="min-width: 300px;">講師（サブ）</th>
+                <th class="vender-assign-import-col-wide">講師（メイン）</th>
+                <th class="vender-assign-import-col-wide">講師（サブ）</th>
               </tr>
             </thead>
             <tbody id="importBody"></tbody>
           </table>
           </div>
         </div>
-        <div id="errorBox" style="margin-top: 12px; font-size: 12.5px; color: #d43c40; white-space: pre-line;"></div>
+        <div class="vender-assign-import-error" id="errorBox"></div>
       </div>
       <div class="modal-footer">
         <a class="search-btn" href="vender_assign_list.html">キャンセル</a>

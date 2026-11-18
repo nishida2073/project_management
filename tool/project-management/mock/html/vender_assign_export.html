@@ -3,19 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style_vender_assign.css">
 <link rel="stylesheet" href="css/style_tag.css">
-<link rel="stylesheet" href="css/style_modify.css">
-<style>
-  .modal-body { display: flex; flex-direction: column; gap: 16px; }
-  .print-area { display: none; }
-  @media print {
-    body * { visibility: hidden; }
-    .print-area, .print-area * { visibility: visible; }
-    .print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; }
-    .print-area table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    .print-area th, .print-area td { border: 1px solid #333; padding: 4px 6px; text-align: left; }
-  }
-</style>
 </head>
 <body>
 <div class="app">
@@ -39,7 +28,7 @@
           <label>講師ベンダー<span class="req">必須</span></label>
           <div class="control js-select" id="requestVendor">選択してください<span class="caret">▾</span></div>
         </div>
-        <div class="filter-panel" style="margin-bottom: 16px;">
+        <div class="filter-panel vender-assign-filter">
           <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-practice-options-active data-practice-default="BEFORE"><span class="caret">▾</span></div></div>
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
           <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
@@ -49,13 +38,13 @@
           <div class="search-btn">検索</div>
           <div class="search-btn" id="resetFilter">リセット</div>
         </div>
-        <div class="table-card" style="height: auto; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
+        <div class="table-card modal-fill-card">
           <div class="table-meta"><div class="count"><b id="printCount">0</b> 件</div></div>
-          <div class="scroll-outer" id="scrollArea" style="overflow: auto; flex: 1 1 auto; min-height: 0;">
+          <div class="scroll-outer modal-scroll-area" id="scrollArea">
           <table>
             <thead>
               <tr>
-                <th class="sticky"><div id="selToggle" class="toggle" style="cursor:pointer;"><span class="knob"></span></div></th>
+                <th class="sticky"><div id="selToggle" class="toggle"><span class="knob"></span></div></th>
                 <th class="sticky">年度</th>
                 <th class="sticky fill">コース</th>
                 <th class="sticky">レッスンNo</th>
@@ -82,7 +71,6 @@
       </div>
     </div>
   </div>
-  <div class="print-area" id="printArea"></div>
 </div>
 <script src="js/storage/practice-status/store/practice-status-store.js"></script>
 <script src="js/storage/operating-status/store/operating-status-store.js"></script>

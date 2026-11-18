@@ -107,7 +107,7 @@
     reqs.forEach(function (rq) { reqNames[TeacherVenderStore.nameOf(rq.vendor) || rq.vendor] = rq.vendor; });
     var requesting = a.mains.concat(a.subs).filter(function (m) { return m.state === 'requesting' && m.vendor; });
     requesting.forEach(function (m) { reqNames[TeacherVenderStore.nameOf(m.vendor) || m.vendor] = m.vendor; });
-    if (reqs.length || requesting.length) $('withdrawBtn').style.display = '';
+    if (reqs.length || requesting.length) $('withdrawBtn').classList.remove('is-hidden');
     $('withdrawBtn').addEventListener('click', function () {
       chooseWithdraw(Object.keys(reqNames)).then(function (name) {
         if (!name) return;
