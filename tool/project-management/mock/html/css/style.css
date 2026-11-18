@@ -192,16 +192,17 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .table-scroll thead th, .table-scroll tbody td, .scroll-outer thead th, .scroll-outer tbody td { overflow: hidden; white-space: nowrap; }
 
 .status-chip { display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
-.status-chip .badge-row { display: flex; align-items: center; gap: 6px; }
-.status-chip .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; width: fit-content; }
+.status-chip .status-row { display: flex; align-items: center; gap: 6px; }
+.status-chip .status-label { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
 .status-chip .dates { display: flex; gap: 12px; font-size: 12.5px; color: #333c4d; }
 .status-chip .owner { font-size: 10.5px; color: #6c7688; }
-.badge.gray { background: #eef0f4; color: #8992a3; }
-.badge.blue { background: #e7f0ff; color: #2f6fed; }
-.badge.green { background: #e5f6ec; color: #279158; }
-.badge.red { background: #fdeaea; color: #d43c40; }
-.badge.na { background: #f6f7f9; color: #b7bfcc; border: 1px dashed #dde1e9; }
-.overall-badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.status-label.gray { background: #eef0f4; color: #8992a3; }
+.status-label.blue { background: #e7f0ff; color: #2f6fed; }
+.status-label.green { background: #e5f6ec; color: #279158; }
+.status-label.red { background: #fdeaea; color: #d43c40; }
+.status-label.orange { background: #fff2e2; color: #d97c1e; }
+.status-label.na { background: #f6f7f9; color: #b7bfcc; border: 1px dashed #dde1e9; }
+.status-label { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
 .chip.tag-like { font-size: 11px; padding: 3px 9px; border-radius: 4px; }
 
 .overall { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
@@ -445,7 +446,7 @@ td .search-btn { width: 64px; justify-content: center; }
 .col-company { font-size: 11px; font-weight: 400; color: #9aa4b5; margin-top: 2px; }
 .status-chip { white-space: normal; }
 .status-chip.status-chip-h { flex-direction: row; align-items: center; gap: 8px; }
-.status-chip-h .badge-row { flex-direction: column; align-items: flex-start; }
+.status-chip-h .status-row { flex-direction: column; align-items: flex-start; }
 .status-chip-h .dates-col { display: flex; flex-direction: column; }
 .mini-control.readonly { background: #f3f5f8; color: #6c7688; cursor: default; }
 /* 一覧：件数・ページ切り替えは固定し、表だけがスクロール */
@@ -453,7 +454,7 @@ td .search-btn { width: 64px; justify-content: center; }
 .content > .table-card > .table-meta, .content > .table-card > .pagination { flex: 0 0 auto; }
 .content > .table-card > .table-scroll, .content > .table-card > .scroll-outer { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .na-text { font-size: 12px; color: #9aa4b5; }
-.status-chip-h .badge-row, .status-chip-h .badge { flex-shrink: 0; white-space: nowrap; }
+.status-chip-h .status-row, .status-chip-h .status-label { flex-shrink: 0; white-space: nowrap; }
 .hide-kind .kind-line { display: none; }
 
 .target-seg { display: inline-flex; align-items: center; gap: 1px; padding: 2px; background: #eef2f8; border: 1px solid #d3d9e3; border-radius: 999px; white-space: nowrap; }

@@ -43,7 +43,7 @@
     var label = STATUS_LABEL[step.status] || StepStatusStore.nameOf('WAIT');
     var cls = STATUS_CLASS[step.status] || 'gray';
     var actual = step.actual ? step.actual : '-';
-    return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + cls + '">' + label + '</span></div>' +
+    return '<div class="status-chip status-chip-h"><div class="status-row"><span class="status-label state-tag ' + cls + '">' + label + '</span></div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + dashOr(step.plan) + '</span></div>' +
       '<div class="dates"><span>実：' + esc(actual) + ' ' + esc(StaffStore.nameOf(step.owner || '')) + '</span></div></div></div>';
   }
@@ -57,7 +57,7 @@
     var key = late ? 'DELAY' : (all ? 'DONE' : (any ? 'PROGRESS' : 'WAIT'));
     var label = TaskProgressStore.nameOf(key);
     var color = TaskProgressStore.colorOf(key);
-    return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
+    return '<span class="status-label state-tag ' + color + '">' + label + '</span>';
   }
 
   var classes = ClassStore.load().filter(function (c) { return c.status !== OperatingStatusStore.nameOf('STOPPED'); });
@@ -79,7 +79,7 @@
     th.classList.add('no-sort');
     th.setAttribute('data-kinds', t.kinds.join(','));
     th.setAttribute('data-company', t.company || '');
-    th.innerHTML = '<div class="kind-line"><span class="tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
+    th.innerHTML = '<div class="kind-line"><span class="tag kind-tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
       '<div>' + esc(DISPLAY_NO[i] + '：' + t.name) + '</div>' +
       '<div>' + esc(StaffVenderStore.nameOf(t.company)) + '</div>';
     headRow.appendChild(th);
@@ -121,7 +121,7 @@
     tr.setAttribute('data-id', c.id);
     var html = '';
     var ps = ClassStore.practiceStatus(c);
-    html += '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
+    html += '<td class="sticky col-practice">' + (ps ? '<span class="tag kind-tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
     var pj = ProjectStore.map()[c.projectCode] || {};
     html += '<td class="sticky col-customer">' + esc(pj.customer ? CustomerStore.nameOf(pj.customer) : '-') + '</td>';
     html += '<td class="sticky col-year">' + esc(yearLabel(c.year)) + '</td>';
@@ -130,7 +130,7 @@
     html += '<td class="sticky">' + esc(c.start) + '</td>';
     html += '<td class="sticky">' + esc(c.end) + '</td>';
     html += '<td class="sticky col-manager">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
-    html += '<td class="sticky">' + (c.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
+    html += '<td class="sticky">' + (c.taskType ? '<span class="tag kind-tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky col-overall">' + overall(activeSteps) + '</td>';
     steps.forEach(function (s, i) {
       if (!isActive(i)) return;

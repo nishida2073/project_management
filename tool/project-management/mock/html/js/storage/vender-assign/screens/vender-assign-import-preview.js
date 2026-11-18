@@ -22,8 +22,12 @@
 
   var TAG_STYLE = 'font-size:10px;';
 
+  function stateLabel(s) {
+    return '<span class="status-label state-tag ' + s.color + '" style="' + TAG_STYLE + '">' + esc(s.name) + '</span>';
+  }
+
   function tagOf(key) {
-    return VenderAssignStore.tag(STATE_TAG[key], TAG_STYLE, 'fixed');
+    return stateLabel(STATE_TAG[key]);
   }
 
   function afterHtml(on, from, isNew) {
@@ -81,7 +85,7 @@
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
-      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? VenderAssignStore.tag(t, TAG_STYLE, 'fixed') + ' ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span></div>');
+      rows.push('<div style="margin:2px 0;">' + SPACER + (t ? stateLabel(t) + ' ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span></div>');
     });
     var pool = { slot: slotInit, req: reqInit, free: freeInit };
     add.forEach(function (p, i) {

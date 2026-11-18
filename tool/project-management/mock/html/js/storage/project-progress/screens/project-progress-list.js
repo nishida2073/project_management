@@ -13,7 +13,7 @@
   function chip(s) {
     if (s.na) return '<div class="status-chip status-chip-h"><span class="na-text">' + StepStatusStore.nameOf('NA') + '</span></div>';
     var actual = s.actual ? s.actual : '-';
-    return '<div class="status-chip status-chip-h"><div class="badge-row"><span class="badge ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span></div>' +
+    return '<div class="status-chip status-chip-h"><div class="status-row"><span class="status-label state-tag ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span></div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + dashOr(s.plan) + '</span></div>' +
       '<div class="dates"><span>実：' + esc(actual) + '</span></div></div></div>';
   }
@@ -31,7 +31,7 @@
     if (key === 'NA') return '<span class="na-text">' + StepStatusStore.nameOf('NA') + '</span>';
     var label = TaskProgressStore.nameOf(key);
     var color = TaskProgressStore.colorOf(key);
-    return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
+    return '<span class="status-label state-tag ' + color + '">' + label + '</span>';
   }
 
   var headRow = document.getElementById('headRow');

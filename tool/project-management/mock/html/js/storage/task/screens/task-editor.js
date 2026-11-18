@@ -5,12 +5,12 @@
   }
   function renderWorkRadios() {
     $('workGroup').innerHTML = WorkTypeStore.load().map(function (it) {
-      return '<label class="radio-option"><input type="radio" name="workType" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + it.color + '">' + it.name + '</span></label>';
+      return '<label class="radio-option"><input type="radio" name="workType" value="' + it.code + '"><span class="radio-dot"></span><span class="tag kind-tag ' + it.color + '">' + it.name + '</span></label>';
     }).join('');
   }
   function renderKindRadios() {
     $('kindGroup').innerHTML = TaskTypeStore.load().map(function (it) {
-      return '<label class="radio-option"><input type="radio" name="taskKind" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + it.color + '">' + it.name + '</span></label>';
+      return '<label class="radio-option"><input type="radio" name="taskKind" value="' + it.code + '"><span class="radio-dot"></span><span class="tag kind-tag ' + it.color + '">' + it.name + '</span></label>';
     }).join('');
   }
   function selectedOf(el) {

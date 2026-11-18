@@ -1,0 +1,12 @@
+.kind-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.tag-stack { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.state-tag { width: 64px; text-align: center; box-sizing: border-box; justify-content: center; }
+.course-radio-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.class-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.position-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.tag-stack-col { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.project-radio-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.vender-radio-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.subject-radio-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.location-radio-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.staff-opt span { width: 80px; justify-content: center; padding: 0; }

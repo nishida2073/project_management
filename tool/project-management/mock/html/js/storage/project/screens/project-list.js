@@ -3,7 +3,7 @@
   function managerTag(positionCode, staffCode) {
     var name = StaffStore.nameOf(staffCode);
     if (!name) return '';
-    return '<span class="tag ' + PositionStore.colorOf(positionCode) + '">' + esc(PositionStore.nameOf(positionCode)) + '</span> ' + esc(name);
+    return '<div><span class="tag position-tag ' + PositionStore.colorOf(positionCode) + '">' + esc(PositionStore.nameOf(positionCode)) + '</span> ' + esc(name) + '</div>';
   }
 
   var body = document.getElementById('projectBody');
@@ -15,13 +15,13 @@
     tr.innerHTML =
       '<td>' + esc(yearLabel(p.year)) + '</td>' +
       '<td>' + esc(p.code) + '</td>' +
-      '<td><span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span></td>' +
-      '<td><span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span></td>' +
+      '<td><span class="tag kind-tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span></td>' +
+      '<td><span class="tag kind-tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span></td>' +
       '<td>' + esc(p.name) + '</td>' +
       '<td>' + esc(CustomerStore.nameOf(p.customer)) + '</td>' +
-      '<td>' + managerList.join('<br>') + '</td>' +
+      '<td><div class="tag-stack-col">' + managerList.join('') + '</div></td>' +
       '<td>' + esc(p.startMonth) + '</td>' +
-      '<td><span class="badge overall-badge ' + (p.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (p.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
+      '<td><span class="status-label ' + (p.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (p.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (p.memo ? ' title="' + esc(p.memo) + '"' : '') + '>' + (p.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="project_modify.html?id=' + encodeURIComponent(p.code) + '">更新</a></td>';
     body.appendChild(tr);

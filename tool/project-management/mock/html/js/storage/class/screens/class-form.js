@@ -24,17 +24,17 @@
     var p = P[pc];
     $('projectName').textContent = p ? p.name : '';
     $('projectSalesType').textContent = p ? SalesTypeStore.nameOf(p.sales) : '';
-    $('projectSalesType').className = p ? 'tag ' + SalesTypeStore.colorOf(p.sales) : 'tag';
+    $('projectSalesType').className = p ? 'tag class-tag ' + SalesTypeStore.colorOf(p.sales) : 'tag class-tag';
     $('projectParticipationType').textContent = p ? ParticipationTypeStore.nameOf(p.part) : '';
-    $('projectParticipationType').className = p ? 'tag ' + ParticipationTypeStore.colorOf(p.part) : 'tag';
+    $('projectParticipationType').className = p ? 'tag class-tag ' + ParticipationTypeStore.colorOf(p.part) : 'tag class-tag';
 
     var cc = getSelect($('courseCode'));
     var c = C[cc];
     $('courseName').textContent = c ? c.name : '';
     $('courseParticipationType').textContent = c ? ParticipationTypeStore.nameOf(c.part) : '';
-    $('courseParticipationType').className = c ? 'tag ' + ParticipationTypeStore.colorOf(c.part) : 'tag';
+    $('courseParticipationType').className = c ? 'tag class-tag ' + ParticipationTypeStore.colorOf(c.part) : 'tag class-tag';
     $('courseDeliveryType').textContent = c ? DeliveryTypeStore.nameOf(c.delivery) : '';
-    $('courseDeliveryType').className = c ? 'tag ' + DeliveryTypeStore.colorOf(c.delivery) : 'tag';
+    $('courseDeliveryType').className = c ? 'tag class-tag ' + DeliveryTypeStore.colorOf(c.delivery) : 'tag class-tag';
     $('courseSchedule').textContent = c ? c.schedule : '';
     if ($('courseTeachers')) $('courseTeachers').textContent = c ? '講師 メイン' + (c.mainTeachers === undefined ? '-' : c.mainTeachers) + '人・サブ' + (c.subTeachers === undefined ? '-' : c.subTeachers) + '人' : '';
     if ($('courseRecommend')) $('courseRecommend').style.display = c ? '' : 'none';

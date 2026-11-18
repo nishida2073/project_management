@@ -22,25 +22,25 @@
 
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="sticky col-practice">' + (ps ? '<span class="tag ' + PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
+      '<td class="sticky col-practice">' + (ps ? '<span class="tag kind-tag ' + PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td class="sticky col-customer">' + esc(p.customer ? CustomerStore.nameOf(p.customer) : '-') + '</td>' +
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
       '<td class="sticky col-project"><div>' + esc(p.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.projectCode) + '</div></td>' +
-      '<td class="sticky col-project">' + (p.sales ? '<span class="tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +
-      '<td class="sticky col-project">' + (p.part ? '<span class="tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
+      '<td class="sticky col-project">' + (p.sales ? '<span class="tag kind-tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span>' : '') + '</td>' +
+      '<td class="sticky col-project">' + (p.part ? '<span class="tag kind-tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span>' : '') + '</td>' +
       '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + ' 版' + dashOr(r.version) + '</div></td>' +
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(relatedText) + '</div></td>' +
-      '<td class="sticky">' + (r.taskType ? '<span class="tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
+      '<td class="sticky">' + (r.taskType ? '<span class="tag kind-tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
-      '<td>' + (r.delivery ? '<span class="tag ' + DeliveryTypeStore.colorOf(r.delivery) + '">' + esc(DeliveryTypeStore.nameOf(r.delivery)) + '</span>' : '') + '</td>' +
+      '<td>' + (r.delivery ? '<span class="tag kind-tag ' + DeliveryTypeStore.colorOf(r.delivery) + '">' + esc(DeliveryTypeStore.nameOf(r.delivery)) + '</span>' : '') + '</td>' +
       '<td>' + (r.people ? esc(r.people) + '人' : '') + '</td>' +
       '<td>' + planText(r.mainTeachers, r.registMainTeachers) + '</td>' +
       '<td>' + planText(r.subTeachers, r.registSubTeachers) + '</td>' +
       '<td>' + (r.managers || []).map(function (c) { return esc(StaffStore.nameOf(c)); }).join('<br>') + '</td>' +
-      '<td>' + (r.locationType ? '<span class="tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
+      '<td>' + (r.locationType ? '<span class="tag kind-tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +
-      '<td><span class="badge overall-badge ' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
+      '<td><span class="status-label ' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (r.memo ? ' title="' + esc(r.memo) + '"' : '') + '>' + (r.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);

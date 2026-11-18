@@ -29,7 +29,7 @@
       vendorCell +
       '<input type="text" class="form-control' + (reference ? ' readonly' : '') + '" placeholder="講師名"' + (reference ? ' disabled' : '') + ' value="' + esc(data.teacherName || '') + '">' +
       '<div class="sub-remove">✕</div>' +
-      '<span class="tag fixed sub-status"></span>';
+      '<span class="status-label state-tag sub-status"></span>';
     row.querySelector('.sub-remove').addEventListener('click', function () {
       var st = row.getAttribute('data-state');
       if (st !== 'done' && st !== 'requesting') { row.remove(); return; }
@@ -60,7 +60,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row'), function (row) {
       var st = statusOfRow(row);
       var tag = row.querySelector('.sub-status');
-      tag.className = 'tag fixed sub-status' + (st ? ' ' + st.color : '');
+      tag.className = 'status-label state-tag sub-status' + (st ? ' ' + st.color : '');
       tag.textContent = st ? st.name : '';
     });
   }
@@ -95,7 +95,7 @@
     var a = VenderAssignStore.find(classId);
     var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0);
     var zanTag = document.createElement('span');
-    zanTag.className = 'tag fixed ' + (zanNow ? 'orange' : 'green');
+    zanTag.className = 'status-label state-tag ' + (zanNow ? 'orange' : 'green');
     zanTag.textContent = zanNow ? 'あり' : 'なし';
     $('subLine').appendChild(document.createTextNode('　残講師：'));
     $('subLine').appendChild(zanTag);
@@ -138,7 +138,7 @@
     $('attendeeVendor').value = a.attendeeVendor || '';
     $('attendee').value = a.attendee || '';
     $('motivationVendor').innerHTML = MotivationCompanyTypeStore.load().map(function (t) {
-      return '<label class="radio-option"><input type="radio" name="motivationVendor" value="' + esc(t.code) + '"><span class="radio-dot"></span><span class="tag ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
+      return '<label class="radio-option"><input type="radio" name="motivationVendor" value="' + esc(t.code) + '"><span class="radio-dot"></span><span class="tag vender-radio-tag ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
     }).join('');
     Array.prototype.forEach.call(document.querySelectorAll('input[name="motivationVendor"]'), function (r) { r.checked = r.value === (a.motivationVendor || ''); });
     $('motivationName').value = a.motivationName || '';
