@@ -8,7 +8,8 @@
 </head>
 <body>
 <div class="app">
-  <iframe src="sidebar.html?active=master&sub=task" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div id="sidebar-slot" data-active="master" data-sub="task"></div>
+  <script src="js/sidebar.js"></script>
   <div class="main">
     <div class="topbar"></div>
     <div class="content"><div class="toolbar"><h1>タスク一覧</h1></div><div class="table-card"></div></div>
@@ -84,7 +85,6 @@
 <script src="js/storage/task/store/task-store.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/chip-select.js" defer></script>
-<script src="js/sidebar-toggle.js" defer></script>
 <script src="js/toggle.js" defer></script>
 <script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
 <script src="js/storage/work-type/store/work-type-store.js"></script>

@@ -8,7 +8,8 @@
 </head>
 <body>
 <div class="app">
-  <iframe src="sidebar.html?active=master&sub=location" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div id="sidebar-slot" data-active="master" data-sub="location"></div>
+  <script src="js/sidebar.js"></script>
   <div class="overlay">
     <div class="modal">
       <div class="modal-resize"></div>
@@ -69,7 +70,6 @@
 <script src="js/storage/location/entry/location-modify.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/toggle.js" defer></script>
-<script src="js/sidebar-toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
 <script src="js/memo-area.js" defer></script>
 <script src="js/modal-resize.js"></script>

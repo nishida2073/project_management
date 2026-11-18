@@ -7,7 +7,8 @@
 </head>
 <body>
 <div class="app">
-  <iframe src="sidebar.html?active=master&sub=user" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div id="sidebar-slot" data-active="master" data-sub="user"></div>
+  <script src="js/sidebar.js"></script>
 
   <div class="main">
     <div class="topbar">
@@ -60,7 +61,6 @@
 <script src="js/storage/user/store/user-store.js"></script>
 <script src="js/storage/user/screens/user-list.js"></script>
 <script src="js/select.js" defer></script>
-<script src="js/sidebar-toggle.js" defer></script>
 <script src="js/table-sort.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/list-filter-auto.js"></script>

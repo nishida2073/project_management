@@ -8,7 +8,8 @@
 </head>
 <body>
 <div class="app">
-  <iframe src="sidebar.html?active=class" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div id="sidebar-slot" data-active="class"></div>
+  <script src="js/sidebar.js"></script>
   <div class="main">
     <div class="topbar"></div>
     <div class="content"><div class="toolbar"><h1>クラス一覧</h1></div><div class="table-card"></div></div>
@@ -182,7 +183,6 @@ ${tags%
 <script src="js/number-select.js" defer></script>
 <script src="js/sub-rows.js" defer></script>
 <script src="js/chip-select.js" defer></script>
-<script src="js/sidebar-toggle.js" defer></script>
 <script src="js/toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
 <script src="js/memo-area.js" defer></script>

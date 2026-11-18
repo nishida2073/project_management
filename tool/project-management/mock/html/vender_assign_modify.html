@@ -8,7 +8,8 @@
 </head>
 <body>
 <div class="app">
-  <iframe src="sidebar.html?active=assign" width="220" height="1040" style="border:0; flex-shrink:0; display:block;" title="サイドバー"></iframe>
+  <div id="sidebar-slot" data-active="assign"></div>
+  <script src="js/sidebar.js"></script>
   <div class="main">
     <div class="topbar"></div>
     <div class="content"><div class="toolbar"><h1>登壇依頼一覧</h1></div><div class="table-card"></div></div>
@@ -85,7 +86,6 @@
 <script src="js/storage/vender-assign/screens/vender-assign-editor.js"></script>
 <script src="js/storage/vender-assign/entry/vender-assign-modify.js"></script>
 <script src="js/select.js" defer></script>
-<script src="js/sidebar-toggle.js" defer></script>
 <script src="js/message-dialog.js"></script>
 <script src="js/memo-area.js" defer></script>
 <script src="js/modal-resize.js"></script>
