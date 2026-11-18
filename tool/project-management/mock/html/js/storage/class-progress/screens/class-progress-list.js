@@ -1,4 +1,16 @@
 (function () {
+  (function buildTaskTypeTabs() {
+    var container = document.getElementById('taskTypeTabs');
+    if (!container) return;
+    TaskTypeStore.load().forEach(function (t) {
+      var tab = document.createElement('span');
+      tab.className = 'year-tab';
+      tab.setAttribute('data-tt', t.name);
+      tab.setAttribute('data-code', t.code);
+      tab.textContent = t.name;
+      container.appendChild(tab);
+    });
+  })();
 
   var SORTED = TaskStore.load().slice().sort(function (a, b) {
     var ka = a.kinds[0] || '';
