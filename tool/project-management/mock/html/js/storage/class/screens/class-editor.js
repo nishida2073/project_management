@@ -74,7 +74,9 @@
   function init(opts) {
     var editing = opts.mode === 'edit';
     renderRadios(document.querySelector('.radio-group[data-target="#locationName"]'), 'locationType', LocationTypeStore.load());
-    renderRadios(document.querySelector('input[name="deliveryType"]').closest('.radio-group'), 'deliveryType', DeliveryTypeStore.load());
+    var deliveryGroup = document.querySelector('[data-master-radio="DeliveryTypeStore"]');
+    renderRadios(deliveryGroup, 'deliveryType', DeliveryTypeStore.load());
+    deliveryGroup.setAttribute('data-generated', '1');
     renderRadios(document.getElementById('taskTypeGroup'), 'taskType', TaskTypeStore.load());
     applyOptions();
     var list = ClassStore.load();
