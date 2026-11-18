@@ -45,7 +45,6 @@ a.btn { cursor: pointer; }
 .btn, .search-btn, .page-btn, .close-x, .add-row, .sidebar-toggle { cursor: pointer; }
 .search-btn, a.search-btn { text-decoration: none; }
 
-
 /* Filter panel */
 .filter-panel { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
@@ -100,8 +99,12 @@ tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f6; color: #333c4d; 
 .tag.teal { background: #e3f6f5; color: #0e8a86; }
 .tag.purple { background: #f5eaf7; color: #8a3f96; }
 .tag.green { background: #e5f6ec; color: #279158; }
-
-
+.tag-stack { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.tag-stack-col { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.state-tag { width: 64px; text-align: center; box-sizing: border-box; justify-content: center; }
+span.task-type-tag, span.practice-status-tag { width: 64px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+span.work-type-tag, span.sales-type-tag, span.participation-type-tag, span.delivery-type-tag, span.location-type-tag, span.affiliation-tag, span.role-tag, span.job-type-tag, span.position-tag, span.subject-type-tag, span.motivation-company-type-tag, span.user-role-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+.multi-opt.role-tag span, .multi-opt.job-type-tag span, .multi-opt.position-tag span { width: 80px; justify-content: center; padding: 0; }
 
 /* 操作列のボタン */
 td.row-actions { white-space: nowrap; text-align: center; }
@@ -157,7 +160,6 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 /* 角丸の状態バッジ（基本の形と色：gray・blue・green・red・orange） */
 .status-label { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
 .chip.tag-like { font-size: 11px; padding: 3px 9px; border-radius: 4px; }
-
 
 /* ダイアログ共通（オーバーレイ・モーダル枠） */
 .input-dialog { background: #ffffff; border-radius: 12px; box-shadow: 0 20px 60px rgba(10,16,30,0.35); width: 360px; max-width: calc(100vw - 32px); padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; }
