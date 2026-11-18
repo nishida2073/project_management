@@ -35,7 +35,7 @@
         </div>
         <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:12px;">
         <div class="field"><label>管理担当者</label><div class="control js-select" id="managerFilter" data-hide-class="col-manager" data-options="すべて">すべて<span class="caret">▾</span></div></div>
-        <div class="field"><label>タスク進捗</label><div class="control small js-select" data-task-progress-options data-hide-class="col-overall">すべて<span class="caret">▾</span></div></div>
+        <div class="field"><label>全体進捗</label><div class="control small js-select" data-task-progress-options data-hide-class="col-overall">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>実施担当ベンダー</label><div class="control wide js-select" id="companyFilter" data-column-only data-options="すべて">すべて<span class="caret">▾</span></div></div>
         <div class="field" style="display:none;"><label>タスク区分</label><div class="control small js-select" data-master-options="TaskTypeStore">すべて<span class="caret">▾</span></div></div>
         <!-- <div class="field"><label>実施担当者</label><div class="control js-select" data-match-attr="data-owners" data-options="すべて">すべて<span class="caret">▾</span></div></div> -->
@@ -51,7 +51,7 @@
           <span class="year-tab" data-master-tab="TaskTypeStore" data-code="TK-02"></span>
         </div>
         <div class="table-meta">
-          <div class="count"><b id="progressCount">0</b> 件（<span data-task-progress-label="DELAY"></span> <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
+          <div class="count"><b id="progressCount">0</b> 件（<span data-task-progress-name="DELAY"></span> <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
         </div>
         <div class="scroll-outer" id="scrollArea">
           <table>
@@ -66,7 +66,7 @@
                 <th class="sticky">終了日</th>
                 <th class="sticky col-manager">管理担当者</th>
                 <th class="sticky">タスク区分</th>
-                <th class="sticky col-overall">タスク進捗</th>
+                <th class="sticky col-overall">全体進捗</th>
                 <th class="col-actions">操作</th>
               </tr>
             </thead>

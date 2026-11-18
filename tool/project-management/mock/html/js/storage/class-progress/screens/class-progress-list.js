@@ -55,7 +55,7 @@
     var all = applicable.length > 0 && applicable.every(function (s) { return s.status === 'DONE'; });
     var any = applicable.some(function (s) { return s.status === 'DONE' || s.status === 'PROGRESS'; });
     var key = late ? 'DELAY' : (all ? 'DONE' : (any ? 'PROGRESS' : 'WAIT'));
-    var label = TaskProgressStore.labelOf(key);
+    var label = TaskProgressStore.nameOf(key);
     var color = TaskProgressStore.colorOf(key);
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }

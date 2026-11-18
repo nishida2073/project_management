@@ -29,7 +29,7 @@
 
   function overall(key) {
     if (key === 'NA') return '<span class="na-text">' + StepStatusStore.nameOf('NA') + '</span>';
-    var label = TaskProgressStore.labelOf(key);
+    var label = TaskProgressStore.nameOf(key);
     var color = TaskProgressStore.colorOf(key);
     return '<span class="badge overall-badge ' + color + '">' + label + '</span>';
   }
@@ -101,7 +101,7 @@
   setOptions('fCustomer', customers);
   setOptions('fManager', managerNames);
 
-  var OVERALL_KEY = TaskProgressStore.byLabel();
+  var OVERALL_KEY = TaskProgressStore.byName();
 
   function val(id) {
     var el = document.getElementById(id);
@@ -173,7 +173,7 @@
       '<div class="form-control js-date" id="pdPlan">' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施日</label>' +
       '<div class="form-control js-date" id="pdActual">' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
-      '<label class="input-dialog-label">状態</label>' +
+      '<label class="input-dialog-label">進捗</label>' +
       '<div class="status-select status-combo ' + P_STATUS_COLOR_OF[sv.status || 'WAIT'] + ' js-select" id="pdStatus" data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\' data-value="' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '">' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">備考</label>' +
       '<textarea class="form-control textarea" id="pdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +

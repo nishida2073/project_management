@@ -3,22 +3,20 @@
   var PREFIX = 'PT-';
 
   var SEED = [
-    { code: 'PT-02', name: '公募', color: 'orange' },
-    { code: 'PT-01', name: '受託', color: 'blue' }
+    { code: 'PT-01', name: '受託', color: 'blue' },
+    { code: 'PT-02', name: '公募', color: 'orange' }
   ];
 
   function save(list) {
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}
   }
 
+  function byCode(a, b) {
+    return String(a.code).localeCompare(String(b.code), 'en', { numeric: true });
+  }
+
   function load() {
-    try {
-      var raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    var seed = JSON.parse(JSON.stringify(SEED));
-    save(seed);
-    return seed;
+    return JSON.parse(JSON.stringify(SEED)).sort(byCode);
   }
 
   function find(code) {

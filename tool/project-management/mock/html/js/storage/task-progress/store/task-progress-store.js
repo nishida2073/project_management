@@ -1,51 +1,59 @@
 (function () {
   var LIST = [
-    { key: 'WAIT', label: '未着手', color: 'gray' },
-    { key: 'PROGRESS', label: '進行中', color: 'blue' },
-    { key: 'DONE', label: '完了', color: 'green' },
-    { key: 'DELAY', label: '遅延', color: 'red' }
+    { code: 'WAIT', name: '未着手', color: 'gray' },
+    { code: 'PROGRESS', name: '進行中', color: 'blue' },
+    { code: 'DONE', name: '完了', color: 'green' },
+    { code: 'DELAY', name: '遅延', color: 'red' }
   ];
 
-  function byKey(key) {
-    for (var i = 0; i < LIST.length; i++) if (LIST[i].key === key) return LIST[i];
+  function load() {
+    return LIST.map(function (s) { return { code: s.code, name: s.name, color: s.color }; });
+  }
+
+  function find(code) {
+    for (var i = 0; i < LIST.length; i++) if (LIST[i].code === code) return LIST[i];
     return null;
   }
 
-  function labelOf(key) {
-    var s = byKey(key);
-    return s ? s.label : '';
+  function nameOf(code) {
+    var s = find(code);
+    return s ? s.name : '';
   }
 
-  function colorOf(key) {
-    var s = byKey(key);
+  function colorOf(code) {
+    var s = find(code);
     return s ? s.color : '';
   }
 
+  function codes() {
+    return LIST.map(function (s) { return s.code; });
+  }
+
   function options() {
-    return LIST.map(function (s) { return s.label; }).join(',');
+    return LIST.map(function (s) { return s.name; }).join(',');
   }
 
-  function byLabel() {
+  function byName() {
     var map = {};
-    LIST.forEach(function (s) { map[s.label] = s.key; });
+    LIST.forEach(function (s) { map[s.name] = s.code; });
     return map;
   }
 
-  function labelByKey() {
+  function nameByCode() {
     var map = {};
-    LIST.forEach(function (s) { map[s.key] = s.label; });
+    LIST.forEach(function (s) { map[s.code] = s.name; });
     return map;
   }
 
-  function colorByKey() {
+  function colorByCode() {
     var map = {};
-    LIST.forEach(function (s) { map[s.key] = s.color; });
+    LIST.forEach(function (s) { map[s.code] = s.color; });
     return map;
   }
 
   function fillDom() {
-    document.querySelectorAll('[data-task-progress-label]').forEach(function (el) {
-      if (!el.textContent) el.textContent = labelOf(el.getAttribute('data-task-progress-label'));
+    document.querySelectorAll('[data-task-progress-name]').forEach(function (el) {
+      if (!el.textContent) el.textContent = nameOf(el.getAttribute('data-task-progress-name'));
     });
     document.querySelectorAll('[data-task-progress-options]').forEach(function (el) {
       el.setAttribute('data-options', 'すべて,' + options());
@@ -56,7 +64,7 @@
   document.addEventListener('DOMContentLoaded', fillDom);
 
   window.TaskProgressStore = {
-    LIST: LIST, labelOf: labelOf, colorOf: colorOf, options: options,
-    byLabel: byLabel, labelByKey: labelByKey, colorByKey: colorByKey
+    load: load, LIST: LIST, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes,
+    options: options, byName: byName, nameByCode: nameByCode, colorByCode: colorByCode
   };
 })();
