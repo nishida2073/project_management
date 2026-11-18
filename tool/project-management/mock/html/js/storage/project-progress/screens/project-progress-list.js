@@ -160,9 +160,10 @@
     var stepName = ProjectProgressStore.STEP_NAMES[i];
     var overlay = document.createElement('div');
     overlay.className = 'overlay';
-    overlay.innerHTML = '<div class="input-dialog">' +
+    overlay.innerHTML = '<div class="input-dialog step-dialog">' +
       '<div class="input-dialog-title">' + esc((i + 1) + '：' + stepName) + '</div>' +
-      '<div style="font-size:12px;color:#6c7688;margin-bottom:8px;">' + esc(projInfo) + '</div>' +
+      '<label class="input-dialog-label">案件情報</label>' +
+      '<div class="step-dialog-info">' + esc(projInfo) + '</div>' +
       '<label class="input-dialog-label">実施</label>' +
       '<div class="radio-group" id="pdTarget">' +
         '<label class="radio-option"><input type="radio" name="pdTargetRadio" value="あり"' + (sv.na ? '' : ' checked') + '><span class="radio-dot"></span><span class="tag blue">あり</span></label>' +

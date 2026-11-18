@@ -9,7 +9,9 @@
 td.is-kind-na { background: #e4e8ef; }
 td.is-kind-na .status-chip { opacity: 0.6; }
 td.has-memo::after { content: "!"; top: 2px; right: 2px; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #fbd29b; color: #9a4a00; font-weight: 700; font-size: 12px; border: none; }
-.step-dialog-row { display: flex; gap: 12px; }
-.step-dialog-cell { flex: 1; }
-.step-dialog-value { padding-top: 6px; padding-left: 6px; font-size: 13px; }
-.step-dialog > :not(.input-dialog-title):not(.input-dialog-actions) { margin-left: 6px; }
+.step-dialog-row { display: flex; gap: 12px; margin-left: 0; }
+.step-dialog-cell { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.step-dialog-value { padding-left: 6px; font-size: 13px; }
+.step-dialog > :not(.input-dialog-title):not(.input-dialog-actions):not(.input-dialog-label):not(.step-dialog-row) { margin-left: 6px; }
+.step-dialog > .step-dialog-info { font-size: 12px; color: #6c7688; }
+.step-dialog .radio-group { height: auto; min-height: 20px; }

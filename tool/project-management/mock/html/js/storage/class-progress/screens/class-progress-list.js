@@ -237,12 +237,12 @@
     overlay.className = 'overlay';
     overlay.innerHTML = '<div class="input-dialog step-dialog">' +
       '<div class="input-dialog-title">' + esc(DISPLAY_NO[i] + '：' + task.name) + '</div>' +
+      '<label class="input-dialog-label">クラス情報</label>' +
+      '<div class="step-dialog-info">' + esc(classInfo) + '</div>' +
       '<div class="step-dialog-row">' +
         '<div class="step-dialog-cell"><label class="input-dialog-label">タスク区分</label><div class="step-dialog-value">' + kindTags + '</div></div>' +
         '<div class="step-dialog-cell"><label class="input-dialog-label">実施担当会社</label><div class="step-dialog-value">' + esc(companyName) + '</div></div>' +
       '</div>' +
-      '<label class="input-dialog-label">クラス情報</label>' +
-      '<div style="font-size:12px;color:#6c7688;margin-bottom:8px;">' + esc(classInfo) + '</div>' +
       '<label class="input-dialog-label">実施</label>' +
       '<div class="radio-group" id="sdTarget">' +
         '<label class="radio-option"><input type="radio" name="sdTargetRadio" value="あり"' + (sv.na ? '' : ' checked') + '><span class="radio-dot"></span><span class="tag blue">あり</span></label>' +
