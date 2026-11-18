@@ -17,7 +17,7 @@ function setDisabledRow(tr, off) {
     MessageDialog.show('対象の案件が見つかりません', function () { location.href = 'project_progress_list.html'; });
       } else {
     $('subLine').textContent = project.code + '　' + project.name + '　実施開始月：' + project.startMonth +
-      '　管理担当者　' + StaffStore.nameOf(project.pm) + (project.pl && project.pl.length ? '／' + project.pl.map(function (c) { return StaffStore.nameOf(c); }).join('／') : '');
+      '　管理担当者：' + StaffStore.nameOf(project.pm) + (project.pl && project.pl.length ? '／' + project.pl.map(function (c) { return StaffStore.nameOf(c); }).join('／') : '');
 
     var rec = ProjectProgressStore.find(project.code);
     var blank = ProjectProgressStore.blank(project.code).steps;
