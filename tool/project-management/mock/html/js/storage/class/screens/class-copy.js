@@ -90,7 +90,7 @@
     var html = '';
     for (var k = 1; k <= count; k++) {
       var typeRadios = types.map(function (t) {
-        return '<label class="radio-option"><input type="radio" name="locationType-' + k + '" value="' + esc(t.code) + '"' + (t.code === src.locationType ? ' checked' : '') + '><span class="radio-dot"></span><span class="tag ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
+        return '<label class="radio-option"><input type="radio" name="locationType-' + k + '" value="' + esc(t.code) + '"' + (t.code === src.locationType ? ' checked' : '') + '><span class="radio-dot"></span><span class="tag ' + tagClassOf('locationType') + ' ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
       }).join('');
       var initName = '';
       var initOptions = (byType[src.locationType] || []).join(',');

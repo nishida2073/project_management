@@ -19,7 +19,7 @@
       if (!store) return;
       var name = el.getAttribute('data-radio-name');
       el.innerHTML = store.load().map(function (r) {
-        return '<label class="radio-option"><input type="radio" name="' + esc(name) + '" value="' + esc(r.name) + '"><span class="radio-dot"></span><span class="tag kind-tag ' + esc(r.color) + '">' + esc(r.name) + '</span></label>';
+        return '<label class="radio-option"><input type="radio" name="' + esc(name) + '" value="' + esc(r.name) + '"><span class="radio-dot"></span><span class="tag ' + tagClassOf(name) + ' ' + esc(r.color) + '">' + esc(r.name) + '</span></label>';
       }).join('');
       el.setAttribute('data-generated', '1');
     });

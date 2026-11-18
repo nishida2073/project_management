@@ -8,7 +8,7 @@
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td>' + esc(s.code) + '</td>' +
-      '<td><span class="tag kind-tag ' + (SubjectTypeStore.colorOf(s.type) || '') + '">' + esc(SubjectTypeStore.nameOf(s.type)) + '</span></td>' +
+      '<td><span class="tag subject-type-tag ' + (SubjectTypeStore.colorOf(s.type) || '') + '">' + esc(SubjectTypeStore.nameOf(s.type)) + '</span></td>' +
       '<td>' + esc(s.name) + '</td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (s.memo ? ' title="' + esc(s.memo) + '"' : '') + '>' + (s.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +

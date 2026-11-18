@@ -23,7 +23,7 @@
   function renderGroup(name, items) {
     var group = document.querySelector('[data-radio-name="' + name + '"]');
     group.innerHTML = items.map(function (it) {
-      return '<label class="radio-option"><input type="radio" name="' + name + '" value="' + it.code + '"><span class="radio-dot"></span><span class="tag project-radio-tag ' + it.color + '">' + it.name + '</span></label>';
+      return '<label class="radio-option"><input type="radio" name="' + name + '" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + tagClassOf(name) + ' ' + it.color + '">' + it.name + '</span></label>';
     }).join('');
     group.setAttribute('data-generated', '1');
   }

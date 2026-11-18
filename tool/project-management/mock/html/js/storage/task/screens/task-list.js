@@ -3,16 +3,16 @@
     var list = TaskStore.load();
     list.forEach(function (t) {
       var kinds = t.kinds.map(function (k) {
-        return '<span class="tag kind-tag ' + (TaskTypeStore.colorOf(k) || '') + '">' + esc(TaskTypeStore.nameOf(k)) + '</span>';
+        return '<span class="tag task-type-tag ' + (TaskTypeStore.colorOf(k) || '') + '">' + esc(TaskTypeStore.nameOf(k)) + '</span>';
       }).join('');
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>' + esc(t.id) + '</td>' +
         '<td>' + esc(t.name) + '</td>' +
         '<td><div class="tag-stack">' + kinds + '</div></td>' +
-        '<td>' + (t.workType ? '<span class="tag kind-tag ' + WorkTypeStore.colorOf(t.workType) + '">' + esc(WorkTypeStore.nameOf(t.workType)) + '</span>' : '') + '</td>' +
+        '<td>' + (t.workType ? '<span class="tag work-type-tag ' + WorkTypeStore.colorOf(t.workType) + '">' + esc(WorkTypeStore.nameOf(t.workType)) + '</span>' : '') + '</td>' +
         '<td>' + esc(t.order) + '</td>' +
-        '<td><span class="tag kind-tag ' + (t.company === StaffVenderStore.INTERNAL ? 'blue' : 'orange') + '">' + (t.company === StaffVenderStore.INTERNAL ? AffiliationStore.nameOf('INTERNAL') : AffiliationStore.nameOf('PARTNER')) + '</span></td>' +
+        '<td><span class="tag affiliation-tag ' + (t.company === StaffVenderStore.INTERNAL ? 'blue' : 'orange') + '">' + (t.company === StaffVenderStore.INTERNAL ? AffiliationStore.nameOf('INTERNAL') : AffiliationStore.nameOf('PARTNER')) + '</span></td>' +
         '<td>' + (t.company === StaffVenderStore.INTERNAL ? '' : esc(StaffVenderStore.nameOf(t.company))) + '</td>' +
         '<td>' + (t.days === '' || t.days === undefined ? '' : esc(t.days) + '日') + '</td>' +
         '<td><span class="status-label ' + (t.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (t.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +

@@ -48,7 +48,7 @@
   }
   function renderRadios(group, name, items) {
     group.innerHTML = items.map(function (it) {
-      return '<label class="radio-option"><input type="radio" name="' + name + '" value="' + it.code + '"><span class="radio-dot"></span><span class="tag class-tag ' + it.color + '">' + it.name + '</span></label>';
+      return '<label class="radio-option"><input type="radio" name="' + name + '" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + tagClassOf(name) + ' ' + it.color + '">' + it.name + '</span></label>';
     }).join('');
   }
 

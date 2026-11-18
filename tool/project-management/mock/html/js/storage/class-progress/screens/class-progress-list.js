@@ -79,7 +79,7 @@
     th.classList.add('no-sort');
     th.setAttribute('data-kinds', t.kinds.join(','));
     th.setAttribute('data-company', t.company || '');
-    th.innerHTML = '<div class="kind-line"><span class="tag step-kind-tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
+    th.innerHTML = '<div class="kind-line"><span class="tag task-type-tag ' + TaskTypeStore.colorOf(t.kinds[0]) + '">' + esc(TaskTypeStore.nameOf(t.kinds[0])) + '</span></div>' +
       '<div>' + esc(DISPLAY_NO[i] + '：' + t.name) + '</div>' +
       '<div>' + esc(StaffVenderStore.nameOf(t.company)) + '</div>';
     headRow.appendChild(th);
@@ -121,7 +121,7 @@
     tr.setAttribute('data-id', c.id);
     var html = '';
     var ps = ClassStore.practiceStatus(c);
-    html += '<td class="sticky col-practice">' + (ps ? '<span class="tag step-kind-tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
+    html += '<td class="sticky col-practice">' + (ps ? '<span class="tag practice-status-tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>';
     var pj = ProjectStore.map()[c.projectCode] || {};
     html += '<td class="sticky col-customer">' + esc(pj.customer ? CustomerStore.nameOf(pj.customer) : '-') + '</td>';
     html += '<td class="sticky col-year">' + esc(yearLabel(c.year)) + '</td>';
@@ -130,7 +130,7 @@
     html += '<td class="sticky">' + esc(c.start) + '</td>';
     html += '<td class="sticky">' + esc(c.end) + '</td>';
     html += '<td class="sticky col-manager">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
-    html += '<td class="sticky">' + (c.taskType ? '<span class="tag step-kind-tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
+    html += '<td class="sticky">' + (c.taskType ? '<span class="tag task-type-tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky col-overall">' + overall(activeSteps) + '</td>';
     steps.forEach(function (s, i) {
       if (!isActive(i)) return;
@@ -231,7 +231,7 @@
     var ownerName = StaffStore.nameOf(sv.owner || '');
     var owners = stepOwnerNames(task);
     var companyName = task ? StaffVenderStore.nameOf(task.company) : '';
-    var kindTags = task ? task.kinds.map(function (k) { return '<span class="tag step-kind-tag ' + TaskTypeStore.colorOf(k) + '">' + esc(TaskTypeStore.nameOf(k)) + '</span>'; }).join('') : '';
+    var kindTags = task ? task.kinds.map(function (k) { return '<span class="tag task-type-tag ' + TaskTypeStore.colorOf(k) + '">' + esc(TaskTypeStore.nameOf(k)) + '</span>'; }).join('') : '';
     if (ownerName && owners.indexOf(ownerName) === -1) owners.unshift(ownerName);
     var overlay = document.createElement('div');
     overlay.className = 'overlay';

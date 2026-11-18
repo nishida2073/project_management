@@ -10,7 +10,7 @@
     var tr = document.createElement('tr');
     tr.innerHTML =
       '<td>' + esc(l.code) + '</td>' +
-      '<td><span class="tag kind-tag ' + (TYPE_CLASS[l.type] || '') + '">' + esc(LocationTypeStore.nameOf(l.type)) + '</span></td>' +
+      '<td><span class="tag location-type-tag ' + (TYPE_CLASS[l.type] || '') + '">' + esc(LocationTypeStore.nameOf(l.type)) + '</span></td>' +
       '<td>' + esc(l.name) + '</td>' +
       '<td>' + esc(l.tel) + '</td>' +
       '<td>' + esc(l.address) + '</td>' +

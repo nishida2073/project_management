@@ -48,7 +48,7 @@
     var tr = document.createElement('tr');
     var custCode = (ClassStore.PROJECTS[r.projectCode] || {}).customer;
     tr.innerHTML =
-      '<td class="sticky col-practice">' + (ps ? '<span class="tag kind-tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
+      '<td class="sticky col-practice">' + (ps ? '<span class="tag practice-status-tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td class="sticky">' + esc(custCode ? CustomerStore.nameOf(custCode) : '-') + '</td>' +
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
       '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + '</div></td>' +

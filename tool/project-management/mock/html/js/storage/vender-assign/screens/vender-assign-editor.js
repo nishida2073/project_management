@@ -138,7 +138,7 @@
     $('attendeeVendor').value = a.attendeeVendor || '';
     $('attendee').value = a.attendee || '';
     $('motivationVendor').innerHTML = MotivationCompanyTypeStore.load().map(function (t) {
-      return '<label class="radio-option"><input type="radio" name="motivationVendor" value="' + esc(t.code) + '"><span class="radio-dot"></span><span class="tag vender-radio-tag ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
+      return '<label class="radio-option"><input type="radio" name="motivationVendor" value="' + esc(t.code) + '"><span class="radio-dot"></span><span class="tag ' + tagClassOf('motivationVendor') + ' ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
     }).join('');
     Array.prototype.forEach.call(document.querySelectorAll('input[name="motivationVendor"]'), function (r) { r.checked = r.value === (a.motivationVendor || ''); });
     $('motivationName').value = a.motivationName || '';

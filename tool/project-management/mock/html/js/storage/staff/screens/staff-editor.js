@@ -1,7 +1,7 @@
 (function () {
   function renderChecks(group, name, items) {
     group.innerHTML = items.map(function (it) {
-      return '<label class="multi-opt staff-opt" data-tone="' + esc(it.color || '') + '"><input type="checkbox" name="' + name + '" value="' + esc(it.code) + '"><span>' + esc(it.name) + '</span></label>';
+      return '<label class="multi-opt ' + tagClassOf(name) + '" data-tone="' + esc(it.color || '') + '"><input type="checkbox" name="' + name + '" value="' + esc(it.code) + '"><span>' + esc(it.name) + '</span></label>';
     }).join('');
   }
   function setChecks(name, values) {

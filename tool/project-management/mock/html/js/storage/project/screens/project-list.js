@@ -15,8 +15,8 @@
     tr.innerHTML =
       '<td>' + esc(yearLabel(p.year)) + '</td>' +
       '<td>' + esc(p.code) + '</td>' +
-      '<td><span class="tag kind-tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span></td>' +
-      '<td><span class="tag kind-tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span></td>' +
+      '<td><span class="tag sales-type-tag ' + SalesTypeStore.colorOf(p.sales) + '">' + esc(SalesTypeStore.nameOf(p.sales)) + '</span></td>' +
+      '<td><span class="tag participation-type-tag ' + ParticipationTypeStore.colorOf(p.part) + '">' + esc(ParticipationTypeStore.nameOf(p.part)) + '</span></td>' +
       '<td>' + esc(p.name) + '</td>' +
       '<td>' + esc(CustomerStore.nameOf(p.customer)) + '</td>' +
       '<td><div class="tag-stack-col">' + managerList.join('') + '</div></td>' +
