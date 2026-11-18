@@ -56,9 +56,13 @@
     refreshAffiliation();
   }
 
+  function applyOptions() {
+    $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
+  }
+
   function init(opts) {
     var editing = opts.mode === 'edit';
-    $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
+    applyOptions();
     renderKindRadios();
     renderWorkRadios();
     var list = TaskStore.load();
@@ -126,3 +130,4 @@
 
   window.TaskEditor = { init: init };
 })();
+

@@ -4,6 +4,12 @@
     return items.reduce(function (m, it) { m[it.name] = it.color; return m; }, {});
   }
 
+  function setYearMap(selectId, list) {
+    var map = { "2024": [], "2025": [], "2026": [], "2027": [] };
+    list.forEach(function (x) { if (!map[x.year]) map[x.year] = []; map[x.year].push(x.code); });
+    document.getElementById(selectId).setAttribute("data-options-map", JSON.stringify(map));
+  }
+
   function applyOptions() {
     var projects = ProjectStore.load().filter(function (x) { return x.status !== OperatingStatusStore.nameOf('STOPPED'); });
     var pc = document.getElementById('projectCode');
@@ -30,6 +36,8 @@
       cSchedule[c.code] = c.days + '日・' + c.min + '〜' + c.max + '人';
     });
     cc.setAttribute('data-options', courses.map(function (c) { return c.code; }).join(','));
+    setYearMap("projectYear", projects);
+    setYearMap("courseYear", courses);
     cc.setAttribute('data-map', JSON.stringify(cName));
     cc.setAttribute('data-map2', JSON.stringify(cPart));
     cc.setAttribute('data-map3', JSON.stringify(cDelivery));

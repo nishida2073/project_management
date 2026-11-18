@@ -98,8 +98,11 @@
   function setOptions(id, list) {
     document.getElementById(id).setAttribute('data-options', ['すべて'].concat(list).join(','));
   }
-  setOptions('fCustomer', customers);
-  setOptions('fManager', managerNames);
+  function applyOptions() {
+    setOptions('fCustomer', customers);
+    setOptions('fManager', managerNames);
+  }
+  applyOptions();
 
   var OVERALL_KEY = TaskProgressStore.byName();
 

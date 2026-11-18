@@ -39,14 +39,18 @@
     refreshCompany();
   }
 
+  function applyOptions() {
+    $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
+  }
+
   function init(opts) {
     var editing = opts.mode === 'edit';
+    applyOptions();
     var list = StaffStore.load();
     var id = new URLSearchParams(location.search).get('id');
     var idx = -1;
     var rec;
 
-    $('company').setAttribute('data-options', StaffVenderStore.activeNames().join(','));
     renderChecks($('roleGroup'), 'roles', StaffRoleStore.load());
     renderChecks($('jobGroup'), 'jobTypes', JobTypeStore.load());
     renderChecks($('positionGroup'), 'positions', PositionStore.load());
@@ -104,3 +108,4 @@
 
   window.StaffEditor = { init: init };
 })();
+

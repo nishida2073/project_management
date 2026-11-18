@@ -29,10 +29,13 @@
 
   document.getElementById('projectCount').textContent = list.length;
 
-  var managerSelect = document.getElementById('managerFilter');
-  if (managerSelect) {
-    managerSelect.setAttribute('data-options', ['すべて'].concat(StaffStore.candidates({
-      includeStopped: true, affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-01')]
-    })).join(','));
+  function applyOptions() {
+    var managerSelect = document.getElementById('managerFilter');
+    if (managerSelect) {
+      managerSelect.setAttribute('data-options', ['すべて'].concat(StaffStore.candidates({
+        includeStopped: true, affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-01')]
+      })).join(','));
+    }
   }
+  applyOptions();
 })();

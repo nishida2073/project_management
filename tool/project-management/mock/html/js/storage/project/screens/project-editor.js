@@ -49,14 +49,18 @@
     $('memo').value = rec.memo || '';
   }
 
-  function init(opts) {
-    var editing = opts.mode === 'edit';
-    renderGroup('salesType', SalesTypeStore.load());
-    renderGroup('participationType', ParticipationTypeStore.load());
+  function applyOptions() {
     var projectStaff = StaffStore.candidates({ affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-01')] }).join(',');
     document.getElementById('pm').setAttribute('data-options', projectStaff);
     document.getElementById('plBox').setAttribute('data-options', projectStaff);
     document.getElementById('customer').setAttribute('data-options', CustomerStore.load().filter(function (c) { return c.status !== OperatingStatusStore.nameOf('STOPPED'); }).map(function (c) { return c.name; }).join(','));
+  }
+
+  function init(opts) {
+    var editing = opts.mode === 'edit';
+    applyOptions();
+    renderGroup('salesType', SalesTypeStore.load());
+    renderGroup('participationType', ParticipationTypeStore.load());
     var list = ProjectStore.load();
     var id = new URLSearchParams(location.search).get('id');
     var idx = -1;

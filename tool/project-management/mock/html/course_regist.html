@@ -22,7 +22,7 @@
         <div class="form-section">科目</div>
         <div class="form-field">
           <label>科目名<span class="req">必須</span></label>
-          <div class="form-control js-select" id="subjectSelect" data-options="システム開発入門,基盤技術基礎,AP要件定義基礎,AP設計・製造基礎,AP試験基礎,データモデル設計基礎,基盤構築プロセス基礎,営業基本Ⅰ,営業リスクマネジメントⅠ,IT-PM入門,品質管理入門,システム基盤実践"><span class="caret">▾</span></div>
+          <div class="form-control js-select" id="subjectSelect" data-options=""><span class="caret">▾</span></div>
         </div>
         <div class="form-field full">
           <label>科目情報</label>
@@ -40,8 +40,7 @@
         <div class="form-field">
           <label>参加区分<span class="req">必須</span></label>
           <div class="radio-group">
-<div class="master-radio" data-master-radio="ParticipationTypeStore" data-radio-name="participationType"></div>
-<script src="js/master-options.js"></script>
+            <div class="master-radio" data-master-radio="ParticipationTypeStore" data-radio-name="participationType"></div>
           </div>
         </div>
         <div class="form-field form-spacer" aria-hidden="true"></div>
@@ -57,8 +56,7 @@
         <div class="form-field full">
           <label>実施形態</label>
           <div class="radio-group">
-<div class="master-radio" data-master-radio="DeliveryTypeStore" data-radio-name="deliveryType"></div>
-<script src="js/master-options.js"></script>
+            <div class="master-radio" data-master-radio="DeliveryTypeStore" data-radio-name="deliveryType"></div>
           </div>
         </div>
         <div class="form-field">
@@ -144,6 +142,7 @@ ${tags%
 <script src="js/storage/participation-type/store/participation-type-store.js"></script>
 <script src="js/storage/course/store/course-store.js"></script>
 <script src="js/storage/subject/store/subject-store.js"></script>
+<script src="js/master-options.js"></script>
 <script src="js/storage/course/screens/course-editor.js"></script>
 <script src="js/storage/course/entry/course-regist.js"></script>
 <script src="js/select.js" defer></script>

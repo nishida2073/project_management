@@ -90,10 +90,14 @@
     };
   }
 
+  function applyOptions() {
+    $('subjectSelect').setAttribute('data-options', SubjectStore.activeNames().join(','));
+  }
+
   function init(opts) {
     var editing = opts.mode === 'edit';
+    applyOptions();
     isEditing = editing;
-    $('subjectSelect').setAttribute('data-options', SubjectStore.activeNames().join(','));
     renderGroup('participationType', ParticipationTypeStore.load());
     if (editing) {
       document.querySelector('input[name="participationType"]').closest('.radio-group').style.opacity = '0.6';
@@ -161,3 +165,4 @@
 
   window.CourseEditor = { init: init };
 })();
+

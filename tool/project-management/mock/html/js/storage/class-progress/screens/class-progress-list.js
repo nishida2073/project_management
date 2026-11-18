@@ -164,12 +164,19 @@
       includeStopped: true, affiliations: affiliations, roles: ['クラス'], jobTypes: [jobType]
     })).join(',');
   }
-  var ownerSelect = document.querySelector('.filter-panel .js-select[data-match-attr="data-owners"]');
-  if (ownerSelect) ownerSelect.setAttribute('data-options', staffOptionsOf([AffiliationStore.nameOf('INTERNAL'), AffiliationStore.nameOf('PARTNER')], '実施'));
-  var managerSelect = document.getElementById('managerFilter');
-  if (managerSelect) managerSelect.setAttribute('data-options', staffOptionsOf(null, '管理'));
-  var customerSelect = document.getElementById('customerFilter');
-  if (customerSelect) customerSelect.setAttribute('data-options', ['すべて'].concat(CustomerStore.names()).join(','));
+  function applyOptions() {
+    var ownerSelect = document.querySelector('.filter-panel .js-select[data-match-attr="data-owners"]');
+    if (ownerSelect) ownerSelect.setAttribute('data-options', staffOptionsOf([AffiliationStore.nameOf('INTERNAL'), AffiliationStore.nameOf('PARTNER')], '実施'));
+    var managerSelect = document.getElementById('managerFilter');
+    if (managerSelect) managerSelect.setAttribute('data-options', staffOptionsOf(null, '管理'));
+    var customerSelect = document.getElementById('customerFilter');
+    if (customerSelect) customerSelect.setAttribute('data-options', ['すべて'].concat(CustomerStore.names()).join(','));
+    var companyFilter = document.getElementById('companyFilter');
+    if (companyFilter) {
+      companyFilter.setAttribute('data-options', ['すべて', StaffVenderStore.nameOf(StaffVenderStore.INTERNAL)].concat(StaffVenderStore.load().map(function (v) { return v.name; })).join(','));
+    }
+  }
+  applyOptions();
   document.getElementById('progressCount').textContent = classes.length;
   document.getElementById('delayCount').textContent = delayClasses;
 
@@ -206,10 +213,6 @@
     var name = el ? ownText(el) : '';
     stepCompanyCode = (!name || name === 'すべて') ? '' : StaffVenderStore.codeOf(name);
     refreshStepColumns();
-  }
-  var companyFilter = document.getElementById('companyFilter');
-  if (companyFilter) {
-    companyFilter.setAttribute('data-options', ['すべて', StaffVenderStore.nameOf(StaffVenderStore.INTERNAL)].concat(StaffVenderStore.load().map(function (v) { return v.name; })).join(','));
   }
   document.addEventListener('click', function () { setTimeout(applyCompanyFilter, 0); }, true);
   applyCompanyFilter();

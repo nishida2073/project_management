@@ -5,7 +5,10 @@
   var KEY = { requesting: 'REQUESTING', before: 'BEFORE', open: 'OPEN' };
   function labelOf(state) { return SlotStatusStore.nameOf(KEY[state]); }
 
-  $('requestVendor').setAttribute('data-options', TeacherVenderStore.activeNames().join(','));
+  function applyOptions() {
+    $('requestVendor').setAttribute('data-options', TeacherVenderStore.activeNames().join(','));
+  }
+  applyOptions();
 
   function vendorCode() {
     return TeacherVenderStore.codeOf(placeholderToEmpty(ownText($('requestVendor'))));

@@ -68,7 +68,10 @@
     body.appendChild(tr);
   });
 
-  document.getElementById('vendorFilter').setAttribute('data-options', ['すべて'].concat(TeacherVenderStore.activeNames()).join(','));
+  function applyOptions() {
+    document.getElementById('vendorFilter').setAttribute('data-options', ['すべて'].concat(TeacherVenderStore.activeNames()).join(','));
+  }
+  applyOptions();
   document.getElementById('venderCount').textContent = list.length;
   window.addEventListener('load', function () {
     var btn = document.querySelector('.filter-panel .search-btn');

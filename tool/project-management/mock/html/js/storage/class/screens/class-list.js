@@ -47,6 +47,9 @@
   });
 
   document.getElementById('classCount').textContent = list.length;
-  var customerSelect = document.getElementById('customerFilter');
-  if (customerSelect) customerSelect.setAttribute('data-options', ['すべて'].concat(CustomerStore.names()).join(','));
+  function applyOptions() {
+    var customerSelect = document.getElementById('customerFilter');
+    if (customerSelect) customerSelect.setAttribute('data-options', ['すべて'].concat(CustomerStore.names()).join(','));
+  }
+  applyOptions();
 })();

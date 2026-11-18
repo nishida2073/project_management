@@ -48,7 +48,10 @@
   });
 
   $('printCount').textContent = list.length;
-  $('requestVendor').setAttribute('data-options', TeacherVenderStore.activeNames().join(','));
+  function applyOptions() {
+    $('requestVendor').setAttribute('data-options', TeacherVenderStore.activeNames().join(','));
+  }
+  applyOptions();
 
   function applyFilter() {
     var kw = $('keyword').value.trim().toLowerCase();

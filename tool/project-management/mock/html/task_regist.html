@@ -44,14 +44,12 @@
         <div class="form-field">
           <label>実務担当区分<span class="req">必須</span></label>
           <div class="radio-group" id="affiliationGroup">
-<div class="master-radio" data-master-radio="AffiliationStore" data-radio-name="affiliation"></div>
-<script src="js/storage/affiliation/store/affiliation-store.js"></script>
-<script src="js/master-options.js"></script>
+            <div class="master-radio" data-master-radio="AffiliationStore" data-radio-name="affiliation"></div>
           </div>
         </div>
         <div class="form-field" id="companyField" style="visibility: hidden;">
           <label>実施担当ベンダー<span class="req">必須</span></label>
-          <div id="company" class="form-control js-select" data-options="社内,株式会社NEUトレーニング,NDUパートナーズ,ユニバ研修サービス,CECトラスト">選択してください<span class="caret">▾</span></div>
+          <div id="company" class="form-control js-select" data-options="">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>作業順<span class="req">必須</span></label>
@@ -90,6 +88,8 @@
 <script src="js/toggle.js" defer></script>
 <script src="js/storage/teacher-vender/store/teacher-vender-store.js"></script>
 <script src="js/storage/work-type/store/work-type-store.js"></script>
+<script src="js/storage/affiliation/store/affiliation-store.js"></script>
+<script src="js/master-options.js"></script>
 <script src="js/storage/task/screens/task-editor.js"></script>
 <script src="js/storage/task/entry/task-regist.js"></script>
 <script src="js/message-dialog.js"></script>
