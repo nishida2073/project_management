@@ -335,13 +335,11 @@
   }
 
   function commit(picked, infos) {
-    var people = 0;
     try {
       Object.keys(picked).forEach(function (key) {
         var u = plan.updates[Number(key)];
         var a = transform(VenderAssignStore.find(u.classId), picked[key]);
         VenderAssignStore.upsert(a);
-        people += picked[key].mains.length + picked[key].subs.length;
       });
       applyPlan(infos);
     } catch (e) {
@@ -349,7 +347,14 @@
       return;
     }
     sessionStorage.removeItem('venderImportPlan');
-    var msg = '反映が完了しました\n反映: ' + people + '人（' + Object.keys(picked).length + 'クラス）';
+    var lines = ['反映が完了しました。', ''];
+    Object.keys(picked).forEach(function (key) {
+      var u = plan.updates[Number(key)];
+      lines.push('・' + u.courseCode + '　' + u.courseName + '　' + u.lessonNo);
+      lines.push('　メイン：' + picked[key].mains.length + '人');
+      lines.push('　サブ：' + picked[key].subs.length + '人');
+    });
+    var msg = lines.join('\n');
     MessageDialog.show(msg, function () { location.href = 'vender_assign_list.html'; });
   }
 
