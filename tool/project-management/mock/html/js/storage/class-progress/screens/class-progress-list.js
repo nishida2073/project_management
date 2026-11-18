@@ -78,7 +78,7 @@
   var byName = {};
   tasks.forEach(function (t) { byName[t.name] = t; });
 
-  var headRow = document.querySelector('#scrollArea thead tr');
+  var headRow = document.querySelector('.progress-scroll thead tr');
   var stickyHeads = headRow.querySelectorAll('th.sticky');
   var lastSticky = stickyHeads[stickyHeads.length - 1];
   while (lastSticky.nextElementSibling) headRow.removeChild(lastSticky.nextElementSibling);
@@ -181,24 +181,24 @@
   document.getElementById('delayCount').textContent = delayClasses;
 
   if (location.search.indexOf('scrolled=1') !== -1) {
-    document.getElementById('scrollArea').scrollLeft = 1316;
+    document.querySelector('.progress-scroll').scrollLeft = 1316;
   }
-  var listTable = document.querySelector('#scrollArea table');
+  var listTable = document.querySelector('.progress-scroll table');
   listTable.style.width = 'auto';
   var stepKindCode = '';
   var stepCompanyCode = '';
   function refreshStepColumns() {
     var hiddenSteps = {};
-    document.querySelectorAll('#scrollArea thead th[data-step]').forEach(function (th) {
+    document.querySelectorAll('.progress-scroll thead th[data-step]').forEach(function (th) {
       var kinds = (th.getAttribute('data-kinds') || '').split(',');
       var kindOk = !stepKindCode || kinds.indexOf(stepKindCode) !== -1;
       var companyOk = !stepCompanyCode || th.getAttribute('data-company') === stepCompanyCode;
       hiddenSteps[th.getAttribute('data-step')] = !(kindOk && companyOk);
     });
-    document.querySelectorAll('#scrollArea [data-step]').forEach(function (el) {
+    document.querySelectorAll('.progress-scroll [data-step]').forEach(function (el) {
       el.style.display = hiddenSteps[el.getAttribute('data-step')] ? 'none' : '';
     });
-    document.querySelector('#scrollArea table').classList.toggle('hide-kind', !!stepKindCode);
+    document.querySelector('.progress-scroll table').classList.toggle('hide-kind', !!stepKindCode);
     if (listTable.style.tableLayout !== 'fixed') return;
     var total = 0;
     listTable.querySelectorAll('thead th').forEach(function (th) { if (th.style.display !== 'none') total += parseFloat(th.style.width) || th.getBoundingClientRect().width; });

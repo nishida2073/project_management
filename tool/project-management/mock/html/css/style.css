@@ -263,12 +263,6 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .select-menu li { padding: 8px 10px; border-radius: 5px; font-size: 13px; color: #333c4d; cursor: pointer; }
 .select-menu li:hover { background: #eef4ff; color: #2f6fed; }
 .select-menu li.selected { background: #eef4ff; color: #2f6fed; font-weight: 700; }
-/* 表示切り替えスイッチ（#selToggle） */
-#selToggle { width: 40px; height: 22px; border-radius: 12px; background: #2f6fed; border: 1px solid #2f6fed; box-sizing: border-box; cursor: pointer; user-select: none; transition: background .15s, border-color .15s; }
-#selToggle.off { background: #fbfcfe; border-color: #d3d9e3; }
-#selToggle.off:hover { border-color: #2f6fed; }
-#selToggle.off .knob { background: #9aa4b5; }
-#selToggle:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 2px; }
 /* チェックボックス（.check-box） */
 .check-box { position: relative; display: inline-flex; cursor: pointer; }
 .check-box input { position: absolute; width: 0; height: 0; opacity: 0; margin: 0; }
@@ -359,6 +353,12 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .toggle .knob { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: left .15s; }
 .toggle.off { background: #c7ccd4; }
 .toggle.off .knob { left: 2px; }
+/* 表示切り替えスイッチ（.sel-toggle） */
+.sel-toggle { width: 40px; height: 22px; border-radius: 12px; background: #2f6fed; border: 1px solid #2f6fed; box-sizing: border-box; cursor: pointer; user-select: none; transition: background .15s, border-color .15s; }
+.sel-toggle.off { background: #fbfcfe; border-color: #d3d9e3; }
+.sel-toggle.off:hover { border-color: #2f6fed; }
+.sel-toggle.off .knob { background: #9aa4b5; }
+.sel-toggle:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 2px; }
 .toggle-row span { font-size: 13px; color: #333c4d; font-weight: 700; }
 /* ボタンの共通の大きさ（確定系・導線系） */
 .btn, .search-btn { height: 34px; padding: 0 18px; border: 1px solid #d3d9e3; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; }

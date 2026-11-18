@@ -124,10 +124,10 @@
   function syncSelToggle() {
     var boxes = Array.prototype.map.call(body.querySelectorAll('.row-check'), function (cb) { return cb.checked; });
     var allOn = boxes.length > 0 && boxes.every(function (v) { return v; });
-    $('selToggle').classList.toggle('off', !allOn);
+    document.querySelector('.sel-toggle').classList.toggle('off', !allOn);
   }
-  $('selToggle').addEventListener('click', function () {
-    var on = $('selToggle').classList.contains('off');
+  document.querySelector('.sel-toggle').addEventListener('click', function () {
+    var on = document.querySelector('.sel-toggle').classList.contains('off');
     Array.prototype.forEach.call(body.querySelectorAll('.row-check'), function (cb) { cb.checked = on; });
     syncSelToggle();
   });

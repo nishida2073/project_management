@@ -138,10 +138,10 @@
   function syncSelToggle() {
     var rows = visibleRows();
     var allOn = rows.length > 0 && rows.every(function (tr) { return tr.querySelector('.row-check').checked; });
-    $('selToggle').classList.toggle('off', !allOn);
+    document.querySelector('.sel-toggle').classList.toggle('off', !allOn);
   }
-  $('selToggle').addEventListener('click', function () {
-    var on = $('selToggle').classList.contains('off');
+  document.querySelector('.sel-toggle').addEventListener('click', function () {
+    var on = document.querySelector('.sel-toggle').classList.contains('off');
     visibleRows().forEach(function (tr) { tr.querySelector('.row-check').checked = on; });
     syncSelToggle();
   });
