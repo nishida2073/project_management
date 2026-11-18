@@ -22,7 +22,7 @@
       '<td><div class="tag-stack-col">' + managerList.join('') + '</div></td>' +
       '<td>' + esc(p.startMonth) + '</td>' +
       '<td><span class="status-label ' + (p.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (p.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
-      '<td class="memo-cell"' + (p.memo ? ' title="' + esc(p.memo) + '"' : '') + '>' + (p.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
+      '<td class="memo-cell"' + (p.memo ? ' data-memo="' + esc(p.memo) + '"' : '') + '>' + (p.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="project_modify.html?id=' + encodeURIComponent(p.code) + '">更新</a></td>';
     body.appendChild(tr);
   });

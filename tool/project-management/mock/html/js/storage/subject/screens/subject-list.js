@@ -11,7 +11,7 @@
       '<td><span class="tag subject-type-tag ' + (SubjectTypeStore.colorOf(s.type) || '') + '">' + esc(SubjectTypeStore.nameOf(s.type)) + '</span></td>' +
       '<td>' + esc(s.name) + '</td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
-      '<td class="memo-cell"' + (s.memo ? ' title="' + esc(s.memo) + '"' : '') + '>' + (s.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
+      '<td class="memo-cell"' + (s.memo ? ' data-memo="' + esc(s.memo) + '"' : '') + '>' + (s.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="subject_modify.html?id=' + encodeURIComponent(s.code) + '">更新</a></td>';
     body.appendChild(tr);
   });

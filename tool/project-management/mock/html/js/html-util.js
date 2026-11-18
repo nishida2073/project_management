@@ -62,4 +62,44 @@
     }
     return fmtDate(d);
   };
+  var tipEl = null;
+  function tipShow(el, text) {
+    if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tooltip-bubble'; document.body.appendChild(tipEl); }
+    tipEl.textContent = text;
+    tipEl.style.display = 'block';
+    var mark = el.querySelector && el.querySelector('.memo-mark');
+    var br = el.getBoundingClientRect();
+    var r = mark ? mark.getBoundingClientRect() : (el.classList.contains('has-memo') ? { left: br.right - 18, right: br.right - 2, top: br.top + 2, bottom: br.top + 18, height: 16, width: 16 } : br);
+    var rh = r.height || (r.bottom - r.top);
+    var cy = r.top + rh / 2;
+    var w = tipEl.offsetWidth, hh = tipEl.offsetHeight;
+    var rightLeft = r.right + 10;
+    if (rightLeft + w <= window.innerWidth - 8) {
+      var top0 = Math.max(8, Math.min(window.innerHeight - hh - 8, cy - hh / 2));
+      tipEl.classList.remove('below');
+      tipEl.classList.add('right');
+      tipEl.style.setProperty('--arrow-y', (cy - top0) + 'px');
+      tipEl.style.left = rightLeft + 'px';
+      tipEl.style.top = top0 + 'px';
+      return;
+    }
+    tipEl.classList.remove('right');
+    var left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+    var top = r.top - hh - 10;
+    var below = top < 8;
+    if (below) top = r.bottom + 10;
+    tipEl.classList.toggle('below', below);
+    tipEl.style.setProperty('--arrow-x', (r.left + r.width / 2 - left) + 'px');
+    tipEl.style.left = left + 'px';
+    tipEl.style.top = top + 'px';
+  }
+  function tipHide() { if (tipEl) tipEl.style.display = 'none'; }
+  function tipTarget(e) { return e.target && e.target.closest ? e.target.closest('[data-memo],[data-tip]') : null; }
+  document.addEventListener('mouseover', function (e) {
+    var el = tipTarget(e);
+    if (!el) return;
+    var text = el.getAttribute('data-memo') || el.getAttribute('data-tip');
+    if (text) tipShow(el, text);
+  });
+  document.addEventListener('mouseout', function (e) { if (tipTarget(e)) tipHide(); });
 })();

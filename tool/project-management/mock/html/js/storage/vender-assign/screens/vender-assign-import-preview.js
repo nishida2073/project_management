@@ -116,10 +116,10 @@
           && !add.some(function (p) { return sameTeacher(p, o.m); });
       });
       var rv = rep[k] || '';
-      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" title="講師の入れ替え">⇄</span>' + (rv ? '<span class="vender-assign-import-replace-note">' + esc(rv) + '</span>' : '') : '';
+      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" data-tip="講師の入れ替え">⇄</span>' + (rv ? '<span class="vender-assign-import-replace-note">' + esc(rv) + '</span>' : '') : '';
       rows.push('<div class="vender-assign-import-line" data-key="' + k + '" data-from="' + from + '"><label class="check-box check-sm vender-assign-import-check-label"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from, !same) + '</span> ' +
-        esc(p.teacherName) + sel + ((on && from === 'none' && !replaceOpts.length) ? '<span class="debug-replace" style="color:#d43c40;font-size:11px;">[DEBUG 候補0 plan=' + esc(String(plan.vendorCode)) + ' ' + esc(existing.map(function (m) { return m.state + '/' + m.vendor + '/' + m.teacherName + '/' + (add.some(function (q) { return sameTeacher(q, m); }) ? 'inAdd' : 'notAdd'); }).join(' | ')) + ']</span>' : '') + '</div>');
+        esc(p.teacherName) + sel + '</div>');
     });
     return rows.length ? rows.join('') : '-';
   }

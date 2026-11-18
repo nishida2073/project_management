@@ -37,7 +37,7 @@
   var activeSub = slot.getAttribute('data-sub') || '';
 
   var html = '<button type="button" class="sidebar-toggle" aria-label="サイドバーの開閉">☰</button>' +
-    '<div class="logo" id="resetStorage" title="保存データを初期化します">研修管理<br>システム</div>';
+    '<div class="logo" id="resetStorage" data-tip="保存データを初期化します">研修管理<br>システム</div>';
   ITEMS.forEach(function (it) {
     if (it.title) {
       html += '<div class="nav-group-title">' + it.title + '</div>';

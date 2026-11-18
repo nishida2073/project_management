@@ -72,7 +72,7 @@
       var classes = [];
       if (isDelayed(s)) classes.push('is-delay');
       if (s.memo) classes.push('has-memo');
-      var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' title="' + esc(s.memo) + '"' : '');
+      var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' data-memo="' + esc(s.memo) + '"' : '');
       html += '<td data-step="' + si + '"' + attrs + '>' + chip(s) + '</td>';
     });
     html += '<td class="row-actions"><a class="search-btn" href="project_progress_modify.html?id=' + encodeURIComponent(p.code) + '">更新</a></td>';

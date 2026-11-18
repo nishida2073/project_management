@@ -22,7 +22,7 @@
       '<td><div class="tag-stack">' + (t.jobTypes || []).map(function (j) { return '<span class="tag job-type-tag ' + (JOB_CLASS[j] || '') + '">' + esc(JobTypeStore.nameOf(j)) + '</span>'; }).join('') + '</div></td>' +
       '<td><div class="tag-stack">' + ((t.positions || []).length ? (t.positions || []).map(function (p) { return '<span class="tag position-tag ' + (POS_CLASS[p] || '') + '">' + esc(PositionStore.nameOf(p)) + '</span>'; }).join('') : '-') + '</div></td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
-      '<td class="memo-cell"' + (t.memo ? ' title="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
+      '<td class="memo-cell"' + (t.memo ? ' data-memo="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="search-btn" href="staff_modify.html?id=' + encodeURIComponent(t.code) + '">更新</a></td>';
     body.appendChild(tr);
   });

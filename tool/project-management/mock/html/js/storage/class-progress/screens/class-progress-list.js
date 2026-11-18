@@ -150,7 +150,7 @@
       if (s.kindNa) classes.push('is-kind-na');
       if (isDelayed(s)) classes.push('is-delay');
       if (s.memo) classes.push('has-memo');
-      var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' title="' + esc(s.memo) + '"' : '');
+      var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' data-memo="' + esc(s.memo) + '"' : '');
       html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + (s.kindNa ? ' data-na="1"' : '') + attrs + '>' + chip(s) + '</td>';
     });
     html += '<td class="row-actions"><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">更新</a></td>';

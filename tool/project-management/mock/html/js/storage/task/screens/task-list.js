@@ -16,7 +16,7 @@
         '<td>' + (t.company === StaffVenderStore.INTERNAL ? '' : esc(StaffVenderStore.nameOf(t.company))) + '</td>' +
         '<td>' + (t.days === '' || t.days === undefined ? '' : esc(t.days) + '日') + '</td>' +
         '<td><span class="status-label ' + (t.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (t.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
-      '<td class="memo-cell"' + (t.memo ? ' title="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
+      '<td class="memo-cell"' + (t.memo ? ' data-memo="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
         '<td class="row-actions"><a class="search-btn" href="task_modify.html?id=' + encodeURIComponent(t.id) + '">更新</a></td>';
       body.appendChild(tr);
     });
