@@ -10,7 +10,7 @@
     var S = VenderAssignStore.STATUS;
     function lines(items) {
       return items.length ? items.map(function (x) {
-        return '<div data-vendor="' + esc(x.code || '') + '">' + esc(x.vendor) + '：' + esc(x.teacherName) + (x.status ? ' ' + VenderAssignStore.tag(x.status) : '') + '</div>';
+        return '<div data-vendor="' + esc(x.code || '') + '">' + (x.status ? VenderAssignStore.tag(x.status, '', 'fixed') + ' ' : '') + esc(x.vendor) + '：' + esc(x.teacherName) + '</div>';
       }).join('') : '-';
     }
     function statusOf(p) {
@@ -28,7 +28,7 @@
     var reqs = VenderAssignStore.requestsOf(a);
     var tot = VenderAssignStore.totalRequest(a);
     reqs.forEach(function (rq) {
-      var reqText = esc(TeacherVenderStore.nameOf(rq.vendor) || '-') + '： ' + VenderAssignStore.tag(S.REQUESTING, '', 'fixed');
+      var reqText = VenderAssignStore.tag(S.REQUESTING, '', 'fixed') + ' ' + esc(TeacherVenderStore.nameOf(rq.vendor) || '-') + '： ';
       for (var mi = 0; mi < (rq.main || 0); mi++) mainLines = (mainLines === '-' ? '' : mainLines) + '<div data-vendor="' + esc(rq.vendor) + '">' + reqText + '</div>';
       for (var si = 0; si < (rq.sub || 0); si++) subLines = (subLines === '-' ? '' : subLines) + '<div data-vendor="' + esc(rq.vendor) + '">' + reqText + '</div>';
     });
