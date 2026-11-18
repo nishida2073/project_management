@@ -81,17 +81,17 @@
         '<td>' + esc(x.cls.end) + '</td>' +
         '<td>' + dashOr(x.cls.mainTeachers, '人') + '</td>' +
         '<td>' + namedMain + '人</td>' +
-        '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;">' +
-          '<span style="color:#d97c1e;font-size:12.5px;">' + (code ? befSel + '人' : '-') + '</span>' +
-          '<span style="color:#2f6fed;font-size:12.5px;">' + (code ? midN + '人' : '-') + '</span>' +
-          '<span style="color:#2f8a5b;font-size:12.5px;">' + (code ? doneSel + '人' : '-') + '</span>' +
+        '<td><div class="count-cell">' +
+          '<span class="count-before">' + (code ? befSel + '人' : '-') + '</span>' +
+          '<span class="count-requesting">' + (code ? midN + '人' : '-') + '</span>' +
+          '<span class="count-done">' + (code ? doneSel + '人' : '-') + '</span>' +
         '</div></td>' +
         '<td>' + dashOr(x.cls.subTeachers, '人') + '</td>' +
         '<td>' + namedSub + '人</td>' +
-        '<td><div style="display:flex;align-items:center;gap:6px;white-space:nowrap;">' +
-          '<span style="color:#d97c1e;font-size:12.5px;">' + (code ? befSubSel + '人' : '-') + '</span>' +
-          '<span style="color:#2f6fed;font-size:12.5px;">' + (code ? midSubN + '人' : '-') + '</span>' +
-          '<span style="color:#2f8a5b;font-size:12.5px;">' + (code ? doneSubSel + '人' : '-') + '</span>' +
+        '<td><div class="count-cell">' +
+          '<span class="count-before">' + (code ? befSubSel + '人' : '-') + '</span>' +
+          '<span class="count-requesting">' + (code ? midSubN + '人' : '-') + '</span>' +
+          '<span class="count-done">' + (code ? doneSubSel + '人' : '-') + '</span>' +
         '</div></td>';
       body.appendChild(tr);
     });
