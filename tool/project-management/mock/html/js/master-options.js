@@ -1,4 +1,23 @@
 (function () {
+  var TAG_CLASS_BY_RADIO = {
+    affiliation: 'affiliation-tag',
+    deliveryType: 'delivery-type-tag',
+    locationType: 'location-type-tag',
+    participationType: 'participation-type-tag',
+    salesType: 'sales-type-tag',
+    taskType: 'task-type-tag',
+    taskKind: 'task-type-tag',
+    workType: 'work-type-tag',
+    subjectType: 'subject-type-tag',
+    authority: 'user-role-tag',
+    motivationVendor: 'motivation-company-type-tag',
+    roles: 'role-tag',
+    jobTypes: 'job-type-tag',
+    positions: 'position-tag'
+  };
+  window.tagClassOf = function (name) {
+    return TAG_CLASS_BY_RADIO[name] || '';
+  };
   function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
@@ -43,6 +62,6 @@
     fillOptions();
   }
 
-  fill();
   document.addEventListener('DOMContentLoaded', fill);
+  fill();
 })();
