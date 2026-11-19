@@ -10,15 +10,8 @@
   <div id="sidebar-slot" data-active="assign"></div>
   <script src="js/sidebar.js"></script>
   <div class="main">
-    <div class="topbar">
-      <div class="crumb-block">
-        <div class="crumb">登壇依頼一覧</div>
-      </div>
-      <div class="user">
-        <span>山田 太郎（BD事業部）</span>
-        <div class="avatar">山田</div>
-      </div>
-    </div>
+    <div id="topbar-slot" data-title="登壇依頼一覧"></div>
+    <script src="js/topbar.js"></script>
     <div class="content">
             <div class="filter-panel">
         <div class="field"><label>実施状況</label><div class="control small js-select" data-practice-options data-match-class="col-practice" data-practice-default="BEFORE"><span class="caret">▾</span></div></div>
@@ -34,7 +27,7 @@
       <div class="vender-assign-list-toolbar">
         <a class="search-btn" href="vender_assign_request_modify.html">依頼枠更新</a>
         <a class="search-btn" href="vender_assign_export.html">依頼</a>
-          <a class="search-btn" href="vender_assign_import.html" onclick="sessionStorage.removeItem('venderImportPlan');">反映</a>
+          <a class="search-btn" id="importLink" href="vender_assign_import.html">反映</a>
       </div>
       <div class="table-card">
         <div class="table-meta">

@@ -24,8 +24,8 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 /* Main column */
 .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .topbar { min-height: 64px; background: #ffffff; border-bottom: 1px solid #dde3ec; display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; }
-.topbar .crumb { font-size: 20px; font-weight: 700; color: #40485a; }
-.topbar .crumb span { color: #9aa4b5; font-weight: 400; margin: 0 6px; }
+.topbar .topbar-title { font-size: 20px; font-weight: 700; color: #40485a; }
+.topbar .topbar-title span { color: #9aa4b5; font-weight: 400; margin: 0 6px; }
 .topbar .user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4a5164; margin-left: auto; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: #4f8cff; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
 

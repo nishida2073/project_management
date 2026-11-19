@@ -12,6 +12,26 @@
     });
   })();
 
+  document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (x) { x.classList.remove('active'); });
+      tab.classList.add('active');
+      var value = tab.getAttribute('data-tt') || 'すべて';
+      var kindRow = TaskTypeStore.load().filter(function (t) { return t.name === value; })[0];
+      if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
+      var field = Array.prototype.filter.call(document.querySelectorAll('.filter-panel .field'), function (f) {
+        var l = f.querySelector('label');
+        return l && l.textContent === 'タスク区分';
+      })[0];
+      var ctl = field && field.querySelector('.js-select');
+      if (ctl) {
+        ctl.setAttribute('data-value', value);
+        ctl.innerHTML = value + '<span class="caret">▾</span>';
+      }
+      document.querySelector('.filter-panel .search-btn').click();
+    });
+  });
+
   var SORTED = TaskStore.load().slice().sort(function (a, b) {
     var ka = a.kinds[0] || '';
     var kb = b.kinds[0] || '';

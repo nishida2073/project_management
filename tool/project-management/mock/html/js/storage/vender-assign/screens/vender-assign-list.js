@@ -78,6 +78,7 @@
     if (btn) btn.click();
   });
   document.querySelector('.filter-panel .search-btn').addEventListener('click', function () { setTimeout(applyVendorLines, 0); });
+  document.getElementById('importLink').addEventListener('click', function () { sessionStorage.removeItem('venderImportPlan'); });
   function applyVendorLines() {
     var name = ownText(document.getElementById('vendorFilter'));
     var code = name && name !== 'すべて' ? TeacherVenderStore.codeOf(name) : '';

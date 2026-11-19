@@ -11,15 +11,8 @@
   <script src="js/sidebar.js"></script>
 
   <div class="main">
-    <div class="topbar">
-      <div class="crumb-block">
-        <div class="crumb">クラス運営進捗一覧</div>
-      </div>
-      <div class="user">
-        <span>山田 太郎（BD事業部）</span>
-        <div class="avatar">山田</div>
-      </div>
-    </div>
+    <div id="topbar-slot" data-title="クラス進捗一覧"></div>
+    <script src="js/topbar.js"></script>
 
     <div class="content">
       
@@ -108,27 +101,6 @@
 <script src="js/table-sort.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/list-filter.js"></script><script src="js/pagination.js"></script>
-<script>
-document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (tab) {
-  tab.addEventListener('click', function () {
-    document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (x) { x.classList.remove('active'); });
-    tab.classList.add('active');
-    var value = tab.getAttribute('data-tt') || 'すべて';
-    var kindRow = TaskTypeStore.load().filter(function (t) { return t.name === value; })[0];
-    if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
-    var field = Array.prototype.filter.call(document.querySelectorAll('.filter-panel .field'), function (f) {
-      var l = f.querySelector('label');
-      return l && l.textContent === 'タスク区分';
-    })[0];
-    var ctl = field && field.querySelector('.js-select');
-    if (ctl) {
-      ctl.setAttribute('data-value', value);
-      ctl.innerHTML = value + '<span class="caret">▾</span>';
-    }
-    document.querySelector('.filter-panel .search-btn').click();
-  });
-});
-</script>
 <script src="js/filter-collapse.js"></script>
 <script src="js/filter-memory.js"></script>
 </body>
