@@ -4,6 +4,9 @@
     var STATUS_LABEL = StepStatusStore.nameByCode();
     var LABEL_STATUS = StepStatusStore.byName();
     var STATUS_COLOR = { DONE: 'green', PROGRESS: 'blue', WAIT: 'gray' };
+    var loginJobs = JSON.parse(sessionStorage.getItem('loginJobNames') || '[]');
+    var lockOn = sessionStorage.getItem('loginUserCode') !== null && sessionStorage.getItem('loginIsAdmin') !== '1' && loginJobs.indexOf('管理') === -1;
+    var lockedCompany = lockOn ? (sessionStorage.getItem('loginCompany') || '__none__') : '';
 
 function setDisabledRow(tr, off) {
   Array.prototype.forEach.call(tr.querySelectorAll('.js-date, .wide.js-select, .status-select'), function (el) {
@@ -15,6 +18,8 @@ function setDisabledRow(tr, off) {
     function addDays(days) {
       var d = new Date(classStart);
       d.setDate(d.getDate() + days);
+      var step = days < 0 ? -1 : 1;
+      while (d.getDay() === 0 || d.getDay() === 6 || HolidayStore.isHoliday(d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()))) d.setDate(d.getDate() + step);
       return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
     }
     function loadProgress() { return ProgressStore.load(); }
@@ -74,6 +79,7 @@ function setDisabledRow(tr, off) {
     stepsList.forEach(function (s, i) {
       var task = sortedTasks[i];
       if (task && (task.status === OperatingStatusStore.nameOf('STOPPED') || task.kinds.indexOf(cls.taskType) === -1)) return;
+      if (task && lockedCompany && task.company !== lockedCompany) return;
       var name = task ? task.name : s.name;
       var sv = saved[s.no] || {};
       var plan = sv.plan !== undefined ? sv.plan : (task ? addDays(task.days) : '');
@@ -85,11 +91,11 @@ function setDisabledRow(tr, off) {
       var company = task ? StaffVenderStore.nameOf(task.company) : '-';
 
       var planCell = plan
-        ? '<div class="mini-control js-date">' + esc(plan) + '<span class="caret">▾</span></div>'
-        : '<div class="mini-control js-date"><span class="caret">▾</span></div>';
+        ? '<div class="mini-control js-date" data-no-holiday>' + esc(plan) + '<span class="caret">▾</span></div>'
+        : '<div class="mini-control js-date" data-no-holiday><span class="caret">▾</span></div>';
       var actualCell = actual
-        ? '<div class="mini-control js-date">' + esc(actual) + '<span class="caret">▾</span></div>'
-        : '<div class="mini-control js-date"><span class="caret">▾</span></div>';
+        ? '<div class="mini-control js-date" data-no-holiday>' + esc(actual) + '<span class="caret">▾</span></div>'
+        : '<div class="mini-control js-date" data-no-holiday><span class="caret">▾</span></div>';
 
       var tr = document.createElement('tr');
       tr.setAttribute('data-no', s.no);
@@ -104,6 +110,10 @@ function setDisabledRow(tr, off) {
         '<td class="col-owner"><div class="mini-control wide js-select" data-options="' + ownerOptions(task).join(',') + '">' + esc(StaffStore.nameOf(owner)) + '<span class="caret">▾</span></div></td>' +
         '<td><div class="na-text"' + ' style="display:none;"' + '>' + StepStatusStore.nameOf('NA') + '</div><div class="status-select status-combo ' + STATUS_COLOR[status] + ' js-select"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(memo) + '</textarea></td>';
+      if (lockOn) {
+        Array.prototype.forEach.call(tr.querySelectorAll('input[type="radio"]'), function (r) { r.disabled = true; });
+        [tr.children[2], tr.children[4]].forEach(function (td) { td.classList.add('is-locked'); });
+      }
       body.appendChild(tr);
       setDisabledRow(tr, na);
       syncOwner(tr);

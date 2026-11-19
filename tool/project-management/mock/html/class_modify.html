@@ -8,7 +8,8 @@
 <body>
 <div class="app">
   <div id="sidebar-slot" data-active="class"></div>
-  <script src="js/sidebar.js"></script>
+  <script src="js/access.js"></script>
+<script src="js/sidebar.js"></script>
 
   <div class="overlay">
     <div class="modal">
@@ -68,11 +69,11 @@
         <div class="form-field"></div>
         <div class="form-field">
           <label>開始日<span class="req">必須</span></label>
-          <div class="form-control js-date" id="start"><span class="caret">▾</span></div>
+          <div class="form-control js-date" id="start" data-no-holiday><span class="caret">▾</span></div>
         </div>
         <div class="form-field">
           <label>終了日<span class="req">必須</span></label>
-          <div class="form-control js-date" id="end"><span class="caret">▾</span></div>
+          <div class="form-control js-date" id="end" data-no-holiday><span class="caret">▾</span></div>
         </div>
         <div class="form-field full">
           <label>実施形態<span class="req">必須</span></label>

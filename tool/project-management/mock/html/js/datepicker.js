@@ -115,11 +115,15 @@
         var ds = viewY + '/' + pad(viewM) + '/' + pad(d);
         if (dow === 0) cell.classList.add('sun');
         else if (dow === 6) cell.classList.add('sat');
-        if (window.HolidayStore && HolidayStore.isHoliday(ds)) cell.classList.add('holiday');
+        var isHol = !!(window.HolidayStore && HolidayStore.isHoliday(ds));
+        var blocked = (isHol || dow === 0 || dow === 6) && el.hasAttribute('data-no-holiday');
+        if (isHol) cell.classList.add('holiday');
+        if (blocked) cell.classList.add('disabled');
         if (current.y === viewY && current.m === viewM && current.d === d) cell.classList.add('selected');
         (function (dd) {
           cell.addEventListener('click', function (e) {
             e.stopPropagation();
+            if (blocked) return;
             setValue(el, viewY + '/' + pad(viewM) + '/' + pad(dd));
             el.classList.remove('open');
           });

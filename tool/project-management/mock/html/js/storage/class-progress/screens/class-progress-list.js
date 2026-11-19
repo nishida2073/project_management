@@ -59,6 +59,8 @@
   function addDays(base, days) {
     var d = new Date(base);
     d.setDate(d.getDate() + days);
+    var step = days < 0 ? -1 : 1;
+    while (d.getDay() === 0 || d.getDay() === 6 || HolidayStore.isHoliday(d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()))) d.setDate(d.getDate() + step);
     return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
   }
 
@@ -205,14 +207,21 @@
   }
   var listTable = document.querySelector('.progress-scroll table');
   listTable.style.width = 'auto';
+  var loginJobs = JSON.parse(sessionStorage.getItem('loginJobNames') || '[]');
+  var lockOn = sessionStorage.getItem('loginUserCode') !== null && sessionStorage.getItem('loginIsAdmin') !== '1' && loginJobs.indexOf('管理') === -1;
+  var lockedCompany = lockOn ? (sessionStorage.getItem('loginCompany') || '__none__') : '';
   var stepKindCode = '';
   var stepCompanyCode = '';
+  if (lockedCompany) {
+    var companyField = document.getElementById('companyFilter').closest('.field');
+    if (companyField) companyField.style.display = 'none';
+  }
   function refreshStepColumns() {
     var hiddenSteps = {};
     document.querySelectorAll('.progress-scroll thead th[data-step]').forEach(function (th) {
       var kinds = (th.getAttribute('data-kinds') || '').split(',');
       var kindOk = !stepKindCode || kinds.indexOf(stepKindCode) !== -1;
-      var companyOk = !stepCompanyCode || th.getAttribute('data-company') === stepCompanyCode;
+      var companyOk = (!stepCompanyCode || th.getAttribute('data-company') === stepCompanyCode) && (!lockedCompany || th.getAttribute('data-company') === lockedCompany);
       hiddenSteps[th.getAttribute('data-step')] = !(kindOk && companyOk);
     });
     document.querySelectorAll('.progress-scroll [data-step]').forEach(function (el) {
@@ -260,6 +269,8 @@
     var all = ProgressStore.load();
     var sv = (all[classId] || {})[i + 1] || {};
     var cls = ClassStore.load().filter(function (c) { return c.id === classId; })[0] || {};
+    var stepTask = byName[STEP_NAMES[i]];
+    var planValue = sv.plan !== undefined ? sv.plan : (stepTask ? addDays(new Date(cls.start), stepTask.days) : '');
     var course = ClassStore.COURSES[cls.courseCode] || {};
     var classInfo = (course.name || cls.courseCode || '') + '　' + (cls.lessonNo || '') + '　' + (cls.start || '') + '〜' + (cls.end || '');
     var task = SORTED[i];
@@ -284,9 +295,9 @@
         '<label class="radio-option"><input type="radio" name="sdTargetRadio" value="なし"' + (sv.na ? ' checked' : '') + '><span class="radio-dot"></span><span class="tag gray">なし</span></label>' +
       '</div>' +
       '<label class="input-dialog-label">予定日</label>' +
-      '<div class="form-control js-date" id="sdPlan">' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="sdPlan" data-no-holiday>' + esc(planValue || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施日</label>' +
-      '<div class="form-control js-date" id="sdActual">' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="sdActual" data-no-holiday>' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施担当者</label>' +
       '<div class="form-control js-select" id="sdOwner" data-options="' + esc(owners.join(',')) + '">' + esc(ownerName || '選択してください') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">進捗</label>' +
@@ -295,6 +306,13 @@
       '<textarea class="form-control textarea" id="sdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
       '<div class="input-dialog-actions"><div class="search-btn sd-cancel">キャンセル</div><div class="btn primary sd-ok">保存</div></div></div>';
     document.body.appendChild(overlay);
+    if (lockOn) {
+      Array.prototype.forEach.call(overlay.querySelectorAll('#sdTarget input[type="radio"]'), function (r) { r.disabled = true; });
+      var sdTargetEl = overlay.querySelector('#sdTarget');
+      if (sdTargetEl) sdTargetEl.classList.add('is-locked');
+      var sdPlanEl = overlay.querySelector('#sdPlan');
+      if (sdPlanEl) sdPlanEl.classList.add('is-locked');
+    }
     function applyNa(off) {
       ['#sdPlan', '#sdActual', '#sdOwner', '#sdStatus'].forEach(function (sel) {
         var el = overlay.querySelector(sel);

@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'projectProgressList';
+  var KEY = 'projectProgressList_v2';
   var STEP_KEY = 'projectProgressStepList';
   var STEP_SEED = [
     '案件受付', '見積作成', '見積提出', '受注確定', '社内承認', '教材準備', '講師手配',
@@ -20,9 +20,11 @@
 
   var DATES = ['08/10', '08/20', '08/25', '08/29', '09/03', '09/08', '09/10', '09/17', '09/24', '10/05', '10/20', '11/10', '11/25'];
 
-  function step(status, na, plan, actual, memo) {
-    return { status: status, na: !!na, plan: plan, actual: actual || '', memo: memo || '' };
+  function step(status, na, plan, actual, memo, owner) {
+    return { status: status, na: !!na, plan: plan, actual: actual || '', memo: memo || '', owner: owner || '' };
   }
+
+  var OWNERS = ['STF-021', 'STF-079', 'STF-091'];
 
   function build(codes) {
     return codes.map(function (s, i) {
@@ -30,7 +32,7 @@
       var status = (s === 'NA') ? 'WAIT' : (s === 'WAIT_DELAY' ? 'WAIT' : s);
       var plan = '2026/' + DATES[i];
       var actual = status === 'DONE' ? plan : '';
-      return step(status, na, plan, actual, '');
+      return step(status, na, plan, actual, '', na ? '' : OWNERS[i % OWNERS.length]);
     });
   }
 
@@ -44,8 +46,8 @@
     'PJ-2607': build(['DONE', 'PROGRESS', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT', 'WAIT'])
   };
 
-  SEED_STEPS['PJ-2601'][7] = step('PROGRESS', false, '2026/03/11', '', '契約書ドラフト送付済み、押印待ち');
-  SEED_STEPS['PJ-2601'][8] = step('WAIT', false, '2026/03/20', '', '契約締結後に着手予定');
+  SEED_STEPS['PJ-2601'][7] = step('PROGRESS', false, '2026/03/11', '', '契約書ドラフト送付済み、押印待ち', 'STF-021');
+  SEED_STEPS['PJ-2601'][8] = step('WAIT', false, '2026/03/20', '', '契約締結後に着手予定', 'STF-079');
 
   var SEED = Object.keys(SEED_STEPS).map(function (code) {
     return { projectCode: code, steps: SEED_STEPS[code] };

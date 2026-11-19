@@ -9,9 +9,10 @@
 <body>
 <div class="app">
   <div id="sidebar-slot" data-active="project-progress"></div>
-  <script src="js/sidebar.js"></script>
+  <script src="js/access.js"></script>
+<script src="js/sidebar.js"></script>
   <div class="overlay">
-    <div class="modal modal-medium">
+    <div class="modal modal-wide">
       <div class="modal-resize"></div>
       <div class="modal-header">
         <div>
@@ -30,8 +31,9 @@
               <th>実施</th>
               <th>予定日</th>
               <th>実施日</th>
+              <th>実施担当者</th>
               <th>進捗</th>
-              <th>備考</th>
+              <th class="fill">備考</th>
             </tr>
           </thead>
           <tbody id="stepBody"></tbody>
@@ -53,6 +55,7 @@
 <script src="js/storage/customer/store/customer-store.js"></script>
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/project/store/project-store.js"></script>
+<script src="js/storage/affiliation/store/affiliation-store.js"></script>
 <script src="js/storage/project-progress/store/project-progress-store.js"></script>
 <script src="js/storage/project-progress/screens/project-progress-editor.js"></script>
 <script src="js/select.js" defer></script>

@@ -1,10 +1,10 @@
 (function () {
-  var KEY = 'userRoleList';
+  var KEY = 'userRoleList_v2';
   var PREFIX = 'AU-';
 
   var SEED = [
-    { code: 'AU-01', name: '管理者', color: 'purple' },
-    { code: 'AU-02', name: '一般', color: 'teal' }
+    { code: 'AU-01', name: '管理者', color: 'gold' },
+    { code: 'AU-02', name: '一般', color: 'blue' }
   ];
 
   function save(list) {

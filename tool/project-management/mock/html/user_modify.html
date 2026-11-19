@@ -8,7 +8,8 @@
 <body>
 <div class="app">
   <div id="sidebar-slot" data-active="master" data-sub="user"></div>
-  <script src="js/sidebar.js"></script>
+  <script src="js/access.js"></script>
+<script src="js/sidebar.js"></script>
   <div class="overlay">
     <div class="modal">
       <div class="modal-resize"></div>
@@ -45,7 +46,7 @@
         <div class="form-divider"></div>
         <div class="form-field">
           <label>実施担当連携</label>
-          <div class="staff-row"><div class="form-control staff-picker-trigger" id="staffSelect"><span class="caret">▾</span></div><div class="search-btn" id="staffClear">解除</div></div>
+          <div class="form-control readonly staff-view" id="staffSelect"></div>
         </div>
         <div class="form-field"></div>
         <div class="form-field">
@@ -96,7 +97,7 @@
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/affiliation/store/affiliation-store.js"></script>
 <script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
-<script src="js/staff-picker.js"></script>
+<script src="js/storage/link-state/store/link-state-store.js"></script>
 <script src="js/storage/user/screens/user-editor.js"></script>
 <script src="js/storage/user/entry/user-modify.js"></script>
 <script src="js/select.js" defer></script>

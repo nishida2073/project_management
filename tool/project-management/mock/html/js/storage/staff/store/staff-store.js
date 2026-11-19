@@ -1,12 +1,12 @@
 (function () {
-  var KEY = 'staffList';
+  var KEY = 'staffList_v2';
 
   var SEED = [
-    { code: 'STF-014', affiliation: '社内', company: '', name: '山口 直人', email: 'yamaguchi@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-01'], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-021', affiliation: '社内', company: '', name: '細野 恵美', email: 'hosono@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-01'], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-022', affiliation: '社内', company: '', name: '市村 拓也', email: 'ichimura@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-01'], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-033', affiliation: '社内', company: '', name: '荒牧 麻衣', email: 'aramaki@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-01'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-045', affiliation: '社内', company: '', name: '佐藤 一郎', email: 'sato@company.co.jp', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-014', affiliation: '社内', company: '', name: '山口 直人', email: 'yamaguchi@company.co.jp', roles: ['SR-01'], jobTypes: [], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-021', affiliation: '社内', company: '', name: '細野 恵美', email: 'hosono@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-03'], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-022', affiliation: '社内', company: '', name: '市村 拓也', email: 'ichimura@company.co.jp', roles: ['SR-01'], jobTypes: [], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-033', affiliation: '社内', company: '', name: '荒牧 麻衣', email: 'aramaki@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-02'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-045', affiliation: '社内', company: '', name: '佐藤 一郎', email: 'sato@company.co.jp', roles: ['SR-02'], jobTypes: ['JT-02', 'JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-052', affiliation: '社内', company: '', name: '中村 桂', email: 'nakamura@company.co.jp', roles: ['SR-02'], jobTypes: ['JT-02'], positions: ['PS-01'], status: OperatingStatusStore.nameOf('STOPPED') },
     { code: 'STF-060', affiliation: 'パートナー', company: 'STV-001', name: '藤井 誠', email: 'fujii@neu-training.co.jp', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-061', affiliation: 'パートナー', company: 'STV-002', name: '森 美香', email: 'mori@ndu-partners.co.jp', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
@@ -22,10 +22,10 @@
     { code: 'STF-071', affiliation: '社内', company: '', name: '松本 健二', email: '', roles: ['SR-01'], jobTypes: ['JT-02'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-072', affiliation: '社内', company: '', name: '岡田 沙織', email: '', roles: ['SR-01'], jobTypes: ['JT-02'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-073', affiliation: '社内', company: '', name: '中島 拓海', email: '', roles: ['SR-01'], jobTypes: ['JT-02'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-074', affiliation: '社内', company: '', name: '佐々木 陽介', email: 'sasaki@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-01'], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-075', affiliation: '社内', company: '', name: '吉田 真理', email: 'yoshida@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-01'], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-076', affiliation: '社内', company: '', name: '石井 翔太', email: '', roles: ['SR-01'], jobTypes: ['JT-01'], positions: [], status: OperatingStatusStore.nameOf('STOPPED') },
-    { code: 'STF-077', affiliation: '社内', company: '', name: '清水 理恵', email: '', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-074', affiliation: '社内', company: '', name: '佐々木 陽介', email: 'sasaki@company.co.jp', roles: ['SR-01'], jobTypes: [], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-075', affiliation: '社内', company: '', name: '吉田 真理', email: 'yoshida@company.co.jp', roles: ['SR-01'], jobTypes: [], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-076', affiliation: '社内', company: '', name: '石井 翔太', email: '', roles: ['SR-01'], jobTypes: [], positions: [], status: OperatingStatusStore.nameOf('STOPPED') },
+    { code: 'STF-077', affiliation: '社内', company: '', name: '清水 理恵', email: 'shimizu@company.co.jp', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-078', affiliation: '社内', company: '', name: '林 大輔', email: '', roles: ['SR-02'], jobTypes: ['JT-02'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-079', affiliation: '社内', company: '', name: '松田 結衣', email: '', roles: ['SR-01', 'SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-080', affiliation: '社内', company: '', name: '上田 悠斗', email: '', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('STOPPED') },
@@ -34,12 +34,12 @@
     { code: 'STF-083', affiliation: 'パートナー', company: 'STV-002', name: '西村 美穂', email: 'nishimura@ndu-partners.co.jp', roles: ['SR-02'], jobTypes: ['JT-02'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-084', affiliation: 'パートナー', company: 'STV-003', name: '大村 光', email: 'omura@univa-service.co.jp', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('STOPPED') },
     { code: 'STF-085', affiliation: 'パートナー', company: 'STV-004', name: '小川 健太', email: 'ogawa@cec-trust.co.jp', roles: ['SR-02'], jobTypes: ['JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-086', affiliation: 'パートナー', company: 'STV-004', name: '原 百合', email: 'hara@cec-trust.co.jp', roles: ['SR-01'], jobTypes: ['JT-01'], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-086', affiliation: 'パートナー', company: 'STV-004', name: '原 百合', email: 'hara@cec-trust.co.jp', roles: ['SR-01'], jobTypes: [], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-087', affiliation: '社内', company: '', name: '菅原 拓', email: 'sugawara@company.co.jp', roles: ['SR-01'], jobTypes: ['JT-02'], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-088', affiliation: '社内', company: '', name: '木下 恭子', email: 'kinoshita@company.co.jp', roles: ['SR-01', 'SR-02'], jobTypes: ['JT-01'], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'STF-088', affiliation: '社内', company: '', name: '木下 恭子', email: 'kinoshita@company.co.jp', roles: ['SR-01', 'SR-02'], jobTypes: [], positions: ['PS-02'], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-089', affiliation: '社内', company: '', name: '村上 怜', email: 'murakami@company.co.jp', roles: ['SR-02'], jobTypes: ['JT-02', 'JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'STF-090', affiliation: 'パートナー', company: 'STV-002', name: '安藤 弘', email: 'ando@ndu-partners.co.jp', roles: ['SR-02'], jobTypes: ['JT-02', 'JT-03'], positions: [], status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'STF-091', affiliation: '社内', company: '', name: '浅野 凛', email: 'asano@company.co.jp', roles: ['SR-01', 'SR-02'], jobTypes: ['JT-01', 'JT-02', 'JT-03'], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') }
+    { code: 'STF-091', affiliation: '社内', company: '', name: '浅野 凛', email: 'asano@company.co.jp', roles: ['SR-01', 'SR-02'], jobTypes: ['JT-02', 'JT-03'], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') }
   ];
 
   function save(list) {

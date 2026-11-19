@@ -1,4 +1,6 @@
 (function () {
+  var loginJobs = JSON.parse(sessionStorage.getItem('loginJobNames') || '[]');
+  var lockOn = sessionStorage.getItem('loginUserCode') !== null && sessionStorage.getItem('loginIsAdmin') !== '1' && loginJobs.indexOf('管理') === -1;
   var LABEL = StepStatusStore.nameByCode();
   var COLOR = { WAIT: 'gray', PROGRESS: 'blue', DONE: 'green' };
   var today = new Date();
@@ -173,17 +175,20 @@
         '<label class="radio-option"><input type="radio" name="pdTargetRadio" value="なし"' + (sv.na ? ' checked' : '') + '><span class="radio-dot"></span><span class="tag gray">なし</span></label>' +
       '</div>' +
       '<label class="input-dialog-label">予定日</label>' +
-      '<div class="form-control js-date" id="pdPlan">' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="pdPlan" data-no-holiday>' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施日</label>' +
-      '<div class="form-control js-date" id="pdActual">' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="pdActual" data-no-holiday>' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
+      '<label class="input-dialog-label">実施担当者</label>' +
+      '<div class="form-control js-select" id="pdOwner" data-options="' + esc(StaffStore.candidates({ affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: ['実施'] }).join(',')) + '">' + esc(StaffStore.nameOf(sv.owner || '') || '選択してください') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">進捗</label>' +
       '<div class="status-select status-combo ' + P_STATUS_COLOR_OF[sv.status || 'WAIT'] + ' js-select" id="pdStatus" data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\' data-value="' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '">' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">備考</label>' +
       '<textarea class="form-control textarea" id="pdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
       '<div class="input-dialog-actions"><div class="search-btn pd-cancel">キャンセル</div><div class="btn primary pd-ok">保存</div></div></div>';
     document.body.appendChild(overlay);
+    if (lockOn) overlay.querySelector('#pdPlan').classList.add('is-locked');
     function applyNa(off) {
-      ['#pdPlan', '#pdActual', '#pdStatus'].forEach(function (sel) {
+      ['#pdPlan', '#pdActual', '#pdOwner', '#pdStatus'].forEach(function (sel) {
         var el = overlay.querySelector(sel);
         el.style.pointerEvents = off ? 'none' : '';
         el.style.opacity = off ? '0.4' : '';
@@ -203,6 +208,7 @@
         status: P_STATUS_OF_LABEL[pValueOf(overlay.querySelector('#pdStatus'))] || 'WAIT',
         plan: pOwnText(overlay.querySelector('#pdPlan')),
         actual: pOwnText(overlay.querySelector('#pdActual')),
+        owner: StaffStore.codeOf(pOwnText(overlay.querySelector('#pdOwner'))),
         memo: overlay.querySelector('#pdMemo').value,
         na: (overlay.querySelector('input[name="pdTargetRadio"]:checked') || { value: 'あり' }).value === 'なし'
       });

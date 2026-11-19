@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ログイン</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-title">研修管理システム</div>
+    <div class="form-field">
+      <label>ログインID（メールアドレス）</label>
+      <input type="email" class="form-control" id="loginId" autocomplete="username">
+    </div>
+    <div class="form-field">
+      <label>パスワード</label>
+      <input type="password" class="form-control" id="loginPassword" autocomplete="current-password">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <div class="btn primary login-btn" id="loginBtn">ログイン</div>
+    <div class="login-reset" id="resetStorage">保存データを初期化</div>
+  </div>
+</div>
+<script src="js/storage/operating-status/store/operating-status-store.js"></script>
+<script src="js/html-util.js"></script>
+<script src="js/storage/user/store/user-store.js"></script>
+<script src="js/storage/user-role/store/user-role-store.js"></script>
+<script src="js/storage/job-type/store/job-type-store.js"></script>
+<script src="js/storage/position/store/position-store.js"></script>
+<script src="js/storage/staff-role/store/staff-role-store.js"></script>
+<script src="js/storage/affiliation/store/affiliation-store.js"></script>
+<script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
+<script src="js/storage/staff/store/staff-store.js"></script>
+<script src="js/access.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

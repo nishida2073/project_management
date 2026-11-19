@@ -38,7 +38,22 @@
 
   var html = '<button type="button" class="sidebar-toggle" aria-label="サイドバーの開閉">☰</button>' +
     '<div class="logo" id="resetStorage" data-tip="保存データを初期化します">研修管理<br>システム</div>';
+  var allowed = Access.allowedHrefs();
+  var shown = [];
+  var pendingTitle = null;
   ITEMS.forEach(function (it) {
+    if (it.title) {
+      pendingTitle = it;
+      return;
+    }
+    if (allowed && allowed.indexOf(it.href) === -1) return;
+    if (pendingTitle) {
+      shown.push(pendingTitle);
+      pendingTitle = null;
+    }
+    shown.push(it);
+  });
+  shown.forEach(function (it) {
     if (it.title) {
       html += '<div class="nav-group-title">' + it.title + '</div>';
     } else if (it.key) {
