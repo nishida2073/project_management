@@ -185,6 +185,21 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .modal-body.picker-body { display: flex; flex-direction: column; gap: 16px; }
 .form-divider { grid-column: 1 / -1; border-top: 1px solid #e6eaf1; }
 .is-locked { pointer-events: none; opacity: 0.4; }
+.cal-view { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.cal-nav { display: flex; align-items: center; gap: 12px; padding: 12px 20px; }
+.cal-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.cal-event { font-size: 11px; padding: 2px 4px; margin-bottom: 2px; border-radius: 4px; background: #eef4ff; color: #2f6fed; cursor: pointer; white-space: pre-line; }
+.cal-event.green { background: #e5f6ec; color: #279158; }
+.cal-event.blue { background: #e7f0ff; color: #2f6fed; }
+.cal-event.gray { background: #eef0f4; color: #7c8598; }
+.cal-event.red { background: #fdeaea; color: #d43c40; }
+.cal-event.orange { background: #fff2e2; color: #d97c1e; }
+.cal-line + .cal-line { border-top: 1px solid #b9cdf5; margin-top: 3px; padding-top: 3px; }
+.day-table td.day-date.sat { color: #2f6fed; }
+.day-table td.day-date.sun, .day-table td.day-date.holiday { color: #d43c40; }
+.day-table th, .day-table td { border: 1px solid #e6eaf1; }
+.day-table .cal-event { margin-bottom: 2px; min-width: 120px; }
+.cal-event.cal-plain { background: none; color: inherit; padding: 0; margin-bottom: 0; min-width: 0; font-size: inherit; line-height: inherit; }
 .form-control.readonly.staff-view { border: none; background: none; padding: 0; height: auto; min-height: 36px; flex-wrap: wrap; gap: 4px; cursor: default; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-header .sub { font-size: 12.5px; color: #7c8598; margin-top: 6px; }

@@ -25,7 +25,12 @@
         <div class="search-btn" id="resetFilter">リセット</div>
       </div>
       <div class="table-card">
-        <div class="table-meta"><div class="count"><b id="projectCount">0</b> 件</div></div>
+        <div class="table-meta">
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div class="count"><b id="projectCount">0</b> 件</div>
+            <div class="field" style="flex-direction:row; align-items:center; gap:8px;"><label>表示形式</label><div class="seg" id="viewTabs"><button type="button" class="seg-opt is-active" data-view="table">表</button><button type="button" class="seg-opt" data-view="calendar">日ごと</button></div></div>
+          </div>
+        </div>
         <div class="table-scroll progress-scroll">
         <table>
           <thead>
@@ -43,6 +48,7 @@
           <tbody id="tbody"></tbody>
         </table>
         </div>
+        <div id="calendarView" class="cal-view" style="display:none;"></div>
         <div class="pagination"></div>
       </div>
     </div>
@@ -60,6 +66,7 @@
 <script src="js/storage/affiliation/store/affiliation-store.js"></script>
 <script src="js/storage/project-progress/store/project-progress-store.js"></script>
 <script src="js/list-filter-auto.js"></script>
+<script src="js/day-table.js"></script>
 <script src="js/storage/project-progress/screens/project-progress-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/storage/holiday/store/holiday-store.js"></script>

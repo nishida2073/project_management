@@ -213,6 +213,7 @@
         na: (overlay.querySelector('input[name="pdTargetRadio"]:checked') || { value: 'あり' }).value === 'なし'
       });
       ProjectProgressStore.upsert({ projectCode: projectCode, steps: steps });
+      calView.saveScroll();
       location.reload();
     });
   }
@@ -221,4 +222,64 @@
     if (!td) return;
     openProjectStepDialog(td.parentNode.getAttribute('data-id'), Number(td.getAttribute('data-step')));
   });
+
+  var calView = DayTable.create({
+    root: document.getElementById('calendarView'),
+    isHoliday: function (k) { return HolidayStore.isHoliday(k); },
+    onEventClick: function (code, step) { openProjectStepDialog(code, step); }
+  });
+
+  function calEvents() {
+    var events = {};
+    var columns = [];
+    document.querySelectorAll('#tbody tr').forEach(function (tr) {
+      if (tr.style.display === 'none') return;
+      var code = tr.getAttribute('data-id');
+      var pname = tr.children[2] ? tr.children[2].textContent.trim() : '';
+      tr.querySelectorAll('td[data-step]').forEach(function (td) {
+        var m = /予：(\d{4}\/\d{2}\/\d{2})/.exec(td.textContent);
+        if (!m) return;
+        var step = Number(td.getAttribute('data-step'));
+        var stateTag = td.querySelector('.state-tag');
+        var color = stateTag ? (stateTag.className.split(' ').filter(function (c) { return ['green', 'blue', 'gray', 'red', 'orange'].indexOf(c) !== -1; })[0] || '') : '';
+        if (!columns.some(function (x) { return x.id === code; })) {
+          var rec = ProjectStore.load().filter(function (x) { return x.code === code; })[0] || {};
+          var customer = rec.customer ? CustomerStore.nameOf(rec.customer) : '-';
+          var managers = [rec.pm].concat(rec.pl || []).map(function (c) { return StaffStore.nameOf(c); }).filter(Boolean).join('、') || '-';
+          var tip = ['顧客：' + customer, '実施開始月：' + (rec.startMonth || ''), '管理担当者：' + managers].join(String.fromCharCode(10));
+          columns.push({ id: code, label: [pname, code], tip: tip });
+        }
+        (events[m[1]] = events[m[1]] || []).push({ colId: code, rowId: code, stepId: step, label: (step + 1) + '：' + (ProjectProgressStore.STEP_NAMES[step] || ''), color: color });
+      });
+    });
+    return { columns: columns, events: events };
+  }
+
+  function renderCalendar() {
+    var data = calEvents();
+    calView.update(data);
+  }
+
+  var calActive = false;
+  function refreshCalendarIfActive() {
+    if (calActive) renderCalendar();
+  }
+  document.addEventListener('click', function () { setTimeout(refreshCalendarIfActive, 0); }, true);
+  document.addEventListener('input', refreshCalendarIfActive);
+
+  document.querySelectorAll('#viewTabs .seg-opt').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('#viewTabs .seg-opt').forEach(function (x) { x.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      var cal = tab.getAttribute('data-view') === 'calendar';
+      calActive = cal;
+      try { localStorage.setItem('viewMode:' + location.pathname, cal ? 'calendar' : 'table'); } catch (e) {}
+      document.querySelector('.progress-scroll').style.display = cal ? 'none' : '';
+      document.getElementById('calendarView').style.display = cal ? '' : 'none';
+      if (cal) renderCalendar();
+    });
+  });
+  var savedView = null;
+  try { savedView = localStorage.getItem('viewMode:' + location.pathname); } catch (e) {}
+  if (savedView === 'calendar') document.querySelector('#viewTabs .seg-opt[data-view="calendar"]').click();
 })();

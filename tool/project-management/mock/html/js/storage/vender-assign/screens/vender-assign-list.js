@@ -8,6 +8,7 @@
   var body = document.getElementById('venderBody');
   var list = ClassStore.load().filter(function (r) { return r.status !== OperatingStatusStore.nameOf('STOPPED'); });
 
+  var rowLines = {};
   list.forEach(function (r) {
     var c = C[r.courseCode] || { name: r.courseCode };
     var a = VenderAssignStore.find(r.id);
@@ -44,8 +45,10 @@
     var freeSub = Math.max(0, planSub - a.subs.length - reqOnly.sub);
     for (var fm = 0; fm < freeMain; fm++) mainLines = (mainLines === '-' ? '' : mainLines) + '<div data-vendor="">' + stateLabel(S.OPEN) + '</div>';
     for (var fs = 0; fs < freeSub; fs++) subLines = (subLines === '-' ? '' : subLines) + '<div data-vendor="">' + stateLabel(S.OPEN) + '</div>';
+    rowLines[r.id] = { main: mainLines, sub: subLines };
     var ps = ClassStore.practiceStatus(r);
     var tr = document.createElement('tr');
+    tr.setAttribute('data-id', r.id);
     var custCode = (ClassStore.PROJECTS[r.projectCode] || {}).customer;
     tr.innerHTML =
       '<td class="sticky col-practice">' + (ps ? '<span class="tag practice-status-tag ' + ClassStore.PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
@@ -88,4 +91,73 @@
     var table = document.querySelector('.table-scroll table');
     if (table && table.__relayout) table.__relayout();
   }
+
+  var calView = DayTable.create({
+    root: document.getElementById('calendarView'),
+    isHoliday: function (k) { return HolidayStore.isHoliday(k); },
+    onEventClick: function (id) { location.href = 'vender_assign_modify.html?id=' + encodeURIComponent(id); }
+  });
+
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function ymd(d) { return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()); }
+  function parseYmd(str) {
+    var p = String(str || '').split('/');
+    if (p.length !== 3) return null;
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  }
+
+  function calData() {
+    var columns = [];
+    var events = {};
+    var all = ClassStore.load();
+    document.querySelectorAll('#venderBody tr').forEach(function (tr) {
+      if (tr.style.display === 'none') return;
+      var id = tr.getAttribute('data-id');
+      var r = all.filter(function (x) { return String(x.id) === String(id); })[0];
+      if (!r) return;
+      var c = ClassStore.COURSES[r.courseCode] || { name: r.courseCode };
+      var a = VenderAssignStore.find(r.id);
+      var lines = ['メイン：' + rowLines[id].main, 'サブ：' + rowLines[id].sub];
+      var custCode = (ClassStore.PROJECTS[r.projectCode] || {}).customer;
+      var tip = ['顧客：' + (custCode ? CustomerStore.nameOf(custCode) : '-'), 'コース：' + c.name, 'レッスンNo：' + (r.lessonNo || ''), '開始日：' + (r.start || ''), '終了日：' + (r.end || '')].join('\n');
+      columns.push({ id: id, label: [c.name, r.lessonNo], tip: tip });
+      var from = parseYmd(r.start);
+      var to = parseYmd(r.end) || from;
+      if (!from) return;
+      for (var t = new Date(from.getFullYear(), from.getMonth(), from.getDate()); t <= to; t.setDate(t.getDate() + 1)) {
+        var key = ymd(t);
+        if (t.getDay() === 0 || t.getDay() === 6 || HolidayStore.isHoliday(key)) continue;
+        (events[key] = events[key] || []).push({ colId: id, rowId: id, stepId: 0, lineHtml: lines, color: '' });
+      }
+    });
+    return { columns: columns, events: events };
+  }
+
+  function renderCalendar() {
+    calView.update(calData());
+  }
+
+  var calActive = false;
+  function refreshCalendarIfActive() {
+    if (calActive) renderCalendar();
+  }
+  document.addEventListener('click', function () { setTimeout(refreshCalendarIfActive, 0); }, true);
+  document.addEventListener('input', refreshCalendarIfActive);
+
+  document.querySelectorAll('#viewTabs .seg-opt').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('#viewTabs .seg-opt').forEach(function (x) { x.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      var cal = tab.getAttribute('data-view') === 'calendar';
+      calActive = cal;
+      try { localStorage.setItem('viewMode:' + location.pathname, cal ? 'calendar' : 'table'); } catch (e) {}
+      document.querySelector('.table-scroll').style.display = cal ? 'none' : '';
+      document.getElementById('calendarView').style.display = cal ? '' : 'none';
+      if (cal) renderCalendar();
+    });
+  });
+  window.addEventListener('pagehide', function () { calView.saveScroll(); });
+  var savedView = null;
+  try { savedView = localStorage.getItem('viewMode:' + location.pathname); } catch (e) {}
+  if (savedView === 'calendar') document.querySelector('#viewTabs .seg-opt[data-view="calendar"]').click();
 })();

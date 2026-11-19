@@ -46,7 +46,10 @@
           
         </div>
         <div class="table-meta">
+          <div style="display:flex; align-items:center; gap:16px;">
           <div class="count"><b id="progressCount">0</b> 件（<span data-task-progress-name="DELAY"></span> <b id="delayCount" style="color:#d43c40">0</b> 件）</div>
+          <div class="field" style="flex-direction:row; align-items:center; gap:8px;"><label>表示形式</label><div class="seg" id="viewTabs"><button type="button" class="seg-opt is-active" data-view="table">表</button><button type="button" class="seg-opt" data-view="calendar">日ごと</button></div></div>
+          </div>
         </div>
         <div class="scroll-outer progress-scroll">
           <table>
@@ -68,6 +71,7 @@
             <tbody id="tbody"></tbody>
           </table>
         </div>
+        <div id="calendarView" class="cal-view" style="display:none;"></div>
         <div class="pagination"></div>
       </div>
     </div>
@@ -97,6 +101,7 @@
 <script src="js/storage/customer/store/customer-store.js"></script>
 <script src="js/list-filter-auto.js"></script>
 <script src="js/storage/holiday/store/holiday-store.js"></script>
+<script src="js/day-table.js"></script>
 <script src="js/storage/class-progress/screens/class-progress-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/datepicker.js" defer></script>

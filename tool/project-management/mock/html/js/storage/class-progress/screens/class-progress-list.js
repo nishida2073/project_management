@@ -342,6 +342,7 @@
       });
       s[classId] = cur;
       ProgressStore.save(s);
+      calView.saveScroll();
       location.reload();
     });
   }
@@ -354,4 +355,73 @@
   window.addEventListener('storage', function (e) {
     if (e.key === 'classProgress') location.reload();
   });
+
+  function calEvents() {
+    var headByStep = {};
+    document.querySelectorAll('.progress-scroll thead th[data-step]').forEach(function (th) {
+      headByStep[th.getAttribute('data-step')] = th;
+    });
+    var events = {};
+    var classes = [];
+    document.querySelectorAll('#tbody tr').forEach(function (tr) {
+      if (tr.style.display === 'none') return;
+      var lesson = tr.children[4] && tr.children[4].firstElementChild ? tr.children[4].firstElementChild.textContent.trim() : '';
+      var course = tr.children[3] && tr.children[3].firstElementChild ? tr.children[3].firstElementChild.textContent.trim() : '';
+      tr.querySelectorAll('td[data-step]').forEach(function (td) {
+        if (td.style.display === 'none') return;
+        var m = /予：(\d{4}\/\d{2}\/\d{2})/.exec(td.textContent);
+        if (!m) return;
+        var th = headByStep[td.getAttribute('data-step')];
+        var stepName = th && th.children[1] ? th.children[1].textContent.trim() : '';
+        var stateTag = td.querySelector('.state-tag');
+        var stateColor = stateTag ? (stateTag.className.split(' ').filter(function (c) { return ['green', 'blue', 'gray', 'red', 'orange'].indexOf(c) !== -1; })[0] || '') : '';
+        if (!classes.some(function (x) { return x.id === tr.getAttribute('data-id'); })) {
+          var rec = ClassStore.load().filter(function (x) { return String(x.id) === String(tr.getAttribute('data-id')); })[0] || {};
+          var pjInfo = ProjectStore.map()[rec.projectCode] || {};
+          var tip = ['顧客：' + (pjInfo.customer ? CustomerStore.nameOf(pjInfo.customer) : '-'), 'コース：' + course, 'レッスンNo：' + (rec.lessonNo || ''), '開始日：' + (rec.start || ''), '終了日：' + (rec.end || ''), '管理担当者：' + ((rec.managers || []).map(function (x) { return StaffStore.nameOf(x); }).join('、') || '-')].join('\n');
+          classes.push({ id: tr.getAttribute('data-id'), label: [course, lesson], tip: tip });
+        }
+        (events[m[1]] = events[m[1]] || []).push({ id: tr.getAttribute('data-id'), step: Number(td.getAttribute('data-step')), text: course + ' ' + lesson, stepName: stepName, color: stateColor });
+      });
+    });
+    return { events: events, classes: classes };
+  }
+
+  var calView = DayTable.create({
+    root: document.getElementById('calendarView'),
+    isHoliday: function (k) { return HolidayStore.isHoliday(k); },
+    onEventClick: function (id, step) { openStepDialog(id, step); }
+  });
+
+  function renderCalendar() {
+    var data = calEvents();
+    var events = {};
+    Object.keys(data.events).forEach(function (k) {
+      events[k] = data.events[k].map(function (ev) { return { colId: ev.id, rowId: ev.id, stepId: ev.step, label: ev.stepName, color: ev.color }; });
+    });
+    calView.update({ columns: data.classes, events: events });
+  }
+
+  var calActive = false;
+  function refreshCalendarIfActive() {
+    if (calActive) renderCalendar();
+  }
+  document.addEventListener('click', function () { setTimeout(refreshCalendarIfActive, 0); }, true);
+  document.addEventListener('input', refreshCalendarIfActive);
+
+  document.querySelectorAll('#viewTabs .seg-opt').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('#viewTabs .seg-opt').forEach(function (x) { x.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      var cal = tab.getAttribute('data-view') === 'calendar';
+      document.querySelector('.progress-scroll').style.display = cal ? 'none' : '';
+      document.getElementById('calendarView').style.display = cal ? '' : 'none';
+      calActive = cal;
+      try { localStorage.setItem('viewMode:' + location.pathname, cal ? 'calendar' : 'table'); } catch (e) {}
+      if (cal) renderCalendar();
+    });
+  });
+  var savedView = null;
+  try { savedView = localStorage.getItem('viewMode:' + location.pathname); } catch (e) {}
+  if (savedView === 'calendar') document.querySelector('#viewTabs .seg-opt[data-view="calendar"]').click();
 })();
