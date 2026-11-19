@@ -260,10 +260,10 @@
     var newName = src[Number(parts[2])].teacherName;
     chooseReplace(names, newName, rep[k] || '').then(function (name) {
       if (name === null) return;
-      var td = mark.closest('td');
-      captureTd(td);
+      $('importBody').querySelectorAll('td[data-role]').forEach(captureTd);
+      if (name) Object.keys(rep).forEach(function (other) { if (other !== k && rep[other] === name) delete rep[other]; });
       rep[k] = name;
-      rerender(td);
+      $('importBody').querySelectorAll('td[data-role]').forEach(function (cell) { rerender(cell); });
       updateCount();
     });
   });

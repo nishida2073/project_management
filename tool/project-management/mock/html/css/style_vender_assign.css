@@ -23,7 +23,7 @@
 .vender-assign-import-line { margin: 2px 0; }
 .vender-assign-import-line .import-name { margin-left: 0; }
 .vender-assign-import-row-gap .import-name { margin-left: 0; }
-.vender-assign-import-line .replace-mark { display: inline-flex; align-items: center; box-sizing: border-box; height: 18px; padding: 0 8px; margin: 0 6px; font-size: 12px; line-height: 1; font-weight: 700; color: #2f6fed; background: #eef4ff; border: 1px solid #9bb8f5; border-radius: 9px; }
+.vender-assign-import-line .replace-mark { display: inline-flex; align-items: center; box-sizing: border-box; height: 14px; padding: 0 5px; margin: 0 6px; font-size: 10px; line-height: 14px; font-weight: 700; color: #2f6fed; background: #eef4ff; border: 1px solid #9bb8f5; border-radius: 7px; }
 .vender-assign-import-line .replace-mark { cursor: pointer; }
 .vender-assign-import-line .replace-mark:hover { background: #dbe8ff; border-color: #2f6fed; }
 .vender-assign-import-swap-mark { display: inline-block; height: 14px; line-height: 14px; margin: 0 6px; padding: 0; font-size: 12px; font-weight: 700; color: #2f6fed; cursor: default; }
