@@ -38,7 +38,9 @@
     try { localStorage.clear(); sessionStorage.clear(); } catch (e) {}
     location.reload();
   });
-  $('loginPassword').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') login();
+  ['loginId', 'loginPassword'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') $('loginBtn').click();
+    });
   });
 })();
