@@ -123,7 +123,7 @@
           && !add.some(function (p) { return sameTeacher(p, o.m); });
       });
       var rv = rep[k] || '';
-      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '" data-tip="講師の入れ替え">⇄</span>' + (rv ? '<span class="import-name">' + esc(rv) + '</span>' : '') : '';
+      var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '">⇄</span>' + (rv ? '<span class="import-name">' + esc(rv) + '</span><span class="import-replace-clear" data-key="' + k + '">×</span>' : '') : '';
       rows.push('<div class="vender-assign-import-line" data-key="' + k + '" data-from="' + from + '"><label class="check-box check-sm vender-assign-import-check-label"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from, !same) + '</span> ' +
         (sel ? '<span class="import-name">' + esc(p.teacherName) + '</span>' + sel : esc(p.teacherName)) + '</div>');
@@ -241,6 +241,16 @@
   });
 
   $('importBody').addEventListener('click', function (e) {
+    var clear = e.target.closest('.import-replace-clear');
+    if (clear) {
+      var ck = clear.getAttribute('data-key');
+      var ctd = clear.closest('td');
+      captureTd(ctd);
+      delete rep[ck];
+      rerender(ctd);
+      updateCount();
+      return;
+    }
     var mark = e.target.closest('.import-replace-mark');
     if (!mark) return;
     var k = mark.getAttribute('data-key');

@@ -24,6 +24,8 @@
 .vender-assign-import-line .import-name { margin-left: 0; }
 .vender-assign-import-line .replace-mark { font-size: 12px; height: 14px; line-height: 14px; margin: 0 6px; }
 .vender-assign-import-swap-mark { display: inline-block; font-size: 12px; height: 14px; line-height: 14px; margin: 0 6px; color: #2f6fed; font-weight: 700; }
+.import-replace-clear { display: inline-flex; align-items: center; justify-content: center; height: 14px; line-height: 14px; margin-left: 4px; font-size: 12px; color: #9aa4b5; cursor: pointer; }
+.import-replace-clear:hover { color: #d43c40; }
 .vender-assign-import-spacer { visibility: hidden; vertical-align: middle; }
 .vender-assign-import-state-tag { font-size: 10px; }
 .vender-assign-import-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
