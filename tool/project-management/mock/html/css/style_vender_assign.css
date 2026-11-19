@@ -22,10 +22,15 @@
 .vender-assign-import-error { margin-top: 12px; font-size: 12.5px; color: #d43c40; white-space: pre-line; }
 .vender-assign-import-line { margin: 2px 0; }
 .vender-assign-import-line .import-name { margin-left: 0; }
-.vender-assign-import-line .replace-mark { font-size: 12px; height: 14px; line-height: 14px; margin: 0 6px; }
-.vender-assign-import-swap-mark { display: inline-block; font-size: 12px; height: 14px; line-height: 14px; margin: 0 6px; color: #2f6fed; font-weight: 700; }
-.import-replace-clear { display: inline-flex; align-items: center; justify-content: center; height: 14px; line-height: 14px; margin-left: 4px; font-size: 12px; color: #9aa4b5; cursor: pointer; }
-.import-replace-clear:hover { color: #d43c40; }
+.vender-assign-import-row-gap .import-name { margin-left: 0; }
+.vender-assign-import-line .replace-mark { display: inline-flex; align-items: center; box-sizing: border-box; height: 18px; padding: 0 8px; margin: 0 6px; font-size: 12px; line-height: 1; font-weight: 700; color: #2f6fed; background: #eef4ff; border: 1px solid #9bb8f5; border-radius: 9px; }
+.vender-assign-import-line .replace-mark { cursor: pointer; }
+.vender-assign-import-line .replace-mark:hover { background: #dbe8ff; border-color: #2f6fed; }
+.vender-assign-import-swap-mark { display: inline-block; height: 14px; line-height: 14px; margin: 0 6px; padding: 0; font-size: 12px; font-weight: 700; color: #2f6fed; cursor: default; }
+.vender-assign-import-swap-mark + .import-name { margin-left: 0; }
+
+.import-replace-clear { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 18px; height: 18px; margin-left: 4px; font-size: 12px; line-height: 1; color: #7c8598; background: #eef0f4; border: 1px solid #d3d9e3; border-radius: 9px; cursor: pointer; }
+.import-replace-clear:hover { background: #dbe8ff; border-color: #2f6fed; }
 .vender-assign-import-spacer { visibility: hidden; vertical-align: middle; }
 .vender-assign-import-state-tag { font-size: 10px; }
 .vender-assign-import-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
