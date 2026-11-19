@@ -15,6 +15,12 @@
     $('statusLabel').textContent = off ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE');
   }
 
+  function tagsOf(codes, store, cls) {
+    return (codes || []).map(function (c) {
+      return '<span class="tag ' + cls + ' ' + (store.colorOf(c) || '') + '">' + esc(store.nameOf(c)) + '</span>';
+    }).join('') || '-';
+  }
+
   function renderRadios(group, name, items) {
     group.innerHTML = items.map(function (it) {
       return '<label class="radio-option"><input type="radio" name="' + name + '" value="' + it.code + '"><span class="radio-dot"></span><span class="tag ' + tagClassOf(name) + ' ' + it.color + '">' + it.name + '</span></label>';
@@ -29,6 +35,8 @@
     var rec;
 
     renderRadios(document.getElementById('authorityGroup'), 'authority', UserRoleStore.load());
+
+    var linkedStaff = list.filter(function (u) { return u.code !== id && u.staffCode; }).map(function (u) { return u.staffCode; });
 
     if (editing) {
       list.forEach(function (u, i) { if (u.code === id) idx = i; });
@@ -45,12 +53,37 @@
 
     fill(rec);
 
+    var pickedStaff = rec.staffCode || '';
+    function showStaff() {
+      $('staffSelect').innerHTML = esc(StaffStore.nameOf(pickedStaff) || '未設定') + '<span class="caret">▾</span>';
+      var st = StaffStore.load().filter(function (s) { return s.code === pickedStaff; })[0];
+      $('affiliationView').innerHTML = st ? '<span class="tag affiliation-tag ' + (st.affiliation === AffiliationStore.nameOf('PARTNER') ? 'orange' : 'blue') + '">' + esc(st.affiliation) + '</span>' : '-';
+      $('venderView').textContent = st && st.company ? StaffVenderStore.nameOf(st.company) : '-';
+      $('roleView').innerHTML = tagsOf(st ? st.roles : [], StaffRoleStore, 'role-tag');
+      $('jobView').innerHTML = tagsOf(st ? st.jobTypes : [], JobTypeStore, 'job-type-tag');
+      $('positionView').innerHTML = tagsOf(st ? st.positions : [], PositionStore, 'position-tag');
+    }
+    showStaff();
+    $('staffSelect').addEventListener('click', function () {
+      StaffPicker.open({ current: pickedStaff, exclude: linkedStaff, keyword: $('userName').value.trim() }).then(function (code) {
+        if (code === null) return;
+        pickedStaff = code;
+        showStaff();
+      });
+    });
+
+    $('staffClear').addEventListener('click', function () {
+      pickedStaff = '';
+      showStaff();
+    });
+
     $('saveBtn').addEventListener('click', function () {
       var v = {
         name: $('userName').value.trim(),
         email: $('userEmail').value.trim(),
         authority: getRadio('authority'),
         memo: $('memo').value,
+        staffCode: pickedStaff,
         status: readStatus()
       };
       var password = $('userPassword').value;
