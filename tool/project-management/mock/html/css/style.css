@@ -148,6 +148,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .status-label.green { background: #e5f6ec; color: #279158; }
 .status-label.red { background: #fdeaea; color: #d43c40; }
 .status-label.orange { background: #fff2e2; color: #d97c1e; }
+.status-label.violet { background: #f0e9ff; color: #7c4de0; }
 /* 角丸の状態バッジ（基本の形と色：gray・blue・green・red・orange） */
 .status-label { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
 .chip.tag-like { font-size: 11px; padding: 3px 9px; border-radius: 4px; }
