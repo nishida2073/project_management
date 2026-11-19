@@ -24,7 +24,7 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 /* Main column */
 .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .topbar { min-height: 64px; background: #ffffff; border-bottom: 1px solid #dde3ec; display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; }
-.topbar .topbar-title { font-size: 20px; font-weight: 700; color: #40485a; }
+.topbar .topbar-title, .modal-header-title { font-size: 20px; font-weight: 700; color: #40485a; }
 .topbar .topbar-title span { color: #9aa4b5; font-weight: 400; margin: 0 6px; }
 .topbar .user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4a5164; margin-left: auto; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: #4f8cff; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
@@ -181,7 +181,6 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .modal-body { padding: 22px 28px; display: flex; flex-direction: column; gap: 16px; }
 .modal-body.modal-body-plain { display: block; padding: 0 28px 18px; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
-.modal-header h2 { font-size: 18px; font-weight: 700; }
 .modal-header .sub { font-size: 12.5px; color: #7c8598; margin-top: 6px; }
 .close-x { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #8993a3; font-size: 16px; border: 1px solid #e6eaf1; text-decoration: none; cursor: default; }
 a.close-x { cursor: pointer; }
