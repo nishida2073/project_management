@@ -80,8 +80,7 @@
       var missing = [];
         if (!v.name) missing.push('ユーザー名');
         if (!v.email) missing.push('メールアドレス（ログインID）');
-        if (!v.authority) missing.push('権限');
-        if (!editing && !password) missing.push('初期パスワード');
+        if (!editing && !password) missing.push('パスワード');
       if (missing.length) {
         MessageDialog.required(missing);
         return;

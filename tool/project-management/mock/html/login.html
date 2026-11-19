@@ -10,15 +10,15 @@
 <div class="login-wrap">
   <div class="login-card">
     <div class="login-title">研修管理システム</div>
+    <div class="login-error" id="loginError"></div>
     <div class="form-field">
       <label>ログインID（メールアドレス）</label>
-      <input type="email" class="form-control" id="loginId" autocomplete="username">
+      <input type="email" class="form-control" id="loginId" autocomplete="username" value="sample@co.jp">
     </div>
     <div class="form-field">
       <label>パスワード</label>
-      <input type="password" class="form-control" id="loginPassword" autocomplete="current-password">
+      <input type="password" class="form-control" id="loginPassword" autocomplete="current-password" value="pass">
     </div>
-    <div class="login-error" id="loginError"></div>
     <div class="btn primary login-btn" id="loginBtn">ログイン</div>
     <div class="login-reset" id="resetStorage">保存データを初期化</div>
   </div>
