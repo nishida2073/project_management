@@ -77,14 +77,20 @@
     var freeCount = add.filter(function (p) { return !matched(p); }).length;
     var slotHide = Math.min(freeCount, slotInit);
     var SPACER = '<span class="check-box check-sm vender-assign-import-spacer"><input type="checkbox"><span class="check-mark"></span></span> ';
-    var replacedHere = Object.keys(rep).filter(function (key) { return key.indexOf(idx + '|' + role + '|') === 0 && rep[key] && chk[key]; }).map(function (key) { return rep[key]; });
+    var swapTo = {};
+    Object.keys(rep).forEach(function (key) {
+      if (key.indexOf(idx + '|' + role + '|') === 0 && rep[key] && chk[key]) {
+        var q = add[Number(key.split('|')[2])];
+        if (q) swapTo[rep[key]] = q.teacherName;
+      }
+    });
     var rows = [];
     existing.forEach(function (m) {
       if (m.vendor !== plan.vendorCode) return;
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
-      rows.push('<div class="vender-assign-import-row-gap">' + SPACER + (t ? stateLabel(t) + ' ' : '') + (replacedHere.indexOf(m.teacherName) !== -1 ? '<span>→</span> <span class="status-label state-tag vender-assign-import-state-tag violet">入れ替え</span> ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span></div>');
+      rows.push('<div class="vender-assign-import-row-gap">' + SPACER + (t ? stateLabel(t) + ' ' : '') + (swapTo[m.teacherName] !== undefined ? '<span>→</span> <span class="status-label state-tag vender-assign-import-state-tag violet">入れ替え</span> ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span>' + (swapTo[m.teacherName] !== undefined ? '<span class="vender-assign-import-swap-mark">⇄</span><span class="import-name">' + esc(swapTo[m.teacherName]) + '</span>' : '') + '</div>');
     });
     var pool = { slot: slotInit, req: reqInit, free: freeInit };
     add.forEach(function (p, i) {
