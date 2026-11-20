@@ -133,8 +133,19 @@
       for (var sq = 0; sq < (rq.sub || 0); sq++) subRows.push({ vendor: rq.vendor, teacherName: '', locked: !!rq.vendor });
     });
     while (subRows.length < planSub) subRows.push({ vendor: '', teacherName: '' });
-    mainRows.forEach(function (m) { makeRow('mainList', m); });
-    subRows.forEach(function (s) { makeRow('subList', s); });
+    function rowRank(m) {
+      if (m.state === 'done') return SlotStatusStore.order('REQUESTED');
+      if (m.state === 'requesting' || m.locked) return SlotStatusStore.order('REQUESTING');
+      if (m.vendor) return SlotStatusStore.order('BEFORE');
+      return SlotStatusStore.order('OPEN');
+    }
+    function sortRows(list) {
+      return list.map(function (m, i) { return { m: m, i: i }; })
+        .sort(function (x, y) { return rowRank(x.m) - rowRank(y.m) || x.i - y.i; })
+        .map(function (x) { return x.m; });
+    }
+    sortRows(mainRows).forEach(function (m) { makeRow('mainList', m); });
+    sortRows(subRows).forEach(function (s) { makeRow('subList', s); });
     $('attendeeVendor').value = a.attendeeVendor || '';
     $('attendee').value = a.attendee || '';
     $('motivationVendor').innerHTML = MotivationCompanyTypeStore.load().map(function (t) {

@@ -85,14 +85,16 @@
       }
     });
     var rows = [];
+    var CODE_OF = { done: 'REQUESTED', requesting: 'REQUESTING', before: 'BEFORE', open: 'OPEN', none: 'OUT_OF_PLAN' };
+    function rankOf(s) { return SlotStatusStore.order(CODE_OF[s] || 'OUT_OF_PLAN'); }
     existing.forEach(function (m) {
       if (m.vendor !== plan.vendorCode) return;
       if (add.some(function (p) { return sameTeacher(p, m) && m.state !== 'done'; })) return;
       if (slotHide > 0 && m.state === 'before' && !m.teacherName && m.vendor === plan.vendorCode) { slotHide--; return; }
       var t = STATE_TAG[m.state];
-      rows.push('<div class="vender-assign-import-row-gap">' + SPACER + (t ? stateLabel(t) + ' ' : '') + (swapTo[m.teacherName] !== undefined ? '<span>→</span> <span class="status-label state-tag vender-assign-import-state-tag violet">入れ替え</span> ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span>' + (swapTo[m.teacherName] !== undefined ? '<span class="vender-assign-import-swap-mark">⇄</span><span class="import-name">' + esc(swapTo[m.teacherName]) + '</span>' : '') + '</div>');
+      rows.push({ r: rankOf(m.state), h: '<div class="vender-assign-import-row-gap">' + SPACER + (t ? stateLabel(t) + ' ' : '') + (swapTo[m.teacherName] !== undefined ? '<span>→</span> <span class="status-label state-tag vender-assign-import-state-tag violet">入れ替え</span> ' : '') + '<span class="import-name">' + esc(m.teacherName) + '</span>' + (swapTo[m.teacherName] !== undefined ? '<span class="vender-assign-import-swap-mark">⇄</span><span class="import-name">' + esc(swapTo[m.teacherName]) + '</span>' : '') + '</div>' });
     });
-    var pool = { slot: slotInit, req: reqInit, free: freeInit };
+    var pool ={ slot: slotInit, req: reqInit, free: freeInit };
     add.forEach(function (p, i) {
       var k = idx + '|' + role + '|' + i;
       if (alreadyDone(p, existing) || matched(p)) return;
@@ -124,11 +126,12 @@
       });
       var rv = rep[k] || '';
       var sel = (on && from === 'none' && replaceOpts.length) ? '<span class="replace-mark import-replace-mark" data-key="' + k + '" data-options="' + esc(replaceOpts.map(function (o) { return o.m.teacherName; }).join(',')) + '">⇄</span>' + (rv ? '<span class="import-name">' + esc(rv) + '</span><span class="import-replace-clear" data-key="' + k + '">×</span>' : '') : '';
-      rows.push('<div class="vender-assign-import-line" data-key="' + k + '" data-from="' + from + '"><label class="check-box check-sm vender-assign-import-check-label"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
+      rows.push({ r: rankOf(from), h: '<div class="vender-assign-import-line" data-key="' + k + '" data-from="' + from + '"><label class="check-box check-sm vender-assign-import-check-label"><input type="checkbox" class="import-check" data-idx="' + idx + '" data-role="' + role + '" data-i="' + i + '"' + (on ? ' checked' : '') + '><span class="check-mark"></span></label> ' +
         tagOf(from) + ' <span>→</span> <span class="js-after">' + afterHtml(on, from, !same) + '</span> ' +
-        (sel ? '<span class="import-name">' + esc(p.teacherName) + '</span>' + sel : esc(p.teacherName)) + '</div>');
+        (sel ? '<span class="import-name">' + esc(p.teacherName) + '</span>' + sel : esc(p.teacherName)) + '</div>' });
     });
-    return rows.length ? rows.join('') : '-';
+    rows.sort(function (x, y) { return x.r - y.r; });
+    return rows.length ? rows.map(function (x) { return x.h; }).join('') : '-';
   }
 
   var newTotal = 0;

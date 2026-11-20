@@ -32,6 +32,11 @@
     return LIST.map(function (s) { return s.code; });
   }
 
+  function order(code) {
+    var i = codes().indexOf(code);
+    return i === -1 ? LIST.length : i;
+  }
+
   function tag(s, style, cls) {
     return '<span class="tag ' + (cls ? cls + ' ' : '') + s.color + '"' + (style ? ' style="' + style + '"' : '') + '>' + s.name + '</span>';
   }
@@ -49,5 +54,5 @@
   fillDom();
   document.addEventListener('DOMContentLoaded', fillDom);
 
-  window.SlotStatusStore = { load: load, STATUS: STATUS, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, options: options, tag: tag };
+  window.SlotStatusStore = { load: load, STATUS: STATUS, find: find, nameOf: nameOf, colorOf: colorOf, codes: codes, order: order, options: options, tag: tag };
 })();

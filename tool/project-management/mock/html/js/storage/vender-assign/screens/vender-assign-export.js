@@ -13,13 +13,6 @@
     var namedSub = a.subs.filter(function (p) { return p.state === 'done'; }).length;
     var remainMain = Math.max(0, (parseInt(r.mainTeachers, 10) || 0) - namedMain);
     var remainSub = Math.max(0, (parseInt(r.subTeachers, 10) || 0) - namedSub);
-    var reqTot = VenderAssignStore.totalRequest(a);
-    var pendMain = reqTot.main;
-    var pendSub = reqTot.sub;
-    var befMain = a.mains.filter(function (p) { return p.state === 'before'; }).length;
-    var befSub = a.subs.filter(function (p) { return p.state === 'before'; }).length;
-    var reqMain = Math.max(0, remainMain - pendMain - befMain);
-    var reqSub = Math.max(0, remainSub - pendSub - befSub);
     var tr = document.createElement('tr');
     tr.setAttribute('data-id', r.id);
     tr.setAttribute('data-practice', ClassStore.practiceStatus(r));
@@ -29,7 +22,7 @@
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
     tr.setAttribute('data-remain-main', remainMain);
     tr.setAttribute('data-remain-sub', remainSub);
-    var teacherLines = VenderLines.build(r);
+    var teacherLines = VenderLines.build(r, '');
     tr.innerHTML =
       '<td class="sticky vender-assign-center"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
@@ -39,10 +32,8 @@
       '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
       '<td>' + teacherLines.main + '</td>' +
-      '<td><input type="number" class="form-control main-count vender-assign-count-input" min="0" max="' + reqMain + '" value="' + reqMain + '"></td>' +
       '<td>' + dashOr(r.subTeachers, '人') + '</td>' +
-      '<td>' + teacherLines.sub + '</td>' +
-      '<td><input type="number" class="form-control sub-count vender-assign-count-input" min="0" max="' + reqSub + '" value="' + reqSub + '"></td>';
+      '<td>' + teacherLines.sub + '</td>';
     body.appendChild(tr);
   });
 
@@ -62,7 +53,7 @@
     var visible = 0;
     body.querySelectorAll('tr').forEach(function (tr) {
       var course = tr.querySelector('.col-course').textContent.toLowerCase();
-      var canRequest = parseInt(tr.querySelector('.main-count').max, 10) > 0 || parseInt(tr.querySelector('.sub-count').max, 10) > 0;
+      var canRequest = tr.querySelectorAll('[data-vendor=""]').length > 0;
       var fitOk = fitVal === 'すべて' || (fitVal === 'あり') === canRequest;
       var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
       var dateOk = dateMatch(tr.getAttribute('data-start'), tr.getAttribute('data-end'));
@@ -80,36 +71,41 @@
 
   var appliedVendor = null;
   var includePendSel = true;
+  function countChecked(tr, role) {
+    return tr.querySelectorAll('.export-check[data-role="' + role + '"]:checked').length;
+  }
+  function eachCheck(tr, fn) {
+    var n = { main: 0, sub: 0 };
+    tr.querySelectorAll('.export-check').forEach(function (cb) {
+      if (cb.hasAttribute('data-pending')) return;
+      var key = cb.getAttribute('data-key');
+      if (!key) {
+        var role = cb.getAttribute('data-role');
+        key = role + n[role];
+        n[role]++;
+      }
+      fn(cb, key);
+    });
+  }
+  function checkState(tr) {
+    var map = {};
+    eachCheck(tr, function (cb, key) { map[key] = cb.checked; });
+    return map;
+  }
+  function restoreChecks(tr, map) {
+    eachCheck(tr, function (cb, key) { if (key in map) cb.checked = map[key]; });
+  }
   function applyVendor() {
     var code = TeacherVenderStore.codeOf(placeholderToEmpty(ownText($('requestVendor'))));
     body.querySelectorAll('tr').forEach(function (tr) {
       var id = tr.getAttribute('data-id');
       var row = rows.filter(function (x) { return x.cls.id === id; })[0];
       if (!row) return;
-      var teacherCells = VenderLines.build(row.cls, code);
+      var saved = checkState(tr);
+      var teacherCells = VenderLines.build(row.cls, code, { check: !!code, includePend: includePendSel });
       tr.children[7].innerHTML = teacherCells.main;
-      tr.children[10].innerHTML = teacherCells.sub;
-      var reqs = VenderAssignStore.requestsOf(row.assign);
-      ['main', 'sub'].forEach(function (role) {
-        var list = role === 'main' ? row.assign.mains : row.assign.subs;
-        var isOther = function (v) { return !code || v !== code; };
-        var befOthers = list.filter(function (p) { return p.state === 'before' && isOther(p.vendor); }).length;
-        var befSel = list.filter(function (p) { return p.state === 'before' && !isOther(p.vendor); }).length;
-        var pendOthers = reqs.filter(function (q) { return isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
-        var pendSelAll = reqs.filter(function (q) { return !isOther(q.vendor); }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
-        var pendSel = includePendSel ? pendSelAll : 0;
-        var remain = parseInt(tr.getAttribute('data-remain-' + role), 10) || 0;
-        var input = tr.querySelector('.' + role + '-count');
-        var minVal = includePendSel ? pendSelAll : 0;
-        var val = Math.max(minVal, Math.max(0, remain - pendOthers - befOthers - (includePendSel ? 0 : pendSelAll)));
-        input.min = minVal;
-        input.max = val;
-        input.value = val;
-        var overPlan = remain < pendOthers + pendSelAll + befOthers + befSel;
-        var willReplace = !!code && befSel > 0 && overPlan;
-        input.classList.toggle('replace-mark', willReplace);
-        input.title = willReplace ? '予定講師数を超過しているため' + val + '人に変更しています。' : '';
-      });
+      tr.children[9].innerHTML = teacherCells.sub;
+      restoreChecks(tr, saved);
     });
   }
   function syncVendor() {
@@ -143,34 +139,7 @@
     visibleRows().forEach(function (tr) { tr.querySelector('.row-check').checked = on; });
     syncSelToggle();
   });
-  function minFor(el) {
-    if (!includePendSel) return 0;
-    var role = el.classList.contains('main-count') ? 'main' : 'sub';
-    var tr = el.closest('tr');
-    var row = tr ? rows.filter(function (x) { return x.cls.id === tr.getAttribute('data-id'); })[0] : null;
-    var code = TeacherVenderStore.codeOf(placeholderToEmpty(ownText($('requestVendor'))));
-    if (!row || !code) return 0;
-    return VenderAssignStore.requestsOf(row.assign).filter(function (q) { return q.vendor === code; }).reduce(function (t, q) { return t + (q[role] || 0); }, 0);
-  }
-  body.addEventListener('focusin', function (e) {
-    if (!e.target.matches('.main-count, .sub-count')) return;
-    e.target.setAttribute('min', String(minFor(e.target)));
-  });
-  body.addEventListener('input', function (e) {
-    if (!e.target.matches('.main-count, .sub-count')) return;
-    var max = parseInt(e.target.getAttribute('max'), 10) || 0;
-    var v = parseInt(e.target.value, 10);
-    if (isNaN(v) || v < 0) { e.target.value = v < 0 ? 0 : e.target.value; return; }
-    var minNow = minFor(e.target);
-    if (v < minNow) { e.target.value = minNow; return; }
-    if (v > max) e.target.value = max;
-  });
   body.addEventListener('change', function (e) {
-    if (e.target.matches('.main-count, .sub-count')) {
-      var mn = minFor(e.target);
-      var cv = parseInt(e.target.value, 10);
-      if (isNaN(cv) || cv < mn) e.target.value = mn;
-    }
     if (e.target.classList.contains('row-check')) syncSelToggle();
   });
 
@@ -184,12 +153,10 @@
     var checkedCount = Array.prototype.filter.call(body.querySelectorAll('tr'), function (tr) {
       if (tr.style.display === 'none') return false;
       if (!tr.querySelector('.row-check') || !tr.querySelector('.row-check').checked) return false;
-      var mc = parseInt(tr.querySelector('.main-count').value, 10) || 0;
-      var sc = parseInt(tr.querySelector('.sub-count').value, 10) || 0;
-      return mc > 0 || sc > 0;
+      return countChecked(tr, 'main') > 0 || countChecked(tr, 'sub') > 0;
     }).length;
     if (!checkedCount) {
-      MessageDialog.show('依頼するクラスと人数を入力してください');
+      MessageDialog.show('依頼するクラスの空き枠または依頼中を選択してください');
       return;
     }
     var items = [];
@@ -200,8 +167,8 @@
       var id = tr.getAttribute('data-id');
       var row = rows.filter(function (x) { return x.cls.id === id; })[0];
       if (!row) return;
-      var mainCount = parseInt(tr.querySelector('.main-count').value, 10) || 0;
-      var subCount = parseInt(tr.querySelector('.sub-count').value, 10) || 0;
+      var mainCount = countChecked(tr, 'main');
+      var subCount = countChecked(tr, 'sub');
       exportedIds.push({ id: id, main: mainCount, sub: subCount });
       var a = Object.assign({}, row.assign, { mainCount: mainCount, subCount: subCount });
       VenderAssignStore.upsert(a);
