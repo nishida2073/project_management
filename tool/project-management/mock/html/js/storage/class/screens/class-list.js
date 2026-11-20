@@ -43,7 +43,7 @@
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +
       '<td><span class="status-label ' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (r.memo ? ' data-memo="' + esc(r.memo) + '"' : '') + '>' + (r.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
-      '<td class="row-actions"><a class="search-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
+      '<td class="row-actions"><a class="nav-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);
   });
 

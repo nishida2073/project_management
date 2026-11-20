@@ -28,7 +28,7 @@
           '<div class="input-dialog-title">' + esc(opts.title || '') + '</div>' +
           fields.map(function (f) { return fieldHtml(f, names, value); }).join('') +
           '<div class="input-dialog-actions">' +
-            '<div class="search-btn sd-cancel">キャンセル</div>' +
+            '<div class="nav-btn sd-cancel">キャンセル</div>' +
             '<div class="btn primary sd-ok">' + esc(opts.okLabel || 'OK') + '</div>' +
           '</div>' +
         '</div>';

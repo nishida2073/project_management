@@ -1,6 +1,6 @@
 (function () {
   var C = ClassStore.COURSES;
-  var body = $('withdrawBody');
+  var body = $('updateBody');
   var rows = [];
   var KEY = { requesting: 'REQUESTING', before: 'BEFORE', open: 'OPEN' };
   function labelOf(state) { return SlotStatusStore.nameOf(KEY[state]); }
@@ -82,7 +82,7 @@
         '<td>' + teacherLines.special + '</td>';
       body.appendChild(tr);
     });
-    $('withdrawCount').textContent = body.querySelectorAll('tr').length;
+    $('updateCount').textContent = body.querySelectorAll('tr').length;
     syncSelToggle();
   }
 
@@ -113,9 +113,9 @@
     }, 0);
   }, true);
   $('requestVendor').addEventListener('click', function () { setTimeout(render, 0); }, true);
-  document.querySelector('.filter-panel .search-btn').addEventListener('click', render);
+  document.querySelector('.filter-panel .nav-btn').addEventListener('click', render);
   $('keyword').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') document.querySelector('.filter-panel .search-btn').click();
+    if (e.key === 'Enter') document.querySelector('.filter-panel .nav-btn').click();
   });
 
   $('saveBtn').addEventListener('click', function () {

@@ -13,7 +13,7 @@
       '<td>' + esc(c.contactName) + '</td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (c.memo ? ' data-memo="' + esc(c.memo) + '"' : '') + '>' + (c.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
-      '<td class="row-actions"><a class="search-btn" href="staff_vender_modify.html?id=' + encodeURIComponent(c.code) + '">更新</a></td>';
+      '<td class="row-actions"><a class="nav-btn" href="staff_vender_modify.html?id=' + encodeURIComponent(c.code) + '">更新</a></td>';
     body.appendChild(tr);
   });
 

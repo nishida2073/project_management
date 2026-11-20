@@ -73,7 +73,7 @@
     return out;
   }
 
-  function openChangeDialog(vendorNames, stateNames, validate) {
+  function openSlotUpdateDialog(vendorNames, stateNames, validate) {
     return new Promise(function (resolve) {
       var overlay = document.createElement('div');
       overlay.className = 'overlay';
@@ -86,8 +86,8 @@
           '<label class="input-dialog-label">変更後の状態</label>' +
           '<div class="form-control js-select" data-options="' + esc(stateNames.join(',')) + '" data-value="' + esc(stateNames[0]) + '">' + esc(stateNames[0]) + '<span class="caret">▾</span></div>' +
           '<div class="input-dialog-actions">' +
-            '<div class="search-btn sd-cancel">キャンセル</div>' +
-            '<div class="search-btn sd-ok">変更</div>' +
+            '<div class="nav-btn sd-cancel">キャンセル</div>' +
+            '<div class="nav-btn sd-ok">変更</div>' +
           '</div>' +
         '</div>';
       document.body.appendChild(overlay);
@@ -191,16 +191,16 @@
         return v === '' || v === code;
       });
     }
-    function changeValidation(code, to) {
+    function slotUpdateValidation(code, to) {
       return targetRows(code, to).length ? '' : '変更できる枠がありません';
     }
-    function applyChange(code, to) {
+    function applySlotUpdate(code, to) {
       targetRows(code, to).forEach(function (r) {
         if (to === 'open') toEmpty(r);
         else toBefore(r, code);
       });
     }
-    $('withdrawBtn').addEventListener('click', function () {
+    $('slotUpdateBtn').addEventListener('click', function () {
       var vendorNames = TeacherVenderStore.activeNames();
       if (!vendorNames.length) {
         MessageDialog.show('変更できる依頼がありません');
@@ -208,13 +208,13 @@
       }
       var openName = SlotStatusStore.nameOf('OPEN');
       var beforeName = SlotStatusStore.nameOf('BEFORE');
-      openChangeDialog(vendorNames, [openName, beforeName], function (vendor, state) {
+      openSlotUpdateDialog(vendorNames, [openName, beforeName], function (vendor, state) {
         var code = TeacherVenderStore.codeOf(vendor);
         var to = state === openName ? 'open' : 'before';
-        return changeValidation(code, to);
+        return slotUpdateValidation(code, to);
       }).then(function (res) {
         if (!res) return;
-        applyChange(TeacherVenderStore.codeOf(res.vendor), res.state === openName ? 'open' : 'before');
+        applySlotUpdate(TeacherVenderStore.codeOf(res.vendor), res.state === openName ? 'open' : 'before');
       });
     });
     reqs.forEach(function (rq) {

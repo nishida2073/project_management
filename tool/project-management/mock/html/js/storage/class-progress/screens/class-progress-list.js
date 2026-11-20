@@ -28,7 +28,7 @@
         ctl.setAttribute('data-value', value);
         ctl.innerHTML = value + '<span class="caret">▾</span>';
       }
-      document.querySelector('.filter-panel .search-btn').click();
+      document.querySelector('.filter-panel .nav-btn').click();
     });
   });
 
@@ -175,7 +175,7 @@
       var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' data-memo="' + esc(s.memo) + '"' : '');
       html += '<td data-step="' + i + '" data-kinds="' + kindsList[i] + '"' + (s.kindNa ? ' data-na="1"' : '') + attrs + '>' + chip(s) + '</td>';
     });
-    html += '<td class="row-actions"><a class="search-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">更新</a></td>';
+    html += '<td class="row-actions"><a class="nav-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">更新</a></td>';
     tr.innerHTML = html;
     tr.setAttribute('data-owners', owners.join('|'));
     body.appendChild(tr);
@@ -304,7 +304,7 @@
       '<div class="status-select status-combo ' + STATUS_COLOR_OF[sv.status || 'WAIT'] + ' js-select" id="sdStatus" data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\' data-value="' + esc(LABEL_OF_STATUS[sv.status || 'WAIT']) + '">' + esc(LABEL_OF_STATUS[sv.status || 'WAIT']) + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">備考</label>' +
       '<textarea class="form-control textarea" id="sdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
-      '<div class="input-dialog-actions"><div class="search-btn sd-cancel">キャンセル</div><div class="btn primary sd-ok">保存</div></div></div>';
+      '<div class="input-dialog-actions"><div class="nav-btn sd-cancel">キャンセル</div><div class="btn primary sd-ok">保存</div></div></div>';
     document.body.appendChild(overlay);
     if (lockOn) {
       Array.prototype.forEach.call(overlay.querySelectorAll('#sdTarget input[type="radio"]'), function (r) { r.disabled = true; });

@@ -38,7 +38,7 @@
         '<div class="input-dialog message-dialog-wide">' +
           '<div class="message-dialog-text">' + esc(message) + '</div>' +
           '<div class="input-dialog-actions">' +
-            '<div class="search-btn message-dialog-cancel">キャンセル</div>' +
+            '<div class="nav-btn message-dialog-cancel">キャンセル</div>' +
             '<div class="btn primary message-dialog-ok">OK</div>' +
           '</div>' +
         '</div>';

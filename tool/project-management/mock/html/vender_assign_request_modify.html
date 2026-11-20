@@ -41,11 +41,11 @@
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
           <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
           <div class="field"><label>終了日</label><div class="control js-date" id="dateTo"><span class="caret">▾</span></div></div>
-          <div class="search-btn">検索</div>
-          <div class="search-btn" id="resetFilter">リセット</div>
+          <div class="nav-btn">検索</div>
+          <div class="nav-btn" id="resetFilter">リセット</div>
         </div>
         <div class="table-card modal-fill-card">
-          <div class="table-meta"><div class="count"><b id="withdrawCount">0</b> 件</div></div>
+          <div class="table-meta"><div class="count"><b id="updateCount">0</b> 件</div></div>
           <div class="scroll-outer modal-scroll-area" id="scrollArea">
           <table>
                         <thead>
@@ -64,13 +64,13 @@
                 <th>講師<br>（特別）</th>
               </tr>
             </thead>
-            <tbody id="withdrawBody"></tbody>
+            <tbody id="updateBody"></tbody>
           </table>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <a class="search-btn" href="vender_assign_list.html">キャンセル</a>
+        <a class="nav-btn" href="vender_assign_list.html">キャンセル</a>
         <div class="btn primary" id="saveBtn">保存</div>
       </div>
     </div>

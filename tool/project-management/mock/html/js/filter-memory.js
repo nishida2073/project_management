@@ -56,7 +56,7 @@
     var initial = collect(p);
     var saved = null;
     try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { saved = null; }
-    var searchBtn = p.querySelector('.search-btn');
+    var searchBtn = p.querySelector('.nav-btn');
     if (saved) {
       applyState(p, saved);
       if (searchBtn) searchBtn.click();

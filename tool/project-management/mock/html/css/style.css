@@ -42,8 +42,8 @@ a.nav-item:hover { background: #203152; color: #ffffff; border-left: 3px solid #
 .toolbar { min-height: 34px; }
 .btn.primary { background: #1c2b45; border-color: #1c2b45; color: #ffffff; }
 a.btn { cursor: pointer; }
-.btn, .search-btn, .page-btn, .close-x, .add-row, .sidebar-toggle { cursor: pointer; }
-.search-btn, a.search-btn { text-decoration: none; }
+.btn, .nav-btn, .page-btn, .close-x, .add-row, .sidebar-toggle { cursor: pointer; }
+.nav-btn, a.nav-btn { text-decoration: none; }
 
 /* Filter panel */
 .filter-panel { background: #ffffff; border: 1px solid #e2e7ef; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
@@ -56,7 +56,7 @@ a.btn { cursor: pointer; }
 input.field-control-input { height: 34px; border: 1px solid #d3d9e3; border-radius: 6px; background: #fbfcfe; padding: 0 10px; font-size: 13px; color: #333c4d; min-width: 220px; outline: none; font-family: inherit; }
 input.field-control-input::placeholder { color: #9aa4b5; }
 input.field-control-input:focus { border-color: #2f6fed; }
-.search-btn { height: 34px; padding: 0 22px; background: #1c2b45; color: white; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
+.nav-btn { height: 34px; padding: 0 22px; background: #1c2b45; color: white; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; }
 .tilde { align-self: flex-end; height: 34px; display: flex; align-items: center; color: #9aa4b5; }
 
 /* 年度タブ */
@@ -100,8 +100,8 @@ span.work-type-tag, span.sales-type-tag, span.participation-type-tag, span.deliv
 
 /* 操作列のボタン */
 td.row-actions { white-space: nowrap; text-align: center; }
-td.row-actions > .search-btn { display: inline-flex; }
-td.row-actions > .search-btn { height: 22px; padding: 0 10px; font-size: 11px; }
+td.row-actions > .nav-btn { display: inline-flex; }
+td.row-actions > .nav-btn { height: 22px; padding: 0 10px; font-size: 11px; }
 .table-scroll thead th.col-actions, .scroll-outer thead th.col-actions { position: sticky; right: 0; top: 0; z-index: 4; box-shadow: -1px 0 0 #e6eaf1; }
 .table-scroll tbody td.row-actions, .scroll-outer tbody td.row-actions { position: sticky; right: 0; z-index: 1; background: #ffffff; box-shadow: -1px 0 0 #eef1f6; }
 
@@ -209,8 +209,8 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 a.close-x { cursor: pointer; }
 .modal-footer { padding: 16px 28px; border-top: 1px solid #eef1f6; display: flex; justify-content: flex-end; gap: 10px; background: #fafbfd; }
 .modal-footer > :first-child { margin-right: auto; }
-.modal-footer > .search-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
-.modal-footer > .search-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
+.modal-footer > .nav-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
+.modal-footer > .nav-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
 
 .modal:has(> .modal-resize) { position: relative; }
 .modal-resize { position: absolute; z-index: 5; }
@@ -412,22 +412,22 @@ span.link-state-tag { width: 80px; text-align: center; box-sizing: border-box; p
 .sel-toggle:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 2px; }
 .toggle-row span { font-size: 13px; color: #333c4d; font-weight: 700; }
 /* ボタンの共通の大きさ（確定系・導線系） */
-.btn, .search-btn { height: 34px; padding: 0 18px; border: 1px solid #d3d9e3; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; }
-.search-btn { background: #6b84ad; border-color: #6b84ad; color: #ffffff; }
+.btn, .nav-btn { height: 34px; padding: 0 18px; border: 1px solid #d3d9e3; border-radius: 6px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; }
+.nav-btn { background: #6b84ad; border-color: #6b84ad; color: #ffffff; }
 /* ボタンのマウスオーバー表示 */
 .btn.primary:hover { background: #2f4f80; border-color: #2f4f80; box-shadow: 0 0 0 3px rgba(28,43,69,0.3); }
 .btn.outline { background: #ffffff; border-color: #2f6fed; color: #2f6fed; cursor: pointer; user-select: none; transition: background .15s, box-shadow .15s; }
 .btn.outline:hover { background: #eef4ff; box-shadow: 0 0 0 3px rgba(47,111,237,0.18); }
 .btn.outline:active { background: #dfeaff; }
 .btn.outline:focus-visible { outline: 2px solid #9bb8f5; outline-offset: 2px; }
-.search-btn:hover { background: #7f97bb; border-color: #7f97bb; box-shadow: 0 0 0 3px rgba(107,132,173,0.3); }
+.nav-btn:hover { background: #7f97bb; border-color: #7f97bb; box-shadow: 0 0 0 3px rgba(107,132,173,0.3); }
 /* 導線系・ページ切り替えのマウスオーバー（大きさを変える） */
-.search-btn, .page-btn { transition: transform 0.15s ease; }
-.search-btn:hover, .page-btn:hover { transform: scale(1.06); }
-table .search-btn { height: 26px; padding: 0 12px; font-size: 12px; }
+.nav-btn, .page-btn { transition: transform 0.15s ease; }
+.nav-btn:hover, .page-btn:hover { transform: scale(1.06); }
+table .nav-btn { height: 26px; padding: 0 12px; font-size: 12px; }
 .page-btn:hover { border-color: #6b84ad; }
 /* 一覧の操作列の編集ボタン（幅を固定） */
-td .search-btn { width: 64px; justify-content: center; }
+td .nav-btn { width: 64px; justify-content: center; }
 /* 工程の状態チップ（一覧の工程セル） */
 .status-chip { white-space: normal; }
 .status-chip.status-chip-h { flex-direction: row; align-items: center; gap: 8px; }
@@ -484,8 +484,8 @@ td .search-btn { width: 64px; justify-content: center; }
 .replace-mark { display: inline-block; height: 16px; line-height: 16px; vertical-align: middle; margin-left: 6px; color: #2f6fed; font-size: 14px; font-weight: 700; cursor: pointer; }
 input.form-control.replace-mark { border-color: #d97c1e; background: #fff2e2; }
 /* ダイアログ下部のボタン（.input-dialog-actions） */
-.input-dialog-actions > .search-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
-.input-dialog-actions > .search-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
+.input-dialog-actions > .nav-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
+.input-dialog-actions > .nav-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
 .input-dialog-actions > :first-child:not(:last-child) { margin-right: auto; }
 /* メモの印・メモ欄（.memo-mark / .memo-cell） */
 .memo-mark { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #fbd29b; color: #9a4a00; font-weight: 700; font-size: 12px; }

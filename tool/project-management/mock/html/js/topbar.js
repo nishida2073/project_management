@@ -78,7 +78,7 @@
       '<label class="input-dialog-label">現在のパスワード</label><input type="password" class="form-control" id="pwCurrent">' +
       '<label class="input-dialog-label">新しいパスワード</label><input type="password" class="form-control" id="pwNew">' +
       '<label class="input-dialog-label">新しいパスワード（確認）</label><input type="password" class="form-control" id="pwConfirm">' +
-      '<div class="input-dialog-actions"><div class="search-btn" id="pwCancel">キャンセル</div><div class="btn primary" id="pwOk">保存</div></div>' +
+      '<div class="input-dialog-actions"><div class="nav-btn" id="pwCancel">キャンセル</div><div class="btn primary" id="pwOk">保存</div></div>' +
       '</div>';
     document.body.appendChild(overlay);
     function close() { overlay.remove(); }

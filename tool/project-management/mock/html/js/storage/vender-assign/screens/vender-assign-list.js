@@ -41,7 +41,7 @@
       '<td>' + (a.attendeeVendor || a.attendee ? '<div>' + dashOr(a.attendeeVendor) + '：' + dashOr(a.attendee) + '</div>' : '-') + '</td>' +
       '<td>' + (a.motivationVendor || a.motivationName ? '<div>' + esc(MotivationCompanyTypeStore.nameOf(a.motivationVendor) || '-') + '：' + dashOr(a.motivationName) + '</div>' : '-') + '</td>' +
       '<td class="memo-cell"' + (a.memo ? ' data-memo="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
-      '<td class="row-actions"><a class="search-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
+      '<td class="row-actions"><a class="nav-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     var names = a.mains.concat(a.subs, a.specials || [], reqs).map(function (x) { return TeacherVenderStore.nameOf(x.vendor) || ''; }).filter(function (n, k, arr) { return n && arr.indexOf(n) === k; });
     tr.setAttribute('data-vendors', names.join('|'));
     body.appendChild(tr);
@@ -53,10 +53,10 @@
   applyOptions();
   document.getElementById('venderCount').textContent = list.length;
   window.addEventListener('load', function () {
-    var btn = document.querySelector('.filter-panel .search-btn');
+    var btn = document.querySelector('.filter-panel .nav-btn');
     if (btn) btn.click();
   });
-  document.querySelector('.filter-panel .search-btn').addEventListener('click', function () { setTimeout(applyVendorLines, 0); });
+  document.querySelector('.filter-panel .nav-btn').addEventListener('click', function () { setTimeout(applyVendorLines, 0); });
   document.getElementById('importLink').addEventListener('click', function () { sessionStorage.removeItem('venderImportPlan'); });
   function applyVendorLines() {
     var name = ownText(document.getElementById('vendorFilter'));

@@ -17,7 +17,7 @@
         '<td>' + (t.days === '' || t.days === undefined ? '' : esc(t.days) + '日') + '</td>' +
         '<td><span class="status-label ' + (t.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (t.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (t.memo ? ' data-memo="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
-        '<td class="row-actions"><a class="search-btn" href="task_modify.html?id=' + encodeURIComponent(t.id) + '">更新</a></td>';
+        '<td class="row-actions"><a class="nav-btn" href="task_modify.html?id=' + encodeURIComponent(t.id) + '">更新</a></td>';
       body.appendChild(tr);
     });
     document.getElementById('taskCount').textContent = list.length;

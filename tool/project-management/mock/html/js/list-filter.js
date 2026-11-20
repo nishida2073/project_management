@@ -85,7 +85,7 @@
       if (window.listPaginate) window.listPaginate(true);
     }
 
-    var button = panel.querySelector('.search-btn');
+    var button = panel.querySelector('.nav-btn');
     if (button) button.addEventListener('click', apply);
     texts.forEach(function (input) {
       input.addEventListener('keydown', function (e) {

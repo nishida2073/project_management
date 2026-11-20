@@ -42,7 +42,7 @@
       }
     }
     if (!searchNeeded) return;
-    var search = document.querySelector('.filter-panel .search-btn');
+    var search = document.querySelector('.filter-panel .nav-btn');
     if (search) setTimeout(function () { search.click(); }, 0);
   }
   snapshot();

@@ -77,7 +77,7 @@
       var attrs = (classes.length ? ' class="' + classes.join(' ') + '"' : '') + (s.memo ? ' data-memo="' + esc(s.memo) + '"' : '');
       html += '<td data-step="' + si + '"' + attrs + '>' + chip(s) + '</td>';
     });
-    html += '<td class="row-actions"><a class="search-btn" href="project_progress_modify.html?id=' + encodeURIComponent(p.code) + '">更新</a></td>';
+    html += '<td class="row-actions"><a class="nav-btn" href="project_progress_modify.html?id=' + encodeURIComponent(p.code) + '">更新</a></td>';
     tr.innerHTML = html;
     body.appendChild(tr);
     rows.push({
@@ -184,7 +184,7 @@
       '<div class="status-select status-combo ' + P_STATUS_COLOR_OF[sv.status || 'WAIT'] + ' js-select" id="pdStatus" data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\' data-value="' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '">' + esc(P_LABEL_OF_STATUS[sv.status || 'WAIT']) + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">備考</label>' +
       '<textarea class="form-control textarea" id="pdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
-      '<div class="input-dialog-actions"><div class="search-btn pd-cancel">キャンセル</div><div class="btn primary pd-ok">保存</div></div></div>';
+      '<div class="input-dialog-actions"><div class="nav-btn pd-cancel">キャンセル</div><div class="btn primary pd-ok">保存</div></div></div>';
     document.body.appendChild(overlay);
     if (lockOn) overlay.querySelector('#pdPlan').classList.add('is-locked');
     function applyNa(off) {

@@ -11,7 +11,7 @@
           '<input type="text" class="form-control" placeholder="' + esc(opts.placeholder || '') + '">' +
           '<div class="input-dialog-error"></div>' +
           '<div class="input-dialog-actions">' +
-            '<div class="search-btn input-dialog-cancel">キャンセル</div>' +
+            '<div class="nav-btn input-dialog-cancel">キャンセル</div>' +
             '<div class="btn primary input-dialog-ok">' + esc(opts.okLabel || '追加') + '</div>' +
           '</div>' +
         '</div>';

@@ -26,7 +26,7 @@
       var y = month.getFullYear();
       var m = month.getMonth();
       var days = new Date(y, m + 1, 0).getDate();
-      var html = '<div class="cal-nav"><div class="search-btn" data-nav="prev">前月</div><b>' + y + '/' + pad2(m + 1) + '</b><div class="search-btn" data-nav="next">翌月</div></div>';
+      var html = '<div class="cal-nav"><div class="nav-btn" data-nav="prev">前月</div><b>' + y + '/' + pad2(m + 1) + '</b><div class="nav-btn" data-nav="next">翌月</div></div>';
       html += '<div class="cal-body">';
       if (!columns.length) {
         html += '<div>この月の予定はありません</div>';
