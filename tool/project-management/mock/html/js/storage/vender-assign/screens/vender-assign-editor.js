@@ -79,7 +79,7 @@
       overlay.className = 'overlay';
       overlay.innerHTML =
         '<div class="input-dialog">' +
-          '<div class="input-dialog-title">依頼枠変更</div>' +
+          '<div class="input-dialog-title">依頼枠更新</div>' +
           '<div class="input-dialog-error"></div>' +
           '<label class="input-dialog-label">講師ベンダー名</label>' +
           '<div class="form-control js-select" data-options="' + esc(vendorNames.join(',')) + '" data-value="' + esc(vendorNames.length === 1 ? vendorNames[0] : '') + '">' + esc(vendorNames.length === 1 ? vendorNames[0] : '選択してください') + '<span class="caret">▾</span></div>' +
@@ -144,10 +144,6 @@
     var planSpecial = parseInt(cls.specialTeachers, 10) || 0;
     var mainRows = a.mains.slice();
     var reqs = VenderAssignStore.requestsOf(a);
-    var reqNames = {};
-    reqs.forEach(function (rq) { reqNames[TeacherVenderStore.nameOf(rq.vendor) || rq.vendor] = rq.vendor; });
-    var requesting = a.mains.concat(a.subs, a.specials || []).filter(function (m) { return (m.state === 'requesting' || m.state === 'before') && m.vendor; });
-    requesting.forEach(function (m) { reqNames[TeacherVenderStore.nameOf(m.vendor) || m.vendor] = m.vendor; });
     function allRows() {
       return Array.prototype.slice.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row, #specialList .sub-row'));
     }
@@ -156,20 +152,6 @@
       if (ref) return ref.getAttribute('data-code') || '';
       var sel = row.querySelector('.js-select');
       return sel ? (TeacherVenderStore.codeOf(placeholderToEmpty(ownText(sel))) || '') : '';
-    }
-    function changeableRows(code) {
-      return allRows().filter(function (r) { return rowVendor(r) === code && r.getAttribute('data-state') !== 'done'; });
-    }
-    function emptyRows() {
-      return allRows().filter(function (r) { return rowVendor(r) === '' && r.getAttribute('data-state') !== 'done'; });
-    }
-    function replaceRow(row, data) {
-      var list = row.parentNode;
-      var next = row.nextElementSibling;
-      row.remove();
-      makeRow(list.id, data);
-      var fresh = list.lastElementChild;
-      if (next) list.insertBefore(fresh, next);
     }
     function nonDoneRows() {
       return allRows().filter(function (r) { return r.getAttribute('data-state') !== 'done'; });

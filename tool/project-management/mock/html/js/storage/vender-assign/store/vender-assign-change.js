@@ -19,21 +19,6 @@
     return Math.max(0, plan - listOf(a, role).length - reqOnly);
   }
 
-  function hasTarget(a, code, to, cls) {
-    if (to === 'open') {
-      var rows = 0;
-      Object.keys(LISTS).forEach(function (role) {
-        listOf(a, role).forEach(function (p) {
-          if (p.vendor === code && p.state !== 'done') rows++;
-        });
-      });
-      return rows + VenderAssignStore.requestsOf(a).filter(function (q) { return q.vendor === code; }).length > 0;
-    }
-    return Object.keys(LISTS).some(function (role) {
-      return requestsFor(a, code, role) > 0 || (cls && freeOf(a, cls, role) > 0);
-    });
-  }
-
   function apply(a, code, to, cls) {
     var counts = {};
     var free = {};
@@ -64,5 +49,5 @@
     return a;
   }
 
-  window.VenderAssignChange = { requestsFor: requestsFor, freeOf: freeOf, hasTarget: hasTarget, apply: apply };
+  window.VenderAssignChange = { requestsFor: requestsFor, freeOf: freeOf, apply: apply };
 })();
