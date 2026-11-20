@@ -190,7 +190,7 @@
       maxOf[role] = 0;
       items.forEach(function (it) { maxOf[role] = Math.max(maxOf[role], it.counts[role]); });
     });
-    if (items.some(function (it) { return it.assign.specialMemo; })) maxOf.special = Math.max(maxOf.special, 1);
+    if (items.some(function (it) { return it.cls.specialMemo; })) maxOf.special = Math.max(maxOf.special, 1);
     var header = ['年度', 'コース名', 'コースコード', 'レッスンNo', '開始日', '終了日'];
     var i;
     function zen(n) { return String.fromCharCode(0xFF10 + n); }
@@ -234,10 +234,10 @@
     });
     var specialStart = 6 + maxOf.main + maxOf.sub;
     items.forEach(function (it, ri) {
-      if (!it.assign.specialMemo || !maxOf.special) return;
+      if (!it.cls.specialMemo || !maxOf.special) return;
       var addr = XLSX.utils.encode_cell({ r: ri + 3, c: specialStart });
       if (!ws[addr]) ws[addr] = { t: 's', v: '' };
-      ws[addr].c = [{ a: '備考', t: it.assign.specialMemo }];
+      ws[addr].c = [{ a: '備考', t: it.cls.specialMemo }];
     });
     var HEAD = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { patternType: 'solid', fgColor: { rgb: '1C2B45' } }, alignment: { horizontal: 'center', vertical: 'center', wrapText: true }, border: { top: { style: 'thin', color: { rgb: '8A94A6' } }, bottom: { style: 'thin', color: { rgb: '8A94A6' } }, left: { style: 'thin', color: { rgb: '8A94A6' } }, right: { style: 'thin', color: { rgb: '8A94A6' } } } };
     header.forEach(function (_, ci) {

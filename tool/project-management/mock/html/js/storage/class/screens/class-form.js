@@ -104,6 +104,7 @@
     $('mainTeachers').querySelector('input').value = r.registMainTeachers !== undefined ? r.registMainTeachers : (r.mainTeachers || '');
     $('subTeachers').querySelector('input').value = r.registSubTeachers !== undefined ? r.registSubTeachers : (r.subTeachers || '');
     $('specialTeachers').querySelector('input').value = r.registSpecialTeachers !== undefined ? r.registSpecialTeachers : (r.specialTeachers || '');
+    $('specialMemo').value = r.specialMemo || '';
     if ($('mainAdjusted')) $('mainAdjusted').textContent = SlotStatusStore.nameOf('REQUESTED') + '：' + (r.mainTeachers || '-') + '人';
     if ($('subAdjusted')) $('subAdjusted').textContent = SlotStatusStore.nameOf('REQUESTED') + '：' + (r.subTeachers || '-') + '人';
     lastCourse = getSelect($('courseCode'));
@@ -136,6 +137,7 @@
       registSubTeachers: $('subTeachers').querySelector('input').value.trim(),
       specialTeachers: $('specialTeachers').querySelector('input').value.trim() || '0',
       registSpecialTeachers: $('specialTeachers').querySelector('input').value.trim() || '0',
+      specialMemo: $('specialMemo').value,
       managers: Array.prototype.map.call($('manager').querySelectorAll('.chip'), function (c) { return StaffStore.codeOf((c.childNodes[0].textContent || '').trim()); }).filter(Boolean),
       locationType: getRadio('locationType'),
       locationName: LocationStore.codeOf(getSelect($('locationName'))),

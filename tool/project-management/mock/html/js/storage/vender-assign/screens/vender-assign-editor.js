@@ -162,7 +162,6 @@
     Array.prototype.forEach.call(document.querySelectorAll('input[name="motivationVendor"]'), function (r) { r.checked = r.value === (a.motivationVendor || ''); });
     $('motivationName').value = a.motivationName || '';
     $('memo').value = a.memo || '';
-    $('specialMemo').value = a.specialMemo || '';
 
     function addRow(listId) {
       makeRow(listId, { vendor: '', teacherName: '' });
@@ -201,8 +200,7 @@
         attendee: $('attendee').value.trim(),
         motivationVendor: (document.querySelector('input[name="motivationVendor"]:checked') || { value: '' }).value,
         motivationName: $('motivationName').value.trim(),
-        memo: $('memo').value,
-        specialMemo: $('specialMemo').value
+        memo: $('memo').value
       };
       var countPresent = function (listId) {
         var m = {};
