@@ -29,6 +29,7 @@
     tr.setAttribute('data-fit', fits ? 'in' : 'over');
     tr.setAttribute('data-remain-main', remainMain);
     tr.setAttribute('data-remain-sub', remainSub);
+    var teacherLines = VenderLines.build(r);
     tr.innerHTML =
       '<td class="sticky vender-assign-center"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
@@ -37,12 +38,10 @@
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
-      '<td>' + namedMain + '人</td>' +
-      '<td><div class="vender-assign-count-cell"><span class="cnt-bef-main vender-assign-count-before">' + befMain + '人</span><span class="cnt-pend-main vender-assign-count-requesting">' + pendMain + '人</span><span class="cnt-done-main vender-assign-count-done">' + namedMain + '人</span></div></td>' +
+      '<td>' + teacherLines.main + '</td>' +
       '<td><input type="number" class="form-control main-count vender-assign-count-input" min="0" max="' + reqMain + '" value="' + reqMain + '"></td>' +
       '<td>' + dashOr(r.subTeachers, '人') + '</td>' +
-      '<td>' + namedSub + '人</td>' +
-      '<td><div class="vender-assign-count-cell"><span class="cnt-bef-sub vender-assign-count-before">' + befSub + '人</span><span class="cnt-pend-sub vender-assign-count-requesting">' + pendSub + '人</span><span class="cnt-done-sub vender-assign-count-done">' + namedSub + '人</span></div></td>' +
+      '<td>' + teacherLines.sub + '</td>' +
       '<td><input type="number" class="form-control sub-count vender-assign-count-input" min="0" max="' + reqSub + '" value="' + reqSub + '"></td>';
     body.appendChild(tr);
   });
@@ -87,6 +86,9 @@
       var id = tr.getAttribute('data-id');
       var row = rows.filter(function (x) { return x.cls.id === id; })[0];
       if (!row) return;
+      var teacherCells = VenderLines.build(row.cls, code);
+      tr.children[7].innerHTML = teacherCells.main;
+      tr.children[10].innerHTML = teacherCells.sub;
       var reqs = VenderAssignStore.requestsOf(row.assign);
       ['main', 'sub'].forEach(function (role) {
         var list = role === 'main' ? row.assign.mains : row.assign.subs;
@@ -107,10 +109,6 @@
         var willReplace = !!code && befSel > 0 && overPlan;
         input.classList.toggle('replace-mark', willReplace);
         input.title = willReplace ? '予定講師数を超過しているため' + val + '人に変更しています。' : '';
-        var doneVal = list.filter(function (p) { return p.state === 'done' && (!code || p.vendor === code); }).length;
-        tr.querySelector('.cnt-bef-' + role).textContent = code ? befSel + '人' : '-';
-        tr.querySelector('.cnt-pend-' + role).textContent = code ? pendSelAll + '人' : '-';
-        tr.querySelector('.cnt-done-' + role).textContent = code ? doneVal + '人' : '-';
       });
     });
   }

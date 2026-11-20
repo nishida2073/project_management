@@ -1,10 +1,6 @@
 /* 登壇依頼の共通（複数の画面で使う） */
 .vender-assign-center { text-align: center; }
-.vender-assign-count-before { color: #d97c1e; font-size: 12.5px; }
-.vender-assign-count-cell { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.vender-assign-count-done { color: #2f8a5b; font-size: 12.5px; }
 .vender-assign-count-input { width: 72px; height: 28px; }
-.vender-assign-count-requesting { color: #2f6fed; font-size: 12.5px; }
 .vender-assign-filter { margin-bottom: 16px; }
 .vender-assign-sub { font-size: 11px; color: #9aa4b5; }
 

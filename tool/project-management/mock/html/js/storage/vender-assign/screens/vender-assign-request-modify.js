@@ -60,18 +60,11 @@
       return (String(x.cls.courseCode) + ' ' + String(c.name || '')).toLowerCase().indexOf(kw) >= 0;
     }).forEach(function (x) {
       var cur = stateOf(x.assign, code);
+      var teacherLines = VenderLines.build(x.cls, code);
       var c = C[x.cls.courseCode] || { name: x.cls.courseCode };
       var tr = document.createElement('tr');
       tr.setAttribute('data-id', x.cls.id);
       tr.setAttribute('data-state', cur);
-      var namedMain = x.assign.mains.filter(function (p) { return p.state === 'done'; }).length;
-      var befSel = code ? x.assign.mains.filter(function (p) { return p.state === 'before' && p.vendor === code; }).length : 0;
-      var midN = code ? requestsFor(x.assign, code, 'main') : 0;
-      var doneSel = code ? x.assign.mains.filter(function (p) { return p.state === 'done' && p.vendor === code; }).length : 0;
-      var namedSub = x.assign.subs.filter(function (p) { return p.state === 'done'; }).length;
-      var befSubSel = code ? x.assign.subs.filter(function (p) { return p.state === 'before' && p.vendor === code; }).length : 0;
-      var midSubN = code ? requestsFor(x.assign, code, 'sub') : 0;
-      var doneSubSel = code ? x.assign.subs.filter(function (p) { return p.state === 'done' && p.vendor === code; }).length : 0;
       tr.innerHTML =
         '<td class="vender-assign-center"><label class="check-box check-sm"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
         '<td>' + esc(yearLabel(x.cls.year)) + '</td>' +
@@ -80,19 +73,9 @@
         '<td>' + esc(x.cls.start) + '</td>' +
         '<td>' + esc(x.cls.end) + '</td>' +
         '<td>' + dashOr(x.cls.mainTeachers, '人') + '</td>' +
-        '<td>' + namedMain + '人</td>' +
-        '<td><div class="vender-assign-count-cell">' +
-          '<span class="vender-assign-count-before">' + (code ? befSel + '人' : '-') + '</span>' +
-          '<span class="vender-assign-count-requesting">' + (code ? midN + '人' : '-') + '</span>' +
-          '<span class="vender-assign-count-done">' + (code ? doneSel + '人' : '-') + '</span>' +
-        '</div></td>' +
+        '<td>' + teacherLines.main + '</td>' +
         '<td>' + dashOr(x.cls.subTeachers, '人') + '</td>' +
-        '<td>' + namedSub + '人</td>' +
-        '<td><div class="vender-assign-count-cell">' +
-          '<span class="vender-assign-count-before">' + (code ? befSubSel + '人' : '-') + '</span>' +
-          '<span class="vender-assign-count-requesting">' + (code ? midSubN + '人' : '-') + '</span>' +
-          '<span class="vender-assign-count-done">' + (code ? doneSubSel + '人' : '-') + '</span>' +
-        '</div></td>';
+        '<td>' + teacherLines.sub + '</td>';
       body.appendChild(tr);
     });
     $('withdrawCount').textContent = body.querySelectorAll('tr').length;

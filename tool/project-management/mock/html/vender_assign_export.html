@@ -30,7 +30,7 @@
           <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
           <div class="field"><label>終了日</label><div class="control js-date" id="dateTo"><span class="caret">▾</span></div></div>
           <div class="field"><label>依頼残</label><div class="control js-select" id="fitFilter" data-options="すべて,なし,あり" data-value="あり">あり<span class="caret">▾</span></div></div>
-          <div class="field"><label>今回依頼数に再依頼を含む</label><div class="seg" id="pendSelSeg"><button type="button" class="seg-opt is-active" data-v="in">含める</button><button type="button" class="seg-opt" data-v="out">含めない</button></div></div>
+          <div class="field"><label>今回依頼数に依頼中を含む</label><div class="seg" id="pendSelSeg"><button type="button" class="seg-opt is-active" data-v="in">含める</button><button type="button" class="seg-opt" data-v="out">含めない</button></div></div>
           <div class="search-btn">検索</div>
           <div class="search-btn" id="resetFilter">リセット</div>
         </div>
@@ -47,12 +47,10 @@
                 <th class="sticky">開始日</th>
                 <th class="sticky">終了日</th>
                 <th>予定講師数<br>（メイン）</th>
-                <th>依頼済講師数<br>（メイン）</th>
-                <th>現依頼数：前・中・済<br>（メイン）</th>
+                                <th>講師<br>（メイン）</th>
                 <th>今回依頼数<br>（メイン）</th>
                 <th>予定講師数<br>（サブ）</th>
-                <th>依頼済講師数<br>（サブ）</th>
-                <th>現依頼数：前・中・済<br>（サブ）</th>
+                                <th>講師<br>（サブ）</th>
                 <th>今回依頼数<br>（サブ）</th>
               </tr>
             </thead>
@@ -80,6 +78,7 @@
 <script src="js/storage/vender-assign/store/vender-assign-store.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="js/list-filter-auto.js"></script>
+<script src="js/storage/vender-assign/screens/vender-assign-lines.js"></script>
 <script src="js/storage/vender-assign/screens/vender-assign-export.js"></script>
 <script src="js/filter-collapse.js"></script>
 <script src="js/select.js" defer></script>
