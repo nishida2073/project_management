@@ -73,7 +73,7 @@
       var midSubN = code ? requestsFor(x.assign, code, 'sub') : 0;
       var doneSubSel = code ? x.assign.subs.filter(function (p) { return p.state === 'done' && p.vendor === code; }).length : 0;
       tr.innerHTML =
-        '<td class="vender-assign-center"><label class="check-box"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
+        '<td class="vender-assign-center"><label class="check-box check-sm"><input type="checkbox" class="row-check" checked><span class="check-mark"></span></label></td>' +
         '<td>' + esc(yearLabel(x.cls.year)) + '</td>' +
         '<td><div>' + esc(c.name) + '</div><div class="vender-assign-sub">' + esc(x.cls.courseCode) + '</div></td>' +
         '<td><div>' + esc(x.cls.lessonNo) + '</div></td>' +

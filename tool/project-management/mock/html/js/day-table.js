@@ -20,6 +20,7 @@
     var columns = [];
     var events = {};
     var lastSig = null;
+    var resetScroll = false;
 
     function render() {
       var y = month.getFullYear();
@@ -36,13 +37,13 @@
           var key = dateKey(date);
           var dayEvents = events[key] || [];
           var cls = isHoliday(key) ? 'holiday' : (date.getDay() === 0 ? 'sun' : (date.getDay() === 6 ? 'sat' : ''));
-          rows += '<tr><td class="sticky day-date ' + cls + '">' + key + '（' + WEEK[date.getDay()] + '）</td>';
+          rows += '<tr><td class="sticky day-date ' + cls + '">' + date.getDate() + '（' + WEEK[date.getDay()] + '）</td>';
           columns.forEach(function (c) {
             rows += '<td>';
             dayEvents.forEach(function (ev) {
               if (ev.colId === c.id) {
                 var body = ev.lineHtml ? ev.lineHtml.map(function (l) { return '<div class="cal-line">' + l + '</div>'; }).join('') : esc(ev.label);
-                rows += '<div class="cal-event ' + (ev.lineHtml ? 'cal-plain' : esc(ev.color || '')) + '" data-row="' + esc(ev.rowId) + '" data-step="' + esc(ev.stepId) + '">' + body + '</div>';
+                rows += '<div class="cal-event ' + (ev.lineHtml ? 'cal-plain' : esc(ev.color || '')) + '" data-row="' + esc(ev.rowId) + '" data-step="' + esc(ev.stepId) + '"' + (ev.tip ? ' data-tip="' + esc(ev.tip) + '"' : '') + '>' + body + (ev.memo ? '<span class="memo-mark">!</span>' : '') + '</div>';
               }
             });
             rows += '</td>';
@@ -59,12 +60,15 @@
       var old = root.querySelector('.cal-body');
       var top = old ? old.scrollTop : 0;
       var left = old ? old.scrollLeft : 0;
-      var pending = null;
-      try { pending = JSON.parse(sessionStorage.getItem('dayTableScroll') || 'null'); } catch (e) {}
+      var pending = window.ScrollKeep ? ScrollKeep.take('.cal-body#0') : null;
       if (pending) {
         top = pending.top;
         left = pending.left;
-        sessionStorage.removeItem('dayTableScroll');
+      }
+      if (resetScroll) {
+        top = 0;
+        left = 0;
+        resetScroll = false;
       }
       root.innerHTML = html;
       var fresh = root.querySelector('.cal-body');
@@ -78,6 +82,7 @@
       var nav = e.target.closest('[data-nav]');
       if (nav) {
         month = new Date(month.getFullYear(), month.getMonth() + (nav.getAttribute('data-nav') === 'next' ? 1 : -1), 1);
+        resetScroll = true;
         render();
         return;
       }
@@ -86,11 +91,6 @@
     });
 
     return {
-      saveScroll: function () {
-        var b = root.querySelector('.cal-body');
-        if (!b || root.style.display === 'none') return;
-        try { sessionStorage.setItem('dayTableScroll', JSON.stringify({ top: b.scrollTop, left: b.scrollLeft })); } catch (e) {}
-      },
       update: function (data) {
         columns = data.columns || [];
         events = data.events || {};
@@ -112,5 +112,34 @@
     };
   }
 
-  window.DayTable = { create: create };
+  function bindView(o) {
+    var tabs = Array.prototype.slice.call(o.tabs.querySelectorAll('.seg-opt'));
+    var active = false;
+    function show(cal) {
+      active = cal;
+      o.table.style.display = cal ? 'none' : '';
+      o.calendar.style.display = cal ? '' : 'none';
+      if (cal) o.render();
+    }
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.classList.remove('is-active'); });
+        tab.classList.add('is-active');
+        var cal = tab.getAttribute('data-view') === 'calendar';
+        try { localStorage.setItem(o.storageKey, cal ? 'calendar' : 'table'); } catch (e) {}
+        show(cal);
+      });
+    });
+    document.addEventListener('click', function () { if (active) setTimeout(o.render, 0); }, true);
+    document.addEventListener('input', function () { if (active) o.render(); });
+    var saved = null;
+    try { saved = localStorage.getItem(o.storageKey); } catch (e) {}
+    if (saved === 'calendar') {
+      tabs.forEach(function (x) { x.classList.toggle('is-active', x.getAttribute('data-view') === 'calendar'); });
+      show(true);
+    }
+    return { isActive: function () { return active; } };
+  }
+
+  window.DayTable = { create: create, bindView: bindView };
 })();

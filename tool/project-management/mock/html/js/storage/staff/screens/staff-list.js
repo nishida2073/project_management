@@ -18,8 +18,8 @@
       '<td>' + (t.company ? esc(StaffVenderStore.nameOf(t.company)) : '-') + '</td>' +
       '<td>' + esc(t.name) + '</td>' +
       '<td>' + esc(t.email) + '</td>' +
-      '<td><div class="tag-stack">' + (t.roles || []).map(function (r) { return '<span class="tag role-tag ' + (ROLE_CLASS[r] || '') + '">' + esc(StaffRoleStore.nameOf(r)) + '</span>'; }).join('') + '</div></td>' +
-      '<td><div class="tag-stack">' + (t.jobTypes || []).map(function (j) { return '<span class="tag job-type-tag ' + (JOB_CLASS[j] || '') + '">' + esc(JobTypeStore.nameOf(j)) + '</span>'; }).join('') + '</div></td>' +
+      '<td><div class="tag-stack-col">' + (t.roles || []).map(function (r) { return '<span class="tag role-tag ' + (ROLE_CLASS[r] || '') + '">' + esc(StaffRoleStore.nameOf(r)) + '</span>'; }).join('') + '</div></td>' +
+      '<td><div class="tag-stack-col">' + (t.jobTypes || []).map(function (j) { return '<span class="tag job-type-tag ' + (JOB_CLASS[j] || '') + '">' + esc(JobTypeStore.nameOf(j)) + '</span>'; }).join('') + '</div></td>' +
       '<td><div class="tag-stack">' + ((t.positions || []).length ? (t.positions || []).map(function (p) { return '<span class="tag position-tag ' + (POS_CLASS[p] || '') + '">' + esc(PositionStore.nameOf(p)) + '</span>'; }).join('') : '-') + '</div></td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (t.memo ? ' data-memo="' + esc(t.memo) + '"' : '') + '>' + (t.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +

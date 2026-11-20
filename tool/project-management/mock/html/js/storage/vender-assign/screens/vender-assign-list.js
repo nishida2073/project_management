@@ -137,27 +137,11 @@
     calView.update(calData());
   }
 
-  var calActive = false;
-  function refreshCalendarIfActive() {
-    if (calActive) renderCalendar();
-  }
-  document.addEventListener('click', function () { setTimeout(refreshCalendarIfActive, 0); }, true);
-  document.addEventListener('input', refreshCalendarIfActive);
-
-  document.querySelectorAll('#viewTabs .seg-opt').forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      document.querySelectorAll('#viewTabs .seg-opt').forEach(function (x) { x.classList.remove('is-active'); });
-      tab.classList.add('is-active');
-      var cal = tab.getAttribute('data-view') === 'calendar';
-      calActive = cal;
-      try { localStorage.setItem('viewMode:' + location.pathname, cal ? 'calendar' : 'table'); } catch (e) {}
-      document.querySelector('.table-scroll').style.display = cal ? 'none' : '';
-      document.getElementById('calendarView').style.display = cal ? '' : 'none';
-      if (cal) renderCalendar();
-    });
+  DayTable.bindView({
+    tabs: document.getElementById('viewTabs'),
+    table: document.querySelector('.table-scroll'),
+    calendar: document.getElementById('calendarView'),
+    render: renderCalendar,
+    storageKey: 'viewMode:' + location.pathname
   });
-  window.addEventListener('pagehide', function () { calView.saveScroll(); });
-  var savedView = null;
-  try { savedView = localStorage.getItem('viewMode:' + location.pathname); } catch (e) {}
-  if (savedView === 'calendar') document.querySelector('#viewTabs .seg-opt[data-view="calendar"]').click();
 })();

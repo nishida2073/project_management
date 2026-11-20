@@ -133,6 +133,12 @@
     }).observe(tbody, { attributes: true, attributeFilter: ['style'], subtree: true });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
     table.__relayout = function () { touched = false; refit(); };
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(refit);
+      ro.observe(table.parentNode);
+      var card = table.closest('.table-card');
+      if (card) ro.observe(card);
+    }
     layout();
   }
 

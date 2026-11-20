@@ -186,9 +186,9 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .form-divider { grid-column: 1 / -1; border-top: 1px solid #e6eaf1; }
 .is-locked { pointer-events: none; opacity: 0.4; }
 .cal-view { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-.cal-nav { display: flex; align-items: center; gap: 12px; padding: 12px 20px; }
+.cal-nav { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 12px 20px; }
 .cal-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
-.cal-event { font-size: 11px; padding: 2px 4px; margin-bottom: 2px; border-radius: 4px; background: #eef4ff; color: #2f6fed; cursor: pointer; white-space: pre-line; }
+.cal-event { font-size: inherit; padding: 2px 4px; margin-bottom: 2px; border-radius: 4px; background: #eef4ff; color: #2f6fed; cursor: pointer; white-space: pre-line; }
 .cal-event.green { background: #e5f6ec; color: #279158; }
 .cal-event.blue { background: #e7f0ff; color: #2f6fed; }
 .cal-event.gray { background: #eef0f4; color: #7c8598; }
@@ -198,8 +198,10 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .day-table td.day-date.sat { color: #2f6fed; }
 .day-table td.day-date.sun, .day-table td.day-date.holiday { color: #d43c40; }
 .day-table th, .day-table td { border: 1px solid #e6eaf1; }
+.day-table td.day-date.sticky, .day-table th.sticky { left: 0; }
 .day-table .cal-event { margin-bottom: 2px; min-width: 120px; }
 .cal-event.cal-plain { background: none; color: inherit; padding: 0; margin-bottom: 0; min-width: 0; font-size: inherit; line-height: inherit; }
+.cal-event:not(.cal-plain) { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .form-control.readonly.staff-view { border: none; background: none; padding: 0; height: auto; min-height: 36px; flex-wrap: wrap; gap: 4px; cursor: default; }
 .modal-header { padding: 20px 28px; border-bottom: 1px solid #eef1f6; display: flex; justify-content: space-between; align-items: flex-start; }
 .modal-header .sub { font-size: 12.5px; color: #7c8598; margin-top: 6px; }
@@ -403,6 +405,7 @@ span.link-state-tag { width: 80px; text-align: center; box-sizing: border-box; p
 .toggle.off .knob { left: 2px; }
 /* 表示切り替えスイッチ（.sel-toggle） */
 .sel-toggle { width: 40px; height: 22px; border-radius: 12px; background: #2f6fed; border: 1px solid #2f6fed; box-sizing: border-box; cursor: pointer; user-select: none; transition: background .15s, border-color .15s; }
+.sel-toggle { transform: scale(0.8); }
 .sel-toggle.off { background: #fbfcfe; border-color: #d3d9e3; }
 .sel-toggle.off:hover { border-color: #2f6fed; }
 .sel-toggle.off .knob { background: #9aa4b5; }
@@ -509,7 +512,7 @@ td div[data-vendor] { margin: 3px 0; }
 .is-hidden { display: none; }
 
 /* ツールチップ（マウスを重ねると内容を表示。data-memo は備考、data-tip はその他の説明） */
-.tooltip-bubble { position: fixed; display: none; z-index: 1000; max-width: 320px; padding: 8px 10px; background: #3d4d6b; color: #ffffff; font-size: 12px; font-weight: 400; line-height: 1.6; text-align: left; white-space: pre-line; border-radius: 6px; box-shadow: 0 6px 18px rgba(10,16,30,0.25); pointer-events: none; }
+.tooltip-bubble { position: fixed; width: max-content; display: none; z-index: 1000; max-width: 320px; padding: 8px 10px; background: #3d4d6b; color: #ffffff; font-size: 12px; font-weight: 400; line-height: 1.6; text-align: left; white-space: pre-line; border-radius: 6px; box-shadow: 0 6px 18px rgba(10,16,30,0.25); pointer-events: none; }
 .tooltip-bubble::after { content: ""; position: absolute; left: var(--arrow-x, 50%); transform: translateX(-50%); border: 6px solid transparent; border-top-color: #3d4d6b; top: 100%; }
 .tooltip-bubble.right::after { left: -5px; top: var(--arrow-y, 50%); bottom: auto; transform: translateY(-50%); border-width: 6px 6px 6px 0; border-style: solid; border-color: transparent #3d4d6b transparent transparent; }
 .tooltip-bubble.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: #3d4d6b; }

@@ -342,7 +342,6 @@
       });
       s[classId] = cur;
       ProgressStore.save(s);
-      calView.saveScroll();
       location.reload();
     });
   }
@@ -381,7 +380,10 @@
           var tip = ['顧客：' + (pjInfo.customer ? CustomerStore.nameOf(pjInfo.customer) : '-'), 'コース：' + course, 'レッスンNo：' + (rec.lessonNo || ''), '開始日：' + (rec.start || ''), '終了日：' + (rec.end || ''), '管理担当者：' + ((rec.managers || []).map(function (x) { return StaffStore.nameOf(x); }).join('、') || '-')].join('\n');
           classes.push({ id: tr.getAttribute('data-id'), label: [course, lesson], tip: tip });
         }
-        (events[m[1]] = events[m[1]] || []).push({ id: tr.getAttribute('data-id'), step: Number(td.getAttribute('data-step')), text: course + ' ' + lesson, stepName: stepName, color: stateColor });
+        var savedStep = (ProgressStore.load()[tr.getAttribute('data-id')] || {})[Number(td.getAttribute('data-step')) + 1] || {};
+        var tipText = ['予定日：' + (savedStep.plan || m[1]), '実施日：' + (savedStep.actual || '-'), '実施担当者：' + (StaffStore.nameOf(savedStep.owner || '') || '-'), '進捗：' + (stateTag ? stateTag.textContent.trim() : '')].join(String.fromCharCode(10));
+        if (savedStep.memo) tipText += String.fromCharCode(10) + '備考：' + String.fromCharCode(10) + savedStep.memo;
+        (events[m[1]] = events[m[1]] || []).push({ id: tr.getAttribute('data-id'), step: Number(td.getAttribute('data-step')), text: course + ' ' + lesson, stepName: stepName, tip: tipText, memo: !!savedStep.memo, color: stateColor });
       });
     });
     return { events: events, classes: classes };
@@ -397,31 +399,16 @@
     var data = calEvents();
     var events = {};
     Object.keys(data.events).forEach(function (k) {
-      events[k] = data.events[k].map(function (ev) { return { colId: ev.id, rowId: ev.id, stepId: ev.step, label: ev.stepName, color: ev.color }; });
+      events[k] = data.events[k].map(function (ev) { return { colId: ev.id, rowId: ev.id, stepId: ev.step, label: ev.stepName, tip: ev.tip, memo: ev.memo, color: ev.color }; });
     });
     calView.update({ columns: data.classes, events: events });
   }
 
-  var calActive = false;
-  function refreshCalendarIfActive() {
-    if (calActive) renderCalendar();
-  }
-  document.addEventListener('click', function () { setTimeout(refreshCalendarIfActive, 0); }, true);
-  document.addEventListener('input', refreshCalendarIfActive);
-
-  document.querySelectorAll('#viewTabs .seg-opt').forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      document.querySelectorAll('#viewTabs .seg-opt').forEach(function (x) { x.classList.remove('is-active'); });
-      tab.classList.add('is-active');
-      var cal = tab.getAttribute('data-view') === 'calendar';
-      document.querySelector('.progress-scroll').style.display = cal ? 'none' : '';
-      document.getElementById('calendarView').style.display = cal ? '' : 'none';
-      calActive = cal;
-      try { localStorage.setItem('viewMode:' + location.pathname, cal ? 'calendar' : 'table'); } catch (e) {}
-      if (cal) renderCalendar();
-    });
+  DayTable.bindView({
+    tabs: document.getElementById('viewTabs'),
+    table: document.querySelector('.progress-scroll'),
+    calendar: document.getElementById('calendarView'),
+    render: renderCalendar,
+    storageKey: 'viewMode:' + location.pathname
   });
-  var savedView = null;
-  try { savedView = localStorage.getItem('viewMode:' + location.pathname); } catch (e) {}
-  if (savedView === 'calendar') document.querySelector('#viewTabs .seg-opt[data-view="calendar"]').click();
 })();
