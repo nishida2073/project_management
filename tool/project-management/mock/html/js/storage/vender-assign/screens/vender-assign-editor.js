@@ -57,7 +57,7 @@
     return row.getAttribute('data-state') === 'done';
   }
   function refreshStatuses() {
-    Array.prototype.forEach.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row'), function (row) {
+    Array.prototype.forEach.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row, #specialList .sub-row'), function (row) {
       var st = statusOfRow(row);
       var tag = row.querySelector('.sub-status');
       tag.className = 'status-label state-tag sub-status' + (st ? ' ' + st.color : '');
@@ -93,7 +93,7 @@
     $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + '　予定講師数：メイン' + (cls.mainTeachers || '-') + '人・サブ' + (cls.subTeachers || '-') + '人';
 
     var a = VenderAssignStore.find(classId);
-    var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0);
+    var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0) || (a.specials || []).length < (parseInt(cls.specialTeachers, 10) || 0);
     var zanTag = document.createElement('span');
     zanTag.className = 'status-label state-tag ' + (zanNow ? 'orange' : 'green');
     zanTag.textContent = zanNow ? 'あり' : 'なし';
@@ -101,11 +101,12 @@
     $('subLine').appendChild(zanTag);
     var planMain = parseInt(cls.mainTeachers, 10) || 0;
     var planSub = parseInt(cls.subTeachers, 10) || 0;
+    var planSpecial = parseInt(cls.specialTeachers, 10) || 0;
     var mainRows = a.mains.slice();
     var reqs = VenderAssignStore.requestsOf(a);
     var reqNames = {};
     reqs.forEach(function (rq) { reqNames[TeacherVenderStore.nameOf(rq.vendor) || rq.vendor] = rq.vendor; });
-    var requesting = a.mains.concat(a.subs).filter(function (m) { return m.state === 'requesting' && m.vendor; });
+    var requesting = a.mains.concat(a.subs, a.specials || []).filter(function (m) { return m.state === 'requesting' && m.vendor; });
     requesting.forEach(function (m) { reqNames[TeacherVenderStore.nameOf(m.vendor) || m.vendor] = m.vendor; });
     if (reqs.length || requesting.length) $('withdrawBtn').classList.remove('is-hidden');
     $('withdrawBtn').addEventListener('click', function () {
@@ -116,6 +117,7 @@
         rec.requests = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== code; });
         rec.mains = (rec.mains || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
         rec.subs = (rec.subs || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
+        rec.specials = (rec.specials || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
         delete rec.requested;
         delete rec.requestMain;
         delete rec.requestSub;
@@ -146,6 +148,12 @@
     }
     sortRows(mainRows).forEach(function (m) { makeRow('mainList', m); });
     sortRows(subRows).forEach(function (s) { makeRow('subList', s); });
+    var specialRows = (a.specials || []).slice();
+    reqs.forEach(function (rq) {
+      for (var spq = 0; spq < (rq.special || 0); spq++) specialRows.push({ vendor: rq.vendor, teacherName: '', locked: !!rq.vendor });
+    });
+    while (specialRows.length < planSpecial) specialRows.push({ vendor: '', teacherName: '' });
+    sortRows(specialRows).forEach(function (s) { makeRow('specialList', s); });
     $('attendeeVendor').value = a.attendeeVendor || '';
     $('attendee').value = a.attendee || '';
     $('motivationVendor').innerHTML = MotivationCompanyTypeStore.load().map(function (t) {
@@ -154,12 +162,14 @@
     Array.prototype.forEach.call(document.querySelectorAll('input[name="motivationVendor"]'), function (r) { r.checked = r.value === (a.motivationVendor || ''); });
     $('motivationName').value = a.motivationName || '';
     $('memo').value = a.memo || '';
+    $('specialMemo').value = a.specialMemo || '';
 
     function addRow(listId) {
       makeRow(listId, { vendor: '', teacherName: '' });
     }
     $('addMain').addEventListener('click', function () { addRow('mainList'); });
     $('addSub').addEventListener('click', function () { addRow('subList'); });
+    $('addSpecial').addEventListener('click', function () { addRow('specialList'); });
     refreshStatuses();
     document.addEventListener('input', refreshStatuses);
     document.addEventListener('click', function () { setTimeout(refreshStatuses, 0); }, true);
@@ -167,8 +177,9 @@
     $('saveBtn').addEventListener('click', function () {
       var mains = readRows('mainList');
       var subs = readRows('subList');
+      var specials = readRows('specialList');
       if (reqs.length) {
-        var noVendor = Array.prototype.some.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row'), function (row) {
+        var noVendor = Array.prototype.some.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row, #specialList .sub-row'), function (row) {
           var teacherInput = row.querySelector('input[type="text"]');
           if (!teacherInput || !teacherInput.value.trim()) return false;
           var sel = row.querySelector('.js-select');
@@ -185,11 +196,13 @@
         subCount: a.subCount,
         mains: mains,
         subs: subs,
+        specials: specials,
         attendeeVendor: $('attendeeVendor').value.trim(),
         attendee: $('attendee').value.trim(),
         motivationVendor: (document.querySelector('input[name="motivationVendor"]:checked') || { value: '' }).value,
         motivationName: $('motivationName').value.trim(),
-        memo: $('memo').value
+        memo: $('memo').value,
+        specialMemo: $('specialMemo').value
       };
       var countPresent = function (listId) {
         var m = {};
@@ -205,30 +218,35 @@
       };
       var presentM = countPresent('mainList');
       var presentS = countPresent('subList');
+      var presentSp = countPresent('specialList');
       var adjReqs = VenderAssignStore.requestsOf(a).map(function (r) {
-        return { vendor: r.vendor, main: Math.min(r.main || 0, presentM[r.vendor] || 0), sub: Math.min(r.sub || 0, presentS[r.vendor] || 0) };
-      }).filter(function (r) { return r.main > 0 || r.sub > 0; });
+        return { vendor: r.vendor, main: Math.min(r.main || 0, presentM[r.vendor] || 0), sub: Math.min(r.sub || 0, presentS[r.vendor] || 0), special: Math.min(r.special || 0, presentSp[r.vendor] || 0) };
+      }).filter(function (r) { return r.main > 0 || r.sub > 0 || r.special > 0; });
       record.requests = adjReqs;
       var reqMainTotal = adjReqs.reduce(function (t, r) { return t + r.main; }, 0);
       var reqSubTotal = adjReqs.reduce(function (t, r) { return t + r.sub; }, 0);
       var newMain = document.querySelectorAll('#mainList .sub-row').length;
       var newSub = document.querySelectorAll('#subList .sub-row').length;
-      var over = newMain > planMain || newSub > planSub;
+      var newSpecial = document.querySelectorAll('#specialList .sub-row').length;
+      var over = newMain > planMain || newSub > planSub || newSpecial > planSpecial;
       function finish() {
         VenderAssignStore.upsert(Object.assign({}, a, record));
         location.href = 'vender_assign_list.html';
       }
       var planMainNext = Math.max(document.querySelectorAll('#mainList .sub-row').length, newMain);
       var planSubNext = Math.max(document.querySelectorAll('#subList .sub-row').length, newSub);
+      var planSpecialNext = Math.max(document.querySelectorAll('#specialList .sub-row').length, newSpecial);
       var reduceLines = [];
       if (planMainNext < planMain) reduceLines.push('予定講師数（メイン）：' + planMain + ' → ' + planMainNext);
       if (planSubNext < planSub) reduceLines.push('予定講師数（サブ）：' + planSub + ' → ' + planSubNext);
-      function setClassPlan(m, sb) {
+      if (planSpecialNext < planSpecial) reduceLines.push('予定講師数（特別）：' + planSpecial + ' → ' + planSpecialNext);
+      function setClassPlan(m, sb, sp) {
         var list = ClassStore.load();
         list.forEach(function (r) {
           if (r.id === classId) {
             r.mainTeachers = String(m);
             r.subTeachers = String(sb);
+            r.specialTeachers = String(sp);
           }
         });
         ClassStore.save(list);
@@ -236,7 +254,7 @@
       if (!over && reduceLines.length) {
         MessageDialog.confirm(['枠が予定より少なくなっています', '予定講師数を減らしますか？', ''].concat(reduceLines).join(String.fromCharCode(10))).then(function (ok) {
           if (!ok) return;
-          setClassPlan(planMainNext, planSubNext);
+          setClassPlan(planMainNext, planSubNext, planSpecialNext);
           finish();
         });
         return;
@@ -245,6 +263,7 @@
       var lines = ['予定講師数を超えています', '', '以下に変更してよろしいですか？'];
       if (newMain !== planMain) lines.push('予定講師数（メイン）：' + planMain + ' → ' + newMain);
       if (newSub !== planSub) lines.push('予定講師数（サブ）：' + planSub + ' → ' + newSub);
+      if (newSpecial !== planSpecial) lines.push('予定講師数（特別）：' + planSpecial + ' → ' + newSpecial);
       MessageDialog.confirm(lines.join('\n')).then(function (ok) {
         if (!ok) return;
         var list = ClassStore.load();
@@ -252,6 +271,7 @@
           if (r.id === classId) {
             r.mainTeachers = String(newMain);
             r.subTeachers = String(newSub);
+            r.specialTeachers = String(newSpecial);
           }
         });
         ClassStore.save(list);

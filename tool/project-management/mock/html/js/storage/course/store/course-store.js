@@ -89,7 +89,8 @@
         delivery: c.delivery,
         schedule: c.days + '日・' + c.min + '〜' + c.max + '人',
         mainTeachers: c.mainTeachers,
-        subTeachers: c.subTeachers
+        subTeachers: c.subTeachers,
+        specialTeachers: c.specialTeachers === undefined ? '' : c.specialTeachers
       };
     });
     return out;

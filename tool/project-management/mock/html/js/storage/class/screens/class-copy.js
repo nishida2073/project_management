@@ -103,6 +103,7 @@
         '<div class="form-section">講師</div>' +
         numberSelect(k, { key: 'mainTeachers', label: '予定講師数（メイン）' }, '0,1,2,3,4,5', src.mainTeachers == null ? '' : src.mainTeachers, true) +
         numberSelect(k, { key: 'subTeachers', label: '予定講師数（サブ）' }, '0,1,2,3,4,5', src.subTeachers == null ? '' : src.subTeachers, true) +
+        numberSelect(k, { key: 'specialTeachers', label: '予定講師数（特別）' }, '0,1,2,3,4,5', src.specialTeachers == null ? '' : src.specialTeachers, true) +
         '<div class="form-section">ロケーション</div>' +
         '<div class="form-field full"><label>ロケーション区分<span class="req">必須</span></label><div class="radio-group" data-k="' + k + '">' + typeRadios + '</div></div>' +
         '<div class="form-field"><label>ロケーション名</label><div class="form-control js-select" data-k="' + k + '" data-f="locationName" data-value="' + esc(initName) + '" data-options="' + esc(initOptions) + '">' + esc(initName || '選択してください') + '<span class="caret">▾</span></div></div>' +
@@ -209,8 +210,10 @@
       copy.people = numVal(n, 'people');
       copy.mainTeachers = numVal(n, 'mainTeachers');
       copy.subTeachers = numVal(n, 'subTeachers');
+      copy.specialTeachers = numVal(n, 'specialTeachers') || '0';
       copy.registMainTeachers = copy.mainTeachers;
       copy.registSubTeachers = copy.subTeachers;
+      copy.registSpecialTeachers = copy.specialTeachers;
       copy.locationType = typeCode(n);
       copy.locationName = LocationStore.codeOf(locNameVal(n));
       all.push(copy);

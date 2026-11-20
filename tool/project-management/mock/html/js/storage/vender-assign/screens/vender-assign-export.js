@@ -33,7 +33,9 @@
       '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
       '<td>' + teacherLines.main + '</td>' +
       '<td>' + dashOr(r.subTeachers, '人') + '</td>' +
-      '<td>' + teacherLines.sub + '</td>';
+      '<td>' + teacherLines.sub + '</td>' +
+      '<td>' + dashOr(r.specialTeachers, '人') + '</td>' +
+      '<td>' + teacherLines.special + '</td>';
     body.appendChild(tr);
   });
 
@@ -105,6 +107,7 @@
       var teacherCells = VenderLines.build(row.cls, code, { check: !!code, includePend: includePendSel });
       tr.children[7].innerHTML = teacherCells.main;
       tr.children[9].innerHTML = teacherCells.sub;
+      tr.children[11].innerHTML = teacherCells.special;
       restoreChecks(tr, saved);
     });
   }
@@ -150,10 +153,19 @@
       MessageDialog.required(['講師ベンダー']);
       return;
     }
+    var ROLES = ['main', 'sub', 'special'];
+    var LABEL = { main: 'メイン', sub: 'サブ', special: '特別' };
+    var KEY = { main: 'mains', sub: 'subs', special: 'specials' };
+    function countsOf(tr) {
+      var c = {};
+      ROLES.forEach(function (role) { c[role] = countChecked(tr, role); });
+      return c;
+    }
     var checkedCount = Array.prototype.filter.call(body.querySelectorAll('tr'), function (tr) {
       if (tr.style.display === 'none') return false;
       if (!tr.querySelector('.row-check') || !tr.querySelector('.row-check').checked) return false;
-      return countChecked(tr, 'main') > 0 || countChecked(tr, 'sub') > 0;
+      var c = countsOf(tr);
+      return c.main > 0 || c.sub > 0 || c.special > 0;
     }).length;
     if (!checkedCount) {
       MessageDialog.show('依頼するクラスの空き枠または依頼中を選択してください');
@@ -167,23 +179,24 @@
       var id = tr.getAttribute('data-id');
       var row = rows.filter(function (x) { return x.cls.id === id; })[0];
       if (!row) return;
-      var mainCount = countChecked(tr, 'main');
-      var subCount = countChecked(tr, 'sub');
-      exportedIds.push({ id: id, main: mainCount, sub: subCount });
-      var a = Object.assign({}, row.assign, { mainCount: mainCount, subCount: subCount });
+      var c = countsOf(tr);
+      exportedIds.push({ id: id, counts: c });
+      var a = Object.assign({}, row.assign, { mainCount: c.main, subCount: c.sub, specialCount: c.special });
       VenderAssignStore.upsert(a);
-      if (mainCount || subCount) items.push({ cls: row.cls, assign: a });
+      if (c.main || c.sub || c.special) items.push({ cls: row.cls, assign: a, counts: c });
     });
-    var mainMax = 0, subMax = 0;
-    items.forEach(function (it) {
-      mainMax = Math.max(mainMax, it.assign.mainCount);
-      subMax = Math.max(subMax, it.assign.subCount);
+    var maxOf = {};
+    ROLES.forEach(function (role) {
+      maxOf[role] = 0;
+      items.forEach(function (it) { maxOf[role] = Math.max(maxOf[role], it.counts[role]); });
     });
+    if (items.some(function (it) { return it.assign.specialMemo; })) maxOf.special = Math.max(maxOf.special, 1);
     var header = ['年度', 'コース名', 'コースコード', 'レッスンNo', '開始日', '終了日'];
     var i;
     function zen(n) { return String.fromCharCode(0xFF10 + n); }
-    for (i = 1; i <= mainMax; i++) header.push('講師（メイン' + zen(i) + '）');
-    for (i = 1; i <= subMax; i++) header.push('講師（サブ' + zen(i) + '）');
+    ROLES.forEach(function (role) {
+      for (i = 1; i <= maxOf[role]; i++) header.push('講師（' + LABEL[role] + zen(i) + '）');
+    });
     var aoa = [['講師ベンダー', vendor], [], header];
     items.forEach(function (it) {
       var c = C[it.cls.courseCode] || { name: it.cls.courseCode };
@@ -198,23 +211,33 @@
       var namesOf = function (list) {
         return (list || []).filter(function (p) { return p.state === 'before' && p.vendor === vendorCode && p.teacherName; }).map(function (p) { return p.teacherName; });
       };
-      var mainNames = namesOf(it.assign.mains);
-      var subNames = namesOf(it.assign.subs);
-      var people = [];
-      for (i = 0; i < mainMax; i++) people.push(mainNames[i] || '');
-      for (i = 0; i < subMax; i++) people.push(subNames[i] || '');
-      aoa.push(line.concat(people));
+      ROLES.forEach(function (role) {
+        var names = namesOf(it.assign[KEY[role]]);
+        for (var k = 0; k < maxOf[role]; k++) line.push(names[k] || '');
+      });
+      aoa.push(line);
     });
     var ws = XLSX.utils.aoa_to_sheet(aoa);
     var GRAY = { fill: { patternType: 'solid', fgColor: { rgb: 'D9D9D9' } } };
     items.forEach(function (it, ri) {
-      for (var k = 0; k < mainMax + subMax; k++) {
-        var used = k < mainMax ? k < it.assign.mainCount : (k - mainMax) < it.assign.subCount;
-        if (used) continue;
-        var addr = XLSX.utils.encode_cell({ r: ri + 3, c: 6 + k });
-        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
-        ws[addr].s = GRAY;
-      }
+      var col = 6;
+      ROLES.forEach(function (role) {
+        for (var k = 0; k < maxOf[role]; k++) {
+          if (k >= it.counts[role]) {
+            var addr = XLSX.utils.encode_cell({ r: ri + 3, c: col });
+            if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+            ws[addr].s = GRAY;
+          }
+          col++;
+        }
+      });
+    });
+    var specialStart = 6 + maxOf.main + maxOf.sub;
+    items.forEach(function (it, ri) {
+      if (!it.assign.specialMemo || !maxOf.special) return;
+      var addr = XLSX.utils.encode_cell({ r: ri + 3, c: specialStart });
+      if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+      ws[addr].c = [{ a: '備考', t: it.assign.specialMemo }];
     });
     var HEAD = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { patternType: 'solid', fgColor: { rgb: '1C2B45' } }, alignment: { horizontal: 'center', vertical: 'center', wrapText: true }, border: { top: { style: 'thin', color: { rgb: '8A94A6' } }, bottom: { style: 'thin', color: { rgb: '8A94A6' } }, left: { style: 'thin', color: { rgb: '8A94A6' } }, right: { style: 'thin', color: { rgb: '8A94A6' } } } };
     header.forEach(function (_, ci) {
@@ -242,17 +265,12 @@
     exportedIds.forEach(function (x) {
       var rec = VenderAssignStore.find(x.id);
       var existing = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor === vendorCode; });
-      var exMain = includePendSel ? 0 : existing.reduce(function (t, r) { return t + (r.main || 0); }, 0);
-      var exSub = includePendSel ? 0 : existing.reduce(function (t, r) { return t + (r.sub || 0); }, 0);
       var reqs = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== vendorCode; });
-      var dropBefore = function (list, n) {
-        var left = n;
-        return (list || []).filter(function (p) {
-          if (left > 0 && p.state === 'before' && p.vendor === vendorCode) { left--; return false; }
-          return true;
-        });
-      };
-      var convertCount = function (role, list, n) {
+      var exCount = {};
+      ROLES.forEach(function (role) {
+        exCount[role] = includePendSel ? 0 : existing.reduce(function (t, r) { return t + (r[role] || 0); }, 0);
+      });
+      var convertCount = function (role, n) {
         if (!includePendSel) return n;
         var exRole = existing.reduce(function (t, r) { return t + (r[role] || 0); }, 0);
         return Math.max(0, n - exRole);
@@ -269,13 +287,20 @@
         });
         return { list: out, named: named };
       };
-      var cm = convertEntries(rec.mains, convertCount('main', rec.mains || [], x.main));
-      var cs = convertEntries(rec.subs, convertCount('sub', rec.subs || [], x.sub));
-      rec.mains = cm.list;
-      rec.subs = cs.list;
-      var addM = Math.max(0, exMain + x.main - cm.named);
-      var addS = Math.max(0, exSub + x.sub - cs.named);
-      if (addM || addS || exMain || exSub) reqs.push({ vendor: vendorCode, main: addM, sub: addS });
+      var named = {};
+      ROLES.forEach(function (role) {
+        var conv = convertEntries(rec[KEY[role]], convertCount(role, x.counts[role]));
+        rec[KEY[role]] = conv.list;
+        named[role] = conv.named;
+      });
+      var entry = { vendor: vendorCode };
+      var any = false;
+      ROLES.forEach(function (role) {
+        var add = Math.max(0, exCount[role] + x.counts[role] - named[role]);
+        entry[role] = add;
+        if (add || exCount[role]) any = true;
+      });
+      if (any) reqs.push(entry);
       rec.requests = reqs;
       delete rec.requested;
       delete rec.requestMain;

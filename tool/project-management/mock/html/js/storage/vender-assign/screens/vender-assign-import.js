@@ -68,10 +68,11 @@
     if (courseCol < 0 || lessonCol < 0) {
       return { error: '登壇依頼の形式ではありません（コースコード、レッスンNo の列が必要です）' };
     }
-    var mainCols = [], subCols = [];
+    var mainCols = [], subCols = [], specialCols = [];
     header.forEach(function (h, ci) {
       if (h.indexOf('講師（メイン') === 0) mainCols.push(ci);
       else if (h.indexOf('講師（サブ') === 0) subCols.push(ci);
+      else if (h.indexOf('講師（特別') === 0) specialCols.push(ci);
     });
 
     var classes = ClassStore.load();
@@ -89,7 +90,7 @@
         return;
       }
 
-      var mains = [], subs = [];
+      var mains = [], subs = [], specials = [];
       function collect(cols, target) {
         cols.forEach(function (ci) {
           if (isColored(ws[XLSX.utils.encode_cell({ r: idx + 3, c: ci })])) return;
@@ -100,18 +101,22 @@
       }
       collect(mainCols, mains);
       collect(subCols, subs);
+      collect(specialCols, specials);
       mains = uniqueByTeacher(mains);
       subs = uniqueByTeacher(subs).filter(function (p) {
         return !mains.some(function (q) { return q.teacherName === p.teacherName; });
       });
 
-      if (!mains.length && !subs.length) {
+      specials = uniqueByTeacher(specials).filter(function (p) {
+        return !mains.some(function (q) { return q.teacherName === p.teacherName; }) && !subs.some(function (q) { return q.teacherName === p.teacherName; });
+      });
+      if (!mains.length && !subs.length && !specials.length) {
         plan.skipped++;
         return;
       }
       var course = ClassStore.COURSES[cls.courseCode];
       var label = cls.courseCode + '-' + (course ? course.name : cls.courseCode) + '：' + cls.lessonNo;
-      plan.updates.push({ cls: cls, mains: mains, subs: subs, label: label });
+      plan.updates.push({ cls: cls, mains: mains, subs: subs, specials: specials, label: label });
     });
     return plan;
   }
@@ -131,7 +136,8 @@
           start: u.cls.start,
           end: u.cls.end,
           mains: u.mains,
-          subs: u.subs
+          subs: u.subs,
+          specials: u.specials || []
         };
       }),
       skipped: plan.skipped,

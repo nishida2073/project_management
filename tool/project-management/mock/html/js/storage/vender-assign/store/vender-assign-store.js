@@ -71,7 +71,7 @@
   function blank(classId) {
     return {
       classId: classId, mainCount: 1, subCount: 0,
-      mains: [], subs: [],
+      mains: [], subs: [], specials: [],
       attendeeVendor: '', attendee: '',
       motivationVendor: '', motivationName: ''
     };
@@ -99,10 +99,12 @@
     var t = requestsOf(rec).reduce(function (acc, r) {
       acc.main += r.main || 0;
       acc.sub += r.sub || 0;
+      acc.special += r.special || 0;
       return acc;
-    }, { main: 0, sub: 0 });
+    }, { main: 0, sub: 0, special: 0 });
     t.main += (rec.mains || []).filter(function (p) { return p.state === 'requesting'; }).length;
     t.sub += (rec.subs || []).filter(function (p) { return p.state === 'requesting'; }).length;
+    t.special += (rec.specials || []).filter(function (p) { return p.state === 'requesting'; }).length;
     return t;
   }
 

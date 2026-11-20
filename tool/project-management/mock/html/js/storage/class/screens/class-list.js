@@ -37,6 +37,7 @@
       '<td>' + (r.people ? esc(r.people) + '人' : '') + '</td>' +
       '<td>' + planText(r.mainTeachers, r.registMainTeachers) + '</td>' +
       '<td>' + planText(r.subTeachers, r.registSubTeachers) + '</td>' +
+      '<td>' + planText(r.specialTeachers, r.registSpecialTeachers) + '</td>' +
       '<td>' + (r.managers || []).map(function (c) { return esc(StaffStore.nameOf(c)); }).join('<br>') + '</td>' +
       '<td>' + (r.locationType ? '<span class="tag location-type-tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +

@@ -27,6 +27,7 @@
       '<td>' + dashOr(c.max, '人') + '</td>' +
       '<td>' + dashOr(c.mainTeachers, '人') + '</td>' +
       '<td>' + dashOr(c.subTeachers, '人') + '</td>' +
+      '<td>' + dashOr(c.specialTeachers, '人') + '</td>' +
       '<td>' + esc(actual) + '/' + planned + 'クラス</td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (c.memo ? ' data-memo="' + esc(c.memo) + '"' : '') + '>' + (c.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +

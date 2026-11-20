@@ -59,6 +59,9 @@
     var t = TEACHER_COUNTS[r.id];
     if (t) { r.mainTeachers = t[0]; r.subTeachers = t[1]; r.registMainTeachers = t[0]; r.registSubTeachers = t[1]; }
   });
+  SEED.forEach(function (r) {
+    if (r.specialTeachers === undefined) { r.specialTeachers = '0'; r.registSpecialTeachers = '0'; }
+  });
 
   function save(list) {
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}

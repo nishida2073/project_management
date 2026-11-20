@@ -17,14 +17,14 @@
   function requestsFor(a, code, role) {
     var fromRequests = VenderAssignStore.requestsOf(a).filter(function (q) { return code && q.vendor === code; })
       .reduce(function (t, q) { return t + (q[role] || 0); }, 0);
-    var named = (role === 'sub' ? (a.subs || []) : (a.mains || [])).filter(function (p) { return code && p.vendor === code && p.state === 'requesting'; }).length;
+    var named = (role === 'sub' ? (a.subs || []) : role === 'special' ? (a.specials || []) : (a.mains || [])).filter(function (p) { return code && p.vendor === code && p.state === 'requesting'; }).length;
     return fromRequests + named;
   }
 
   function stateOf(a, code) {
     if (!code) return 'open';
-    if (requestsFor(a, code, 'main') + requestsFor(a, code, 'sub') > 0) return 'requesting';
-    var has = (a.mains || []).concat(a.subs || []).some(function (p) { return p.state === 'before' && p.vendor === code; });
+    if (requestsFor(a, code, 'main') + requestsFor(a, code, 'sub') + requestsFor(a, code, 'special') > 0) return 'requesting';
+    var has = (a.mains || []).concat(a.subs || [], a.specials || []).some(function (p) { return p.state === 'before' && p.vendor === code; });
     return has ? 'before' : 'open';
   }
 
@@ -54,7 +54,9 @@
       var planS = parseInt(x.cls.subTeachers, 10) || 0;
       var doneM = x.assign.mains.filter(function (p) { return p.state === 'done'; }).length;
       var doneS = x.assign.subs.filter(function (p) { return p.state === 'done'; }).length;
-      if (planM === doneM && planS === doneS) return false;
+      var planSp = parseInt(x.cls.specialTeachers, 10) || 0;
+      var doneSp = (x.assign.specials || []).filter(function (p) { return p.state === 'done'; }).length;
+      if (planM === doneM && planS === doneS && planSp === doneSp) return false;
       if (!kw) return true;
       var c = C[x.cls.courseCode] || { name: '' };
       return (String(x.cls.courseCode) + ' ' + String(c.name || '')).toLowerCase().indexOf(kw) >= 0;
@@ -75,7 +77,9 @@
         '<td>' + dashOr(x.cls.mainTeachers, '人') + '</td>' +
         '<td>' + teacherLines.main + '</td>' +
         '<td>' + dashOr(x.cls.subTeachers, '人') + '</td>' +
-        '<td>' + teacherLines.sub + '</td>';
+        '<td>' + teacherLines.sub + '</td>' +
+        '<td>' + dashOr(x.cls.specialTeachers, '人') + '</td>' +
+        '<td>' + teacherLines.special + '</td>';
       body.appendChild(tr);
     });
     $('withdrawCount').textContent = body.querySelectorAll('tr').length;
@@ -87,12 +91,16 @@
       a.requests = VenderAssignStore.requestsOf(a).filter(function (q) { return q.vendor !== code; });
       a.mains = (a.mains || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
       a.subs = (a.subs || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
+      a.specials = (a.specials || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
     } else if (to === 'before') {
       if (from === 'requesting') {
         var mainN = requestsFor(a, code, 'main');
         var subN = requestsFor(a, code, 'sub');
         for (var i = 0; i < mainN; i++) a.mains.push({ vendor: code, teacherName: '', state: 'before' });
         for (var j = 0; j < subN; j++) a.subs.push({ vendor: code, teacherName: '', state: 'before' });
+        var specN = requestsFor(a, code, 'special');
+        a.specials = a.specials || [];
+        for (var sp = 0; sp < specN; sp++) a.specials.push({ vendor: code, teacherName: '', state: 'before' });
         a.requests = VenderAssignStore.requestsOf(a).filter(function (q) { return q.vendor !== code; });
       } else if (from === 'open') {
         a.mains = (a.mains || []).concat([{ vendor: code, teacherName: '', state: 'before' }]);

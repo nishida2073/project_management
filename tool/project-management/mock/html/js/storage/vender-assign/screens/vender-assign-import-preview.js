@@ -15,6 +15,10 @@
     return TeacherVenderStore.nameOf(v) || v;
   }
 
+  var ROLES = ['main', 'sub', 'special'];
+  var LIST_KEY = { main: 'mains', sub: 'subs', special: 'specials' };
+  var DROP_KEY = { main: 'dropMains', sub: 'dropSubs', special: 'dropSpecials' };
+  var PLAN_KEY = { main: 'mainTeachers', sub: 'subTeachers', special: 'specialTeachers' };
   var STATE_TAG = (function () {
     var ST = VenderAssignStore.STATUS;
     return { done: ST.REQUESTED, requesting: ST.REQUESTING, before: ST.BEFORE, none: ST.OUT_OF_PLAN, open: ST.OPEN };
@@ -43,7 +47,7 @@
 
   function existingOf(u) {
     var a = VenderAssignStore.find(u.classId) || {};
-    return { mains: a.mains || [], subs: a.subs || [] };
+    return { mains: a.mains || [], subs: a.subs || [], specials: a.specials || [] };
   }
 
   var chk = {};
@@ -67,12 +71,12 @@
   function cellHtml(u, idx, role, existing, add) {
     var rec = VenderAssignStore.find(u.classId) || {};
     var reqInit = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor === plan.vendorCode; })
-      .reduce(function (t, r) { return t + (role === 'sub' ? (r.sub || 0) : (r.main || 0)); }, 0);
+      .reduce(function (t, r) { return t + (r[role] || 0); }, 0);
     var slotInit = existing.filter(function (p) { return p.state === 'before' && !p.teacherName && p.vendor === plan.vendorCode; }).length;
     var matched = function (p) { return existing.filter(function (q) { return sameTeacher(p, q); })[0]; };
     var clsRec = ClassStore.load().filter(function (r) { return String(r.id) === String(u.classId); })[0] || {};
-    var planN = parseInt(role === 'sub' ? clsRec.subTeachers : clsRec.mainTeachers, 10) || 0;
-    var reqAll = VenderAssignStore.requestsOf(rec).reduce(function (t, r) { return t + (role === 'sub' ? (r.sub || 0) : (r.main || 0)); }, 0);
+    var planN = parseInt(clsRec[PLAN_KEY[role]], 10) || 0;
+    var reqAll = VenderAssignStore.requestsOf(rec).reduce(function (t, r) { return t + (r[role] || 0); }, 0);
     var freeInit = Math.max(0, planN - existing.length - reqAll);
     var freeCount = add.filter(function (p) { return !matched(p); }).length;
     var slotHide = Math.min(freeCount, slotInit);
@@ -139,6 +143,7 @@
     var ex = existingOf(u);
     (u.mains || []).forEach(function (p) { if (!alreadyDone(p, ex.mains)) newTotal++; });
     (u.subs || []).forEach(function (p) { if (!alreadyDone(p, ex.subs)) newTotal++; });
+    (u.specials || []).forEach(function (p) { if (!alreadyDone(p, ex.specials)) newTotal++; });
   });
   if (!newTotal && !noPlan) {
     sessionStorage.removeItem('venderImportPlan');
@@ -157,7 +162,8 @@
       '<td>' + esc(u.start) + '</td>' +
       '<td>' + esc(u.end) + '</td>' +
       '<td data-role="main">' + cellHtml(u, idx, 'main', ex.mains, u.mains) + '</td>' +
-      '<td data-role="sub">' + cellHtml(u, idx, 'sub', ex.subs, u.subs) + '</td>';
+      '<td data-role="sub">' + cellHtml(u, idx, 'sub', ex.subs, u.subs) + '</td>' +
+      '<td data-role="special">' + cellHtml(u, idx, 'special', ex.specials, u.specials) + '</td>';
     $('importBody').appendChild(tr);
   });
   document.querySelectorAll('#importBody .js-select').forEach(function (el) { window.bindJsSelect(el); });
@@ -229,7 +235,7 @@
     var role = td.getAttribute('data-role');
     var u = plan.updates[idx];
     var ex = existingOf(u);
-    td.innerHTML = role === 'sub' ? cellHtml(u, idx, 'sub', ex.subs, u.subs) : cellHtml(u, idx, 'main', ex.mains, u.mains);
+    td.innerHTML = cellHtml(u, idx, role, ex[LIST_KEY[role]], u[LIST_KEY[role]]);
     td.querySelectorAll('.js-select').forEach(function (el) { window.bindJsSelect(el); });
     fitColumns();
   }
@@ -259,7 +265,7 @@
     var k = mark.getAttribute('data-key');
     var names = (mark.getAttribute('data-options') || '').split(',');
     var parts = k.split('|');
-    var src = parts[1] === 'sub' ? plan.updates[Number(parts[0])].subs : plan.updates[Number(parts[0])].mains;
+    var src = plan.updates[Number(parts[0])][LIST_KEY[parts[1]]];
     var newName = src[Number(parts[2])].teacherName;
     chooseReplace(names, newName, rep[k] || '').then(function (name) {
       if (name === null) return;
@@ -286,27 +292,30 @@
   }
 
   function transform(a, pick) {
-    (pick.dropMains || []).filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return y - x; }).forEach(function (k) { a.mains.splice(k, 1); });
-    (pick.dropSubs || []).filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return y - x; }).forEach(function (k) { a.subs.splice(k, 1); });
-    var beforeM = a.mains.length;
-    var beforeS = a.subs.length;
-    a.mains = mergeUnique(a.mains, pick.mains);
-    a.subs = mergeUnique(a.subs, pick.subs);
-    var addM = a.mains.length - beforeM;
-    var addS = a.subs.length - beforeS;
+    ROLES.forEach(function (role) { a[LIST_KEY[role]] = a[LIST_KEY[role]] || []; });
+    ROLES.forEach(function (role) {
+      var key = LIST_KEY[role];
+      (pick[DROP_KEY[role]] || []).filter(function (v, k, arr) { return arr.indexOf(v) === k; }).sort(function (x, y) { return y - x; }).forEach(function (k) { a[key].splice(k, 1); });
+    });
+    var added = {};
+    ROLES.forEach(function (role) {
+      var key = LIST_KEY[role];
+      var beforeN = a[key].length;
+      a[key] = mergeUnique(a[key], pick[key] || []);
+      added[role] = a[key].length - beforeN;
+    });
     var reqs = VenderAssignStore.requestsOf(a).map(function (r) {
-      return { vendor: r.vendor, main: r.main || 0, sub: r.sub || 0 };
+      return { vendor: r.vendor, main: r.main || 0, sub: r.sub || 0, special: r.special || 0 };
     });
     reqs.forEach(function (r) {
       if (r.vendor !== plan.vendorCode) return;
-      var t = Math.min(r.main, addM);
-      r.main -= t;
-      addM -= t;
-      t = Math.min(r.sub, addS);
-      r.sub -= t;
-      addS -= t;
+      ROLES.forEach(function (role) {
+        var t = Math.min(r[role], added[role]);
+        r[role] -= t;
+        added[role] -= t;
+      });
     });
-    a.requests = reqs.filter(function (r) { return r.main > 0 || r.sub > 0; });
+    a.requests = reqs.filter(function (r) { return r.main > 0 || r.sub > 0 || r.special > 0; });
     delete a.requested;
     delete a.requestMain;
     delete a.requestSub;
@@ -319,7 +328,7 @@
   }
 
   function totals(a) {
-    return { m: a.mains.length + sumReq(a, 'main'), s: a.subs.length + sumReq(a, 'sub') };
+    return { m: a.mains.length + sumReq(a, 'main'), s: a.subs.length + sumReq(a, 'sub'), p: (a.specials || []).length + sumReq(a, 'special') };
   }
 
   function overInfo(u, before, after) {
@@ -327,7 +336,7 @@
     if (!cls) return null;
     var planM = parseInt(cls.mainTeachers, 10);
     var planS = parseInt(cls.subTeachers, 10);
-    var info = { classId: u.classId, lines: [], mainTeachers: null, subTeachers: null };
+    var info = { classId: u.classId, lines: [], mainTeachers: null, subTeachers: null, specialTeachers: null };
     if (!isNaN(planM) && after.m > planM && after.m > before.m) {
       info.lines.push('　メイン：予定 ' + planM + '人 → ' + after.m + '人');
       info.mainTeachers = String(after.m);
@@ -335,6 +344,11 @@
     if (!isNaN(planS) && after.s > planS && after.s > before.s) {
       info.lines.push('　サブ：予定 ' + planS + '人 → ' + after.s + '人');
       info.subTeachers = String(after.s);
+    }
+    var planP = parseInt(cls.specialTeachers, 10);
+    if (!isNaN(planP) && after.p > planP && after.p > before.p) {
+      info.lines.push('　特別：予定 ' + planP + '人 → ' + after.p + '人');
+      info.specialTeachers = String(after.p);
     }
     if (!info.lines.length) return null;
     info.lines.unshift('・' + u.courseCode + '　' + u.courseName + '　' + u.lessonNo);
@@ -349,6 +363,7 @@
         if (String(i.classId) !== String(r.id)) return;
         if (i.mainTeachers !== null) r.mainTeachers = i.mainTeachers;
         if (i.subTeachers !== null) r.subTeachers = i.subTeachers;
+        if (i.specialTeachers !== null) r.specialTeachers = i.specialTeachers;
       });
     });
     ClassStore.save(classes);
@@ -373,6 +388,7 @@
       lines.push('・' + u.courseCode + '　' + u.courseName + '　' + u.lessonNo);
       lines.push('　メイン：' + picked[key].mains.length + '人');
       lines.push('　サブ：' + picked[key].subs.length + '人');
+      lines.push('　特別：' + picked[key].specials.length + '人');
     });
     var msg = lines.join('\n');
     MessageDialog.show(msg, function () { location.href = 'vender_assign_list.html'; });
@@ -391,18 +407,18 @@
       var role = cb.getAttribute('data-role');
       var i = Number(cb.getAttribute('data-i'));
       var u = plan.updates[idx];
-      picked[idx] = picked[idx] || { mains: [], subs: [], dropMains: [], dropSubs: [] };
-      var src = role === 'sub' ? u.subs : u.mains;
-      picked[idx][role === 'sub' ? 'subs' : 'mains'].push(src[i]);
+      picked[idx] = picked[idx] || { mains: [], subs: [], specials: [], dropMains: [], dropSubs: [], dropSpecials: [] };
+      var src = u[LIST_KEY[role]];
+      picked[idx][LIST_KEY[role]].push(src[i]);
       var chosen = rep[cb.closest('.vender-assign-import-line').getAttribute('data-key')] || '';
       if (chosen) {
         var tkey = idx + '|' + role + '|' + chosen;
         if (usedTargets[tkey]) dupName = dupName || chosen;
         usedTargets[tkey] = true;
         var rec = VenderAssignStore.find(u.classId);
-        var list = role === 'sub' ? rec.subs : rec.mains;
+        var list = rec[LIST_KEY[role]] || [];
         var k = list.findIndex(function (m) { return m.state !== 'done' && String(m.teacherName || '').trim() === chosen; });
-        if (k >= 0) picked[idx][role === 'sub' ? 'dropSubs' : 'dropMains'].push(k);
+        if (k >= 0) picked[idx][DROP_KEY[role]].push(k);
       }
     });
     if (dupName) {

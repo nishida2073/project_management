@@ -16,8 +16,14 @@
     var check = !!opts.check;
     var cls = check ? ' class="vender-assign-import-line"' : '';
     var tagCls = check ? 'vender-assign-import-state-tag' : '';
-    var out = { main: [], sub: [] };
+    var out = { main: [], sub: [], special: [] };
+    var specials = a.specials || [];
 
+    function listOf(role) {
+      if (role === 'main') return a.mains;
+      if (role === 'sub') return a.subs;
+      return specials;
+    }
     function statusOf(p) {
       if (p.state === 'done') return S.REQUESTED;
       if (p.state === 'requesting') return S.REQUESTING;
@@ -37,10 +43,10 @@
     function push(role, rank, html) {
       out[role].push({ r: rank, h: html });
     }
+    var ROLES = ['main', 'sub', 'special'];
 
-    ['main', 'sub'].forEach(function (role) {
-      var list = role === 'main' ? a.mains : a.subs;
-      list.forEach(function (p, i) {
+    ROLES.forEach(function (role) {
+      listOf(role).forEach(function (p, i) {
         if (!vf(p)) return;
         var st = statusOf(p);
         var can = !!vendorCode && p.vendor === vendorCode && p.state === 'before';
@@ -52,18 +58,28 @@
       var reqText = stateLabel(S.REQUESTING, tagCls) + ' ' + esc(TeacherVenderStore.nameOf(rq.vendor) || '-') + '： ';
       var pendable = !!opts.includePend && rq.vendor === vendorCode;
       var rank = SlotStatusStore.order('REQUESTING');
-      for (var mi = 0; mi < (rq.main || 0); mi++) push('main', rank, '<div' + cls + ' data-vendor="' + esc(rq.vendor) + '">' + prefix('main', pendable, true) + reqText + '</div>');
-      for (var si = 0; si < (rq.sub || 0); si++) push('sub', rank, '<div' + cls + ' data-vendor="' + esc(rq.vendor) + '">' + prefix('sub', pendable, true) + reqText + '</div>');
+      ROLES.forEach(function (role) {
+        var n = role === 'main' ? (rq.main || 0) : (role === 'sub' ? (rq.sub || 0) : (rq.special || 0));
+        for (var i = 0; i < n; i++) push(role, rank, '<div' + cls + ' data-vendor="' + esc(rq.vendor) + '">' + prefix(role, pendable, true) + reqText + '</div>');
+      });
     });
 
-    var planMain = parseInt(r.mainTeachers, 10) || 0;
-    var planSub = parseInt(r.subTeachers, 10) || 0;
-    var reqOnly = VenderAssignStore.requestsOf(a).reduce(function (t, q) { t.main += q.main || 0; t.sub += q.sub || 0; return t; }, { main: 0, sub: 0 });
-    var freeMain = Math.max(0, planMain - a.mains.length - reqOnly.main);
-    var freeSub = Math.max(0, planSub - a.subs.length - reqOnly.sub);
+    var planOf = {
+      main: parseInt(r.mainTeachers, 10) || 0,
+      sub: parseInt(r.subTeachers, 10) || 0,
+      special: parseInt(r.specialTeachers, 10) || 0
+    };
+    var reqOnly = { main: 0, sub: 0, special: 0 };
+    VenderAssignStore.requestsOf(a).forEach(function (q) {
+      reqOnly.main += q.main || 0;
+      reqOnly.sub += q.sub || 0;
+      reqOnly.special += q.special || 0;
+    });
     var openRank = SlotStatusStore.order('OPEN');
-    for (var fm = 0; fm < freeMain; fm++) push('main', openRank, '<div' + cls + ' data-vendor="">' + prefix('main', true, false) + stateLabel(S.OPEN, tagCls) + '</div>');
-    for (var fs = 0; fs < freeSub; fs++) push('sub', openRank, '<div' + cls + ' data-vendor="">' + prefix('sub', true, false) + stateLabel(S.OPEN, tagCls) + '</div>');
+    ROLES.forEach(function (role) {
+      var free = Math.max(0, planOf[role] - listOf(role).length - reqOnly[role]);
+      for (var k = 0; k < free; k++) push(role, openRank, '<div' + cls + ' data-vendor="">' + prefix(role, true, false) + stateLabel(S.OPEN, tagCls) + '</div>');
+    });
 
     function joinParts(list) {
       if (!list.length) return '-';
@@ -72,7 +88,8 @@
 
     return {
       main: joinParts(out.main),
-      sub: joinParts(out.sub)
+      sub: joinParts(out.sub),
+      special: joinParts(out.special)
     };
   }
 
