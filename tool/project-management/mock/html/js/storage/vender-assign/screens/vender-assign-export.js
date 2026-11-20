@@ -55,7 +55,9 @@
     var visible = 0;
     body.querySelectorAll('tr').forEach(function (tr) {
       var course = tr.querySelector('.col-course').textContent.toLowerCase();
-      var canRequest = tr.querySelectorAll('[data-vendor=""]').length > 0;
+      var beforeName = SlotStatusStore.nameOf('BEFORE');
+      var hasBefore = Array.prototype.some.call(tr.querySelectorAll('.state-tag'), function (t) { return t.textContent === beforeName; });
+      var canRequest = tr.querySelectorAll('[data-vendor=""]').length > 0 || hasBefore;
       var fitOk = fitVal === 'すべて' || (fitVal === 'あり') === canRequest;
       var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
       var dateOk = dateMatch(tr.getAttribute('data-start'), tr.getAttribute('data-end'));

@@ -86,30 +86,10 @@
     syncSelToggle();
   }
 
-  function apply(a, code, from, to) {
-    if (to === 'open') {
-      a.requests = VenderAssignStore.requestsOf(a).filter(function (q) { return q.vendor !== code; });
-      a.mains = (a.mains || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
-      a.subs = (a.subs || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
-      a.specials = (a.specials || []).filter(function (p) { return !((p.state === 'before' || p.state === 'requesting') && p.vendor === code); });
-    } else if (to === 'before') {
-      if (from === 'requesting') {
-        var mainN = requestsFor(a, code, 'main');
-        var subN = requestsFor(a, code, 'sub');
-        for (var i = 0; i < mainN; i++) a.mains.push({ vendor: code, teacherName: '', state: 'before' });
-        for (var j = 0; j < subN; j++) a.subs.push({ vendor: code, teacherName: '', state: 'before' });
-        var specN = requestsFor(a, code, 'special');
-        a.specials = a.specials || [];
-        for (var sp = 0; sp < specN; sp++) a.specials.push({ vendor: code, teacherName: '', state: 'before' });
-        a.requests = VenderAssignStore.requestsOf(a).filter(function (q) { return q.vendor !== code; });
-      } else if (from === 'open') {
-        a.mains = (a.mains || []).concat([{ vendor: code, teacherName: '', state: 'before' }]);
-      }
+  function apply(a, code, from, to, cls) {
+    if (to === 'open' || to === 'before') {
+      VenderAssignChange.apply(a, code, to, cls);
     }
-    delete a.requested;
-    delete a.requestMain;
-    delete a.requestSub;
-    delete a.requestVendor;
   }
 
   function syncSelToggle() {
@@ -156,7 +136,11 @@
       var bulkLabel = placeholderToEmpty(ownText($('bulkState')));
       var bulkTo = bulkLabel ? (bulkLabel === SlotStatusStore.nameOf('OPEN') ? 'open' : 'before') : '';
       var to = cb && cb.checked && bulkTo ? bulkTo : from;
-      if (from !== to) changes.push({ tr: tr, from: from, to: to });
+      var hasFree = to === 'before' && ['main', 'sub', 'special'].some(function (role) {
+        var x = findRow(tr);
+        return x && VenderAssignChange.freeOf(x.assign, x.cls, role) > 0;
+      });
+      if (from !== to || hasFree) changes.push({ tr: tr, from: from, to: to });
     });
     if (!changes.length) {
       MessageDialog.show('状態を変更する依頼がありません');
@@ -171,7 +155,7 @@
       if (!ok) return;
       changes.forEach(function (ch) {
         var x = findRow(ch.tr);
-        apply(x.assign, code, ch.from, ch.to);
+        apply(x.assign, code, ch.from, ch.to, x.cls);
         VenderAssignStore.upsert(x.assign);
       });
       location.href = 'vender_assign_list.html';

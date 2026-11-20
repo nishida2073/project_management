@@ -32,3 +32,6 @@
 .vender-assign-import-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
 .vender-assign-import-vendor-line { min-height: 20px; }
 .vender-assign-import-row-gap { margin: 2px 0; }
+
+.input-dialog-actions > .search-btn.sd-ok { background: #6b84ad; border-color: #6b84ad; color: #ffffff; }
+.input-dialog-actions > .search-btn.sd-ok:hover { background: #7f97bb; border-color: #7f97bb; }

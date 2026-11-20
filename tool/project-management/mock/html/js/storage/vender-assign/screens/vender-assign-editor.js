@@ -1,14 +1,6 @@
 (function () {
 
 
-  function chooseWithdraw(names) {
-    return SelectDialog.open({
-      title: '依頼の取り下げ',
-      fields: [{ label: '講師ベンダー名', select: { options: names, value: names.length === 1 ? names[0] : '' } }],
-      okLabel: '取り下げる'
-    });
-  }
-
   function vendorOptions() { return TeacherVenderStore.activeNames(); }
 
   function makeRow(listId, data) {
@@ -81,6 +73,54 @@
     return out;
   }
 
+  function openChangeDialog(vendorNames, stateNames, validate) {
+    return new Promise(function (resolve) {
+      var overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.innerHTML =
+        '<div class="input-dialog">' +
+          '<div class="input-dialog-title">依頼枠変更</div>' +
+          '<div class="input-dialog-error"></div>' +
+          '<label class="input-dialog-label">講師ベンダー名</label>' +
+          '<div class="form-control js-select" data-options="' + esc(vendorNames.join(',')) + '" data-value="' + esc(vendorNames.length === 1 ? vendorNames[0] : '') + '">' + esc(vendorNames.length === 1 ? vendorNames[0] : '選択してください') + '<span class="caret">▾</span></div>' +
+          '<label class="input-dialog-label">変更後の状態</label>' +
+          '<div class="form-control js-select" data-options="' + esc(stateNames.join(',')) + '" data-value="' + esc(stateNames[0]) + '">' + esc(stateNames[0]) + '<span class="caret">▾</span></div>' +
+          '<div class="input-dialog-actions">' +
+            '<div class="search-btn sd-cancel">キャンセル</div>' +
+            '<div class="search-btn sd-ok">変更</div>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(overlay);
+      var sels = overlay.querySelectorAll('.js-select');
+      var errEl = overlay.querySelector('.input-dialog-error');
+      Array.prototype.forEach.call(sels, function (el) { window.bindJsSelect(el); });
+
+      function close(result) {
+        document.removeEventListener('keydown', onKey);
+        overlay.remove();
+        resolve(result);
+      }
+      function onKey(e) { if (e.key === 'Escape') close(null); }
+
+      overlay.querySelector('.sd-ok').addEventListener('click', function () {
+        var vendor = sels[0].getAttribute('data-value') || '';
+        var state = sels[1].getAttribute('data-value') || '';
+        var err = '';
+        if (vendorNames.indexOf(vendor) === -1) err = '講師ベンダー名を選択してください';
+        else if (stateNames.indexOf(state) === -1) err = '変更後の状態を選択してください';
+        else if (validate) err = validate(vendor, state) || '';
+        if (err) {
+          errEl.textContent = err;
+          return;
+        }
+        close({ vendor: vendor, state: state });
+      });
+      overlay.querySelector('.sd-cancel').addEventListener('click', function () { close(null); });
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) close(null); });
+      document.addEventListener('keydown', onKey);
+    });
+  }
+
   function init(opts) {
     var classId = new URLSearchParams(location.search).get('id');
     var cls = null;
@@ -106,24 +146,93 @@
     var reqs = VenderAssignStore.requestsOf(a);
     var reqNames = {};
     reqs.forEach(function (rq) { reqNames[TeacherVenderStore.nameOf(rq.vendor) || rq.vendor] = rq.vendor; });
-    var requesting = a.mains.concat(a.subs, a.specials || []).filter(function (m) { return m.state === 'requesting' && m.vendor; });
+    var requesting = a.mains.concat(a.subs, a.specials || []).filter(function (m) { return (m.state === 'requesting' || m.state === 'before') && m.vendor; });
     requesting.forEach(function (m) { reqNames[TeacherVenderStore.nameOf(m.vendor) || m.vendor] = m.vendor; });
-    if (reqs.length || requesting.length) $('withdrawBtn').classList.remove('is-hidden');
+    function allRows() {
+      return Array.prototype.slice.call(document.querySelectorAll('#mainList .sub-row, #subList .sub-row, #specialList .sub-row'));
+    }
+    function rowVendor(row) {
+      var ref = row.querySelector('[data-code]');
+      if (ref) return ref.getAttribute('data-code') || '';
+      var sel = row.querySelector('.js-select');
+      return sel ? (TeacherVenderStore.codeOf(placeholderToEmpty(ownText(sel))) || '') : '';
+    }
+    function changeableRows(code) {
+      return allRows().filter(function (r) { return rowVendor(r) === code && r.getAttribute('data-state') !== 'done'; });
+    }
+    function emptyRows() {
+      return allRows().filter(function (r) { return rowVendor(r) === '' && r.getAttribute('data-state') !== 'done'; });
+    }
+    function replaceRow(row, data) {
+      var list = row.parentNode;
+      var next = row.nextElementSibling;
+      row.remove();
+      makeRow(list.id, data);
+      var fresh = list.lastElementChild;
+      if (next) list.insertBefore(fresh, next);
+    }
+    function nonDoneRows() {
+      return allRows().filter(function (r) { return r.getAttribute('data-state') !== 'done'; });
+    }
+    function toBefore(row, code) {
+      var name = TeacherVenderStore.nameOf(code) || '';
+      var sel = document.createElement('div');
+      sel.className = 'form-control js-select';
+      sel.setAttribute('data-options', esc(vendorOptions().join(',')));
+      sel.setAttribute('data-value', name);
+      sel.innerHTML = esc(name) + '<span class="caret">▾</span>';
+      row.replaceChild(sel, row.firstElementChild);
+      window.bindJsSelect(sel);
+      row.setAttribute('data-state', 'before');
+      var input = row.querySelector('input[type="text"]');
+      input.value = '';
+      input.disabled = false;
+      input.classList.remove('readonly');
+    }
+    function toEmpty(row) {
+      var sel = document.createElement('div');
+      sel.className = 'form-control js-select';
+      sel.setAttribute('data-options', esc(vendorOptions().join(',')));
+      sel.innerHTML = '選択してください<span class="caret">▾</span>';
+      row.replaceChild(sel, row.firstElementChild);
+      window.bindJsSelect(sel);
+      row.setAttribute('data-state', '');
+      var input = row.querySelector('input[type="text"]');
+      input.value = '';
+      input.disabled = false;
+      input.classList.remove('readonly');
+    }
+    function targetRows(code, to) {
+      return nonDoneRows().filter(function (r) {
+        var v = rowVendor(r);
+        if (to === 'open') return v === code;
+        return v === '' || v === code;
+      });
+    }
+    function changeValidation(code, to) {
+      return targetRows(code, to).length ? '' : '変更できる枠がありません';
+    }
+    function applyChange(code, to) {
+      targetRows(code, to).forEach(function (r) {
+        if (to === 'open') toEmpty(r);
+        else toBefore(r, code);
+      });
+    }
     $('withdrawBtn').addEventListener('click', function () {
-      chooseWithdraw(Object.keys(reqNames)).then(function (name) {
-        if (!name) return;
-        var code = reqNames[name];
-        var rec = VenderAssignStore.find(classId);
-        rec.requests = VenderAssignStore.requestsOf(rec).filter(function (r) { return r.vendor !== code; });
-        rec.mains = (rec.mains || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
-        rec.subs = (rec.subs || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
-        rec.specials = (rec.specials || []).filter(function (m) { return !(m.state === 'requesting' && m.vendor === code); });
-        delete rec.requested;
-        delete rec.requestMain;
-        delete rec.requestSub;
-        delete rec.requestVendor;
-        VenderAssignStore.upsert(rec);
-        location.href = 'vender_assign_list.html';
+      var vendorNames = TeacherVenderStore.activeNames();
+      if (!vendorNames.length) {
+        MessageDialog.show('変更できる依頼がありません');
+        return;
+      }
+      var openName = SlotStatusStore.nameOf('OPEN');
+      var beforeName = SlotStatusStore.nameOf('BEFORE');
+      openChangeDialog(vendorNames, [openName, beforeName], function (vendor, state) {
+        var code = TeacherVenderStore.codeOf(vendor);
+        var to = state === openName ? 'open' : 'before';
+        return changeValidation(code, to);
+      }).then(function (res) {
+        if (!res) return;
+        applyChange(TeacherVenderStore.codeOf(res.vendor), res.state === openName ? 'open' : 'before');
       });
     });
     reqs.forEach(function (rq) {
