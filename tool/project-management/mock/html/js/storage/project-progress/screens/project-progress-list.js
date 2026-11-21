@@ -267,6 +267,6 @@
     table: document.querySelector('.progress-scroll'),
     calendar: document.getElementById('calendarView'),
     render: renderCalendar,
-    storageKey: 'viewMode:' + location.pathname
+    storageKey: 'displaySetting:view:' + location.pathname
   });
 })();

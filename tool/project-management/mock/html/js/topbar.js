@@ -4,7 +4,7 @@
   slot.className = 'topbar';
   slot.innerHTML = '<div class="topbar-title-block"><div class="topbar-title"></div></div>' +
     '<div class="user" id="userMenu"><span class="tag user-role-tag" id="userRole"></span><span id="userName"></span><div class="avatar" id="userAvatar"></div>' +
-    '<div class="user-menu" id="userMenuList"><div class="user-menu-info" id="userMenuTags"></div><div class="user-menu-pw"><div class="btn outline" id="pwBtn">パスワード変更</div></div><div class="user-menu-logout"><div class="btn primary" id="logoutBtn">ログアウト</div></div></div></div>';
+    '<div class="user-menu" id="userMenuList"><div class="user-menu-info" id="userMenuTags"></div><div class="user-menu-pw"><div class="nav-btn" id="pwBtn">パスワード変更</div></div><div class="user-menu-reset"><div class="nav-btn" id="resetSearchBtn">表示設定の初期化</div></div><div class="user-menu-logout"><div class="btn primary" id="logoutBtn">ログアウト</div></div></div></div>';
   slot.querySelector('.topbar-title').textContent = slot.getAttribute('data-title') || '';
   var name = sessionStorage.getItem('loginUserName') || '未ログイン';
   document.getElementById('userName').textContent = name;
@@ -106,5 +106,21 @@
     e.stopPropagation();
     document.getElementById('userMenuList').classList.remove('open');
     ensureUserStore(openPasswordDialog);
+  });
+
+  document.getElementById('resetSearchBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    document.getElementById('userMenuList').classList.remove('open');
+    ensureMessageDialog(function () {
+      MessageDialog.confirm('検索条件や表示の設定を初期化します。よろしいですか？').then(function (ok) {
+        if (!ok) return;
+        try {
+          Object.keys(localStorage).filter(function (k) {
+            return k.indexOf('displaySetting:') === 0;
+          }).forEach(function (k) { localStorage.removeItem(k); });
+        } catch (err) {}
+        location.reload();
+      });
+    });
   });
 })();

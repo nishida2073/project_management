@@ -18,11 +18,28 @@
     if (table.__relayout) table.__relayout();
   }
 
+  function keyOf(seg) {
+    return 'displaySetting:col:' + location.pathname + ':' + seg.getAttribute('data-hide-class');
+  }
+
+  function savedValue(seg) {
+    try { return localStorage.getItem(keyOf(seg)); } catch (e) { return null; }
+  }
+
+  function save(seg, v) {
+    try { localStorage.setItem(keyOf(seg), v); } catch (e) {}
+  }
+
   document.querySelectorAll('.seg[data-hide-class]').forEach(function (seg) {
     var opts = seg.querySelectorAll('.seg-opt');
+    var saved = savedValue(seg);
+    if (saved) {
+      Array.prototype.forEach.call(opts, function (b) { b.classList.toggle('is-active', b.getAttribute('data-v') === saved); });
+    }
     Array.prototype.forEach.call(opts, function (btn) {
       btn.addEventListener('click', function () {
         Array.prototype.forEach.call(opts, function (b) { b.classList.toggle('is-active', b === btn); });
+        save(seg, btn.getAttribute('data-v'));
         apply(seg, btn.getAttribute('data-v') === 'hide');
       });
     });

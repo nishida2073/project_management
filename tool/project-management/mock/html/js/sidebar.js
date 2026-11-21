@@ -19,8 +19,8 @@
     { title: 'システム管理' },
     { sub: 'user', label: 'ユーザー', href: 'user_list.html' }
   ];
-  var CLOSED_KEY = 'sidebarClosed';
-  var GROUPS_KEY = 'sidebarCollapsedGroups';
+  var CLOSED_KEY = 'displaySetting:sidebarClosed';
+  var GROUPS_KEY = 'displaySetting:sidebarCollapsedGroups';
 
   function loadJson(key) {
     try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }

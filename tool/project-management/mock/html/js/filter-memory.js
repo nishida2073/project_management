@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'filterMemory:' + location.pathname;
+  var KEY = 'displaySetting:filter:' + location.pathname;
 
   function panel() { return document.querySelector('.filter-panel'); }
   function texts(p) { return Array.prototype.slice.call(p.querySelectorAll('input.field-control-input, input.form-control')); }

@@ -16,6 +16,7 @@
     tab.addEventListener('click', function () {
       document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (x) { x.classList.remove('active'); });
       tab.classList.add('active');
+      try { localStorage.setItem('displaySetting:taskTab:' + location.pathname, tab.getAttribute('data-tt') || ''); } catch (e) {}
       var value = tab.getAttribute('data-tt') || 'すべて';
       var kindRow = TaskTypeStore.load().filter(function (t) { return t.name === value; })[0];
       if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
@@ -404,11 +405,24 @@
     calView.update({ columns: data.classes, events: events });
   }
 
+  (function restoreTaskTypeTab() {
+    var saved = null;
+    try { saved = localStorage.getItem('displaySetting:taskTab:' + location.pathname); } catch (e) {}
+    if (saved === null) return;
+    var target = Array.prototype.filter.call(document.querySelectorAll('#taskTypeTabs .year-tab'), function (t) {
+      return (t.getAttribute('data-tt') || '') === saved;
+    })[0];
+    if (!target) return;
+    document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (x) { x.classList.toggle('active', x === target); });
+    var kindRow = TaskTypeStore.load().filter(function (t) { return t.name === saved; })[0];
+    if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
+  })();
+
   DayTable.bindView({
     tabs: document.getElementById('viewTabs'),
     table: document.querySelector('.progress-scroll'),
     calendar: document.getElementById('calendarView'),
     render: renderCalendar,
-    storageKey: 'viewMode:' + location.pathname
+    storageKey: 'displaySetting:view:' + location.pathname
   });
 })();

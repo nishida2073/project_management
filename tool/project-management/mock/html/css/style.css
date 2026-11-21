@@ -277,8 +277,9 @@ input.form-control::placeholder, textarea.form-control::placeholder { color: #9a
 .user-menu-info { display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; border-bottom: 1px solid #eef1f6; }
 .user-menu-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .user-menu-label { margin-right: 4px; }
-.user-menu-pw { padding: 10px 14px 32px; display: flex; justify-content: flex-end; }
+.user-menu-pw { padding: 10px 14px 0; display: flex; justify-content: flex-start; }
 .user-menu-logout { padding: 0 14px 10px; display: flex; justify-content: flex-end; }
+.user-menu-reset { padding: 6px 14px 32px; display: flex; justify-content: flex-start; }
 .avatar.avatar-purple { background: #f5eaf7; color: #8a3f96; }
 .avatar.avatar-gold { background: #fbf3d9; color: #9a7400; }
 .avatar.avatar-blue { background: #e7f0ff; color: #2f6fed; }
