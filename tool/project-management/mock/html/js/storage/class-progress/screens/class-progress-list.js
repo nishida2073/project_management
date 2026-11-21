@@ -1,38 +1,4 @@
 (function () {
-  (function buildTaskTypeTabs() {
-    var container = document.getElementById('taskTypeTabs');
-    if (!container) return;
-    TaskTypeStore.load().forEach(function (t) {
-      var tab = document.createElement('span');
-      tab.className = 'year-tab';
-      tab.setAttribute('data-tt', t.name);
-      tab.setAttribute('data-code', t.code);
-      tab.textContent = t.name;
-      container.appendChild(tab);
-    });
-  })();
-
-  document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (x) { x.classList.remove('active'); });
-      tab.classList.add('active');
-      try { localStorage.setItem('displaySetting:taskTab:' + location.pathname, tab.getAttribute('data-tt') || ''); } catch (e) {}
-      var value = tab.getAttribute('data-tt') || 'すべて';
-      var kindRow = TaskTypeStore.load().filter(function (t) { return t.name === value; })[0];
-      if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
-      var field = Array.prototype.filter.call(document.querySelectorAll('.filter-panel .field'), function (f) {
-        var l = f.querySelector('label');
-        return l && l.textContent === 'タスク区分';
-      })[0];
-      var ctl = field && field.querySelector('.js-select');
-      if (ctl) {
-        ctl.setAttribute('data-value', value);
-        ctl.innerHTML = value + '<span class="caret">▾</span>';
-      }
-      document.querySelector('.filter-panel .nav-btn').click();
-    });
-  });
-
   var SORTED = TaskStore.load().slice().sort(function (a, b) {
     var ka = a.kinds[0] || '';
     var kb = b.kinds[0] || '';
@@ -405,18 +371,18 @@
     calView.update({ columns: data.classes, events: events });
   }
 
-  (function restoreTaskTypeTab() {
-    var saved = null;
-    try { saved = localStorage.getItem('displaySetting:taskTab:' + location.pathname); } catch (e) {}
-    if (saved === null) return;
-    var target = Array.prototype.filter.call(document.querySelectorAll('#taskTypeTabs .year-tab'), function (t) {
-      return (t.getAttribute('data-tt') || '') === saved;
-    })[0];
-    if (!target) return;
-    document.querySelectorAll('#taskTypeTabs .year-tab').forEach(function (x) { x.classList.toggle('active', x === target); });
-    var kindRow = TaskTypeStore.load().filter(function (t) { return t.name === saved; })[0];
+  var taskTypeField = Array.prototype.filter.call(document.querySelectorAll('.filter-panel .field'), function (f) {
+    var l = f.querySelector('label');
+    return l && l.textContent === 'タスク区分';
+  })[0];
+  function applyTaskTypeColumns() {
+    var ctl = taskTypeField && taskTypeField.querySelector('.js-select');
+    var v = ctl ? (ctl.getAttribute('data-value') || ownText(ctl)) : '';
+    if (v === 'すべて' || v === '選択してください') v = '';
+    var kindRow = v ? TaskTypeStore.load().filter(function (t) { return t.name === v; })[0] : null;
     if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
-  })();
+  }
+  document.querySelector('.filter-panel .nav-btn').addEventListener('click', applyTaskTypeColumns);
 
   DayTable.bindView({
     tabs: document.getElementById('viewTabs'),
