@@ -62,6 +62,13 @@
   SEED.forEach(function (r) {
     if (r.specialTeachers === undefined) { r.specialTeachers = '0'; r.registSpecialTeachers = '0'; }
   });
+  var PRACTICE_AND_PC = {
+    'CLS-001': ['A101', 'SPG-001'], 'CLS-003': ['B203', 'SPG-002'], 'CLS-004': ['C301', 'SPG-003']
+  };
+  SEED.forEach(function (r) {
+    var pp = PRACTICE_AND_PC[r.id];
+    if (pp) { r.practiceRoom = pp[0]; r.sharedPcGroup = pp[1]; }
+  });
 
   function save(list) {
     try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) {}

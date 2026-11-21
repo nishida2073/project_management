@@ -44,6 +44,8 @@
       '<td>' + (r.managers || []).map(function (c) { return esc(StaffStore.nameOf(c)); }).join('<br>') + '</td>' +
       '<td>' + (r.locationType ? '<span class="tag location-type-tag ' + (LOCATION_CLASS[r.locationType] || '') + '">' + esc(LocationTypeStore.nameOf(r.locationType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(LocationStore.nameOf(r.locationName)) + '</td>' +
+      '<td>' + dashOr(r.practiceRoom) + '</td>' +
+      '<td>' + esc(SharedPcGroupStore.nameOf(r.sharedPcGroup)) + '</td>' +
       '<td>' + dashOr(ClassStore.surveyPinOf(r)) + '</td>' +
       '<td>' + dashOr(ClassStore.testPinOf(r)) + '</td>' +
       '<td><span class="status-label ' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +

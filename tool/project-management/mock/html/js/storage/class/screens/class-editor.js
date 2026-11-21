@@ -127,6 +127,8 @@ var ClassForm = (function () {
     (r.managers || []).forEach(function (code) { addManagerChip(mbox, StaffStore.nameOf(code)); });
     checkRadio('locationType', r.locationType);
     setSelect($('locationName'), LocationStore.nameOf(r.locationName));
+    $('practiceRoom').value = r.practiceRoom || '';
+    setSelect($('sharedPcGroup'), SharedPcGroupStore.nameOf(r.sharedPcGroup));
     $('memo').value = r.memo || '';
     fillRelated(r.related);
     refreshDerived();
@@ -156,6 +158,8 @@ var ClassForm = (function () {
       managers: Array.prototype.map.call($('manager').querySelectorAll('.chip'), function (c) { return StaffStore.codeOf((c.childNodes[0].textContent || '').trim()); }).filter(Boolean),
       locationType: getRadio('locationType'),
       locationName: LocationStore.codeOf(getSelect($('locationName'))),
+      practiceRoom: $('practiceRoom').value.trim(),
+      sharedPcGroup: SharedPcGroupStore.codeOf(getSelect($('sharedPcGroup'))),
       memo: $('memo').value,
       status: readStatus(),
       related: readRelated()
@@ -248,6 +252,7 @@ var ClassForm = (function () {
   function init(opts) {
     var editing = opts.mode === 'edit';
     renderRadios(document.querySelector('.radio-group[data-target="#locationName"]'), 'locationType', LocationTypeStore.load());
+    document.getElementById('sharedPcGroup').setAttribute('data-options', SharedPcGroupStore.names().join(','));
     var deliveryGroup = document.querySelector('[data-master-radio="DeliveryTypeStore"]');
     renderRadios(deliveryGroup, 'deliveryType', DeliveryTypeStore.load());
     deliveryGroup.setAttribute('data-generated', '1');
