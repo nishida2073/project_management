@@ -20,6 +20,7 @@
       <div class="filter-panel">
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
+        <div class="field"><label>科目区分</label><div class="control js-select" data-master-options="SubjectTypeStore" data-match-class="subject-type-tag">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>参加区分</label><div class="control small js-select" data-master-options="ParticipationTypeStore">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>稼働状態</label><div class="control small js-select" data-status-options="all">すべて<span class="caret">▾</span></div></div>
         <div class="nav-btn">検索</div>
@@ -40,6 +41,7 @@
               <th class="sticky">コースコード</th>
               <th class="sticky">参加区分</th>
               <th class="sticky">コース名</th>
+              <th class="sticky">科目区分</th>
               <th>日数</th>
               <th>実施時間</th>
               <th>実施形態</th>
@@ -74,6 +76,8 @@
 ${tags%
 }
 <script src="js/storage/course/store/course-store.js"></script>
+<script src="js/storage/subject/store/subject-store.js"></script>
+<script src="js/storage/subject-type/store/subject-type-store.js"></script>
 <script src="js/storage/delivery-type/store/delivery-type-store.js"></script>
 <script src="js/storage/participation-type/store/participation-type-store.js"></script>
 <script src="js/storage/project/store/project-store.js"></script>

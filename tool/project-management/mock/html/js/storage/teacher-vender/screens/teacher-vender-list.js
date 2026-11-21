@@ -9,7 +9,9 @@
       '<td>' + esc(v.code) + '</td>' +
       '<td>' + esc(v.name) + '</td>' +
       '<td>' + esc(v.tel) + '</td>' +
+      '<td>' + dashOr(v.address) + '</td>' +
       '<td>' + esc(v.contactName) + '</td>' +
+      '<td>' + dashOr(v.contactEmail) + '</td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (v.memo ? ' data-memo="' + esc(v.memo) + '"' : '') + '>' + (v.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="nav-btn" href="teacher_vender_modify.html?id=' + encodeURIComponent(v.code) + '">更新</a></td>';

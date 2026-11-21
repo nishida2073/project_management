@@ -27,7 +27,7 @@
       '<td>' + (st ? '<span class="tag affiliation-tag ' + (st.affiliation === AffiliationStore.nameOf('PARTNER') ? 'orange' : 'blue') + '">' + esc(st.affiliation) + '</span>' : '-') + '</td>' +
       '<td>' + (st && st.company ? esc(StaffVenderStore.nameOf(st.company)) : '-') + '</td>' +
       '<td>' + tagsOf(st ? st.roles : [], StaffRoleStore, 'role-tag') + '</td>' +
-      '<td>' + tagsOf(st ? st.jobTypes : [], JobTypeStore, 'job-type-tag') + '</td>' +
+      '<td><div class="tag-stack-col">' + ((st ? st.jobTypes : []) || []).map(function (j) { return '<span class="tag job-type-tag ' + (JobTypeStore.colorOf(j) || '') + '">' + esc(JobTypeStore.nameOf(j)) + '</span>'; }).join('') + '</div></td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (u.memo ? ' data-memo="' + esc(u.memo) + '"' : '') + '>' + (u.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="nav-btn" href="user_modify.html?id=' + encodeURIComponent(u.code) + '">更新</a></td>';

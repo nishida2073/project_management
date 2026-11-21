@@ -2,9 +2,9 @@
   var KEY = 'sharedPcGroupList';
 
   var SEED = [
-    { code: 'SPG-001', name: 'グループA', status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'SPG-002', name: 'グループB', status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'SPG-003', name: 'グループC', status: OperatingStatusStore.nameOf('ACTIVE') }
+    { code: 'SPG-001', name: 'グループA', pcCount: 20, status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'SPG-002', name: 'グループB', pcCount: 30, status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'SPG-003', name: 'グループC', pcCount: 15, status: OperatingStatusStore.nameOf('ACTIVE') }
   ];
 
   function save(list) {
@@ -39,6 +39,11 @@
     return found ? found.name : '';
   }
 
+  function pcCountOf(code) {
+    var found = load().filter(function (g) { return g.code === code; })[0];
+    return found ? found.pcCount : '';
+  }
+
   function codeOf(name) {
     var found = load().filter(function (g) { return g.name === name; })[0];
     return found ? found.code : '';
@@ -50,6 +55,7 @@
     nextCode: nextCode,
     names: names,
     nameOf: nameOf,
-    codeOf: codeOf
+    codeOf: codeOf,
+    pcCountOf: pcCountOf
   };
 })();

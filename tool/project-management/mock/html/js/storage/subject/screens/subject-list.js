@@ -10,6 +10,7 @@
       '<td>' + esc(s.code) + '</td>' +
       '<td><span class="tag subject-type-tag ' + (SubjectTypeStore.colorOf(s.type) || '') + '">' + esc(SubjectTypeStore.nameOf(s.type)) + '</span></td>' +
       '<td>' + esc(s.name) + '</td>' +
+      '<td>' + ((s.versions || []).length ? s.versions.map(function (v) { return '<span class="chip tag-like blue">' + esc(v) + '</span>'; }).join(' ') : '-') + '</td>' +
       '<td><span class="status-label ' + (on ? 'green' : 'gray') + '">' + (on ? OperatingStatusStore.nameOf('ACTIVE') : OperatingStatusStore.nameOf('STOPPED')) + '</span></td>' +
       '<td class="memo-cell"' + (s.memo ? ' data-memo="' + esc(s.memo) + '"' : '') + '>' + (s.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       '<td class="row-actions"><a class="nav-btn" href="subject_modify.html?id=' + encodeURIComponent(s.code) + '">更新</a></td>';
