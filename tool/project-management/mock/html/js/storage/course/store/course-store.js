@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'courseList';
+  var KEY = 'courseList_v2';
 
   function month(counts) {
     var m = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -10,7 +10,7 @@
   function course(code, part, name, delivery, days, min, max, status, subject, actual, monthly) {
     return {
       code: code, year: '2026', subject: subject, part: part, name: name,
-      delivery: delivery, days: days, min: min, max: max, status: status, actual: actual, monthly: monthly
+      delivery: delivery, days: days, min: min, max: max, status: status, actual: actual, monthly: monthly, duration: 450
     };
   }
 
@@ -90,7 +90,8 @@
         schedule: c.days + '日・' + c.min + '〜' + c.max + '人',
         mainTeachers: c.mainTeachers,
         subTeachers: c.subTeachers,
-        specialTeachers: c.specialTeachers === undefined ? '' : c.specialTeachers
+        specialTeachers: c.specialTeachers === undefined ? '' : c.specialTeachers,
+        duration: c.duration || ''
       };
     });
     return out;

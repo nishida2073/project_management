@@ -247,6 +247,9 @@
     sortRows(specialRows).forEach(function (s) { makeRow('specialList', s); });
     $('attendeeVendor').value = a.attendeeVendor || '';
     $('attendee').value = a.attendee || '';
+    $('contractMain').value = a.contractMain || '';
+    $('contractSub').value = a.contractSub || '';
+    $('docNo').value = a.docNo || '';
     $('motivationVendor').innerHTML = MotivationCompanyTypeStore.load().map(function (t) {
       return '<label class="radio-option"><input type="radio" name="motivationVendor" value="' + esc(t.code) + '"><span class="radio-dot"></span><span class="tag ' + tagClassOf('motivationVendor') + ' ' + esc(t.color) + '">' + esc(t.name) + '</span></label>';
     }).join('');
@@ -289,6 +292,9 @@
         specials: specials,
         attendeeVendor: $('attendeeVendor').value.trim(),
         attendee: $('attendee').value.trim(),
+        contractMain: $('contractMain').value.trim(),
+        contractSub: $('contractSub').value.trim(),
+        docNo: $('docNo').value.trim(),
         motivationVendor: (document.querySelector('input[name="motivationVendor"]:checked') || { value: '' }).value,
         motivationName: $('motivationName').value.trim(),
         memo: $('memo').value

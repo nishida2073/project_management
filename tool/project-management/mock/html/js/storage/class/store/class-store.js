@@ -119,6 +119,22 @@
     return PracticeStatusStore.nameOf('DURING');
   }
 
+  function classIdOf(r) {
+    return (r.courseCode || '') + String(r.year || '').slice(-2) + (r.lessonNo || '');
+  }
+
+  function reversePin(s, n) {
+    return s.split('').reverse().join('').slice(0, n);
+  }
+  function surveyPinOf(r) {
+    if (!r.courseCode || !r.lessonNo) return '';
+    return reversePin(r.courseCode + 'q' + r.lessonNo, 10);
+  }
+  function testPinOf(r) {
+    if (!r.courseCode || !r.lessonNo) return '';
+    return reversePin(r.courseCode + 't' + r.lessonNo, 12);
+  }
+
   window.ClassStore = {
     PROJECTS: ProjectStore.map(),
     COURSES: CourseStore.map(),
@@ -127,6 +143,9 @@
     save: save,
     nextId: nextId,
     nextLessonNo: nextLessonNo,
+    classIdOf: classIdOf,
+    surveyPinOf: surveyPinOf,
+    testPinOf: testPinOf,
     practiceStatus: practiceStatus,
     PRACTICE_CLASS: PracticeStatusStore.colorMap()
   };

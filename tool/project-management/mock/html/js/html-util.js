@@ -102,4 +102,13 @@
     if (text) tipShow(el, text);
   });
   document.addEventListener('mouseout', function (e) { if (tipTarget(e)) tipHide(); });
+  window.TimeUtil = {
+    toMinutes: function (t) {
+      var p = String(t).split(':');
+      return Number(p[0]) * 60 + Number(p[1]);
+    },
+    toTime: function (m) {
+      return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+    }
+  };
 })();

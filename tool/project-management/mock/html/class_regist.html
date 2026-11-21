@@ -62,10 +62,13 @@
         </div>
         <div class="form-section">クラス</div>
         <div class="form-field">
+          <label>クラスID</label>
+          <div class="form-control readonly" id="classId">自動採番</div>
+        </div>
+        <div class="form-field">
           <label>レッスンNo</label>
           <div class="form-control readonly" id="lessonNo">001</div>
         </div>
-        <div class="form-field"></div>
         <div class="form-field">
           <label>開始日<span class="req">必須</span></label>
           <div class="form-control js-date" id="start" data-no-holiday><span class="caret">▾</span></div>
@@ -73,6 +76,14 @@
         <div class="form-field">
           <label>終了日<span class="req">必須</span></label>
           <div class="form-control js-date" id="end" data-no-holiday><span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>開始時刻</label>
+          <div class="form-control js-select" id="startTime" data-options="00:00,00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00,23:30">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field">
+          <label>終了時刻</label>
+          <div class="form-control js-select" id="endTime" data-options="00:00,00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00,23:30">選択してください<span class="caret">▾</span></div>
         </div>
         <div class="form-field full">
           <label>実施形態<span class="req">必須</span></label>
@@ -129,6 +140,15 @@
           <label>備考（特別講師）</label>
           <textarea class="form-control textarea auto-grow" data-min="68" id="specialMemo" placeholder="例）特別講師の依頼条件など"></textarea>
         </div>
+        <div class="form-section">OliveOne</div>
+        <div class="form-field">
+          <label>アンケート暗証番号</label>
+          <div class="form-control readonly" id="surveyPin">自動採番</div>
+        </div>
+        <div class="form-field">
+          <label>テスト暗証番号</label>
+          <div class="form-control readonly" id="testPin">自動採番</div>
+        </div>
         <div class="form-section">クラス構成</div>
         <div class="form-field full">
           <label>クラスの関連（複数選択可）</label>
@@ -177,7 +197,6 @@ ${tags%
 <script src="js/storage/task-type/store/task-type-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
 <script src="js/master-options.js"></script>
-<script src="js/storage/class/screens/class-form.js"></script>
 <script src="js/storage/class/screens/class-editor.js"></script>
 <script src="js/storage/class/entry/class-regist.js"></script>
 <script src="js/select.js" defer></script>

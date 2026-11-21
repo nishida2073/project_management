@@ -53,6 +53,10 @@
     $('courseName').value = rec.name || '';
     checkRadio('deliveryType', rec.delivery || '');
     $('days').querySelector('input').value = rec.days === undefined ? '' : rec.days;
+    var durEl = $('duration');
+    var durText = rec.duration ? TimeUtil.toTime(Number(rec.duration)) : '';
+    durEl.setAttribute('data-value', durText);
+    durEl.innerHTML = (durText ? esc(durText) : '選択してください') + '<span class="caret">▾</span>';
     $('minPeople').querySelector('input').value = rec.min === undefined ? '' : rec.min;
     $('maxPeople').querySelector('input').value = rec.max === undefined ? '' : rec.max;
     $('mainTeachers').querySelector('input').value = rec.mainTeachers === undefined ? '' : rec.mainTeachers;
@@ -81,6 +85,7 @@
       name: $('courseName').value.trim(),
       delivery: getRadio('deliveryType'),
       days: $('days').querySelector('input').value.trim(),
+      duration: (function (t) { return t ? TimeUtil.toMinutes(t) : ''; })(placeholderToEmpty(ownText($('duration')))),
       min: $('minPeople').querySelector('input').value.trim(),
       max: $('maxPeople').querySelector('input').value.trim(),
       mainTeachers: $('mainTeachers').querySelector('input').value.trim(),
@@ -148,7 +153,7 @@
       }
       var item = {
         code: v.code, year: v.year, subject: v.subject, part: v.part,
-        name: v.name, delivery: v.delivery, days: v.days === '' ? '' : parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
+        name: v.name, duration: v.duration, delivery: v.delivery, days: v.days === '' ? '' : parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
         max: v.max === '' ? '' : parseInt(v.max, 10), status: v.status, monthly: v.monthly,
         mainTeachers: v.mainTeachers === '' ? '' : parseInt(v.mainTeachers, 10),
         subTeachers: v.subTeachers === '' ? '' : parseInt(v.subTeachers, 10),

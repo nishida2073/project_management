@@ -21,8 +21,9 @@
       '<td class="sticky">' + esc(c.code) + '</td>' +
       '<td class="sticky"><span class="tag participation-type-tag ' + ParticipationTypeStore.colorOf(c.part) + '">' + esc(ParticipationTypeStore.nameOf(c.part)) + '</span></td>' +
       '<td class="sticky">' + esc(c.name) + '</td>' +
-      (c.delivery ? '<td><span class="tag delivery-type-tag ' + DeliveryTypeStore.colorOf(c.delivery) + '">' + esc(DeliveryTypeStore.nameOf(c.delivery)) + '</span></td>' : '<td>-</td>') +
       '<td>' + dashOr(c.days, '日') + '</td>' +
+      '<td>' + (c.duration ? TimeUtil.toTime(Number(c.duration)) : '-') + '</td>' +
+      (c.delivery ? '<td><span class="tag delivery-type-tag ' + DeliveryTypeStore.colorOf(c.delivery) + '">' + esc(DeliveryTypeStore.nameOf(c.delivery)) + '</span></td>' : '<td>-</td>') +
       '<td>' + dashOr(c.min, '人') + '</td>' +
       '<td>' + dashOr(c.max, '人') + '</td>' +
       '<td>' + dashOr(c.mainTeachers, '人') + '</td>' +

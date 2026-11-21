@@ -54,13 +54,7 @@
           <label>コース名<span class="req">必須</span></label>
           <input type="text" class="form-control" id="courseName">
         </div>
-        <div class="form-section">推奨設定</div>
-        <div class="form-field full">
-          <label>実施形態</label>
-          <div class="radio-group">
-            <div class="master-radio" data-master-radio="DeliveryTypeStore" data-radio-name="deliveryType"></div>
-          </div>
-        </div>
+        <div class="form-section">クラス（推奨）</div>
         <div class="form-field">
           <label>日数</label>
           <div class="form-control number-select" id="days" data-options="1,2,3,4,5">
@@ -68,36 +62,47 @@
             <span class="caret">▾</span>
           </div>
         </div>
+        <div class="form-field">
+          <label>実施時間</label>
+          <div class="form-control js-select" id="duration" data-options="00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00">選択してください<span class="caret">▾</span></div>
+        </div>
+        <div class="form-field full">
+          <label>実施形態</label>
+          <div class="radio-group">
+            <div class="master-radio" data-master-radio="DeliveryTypeStore" data-radio-name="deliveryType"></div>
+          </div>
+        </div>
         <div class="form-field" style="grid-column: 1;">
-          <label>最小人数（推奨）</label>
+          <label>最小人数</label>
           <div class="form-control number-select" id="minPeople" data-options="10,15,20,24,30,35,40,50">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>
           </div>
         </div>
         <div class="form-field">
-          <label>最大人数（推奨）</label>
+          <label>最大人数</label>
           <div class="form-control number-select" id="maxPeople" data-options="10,15,20,24,30,35,40,50">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>
           </div>
         </div>
+        <div class="form-section">講師（推奨）</div>
         <div class="form-field">
-          <label>講師数（メイン）（推奨）</label>
+          <label>講師数（メイン）</label>
           <div class="form-control number-select" id="mainTeachers" data-options="0,1,2,3,4,5">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>
           </div>
         </div>
         <div class="form-field">
-          <label>講師数（サブ）（推奨）</label>
+          <label>講師数（サブ）</label>
           <div class="form-control number-select" id="subTeachers" data-options="0,1,2,3,4,5">
             <input type="text" inputmode="numeric" value="">
             <span class="caret">▾</span>
           </div>
         </div>
         <div class="form-field">
-          <label>講師数（特別）（推奨）</label>
+          <label>講師数（特別）</label>
           <div class="form-control number-select" id="specialTeachers" data-options="0,1,2,3,4,5">
             <input type="text" inputmode="numeric" value="0">
             <span class="caret">▾</span>
