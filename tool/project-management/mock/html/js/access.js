@@ -2,7 +2,7 @@
   var MENU_BY_PAIR = {
     '案件/管理': ['project_list.html', 'project_progress_list.html'],
     '案件/実施': ['project_progress_list.html'],
-    'クラス/管理': ['course_list.html', 'class_list.html', 'vender_assign_list.html', 'class_progress_list.html'],
+    'クラス/管理': ['course_list.html', 'class_list.html', 'vender_assign_list.html', 'class_progress_list.html', 'vender_assign_request_history.html'],
     'クラス/実施': ['class_progress_list.html']
   };
 

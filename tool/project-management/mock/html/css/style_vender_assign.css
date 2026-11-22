@@ -6,6 +6,7 @@
 
 /* 依頼一覧 */
 .vender-assign-list-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px; }
+.vender-assign-history-list { display: flex; flex-direction: column; gap: 16px; }
 
 /* 依頼枠更新 */
 .vender-assign-request-bulk-select { min-width: 140px; }
