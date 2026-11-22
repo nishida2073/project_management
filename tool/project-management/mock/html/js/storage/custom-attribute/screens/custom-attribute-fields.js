@@ -1,8 +1,14 @@
 (function () {
   function render(box, target) {
-    CustomAttributeStore.forTarget(target).forEach(function (a) {
+    var defs = CustomAttributeStore.forTarget(target);
+    if (!defs.length) return;
+    var heading = document.createElement('div');
+    heading.className = 'form-section';
+    heading.textContent = '追加属性';
+    box.appendChild(heading);
+    defs.forEach(function (a) {
       var field = document.createElement('div');
-      field.className = 'form-field';
+      field.className = a.width === 'full' ? 'form-field full' : 'form-field';
       var label = document.createElement('label');
       label.textContent = a.name;
       field.appendChild(label);

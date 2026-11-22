@@ -2,6 +2,11 @@
   var body = $('attrBody');
   var editing = null;
 
+  function relayoutTable() {
+    var table = body.closest('table');
+    if (table && table.__relayout) table.__relayout();
+  }
+
   function targetOf(code) {
     return CustomAttributeStore.TARGETS[code] || '';
   }
@@ -19,7 +24,7 @@
       '<td>' + esc(a.name) + '</td>' +
       '<td>' + esc(targetOf(a.target)) + '</td>' +
       '<td>' + esc(CustomAttributeStore.TYPES[a.type] || '') + '</td>' +
-      '<td>' + (a.type === 'select' ? esc(a.options.join(', ')) : '-') + '</td>' +
+      '<td>' + (a.type === 'select' ? '<div class="tag-stack">' + a.options.map(function (o) { return '<span class="tag blue">' + esc(o) + '</span>'; }).join('') + '</div>' : '-') + '</td>' +
       '<td>' + (a.showInList ? '表示する' : '表示しない') + '</td>' +
       '<td class="row-actions"><div class="nav-btn cell-action" data-edit>更新</div><div class="btn primary cell-action" data-del>削除</div></td>' +
       '</tr>';
@@ -65,7 +70,7 @@
   function bindChipRemove(chip) {
     var x = document.createElement('x');
     x.textContent = '✕';
-    x.addEventListener('click', function (e) { e.stopPropagation(); chip.remove(); });
+    x.addEventListener('click', function (e) { e.stopPropagation(); chip.remove(); relayoutTable(); });
     chip.appendChild(x);
   }
 
@@ -87,7 +92,10 @@
           return '';
         }
       }).then(function (value) {
-        if (value) addOptionChip(box, value);
+        if (value) {
+          addOptionChip(box, value);
+          relayoutTable();
+        }
       });
     });
     sync();
@@ -145,6 +153,7 @@
     var options = optionValues(tr.querySelector('[data-f="options"]'));
     var showInList = !tr.querySelector('[data-f="show"] .toggle').classList.contains('off');
     var isNew = tr.getAttribute('data-new') === '1';
+    var width = 'half';
     var typeName = isNew ? placeholderToEmpty(ownText(tr.querySelector('[data-f="type"]'))) : '';
     var type = isNew ? (Object.keys(CustomAttributeStore.TYPES).filter(function (k) { return CustomAttributeStore.TYPES[k] === typeName; })[0] || '') : null;
     var targetName = isNew ? placeholderToEmpty(ownText(tr.querySelector('[data-f="target"]'))) : '';
@@ -170,9 +179,9 @@
     }
 
     if (isNew) {
-      CustomAttributeStore.add({ name: name, target: targetKey, type: type, options: type === 'select' ? options : [], showInList: showInList });
+      CustomAttributeStore.add({ name: name, target: targetKey, type: type, width: width, options: type === 'select' ? options : [], showInList: showInList });
     } else {
-      CustomAttributeStore.update(code, { name: name, options: type === 'select' ? options : [], showInList: showInList });
+      CustomAttributeStore.update(code, { name: name, width: width, options: type === 'select' ? options : [], showInList: showInList });
     }
     editing = null;
     render();

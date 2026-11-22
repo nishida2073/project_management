@@ -7,9 +7,9 @@
       overlay.innerHTML =
         '<div class="input-dialog">' +
           '<div class="input-dialog-title">' + esc(opts.title || '入力') + '</div>' +
+          '<div class="input-dialog-error"></div>' +
           (opts.label ? '<label class="input-dialog-label">' + esc(opts.label) + '</label>' : '') +
           '<input type="text" class="form-control" placeholder="' + esc(opts.placeholder || '') + '">' +
-          '<div class="input-dialog-error"></div>' +
           '<div class="input-dialog-actions">' +
             '<div class="nav-btn input-dialog-cancel">キャンセル</div>' +
             '<div class="btn primary input-dialog-ok">' + esc(opts.okLabel || '追加') + '</div>' +
