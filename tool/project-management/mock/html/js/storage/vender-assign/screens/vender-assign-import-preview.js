@@ -161,6 +161,7 @@
       '<td>' + esc(u.lessonNo) + '</td>' +
       '<td>' + esc(u.start) + '</td>' +
       '<td>' + esc(u.end) + '</td>' +
+      '<td>' + dashOr(classDays(u), '日') + '</td>' +
       '<td data-role="main">' + cellHtml(u, idx, 'main', ex.mains, u.mains) + '</td>' +
       '<td data-role="sub">' + cellHtml(u, idx, 'sub', ex.subs, u.subs) + '</td>' +
       '<td data-role="special">' + cellHtml(u, idx, 'special', ex.specials, u.specials) + '</td>';
@@ -171,7 +172,7 @@
   function fitColumns() {
     var table = $('importBody').closest('table');
     var ths = table.querySelectorAll('thead th');
-    [5, 6].forEach(function (c) {
+    [6, 7].forEach(function (c) {
       var th = ths[c];
       var need = 0;
       Array.prototype.forEach.call($('importBody').querySelectorAll('tr'), function (tr) {

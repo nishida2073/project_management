@@ -50,6 +50,23 @@
     return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
   }
   window.fmtDate = fmtDate;
+  window.businessDays = function (startText, endText) {
+    function parseDay(s) {
+      var m = /^(\d{4})\/(\d{2})\/(\d{2})$/.exec(String(s || '')); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    }
+    var s = parseDay(startText), e = parseDay(endText);
+    if (!s || !e || e < s) return '';
+    var n = 0;
+    for (var d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+      var dow = d.getDay();
+      var holiday = window.HolidayStore ? HolidayStore.isHoliday(fmtDate(d)) : false;
+      if (dow !== 0 && dow !== 6 && !holiday) n++;
+    }
+    return n;
+  };
+  window.classDays = function (cls) {
+    return window.businessDays(cls.start, cls.end);
+  };
   window.calcEndDate = function (startText, days) {
     if (!/^\d{4}\/\d{2}\/\d{2}$/.test(startText) || !days) return null;
     var d = new Date(startText.replace(/\//g, '-'));

@@ -36,6 +36,7 @@
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + dashOr(r.startTime) + '</td>' +
       '<td>' + dashOr(r.endTime) + '</td>' +
+      '<td>' + dashOr(classDays(r), '日') + '</td>' +
       '<td>' + (r.delivery ? '<span class="tag delivery-type-tag ' + DeliveryTypeStore.colorOf(r.delivery) + '">' + esc(DeliveryTypeStore.nameOf(r.delivery)) + '</span>' : '') + '</td>' +
       '<td>' + (r.people ? esc(r.people) + '人' : '') + '</td>' +
       '<td>' + planText(r.mainTeachers, r.registMainTeachers) + '</td>' +

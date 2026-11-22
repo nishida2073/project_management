@@ -32,6 +32,7 @@
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div class="vender-assign-sub">' + esc(related) + '</div></td>' +
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
+      '<td>' + dashOr(classDays(r), '日') + '</td>' +
       '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
       '<td>' + mainLines + '</td>' +
       '<td>' + dashOr(r.subTeachers, '人') + '</td>' +

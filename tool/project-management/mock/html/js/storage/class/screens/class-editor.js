@@ -27,7 +27,11 @@ var ClassForm = (function () {
     $('specialTeachers').querySelector('input').value = c.specialTeachers === undefined ? '' : c.specialTeachers;
   }
   document.addEventListener('click', function () { setTimeout(fillPlanFromCourse, 0); }, true);
+  function refreshDays() {
+    $('classDays').textContent = classDays({ start: getDate($('start')), end: getDate($('end')) });
+  }
   function refreshDerived() {
+    refreshDays();
     var P = ClassStore.PROJECTS, C = ClassStore.COURSES;
     var pc = getSelect($('projectCode'));
     var p = P[pc];
@@ -166,7 +170,7 @@ var ClassForm = (function () {
     };
   }
 
-  return { fill: fill, read: read, refreshDerived: refreshDerived };
+  return { fill: fill, read: read, refreshDerived: refreshDerived, refreshDays: refreshDays };
 
 })();
 
@@ -252,6 +256,8 @@ var ClassForm = (function () {
 
   function init(opts) {
     var editing = opts.mode === 'edit';
+    new MutationObserver(ClassForm.refreshDays).observe($('start'), { childList: true, subtree: true, characterData: true });
+    new MutationObserver(ClassForm.refreshDays).observe($('end'), { childList: true, subtree: true, characterData: true });
     renderRadios(document.querySelector('.radio-group[data-target="#locationName"]'), 'locationType', LocationTypeStore.load());
     document.getElementById('sharedPcGroup').setAttribute('data-options', SharedPcGroupStore.names().join(','));
     var deliveryGroup = document.querySelector('[data-master-radio="DeliveryTypeStore"]');

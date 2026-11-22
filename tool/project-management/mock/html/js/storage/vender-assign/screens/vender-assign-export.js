@@ -30,6 +30,7 @@
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div></td>' +
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
+      '<td>' + dashOr(classDays(r), '日') + '</td>' +
       '<td>' + dashOr(r.mainTeachers, '人') + '</td>' +
       '<td>' + teacherLines.main + '</td>' +
       '<td>' + dashOr(r.subTeachers, '人') + '</td>' +
@@ -107,9 +108,9 @@
       if (!row) return;
       var saved = checkState(tr);
       var teacherCells = VenderLines.build(row.cls, code, { check: !!code, includePend: includePendSel });
-      tr.children[7].innerHTML = teacherCells.main;
-      tr.children[9].innerHTML = teacherCells.sub;
-      tr.children[11].innerHTML = teacherCells.special;
+      tr.children[8].innerHTML = teacherCells.main;
+      tr.children[10].innerHTML = teacherCells.sub;
+      tr.children[12].innerHTML = teacherCells.special;
       restoreChecks(tr, saved);
     });
   }
@@ -193,7 +194,8 @@
       items.forEach(function (it) { maxOf[role] = Math.max(maxOf[role], it.counts[role]); });
     });
     if (items.some(function (it) { return it.cls.specialMemo; })) maxOf.special = Math.max(maxOf.special, 1);
-    var header = ['年度', 'コース名', 'コースコード', 'レッスンNo', '開始日', '終了日'];
+    var header = ['年度', 'コース名', 'コースコード', 'レッスンNo', '開始日', '終了日', '日数'];
+    var teacherStart = header.length;
     var i;
     function zen(n) { return String.fromCharCode(0xFF10 + n); }
     ROLES.forEach(function (role) {
@@ -208,7 +210,8 @@
         it.cls.courseCode,
         it.cls.lessonNo,
         it.cls.start,
-        it.cls.end
+        it.cls.end,
+        classDays(it.cls)
       ];
       var namesOf = function (list) {
         return (list || []).filter(function (p) { return p.state === 'before' && p.vendor === vendorCode && p.teacherName; }).map(function (p) { return p.teacherName; });
@@ -222,7 +225,7 @@
     var ws = XLSX.utils.aoa_to_sheet(aoa);
     var GRAY = { fill: { patternType: 'solid', fgColor: { rgb: 'D9D9D9' } } };
     items.forEach(function (it, ri) {
-      var col = 6;
+      var col = teacherStart;
       ROLES.forEach(function (role) {
         for (var k = 0; k < maxOf[role]; k++) {
           if (k >= it.counts[role]) {
@@ -234,7 +237,7 @@
         }
       });
     });
-    var specialStart = 6 + maxOf.main + maxOf.sub;
+    var specialStart = teacherStart + maxOf.main + maxOf.sub;
     items.forEach(function (it, ri) {
       if (!it.cls.specialMemo || !maxOf.special) return;
       var addr = XLSX.utils.encode_cell({ r: ri + 3, c: specialStart });
@@ -251,6 +254,7 @@
     ws['B1'].s = { border: HEAD.border, alignment: { vertical: 'center' } };
     ws['!cols'] = header.map(function (name, ci) {
       if (ci === 1) return { wch: 32 };
+      if (ci === 6) return { wch: 8 };
       if (ci < 6) return { wch: 14 };
       return { wch: 28 };
     });

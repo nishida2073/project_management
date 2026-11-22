@@ -74,6 +74,7 @@
         '<td><div>' + esc(x.cls.lessonNo) + '</div></td>' +
         '<td>' + esc(x.cls.start) + '</td>' +
         '<td>' + esc(x.cls.end) + '</td>' +
+        '<td>' + dashOr(classDays(x.cls), '日') + '</td>' +
         '<td>' + dashOr(x.cls.mainTeachers, '人') + '</td>' +
         '<td>' + teacherLines.main + '</td>' +
         '<td>' + dashOr(x.cls.subTeachers, '人') + '</td>' +
