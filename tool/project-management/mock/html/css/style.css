@@ -88,6 +88,8 @@ tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f6; color: #333c4d; 
 .tag.green { background: #e5f6ec; color: #279158; }
 .tag.gold { background: #fbf3d9; color: #9a7400; }
 .tag-stack { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.list-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px; }
+.empty-message { text-align: center; color: #9aa4b5; padding: 24px 0; }
 .tag-stack-col { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .state-tag { width: 64px; text-align: center; box-sizing: border-box; justify-content: center; }
 span.task-type-tag, span.practice-status-tag { width: 64px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }

@@ -121,7 +121,7 @@
       if (edit) edit.addEventListener('click', function () { editing = { code: code }; render(); });
       var del = tr.querySelector('[data-del]');
       if (del) del.addEventListener('click', function () {
-        MessageDialog.confirm('この項目を削除します。よろしいですか？').then(function (ok) {
+        MessageDialog.confirm('削除してよろしいですか？').then(function (ok) {
           if (!ok) return;
           CustomAttributeStore.remove(code);
           if (editing && editing.code === code) editing = null;

@@ -5,7 +5,10 @@
   });
 
   if (!list.length) {
-    box.textContent = '依頼履歴はありません';
+    var message = document.createElement('div');
+    message.className = 'empty-message';
+    message.textContent = '依頼履歴はありません';
+    box.appendChild(message);
     return;
   }
 

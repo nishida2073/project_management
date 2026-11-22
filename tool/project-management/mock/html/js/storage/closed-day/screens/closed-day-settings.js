@@ -48,7 +48,7 @@
       if (edit) edit.addEventListener('click', function () { editing = { date: date }; render(); });
       var del = tr.querySelector('[data-del]');
       if (del) del.addEventListener('click', function () {
-        MessageDialog.confirm('この休業日を削除します。よろしいですか？').then(function (ok) {
+        MessageDialog.confirm('削除してよろしいですか？').then(function (ok) {
           if (!ok) return;
           ClosedDayStore.remove(date);
           if (editing && editing.date === date) editing = null;
@@ -101,6 +101,43 @@
     render();
     var newRow = body.querySelector('tr[data-new="1"]');
     if (newRow) newRow.scrollIntoView({ block: 'end' });
+  });
+
+  var importInput = $('closedDayImportFile');
+  var SHEET_SPEC = {
+    columns: [
+      { key: 'date', label: '日付', type: 'date', required: true },
+      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'type', label: '種別', type: 'select', options: TYPES, required: true }
+    ],
+    existingKeys: function () {
+      return ClosedDayStore.load().map(function (h) { return h.date; });
+    },
+    keyOf: function (o) { return o.date; },
+    add: function (o) { ClosedDayStore.add(o.date, o.name, o.type); },
+    update: function (o) {
+      var list = ClosedDayStore.load();
+      list.forEach(function (h) { if (h.date === o.date) { h.name = o.name; h.type = o.type; } });
+      ClosedDayStore.save(list);
+    },
+    refresh: render
+  };
+
+  $('closedDayExport').addEventListener('click', function () {
+    StoreImport.exportRows({
+      columns: SHEET_SPEC.columns,
+      sheetName: '休業日'
+    }, ClosedDayStore.load(), '休業日.xlsx');
+  });
+
+  $('closedDayImport').addEventListener('click', function () {
+    importInput.value = '';
+    importInput.click();
+  });
+  importInput.addEventListener('change', function () {
+    var file = importInput.files && importInput.files[0];
+    if (!file) return;
+    StoreImport.run(file, SHEET_SPEC);
   });
 
   render();

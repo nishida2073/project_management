@@ -5,7 +5,6 @@
 .vender-assign-sub { font-size: 11px; color: #9aa4b5; }
 
 /* 依頼一覧 */
-.vender-assign-list-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-bottom: 16px; }
 .card-stack { display: flex; flex-direction: column; gap: 16px; }
 
 /* 依頼枠更新 */
@@ -30,7 +29,6 @@
 .import-replace-clear:hover { background: #dbe8ff; border-color: #2f6fed; }
 .vender-assign-import-spacer { visibility: hidden; vertical-align: middle; }
 .vender-assign-import-state-tag { font-size: 10px; }
-.vender-assign-import-toolbar { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
 .vender-assign-import-vendor-line { min-height: 20px; }
 .vender-assign-import-row-gap { margin: 2px 0; }
 
