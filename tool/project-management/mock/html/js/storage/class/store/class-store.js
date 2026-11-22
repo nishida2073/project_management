@@ -62,6 +62,9 @@
   SEED.forEach(function (r) {
     if (r.specialTeachers === undefined) { r.specialTeachers = '0'; r.registSpecialTeachers = '0'; }
   });
+  SEED.forEach(function (r) {
+    if (r.locationName) r.locationName = LocationStore.nameOf(r.locationName) || r.locationName;
+  });
   var PRACTICE_AND_PC = {
     'CLS-001': ['A101', 'SPG-001'], 'CLS-003': ['B203', 'SPG-002'], 'CLS-004': ['C301', 'SPG-003']
   };

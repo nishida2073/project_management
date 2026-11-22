@@ -126,7 +126,7 @@ var ClassForm = (function () {
     mbox.querySelectorAll('.chip').forEach(function (c) { c.remove(); });
     (r.managers || []).forEach(function (code) { addManagerChip(mbox, StaffStore.nameOf(code)); });
     checkRadio('locationType', r.locationType);
-    setSelect($('locationName'), LocationStore.nameOf(r.locationName));
+    setSelect($('locationName'), r.locationName || '');
     $('practiceRoom').value = r.practiceRoom || '';
     setSelect($('sharedPcGroup'), SharedPcGroupStore.nameOf(r.sharedPcGroup));
     $('memo').value = r.memo || '';
@@ -157,7 +157,7 @@ var ClassForm = (function () {
       specialMemo: $('specialMemo').value,
       managers: Array.prototype.map.call($('manager').querySelectorAll('.chip'), function (c) { return StaffStore.codeOf((c.childNodes[0].textContent || '').trim()); }).filter(Boolean),
       locationType: getRadio('locationType'),
-      locationName: LocationStore.codeOf(getSelect($('locationName'))),
+      locationName: placeholderToEmpty(getSelect($('locationName'))),
       practiceRoom: $('practiceRoom').value.trim(),
       sharedPcGroup: SharedPcGroupStore.codeOf(getSelect($('sharedPcGroup'))),
       memo: $('memo').value,
@@ -220,6 +220,7 @@ var ClassForm = (function () {
     }).join(','));
     var locGroup = document.querySelector('.radio-group[data-target="#locationName"]');
     var byType = LocationStore.namesByType();
+    LocationTypeStore.load().forEach(function (t) { if (!byType[t.code]) byType[t.code] = []; });
     locGroup.setAttribute('data-options-map', JSON.stringify(byType));
     document.getElementById('locationName').setAttribute('data-options', Object.keys(byType).reduce(function (a, k) { return a.concat(byType[k]); }, []).join(','));
 

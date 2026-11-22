@@ -33,6 +33,14 @@
     input.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;
       e.preventDefault();
+      var typed = input.value.trim();
+      if (el.hasAttribute('data-allow-input') && typed) {
+        var exact = Array.prototype.filter.call(menu.querySelectorAll('li[data-opt]'), function (li) { return li.getAttribute('data-opt') === typed; })[0];
+        if (exact) { exact.click(); return; }
+        selectValue(el, typed);
+        el.classList.remove('open');
+        return;
+      }
       var first = Array.prototype.filter.call(menu.querySelectorAll('li[data-opt]'), function (li) { return li.style.display !== 'none'; })[0];
       if (first) first.click();
     });
