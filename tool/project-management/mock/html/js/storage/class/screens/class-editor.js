@@ -352,7 +352,7 @@ var ClassForm = (function () {
         var code = courseTimeEl.getAttribute('data-value') || '';
         var course = CourseStore.load().filter(function (c) { return c.code === code; })[0];
         if (!start || !course || !course.duration) return;
-        var end = TimeUtil.toMinutes(start) + Number(course.duration);
+        var end = TimeUtil.toMinutes(start) + Number(course.duration) + Number(course.breakTime || 0);
         if (end > 23 * 60 + 30) return;
         var t = TimeUtil.toTime(end);
         endTimeEl.setAttribute('data-value', t);

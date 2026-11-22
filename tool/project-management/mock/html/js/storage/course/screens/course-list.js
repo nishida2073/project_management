@@ -24,6 +24,7 @@
       '<td class="sticky">' + (SubjectStore.find(c.subject) ? '<span class="tag subject-type-tag ' + SubjectTypeStore.colorOf(SubjectStore.find(c.subject).type) + '">' + esc(SubjectTypeStore.nameOf(SubjectStore.find(c.subject).type)) + '</span>' : '-') + '</td>' +
       '<td>' + dashOr(c.days, '日') + '</td>' +
       '<td>' + (c.duration ? TimeUtil.toTime(Number(c.duration)) : '-') + '</td>' +
+      '<td>' + ((c.breakTime === undefined || c.breakTime === '') ? '-' : TimeUtil.toTime(Number(c.breakTime))) + '</td>' +
       (c.delivery ? '<td><span class="tag delivery-type-tag ' + DeliveryTypeStore.colorOf(c.delivery) + '">' + esc(DeliveryTypeStore.nameOf(c.delivery)) + '</span></td>' : '<td>-</td>') +
       '<td>' + dashOr(c.min, '人') + '</td>' +
       '<td>' + dashOr(c.max, '人') + '</td>' +

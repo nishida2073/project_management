@@ -10,7 +10,7 @@
   function course(code, part, name, delivery, days, min, max, status, subject, actual, monthly) {
     return {
       code: code, year: '2026', subject: subject, part: part, name: name,
-      delivery: delivery, days: days, min: min, max: max, status: status, actual: actual, monthly: monthly, duration: 450
+      delivery: delivery, days: days, min: min, max: max, status: status, actual: actual, monthly: monthly, duration: 450, breakTime: 60
     };
   }
 

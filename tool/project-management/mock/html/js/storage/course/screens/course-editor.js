@@ -57,6 +57,10 @@
     var durText = rec.duration ? TimeUtil.toTime(Number(rec.duration)) : '';
     durEl.setAttribute('data-value', durText);
     durEl.innerHTML = (durText ? esc(durText) : '選択してください') + '<span class="caret">▾</span>';
+    var brkEl = $('breakTime');
+    var brkText = (rec.breakTime === undefined || rec.breakTime === '') ? '' : TimeUtil.toTime(Number(rec.breakTime));
+    brkEl.setAttribute('data-value', brkText);
+    brkEl.innerHTML = (brkText ? esc(brkText) : '選択してください') + '<span class="caret">▾</span>';
     $('minPeople').querySelector('input').value = rec.min === undefined ? '' : rec.min;
     $('maxPeople').querySelector('input').value = rec.max === undefined ? '' : rec.max;
     $('mainTeachers').querySelector('input').value = rec.mainTeachers === undefined ? '' : rec.mainTeachers;
@@ -86,6 +90,7 @@
       delivery: getRadio('deliveryType'),
       days: $('days').querySelector('input').value.trim(),
       duration: (function (t) { return t ? TimeUtil.toMinutes(t) : ''; })(placeholderToEmpty(ownText($('duration')))),
+      breakTime: (function (t) { return t ? TimeUtil.toMinutes(t) : ''; })(placeholderToEmpty(ownText($('breakTime')))),
       min: $('minPeople').querySelector('input').value.trim(),
       max: $('maxPeople').querySelector('input').value.trim(),
       mainTeachers: $('mainTeachers').querySelector('input').value.trim(),
@@ -153,7 +158,7 @@
       }
       var item = {
         code: v.code, year: v.year, subject: v.subject, part: v.part,
-        name: v.name, duration: v.duration, delivery: v.delivery, days: v.days === '' ? '' : parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
+        name: v.name, duration: v.duration, breakTime: v.breakTime, delivery: v.delivery, days: v.days === '' ? '' : parseInt(v.days, 10), min: v.min === '' ? '' : parseInt(v.min, 10),
         max: v.max === '' ? '' : parseInt(v.max, 10), status: v.status, monthly: v.monthly,
         mainTeachers: v.mainTeachers === '' ? '' : parseInt(v.mainTeachers, 10),
         subTeachers: v.subTeachers === '' ? '' : parseInt(v.subTeachers, 10),
