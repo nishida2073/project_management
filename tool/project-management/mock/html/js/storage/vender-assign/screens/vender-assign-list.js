@@ -8,10 +8,13 @@
   var body = document.getElementById('venderBody');
   var list = ClassStore.load().filter(function (r) { return r.status !== OperatingStatusStore.nameOf('STOPPED'); });
 
+  var CUSTOM = CustomAttributeFields.addListColumns(document.querySelector('table thead tr'), 'vendorAssign');
+
   var rowLines = {};
   list.forEach(function (r) {
     var c = C[r.courseCode] || { name: r.courseCode };
     var a = VenderAssignStore.find(r.id);
+    var customCells = CustomAttributeFields.listCells(CUSTOM, a.attributes);
     var S = VenderAssignStore.STATUS;
     var built = VenderLines.build(r);
     rowLines[r.id] = built;
@@ -45,7 +48,7 @@
       '<td>' + dashOr(a.contractSub) + '</td>' +
       '<td>' + dashOr(a.docNo) + '</td>' +
       '<td class="memo-cell"' + (a.memo ? ' data-memo="' + esc(a.memo) + '"' : '') + '>' + (a.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
-      '<td class="row-actions"><a class="nav-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
+      customCells + '<td class="row-actions"><a class="nav-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     var names = a.mains.concat(a.subs, a.specials || [], reqs).map(function (x) { return TeacherVenderStore.nameOf(x.vendor) || ''; }).filter(function (n, k, arr) { return n && arr.indexOf(n) === k; });
     tr.setAttribute('data-vendors', names.join('|'));
     body.appendChild(tr);

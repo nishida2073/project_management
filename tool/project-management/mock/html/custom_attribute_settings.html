@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-slot" data-active="master" data-sub="customAttribute"></div>
+  <script src="js/message-dialog.js"></script>
+<script src="js/access.js"></script>
+<script src="js/sidebar.js"></script>
+  <div class="main">
+    <div id="topbar-slot" data-title="項目設定"></div>
+    <script src="js/topbar.js"></script>
+    <div class="content">
+      <div class="filter-panel">
+        <div class="field"><label>対象</label><div class="control small js-select" id="targetFilter" data-options="すべて,クラス,登壇依頼">すべて<span class="caret">▾</span></div></div>
+        <div class="nav-btn" id="searchBtn">検索</div>
+      </div>
+      <div class="table-card">
+        <div class="table-meta">
+          <div class="count"><b id="attrCount">0</b> 件</div>
+          <div class="nav-btn" id="attrAdd">新規登録</div>
+        </div>
+        <div class="table-scroll table-scroll-x">
+        <table>
+          <thead>
+            <tr>
+              <th>対象</th>
+              <th>項目名</th>
+              <th>種別</th>
+              <th>選択肢</th>
+              <th>一覧に表示</th>
+              <th class="col-actions" data-min-width="160">操作</th>
+            </tr>
+          </thead>
+          <tbody id="attrBody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/storage/operating-status/store/operating-status-store.js"></script>
+<script src="js/html-util.js"></script>
+<script src="js/input-dialog.js"></script>
+<script src="js/storage/custom-attribute/store/custom-attribute-store.js"></script>
+<script src="js/storage/custom-attribute/screens/custom-attribute-settings.js"></script>
+<script src="js/select.js" defer></script>
+<script src="js/list-filter-auto.js"></script>
+<script src="js/column-resize.js" defer></script>
+</body>
+</html>

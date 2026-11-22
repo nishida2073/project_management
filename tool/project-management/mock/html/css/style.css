@@ -96,8 +96,15 @@ span.work-type-tag, span.sales-type-tag, span.participation-type-tag, span.deliv
 
 /* 操作列のボタン */
 td.row-actions { white-space: nowrap; text-align: center; }
-td.row-actions > .nav-btn { display: inline-flex; }
-td.row-actions > .nav-btn { height: 22px; padding: 0 10px; font-size: 11px; }
+td.row-actions > .nav-btn, td.row-actions > .btn { display: inline-flex; }
+td.row-actions > .nav-btn, td.row-actions > .btn { height: 22px; padding: 0 10px; font-size: 11px; }
+td.row-actions > * + * { margin-left: 8px; }
+td > .cell-chip-box { height: 30px; min-height: 30px; padding: 0 6px; flex-wrap: nowrap; overflow: hidden; }
+td > input.cell-input { width: 100%; min-width: 0; box-sizing: border-box; }
+td > .cell-toggle { height: 30px; }
+tr.cell-row > td { height: 36px; }
+td.row-actions > .cell-action { height: 22px; width: 80px; padding: 0 10px; font-size: 11px; box-sizing: border-box; justify-content: center; }
+td.row-actions > .nav-btn, td.row-actions > .btn { min-width: 56px; justify-content: center; box-sizing: border-box; }
 .table-scroll thead th.col-actions, .scroll-outer thead th.col-actions { position: sticky; right: 0; top: 0; z-index: 4; box-shadow: -1px 0 0 #e6eaf1; }
 .table-scroll tbody td.row-actions, .scroll-outer tbody td.row-actions { position: sticky; right: 0; z-index: 1; background: #ffffff; box-shadow: -1px 0 0 #eef1f6; }
 
@@ -128,6 +135,7 @@ thead th[data-tone="teal"] { background: #e3f6f5; }
 thead th.sticky { background: #f6f8fb; z-index: 3; }
 /* 表ヘッダー固定（スクロール表の共通設定） */
 .table-scroll, .scroll-outer { overflow: visible; }
+.table-scroll.table-scroll-x { overflow-x: auto; }
 .table-scroll thead th, .scroll-outer thead th { position: sticky; top: 0; z-index: 2; }
 .table-scroll thead th.sticky, .scroll-outer thead th.sticky { z-index: 3; }
 .col-resize { position: absolute; top: 0; right: 0; width: 6px; height: 100%; cursor: col-resize; z-index: 5; }
@@ -483,6 +491,8 @@ input.form-control.replace-mark { border-color: #d97c1e; background: #fff2e2; }
 /* ダイアログ下部のボタン（.input-dialog-actions） */
 .input-dialog-actions > .nav-btn { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
 .input-dialog-actions > .nav-btn:hover { background: #f3f5f9; border-color: #9aa4b5; }
+.nav-btn.cancel { background: #ffffff; border-color: #c5ccd9; color: #5a6376; }
+.nav-btn.cancel:hover { background: #f3f5f9; border-color: #9aa4b5; }
 .input-dialog-actions > :first-child:not(:last-child) { margin-right: auto; }
 /* メモの印・メモ欄（.memo-mark / .memo-cell） */
 .memo-mark { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 50%; background: #fbd29b; color: #9a4a00; font-weight: 700; font-size: 12px; }

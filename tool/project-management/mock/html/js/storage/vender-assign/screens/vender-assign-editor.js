@@ -122,6 +122,7 @@
   }
 
   function init(opts) {
+    CustomAttributeFields.render($('customAttributes'), 'vendorAssign');
     var classId = new URLSearchParams(location.search).get('id');
     var cls = null;
     ClassStore.load().forEach(function (r) { if (r.id === classId) cls = r; });
@@ -256,6 +257,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('input[name="motivationVendor"]'), function (r) { r.checked = r.value === (a.motivationVendor || ''); });
     $('motivationName').value = a.motivationName || '';
     $('memo').value = a.memo || '';
+    CustomAttributeFields.fill($('customAttributes'), a.attributes);
 
     function addRow(listId) {
       makeRow(listId, { vendor: '', teacherName: '' });
@@ -297,7 +299,8 @@
         docNo: $('docNo').value.trim(),
         motivationVendor: (document.querySelector('input[name="motivationVendor"]:checked') || { value: '' }).value,
         motivationName: $('motivationName').value.trim(),
-        memo: $('memo').value
+        memo: $('memo').value,
+        attributes: CustomAttributeFields.read($('customAttributes'))
       };
       var countPresent = function (listId) {
         var m = {};

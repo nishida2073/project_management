@@ -30,6 +30,15 @@ var ClassForm = (function () {
   function refreshDays() {
     $('classDays').textContent = classDays({ start: getDate($('start')), end: getDate($('end')) });
   }
+  function renderCustomAttributes() {
+    CustomAttributeFields.render($('customAttributes'), 'class');
+  }
+  function readCustomAttributes() {
+    return CustomAttributeFields.read($('customAttributes'));
+  }
+  function fillCustomAttributes(attrs) {
+    CustomAttributeFields.fill($('customAttributes'), attrs);
+  }
   function refreshDerived() {
     refreshDays();
     var P = ClassStore.PROJECTS, C = ClassStore.COURSES;
@@ -134,6 +143,7 @@ var ClassForm = (function () {
     $('practiceRoom').value = r.practiceRoom || '';
     setSelect($('sharedPcGroup'), SharedPcGroupStore.nameOf(r.sharedPcGroup));
     $('memo').value = r.memo || '';
+    fillCustomAttributes(r.attributes);
     fillRelated(r.related);
     refreshDerived();
   }
@@ -165,12 +175,13 @@ var ClassForm = (function () {
       practiceRoom: $('practiceRoom').value.trim(),
       sharedPcGroup: SharedPcGroupStore.codeOf(getSelect($('sharedPcGroup'))),
       memo: $('memo').value,
+      attributes: readCustomAttributes(),
       status: readStatus(),
       related: readRelated()
     };
   }
 
-  return { fill: fill, read: read, refreshDerived: refreshDerived, refreshDays: refreshDays };
+  return { fill: fill, read: read, refreshDerived: refreshDerived, refreshDays: refreshDays, renderCustomAttributes: renderCustomAttributes };
 
 })();
 
@@ -256,6 +267,7 @@ var ClassForm = (function () {
 
   function init(opts) {
     var editing = opts.mode === 'edit';
+    ClassForm.renderCustomAttributes();
     new MutationObserver(ClassForm.refreshDays).observe($('start'), { childList: true, subtree: true, characterData: true });
     new MutationObserver(ClassForm.refreshDays).observe($('end'), { childList: true, subtree: true, characterData: true });
     renderRadios(document.querySelector('.radio-group[data-target="#locationName"]'), 'locationType', LocationTypeStore.load());

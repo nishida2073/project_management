@@ -6,6 +6,7 @@
 
   var body = document.getElementById('classBody');
   var list = ClassStore.load();
+  var CUSTOM = CustomAttributeFields.addListColumns(document.querySelector('table thead tr'), 'class');
 
   var PRACTICE_CLASS = ClassStore.PRACTICE_CLASS;
 
@@ -15,6 +16,7 @@
     return esc(cur) + '人' + (differs ? ' <span style="font-size:11px;color:#9aa4b5;">（' + esc(reg) + '人）</span>' : '');
   }
   list.forEach(function (r) {
+    var customCells = CustomAttributeFields.listCells(CUSTOM, r.attributes);
     var p = P[r.projectCode] || { name: '', sales: '', part: '' };
     var c = C[r.courseCode] || { name: '', part: '', delivery: '', schedule: '' };
     var relatedText = r.related && r.related.length ? r.related.slice().sort(function (a, b) { return String(a).localeCompare(String(b), 'ja', { numeric: true }); }).join(', ') : '-';
@@ -51,7 +53,7 @@
       '<td>' + dashOr(ClassStore.testPinOf(r)) + '</td>' +
       '<td><span class="status-label ' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (r.memo ? ' data-memo="' + esc(r.memo) + '"' : '') + '>' + (r.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
-      '<td class="row-actions"><a class="nav-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
+      customCells + '<td class="row-actions"><a class="nav-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     body.appendChild(tr);
   });
 

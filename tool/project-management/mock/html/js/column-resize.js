@@ -40,7 +40,7 @@
           var td = tr.children[i];
           if (td) w = Math.max(w, td.getBoundingClientRect().width);
         });
-        if (th.textContent.trim() === '操作') w = ACTIONS_W;
+        if (th.textContent.trim() === '操作') w = Number(th.getAttribute('data-min-width')) || ACTIONS_W;
         if (i === yearIdx) w = Math.max(w, YEAR_MIN);
         th.style.width = w + 'px';
         if (th.textContent.trim() === '操作' || th.classList.contains('no-resize')) th.style.minWidth = th.style.maxWidth = w + 'px';
