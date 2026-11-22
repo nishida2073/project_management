@@ -27,6 +27,9 @@
 
       <div class="list-toolbar">
         <a class="nav-btn" href="subject_regist.html">新規登録</a>
+        <div class="nav-btn" id="subjectImport">インポート</div>
+        <div class="nav-btn" id="subjectExport">エクスポート</div>
+        <input type="file" id="subjectImportFile" class="is-hidden" accept=".xlsx">
       </div>
 
       <div class="table-card">
@@ -60,6 +63,8 @@
 <script src="js/column-resize.js" defer></script>
 <script src="js/storage/subject-type/store/subject-type-store.js"></script>
 <script src="js/storage/subject/store/subject-store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="js/store-import.js"></script>
 <script src="js/storage/subject/screens/subject-list.js"></script>
 <script src="js/list-filter-auto.js"></script>
 <script src="js/list-filter.js"></script><script src="js/pagination.js"></script>

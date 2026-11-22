@@ -2,12 +2,12 @@
   var KEY = 'customerList';
 
   var SEED = [
-    { id: 'CUS-001', name: 'NTTデータ金融', staff: '山口 直人' },
-    { id: 'CUS-002', name: '株式会社ABC商事', staff: '荒牧 麻衣' },
-    { id: 'CUS-003', name: 'DEFホールディングス', staff: '佐藤 一郎' },
-    { id: 'CUS-004', name: 'CECトラスト', staff: '細野 恵美' },
-    { id: 'CUS-005', name: 'NTTデータUNIV', staff: '市村 拓也' },
-    { id: 'CUS-006', name: 'グループ各社', staff: '佐藤 一郎' }
+    { id: 'CUS-001', name: 'NTTデータ金融', staff: '山口 直人', status: OperatingStatusStore.nameOf('ACTIVE') },
+    { id: 'CUS-002', name: '株式会社ABC商事', staff: '荒牧 麻衣', status: OperatingStatusStore.nameOf('ACTIVE') },
+    { id: 'CUS-003', name: 'DEFホールディングス', staff: '佐藤 一郎', status: OperatingStatusStore.nameOf('ACTIVE') },
+    { id: 'CUS-004', name: 'CECトラスト', staff: '細野 恵美', status: OperatingStatusStore.nameOf('ACTIVE') },
+    { id: 'CUS-005', name: 'NTTデータUNIV', staff: '市村 拓也', status: OperatingStatusStore.nameOf('ACTIVE') },
+    { id: 'CUS-006', name: 'グループ各社', staff: '佐藤 一郎', status: OperatingStatusStore.nameOf('ACTIVE') }
   ];
 
   function save(list) {

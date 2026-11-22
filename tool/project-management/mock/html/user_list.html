@@ -30,6 +30,9 @@
 
       <div class="list-toolbar">
         <a class="nav-btn" href="user_regist.html">新規登録</a>
+        <div class="nav-btn" id="userImport">インポート</div>
+        <div class="nav-btn" id="userExport">エクスポート</div>
+        <input type="file" id="userImportFile" class="is-hidden" accept=".xlsx">
       </div>
 
       <div class="table-card">
@@ -71,6 +74,8 @@
 <script src="js/storage/affiliation/store/affiliation-store.js"></script>
 <script src="js/storage/staff-vender/store/staff-vender-store.js"></script>
 <script src="js/storage/link-state/store/link-state-store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="js/store-import.js"></script>
 <script src="js/storage/user/screens/user-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/table-sort.js" defer></script>

@@ -18,3 +18,34 @@
 
   document.getElementById('customerCount').textContent = list.length;
 })();
+
+(function () {
+  var SHEET_SPEC = {
+    sheetName: '顧客',
+    load: function () { return CustomerStore.load(); },
+    columns: [
+      { key: 'id', label: 'コード', type: 'text', required: false },
+      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'staff', label: '担当者', type: 'text', required: false },
+      { key: 'email', label: 'メールアドレス', type: 'text', required: false },
+      { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
+      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+    ],
+    existingKeys: function () { return CustomerStore.load().map(function (c) { return c.id; }); },
+    keyOf: function (o) { return o.id; },
+    add: function (o) {
+      var list = CustomerStore.load();
+      list.push({ id: o.id || CustomerStore.nextId(list), name: o.name, staff: o.staff, email: o.email, memo: o.memo, status: o.status });
+      CustomerStore.save(list);
+    },
+    update: function (o) {
+      var list = CustomerStore.load();
+      list.forEach(function (c) {
+        if (c.id === o.id) { c.name = o.name; c.staff = o.staff; c.email = o.email; c.memo = o.memo; c.status = o.status; }
+      });
+      CustomerStore.save(list);
+    },
+    refresh: function () { location.reload(); }
+  };
+  StoreImport.bind(SHEET_SPEC, { export: 'customerExport', import: 'customerImport', file: 'customerImportFile', fileName: '顧客.xlsx' });
+})();

@@ -29,6 +29,9 @@
 
       <div class="list-toolbar">
         <a class="nav-btn" href="course_regist.html">新規登録</a>
+        <div class="nav-btn" id="courseImport">インポート</div>
+        <div class="nav-btn" id="courseExport">エクスポート</div>
+        <input type="file" id="courseImportFile" class="is-hidden" accept=".xlsx">
       </div>
 
       <div class="table-card">
@@ -84,6 +87,8 @@
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/location-type/store/location-type-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="js/store-import.js"></script>
 <script src="js/storage/course/screens/course-list.js"></script>
 <script src="js/list-filter-auto.js"></script>
 <script src="js/list-filter.js"></script><script src="js/pagination.js"></script>

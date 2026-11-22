@@ -25,6 +25,9 @@
       </div>
       <div class="list-toolbar">
         <a class="nav-btn" href="customer_regist.html">新規登録</a>
+        <div class="nav-btn" id="customerImport">インポート</div>
+        <div class="nav-btn" id="customerExport">エクスポート</div>
+        <input type="file" id="customerImportFile" class="is-hidden" accept=".xlsx">
       </div>
 
       <div class="table-card">
@@ -56,6 +59,8 @@
 <script src="js/html-util.js"></script>
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/customer/store/customer-store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="js/store-import.js"></script>
 <script src="js/storage/customer/screens/customer-list.js"></script>
 <script src="js/select.js" defer></script>
 <script src="js/table-sort.js" defer></script>

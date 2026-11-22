@@ -103,8 +103,9 @@
     if (newRow) newRow.scrollIntoView({ block: 'end' });
   });
 
-  var importInput = $('closedDayImportFile');
   var SHEET_SPEC = {
+    sheetName: '休業日',
+    load: function () { return ClosedDayStore.load(); },
     columns: [
       { key: 'date', label: '日付', type: 'date', required: true },
       { key: 'name', label: '名称', type: 'text', required: true },
@@ -123,22 +124,7 @@
     refresh: render
   };
 
-  $('closedDayExport').addEventListener('click', function () {
-    StoreImport.exportRows({
-      columns: SHEET_SPEC.columns,
-      sheetName: '休業日'
-    }, ClosedDayStore.load(), '休業日.xlsx');
-  });
-
-  $('closedDayImport').addEventListener('click', function () {
-    importInput.value = '';
-    importInput.click();
-  });
-  importInput.addEventListener('change', function () {
-    var file = importInput.files && importInput.files[0];
-    if (!file) return;
-    StoreImport.run(file, SHEET_SPEC);
-  });
+  StoreImport.bind(SHEET_SPEC, { export: 'closedDayExport', import: 'closedDayImport', file: 'closedDayImportFile', fileName: '休業日.xlsx' });
 
   render();
 })();

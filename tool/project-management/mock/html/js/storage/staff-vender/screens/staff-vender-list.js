@@ -20,3 +20,36 @@
 
   document.getElementById('staffVenderCount').textContent = list.length;
 })();
+
+(function () {
+  var SHEET_SPEC = {
+    sheetName: '実施担当ベンダー',
+    load: function () { return StaffVenderStore.load(); },
+    columns: [
+      { key: 'code', label: 'コード', type: 'text', required: false },
+      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'tel', label: '電話番号', type: 'text', required: false },
+      { key: 'address', label: '住所', type: 'text', required: false },
+      { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
+      { key: 'contactName', label: '窓口担当者名', type: 'text', required: false },
+      { key: 'contactEmail', label: 'メールアドレス', type: 'text', required: false },
+      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+    ],
+    existingKeys: function () { return StaffVenderStore.load().map(function (v) { return v.code; }); },
+    keyOf: function (o) { return o.code; },
+    add: function (o) {
+      var list = StaffVenderStore.load();
+      list.push({ code: o.code || StaffVenderStore.nextCode(list), name: o.name, tel: o.tel, address: o.address, memo: o.memo, contactName: o.contactName, contactEmail: o.contactEmail, status: o.status });
+      StaffVenderStore.save(list);
+    },
+    update: function (o) {
+      var list = StaffVenderStore.load();
+      list.forEach(function (v) {
+        if (v.code === o.code) { v.name = o.name; v.tel = o.tel; v.address = o.address; v.memo = o.memo; v.contactName = o.contactName; v.contactEmail = o.contactEmail; v.status = o.status; }
+      });
+      StaffVenderStore.save(list);
+    },
+    refresh: function () { location.reload(); }
+  };
+  StoreImport.bind(SHEET_SPEC, { export: 'staffVenderExport', import: 'staffVenderImport', file: 'staffVenderImportFile', fileName: '実施担当ベンダー.xlsx' });
+})();

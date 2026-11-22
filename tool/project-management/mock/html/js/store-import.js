@@ -17,7 +17,7 @@
       if (!v && col.required) { out.errors.push(rowNo + '行目: ' + col.label + 'がありません'); return null; }
       if (v && col.type === 'date' && !/^\d{4}\/\d{2}\/\d{2}$/.test(v)) { out.errors.push(rowNo + '行目: ' + col.label + 'の形式が不正です（' + v + '）'); return null; }
       if (v && col.type === 'select' && col.options.indexOf(v) === -1) { out.errors.push(rowNo + '行目: ' + col.label + 'が不正です（' + v + '）'); return null; }
-      obj[col.key] = v;
+      obj[col.key] = col.parse ? col.parse(v) : v;
     }
     return obj;
   }
@@ -47,7 +47,7 @@
         var obj = checkRow(aoa[r], spec, r + 1, out);
         if (!obj) continue;
         var key = spec.keyOf(obj);
-        if (seen.indexOf(key) !== -1) { out.errors.push((r + 1) + '行目: 同じキーがファイル内にあります（' + key + '）'); continue; }
+        if (key && seen.indexOf(key) !== -1) { out.errors.push((r + 1) + '行目: 同じキーがファイル内にあります（' + key + '）'); continue; }
         seen.push(key);
         if (existing.indexOf(key) !== -1) {
           if (spec.update) updates.push(obj);
@@ -76,7 +76,10 @@
   function exportRows(spec, rows, fileName) {
     var head = spec.columns.map(function (col) { return col.label; });
     var body = rows.map(function (row) {
-      return spec.columns.map(function (col) { return row[col.key] === undefined ? '' : row[col.key]; });
+      return spec.columns.map(function (col) {
+        if (col.format) return col.format(row);
+        return row[col.key] === undefined ? '' : row[col.key];
+      });
     });
     var ws = XLSX.utils.aoa_to_sheet([head].concat(body));
     var HEAD = { font: { bold: true, color: { rgb: 'FFFFFF' } }, fill: { patternType: 'solid', fgColor: { rgb: '1C2B45' } }, alignment: { horizontal: 'center', vertical: 'center', wrapText: true }, border: { top: { style: 'thin', color: { rgb: '8A94A6' } }, bottom: { style: 'thin', color: { rgb: '8A94A6' } }, left: { style: 'thin', color: { rgb: '8A94A6' } }, right: { style: 'thin', color: { rgb: '8A94A6' } } } };
@@ -90,5 +93,31 @@
     XLSX.writeFile(wb, fileName);
   }
 
-  window.StoreImport = { run: run, exportRows: exportRows };
+  function bind(spec, ids) {
+    var exportBtn = document.getElementById(ids.export);
+    var importBtn = document.getElementById(ids.import);
+    var input = document.getElementById(ids.file);
+    exportBtn.addEventListener('click', function () {
+      exportRows(spec, spec.load(), ids.fileName);
+    });
+    importBtn.addEventListener('click', function () {
+      input.value = '';
+      input.click();
+    });
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      if (file) run(file, spec);
+    });
+  }
+
+  function codeByName(store, name) {
+    var t = store.load().filter(function (x) { return x.name === name; })[0];
+    return t ? t.code : '';
+  }
+
+  function numOf(v) {
+    return v === '' || v === undefined ? '' : Number(v);
+  }
+
+  window.StoreImport = { run: run, exportRows: exportRows, bind: bind, codeByName: codeByName, numOf: numOf };
 })();

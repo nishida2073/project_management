@@ -22,3 +22,37 @@
 
   document.getElementById('locationCount').textContent = list.length;
 })();
+
+(function () {
+  var SHEET_SPEC = {
+    sheetName: 'ロケーション',
+    load: function () { return LocationStore.load(); },
+    columns: [
+      { key: 'code', label: 'コード', type: 'text', required: false },
+      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'type', label: 'ロケーション区分', type: 'select', required: true, options: LocationTypeStore.load().map(function (t) { return t.name; }),
+        format: function (r) { return LocationTypeStore.nameOf(r.type); },
+        parse: function (t) { return StoreImport.codeByName(LocationTypeStore, t); } },
+      { key: 'tel', label: '電話番号', type: 'text', required: false },
+      { key: 'address', label: '住所', type: 'text', required: false },
+      { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
+      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+    ],
+    existingKeys: function () { return LocationStore.load().map(function (l) { return l.code; }); },
+    keyOf: function (o) { return o.code; },
+    add: function (o) {
+      var list = LocationStore.load();
+      list.push({ code: o.code || LocationStore.nextCode(list), name: o.name, type: o.type, tel: o.tel, address: o.address, memo: o.memo, status: o.status });
+      LocationStore.save(list);
+    },
+    update: function (o) {
+      var list = LocationStore.load();
+      list.forEach(function (l) {
+        if (l.code === o.code) { l.name = o.name; l.type = o.type; l.tel = o.tel; l.address = o.address; l.memo = o.memo; l.status = o.status; }
+      });
+      LocationStore.save(list);
+    },
+    refresh: function () { location.reload(); }
+  };
+  StoreImport.bind(SHEET_SPEC, { export: 'locationExport', import: 'locationImport', file: 'locationImportFile', fileName: 'ロケーション.xlsx' });
+})();

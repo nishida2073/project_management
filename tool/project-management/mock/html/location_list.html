@@ -27,6 +27,9 @@
 
       <div class="list-toolbar">
         <a class="nav-btn" href="location_regist.html">新規登録</a>
+        <div class="nav-btn" id="locationImport">インポート</div>
+        <div class="nav-btn" id="locationExport">エクスポート</div>
+        <input type="file" id="locationImportFile" class="is-hidden" accept=".xlsx">
       </div>
 
       <div class="table-card">
@@ -61,6 +64,8 @@
 <script src="js/column-resize.js" defer></script>
 <script src="js/storage/location-type/store/location-type-store.js"></script>
 <script src="js/storage/location/store/location-store.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="js/store-import.js"></script>
 <script src="js/storage/location/screens/location-list.js"></script>
 <script src="js/list-filter-auto.js"></script>
 <script src="js/list-filter.js"></script><script src="js/pagination.js"></script>

@@ -36,3 +36,42 @@
 
   document.getElementById('userCount').textContent = list.length;
 })();
+
+(function () {
+  var SHEET_SPEC = {
+    sheetName: 'ユーザー',
+    load: function () { return UserStore.load(); },
+    columns: [
+      { key: 'code', label: 'コード', type: 'text', required: false },
+      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'email', label: 'メールアドレス', type: 'text', required: true },
+      { key: 'authority', label: '権限', type: 'select', required: true, options: UserRoleStore.load().map(function (r) { return r.name; }),
+        format: function (r) { return UserRoleStore.nameOf(r.authority); },
+        parse: function (t) { return StoreImport.codeByName(UserRoleStore, t); } },
+      { key: 'password', label: 'パスワード', type: 'text', required: false, format: function (r) { return r.password || ''; } },
+      { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
+      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+    ],
+    existingKeys: function () { return UserStore.load().map(function (u) { return u.code; }); },
+    keyOf: function (o) { return o.code; },
+    add: function (o) {
+      var list = UserStore.load();
+      var rec = { code: o.code || UserStore.nextCode(list), name: o.name, email: o.email, authority: o.authority, memo: o.memo, status: o.status };
+      if (o.password) rec.password = o.password;
+      list.push(rec);
+      UserStore.save(list);
+    },
+    update: function (o) {
+      var list = UserStore.load();
+      list.forEach(function (u) {
+        if (u.code === o.code) {
+          u.name = o.name; u.email = o.email; u.authority = o.authority; u.memo = o.memo; u.status = o.status;
+          if (o.password) u.password = o.password;
+        }
+      });
+      UserStore.save(list);
+    },
+    refresh: function () { location.reload(); }
+  };
+  StoreImport.bind(SHEET_SPEC, { export: 'userExport', import: 'userImport', file: 'userImportFile', fileName: 'ユーザー.xlsx' });
+})();
