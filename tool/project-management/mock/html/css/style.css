@@ -200,7 +200,7 @@ thead th.sticky { background: #f6f8fb; z-index: 3; }
 .cal-event.orange { background: #fff2e2; color: #d97c1e; }
 .cal-line + .cal-line { border-top: 1px solid #b9cdf5; margin-top: 3px; padding-top: 3px; }
 .day-table td.day-date.sat { color: #2f6fed; }
-.day-table td.day-date.sun, .day-table td.day-date.holiday { color: #d43c40; }
+.day-table td.day-date.sun, .day-table td.day-date.closed-day { color: #d43c40; }
 .day-table th, .day-table td { border: 1px solid #e6eaf1; }
 .day-table td.day-date.sticky, .day-table th.sticky { left: 0; }
 .day-table .cal-event { margin-bottom: 2px; min-width: 120px; }
@@ -359,8 +359,8 @@ span.link-state-tag { width: 80px; text-align: center; box-sizing: border-box; p
 .date-picker .dp-day.muted { color: #c3c9d4; }
 .date-picker .dp-day.sat { color: #2f6fed; }
 .date-picker .dp-day.sun { color: #d43c40; }
-.date-picker .dp-day.holiday { color: #d43c40; }
-.date-picker .dp-day.holiday.disabled { cursor: not-allowed; }
+.date-picker .dp-day.closed-day { color: #d43c40; }
+.date-picker .dp-day.closed-day.disabled { cursor: not-allowed; }
 .date-picker .dp-day.disabled { cursor: not-allowed; }
 .date-picker .dp-day.selected { background: #2f6fed; color: #fff; font-weight: 700; }
 .date-picker.month-picker .dp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }

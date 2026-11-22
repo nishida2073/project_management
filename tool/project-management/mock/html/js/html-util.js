@@ -59,8 +59,8 @@
     var n = 0;
     for (var d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
       var dow = d.getDay();
-      var holiday = window.HolidayStore ? HolidayStore.isHoliday(fmtDate(d)) : false;
-      if (dow !== 0 && dow !== 6 && !holiday) n++;
+      var closedDay = window.ClosedDayStore ? ClosedDayStore.isClosedDay(fmtDate(d)) : false;
+      if (dow !== 0 && dow !== 6 && !closedDay) n++;
     }
     return n;
   };
@@ -74,8 +74,8 @@
     while (remaining > 0) {
       d.setDate(d.getDate() + 1);
       var dow = d.getDay();
-      var holiday = window.HolidayStore ? window.HolidayStore.isHoliday(fmtDate(d)) : false;
-      if (dow !== 0 && dow !== 6 && !holiday) remaining--;
+      var closedDay = window.ClosedDayStore ? window.ClosedDayStore.isClosedDay(fmtDate(d)) : false;
+      if (dow !== 0 && dow !== 6 && !closedDay) remaining--;
     }
     return fmtDate(d);
   };

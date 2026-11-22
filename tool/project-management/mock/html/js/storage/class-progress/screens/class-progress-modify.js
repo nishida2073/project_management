@@ -19,7 +19,7 @@ function setDisabledRow(tr, off) {
       var d = new Date(classStart);
       d.setDate(d.getDate() + days);
       var step = days < 0 ? -1 : 1;
-      while (d.getDay() === 0 || d.getDay() === 6 || HolidayStore.isHoliday(d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()))) d.setDate(d.getDate() + step);
+      while (d.getDay() === 0 || d.getDay() === 6 || ClosedDayStore.isClosedDay(d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()))) d.setDate(d.getDate() + step);
       return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
     }
     function loadProgress() { return ProgressStore.load(); }
@@ -91,11 +91,11 @@ function setDisabledRow(tr, off) {
       var company = task ? StaffVenderStore.nameOf(task.company) : '-';
 
       var planCell = plan
-        ? '<div class="mini-control js-date" data-no-holiday>' + esc(plan) + '<span class="caret">▾</span></div>'
-        : '<div class="mini-control js-date" data-no-holiday><span class="caret">▾</span></div>';
+        ? '<div class="mini-control js-date" data-no-closed-day>' + esc(plan) + '<span class="caret">▾</span></div>'
+        : '<div class="mini-control js-date" data-no-closed-day><span class="caret">▾</span></div>';
       var actualCell = actual
-        ? '<div class="mini-control js-date" data-no-holiday>' + esc(actual) + '<span class="caret">▾</span></div>'
-        : '<div class="mini-control js-date" data-no-holiday><span class="caret">▾</span></div>';
+        ? '<div class="mini-control js-date" data-no-closed-day>' + esc(actual) + '<span class="caret">▾</span></div>'
+        : '<div class="mini-control js-date" data-no-closed-day><span class="caret">▾</span></div>';
 
       var tr = document.createElement('tr');
       tr.setAttribute('data-no', s.no);

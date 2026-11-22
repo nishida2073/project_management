@@ -14,7 +14,7 @@
   function create(opts) {
     var root = opts.root;
     var onEventClick = opts.onEventClick || function () {};
-    var isHoliday = opts.isHoliday || function () { return false; };
+    var isClosedDay = opts.isClosedDay || function () { return false; };
     var today = new Date();
     var month = new Date(today.getFullYear(), today.getMonth(), 1);
     var columns = [];
@@ -36,7 +36,7 @@
           var date = new Date(y, m, d);
           var key = dateKey(date);
           var dayEvents = events[key] || [];
-          var cls = isHoliday(key) ? 'holiday' : (date.getDay() === 0 ? 'sun' : (date.getDay() === 6 ? 'sat' : ''));
+          var cls = isClosedDay(key) ? 'closed-day' : (date.getDay() === 0 ? 'sun' : (date.getDay() === 6 ? 'sat' : ''));
           rows += '<tr><td class="sticky day-date ' + cls + '">' + date.getDate() + '（' + WEEK[date.getDay()] + '）</td>';
           columns.forEach(function (c) {
             rows += '<td>';

@@ -16,6 +16,7 @@
     { sub: 'staffVender', label: '実施担当ベンダー', href: 'staff_vender_list.html' },
     { sub: 'staff', label: '実施担当者', href: 'staff_list.html' },
     { sub: 'task', label: 'タスク', href: 'task_list.html' },
+    { sub: 'closedDay', label: '休業日', href: 'closed_day_settings.html' },
     { sub: 'customAttribute', label: '項目設定', href: 'custom_attribute_settings.html' },
     { title: 'システム管理' },
     { sub: 'user', label: 'ユーザー', href: 'user_list.html' }

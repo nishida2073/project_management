@@ -15,6 +15,7 @@
     <script src="js/topbar.js"></script>
     <div class="content">
       <div class="filter-panel">
+        <div class="field"><label>項目名</label><input type="text" class="field-control-input" id="nameFilter"></div>
         <div class="field"><label>対象</label><div class="control small js-select" id="targetFilter" data-options="すべて,クラス,登壇依頼">すべて<span class="caret">▾</span></div></div>
         <div class="nav-btn" id="searchBtn">検索</div>
       </div>
@@ -27,10 +28,10 @@
         <table>
           <thead>
             <tr>
-              <th>対象</th>
               <th>項目名</th>
+              <th>対象</th>
               <th>種別</th>
-              <th>選択肢</th>
+              <th class="no-sort">選択肢</th>
               <th>一覧に表示</th>
               <th class="col-actions" data-min-width="160">操作</th>
             </tr>
@@ -48,7 +49,9 @@
 <script src="js/storage/custom-attribute/store/custom-attribute-store.js"></script>
 <script src="js/storage/custom-attribute/screens/custom-attribute-settings.js"></script>
 <script src="js/select.js" defer></script>
+<script src="js/table-sort.js" defer></script>
 <script src="js/list-filter-auto.js"></script>
+<script src="js/filter-memory.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 </body>
 </html>

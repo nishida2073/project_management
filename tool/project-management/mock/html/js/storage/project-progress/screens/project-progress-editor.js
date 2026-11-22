@@ -35,8 +35,8 @@ function setDisabledRow(tr, off) {
         '<td class="step-name sticky">' + esc(name) + '</td>' +
         '<td><div class="target-seg"><label class="target-opt"><input type="radio" name="target' + i + '" value="あり"' + (s.na ? '' : ' checked') + '><span>あり</span></label>' +
           '<label class="target-opt off"><input type="radio" name="target' + i + '" value="なし"' + (s.na ? ' checked' : '') + '><span>なし</span></label></div></td>' +
-        '<td><div class="mini-control js-date plan-input" data-no-holiday>' + esc(s.plan || '') + '<span class="caret">▾</span></div></td>' +
-        '<td><div class="mini-control js-date actual-input" data-no-holiday>' + esc(s.actual || '') + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="mini-control js-date plan-input" data-no-closed-day>' + esc(s.plan || '') + '<span class="caret">▾</span></div></td>' +
+        '<td><div class="mini-control js-date actual-input" data-no-closed-day>' + esc(s.actual || '') + '<span class="caret">▾</span></div></td>' +
         '<td><div class="mini-control wide js-select owner-input" data-options="' + esc(ownerNames.join(',')) + '">' + esc(StaffStore.nameOf(s.owner || '') || '選択してください') + '<span class="caret">▾</span></div></td>' +
         '<td>' +
           '<div class="status-select status-combo ' + STATUS_COLOR[s.status] + ' js-select status-input"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[s.status] + '<span class="caret">▾</span></div></td>' +

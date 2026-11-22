@@ -115,9 +115,9 @@
         var ds = viewY + '/' + pad(viewM) + '/' + pad(d);
         if (dow === 0) cell.classList.add('sun');
         else if (dow === 6) cell.classList.add('sat');
-        var isHol = !!(window.HolidayStore && HolidayStore.isHoliday(ds));
-        var blocked = (isHol || dow === 0 || dow === 6) && el.hasAttribute('data-no-holiday');
-        if (isHol) cell.classList.add('holiday');
+        var isClosed = !!(window.ClosedDayStore && ClosedDayStore.isClosedDay(ds));
+        var blocked = (isClosed || dow === 0 || dow === 6) && el.hasAttribute('data-no-closed-day');
+        if (isClosed) cell.classList.add('closed-day');
         if (blocked) cell.classList.add('disabled');
         if (current.y === viewY && current.m === viewM && current.d === d) cell.classList.add('selected');
         (function (dd) {

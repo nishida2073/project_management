@@ -96,8 +96,8 @@
       var initOptions = (byType[src.locationType] || []).join(',');
       html += '<div class="form-section copy-section">複製 ' + k + '</div>' +
         '<div class="form-section">クラス</div>' +
-        '<div class="form-field"><label>開始日<span class="req">必須</span></label><div class="form-control js-date" data-no-holiday data-k="' + k + '" data-f="start">' + esc(src.start) + '<span class="caret">▾</span></div></div>' +
-        '<div class="form-field"><label>終了日<span class="req">必須</span></label><div class="form-control js-date" data-no-holiday data-k="' + k + '" data-f="end">' + esc(src.end) + '<span class="caret">▾</span></div></div>' +
+        '<div class="form-field"><label>開始日<span class="req">必須</span></label><div class="form-control js-date" data-no-closed-day data-k="' + k + '" data-f="start">' + esc(src.start) + '<span class="caret">▾</span></div></div>' +
+        '<div class="form-field"><label>終了日<span class="req">必須</span></label><div class="form-control js-date" data-no-closed-day data-k="' + k + '" data-f="end">' + esc(src.end) + '<span class="caret">▾</span></div></div>' +
         '<div class="form-section">受講生</div>' +
         numberSelect(k, { key: 'people', label: '受講人数' }, '10,15,20,24,30,35,40,50', '', false) + empty() +
         '<div class="form-section">講師</div>' +

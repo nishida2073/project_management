@@ -27,7 +27,7 @@
     var d = new Date(base);
     d.setDate(d.getDate() + days);
     var step = days < 0 ? -1 : 1;
-    while (d.getDay() === 0 || d.getDay() === 6 || HolidayStore.isHoliday(d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()))) d.setDate(d.getDate() + step);
+    while (d.getDay() === 0 || d.getDay() === 6 || ClosedDayStore.isClosedDay(d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()))) d.setDate(d.getDate() + step);
     return d.getFullYear() + '/' + pad2(d.getMonth() + 1) + '/' + pad2(d.getDate());
   }
 
@@ -262,9 +262,9 @@
         '<label class="radio-option"><input type="radio" name="sdTargetRadio" value="なし"' + (sv.na ? ' checked' : '') + '><span class="radio-dot"></span><span class="tag gray">なし</span></label>' +
       '</div>' +
       '<label class="input-dialog-label">予定日</label>' +
-      '<div class="form-control js-date" id="sdPlan" data-no-holiday>' + esc(planValue || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="sdPlan" data-no-closed-day>' + esc(planValue || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施日</label>' +
-      '<div class="form-control js-date" id="sdActual" data-no-holiday>' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="sdActual" data-no-closed-day>' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施担当者</label>' +
       '<div class="form-control js-select" id="sdOwner" data-options="' + esc(owners.join(',')) + '">' + esc(ownerName || '選択してください') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">進捗</label>' +
@@ -358,7 +358,7 @@
 
   var calView = DayTable.create({
     root: document.getElementById('calendarView'),
-    isHoliday: function (k) { return HolidayStore.isHoliday(k); },
+    isClosedDay: function (k) { return ClosedDayStore.isClosedDay(k); },
     onEventClick: function (id, step) { openStepDialog(id, step); }
   });
 

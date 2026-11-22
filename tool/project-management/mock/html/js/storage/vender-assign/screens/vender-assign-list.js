@@ -77,7 +77,7 @@
 
   var calView = DayTable.create({
     root: document.getElementById('calendarView'),
-    isHoliday: function (k) { return HolidayStore.isHoliday(k); },
+    isClosedDay: function (k) { return ClosedDayStore.isClosedDay(k); },
     onEventClick: function (id) { location.href = 'vender_assign_modify.html?id=' + encodeURIComponent(id); }
   });
 
@@ -109,7 +109,7 @@
       if (!from) return;
       for (var t = new Date(from.getFullYear(), from.getMonth(), from.getDate()); t <= to; t.setDate(t.getDate() + 1)) {
         var key = ymd(t);
-        if (t.getDay() === 0 || t.getDay() === 6 || HolidayStore.isHoliday(key)) continue;
+        if (t.getDay() === 0 || t.getDay() === 6 || ClosedDayStore.isClosedDay(key)) continue;
         (events[key] = events[key] || []).push({ colId: id, rowId: id, stepId: 0, lineHtml: lines, color: '' });
       }
     });

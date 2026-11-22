@@ -175,9 +175,9 @@
         '<label class="radio-option"><input type="radio" name="pdTargetRadio" value="なし"' + (sv.na ? ' checked' : '') + '><span class="radio-dot"></span><span class="tag gray">なし</span></label>' +
       '</div>' +
       '<label class="input-dialog-label">予定日</label>' +
-      '<div class="form-control js-date" id="pdPlan" data-no-holiday>' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="pdPlan" data-no-closed-day>' + esc(sv.plan || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施日</label>' +
-      '<div class="form-control js-date" id="pdActual" data-no-holiday>' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
+      '<div class="form-control js-date" id="pdActual" data-no-closed-day>' + esc(sv.actual || '') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">実施担当者</label>' +
       '<div class="form-control js-select" id="pdOwner" data-options="' + esc(StaffStore.candidates({ affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: ['実施'] }).join(',')) + '">' + esc(StaffStore.nameOf(sv.owner || '') || '選択してください') + '<span class="caret">▾</span></div>' +
       '<label class="input-dialog-label">進捗</label>' +
@@ -224,7 +224,7 @@
 
   var calView = DayTable.create({
     root: document.getElementById('calendarView'),
-    isHoliday: function (k) { return HolidayStore.isHoliday(k); },
+    isClosedDay: function (k) { return ClosedDayStore.isClosedDay(k); },
     onEventClick: function (code, step) { openProjectStepDialog(code, step); }
   });
 

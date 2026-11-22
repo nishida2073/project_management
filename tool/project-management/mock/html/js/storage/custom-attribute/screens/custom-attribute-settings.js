@@ -16,8 +16,8 @@
 
   function viewRow(a) {
     return '<tr class="cell-row" data-code="' + esc(a.code) + '">' +
-      '<td>' + esc(targetOf(a.target)) + '</td>' +
       '<td>' + esc(a.name) + '</td>' +
+      '<td>' + esc(targetOf(a.target)) + '</td>' +
       '<td>' + esc(CustomAttributeStore.TYPES[a.type] || '') + '</td>' +
       '<td>' + (a.type === 'select' ? esc(a.options.join(', ')) : '-') + '</td>' +
       '<td>' + (a.showInList ? '表示する' : '表示しない') + '</td>' +
@@ -33,10 +33,10 @@
     var optionChips = isNew ? '' : a.options.map(function (o) { return chipHtml(o); }).join('');
     var shown = !isNew && a.showInList;
     return '<tr class="cell-row" data-code="' + (isNew ? '' : esc(a.code)) + '" data-new="' + (isNew ? '1' : '') + '" data-type="' + (isNew ? '' : esc(a.type)) + '">' +
+      '<td><input type="text" class="mini-control cell-input" data-f="name" value="' + esc(name) + '"></td>' +
       '<td>' + (isNew
         ? '<div class="mini-control js-select" data-f="target" data-options="' + esc(targetOptions()) + '">' + esc(target || '選択してください') + '<span class="caret">▾</span></div>'
         : '<div class="mini-control readonly">' + esc(target) + '</div>') + '</td>' +
-      '<td><input type="text" class="mini-control cell-input" data-f="name" value="' + esc(name) + '"></td>' +
       '<td>' + (isNew
         ? '<div class="mini-control js-select" data-f="type" data-options="' + esc(typeOptions()) + '">' + esc(type || '選択してください') + '<span class="caret">▾</span></div>'
         : '<div class="mini-control readonly">' + esc(type) + '</div>') + '</td>' +
@@ -81,7 +81,6 @@
       InputDialog.open({
         title: '選択肢を追加',
         label: '選択肢',
-        placeholder: '例）A教室',
         validate: function (value) {
           if (!value) return '選択肢を入力してください';
           if (optionValues(box).indexOf(value) !== -1) return '同じ選択肢が既に登録されています';
@@ -98,7 +97,8 @@
   function render() {
     var list = CustomAttributeStore.load().filter(function (a) {
       var v = placeholderToEmpty(ownText($('targetFilter')));
-      return !v || v === 'すべて' || targetOf(a.target) === v;
+      var kw = $('nameFilter').value.trim().toLowerCase();
+      return (!v || v === 'すべて' || targetOf(a.target) === v) && (!kw || a.name.toLowerCase().indexOf(kw) !== -1);
     });
     var rows = list.map(function (a) {
       return editing && editing.code === a.code ? editRow(a) : viewRow(a);
@@ -182,8 +182,13 @@
     if (editing && editing.code === null) return;
     editing = { code: null };
     render();
+    var newRow = body.querySelector('tr[data-new="1"]');
+    if (newRow) newRow.scrollIntoView({ block: 'end' });
   });
 
   $('searchBtn').addEventListener('click', render);
+  $('nameFilter').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') $('searchBtn').click();
+  });
   render();
 })();

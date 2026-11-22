@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'holidayList';
+  var KEY = 'closedDayList';
 
   var SEED = [
     { date: '2026/01/01', name: '元日', type: '祝日' },
@@ -49,9 +49,9 @@
     save(load().filter(function (h) { return h.date !== date; }));
   }
 
-  function isHoliday(date) {
+  function isClosedDay(date) {
     return load().some(function (h) { return h.date === date; });
   }
 
-  window.HolidayStore = { load: load, save: save, add: add, remove: remove, isHoliday: isHoliday };
+  window.ClosedDayStore = { load: load, save: save, add: add, remove: remove, isClosedDay: isClosedDay };
 })();

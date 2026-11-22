@@ -14,6 +14,12 @@
         control.innerHTML = '選択してください<span class="caret">▾</span>';
         field.appendChild(control);
         if (window.bindJsSelect) window.bindJsSelect(control);
+      } else if (a.type === 'date') {
+        control = document.createElement('div');
+        control.className = 'form-control js-date';
+        control.innerHTML = '<span class="caret">▾</span>';
+        field.appendChild(control);
+        if (window.bindDatePicker) window.bindDatePicker(control);
       } else {
         control = document.createElement('input');
         control.type = 'text';
