@@ -50,9 +50,11 @@
   }
 
   function applyOptions() {
-    var projectStaff = StaffStore.candidates({ affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-01')] }).join(',');
-    document.getElementById('pm').setAttribute('data-options', projectStaff);
-    document.getElementById('plBox').setAttribute('data-options', projectStaff);
+    var base = { affiliations: [AffiliationStore.nameOf('INTERNAL')], roles: ['案件'], jobTypes: [JobTypeStore.nameOf('JT-02')] };
+    var pmOptions = StaffStore.candidates(Object.assign({ positions: [PositionStore.nameOf('PS-01')] }, base)).join(',');
+    var plOptions = StaffStore.candidates(Object.assign({ positions: [PositionStore.nameOf('PS-02')] }, base)).join(',');
+    document.getElementById('pm').setAttribute('data-options', pmOptions);
+    document.getElementById('plBox').setAttribute('data-options', plOptions);
     document.getElementById('customer').setAttribute('data-options', CustomerStore.load().filter(function (c) { return c.status !== OperatingStatusStore.nameOf('STOPPED'); }).map(function (c) { return c.name; }).join(','));
   }
 

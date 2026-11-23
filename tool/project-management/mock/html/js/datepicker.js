@@ -120,14 +120,14 @@
         if (isClosed) cell.classList.add('closed-day');
         if (blocked) cell.classList.add('disabled');
         if (current.y === viewY && current.m === viewM && current.d === d) cell.classList.add('selected');
-        (function (dd) {
+        (function (dd, isBlocked) {
           cell.addEventListener('click', function (e) {
             e.stopPropagation();
-            if (blocked) return;
+            if (isBlocked) return;
             setValue(el, viewY + '/' + pad(viewM) + '/' + pad(dd));
             el.classList.remove('open');
           });
-        })(d);
+        })(d, blocked);
         grid.appendChild(cell);
       }
       var totalCells = firstDow + daysInMonth;

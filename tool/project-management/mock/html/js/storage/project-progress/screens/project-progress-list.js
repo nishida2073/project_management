@@ -17,7 +17,7 @@
     var actual = s.actual ? s.actual : '-';
     return '<div class="status-chip status-chip-h"><div class="status-row"><span class="status-label state-tag ' + COLOR[s.status] + '">' + LABEL[s.status] + '</span></div>' +
       '<div class="dates-col"><div class="dates"><span>予：' + dashOr(s.plan) + '</span></div>' +
-      '<div class="dates"><span>実：' + esc(actual) + '</span></div></div></div>';
+      '<div class="dates"><span>実：' + esc(actual) + ' ' + esc(StaffStore.nameOf(s.owner || '')) + '</span></div></div></div>';
   }
 
   function overallKey(steps) {
