@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'AT-';
   var KEY = 'customAttributeList';
 
   var TYPES = { text: '文字', number: '数字', date: '日付', select: '選択' };
@@ -19,10 +20,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (a) {
-      var n = parseInt(String(a.code).replace('AT-', ''), 10);
+      var n = parseInt(String(a.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'AT-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   function add(def) {

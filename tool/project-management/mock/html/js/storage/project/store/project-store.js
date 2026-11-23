@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'PJ-';
   var KEY = 'projectList';
 
   var SEED = [
@@ -28,10 +29,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (p) {
-      var n = parseInt(String(p.code).replace('PJ-', ''), 10);
+      var n = parseInt(String(p.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'PJ-' + String(max + 1).padStart(4, '0');
+    return PREFIX + String(max + 1).padStart(4, '0');
   }
 
   function map() {

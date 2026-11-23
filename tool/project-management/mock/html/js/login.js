@@ -1,7 +1,4 @@
 (function () {
-  ['userList', 'userRoleList', 'staffList'].forEach(function (key) {
-    try { localStorage.removeItem(key); } catch (e) {}
-  });
   function login() {
     var email = $('loginId').value.trim();
     var password = $('loginPassword').value;

@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'LOC-';
   var KEY = 'locationList';
 
   var SEED = [
@@ -25,10 +26,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (l) {
-      var n = parseInt(String(l.code).replace('LOC-', ''), 10);
+      var n = parseInt(String(l.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'LOC-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   function namesByType() {

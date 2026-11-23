@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'STV-';
   var KEY = 'staffVenderList';
 
   var SEED = [
@@ -47,10 +48,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (c) {
-      var n = parseInt(String(c.code).replace('STV-', ''), 10);
+      var n = parseInt(String(c.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'STV-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   window.StaffVenderStore = { load: load, save: save, find: find, nameOf: nameOf, codeOf: codeOf, activeNames: activeNames, nextCode: nextCode, INTERNAL: INTERNAL };

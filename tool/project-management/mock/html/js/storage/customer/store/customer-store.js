@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'CUS-';
   var KEY = 'customerList';
 
   var SEED = [
@@ -27,10 +28,10 @@
   function nextId(list) {
     var max = 0;
     list.forEach(function (c) {
-      var n = parseInt(String(c.id).replace('CUS-', ''), 10);
+      var n = parseInt(String(c.id).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'CUS-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   function names() {

@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'courseList_v2';
+  var KEY = 'courseList';
 
   function month(counts) {
     var m = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];

@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'jobTypeList_v2';
+  var KEY = 'jobTypeList';
   var PREFIX = 'JT-';
 
   var SEED = [

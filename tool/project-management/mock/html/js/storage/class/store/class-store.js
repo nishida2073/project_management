@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'CLS-';
   var KEY = 'classList';
 
 
@@ -96,10 +97,10 @@
   function nextId(list) {
     var max = 0;
     list.forEach(function (r) {
-      var n = parseInt(String(r.id).replace('CLS-', ''), 10);
+      var n = parseInt(String(r.id).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'CLS-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   function nextLessonNo(list, courseCode) {

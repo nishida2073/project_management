@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 'userRoleList_v2';
+  var KEY = 'userRoleList';
   var PREFIX = 'AU-';
 
   var SEED = [

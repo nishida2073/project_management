@@ -1,5 +1,6 @@
 (function () {
-  var KEY = 'staffList_v2';
+  var PREFIX = 'STF-';
+  var KEY = 'staffList';
 
   var SEED = [
     { code: 'STF-014', affiliation: '社内', company: '', name: '山口 直人', email: 'yamaguchi@company.co.jp', roles: ['SR-01'], jobTypes: [], positions: ['PS-01'], status: OperatingStatusStore.nameOf('ACTIVE') },
@@ -67,10 +68,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (t) {
-      var n = parseInt(String(t.code).replace('STF-', ''), 10);
+      var n = parseInt(String(t.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'STF-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   function activeNames() {

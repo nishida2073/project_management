@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'TCV-';
   var KEY = 'teacherVenderList';
 
   var SEED = [
@@ -26,10 +27,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (v) {
-      var n = parseInt(String(v.code).replace('TCV-', ''), 10);
+      var n = parseInt(String(v.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'TCV-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   function activeNames() {

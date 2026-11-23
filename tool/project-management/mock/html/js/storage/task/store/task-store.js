@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'TSK-';
   var KEY = 'taskList';
   var SEED = [
     { id: 'TSK-001', name: 'クラス登録', kinds: ['TK-01'], order: 1, company: 'INTERNAL', days: -10, workType: 'WT-01', status: OperatingStatusStore.nameOf('ACTIVE') },
@@ -38,10 +39,10 @@
   function nextId(list) {
     var max = 0;
     list.forEach(function (t) {
-      var n = parseInt(String(t.id).replace('TSK-', ''), 10);
+      var n = parseInt(String(t.id).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'TSK-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   window.TaskStore = { load: load, save: save, nextId: nextId };

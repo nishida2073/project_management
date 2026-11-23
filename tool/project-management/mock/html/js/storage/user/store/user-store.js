@@ -1,5 +1,6 @@
 (function () {
-  var KEY = 'userList_v2';
+  var PREFIX = 'USR-';
+  var KEY = 'userList';
 
   var SEED = [
     { code: 'USR-001', name: '山田 太郎', email: 'yamada@company.co.jp', authority: 'AU-01', password: 'pass', status: OperatingStatusStore.nameOf('ACTIVE') },
@@ -32,10 +33,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (u) {
-      var n = parseInt(String(u.code).replace('USR-', ''), 10);
+      var n = parseInt(String(u.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'USR-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   window.UserStore = { load: load, save: save, nextCode: nextCode };

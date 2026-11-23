@@ -1,4 +1,5 @@
 (function () {
+  var PREFIX = 'SPG-';
   var KEY = 'sharedPcGroupList';
 
   var SEED = [
@@ -24,10 +25,10 @@
   function nextCode(list) {
     var max = 0;
     list.forEach(function (g) {
-      var n = parseInt(String(g.code).replace('SPG-', ''), 10);
+      var n = parseInt(String(g.code).replace(PREFIX, ''), 10);
       if (!isNaN(n) && n > max) max = n;
     });
-    return 'SPG-' + String(max + 1).padStart(3, '0');
+    return PREFIX + String(max + 1).padStart(3, '0');
   }
 
   function names() {
