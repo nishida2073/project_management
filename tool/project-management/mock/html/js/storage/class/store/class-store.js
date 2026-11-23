@@ -29,29 +29,26 @@
     return [fmt(start), fmt(end)];
   }
 
-  function rec(id, year, projectCode, courseCode, lessonNo, related, sp, delivery, people, manager, locationType, locationName) {
+  function rec(id, year, projectCode, courseCode, lessonNo, related, sp, delivery, people, manager, locationType, locationName, taskType, classType) {
     return {
-      id: id, year: year, version: '1.0', taskType: 'TK-02', projectCode: projectCode, courseYear: '2026', courseCode: courseCode,
+      id: id, year: year, version: '1.0', taskType: taskType, classType: classType, projectCode: projectCode, courseYear: '2026', courseCode: courseCode,
       lessonNo: lessonNo, related: related, start: sp[0], end: sp[1], delivery: delivery,
       people: people, manager: manager, locationType: locationType, locationName: locationName, memo: ''
     };
   }
 
   var SEED = [
-    rec('CLS-001', '2026', 'PJ-2602', 'BC02B', '001', ['002', '003'], span('before', 3, 0), 'DL-01', '24', 'STF-045', 'LT-01', 'LOC-001'),
-    rec('CLS-002', '2026', 'PJ-2602', 'BC02B', '002', ['001', '003'], span('during', 3, 0), 'DL-02', '20', 'STF-068', 'LT-01', 'LOC-002'),
-    rec('CLS-003', '2026', 'PJ-2604', 'BC07A', '001', ['002'], span('after', 2, 0), 'DL-02', '18', 'STF-068', 'LT-01', 'LOC-002'),
-    rec('CLS-004', '2026', 'PJ-2603', 'ND02B', '001', [], span('before', 3, 1), 'DL-01', '30', 'STF-065', 'LT-02', 'LOC-003'),
-    rec('CLS-005', '2026', 'PJ-2602', 'BC02B', '003', ['001', '002'], span('after', 3, 1), 'DL-03', '22', 'STF-045', 'LT-01', 'LOC-001'),
-    rec('CLS-006', '2026', 'PJ-2604', 'BC07A', '002', ['001'], span('during', 1, 0), 'DL-02', '40', 'STF-066', 'LT-03', 'LOC-004'),
-    rec('CLS-007', '2026', 'PJ-2603', 'ND02B', '002', ['001', '003'], span('before', 3, 2), 'DL-01', '28', 'STF-065', 'LT-02', 'LOC-003'),
-    rec('CLS-008', '2026', 'PJ-2605', 'CE01B', '001', [], span('after', 2, 2), 'DL-01', '20', 'STF-067', 'LT-01', 'LOC-002'),
-    rec('CLS-009', '2026', 'PJ-2603', 'ND02B', '003', ['001', '002'], span('during', 3, 0), 'DL-01', '25', 'STF-065', 'LT-01', ''),
-    rec('CLS-010', '2026', 'PJ-2605', 'CE01B', '002', [], span('before', 3, 3), 'DL-01', '18', 'STF-067', 'LT-02', 'LOC-003')
+    rec('CLS-001', '2026', 'PJ-2602', 'BC02B', '001', ['002', '003'], span('before', 3, 0), 'DL-01', '24', 'STF-045', 'LT-01', 'LOC-001', 'TK-02', 'CK-02'),
+    rec('CLS-002', '2026', 'PJ-2602', 'BC02B', '002', ['001', '003'], span('during', 3, 0), 'DL-02', '20', 'STF-068', 'LT-01', 'LOC-002', 'TK-01', 'CK-01'),
+    rec('CLS-003', '2026', 'PJ-2604', 'BC07A', '001', ['002'], span('after', 2, 0), 'DL-02', '18', 'STF-068', 'LT-01', 'LOC-002', 'TK-02', 'CK-02'),
+    rec('CLS-004', '2026', 'PJ-2603', 'ND02B', '001', [], span('before', 3, 1), 'DL-01', '30', 'STF-065', 'LT-02', 'LOC-003', 'TK-01', 'CK-01'),
+    rec('CLS-005', '2026', 'PJ-2602', 'BC02B', '003', ['001', '002'], span('after', 3, 1), 'DL-03', '22', 'STF-045', 'LT-01', 'LOC-001', 'TK-02', 'CK-02'),
+    rec('CLS-006', '2026', 'PJ-2604', 'BC07A', '002', ['001'], span('during', 1, 0), 'DL-02', '40', 'STF-066', 'LT-03', 'LOC-004', 'TK-01', 'CK-01'),
+    rec('CLS-007', '2026', 'PJ-2603', 'ND02B', '002', ['001', '003'], span('before', 3, 2), 'DL-01', '28', 'STF-065', 'LT-02', 'LOC-003', 'TK-02', 'CK-02'),
+    rec('CLS-008', '2026', 'PJ-2605', 'CE01B', '001', [], span('after', 2, 2), 'DL-01', '20', 'STF-067', 'LT-01', 'LOC-002', 'TK-01', 'CK-01'),
+    rec('CLS-009', '2026', 'PJ-2603', 'ND02B', '003', ['001', '002'], span('during', 3, 0), 'DL-01', '25', 'STF-065', 'LT-01', '', 'TK-02', 'CK-02'),
+    rec('CLS-010', '2026', 'PJ-2605', 'CE01B', '002', [], span('before', 3, 3), 'DL-01', '18', 'STF-067', 'LT-02', 'LOC-003', 'TK-02', 'CK-02')
   ];
-  SEED.forEach(function (r) {
-    if (['CLS-002', 'CLS-004', 'CLS-006', 'CLS-008'].indexOf(r.id) !== -1) r.taskType = 'TK-01';
-  });
   var TEACHER_COUNTS = {
     'CLS-001': ['1', '1'], 'CLS-002': ['1', '0'], 'CLS-003': ['1', '1'], 'CLS-004': ['2', '0'], 'CLS-005': ['1', '2'],
     'CLS-006': ['1', '0'], 'CLS-007': ['2', '1'], 'CLS-008': ['1', '0'], 'CLS-009': ['1', '1'], 'CLS-010': ['1', '0']

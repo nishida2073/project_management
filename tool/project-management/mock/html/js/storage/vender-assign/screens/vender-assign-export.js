@@ -28,6 +28,7 @@
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
       '<td class="sticky col-course"><div>' + esc(c.name) + '</div><div class="vender-assign-sub">' + esc(r.courseCode) + '</div></td>' +
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div></td>' +
+      '<td class="sticky col-class">' + (r.classType ? '<span class="tag class-type-tag ' + ClassTypeStore.colorOf(r.classType) + '">' + esc(ClassTypeStore.nameOf(r.classType)) + '</span>' : '') + '</td>' +
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + dashOr(classDays(r), '日') + '</td>' +
@@ -50,6 +51,7 @@
     var kw = $('keyword').value.trim().toLowerCase();
     var fitVal = placeholderToEmpty(ownText($('fitFilter'))) || 'すべて';
     var practiceVal = placeholderToEmpty(ownText($('practiceFilter'))) || 'すべて';
+    var classVal = placeholderToEmpty(ownText($('classTypeFilter')));
     var df = placeholderToEmpty(ownText($('dateFrom'))), dt = placeholderToEmpty(ownText($('dateTo')));
     var inRange = function (v, from, to) { if (from && (!v || v < from)) return false; if (to && (!v || v > to)) return false; return true; };
     var dateMatch = function (start, end) { if (!df && !dt) return true; return inRange(start, df, dt) || inRange(end, df, dt); };
@@ -62,7 +64,8 @@
       var fitOk = fitVal === 'すべて' || (fitVal === 'あり') === canRequest;
       var practiceOk = practiceVal === 'すべて' || tr.getAttribute('data-practice') === practiceVal;
       var dateOk = dateMatch(tr.getAttribute('data-start'), tr.getAttribute('data-end'));
-      var ok = (!kw || course.indexOf(kw) !== -1) && fitOk && practiceOk && dateOk;
+      var classOk = !classVal || classVal === 'すべて' || tr.querySelector('.col-class').textContent.trim() === classVal;
+      var ok = (!kw || course.indexOf(kw) !== -1) && fitOk && practiceOk && dateOk && classOk;
       tr.style.display = ok ? '' : 'none';
       if (ok) visible++;
     });
@@ -108,9 +111,9 @@
       if (!row) return;
       var saved = checkState(tr);
       var teacherCells = VenderLines.build(row.cls, code, { check: !!code, includePend: includePendSel });
-      tr.children[8].innerHTML = teacherCells.main;
-      tr.children[10].innerHTML = teacherCells.sub;
-      tr.children[12].innerHTML = teacherCells.special;
+      tr.children[9].innerHTML = teacherCells.main;
+      tr.children[11].innerHTML = teacherCells.sub;
+      tr.children[13].innerHTML = teacherCells.special;
       restoreChecks(tr, saved);
     });
   }
@@ -194,7 +197,7 @@
       items.forEach(function (it) { maxOf[role] = Math.max(maxOf[role], it.counts[role]); });
     });
     if (items.some(function (it) { return it.cls.specialMemo; })) maxOf.special = Math.max(maxOf.special, 1);
-    var header = ['年度', 'コース名', 'コースコード', 'レッスンNo', '開始日', '終了日', '日数'];
+    var header = ['年度', 'コース名', 'コースコード', 'レッスンNo', 'クラス区分', '開始日', '終了日', '日数'];
     var teacherStart = header.length;
     var i;
     function zen(n) { return String.fromCharCode(0xFF10 + n); }
@@ -209,6 +212,7 @@
         c.name,
         it.cls.courseCode,
         it.cls.lessonNo,
+        ClassTypeStore.nameOf(it.cls.classType || ''),
         it.cls.start,
         it.cls.end,
         classDays(it.cls)

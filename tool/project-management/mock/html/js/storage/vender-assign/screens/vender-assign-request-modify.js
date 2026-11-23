@@ -43,6 +43,7 @@
     var code = vendorCode();
     var kw = ($('keyword').value || '').trim().toLowerCase();
     var practiceVal = placeholderToEmpty(ownText($('practiceFilter'))) || 'すべて';
+    var classVal = placeholderToEmpty(ownText($('classTypeFilter')));
     var df = placeholderToEmpty(ownText($('dateFrom'))), dt = placeholderToEmpty(ownText($('dateTo')));
     var inRange = function (v, from, to) { if (from && (!v || v < from)) return false; if (to && (!v || v > to)) return false; return true; };
     var dateMatch = function (start, end) { if (!df && !dt) return true; return inRange(start, df, dt) || inRange(end, df, dt); };
@@ -50,6 +51,7 @@
     rows.filter(function (x) {
       if (practiceVal !== 'すべて' && ClassStore.practiceStatus(x.cls) !== practiceVal) return false;
       if (!dateMatch(x.cls.start, x.cls.end)) return false;
+      if (classVal && classVal !== 'すべて' && ClassTypeStore.nameOf(x.cls.classType || '') !== classVal) return false;
       var planM = parseInt(x.cls.mainTeachers, 10) || 0;
       var planS = parseInt(x.cls.subTeachers, 10) || 0;
       var doneM = x.assign.mains.filter(function (p) { return p.state === 'done'; }).length;
@@ -72,6 +74,7 @@
         '<td>' + esc(yearLabel(x.cls.year)) + '</td>' +
         '<td><div>' + esc(c.name) + '</div><div class="vender-assign-sub">' + esc(x.cls.courseCode) + '</div></td>' +
         '<td><div>' + esc(x.cls.lessonNo) + '</div></td>' +
+        '<td>' + (x.cls.classType ? '<span class="tag class-type-tag ' + ClassTypeStore.colorOf(x.cls.classType) + '">' + esc(ClassTypeStore.nameOf(x.cls.classType)) + '</span>' : '') + '</td>' +
         '<td>' + esc(x.cls.start) + '</td>' +
         '<td>' + esc(x.cls.end) + '</td>' +
         '<td>' + dashOr(classDays(x.cls), '日') + '</td>' +

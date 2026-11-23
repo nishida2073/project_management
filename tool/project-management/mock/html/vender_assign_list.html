@@ -18,6 +18,7 @@
         <div class="field"><label>実施状況</label><div class="control small js-select" data-practice-options data-match-class="col-practice" data-practice-default="BEFORE"><span class="caret">▾</span></div></div>
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
+        <div class="field"><label>クラス区分</label><div class="control small js-select" data-master-options="ClassTypeStore" data-match-attr="data-class-types">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>開始日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
         <div class="field"><label>終了日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
@@ -47,6 +48,7 @@
               <th class="sticky">年度</th>
               <th class="sticky">コース</th>
               <th class="sticky">レッスンNo</th>
+              <th class="sticky">クラス区分</th>
               <th class="sticky">開始日</th>
               <th class="sticky">終了日</th>
               <th>日数</th>
@@ -94,6 +96,8 @@
 <script src="js/storage/closed-day/store/closed-day-store.js"></script>
 <script src="js/storage/custom-attribute/store/custom-attribute-store.js"></script>
 <script src="js/storage/custom-attribute/screens/custom-attribute-fields.js"></script>
+<script src="js/storage/class-type/store/class-type-store.js"></script>
+<script src="js/master-options.js"></script>
 <script src="js/storage/vender-assign/screens/vender-assign-list.js"></script>
 <script src="js/filter-memory.js" defer></script>
 <script src="js/select.js" defer></script>

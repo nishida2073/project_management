@@ -111,6 +111,7 @@ var ClassForm = (function () {
     setSelect($('courseYear'), r.courseYear);
     setSelect($('courseCode'), r.courseCode);
     setSelect($('version'), r.version || '1.0');
+    checkRadio('classType', r.classType || '');
     checkRadio('taskType', r.taskType || '');
     var statusOff = r.status === OperatingStatusStore.nameOf('STOPPED');
     $('statusRow').setAttribute('data-on', OperatingStatusStore.nameOf('ACTIVE'));
@@ -155,6 +156,7 @@ var ClassForm = (function () {
       courseYear: getSelect($('courseYear')),
       courseCode: getSelect($('courseCode')),
       version: getSelect($('version')),
+      classType: getRadio('classType'),
       taskType: getRadio('taskType'),
       start: getDate($('start')),
       end: getDate($('end')),
@@ -275,6 +277,7 @@ var ClassForm = (function () {
     var deliveryGroup = document.querySelector('[data-master-radio="DeliveryTypeStore"]');
     renderRadios(deliveryGroup, 'deliveryType', DeliveryTypeStore.load());
     deliveryGroup.setAttribute('data-generated', '1');
+    renderRadios(document.getElementById('classTypeGroup'), 'classType', ClassTypeStore.load());
     renderRadios(document.getElementById('taskTypeGroup'), 'taskType', TaskTypeStore.load());
     applyOptions();
     var list = ClassStore.load();
@@ -296,7 +299,7 @@ var ClassForm = (function () {
         if (cancelEl) cancelEl.href = 'class_modify.html?id=' + encodeURIComponent(fromRec.id);
       }
       rec = fromRec ? Object.assign(JSON.parse(JSON.stringify(fromRec)), { id: '', lessonNo: '', memo: '', status: OperatingStatusStore.nameOf('ACTIVE') }) : {
-        year: '2026', courseYear: '2026', version: '1.0', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
+        year: '2026', courseYear: '2026', version: '1.0', classType: '', taskType: '', projectCode: '', courseCode: '', lessonNo: '',
         related: [], start: '', end: '', delivery: '', people: '', managers: [],
         locationType: '', locationName: '', memo: '', status: OperatingStatusStore.nameOf('STOPPED')
       };
@@ -397,13 +400,14 @@ var ClassForm = (function () {
         if (!v.courseYear) missing.push('年度');
         if (!v.courseCode) missing.push('コースコード');
         if (!v.version) missing.push('版');
-        if (!v.taskType) missing.push('タスク区分');
         if (!v.start) missing.push('開始日');
         if (!v.end) missing.push('終了日');
         if (!v.delivery) missing.push('実施形態');
+        if (!v.classType) missing.push('クラス区分');
         if (!v.locationType) missing.push('ロケーション区分');
         if (v.mainTeachers === '') missing.push('予定講師数（メイン）');
         if (v.subTeachers === '') missing.push('予定講師数（サブ）');
+        if (!v.taskType) missing.push('タスク区分');
       if (missing.length) {
         MessageDialog.required(missing);
         return;

@@ -24,6 +24,7 @@
         <div class="field narrow"><label>顧客</label><div class="control js-select" id="customerFilter" data-hide-class="col-customer" data-options="すべて" data-match-class="col-customer">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>年度</label><div class="control small js-select" data-options="すべて,2024,2025,2026,2027" data-hide-class="col-year">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>キーワード検索</label><input type="text" class="field-control-input" placeholder="コースコード・コース名で検索"></div>
+        <div class="field"><label>クラス区分</label><div class="control small js-select" data-master-options="ClassTypeStore" data-match-attr="data-class-type">すべて<span class="caret">▾</span></div></div>
         <div class="field"><label>開始日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
         <div class="tilde">〜</div>
         <div class="field"><label>終了日</label><div class="control small js-date"><span class="caret">▾</span></div></div>
@@ -55,6 +56,7 @@
                 <th class="sticky col-year">年度</th>
                 <th class="sticky">コース</th>
                 <th class="sticky">レッスンNo</th>
+                <th class="sticky">クラス区分</th>
                 <th class="sticky">開始日</th>
                 <th class="sticky">終了日</th>
                 <th class="sticky col-manager">管理担当者</th>
@@ -90,6 +92,7 @@
 <script src="js/storage/task/store/task-store.js"></script>
 <script src="js/storage/class-progress/store/progress-store.js"></script>
 <script src="js/storage/task-type/store/task-type-store.js"></script>
+<script src="js/storage/class-type/store/class-type-store.js"></script>
 <script src="js/storage/job-type/store/job-type-store.js"></script>
 <script src="js/storage/work-type/store/work-type-store.js"></script>
 <script src="js/storage/staff-role/store/staff-role-store.js"></script>

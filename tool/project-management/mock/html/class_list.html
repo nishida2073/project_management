@@ -35,6 +35,10 @@
           <input type="text" class="field-control-input" placeholder="コースコード・コース名で検索">
         </div>
         <div class="field">
+          <label>クラス区分</label>
+          <div class="control small js-select" data-master-options="ClassTypeStore" data-match-attr="data-class-type">すべて<span class="caret">▾</span></div>
+        </div>
+        <div class="field">
           <label>開始日</label>
           <div class="control small js-date"><span class="caret">▾</span></div>
         </div>
@@ -42,10 +46,6 @@
         <div class="field">
           <label>終了日</label>
           <div class="control small js-date"><span class="caret">▾</span></div>
-        </div>
-        <div class="field">
-          <label>タスク区分</label>
-          <div class="control small js-select" data-master-options="TaskTypeStore">すべて<span class="caret">▾</span></div>
         </div>
         <div class="nav-btn">検索</div>
         <div class="nav-btn" id="resetFilter">リセット</div>
@@ -75,7 +75,7 @@
               <th class="sticky">コース</th>
               <th class="sticky">クラスID</th>
               <th class="sticky">レッスンNo</th>
-              <th class="sticky">タスク区分</th>
+              <th class="sticky">クラス区分</th>
               <th>開始日</th>
               <th>終了日</th>
               <th>開始時刻</th>
@@ -93,6 +93,7 @@
               <th>共用PCグループ</th>
               <th>アンケート暗証番号</th>
               <th>テスト暗証番号</th>
+              <th>タスク区分</th>
               <th>稼働状態</th>
               <th class="no-sort">備考</th>
               <th class="col-actions">操作</th>
@@ -122,6 +123,7 @@
 <script src="js/storage/staff/store/staff-store.js"></script>
 <script src="js/storage/location-type/store/location-type-store.js"></script>
 <script src="js/storage/task-type/store/task-type-store.js"></script>
+<script src="js/storage/class-type/store/class-type-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
 <script src="js/storage/customer/store/customer-store.js"></script>
 <script src="js/storage/custom-attribute/store/custom-attribute-store.js"></script>

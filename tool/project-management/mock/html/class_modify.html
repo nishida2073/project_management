@@ -71,6 +71,11 @@
           <div class="form-control readonly" id="lessonNo">001</div>
         </div>
         <div class="form-field">
+          <label>クラス区分<span class="req">必須</span></label>
+          <div class="radio-group" id="classTypeGroup"></div>
+        </div>
+        <div class="form-field form-spacer" aria-hidden="true"></div>
+        <div class="form-field">
           <label>開始日<span class="req">必須</span></label>
           <div class="form-control js-date" id="start" data-no-closed-day><span class="caret">▾</span></div>
         </div>
@@ -97,7 +102,7 @@
             <div class="master-radio" data-master-radio="DeliveryTypeStore" data-radio-name="deliveryType"></div>
           </div>
         </div>
-        <div class="form-field">
+        <div class="form-field full">
           <label>管理担当者（複数選択可）</label>
           <div class="chip-box js-chip-select" id="manager" data-options="" data-chip-class="tag-like blue"><span class="chip-add">追加</span></div>
         </div>
@@ -213,6 +218,7 @@
 <script src="js/storage/location-type/store/location-type-store.js"></script>
 <script src="js/storage/subject/store/subject-store.js"></script>
 <script src="js/storage/task-type/store/task-type-store.js"></script>
+<script src="js/storage/class-type/store/class-type-store.js"></script>
 <script src="js/storage/class/store/class-store.js"></script>
 <script src="js/master-options.js"></script>
 <script src="js/storage/custom-attribute/store/custom-attribute-store.js"></script>

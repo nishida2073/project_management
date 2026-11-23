@@ -33,6 +33,7 @@
       '<td class="sticky">' + esc(yearLabel(r.year)) + '</td>' +
       '<td class="sticky"><div>' + esc(c.name) + '</div><div class="vender-assign-sub">' + esc(r.courseCode) + '</div></td>' +
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div class="vender-assign-sub">' + esc(related) + '</div></td>' +
+      '<td class="sticky">' + (r.classType ? '<span class="tag class-type-tag ' + ClassTypeStore.colorOf(r.classType) + '">' + esc(ClassTypeStore.nameOf(r.classType)) + '</span>' : '') + '</td>' +
       '<td class="sticky">' + esc(r.start) + '</td>' +
       '<td class="sticky">' + esc(r.end) + '</td>' +
       '<td>' + dashOr(classDays(r), '日') + '</td>' +
@@ -51,6 +52,7 @@
       customCells + '<td class="row-actions"><a class="nav-btn" href="vender_assign_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';
     var names = a.mains.concat(a.subs, a.specials || [], reqs).map(function (x) { return TeacherVenderStore.nameOf(x.vendor) || ''; }).filter(function (n, k, arr) { return n && arr.indexOf(n) === k; });
     tr.setAttribute('data-vendors', names.join('|'));
+    tr.setAttribute('data-class-types', ClassTypeStore.nameOf(r.classType || ''));
     body.appendChild(tr);
   });
 
@@ -102,7 +104,7 @@
       var a = VenderAssignStore.find(r.id);
       var lines = ['メイン：' + rowLines[id].main, 'サブ：' + rowLines[id].sub, '特別：' + rowLines[id].special];
       var custCode = (ClassStore.PROJECTS[r.projectCode] || {}).customer;
-      var tip = ['顧客：' + (custCode ? CustomerStore.nameOf(custCode) : '-'), 'コース：' + c.name, 'レッスンNo：' + (r.lessonNo || ''), '開始日：' + (r.start || ''), '終了日：' + (r.end || '')].join('\n');
+      var tip = ['顧客：' + (custCode ? CustomerStore.nameOf(custCode) : '-'), 'コース：' + c.name, 'レッスンNo：' + (r.lessonNo || ''), 'クラス区分：' + (ClassTypeStore.nameOf(r.classType || '') || '-'), '開始日：' + (r.start || ''), '終了日：' + (r.end || '')].join('\n');
       columns.push({ id: id, label: [c.name, r.lessonNo], tip: tip });
       var from = parseYmd(r.start);
       var to = parseYmd(r.end) || from;

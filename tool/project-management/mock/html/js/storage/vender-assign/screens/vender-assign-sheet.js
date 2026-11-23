@@ -40,8 +40,8 @@
     ws['B1'].s = { border: HEAD.border, alignment: { vertical: 'center' } };
     ws['!cols'] = header.map(function (name, ci) {
       if (ci === 1) return { wch: 32 };
-      if (ci === 6) return { wch: 8 };
-      if (ci < 6) return { wch: 14 };
+      if (ci === 7) return { wch: 8 };
+      if (ci < 7) return { wch: 14 };
       return { wch: 28 };
     });
     ws['!rows'] = [{ hpt: 18 }, {}, { hpt: 18 }];

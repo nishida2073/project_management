@@ -128,6 +128,7 @@
     html += '<td class="sticky col-year">' + esc(yearLabel(c.year)) + '</td>';
     html += '<td class="sticky"><div>' + esc(course ? course.name : c.courseCode) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(c.courseCode) + '</div></td>';
     html += '<td class="sticky"><div>' + esc(c.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(related) + '</div></td>';
+    html += '<td class="sticky">' + (c.classType ? '<span class="tag class-type-tag ' + ClassTypeStore.colorOf(c.classType) + '">' + esc(ClassTypeStore.nameOf(c.classType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky">' + esc(c.start) + '</td>';
     html += '<td class="sticky">' + esc(c.end) + '</td>';
     html += '<td class="sticky col-manager">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
@@ -145,6 +146,7 @@
     html += '<td class="row-actions"><a class="nav-btn" href="class_progress_modify.html?id=' + encodeURIComponent(c.id) + '">更新</a></td>';
     tr.innerHTML = html;
     tr.setAttribute('data-owners', owners.join('|'));
+    tr.setAttribute('data-class-type', ClassTypeStore.nameOf(c.classType || ''));
     body.appendChild(tr);
   });
 
@@ -344,7 +346,7 @@
         if (!classes.some(function (x) { return x.id === tr.getAttribute('data-id'); })) {
           var rec = ClassStore.load().filter(function (x) { return String(x.id) === String(tr.getAttribute('data-id')); })[0] || {};
           var pjInfo = ProjectStore.map()[rec.projectCode] || {};
-          var tip = ['顧客：' + (pjInfo.customer ? CustomerStore.nameOf(pjInfo.customer) : '-'), 'コース：' + course, 'レッスンNo：' + (rec.lessonNo || ''), '開始日：' + (rec.start || ''), '終了日：' + (rec.end || ''), '管理担当者：' + ((rec.managers || []).map(function (x) { return StaffStore.nameOf(x); }).join('、') || '-')].join('\n');
+          var tip = ['顧客：' + (pjInfo.customer ? CustomerStore.nameOf(pjInfo.customer) : '-'), 'コース：' + course, 'レッスンNo：' + (rec.lessonNo || ''), 'クラス区分：' + (ClassTypeStore.nameOf(rec.classType || '') || '-'), '開始日：' + (rec.start || ''), '終了日：' + (rec.end || ''), '管理担当者：' + ((rec.managers || []).map(function (x) { return StaffStore.nameOf(x); }).join('、') || '-')].join('\n');
           classes.push({ id: tr.getAttribute('data-id'), label: [course, lesson], tip: tip });
         }
         var savedStep = (ProgressStore.load()[tr.getAttribute('data-id')] || {})[Number(td.getAttribute('data-step')) + 1] || {};

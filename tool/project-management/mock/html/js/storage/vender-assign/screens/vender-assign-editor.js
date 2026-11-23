@@ -131,7 +131,15 @@
       return;
     }
     var c = ClassStore.COURSES[cls.courseCode];
-    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode) + '　予定講師数：メイン' + (cls.mainTeachers || '-') + '人・サブ' + (cls.subTeachers || '-') + '人';
+    $('subLine').textContent = cls.lessonNo + '　' + (c ? c.name : cls.courseCode);
+    if (cls.classType) {
+      var classTag = document.createElement('span');
+      classTag.className = 'tag class-type-tag ' + ClassTypeStore.colorOf(cls.classType);
+      classTag.textContent = ClassTypeStore.nameOf(cls.classType);
+      $('subLine').appendChild(document.createTextNode('　'));
+      $('subLine').appendChild(classTag);
+    }
+    $('subLine').appendChild(document.createTextNode('　予定講師数：メイン' + (cls.mainTeachers || '-') + '人・サブ' + (cls.subTeachers || '-') + '人'));
 
     var a = VenderAssignStore.find(classId);
     var zanNow = a.mains.length < (parseInt(cls.mainTeachers, 10) || 0) || a.subs.length < (parseInt(cls.subTeachers, 10) || 0) || (a.specials || []).length < (parseInt(cls.specialTeachers, 10) || 0);

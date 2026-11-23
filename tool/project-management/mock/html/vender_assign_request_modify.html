@@ -39,6 +39,7 @@
         <div class="filter-panel vender-assign-filter">
           <div class="field"><label>実施状況</label><div class="control small js-select" id="practiceFilter" data-practice-options-active data-practice-default="BEFORE"><span class="caret">▾</span></div></div>
           <div class="field"><label>キーワード検索（コース）</label><input type="text" class="field-control-input" id="keyword" placeholder="コースコード・コース名で検索"></div>
+          <div class="field"><label>クラス区分</label><div class="control small js-select" id="classTypeFilter" data-master-options="ClassTypeStore">すべて<span class="caret">▾</span></div></div>
           <div class="field"><label>開始日</label><div class="control js-date" id="dateFrom"><span class="caret">▾</span></div></div>
           <div class="field"><label>終了日</label><div class="control js-date" id="dateTo"><span class="caret">▾</span></div></div>
           <div class="nav-btn">検索</div>
@@ -54,6 +55,7 @@
                 <th class="sticky">年度</th>
                 <th class="sticky fill">コース</th>
                 <th class="sticky">レッスンNo</th>
+                <th class="sticky">クラス区分</th>
                 <th class="sticky">開始日</th>
                 <th class="sticky">終了日</th>
                 <th>日数</th>
@@ -93,6 +95,8 @@
 <script src="js/filter-collapse.js"></script>
 <script src="js/storage/vender-assign/screens/vender-assign-lines.js"></script>
 <script src="js/storage/vender-assign/store/vender-assign-change.js"></script>
+<script src="js/storage/class-type/store/class-type-store.js"></script>
+<script src="js/master-options.js"></script>
 <script src="js/storage/vender-assign/screens/vender-assign-request-modify.js" defer></script>
 <script src="js/column-resize.js" defer></script>
 <script src="js/message-dialog.js"></script>

@@ -23,6 +23,7 @@
     var ps = ClassStore.practiceStatus(r);
 
     var tr = document.createElement('tr');
+    tr.setAttribute('data-class-type', ClassTypeStore.nameOf(r.classType || ''));
     tr.innerHTML =
       '<td class="sticky col-practice">' + (ps ? '<span class="tag practice-status-tag ' + PRACTICE_CLASS[ps] + '">' + ps + '</span>' : '') + '</td>' +
       '<td class="sticky col-customer">' + esc(p.customer ? CustomerStore.nameOf(p.customer) : '-') + '</td>' +
@@ -33,7 +34,7 @@
       '<td class="sticky"><div>' + esc(c.name) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(r.courseCode) + ' 版' + dashOr(r.version) + '</div></td>' +
       '<td class="sticky">' + esc(ClassStore.classIdOf(r)) + '</td>' +
       '<td class="sticky"><div>' + esc(r.lessonNo) + '</div><div style="font-size:11px;color:#9aa4b5;">' + esc(relatedText) + '</div></td>' +
-      '<td class="sticky">' + (r.taskType ? '<span class="tag task-type-tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
+      '<td class="sticky">' + (r.classType ? '<span class="tag class-type-tag ' + ClassTypeStore.colorOf(r.classType) + '">' + esc(ClassTypeStore.nameOf(r.classType)) + '</span>' : '') + '</td>' +
       '<td>' + esc(r.start) + '</td>' +
       '<td>' + esc(r.end) + '</td>' +
       '<td>' + dashOr(r.startTime) + '</td>' +
@@ -51,6 +52,7 @@
       '<td>' + esc(SharedPcGroupStore.nameOf(r.sharedPcGroup)) + '</td>' +
       '<td>' + dashOr(ClassStore.surveyPinOf(r)) + '</td>' +
       '<td>' + dashOr(ClassStore.testPinOf(r)) + '</td>' +
+      '<td>' + (r.taskType ? '<span class="tag task-type-tag ' + TaskTypeStore.colorOf(r.taskType) + '">' + esc(TaskTypeStore.nameOf(r.taskType)) + '</span>' : '') + '</td>' +
       '<td><span class="status-label ' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? 'gray' : 'green') + '">' + (r.status === OperatingStatusStore.nameOf('STOPPED') ? OperatingStatusStore.nameOf('STOPPED') : OperatingStatusStore.nameOf('ACTIVE')) + '</span></td>' +
       '<td class="memo-cell"' + (r.memo ? ' data-memo="' + esc(r.memo) + '"' : '') + '>' + (r.memo ? '<span class="memo-mark">!</span>' : '') + '</td>' +
       customCells + '<td class="row-actions"><a class="nav-btn" href="class_modify.html?id=' + encodeURIComponent(r.id) + '">更新</a></td>';

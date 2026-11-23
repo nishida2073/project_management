@@ -92,7 +92,7 @@ tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f6; color: #333c4d; 
 .empty-message { text-align: center; color: #9aa4b5; padding: 24px 0; }
 .tag-stack-col { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .state-tag { width: 64px; text-align: center; box-sizing: border-box; justify-content: center; }
-span.task-type-tag, span.practice-status-tag { width: 64px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
+span.task-type-tag, span.class-type-tag, span.practice-status-tag { width: 64px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
 span.work-type-tag, span.sales-type-tag, span.participation-type-tag, span.delivery-type-tag, span.location-type-tag, span.affiliation-tag, span.role-tag, span.job-type-tag, span.position-tag, span.subject-type-tag, span.motivation-company-type-tag, span.user-role-tag { width: 80px; text-align: center; box-sizing: border-box; padding-left: 0; padding-right: 0; }
 .multi-opt.role-tag span, .multi-opt.job-type-tag span, .multi-opt.position-tag span { width: 80px; justify-content: center; padding: 0; }
 
