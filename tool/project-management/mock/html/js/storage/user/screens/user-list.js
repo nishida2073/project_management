@@ -42,15 +42,15 @@
     sheetName: 'ユーザー',
     load: function () { return UserStore.load(); },
     columns: [
-      { key: 'code', label: 'コード', type: 'text', required: false },
-      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'code', label: 'ユーザーコード', type: 'text', required: false },
+      { key: 'name', label: 'ユーザー名', type: 'text', required: true },
       { key: 'email', label: 'メールアドレス', type: 'text', required: true },
-      { key: 'authority', label: '権限', type: 'select', required: true, options: UserRoleStore.load().map(function (r) { return r.name; }),
-        format: function (r) { return UserRoleStore.nameOf(r.authority); },
-        parse: function (t) { return StoreImport.codeByName(UserRoleStore, t); } },
+      { key: 'authority', label: '権限コード', type: 'select', required: true, options: UserRoleStore.load().map(function (x) { return x.code; }) },
       { key: 'password', label: 'パスワード', type: 'text', required: false, format: function (r) { return r.password || ''; } },
       { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
-      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+      { key: 'status', label: '稼働状態コード', type: 'select', required: true, options: OperatingStatusStore.codes(),
+        format: function (r) { return StoreImport.codeByName(OperatingStatusStore, r.status); },
+        parse: function (v) { return OperatingStatusStore.nameOf(v); } }
     ],
     existingKeys: function () { return UserStore.load().map(function (u) { return u.code; }); },
     keyOf: function (o) { return o.code; },

@@ -24,12 +24,16 @@
     sheetName: '顧客',
     load: function () { return CustomerStore.load(); },
     columns: [
-      { key: 'id', label: 'コード', type: 'text', required: false },
-      { key: 'name', label: '名称', type: 'text', required: true },
-      { key: 'staff', label: '担当者', type: 'text', required: false },
+      { key: 'id', label: '顧客コード', type: 'text', required: false },
+      { key: 'name', label: '顧客名', type: 'text', required: true },
+      { key: 'staff', label: '担当者コード', type: 'select', required: false, options: StaffStore.load().map(function (x) { return x.code; }),
+        format: function (r) { return StoreImport.codeByName(StaffStore, r.staff); },
+        parse: function (v) { return StaffStore.nameOf(v); } },
       { key: 'email', label: 'メールアドレス', type: 'text', required: false },
       { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
-      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+      { key: 'status', label: '稼働状態コード', type: 'select', required: true, options: OperatingStatusStore.codes(),
+        format: function (r) { return StoreImport.codeByName(OperatingStatusStore, r.status); },
+        parse: function (v) { return OperatingStatusStore.nameOf(v); } }
     ],
     existingKeys: function () { return CustomerStore.load().map(function (c) { return c.id; }); },
     keyOf: function (o) { return o.id; },

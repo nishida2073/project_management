@@ -28,15 +28,15 @@
     sheetName: 'ロケーション',
     load: function () { return LocationStore.load(); },
     columns: [
-      { key: 'code', label: 'コード', type: 'text', required: false },
-      { key: 'name', label: '名称', type: 'text', required: true },
-      { key: 'type', label: 'ロケーション区分', type: 'select', required: true, options: LocationTypeStore.load().map(function (t) { return t.name; }),
-        format: function (r) { return LocationTypeStore.nameOf(r.type); },
-        parse: function (t) { return StoreImport.codeByName(LocationTypeStore, t); } },
+      { key: 'code', label: 'ロケーションコード', type: 'text', required: false },
+      { key: 'name', label: 'ロケーション名', type: 'text', required: true },
+      { key: 'type', label: 'ロケーション区分コード', type: 'select', required: true, options: LocationTypeStore.load().map(function (x) { return x.code; }) },
       { key: 'tel', label: '電話番号', type: 'text', required: false },
       { key: 'address', label: '住所', type: 'text', required: false },
       { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
-      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+      { key: 'status', label: '稼働状態コード', type: 'select', required: true, options: OperatingStatusStore.codes(),
+        format: function (r) { return StoreImport.codeByName(OperatingStatusStore, r.status); },
+        parse: function (v) { return OperatingStatusStore.nameOf(v); } }
     ],
     existingKeys: function () { return LocationStore.load().map(function (l) { return l.code; }); },
     keyOf: function (o) { return o.code; },

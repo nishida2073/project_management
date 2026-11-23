@@ -14,9 +14,16 @@
     for (var i = 0; i < spec.columns.length; i++) {
       var col = spec.columns[i];
       var v = col.type === 'date' ? dateOf(row[col.index]) : textOf(row[col.index]);
-      if (!v && col.required) { out.errors.push(rowNo + '行目: ' + col.label + 'がありません'); return null; }
-      if (v && col.type === 'date' && !/^\d{4}\/\d{2}\/\d{2}$/.test(v)) { out.errors.push(rowNo + '行目: ' + col.label + 'の形式が不正です（' + v + '）'); return null; }
-      if (v && col.type === 'select' && col.options.indexOf(v) === -1) { out.errors.push(rowNo + '行目: ' + col.label + 'が不正です（' + v + '）'); return null; }
+      if (!v && col.required) { out.errors.push(rowNo + '行目：' + col.label + 'がありません'); return null; }
+      if (v && col.type === 'date' && !/^\d{4}\/\d{2}\/\d{2}$/.test(v)) { out.errors.push(rowNo + '行目：' + col.label + 'の形式が不正です（' + v + '）'); return null; }
+      if (v && col.type === 'select' && col.options.indexOf(v) === -1) { out.errors.push(rowNo + '行目：' + col.label + 'のコードが存在しません（' + v + '）'); return null; }
+      if (v && col.type === 'list') {
+        var items = v.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+        var bad = items.filter(function (x) { return col.options.indexOf(x) === -1; });
+        if (bad.length) { out.errors.push(rowNo + '行目：' + col.label + 'のコードが存在しません（' + bad.join(',') + '）'); return null; }
+        obj[col.key] = items;
+        continue;
+      }
       obj[col.key] = col.parse ? col.parse(v) : v;
     }
     return obj;
@@ -47,7 +54,7 @@
         var obj = checkRow(aoa[r], spec, r + 1, out);
         if (!obj) continue;
         var key = spec.keyOf(obj);
-        if (key && seen.indexOf(key) !== -1) { out.errors.push((r + 1) + '行目: 同じキーがファイル内にあります（' + key + '）'); continue; }
+        if (key && seen.indexOf(key) !== -1) { out.errors.push((r + 1) + '行目：同じキーがファイル内にあります（' + key + '）'); continue; }
         seen.push(key);
         if (existing.indexOf(key) !== -1) {
           if (spec.update) updates.push(obj);
@@ -78,7 +85,9 @@
     var body = rows.map(function (row) {
       return spec.columns.map(function (col) {
         if (col.format) return col.format(row);
-        return row[col.key] === undefined ? '' : row[col.key];
+        var val = row[col.key];
+        if (val === undefined || val === null) return '';
+        return Array.isArray(val) ? val.join(',') : val;
       });
     });
     var ws = XLSX.utils.aoa_to_sheet([head].concat(body));

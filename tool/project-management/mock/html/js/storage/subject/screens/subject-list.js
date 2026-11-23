@@ -21,24 +21,20 @@
 })();
 
 (function () {
-  var STATUS_NAMES = [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')];
   var SHEET_SPEC = {
     sheetName: '科目',
     load: function () { return SubjectStore.load(); },
     columns: [
-      { key: 'code', label: 'コード', type: 'text', required: true },
-      { key: 'name', label: '名称', type: 'text', required: true },
-      { key: 'type', label: '科目区分', type: 'select', required: true, options: SubjectTypeStore.load().map(function (t) { return t.name; }),
-        format: function (r) { return SubjectTypeStore.nameOf(r.type); },
-        parse: function (t) { return StoreImport.codeByName(SubjectTypeStore, t); } },
+      { key: 'code', label: '科目コード', type: 'text', required: true },
+      { key: 'name', label: '科目名', type: 'text', required: true },
+      { key: 'type', label: '科目区分コード', type: 'select', required: true, options: SubjectTypeStore.load().map(function (x) { return x.code; }) },
       { key: 'versions', label: '版', type: 'text', required: true,
         format: function (r) { return (r.versions || []).join(','); },
         parse: function (t) { return t.split(',').map(function (x) { return x.trim(); }).filter(Boolean); } },
-      { key: 'status', label: '稼働状態', type: 'select', required: true, options: STATUS_NAMES,
-        format: function (r) { return r.status; },
-        parse: function (t) { return t; } },
-      { key: 'memo', label: '備考', type: 'text', required: false,
-        format: function (r) { return r.memo || ''; } }
+      { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
+      { key: 'status', label: '稼働状態コード', type: 'select', required: true, options: OperatingStatusStore.codes(),
+        format: function (r) { return StoreImport.codeByName(OperatingStatusStore, r.status); },
+        parse: function (v) { return OperatingStatusStore.nameOf(v); } }
     ],
     existingKeys: function () {
       return SubjectStore.load().map(function (s) { return s.code; });

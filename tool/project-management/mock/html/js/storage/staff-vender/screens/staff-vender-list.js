@@ -26,14 +26,16 @@
     sheetName: '実施担当ベンダー',
     load: function () { return StaffVenderStore.load(); },
     columns: [
-      { key: 'code', label: 'コード', type: 'text', required: false },
-      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'code', label: '実施担当ベンダーコード', type: 'text', required: false },
+      { key: 'name', label: '実施担当ベンダー名', type: 'text', required: true },
       { key: 'tel', label: '電話番号', type: 'text', required: false },
       { key: 'address', label: '住所', type: 'text', required: false },
-      { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
       { key: 'contactName', label: '窓口担当者名', type: 'text', required: false },
       { key: 'contactEmail', label: 'メールアドレス', type: 'text', required: false },
-      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+      { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
+      { key: 'status', label: '稼働状態コード', type: 'select', required: true, options: OperatingStatusStore.codes(),
+        format: function (r) { return StoreImport.codeByName(OperatingStatusStore, r.status); },
+        parse: function (v) { return OperatingStatusStore.nameOf(v); } }
     ],
     existingKeys: function () { return StaffVenderStore.load().map(function (v) { return v.code; }); },
     keyOf: function (o) { return o.code; },

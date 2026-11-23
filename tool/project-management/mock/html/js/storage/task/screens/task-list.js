@@ -29,24 +29,17 @@
     sheetName: 'タスク',
     load: function () { return TaskStore.load(); },
     columns: [
-      { key: 'id', label: 'コード', type: 'text', required: false },
-      { key: 'name', label: '名称', type: 'text', required: true },
-      { key: 'kinds', label: 'タスク区分', type: 'text', required: true,
-        format: function (r) { return (r.kinds || []).map(function (c) { return TaskTypeStore.nameOf(c); }).join(','); },
-        parse: function (t) { return t.split(',').map(function (x) { return x.trim(); }).filter(Boolean).map(function (n) { return StoreImport.codeByName(TaskTypeStore, n); }).filter(Boolean); } },
+      { key: 'id', label: 'タスクコード', type: 'text', required: false },
+      { key: 'name', label: 'タスク名', type: 'text', required: true },
+      { key: 'kinds', label: 'タスク区分コード', type: 'list', required: true, options: TaskTypeStore.load().map(function (x) { return x.code; }) },
       { key: 'order', label: '順番', type: 'text', required: true, format: function (r) { return r.order === undefined ? '' : r.order; }, parse: StoreImport.numOf },
-      { key: 'affiliation', label: '実務担当区分', type: 'select', required: true, options: AffiliationStore.load().map(function (a) { return a.name; }),
-        format: function (r) { return r.company === StaffVenderStore.INTERNAL ? INTERNAL_NAME : AffiliationStore.nameOf('PARTNER'); },
-        parse: function (t) { return t; } },
-      { key: 'companyName', label: '所属先', type: 'text', required: false,
-        format: function (r) { return r.company === StaffVenderStore.INTERNAL ? '' : StaffVenderStore.nameOf(r.company); },
-        parse: function (t) { return t; } },
-      { key: 'days', label: '予定開始日数', type: 'text', required: true, format: function (r) { return r.days === undefined ? '' : r.days; }, parse: StoreImport.numOf },
-      { key: 'workType', label: '作業区分', type: 'text', required: true,
-        format: function (r) { return WorkTypeStore.nameOf(r.workType); },
-        parse: function (t) { return StoreImport.codeByName(WorkTypeStore, t); } },
+      { key: 'company', label: '所属先コード', type: 'select', required: true, options: [StaffVenderStore.INTERNAL].concat(StaffVenderStore.load().map(function (x) { return x.code; })) },
+            { key: 'days', label: '予定開始日数', type: 'text', required: true, format: function (r) { return r.days === undefined ? '' : r.days; }, parse: StoreImport.numOf },
+      { key: 'workType', label: '作業区分コード', type: 'select', required: true, options: WorkTypeStore.load().map(function (x) { return x.code; }) },
       { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
-      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+      { key: 'status', label: '稼働状態コード', type: 'select', required: true, options: OperatingStatusStore.codes(),
+        format: function (r) { return StoreImport.codeByName(OperatingStatusStore, r.status); },
+        parse: function (v) { return OperatingStatusStore.nameOf(v); } }
     ],
     existingKeys: function () { return TaskStore.load().map(function (t) { return t.id; }); },
     keyOf: function (o) { return o.id; },
@@ -68,9 +61,7 @@
     refresh: function () { location.reload(); }
   };
   function taskRecord(o, id) {
-    var internal = o.affiliation === INTERNAL_NAME;
-    return { id: id, name: o.name, kinds: o.kinds, order: o.order,
-      company: internal ? StaffVenderStore.INTERNAL : StaffVenderStore.codeOf(o.companyName),
+    return { id: id, name: o.name, kinds: o.kinds, order: o.order, company: o.company,
       days: o.days, workType: o.workType, memo: o.memo, status: o.status };
   }
   StoreImport.bind(SHEET_SPEC, { export: 'taskExport', import: 'taskImport', file: 'taskImportFile', fileName: 'タスク.xlsx' });

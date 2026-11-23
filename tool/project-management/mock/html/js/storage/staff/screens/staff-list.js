@@ -31,38 +31,24 @@
 })();
 
 (function () {
-  function listOf(store) {
-    return function (v) {
-      return v.split(',').map(function (x) { return x.trim(); }).filter(Boolean).map(function (n) { return StoreImport.codeByName(store, n); }).filter(Boolean);
-    };
-  }
-  function namesOf(store) {
-    return function (r, key) { return (r[key] || []).map(function (c) { return store.nameOf(c); }).join(','); };
-  }
   var SHEET_SPEC = {
     sheetName: '実施担当者',
     load: function () { return StaffStore.load(); },
     columns: [
-      { key: 'code', label: 'コード', type: 'text', required: false },
-      { key: 'affiliation', label: '所属', type: 'select', required: true, options: AffiliationStore.load().map(function (a) { return a.name; }),
-        format: function (r) { return r.affiliation; },
-        parse: function (t) { return t; } },
-      { key: 'company', label: '所属先', type: 'text', required: false,
-        format: function (r) { return StaffVenderStore.nameOf(r.company); },
-        parse: function (t) { return StaffVenderStore.codeOf(t); } },
-      { key: 'name', label: '名称', type: 'text', required: true },
+      { key: 'code', label: '実施担当者コード', type: 'text', required: false },
+      { key: 'affiliation', label: '所属区分コード', type: 'select', required: true, options: AffiliationStore.load().map(function (a) { return a.code; }),
+        format: function (r) { return StoreImport.codeByName(AffiliationStore, r.affiliation); },
+        parse: function (v) { return AffiliationStore.nameOf(v); } },
+      { key: 'company', label: '実施担当ベンダーコード', type: 'select', required: false, options: StaffVenderStore.load().map(function (x) { return x.code; }) },
+      { key: 'name', label: '実施担当者名', type: 'text', required: true },
       { key: 'email', label: 'メールアドレス', type: 'text', required: false },
-      { key: 'roles', label: '担当区分', type: 'text', required: false,
-        format: function (r) { return namesOf(StaffRoleStore)(r, 'roles'); },
-        parse: listOf(StaffRoleStore) },
-      { key: 'jobTypes', label: '業務区分', type: 'text', required: false,
-        format: function (r) { return namesOf(JobTypeStore)(r, 'jobTypes'); },
-        parse: listOf(JobTypeStore) },
-      { key: 'positions', label: '役職', type: 'text', required: false,
-        format: function (r) { return namesOf(PositionStore)(r, 'positions'); },
-        parse: listOf(PositionStore) },
+      { key: 'roles', label: '担当区分コード', type: 'list', required: false, options: StaffRoleStore.load().map(function (x) { return x.code; }) },
+      { key: 'jobTypes', label: '業務区分コード', type: 'list', required: false, options: JobTypeStore.load().map(function (x) { return x.code; }) },
+      { key: 'positions', label: '役職コード', type: 'list', required: false, options: PositionStore.load().map(function (x) { return x.code; }) },
       { key: 'memo', label: '備考', type: 'text', required: false, format: function (r) { return r.memo || ''; } },
-      { key: 'status', label: '稼働状態', type: 'select', required: true, options: [OperatingStatusStore.nameOf('ACTIVE'), OperatingStatusStore.nameOf('STOPPED')] }
+      { key: 'status', label: '稼働状態コード', type: 'select', required: true, options: OperatingStatusStore.codes(),
+        format: function (r) { return StoreImport.codeByName(OperatingStatusStore, r.status); },
+        parse: function (v) { return OperatingStatusStore.nameOf(v); } }
     ],
     existingKeys: function () { return StaffStore.load().map(function (s) { return s.code; }); },
     keyOf: function (o) { return o.code; },
