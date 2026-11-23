@@ -13,7 +13,8 @@
     { code: 'USR-008', name: '中野 亮', email: 'nakano@neu-training.co.jp', authority: 'AU-02', password: 'pass', status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'USR-009', name: '西村 美穂', email: 'nishimura@ndu-partners.co.jp', authority: 'AU-02', password: 'pass', status: OperatingStatusStore.nameOf('ACTIVE') },
     { code: 'USR-010', name: '清水 理恵', email: 'shimizu@company.co.jp', authority: 'AU-02', password: 'pass', status: OperatingStatusStore.nameOf('ACTIVE') },
-    { code: 'USR-011', name: 'サンプル管理者', email: 'sample@co.jp', authority: 'AU-01', password: 'pass', status: OperatingStatusStore.nameOf('ACTIVE') }
+    { code: 'USR-011', name: 'サンプル管理者', email: 'sample@co.jp', authority: 'AU-01', password: 'pass', status: OperatingStatusStore.nameOf('ACTIVE') },
+    { code: 'USR-012', name: '松田 結衣', email: 'matsuda@company.co.jp', authority: 'AU-02', password: 'pass', status: OperatingStatusStore.nameOf('ACTIVE') }
   ];
 
   function save(list) {

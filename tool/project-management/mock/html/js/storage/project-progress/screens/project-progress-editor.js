@@ -42,7 +42,11 @@ function setDisabledRow(tr, off) {
           '<div class="status-select status-combo ' + STATUS_COLOR[s.status] + ' js-select status-input"' + ' data-options="' + StepStatusStore.options() + '" data-class-map=\'' + StepStatusStore.classMapJson() + '\'>' + STATUS_LABEL[s.status] + '<span class="caret">▾</span></div></td>' +
         '<td><textarea class="form-control textarea memo-area" rows="1">' + esc(s.memo) + '</textarea></td>';
       body.appendChild(tr);
-      if (lockOn) tr.children[3].classList.add('is-locked');
+      if (lockOn) {
+        Array.prototype.forEach.call(tr.querySelectorAll('input[type="radio"]'), function (r) { r.disabled = true; });
+        tr.children[2].classList.add('is-locked');
+        tr.children[3].classList.add('is-locked');
+      }
       setDisabledRow(tr, s.na);
       Array.prototype.forEach.call(tr.querySelectorAll('input[type="radio"]'), function (r) {
         r.addEventListener('change', function () {

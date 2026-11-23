@@ -186,7 +186,11 @@
       '<textarea class="form-control textarea" id="pdMemo" rows="2">' + esc(sv.memo || '') + '</textarea>' +
       '<div class="input-dialog-actions"><div class="nav-btn pd-cancel">キャンセル</div><div class="btn primary pd-ok">保存</div></div></div>';
     document.body.appendChild(overlay);
-    if (lockOn) overlay.querySelector('#pdPlan').classList.add('is-locked');
+    if (lockOn) {
+      Array.prototype.forEach.call(overlay.querySelectorAll('#pdTarget input[type="radio"]'), function (r) { r.disabled = true; });
+      overlay.querySelector('#pdTarget').classList.add('is-locked');
+      overlay.querySelector('#pdPlan').classList.add('is-locked');
+    }
     function applyNa(off) {
       ['#pdPlan', '#pdActual', '#pdOwner', '#pdStatus'].forEach(function (sel) {
         var el = overlay.querySelector(sel);
