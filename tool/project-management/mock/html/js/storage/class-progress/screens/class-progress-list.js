@@ -132,7 +132,6 @@
     html += '<td class="sticky">' + esc(c.start) + '</td>';
     html += '<td class="sticky">' + esc(c.end) + '</td>';
     html += '<td class="sticky col-manager">' + (c.managers || []).map(function (m) { return esc(StaffStore.nameOf(m)); }).join('<br>') + '</td>';
-    html += '<td class="sticky">' + (c.taskType ? '<span class="tag task-type-tag ' + TaskTypeStore.colorOf(c.taskType) + '">' + esc(TaskTypeStore.nameOf(c.taskType)) + '</span>' : '') + '</td>';
     html += '<td class="sticky col-overall">' + overall(activeSteps) + '</td>';
     steps.forEach(function (s, i) {
       if (!isActive(i)) return;
@@ -373,18 +372,6 @@
     calView.update({ columns: data.classes, events: events });
   }
 
-  var taskTypeField = Array.prototype.filter.call(document.querySelectorAll('.filter-panel .field'), function (f) {
-    var l = f.querySelector('label');
-    return l && l.textContent === 'タスク区分';
-  })[0];
-  function applyTaskTypeColumns() {
-    var ctl = taskTypeField && taskTypeField.querySelector('.js-select');
-    var v = ctl ? (ctl.getAttribute('data-value') || ownText(ctl)) : '';
-    if (v === 'すべて' || v === '選択してください') v = '';
-    var kindRow = v ? TaskTypeStore.load().filter(function (t) { return t.name === v; })[0] : null;
-    if (window.applyStepColumns) window.applyStepColumns(kindRow ? kindRow.code : '');
-  }
-  document.querySelector('.filter-panel .nav-btn').addEventListener('click', applyTaskTypeColumns);
 
   DayTable.bindView({
     tabs: document.getElementById('viewTabs'),
