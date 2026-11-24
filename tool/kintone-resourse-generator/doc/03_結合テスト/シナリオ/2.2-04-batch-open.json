@@ -1,6 +1,6 @@
 {
-  "name": "2.2-07 一括実行で途中の処理が失敗すると、後続の処理は実行されない",
-  "kind": "異常系",
+  "name": "2.2-04 一括実行の開くを押すと、対象の画面またはExcelが開く",
+  "kind": "正常系",
   "vars": {
     "client": "ok"
   },
@@ -35,7 +35,7 @@
     {
       "action": "typeAt",
       "part": "実行（一括実行）/スペーステンプレートID",
-      "value": "99999"
+      "value": "3"
     },
     {
       "action": "keysAt",
@@ -83,21 +83,80 @@
     {
       "action": "expectTextAt",
       "part": "実行（一括実行）/状態（スペースの作成）",
-      "pattern": "^失敗$",
+      "pattern": "^成功$",
       "timeoutSec": 60
     },
     {
-      "action": "expectTextAt",
-      "part": "実行（一括実行）/状態（設定ファイルの作成）",
-      "pattern": ".+",
-      "absent": true,
-      "timeoutSec": 15
+      "action": "waitDoneAt",
+      "part": "実行（一括実行）/状態（一括実行）",
+      "timeoutSec": 3000
     },
     {
-      "action": "expectTextAt",
-      "part": "実行（一括実行）/状態（一括実行）",
-      "timeoutSec": 60,
-      "pattern": "^失敗$"
+      "action": "clickAt",
+      "part": "実行（一括実行）/開く（スペースの作成）"
+    },
+    {
+      "action": "expectWindow",
+      "title": "TestSpace",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "TestSpace",
+      "keys": "^w"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/開く（スペースのダウンロード）"
+    },
+    {
+      "action": "expectWindow",
+      "title": "TestSpace_download",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "TestSpace_download"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/開く（設定ファイルの作成）"
+    },
+    {
+      "action": "expectWindow",
+      "title": "TestSpace_config",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "TestSpace_config"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/開く（スペースの更新）"
+    },
+    {
+      "action": "expectWindow",
+      "title": "TestSpace",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "TestSpace",
+      "keys": "^w"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/開く（スペースの確認）"
+    },
+    {
+      "action": "expectWindow",
+      "title": "TestSpace_check",
+      "timeoutSec": 60
+    },
+    {
+      "action": "closeWindow",
+      "title": "TestSpace_check"
     },
     {
       "action": "shot"

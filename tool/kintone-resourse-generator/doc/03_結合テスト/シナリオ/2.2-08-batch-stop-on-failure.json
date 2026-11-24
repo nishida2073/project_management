@@ -1,0 +1,106 @@
+{
+  "name": "2.2-08 一括実行で途中の処理が失敗すると、後続の処理は実行されない",
+  "kind": "異常系",
+  "vars": {
+    "client": "ok"
+  },
+  "setup": [],
+  "steps": [
+    {
+      "action": "clickAt",
+      "part": "メニュー/実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "clickAt",
+      "part": "実行/一括実行タブ"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "selectComboAt",
+      "part": "実行（一括実行）/対象のグループ",
+      "value": "{{client}}"
+    },
+    {
+      "action": "typeAt",
+      "part": "実行（一括実行）/スペース識別名",
+      "value": "TestSpace"
+    },
+    {
+      "action": "typeAt",
+      "part": "実行（一括実行）/スペーステンプレートID",
+      "value": "99999"
+    },
+    {
+      "action": "keysAt",
+      "part": "実行（一括実行）/設定テンプレート名（基本）",
+      "keys": "{DOWN}{ENTER}"
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/表示／隠す"
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/スペースの作成",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/スペースのダウンロード",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/設定ファイルの作成",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/スペースの更新",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectCheckedAt",
+      "part": "実行（一括実行）/スペースの確認",
+      "checked": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "clickAt",
+      "part": "実行（一括実行）/実行（一括実行）"
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態（スペースの作成）",
+      "pattern": "^失敗$",
+      "timeoutSec": 60
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態（設定ファイルの作成）",
+      "pattern": ".+",
+      "absent": true,
+      "timeoutSec": 15
+    },
+    {
+      "action": "expectTextAt",
+      "part": "実行（一括実行）/状態（一括実行）",
+      "timeoutSec": 60,
+      "pattern": "^失敗$"
+    },
+    {
+      "action": "shot"
+    }
+  ]
+}
