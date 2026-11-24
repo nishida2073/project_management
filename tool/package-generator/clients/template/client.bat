@@ -1,7 +1,7 @@
 @echo off
 
 set "GenerateSourcePath=%BASE_PATH%download"
-set "GenerateConfigPath=%BASE_PATH%clients\template\package_definition.xlsx"
+set "GenerateConfigPath=%BASE_PATH%clients\template\client.xlsx"
 set "GenerateWorkPath=%BASE_PATH%work"
 set "GenerateOutputPath=%BASE_PATH%generated"
 set "GenerateSheetsInclude="

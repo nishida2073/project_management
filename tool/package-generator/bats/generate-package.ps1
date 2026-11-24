@@ -198,7 +198,7 @@ try {
                 throw "パッケージの作成に失敗しました：$($_.Exception.Message)"
             }
             finally {
-                if ($workbook) { $workbook.Close($true) }
+                if ($workbook) { $workbook.Close($false) }
                 if ($excel) { $excel.Quit() }
                 if ($workbook) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) }
                 if ($excel) { [void][Runtime.InteropServices.Marshal]::ReleaseComObject($excel) }
