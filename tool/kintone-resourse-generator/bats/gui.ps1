@@ -590,7 +590,12 @@ $batchRunAllInputs = @(
 )
 
 $batchTab = New-BatchRunTab -TabPage $tabBatchAll -ButtonDefs $allStepDefs -EnableStepToggle `
-    -Inputs $batchRunAllInputs -OnRunClick {
+    -Inputs $batchRunAllInputs `
+    -OnOpenClick {
+        param($target)
+        Open-TargetOrWarn -Path $target
+    } `
+    -OnRunClick {
     param($controls, $statusLabel)
     Set-RunButtonsEnabled $false
     Set-StepStatus -Label $statusLabel -Text "実行中..."
